@@ -559,3 +559,7 @@ Corretti prompt tardivi dopo blocco, dismissione dell’adattatore, errori di sm
 ### Riscontro iPhone del product owner — 12/09/2026
 
 Ricevuti quattro esiti positivi riferiti dall’utente per la demo (navigazione, refresh, inattività/background, offline). Superato il controllo preliminare necessario ad ampliare la preparazione delle liste reali. Restano aperti i collaudi dell’app completa. [Audit §16](../docs/AUDIT_VAULT_SESSION_P0.md#16-esito-riferito-dal-product-owner--12092026) distingue riscontro utente e verifiche osservate dall’agente.
+
+### Orchestratori liste reali — 12/09/2026
+
+Preparati montaggio/smontaggio e annullamento dei consumatori per liste private e aziendali; 19 test aggiunti al gate navigazione. Gli URL e i percorsi dati esistenti restano operativi. Il collegamento completo alla shell è ancora aperto. [Audit §17](../docs/AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).

@@ -22,304 +22,367 @@ import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
 import {createArchiveMetadata} from '../settings/archive-account-model.js';
 
-// --- STATE ---
-let allAccounts = [];
-let currentUser = null;
-let sortOrder = 'asc';
-
-const THEMES = {
-    standard: { accent: 'bg-blue-500', text: 'text-blue-400' },
-    shared: { accent: 'bg-purple-500', text: 'text-purple-400' },
-    memo: { accent: 'bg-amber-500', text: 'text-amber-400' },
-    shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
-};
-
-const accountListView = createAccountListView({
-    themes: THEMES,
-    emptyStateClass: 'text-center py-10',
-    emptyTextClass: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6',
-    getSubtitle: account => account.username || account.email || 'Utente Nascosto',
-    onNavigate(account) {
-        if (account._aziendaId) {
-            window.location.href = `dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`;
-        } else {
-            window.location.href = `dettaglio_account_privato.html?id=${account.id}${account.isOwner ? '' : `&ownerId=${account.ownerId}`}`;
-        }
-    },
-    onPin: togglePin,
-    onDelete: handleDelete,
-    onArchive: handleArchive
-});
-
-/**
- * ACCOUNT PRIVATI MODULE (V5.0 ADAPTER)
- * Gestione liste account: personali, condivisi, memorandum.
- * - Entry Point: initAccountPrivati(user)
- */
-
-export async function initAccountPrivati(user) {
-    
-    if (!user) return;
-    currentUser = user;
-
-    // Nota: initComponents() rimosso (gestito da main.js)
-
-    setupUI();
-    await loadAccounts();
-    
+// Compatibility entry point: one active mount per canonical document.
+let activeMount = null;
+export async function initAccountPrivati(user, options = {}) {
+    activeMount?.destroy();
+    const mounted = mountAccountPrivati(user, options);
+    activeMount = mounted;
+    await mounted.ready;
+    return mounted.destroy;
 }
 
-function setupUI() {
-    // Override freccia back -> sempre verso area_privata.html
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.href = 'area_privata.html'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
+// Each mount owns its state, listeners and pending consumers.
+export function mountAccountPrivati(user, options = {}) {
+    const lifecycle = new AbortController();
+    const signal = lifecycle.signal;
+    const query = options.search ?? window.location.search;
+    const navigate = url => {
+        if (signal.aborted) return;
+        if (options.navigate) options.navigate(url);
+        else window.location.href = url;
+    };
+    const content = document.getElementById('accounts-container');
+    function assertActive() { if (signal.aborted) throw new DOMException('Page unmounted', 'AbortError'); }
+    async function waitFor(promise) { const result = await promise; assertActive(); return result; }
+    function destroy() {
+        if (signal.aborted) return;
+        lifecycle.abort();
+        options.signal?.removeEventListener('abort', destroy);
+        accountListView.destroy();
+        allAccounts = [];
+        currentUser = null;
+        if (content) clearElement(content);
     }
 
-    const searchInput = document.getElementById('account-search');
-    if (searchInput) {
-        searchInput.addEventListener('input', filterAndRender);
-    }
+    // --- STATE ---
+    let allAccounts = [];
+    let currentUser = null;
+    let sortOrder = 'asc';
 
-    // Sort Button Logic (Toggle)
-    const sortBtn = document.getElementById('sort-btn');
-    const sortLabel = document.getElementById('sort-label');
+    const THEMES = {
+        standard: { accent: 'bg-blue-500', text: 'text-blue-400' },
+        shared: { accent: 'bg-purple-500', text: 'text-purple-400' },
+        memo: { accent: 'bg-amber-500', text: 'text-amber-400' },
+        shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
+    };
 
-    if (sortBtn && sortLabel) {
-        sortBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Toggle Sort Order
-            sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
-
-            // Update UI
-            sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
-
-            // Re-render
-            filterAndRender();
-        });
-    }
-
-    // Aggiungi pulsanti FAB nel footer center
-    const fCenter = document.getElementById('footer-center-actions');
-    if (fCenter) {
-        clearElement(fCenter);
-        const type = new URLSearchParams(window.location.search).get('type') || 'standard';
-        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
-            createElement('a', {
-                href: 'archivio_account.html',
-                className: 'btn-fab-action btn-fab-archive',
-                title: t('account_archive') || 'Archivio',
-                dataset: { label: t('archive') || 'Archivio' }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
-            ]),
-            createElement('button', {
-                id: 'add-account-btn',
-                className: 'btn-fab-action btn-fab-scadenza',
-                title: t('add_account') || 'Nuovo Account',
-                dataset: { label: t('add_short') || 'Aggiungi' },
-                onclick: () => window.location.href = `form_account_privato.html?type=${type}`
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
-            ])
-        ]));
-    }
-}
-
-/**
- * LOADING ENGINE
- */
-async function loadAccounts() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('m6refresh') === '1') && navigator.onLine;
-        let sharedWithMe = [];
-
-        // 1. Invitations Accepted
-        LOG('[ACCOUNTS] Searching invites for authenticated user');
-        // Account propri e inviti sono indipendenti: avviamo entrambe le letture
-        // subito, mantenendo invariato il successivo assemblaggio delle card.
-        const ownAccountsPromise = requireServerRefresh
-            ? listPrivateAccountsConfirmed(currentUser.uid)
-            : listPrivateAccounts(currentUser.uid);
-        const invites = await listAcceptedInvites(currentUser.email);
-        LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
-
-        const invitePromises = invites.map(async inv => {
-            const inviteId = inv.id;
-            try {
-                const senderId = inv.senderId || inv.senderUid || inv.ownerId;
-                if (!senderId) {
-                    console.error(`[ACCOUNTS] Invite ${inviteId} skipped: missing sender/owner ID`);
-                    return null;
-                }
-
-                let accPath = `users/${senderId}/accounts/${inv.accountId}`;
-                // Consider empty string or null as no azienda
-                if (inv.aziendaId && inv.aziendaId.trim() !== "") {
-                    accPath = `users/${senderId}/aziende/${inv.aziendaId}/accounts/${inv.accountId}`;
-                }
-
-                LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
-                const sharedAccount = await getRecordByPath(accPath);
-
-                if (sharedAccount) {
-                    LOG('[ACCOUNTS] Shared account loaded');
-                    return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
-                } else {
-                    console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
-                }
-            } catch (e) {
-                console.error(`[ACCOUNTS] ERROR loading ${inviteId}:`, e.message);
+    const accountListView = createAccountListView({
+        themes: THEMES,
+        emptyStateClass: 'text-center py-10',
+        emptyTextClass: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6',
+        getSubtitle: account => account.username || account.email || 'Utente Nascosto',
+        onNavigate(account) {
+            if (signal.aborted) return;
+            if (account._aziendaId) {
+                navigate(`dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`);
+            } else {
+                navigate(`dettaglio_account_privato.html?id=${account.id}${account.isOwner ? '' : `&ownerId=${account.ownerId}`}`);
             }
-            return null;
-        });
-        sharedWithMe = (await Promise.all(invitePromises)).filter(Boolean);
-        LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
+        },
+        onPin: togglePin,
+        onDelete: handleDelete,
+        onArchive: handleArchive
+    });
 
-        // 2. Own Accounts
-        LOG('[ACCOUNTS] Loading own accounts');
-        const ownRecords = await ownAccountsPromise;
-        if (requireServerRefresh) {
-            const pilot = await import('../data/private-account-offline-pilot.js');
-            const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
-            if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) {
-                ownRecords.push(handoffRecord);
-            }
-        }
-        LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
-        const ownAccounts = ownRecords.map(data => {
-            const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
-            return {
-                ...data,
-                id: data.id,
-                isOwner: isRealOwner,
-                ownerId: data.ownerId || currentUser.uid,
-                _isGuest: !isRealOwner
-            };
-        }).filter(a => !a.isArchived);
+    /**
+     * ACCOUNT PRIVATI MODULE (V5.0 ADAPTER)
+     * Gestione liste account: personali, condivisi, memorandum.
+     * - Entry Point: initAccountPrivati(user)
+     */
 
-        allAccounts = [...ownAccounts, ...sharedWithMe];
+    async function start() {
+    
+        if (!user) return;
+        currentUser = user;
 
-        if (requireServerRefresh) {
-            urlParams.delete('afterWrite');
-            urlParams.delete('m6refresh');
-            const cleanQuery = urlParams.toString();
-            window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+        // Nota: initComponents() rimosso (gestito da main.js)
+
+        setupUI();
+        await loadAccounts();
+    
+    }
+
+    function setupUI() {
+        // Override freccia back -> sempre verso area_privata.html
+        const hLeft = document.getElementById('header-left');
+        if (hLeft) {
+            clearElement(hLeft);
+            setChildren(hLeft, createElement('button', {
+                className: 'btn-icon-header',
+                onclick: () => navigate('area_privata.html')
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+            ]));
         }
 
-        // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
-        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
-        if (vaultKeyMaterial) {
-            allAccounts = await Promise.all(allAccounts.map(async acc => {
-                if (acc._encrypted) {
-                    try {
-                        acc.username = acc.username ? await decrypt(acc.username, vaultKeyMaterial) : acc.username;
-                        acc.account = acc.account ? await decrypt(acc.account, vaultKeyMaterial) : acc.account;
-                        // La password non è visibile né ricercabile nella lista:
-                        // resta cifrata finché non viene aperto il dettaglio.
-                    } catch (e) {
-                        console.error("[Accounts] Decryption failed for:", acc.id, e);
+        const searchInput = document.getElementById('account-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterAndRender, {signal});
+        }
+
+        // Sort Button Logic (Toggle)
+        const sortBtn = document.getElementById('sort-btn');
+        const sortLabel = document.getElementById('sort-label');
+
+        if (sortBtn && sortLabel) {
+            sortLabel.textContent = 'A-Z';
+            sortBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Toggle Sort Order
+                sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
+
+                // Update UI
+                sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
+
+                // Re-render
+                filterAndRender();
+            }, {signal});
+        }
+
+        // Aggiungi pulsanti FAB nel footer center
+        const fCenter = document.getElementById('footer-center-actions');
+        if (fCenter) {
+            clearElement(fCenter);
+            const type = new URLSearchParams(query).get('type') || 'standard';
+            setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+                createElement('a', {
+                    href: 'archivio_account.html',
+                    className: 'btn-fab-action btn-fab-archive',
+                    title: t('account_archive') || 'Archivio',
+                    dataset: { label: t('archive') || 'Archivio' }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
+                ]),
+                createElement('button', {
+                    id: 'add-account-btn',
+                    className: 'btn-fab-action btn-fab-scadenza',
+                    title: t('add_account') || 'Nuovo Account',
+                    dataset: { label: t('add_short') || 'Aggiungi' },
+                    onclick: () => navigate(`form_account_privato.html?type=${type}`)
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                ])
+            ]));
+        }
+    }
+
+    /**
+     * LOADING ENGINE
+     */
+    async function loadAccounts() {
+        try {
+            const urlParams = new URLSearchParams(query);
+            const requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('m6refresh') === '1') && navigator.onLine;
+            let sharedWithMe = [];
+
+            // 1. Invitations Accepted
+            LOG('[ACCOUNTS] Searching invites for authenticated user');
+            // Account propri e inviti sono indipendenti: avviamo entrambe le letture
+            // subito, mantenendo invariato il successivo assemblaggio delle card.
+            const ownAccountsPromise = requireServerRefresh
+                ? listPrivateAccountsConfirmed(currentUser.uid)
+                : listPrivateAccounts(currentUser.uid);
+            const [ownResult, invites] = await waitFor(Promise.all([ownAccountsPromise, listAcceptedInvites(currentUser.email)]));
+            LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
+
+            const invitePromises = invites.map(async inv => {
+                const inviteId = inv.id;
+                try {
+                    const senderId = inv.senderId || inv.senderUid || inv.ownerId;
+                    if (!senderId) {
+                        console.error(`[ACCOUNTS] Invite ${inviteId} skipped: missing sender/owner ID`);
+                        return null;
                     }
+
+                    let accPath = `users/${senderId}/accounts/${inv.accountId}`;
+                    // Consider empty string or null as no azienda
+                    if (inv.aziendaId && inv.aziendaId.trim() !== "") {
+                        accPath = `users/${senderId}/aziende/${inv.aziendaId}/accounts/${inv.accountId}`;
+                    }
+
+                    LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
+                    const sharedAccount = await waitFor(getRecordByPath(accPath));
+
+                    if (sharedAccount) {
+                        LOG('[ACCOUNTS] Shared account loaded');
+                        return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
+                    } else {
+                        console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
+                    }
+                } catch (e) {
+                    if (signal.aborted) return;
+                    console.error(`[ACCOUNTS] ERROR loading ${inviteId}:`, e.message);
                 }
-                return acc;
-            }));
-        }
-
-        filterAndRender();
-    } catch (e) {
-        logError("LoadAccounts", e);
-        showToast(t('error_generic'), "error");
-    }
-}
-
-/**
- * FILTER & RENDER
- */
-function filterAndRender() {
-    const type = new URLSearchParams(window.location.search).get('type') || 'standard';
-    const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
-
-    let filtered = allAccounts.filter(acc => {
-        const mode = accountModeFromRecord(acc);
-        if (type === 'standard') return mode === 'account-private';
-        if (type === 'shared') return mode === 'account-shared';
-        if (type === 'memo') return mode === 'memo-private';
-        if (type === 'shared_memo') return mode === 'memo-shared';
-        return true;
-    });
-
-    if (searchVal) {
-        filtered = filtered.filter(acc =>
-            (acc.nomeAccount || '').toLowerCase().includes(searchVal) ||
-            (acc.username || '').toLowerCase().includes(searchVal)
-        );
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        const nA = (a.nomeAccount || '').toLowerCase();
-        const nB = (b.nomeAccount || '').toLowerCase();
-        return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
-    });
-
-    accountListView.render(filtered);
-}
-
-/**
- * ACTIONS
- */
-async function togglePin(acc) {
-    if (!acc.isOwner) { showToast(t('error_only_owner_pin') || "Solo il proprietario può fissare l'account", "info"); return; }
-    try {
-        const newVal = !acc.isPinned;
-        await updateDoc(doc(db, "users", currentUser.uid, "accounts", acc.id), { isPinned: newVal });
-        acc.isPinned = newVal;
-        filterAndRender();
-    } catch (e) { logError("Pin", e); }
-}
-
-async function handleArchive(item) {
-    const id = item.dataset.id;
-    if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
-    try {
-        const account = allAccounts.find(candidate => candidate.id === id);
-        await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), createArchiveMetadata(account));
-        showToast(t('success_archived'));
-        allAccounts = allAccounts.filter(a => a.id !== id);
-        filterAndRender();
-    } catch (e) { logError("Archive", e); }
-}
-
-async function handleDelete(item) {
-    const id = item.dataset.id;
-    if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
-    if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) { filterAndRender(); return; }
-    try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userProfile = await getUserProfile(currentUser.uid);
-        const emails = userProfile?.contactEmails || [];
-        const hasProfileLink = emails.some(email => email.linkedAccountId === id);
-        const batch = writeBatch(db);
-        batch.delete(doc(db, "users", currentUser.uid, "accounts", id));
-        if (hasProfileLink) {
-            batch.update(userRef, {
-                contactEmails: emails.map(email => email.linkedAccountId === id
-                    ? { ...email, linkedAccountId: null }
-                    : email)
+                return null;
             });
+            sharedWithMe = (await waitFor(Promise.all(invitePromises))).filter(Boolean);
+            LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
+
+            // 2. Own Accounts
+            LOG('[ACCOUNTS] Loading own accounts');
+            const ownRecords = ownResult.map(record => ({...record}));
+            if (requireServerRefresh) {
+                const pilot = await waitFor(import('../data/private-account-offline-pilot.js'));
+                const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
+                if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) {
+                    ownRecords.push(handoffRecord);
+                }
+            }
+            LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
+            const ownAccounts = ownRecords.map(data => {
+                const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
+                return {
+                    ...data,
+                    id: data.id,
+                    isOwner: isRealOwner,
+                    ownerId: data.ownerId || currentUser.uid,
+                    _isGuest: !isRealOwner
+                };
+            }).filter(a => !a.isArchived);
+
+            allAccounts = [...ownAccounts, ...sharedWithMe];
+
+            if (requireServerRefresh) {
+                urlParams.delete('afterWrite');
+                urlParams.delete('m6refresh');
+                const cleanQuery = urlParams.toString();
+                if (options.replaceQuery) options.replaceQuery(cleanQuery);
+                else window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+            }
+
+            // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
+            const vaultKeyMaterial = await waitFor(ensureVaultKeyMaterial().catch(() => null));
+            if (vaultKeyMaterial) {
+                allAccounts = await waitFor(Promise.all(allAccounts.map(async acc => {
+                    if (acc._encrypted) {
+                        try {
+                            acc.username = acc.username ? await waitFor(decrypt(acc.username, vaultKeyMaterial)) : acc.username;
+                            acc.account = acc.account ? await waitFor(decrypt(acc.account, vaultKeyMaterial)) : acc.account;
+                            // La password non è visibile né ricercabile nella lista:
+                            // resta cifrata finché non viene aperto il dettaglio.
+                        } catch (e) {
+                            if (signal.aborted) return;
+                            console.error("[Accounts] Decryption failed for:", acc.id, e);
+                        }
+                    }
+                    return acc;
+                })));
+            }
+
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("LoadAccounts", e);
+            showToast(t('error_generic'), "error");
         }
-        await batch.commit();
-        showToast(t('success_deleted'));
-        allAccounts = allAccounts.filter(a => a.id !== id);
-        filterAndRender();
-    } catch (e) { logError("Delete", e); }
+    }
+
+    /**
+     * FILTER & RENDER
+     */
+    function filterAndRender() {
+        if (signal.aborted) return;
+        const type = new URLSearchParams(query).get('type') || 'standard';
+        const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
+
+        let filtered = allAccounts.filter(acc => {
+            const mode = accountModeFromRecord(acc);
+            if (type === 'standard') return mode === 'account-private';
+            if (type === 'shared') return mode === 'account-shared';
+            if (type === 'memo') return mode === 'memo-private';
+            if (type === 'shared_memo') return mode === 'memo-shared';
+            return true;
+        });
+
+        if (searchVal) {
+            filtered = filtered.filter(acc =>
+                (acc.nomeAccount || '').toLowerCase().includes(searchVal) ||
+                (acc.username || '').toLowerCase().includes(searchVal)
+            );
+        }
+
+        // Sort
+        filtered.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            const nA = (a.nomeAccount || '').toLowerCase();
+            const nB = (b.nomeAccount || '').toLowerCase();
+            return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
+        });
+
+        accountListView.render(filtered);
+    }
+
+    /**
+     * ACTIONS
+     */
+    async function togglePin(acc) {
+        if (signal.aborted) return;
+        if (!acc.isOwner) { showToast(t('error_only_owner_pin') || "Solo il proprietario può fissare l'account", "info"); return; }
+        try {
+            const newVal = !acc.isPinned;
+            await updateDoc(doc(db, "users", currentUser.uid, "accounts", acc.id), { isPinned: newVal });
+            if (signal.aborted) return;
+            acc.isPinned = newVal;
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("Pin", e);
+        }
+    }
+
+    async function handleArchive(item) {
+        if (signal.aborted) return;
+        const id = item.dataset.id;
+        if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
+        try {
+            const account = allAccounts.find(candidate => candidate.id === id);
+            await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), createArchiveMetadata(account));
+            if (signal.aborted) return;
+            showToast(t('success_archived'));
+            allAccounts = allAccounts.filter(a => a.id !== id);
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("Archive", e);
+        }
+    }
+
+    async function handleDelete(item) {
+        if (signal.aborted) return;
+        const id = item.dataset.id;
+        if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
+        const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'));
+        if (signal.aborted) return;
+        if (!confirmed) { filterAndRender(); return; }
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+            const userProfile = await waitFor(getUserProfile(currentUser.uid));
+            const emails = userProfile?.contactEmails || [];
+            const hasProfileLink = emails.some(email => email.linkedAccountId === id);
+            const batch = writeBatch(db);
+            batch.delete(doc(db, "users", currentUser.uid, "accounts", id));
+            if (hasProfileLink) {
+                batch.update(userRef, {
+                    contactEmails: emails.map(email => email.linkedAccountId === id
+                        ? { ...email, linkedAccountId: null }
+                        : email)
+                });
+            }
+            await batch.commit();
+            if (signal.aborted) return;
+            showToast(t('success_deleted'));
+            allAccounts = allAccounts.filter(a => a.id !== id);
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("Delete", e);
+        }
+    }
+
+    options.signal?.addEventListener('abort', destroy, {once: true});
+    if (options.signal?.aborted) destroy();
+    const ready = signal.aborted ? Promise.resolve() : start();
+    return Object.freeze({ready, destroy});
 }

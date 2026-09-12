@@ -40,3 +40,5 @@ Restano leggibili dal modello applicativo date e metadati necessari alle liste, 
 - M1 non riscrive documenti, non rimuove fallback e non cambia lo schema Firestore.
 
 Verifica sperimentale 12/09/2026, base `ff006c71`: introdotto AbortSignal per il ciclo di sblocco; nessuna variazione dei campi, della cifratura o della persistenza. [Evidenze](./AUDIT_VAULT_SESSION_P0.md#15-annullamento-e-robustezza-del-laboratorio--12092026).
+
+Preparazione delle liste 12/09/2026, base `0a807adb`: rimosse le referenze ai record e il contenuto visibile allo smontaggio; invalidata la prosecuzione delle decifrature dopo uscita. Campi, formati e persistenza invariati. [Audit §17](./AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).

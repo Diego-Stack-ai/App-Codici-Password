@@ -111,3 +111,7 @@ Scegliere test che esercitino il requisito modificato; distinguere test statici,
 Il [gate M10](../docs/M10_HARDENING_RILASCIO.md) resta il riferimento per il rilascio. Il workflow della revisione indicata valida PR/push e distribuisce solo Hosting su avvio manuale. Rules, Functions e dati richiedono autorizzazione e distribuzione separate.
 
 Aggiornare i contratti interessati nello stesso lavoro; rigenerare gli inventari con gli script previsti. Conservare commit, test, rollback e limiti nel registro. Il riallineamento documentale non chiude automaticamente i gate del progetto.
+
+### Liste Account predisposte al montaggio — 12/09/2026
+
+Su base `0a807adb`, i moduli canonici privato/azienda espongono un montaggio con stato per vista, `ready`, `destroy`, AbortSignal e navigazione iniettata. Gli inizializzatori storici restano compatibili e `pages-init.js` restituisce la dismissione. Il futuro chiamante deve usarla su uscita/blocco/cambio identità; la shell persistente non è ancora attivata nell’app. [Evidenze e limiti](../docs/AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).

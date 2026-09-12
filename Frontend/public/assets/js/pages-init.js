@@ -87,9 +87,9 @@ export async function initPrivacy() { LOG("[Router] Privacy Page Loaded"); }
 export async function initTermini() { LOG("[Router] Termini Page Loaded"); }
 
 // --- 3. MODULI ACCOUNT PRIVATI ---
-export async function initAccountPrivati(user) {
+export async function initAccountPrivati(user, options) {
     const module = await import('./modules/privato/account_privati.js');
-    await module.initAccountPrivati(user);
+    return module.initAccountPrivati(user, options);
 }
 
 export async function initFormAccountPrivato(user) {
@@ -135,9 +135,9 @@ export async function initDatiAzienda(user) {
     if (module.initDatiAzienda) await module.initDatiAzienda(user);
 }
 
-export async function initAccountAziendaList(user) {
+export async function initAccountAziendaList(user, options) {
     const module = await import('./modules/azienda/account_azienda.js');
-    if (module.initAccountAziendaList) await module.initAccountAziendaList(user);
+    if (module.initAccountAziendaList) return module.initAccountAziendaList(user, options);
 }
 
 export async function initDettaglioAccountAzienda(user) {

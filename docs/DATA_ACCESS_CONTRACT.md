@@ -53,3 +53,7 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 Tutti i moduli applicativi passano ora dal repository. `offline-firestore.js` resta confinato all'infrastruttura del repository.
 
 Il cutover M6 è attivo per Account e memorandum privati isolati. Banca, condivisioni e collegamenti Profilo non rientrano in quel percorso. Revisioni, idempotenza, conflitti e gate ancora aperti sono definiti in `OFFLINE_WRITE_CONFLICT_POLICY.md` e `M6_SINCRONIZZAZIONE_OFFLINE.md`. La consultazione offline completa non è certificata.
+
+## Consumo delle liste durante il cambio vista — 12/09/2026
+
+Su base `0a807adb`, le due liste canoniche mantengono il repository corrente ma invalidano il consumatore quando la vista viene smontata. Le richieste già inviate possono terminare; non vengono promesse cancellazione remota o revoca di scritture in corso. La chiusura annulla listener e impedisce render tardivi. Nessun nuovo cache o schema. [Audit §17](./AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).
