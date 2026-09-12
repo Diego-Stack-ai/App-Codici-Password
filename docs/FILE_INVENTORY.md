@@ -241,14 +241,14 @@ File censiti: **418**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/ui-components.js` | JS | 4122 | 101 | Supporto frontend: ui-components. |
 | `Frontend/public/assets/js/ui-core-v129.js` | JS | 19841 | 457 | Toast, modali, input protetti e componenti UI globali. |
 | `Frontend/public/assets/js/utils.js` | JS | 1481 | 48 | Supporto frontend: utils. |
-| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724606 | 70 | Supporto frontend: firebase-runtime. |
-| `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80549 | 8 | Supporto frontend: firebase-sw-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724675 | 70 | Supporto frontend: firebase-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80556 | 8 | Supporto frontend: firebase-sw-runtime. |
 | `Frontend/public/assets/js/vendor/qrcode.min.js` | JS | 19927 | 1 | Supporto frontend: qrcode.min. |
 | `Frontend/public/configurazione_automezzi.html` | HTML | 8287 | 159 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
 | `Frontend/public/configurazione_documenti.html` | HTML | 8298 | 159 | Struttura della pagina configurazione documenti; comportamento demandato ai moduli. |
 | `Frontend/public/configurazione_generali.html` | HTML | 6664 | 133 | Struttura della pagina configurazione generali; comportamento demandato ai moduli. |
 | `Frontend/public/contatto_condiviso.html` | HTML | 1508 | 29 | Struttura della pagina contatto condiviso; comportamento demandato ai moduli. |
-| `Frontend/public/dati_azienda.html` | HTML | 20429 | 320 | Struttura della pagina dati azienda; comportamento demandato ai moduli. |
+| `Frontend/public/dati_azienda.html` | HTML | 20485 | 320 | Struttura della pagina dati azienda; comportamento demandato ai moduli. |
 | `Frontend/public/dettaglio_account_azienda.html` | HTML | 27161 | 411 | Struttura della pagina dettaglio account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/dettaglio_account_privato.html` | HTML | 24165 | 377 | Struttura della pagina dettaglio account privato; comportamento demandato ai moduli. |
 | `Frontend/public/dettaglio_scadenza.html` | HTML | 8890 | 176 | Struttura della pagina dettaglio scadenza; comportamento demandato ai moduli. |
@@ -264,7 +264,7 @@ File censiti: **418**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 8139 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 67004 | 822 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 10018 | 237 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 10254 | 237 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13808 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15598 | 259 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |

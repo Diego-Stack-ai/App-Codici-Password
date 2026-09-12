@@ -3,7 +3,7 @@
  * Mantiene rendering e revoca fuori dal modulo principale della pagina.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.116';
+import { auth, db } from '../../firebase-config.js?v=1.2.117';
 import { LOG } from '../../logger.js';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
