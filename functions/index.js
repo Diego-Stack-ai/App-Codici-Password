@@ -67,7 +67,11 @@ function verifiedMutationRetry(resultSnapshot, legacySnapshot, binding) {
         }
     }
     // Legacy results were owner-writable: never trust or silently reapply them.
-    if (legacySnapshot.exists) throw new HttpsError('failed-precondition', 'Esito precedente da verificare prima di riprovare.');
+    if (legacySnapshot.exists) throw new HttpsError(
+        'failed-precondition',
+        'Esito precedente da verificare prima di riprovare.',
+        {reason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'}
+    );
     return null;
 }
 
