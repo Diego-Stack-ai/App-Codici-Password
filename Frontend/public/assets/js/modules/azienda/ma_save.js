@@ -17,6 +17,15 @@ import { logError } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, validateAttachmentFile } from '../shared/attachment-security.js';
 
+function sameContactValue(left, right) {
+    if (left === right) return true;
+    if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false;
+    if (Array.isArray(left) !== Array.isArray(right)) return false;
+    const keys = Object.keys(left), otherKeys = Object.keys(right);
+    return keys.length === otherKeys.length && keys.every(key =>
+        Object.hasOwn(right, key) && sameContactValue(left[key], right[key]));
+}
+
 // ─── SAVE ─────────────────────────────────────────────────────────────────────
 
 export async function saveAzienda() {
@@ -158,7 +167,7 @@ export async function saveAzienda() {
                 if (!snap.exists()) throw new Error('Azienda non disponibile');
                 const current = snap.data();
                 for (const key of ['emails', 'aziendaEmail', 'aziendaEmailPassword', 'phoneAccountLinks', 'telefonoAzienda', 'faxAzienda', 'referenteCellulare']) {
-                    if (JSON.stringify(current[key] || null) !== JSON.stringify(original[key] || null)) throw new Error('Contatti modificati: ricarica prima di salvare.');
+                    if (!sameContactValue(current[key] ?? null, original[key] ?? null)) throw new Error('Contatti modificati: ricarica prima di salvare.');
                 }
                 const oldContacts = [original.emails?.pec, original.emails?.amministrazione, original.emails?.personale, ...(original.emails?.extra || [])].filter(Boolean);
                 const newContacts = [data.emails.pec, data.emails.amministrazione, data.emails.personale, ...data.emails.extra].filter(Boolean);

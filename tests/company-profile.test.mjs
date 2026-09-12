@@ -19,13 +19,35 @@ test('tessera: selezione rispettata, valori escapati e credenziali escluse',()=>
  assert.doesNotMatch(card,/SECRET|PRIVATE-NOTE|pec@example|hidden@example|\nTEL:iniettato/);assert.match(card,/admin@example.test/);assert.match(card,/Nome\\nTEL:iniettato/);
 });
 
-async function companySaveFixture({conflict=false,changedEmail=false,locked=false}={}){
+async function companySaveFixture({conflict=false,changedEmail=false,locked=false,reordered=false,removePhone=false,phoneConflict=false,linkedPhone=false}={}){
  const original={emails:{pec:{email:'pec@example.test',password:'cipher: old ',linkedAccountId:'a',linkedAccountCompanyId:'c',username:'user',custom:42},extra:[]},qrConfig:{custom:true}};
+ if(removePhone || phoneConflict || linkedPhone) original.telefonoAzienda='0123456';
+ if(linkedPhone) original.phoneAccountLinks={telefonoAzienda:{linkedAccountId:'phone-account'}};
+ const remote=structuredClone(original);
+ if(reordered) remote.emails={extra:[],pec:Object.fromEntries(Object.entries(original.emails.pec).reverse())};
+ if(phoneConflict) remote.telefonoAzienda='999999';
  const inputs=new Map();const get=id=>{if(!inputs.has(id))inputs.set(id,{value:'',disabled:false});return inputs.get(id);};
  for(const [id,value] of Object.entries({'ragione-sociale':'Fixture','email-pec':changedEmail?'different@example.test':'pec@example.test','email-pec-password':' old ','type-pec':'PEC','type-amministrazione':'Amministrazione','type-personale':'Personale'}))get(id).value=value;
- const writes=[];const state={currentUid:'owner',currentAziendaId:'company',originalCompany:original,formLoaded:true,selectedFiles:[],existingAttachments:[]};
- const ctrl=await controller('ma_save.js',{state,db:{},doc:(...p)=>p,runTransaction:async(db,cb)=>{const staged=[];await cb({get:async()=>({exists:()=>true,data:()=>conflict?{...original,emails:{}}:original}),update:(ref,data)=>staged.push(data)});writes.push(...staged);},serverTimestamp:()=>1,document:{getElementById:get,querySelectorAll:()=>[]},ensureVaultKeyMaterial:async()=>locked?null:'key',encrypt:async value=>value?'cipher:'+value:'',showToast:()=>{},t:k=>k,logError:()=>{},setTimeout:()=>{},createElement:()=>({}),setChildren:()=>{}},['saveAzienda']);
- await ctrl.saveAzienda();return {writes,original};
+ if(!removePhone)get('telefono-azienda').value=original.telefonoAzienda || '';
+ const writes=[];const messages=[];const state={currentUid:'owner',currentAziendaId:'company',originalCompany:original,formLoaded:true,selectedFiles:[],existingAttachments:[]};
+ const ctrl=await controller('ma_save.js',{state,db:{},doc:(...p)=>p,runTransaction:async(db,cb)=>{const staged=[];await cb({get:async()=>({exists:()=>true,data:()=>conflict?{...remote,emails:{}}:remote}),update:(ref,data)=>staged.push(data)});writes.push(...staged);},serverTimestamp:()=>1,document:{getElementById:get,querySelectorAll:()=>[]},ensureVaultKeyMaterial:async()=>locked?null:'key',encrypt:async value=>value?'cipher:'+value:'',showToast:(message)=>messages.push(message),t:k=>k,logError:()=>{},setTimeout:()=>{},createElement:()=>({}),setChildren:()=>{}},['saveAzienda']);
+ await ctrl.saveAzienda();return {writes,original,messages};
 }
 test('modifica azienda conserva link, username, password con spazi e configurazione QR',async()=>{const {writes,original}=await companySaveFixture();assert.equal(writes.length,1);assert.deepEqual(writes[0].emails.pec,{...original.emails.pec,tipo:'PEC',note:''});assert.equal(writes[0].qrConfig.custom,true);});
 for(const condition of ['conflict','changedEmail','locked'])test('modifica azienda bloccata senza perdita dati: '+condition,async()=>{assert.deepEqual((await companySaveFixture({[condition]:true})).writes,[]);});
+
+test('elimina telefono non collegato anche quando Firestore riordina le chiavi delle email',async()=>{
+ const {writes,original}=await companySaveFixture({removePhone:true,reordered:true});
+ assert.equal(writes.length,1);assert.equal(writes[0].telefonoAzienda,'');
+ assert.equal(original.telefonoAzienda,'0123456');
+ assert.equal(writes[0].emails.pec.linkedAccountId,'a');
+});
+test('conflitto reale sul telefono blocca la cancellazione senza sovrascrivere il dato remoto',async()=>{
+ const {writes,messages}=await companySaveFixture({removePhone:true,phoneConflict:true});
+ assert.deepEqual(writes,[]);assert.ok(messages.some(message=>message.startsWith('Contatti modificati')));
+});
+test('telefono collegato richiede scollegamento e non segnala un falso conflitto',async()=>{
+ const {writes,messages}=await companySaveFixture({removePhone:true,linkedPhone:true,reordered:true});
+ assert.deepEqual(writes,[]);assert.ok(messages.some(message=>message.startsWith('Scollega')));
+ assert.equal(messages.some(message=>message.startsWith('Contatti modificati')),false);
+});

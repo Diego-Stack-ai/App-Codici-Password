@@ -56,6 +56,8 @@ export const findPrivateAccountByLegacyId = (uid, accountId) => coalesceRead(`le
     ))).then(snapshot => snapshot.empty ? null : record(snapshot.docs[0]));
 
 export const getCompany = (uid, companyId) => getRecordByPath(`users/${uid}/aziende/${companyId}`);
+export const getCompanyConfirmed = (uid, companyId) => readConfirmedRecord(
+    doc(db, 'users', uid, 'aziende', companyId));
 export const getCompanyAccount = (uid, companyId, accountId) =>
     getRecordByPath(`users/${uid}/aziende/${companyId}/accounts/${accountId}`);
 export const getCompanyAccountConfirmed = (uid, companyId, accountId) => readConfirmedRecord(
