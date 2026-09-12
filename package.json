@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.114",
+  "version": "1.2.115",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -29,7 +29,7 @@
     "test:offline": "node scripts/audit-offline-shell.mjs",
     "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs",
     "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs",
-    "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs tests/legacy-email-audit-model.test.mjs tests/shared-vault-data-model.test.mjs tests/account-widget-ui.test.mjs tests/shared-credential-editor.test.mjs tests/shared-credential-update-session.test.mjs tests/account-field-usage-model.test.mjs",
+    "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs tests/legacy-email-audit-model.test.mjs tests/shared-vault-data-model.test.mjs tests/account-widget-ui.test.mjs tests/shared-credential-editor.test.mjs tests/shared-credential-update-session.test.mjs tests/widget-common-picker.test.mjs tests/new-account-shared-link.test.mjs tests/account-field-usage-model.test.mjs",
     "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/profile-deadline-link-model.test.mjs tests/account-mode-model.test.mjs tests/banking-model.test.mjs",
     "test:page-shells": "node scripts/audit-page-shells.mjs",
     "test:ui-foundations": "node scripts/audit-ui-foundations.mjs",

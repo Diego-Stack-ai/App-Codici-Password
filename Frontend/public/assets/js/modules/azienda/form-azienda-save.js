@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.114';
+import { auth, db } from '../../firebase-config.js?v=1.2.115';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -31,6 +31,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
 export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '' }) {
     const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
+    let savedAccountId = currentDocId;
 
     if (hasInvalidCardExpiry(bankAccounts)) {
         showToast('Inserisci la scadenza della carta nel formato MM/AA, con un mese da 01 a 12.', 'warning');
@@ -145,6 +146,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         // --- ATOMIC TRANSACTION V3.1 ---
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
+            savedAccountId = accRef.id;
             const targetId = accRef.id;
 
             // 1. ALL READS FIRST
@@ -314,7 +316,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         if (profileContactLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
         showToast(retainedProfilePassword ? 'Account collegato. La password diversa è stata conservata nel Profilo.' : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
-            const destination = isEditing
+            const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
+                ? `form_account_azienda.html?id=${savedAccountId}&aziendaId=${currentAziendaId}&linkShared=1#shared-credentials-section`
+                : isEditing
                 ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}&afterWrite=1`
                 : `dati_azienda.html?id=${currentAziendaId}`;
             window.location.replace(destination);

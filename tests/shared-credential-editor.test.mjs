@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-const source=(await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-shared-credentials.js',import.meta.url),'utf8')).replace(/^import[\s\S]*?;\r?\n/gm,'').replace('export async function','async function');
+const source=(await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-shared-credentials.js',import.meta.url),'utf8')).replace(/^import[\s\S]*?;\r?\n/gm,'').replace(/export (async )?function/g, '$1function');
 function fixture(){
  const nodes=[], updates=[]; let decrypted=0, active=true, confirm=true, fail=false;
  const createElement=(tag, props={},children=[])=>{const n={tag,...props,children, classList:{toggle(){}},appendChild(x){this.children.push(x)},remove(){this.removed=true}};nodes.push(n);return n};
