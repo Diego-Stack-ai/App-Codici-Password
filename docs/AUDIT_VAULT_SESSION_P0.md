@@ -403,3 +403,11 @@ Base `6432cad8`, correzione sorgenti nel commit `73fbe022`. Segnalazione del pro
 **Validazione complessiva:** npm test terminato con codice 0, 531 test superati inclusi entrambi i gate emulati; quattro test separati della preview superati. Budget delle 30 pagine rispettati e baseline rigenerata; inventario di 464 file, 162 collegamenti relativi nei 38 MD verificati senza destinazioni mancanti (ancore e URL esterni esclusi).
 
 **Rilascio e rollback:** correzione candidata locale, nessuna pubblicazione, migrazione o scrittura su dati reali. Restano invariati collegamenti Account e regole che richiedono Scollega prima di eliminare un contatto collegato. Rollback tramite revert dei tre moduli interessati e dei relativi test; nessun dato da ripristinare.
+
+## 28. Rilascio isolato della correzione azienda — 12/09/2026
+
+Il proprietario ha autorizzato di proseguire dopo la correzione segnalata. Creata worktree separata da master `fa555d49`, branch `fix/company-contact-save-conflict`, trasferita soltanto la correzione del blocco 27 e preparata v1.2.111. Preservato il mapper ID della produzione: il test di freschezza verifica separatamente il payload legacy e il percorso fisico richiesto. Nessun codice sperimentale della shell, modifica alle Rules o alle Functions incluso.
+
+Commit release `cba1efe29d8f3ffbd2ba9889524a4effbd910094`; [PR #45](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/45) validata e unita in master `f4d9393b9c4b9b1f3a7eeb4b6d3ec9f16b84dea8`. La suite della base produttiva supera 301 test, inclusi 14 mirati alla regressione; non va confusa con i 531 test del ramo sperimentale. Versione, 236 query asset e file generati inclusi nel commit; inventario e baseline rigenerati.
+
+[Workflow Hosting](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/34712067898) avviato su master, validazione e deploy conclusi con successo. Verificati via HTTPS sul sito pubblico env-v126.js, ma_save.js, modifica_azienda.js, vault-repository.js e sw.js: identici alla release dopo normalizzazione delle terminazioni di riga. Nessuna cancellazione di contatti reali eseguita per il collaudo. Il programma sperimentale resta sul proprio ramo; il rilascio non chiude il P0 o gli altri gate. Rollback: Hosting del precedente master `fa555d49`.
