@@ -28,6 +28,7 @@ const {
 } = require("./recovery-security");
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
 const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require("./mutation-result-binding");
+const {assertPrivateAccountWriteScope} = require("./private-account-write-scope");
 const {
     privateAccountMutationDecision, validatePrivateAccountMutation
 } = require("./private-account-mutation-service");
@@ -144,6 +145,16 @@ exports.applyPrivateAccountMutation = onCall(
                 transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
             const previous = verifiedMutationRetry(resultSnapshot, legacySnapshot, binding);
+            // A trusted retry reports its original result without mutating the
+            // current document, even if its scope has legitimately changed since.
+            if (previous) return {...previous, duplicate: true};
+            if (recordSnapshot.exists) {
+                try { assertPrivateAccountWriteScope({uid: request.auth.uid, record: recordSnapshot.data()}); }
+                catch {
+                    throw new HttpsError('failed-precondition', 'Questo Account richiede il percorso di modifica completo.',
+                        {reason: 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'});
+                }
+            }
             const result = privateAccountMutationDecision({
                 exists: recordSnapshot.exists,
                 currentRevision: verifiedCurrentRevision(recordSnapshot),
