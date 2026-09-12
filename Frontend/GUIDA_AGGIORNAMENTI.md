@@ -555,3 +555,7 @@ Su autorizzazione del product owner, pubblicato il canale temporaneo `vault-shel
 ### Robustezza laboratorio Vault — 12/09/2026
 
 Corretti prompt tardivi dopo blocco, dismissione dell’adattatore, errori di smontaggio e titoli dei collegamenti diretti alle liste. Sette test nuovi: gate laboratorio 32/32 e anteprima 2/2. Censiti i vincoli dei due orchestratori reali prima della futura migrazione. [Audit §15](../docs/AUDIT_VAULT_SESSION_P0.md#15-annullamento-e-robustezza-del-laboratorio--12092026). Nessuna attivazione nell’app live.
+
+### Riscontro iPhone del product owner — 12/09/2026
+
+Ricevuti quattro esiti positivi riferiti dall’utente per la demo (navigazione, refresh, inattività/background, offline). Superato il controllo preliminare necessario ad ampliare la preparazione delle liste reali. Restano aperti i collaudi dell’app completa. [Audit §16](../docs/AUDIT_VAULT_SESSION_P0.md#16-esito-riferito-dal-product-owner--12092026) distingue riscontro utente e verifiche osservate dall’agente.
