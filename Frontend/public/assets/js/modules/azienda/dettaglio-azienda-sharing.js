@@ -5,7 +5,7 @@
  * Init: initSharingModule(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.115';
+import { auth, db } from '../../firebase-config.js?v=1.2.116';
 import { LOG } from '../../logger.js';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
