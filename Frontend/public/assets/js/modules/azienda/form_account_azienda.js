@@ -7,7 +7,7 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.113';
+import { db } from '../../firebase-config.js?v=1.2.114';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -20,7 +20,8 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.113';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.114';
+import { initAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.114';
 
 // --- STATE ---
 let currentUid = null;
@@ -117,6 +118,10 @@ export async function initFormAccountAzienda(user) {
     }
     if (isEditing) {
         accountWidgetController = await initAccountEmbeddedWidgets({
+            uid: currentUid, context: 'company', companyId: currentAziendaId,
+            accountId: currentDocId, editable: true
+        });
+        await initAccountSharedCredentials({
             uid: currentUid, context: 'company', companyId: currentAziendaId,
             accountId: currentDocId, editable: true
         });

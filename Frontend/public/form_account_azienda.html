@@ -7,19 +7,19 @@
     <title>Account Azienda - PROTOCOLLO BASE V5.3</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.113" />
+    <link rel="manifest" href="manifest.json?v=1.2.114" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.113">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.114">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.113">
-    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.113">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.114">
+    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.114">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.113">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.114">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -227,6 +227,17 @@
                                         class="form-textarea form-textarea-notes"></textarea>
                                 </div>
                             </div>
+
+                            <section id="shared-credentials-section" class="hidden">
+                                <div class="detail-section-header">
+                                    <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                                    <h3 class="detail-section-title">Credenziali comuni</h3>
+                                    <button id="btn-link-shared-credential" type="button" class="btn-icon-header" aria-label="Collega Credenziale comune">
+                                        <span class="material-symbols-outlined">add_link</span>
+                                    </button>
+                                </div>
+                                <div id="shared-credentials-list" class="shared-account-credentials"></div>
+                            </section>
 
                             <section id="account-widgets-section" class="hidden">
                                 <div class="detail-section-header">
