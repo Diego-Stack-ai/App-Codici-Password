@@ -44,7 +44,7 @@ import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } fro
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
-import { connectEmailAccount, connectPhoneAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
+import { readLinkedEmailAccountPassword, connectEmailAccount, connectPhoneAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -129,7 +129,7 @@ export async function initProfiloPrivato(user) {
 
     initPhonesEmailsModule(
         () => ({ contactPhones, contactEmails, profileLabels, qrCodeInclusions }),
-        { syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
+        { readLinkedEmailAccountPassword, syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
     );
 
     initAddressesDocsModule(

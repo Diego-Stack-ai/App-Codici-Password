@@ -2,13 +2,28 @@ import { auth, db } from '../../firebase-config.js?v=1.2.102';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { showProfileAccountPicker } from './profilo-modal.js';
-import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts} from '../data/vault-repository.js';
+import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 import {
     buildProfileAccountLinkDraft, profileAccountUrl,
     buildProfileDocumentDeadlineDraft,
     findCompatibleDocumentDeadlines
 } from './profile-model.js';
+
+export async function readLinkedEmailAccountPassword(email) {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !email?.linkedAccountId) throw new Error('Account non collegato.');
+    const key = await ensureVaultKeyMaterial();
+    if (!key || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per leggere la password.');
+    const account = email.linkedAccountCompanyId
+        ? await getCompanyAccountConfirmed(uid, email.linkedAccountCompanyId, email.linkedAccountId)
+        : await getPrivateAccountConfirmed(uid, email.linkedAccountId);
+    if (!account || account.isArchived) throw new Error('Account collegato non disponibile.');
+    const password = await decryptRequiredValue(account.password, key);
+    if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata.');
+    return password || '';
+}
 
 export function openLinkedAccount(accountId, companyId = '') {
     if (accountId) window.location.href = profileAccountUrl(accountId, companyId);

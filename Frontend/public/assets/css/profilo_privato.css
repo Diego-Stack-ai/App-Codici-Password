@@ -1286,3 +1286,5 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     .profile-account-results { min-height: 100px; }
     .profile-account-result { padding: 10px; }
 }
+
+.profile-linked-password-value { min-width: 0; flex: 1; overflow-wrap: anywhere; white-space: pre-wrap; }
