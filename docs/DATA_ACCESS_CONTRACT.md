@@ -57,3 +57,5 @@ Il cutover M6 è attivo per Account e memorandum privati isolati. Banca, condivi
 ## Consumo delle liste durante il cambio vista — 12/09/2026
 
 Su base `0a807adb`, le due liste canoniche mantengono il repository corrente ma invalidano il consumatore quando la vista viene smontata. Le richieste già inviate possono terminare; non vengono promesse cancellazione remota o revoca di scritture in corso. La chiusura annulla listener e impedisce render tardivi. Nessun nuovo cache o schema. [Audit §17](./AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).
+
+Integrazione sperimentale 12/09/2026, base `4c1d90b5`: gli orchestratori canonici usano nel solo laboratorio un repository sintetico senza rete, con clonazione e dismissione per contesto; il repository produttivo resta invariato. [Audit §18](./AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026).

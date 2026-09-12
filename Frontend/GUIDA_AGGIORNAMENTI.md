@@ -563,3 +563,7 @@ Ricevuti quattro esiti positivi riferiti dall’utente per la demo (navigazione,
 ### Orchestratori liste reali — 12/09/2026
 
 Preparati montaggio/smontaggio e annullamento dei consumatori per liste private e aziendali; 19 test aggiunti al gate navigazione. Gli URL e i percorsi dati esistenti restano operativi. Il collegamento completo alla shell è ancora aperto. [Audit §17](../docs/AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).
+
+### Liste canoniche nel laboratorio — 12/09/2026
+
+Su base `4c1d90b5`, montati i due orchestratori reali con repository sintetico e sola lettura. Nel browser verificati ordinamento, ricerca vuota e cambio dominio senza stato residuo. Suite completa: 364 test; anteprima: quattro. Aggiornato il piano di maturità per distinguere avanzamento corrente e gate aperti. [Audit §18](../docs/AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026).

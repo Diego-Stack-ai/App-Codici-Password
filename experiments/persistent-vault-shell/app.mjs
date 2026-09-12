@@ -53,7 +53,7 @@ async function mount({signal, route: name}) {
             if (!signal.aborted) {
                 if (isList) {
                     container.replaceChildren();
-                    disposeList = mountRealList(container, JSON.parse(value), {signal, company: name === 'company'});
+                    disposeList = await mountRealList(container, JSON.parse(value), {signal, company: name === 'company'});
                 } else container.append(element('p', value, 'secret'));
             }
         } catch {

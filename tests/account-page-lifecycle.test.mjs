@@ -174,3 +174,18 @@ test('private: confirmed deletion still dissociates only matching profile email 
     assert.equal(f.writes[1][1].contactEmails[1].linkedAccountId, 'b');
     mounted.destroy();
 });
+
+for (const company of [false, true]) {
+    test(`${company ? 'company' : 'private'}: read-only mount rejects every write callback`, async () => {
+        const f = await fixture(company);
+        const mounted = f.mount({readOnly: true}); await mounted.ready;
+        const view = f.views[0];
+        assert.equal(view.options.readOnly, true);
+        await view.options.onPin(view.renders[0][0]);
+        await view.options.onArchive({dataset: {id: 'a', owner: 'true'}});
+        await view.options.onDelete({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.writes.length, 0);
+        assert.equal(f.toasts.length, 0);
+        mounted.destroy();
+    });
+}

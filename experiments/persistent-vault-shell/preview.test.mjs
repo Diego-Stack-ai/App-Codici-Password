@@ -44,3 +44,30 @@ test('worker precaches only fixture assets and ignores POST, foreign origins and
     handlers.fetch({request: {url: 'https://preview.invalid/', method: 'GET'}, respondWith: promise => { response = promise; }});
     assert.equal(await response, 'cached:/index.html');
 });
+
+test('synthetic repository isolates owners, clones records and releases only its own context', async () => {
+    const {installFixture, listPrivateAccounts, listCompanyAccounts, getRecordByPath} = await import('./fixture-repository.mjs');
+    const input = [{id: 'first', company: false}];
+    const first = installFixture(input);
+    input[0].id = 'mutated';
+    const rows = await listPrivateAccounts('demo-user');
+    assert.equal(rows[0].id, 'first');
+    rows[0].id = 'mutated-again';
+    assert.equal((await listPrivateAccounts('demo-user'))[0].id, 'first');
+    await assert.rejects(listPrivateAccounts('real-user'), /FIXTURE_ONLY/);
+    await assert.rejects(listCompanyAccounts('demo-user', 'other-company'), /FIXTURE_ONLY/);
+    await assert.rejects(getRecordByPath('anything'), /FIXTURE_ONLY/);
+    const second = installFixture([{id: 'second', company: false}]);
+    first();
+    assert.equal((await listPrivateAccounts('demo-user'))[0].id, 'second');
+    second();
+    await assert.rejects(listPrivateAccounts('demo-user'), /FIXTURE_ONLY/);
+});
+
+test('preview bundles both canonical orchestrators but replaces every backend boundary', async () => {
+    const inputs = JSON.parse(await readFile(new URL('./dist/inputs.json', import.meta.url), 'utf8'));
+    assert.ok(inputs.some(name => name.endsWith('/privato/account_privati.js')));
+    assert.ok(inputs.some(name => name.endsWith('/azienda/account_azienda.js')));
+    assert.ok(inputs.some(name => name === 'fixture:vault-repository.js'));
+    assert.equal(inputs.filter(name => !name.startsWith('fixture:') && /firebase|security-manager|vault-repository/.test(name)).length, 0);
+});

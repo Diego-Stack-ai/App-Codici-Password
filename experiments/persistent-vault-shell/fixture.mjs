@@ -11,10 +11,12 @@ export async function createFixture() {
     const key = await demoKey(salt);
     const records = {};
     for (const [name, value] of Object.entries({
-        overview: 'Profilo dimostrativo · 1 account fittizio',
+        overview: 'Profilo dimostrativo · 4 account fittizi',
         account: 'Gestore demo · numero fittizio 000 000000 · codice DEMO-2076',
         lists: JSON.stringify([
             {id: 'demo-private', nomeAccount: 'Gestore personale demo', username: 'utente.fittizio', password: 'PASSWORD-FITTIZIA', company: false},
+            {id: 'demo-private-alt', nomeAccount: 'Archivio personale demo', username: 'secondo.fittizio', company: false},
+            {id: 'demo-company-alt', nomeAccount: 'Archivio aziendale demo', username: 'seconda.azienda.fittizia', company: true},
             {id: 'demo-company', nomeAccount: 'Gestore aziendale demo', username: 'azienda.fittizia', password: 'PASSWORD-FITTIZIA', company: true}
         ])
     })) {

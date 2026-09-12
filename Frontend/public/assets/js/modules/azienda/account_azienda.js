@@ -61,6 +61,7 @@ export function mountAccountAziendaList(user, options = {}) {
     };
 
     const accountListView = createAccountListView({
+        readOnly: options.readOnly === true,
         themes: THEMES,
         emptyStateClass: 'empty-state-box',
         emptyTextClass: 'empty-state-text',
@@ -125,7 +126,7 @@ export function mountAccountAziendaList(user, options = {}) {
 
         // 4. Footer FAB (Add Account)
         const fCenter = document.getElementById('footer-center-actions');
-        if (fCenter && currentAziendaId) {
+        if (fCenter && currentAziendaId && !options.readOnly) {
             clearElement(fCenter);
             setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
                 createElement('a', {
@@ -200,7 +201,7 @@ export function mountAccountAziendaList(user, options = {}) {
     // --- ACTIONS ---
 
     async function togglePin(acc) {
-        if (signal.aborted) return;
+        if (signal.aborted || options.readOnly) return;
         if (!currentAziendaId) return;
         try {
             const newVal = !acc.isPinned;
@@ -215,7 +216,7 @@ export function mountAccountAziendaList(user, options = {}) {
     }
 
     async function handleArchive(item) {
-        if (signal.aborted) return;
+        if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (!currentAziendaId) return;
         try {
@@ -232,7 +233,7 @@ export function mountAccountAziendaList(user, options = {}) {
     }
 
     async function handleDelete(item) {
-        if (signal.aborted) return;
+        if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (!currentAziendaId) return;
         const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'));

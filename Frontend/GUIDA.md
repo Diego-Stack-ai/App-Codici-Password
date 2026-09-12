@@ -115,3 +115,7 @@ Aggiornare i contratti interessati nello stesso lavoro; rigenerare gli inventari
 ### Liste Account predisposte al montaggio — 12/09/2026
 
 Su base `0a807adb`, i moduli canonici privato/azienda espongono un montaggio con stato per vista, `ready`, `destroy`, AbortSignal e navigazione iniettata. Gli inizializzatori storici restano compatibili e `pages-init.js` restituisce la dismissione. Il futuro chiamante deve usarla su uscita/blocco/cambio identità; la shell persistente non è ancora attivata nell’app. [Evidenze e limiti](../docs/AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).
+
+### Montaggio reale nel laboratorio — 12/09/2026
+
+Importati gli orchestratori canonici delle due liste nella shell sperimentale, con template minimo e repository fittizio. Aggiunta opzione esplicita `readOnly` che sopprime UI e callback di scrittura; default produttivo invariato. [Audit §18](../docs/AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026) definisce perimetro e limiti; le pagine complete non sono ancora migrate.

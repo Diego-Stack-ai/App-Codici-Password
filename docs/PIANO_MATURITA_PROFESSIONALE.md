@@ -308,3 +308,11 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | Post-M10 | revisione lingue, riordino della pagina Impostazioni e collaudo completo dei campi protetti dal lucchetto |
 
 Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` è la guida implementativa subordinata alla baseline sicurezza e ai contratti specialistici; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.
+
+## Avanzamento strutturale successivo — 12/09/2026
+
+La richiesta del product owner di proseguire fino alla fine del programma autorizza l’implementazione autonoma dei blocchi ordinari; non chiude i gate specialistici e non autorizza implicitamente migrazioni distruttive, modifiche della baseline o rilascio in produzione. Le chiusure M0–M4 della tabella precedente restano storiche e non equivalgono alla risoluzione dei finding dell’audit successivo.
+
+Fase strutturale attiva: risoluzione del P0 di sessione Vault attraverso navigazione persistente. Dopo prototipo, compatibilità crittografica su fixture e quattro prove iPhone riferite dal product owner, sono stati adattati i due orchestratori delle liste e montati nel laboratorio in sola lettura. Ultima suite locale: 364 test; anteprima: quattro test aggiuntivi. [Evidenze e limiti](./AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026).
+
+Ordine operativo successivo: integrare identità e ciclo Vault nel percorso persistente; completare routing e pagine con scritture/condivisioni; verificare regressioni e dati legacy prima del cutover. In seguito riprendere i gate specialistici M5–M10 e post-M10, preservando le dipendenze indicate nei contratti. Restano decisioni/prove esterne: retention M7, ambiente non produttivo per recupero, dispositivi, configurazioni remote e audit indipendente. Nessuna percentuale globale o data di maturità definitiva viene dedotta dai soli test automatici.

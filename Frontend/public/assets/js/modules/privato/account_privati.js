@@ -68,6 +68,7 @@ export function mountAccountPrivati(user, options = {}) {
     };
 
     const accountListView = createAccountListView({
+        readOnly: options.readOnly === true,
         themes: THEMES,
         emptyStateClass: 'text-center py-10',
         emptyTextClass: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6',
@@ -142,7 +143,7 @@ export function mountAccountPrivati(user, options = {}) {
 
         // Aggiungi pulsanti FAB nel footer center
         const fCenter = document.getElementById('footer-center-actions');
-        if (fCenter) {
+        if (fCenter && !options.readOnly) {
             clearElement(fCenter);
             const type = new URLSearchParams(query).get('type') || 'standard';
             setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
@@ -318,7 +319,7 @@ export function mountAccountPrivati(user, options = {}) {
      * ACTIONS
      */
     async function togglePin(acc) {
-        if (signal.aborted) return;
+        if (signal.aborted || options.readOnly) return;
         if (!acc.isOwner) { showToast(t('error_only_owner_pin') || "Solo il proprietario può fissare l'account", "info"); return; }
         try {
             const newVal = !acc.isPinned;
@@ -333,7 +334,7 @@ export function mountAccountPrivati(user, options = {}) {
     }
 
     async function handleArchive(item) {
-        if (signal.aborted) return;
+        if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
         try {
@@ -350,7 +351,7 @@ export function mountAccountPrivati(user, options = {}) {
     }
 
     async function handleDelete(item) {
-        if (signal.aborted) return;
+        if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
         const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'));

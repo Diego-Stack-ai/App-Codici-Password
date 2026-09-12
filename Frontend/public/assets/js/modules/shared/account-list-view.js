@@ -112,7 +112,7 @@ function createAccountCard(account, options) {
                         })
                     ])
                 ]),
-                createElement('div', { className: 'account-card-right' }, [
+                options.readOnly ? null : createElement('div', { className: 'account-card-right' }, [
                     createElement('button', {
                         className: `btn-mini-action ${isPinned ? 'active' : ''}`,
                         onclick: event => {
@@ -164,6 +164,7 @@ export function createAccountListView(options) {
             }
 
             setChildren(container, accounts.map(account => createAccountCard(account, {...options, signal: lifecycle.signal})));
+            if (options.readOnly) return;
             swipeList = new SwipeList('.swipe-row', {
                 threshold: 0.15,
                 onSwipeLeft: options.onDelete,

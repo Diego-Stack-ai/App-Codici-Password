@@ -103,3 +103,13 @@ test('destroy prevents a pending reveal from writing plaintext into the old card
     assert.equal(value.textContent, '••••••••');
     assert.equal(icon.textContent, undefined);
 });
+
+test('read-only renderer has no pin button and installs no swipe listeners', () => {
+    const f = fixture();
+    const view = f.run("createAccountListView({readOnly: true, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+    view.render([{id: 'fixture', nomeAccount: 'Demo'}]);
+    for (const name of events) assert.equal(getEventListeners(f.document, name).length, 0);
+    const tree = f.document.getElementById('accounts-container').children;
+    assert.doesNotMatch(JSON.stringify(tree), /account-pin-icon/);
+    view.destroy();
+});
