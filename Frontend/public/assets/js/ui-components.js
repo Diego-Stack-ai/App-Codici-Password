@@ -19,7 +19,10 @@ export function setupPasswordToggles() {
             const icon = this.querySelector('.material-symbols-outlined');
             const isPasswordType = input.type === 'password' || input.type === 'text';
 
-            if (isPasswordType) {
+            if (input.getAttribute('data-form-type') === 'other') {
+                const masked = input.classList.toggle('base-shield');
+                if (icon) icon.textContent = masked ? 'visibility' : 'visibility_off';
+            } else if (isPasswordType) {
                 const isNowVisible = input.type === 'text';
                 input.type = isNowVisible ? 'password' : 'text';
                 if (icon) icon.textContent = isNowVisible ? 'visibility' : 'visibility_off';

@@ -87,7 +87,7 @@ function initGlobalDelegation() {
 
                     // Check if classic password OR shield class
                     // Use dataset flag to remember if it was originally password
-                    const isClassicPassword = (input.type === 'password' || input.getAttribute('type') === 'password' || input.dataset.wasPassword === 'true');
+                    const isClassicPassword = input.getAttribute('data-form-type') !== 'other' && (input.type === 'password' || input.getAttribute('type') === 'password' || input.dataset.wasPassword === 'true');
 
                     if (isClassicPassword) {
                         input.dataset.wasPassword = 'true';

@@ -138,7 +138,7 @@ export function addExtraEmail(data = null) {
             placeholder: t('email_type_placeholder') || 'TIPO EMAIL',
             value: data ? data.tipo : '',
             'data-stop-propagation': true,
-            autocomplete: 'new-password'
+            autocomplete: 'off'
         }),
         createElement('div', { className: 'email-actions-group' }, [
             createElement('div', { className: 'field-action-qr field-action-muted' }, [
@@ -180,7 +180,7 @@ export function addExtraEmail(data = null) {
                     className: 'detail-field-input email-value',
                     placeholder: 'codex@codex.it',
                     value: data ? data.email : '',
-                    autocomplete: 'new-password'
+                    autocomplete: 'off'
                 })
             ])
         ]),
@@ -193,7 +193,7 @@ export function addExtraEmail(data = null) {
                     className: 'detail-field-input base-shield email-pass',
                     placeholder: 'Password',
                     value: data ? data.password : '',
-                    autocomplete: 'new-password'
+                    autocomplete: 'off'
                 }),
                 createElement('div', { className: 'detail-field-actions' }, [
                     createElement('button', {
@@ -213,7 +213,7 @@ export function addExtraEmail(data = null) {
                     className: 'form-textarea email-note',
                     placeholder: 'Note accessorie email...',
                     textContent: data ? data.note : '',
-                    autocomplete: 'new-password'
+                    autocomplete: 'off'
                 })
             ])
         ])

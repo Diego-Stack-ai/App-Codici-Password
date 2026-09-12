@@ -71,10 +71,6 @@ export function initFormEvents() {
             }
             if (input) {
                 const isNowShielded = input.classList.toggle('base-shield');
-                // Fallback Firefox: -webkit-text-security non funziona → cambio type
-                if (!CSS.supports('-webkit-text-security', 'disc')) {
-                    input.type = isNowShielded ? 'password' : 'text';
-                }
                 const icon = btnPass.querySelector('span');
                 if (icon) icon.textContent = isNowShielded ? 'visibility' : 'visibility_off';
             }

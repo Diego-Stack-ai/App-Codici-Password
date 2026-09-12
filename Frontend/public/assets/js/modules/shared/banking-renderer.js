@@ -6,7 +6,7 @@
  *
  * Miglioramenti V2.0 rispetto a V1.0:
  * - _createInputField supporta parametro `type` (password, text, ecc.)
- * - autocomplete: 'new-password' per tutti i campi (blocca autofill browser)
+ * - autocomplete: 'off' per tutti i campi (dato locale, escluso dalle credenziali)
  * - Nuove card inizializzate con { type: 'Credit' }
  * - Carte già aperte chiuse prima di aggiungerne una nuova
  * - Delete button dentro card-entry-header (layout inline con titolo)
@@ -185,7 +185,7 @@ function _createInputField(label, value, onInput, icon, type = 'text', options =
                     if (formatted !== e.target.value) e.target.value = formatted;
                     onInput(formatted);
                 },
-                autocomplete: 'new-password'  // blocca autofill browser su tutti i campi
+                autocomplete: 'off'  // dato locale, escluso dalle credenziali su tutti i campi
             })
         ])
     ]);

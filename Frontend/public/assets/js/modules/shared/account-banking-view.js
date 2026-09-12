@@ -35,8 +35,7 @@ function createReadonlyField(label, value, icon, isPassword = false) {
                 event.stopPropagation();
                 const input = document.getElementById(id);
                 if (!input) return;
-                const hidden = input.type === 'password' || input.classList.contains('base-shield');
-                input.type = hidden ? 'text' : 'password';
+                const hidden = input.classList.contains('base-shield');
                 input.classList.toggle('base-shield', !hidden);
                 const toggleIcon = event.currentTarget.querySelector('span');
                 if (toggleIcon) toggleIcon.textContent = hidden ? 'visibility_off' : 'visibility';
@@ -59,7 +58,7 @@ function createReadonlyField(label, value, icon, isPassword = false) {
                 className: `field-input w-full no-transform ${isPassword ? 'base-shield field-value-password' : ''}`,
                 value: value || '-',
                 readonly: true,
-                autocomplete: 'new-password'
+                autocomplete: 'off'
             }),
             actions
         ])

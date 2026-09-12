@@ -7,21 +7,21 @@
     <title>Profilo aziendale</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.105" />
+    <link rel="manifest" href="manifest.json?v=1.2.106" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.106">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.106">
 
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.106">
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
 </head>
@@ -84,11 +84,6 @@
 <section data-company-panel="overview" class="detail-section" id="company-overview"></section>
 <section data-company-panel="digital-card" class="detail-section hidden" id="company-digital-card"></section>
 <div id="company-section-actions" class="company-section-actions"></div>
-                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
-                    <div class="anti-autofill-trap" aria-hidden="true">
-                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
-                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
-                    </div>
 
                     <!-- Section: Referente -->
                     <section data-company-panel="personal" class="detail-section">
@@ -129,7 +124,7 @@
                                     <div class="detail-field-box border-glow">
                                         <span
                                             class="material-symbols-outlined icon-field-left opacity-low">smartphone</span>
-                                        <input id="referente-cellulare" readonly class="detail-field-input no-transform"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="referente-cellulare" readonly class="detail-field-input no-transform"
                                             value="-">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
@@ -207,7 +202,7 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="piva" data-t="vat_number">Partita IVA</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="piva" readonly class="detail-field-input" value="-">
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="piva" readonly class="detail-field-input" value="-">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="piva" data-field="piva">
@@ -220,7 +215,7 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="codice-sdi" data-t="sdi_code">Codice SDI</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="codice-sdi" readonly class="detail-field-input" value="-">
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="codice-sdi" readonly class="detail-field-input" value="-">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="codice-sdi" data-field="codice-sdi">
@@ -234,7 +229,7 @@
                                     <label class="view-label" for="cciaa" data-t="cciaa_number">CCIAA (Numero
                                         Iscrizione)</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="cciaa" readonly class="detail-field-input" value="-">
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="cciaa" readonly class="detail-field-input" value="-">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="cciaa" data-field="cciaa">
@@ -248,7 +243,7 @@
                                     <label class="view-label" for="data-iscrizione" data-t="registration_date">Data
                                         Iscrizione</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="data-iscrizione" readonly class="detail-field-input text-primary"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="data-iscrizione" readonly class="detail-field-input text-primary"
                                             value="-">
                                     </div>
                                 </div>
@@ -274,7 +269,7 @@
 
                         <div class="detail-field-box border-glow note-box-container">
                             <p id="note-azienda" class="note-text-display">-</p>
-                            <textarea id="note-azienda-edit" class="hidden form-textarea" rows="4"></textarea>
+                            <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="note-azienda-edit" class="hidden form-textarea" rows="4"></textarea>
                         </div>
                     </section>
 
