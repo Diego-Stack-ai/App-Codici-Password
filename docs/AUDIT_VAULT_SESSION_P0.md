@@ -481,3 +481,9 @@ Nota separata sul ramo sperimentale: i dieci test mirati passano; la baseline ri
 ## 37. Uniformità grafica selettore widget — 12/09/2026
 
 Correzione CSS `2c6da4cb`: sfondo trasparente del controllo e colori delle opzioni coerenti con le modali chiare/scure. Release isolata 1.2.116, commit `87477d264cc26dcec77ecc9dd094af83df6ad93f`, PR #50 unita in master `7e2000c80b907de17a98c9d070d700ba38cbefe6`. CSS, versione, shell offline e budget pagine verificati localmente; suite CI completa riuscita. Workflow Hosting `34718435775` completato con successo, dieci file online corrispondenti alla release via HTTPS. Nessuna modifica funzionale, ai dati o al backend. Rollback Hosting alla 1.2.115. Rendering del menu nativo ancora dipendente dal browser/dispositivo; nessun collaudo fisico aggiuntivo eseguito.
+
+## 38. Visibilità iniziale linguette azienda — 12/09/2026
+
+Correzione sorgenti `366a98db`: gli otto pannelli legacy non attivi ora hanno hidden nell’HTML, oltre al pannello tessera digitale già nascosto. Verificati dieci pannelli: solo Panoramica inizialmente visibile. L’attivazione esistente ripristina la scheda memorizzata dopo la lettura dati. Nessun cambiamento ai collegamenti o ai dati.
+
+Release isolata 1.2.117, commit `83513576b6e36c0ef91b7b000841067552f50903`, PR #51 unita in master `445b338dd9320f4854eb97bc2f3e90cb60a59a0f`. HTML, shell offline, versione e budget verificati; suite CI completa riuscita. Deploy Hosting `34719109968` riuscito, undici file verificati via HTTPS corrispondono alla release, incluso dati_azienda.html. Rollback Hosting alla 1.2.116. Backend e programma sperimentale esclusi.
