@@ -6,47 +6,47 @@ Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il labo
 
 | Pagina | HTML | CSS | Moduli JS | Peso grezzo | Stima gzip |
 |---|---:|---:|---:|---:|---:|
-| `profilo_privato.html` | 1 | 7 | 42 | 1181.5 KB | 336.0 KB |
-| `form_account_privato.html` | 1 | 6 | 42 | 1138.5 KB | 326.2 KB |
-| `form_account_azienda.html` | 1 | 6 | 41 | 1127.7 KB | 323.8 KB |
-| `dati_azienda.html` | 1 | 8 | 38 | 1097.6 KB | 317.8 KB |
-| `aggiungi_scadenza.html` | 1 | 7 | 38 | 1095.8 KB | 316.1 KB |
-| `impostazioni.html` | 1 | 5 | 34 | 1094.8 KB | 312.4 KB |
-| `dettaglio_account_azienda.html` | 1 | 7 | 36 | 1075.8 KB | 311.0 KB |
-| `dettaglio_account_privato.html` | 1 | 7 | 36 | 1074.5 KB | 310.7 KB |
-| `modifica_azienda.html` | 1 | 6 | 35 | 1091.9 KB | 306.1 KB |
-| `account_privati.html` | 1 | 6 | 34 | 1014.3 KB | 297.9 KB |
-| `home_page.html` | 1 | 6 | 34 | 1006.4 KB | 297.0 KB |
-| `dettaglio_scadenza.html` | 1 | 6 | 32 | 1015.1 KB | 296.6 KB |
-| `account_azienda.html` | 1 | 6 | 34 | 1008.6 KB | 296.4 KB |
-| `area_privata.html` | 1 | 7 | 31 | 1014.5 KB | 296.2 KB |
-| `archivio_account.html` | 1 | 6 | 32 | 1007.3 KB | 296.0 KB |
-| `scadenze.html` | 1 | 6 | 28 | 967.6 KB | 285.3 KB |
-| `configurazione_automezzi.html` | 1 | 6 | 27 | 957.8 KB | 280.4 KB |
-| `configurazione_generali.html` | 1 | 6 | 27 | 957.2 KB | 280.3 KB |
-| `configurazione_documenti.html` | 1 | 6 | 27 | 957.4 KB | 280.3 KB |
-| `lista_aziende.html` | 1 | 6 | 28 | 939.5 KB | 278.5 KB |
-| `gestione_destinatari.html` | 1 | 6 | 26 | 941.7 KB | 277.8 KB |
-| `registrati.html` | 1 | 5 | 25 | 934.0 KB | 277.0 KB |
-| `reset_password.html` | 1 | 4 | 25 | 927.7 KB | 275.7 KB |
-| `regole_scadenze.html` | 1 | 6 | 23 | 926.2 KB | 274.0 KB |
-| `imposta_nuova_password.html` | 1 | 4 | 24 | 921.8 KB | 273.5 KB |
+| `profilo_privato.html` | 1 | 7 | 42 | 1182.0 KB | 336.1 KB |
+| `form_account_privato.html` | 1 | 6 | 42 | 1144.1 KB | 327.6 KB |
+| `form_account_azienda.html` | 1 | 6 | 41 | 1133.2 KB | 325.2 KB |
+| `dati_azienda.html` | 1 | 8 | 38 | 1098.1 KB | 317.9 KB |
+| `aggiungi_scadenza.html` | 1 | 7 | 38 | 1096.3 KB | 316.2 KB |
+| `impostazioni.html` | 1 | 5 | 34 | 1095.3 KB | 312.5 KB |
+| `dettaglio_account_azienda.html` | 1 | 7 | 36 | 1076.3 KB | 311.1 KB |
+| `dettaglio_account_privato.html` | 1 | 7 | 36 | 1075.0 KB | 310.8 KB |
+| `modifica_azienda.html` | 1 | 6 | 35 | 1092.4 KB | 306.2 KB |
+| `account_privati.html` | 1 | 6 | 34 | 1014.8 KB | 298.0 KB |
+| `home_page.html` | 1 | 6 | 34 | 1006.9 KB | 297.1 KB |
+| `dettaglio_scadenza.html` | 1 | 6 | 32 | 1015.6 KB | 296.7 KB |
+| `account_azienda.html` | 1 | 6 | 34 | 1009.1 KB | 296.5 KB |
+| `area_privata.html` | 1 | 7 | 31 | 1015.0 KB | 296.3 KB |
+| `archivio_account.html` | 1 | 6 | 32 | 1007.8 KB | 296.1 KB |
+| `scadenze.html` | 1 | 6 | 28 | 968.1 KB | 285.3 KB |
+| `configurazione_automezzi.html` | 1 | 6 | 27 | 958.3 KB | 280.5 KB |
+| `configurazione_generali.html` | 1 | 6 | 27 | 957.7 KB | 280.4 KB |
+| `configurazione_documenti.html` | 1 | 6 | 27 | 957.9 KB | 280.4 KB |
+| `lista_aziende.html` | 1 | 6 | 28 | 940.0 KB | 278.6 KB |
+| `gestione_destinatari.html` | 1 | 6 | 26 | 942.2 KB | 277.9 KB |
+| `registrati.html` | 1 | 5 | 25 | 934.5 KB | 277.1 KB |
+| `reset_password.html` | 1 | 4 | 25 | 928.2 KB | 275.8 KB |
+| `regole_scadenze.html` | 1 | 6 | 23 | 926.7 KB | 274.1 KB |
+| `imposta_nuova_password.html` | 1 | 4 | 24 | 922.3 KB | 273.6 KB |
 | `privacy.html` | 1 | 4 | 23 | 896.7 KB | 266.0 KB |
 | `termini.html` | 1 | 4 | 23 | 894.5 KB | 265.8 KB |
-| `login-v115.html` | 1 | 4 | 19 | 885.5 KB | 264.0 KB |
+| `login-v115.html` | 1 | 4 | 19 | 886.0 KB | 264.1 KB |
 | `contatto_condiviso.html` | 1 | 3 | 3 | 25.9 KB | 9.2 KB |
 | `index.html` | 1 | 1 | 1 | 13.4 KB | 4.4 KB |
 
 ## Pagine con il maggiore carico statico
 
-- `profilo_privato.html`: 336.0 KB gzip stimati, 42 moduli JS e 7 fogli CSS.
-- `form_account_privato.html`: 326.2 KB gzip stimati, 42 moduli JS e 6 fogli CSS.
-- `form_account_azienda.html`: 323.8 KB gzip stimati, 41 moduli JS e 6 fogli CSS.
-- `dati_azienda.html`: 317.8 KB gzip stimati, 38 moduli JS e 8 fogli CSS.
-- `aggiungi_scadenza.html`: 316.1 KB gzip stimati, 38 moduli JS e 7 fogli CSS.
-- `impostazioni.html`: 312.4 KB gzip stimati, 34 moduli JS e 5 fogli CSS.
-- `dettaglio_account_azienda.html`: 311.0 KB gzip stimati, 36 moduli JS e 7 fogli CSS.
-- `dettaglio_account_privato.html`: 310.7 KB gzip stimati, 36 moduli JS e 7 fogli CSS.
+- `profilo_privato.html`: 336.1 KB gzip stimati, 42 moduli JS e 7 fogli CSS.
+- `form_account_privato.html`: 327.6 KB gzip stimati, 42 moduli JS e 6 fogli CSS.
+- `form_account_azienda.html`: 325.2 KB gzip stimati, 41 moduli JS e 6 fogli CSS.
+- `dati_azienda.html`: 317.9 KB gzip stimati, 38 moduli JS e 8 fogli CSS.
+- `aggiungi_scadenza.html`: 316.2 KB gzip stimati, 38 moduli JS e 7 fogli CSS.
+- `impostazioni.html`: 312.5 KB gzip stimati, 34 moduli JS e 5 fogli CSS.
+- `dettaglio_account_azienda.html`: 311.1 KB gzip stimati, 36 moduli JS e 7 fogli CSS.
+- `dettaglio_account_privato.html`: 310.8 KB gzip stimati, 36 moduli JS e 7 fogli CSS.
 
 ## Asset condivisi da almeno il 75% delle pagine
 
@@ -75,7 +75,7 @@ Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il labo
 - `assets/js/pages-init.js`: 1.1 KB gzip stimati, usato da 27/30 pagine.
 - `assets/js/offline-sync.js`: 1.5 KB gzip stimati, usato da 27/30 pagine.
 - `assets/js/performance-metrics.js`: 1.4 KB gzip stimati, usato da 27/30 pagine.
-- `assets/css/core_ui.css`: 5.9 KB gzip stimati, usato da 26/30 pagine.
+- `assets/css/core_ui.css`: 6.0 KB gzip stimati, usato da 26/30 pagine.
 - `assets/css/core_fascie.css`: 2.2 KB gzip stimati, usato da 24/30 pagine.
 
 ## Regola di utilizzo

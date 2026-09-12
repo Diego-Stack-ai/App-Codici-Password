@@ -20,6 +20,12 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Collegamento Credenziali comuni in creazione e modifica — 12/09/2026
+
+Release 1.2.115: pulsante esplicito nei form privato e aziendale; in creazione salva prima l’Account e apre il selettore soltanto dopo l’esito positivo. Il menu Nuovo widget propone anche le Credenziali comuni già usate da altri Account e collega il record originale senza copiarne i valori. Esclude soltanto i collegamenti già presenti nell’Account corrente, includendo il contesto aziendale. Opzioni leggibili in tema chiaro/scuro e comando adattabile agli schermi stretti.
+
+Sei nuovi test verificano riuso, isolamento del contesto, scadenza della sessione, errore senza creazione alternativa e percorso di salvataggio. Suite completa produttiva superata; nessuna migrazione dei dati o modifica di Rules/Functions. Rollback Hosting alla 1.2.114. Pubblicazione ed esito HTTPS registrati separatamente nell’audit.
+
 ### Widget comuni in Modifica Account — 12/09/2026
 
 Correzione candidata: i form privato e aziendale montano anche le credenziali comuni (`shared-reference`), prima presenti soltanto nel dettaglio. Il comando di modifica dei valori aggiorna il record centrale con revisione e conferma esplicita dell'effetto su tutti gli Account collegati. Collegamento e scollegamento sono disponibili nel form; il dettaglio resta consultazione. Nessuna copia dei dati o modifica a Rules/Functions. Verifiche e rilascio registrati separatamente nell'audit Vault.

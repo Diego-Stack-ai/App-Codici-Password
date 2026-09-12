@@ -21,7 +21,7 @@ import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
 import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.110';
-import { initAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.110';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.110';
 
 // --- STATE ---
 let currentUid = null;
@@ -117,14 +117,20 @@ export async function initFormAccountAzienda(user) {
         }
     }
     if (isEditing) {
-        accountWidgetController = await initAccountEmbeddedWidgets({
-            uid: currentUid, context: 'company', companyId: currentAziendaId,
-            accountId: currentDocId, editable: true
-        });
         await initAccountSharedCredentials({
             uid: currentUid, context: 'company', companyId: currentAziendaId,
             accountId: currentDocId, editable: true
         });
+        accountWidgetController = await initAccountEmbeddedWidgets({
+            uid: currentUid, context: 'company', companyId: currentAziendaId,
+            accountId: currentDocId, editable: true,
+            onSharedLinked: () => initAccountSharedCredentials({
+                uid: currentUid, context: 'company', companyId: currentAziendaId,
+                accountId: currentDocId, editable: true
+            })
+        });
+    } else {
+        initNewAccountSharedCredentials({saveButtonId: 'save-btn-footer'});
     }
 }
 

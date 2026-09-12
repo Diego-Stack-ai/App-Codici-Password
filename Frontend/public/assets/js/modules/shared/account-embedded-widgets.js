@@ -5,10 +5,21 @@ import {
     createAccountWidget, deleteAccountWidget, updateAccountWidget
 } from '../data/account-widget-client.js';
 import {
-    listAccountWidgets, listAccountWidgetsConfirmed
+    listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
+import {linkSharedCredential} from '../data/shared-vault-data-client.js';
+import {auth} from '../../firebase-config.js?v=1.2.110';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
+let mountVersion = 0;
+
+function availableCommonCredentials(records, widgets, context) {
+    const linked = new Set(widgets.filter(widget => widget.kind === 'shared-reference' &&
+        widget.context === context.context && widget.accountId === context.accountId &&
+        (context.context !== 'company' || widget.companyId === context.companyId))
+        .map(widget => widget.sharedDataId));
+    return records.filter(record => !linked.has(record.id));
+}
 
 async function editableFields(widget) {
     if (!widget) return [{id: newId('field'), label: '', value: '', encrypted: false}];
@@ -82,26 +93,35 @@ function widgetData(widget, fields, collapsed = widget?.collapsed === true) {
     };
 }
 
-async function openEditor(widget, context, refresh, templates = []) {
+async function openEditor(widget, context, refresh, templates = [], commonRecords = []) {
     const fields = await editableFields(widget);
     const overlay = createElement('div', {className: 'modal-overlay active'});
-    const close = () => overlay.remove();
+    let closed = false;
+    const close = () => { closed = true; overlay.remove(); };
     const title = createElement('input', {
         className: 'shared-account-select-control', type: 'text', maxlength: 120,
         placeholder: 'Titolo del widget', value: widget?.title || '', required: true
     });
     const fieldList = createElement('div', {className: 'account-widget-editor-fields'});
     fields.forEach(field => fieldList.appendChild(fieldRow(field)));
-    const templateSelect = !widget && templates.length ? createElement('select', {
-        className: 'shared-account-select-control', 'aria-label': 'Modello di widget esistente'
+    const templateSelect = !widget && (templates.length || commonRecords.length) ? createElement('select', {
+        className: 'shared-account-select-control', 'aria-label': 'Modello widget o credenziale comune'
     }, [
         createElement('option', {value: '', textContent: 'Crea widget personalizzato'}),
         ...templates.map((template, index) => createElement('option', {
-            value: String(index), textContent: `${template.title} · ${template.fields.length} campi`
+            value: String(index), textContent: `Modello: ${template.title} · ${template.fields.length} campi`
+        })),
+        ...commonRecords.map((record, index) => createElement('option', {
+            value: `common:${index}`, textContent: `Collega credenziale comune: ${record.title || 'Senza titolo'}`
         }))
     ]) : null;
     templateSelect?.addEventListener('change', () => {
+        const common = templateSelect.value.startsWith('common:');
+        title.hidden = fieldList.hidden = addField.hidden = common;
+        title.required = !common;
+        save.textContent = common ? 'Collega credenziale comune' : 'Salva';
         if (templateSelect.value === '') return;
+        if (common) return;
         const template = templates[Number(templateSelect.value)];
         if (!template) return;
         title.value = template.title;
@@ -119,6 +139,26 @@ async function openEditor(widget, context, refresh, templates = []) {
     const form = createElement('form', {className: 'account-widget-editor', autocomplete: 'off', 'data-form-type': 'other'});
     form.addEventListener('submit', async event => {
         event.preventDefault();
+        if (save.disabled || closed) return;
+        if (templateSelect?.value.startsWith('common:')) {
+            const record = commonRecords[Number(templateSelect.value.slice(7))];
+            if (!record || !context.editable || context.readOnly || !context.active?.()) return;
+            save.disabled = true;
+            try {
+                await linkSharedCredential(record.id, Number(record.revision || 0), {
+                    context: context.context, accountId: context.accountId,
+                    ...(context.context === 'company' ? {companyId: context.companyId} : {}),
+                    order: 0, collapsed: false
+                });
+                close();
+                if (!context.active()) return;
+                await context.onSharedLinked?.();
+                if (context.active()) showToast('Credenziale comune collegata. I valori restano condivisi.', 'success');
+            } catch {
+                if (context.active()) showToast('Collegamento non completato. Aggiorna e riprova.', 'error');
+            } finally { save.disabled = false; }
+            return;
+        }
         const rows = [...fieldList.children];
         if (!title.value.trim() || !rows.length || rows.some(row => !row.getValue().label.trim())) {
             showToast('Inserisci titolo e nome di ogni campo.', 'warning');
@@ -147,7 +187,7 @@ async function openEditor(widget, context, refresh, templates = []) {
     });
     setChildren(form, [
         createElement('h2', {className: 'modal-title', textContent: widget ? 'Modifica widget' : 'Nuovo widget'}),
-        createElement('p', {className: 'modal-text', textContent: 'Aggiungi uno o più campi specifici per questo Account.'}),
+        createElement('p', {className: 'modal-text', textContent: 'Crea campi per questo Account oppure collega una Credenziale comune: i suoi valori restano condivisi con gli altri Account.'}),
         templateSelect, title, fieldList, addField,
         createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
             createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
@@ -321,6 +361,8 @@ function widgetCard(widget, context, refresh) {
 }
 
 export async function initAccountEmbeddedWidgets(context) {
+    const version = ++mountVersion;
+    context = {...context, active: () => version === mountVersion && auth.currentUser?.uid === context.uid};
     const section = document.getElementById('account-widgets-section');
     const list = document.getElementById('account-widgets-list');
     const add = document.getElementById('btn-add-account-widget');
@@ -356,9 +398,20 @@ export async function initAccountEmbeddedWidgets(context) {
         section.classList.toggle('hidden', !context.editable && widgets.length === 0);
         if (add) {
             add.classList.toggle('hidden', !context.editable);
-            add.onclick = () => navigator.onLine
-                ? openEditor(null, context, refresh, templates)
-                : showToast('La creazione dei Widget richiede internet.', 'warning');
+            add.onclick = async () => {
+                if (!context.editable || !context.active()) return;
+                if (!navigator.onLine) return showToast('La creazione dei Widget richiede internet.', 'warning');
+                try {
+                    const [records, currentWidgets] = await Promise.all([
+                        listSharedVaultDataConfirmed(context.uid), listAccountWidgetsConfirmed(context.uid)
+                    ]);
+                    if (!context.active()) return;
+                    await openEditor(null, context, refresh, templates,
+                        availableCommonCredentials(records, currentWidgets, context));
+                } catch {
+                    if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
+                }
+            };
         }
     };
     await refresh(false);

@@ -27,6 +27,7 @@ export async function savePrivateAccount({
     const get = id => document.getElementById(id)?.value.trim() || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
+    let savedAccountId = currentDocId;
 
     if (hasInvalidCardExpiry(bankAccounts)) {
         showToast('Inserisci la scadenza della carta nel formato MM/AA, con un mese da 01 a 12.', 'warning');
@@ -208,7 +209,9 @@ export async function savePrivateAccount({
             });
             showToast(t('success_save'), "success");
             setTimeout(() => {
-                const destination = isEditing
+                const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
+                    ? `form_account_privato.html?id=${accountRef.id}&linkShared=1#shared-credentials-section`
+                    : isEditing
                     ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`
                     : 'account_privati.html?afterWrite=1';
                 window.location.replace(destination);
@@ -220,6 +223,7 @@ export async function savePrivateAccount({
         let retainedProfilePassword = false;
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
+            savedAccountId = accRef.id;
             const targetId = accRef.id;
 
             // 1. ALL READS FIRST
@@ -397,7 +401,9 @@ export async function savePrivateAccount({
             ? 'Account collegato. La password diversa è stata conservata nel Profilo.'
             : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
-            const destination = isEditing
+            const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
+                ? `form_account_privato.html?id=${savedAccountId}&linkShared=1#shared-credentials-section`
+                : isEditing
                 ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`
                 : 'account_privati.html';
             window.location.replace(destination);
