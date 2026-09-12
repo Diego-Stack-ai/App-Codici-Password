@@ -50,3 +50,7 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 Tutti i moduli applicativi passano ora dal repository. `offline-firestore.js` resta confinato all'infrastruttura del repository.
 
 Le scritture offline non sono ancora abilitate. Il contratto preventivo per revisioni, idempotenza e conflitti è definito in `OFFLINE_WRITE_CONFLICT_POLICY.md` e verrà implementato in M6.
+
+### Modulo azienda: base aggiornata per la modifica — v1.2.111
+
+Online il modulo modifica azienda usa `getCompanyConfirmed`, una lettura confermata dal server attraverso il repository, prima di abilitare Salva. Una risposta mancante o fallita non viene sostituita dalla copia obsoleta. Offline resta `getCompany`; liste e consultazione mantengono il percorso local-first. Il controllo transazionale confronta i valori dei contatti senza dipendere dall’ordine delle chiavi delle mappe, preservando conflitti reali e collegamenti Account. Nessuna modifica del mapper degli identificativi o dei dati persistiti.

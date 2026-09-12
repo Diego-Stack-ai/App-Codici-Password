@@ -511,3 +511,9 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Le zone Widget caricate in background rispettano subito la linguetta attiva; non compaiono più comandi appartenenti alle altre linguette.
 - Ogni linguetta mostra un solo pulsante `+` per creare Widget. Il numero dei Widget non è limitato; resta soltanto il limite di sicurezza di 30 campi per singolo Widget.
 - Cache applicativa aggiornata a `1.2.100`. Suite completa locale superata, inclusi emulatori Firestore/Storage; test comportamentali per selezione, salvataggio atomico, password differenti, errori e schede del Profilo.
+
+## Correzione contatti azienda — v1.2.111, 12/09/2026
+
+Rilascio isolato su base v1.2.110 (`fa555d49`). Eliminando un telefono non collegato, il confronto JSON delle mappe contatti poteva segnalare falsamente “Contatti modificati” per il solo ordine delle proprietà. Il confronto ora è strutturale; modifiche reali e obbligo di scollegare un Account restano protetti. Online il modulo parte da una lettura confermata dal server, senza ripiego sulla cache obsoleta in caso di errore. Offline conserva il caricamento precedente.
+
+Quattordici test mirati coprono cancellazione, mappe equivalenti, conflitti reali, telefono collegato, caricamento server/cache ed errore. Suite completa della release: 301 test superati, build e gate Rules inclusi. Versione e 236 riferimenti asset verificati; inventario e baseline rigenerati. Pubblicazione da verificare al termine del workflow. Correzione adattata dal commit locale `73fbe022`; preservato il mapper ID di produzione, senza importare la shell Vault sperimentale o modificare Rules/Functions. Rollback Hosting: ripubblicare il commit di produzione precedente `fa555d49`; nessuna migrazione di dati.

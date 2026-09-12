@@ -35,7 +35,8 @@ test('online company form loads the server snapshot through the canonical reposi
     assert.deepEqual(f.reads, [['server', 'users/owner/aziende/company']]);
     assert.equal(f.populated.length, 1); assert.equal(f.state.originalCompany.telefonoAzienda, 'NEW');
     assert.equal(f.state.originalCompany.emails.pec.email, 'new@example.invalid');
-    assert.equal(f.state.originalCompany.id, 'company');
+    assert.equal(f.state.originalCompany.id, f.remote.id);
+    assert.equal(f.state.currentAziendaId, 'company');
     assert.equal(f.remote.id, 'payload-alias'); assert.equal(f.cached.telefonoAzienda, 'OLD');
     assert.equal(f.state.formLoaded, true); assert.equal(f.save().disabled, false); assert.deepEqual(f.errors, []);
 });
