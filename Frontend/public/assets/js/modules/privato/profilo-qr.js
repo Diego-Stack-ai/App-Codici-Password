@@ -8,10 +8,10 @@
  *   profilo_privato.js → profilo-qr.js → qr_code_utils.js, firebase
  */
 
-import { db } from '../../firebase-config.js?v=1.2.108';
+import { db } from '../../firebase-config.js?v=1.2.109';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
-import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils-v2.js';
+import { ensureQRCodeLib, buildVCard, buildProfileQrPayload, renderQRCode } from '../shared/qr_code_utils-v2.js';
 
 let _getState = null;
 let _renders = null;
@@ -100,10 +100,15 @@ export async function generateProfileQRCode() {
         customFields: (customWidgets || []).flatMap(widget => widget.fields || [])
     });
     clearElement(container);
-    renderQRCode(container, vcard, { width: 104, height: 104, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 2 });
-    container.onclick = () => _showEnlargedQR(vcard);
+    const payload = buildProfileQrPayload(vcard, window.location.origin);
+    renderQRCode(container, payload, { width: 104, height: 104, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 2 });
+    container.onclick = () => _showEnlargedQR(payload);
     const zoomIcon = document.getElementById('qr-zoom-icon');
-    if (zoomIcon) zoomIcon.onclick = () => _showEnlargedQR(vcard);
+    if (zoomIcon) zoomIcon.onclick = () => _showEnlargedQR(payload);
+}
+
+export function getProfileQRPayload() {
+    return buildProfileQrPayload(getProfileVCard(), window.location.origin);
 }
 
 function _showEnlargedQR(vcard) {

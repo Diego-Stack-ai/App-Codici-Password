@@ -7,7 +7,7 @@ import { decryptRequiredValue } from '../core/crypto-utils.js';
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.108';
+import { auth, db } from '../../firebase-config.js?v=1.2.109';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';

@@ -1,0 +1,20 @@
+.shared-contact-card {
+    box-sizing: border-box;
+    width: min(100% - 32px, 480px);
+    margin: max(32px, 8vh) auto;
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    background: var(--surface-glass);
+    color: var(--text-primary);
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.shared-contact-brand { font: var(--font-label); color: var(--text-secondary); }
+.shared-contact-card h1 { font: var(--font-title); }
+.shared-contact-card p { line-height: 1.6; }
+.shared-contact-card img { width: 128px; height: 128px; object-fit: cover; border-radius: 24px; margin: 16px auto; }
+.shared-contact-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; box-sizing: border-box; padding: 12px 24px; margin-top: 16px; border: 0; border-radius: 14px; background: var(--accent); color: white; font: var(--font-button); text-decoration: none; cursor: pointer; }
+.shared-contact-card [hidden] { display: none; }
+.shared-contact-button:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 4px; }

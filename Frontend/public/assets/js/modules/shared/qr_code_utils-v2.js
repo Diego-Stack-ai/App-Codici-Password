@@ -95,6 +95,17 @@ export function buildVCard(userData, inclusions, options = {}) {
     return v.join("\n");
 }
 
+// Camera contact parsers often drop PHOTO URLs. A photo-bearing QR opens the
+// receiver page, which embeds the image in a downloadable vCard. The fragment
+// carries only the user's selected fields and is not sent to the web server.
+export function buildProfileQrPayload(vcard, origin) {
+    if (!/^PHOTO;VALUE=URI:https:\/\//m.test(vcard)) return vcard;
+    const bytes = new TextEncoder().encode(vcard);
+    const encoded = btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join(''))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return new URL('contatto_condiviso.html', origin).href + '#card=' + encoded;
+}
+
 /**
  * Renders a QR code into a container element.
  * @param {HTMLElement} container - The DOM element to render into
