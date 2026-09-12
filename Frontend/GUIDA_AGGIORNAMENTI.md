@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Stile del selettore widget — 12/09/2026
+
+Release 1.2.116: il controllo chiuso torna allo sfondo trasparente degli altri campi; le opzioni mantengono testo contrastato su azzurro chiaro/blu coerente con le modali. Correzione esclusivamente CSS, senza modifiche a selezione, collegamenti o dati. Verificati CSS, versione, risorse offline e budget pagine. Rollback Hosting alla 1.2.115.
+
 ### Collegamento Credenziali comuni in creazione e modifica — 12/09/2026
 
 Release 1.2.115: pulsante esplicito nei form privato e aziendale; in creazione salva prima l’Account e apre il selettore soltanto dopo l’esito positivo. Il menu Nuovo widget propone anche le Credenziali comuni già usate da altri Account e collega il record originale senza copiarne i valori. Esclude soltanto i collegamenti già presenti nell’Account corrente, includendo il contesto aziendale. Opzioni leggibili in tema chiaro/scuro e comando adattabile agli schermi stretti.

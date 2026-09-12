@@ -751,14 +751,13 @@
 }
 
 select.shared-account-select-control {
-    background: var(--card-bg, #fff);
     color: var(--text-primary, #172033);
     color-scheme: light;
 }
 
 select.shared-account-select-control option,
 select.shared-account-select-control optgroup {
-    background: #fff;
+    background: #e3f2fd;
     color: #172033;
 }
 
@@ -768,7 +767,7 @@ select.shared-account-select-control optgroup {
 
 .dark select.shared-account-select-control option,
 .dark select.shared-account-select-control optgroup {
-    background: #1e293b;
+    background: #1e3a8a;
     color: #f8fafc;
 }
 
