@@ -512,3 +512,14 @@ Suite completa `npm test` conclusa con codice 0: 642 test superati, inclusi Func
 | Retention M7, ripresa backup M8, App Check remoto e audit indipendente | Richiedono scelte/verifiche specifiche; non chiusi dai test locali | Blocchi che non dipendono da tali decisioni |
 
 Prima del deploy strutturale: usare ambiente non produttivo separato; verificare lettore nuovo/vecchio e marker di coda, Rules che negano esiti client e Functions che usano soltanto ricevute attendibili. Provare risposta persa, retry, errore legacy e ripristino della copia senza segreti nei log. Un eventuale artefatto di rollback deve mantenere il nuovo registro e la deduplicazione: non distribuire le vecchie Functions come scorciatoia. L'ordine esatto e la prova di rollback restano gate documentato, non esecuzione autorizzata su produzione.
+
+
+## 41. Widget, riferimenti inversi e checkpoint multi-commit — 12/09/2026
+
+Commit `3f40efbc`: controllo autorevole dei riferimenti inversi nei Profili privati e aziendali prima di nuove mutazioni private. Le ricevute attendibili continuano a precedere ogni verifica aggiuntiva. ID legacy divergenti e strutture malformate sono respinti senza correzioni automatiche. Il punto inventario del §40 è avanzato per i campi noti: restano risoluzione degli alias, altri domini e valutazione della scansione completa delle aziende sotto carico.
+
+Commit `59ebff4e`: widget e dialoghi appartengono al montaggio della vista; blocco Vault anche a UID invariato, logout, cambio vista e pagehide invalidano le operazioni in attesa e cancellano i valori UI. Crea/modifica delle credenziali comuni e dei widget ricontrollano la sessione dopo cifratura. Il timer del salvataggio privato non naviga da una vista scaduta. Il renderer bancario si carica su richiesta; form privato entro 42 moduli iniziali, circa 328,1 KB gzip, senza aumento dei budget.
+
+Validazione complessiva: `npm test` codice 0, **669 test** superati; include 55 test Functions e 22 esiti delle mutazioni con Auth/Firestore emulati. Le nuove combinazioni dei riferimenti inversi sono verificate tramite handler reale con transazione simulata; la suite emulata verifica anche l'esecuzione delle nuove letture con SDK reale, senza certificare ogni combinazione o la concorrenza sotto carico. Budget di tutte le 30 pagine rispettati; versione candidata 1.2.110 e 240 riferimenti asset coerenti; 38 MD, 174 collegamenti relativi senza destinazioni mancanti (ancore/URL esclusi); inventario 482 file.
+
+Nessun dato reale, migrazione o deploy in questo checkpoint. Produzione resta 1.2.117. Il costo del controllo inverso cresce con tutte le aziende dell'utente; scala/contesa, prove fisiche, distribuzione e rollback strutturale restano aperti. Le richieste già inviate al server non vengono annullate dalla dismissione UI. Il programma completo non è dichiarato terminato.

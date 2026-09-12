@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Checkpoint multi-commit verificato — 12/09/2026
+
+Commit `3f40efbc` e `59ebff4e`: riferimenti inversi dei Profili controllati prima della mutazione privata; ciclo di vita widget e dialoghi invalidato a blocco/logout/cambio vista; renderer bancario differito entro budget. Suite completa 669 test, 30 pagine entro budget. Produzione 1.2.117 invariata. Scala della scansione aziende, alias, dispositivi fisici e distribuzione/rollback restano aperti. Evidenze e limiti nell'audit Vault §41.
+
 ### Ripresa per commit verificati — 12/09/2026
 
 Sul ramo sperimentale: recupero sicuro delle code legacy, sostituzione atomica, controlli del record corrente e caricamento differito degli editor Profilo. Suite completa: 642 test. Produzione resta 1.2.117. I gate fisici e di distribuzione/rollback sono esplicitamente separati dai blocchi indipendenti; vedere [audit §39–40](../docs/AUDIT_VAULT_SESSION_P0.md#39-ripresa-autonoma-per-blocchi-verificati--12092026). Nessuna nuova migrazione o pubblicazione backend.
