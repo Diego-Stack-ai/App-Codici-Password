@@ -144,7 +144,7 @@ function _createPhoneCard(phone, idx) {
                 className: 'btn-upload-trigger',
                 textContent: phone.linkedAccountId ? 'Apri Account collegato' : 'Collega o crea Account',
                 onclick: () => phone.linkedAccountId
-                    ? _callbacks.openLinkedAccount(phone.linkedAccountId)
+                    ? _callbacks.openLinkedAccount(phone.linkedAccountId, phone.linkedAccountCompanyId)
                     : _callbacks.connectPhoneAccount(phone, _callbacks.syncData)
             })
         ])
@@ -257,7 +257,7 @@ export function renderEmailsView() {
                     ? 'Apri Account collegato'
                     : 'Collega o crea Account',
                 onclick: () => e.linkedAccountId
-                    ? _callbacks.openLinkedAccount(e.linkedAccountId)
+                    ? _callbacks.openLinkedAccount(e.linkedAccountId, e.linkedAccountCompanyId)
                     : _callbacks.connectEmailAccount(e, _callbacks.syncData)
             }),
             e.linkedAccountId && hasLegacyEmailPassword(e) ? createElement('button', {

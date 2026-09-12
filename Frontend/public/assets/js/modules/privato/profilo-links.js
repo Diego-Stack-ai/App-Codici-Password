@@ -1,68 +1,64 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.100';
+import { auth, db } from '../../firebase-config.js?v=1.2.101';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { showProfileModal } from './profilo-modal.js';
-import {listDeadlines, listPrivateAccounts} from '../data/vault-repository.js';
+import { showProfileAccountPicker } from './profilo-modal.js';
+import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts} from '../data/vault-repository.js';
 import {
-    buildProfileAccountLinkDraft,
+    buildProfileAccountLinkDraft, profileAccountUrl,
     buildProfileDocumentDeadlineDraft,
     findCompatibleDocumentDeadlines
 } from './profile-model.js';
 
-export function openLinkedAccount(accountId) {
-    if (accountId) window.location.href = `dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`;
+export function openLinkedAccount(accountId, companyId = '') {
+    if (accountId) window.location.href = profileAccountUrl(accountId, companyId);
 }
 
 export const connectEmailAccount = (email, syncData) => connectContactAccount(email, syncData, 'email');
 export const connectPhoneAccount = (phone, syncData) => connectContactAccount(phone, syncData, 'phone');
 
-async function connectContactAccount(email, syncData, contactType) {
+async function connectContactAccount(contact, syncData, contactType) {
     const user = auth.currentUser;
-    if (!user || !email?.id) return;
-    if (email.linkedAccountId) {
+    if (!user || !contact?.id) return;
+    const openForm = async ({ id = '', companyId = '' }) => {
         await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
-        window.location.href = `form_account_privato.html?id=${encodeURIComponent(email.linkedAccountId)}&profileContactId=${encodeURIComponent(email.id)}`;
-        return;
-    }
-    const accountRecords = await listPrivateAccounts(user.uid);
-    const vaultKeyMaterial = await ensureVaultKeyMaterial();
-    const accounts = await Promise.all(accountRecords.filter(data =>
-        !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
-        data.visibility !== 'shared' && !['memo', 'memorandum'].includes(data.type) && !data.isMemo && !data.hasMemo &&
-        (!data.linkedProfileField || (data.linkedProfileField.id === email.id && data.linkedProfileField.type === contactType))
-    ).map(async data => {
-        let username = '';
-        try { username = data._encrypted && data.username ? await decrypt(data.username, vaultKeyMaterial) : (data.username || ''); } catch { username = ''; }
-        return { id: data.id, name: data.nomeAccount || 'Account', username };
-    }));
-    if (accounts.length === 0) {
-        const create = await showConfirmModal('Nessun Account collegabile', 'Non esiste ancora un Account collegabile. Vuoi aprire la creazione guidata?');
-        if (!create) return;
-        await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
-        window.location.href = `form_account_privato.html?profileContactId=${encodeURIComponent(email.id)}`;
-        return;
-    }
-    const labels = accounts.map((account, index) => `${index + 1}. ${account.name}${account.username ? ` — ${account.username}` : ''}`);
-    const createLabel = '＋ Crea un nuovo Account';
-    const options = [createLabel, ...labels];
-    showProfileModal(contactType === 'phone' ? 'Collega o crea Account telefono' : 'Collega o crea Account email', [
-        { key: 'account', label: 'Account', type: 'select', options, icon: 'link' }
-    ], { account: labels[0] }, async values => {
-        if (values.account === createLabel) {
-            await syncData();
-            sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
-            window.location.href = `form_account_privato.html?profileContactId=${encodeURIComponent(email.id)}`;
+        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({
+            ...buildProfileAccountLinkDraft(contact, contactType), ownerUid: user.uid, companyId
+        }));
+        window.location.href = profileAccountUrl(id, companyId, { edit: true, contactId: contact.id });
+    };
+    try {
+        if (contact.linkedAccountId) {
+            await openForm({ id: contact.linkedAccountId, companyId: contact.linkedAccountCompanyId || '' });
             return;
         }
-        const selected = accounts[labels.indexOf(values.account)];
-        if (!selected) return;
-        await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
-        window.location.href = `form_account_privato.html?id=${encodeURIComponent(selected.id)}&profileContactId=${encodeURIComponent(email.id)}`;
-    });
+        const [personal, companyRecords, key] = await Promise.all([
+            listPrivateAccounts(user.uid), listCompanies(user.uid), ensureVaultKeyMaterial()
+        ]);
+        const companies = companyRecords.filter(company => !company.isArchived).map(company => ({
+            id: company.id, name: company.ragioneSociale || 'Azienda senza nome'
+        })).sort((a, b) => a.name.localeCompare(b.name, 'it'));
+        const companyAccounts = await Promise.all(companies.map(async company =>
+            (await listCompanyAccounts(user.uid, company.id)).map(account => ({ ...account, companyId: company.id, companyName: company.name }))
+        ));
+        const accounts = await Promise.all([...personal.map(account => ({ ...account, companyId: '' })), ...companyAccounts.flat()]
+            .filter(data => !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
+                data.visibility !== 'shared' && !['memo', 'memorandum'].includes(data.type) && !data.isMemo && !data.hasMemo &&
+                (!data.linkedProfileField || (data.linkedProfileField.id === contact.id && data.linkedProfileField.type === contactType)))
+            .map(async data => {
+                let username = '';
+                try { username = data._encrypted && data.username ? await decrypt(data.username, key) : (data.username || ''); } catch { username = ''; }
+                if (username === '--ERRORE--') username = '';
+                return { id: data.id, companyId: data.companyId, companyName: data.companyName || '', name: data.nomeAccount || 'Account', username };
+            }));
+        accounts.sort((a, b) => a.name.localeCompare(b.name, 'it') || a.companyName.localeCompare(b.companyName, 'it'));
+        showProfileAccountPicker({
+            title: contactType === 'phone' ? 'Collega Account telefono' : 'Collega Account email',
+            accounts, companies, onSelect: openForm
+        });
+    } catch {
+        showToast('Impossibile caricare gli Account. Controlla la connessione e riprova.', 'error');
+    }
 }
 
 export async function createDeadlineFromDocument(documentItem, syncData, profile = {}) {

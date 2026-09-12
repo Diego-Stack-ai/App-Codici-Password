@@ -169,7 +169,7 @@ assert.match(settingsHtml, /non la Master Password della Vault/, 'Il cambio pass
 assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2FA non è visibile');
 assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma cambio password ambigua');
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
-assert.match(profileLinks, /buildProfileAccountLinkDraft\(email, contactType\)[\s\S]+profileContactId=/,
+assert.match(profileLinks, /buildProfileAccountLinkDraft\(contact, contactType\)[\s\S]+profileAccountUrl\(id, companyId, \{ edit: true, contactId: contact.id \}\)/,
     'Il contatto non dispone del passaggio esplicito al form Account');
 assert.match(privateAccountSave, /isProfileEmailPasswordTransferred\(legacyPassword, credentialValues.password\)[\s\S]+linkProfileEmailToAccount\(email, targetId, \{ passwordTransferred \}\)/,
     'La rimozione della password legacy deve dipendere dalla verifica del trasferimento nella transazione Account');

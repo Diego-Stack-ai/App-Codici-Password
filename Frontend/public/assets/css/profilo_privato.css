@@ -1210,6 +1210,39 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     .profile-tabs { margin-inline: -0.25rem; border-radius: 0.75rem; }
 }
 
+.profile-account-picker {
+    display: flex;
+    flex-direction: column;
+    width: min(640px, calc(100vw - 24px));
+    max-width: 640px;
+    height: min(760px, calc(100dvh - 32px));
+    max-height: calc(100dvh - 32px);
+    gap: 12px;
+    padding: 24px;
+    overflow: hidden;
+}
+
+.profile-account-picker .modal-header { flex: 0 0 auto; margin: 0; }
+.profile-account-filters { display: grid; gap: 8px; flex: 0 0 auto; }
+.profile-account-search,
+.profile-account-scope { width: 100%; min-height: 44px; border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 12px; color: var(--text-primary); background: var(--surface-glass); font-size: var(--fs-base); }
+.profile-account-count { flex: 0 0 auto; margin: 0; color: var(--text-secondary); font: var(--font-caption); }
+.profile-account-results { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 8px; }
+.profile-account-result { display: grid; flex: 0 0 auto; gap: 4px; padding: 14px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface-glass); color: var(--text-primary); text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.profile-account-result[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface-glass)); box-shadow: inset 3px 0 var(--accent); }
+.profile-account-result:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.profile-account-result-name { font-weight: 650; font-size: var(--fs-base); }
+.profile-account-result-context { color: var(--accent); font-size: var(--fs-sm); }
+.profile-account-result-user { color: var(--text-secondary); font-size: var(--fs-sm); }
+.profile-account-empty { padding: 16px; color: var(--text-secondary); }
+.profile-account-create { flex: 0 0 auto; margin: 0; text-align: center; }
+.profile-account-picker .modal-actions { flex: 0 0 auto; margin: 0; padding-top: 4px; }
+
+@media (max-width: 700px) {
+    .profile-account-picker { padding: 18px; gap: 10px; }
+    .profile-account-picker .modal-title { font-size: var(--fs-lg); }
+}
+
 .profile-widget-zone { display: grid; gap: 1rem; }
 .profile-widget-zone.hidden { display: none; }
 .profile-widget-zone-heading,
@@ -1236,4 +1269,13 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     .profile-widget-wide,
     .profile-widget:has(.profile-widget-body) { grid-column: 1 / -1; }
     .profile-widget-header { align-items: flex-start; flex-wrap: wrap; }
+}
+
+@media (max-height: 550px) {
+    .profile-account-picker { padding: 12px; gap: 6px; overflow-y: auto; }
+    .profile-account-picker .modal-header { padding-bottom: 0; }
+    .profile-account-picker .modal-accent-bar { display: none; }
+    .profile-account-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .profile-account-results { min-height: 100px; }
+    .profile-account-result { padding: 10px; }
 }

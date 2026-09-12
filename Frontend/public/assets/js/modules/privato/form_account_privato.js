@@ -13,7 +13,7 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.100';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.101';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -168,7 +168,7 @@ export async function initFormAccountPrivato(user) {
     if (profileContactId) {
         try {
             const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
-            if (draft?.profileContactId === profileContactId && draft.ownerUid === user.uid && ['email', 'phone'].includes(draft.contactType)) profileContactLinkDraft = draft;
+            if (draft?.profileContactId === profileContactId && draft.ownerUid === user.uid && !draft.companyId && ['email', 'phone'].includes(draft.contactType)) profileContactLinkDraft = draft;
         } catch { profileContactLinkDraft = null; }
     }
 

@@ -20,7 +20,7 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.100';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.101';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -40,7 +40,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.100';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.101';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -441,12 +441,13 @@ async function deletePhone(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo numero?')) return;
     try {
         const linkedAccountId = contactPhones[idx]?.linkedAccountId;
+        const companyId = contactPhones[idx]?.linkedAccountCompanyId;
         contactPhones.splice(idx, 1);
         contactPhones = contactPhones.filter(p => p !== undefined && p !== null);
         await syncData();
         if (linkedAccountId) {
             try {
-                await updateDoc(doc(db, 'users', currentUserUid, 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
+                await updateDoc(doc(db, 'users', currentUserUid, ...(companyId ? ['aziende', companyId] : []), 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
             } catch {
                 showToast('Telefono eliminato. Il riferimento nell’Account non è stato aggiornato.', 'warning');
             }
@@ -463,12 +464,13 @@ async function deleteEmail(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa email?')) return;
     try {
         const linkedAccountId = contactEmails[idx]?.linkedAccountId;
+        const companyId = contactEmails[idx]?.linkedAccountCompanyId;
         contactEmails.splice(idx, 1);
         contactEmails = contactEmails.filter(e => e !== undefined && e !== null);
         await syncData();
         if (linkedAccountId) {
             try {
-                await updateDoc(doc(db, 'users', currentUserUid, 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
+                await updateDoc(doc(db, 'users', currentUserUid, ...(companyId ? ['aziende', companyId] : []), 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
             } catch (unlinkError) {
                 console.warn('[Email] Account collegato non disponibile durante la rimozione del riferimento:', unlinkError);
             }

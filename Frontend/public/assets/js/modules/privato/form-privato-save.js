@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.100';
+import { auth, db } from '../../firebase-config.js?v=1.2.101';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -228,10 +228,10 @@ export async function savePrivateAccount({
             let linkedContact = null;
             const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
             if (profileContactLinkDraft?.profileContactId) {
-                if (profileContactLinkDraft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || !['email', 'phone'].includes(profileContactLinkDraft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
+                if (profileContactLinkDraft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || Boolean(profileContactLinkDraft.companyId) || !['email', 'phone'].includes(profileContactLinkDraft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
                 const email = profileUserSnap?.data()?.[contactCollection]?.find(item => item.id === profileContactLinkDraft.profileContactId);
                 if (!email) throw new Error('Contatto del Profilo non più disponibile.');
-                if (email.linkedAccountId && email.linkedAccountId !== targetId) throw new Error('Email già collegata a un altro Account.');
+                if (email.linkedAccountId && (email.linkedAccountId !== targetId || email.linkedAccountCompanyId)) throw new Error('Email già collegata a un altro Account.');
                 if (oldData?.linkedProfileField && (oldData.linkedProfileField.id !== email.id || oldData.linkedProfileField.type !== profileContactLinkDraft.contactType)) throw new Error('Account già collegato a un altro campo del Profilo.');
                 if (isEditing && Number(oldData?.revision || 0) !== Number(baseRevision)) throw new Error('Account modificato su un altro dispositivo. Ricarica prima di collegare.');
                 if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account privato attivo per collegare il contatto.');
