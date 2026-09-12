@@ -31,15 +31,35 @@ function fieldRow(field = {}) {
         className: 'shared-account-select-control', type: 'text', maxlength: 10000,
         placeholder: 'Valore', value: field.value ?? '', 'aria-label': 'Valore del campo'
     });
+    value.spellcheck = false;
+    value.setAttribute('autocapitalize', 'off');
+    value.classList.toggle('local-data-masked', field.encrypted === true);
+    const visibilityIcon = createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'});
+    const visibility = createElement('button', {
+        type: 'button', className: `shared-account-reveal${field.encrypted === true ? '' : ' hidden'}`,
+        'aria-label': 'Mostra valore', hidden: field.encrypted !== true,
+        onclick: () => {
+            const masked = value.classList.toggle('local-data-masked');
+            visibility.setAttribute('aria-label', masked ? 'Mostra valore' : 'Nascondi valore');
+            visibilityIcon.textContent = masked ? 'visibility' : 'visibility_off';
+        }
+    }, [visibilityIcon]);
     const sensitive = createElement('label', {className: 'account-widget-sensitive'}, [
         createElement('input', {type: 'checkbox', checked: field.encrypted === true}),
         createElement('span', {textContent: 'Dato sensibile cifrato'})
     ]);
+    sensitive.firstElementChild.addEventListener('change', event => {
+        value.classList.toggle('local-data-masked', event.target.checked);
+        visibility.hidden = !event.target.checked;
+        visibility.classList.toggle('hidden', !event.target.checked);
+        visibility.setAttribute('aria-label', 'Mostra valore');
+        visibilityIcon.textContent = 'visibility';
+    });
     const remove = createElement('button', {
         type: 'button', className: 'account-widget-remove', 'aria-label': 'Rimuovi campo',
         onclick: () => row.remove()
     }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
-    setChildren(row, [label, value, sensitive, remove]);
+    setChildren(row, [label, createElement('div', {className: 'account-widget-inline-control'}, [value, visibility]), sensitive, remove]);
     row.getValue = () => ({
         id: field.id || newId('field'), label: label.value, value: value.value,
         type: sensitive.firstElementChild.checked
@@ -96,7 +116,7 @@ async function openEditor(widget, context, refresh, templates = []) {
         onclick: () => fieldList.appendChild(fieldRow())
     });
     const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Salva'});
-    const form = createElement('form', {className: 'account-widget-editor'});
+    const form = createElement('form', {className: 'account-widget-editor', autocomplete: 'off', 'data-form-type': 'other'});
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const rows = [...fieldList.children];
@@ -188,11 +208,14 @@ function widgetCard(widget, context, refresh) {
         if (context.editable) {
             const input = createElement('input', {
                 className: 'account-widget-inline-input',
-                type: field.encrypted ? 'password' : 'text',
+                type: 'text',
+                spellcheck: false,
+                autocapitalize: 'off',
                 maxlength: 10000,
                 value: field.value ?? '',
                 'aria-label': field.label
             });
+            input.classList.toggle('local-data-masked', field.encrypted === true);
             input.addEventListener('input', markDirty);
             const controls = [input];
             if (field.encrypted) {
@@ -200,8 +223,8 @@ function widgetCard(widget, context, refresh) {
                     type: 'button', className: 'shared-account-reveal',
                     'aria-label': `Mostra ${field.label}`,
                     onclick: event => {
-                        const revealed = input.type === 'text';
-                        input.type = revealed ? 'password' : 'text';
+                        const revealed = !input.classList.contains('local-data-masked');
+                        input.classList.toggle('local-data-masked', revealed);
                         event.currentTarget.setAttribute('aria-label', `${revealed ? 'Mostra' : 'Nascondi'} ${field.label}`);
                         const icon = event.currentTarget.querySelector('.material-symbols-outlined');
                         if (icon) icon.textContent = revealed ? 'visibility' : 'visibility_off';

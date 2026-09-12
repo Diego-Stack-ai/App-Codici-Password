@@ -7,19 +7,19 @@
     <title>Account Azienda - PROTOCOLLO BASE V5.3</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.105" />
+    <link rel="manifest" href="manifest.json?v=1.2.106" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.106">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.106">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.106">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -63,11 +63,6 @@
                 </div>
 
                 <div class="detail-content-wrap">
-                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
-                    <div class="anti-autofill-trap" aria-hidden="true">
-                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
-                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
-                    </div>
 
                     <!-- 1. Dati Principali -->
                     <section>
@@ -83,8 +78,8 @@
                                     Account</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">badge</span>
-                                    <input id="account-name" type="text" data-t-placeholder="account_name_placeholder"
-                                        autocomplete="no-autofill" spellcheck="false" class="field-input" />
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="account-name" type="text" data-t-placeholder="account_name_placeholder"
+                                        autocomplete="off" spellcheck="false" class="field-input" />
                                 </div>
                             </div>
 
@@ -94,7 +89,7 @@
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">person</span>
                                     <input id="account-username" type="text" data-t-placeholder="username_placeholder"
-                                        autocomplete="off" autocorrect="off" spellcheck="false" class="field-input" />
+                                        autocomplete="username" autocorrect="off" spellcheck="false" class="field-input" />
                                 </div>
                             </div>
 
@@ -113,8 +108,8 @@
                                     <label class="view-label" for="account-password" data-t="password">Password</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">lock</span>
-                                        <input id="account-password" type="text" class="field-input base-shield"
-                                            data-t-placeholder="password_placeholder" autocomplete="off"
+                                        <input id="account-password" type="password" class="field-input base-shield"
+                                            data-t-placeholder="password_placeholder" autocomplete="current-password"
                                             autocorrect="off" spellcheck="false" />
                                         <button id="btn-toggle-password-edit" type="button" class="btn-field-toggle">
                                             <span class="material-symbols-outlined">visibility</span>
@@ -127,7 +122,7 @@
                                 <label class="view-label" for="account-url" data-t="website">Sito Web</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">language</span>
-                                    <input id="account-url" type="url" placeholder="https://"
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="account-url" type="url" placeholder="https://"
                                         class="field-input" autocomplete="off" />
                                 </div>
                             </div>
@@ -174,7 +169,7 @@
                                 <label class="view-label" for="ref-name" data-t="full_name">Nome e Cognome</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">badge</span>
-                                    <input id="ref-name" type="text" class="field-input" />
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="ref-name" type="text" class="field-input" />
                                 </div>
                             </div>
                             <div class="form-grid-2">
@@ -182,14 +177,14 @@
                                     <label class="view-label" for="ref-phone" data-t="phone">Telefono</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">call</span>
-                                        <input id="ref-phone" type="tel" class="field-input" />
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="ref-phone" type="tel" class="field-input" />
                                     </div>
                                 </div>
                                 <div class="glass-field-container">
                                     <label class="view-label" for="ref-mobile" data-t="mobile">Cellulare</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">smartphone</span>
-                                        <input id="ref-mobile" type="tel" class="field-input" />
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="ref-mobile" type="tel" class="field-input" />
                                     </div>
                                 </div>
                             </div>
@@ -211,7 +206,7 @@
                                         data-t="numero_iscrizione">Numero Iscrizione</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">app_registration</span>
-                                        <input type="text" id="account-numero-iscrizione" class="field-input"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" type="text" id="account-numero-iscrizione" class="field-input"
                                             placeholder="Numero Iscrizione">
                                     </div>
                                 </div>
@@ -220,7 +215,7 @@
                                         data-t="codice_societa">Codice Società</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">id_card</span>
-                                        <input type="text" id="account-codice-societa" class="field-input"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" type="text" id="account-codice-societa" class="field-input"
                                             placeholder="Codice Società">
                                     </div>
                                 </div>
@@ -228,7 +223,7 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="account-note" data-t="notes">Note</label>
                                 <div class="note-display-box border-glow">
-                                    <textarea id="account-note" data-t-placeholder="notes_placeholder"
+                                    <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="account-note" data-t-placeholder="notes_placeholder"
                                         class="form-textarea form-textarea-notes"></textarea>
                                 </div>
                             </div>
@@ -260,7 +255,7 @@
                             <div id="shared-management" class="hidden shared-management-container">
                                 <div id="guests-list" class="flex-col-gap"></div>
                                 <div class="invite-row border-glow">
-                                    <input id="invite-email" type="email"
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="invite-email" type="email"
                                         placeholder="Cerca contatto o inserisci email..."
                                         data-t-placeholder="invite_search_placeholder" class="invite-input" />
                                     <button id="btn-send-invite" type="button" class="btn-invite">INVITA</button>

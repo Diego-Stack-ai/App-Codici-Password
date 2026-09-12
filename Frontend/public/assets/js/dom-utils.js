@@ -23,6 +23,18 @@ export const safeSetText = (el, text) => {
 export const createElement = (tag, props = {}, children = []) => {
     const el = document.createElement(tag);
 
+    // Local records are data, even when encrypted. Only explicit credential
+    // fields opt in to password-manager semantics; masking is independent.
+    if ((tag === 'textarea' || (tag === 'input' &&
+        ['text', 'email', 'tel', 'url', 'search', 'number'].includes(props.type || 'text'))) &&
+        !/^(username|current-password|new-password|one-time-code)$/.test(props.autocomplete || '')) {
+        el.setAttribute('autocomplete', 'off');
+        el.setAttribute('data-form-type', 'other');
+        el.setAttribute('data-1p-ignore', 'true');
+        el.setAttribute('data-lpignore', 'true');
+        el.setAttribute('data-bwignore', 'true');
+    }
+
     for (const key in props) {
         // Salta undefined/null: evita coercioni WebIDL pericolose (es. maxLength=undefined → 0)
         if (props[key] === undefined || props[key] === null) continue;

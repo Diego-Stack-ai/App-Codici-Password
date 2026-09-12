@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.105",
+  "version": "1.2.106",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -27,7 +27,7 @@
     "release:patch": "npm run version:patch && npm test",
     "test": "npm run test:offline && npm run test:security && npm run test:vault-contract && npm run test:data-access && npm run test:navigation && npm run test:page-shells && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:lightweight && npm run test:performance-budget && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:maturity-fixture && npm run test:crypto && npm run test:attachments && npm run test:sharing-prototype && npm run test:offline-write-prototype && npm run test:history-prototype && npm run test:backup-prototype && npm run test:credential-health-prototype && npm run test:release-hardening && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",
     "test:offline": "node scripts/audit-offline-shell.mjs",
-    "test:security": "node scripts/audit-security-flows.mjs",
+    "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs",
     "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs",
     "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs tests/legacy-email-audit-model.test.mjs tests/shared-vault-data-model.test.mjs tests/account-widget-ui.test.mjs tests/account-field-usage-model.test.mjs",
     "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/profile-deadline-link-model.test.mjs tests/account-mode-model.test.mjs tests/banking-model.test.mjs",

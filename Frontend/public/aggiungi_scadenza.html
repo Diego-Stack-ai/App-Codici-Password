@@ -13,17 +13,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.105" />
+    <link rel="manifest" href="manifest.json?v=1.2.106" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.105&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.106&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -73,7 +73,7 @@
                             </label>
                             <div class="input-wrapper">
                                 <span class="material-symbols-outlined">person</span>
-                                <input id="nome_cognome" list="names-list" type="text" class="input"
+                                <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="nome_cognome" list="names-list" type="text" class="input"
                                     placeholder="Mario Rossi">
                                 <datalist id="names-list"></datalist>
                                 <button type="button" id="btn-remove-saved-name" class="btn-icon-header"
@@ -190,7 +190,7 @@
                                 <label class="label-sm" for="oggetto_email" data-t="email_subject_preview">Anteprima
                                     Oggetto</label>
                                 <div class="input-wrapper read-only input-wrapper-textarea">
-                                    <textarea id="oggetto_email" readonly
+                                    <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="oggetto_email" readonly
                                         class="input italic input-textarea-resize-none"
                                         placeholder="Oggetto automatico..." rows="3"></textarea>
                                 </div>
@@ -261,7 +261,7 @@
                             <span class="material-symbols-outlined icon-amber label-icon">link</span>
                             <span>URL</span>
                         </label>
-                        <input id="deadline_url" class="input" type="url" inputmode="url" autocomplete="url"
+                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="deadline_url" class="input" type="url" inputmode="url" autocomplete="url"
                             placeholder="https://esempio.it">
                     </div>
 
@@ -271,7 +271,7 @@
                             <span class="material-symbols-outlined icon-amber label-icon">description</span>
                             <span data-t="notes">Note Aggiuntive</span>
                         </label>
-                        <textarea id="notes" class="input-textarea" placeholder="Dettagli sulla scadenza..."></textarea>
+                        <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="notes" class="input-textarea" placeholder="Dettagli sulla scadenza..."></textarea>
                     </div>
 
                     <!-- Allegati Logic Wrapper (Premium V4.1) -->

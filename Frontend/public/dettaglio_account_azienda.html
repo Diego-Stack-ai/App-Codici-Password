@@ -8,18 +8,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Dettaglio Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.105" />
+    <link rel="manifest" href="manifest.json?v=1.2.106" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.106">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=1.2.105">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.105">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=1.2.106">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.106">
 </head>
 
 <body class="base-bg" data-ui-model="detail">
@@ -60,12 +60,6 @@
                             <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
                         <div class="flex-col-gap">
-                            <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
-                            <div class="anti-autofill-trap" aria-hidden="true">
-                                <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
-                                <input type="password" name="password_trap" autocomplete="current-password"
-                                    tabindex="-1">
-                            </div>
 
                             <!-- Nome Account -->
                             <div class="glass-field-container">
@@ -73,8 +67,8 @@
                                     Account</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">badge</span>
-                                    <input id="detail-nomeAccount" readonly class="field-input no-transform"
-                                        autocomplete="no-autofill" spellcheck="false">
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-nomeAccount" readonly class="field-input no-transform"
+                                        autocomplete="off" spellcheck="false">
                                     <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-nomeAccount">
@@ -107,7 +101,7 @@
                                         Codice</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">pin</span>
-                                        <input id="detail-account" type="text" readonly class="field-input no-transform"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-account" type="text" readonly class="field-input no-transform"
                                             autocomplete="off" spellcheck="false">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
@@ -145,7 +139,7 @@
                                 <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">language</span>
-                                    <input id="detail-website" readonly
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="detail-website" readonly
                                         class="field-input link-underlined no-transform">
                                     <div class="detail-field-actions">
                                         <button id="open-website" class="btn-icon-header btn-field-toggle"
@@ -167,7 +161,7 @@
                                         data-t="numero_iscrizione">Numero Iscrizione</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">app_registration</span>
-                                        <input id="detail-numero-iscrizione" readonly class="field-input no-transform"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-numero-iscrizione" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
@@ -182,7 +176,7 @@
                                         Società</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">id_card</span>
-                                        <input id="detail-codice-societa" readonly class="field-input no-transform"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-codice-societa" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
@@ -229,7 +223,7 @@
                                 <label class="view-label">Nome Referente</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined">badge</span>
-                                    <input id="ref-name" readonly class="field-input no-transform" autocomplete="off">
+                                    <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-name" readonly class="field-input no-transform" autocomplete="off">
                                     <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
                                             <span class="material-symbols-outlined">content_copy</span>
@@ -244,7 +238,7 @@
                                     <label class="view-label">Telefono</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">call</span>
-                                        <input id="ref-phone" readonly class="field-input no-transform"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-phone" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button id="btn-call-ref-phone" class="btn-icon-header btn-field-toggle"
@@ -263,7 +257,7 @@
                                     <label class="view-label">Cellulare</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined">smartphone</span>
-                                        <input id="ref-mobile" readonly class="field-input no-transform"
+                                        <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-mobile" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button id="btn-call-ref-mobile" class="btn-icon-header btn-field-toggle"

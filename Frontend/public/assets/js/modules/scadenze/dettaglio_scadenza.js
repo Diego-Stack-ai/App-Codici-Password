@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.105';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.106';
 import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";

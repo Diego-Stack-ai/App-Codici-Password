@@ -132,14 +132,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
             createElement('div', { className: 'modal-accent-bar' })
         ]);
 
-        // 🛡️ Trappola Anti-autofill V7.0
-        const trap = createElement('div', { className: 'anti-autofill-trap', ariaHidden: 'true' }, [
-            createElement('input', { type: 'text', name: 'user_login_trap', autocomplete: 'username', tabindex: '-1' }),
-            createElement('input', { type: 'password', name: 'password_trap', autocomplete: 'current-password', tabindex: '-1' })
-        ]);
-
         const form = createElement('div', { className: 'flex-col-gap profile-modal-form' });
-        form.appendChild(trap);
         const formScroll = createElement('div', {
             className: 'modal-form-scroll vertical-scroll profile-modal-scroll'
         }, [form]);
