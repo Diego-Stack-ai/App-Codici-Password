@@ -54,3 +54,7 @@ Le scritture offline non sono ancora abilitate. Il contratto preventivo per revi
 ### Modulo azienda: base aggiornata per la modifica — v1.2.111
 
 Online il modulo modifica azienda usa `getCompanyConfirmed`, una lettura confermata dal server attraverso il repository, prima di abilitare Salva. Una risposta mancante o fallita non viene sostituita dalla copia obsoleta. Offline resta `getCompany`; liste e consultazione mantengono il percorso local-first. Il controllo transazionale confronta i valori dei contatti senza dipendere dall’ordine delle chiavi delle mappe, preservando conflitti reali e collegamenti Account. Nessuna modifica del mapper degli identificativi o dei dati persistiti.
+
+### Dati azienda dopo scrittura — v1.2.112
+
+Dopo creazione/modifica il dettaglio usa getCompanyConfirmed su afterWrite=1, consumato soltanto dopo rendering riuscito. Callback dei collegamenti usano la stessa lettura confermata; errori e offline preservano la richiesta di refresh senza dichiarare aggiornata la vecchia cache. Navigazione ordinaria invariata. Generazione della vista e delle richieste distinte impediscono aggiornamenti tardivi senza bloccare il retry nella stessa vista.
