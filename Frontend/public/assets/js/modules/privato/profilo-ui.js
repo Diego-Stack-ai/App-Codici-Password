@@ -93,6 +93,14 @@ async function saveProfileLabels() {
     }
 }
 
+export async function updateProfileLabelOptions(configKey, options) {
+    const { profileLabels } = _getState();
+    if (!Array.isArray(profileLabels?.[configKey]) || !Array.isArray(options)) return [];
+    profileLabels[configKey] = [...new Set(options.map(value => String(value || '').trim()).filter(Boolean))];
+    await saveProfileLabels();
+    return [...profileLabels[configKey]];
+}
+
 // ─── COLLAPSIBLE SECTIONS ─────────────────────────────────────────────────────
 
 export function setupCollapsibleSections() {

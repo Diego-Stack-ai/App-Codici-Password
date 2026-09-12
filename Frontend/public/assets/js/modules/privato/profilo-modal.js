@@ -5,7 +5,7 @@
  */
 
 import { createElement, setChildren } from '../../dom-utils.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 
 /**
@@ -48,45 +48,122 @@ export function showProfileModal(title, fields, currentValues, onSave) {
             let valueInput;
 
             if (f.type === 'select') {
-                const hiddenSelect = createElement('select', { className: 'hidden-select' },
-                    (f.options || []).map(opt => createElement('option', { value: opt, textContent: opt, selected: opt === val }))
-                );
+                let optionValues = [...(f.options || [])];
+                let selectedValue = optionValues.includes(val) ? val : (optionValues[0] || '');
+                const hiddenSelect = createElement('select', { className: 'hidden-select' });
+                const selectedText = createElement('span', { className: 'selected-text' });
+                const menu = createElement('div', { className: 'custom-select-menu vertical-scroll' });
+                const canManageOptions = Boolean(f.configKey && typeof f.onOptionsChanged === 'function');
                 valueInput = hiddenSelect;
 
-                finalInputEl = createElement('div', { className: 'custom-select-wrapper' }, [
-                    hiddenSelect,
-                    createElement('div', {
-                        className: 'glass-field-input custom-select-trigger',
-                        onclick: (e) => {
-                            e.stopPropagation();
-                            const currentMenu = e.currentTarget.nextElementSibling;
-                            document.querySelectorAll('.custom-select-menu.show').forEach(m => {
-                                if (m !== currentMenu) m.classList.remove('show');
-                            });
-                            currentMenu.classList.toggle('show');
+                const persistOptions = async nextOptions => {
+                    if (!canManageOptions) return optionValues;
+                    return f.onOptionsChanged(f.configKey, nextOptions);
+                };
+
+                const rebuildOptions = () => {
+                    if (!optionValues.includes(selectedValue)) selectedValue = optionValues[0] || '';
+                    setChildren(hiddenSelect, optionValues.map(opt => createElement('option', {
+                        value: opt,
+                        textContent: opt,
+                        selected: opt === selectedValue
+                    })));
+                    hiddenSelect.value = selectedValue;
+                    selectedText.textContent = selectedValue || 'Seleziona...';
+
+                    const rows = optionValues.map(opt => createElement('div', {
+                        className: 'custom-option',
+                        onclick: (event) => {
+                            if (event.target.closest('button')) return;
+                            event.stopPropagation();
+                            selectedValue = opt;
+                            hiddenSelect.value = opt;
+                            selectedText.textContent = opt;
+                            hiddenSelect.dispatchEvent(new Event('change'));
+                            menu.classList.remove('show');
                         }
                     }, [
-                        createElement('span', { className: 'selected-text', textContent: val || 'Seleziona...' }),
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'expand_more' })
-                    ]),
-                    createElement('div', { className: 'custom-select-menu vertical-scroll' },
-                        (f.options || []).map(opt => createElement('div', {
-                            className: 'custom-option',
-                            textContent: opt,
-                            onclick: (e) => {
-                                e.stopPropagation();
-                                const wrapper = e.currentTarget.closest('.custom-select-wrapper');
-                                const sel = wrapper.querySelector('select');
-                                const txt = wrapper.querySelector('.selected-text');
-                                const menu = wrapper.querySelector('.custom-select-menu');
-                                sel.value = opt;
-                                txt.textContent = opt;
-                                sel.dispatchEvent(new Event('change'));
-                                menu.classList.remove('show');
+                        createElement('span', { textContent: opt }),
+                        canManageOptions ? createElement('div', { className: 'flex-center-row profile-label-actions' }, [
+                            createElement('button', {
+                                className: 'btn-action-mini profile-label-action profile-label-edit',
+                                title: `Rinomina ${opt}`,
+                                'aria-label': `Rinomina ${opt}`,
+                                onclick: async event => {
+                                    event.stopPropagation();
+                                    const renamed = await showInputModal('Rinomina etichetta', opt, 'Nuovo nome etichetta...');
+                                    const cleanName = String(renamed || '').trim();
+                                    if (!cleanName || cleanName === opt || optionValues.includes(cleanName)) return;
+                                    optionValues = await persistOptions(optionValues.map(value => value === opt ? cleanName : value));
+                                    if (selectedValue === opt) selectedValue = cleanName;
+                                    rebuildOptions();
+                                    showToast('Etichetta aggiornata!', 'success');
+                                }
+                            }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'edit' })]),
+                            createElement('button', {
+                                className: 'btn-action-mini profile-label-action profile-label-delete',
+                                title: `Elimina ${opt}`,
+                                'aria-label': `Elimina ${opt}`,
+                                onclick: async event => {
+                                    event.stopPropagation();
+                                    if (optionValues.length <= 1) {
+                                        showToast('Deve rimanere almeno un’etichetta.', 'warning');
+                                        return;
+                                    }
+                                    const confirmed = await showConfirmModal(
+                                        'Elimina etichetta',
+                                        `Vuoi eliminare l’etichetta “${opt}”? I dati già salvati con questo nome non vengono modificati.`,
+                                        'Elimina',
+                                        'Annulla'
+                                    );
+                                    if (!confirmed) return;
+                                    optionValues = await persistOptions(optionValues.filter(value => value !== opt));
+                                    rebuildOptions();
+                                    showToast('Etichetta eliminata!', 'success');
+                                }
+                            }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'delete' })])
+                        ]) : null
+                    ]));
+
+                    if (canManageOptions) rows.push(createElement('div', {
+                        className: 'custom-option profile-label-add',
+                        onclick: async event => {
+                            event.stopPropagation();
+                            const added = await showInputModal('Aggiungi etichetta', '', 'Nome nuova etichetta...');
+                            const cleanName = String(added || '').trim();
+                            if (!cleanName) return;
+                            if (optionValues.includes(cleanName)) {
+                                showToast('Etichetta già esistente', 'info');
+                                return;
                             }
-                        }))
-                    )
+                            optionValues = await persistOptions([...optionValues, cleanName]);
+                            selectedValue = cleanName;
+                            rebuildOptions();
+                            showToast('Etichetta aggiunta!', 'success');
+                        }
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined profile-label-add-icon', textContent: 'add_circle' }),
+                        createElement('span', { textContent: 'Aggiungi etichetta...' })
+                    ]));
+                    setChildren(menu, rows);
+                };
+
+                const trigger = createElement('div', {
+                    className: 'glass-field-input custom-select-trigger',
+                    onclick: (event) => {
+                        event.stopPropagation();
+                        document.querySelectorAll('.custom-select-menu.show').forEach(openMenu => {
+                            if (openMenu !== menu) openMenu.classList.remove('show');
+                        });
+                        menu.classList.toggle('show');
+                    }
+                }, [
+                    selectedText,
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'expand_more' })
                 ]);
+
+                finalInputEl = createElement('div', { className: 'custom-select-wrapper' }, [hiddenSelect, trigger, menu]);
+                rebuildOptions();
             } else if (f.type === 'textarea' || f.key === 'note') {
                 valueInput = createElement('textarea', {
                     className: 'glass-field-input vertical-scroll profile-modal-textarea',

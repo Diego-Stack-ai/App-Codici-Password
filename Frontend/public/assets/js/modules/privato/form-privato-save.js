@@ -8,6 +8,7 @@ import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
+import { linkProfileEmailToAccount } from './profile-model.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -359,7 +360,7 @@ export async function savePrivateAccount({
                 const emails = profileUserSnap?.data()?.contactEmails || [];
                 transaction.update(profileUserRef, {
                     contactEmails: emails.map(email => email.id === profileEmailLinkDraft.profileEmailId
-                        ? { ...email, linkedAccountId: targetId, password: '' }
+                        ? linkProfileEmailToAccount(email, targetId)
                         : email)
                 });
             }

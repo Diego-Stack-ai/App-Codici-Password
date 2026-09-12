@@ -9,6 +9,25 @@ export const QR_FORBIDDEN_TYPES = new Set([
     'password', 'pin', 'puk', 'secret', 'attachment', 'pdf', 'photo', 'sensitive'
 ]);
 
+export function hasLegacyEmailPassword(email) {
+    return Boolean(String(email?.password || '').trim());
+}
+
+export function buildProfileAccountLinkDraft(email) {
+    return {
+        profileEmailId: email?.id || '',
+        email: email?.address || ''
+    };
+}
+
+export function linkProfileEmailToAccount(email, accountId) {
+    return {
+        ...email,
+        linkedAccountId: accountId,
+        password: ''
+    };
+}
+
 function normalizedDeadlineText(value) {
     return String(value || '').trim().toLocaleLowerCase('it');
 }
