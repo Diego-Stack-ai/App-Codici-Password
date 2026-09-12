@@ -1,8 +1,25 @@
 # 🧪 REGISTRO AGGIORNAMENTI, RISCHI E WIP — APP CODICI PASSWORD
 
-> **Stato:** registro operativo e cronologico  
-> **Autorità:** roadmap; non è un contratto e non certifica la produzione  
-> **Ultima revisione di gerarchia:** 11 settembre 2026  
+> **Stato:** registro operativo e cronologico.
+> **Autorità:** roadmap subordinata ai contratti, non certificazione; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** release e attività aperte.
+> **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+## Stato corrente — riallineamento documentale 12/09/2026, v1.2.110
+
+Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi preliminari e i conteggi valgono per la data o la versione indicata; non sono comandi da eseguire oggi. Le indicazioni operative sono nella [guida tecnica](./GUIDA.md) e nei contratti specialistici.
+
+- Guida tecnica riallineata: nessuna bonifica massiva, PDF con segreti o scelta libsodium/24 parole implicita; semantica distinta fra credenziali Account e altri campi protetti.
+- Stati M6–M9 riconciliati con i rispettivi contratti. M4 resta chiusa per l’accettazione storica; la matrice estesa resta M10.
+- Release 1.2.101–1.2.110: selezione Account migliorata; note e credenziali collegate nei contatti; profilo aziendale a linguette; riuso, cambio e scollegamento; azioni compatte; distinzione autofill; QR con foto e riepilogo del contatto; composizioni condivise tra profili.
+- La superficie canonica comprende 30 pagine, incluso `contatto_condiviso.html`. Inventari rigenerati con gli script del progetto.
+- Restano aperti sessione Vault, validazione delle scritture, recupero backup interrotto, inventario reale, consultazione bancaria offline e verifiche Firebase/dispositivi.
+- La revisione modifica documentazione e testo del generatore dei report; non modifica comportamento applicativo, dati, Rules o Functions e non certifica un nuovo rilascio.
+
+## Diario storico
+
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](../docs/ARCHITETTURA_SICUREZZA_V1.md)
 
 Questo documento traccia nuove funzioni, refactoring, prove e attività aperte. Le sezioni possono descrivere epoche diverse: la dicitura “completato” vale soltanto per il perimetro e la versione indicati. Una decisione consolidata viene riportata nel contratto specialistico pertinente; `GUIDA.md` conserva le regole implementative e non prevale sulla baseline sicurezza.
@@ -15,7 +32,7 @@ L'obiettivo finale è la **conoscenza zero** (Zero-Knowledge Architecture).
 - **Algoritmo**: `libsodium.js` era una proposta storica, non una decisione attiva. Algoritmi e formati possono cambiare soltanto tramite il contratto crittografico, migrazione verificata e audit indipendente.
 - **Dettagli**:
     1. Cifratura sul dispositivo prima dell'invio a Firebase.
-    2. Chiave di recupero (Recovery Key) da 24 parole.
+    2. Recovery Key: la proposta storica di 24 parole è superata dai formati descritti in M8; nessun nuovo formato approvato qui.
     3. Nessuna chiave sensibile memorizzata sui server Google.
 
 ## 2. REFACTORING IN CORSO: PROFILO PRIVATO & GLOBAL DECRYPT
@@ -46,7 +63,7 @@ Sezione sperimentale per nuovi effetti visivi.
 Definizione dei nuovi standard di accesso e protezione dati.
 
 - **5.1 Autenticazione 2FA (Authenticator)**:
-    - Obbligo di configurazione tramite App (Google/Microsoft Authenticator). 
+    - Obbligo di configurazione tramite App (Google/Microsoft Authenticator).
     - Generazione e stampa automatica dei dati di backup al primo avvio.
 - **5.2 Sblocco Biometrico (Face ID)**:
     - Implementazione via WebAuthn per sbloccare il Vault senza digitazione manuale della Master Password (previo inserimento iniziale).
@@ -487,7 +504,6 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Consolidamento successivo: `sw.js` è tornato a occuparsi soltanto della shell offline; messaggi e click Push appartengono esclusivamente a `firebase-messaging-sw.js`. Il listener online non viene più caricato sui dispositivi certamente disabilitati e gli errori tecnici restano nella console.
 - La revoca delle scadenze ricevute non dipende più dalla possibilità di ritrovare l'email precedente: il backend conserva gli UID risolti in un indice tecnico non accessibile al client e li usa per la pulizia.
 
-
 # Riallineamento documentale — 11/09/2026
 
 - [x] creata `docs/ARCHITETTURA_SICUREZZA_V1.md`;
@@ -497,7 +513,7 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - [x] riallineato `VAULT_KEY_CONTRACT.md`, con session wrapping classificato P0;
 - [x] esclusa ogni interpretazione del Cripto-Healing come migrazione automatica autorizzata;
 - [x] aperta la decisione di retention del cestino;
-- [ ] completare il riallineamento dei contratti specialistici;
+- [x] riallineamento documentale dei contratti completato il 12/09/2026 nel perimetro descritto in apertura; i gate tecnici restano aperti;
 - [ ] eseguire [il piano di audit completo](../docs/PIANO_AUDIT_COMPLETO_PROGETTO.md) su codice, Rules, Functions, Storage, crittografia, offline e configurazione Firebase;
 - [ ] aggiornare la documentazione con gli esiti reali senza confondere test locali e produzione.
 

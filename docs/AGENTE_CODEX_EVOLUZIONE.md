@@ -1,5 +1,14 @@
 # Evoluzione Agente Codex — audit e roadmap locale
 
+> **Stato:** direzione approvata; attivazioni e gate separati.
+> **Autorità:** roadmap specialistica; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** Agente locale e accesso ai dati.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+La fotografia prestazionale del 10/09 resta storica. Il catalogo futuro deve coprire le 30 pagine canoniche della v1.2.110, distinguendo il ricevitore pubblico dal contesto Vault. L’ordine post-M0–M10 sotto riportato non anticipa i gate di sicurezza della baseline né quelli del piano di audit. Prezzi, compatibilità e dimensioni citati sono riferimenti della fotografia originale da riverificare prima di adottare un provider o modello; nessuna adozione è autorizzata qui.
+
 > Audit eseguito il 10/09/2026 sulla v1.2.90. Questo documento approva l'architettura progressiva; non autorizza ancora il download di modelli, API esterne o azioni automatiche sui dati.
 
 ## Decisione
@@ -83,7 +92,7 @@ Schema minimo per ogni pagina:
 
 `pageId` deve provenire dallo stesso router usato dall'app ed essere passato al controller come oggetto immutabile. Le chiavi linguistiche traducono soltanto contenuti dell'app. Titoli creati dall'utente, come “Casa al mare”, restano invariati; eventuali traduzioni personali saranno campi separati e facoltativi.
 
-Il primo catalogo deve coprire le 29 pagine canoniche. `prova.html`, modali e pagine archiviate non vi entrano. Un test deve fallire quando una pagina canonica non possiede una scheda o quando una scheda cita campi/azioni inesistenti.
+Il primo catalogo deve coprire le 30 pagine canoniche. `prova.html`, modali e pagine archiviate non vi entrano. Un test deve fallire quando una pagina canonica non possiede una scheda o quando una scheda cita campi/azioni inesistenti.
 
 ## Contratto di accesso ai dati
 
@@ -109,7 +118,7 @@ Il modello, se presente, non riceve mai D4. Le azioni future usano comandi tipiz
 
 ### A1 — guida contestuale senza LLM
 
-- creare schede Markdown e manifest delle 29 pagine;
+- creare schede Markdown e manifest delle 30 pagine;
 - gestire intenti come “a cosa serve”, “dove inserisco”, “perché”, “cosa posso fare”;
 - collegare campi, validazioni, errori frequenti e percorsi correlati;
 - proporre navigazione e wizard, senza scrivere dati;
@@ -173,7 +182,7 @@ Google Drive, OneDrive e iCloud possono in futuro conservare un pacchetto modell
 
 1. approvare schema del manifest e contratto D0–D4;
 2. realizzare A0/A1 con fixture, senza cambiare la Vault;
-3. verificare tutte le 29 pagine e il fallback offline;
+3. verificare tutte le 30 pagine e il fallback offline;
 4. misurare tempi/peso dell'indice su account piccolo e grande;
 5. solo dopo, creare un laboratorio A2 isolato e non pubblicato;
 6. provare WebGPU/WASM su iPhone, Android e Windows;
@@ -187,7 +196,7 @@ Non viene creata ora una prova LLM: prima servono il manifest di pagina e una mi
 1. coerenza Profilo/Account/Widget/Cache: audit, piano e implementazione per blocchi, con priorità al read-your-writes; il contratto completo è in `PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md`;
 2. Agente Codex A0/A1: contesto e conoscenza per pagina senza LLM, dopo la stabilizzazione dello schema dati;
 3. collaudo fisico Windows online;
-4. collaudo offline sistematico con F12 sulle 29 pagine;
+4. collaudo offline sistematico con F12 sulle 30 pagine;
 5. correzione della consultazione offline reale emersa dal collaudo;
 6. rifiniture UI rinviate, inclusi lucchetti, modali, watermark, sticky, glass e animazioni;
 7. audit indipendente di crittografia, condivisione, backup e nuovo contratto Agente;

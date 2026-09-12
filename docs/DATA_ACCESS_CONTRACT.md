@@ -1,8 +1,11 @@
 # Contratto di accesso dati local-first
 
-> **Stato:** attivo per le letture; scritture e coda in evoluzione M6  
-> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** letture attive e cutover M6 limitato.
+> **Autorità:** contratto specialistico; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** repository e accesso dati.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
 Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e dalla rete.
 
@@ -21,7 +24,7 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 1. La chiave di deduplicazione include dominio, UID e identificatori necessari.
 2. Una Promise viene rimossa appena conclusa, anche in errore; una lettura successiva può quindi ottenere dati aggiornati.
 3. Utenti, aziende e record diversi non possono condividere la stessa Promise.
-4. Le scritture restano sui percorsi esistenti finché non è definito il modello M6 di conflitto e coda offline.
+4. I domini già adottati usano il percorso M6; gli altri mantengono i percorsi esistenti e le relative limitazioni. Nessuna estensione è implicita nel contratto di lettura.
 5. Un errore di refresh remoto non deve cancellare un risultato locale valido.
 6. Nessun dato decifrato viene conservato dal repository.
 7. La lettura remota/cache può essere condivisa, ma ogni consumatore riceve nuovi oggetti: la decifratura o la normalizzazione di una pagina non contamina le altre.
@@ -49,4 +52,4 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 
 Tutti i moduli applicativi passano ora dal repository. `offline-firestore.js` resta confinato all'infrastruttura del repository.
 
-Le scritture offline non sono ancora abilitate. Il contratto preventivo per revisioni, idempotenza e conflitti è definito in `OFFLINE_WRITE_CONFLICT_POLICY.md` e verrà implementato in M6.
+Il cutover M6 è attivo per Account e memorandum privati isolati. Banca, condivisioni e collegamenti Profilo non rientrano in quel percorso. Revisioni, idempotenza, conflitti e gate ancora aperti sono definiti in `OFFLINE_WRITE_CONFLICT_POLICY.md` e `M6_SINCRONIZZAZIONE_OFFLINE.md`. La consultazione offline completa non è certificata.

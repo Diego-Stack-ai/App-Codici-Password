@@ -1,9 +1,16 @@
 # Guida del progetto — Codici & Password
 
-> **Stato:** attivo  
-> **Autorità:** indice documentale centrale  
-> **Versione:** 1.0  
-> **Ultima verifica:** 11 settembre 2026  
+> **Stato:** attivo.
+> **Autorità:** indice documentale centrale; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** gerarchia e manutenzione documentale.
+> **Dipendenze:** [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e mappa dei contratti della sezione 4.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+## Stato della revisione documentale — 12/09/2026
+
+La revisione separa norme attive, stato implementato e cronologia. I 38 MD comprendono quattro riferimenti centrali, contratti specialistici, guide, audit, inventari e due documenti sperimentali: non sono 38 piani indipendenti. Nessun gate runtime si chiude per effetto del riordino. Il piano di maturità riporta lo stato corrente; i contratti d’area mantengono requisiti e prove. Gli audit precedenti restano riferiti ai loro commit.
+
 > **Regola:** questo documento indica dove trovare la regola autorevole. Non sostituisce i contratti specialistici.
 
 ## 1. Scopo
@@ -51,19 +58,19 @@ Una dichiarazione più recente non prevale automaticamente: deve avere autorità
 |---|---|---|
 | Sicurezza generale | [ARCHITETTURA_SICUREZZA_V1.md](./ARCHITETTURA_SICUREZZA_V1.md) | Attivo |
 | Vault e terminologia delle chiavi | [VAULT_KEY_CONTRACT.md](./VAULT_KEY_CONTRACT.md) | Attivo, da verificare sul codice |
-| Funzioni e dati visibili | [FUNCTIONAL_DATA_CONTRACT.md](./FUNCTIONAL_DATA_CONTRACT.md) | Fotografia M0 |
+| Funzioni e dati visibili | [FUNCTIONAL_DATA_CONTRACT.md](./FUNCTIONAL_DATA_CONTRACT.md) | Baseline M0 con integrazioni successive |
 | Accesso ai dati local-first | [DATA_ACCESS_CONTRACT.md](./DATA_ACCESS_CONTRACT.md) | Attivo, transitorio |
 | Campi cifrati | [ENCRYPTED_FIELD_INVENTORY.md](./ENCRYPTED_FIELD_INVENTORY.md) | Inventario da aggiornare |
 | Condivisioni | [M5_CONDIVISIONE_THREAT_MODEL.md](./M5_CONDIVISIONE_THREAT_MODEL.md) e [M5_PIANO_INTEGRAZIONE.md](./M5_PIANO_INTEGRAZIONE.md) | Target candidato |
 | Offline e conflitti | [M6_SINCRONIZZAZIONE_OFFLINE.md](./M6_SINCRONIZZAZIONE_OFFLINE.md) e [OFFLINE_WRITE_CONFLICT_POLICY.md](./OFFLINE_WRITE_CONFLICT_POLICY.md) | Parzialmente attivo |
-| Cronologia e cestino | [M7_CRONOLOGIA_CESTINO_AUDIT.md](./M7_CRONOLOGIA_CESTINO_AUDIT.md) | Contratto candidato |
-| Backup e recupero | [M8_BACKUP_RECUPERO.md](./M8_BACKUP_RECUPERO.md) | Laboratorio/candidato |
-| Salute credenziali | [M9_SALUTE_CREDENZIALI.md](./M9_SALUTE_CREDENZIALI.md) | Laboratorio/candidato |
+| Cronologia e cestino | [M7_CRONOLOGIA_CESTINO_AUDIT.md](./M7_CRONOLOGIA_CESTINO_AUDIT.md) | Funzioni collaudate storicamente; retention aperta |
+| Backup e recupero | [M8_BACKUP_RECUPERO.md](./M8_BACKUP_RECUPERO.md) | Runtime implementato; gate specialistici aperti |
+| Salute credenziali | [M9_SALUTE_CREDENZIALI.md](./M9_SALUTE_CREDENZIALI.md) | Runtime implementato; gate specialistici aperti |
 | Hardening e rilascio | [M10_HARDENING_RILASCIO.md](./M10_HARDENING_RILASCIO.md) | Gate automatico + verifiche reali aperte |
 | Widget e coerenza Account | [PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md](./PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md) | In evoluzione |
 | Risposta agli incidenti | [RISPOSTA_INCIDENTI_E_RECUPERO.md](./RISPOSTA_INCIDENTI_E_RECUPERO.md) | Attivo |
 | Pagine canoniche | [CANONICAL_PAGE_REGISTRY.md](./CANONICAL_PAGE_REGISTRY.md) | Attivo |
-| Guida implementativa/UI | [GUIDA.md](../Frontend/GUIDA.md) | Da consolidare |
+| Guida implementativa/UI | [GUIDA.md](../Frontend/GUIDA.md) | Riallineata alla revisione documentale v1.2.110 |
 | Attività aperte | [GUIDA_AGGIORNAMENTI.md](../Frontend/GUIDA_AGGIORNAMENTI.md) | Registro operativo |
 | Audit di riallineamento | [AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md](./AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md) | Evidenza 11/09/2026 |
 | Audit completo del progetto | [PIANO_AUDIT_COMPLETO_PROGETTO.md](./PIANO_AUDIT_COMPLETO_PROGETTO.md) | In esecuzione |

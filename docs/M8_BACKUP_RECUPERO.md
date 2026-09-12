@@ -1,8 +1,11 @@
 # M8 — Backup e recupero
 
-> **Stato:** contratto candidato e laboratorio; ripristino reale di produzione non certificato  
-> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** runtime v2 e collaudo storico disponibili; recupero complessivo non certificato.
+> **Autorità:** contratto specialistico e registro prove; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** backup e ripristino.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
 ## Contratto
 
@@ -10,7 +13,7 @@ Il backup è un file cifrato, autenticato e versionato. L'intestazione espone so
 
 Il laboratorio usa 192 bit casuali, PBKDF2-SHA256 a 600.000 iterazioni e AES-GCM-256 con intestazione autenticata. Prima di scrivere dati, l'importazione valida formato, versione, proprietario e autenticità. Il ripristino definitivo dovrà usare staging, confronto e transazione, mai sovrascrivere direttamente il Vault attivo.
 
-Il formato runtime v2 usa righe cifrate AES-GCM concatenate da numero di sequenza e digest del blocco precedente. Consente una scrittura progressiva, limita la memoria al record o allegato corrente e rende rilevabili manomissione, riordino e troncamento tramite il footer finale autenticato. Il formato v1 resta esclusivamente una fixture di laboratorio.
+Il formato runtime v2 usa righe cifrate AES-GCM concatenate da numero di sequenza e digest del blocco precedente. Il formato consente una scrittura progressiva e rende rilevabili manomissione, riordino e troncamento tramite il footer finale autenticato. Il formato v1 resta esclusivamente una fixture di laboratorio.
 
 Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso verificabile. Non viene abilitato implicitamente dalla Recovery Key.
 
@@ -34,4 +37,15 @@ Il ripristino usa un **Vault fantasma** in sola lettura prima di qualsiasi scrit
 - [x] apertura fisica del `.cpbackup` con Recovery Key e anteprima server verificate il 09/09/2026: il Vault attivo ha prodotto il blocco collisioni previsto senza modificare dati;
 - [x] collaudo fisico esporta/cancella/modifica/ripristina su account di prova completato il 09/09/2026: 3 elementi mancanti e 2 modificati sono stati riconosciuti e recuperati, compresi account privato, account aziendale, profilo/codice fiscale e allegato; il secondo confronto li ha classificati invariati.
 
-M8 è chiusa il 09/09/2026. La release 1.2.70 aggiunge il ricaricamento automatico della vista dopo il recupero; la relativa prova visiva resta un controllo di regressione e non rimette in discussione l'integrità del ripristino già verificato.
+Il collaudo del 09/09/2026 attesta il percorso riuscito descritto sopra. La release 1.2.70 aggiunge il ricaricamento della vista. Queste evidenze storiche non certificano il recupero in tutti i casi di interruzione né chiudono i requisiti della baseline dell’11/09.
+
+## Verifica locale del 12/09/2026 e gate aperti
+
+Sul commit applicativo indicato, `executeBackupRestore` applica transazioni separate fino a 400 record e carica gli allegati dopo i record. Due prove isolate del client, con servizi Firebase simulati e dati fittizi, confermano che un errore al secondo blocco lascia il primo già accettato e che un errore Storage arriva dopo l’applicazione del record allegato. Il backend conferma nel codice l’atomicità per singolo blocco; non è una transazione globale.
+
+- [ ] progettare e collaudare staging, ripresa o compensazione fra blocchi e allegati;
+- [ ] verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima;
+- [ ] dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva;
+- [ ] misurare memoria e dimensioni su iPhone e Windows.
+
+L’export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.

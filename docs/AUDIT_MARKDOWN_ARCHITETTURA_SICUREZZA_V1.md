@@ -1,10 +1,19 @@
 # Audit Markdown rispetto ad Architettura Sicurezza V1
 
-> **Data:** 11 settembre 2026  
-> **Baseline:** [ARCHITETTURA_SICUREZZA_V1.md](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Branch esaminato:** `master`; fotografia iniziale `b67662b430208771674f59d4084a89b8f5ca38d2`, aggiornata durante il consolidamento documentale dell’11 settembre 2026  
-> **Ambito:** tutti i 35 file Markdown presenti nella fotografia consolidata, incluso il piano di audit creato al termine del riallineamento.  
-> **Metodo:** confronto documentale, con controllo puntuale di `firestore.rules` e `storage.rules` per separare dichiarazioni, laboratori e produzione.  
+> **Stato:** audit storico dell’11/09 con rettifica della gerarchia.
+> **Autorità:** evidenza storica, non istruzioni operative correnti; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** audit dei Markdown.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+> **Rettifica di lettura — 12/09/2026:** questo audit conserva analisi e proposte dell’11/09. La gerarchia proposta nella sezione 2 è superata dalla gerarchia definitiva di [GUIDA_PROGETTO.md](./GUIDA_PROGETTO.md): contratti specialistici prima della guida implementativa. Riferimenti mancanti, conteggi e azioni proposte descrivono le fotografie indicate, non lo stato del repository corrente. Le prescrizioni operative della guida sono state riallineate nella revisione documentale v1.2.110; i rischi del runtime non sono per questo risolti.
+
+> **Data:** 11 settembre 2026\
+> **Baseline:** [ARCHITETTURA_SICUREZZA_V1.md](./ARCHITETTURA_SICUREZZA_V1.md)\
+> **Branch esaminato:** `master`; fotografia iniziale `b67662b430208771674f59d4084a89b8f5ca38d2`, aggiornata durante il consolidamento documentale dell’11 settembre 2026\
+> **Ambito:** tutti i 35 file Markdown presenti nella fotografia consolidata, incluso il piano di audit creato al termine del riallineamento.\
+> **Metodo:** confronto documentale, con controllo puntuale di `firestore.rules` e `storage.rules` per separare dichiarazioni, laboratori e produzione.\
 > **Limite:** questo rapporto non certifica il runtime pubblicato, Firebase Console, i dati reali o la robustezza crittografica. Non modifica automaticamente nessun documento esistente.
 
 ## 1. Esito generale

@@ -1,17 +1,24 @@
 # Contratto strutturale delle pagine e del viewport
 
-> **Stato:** attivo per la struttura delle pagine; prove fisiche restano necessarie  
-> **Autorità:** contratto UI subordinato a [Guida progetto](./GUIDA_PROGETTO.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** attivo; collaudo fisico richiesto.
+> **Autorità:** contratto UI specialistico; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** viewport e struttura delle pagine.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
-Questo documento definisce esclusivamente la struttura delle 29 pagine pubbliche. Non modifica né disciplina ombre, vetro, colori delle card, animazioni, watermark, decorazioni, modali o altri componenti sovrapposti.
+## Ricevitore pubblico del contatto — eccezione v1.2.110
+
+`contatto_condiviso.html` è la trentesima pagina canonica, distinta dalle cinque pagine di accesso e dalle 24 interne. Usa `body.base-bg`, il proprio `main.shared-contact-card`, `contact-card-receiver.css` e un entry point dedicato; non applica header/footer o bootstrap privato. Mostra esclusivamente il contatto condiviso dal QR e prepara il download vCard. Il laboratorio `prova.html` resta escluso.
+
+Questo documento definisce esclusivamente la struttura delle 30 pagine canoniche. Non modifica né disciplina ombre, vetro, colori delle card, animazioni, watermark, decorazioni, modali o altri componenti sovrapposti.
 
 ## Perimetro ufficiale
 
 - **Famiglia accesso:** `index.html`, `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`.
-- **Famiglia interna:** le altre 24 pagine canoniche elencate in `CANONICAL_PAGE_REGISTRY.md`.
+- **Famiglia interna:** le 24 pagine canoniche operative elencate in `CANONICAL_PAGE_REGISTRY.md`.
 - I confronti Home e i redirect storici sono conservati in `archive/home-experiments/` e non appartengono al runtime pubblico.
-- `prova.html` è un laboratorio temporaneo pubblicato per il collaudo fisico del viewport. Non è una trentesima pagina applicativa, non entra nel conteggio né nel gate statico delle 29 pagine e non può introdurre eccezioni nel contratto definitivo.
+- `prova.html` è un laboratorio temporaneo pubblicato per il collaudo fisico del viewport. Non è una pagina canonica, non entra nel conteggio né nel gate statico delle 30 pagine e non può introdurre eccezioni nel contratto definitivo.
 
 ## Strati comuni
 
@@ -94,6 +101,6 @@ La correzione della fascia terminale iOS deve quindi:
 
 ## Gate
 
-`npm run test:page-shells` controlla classificazione e struttura statica delle 29 pagine. Il collaudo fisico descritto in `M4_VISUAL_ACCEPTANCE.md` resta obbligatorio per safe area, overscroll e ricomposizione grafica di iOS.
+`npm run test:page-shells` controlla classificazione e struttura statica delle 30 pagine. Il collaudo fisico descritto in `M4_VISUAL_ACCEPTANCE.md` resta obbligatorio per safe area, overscroll e ricomposizione grafica di iOS.
 
 `prova.html` serve unicamente a separare il comportamento della superficie radice da header, footer, nebbia e contenuti reali. Un esito positivo nel laboratorio non chiude il gate: la stessa soluzione deve essere riportata nel contratto comune e verificata sulle due famiglie.

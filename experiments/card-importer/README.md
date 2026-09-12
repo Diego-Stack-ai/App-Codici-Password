@@ -1,7 +1,14 @@
 # Prototipo isolato — importatore leggero di card
 
+> **Stato:** laboratorio isolato, non integrato nel runtime.
+> **Autorità:** documentazione sperimentale; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** OCR e acquisizione card.
+> **Dipendenze:** [Guida progetto](../../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
 Questo esperimento non viene caricato dall'app, non è incluso in `Frontend/public`,
-non entra nella shell PWA e non tratta dati reali.
+non entra nella shell PWA e non salva dati applicativi. Il collaudo storico con fotografie reali, esterne al repository, è descritto in `REAL_IMAGE_AUDIT.md`; non equivale a integrazione nei dati di produzione.
 
 ## Obiettivo
 

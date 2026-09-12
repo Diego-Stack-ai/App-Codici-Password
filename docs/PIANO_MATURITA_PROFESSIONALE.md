@@ -1,8 +1,11 @@
 # Piano di maturità professionale — Codici & Password
 
-> **Stato:** piano evolutivo iniziato sulla v1.2.49; gli stati successivi richiedono verifica nel relativo contratto  
-> **Autorità:** piano, subordinato a [Guida progetto](./GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** programma in corso; avanzamento riconciliato, gate aperti conservati.
+> **Autorità:** piano subordinato alla baseline e ai contratti specialistici; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** maturità M0–M10 e post-M10.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
 > Stato iniziale: versione locale 1.2.49. Documento di progetto, non autorizza migrazioni, cancellazioni, deploy o modifiche distruttive.
 
@@ -28,7 +31,7 @@ Vault Key casuale
   └─ protegge i dati cifrati della Vault
 ```
 
-Nel codice attuale la variabile `_masterKey` di `security-manager.js` contiene, dopo lo sblocco, la **Vault Key risolta** o il keyring di compatibilità; il nome è storico e ambiguo. I Vault nuovi ricevono già una chiave casuale generata da `generateVaultKey()`, protetta da `wrapVaultKey()`. Per i dati precedenti può esistere temporaneamente un fallback legacy nel keyring, necessario a leggerli senza una ricifratura non atomica.
+Nella fotografia iniziale, prima del completamento M1, la variabile `_masterKey` di `security-manager.js` contiene, dopo lo sblocco, la **Vault Key risolta** o il keyring di compatibilità; il nome è storico e ambiguo. I Vault nuovi ricevono già una chiave casuale generata da `generateVaultKey()`, protetta da `wrapVaultKey()`. Per i dati precedenti può esistere temporaneamente un fallback legacy nel keyring, necessario a leggerli senza una ricifratura non atomica.
 
 Il possibile livello futuro non è “aggiungere una Vault Key”, perché esiste già. È valutare una **Data Encryption Key per record (DEK)**:
 
@@ -151,8 +154,8 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 
 - [x] rinominare gradualmente `_masterKey` in `vaultKeyMaterial` senza cambiare il valore;
 - [x] documentare verifier, KEK, envelope, Vault Key, keyring legacy e session wrapping in `VAULT_KEY_CONTRACT.md`;
-- [x] inventariare ogni campo cifrato e relativo formato in `ENCRYPTED_FIELD_INVENTORY.md`;
-- [x] dimostrare con test che logout e blocco eliminino il materiale previsto;
+- [x] produrre l’inventario iniziale M1 in `ENCRYPTED_FIELD_INVENTORY.md`; l’estensione ai campi successivi e l’inventario reale restano aperti;
+- [x] verificare il helper di pulizia della sessione; integrazione dei logout, blocco e conformità della persistenza restano aperti nell’audit Vault;
 - [x] vietare il ritorno della variabile interna ambigua `_masterKey` tramite audit.
 
 **Uscita:** nessuna ambiguità fra password e chiavi; nessuna migrazione dati in questa fase.
@@ -165,7 +168,7 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 - [x] rendere selettiva la sincronizzazione per pagina tramite le priorità di `offline-sync.js`;
 - [x] definire conflitti prima di abilitare scritture offline in `OFFLINE_WRITE_CONFLICT_POLICY.md`.
 
-M2 completata: i moduli applicativi usano il repository unico; richieste equivalenti sono coordinate senza introdurre una seconda cache permanente. Le scritture offline restano disabilitate fino all'implementazione dei gate M6.
+M2 completata: i moduli applicativi usano il repository unico; richieste equivalenti sono coordinate senza introdurre una seconda cache permanente. Questa chiusura riguarda M2; il cutover successivo e limitato delle scritture è descritto in M6.
 
 **Uscita:** le pagine non conoscono più i dettagli della cache o della rete.
 
@@ -214,39 +217,37 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 ### M6 — Sincronizzazione e scritture offline
 
-- [ ] modello versione/revisione del record;
-- [ ] coda locale cifrata e idempotente;
-- [ ] risoluzione conflitti comprensibile;
-- [ ] gestione multi-tab e multi-dispositivo;
-- [ ] test modalità aereo, chiusura forzata e ritorno online.
+- [x] modello di revisione, coda cifrata, idempotenza e conflitti per il perimetro privato isolato;
+- [x] prove del cutover registrate nel contratto M6;
+- [ ] consultazione bancaria offline iPhone e matrice completa;
+- [ ] fallback quando Web Locks non è disponibile e collaudi aggiuntivi dei dispositivi supportati.
 
-**Uscita:** nessuna perdita o sovrascrittura silenziosa.
+**Uscita:** nessuna perdita o sovrascrittura silenziosa nel perimetro collaudato; estensione ad altri domini separata.
 
 ### M7 — Cronologia, cestino e audit
 
-- [x] cestino con conservazione definita;
-- [~] ripristino e cancellazione definitiva implementati; manca il collaudo su copia non produttiva e la distribuzione della callable;
-- [x] cronologia limitata ai cambiamenti necessari;
-- [x] audit delle azioni condivise senza registrare segreti.
+- [x] archivio e purge manuale implementati; distribuzione e collaudo storico del 09/09 registrati in M7;
+- [x] audit tecnico e controlli di revisione/idempotenza nel perimetro implementato;
+- [ ] politica di retention complessiva approvata e verificata su dati, allegati e backup.
 
-**Uscita:** gli errori dell'utente e della sincronizzazione sono recuperabili.
+**Uscita:** recupero e cancellazione verificabili; il collaudo storico non chiude la decisione sulla retention.
 
 ### M8 — Backup e recupero
 
-- [ ] formato di esportazione cifrato e versionato;
-- [ ] verifica automatica dell'integrità del backup;
-- [ ] procedura reale di ripristino;
-- [ ] progetto Recovery Key;
-- [ ] valutazione separata Emergency Access.
+- [x] formato v2 cifrato, Recovery Key distinta, integrità e anteprima implementati;
+- [x] distribuzione e prova di recupero riuscita su account di prova registrate il 09/09 in M8;
+- [ ] gestione completa delle interruzioni fra blocchi e allegati;
+- [ ] rispondenza al requisito di staging e ripresa/rollback su copia non produttiva;
+- [ ] limiti di memoria e matrice fisica completa.
 
-**Uscita:** il recupero è provato, non soltanto dichiarato.
+**Uscita:** recupero dimostrato anche in errore. Emergency Access resta separato e non attivato.
 
 ### M9 — Salute credenziali e integrazioni
 
-- [x] controllo locale di password deboli, duplicate e datate dimostrato nel laboratorio;
-- [~] protocollo k-anonimo modellato senza rete; provider e privacy restano da verificare prima dell'attivazione;
-- [x] estensione browser/autofill separata dalla PWA e subordinata a protezione phishing e audit dedicato;
-- [x] passkey dei servizi definita come tipo di dato distinto dalla passkey di sblocco Vault.
+- [x] analisi locale e UI su richiesta implementate, con collaudo iPhone registrato il 10/09;
+- [ ] collaudo Windows;
+- [ ] provider violazioni, privacy e consenso prima di qualsiasi attivazione di rete;
+- [x] passkey di servizio e autofill esterno distinti dallo sblocco Vault e dalla PWA.
 
 **Uscita:** nessuna integrazione riduce la sicurezza o appesantisce il bootstrap.
 
@@ -299,11 +300,11 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M3 | completata il 06/09/2026 |
 | M4 | completata l'08/09/2026; matrice estesa di regressione trasferita a M10 |
 | M5 | laboratorio e architettura completati; attivazione reale subordinata a collaudo fisico, M6, M8 e approvazione |
-| M6 | attiva: modello revisioni, coda cifrata e conflitti dimostrati in laboratorio |
-| M7 | attiva: cestino e purge backend integrati localmente; manca collaudo non produttivo e distribuzione |
-| M8 | attiva: esportazione e ripristino cifrati completi nel runtime locale, compresi lettore in due passaggi, allegati e callable transazionale; mancano distribuzione e collaudo non produttivo |
-| M9 | attiva: laboratorio e UI locale su richiesta completati; provider violazioni resta disattivato in attesa di valutazione privacy e manca il collaudo fisico |
+| M6 | cutover privato isolato attivo; consultazione bancaria iPhone e matrice completa aperte |
+| M7 | funzioni e collaudo storico registrati; retention complessiva non approvata |
+| M8 | runtime e collaudo riuscito registrati; interruzioni, staging e recupero complessivo non certificati |
+| M9 | analisi locale attiva e iPhone collaudato; Windows e provider di rete aperti |
 | M10 | attiva: gate statici e procedura incidenti presenti; restano verifiche reali, matrice fisica e audit indipendente |
 | Post-M10 | revisione lingue, riordino della pagina Impostazioni e collaudo completo dei campi protetti dal lucchetto |
 
-Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` resta il contratto tecnico e di sicurezza; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.
+Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` è la guida implementativa subordinata alla baseline sicurezza e ai contratti specialistici; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.

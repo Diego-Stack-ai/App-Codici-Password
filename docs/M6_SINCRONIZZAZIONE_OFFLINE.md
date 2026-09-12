@@ -1,8 +1,13 @@
 # M6 — Sincronizzazione e scritture offline
 
-> **Stato:** scritture private isolate collaudate; consultazione offline completa non certificata  
-> **Autorità:** contratto specialistico e registro prove, subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** cutover privato isolato attivo; consultazione offline completa non certificata.
+> **Autorità:** contratto specialistico e registro prove; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** coda, conflitti e consultazione offline.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+Le tappe di adozione e le checkbox registrano la sequenza storica; lo stato corrente è il perimetro del primo cutover descritto in fondo. La flag disattivata del client generico non disattiva l'adattatore privato, che passa esplicitamente `enabled: true`. Il codice della coda richiede Web Locks: se l'API manca restituisce `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`; il fallback previsto dal contratto resta da realizzare e collaudare. Queste precisazioni non estendono i domini abilitati e non chiudono il gate bancario.
 
 > **Esito vincolante:** il test iPhone del 10/09/2026 con Account bancario non ha superato la consultazione offline. Nessun altro esito “verde” può essere interpretato come certificazione dell’offline completo finché quel flusso e la matrice prevista non sono superati.
 

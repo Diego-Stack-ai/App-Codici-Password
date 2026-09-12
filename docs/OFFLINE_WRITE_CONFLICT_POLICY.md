@@ -1,6 +1,13 @@
-# Politica conflitti per le future scritture offline
+# Politica dei conflitti e delle scritture offline
 
-Contratto definito in M2. Non abilita scritture offline: stabilisce le condizioni che M6 dovrà rispettare prima di introdurle.
+> **Stato:** requisiti attivi, adozione per dominio secondo M6.
+> **Autorità:** contratto specialistico; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** revisioni e mutazioni offline.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+Contratto introdotto in M2 e applicato progressivamente da M6. Alla v1.2.110 il cutover riguarda Account e memorandum privati isolati; i gate di M6 restano vincolanti per gli altri domini. Questo documento non autorizza nuove attivazioni né certifica la consultazione offline completa.
 
 ## Regole obbligatorie
 

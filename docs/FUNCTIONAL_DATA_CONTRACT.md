@@ -1,5 +1,14 @@
 # Contratto funzionale e dati — baseline M0
 
+> **Stato:** baseline M0 con integrazioni successive.
+> **Autorità:** contratto funzionale subordinato alla baseline sicurezza; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** domini funzionali e compatibilità.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+> **Aggiornamento di lettura:** baseline M0 v1.2.49 con integrazioni funzionali successive. Le tabelle storiche non certificano l’offline corrente. Alla v1.2.110 valgono il cutover privato isolato M6, i profili a linguette e il ricevitore pubblico del contatto; stato e limiti sono descritti nei contratti M6 e Profilo/Account/Widget. Nessuna migrazione generale dei campi è implicita.
+
 > Fotografia dell'app alla versione 1.2.49. Questo documento descrive il comportamento da preservare; non dichiara ideale l'accesso diretto a Firebase presente in alcune pagine.
 
 ## Regole trasversali
@@ -75,7 +84,7 @@ I nominativi digitati nelle Scadenze restano suggerimenti storici nelle configur
 | Ricerca locale sui dati sincronizzati | sì |
 | Scaricare un allegato mai aperto | no |
 | Inviare email/Push, risolvere destinatari o accettare inviti | no; ripresa con rete |
-| Scrivere/modificare record | non ancora garantito finché M6 non definisce coda e conflitti |
+| Scrivere/modificare record | solo per i domini adottati da M6; non è una garanzia generale per tutti i record |
 
 ## Gate per le rifattorizzazioni
 

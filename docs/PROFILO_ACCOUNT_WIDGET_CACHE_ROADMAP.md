@@ -1,8 +1,27 @@
 # Profilo, Account, Widget e Cache — roadmap di coerenza dati
 
-> **Stato:** roadmap in evoluzione; contiene blocchi implementati e gate ancora aperti  
-> **Autorità:** roadmap specialistica subordinata ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** blocchi implementati; inventario e gate reali ancora aperti.
+> **Autorità:** roadmap specialistica; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** profili, collegamenti e widget.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+## Stato corrente verificato — 12/09/2026
+
+La fotografia del 10/09 e i blocchi successivi sono cronologia: le descrizioni “non esiste” o “non conosce” valgono per quella tappa, non per il runtime 1.2.110.
+
+| Area | Stato attuale e limite |
+|---|---|
+| Read-your-writes | `afterWrite` e sorgenti server esplicite implementati; le letture ordinarie restano cache-first |
+| Allegati aziendali | Contesto proprietario e sola lettura corretti; nessuna estensione implicita dei permessi |
+| Widget e Credenziali comuni | Runtime, scope backup e servizi backend presenti; i vecchi paragrafi di predisposizione non sono lo stato attuale |
+| Profili privato/azienda | Linguette e composizioni condivise, con dati specifici del dominio |
+| Collegamenti | Selezione/creazione Account, riuso, cambio e scollegamento disponibili nei flussi implementati |
+| Tessera digitale | Ricevitore pubblico con foto e riepilogo dei dati selezionati; segreti esclusi |
+| Dati legacy | Nessuna cancellazione globale autorizzata; inventario e verifica dei trasferimenti restano distinti dalla UI |
+
+Il codice corrente è il riferimento per la disponibilità dei comandi, non una prova di migrazione di tutti i dati. I collaudi fisici e i gate non registrati restano aperti.
 
 > Le diciture “implementato”, “testato” e “attivo” devono essere lette nel perimetro indicato. Non equivalgono a verifica dei dati reali o della configurazione Firebase pubblicata. Per ogni widget, il percorso diretto/Function segue la matrice della baseline: singolo record con Rules complete può essere diretto; collegamenti multi-documento e credenziali comuni richiedono Function.
 
@@ -214,7 +233,7 @@ I widget Account non vengono incorporati nel documento Account. Usano collezioni
 
 Le collezioni separate evitano di avvicinarsi al limite Firestore del singolo Account, impediscono che il riordino riscriva l'intero Account e riducono i conflitti con le credenziali standard. Sono state preferite alle sottocollezioni annidate perché l'attuale Rule generica su `accounts` e `aziende` renderebbe impossibile applicare una validazione più stretta ai soli widget senza un refactor rischioso delle regole esistenti.
 
-Ogni documento nella sottocollezione `widgets` ha un solo contratto e un discriminante:
+Ogni documento nella collezione proprietaria `accountWidgets` ha un solo contratto e un discriminante:
 
 - `kind: embedded`: contiene `fields[]` ed è proprietà dell'Account;
 - `kind: shared-reference`: contiene `sharedDataId` e metadati di presentazione/ordine, ma nessuna copia dei valori centrali.

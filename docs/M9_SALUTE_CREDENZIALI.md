@@ -1,8 +1,11 @@
 # M9 — Salute credenziali e integrazioni
 
-> **Stato:** analisi locale/laboratorio; integrazione di rete disattivata finché non approvata  
-> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e [Contratto Vault Key](./VAULT_KEY_CONTRACT.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** analisi locale implementata e iPhone collaudato; Windows aperto, rete disattivata.
+> **Autorità:** contratto specialistico e registro prove; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** salute credenziali.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
 ## Confine di sicurezza
 

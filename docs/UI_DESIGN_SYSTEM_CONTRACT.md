@@ -1,8 +1,11 @@
 # Contratto UI e design system
 
-> **Stato:** attivo per fondazioni e componenti condivisi  
-> **Autorità:** contratto UI subordinato a [Guida progetto](./GUIDA_PROGETTO.md)  
-> **Ultima revisione documentale:** 11 settembre 2026
+> **Stato:** fondazioni e componenti attivi; verifiche fisiche separate.
+> **Autorità:** contratto UI specialistico; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** design system e composizioni.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
 Questo documento definisce i vincoli tecnici della fase M4. Non sostituisce la revisione completa di lingue e organizzazione delle Impostazioni prevista dopo M10.
 
@@ -23,14 +26,14 @@ La struttura di viewport, fondale, contenitori, area scorrevole, fasce e spaziat
 - Token tipografici: `assets/css/core_fonts.css`.
 - Header e footer: `assets/css/core_fascie.css` e `components-v129.js`.
 - Controlli, modali e stati condivisi: `assets/css/core_ui.css`.
-- Campi dei form: `assets/css/moduli.css`; composizione comune dei form Account Privato/Azienda: `assets/css/account_form.css`; fondazioni comuni dei dettagli Account Privato/Azienda: `assets/css/account_detail.css`; primitive comuni di Dati azienda e Modifica azienda: `assets/css/azienda_shared.css`.
+- Campi dei form: `assets/css/moduli.css`; composizione comune dei form Account Privato/Azienda: `assets/css/account_form.css`; fondazioni comuni dei dettagli Account Privato/Azienda: `assets/css/account_detail.css`; primitive comuni di Dati azienda e Modifica azienda: `assets/css/azienda_shared.css`; linguette e composizioni dei profili privato/azienda: `assets/css/profile-layout.css`.
 - Card e righe Account: `modules/shared/account-list-view.js`.
 - Campi sensibili: `modules/shared/card-secret.js`.
 - Stati di pagina: `modules/shared/ui-state-view.js`.
 
 ## Famiglie della superficie UI
 
-Le due famiglie definite dal contratto strutturale restano il livello esterno:
+Le due famiglie principali definite dal contratto strutturale restano il livello esterno; il ricevitore pubblico `contatto_condiviso.html` è un’eccezione dedicata, documentata nel contratto shell:
 
 - **Accesso**: `index.html` come ingresso tecnico e le quattro pagine di autenticazione;
 - **Operativa**: le 24 pagine dotate di header, area centrale scorrevole e footer condivisi.

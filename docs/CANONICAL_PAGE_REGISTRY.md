@@ -1,12 +1,19 @@
 # Registro delle pagine canoniche
 
+> **Stato:** attivo, 30 pagine canoniche.
+> **Autorità:** contratto specialistico; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** pagine e compatibilità.
+> **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
 Contratto M3 per distinguere le funzioni reali dai percorsi storici di compatibilità.
 
 ## Regola
 
 - Ogni funzione visibile possiede una sola pagina HTML e un solo modulo inizializzatore canonici.
 - Nuove pagine con suffissi di versione sono vietate. Le evoluzioni modificano la pagina canonica e sono protette da Git e test.
-- Laboratori e redirect storici non appartengono alla superficie pubblica e restano conservati soltanto nell'archivio del repository.
+- Redirect storici e laboratori archiviati non appartengono al runtime; `prova.html` è la sola eccezione temporanea pubblicata qui documentata e resta esclusa dalle pagine canoniche.
 
 ## Compatibilità Home
 
@@ -24,12 +31,14 @@ Questi file non vengono pubblicati, memorizzati offline o inclusi negli audit de
 
 ## Laboratorio viewport temporaneo
 
-`prova.html` e `prova.css` costituiscono un banco di prova isolato, raggiungibile durante il collaudo su dispositivi reali. La pagina mostra soltanto fondale, viewport dinamico e una card neutra: non rappresenta una funzione dell'app e non appartiene alle 29 pagine canoniche.
+`prova.html` e `prova.css` costituiscono un banco di prova isolato, raggiungibile durante il collaudo su dispositivi reali. La pagina mostra soltanto fondale, viewport dinamico e una card neutra: non rappresenta una funzione dell'app e non appartiene alle 30 pagine canoniche.
 
 Il laboratorio è escluso dagli audit che certificano la superficie applicativa. Quando il contratto del viewport sarà validato sulle pagine reali, dovrà essere archiviato o rimosso dalla pubblicazione senza creare alias o suffissi di versione.
 
 ## Domini canonici
 
+- ingresso tecnico: `index.html`;
+- ricevitore pubblico contatto: `contatto_condiviso.html` → `assets/js/contact-card-receiver.js`;
 - autenticazione: `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`;
 - Home: `home_page.html`;
 - Privato: `area_privata.html`, `account_privati.html`, `form_account_privato.html`, `dettaglio_account_privato.html`, `profilo_privato.html`;
