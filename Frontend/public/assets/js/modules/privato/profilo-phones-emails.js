@@ -248,7 +248,7 @@ export function renderEmailsView() {
                 className: 'btn-upload-trigger',
                 textContent: e.linkedAccountId
                     ? 'Apri Account collegato'
-                    : (hasLegacyEmailPassword(e) ? 'Crea Account e trasferisci' : 'Collega un Account'),
+                    : 'Collega o crea Account',
                 onclick: () => e.linkedAccountId
                     ? _callbacks.openLinkedAccount(e.linkedAccountId)
                     : _callbacks.connectEmailAccount(e, _callbacks.syncData)

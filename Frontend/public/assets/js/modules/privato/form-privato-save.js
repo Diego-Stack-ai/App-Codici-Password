@@ -356,7 +356,7 @@ export async function savePrivateAccount({
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
 
-            if (!isEditing && profileEmailLinkDraft?.profileEmailId) {
+            if (profileEmailLinkDraft?.profileEmailId) {
                 const emails = profileUserSnap?.data()?.contactEmails || [];
                 transaction.update(profileUserRef, {
                     contactEmails: emails.map(email => email.id === profileEmailLinkDraft.profileEmailId

@@ -227,14 +227,23 @@ function fieldCard(field) {
 
 function renderWidgets() {
     document.querySelectorAll('.profile-widget-zone').forEach(zone => zone.remove());
+    const activeTab = document.querySelector('[data-profile-tab-target].is-active')?.dataset.profileTabTarget || 'overview';
     PROFILE_TABS.filter(tab => !['overview', 'digital-card'].includes(tab)).forEach(tab => {
         const panels = [...document.querySelectorAll(`[data-profile-tab="${tab}"]`)];
         const anchor = panels.at(-1);
         if (!anchor) return;
-        const zone = createElement('section', { className: 'profile-widget-zone', dataset: { profileTab: tab, widgetZone: tab } }, [
+        const zone = createElement('section', {
+            className: `profile-widget-zone${tab === activeTab ? '' : ' hidden'}`,
+            dataset: { profileTab: tab, widgetZone: tab }
+        }, [
             createElement('div', { className: 'profile-widget-zone-heading' }, [
                 createElement('h3', { className: 'form-section-title', textContent: 'Widget personalizzati' }),
-                createElement('button', { className: 'btn-upload-trigger', textContent: 'Aggiungi widget', onclick: () => addWidget(tab) })
+                createElement('button', {
+                    className: 'btn-icon-header',
+                    title: 'Aggiungi widget',
+                    'aria-label': 'Aggiungi widget',
+                    onclick: () => addWidget(tab)
+                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })])
             ]),
             createElement('div', { className: 'profile-widget-grid' }, widgets.filter(widget => widget.tab === tab).map(widget => createElement('article', {
                 className: `form-card profile-widget profile-widget-${widget.size || 'medium'}`,

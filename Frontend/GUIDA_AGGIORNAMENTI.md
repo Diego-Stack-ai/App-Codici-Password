@@ -500,3 +500,10 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - [ ] completare il riallineamento dei contratti specialistici;
 - [ ] eseguire [il piano di audit completo](../docs/PIANO_AUDIT_COMPLETO_PROGETTO.md) su codice, Rules, Functions, Storage, crittografia, offline e configurazione Firebase;
 - [ ] aggiornare la documentazione con gli esiti reali senza confondere test locali e produzione.
+
+# Collegamento email e comando widget Profilo — 12/09/2026
+
+- Un’email del Profilo può scegliere dal medesimo menu se collegare un Account privato esistente oppure crearne uno nuovo, anche quando conserva una password legacy.
+- Per una password legacy il collegamento a un Account esistente apre prima la modifica dell’Account: il dato nel Profilo viene rimosso soltanto insieme al salvataggio riuscito, senza copiarlo in `sessionStorage`.
+- Le zone Widget caricate in background rispettano subito la linguetta attiva; non compaiono più comandi appartenenti alle altre linguette.
+- Ogni linguetta mostra un solo pulsante `+` per creare Widget. Il numero dei Widget non è limitato; resta soltanto il limite di sicurezza di 30 campi per singolo Widget.

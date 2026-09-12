@@ -50,7 +50,7 @@
     "test:storage-rules": "node scripts/run-storage-rules-tests.mjs",
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",
     "test:assistant": "node scripts/test-vault-assistant.mjs && node --test experiments/card-importer/card-parser.test.mjs",
-    "test:profile": "node --test tests/profile-model.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs",
+    "test:profile": "node --test tests/profile-model.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs",
     "test:maturity-fixture": "node --test tests/maturity-dataset.test.mjs",
     "test:css": "node node_modules/stylelint/bin/stylelint.mjs \"Frontend/public/assets/css/**/*.css\"",
     "test:dependencies": "node node_modules/madge/bin/cli.js Frontend/public/assets/js --extensions js --circular",

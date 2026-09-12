@@ -19,19 +19,6 @@ export function openLinkedAccount(accountId) {
 export async function connectEmailAccount(email, syncData) {
     const user = auth.currentUser;
     if (!user || !email?.id) return;
-    if (hasLegacyEmailPassword(email)) {
-        const create = await showConfirmModal(
-            'Crea Account per questa email',
-            'Prima mostra o copia la password legacy dalla scheda Email. Nella pagina successiva inseriscila nel nuovo Account: verrà rimossa dal Profilo soltanto dopo il salvataggio riuscito.',
-            'Apri creazione Account',
-            'Annulla'
-        );
-        if (!create) return;
-        await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
-        window.location.href = `form_account_privato.html?profileEmailId=${encodeURIComponent(email.id)}`;
-        return;
-    }
     const accountRecords = await listPrivateAccounts(user.uid);
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
     const accounts = await Promise.all(accountRecords.map(async data => {
@@ -48,11 +35,25 @@ export async function connectEmailAccount(email, syncData) {
         return;
     }
     const labels = accounts.map(account => `${account.name}${account.username ? ` — ${account.username}` : ''} · ${account.id.slice(0, 6)}`);
-    showProfileModal('Collega Account email', [
-        { key: 'account', label: 'Account', type: 'select', options: labels, icon: 'link' }
-    ], { account: labels[0] }, async values => {
+    const createLabel = '＋ Crea un nuovo Account';
+    const options = [createLabel, ...labels];
+    showProfileModal('Collega o crea Account email', [
+        { key: 'account', label: 'Account', type: 'select', options, icon: 'link' }
+    ], { account: hasLegacyEmailPassword(email) ? createLabel : labels[0] }, async values => {
+        if (values.account === createLabel) {
+            await syncData();
+            sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
+            window.location.href = `form_account_privato.html?profileEmailId=${encodeURIComponent(email.id)}`;
+            return;
+        }
         const selected = accounts[labels.indexOf(values.account)];
         if (!selected) return;
+        if (hasLegacyEmailPassword(email)) {
+            await syncData();
+            sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
+            window.location.href = `form_account_privato.html?id=${encodeURIComponent(selected.id)}&profileEmailId=${encodeURIComponent(email.id)}`;
+            return;
+        }
         await updateDoc(doc(db, 'users', user.uid, 'accounts', selected.id), {
             linkedProfileField: { type: 'email', id: email.id }
         });

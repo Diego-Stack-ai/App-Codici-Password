@@ -162,7 +162,7 @@ export async function initFormAccountPrivato(user) {
         link.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
     });
     const profileEmailId = params.get('profileEmailId');
-    if (!isEditing && profileEmailId) {
+    if (profileEmailId) {
         try {
             const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
             if (draft?.profileEmailId === profileEmailId) profileEmailLinkDraft = draft;

@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/privato/profile-model.js', import.meta.url), 'utf8');
+const linkSource = await readFile(new URL('../Frontend/public/assets/js/modules/privato/profilo-links.js', import.meta.url), 'utf8');
+const formSource = await readFile(new URL('../Frontend/public/assets/js/modules/privato/form_account_privato.js', import.meta.url), 'utf8');
+const saveSource = await readFile(new URL('../Frontend/public/assets/js/modules/privato/form-privato-save.js', import.meta.url), 'utf8');
 const {
     buildProfileAccountLinkDraft,
     hasLegacyEmailPassword,
@@ -33,4 +36,15 @@ test('la password legacy viene rimossa solo quando il collegamento Account è pr
     assert.equal(source.password, 'ciphertext');
     assert.equal(linked.password, '');
     assert.equal(linked.linkedAccountId, 'account-1');
+});
+
+test('una email legacy può scegliere un Account esistente oppure crearne uno nuovo', () => {
+    assert.match(linkSource, /const options = \[createLabel, \.\.\.labels\]/);
+    assert.match(linkSource, /form_account_privato\.html\?id=\$\{encodeURIComponent\(selected\.id\)\}&profileEmailId=/);
+    assert.match(linkSource, /form_account_privato\.html\?profileEmailId=/);
+});
+
+test('il collegamento a un Account esistente completa il trasferimento solo al salvataggio', () => {
+    assert.match(formSource, /if \(profileEmailId\)[\s\S]+profile-account-link-draft/);
+    assert.match(saveSource, /if \(profileEmailLinkDraft\?\.profileEmailId\)[\s\S]+linkProfileEmailToAccount\(email, targetId\)/);
 });
