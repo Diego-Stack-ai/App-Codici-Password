@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.99';
+import { auth, db } from '../../firebase-config.js?v=1.2.100';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -8,7 +8,8 @@ import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
-import { linkProfileEmailToAccount } from './profile-model.js';
+import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from './profile-model.js';
+import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -18,7 +19,7 @@ export async function savePrivateAccount({
     currentDocId,
     isEditing,
     baseRevision = 0,
-    profileEmailLinkDraft,
+    profileContactLinkDraft,
     hasLinkedProfileField = false
 }) {
     const get = id => document.getElementById(id)?.value.trim() || '';
@@ -72,9 +73,9 @@ export async function savePrivateAccount({
 
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro
-        username: await encrypt((get('account-username') || '').trim(), vaultKeyMaterial),
-        account: await encrypt((get('account-code') || '').trim(), vaultKeyMaterial),
-        password: await encrypt((get('account-password') || '').trim(), vaultKeyMaterial),
+        username: await encrypt(credentialValues.username, vaultKeyMaterial),
+        account: await encrypt(credentialValues.account, vaultKeyMaterial),
+        password: await encrypt(credentialValues.password, vaultKeyMaterial),
         url: (get('account-url') || '').trim(), // In chiaro
         note: await encrypt((get('account-note') || '').trim(), vaultKeyMaterial),
         logo: logoSrc || null,
@@ -101,8 +102,8 @@ export async function savePrivateAccount({
         updatedAt: new Date().toISOString(),
         _encrypted: true // Flag per indicare che i dati sono cifrati (V6.0)
     };
-    if (profileEmailLinkDraft?.profileEmailId) {
-        data.linkedProfileField = { type: 'email', id: profileEmailLinkDraft.profileEmailId };
+    if (profileContactLinkDraft?.profileContactId) {
+        data.linkedProfileField = { type: profileContactLinkDraft.contactType, id: profileContactLinkDraft.profileContactId };
     }
 
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); if (btnSave) btnSave.disabled = false; return; }
@@ -112,7 +113,7 @@ export async function savePrivateAccount({
         type: data.type,
         visibility: data.visibility,
         isBanking: data.isBanking,
-        hasProfileLink: Boolean(profileEmailLinkDraft || hasLinkedProfileField)
+        hasProfileLink: Boolean(profileContactLinkDraft || hasLinkedProfileField)
     });
 
     if (!navigator.onLine && !offlinePolicy.eligible) {
@@ -214,15 +215,33 @@ export async function savePrivateAccount({
         }
 
         // --- ATOMIC TRANSACTION V3.1 ---
+        let retainedProfilePassword = false;
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
             const targetId = accRef.id;
 
             // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
-            const profileUserRef = profileEmailLinkDraft?.profileEmailId ? doc(db, 'users', currentUid) : null;
+            const profileUserRef = profileContactLinkDraft?.profileContactId ? doc(db, 'users', currentUid) : null;
             const profileUserSnap = profileUserRef ? await transaction.get(profileUserRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
+            let linkedContact = null;
+            const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
+            if (profileContactLinkDraft?.profileContactId) {
+                if (profileContactLinkDraft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || !['email', 'phone'].includes(profileContactLinkDraft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
+                const email = profileUserSnap?.data()?.[contactCollection]?.find(item => item.id === profileContactLinkDraft.profileContactId);
+                if (!email) throw new Error('Contatto del Profilo non più disponibile.');
+                if (email.linkedAccountId && email.linkedAccountId !== targetId) throw new Error('Email già collegata a un altro Account.');
+                if (oldData?.linkedProfileField && (oldData.linkedProfileField.id !== email.id || oldData.linkedProfileField.type !== profileContactLinkDraft.contactType)) throw new Error('Account già collegato a un altro campo del Profilo.');
+                if (isEditing && Number(oldData?.revision || 0) !== Number(baseRevision)) throw new Error('Account modificato su un altro dispositivo. Ricarica prima di collegare.');
+                if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account privato attivo per collegare il contatto.');
+                const legacyPassword = contactCollection === 'contactEmails' ? await decodeProfileContactValue(email.password, vaultKeyMaterial) : '';
+                const passwordTransferred = isProfileEmailPasswordTransferred(legacyPassword, credentialValues.password);
+                retainedProfilePassword = Boolean(legacyPassword) && !passwordTransferred;
+                linkedContact = contactCollection === 'contactEmails'
+                    ? linkProfileEmailToAccount(email, targetId, { passwordTransferred })
+                    : { ...email, linkedAccountId: targetId };
+            }
             let currentSharedWith = oldData?.sharedWith || {};
 
             // 2. NOW EXECUTE ALL WRITES
@@ -356,19 +375,21 @@ export async function savePrivateAccount({
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
 
-            if (profileEmailLinkDraft?.profileEmailId) {
-                const emails = profileUserSnap?.data()?.contactEmails || [];
+            if (profileContactLinkDraft?.profileContactId) {
+                const contacts = profileUserSnap?.data()?.[contactCollection] || [];
                 transaction.update(profileUserRef, {
-                    contactEmails: emails.map(email => email.id === profileEmailLinkDraft.profileEmailId
-                        ? linkProfileEmailToAccount(email, targetId)
+                    [contactCollection]: contacts.map(email => email.id === profileContactLinkDraft.profileContactId
+                        ? linkedContact
                         : email)
                 });
             }
         });
 
-        if (profileEmailLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
+        if (profileContactLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
 
-        showToast(t('success_save'), "success");
+        showToast(retainedProfilePassword
+            ? 'Account collegato. La password diversa è stata conservata nel Profilo.'
+            : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
             const destination = isEditing
                 ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`

@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.99';
+import { db } from '../../firebase-config.js?v=1.2.100';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -146,13 +146,13 @@ async function loadAccount() {
         const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.99').then(({initAccountSharedCredentials}) =>
+        import('../shared/account-shared-credentials.js?v=1.2.100').then(({initAccountSharedCredentials}) =>
             initAccountSharedCredentials({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly
             })
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.99').then(({initAccountEmbeddedWidgets}) =>
+        import('../shared/account-embedded-widgets.js?v=1.2.100').then(({initAccountEmbeddedWidgets}) =>
             initAccountEmbeddedWidgets({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly

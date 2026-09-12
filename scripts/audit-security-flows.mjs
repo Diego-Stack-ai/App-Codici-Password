@@ -169,10 +169,10 @@ assert.match(settingsHtml, /non la Master Password della Vault/, 'Il cambio pass
 assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2FA non è visibile');
 assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma cambio password ambigua');
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
-assert.match(profileLinks, /hasLegacyEmailPassword\(email\)[\s\S]+buildProfileAccountLinkDraft\(email\)/,
-    'La password email legacy non dispone di un passaggio esplicito alla creazione Account');
-assert.match(privateAccountSave, /linkProfileEmailToAccount\(email, targetId\)/,
-    'La password email legacy non viene rimossa nella transazione che salva il nuovo Account');
+assert.match(profileLinks, /buildProfileAccountLinkDraft\(email, contactType\)[\s\S]+profileContactId=/,
+    'Il contatto non dispone del passaggio esplicito al form Account');
+assert.match(privateAccountSave, /isProfileEmailPasswordTransferred\(legacyPassword, credentialValues.password\)[\s\S]+linkProfileEmailToAccount\(email, targetId, \{ passwordTransferred \}\)/,
+    'La rimozione della password legacy deve dipendere dalla verifica del trasferimento nella transazione Account');
 assert.doesNotMatch(profileModel.match(/buildProfileAccountLinkDraft[\s\S]+?\n\}/)?.[0] || '', /password/,
     'Il draft Profilo/Account non deve trasferire la password legacy in sessionStorage');
 assert.match(firebaseConfig, /firebaseapp\.com[\s\S]*?location\.replace[\s\S]*?CANONICAL_HOST/, 'Il dominio Firebase alternativo non viene ricondotto all origin canonico');

@@ -319,3 +319,13 @@ export async function decryptIfPossible(val, vaultKeyMaterial, fallback = '') {
         return val;
     }
 }
+
+// Per i flussi che salvano o trasferiscono dati: un errore non diventa un valore salvabile.
+export async function decryptRequiredValue(value, vaultKeyMaterial) {
+    if (!vaultKeyMaterial) throw new Error('Sblocca il Vault per leggere i dati.');
+    const decoded = await decryptIfPossible(value, vaultKeyMaterial);
+    if (decoded === '--ERRORE--' || (isEncryptedValue(value) && decoded === value)) {
+        throw new Error('Dato non leggibile: salvataggio interrotto per conservarlo.');
+    }
+    return decoded;
+}
