@@ -44,3 +44,5 @@ Verifica sperimentale 12/09/2026, base `ff006c71`: introdotto AbortSignal per il
 Preparazione delle liste 12/09/2026, base `0a807adb`: rimosse le referenze ai record e il contenuto visibile allo smontaggio; invalidata la prosecuzione delle decifrature dopo uscita. Campi, formati e persistenza invariati. [Audit §17](./AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).
 
 Verifica sperimentale 12/09/2026, base `d906fd50`: letture v2 sintetiche collegate al ciclo delle viste e invalidate al cambio identità. Nessun campo o formato persistito modificato; nessun record reale letto o migrato. [Audit §19](./AUDIT_VAULT_SESSION_P0.md#19-coordinamento-identità-vault-e-viste--12092026).
+
+Riscontro emulato 12/09/2026, base `0e07621d`: il lettore candidato rifiuta password non cifrate e ownerId incoerente, che le Rules attuali consentono al proprietario di salvare. Non è stato censito o corretto alcun dato reale. Nessun campo o formato modificato. [Audit §20](./AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).

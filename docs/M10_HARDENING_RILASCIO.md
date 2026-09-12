@@ -46,3 +46,7 @@ Prima di implementare tale evoluzione è stato aggiunto il blocco di coerenza Pr
 6. piano di rollback identificato prima del deploy produzione;
 7. monitoraggio errori tecnici senza contenuti del Vault;
 8. chiusura o rollback immediato se autenticazione, cifratura, sync o recupero regrediscono.
+
+## Gate aggiuntivo Auth/Vault — 12/09/2026
+
+`npm run test:vault-emulators` verifica il collegamento SDK Authentication/Firestore e lettore v2 su progetto demo locale, con una copia identica delle Rules correnti. Undici test superati. Integrato nella suite completa; non modifica il canale pubblicato né dimostra enforcement remoto, MFA/PRF, App Check o recupero completo. [Audit §20](./AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).

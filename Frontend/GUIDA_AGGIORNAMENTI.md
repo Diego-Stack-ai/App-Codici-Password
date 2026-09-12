@@ -571,3 +571,7 @@ Su base `4c1d90b5`, montati i due orchestratori reali con repository sintetico e
 ### Coordinatore della sessione — 12/09/2026
 
 Collegati identità, Vault e viste nel laboratorio: blocco/logout/cambio UID invalidano i consumatori, logout pendente impedisce nuovi sblocchi. Tredici nuove prove, inclusa integrazione con il lettore v2 su credenziali sintetiche; identità nel browser ancora fittizia. [Audit §19](../docs/AUDIT_VAULT_SESSION_P0.md#19-coordinamento-identità-vault-e-viste--12092026). Nessun aggiornamento del runtime produttivo o del canale HTTPS in questo blocco.
+
+### Firebase Auth/Firestore in emulatore — 12/09/2026
+
+Collegato il bootstrap candidato agli SDK reali e al lettore v2 su utenti e record sintetici. Undici test emulati superati: separazione login/sblocco, isolamento utenti, letture cifrate, logout e rifiuto di record non conformi. Nuovo gate `npm run test:vault-emulators`, incluso in npm test. Confermato che la validazione degli schemi nelle Rules resta aperta. [Audit §20](../docs/AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).
