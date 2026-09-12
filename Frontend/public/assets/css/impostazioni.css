@@ -810,6 +810,40 @@ h3.settings-desc {
     gap: 10px;
 }
 
+/* Ogni coppia di Account collegati condivide un ponte laterale.
+   Le due metà seguono l'altezza reale delle righe, anche su telefono. */
+.shared-credential-account-list:has(> .linked + .linked) {
+    padding-left: 22px;
+}
+
+.shared-credential-account-list > .linked {
+    position: relative;
+}
+
+.shared-credential-account-list > .linked + .linked::before,
+.shared-credential-account-list > .linked:has(+ .linked)::after {
+    position: absolute;
+    left: -19px;
+    width: 17px;
+    border-left: 2px solid var(--accent-color, #3b82f6);
+    content: '';
+    pointer-events: none;
+}
+
+.shared-credential-account-list > .linked + .linked::before {
+    top: -12px;
+    bottom: 50%;
+    border-bottom: 2px solid var(--accent-color, #3b82f6);
+    border-bottom-left-radius: 8px;
+}
+
+.shared-credential-account-list > .linked:has(+ .linked)::after {
+    top: 50%;
+    bottom: -12px;
+    border-top: 2px solid var(--accent-color, #3b82f6);
+    border-top-left-radius: 8px;
+}
+
 .shared-credentials-link-manager-body {
     display: flex;
     flex-direction: column;
@@ -860,7 +894,9 @@ h3.settings-desc {
 .shared-credential-account-copy {
     display: grid;
     flex: 1;
+    min-width: 0;
     gap: 2px;
+    overflow-wrap: anywhere;
 }
 
 .shared-credentials-card-copy small,
