@@ -4,50 +4,6 @@
 
 File censiti: **432**. Duplicati byte-per-byte: **1 gruppi**.
 
-## experiments
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `experiments/persistent-vault-shell/fixture-repository.mjs` | MJS | 1016 | 21 | File di progetto: fixture-repository. |
-| `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
-| `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
-| `experiments/card-importer/README.md` | MD | 3342 | 70 | Documentazione: README. |
-| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2746 | 49 | Documentazione: REAL IMAGE AUDIT. |
-| `experiments/card-importer/card-parser.mjs` | MJS | 3041 | 81 | File di progetto: card-parser. |
-| `experiments/card-importer/card-parser.test.mjs` | MJS | 1480 | 33 | File di progetto: card-parser.test. |
-| `experiments/card-importer/prototype.css` | CSS | 1529 | 18 | File di progetto: prototype. |
-| `experiments/card-importer/prototype.html` | HTML | 2168 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
-| `experiments/card-importer/prototype.mjs` | MJS | 13822 | 312 | File di progetto: prototype. |
-| `experiments/credential-health/credential-health.mjs` | MJS | 1968 | 46 | File di progetto: credential-health. |
-| `experiments/credential-health/credential-health.test.mjs` | MJS | 1701 | 36 | File di progetto: credential-health.test. |
-| `experiments/history-recovery/firestore.candidate.rules` | RULES | 644 | 20 | File di progetto: firestore.candidate. |
-| `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
-| `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
-| `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
-| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
-| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/persistent-vault-shell/app.mjs` | MJS | 4554 | 89 | File di progetto: app. |
-| `experiments/persistent-vault-shell/build.mjs` | MJS | 2494 | 32 | File di progetto: build. |
-| `experiments/persistent-vault-shell/firebase.preview.json` | JSON | 612 | 15 | File di progetto: firebase.preview. |
-| `experiments/persistent-vault-shell/fixture.mjs` | MJS | 1994 | 32 | File di progetto: fixture. |
-| `experiments/persistent-vault-shell/index.html` | HTML | 1722 | 27 | Struttura della pagina index; comportamento demandato ai moduli. |
-| `experiments/persistent-vault-shell/legacy-adapter.mjs` | MJS | 2860 | 67 | File di progetto: legacy-adapter. |
-| `experiments/persistent-vault-shell/legacy-adapter.test.mjs` | MJS | 6850 | 144 | File di progetto: legacy-adapter.test. |
-| `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 1811 | 50 | File di progetto: memory-vault. |
-| `experiments/persistent-vault-shell/prepare-preview.mjs` | MJS | 2113 | 32 | File di progetto: prepare-preview. |
-| `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4432 | 74 | File di progetto: preview.test. |
-| `experiments/persistent-vault-shell/prototype.test.mjs` | MJS | 7812 | 184 | File di progetto: prototype.test. |
-| `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2253 | 39 | File di progetto: real-lists-entry. |
-| `experiments/persistent-vault-shell/router.mjs` | MJS | 1178 | 33 | File di progetto: router. |
-| `experiments/persistent-vault-shell/serve.mjs` | MJS | 1557 | 21 | File di progetto: serve. |
-| `experiments/persistent-vault-shell/style.css` | CSS | 2731 | 36 | File di progetto: style. |
-| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2077 | 50 | File di progetto: firestore.candidate. |
-| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2662 | 81 | File di progetto: migration-simulator. |
-| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2416 | 54 | File di progetto: migration-simulator.test. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5927 | 139 | File di progetto: record-sharing-crypto. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
-| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
-
 ## .firebaserc
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -343,7 +299,7 @@ File censiti: **432**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21540 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 35191 | 254 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 35772 | 256 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3096 | 51 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 4320 | 62 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 4861 | 45 | Documentazione: ENCRYPTED FIELD INVENTORY. |
@@ -369,6 +325,50 @@ File censiti: **432**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11580 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
 | `docs/VAULT_KEY_CONTRACT.md` | MD | 10018 | 149 | Documentazione: VAULT KEY CONTRACT. |
+
+## experiments
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
+| `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
+| `experiments/card-importer/README.md` | MD | 3342 | 70 | Documentazione: README. |
+| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2746 | 49 | Documentazione: REAL IMAGE AUDIT. |
+| `experiments/card-importer/card-parser.mjs` | MJS | 3041 | 81 | File di progetto: card-parser. |
+| `experiments/card-importer/card-parser.test.mjs` | MJS | 1480 | 33 | File di progetto: card-parser.test. |
+| `experiments/card-importer/prototype.css` | CSS | 1529 | 18 | File di progetto: prototype. |
+| `experiments/card-importer/prototype.html` | HTML | 2168 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
+| `experiments/card-importer/prototype.mjs` | MJS | 13822 | 312 | File di progetto: prototype. |
+| `experiments/credential-health/credential-health.mjs` | MJS | 1968 | 46 | File di progetto: credential-health. |
+| `experiments/credential-health/credential-health.test.mjs` | MJS | 1701 | 36 | File di progetto: credential-health.test. |
+| `experiments/history-recovery/firestore.candidate.rules` | RULES | 644 | 20 | File di progetto: firestore.candidate. |
+| `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
+| `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
+| `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
+| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
+| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
+| `experiments/persistent-vault-shell/app.mjs` | MJS | 4554 | 89 | File di progetto: app. |
+| `experiments/persistent-vault-shell/build.mjs` | MJS | 2494 | 32 | File di progetto: build. |
+| `experiments/persistent-vault-shell/firebase.preview.json` | JSON | 612 | 15 | File di progetto: firebase.preview. |
+| `experiments/persistent-vault-shell/fixture-repository.mjs` | MJS | 1016 | 21 | File di progetto: fixture-repository. |
+| `experiments/persistent-vault-shell/fixture.mjs` | MJS | 1994 | 32 | File di progetto: fixture. |
+| `experiments/persistent-vault-shell/index.html` | HTML | 1722 | 27 | Struttura della pagina index; comportamento demandato ai moduli. |
+| `experiments/persistent-vault-shell/legacy-adapter.mjs` | MJS | 2860 | 67 | File di progetto: legacy-adapter. |
+| `experiments/persistent-vault-shell/legacy-adapter.test.mjs` | MJS | 6850 | 144 | File di progetto: legacy-adapter.test. |
+| `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 1811 | 50 | File di progetto: memory-vault. |
+| `experiments/persistent-vault-shell/prepare-preview.mjs` | MJS | 2113 | 32 | File di progetto: prepare-preview. |
+| `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4432 | 74 | File di progetto: preview.test. |
+| `experiments/persistent-vault-shell/prototype.test.mjs` | MJS | 7812 | 184 | File di progetto: prototype.test. |
+| `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2253 | 39 | File di progetto: real-lists-entry. |
+| `experiments/persistent-vault-shell/router.mjs` | MJS | 1178 | 33 | File di progetto: router. |
+| `experiments/persistent-vault-shell/serve.mjs` | MJS | 1557 | 21 | File di progetto: serve. |
+| `experiments/persistent-vault-shell/style.css` | CSS | 2731 | 36 | File di progetto: style. |
+| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2077 | 50 | File di progetto: firestore.candidate. |
+| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2662 | 81 | File di progetto: migration-simulator. |
+| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2416 | 54 | File di progetto: migration-simulator.test. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5927 | 139 | File di progetto: record-sharing-crypto. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
+| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
 
 ## firebase.json
 
