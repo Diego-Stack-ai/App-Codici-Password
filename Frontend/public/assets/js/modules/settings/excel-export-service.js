@@ -1,6 +1,7 @@
 import {collectOwnerBackup} from './backup-export-service.js';
 import {decryptIfPossible, isEncryptedValue} from '../core/crypto-utils.js';
 import {ensureVaultKeyMaterial} from '../core/security-manager.js';
+import {createVaultXlsx} from './xlsx-workbook.js';
 
 const MASK = '••••••••';
 const SENSITIVE_KEY = /(password|passwd|passphrase|pin|ccv|cvv|secret|token|recovery|credential|private.?key|vault.?key)/i;
@@ -20,10 +21,6 @@ const SCOPE_LABELS = Object.freeze({
     'shared-vault-data-link': 'Collegamenti',
     settings: 'Impostazioni'
 });
-
-const xml = value => String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;').replaceAll("'", '&apos;');
 
 function displayValue(value) {
     if (value === null || value === undefined) return '';
@@ -68,28 +65,12 @@ function flatten(value, prefix = '', rows = []) {
     return rows;
 }
 
-function cell(input, style = 'Body') {
-    const value = input && typeof input === 'object' && 'value' in input ? input.value : input;
-    const href = input && typeof input === 'object' && input.href ? ` ss:HRef="${xml(input.href)}"` : '';
-    const effectiveStyle = href ? 'Link' : style;
-    return `<Cell ss:StyleID="${effectiveStyle}"${href}><Data ss:Type="String">${xml(value)}</Data></Cell>`;
-}
-
-function row(values, style = 'Body') {
-    return `<Row>${values.map(value => cell(value, style)).join('')}</Row>`;
-}
-
-function worksheet(name, headers, rows, widths = []) {
-    const columns = widths.map(width => `<Column ss:Width="${width}"/>`).join('');
-    return `<Worksheet ss:Name="${xml(name.slice(0, 31))}"><Table>${columns}${row(headers, 'Header')}${rows.map(item => row(item)).join('')}</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane><ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios></WorksheetOptions></Worksheet>`;
-}
-
 function accountTitle(record) {
     const data = record.data || {};
     return data.nomeAccount || data.nome || data.denominazione || data.ragioneSociale || 'Senza nome';
 }
 
-export async function buildExcelXml(uid, {includeSecrets = false} = {}) {
+export async function buildExcelWorkbook(uid, {includeSecrets = false} = {}) {
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
     if (!vaultKeyMaterial) throw new Error('VAULT_LOCKED');
     const {records} = await collectOwnerBackup(uid);
@@ -100,26 +81,13 @@ export async function buildExcelXml(uid, {includeSecrets = false} = {}) {
     const accountRecords = opened.filter(record => record.scope === 'private-account' || record.scope === 'company-account');
     const companyNames = new Map(opened.filter(record => record.scope === 'company')
         .map(record => [record.id, accountTitle(record)]));
-    const summaryCounts = new Map();
-    opened.forEach(record => summaryCounts.set(record.scope, (summaryCounts.get(record.scope) || 0) + 1));
-    const summaryRows = [
-        ['Esportazione', new Date().toLocaleString('it-IT')],
-        ['Protezione', includeSecrets ? 'ESPORTAZIONE COMPLETA: contiene segreti in chiaro' : 'Password, PIN, token e segreti mascherati'],
-        ['', ''],
-        ['Categoria', 'Elementi'],
-        ...[...summaryCounts.entries()].map(([scope, count]) => [SCOPE_LABELS[scope] || scope, String(count)]),
-        ['', ''],
-        ['Account', 'Contesto', 'Apri'],
-        ...accountRecords.map((record, index) => [
-            accountTitle(record),
-            record.companyId ? (companyNames.get(record.companyId) || 'Azienda') : 'Privato',
-            {value: 'Vai alla riga Account', href: `#Account!R${index + 2}C1`}
-        ])
-    ];
-
     const accountRows = accountRecords.map(record => {
         const data = record.data || {};
-        return [record.id, record.companyId || '', accountTitle(record), data.username || '', data.account || data.codice || '', data.password || '', data.url || data.sitoWeb || '', data.visibility || ''];
+        const type = record.companyId ? 'Azienda' : 'Privato';
+        const companyName = record.companyId ? (companyNames.get(record.companyId) || 'Azienda') : '';
+        const title = accountTitle(record);
+        const key = `${type} — ${companyName ? `${companyName} — ` : ''}${title} [${record.id.slice(0, 8)}]`;
+        return [record.id, type, record.companyId || '', companyName, title, data.username || '', data.account || data.codice || '', data.password || '', data.url || data.sitoWeb || '', data.visibility || '', key];
     });
     const accountWidgetRecords = opened.filter(record => record.scope === 'private-account-widget' || record.scope === 'company-account-widget');
     const detailRows = accountRecords.flatMap(record => flatten(record.data).map(([field, value]) => [
@@ -139,26 +107,23 @@ export async function buildExcelXml(uid, {includeSecrets = false} = {}) {
         ]));
     });
 
-    const sheets = [
-        worksheet('Consultazione', ['Voce', 'Valore', 'Collegamento'], summaryRows, [190, 330, 150]),
-        worksheet('Account', ['ID', 'ID azienda', 'Nome', 'Username', 'Codice account', 'Password', 'Sito', 'Visibilità'], accountRows, [150, 130, 210, 190, 180, 90, 220, 100]),
-        worksheet('Campi account', ['ID account', 'ID azienda', 'Account', 'Campo', 'Valore'], detailRows, [150, 130, 210, 210, 360])
-    ];
-    for (const [name, rows] of scopeSheets) {
-        sheets.push(worksheet(name, ['ID record', 'ID azienda', 'ID account', 'Campo', 'Valore'], rows, [150, 130, 150, 220, 360]));
-    }
-
-    const workbook = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10"/></Style><Style ss:ID="Body"><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style><Style ss:ID="Link"><Alignment ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10" ss:Color="#0563C1" ss:Underline="Single"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style><Style ss:ID="Header"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#16324F" ss:Pattern="Solid"/></Style></Styles>${sheets.join('')}</Workbook>`;
+    const workbook = createVaultXlsx({
+        accountRows,
+        detailRows,
+        otherSheets: [...scopeSheets.entries()],
+        companies: [...companyNames.values()].sort((left, right) => left.localeCompare(right, 'it')),
+        includeSecrets
+    });
     return {workbook, recordCount: records.length, accountCount: accountRecords.length};
 }
 
 export async function exportOwnerExcel(uid, options = {}) {
-    const result = await buildExcelXml(uid, options);
-    const url = URL.createObjectURL(new Blob([result.workbook], {type: 'application/vnd.ms-excel;charset=utf-8'}));
+    const result = await buildExcelWorkbook(uid, options);
+    const url = URL.createObjectURL(new Blob([result.workbook], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
     const link = document.createElement('a');
     link.href = url;
     const suffix = options.includeSecrets ? 'completa' : 'protetta';
-    link.download = `codici-password-esportazione-${suffix}-${new Date().toISOString().slice(0, 10)}.xml`;
+    link.download = `codici-password-esportazione-${suffix}-${new Date().toISOString().slice(0, 10)}.xlsx`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     return result;
