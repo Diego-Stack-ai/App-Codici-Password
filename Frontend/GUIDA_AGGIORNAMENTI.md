@@ -591,3 +591,7 @@ Avanzamento locale base `6432cad8`: preparatore M6 per quattro campi sensibili e
 Correzione contatti azienda, 12/09/2026: confronto strutturale elimina falsi conflitti dovuti all’ordine delle mappe; modulo online caricato dal server prima di abilitare Salva. Conflitti reali e obbligo di scollegare Account restano protetti. Correzione locale non pubblicata. [Audit §27](../docs/AUDIT_VAULT_SESSION_P0.md#27-falso-conflitto-nella-modifica-dei-contatti-azienda--12092026).
 
 Rilasciata separatamente la correzione contatti azienda v1.2.111 tramite PR #45, master `f4d9393b`; Hosting verificato. Il ramo sperimentale non è stato pubblicato. [Evidenze](../docs/AUDIT_VAULT_SESSION_P0.md#28-rilascio-isolato-della-correzione-azienda--12092026).
+
+Avanzamento P0 base `1b6a13ed`: controller sperimentale per esito incerto, retry con stesso payload e ricerca del risultato. Individuato gate operationResults scrivibile dal proprietario; nessuna attivazione UI o modifica Rules/Functions. [Audit §29](../docs/AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
+
+Dati azienda, aggiornamento dopo scrittura: creazione/modifica tornano subito al dettaglio con afterWrite; server confermato per mostrare il dato aggiornato, anche dopo cambio/scollegamento Account. Consultazione ordinaria local-first preservata. [Audit §30](../docs/AUDIT_VAULT_SESSION_P0.md#30-dati-azienda-aggiornati-dopo-il-salvataggio--12092026).

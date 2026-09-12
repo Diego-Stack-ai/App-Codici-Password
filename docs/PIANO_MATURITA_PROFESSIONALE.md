@@ -332,3 +332,5 @@ Avanzamento locale base `755c68ed`, 12/09/2026: dettaglio con note e URL cifrati
 Avanzamento P0, base `b792b1c0`: preparazione di modifiche cifrate nella sessione in RAM. Nessun salvataggio UI attivato; integrazione del writer M6, controlli sulle relazioni e compatibilità di schema rimangono passi successivi. [Audit §25](./AUDIT_VAULT_SESSION_P0.md#25-preparazione-cifrata-delle-modifiche-nella-sessione-in-ram--12092026).
 
 Avanzamento P0 base `6432cad8`: preparazione del payload M6 e prova locale di salvataggio tramite transazione originale. UI, isolamento autorevole e gestione degli esiti dopo invio restano da integrare. [Audit §26](./AUDIT_VAULT_SESSION_P0.md#26-preparazione-m6-e-transazione-originale-su-dati-emulati--12092026).
+
+Avanzamento P0 base `1b6a13ed`: gestione dell’esito incerto in RAM e collaudo del retry. La provenienza dei risultati non è garantita dalle Rules correnti: correggere namespace degli esiti e legame risultato/operazione prima del salvataggio UI; integrazione della coda canonica ancora aperta. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).

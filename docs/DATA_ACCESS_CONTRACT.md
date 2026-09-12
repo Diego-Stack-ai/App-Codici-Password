@@ -75,3 +75,7 @@ Preparazione locale, base `b792b1c0`: patch cifrata prodotta senza repository di
 Integrazione sperimentale base `6432cad8`: preparatore di operazioni M6 e prova del backend originale su Firestore emulato. Nessun nuovo accesso dati attivato; il controllo delle relazioni correnti sul server rimane aperto. [Audit §26](./AUDIT_VAULT_SESSION_P0.md#26-preparazione-m6-e-transazione-originale-su-dati-emulati--12092026).
 
 Modulo modifica azienda, 12/09/2026: lettura puntuale getCompanyConfirmed online per stabilire una base aggiornata prima della transazione. Offline rimane getCompany; errore server non è sostituito da cache obsoleta. Liste e consultazione mantengono il percorso local-first. [Audit §27](./AUDIT_VAULT_SESSION_P0.md#27-falso-conflitto-nella-modifica-dei-contatti-azienda--12092026).
+
+Prova locale base `1b6a13ed`: riconciliazione di una singola operazione in RAM tramite lookup puntuale iniettato. Assenza del documento esito non prova mancato salvataggio; il namespace operationResults attuale non è esclusivo del backend. Nessun nuovo repository persistente o accesso client attivato. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
+
+Dati azienda dopo scrittura: afterWrite e callback di modifica collegamenti richiedono getCompanyConfirmed. Il flag è consumato dopo rendering riuscito; errore o offline non dichiarano aggiornata una copia vecchia. Richieste e callback sono vincolati alla vista. [Audit §30](./AUDIT_VAULT_SESSION_P0.md#30-dati-azienda-aggiornati-dopo-il-salvataggio--12092026).

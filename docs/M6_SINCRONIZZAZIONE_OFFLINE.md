@@ -77,3 +77,5 @@ Il 10/09/2026 la prova fisica su telefono ha confermato che un Account bancario 
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.
 
 Prova locale della nuova sessione, base `6432cad8`: aggiornamento cifrato sperimentale attraverso il contratto M6 e il backend originale emulato. Non è un nuovo cutover o collaudo della coda offline; restano verifiche delle relazioni correnti e compatibilità dei lettori. [Audit §26](./AUDIT_VAULT_SESSION_P0.md#26-preparazione-m6-e-transazione-originale-su-dati-emulati--12092026).
+
+Verifica sul codice corrente, 12/09/2026: il wildcard proprietario delle Rules include operationResults anche in scrittura; la callable può accettare un esito precedente con dominio/recordId compatibili senza applicare il payload. La riconciliazione sperimentale non certifica la provenienza backend. Questo finding resta un gate, distinto dalle prove storiche della coda. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
