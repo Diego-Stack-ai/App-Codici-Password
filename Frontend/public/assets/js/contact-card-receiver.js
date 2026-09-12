@@ -1,4 +1,4 @@
-import {readContactCard} from './modules/shared/contact-card-model.js';
+import {readContactCard, contactDetails} from './modules/shared/contact-card-model.js';
 import {prepareContactVCard} from './modules/shared/contact-card-photo.js';
 
 const status = document.getElementById('contact-status');
@@ -16,6 +16,16 @@ async function prepare() {
     try {
         const card = readContactCard(window.location.hash);
         document.getElementById('contact-name').textContent = card.name;
+        const details = document.getElementById('contact-details');
+        details.replaceChildren(...contactDetails(card).map(({label, value}) => {
+            const row = document.createElement('div');
+            const term = document.createElement('dt');
+            const description = document.createElement('dd');
+            term.textContent = label;
+            description.textContent = value;
+            row.append(term, description);
+            return row;
+        }));
         const prepared = await prepareContactVCard(card);
         photo.src = prepared.photo;
         photo.hidden = false;

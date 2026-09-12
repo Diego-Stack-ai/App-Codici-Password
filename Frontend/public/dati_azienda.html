@@ -7,26 +7,27 @@
     <title>Profilo aziendale</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.109" />
+    <link rel="manifest" href="manifest.json?v=1.2.110" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.109">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.110">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.109">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.109">
-    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.109">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.110">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.110">
+    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.110">
 
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.109">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.110">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.110">
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
 </head>
 
-<body class="base-bg" data-ui-model="detail">
+<body class="base-bg company-profile-page" data-ui-model="detail">
     <div class="base-container relative">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
@@ -72,18 +73,26 @@
                     </div>
                 </div>
 
-                <nav class="company-profile-tabs" role="tablist" aria-label="Sezioni profilo aziendale">
-<button type="button" role="tab" data-company-tab="overview" aria-selected="true">Panoramica</button>
-<button type="button" role="tab" data-company-tab="personal" aria-selected="false">Anagrafica</button>
-<button type="button" role="tab" data-company-tab="contacts" aria-selected="false">Contatti</button>
-<button type="button" role="tab" data-company-tab="addresses" aria-selected="false">Indirizzi</button>
-<button type="button" role="tab" data-company-tab="documents" aria-selected="false">Documenti</button>
-<button type="button" role="tab" data-company-tab="digital-card" aria-selected="false">Tessera digitale</button>
+                <nav class="company-profile-tabs profile-tabs" role="tablist" aria-label="Sezioni profilo aziendale">
+<button type="button" class="profile-tab" role="tab" data-company-tab="overview" aria-selected="true">Panoramica</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="personal" aria-selected="false">Anagrafica</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="contacts" aria-selected="false">Contatti</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="addresses" aria-selected="false">Indirizzi</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="documents" aria-selected="false">Documenti</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="digital-card" aria-selected="false">Tessera digitale</button>
 </nav>
 <div class="detail-content-wrap">
 <section data-company-panel="overview" class="detail-section" id="company-overview"></section>
 <section data-company-panel="digital-card" class="detail-section hidden" id="company-digital-card"></section>
-<div id="company-section-actions" class="company-section-actions"></div>
+
+
+                    <section data-company-panel="personal" class="detail-section">
+                        <div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon">domain</span><h3 class="detail-section-title">Anagrafica Principale</h3></div>
+                        <div class="form-card">
+                            <div class="data-display-group"><span class="view-label">Ragione sociale</span><span id="company-name-view" class="data-value">-</span></div>
+                            <div class="data-display-group"><span class="view-label">Forma giuridica</span><span id="company-type-view" class="data-value">-</span></div>
+                        </div>
+                    </section>
 
                     <!-- Section: Referente -->
                     <section data-company-panel="personal" class="detail-section">
@@ -146,19 +155,10 @@
                             <h3 class="detail-section-title" data-t="company_locations">Sedi Aziendali</h3>
                         </div>
 
-                        <div id="locations-tabs-container" class="tabs-scroll-row">
-                            <!-- Generato via JS -->
-                        </div>
-
-                        <div id="location-content-card" class="glass-card mt-content">
-                            <div class="flex-col-gap-xs">
-                                <p id="indirizzo-completo" class="address-text">-</p>
-                                <p id="citta-cap-prov" class="address-subtext">-</p>
-                            </div>
-                        </div>
+                        <div id="company-locations-list"></div>
                     </section>
 
-                    <section data-company-panel="contacts" class="detail-section"><h3 class="detail-section-title">Telefoni e referente</h3><div id="company-phone-list"></div></section>
+                    <section data-company-panel="contacts" class="detail-section"><div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon">call</span><h3 class="detail-section-title">Contatti Telefonici</h3></div><div id="company-phone-list"></div></section>
 <!-- Section: Email Categorizzate -->
                     <section data-company-panel="contacts" id="wrapper-email-section" class="detail-section">
                         <button class="accordion-trigger-premium group" id="toggle-email-btn">
@@ -252,7 +252,7 @@
                     </section>
 
                     <!-- Section: Note -->
-                    <section data-company-panel="overview" class="detail-section">
+                    <section data-company-panel="personal" class="detail-section">
                         <div class="detail-section-header">
                             <div class="detail-section-actions">
                                 <span

@@ -1,5 +1,5 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.109';
+import { auth, db } from '../../firebase-config.js?v=1.2.110';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -81,7 +81,7 @@ export function renderCompanyContacts(data, companyId, reload) {
 }
 export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
     const tabs = [...document.querySelectorAll('[data-company-tab]')];
-    const actions = document.getElementById('company-section-actions');
+    styleCompanySections(companyId);
     tabs.forEach(tab => {
         tab.id = 'company-tab-' + tab.dataset.companyTab;
         const panels = [...document.querySelectorAll('[data-company-panel]')].filter(panel => panel.dataset.companyPanel === tab.dataset.companyTab);
@@ -90,25 +90,81 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
     });
     const activate = name => {
         if (!tabs.some(tab=>tab.dataset.companyTab===name)) name='overview';
-        tabs.forEach(tab=>{const active=tab.dataset.companyTab===name;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
+        tabs.forEach(tab=>{const active=tab.dataset.companyTab===name;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
         document.querySelectorAll('[data-company-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.companyPanel!==name));
-        const labels={overview:'Modifica azienda',personal:'Modifica anagrafica',contacts:'Modifica contatti',addresses:'Modifica indirizzi',documents:'Gestisci documenti e allegati','digital-card':'Altre opzioni tessera'};
-        setChildren(actions,button(labels[name],()=>{window.location.href=editUrl(companyId)+(name==='contacts'?'#section-email':'');}));
         sessionStorage.setItem('company-profile-tab:'+companyId,name);
     };
     tabs.forEach((tab,index)=>{tab.onclick=()=>activate(tab.dataset.companyTab);tab.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowLeft'?-1:1)+tabs.length)%tabs.length;tabs[next].focus();activate(tabs[next].dataset.companyTab);};});
-    const summary=[['Partita IVA',data.partitaIva,'personal'],['Email principale',companyProfileContacts(data).emails[0]?.address,'contacts'],['Telefono',data.telefonoAzienda,'contacts'],['Sede legale',[data.indirizzoSede,data.civicoSede,data.cittaSede].filter(Boolean).join(' '),'addresses']];
-    setChildren(document.getElementById('company-overview'),[createElement('h2',{className:'detail-section-title',textContent:'Panoramica aziendale'}),createElement('div',{className:'company-summary-grid'},summary.map(([label,value,tab])=>createElement('button',{type:'button',className:'company-summary-card',onclick:()=>activate(tab)},[text(label,'view-label'),text(value||'Non indicato')])))]);
+    const summary=[['badge','Partita IVA',data.partitaIva,'personal'],['mail','Email principale',companyProfileContacts(data).emails[0]?.address,'contacts'],['call','Telefono',data.telefonoAzienda,'contacts'],['home','Sede legale',[data.indirizzoSede,data.civicoSede,data.cittaSede].filter(Boolean).join(' '),'addresses']];
+    setChildren(document.getElementById('company-overview'),[
+        createElement('div',{className:'profile-overview-heading'},[
+            createElement('div',{},[text('Profilo aziendale','data-label'),createElement('h2',{className:'profile-overview-name',textContent:data.ragioneSociale||'Azienda'})]),
+            button('Modifica anagrafica',()=>{window.location.href=editUrl(companyId);})
+        ]),
+        createElement('div',{className:'profile-summary-grid'},summary.map(([icon,label,value,tab])=>createElement('button',{type:'button',className:'profile-summary-card profile-summary-card-action',onclick:()=>activate(tab)},[
+            text(icon,'material-symbols-outlined'),createElement('div',{},[text(label,'data-label'),createElement('p',{className:'data-value',textContent:value||'Non indicato'})])
+        ]))),
+        createElement('section',{className:'form-card profile-expiry-card'},[
+            createElement('h3',{className:'form-section-title',textContent:'Documenti aziendali'}),
+            button(`${data.allegati?.length||0} allegati — Apri documenti`,()=>activate('documents'))
+        ])
+    ]);
     const qr=document.getElementById('company-digital-card');
     const options=[['ragioneSociale','Ragione sociale'],['partitaIva','Partita IVA'],['codiceSDI','Codice SDI'],['numeroCCIAA','CCIAA'],['dataIscrizione','Data iscrizione'],['referenteNome','Nome referente'],['referenteCognome','Cognome referente'],['referenteTitolo','Ruolo referente'],['referenteCellulare','Cellulare referente'],['aziendaEmail','PEC'],['adminEmail','Email amministrazione'],['persEmail','Email personale'],['qrLegale','Sede legale']];
     const preview=createElement('div',{className:'company-qr-preview'});
     const config={...data.qrConfig};
-    const refresh=()=>renderQRCode(preview,buildVCard({...data,qrConfig:config}),{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'});
-    const checks=options.map(([key,label])=>createElement('label',{},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
+    const refresh=()=>{ const vcard=buildVCard({...data,qrConfig:config}); renderQRCode(preview,vcard,{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'}); const capacity=document.getElementById('company-qr-capacity'); if(capacity) { const bytes=new TextEncoder().encode(vcard).length; capacity.textContent=bytes>1200 ? `Il QR contiene ${bytes} byte: riduci i campi per renderlo più facile da leggere.` : `Capacità utilizzata: ${bytes} byte.`; capacity.classList.toggle('is-warning',bytes>1200); } };
+    const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
     const save=button('Salva selezione',async()=>{try{save.disabled=true;await updateDoc(doc(db,'users',auth.currentUser.uid,'aziende',companyId),{qrConfig:config});showToast('Tessera aggiornata','success');await reload();}catch{showToast('Impossibile salvare la tessera','error');}finally{save.disabled=false;}});
     const download=button('Scarica contatto',()=>{const blob=new Blob([buildVCard({...data,qrConfig:config})],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
-    setChildren(qr,[createElement('h2',{className:'detail-section-title',textContent:'Tessera digitale aziendale'}),text('Seleziona i dati da condividere. Password e credenziali sono escluse.'),preview,createElement('div',{className:'company-qr-options'},checks),createElement('div',{className:'company-contact-actions'},[save,download])]);
+    setChildren(qr,[createElement('div',{className:'digital-card-layout'},[
+        createElement('section',{className:'form-card digital-card-preview'},[
+            createElement('h2',{className:'form-section-title',textContent:'Anteprima Tessera digitale'}),preview,
+            createElement('p',{className:'digital-card-warning',textContent:'Il QR contiene dati in chiaro. Password, PIN, chiavi e allegati sono sempre esclusi.'}),
+            createElement('p',{className:'digital-card-capacity',id:'company-qr-capacity'}),
+            createElement('div',{className:'digital-card-actions'},[download])
+        ]),
+        createElement('section',{className:'form-card digital-card-fields'},[
+            createElement('h2',{className:'form-section-title',textContent:'Dati inclusi'}),
+            text('Ogni scelta aggiorna l’anteprima. Salva la selezione per mantenerla.','data-value-sub'),
+            ...checks,save
+        ])
+    ])]);
     refresh();
     renderCompanyContacts(data,companyId,reload);
     activate(new URLSearchParams(window.location.search).get('profileTab')||sessionStorage.getItem('company-profile-tab:'+companyId)||'overview');
+}
+
+function styleCompanySections(companyId) {
+    document.querySelectorAll('[data-company-panel]').forEach(panel=>{
+        const type=panel.dataset.companyPanel;
+        panel.classList.add('profile-tab-panel');
+        panel.querySelectorAll('.glass-card').forEach(card=>{card.classList.remove('glass-card');card.classList.add('form-card');});
+        const header=panel.querySelector('.accordion-trigger-premium, .detail-section-header');
+        if(!header || header.dataset.profileStyled) return;
+        header.dataset.profileStyled='true';
+        header.classList.add('form-section-header');
+        const title=header.querySelector('.detail-section-title');
+        title?.classList.add('form-section-title');
+        const icon=header.querySelector('.detail-section-icon');
+        if(icon) {
+            icon.className='material-symbols-outlined detail-section-icon';
+            const wrapper=createElement('div',{className:'section-title-wrapper'});
+            const box=createElement('div',{className:'settings-icon-box '+({personal:'icon-blue',contacts:'icon-emerald',addresses:'icon-amber',documents:'icon-purple'}[type]||'icon-blue')},[icon]);
+            wrapper.append(box);
+            if(title) wrapper.append(title);
+            header.prepend(wrapper);
+        }
+        // Editing belongs to each section, as in the private profile.
+        panel.querySelector('#btn-add-email')?.remove();
+        panel.querySelector('#btn-edit-fiscal')?.remove();
+        if(!panel.querySelector('#btn-edit-note')) {
+            const action=miniButton('Modifica '+({personal:'anagrafica',contacts:'contatti',addresses:'indirizzi',documents:'documenti'}[type]||'sezione'),'edit',event=>{
+                event.stopPropagation();window.location.href=editUrl(companyId)+(type==='contacts'?'#section-email':'');
+            });
+            // Avoid nested buttons in accordion triggers.
+            const row=createElement('div',{className:'profile-overview-heading'});
+            header.before(row);row.append(header,action);
+        }
+    });
 }
