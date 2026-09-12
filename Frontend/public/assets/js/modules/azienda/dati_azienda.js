@@ -13,7 +13,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import {getCompany} from '../data/vault-repository.js';
+import {getCompany, getCompanyConfirmed} from '../data/vault-repository.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -25,16 +25,26 @@ let currentAziendaData = null;
 let currentLocations = [];
 let currentVCard = null;       // VCard string per lazy QR zoom
 let isQRZoomRendered = false;  // Evita re-render ad ogni apertura del modal
+let refreshAfterWrite = false;
+let loadVersion = 0;
+let currentUid = null;
+let initializationVersion = 0;
 
 // --- INITIALIZATION ---
 export async function initDatiAzienda(user) {
     
     if (!user) return;
+    currentUid = user.uid;
+    initializationVersion++;
+    const version = ++loadVersion;
 
     // Assicura caricamento libreria QR in modo passivo
     await ensureQRCodeLib();
+    if (version !== loadVersion) return;
 
-    currentAziendaId = new URLSearchParams(window.location.search).get('id');
+    const params = new URLSearchParams(window.location.search);
+    currentAziendaId = params.get('id');
+    refreshAfterWrite = params.get('afterWrite') === '1';
     if (!currentAziendaId) {
         window.location.href = 'lista_aziende.html';
         return;
@@ -165,27 +175,50 @@ function setupEventListeners() {
     }
 }
 
-async function loadData(uid) {
+async function loadData(uid, {afterWrite = false} = {}) {
+    const version = ++loadVersion;
+    const companyId = currentAziendaId;
+    const initialization = initializationVersion;
+    if (afterWrite) refreshAfterWrite = true;
+    const needsRefresh = refreshAfterWrite;
+    const confirmed = needsRefresh && navigator.onLine;
     try {
-        const company = await getCompany(uid, currentAziendaId);
+        const company = await (confirmed ? getCompanyConfirmed(uid, companyId) : getCompany(uid, companyId));
+        if (version !== loadVersion) return;
         if (company) {
-            currentAziendaData = structuredClone(company);
+            const data = structuredClone(company);
 
             const noteButton = document.getElementById('btn-edit-note');
             if (noteButton) noteButton.disabled = false;
-            if (currentAziendaData.note) {
-                try { currentAziendaData.note = await decryptRequiredValue(currentAziendaData.note, await ensureVaultKeyMaterial()); }
-                catch { currentAziendaData.note = 'Nota non disponibile: sblocca il Vault.'; if (noteButton) noteButton.disabled = true; }
+            if (data.note) {
+                try { data.note = await decryptRequiredValue(data.note, await ensureVaultKeyMaterial()); }
+                catch { data.note = 'Nota non disponibile: sblocca il Vault.'; if (version === loadVersion && noteButton) noteButton.disabled = true; }
             }
+            if (version !== loadVersion) return;
+            currentAziendaData = data;
             populateFields(currentAziendaData);
             handleLogoAndQR(currentAziendaData);
             renderCompanyEmbeddedAttachments(currentAziendaData.allegati);
-            initCompanyProfile(currentAziendaData, currentAziendaId, {buildVCard, reload: () => loadData(uid)});
+            initCompanyProfile(currentAziendaData, companyId, {buildVCard, reload: () => {
+                if (initialization !== initializationVersion || currentAziendaId !== companyId || currentUid !== uid) return;
+                return loadData(uid, {afterWrite: true});
+            }});
+            if (confirmed) {
+                const params = new URLSearchParams(window.location.search);
+                params.delete('afterWrite');
+                const query = params.toString();
+                window.history.replaceState(null, '', `${window.location.pathname}${query ? '?' + query : ''}${window.location.hash || ''}`);
+                refreshAfterWrite = false;
+            } else if (needsRefresh) {
+                showToast('Sei offline: i dati visualizzati potrebbero non includere le ultime modifiche. Ricarica quando torni online.', 'warning');
+            }
         } else {
             showToast(t('error_not_found'), "error");
         }
     } catch (e) {
+        if (version !== loadVersion) return;
         logError("LoadData", e);
+        if (needsRefresh) showToast('Impossibile aggiornare i dati: ricarica per vedere le ultime modifiche.', 'warning');
     }
 }
 

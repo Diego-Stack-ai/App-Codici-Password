@@ -5,7 +5,7 @@ const root=new URL('../Frontend/public/assets/js/modules/azienda/',import.meta.u
 async function moduleFile(file){return import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL(file,root),'utf8')).toString('base64'));}
 const model=await moduleFile('company-profile-model.js');
 const {buildCompanyVCard}=await moduleFile('company-vcard.js');
-async function controller(file,deps,names){const src=(await readFile(new URL(file,root),'utf8')).replace(/import\s+(?!\()[\s\S]*?\sfrom\s*['"][^'"]+['"];?/g,'').replace(/export\s+(?=(async\s+)?function|const|let)/g,'');return new Function(...Object.keys(deps),src+'\nreturn {'+names.join(',')+'};')(...Object.values(deps));}
+async function controller(file,deps,names){const src=(await readFile(new URL(file,root),'utf8')).replace(/import\s+(?!\()[\s\S]*?\sfrom\s*['"][^'"]+['"];?/g,'').replace(/export\s+(?=(async\s+)?function|const|let)/g,'').replace('await import("/assets/js/vendor/firebase-runtime.js")','fakeRuntime');return new Function(...Object.keys(deps),src+'\nreturn {'+names.join(',')+'};')(...Object.values(deps));}
 
 test('email legacy e aggiuntive: collegamento e scollegamento conservano credenziali e metadati',()=>{
  const data={aziendaEmail:'old@example.test',aziendaEmailPassword:'cipher:original',emails:{extra:[{email:'extra@example.test',password:'cipher:extra',username:'user',custom:42}]},telefonoAzienda:'123'};
@@ -19,7 +19,7 @@ test('tessera: selezione rispettata, valori escapati e credenziali escluse',()=>
  assert.doesNotMatch(card,/SECRET|PRIVATE-NOTE|pec@example|hidden@example|\nTEL:iniettato/);assert.match(card,/admin@example.test/);assert.match(card,/Nome\\nTEL:iniettato/);
 });
 
-async function companySaveFixture({conflict=false,changedEmail=false,locked=false,reordered=false,removePhone=false,phoneConflict=false,linkedPhone=false}={}){
+async function companySaveFixture({conflict=false,changedEmail=false,locked=false,reordered=false,removePhone=false,phoneConflict=false,linkedPhone=false,createCompany=false}={}){
  const original={emails:{pec:{email:'pec@example.test',password:'cipher: old ',linkedAccountId:'a',linkedAccountCompanyId:'c',username:'user',custom:42},extra:[]},qrConfig:{custom:true}};
  if(removePhone || phoneConflict || linkedPhone) original.telefonoAzienda='0123456';
  if(linkedPhone) original.phoneAccountLinks={telefonoAzienda:{linkedAccountId:'phone-account'}};
@@ -29,9 +29,9 @@ async function companySaveFixture({conflict=false,changedEmail=false,locked=fals
  const inputs=new Map();const get=id=>{if(!inputs.has(id))inputs.set(id,{value:'',disabled:false});return inputs.get(id);};
  for(const [id,value] of Object.entries({'ragione-sociale':'Fixture','email-pec':changedEmail?'different@example.test':'pec@example.test','email-pec-password':' old ','type-pec':'PEC','type-amministrazione':'Amministrazione','type-personale':'Personale'}))get(id).value=value;
  if(!removePhone)get('telefono-azienda').value=original.telefonoAzienda || '';
- const writes=[];const messages=[];const state={currentUid:'owner',currentAziendaId:'company',originalCompany:original,formLoaded:true,selectedFiles:[],existingAttachments:[]};
- const ctrl=await controller('ma_save.js',{state,db:{},doc:(...p)=>p,runTransaction:async(db,cb)=>{const staged=[];await cb({get:async()=>({exists:()=>true,data:()=>conflict?{...remote,emails:{}}:remote}),update:(ref,data)=>staged.push(data)});writes.push(...staged);},serverTimestamp:()=>1,document:{getElementById:get,querySelectorAll:()=>[]},ensureVaultKeyMaterial:async()=>locked?null:'key',encrypt:async value=>value?'cipher:'+value:'',showToast:(message)=>messages.push(message),t:k=>k,logError:()=>{},setTimeout:()=>{},createElement:()=>({}),setChildren:()=>{}},['saveAzienda']);
- await ctrl.saveAzienda();return {writes,original,messages};
+ const writes=[];const messages=[];const redirects=[];const state={currentUid:'owner',currentAziendaId:createCompany?null:'company',originalCompany:original,formLoaded:true,selectedFiles:[],existingAttachments:[]};
+ const ctrl=await controller('ma_save.js',{state,fakeRuntime:{collection:(...parts)=>parts,addDoc:async(_ref,data)=>{writes.push(data);return{id:'created-company'};}},db:{},doc:(...p)=>p,runTransaction:async(db,cb)=>{const staged=[];await cb({get:async()=>({exists:()=>true,data:()=>conflict?{...remote,emails:{}}:remote}),update:(ref,data)=>staged.push(data)});writes.push(...staged);},serverTimestamp:()=>1,window:{location:{replace:url=>redirects.push(url)}},document:{getElementById:get,querySelectorAll:()=>[]},ensureVaultKeyMaterial:async()=>locked?null:'key',encrypt:async value=>value?'cipher:'+value:'',showToast:(message)=>messages.push(message),t:k=>k,logError:()=>{},setTimeout:()=>{},createElement:()=>({}),setChildren:()=>{}},['saveAzienda']);
+ await ctrl.saveAzienda();return {writes,original,messages,redirects};
 }
 test('modifica azienda conserva link, username, password con spazi e configurazione QR',async()=>{const {writes,original}=await companySaveFixture();assert.equal(writes.length,1);assert.deepEqual(writes[0].emails.pec,{...original.emails.pec,tipo:'PEC',note:''});assert.equal(writes[0].qrConfig.custom,true);});
 for(const condition of ['conflict','changedEmail','locked'])test('modifica azienda bloccata senza perdita dati: '+condition,async()=>{assert.deepEqual((await companySaveFixture({[condition]:true})).writes,[]);});
@@ -50,4 +50,17 @@ test('telefono collegato richiede scollegamento e non segnala un falso conflitto
  const {writes,messages}=await companySaveFixture({removePhone:true,linkedPhone:true,reordered:true});
  assert.deepEqual(writes,[]);assert.ok(messages.some(message=>message.startsWith('Scollega')));
  assert.equal(messages.some(message=>message.startsWith('Contatti modificati')),false);
+});
+
+test('dopo salvataggio confermato ritorna subito al dettaglio richiedendo dati aggiornati',async()=>{
+ const {writes,redirects}=await companySaveFixture({removePhone:true});
+ assert.equal(writes.length,1);assert.deepEqual(redirects,['dati_azienda.html?id=company&afterWrite=1']);
+});
+test('un salvataggio respinto non naviga e non dichiara dati aggiornati',async()=>{
+ const {redirects}=await companySaveFixture({phoneConflict:true});assert.deepEqual(redirects,[]);
+});
+
+test('dopo creazione confermata apre subito la nuova azienda con richiesta server',async()=>{
+ const {writes,redirects}=await companySaveFixture({createCompany:true});
+ assert.equal(writes.length,1);assert.deepEqual(redirects,['dati_azienda.html?id=created-company&afterWrite=1']);
 });
