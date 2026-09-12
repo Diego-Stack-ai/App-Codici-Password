@@ -153,6 +153,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/settings/backup-import-service.js",
   "assets/js/modules/settings/credential-health-model.js",
   "assets/js/modules/settings/credential-health-service.js",
+  "assets/js/modules/settings/excel-export-service.js",
   "assets/js/modules/settings/impostazioni.js",
   "assets/js/modules/settings/push-settings-controller.js",
   "assets/js/modules/settings/shared-credentials-controller.js",

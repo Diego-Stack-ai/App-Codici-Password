@@ -41,6 +41,7 @@ export async function initImpostazioni(user) {
     setupTermsShort();
     setupPerformanceDiagnostics();
     setupEncryptedBackup(user);
+    setupExcelExport(user);
     setupEncryptedRestore(user);
     setupCredentialHealth(user);
     setupAccountFieldUsage(user);
@@ -571,6 +572,46 @@ function setupEncryptedBackup(user) {
             createElement('p', {
                 className: 'modal-text',
                 textContent: 'Verranno esportati Profilo, impostazioni, Account, Aziende, Scadenze, contatti, widget e allegati. La Recovery Key sarà mostrata una sola volta.'
+            }),
+            createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
+        ]));
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+    });
+}
+
+function setupExcelExport(user) {
+    const button = document.getElementById('btn-export-excel');
+    if (!button) return;
+    button.addEventListener('click', () => {
+        const modal = createElement('div', {className: 'modal-overlay'});
+        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
+        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Crea file Excel'});
+        const close = () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); };
+        cancelButton.addEventListener('click', close);
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true;
+            startButton.textContent = 'Preparazione…';
+            try {
+                const {exportOwnerExcel} = await import('./excel-export-service.js?v=1.2.99');
+                const result = await exportOwnerExcel(user.uid);
+                close();
+                showToast(`File Excel creato: ${result.accountCount} Account esportati.`, 'success');
+            } catch (error) {
+                console.error('[EXCEL EXPORT] Esportazione non riuscita.', error?.message);
+                startButton.disabled = false;
+                startButton.textContent = 'Riprova';
+                showToast(error?.message === 'BACKUP_REQUIRES_ONLINE'
+                    ? 'Per questa prova serve una connessione Internet.'
+                    : 'Esportazione non completata. Nessun dato è stato modificato.', 'error');
+            }
+        });
+        modal.appendChild(createElement('div', {className: 'modal-box'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'table_view'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Esporta dati per Excel'}),
+            createElement('p', {
+                className: 'modal-text',
+                textContent: 'Il file viene creato sul dispositivo con i dati reali. Password, PIN, token e chiavi restano mascherati. Il file non viene caricato online e i dati dell’app non vengono modificati.'
             }),
             createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
         ]));
