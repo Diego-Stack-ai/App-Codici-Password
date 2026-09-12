@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vault · laboratorio Firebase locale</title><link rel="stylesheet" href="/emulator.css"><script type="module" src="/emulator.js"></script></head>
+<body><main><p>CODICI &amp; PASSWORD · LABORATORIO LOCALE</p><h1>Accesso e sblocco separati</h1><p>Due utenti fittizi, dati cifrati negli emulatori. Nessun dato personale. Al ricaricamento serve un nuovo accesso.</p>
+<label for="identity">Utente di prova</label><select id="identity"><option value="a">Utente A</option><option value="b">Utente B</option></select>
+<div class="actions"><button id="login">Accedi al laboratorio</button><button id="unlock">Sblocca Vault</button><button id="lock">Blocca</button><button id="logout">Esci</button></div>
+<p id="status" role="status">Accesso non effettuato</p><p id="message" role="alert"></p>
+<nav aria-label="Viste di prova"><button id="private">Account privato</button><button id="company">Account aziendale</button></nav><section id="content" aria-live="polite"></section>
+<details><summary>Credenziali fittizie di sblocco</summary><p>Utente A: MASTER-FITTIZIA-A!123</p><p>Utente B: MASTER-FITTIZIA-B!123</p><p>L'accesso usa una credenziale sintetica predisposta; la Master Password viene verificata nel browser.</p></details></main>
+<dialog id="master-dialog"><form autocomplete="off"><h2>Sblocca Vault</h2><label for="unlock-value">Master Password</label><input id="unlock-value" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore spellcheck="false" autocapitalize="off" required><p>Puoi annullare con il pulsante o con Esc. Il valore viene cancellato dopo l'uso.</p><div class="actions"><button type="submit">Conferma sblocco</button><button type="button" data-cancel-master>Annulla</button></div></form></dialog></body></html>

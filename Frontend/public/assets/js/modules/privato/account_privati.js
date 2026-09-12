@@ -45,6 +45,10 @@ export function mountAccountPrivati(user, options = {}) {
     const content = document.getElementById('accounts-container');
     function assertActive() { if (signal.aborted) throw new DOMException('Page unmounted', 'AbortError'); }
     async function waitFor(promise) { const result = await promise; assertActive(); return result; }
+    async function readField(record, field) {
+        assertActive();
+        return waitFor(options.readField(record, field));
+    }
     function destroy() {
         if (signal.aborted) return;
         lifecycle.abort();
@@ -68,6 +72,7 @@ export function mountAccountPrivati(user, options = {}) {
     };
 
     const accountListView = createAccountListView({
+        resolveSecret: options.readField ? readField : undefined,
         readOnly: options.readOnly === true,
         themes: THEMES,
         emptyStateClass: 'text-center py-10',
@@ -252,6 +257,24 @@ export function mountAccountPrivati(user, options = {}) {
                 else window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
             }
 
+            if (options.readField) {
+                // The view owns these plaintext copies; passwords remain ciphertext
+                // until an explicit reveal/copy request through the same capability.
+                allAccounts = (await waitFor(Promise.all(allAccounts.map(async record => {
+                    const visible = {...record};
+                    try {
+                        for (const field of ['nomeAccount', 'username', 'account']) {
+                            if (record[field] != null && record[field] !== '') {
+                                visible[field] = await readField(record, field);
+                            }
+                        }
+                        return visible;
+                    } catch {
+                        assertActive();
+                        return null; // Reject the entire record; never render a fallback.
+                    }
+                })))).filter(Boolean);
+            } else {
             // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
             const vaultKeyMaterial = await waitFor(ensureVaultKeyMaterial().catch(() => null));
             if (vaultKeyMaterial) {
@@ -271,6 +294,7 @@ export function mountAccountPrivati(user, options = {}) {
                 })));
             }
 
+            }
             filterAndRender();
         } catch (e) {
             if (signal.aborted) return;

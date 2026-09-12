@@ -61,3 +61,7 @@ Su base `0a807adb`, le due liste canoniche mantengono il repository corrente ma 
 Integrazione sperimentale 12/09/2026, base `4c1d90b5`: gli orchestratori canonici usano nel solo laboratorio un repository sintetico senza rete, con clonazione e dismissione per contesto; il repository produttivo resta invariato. [Audit §18](./AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026).
 
 Collegamento SDK sperimentale 12/09/2026: `firebase-session.mjs` usa letture dirette soltanto nel laboratorio per il collaudo Auth/Rules. Non sostituisce né duplica una cache del repository canonico nell’app; la successiva integrazione browser dovrà passare dal repository. [Audit §20](./AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).
+
+Laboratorio browser 12/09/2026, base `83dffc30`: UI collegata al lettore SDK emulato; nessuna cache persistente o scrittura utente dalla pagina. Il repository canonico resta da integrare: questa prova non ne autorizza la sostituzione. [Audit §21](./AUDIT_VAULT_SESSION_P0.md#21-interfaccia-browser-degli-emulatori--12092026).
+
+Integrazione browser successiva, 12/09/2026: gli orchestratori canonici usano vault-repository, offline-firestore e request-coordinator originali collegati agli SDK emulati; il build verifica tali dipendenze. Nessuna sostituzione del repository con fixture, nessun cutover offline o nuova scrittura attivata. [Audit §22](./AUDIT_VAULT_SESSION_P0.md#22-liste-canoniche-e-repository-negli-emulatori--12092026).

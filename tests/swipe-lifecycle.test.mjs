@@ -113,3 +113,59 @@ test('read-only renderer has no pin button and installs no swipe listeners', () 
     assert.doesNotMatch(JSON.stringify(tree), /account-pin-icon/);
     view.destroy();
 });
+
+function findButton(nodes, icon) {
+    for (const node of Array.isArray(nodes) ? nodes : [nodes]) {
+        if (node?.tag === 'button' && node.children?.[0]?.props.textContent === icon) return node;
+        const nested = node?.children && findButton(node.children, icon);
+        if (nested) return nested;
+    }
+}
+
+test('scoped password reader is lazy, receives ciphertext and bypasses legacy resolver', async () => {
+    const f = fixture(); let reads = 0;
+    f.context.createCardSecretResolver = () => { throw new Error('LEGACY_FORBIDDEN'); };
+    f.context.resolveSecret = async (record, field) => {
+        reads++; assert.equal(field, 'password'); assert.equal(record.password, 'cipher-password');
+        return 'Scoped plaintext';
+    };
+    const view = f.run("createAccountListView({readOnly:true, resolveSecret, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+    view.render([{id: 'fixture', password: 'cipher-password', _encrypted: true}]);
+    assert.equal(reads, 0);
+    const button = findButton(f.document.getElementById().children, 'visibility');
+    const value = {textContent: '••••••••'}, icon = {};
+    f.document.getElementById = () => value;
+    const event = {stopPropagation() {}, currentTarget: {querySelector: () => icon}};
+    await button.props.onclick(event);
+    assert.equal(value.textContent, 'Scoped plaintext');
+    assert.equal(reads, 1);
+    await button.props.onclick(event);
+    assert.equal(value.textContent, '••••••••');
+    assert.equal(reads, 1);
+    view.destroy();
+});
+
+test('scoped password copy pending during destroy cannot reach the clipboard', async () => {
+    const f = fixture(); const copied = []; let resolve;
+    f.context.navigator = {clipboard: {writeText: async value => copied.push(value)}};
+    f.context.resolveSecret = () => new Promise(yes => { resolve = yes; });
+    const view = f.run("createAccountListView({readOnly:true, resolveSecret, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+    view.render([{id: 'fixture', password: 'cipher-password'}]);
+    const button = findButton(f.document.getElementById().children, 'content_copy');
+    const copying = button.props.onclick({stopPropagation() {}});
+    view.destroy(); resolve('Must stay private'); await copying;
+    assert.deepEqual(copied, []);
+});
+
+for (const field of ['username', 'account']) {
+    test(`${field}: copy works while active and is rejected from a disposed card`, async () => {
+        const f = fixture(); const copied = [];
+        f.context.navigator = {clipboard: {writeText: async value => copied.push(value)}};
+        const view = f.run("createAccountListView({readOnly:true, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+        view.render([{id: 'fixture', [field]: 'Visible fixture'}]);
+        const button = findButton(f.document.getElementById().children, 'content_copy');
+        await button.props.onclick({stopPropagation() {}});
+        view.destroy(); await button.props.onclick({stopPropagation() {}});
+        assert.deepEqual(copied, ['Visible fixture']);
+    });
+}

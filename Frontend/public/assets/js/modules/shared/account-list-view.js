@@ -6,9 +6,9 @@ import { logError } from '../../utils.js';
 import { accountModeFromRecord } from './account-mode-model.js';
 import { createCardSecretResolver } from './card-secret.js';
 
-function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false, signal) {
+function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false, signal, resolveSecret) {
     const rowId = crypto.randomUUID();
-    const resolve = createCardSecretResolver(copyValue, encrypted && isPassword);
+    const resolve = resolveSecret || createCardSecretResolver(copyValue, encrypted && isPassword);
     const resolveCopyValue = async () => {
         if (signal.aborted) throw new Error('VIEW_DISPOSED');
         const value = await resolve();
@@ -52,6 +52,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                 onclick: async event => {
                     event.stopPropagation();
                     try {
+                        if (signal.aborted) throw new Error('VIEW_DISPOSED');
                         await navigator.clipboard.writeText(isPassword
                             ? await resolveCopyValue()
                             : (copyValue || displayValue));
@@ -126,9 +127,10 @@ function createAccountCard(account, options) {
                 ])
             ]),
             createElement('div', { className: 'account-data-display' }, [
-                account.username ? createDataRow(t('label_user'), account.username) : null,
-                account.account ? createDataRow(t('label_account'), account.account) : null,
-                account.password ? createDataRow(t('label_password'), '••••••••', account.password, true, account._encrypted, options.signal) : null
+                account.username ? createDataRow(t('label_user'), account.username, null, false, false, options.signal) : null,
+                account.account ? createDataRow(t('label_account'), account.account, null, false, false, options.signal) : null,
+                account.password ? createDataRow(t('label_password'), '••••••••', account.password, true, account._encrypted, options.signal,
+                    options.resolveSecret ? () => options.resolveSecret(account, 'password') : undefined) : null
             ].filter(Boolean))
         ])
     ]);

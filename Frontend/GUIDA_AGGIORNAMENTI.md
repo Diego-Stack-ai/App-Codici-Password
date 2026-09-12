@@ -575,3 +575,7 @@ Collegati identità, Vault e viste nel laboratorio: blocco/logout/cambio UID inv
 ### Firebase Auth/Firestore in emulatore — 12/09/2026
 
 Collegato il bootstrap candidato agli SDK reali e al lettore v2 su utenti e record sintetici. Undici test emulati superati: separazione login/sblocco, isolamento utenti, letture cifrate, logout e rifiuto di record non conformi. Nuovo gate `npm run test:vault-emulators`, incluso in npm test. Confermato che la validazione degli schemi nelle Rules resta aperta. [Audit §20](../docs/AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).
+
+Laboratorio browser 12/09/2026, base `83dffc30`: comando `npm run prototype:vault-emulators`, due utenti sintetici, accesso e sblocco distinti, letture private/aziendali e pulizia su uscita/refresh verificati nel browser Windows. Anteprima pubblicata invariata. [Audit §21](../docs/AUDIT_VAULT_SESSION_P0.md#21-interfaccia-browser-degli-emulatori--12092026).
+
+Integrazione liste nel laboratorio, 12/09/2026: repository canonico e callback Vault per vista, ricerca e ordinamento su copie decifrate, password letta su richiesta. Nuove opzioni preservano i chiamanti legacy. [Audit §22](../docs/AUDIT_VAULT_SESSION_P0.md#22-liste-canoniche-e-repository-negli-emulatori--12092026).

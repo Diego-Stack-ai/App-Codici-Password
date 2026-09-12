@@ -2,15 +2,21 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **447**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3027 | 53 | File di progetto: firebase-session. |
-| `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 8173 | 118 | File di progetto: firebase-session.test. |
-| `experiments/persistent-vault-shell/firebase.emulators.json` | JSON | 348 | 12 | File di progetto: firebase.emulators. |
+| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 3543 | 40 | File di progetto: build-emulator. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 3941 | 51 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 2928 | 53 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 617 | 11 | File di progetto: emulator-firebase. |
+| `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 2970 | 46 | File di progetto: emulator-list-view. |
+| `experiments/persistent-vault-shell/emulator.css` | CSS | 1765 | 15 | File di progetto: emulator. |
+| `experiments/persistent-vault-shell/emulator.html` | HTML | 1876 | 10 | Struttura della pagina emulator; comportamento demandato ai moduli. |
+| `experiments/persistent-vault-shell/master-prompt.mjs` | MJS | 1387 | 29 | File di progetto: master-prompt. |
+| `experiments/persistent-vault-shell/master-prompt.test.mjs` | MJS | 3527 | 64 | File di progetto: master-prompt.test. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3342 | 70 | Documentazione: README. |
@@ -30,6 +36,9 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
 | `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
 | `experiments/persistent-vault-shell/build.mjs` | MJS | 2494 | 32 | File di progetto: build. |
+| `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3027 | 53 | File di progetto: firebase-session. |
+| `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 8173 | 118 | File di progetto: firebase-session.test. |
+| `experiments/persistent-vault-shell/firebase.emulators.json` | JSON | 348 | 12 | File di progetto: firebase.emulators. |
 | `experiments/persistent-vault-shell/firebase.preview.json` | JSON | 612 | 15 | File di progetto: firebase.preview. |
 | `experiments/persistent-vault-shell/fixture-repository.mjs` | MJS | 1016 | 21 | File di progetto: fixture-repository. |
 | `experiments/persistent-vault-shell/fixture.mjs` | MJS | 1994 | 32 | File di progetto: fixture. |
@@ -52,41 +61,6 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5927 | 139 | File di progetto: record-sharing-crypto. |
 | `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
 | `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
-
-## scripts
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `scripts/run-vault-session-emulators.mjs` | MJS | 926 | 15 | Strumento manutenzione/test: run-vault-session-emulators. |
-| `scripts/audit-canonical-pages.mjs` | MJS | 1211 | 29 | Strumento manutenzione/test: audit-canonical-pages. |
-| `scripts/audit-data-access.mjs` | MJS | 5974 | 91 | Strumento manutenzione/test: audit-data-access. |
-| `scripts/audit-firestore-legacy-email-metadata.mjs` | MJS | 1947 | 44 | Strumento manutenzione/test: audit-firestore-legacy-email-metadata. |
-| `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
-| `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
-| `scripts/audit-lightweight-features.mjs` | MJS | 2698 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 10162 | 130 | Strumento manutenzione/test: audit-navigation-flows. |
-| `scripts/audit-offline-shell.mjs` | MJS | 3627 | 70 | Strumento manutenzione/test: audit-offline-shell. |
-| `scripts/audit-page-performance.mjs` | MJS | 8127 | 146 | Strumento manutenzione/test: audit-page-performance. |
-| `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
-| `scripts/audit-project-inventory.mjs` | MJS | 8433 | 127 | Strumento manutenzione/test: audit-project-inventory. |
-| `scripts/audit-release-hardening.mjs` | MJS | 2220 | 35 | Strumento manutenzione/test: audit-release-hardening. |
-| `scripts/audit-security-flows.mjs` | MJS | 34119 | 296 | Strumento manutenzione/test: audit-security-flows. |
-| `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |
-| `scripts/audit-ui-foundations.mjs` | MJS | 10399 | 139 | Strumento manutenzione/test: audit-ui-foundations. |
-| `scripts/audit-vault-key-terminology.mjs` | MJS | 2058 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
-| `scripts/build-card-importer-prototype.mjs` | MJS | 561 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
-| `scripts/build-offline-runtime.mjs` | MJS | 5011 | 125 | Strumento manutenzione/test: build-offline-runtime. |
-| `scripts/bump-version.mjs` | MJS | 5788 | 144 | Strumento manutenzione/test: bump-version. |
-| `scripts/lib/legacy-email-audit-model.mjs` | MJS | 3871 | 66 | Strumento manutenzione/test: legacy-email-audit-model. |
-| `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
-| `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
-| `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
-| `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
-| `scripts/run-storage-rules-tests.mjs` | MJS | 1320 | 35 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
-| `scripts/test-functions-emulator.mjs` | MJS | 2598 | 59 | Strumento manutenzione/test: test-functions-emulator. |
-| `scripts/test-vault-assistant.mjs` | MJS | 1397 | 21 | Strumento manutenzione/test: test-vault-assistant. |
-| `scripts/ui-quality-baseline.json` | JSON | 128 | 7 | Strumento manutenzione/test: ui-quality-baseline. |
 
 ## .firebaserc
 
@@ -119,7 +93,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 14226 | 122 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 52400 | 578 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 53081 | 582 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -196,7 +170,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/auth/login.js` | JS | 14122 | 340 | Flusso autenticazione: login. |
 | `Frontend/public/assets/js/modules/auth/registrati.js` | JS | 7113 | 202 | Flusso autenticazione: registrati. |
 | `Frontend/public/assets/js/modules/auth/reset_password.js` | JS | 4396 | 134 | Flusso autenticazione: reset password. |
-| `Frontend/public/assets/js/modules/azienda/account_azienda.js` | JS | 10863 | 262 | Flusso aziende/account aziendali: account azienda. |
+| `Frontend/public/assets/js/modules/azienda/account_azienda.js` | JS | 12033 | 286 | Flusso aziende/account aziendali: account azienda. |
 | `Frontend/public/assets/js/modules/azienda/company-list-service.js` | JS | 423 | 11 | Flusso aziende/account aziendali: company-list-service. |
 | `Frontend/public/assets/js/modules/azienda/company-profile-link.js` | JS | 2761 | 25 | Flusso aziende/account aziendali: company-profile-link. |
 | `Frontend/public/assets/js/modules/azienda/company-profile-model.js` | JS | 2642 | 37 | Flusso aziende/account aziendali: company-profile-model. |
@@ -238,7 +212,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3459 | 71 | Supporto frontend: home-deadline-inbox. |
 | `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3669 | 88 | Supporto frontend: home-presentation. |
 | `Frontend/public/assets/js/modules/home/home.js` | JS | 14430 | 355 | Supporto frontend: home. |
-| `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 17143 | 390 | Flusso profilo/account personali: account privati. |
+| `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 18313 | 414 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 21560 | 514 | Flusso profilo/account personali: area privata. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 9101 | 234 | Flusso profilo/account personali: dettaglio-privato-attachments. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 7460 | 161 | Flusso profilo/account personali: dettaglio-privato-sharing. |
@@ -288,7 +262,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17243 | 320 | Impostazioni applicative: shared-credentials-controller. |
 | `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 6767 | 147 | Supporto frontend: account-banking-view. |
 | `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 19538 | 376 | Supporto frontend: account-embedded-widgets. |
-| `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 8361 | 176 | Supporto frontend: account-list-view. |
+| `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 8644 | 178 | Supporto frontend: account-list-view. |
 | `Frontend/public/assets/js/modules/shared/account-mode-model.js` | JS | 1828 | 40 | Supporto frontend: account-mode-model. |
 | `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 8873 | 169 | Supporto frontend: account-shared-credentials. |
 | `Frontend/public/assets/js/modules/shared/attachment-security.js` | JS | 5917 | 139 | Validazione e cifratura degli allegati prima di Storage. |
@@ -348,7 +322,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 8139 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 67004 | 822 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 10254 | 237 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 10018 | 237 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13808 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15598 | 259 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
@@ -383,10 +357,10 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21540 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 42190 | 284 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 50728 | 316 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3096 | 51 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 4702 | 64 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 5546 | 49 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 5441 | 68 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 6227 | 53 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 11217 | 100 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 8588 | 152 | Documentazione: GUIDA PROGETTO. |
 | `docs/M10_HARDENING_RILASCIO.md` | MD | 5031 | 53 | Documentazione: M10 HARDENING RILASCIO. |
@@ -403,12 +377,12 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6577 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 22531 | 323 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 23358 | 327 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 33324 | 347 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11580 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 10862 | 153 | Documentazione: VAULT KEY CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 11597 | 157 | Documentazione: VAULT KEY CONTRACT. |
 
 ## firebase.json
 
@@ -464,7 +438,42 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 7271 | 79 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 7516 | 81 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+
+## scripts
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `scripts/audit-canonical-pages.mjs` | MJS | 1211 | 29 | Strumento manutenzione/test: audit-canonical-pages. |
+| `scripts/audit-data-access.mjs` | MJS | 5974 | 91 | Strumento manutenzione/test: audit-data-access. |
+| `scripts/audit-firestore-legacy-email-metadata.mjs` | MJS | 1947 | 44 | Strumento manutenzione/test: audit-firestore-legacy-email-metadata. |
+| `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
+| `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
+| `scripts/audit-lightweight-features.mjs` | MJS | 2698 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 10257 | 130 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-offline-shell.mjs` | MJS | 3627 | 70 | Strumento manutenzione/test: audit-offline-shell. |
+| `scripts/audit-page-performance.mjs` | MJS | 8127 | 146 | Strumento manutenzione/test: audit-page-performance. |
+| `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
+| `scripts/audit-project-inventory.mjs` | MJS | 8433 | 127 | Strumento manutenzione/test: audit-project-inventory. |
+| `scripts/audit-release-hardening.mjs` | MJS | 2220 | 35 | Strumento manutenzione/test: audit-release-hardening. |
+| `scripts/audit-security-flows.mjs` | MJS | 34119 | 296 | Strumento manutenzione/test: audit-security-flows. |
+| `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |
+| `scripts/audit-ui-foundations.mjs` | MJS | 10399 | 139 | Strumento manutenzione/test: audit-ui-foundations. |
+| `scripts/audit-vault-key-terminology.mjs` | MJS | 2058 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
+| `scripts/build-card-importer-prototype.mjs` | MJS | 561 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
+| `scripts/build-offline-runtime.mjs` | MJS | 5011 | 125 | Strumento manutenzione/test: build-offline-runtime. |
+| `scripts/bump-version.mjs` | MJS | 5788 | 144 | Strumento manutenzione/test: bump-version. |
+| `scripts/lib/legacy-email-audit-model.mjs` | MJS | 3871 | 66 | Strumento manutenzione/test: legacy-email-audit-model. |
+| `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
+| `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
+| `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
+| `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
+| `scripts/run-storage-rules-tests.mjs` | MJS | 1320 | 35 | Strumento manutenzione/test: run-storage-rules-tests. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 1115 | 17 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
+| `scripts/test-functions-emulator.mjs` | MJS | 2598 | 59 | Strumento manutenzione/test: test-functions-emulator. |
+| `scripts/test-vault-assistant.mjs` | MJS | 1397 | 21 | Strumento manutenzione/test: test-vault-assistant. |
+| `scripts/ui-quality-baseline.json` | JSON | 128 | 7 | Strumento manutenzione/test: ui-quality-baseline. |
 
 ## storage.cors.json
 
@@ -490,7 +499,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
-| `tests/account-page-lifecycle.test.mjs` | MJS | 11516 | 192 | Test automatico: account-page-lifecycle.test. |
+| `tests/account-page-lifecycle.test.mjs` | MJS | 14766 | 241 | Test automatico: account-page-lifecycle.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 1780 | 38 | Test automatico: account-widget-ui.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
@@ -532,7 +541,7 @@ File censiti: **438**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4079 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
 | `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
 | `tests/storage.rules.test.mjs` | MJS | 4149 | 99 | Test automatico: storage.rules.test. |
-| `tests/swipe-lifecycle.test.mjs` | MJS | 5659 | 116 | Test automatico: swipe-lifecycle.test. |
+| `tests/swipe-lifecycle.test.mjs` | MJS | 8753 | 172 | Test automatico: swipe-lifecycle.test. |
 | `tests/vault-logout.test.mjs` | MJS | 4374 | 92 | Test automatico: vault-logout.test. |
 | `tests/vault-session-races.test.mjs` | MJS | 9272 | 206 | Test automatico: vault-session-races.test. |
 | `tests/vault-session.test.mjs` | MJS | 1865 | 39 | Test automatico: vault-session.test. |

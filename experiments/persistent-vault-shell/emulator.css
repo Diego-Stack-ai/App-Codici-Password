@@ -1,0 +1,14 @@
+:root{font-family:system-ui,sans-serif;color:#153047;background:#e8f3fd}body{margin:0;padding:24px}main{max-width:760px;margin:36px auto}h1{font-size:2rem}button,select,input{font:inherit;padding:12px;border-radius:12px;border:1px solid #94afc4}button{background:#087fe9;color:white;cursor:pointer}button:disabled{opacity:.5;cursor:default}.actions,nav{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}label{display:block;margin:12px 0 6px}section{background:white;border-radius:16px;padding:24px;min-height:64px;overflow-wrap:anywhere}details{margin-top:24px}dialog{max-width:420px;border:0;border-radius:20px;padding:28px}dialog::backdrop{background:#15304788}input{box-sizing:border-box;width:100%;-webkit-text-security:disc}#message{color:#a11726}button:focus-visible,input:focus-visible{outline:3px solid #153047;outline-offset:3px}
+@font-face{font-family:Symbols;src:url('/symbols.woff2') format('woff2');font-display:swap}
+.material-symbols-outlined{font-family:Symbols,sans-serif;font-weight:normal;font-style:normal;font-size:22px;line-height:1}
+#account-search{-webkit-text-security:none;margin-bottom:12px}
+.swipe-action-bg{display:none}
+.account-card{padding:16px;border-radius:12px;background:#edf5fc;margin-top:12px;overflow:hidden}
+.account-avatar{width:36px;height:36px;border-radius:50%}
+.account-card-left,.account-card-layout,.account-card-right{display:flex;align-items:center;gap:12px}
+.account-card-title{margin:0;font-size:1rem}
+.account-card-subtitle{margin:4px 0}
+.account-data-row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.account-data-value{overflow-wrap:anywhere;flex:1}
+.account-data-label{font-size:.85rem}
+.btn-mini-action{padding:10px;display:inline-flex;align-items:center;justify-content:center}

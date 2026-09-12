@@ -47,6 +47,55 @@ async function fixture(company, overrides = {}) {
 
 for (const company of [false, true]) {
     const label = company ? 'company' : 'private';
+    test(`${label}: scoped reader decrypts searchable copies and resolves password only on demand`, async () => {
+        const ciphertext = {id: 'a', nomeAccount: 'cipher-title', username: 'cipher-user', account: 'cipher-code', password: 'cipher-password', _encrypted: true};
+        const load = async () => [ciphertext];
+        let legacyReads = 0;
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load,
+            ensureVaultKeyMaterial: async () => { legacyReads++; throw new Error('LEGACY_FORBIDDEN'); }});
+        const calls = [];
+        const mounted = f.mount({readOnly: true, readField: async (record, field) => {
+            calls.push(field);
+            assert.equal(record[field], ciphertext[field]);
+            return {nomeAccount: 'Searchable title', username: 'Visible user', account: 'Visible code', password: 'Lazy secret'}[field];
+        }});
+        await mounted.ready;
+        const view = f.views[0], visible = view.renders[0][0];
+        assert.equal(legacyReads, 0);
+        assert.deepEqual(calls, ['nomeAccount', 'username', 'account']);
+        assert.equal(visible.password, 'cipher-password');
+        assert.equal(ciphertext.username, 'cipher-user');
+        assert.equal(ciphertext.nomeAccount, 'cipher-title');
+        f.elements['account-search'].value = 'searchable';
+        f.elements['account-search'].dispatchEvent(new Event('input'));
+        assert.equal(view.renders.at(-1).length, 1);
+        assert.equal(await view.options.resolveSecret(visible, 'password'), 'Lazy secret');
+        mounted.destroy();
+        await assert.rejects(view.options.resolveSecret(visible, 'password'), {name: 'AbortError'});
+        assert.deepEqual(calls, ['nomeAccount', 'username', 'account', 'password']);
+    });
+    test(`${label}: scoped reader excludes rejected records without plaintext or ciphertext fallback`, async () => {
+        const load = async () => [{id: 'bad', nomeAccount: 'plain-rejected', username: 'cipher-user'}, {id: 'good', nomeAccount: 'cipher-good'}];
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load});
+        const mounted = f.mount({readField: async record => {
+            if (record.id === 'bad') throw new Error('CIPHERTEXT_REQUIRED');
+            return 'Accepted title';
+        }});
+        await mounted.ready;
+        assert.equal(f.views[0].renders[0].length, 1);
+        assert.equal(f.views[0].renders[0][0].id, 'good');
+        assert.doesNotMatch(JSON.stringify(f.views[0].renders), /plain-rejected|cipher-user/);
+        mounted.destroy();
+    });
+    test(`${label}: scoped reader completion after abort cannot render or read another field`, async () => {
+        const pending = deferred(); let reads = 0;
+        const load = async () => [{id: 'x', nomeAccount: 'cipher-title', username: 'cipher-user'}];
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load});
+        const mounted = f.mount({readField: () => { reads++; return pending.promise; }});
+        await tick(); mounted.destroy(); pending.resolve('Stale plaintext'); await mounted.ready;
+        assert.equal(reads, 1);
+        assert.equal(f.views[0].renders.length, 0);
+    });
     test(`${label}: search, sort and remount keep exactly one listener and reset ordering`, async () => {
         const f = await fixture(company);
         await f.init();

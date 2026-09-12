@@ -46,3 +46,7 @@ Preparazione delle liste 12/09/2026, base `0a807adb`: rimosse le referenze ai re
 Verifica sperimentale 12/09/2026, base `d906fd50`: letture v2 sintetiche collegate al ciclo delle viste e invalidate al cambio identità. Nessun campo o formato persistito modificato; nessun record reale letto o migrato. [Audit §19](./AUDIT_VAULT_SESSION_P0.md#19-coordinamento-identità-vault-e-viste--12092026).
 
 Riscontro emulato 12/09/2026, base `0e07621d`: il lettore candidato rifiuta password non cifrate e ownerId incoerente, che le Rules attuali consentono al proprietario di salvare. Non è stato censito o corretto alcun dato reale. Nessun campo o formato modificato. [Audit §20](./AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).
+
+Prova browser locale 12/09/2026, base `83dffc30`: quattro campi sintetici creati cifrati negli emulatori e letti con crypto-utils originale. Nessun inventario, lettura o modifica di dati personali. [Audit §21](./AUDIT_VAULT_SESSION_P0.md#21-interfaccia-browser-degli-emulatori--12092026).
+
+Integrazione delle liste, 12/09/2026: otto record sintetici con nomeAccount, username, account e password cifrati; soltanto i primi tre campi sono decifrati su copie per ricerca/render. La password resta ciphertext fino al comando esplicito. Nessuna riscrittura del formato o dato reale. [Audit §22](./AUDIT_VAULT_SESSION_P0.md#22-liste-canoniche-e-repository-negli-emulatori--12092026).
