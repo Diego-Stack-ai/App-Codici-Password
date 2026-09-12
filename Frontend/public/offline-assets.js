@@ -173,6 +173,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/shared/company-area-preference.js",
   "assets/js/modules/shared/detail-account-mode.js",
   "assets/js/modules/shared/gestione-destinatari.js",
+  "assets/js/modules/shared/profile-account-management.js",
   "assets/js/modules/shared/push-manager.js",
   "assets/js/modules/shared/qr_code_utils-v2.js",
   "assets/js/modules/shared/qr_code_utils.js",

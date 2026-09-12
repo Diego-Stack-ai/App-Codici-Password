@@ -9,7 +9,7 @@ import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.
 import { t } from '../../translations.js';
 import { filterProfileAccounts } from './profile-model.js';
 
-export function showProfileAccountPicker({ title, accounts, companies, onSelect, initialScope = 'all' }) {
+export function showProfileAccountPicker({ title, accounts, companies, onSelect, initialScope = 'all', allowCreate = true, confirmLabel = 'Continua' }) {
     document.getElementById('profile-account-picker')?.remove();
     const previousFocus = document.activeElement;
     let selected = null;
@@ -54,7 +54,7 @@ export function showProfileAccountPicker({ title, accounts, companies, onSelect,
         }
     };
     const confirm = createElement('button', {
-        className: 'btn-modal btn-primary', textContent: 'Continua', disabled: true,
+        className: 'btn-modal btn-primary', textContent: confirmLabel, disabled: true,
         onclick: () => selected && submit(selected)
     });
     const create = createElement('button', {
@@ -100,7 +100,7 @@ export function showProfileAccountPicker({ title, accounts, companies, onSelect,
             createElement('h3', { id: 'profile-account-picker-title', className: 'modal-title', textContent: title }),
             createElement('div', { className: 'modal-accent-bar' })
         ]),
-        createElement('div', { className: 'profile-account-filters' }, [search, scope]), count, list, create,
+        createElement('div', { className: 'profile-account-filters' }, [search, scope]), count, list, ...(allowCreate ? [create] : []),
         createElement('div', { className: 'modal-actions' }, [
             createElement('button', { className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close }), confirm
         ])
