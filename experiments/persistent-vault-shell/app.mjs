@@ -1,7 +1,6 @@
 import {createMemoryVault} from './memory-vault.mjs';
-import {createRouter} from './router.mjs';
 import {createFixture, decryptRecord} from './fixture.mjs';
-import {mountRealList} from './real-lists.mjs';
+import {mountRealList, createProtectedSession} from './real-lists.mjs';
 
 const view = document.querySelector('#view');
 const status = document.querySelector('#status');
@@ -12,15 +11,8 @@ if ('serviceWorker' in navigator) {
         document.querySelector('#offline').textContent = 'Demo disponibile anche offline';
     }).catch(() => { document.querySelector('#offline').textContent = 'Demo offline non disponibile'; });
 } else document.querySelector('#offline').textContent = 'Browser senza supporto offline';
-let router, mounts = 0, cleanups = 0;
-const vault = createMemoryVault({
-    unlockKey: fixture.unlockKey, decryptRecord,
-    onLock(reason) {
-        router?.stop();
-        view.replaceChildren();
-        status.textContent = reason === 'logout' ? 'Demo terminata' : 'Vault bloccata';
-    }
-});
+let mounts = 0, cleanups = 0;
+let demoUser = {uid: 'demo-user'}, identityObserver;
 const route = () => ['account', 'private', 'company'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -31,7 +23,7 @@ function element(tag, text, className) {
 function counters() {
     document.querySelector('#mounts').textContent = `Viste montate: ${mounts} · Viste smontate: ${cleanups}`;
 }
-async function mount({signal, route: name}) {
+async function mount({signal, route: name, unlocked, read}) {
     mounts++;
     counters();
     const container = element('div', '');
@@ -45,11 +37,11 @@ async function mount({signal, route: name}) {
     }
     const cleanup = () => { disposeList?.(); container.replaceChildren(); container.remove(); cleanups++; counters(); };
     signal.addEventListener('abort', () => container.replaceChildren(), {once: true});
-    if (!vault.isUnlocked()) container.append(element('p', 'Sblocca la demo per leggere i dati fittizi.'));
+    if (!unlocked) container.append(element('p', 'Sblocca la demo per leggere i dati fittizi.'));
     else {
         try {
             const isList = name === 'private' || name === 'company';
-            const value = await vault.read('demo-user', fixture.records[isList ? 'lists' : name]);
+            const value = await read(fixture.records[isList ? 'lists' : name]);
             if (!signal.aborted) {
                 if (isList) {
                     container.replaceChildren();
@@ -62,27 +54,40 @@ async function mount({signal, route: name}) {
     }
     return cleanup;
 }
-router = createRouter({routes: {overview: mount, account: mount, private: mount, company: mount}, onError: () => vault.lock('error')});
+const session = createProtectedSession({
+    getUser: () => demoUser,
+    subscribeUser: listener => { identityObserver = listener; return () => { identityObserver = null; }; },
+    createVault: callbacks => createMemoryVault({unlockKey: fixture.unlockKey, decryptRecord, ...callbacks}),
+    routes: {overview: mount, account: mount, private: mount, company: mount},
+    onState({state}) {
+        if (state !== 'unlocked') view.replaceChildren();
+        status.textContent = state === 'unlocked' ? 'Vault sbloccata · chiave solo in memoria'
+            : state === 'signed-out' ? 'Demo terminata' : 'Vault bloccata';
+    }
+});
 unlock.disabled = false;
 unlock.addEventListener('click', async () => {
     unlock.disabled = true;
     try {
-        await vault.unlock('demo-user');
-        status.textContent = 'Vault sbloccata · chiave solo in memoria';
-        await router.navigate(route());
-    } catch { status.textContent = 'Sblocco annullato. Riprova.'; }
+        if (!demoUser) { demoUser = {uid: 'demo-user'}; identityObserver?.(); }
+        await session.unlock();
+        await session.navigate(route());
+    } catch { status.textContent = demoUser ? 'Sblocco annullato. Riprova.' : 'Demo terminata'; }
     finally { unlock.disabled = false; }
 });
-document.querySelector('#lock').addEventListener('click', () => { vault.lock(); router.navigate(route()); });
-document.querySelector('#logout').addEventListener('click', () => { vault.lock('logout'); router.navigate(route()); });
-window.addEventListener('hashchange', () => router.navigate(route()));
-// Lock before a page can enter the browser's back/forward cache.
-window.addEventListener('pagehide', () => vault.lock('pagehide'));
-window.addEventListener('pageshow', event => {
-    if (event.persisted) { vault.lock('pageshow'); router.navigate(route()); }
+document.querySelector('#lock').addEventListener('click', () => { session.lock(); session.navigate(route()); });
+document.querySelector('#logout').addEventListener('click', async () => {
+    await session.logout(async () => { demoUser = null; identityObserver?.(); });
+    session.navigate(route());
 });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) vault.isUnlocked(); });
-for (const event of ['pointerdown', 'keydown']) document.addEventListener(event, () => vault.touch(), {passive: true});
-setInterval(() => vault.isUnlocked(), 500);
+window.addEventListener('hashchange', () => session.navigate(route()));
+// Lock before a page can enter the browser's back/forward cache.
+window.addEventListener('pagehide', () => session.lock('pagehide'));
+window.addEventListener('pageshow', event => {
+    if (event.persisted) { session.lock('pageshow'); session.navigate(route()); }
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) session.check(); });
+for (const event of ['pointerdown', 'keydown']) document.addEventListener(event, () => session.touch(), {passive: true});
+setInterval(() => session.check(), 500);
 status.textContent = 'Vault bloccata';
-router.navigate(route());
+session.navigate(route());

@@ -29,7 +29,7 @@
     "test:offline": "node scripts/audit-offline-shell.mjs",
     "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs",
     "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs tests/vault-logout.test.mjs tests/vault-session-races.test.mjs && npm run test:vault-shell",
-    "test:vault-shell": "node --test experiments/persistent-vault-shell/prototype.test.mjs experiments/persistent-vault-shell/legacy-adapter.test.mjs tests/swipe-lifecycle.test.mjs",
+    "test:vault-shell": "node --test experiments/persistent-vault-shell/prototype.test.mjs experiments/persistent-vault-shell/legacy-adapter.test.mjs tests/swipe-lifecycle.test.mjs experiments/persistent-vault-shell/protected-session.test.mjs",
     "build:vault-shell": "node experiments/persistent-vault-shell/build.mjs",
     "prepare:vault-preview": "node experiments/persistent-vault-shell/prepare-preview.mjs",
     "test:vault-preview": "npm run prepare:vault-preview && node --test experiments/persistent-vault-shell/preview.test.mjs",

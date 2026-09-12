@@ -1,6 +1,7 @@
 import {mountAccountPrivati} from '../../Frontend/public/assets/js/modules/privato/account_privati.js';
 import {mountAccountAziendaList} from '../../Frontend/public/assets/js/modules/azienda/account_azienda.js';
 import {installFixture} from './fixture-repository.mjs';
+export {createProtectedSession} from './protected-session.mjs';
 
 // Mount canonical page orchestrators with an explicitly synthetic repository.
 export async function mountRealList(root, records, {signal, company = false}) {

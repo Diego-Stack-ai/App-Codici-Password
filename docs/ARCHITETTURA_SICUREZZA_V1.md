@@ -370,3 +370,5 @@ La convenienza del codice esistente non può prevalere sulla protezione dei dati
 Verifica locale 12/09/2026, base `ff006c71`: il laboratorio invalida anche le dipendenze dei tentativi di sblocco annullati e gestisce gli errori di smontaggio. Nessuna modifica della baseline o attivazione produttiva; [audit §15](./AUDIT_VAULT_SESSION_P0.md#15-annullamento-e-robustezza-del-laboratorio--12092026).
 
 Preparazione locale 12/09/2026, base `0a807adb`: montaggio/smontaggio degli orchestratori delle liste con invalidazione dei consumatori e rimozione dei dati visibili. Nessuna modifica della baseline, delle chiavi o dei dati persistiti; integrazione con blocco/Auth ancora da completare. [Audit §17](./AUDIT_VAULT_SESSION_P0.md#17-primo-adattamento-degli-orchestratori-reali--12092026).
+
+Integrazione sperimentale 12/09/2026, base `d906fd50`: coordinatore identità/Vault/viste con lettori legati a UID e revisione del contesto. Logout invalida prima dell’uscita remota; la prova browser mantiene un’identità simulata. Nessuna modifica della baseline o attivazione produttiva. [Audit §19](./AUDIT_VAULT_SESSION_P0.md#19-coordinamento-identità-vault-e-viste--12092026).

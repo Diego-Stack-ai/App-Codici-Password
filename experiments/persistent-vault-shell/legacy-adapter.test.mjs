@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createLegacyAdapter} from './legacy-adapter.mjs';
+import {createProtectedSession} from './protected-session.mjs';
 const source = await readFile(new URL('../../Frontend/public/assets/js/modules/core/crypto-utils.js', import.meta.url), 'utf8');
 const cryptoApi = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const master = 'SOLO-FIXTURE!123456';
@@ -140,4 +141,31 @@ test('dispose unsubscribes once even when the UI lock callback fails', () => {
     f.adapter.dispose();
     assert.equal(unsubscribes, 1);
     assert.equal(f.adapter.isUnlocked(), false);
+});
+
+test('protected routing reads real v2 ciphertext through the legacy adapter and releases Auth subscriptions', async () => {
+    let user = {uid: 'a'}, context;
+    const listeners = new Set();
+    const subscribeUser = fn => { listeners.add(fn); return () => listeners.delete(fn); };
+    const session = createProtectedSession({
+        getUser: () => user, subscribeUser,
+        createVault: callbacks => {
+            const adapter = createLegacyAdapter({getUser: () => user, subscribeUser,
+                loadSecurity: async () => ({verifier, vaultKeyEnvelope: envelope}),
+                requestPassword: async () => master, cryptoApi, ...callbacks});
+            return {unlock: () => adapter.unlock(), read: (uid, record) => adapter.read(record),
+                lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
+        },
+        routes: {overview: value => { context = value; }}
+    });
+    await session.unlock(); await session.navigate('overview');
+    assert.equal(await context.read({ownerId: 'a', ciphertext}), 'fixture-current');
+    const old = context;
+    user = {uid: 'b'};
+    for (const listener of listeners) listener(user);
+    assert.equal(old.signal.aborted, true);
+    assert.equal(session.check(), false);
+    await assert.rejects(old.read({ownerId: 'a', ciphertext}));
+    session.dispose();
+    assert.equal(listeners.size, 0);
 });

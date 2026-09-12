@@ -567,3 +567,7 @@ Preparati montaggio/smontaggio e annullamento dei consumatori per liste private 
 ### Liste canoniche nel laboratorio — 12/09/2026
 
 Su base `4c1d90b5`, montati i due orchestratori reali con repository sintetico e sola lettura. Nel browser verificati ordinamento, ricerca vuota e cambio dominio senza stato residuo. Suite completa: 364 test; anteprima: quattro. Aggiornato il piano di maturità per distinguere avanzamento corrente e gate aperti. [Audit §18](../docs/AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026).
+
+### Coordinatore della sessione — 12/09/2026
+
+Collegati identità, Vault e viste nel laboratorio: blocco/logout/cambio UID invalidano i consumatori, logout pendente impedisce nuovi sblocchi. Tredici nuove prove, inclusa integrazione con il lettore v2 su credenziali sintetiche; identità nel browser ancora fittizia. [Audit §19](../docs/AUDIT_VAULT_SESSION_P0.md#19-coordinamento-identità-vault-e-viste--12092026). Nessun aggiornamento del runtime produttivo o del canale HTTPS in questo blocco.
