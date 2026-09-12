@@ -487,3 +487,28 @@ Correzione CSS `2c6da4cb`: sfondo trasparente del controllo e colori delle opzio
 Correzione sorgenti `366a98db`: gli otto pannelli legacy non attivi ora hanno hidden nell’HTML, oltre al pannello tessera digitale già nascosto. Verificati dieci pannelli: solo Panoramica inizialmente visibile. L’attivazione esistente ripristina la scheda memorizzata dopo la lettura dati. Nessun cambiamento ai collegamenti o ai dati.
 
 Release isolata 1.2.117, commit `83513576b6e36c0ef91b7b000841067552f50903`, PR #51 unita in master `445b338dd9320f4854eb97bc2f3e90cb60a59a0f`. HTML, shell offline, versione e budget verificati; suite CI completa riuscita. Deploy Hosting `34719109968` riuscito, undici file verificati via HTTPS corrispondono alla release, incluso dati_azienda.html. Rollback Hosting alla 1.2.116. Backend e programma sperimentale esclusi.
+
+## 39. Ripresa autonoma per blocchi verificati — 12/09/2026
+
+Autorizzazione utente: proseguire il programma, registrando i punti che richiedono intervento e continuando sui blocchi indipendenti. Un solo ramo `experiment/persistent-vault-shell`, commit distinti; nessun merge o deploy implicito delle modifiche strutturali. Produzione resta alla 1.2.117 (`445b338d`).
+
+Commit verificati:
+- `91effaca`: le due callable distinguono legacy non verificato con failed-precondition e reason; otto test handler aggiuntivi, nessuna nuova scrittura.
+- `95b8adaf`: sostituzione atomica IndexedDB e marker di riconciliazione nel contenitore cifrato. CAS, collisione ID, ordine, errore cifratura/transazione e cambio sessione coperti da undici test della coda.
+- `c6fb7ff5`: marker persistente impedisce retry automatici; recupero nel modulo conserva l'originale fino a sostituzione atomica o scelta esplicita server. Decifratura rigorosa, revisione server fresca, stato e lifecycle controllati. Esiti non confermati e lease occupato non dichiarano salvato. Cinque test UI recupero, più synchronizer/client.
+- `0d1ae576`: editor Profilo caricato su azione con guard UID/generazione/DOM. Tre test; pagina a circa 333,7 KB gzip, senza aumento del budget di 336 KB.
+- `99ac08d4`: guard del record corrente nella transazione privata. Impedisce di eliminare implicitamente condivisione, banca, archivio, proprietario o collegamenti dichiarati con payload ridotto. Retry già attestato resta consultazione. Riferimenti inversi/alias ancora da censire.
+
+Suite completa `npm test` conclusa con codice 0: 642 test superati, inclusi Functions, Rules, Storage, sessione e mutazioni emulati. Non equivale a certificazione dei dispositivi fisici. Nessuna migrazione, dato reale o pubblicazione backend in questo blocco.
+
+## 40. Decisioni e collaudi lasciati aperti senza bloccare lavori indipendenti
+
+| Punto | Perché resta aperto | Lavoro proseguibile |
+|---|---|---|
+| iPhone e Windows: ripresa, chiusura, conflitti, lista bancaria offline | La precedente prova iPhone non è superata; servono dispositivi reali e dati fittizi | Test automatici e lifecycle canonici |
+| Inventario riferimenti inversi/alias Profilo | Il guard controlla solo campi dichiarati nel record; non certifica assenza di altri link | Policy e test negativi del record corrente |
+| Deploy Rules/Functions e rollback | Vecchie Functions ignorano il nuovo registro mutationResults; tornare alla vecchia versione non è un rollback valido | Preparazione artefatti e prove locali di compatibilità |
+| Recupero di record divenuti condivisi/bancari/archiviati o eliminati | La copia resta cifrata e bloccata; non può essere riscritta come account isolato | Consultazione, mantenimento server esplicito e altri record |
+| Retention M7, ripresa backup M8, App Check remoto e audit indipendente | Richiedono scelte/verifiche specifiche; non chiusi dai test locali | Blocchi che non dipendono da tali decisioni |
+
+Prima del deploy strutturale: usare ambiente non produttivo separato; verificare lettore nuovo/vecchio e marker di coda, Rules che negano esiti client e Functions che usano soltanto ricevute attendibili. Provare risposta persa, retry, errore legacy e ripristino della copia senza segreti nei log. Un eventuale artefatto di rollback deve mantenere il nuovo registro e la deduplicazione: non distribuire le vecchie Functions come scorciatoia. L'ordine esatto e la prova di rollback restano gate documentato, non esecuzione autorizzata su produzione.

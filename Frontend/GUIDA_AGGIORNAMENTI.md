@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Ripresa per commit verificati — 12/09/2026
+
+Sul ramo sperimentale: recupero sicuro delle code legacy, sostituzione atomica, controlli del record corrente e caricamento differito degli editor Profilo. Suite completa: 642 test. Produzione resta 1.2.117. I gate fisici e di distribuzione/rollback sono esplicitamente separati dai blocchi indipendenti; vedere [audit §39–40](../docs/AUDIT_VAULT_SESSION_P0.md#39-ripresa-autonoma-per-blocchi-verificati--12092026). Nessuna nuova migrazione o pubblicazione backend.
+
 ### Caricamento iniziale Dati azienda — 12/09/2026
 
 Release 1.2.117: i pannelli delle linguette non attive sono nascosti già nell’HTML. Evita la comparsa temporanea delle vecchie sezioni tutte insieme prima del caricamento dati e dell’attivazione della linguetta memorizzata. Nessuna modifica ai dati o al percorso di collegamento email/Account. Verificati stato iniziale dei dieci pannelli, purezza HTML e budget pagine. Rollback Hosting alla 1.2.116.
