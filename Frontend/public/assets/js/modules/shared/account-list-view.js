@@ -6,9 +6,15 @@ import { logError } from '../../utils.js';
 import { accountModeFromRecord } from './account-mode-model.js';
 import { createCardSecretResolver } from './card-secret.js';
 
-function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false) {
+function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false, signal) {
     const rowId = crypto.randomUUID();
-    const resolveCopyValue = createCardSecretResolver(copyValue, encrypted && isPassword);
+    const resolve = createCardSecretResolver(copyValue, encrypted && isPassword);
+    const resolveCopyValue = async () => {
+        if (signal.aborted) throw new Error('VIEW_DISPOSED');
+        const value = await resolve();
+        if (signal.aborted) throw new Error('VIEW_DISPOSED');
+        return value;
+    };
     return createElement('div', { className: 'account-data-row' }, [
         createElement('span', { className: 'account-data-label', textContent: `${label}:` }),
         createElement('span', {
@@ -122,7 +128,7 @@ function createAccountCard(account, options) {
             createElement('div', { className: 'account-data-display' }, [
                 account.username ? createDataRow(t('label_user'), account.username) : null,
                 account.account ? createDataRow(t('label_account'), account.account) : null,
-                account.password ? createDataRow(t('label_password'), '••••••••', account.password, true, account._encrypted) : null
+                account.password ? createDataRow(t('label_password'), '••••••••', account.password, true, account._encrypted, options.signal) : null
             ].filter(Boolean))
         ])
     ]);
@@ -130,9 +136,19 @@ function createAccountCard(account, options) {
 
 export function createAccountListView(options) {
     let swipeList = null;
+    let lifecycle = new AbortController();
 
     return Object.freeze({
+        destroy() {
+            lifecycle.abort();
+            swipeList?.destroy();
+            swipeList = null;
+        },
         render(accounts) {
+            lifecycle.abort();
+            lifecycle = new AbortController();
+            swipeList?.destroy();
+            swipeList = null;
             const container = document.getElementById(options.containerId || 'accounts-container');
             if (!container) return;
             clearElement(container);
@@ -147,8 +163,7 @@ export function createAccountListView(options) {
                 return;
             }
 
-            setChildren(container, accounts.map(account => createAccountCard(account, options)));
-            swipeList = null;
+            setChildren(container, accounts.map(account => createAccountCard(account, {...options, signal: lifecycle.signal})));
             swipeList = new SwipeList('.swipe-row', {
                 threshold: 0.15,
                 onSwipeLeft: options.onDelete,

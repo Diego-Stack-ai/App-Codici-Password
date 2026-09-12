@@ -12,7 +12,11 @@ export async function createFixture() {
     const records = {};
     for (const [name, value] of Object.entries({
         overview: 'Profilo dimostrativo · 1 account fittizio',
-        account: 'Gestore demo · numero fittizio 000 000000 · codice DEMO-2076'
+        account: 'Gestore demo · numero fittizio 000 000000 · codice DEMO-2076',
+        lists: JSON.stringify([
+            {id: 'demo-private', nomeAccount: 'Gestore personale demo', username: 'utente.fittizio', password: 'PASSWORD-FITTIZIA', company: false},
+            {id: 'demo-company', nomeAccount: 'Gestore aziendale demo', username: 'azienda.fittizia', password: 'PASSWORD-FITTIZIA', company: true}
+        ])
     })) {
         const iv = crypto.getRandomValues(new Uint8Array(12));
         records[name] = {iv, ciphertext: await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, encoder.encode(value))};

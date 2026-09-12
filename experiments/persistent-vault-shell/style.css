@@ -13,10 +13,23 @@ p { line-height: 1.6; }
 button, nav a { border: 1px solid #b6cadc; border-radius: 10px; padding: 12px 16px; background: #f0f6fc; color: #20354b; font: inherit; cursor: pointer; min-height: 44px; text-decoration: none; }
 #unlock { background: #087bdf; border-color: #087bdf; color: white; }
 button:disabled { opacity: .5; cursor: wait; }
-nav { display: flex; gap: 12px; margin: 24px 0; }
+nav { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
 nav a[aria-current="page"] { background: #d5eafd; border-color: #087bdf; }
 #view { min-height: 210px; }
 .secret { padding: 18px; background: #eaf6ef; border-radius: 12px; overflow-wrap: anywhere; }
 aside { margin-top: 28px; color: #526880; }
 .technical { font-size: .8rem; }
 :focus-visible { outline: 3px solid #135fba; outline-offset: 3px; }
+@font-face { font-family: Symbols; src: url('./symbols.woff2') format('woff2'); font-display: swap; }
+.material-symbols-outlined { font-family: Symbols, sans-serif; font-weight: normal; font-style: normal; font-size: 22px; line-height: 1; }
+#view input { width: 100%; padding: 12px; border: 1px solid #b6cadc; border-radius: 10px; font: inherit; margin-bottom: 16px; }
+.swipe-action-bg { display: none; }
+.account-card { padding: 16px; border-radius: 12px; background: #edf5fc; margin-top: 12px; overflow: hidden; }
+.account-avatar { width: 36px; height: 36px; border-radius: 50%; }
+.account-card-left, .account-card-layout, .account-card-right { display: flex; align-items: center; gap: 12px; }
+.account-card-title { margin: 0; font-size: 1rem; }
+.account-card-subtitle { margin: 4px 0; }
+.account-data-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.account-data-value { overflow-wrap: anywhere; flex: 1; }
+.account-data-label { font-size: .85rem; }
+.btn-mini-action { padding: 10px; display: inline-flex; align-items: center; justify-content: center; }

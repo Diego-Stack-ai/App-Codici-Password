@@ -77,7 +77,7 @@ for (const [name, source] of [['privata', privateAccountList], ['aziendale', com
 }
 assert.match(accountListView, /createCardSecretResolver\(copyValue, encrypted && isPassword\)/,
     'La vista Account condivisa non mantiene la risoluzione lazy delle password');
-assert.match(accountListView, /account\.password \? createDataRow\([^\n]+true, account\._encrypted\)/,
+assert.match(accountListView, /account\.password \? createDataRow\([^\n]+true, account\._encrypted, options\.signal\)/,
     'La vista Account condivisa non mantiene la password cifrata fino a reveal/copia');
 for (const [name, source] of [['privato', privateDetail], ['aziendale', companyDetail]]) {
     assert.match(source, /renderAccountBanking\(acc, \{/,

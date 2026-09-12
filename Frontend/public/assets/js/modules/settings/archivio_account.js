@@ -147,6 +147,8 @@ async function loadArchived() {
 }
 
 function filterAndRender() {
+    currentSwipeList?.destroy();
+    currentSwipeList = null;
     const searchVal = document.querySelector('input[type="search"]')?.value.toLowerCase() || '';
     const filtered = allArchived.filter(acc =>
         (acc.nomeAccount || '').toLowerCase().includes(searchVal) ||
@@ -225,7 +227,6 @@ function filterAndRender() {
 
 
 function setupSwipe() {
-    if (currentSwipeList) currentSwipeList = null;
     currentSwipeList = new SwipeList('.archive-row-container', {
         threshold: 0.2,
         onSwipeRight: (item) => handleRestore(item.dataset.id), // Swippa a DESTRA -> Ripristina

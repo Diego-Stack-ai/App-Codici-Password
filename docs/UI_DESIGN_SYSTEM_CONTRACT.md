@@ -13,6 +13,8 @@ La struttura di viewport, fondale, contenitori, area scorrevole, fasce e spaziat
 
 ## Principi
 
+Preparazione locale del 12/09/2026, base `321fec0b`: i componenti destinati al riuso senza ricaricamento devono rimuovere listener/timer e invalidare letture pendenti allo smontaggio. `SwipeList` e il renderer Account condiviso espongono `destroy()`; ogni nuovo render rilascia la vecchia istanza, anche con lista vuota. [Prove e limiti](./AUDIT_VAULT_SESSION_P0.md#12-componenti-reali-delle-liste--12092026). Non equivale alla migrazione completa degli orchestratori di pagina.
+
 - Un componente condiviso nasce soltanto quando esistono almeno due utilizzi reali.
 - HTML, stile, comportamento e accesso ai dati restano separati.
 - Le pagine compongono componenti e servizi; non duplicano renderer o mutazioni di dominio.

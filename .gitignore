@@ -49,6 +49,7 @@ build/Release
 # Dependency directories
 node_modules/
 experiments/card-importer/dist/
+experiments/persistent-vault-shell/dist/
 
 # Optional npm cache directory
 .npm

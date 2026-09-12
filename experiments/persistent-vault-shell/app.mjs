@@ -1,6 +1,7 @@
 import {createMemoryVault} from './memory-vault.mjs';
 import {createRouter} from './router.mjs';
 import {createFixture, decryptRecord} from './fixture.mjs';
+import {mountRealList} from './real-lists.mjs';
 
 const view = document.querySelector('#view');
 const status = document.querySelector('#status');
@@ -15,7 +16,7 @@ const vault = createMemoryVault({
         status.textContent = reason === 'logout' ? 'Demo terminata' : 'Vault bloccata';
     }
 });
-const route = () => location.hash === '#account' ? 'account' : 'overview';
+const route = () => ['account', 'private', 'company'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 function element(tag, text, className) {
     const node = document.createElement(tag);
     node.textContent = text;
@@ -30,26 +31,33 @@ async function mount({signal, route: name}) {
     counters();
     const container = element('div', '');
     view.replaceChildren(container);
+    let disposeList;
     const heading = element('h2', name === 'account' ? 'Account demo' : 'Panoramica');
     container.append(heading);
     for (const link of document.querySelectorAll('nav a')) {
         if (link.hash === `#${name}`) link.setAttribute('aria-current', 'page');
         else link.removeAttribute('aria-current');
     }
-    const cleanup = () => { container.replaceChildren(); container.remove(); cleanups++; counters(); };
+    const cleanup = () => { disposeList?.(); container.replaceChildren(); container.remove(); cleanups++; counters(); };
     signal.addEventListener('abort', () => container.replaceChildren(), {once: true});
     if (!vault.isUnlocked()) container.append(element('p', 'Sblocca la demo per leggere i dati fittizi.'));
     else {
         try {
-            const value = await vault.read('demo-user', fixture.records[name]);
-            if (!signal.aborted) container.append(element('p', value, 'secret'));
+            const isList = name === 'private' || name === 'company';
+            const value = await vault.read('demo-user', fixture.records[isList ? 'lists' : name]);
+            if (!signal.aborted) {
+                if (isList) {
+                    container.replaceChildren();
+                    disposeList = mountRealList(container, JSON.parse(value), {signal, company: name === 'company'});
+                } else container.append(element('p', value, 'secret'));
+            }
         } catch {
             if (!signal.aborted) container.append(element('p', 'Sessione scaduta. Sblocca nuovamente la demo.'));
         }
     }
     return cleanup;
 }
-router = createRouter({routes: {overview: mount, account: mount}, onError: () => vault.lock('error')});
+router = createRouter({routes: {overview: mount, account: mount, private: mount, company: mount}, onError: () => vault.lock('error')});
 unlock.disabled = false;
 unlock.addEventListener('click', async () => {
     unlock.disabled = true;
