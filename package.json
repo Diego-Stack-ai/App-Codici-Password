@@ -36,7 +36,7 @@
     "prepare:vault-preview": "node experiments/persistent-vault-shell/prepare-preview.mjs",
     "test:vault-preview": "npm run prepare:vault-preview && node --test experiments/persistent-vault-shell/preview.test.mjs",
     "prototype:vault-shell": "npm run prepare:vault-preview && node experiments/persistent-vault-shell/serve.mjs",
-    "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs tests/legacy-email-audit-model.test.mjs tests/shared-vault-data-model.test.mjs tests/account-widget-ui.test.mjs tests/account-field-usage-model.test.mjs tests/repository-record-identity.test.mjs",
+    "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs tests/legacy-email-audit-model.test.mjs tests/shared-vault-data-model.test.mjs tests/account-widget-ui.test.mjs tests/shared-credential-editor.test.mjs tests/shared-credential-update-session.test.mjs tests/account-field-usage-model.test.mjs tests/repository-record-identity.test.mjs",
     "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/profile-deadline-link-model.test.mjs tests/account-mode-model.test.mjs tests/banking-model.test.mjs tests/account-page-lifecycle.test.mjs tests/company-detail-readonly.test.mjs tests/private-detail-legacy-id.test.mjs",
     "test:page-shells": "node scripts/audit-page-shells.mjs",
     "test:ui-foundations": "node scripts/audit-ui-foundations.mjs",

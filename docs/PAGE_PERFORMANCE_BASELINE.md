@@ -7,8 +7,8 @@ Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il labo
 | Pagina | HTML | CSS | Moduli JS | Peso grezzo | Stima gzip |
 |---|---:|---:|---:|---:|---:|
 | `profilo_privato.html` | 1 | 7 | 42 | 1181.5 KB | 336.0 KB |
-| `form_account_privato.html` | 1 | 6 | 40 | 1120.7 KB | 321.7 KB |
-| `form_account_azienda.html` | 1 | 6 | 39 | 1109.9 KB | 319.3 KB |
+| `form_account_privato.html` | 1 | 6 | 42 | 1138.5 KB | 326.2 KB |
+| `form_account_azienda.html` | 1 | 6 | 41 | 1127.7 KB | 323.8 KB |
 | `dati_azienda.html` | 1 | 8 | 38 | 1097.6 KB | 317.8 KB |
 | `aggiungi_scadenza.html` | 1 | 7 | 38 | 1095.8 KB | 316.1 KB |
 | `impostazioni.html` | 1 | 5 | 34 | 1094.8 KB | 312.4 KB |
@@ -40,8 +40,8 @@ Pagine canoniche analizzate: **30**. I redirect storici sono archiviati; il labo
 ## Pagine con il maggiore carico statico
 
 - `profilo_privato.html`: 336.0 KB gzip stimati, 42 moduli JS e 7 fogli CSS.
-- `form_account_privato.html`: 321.7 KB gzip stimati, 40 moduli JS e 6 fogli CSS.
-- `form_account_azienda.html`: 319.3 KB gzip stimati, 39 moduli JS e 6 fogli CSS.
+- `form_account_privato.html`: 326.2 KB gzip stimati, 42 moduli JS e 6 fogli CSS.
+- `form_account_azienda.html`: 323.8 KB gzip stimati, 41 moduli JS e 6 fogli CSS.
 - `dati_azienda.html`: 317.8 KB gzip stimati, 38 moduli JS e 8 fogli CSS.
 - `aggiungi_scadenza.html`: 316.1 KB gzip stimati, 38 moduli JS e 7 fogli CSS.
 - `impostazioni.html`: 312.4 KB gzip stimati, 34 moduli JS e 5 fogli CSS.

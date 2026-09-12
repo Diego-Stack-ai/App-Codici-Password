@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Widget comuni in Modifica Account — 12/09/2026
+
+Correzione candidata: i form privato e aziendale montano anche le credenziali comuni (`shared-reference`), prima presenti soltanto nel dettaglio. Il comando di modifica dei valori aggiorna il record centrale con revisione e conferma esplicita dell'effetto su tutti gli Account collegati. Collegamento e scollegamento sono disponibili nel form; il dettaglio resta consultazione. Nessuna copia dei dati o modifica a Rules/Functions. Verifiche e rilascio registrati separatamente nell'audit Vault.
+
 ### Esiti di salvataggio verificabili — candidato locale, 12/09/2026
 
 Base `a795b462`: correzione candidata della provenienza degli esiti e del riuso di operationId con payload diverso; nessuna modifica ai dati reali o pubblicazione di Rules/Functions. La coda conserva le modifiche quando la risposta non conferma l'applicazione. Recupero delle code pregresse e rollback sono gate prima del rilascio. [Audit §32](../docs/AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).
