@@ -29,7 +29,7 @@ const [company, privateAccount, companyAccount, deadline, privateDetail, private
     read('Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js')
 ]);
 
-assert.match(company, /window\.location\.replace\(`dati_azienda\.html\?id=\$\{state\.currentAziendaId\}`\)/,
+assert.match(company, /window\.location\.replace\(`dati_azienda\.html\?id=\$\{state\.currentAziendaId\}&afterWrite=1`\)/,
     'Il salvataggio azienda lascia il modulo Modifica nella cronologia');
 assert.match(privateAccountSave, /isEditing[\s\S]+dettaglio_account_privato\.html[\s\S]+window\.location\.replace\(destination\)/,
     'Il salvataggio account privato non sostituisce il modulo di modifica');
