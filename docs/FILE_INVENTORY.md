@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **414**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## tests
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/vault-logout.test.mjs` | MJS | 4374 | 92 | Test automatico: vault-logout.test. |
+| `tests/vault-session-races.test.mjs` | MJS | 9272 | 206 | Test automatico: vault-session-races.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 1780 | 38 | Test automatico: account-widget-ui.test. |
@@ -52,6 +52,7 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4079 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
 | `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
 | `tests/storage.rules.test.mjs` | MJS | 4149 | 99 | Test automatico: storage.rules.test. |
+| `tests/vault-logout.test.mjs` | MJS | 4374 | 92 | Test automatico: vault-logout.test. |
 | `tests/vault-session.test.mjs` | MJS | 1865 | 39 | Test automatico: vault-session.test. |
 
 ## .firebaserc
@@ -85,7 +86,7 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 13221 | 114 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 46796 | 534 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 47357 | 538 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -185,9 +186,9 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/crypto-utils.js` | JS | 12441 | 332 | Primitive KDF, AES-GCM, verifier e codifiche crittografiche. |
 | `Frontend/public/assets/js/modules/core/mfa-manager.js` | JS | 4798 | 108 | Enroll, rimozione, recupero e revoca sessioni TOTP. |
 | `Frontend/public/assets/js/modules/core/password-policy.js` | JS | 3229 | 76 | Supporto frontend: password-policy. |
-| `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 23608 | 566 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
+| `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 24679 | 601 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
 | `Frontend/public/assets/js/modules/core/sharing-identity.js` | JS | 4101 | 78 | Supporto frontend: sharing-identity. |
-| `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 3289 | 84 | Sessione Vault cifrata e limitata alla scheda/browser session. |
+| `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 3901 | 98 | Sessione Vault cifrata e limitata alla scheda/browser session. |
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7326 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
 | `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 2359 | 60 | Supporto frontend: account-widget-client. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 1427 | 38 | Supporto frontend: offline-mutation-client-core. |
@@ -314,7 +315,7 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 8139 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 67004 | 822 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 10018 | 237 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 10254 | 237 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13808 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15598 | 259 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
@@ -345,14 +346,14 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15166 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
 | `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 21306 | 363 | Documentazione: ARCHITETTURA SICUREZZA V1. |
+| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 21718 | 365 | Documentazione: ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21540 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 9364 | 120 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 13664 | 148 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3096 | 51 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 3485 | 56 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 3127 | 35 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 3545 | 37 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 11217 | 100 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 8588 | 152 | Documentazione: GUIDA PROGETTO. |
 | `docs/M10_HARDENING_RILASCIO.md` | MD | 4552 | 49 | Documentazione: M10 HARDENING RILASCIO. |
@@ -374,7 +375,7 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11100 | 127 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 8010 | 139 | Documentazione: VAULT KEY CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 8450 | 141 | Documentazione: VAULT KEY CONTRACT. |
 
 ## experiments
 
@@ -458,7 +459,7 @@ File censiti: **413**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 6399 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 6434 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

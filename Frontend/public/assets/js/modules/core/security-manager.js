@@ -18,6 +18,20 @@ let _vaultKeyMaterial = null;
 let _vaultAutoUnlock = false;
 let _isSoftLocked = false;
 let _unlockPromise = null;
+let _sessionGeneration = 0;
+
+function invalidatePendingUnlock() {
+    _sessionGeneration++;
+    _unlockPromise = null;
+}
+
+function assertCurrentSession(uid, generation) {
+    if (!uid || auth.currentUser?.uid !== uid || generation !== _sessionGeneration) {
+        const error = new Error('Sblocco Vault scaduto. Riprova.');
+        error.code = 'vault/session-invalidated';
+        throw error;
+    }
+}
 const updateGlobalState = () => {};
 
 const STORAGE_PREFIX = 'codex_vault_secret_';
@@ -199,6 +213,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 export function softLock() {
+    invalidatePendingUnlock();
     _isSoftLocked = true;
     _vaultKeyMaterial = null;
     _clearSessionStorage();
@@ -287,14 +302,18 @@ export async function ensureVaultKeyMaterial(options = {}) {
 }
 
 async function ensureVaultKeyMaterialInternal(options = {}) {
+    const generation = _sessionGeneration;
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
     const promptImmediately = typeof options === 'object' && options.promptImmediately === true;
 
     if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
 
     const uid = auth.currentUser?.uid;
+    const assertCurrent = () => assertCurrentSession(uid, generation);
+    assertCurrent();
     if (!forceReload && uid) {
         const sessionKey = await restoreVaultSession(uid);
+        assertCurrent();
         if (sessionKey) {
             _vaultKeyMaterial = sessionKey;
             _isSoftLocked = false;
@@ -306,9 +325,11 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
 
     if (!forceReload) {
         const recovered = await tryBiometricUnlock();
+        assertCurrent();
         if (recovered) {
             _vaultKeyMaterial = recovered;
             await saveVaultSession(_vaultKeyMaterial, uid);
+            assertCurrent();
             updateGlobalState();
             return _vaultKeyMaterial;
         }
@@ -322,16 +343,19 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
     const offerMasterSuggestion = !promptImmediately
         && !isBiometricUnlockConfigured()
         && await isNewVault(uid);
+    assertCurrent();
     const pass = await showInputModal(
         "SBLOCCO VAULT", '', msg, description,
         { vaultSecret: true, ...(offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}) }
     );
+    assertCurrent();
 
     if (pass) {
         const cleanPass = pass.normalize('NFC').trim();
         
         try {
             const verificationResult = await verifyMasterPassword(cleanPass, uid);
+            assertCurrent();
             
             if (verificationResult === true) {
                 // Success
@@ -371,10 +395,13 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
             throw e;
         }
 
-        _vaultKeyMaterial = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
+        const vaultKey = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
+        assertCurrent();
+        _vaultKeyMaterial = vaultKey;
         _isSoftLocked = false;
         _vaultAutoUnlock = true;
         await saveVaultSession(_vaultKeyMaterial, uid);
+        assertCurrent();
         updateGlobalState();
 
         showToast("Vault sbloccata correttamente!", "success");
@@ -385,6 +412,7 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
 }
 
 export async function resetVault() {
+    invalidatePendingUnlock();
     _vaultKeyMaterial = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
@@ -520,7 +548,9 @@ export async function enableBiometricUnlock(pass) {
 }
 
 export async function changeMasterPassword() {
+    const generation = _sessionGeneration;
     const uid = auth.currentUser?.uid;
+    const assertCurrent = () => assertCurrentSession(uid, generation);
     if (!uid) throw new Error('Utente non autenticato.');
     const oldPassword = await showInputModal('CAMBIA MASTER PASSWORD', '', 'Master Password attuale', 'Verifica la chiave attuale della Vault.', { vaultSecret: true });
     if (!oldPassword) return false;
@@ -541,17 +571,22 @@ export async function changeMasterPassword() {
         : createVaultKeyring(generateVaultKey(), cleanOld);
     const newEnvelope = await wrapVaultKey(vaultKey, cleanNew, envelope?.keyOrigin || 'random-with-legacy-fallback');
     const verifier = await createVaultVerifier(VERIFIER_MARKER, cleanNew);
+    assertCurrent();
     await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier, vaultKeyEnvelope: newEnvelope }, { merge: true });
+    // Copie cifrate aggiornate anche dopo logout.
     localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
     localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(newEnvelope));
     localStorage.removeItem(getStorageKey(uid));
+    assertCurrent();
     _vaultKeyMaterial = vaultKey;
     await saveVaultSession(vaultKey, uid);
+    assertCurrent();
     showToast('Master Password modificata. Riattiva la biometria su questo dispositivo.', 'success');
     return true;
 }
 
 export function clearSession() {
+    invalidatePendingUnlock();
     _vaultKeyMaterial = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;

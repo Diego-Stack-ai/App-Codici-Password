@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Intervento locale 12/09/2026 — invalidazione sblocchi pendenti
+
+Su base `67288cc3`, impedito alle operazioni Vault precedenti a logout/blocco/reset di ripubblicare chiavi o cancellare una sessione successiva; controllo UID e scadenza al termine della decifratura. Aggiunti 14 test di concorrenza al gate Vault. Formati e navigazione invariati, nessun deploy. [Audit Vault §9–10](../docs/AUDIT_VAULT_SESSION_P0.md#9-correzione-locale-del-12092026--operazioni-concorrenti) riporta prove, rollback, limiti e proposta del prossimo modello di navigazione.
+
 ### Intervento locale 12/09/2026 — pulizia prima del logout
 
 Su base v1.2.110, completata la pulizia esplicita nei quattro comandi mancanti: Home, logout comune e due uscite del cambio password. Ora tutti i sette percorsi eliminano RAM/sessione Vault prima di `signOut`; test del logout riuscito e fallito e censimento automatico aggiunti al gate Vault. Nessun cambio di formato o dati, nessun deploy. Dettagli, rollback e gate ancora aperti in [Audit Vault §8](../docs/AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout). La persistenza delle chiavi fra documenti resta da riprogettare.

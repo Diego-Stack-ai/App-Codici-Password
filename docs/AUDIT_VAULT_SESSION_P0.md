@@ -117,3 +117,31 @@ Base applicativa: v1.2.110, `fa555d49`; documentazione consolidata in `5ef16228`
 **Validazione locale:** `npm test` completato con successo il 12/09/2026, inclusi build, gate statici, test Vault e suite Firestore/Storage negli emulatori. Rigenerati inventario e baseline delle 30 pagine; nessun collegamento relativo a file MD rotto. Il primo tentativo di build era impedito dai permessi di lettura della sandbox; la suite completa è stata poi eseguita con l’accesso locale necessario. Queste prove non sostituiscono i collaudi fisici elencati sotto.
 
 **Limiti:** VS-P1-02 corretto nei comandi espliciti; listener Firebase conservato come seconda difesa. VS-P0-01 rimane aperto: chiave di wrapping e payload persistono ancora nello stesso storage durante la sessione. Nessuna prova fisica di crash/ripristino scheda né certificazione di operazioni di sblocco già in corso. Il Blocco 1 complessivo e il Blocco 2 non sono chiusi da questa correzione. Nessun deploy eseguito.
+
+## 9. Correzione locale del 12/09/2026 — operazioni concorrenti
+
+Base del confronto: commit `67288cc3`, dopo la pulizia esplicita dei logout. La limitazione sulle operazioni già in corso della sezione 8 viene affrontata nel perimetro seguente.
+
+**Problema riprodotto:** Web Crypto e sblocco sono asincroni. Un salvataggio avviato prima del blocco poteva ricreare il payload dopo la pulizia; un ripristino già in corso poteva restituire la vecchia chiave e ripubblicarla in RAM. Anche un errore tardivo poteva cancellare una sessione più recente. La stessa sequenza coinvolgeva biometria, prompt Master Password e risoluzione della chiave.
+
+**Correzione:** contatori esclusivamente in RAM invalidano le operazioni precedenti a logout, blocco e reset; il controllo UID impedisce di pubblicare il risultato per un altro utente. Il livello di sessione scarta salvataggi/ripristini obsoleti e ricontrolla la scadenza dopo la decifratura. Una nuova richiesta di sblocco può partire senza attendere quella invalidata. Il cambio Master Password verifica il contesto prima della scrittura remota e prima di riaprire la Vault. Se la scrittura era già completata, conserva verifier/envelope cifrati aggiornati per evitare una cache locale obsoleta, ma non ripristina la chiave sbloccata.
+
+**Prove:** 14 nuovi test deterministici in `vault-session-races.test.mjs`, con ritardi controllati e dati fittizi; Web Crypto reale per cifratura/decifratura della sessione, confini Firebase/UI/biometria simulati per il gestore. Eseguiti contro la copia precedente `67288cc3`, i test producono 13 fallimenti e un timeout sulla nuova richiesta bloccata dalla vecchia promise; contro la correzione passano tutti. Non sono prove biometriche su dispositivo reale.
+
+**Verifica finale locale:** `npm test` superato il 12/09/2026, inclusi 310 test, emulatori Firestore/Storage e gate statici. Il budget delle 30 pagine è rispettato senza aumentarne i limiti; inventario e baseline rigenerati. Verificati 94 collegamenti relativi a file MD senza destinazioni mancanti (ancore e URL esterni esclusi dal controllo automatico).
+
+**Compatibilità e rollback:** API, formato v1 di sessione, chiavi di storage, verifier, envelope e record Firestore invariati. Nessuna migrazione o cancellazione di dati reali. Revert del commit per rollback applicativo. Non viene promessa la cancellazione fisica della memoria JavaScript né l’annullamento di richieste remote già inviate; vengono impediti la ripubblicazione e il ritorno delle chiavi dalle operazioni invalidate nel perimetro verificato.
+
+**Gate aperti:** VS-P0-01 (chiave e ciphertext nello stesso storage), ripristino/crash e matrice fisica, operazioni legacy di provisioning/migrazione e revisione crittografica indipendente. Nessuna distribuzione. Il Blocco 2 resta una decisione di prodotto: rimuovere la persistenza adesso comporterebbe uno sblocco per ogni documento HTML.
+
+## 10. Proposta per il Blocco 2 — da scegliere prima dell’implementazione
+
+Raccomandazione: navigazione persistente per le pagine protette, con chiave soltanto in RAM; nuovo sblocco dopo refresh, chiusura o caricamento completo. Permette di conservare la comodità della navigazione ordinaria, ma richiede la migrazione graduale degli inizializzatori di pagina e la pulizia di listener/stato quando cambia vista.
+
+| Direzione | Esperienza prevista | Lavoro necessario |
+|---|---|---|
+| Navigazione persistente, raccomandata | Uno sblocco durante la navigazione interna; nuovo sblocco dopo refresh | Prototipo isolato su due pagine, montaggio/smontaggio controllato, link e history, offline, timeout, logout, iPhone/PWA e Windows; nessun cutover globale prima dei gate |
+| RAM nelle pagine attuali | Nuovo sblocco a ogni pagina HTML | Gestore reversibile, rimozione della lettura della sessione persistita, collaudo di tutti i percorsi e accettazione dei prompt ripetuti |
+| WebAuthn/PRF a ogni documento | Gesto di sblocco dispositivo a ogni pagina compatibile; Master Password di fallback | Prova fisica delle capacità e dell’esperienza sui dispositivi supportati |
+
+Questa proposta non attiva una nuova modalità e non rende conforme la compatibilità temporanea attuale. L’approvazione della direzione autorizzerà il prototipo; pubblicazione e migrazione restano gate separati.
