@@ -5,7 +5,89 @@ import {
     listAccountWidgets, listAccountWidgetsConfirmed,
     listSharedVaultData, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
-import {linkSharedCredential, unlinkSharedCredential} from '../data/shared-vault-data-client.js';
+import {linkSharedCredential, unlinkSharedCredential, updateSharedCredential} from '../data/shared-vault-data-client.js';
+import {auth} from '../../firebase-config.js?v=1.2.114';
+
+let mountVersion = 0;
+
+async function editCredential(record, context, refresh) {
+    if (!context.active() || !context.editable || context.readOnly) return;
+    let rows = [], overlay, closed = false;
+    const close = () => {
+        closed = true;
+        rows.forEach(({input}) => { input.value = ''; });
+        overlay?.remove();
+    };
+    try {
+        const key = await ensureVaultKeyMaterial({promptImmediately: true});
+        if (!context.active()) return;
+        if (!key) throw new Error('Vault locked');
+        const values = await Promise.all(record.fields.map(field => field.encrypted
+            ? decrypt(field.valueEnc, key) : field.value ?? ''));
+        if (record.fields.some((field, index) => field.encrypted &&
+            (typeof values[index] !== 'string' || values[index] === '--ERRORE--' || values[index] === field.valueEnc))) {
+            throw new Error('Unreadable field');
+        }
+        if (!context.active()) return;
+        rows = record.fields.map((field, index) => {
+            const input = createElement('input', {
+                type: 'text', className: `account-widget-inline-input${field.encrypted ? ' local-data-masked' : ''}`,
+                value: String(values[index]), autocomplete: 'off', 'data-form-type': 'other',
+                'data-lpignore': 'true', 'data-1p-ignore': 'true', 'aria-label': field.label || 'Campo'
+            });
+            const controls = [input];
+            if (field.encrypted) controls.push(createElement('button', {
+                type: 'button', className: 'shared-account-reveal', 'aria-label': 'Mostra o nascondi valore',
+                onclick: () => input.classList.toggle('local-data-masked')
+            }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+            return {field, input, element: createElement('label', {}, [
+                createElement('strong', {textContent: field.label || 'Campo'}),
+                createElement('div', {className: 'account-widget-inline-control'}, controls)
+            ])};
+        });
+        values.fill('');
+        const save = createElement('button', {
+            type: 'button', className: 'btn-modal btn-primary', textContent: 'Salva modifica comune',
+            onclick: async () => {
+                if (closed || !context.active()) return close();
+                if (save.disabled) return;
+                save.disabled = true;
+                try {
+                    const confirmed = await showConfirmModal('Modifica Credenziale comune',
+                        'La modifica sarà visibile in tutti gli Account collegati. Confermi il salvataggio?', 'Salva per tutti', 'Annulla');
+                    if (closed || !context.active()) return close();
+                    if (!confirmed) return;
+                    await updateSharedCredential(record.id, record.revision, {
+                        ...record, fields: rows.map(({field, input}) => ({...field,
+                            value: !field.encrypted && input.value === String(field.value ?? '') ? field.value : input.value
+                        }))
+                    });
+                    close();
+                    if (!context.active()) return;
+                    await refresh(true);
+                    if (context.active()) showToast('Credenziale comune aggiornata.', 'success');
+                } catch {
+                    if (context.active() && !closed) showToast('Modifica non completata. I valori inseriti restano disponibili: verifica e riprova.', 'error');
+                    else close();
+                } finally { save.disabled = false; }
+            }
+        });
+        overlay = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('section', {className: 'modal-box account-widget-editor-modal', role: 'dialog', 'aria-modal': 'true'}, [
+                createElement('h2', {className: 'modal-title', textContent: 'Modifica Credenziale comune'}),
+                createElement('p', {className: 'modal-text', textContent: 'Questi valori sono condivisi: ogni Account collegato vedrà la modifica.'}),
+                createElement('div', {className: 'account-widget-editor-fields'}, rows.map(row => row.element)),
+                createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}), save
+                ])
+            ])
+        ]);
+        document.body.appendChild(overlay);
+    } catch {
+        close();
+        if (context.active()) showToast('Impossibile aprire i valori della Credenziale comune. Sblocca la Vault e riprova.', 'warning');
+    }
+}
 
 function belongsToAccount(widget, context) {
     return widget.kind === 'shared-reference' &&
@@ -69,7 +151,11 @@ function credentialCard(record, widget, context, refresh) {
         ]),
         fields
     ];
-    if (!context.readOnly) cardChildren.push(createElement('button', {
+    if (context.editable && !context.readOnly) cardChildren.push(createElement('button', {
+        type: 'button', className: 'shared-account-unlink', textContent: 'Modifica Credenziale comune',
+        onclick: () => editCredential(record, context, refresh)
+    }));
+    if (context.editable && !context.readOnly) cardChildren.push(createElement('button', {
         type: 'button', className: 'shared-account-unlink', textContent: 'Scollega da questo Account',
         onclick: async () => {
             const confirmed = await showConfirmModal(
@@ -77,7 +163,7 @@ function credentialCard(record, widget, context, refresh) {
                 'Il dato centrale non verrà eliminato e resterà disponibile negli altri Account.',
                 'Scollega', 'Annulla'
             );
-            if (!confirmed) return;
+            if (!confirmed || !context.active()) return;
             try {
                 await unlinkSharedCredential(record.id, Number(record.revision || 0), linkPayload(context, widget.order));
                 await refresh(true);
@@ -124,6 +210,8 @@ function selectorModal(records, close, onSelect) {
 }
 
 export async function initAccountSharedCredentials(context) {
+    const version = ++mountVersion;
+    context = {...context, active: () => version === mountVersion && auth.currentUser?.uid === context.uid};
     const section = document.getElementById('shared-credentials-section');
     const list = document.getElementById('shared-credentials-list');
     const add = document.getElementById('btn-link-shared-credential');
@@ -132,6 +220,7 @@ export async function initAccountSharedCredentials(context) {
         const readWidgets = serverConfirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
         const readData = serverConfirmed ? listSharedVaultDataConfirmed : listSharedVaultData;
         const [allWidgets, records] = await Promise.all([readWidgets(context.uid), readData(context.uid)]);
+        if (!context.active()) return;
         const widgets = allWidgets.filter(widget => belongsToAccount(widget, context)).sort((a, b) => a.order - b.order);
         const recordsById = new Map(records.map(record => [record.id, record]));
         clearElement(list);
@@ -139,10 +228,11 @@ export async function initAccountSharedCredentials(context) {
             const record = recordsById.get(widget.sharedDataId);
             if (record) list.appendChild(credentialCard(record, widget, context, refresh));
         }
-        section.classList.toggle('hidden', context.readOnly && !list.children.length);
-        if (add) add.classList.toggle('hidden', context.readOnly);
-        if (add && !context.readOnly) {
+        section.classList.toggle('hidden', (!context.editable || context.readOnly) && !list.children.length);
+        if (add) { add.classList.toggle('hidden', !context.editable || context.readOnly); add.onclick = null; }
+        if (add && context.editable && !context.readOnly) {
             add.onclick = () => {
+                if (!context.active()) return;
                 if (!navigator.onLine) {
                     showToast('Il collegamento richiede la connessione internet.', 'warning');
                     return;
@@ -152,6 +242,7 @@ export async function initAccountSharedCredentials(context) {
                 const close = overlay => overlay.remove();
                 const modal = selectorModal(available, close, async (record, overlay) => {
                     try {
+                        if (!context.active()) return close(overlay);
                         await linkSharedCredential(record.id, Number(record.revision || 0), linkPayload(context, widgets.length));
                         close(overlay);
                         await refresh(true);

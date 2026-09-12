@@ -1,4 +1,4 @@
-import {functions} from '../../firebase-config.js?v=1.2.113';
+import {auth, functions} from '../../firebase-config.js?v=1.2.114';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {encrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
@@ -33,9 +33,13 @@ export async function createSharedCredential(data, sharedDataId) {
 }
 
 export async function updateSharedCredential(sharedDataId, expectedRevision, data) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('Accesso richiesto.');
+    const payload = await encryptedPayload(data);
+    if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata. Riapri la modifica.');
     return send({
         ...createSharedVaultIdentifiers(sharedDataId), action: 'update', expectedRevision,
-        data: await encryptedPayload(data)
+        data: payload
     });
 }
 

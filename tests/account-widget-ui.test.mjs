@@ -35,3 +35,13 @@ test('il salvataggio principale attende i widget sia nel form privato sia aziend
     assert.match(source, /await accountWidgetController\?\.savePendingChanges\(\)/);
   }
 });
+
+test('entrambi i form montano anche i widget comuni in modalita modifica', async () => {
+  for (const [source, page] of [[privateFormSource, 'form_account_privato.html'], [companyFormSource, 'form_account_azienda.html']]) {
+    assert.match(source, /await initAccountSharedCredentials\(\{[\s\S]*?editable: true[\s\S]*?\}\)/);
+    const html = await readFile(new URL(`../Frontend/public/${page}`, import.meta.url), 'utf8');
+    for (const id of ['shared-credentials-section', 'shared-credentials-list', 'btn-link-shared-credential']) {
+      assert.equal(html.split(`id="${id}"`).length - 1, 1, `${page}: contenitore ${id} presente una sola volta`);
+    }
+  }
+});
