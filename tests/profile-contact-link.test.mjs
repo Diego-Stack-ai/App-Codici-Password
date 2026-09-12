@@ -82,7 +82,7 @@ for (const type of ['email', 'phone']) {
             const contact = { id: 'contact-1', address: 'fixture@example.test', number: '+390001', password: 'SECRET-FIXTURE', pin: 'PIN-FIXTURE' };
             let synced = 0;
             await controller[type === 'email' ? 'connectEmailAccount' : 'connectPhoneAccount'](contact, async () => { synced++; });
-            assert.equal(modal.accounts.length, 3);
+            assert.equal(modal.accounts.length, 4);
             assert.equal(modal.accounts.filter(item => item.id === 'account-b').length, 2);
             await modal.onSelect(createNew ? { companyId: company ? 'company-1' : '' } : modal.accounts.find(item => item.id === 'account-b' && Boolean(item.companyId) === company));
             assert.equal(window.location.href.includes('aziendaId=company-1'), company);
@@ -117,10 +117,11 @@ test('un errore di sincronizzazione non apre il form e non persiste la bozza', a
     assert.equal(window.location.href, '');
 });
 
-async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false } = {}) {
-    const profileKey = type === 'phone' ? 'contactPhones' : 'contactEmails';
+async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false, multiple = false } = {}) {
+    const profileKey = {email:'contactEmails',phone:'contactPhones',document:'documenti',utility:'userAddresses'}[type];
     const contact = { id: 'contact-1', number: '+390001', address: 'fixture@example.test', password: legacy ? `cipher:${legacy}` : '', note: 'cipher:nota', custom: 'preserve' };
-    const profile = { [profileKey]: missing ? [] : [contact, { id: 'other', password: 'cipher:other' }] };
+    const records = missing ? [] : [contact, {id:'other',password:'cipher:other',...(multiple?{linkedAccountId:'account-1',linkedAccountCompanyId:company?'company-1':''}:{})}];
+    const profile = {[profileKey]:type==='utility'?[{id:'address',utilities:records}]:records};
     const sourceData = {emails:{extra:[{...contact,email:contact.address}]},telefonoAzienda:contact.number};
     const fields = { 'account-name': { value: 'Fixture' }, 'account-password': { value: password }, 'account-username': { value: 'fixture@example.test' }, 'btn-save-footer': { disabled: false }, 'save-btn-footer': { disabled: false } };
     const committed = [];
@@ -138,7 +139,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         runTransaction: async (db, callback) => {
             const staged = [];
             await callback({
-                get: async reference => ({ exists: () => true, data: () => reference.path === 'users/owner/aziende/source' ? sourceData : reference.path === 'users/owner' ? profile : { revision: conflict ? 2 : 1, updatedAt: conflict ? 'changed' : '' } }),
+                get: async reference => ({ exists: () => true, data: () => reference.path === 'users/owner/aziende/source' ? sourceData : reference.path === 'users/owner' ? profile : { revision: conflict ? 2 : 1, updatedAt: conflict ? 'changed' : '', ...(multiple?{linkedProfileField:{type,id:'other'},linkedCompanyProfileField:{companyId:'another',type:'phone',id:'already'}}:{}) } }),
                 update: (reference, value) => staged.push({ path: reference.path, value }),
                 set: (reference, value) => staged.push({ path: reference.path, value }), delete: () => {}
             });
@@ -159,7 +160,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
     const method = company ? 'saveAccount' : 'savePrivateAccount';
     const controller = await loadController(company ? 'azienda/form-azienda-save.js' : 'privato/form-privato-save.js', dependencies, [method]);
     await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1,
-        profileContactLinkDraft: { profileContactId: sourceCompany && type === 'phone' ? 'telefonoAzienda' : 'contact-1', contactType: type, ownerUid: 'owner', ...(sourceCompany ? {sourceCompanyId:'source',contactValue:type==='phone'?contact.number:contact.address} : {}), ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
+        profileContactLinkDraft: { profileContactId: sourceCompany && type === 'phone' ? 'telefonoAzienda' : 'contact-1', contactType: type, ownerUid: 'owner', ...(type==='utility'?{parentAddressId:'address'}:{}), ...(sourceCompany ? {sourceCompanyId:'source',contactValue:type==='phone'?contact.number:contact.address} : {}), ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
     return { committed, contact, messages, draftRemoved, profileKey };
 }
 
@@ -307,4 +308,38 @@ for (const company of [false,true]) for (const editing of [false,true]) for (con
 for(const company of [false,true]) for(const condition of ['conflict','failCommit']) test('Profilo aziendale: nessuna modifica parziale '+company+' '+condition,async()=>{
     const result=await saveFixture({sourceCompany:true,company,[condition]:true});
     assert.deepEqual(result.committed,[]);assert.equal(result.draftRemoved,false);
+});
+
+for(const company of [false,true]) for(const type of ['email','phone','utility','document']) test('Riutilizza Account '+company+' per più '+type+' conservando i collegamenti precedenti',async()=>{
+ const r=await saveFixture({company,type,multiple:true});assert.equal(r.committed.length,2,JSON.stringify(r.messages));
+ const account=r.committed.find(x=>x.path.includes('/accounts/')).value;
+ assert.equal(account.linkedProfileFields.length,2);assert.deepEqual(account.linkedProfileFields.map(x=>x.id),['contact-1','other']);
+ const profile=r.committed.find(x=>x.path==='users/owner').value;
+ const items=type==='utility'?profile.userAddresses[0].utilities:profile[r.profileKey];
+ assert.equal(items[0].linkedAccountId,'account-1');assert.equal(items[1].linkedAccountId,'account-1');assert.equal(items[1].password,'cipher:other');
+ if(type==='document')assert.equal(items[0].password,'cipher:legacy');
+});
+test('Riferimenti aziendali multipli: aggiunta e rimozione non toccano gli altri contatti',()=>{
+ const first={companyId:'c',type:'phone',id:'mobile'},second={companyId:'c',type:'phone',id:'fixed'};
+ const refs=companyModel.companyAccountReferences({linkedCompanyProfileField:first},second);
+ assert.deepEqual(refs,[first,second]);assert.deepEqual(companyModel.companyAccountReferences({linkedCompanyProfileField:first,linkedCompanyProfileFields:refs},first,true),[second]);
+});
+test('Foto vCard soltanto con inclusione esplicita e senza righe iniettate',async()=>{
+ const qr=await sourceModule('shared/qr_code_utils-v2.js');const user={photoURL:'https://example.test/avatar.jpg\nTEL:fake'};
+ assert.doesNotMatch(qr.buildVCard(user,{}),/PHOTO/);
+ const card=qr.buildVCard(user,{photo:true});assert.match(card,/PHOTO;VALUE=URI:https:/);assert.doesNotMatch(card,/\nTEL:fake/);
+ assert.doesNotMatch(qr.buildVCard({photoURL:'javascript:alert(1)'},{photo:true}),/PHOTO/);
+});
+
+test('Utenze con ID uguale in indirizzi diversi: aggiorna soltanto l’indirizzo selezionato',()=>{
+ const profile={userAddresses:[{id:'home',utilities:[{id:'u',value:'cipher:pod',custom:1}]},{id:'office',utilities:[{id:'u',value:'cipher:other'}]}]};
+ const draft={contactType:'utility',profileContactId:'u',parentAddressId:'home'};
+ const found=model.findProfileAccountItem(profile,draft);const patch=model.patchProfileAccountItem(profile,draft,{...found,linkedAccountId:'a'});
+ assert.equal(patch.userAddresses[0].utilities[0].linkedAccountId,'a');assert.deepEqual(patch.userAddresses[1],profile.userAddresses[1]);assert.equal(patch.userAddresses[0].utilities[0].value,'cipher:pod');
+});
+test('Eliminare un telefono conserva i riferimenti di email, utenze e documenti dello stesso Account',async()=>{
+ const profile={contactPhones:[],contactEmails:[{id:'e',linkedAccountId:'a'}],documenti:[{id:'d',linkedAccountId:'a'}],userAddresses:[{id:'address',utilities:[{id:'u',linkedAccountId:'a'}]}]};
+ let patch;
+ const ctrl=await loadController('privato/profilo-links.js',{...model,auth:{currentUser:{uid:'owner'}},db:{},doc:(db,...parts)=>parts.join('/'),deleteField:()=> 'DELETE',showToast:()=>{},runTransaction:async(db,cb)=>cb({get:async ref=>({exists:()=>true,data:()=>ref==='users/owner'?profile:{linkedProfileField:{type:'phone',id:'removed'}}}),update:(ref,data)=>{patch=data;}})},['refreshProfileAccountReferences']);
+ await ctrl.refreshProfileAccountReferences('a');assert.deepEqual(patch.linkedProfileFields.map(x=>x.type),['email','document','utility']);assert.deepEqual(patch.linkedProfileField,{type:'email',id:'e'});
 });

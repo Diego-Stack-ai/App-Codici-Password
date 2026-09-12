@@ -122,10 +122,12 @@ export function renderDigitalCard() {
     const container = document.getElementById('profile-digital-card');
     if (!container || !_getState) return;
     const state = _getState();
+    const photoURL = document.getElementById('profile-avatar')?.getAttribute('src') || state.currentUserData.photoURL || '';
     const vcardSize = new TextEncoder().encode(_callbacks.getVCard()).length;
     const capacityWarning = vcardSize > 1200;
     const selected = (type, item, index) => state.qrCodeInclusions[type]?.includes(item.id) || state.qrCodeInclusions[type]?.includes(index);
     const choices = [
+        qrChoice('Foto del profilo', state.qrCodeInclusions.photo === true, value => _callbacks.setQRScalar('photo', value)),
         qrChoice('Nome e cognome', state.qrCodeInclusions.nome, value => _callbacks.setQRScalar('nome', value)),
         qrChoice('Codice fiscale', state.qrCodeInclusions.cf, value => _callbacks.setQRScalar('cf', value), 'Dato personale: sarà leggibile da chi scansiona il QR.'),
         qrChoice('Dati di nascita', state.qrCodeInclusions.nascita, value => _callbacks.setQRScalar('nascita', value), 'Dato personale: condividilo solo se necessario.'),
@@ -142,6 +144,7 @@ export function renderDigitalCard() {
         createElement('div', { className: 'digital-card-layout' }, [
             createElement('section', { className: 'form-card digital-card-preview' }, [
                 createElement('h2', { className: 'form-section-title', textContent: 'Anteprima Tessera digitale' }),
+                photoURL ? createElement('img',{className:'digital-card-avatar',src:photoURL,alt:'Foto del profilo',onerror:event=>{event.currentTarget.hidden=true;}}) : null,
                 qrWrapper,
                 createElement('p', { className: 'digital-card-warning', textContent: 'Il QR contiene dati in chiaro. Password, PIN, chiavi e allegati sono sempre esclusi.' }),
                 createElement('p', {

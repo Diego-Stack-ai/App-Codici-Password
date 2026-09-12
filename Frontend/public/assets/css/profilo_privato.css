@@ -1288,3 +1288,5 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .profile-linked-password-value { min-width: 0; flex: 1; overflow-wrap: anywhere; white-space: pre-wrap; }
+
+.digital-card-avatar { width: 96px; height: 96px; object-fit: cover; border-radius: 50%; margin: 0 auto; }

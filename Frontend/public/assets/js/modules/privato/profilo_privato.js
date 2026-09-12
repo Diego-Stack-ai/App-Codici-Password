@@ -20,7 +20,7 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.103';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.104';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -40,11 +40,11 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.103';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.104';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
-import { readLinkedEmailAccountPassword, connectEmailAccount, connectPhoneAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
+import { readLinkedEmailAccountPassword, connectEmailAccount, connectPhoneAccount, connectUtilityAccount, connectDocumentAccount, refreshProfileAccountReferences, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -135,7 +135,7 @@ export async function initProfiloPrivato(user) {
     initAddressesDocsModule(
         () => ({ userAddresses, qrCodeInclusions, userDocuments }),
         {
-            toggleQRInclusion,
+            toggleQRInclusion, openLinkedAccount, syncData, connectUtilityAccount, connectDocumentAccount,
             onAddAddress: () => editAddress(-1, buildCtx()),
             onAddDoc: () => editUserDocument(-1, buildCtx()),
             createDeadlineFromDocument: documentItem => createDeadlineFromDocument(documentItem, syncData, currentUserData)
@@ -412,9 +412,11 @@ function setupDelegation(ctx) {
 async function deleteAddress(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo indirizzo?')) return;
     try {
+        const removedLinks = userAddresses[idx]?.utilities || [];
         userAddresses.splice(idx, 1);
         userAddresses = userAddresses.filter(a => a !== undefined && a !== null);
         await syncData();
+        for (const item of removedLinks) await refreshProfileAccountReferences(item?.linkedAccountId,item?.linkedAccountCompanyId);
         renderAddressesView();
         LOG(`[Address] Eliminato indirizzo #${idx}. Rimanenti: ${userAddresses.length}`);
     } catch (e) {
@@ -426,9 +428,11 @@ async function deleteAddress(idx) {
 async function deleteUtility(aIdx, uIdx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa utenza?')) return;
     try {
+        const removedLinks = [userAddresses[aIdx].utilities[uIdx]];
         userAddresses[aIdx].utilities.splice(uIdx, 1);
         userAddresses[aIdx].utilities = (userAddresses[aIdx].utilities || []).filter(u => u !== undefined && u !== null);
         await syncData();
+        for (const item of removedLinks) await refreshProfileAccountReferences(item?.linkedAccountId,item?.linkedAccountCompanyId);
         renderAddressesView();
         LOG(`[Utility] Eliminata utenza #${uIdx} dall'indirizzo #${aIdx}`);
     } catch (e) {
@@ -447,7 +451,7 @@ async function deletePhone(idx) {
         await syncData();
         if (linkedAccountId) {
             try {
-                await updateDoc(doc(db, 'users', currentUserUid, ...(companyId ? ['aziende', companyId] : []), 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
+                await refreshProfileAccountReferences(linkedAccountId, companyId);
             } catch {
                 showToast('Telefono eliminato. Il riferimento nell’Account non è stato aggiornato.', 'warning');
             }
@@ -470,7 +474,7 @@ async function deleteEmail(idx) {
         await syncData();
         if (linkedAccountId) {
             try {
-                await updateDoc(doc(db, 'users', currentUserUid, ...(companyId ? ['aziende', companyId] : []), 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
+                await refreshProfileAccountReferences(linkedAccountId, companyId);
             } catch (unlinkError) {
                 console.warn('[Email] Account collegato non disponibile durante la rimozione del riferimento:', unlinkError);
             }
@@ -486,10 +490,12 @@ async function deleteEmail(idx) {
 async function deleteDocumento(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo documento?')) return;
     try {
+        const removedLinks = [userDocuments[idx]];
         const linkedDeadlineId = userDocuments[idx]?.expiryReference?.deadlineId;
         userDocuments.splice(idx, 1);
         userDocuments = userDocuments.filter(d => d !== undefined && d !== null);
         await syncData();
+        for (const item of removedLinks) await refreshProfileAccountReferences(item?.linkedAccountId,item?.linkedAccountCompanyId);
         if (linkedDeadlineId) {
             try {
                 await updateDoc(doc(db, 'users', currentUserUid, 'scadenze', linkedDeadlineId), { sourceRef: deleteField() });

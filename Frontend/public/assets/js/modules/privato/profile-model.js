@@ -17,6 +17,7 @@ export function buildProfileAccountLinkDraft(contact, contactType = 'email') {
     return {
         profileContactId: contact?.id || '',
         contactType,
+        ...(contact?.parentAddressId ? {parentAddressId:contact.parentAddressId} : {}),
         value: contactType === 'phone' ? (contact?.number || '') : (contact?.address || '')
     };
 }
@@ -194,4 +195,26 @@ export function migrateQrIndexesToIds(inclusions = {}, profile = {}) {
         addresses: mapIndexes('addresses', profile.userAddresses || []),
         schemaVersion: 2
     };
+}
+
+// I riferimenti nei contatti sono la fonte autorevole: un Account può servire più schede.
+export function profileAccountItems(profile) {
+    return [
+        ...(profile.contactEmails || []).map(item=>({type:'email',item})),
+        ...(profile.contactPhones || []).map(item=>({type:'phone',item})),
+        ...(profile.documenti || []).map(item=>({type:'document',item})),
+        ...(profile.userAddresses || []).flatMap(address=>(address.utilities || []).map(item=>({type:'utility',parentAddressId:address.id,item})))
+    ];
+}
+export function findProfileAccountItem(profile, draft) {
+    return profileAccountItems(profile || {}).find(entry=>entry.type===draft.contactType && entry.item.id===draft.profileContactId && (entry.type!=='utility' || entry.parentAddressId===draft.parentAddressId))?.item;
+}
+export function patchProfileAccountItem(profile, draft, item) {
+    if(draft.contactType==='utility') return {userAddresses:profile.userAddresses.map(address=>address.id===draft.parentAddressId ? {...address,utilities:address.utilities.map(value=>value.id===draft.profileContactId?item:value)} : address)};
+    const field={email:'contactEmails',phone:'contactPhones',document:'documenti'}[draft.contactType];
+    if(!field) throw new Error('Tipo collegamento non valido');
+    return {[field]:profile[field].map(value=>value.id===draft.profileContactId?item:value)};
+}
+export function profileAccountReferences(profile, accountId, companyId='') {
+    return profileAccountItems(profile).filter(({item})=>item.linkedAccountId===accountId && (item.linkedAccountCompanyId || '')===companyId).map(({type,item,parentAddressId})=>({type,id:item.id,...(parentAddressId?{parentAddressId}: {})}));
 }

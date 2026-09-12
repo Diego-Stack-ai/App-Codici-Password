@@ -1,12 +1,12 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.103';
-import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { auth, db } from '../../firebase-config.js?v=1.2.104';
+import { collection, doc, updateDoc, runTransaction, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { showProfileAccountPicker } from './profilo-modal.js';
 import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 import {
-    buildProfileAccountLinkDraft, profileAccountUrl,
+    buildProfileAccountLinkDraft, profileAccountUrl, profileAccountReferences,
     buildProfileDocumentDeadlineDraft,
     findCompatibleDocumentDeadlines
 } from './profile-model.js';
@@ -30,6 +30,8 @@ export function openLinkedAccount(accountId, companyId = '') {
 }
 
 export const connectEmailAccount = (email, syncData) => connectContactAccount(email, syncData, 'email');
+export const connectUtilityAccount = (utility, syncData) => connectContactAccount(utility, syncData, 'utility');
+export const connectDocumentAccount = (document, syncData) => connectContactAccount(document, syncData, 'document');
 export const connectPhoneAccount = (phone, syncData) => connectContactAccount(phone, syncData, 'phone');
 
 async function connectContactAccount(contact, syncData, contactType) {
@@ -57,9 +59,8 @@ async function connectContactAccount(contact, syncData, contactType) {
             (await listCompanyAccounts(user.uid, company.id)).map(account => ({ ...account, companyId: company.id, companyName: company.name }))
         ));
         const accounts = await Promise.all([...personal.map(account => ({ ...account, companyId: '' })), ...companyAccounts.flat()]
-            .filter(data => !data.linkedCompanyProfileField && !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
-                data.visibility !== 'shared' && !['memo', 'memorandum'].includes(data.type) && !data.isMemo && !data.hasMemo &&
-                (!data.linkedProfileField || (data.linkedProfileField.id === contact.id && data.linkedProfileField.type === contactType)))
+            .filter(data => !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
+                data.visibility !== 'shared' && !['memo', 'memorandum'].includes(data.type) && !data.isMemo && !data.hasMemo)
             .map(async data => {
                 let username = '';
                 try { username = data._encrypted && data.username ? await decrypt(data.username, key) : (data.username || ''); } catch { username = ''; }
@@ -68,7 +69,7 @@ async function connectContactAccount(contact, syncData, contactType) {
             }));
         accounts.sort((a, b) => a.name.localeCompare(b.name, 'it') || a.companyName.localeCompare(b.companyName, 'it'));
         showProfileAccountPicker({
-            title: contactType === 'phone' ? 'Collega Account telefono' : 'Collega Account email',
+            title: {phone:'Collega Account telefono',email:'Collega Account email',utility:'Collega Account utenza',document:'Collega Account documento'}[contactType],
             accounts, companies, onSelect: openForm
         });
     } catch {
@@ -121,4 +122,19 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
         buildProfileDocumentDeadlineDraft(documentItem, profile)
     ));
     window.location.href = `aggiungi_scadenza.html?profileDocumentId=${encodeURIComponent(documentItem.id)}`;
+}
+
+export async function refreshProfileAccountReferences(accountId, companyId='') {
+    const uid=auth.currentUser?.uid;
+    if(!uid || !accountId) return;
+    try {
+        await runTransaction(db,async tx=>{
+            const ref=doc(db,'users',uid,...(companyId?['aziende',companyId]:[]),'accounts',accountId);
+            const profile=await tx.get(doc(db,'users',uid));
+            const account=await tx.get(ref);
+            if(!account.exists())return;
+            const links=profileAccountReferences(profile.data() || {},accountId,companyId);
+            tx.update(ref,{linkedProfileFields:links,linkedProfileField:links[0] || deleteField()});
+        });
+    } catch { showToast('Il contatto è stato eliminato. Riferimenti Account da aggiornare alla prossima connessione.','warning'); }
 }

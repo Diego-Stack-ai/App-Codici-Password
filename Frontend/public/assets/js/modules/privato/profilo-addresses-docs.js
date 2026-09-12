@@ -144,7 +144,8 @@ function _renderUtilitiesInCard(utils, list, addrIdx) {
         createElement('div', { className: 'field-value-row' }, [
             createElement('span', { className: 'data-value', textContent: u.value }),
             createCopyBtn(u.value)
-        ])
+        ]),
+        createElement('button', {className:'btn-upload-trigger', textContent:u.linkedAccountId?'Apri Account collegato':'Collega o crea Account', onclick:()=>u.linkedAccountId?_callbacks.openLinkedAccount(u.linkedAccountId,u.linkedAccountCompanyId):_callbacks.connectUtilityAccount({...u,parentAddressId:_getState().userAddresses[addrIdx].id},_callbacks.syncData)})
     ]));
     setChildren(list, items);
 }
@@ -261,6 +262,7 @@ export function renderDocumentiView() {
                         })
                     ]) : null,
 
+                    createElement('button',{className:'btn-upload-trigger',textContent:docItem.linkedAccountId?'Apri Account collegato':'Collega o crea Account',onclick:()=>docItem.linkedAccountId?_callbacks.openLinkedAccount(docItem.linkedAccountId,docItem.linkedAccountCompanyId):_callbacks.connectDocumentAccount(docItem,_callbacks.syncData)}),
                     docItem.note ? createElement('p', {
                         className: 'note-text document-note',
                         textContent: docItem.note
