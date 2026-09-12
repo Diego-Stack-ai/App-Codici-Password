@@ -911,3 +911,14 @@ input:checked+.base-switch::after {
     font-weight: var(--font-label-weight);
     opacity: 0.8;
 }
+
+.shared-credentials-header {
+    flex-wrap: wrap;
+}
+
+.shared-credentials-header .btn-modal {
+    flex: 0 1 auto;
+    max-width: 100%;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+}

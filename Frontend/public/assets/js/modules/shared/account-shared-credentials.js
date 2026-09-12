@@ -6,7 +6,7 @@ import {
     listSharedVaultData, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential, unlinkSharedCredential, updateSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.114';
+import {auth} from '../../firebase-config.js?v=1.2.115';
 
 let mountVersion = 0;
 
@@ -209,6 +209,21 @@ function selectorModal(records, close, onSelect) {
     return overlay;
 }
 
+export function initNewAccountSharedCredentials({saveButtonId}) {
+    const section = document.getElementById('shared-credentials-section');
+    const add = document.getElementById('btn-link-shared-credential');
+    if (!section || !add) return;
+    section.classList.remove('hidden');
+    add.textContent = 'Salva Account e collega credenziale';
+    add.onclick = () => {
+        if (!navigator.onLine) return showToast('Salva online l’Account prima di collegare una credenziale comune.', 'warning');
+        const save = document.getElementById(saveButtonId);
+        if (!save || save.disabled) return;
+        save.dataset.openSharedCredentials = 'true';
+        save.click();
+    };
+}
+
 export async function initAccountSharedCredentials(context) {
     const version = ++mountVersion;
     context = {...context, active: () => version === mountVersion && auth.currentUser?.uid === context.uid};
@@ -255,5 +270,11 @@ export async function initAccountSharedCredentials(context) {
             };
         }
     };
-    await refresh();
+    await refresh(context.editable && navigator.onLine);
+    if (context.editable && !context.readOnly && context.active() && new URLSearchParams(globalThis.location?.search || '').get('linkShared') === '1') {
+        const url = new URL(globalThis.location.href);
+        url.searchParams.delete('linkShared');
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+        add?.click();
+    }
 }

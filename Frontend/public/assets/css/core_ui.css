@@ -750,6 +750,28 @@
     font: var(--font-body);
 }
 
+select.shared-account-select-control {
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, #172033);
+    color-scheme: light;
+}
+
+select.shared-account-select-control option,
+select.shared-account-select-control optgroup {
+    background: #fff;
+    color: #172033;
+}
+
+.dark select.shared-account-select-control {
+    color-scheme: dark;
+}
+
+.dark select.shared-account-select-control option,
+.dark select.shared-account-select-control optgroup {
+    background: #1e293b;
+    color: #f8fafc;
+}
+
 .account-widget-editor-modal {
     width: min(92vw, 620px);
     max-height: min(86dvh, 760px);

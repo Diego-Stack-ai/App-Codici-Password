@@ -15,8 +15,8 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.114';
-import { initAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.114';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.115';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.115';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -280,12 +280,17 @@ export async function initFormAccountPrivato(user) {
         }
     }
     if (isEditing) {
-        accountWidgetController = await initAccountEmbeddedWidgets({
-            uid: currentUid, context: 'private', accountId: currentDocId, editable: true
-        });
         await initAccountSharedCredentials({
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true
         });
+        accountWidgetController = await initAccountEmbeddedWidgets({
+            uid: currentUid, context: 'private', accountId: currentDocId, editable: true,
+            onSharedLinked: () => initAccountSharedCredentials({
+                uid: currentUid, context: 'private', accountId: currentDocId, editable: true
+            })
+        });
+    } else {
+        initNewAccountSharedCredentials({saveButtonId: 'btn-save-footer'});
     }
 
     if (navigator.onLine) {

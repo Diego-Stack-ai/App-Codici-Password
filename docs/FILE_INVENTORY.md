@@ -2,14 +2,14 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **418**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## tests
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/shared-credential-editor.test.mjs` | MJS | 3398 | 21 | Test automatico: shared-credential-editor.test. |
-| `tests/shared-credential-update-session.test.mjs` | MJS | 2156 | 40 | Test automatico: shared-credential-update-session.test. |
+| `tests/new-account-shared-link.test.mjs` | MJS | 2438 | 32 | Test automatico: new-account-shared-link.test. |
+| `tests/widget-common-picker.test.mjs` | MJS | 4442 | 40 | Test automatico: widget-common-picker.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 2454 | 48 | Test automatico: account-widget-ui.test. |
@@ -48,6 +48,8 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/profile-model.test.mjs` | MJS | 4327 | 79 | Test automatico: profile-model.test. |
 | `tests/profile-widget-zone.test.mjs` | MJS | 769 | 17 | Test automatico: profile-widget-zone.test. |
 | `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
+| `tests/shared-credential-editor.test.mjs` | MJS | 3417 | 21 | Test automatico: shared-credential-editor.test. |
+| `tests/shared-credential-update-session.test.mjs` | MJS | 2194 | 40 | Test automatico: shared-credential-update-session.test. |
 | `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
 | `tests/shared-vault-data-model.test.mjs` | MJS | 4401 | 87 | Test automatico: shared-vault-data-model.test. |
 | `tests/sharing-identity.test.mjs` | MJS | 1748 | 24 | Test automatico: sharing-identity.test. |
@@ -111,7 +113,7 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/css/core_fascie.css` | CSS | 9062 | 346 | Stili della sezione core fascie. |
 | `Frontend/public/assets/css/core_fonts.css` | CSS | 4599 | 136 | Stili della sezione core fonts. |
 | `Frontend/public/assets/css/core_pagine.css` | CSS | 5563 | 242 | Stili della sezione core pagine. |
-| `Frontend/public/assets/css/core_ui.css` | CSS | 26281 | 1101 | Stili della sezione core ui. |
+| `Frontend/public/assets/css/core_ui.css` | CSS | 26812 | 1123 | Stili della sezione core ui. |
 | `Frontend/public/assets/css/datepicker_v5.css` | CSS | 4846 | 218 | Stili della sezione datepicker v5. |
 | `Frontend/public/assets/css/dati_azienda.css` | CSS | 24636 | 863 | Stili della sezione dati azienda. |
 | `Frontend/public/assets/css/dettaglio_account_azienda.css` | CSS | 5897 | 257 | Stili della sezione dettaglio account azienda. |
@@ -176,8 +178,8 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 8844 | 222 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 12707 | 276 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 15393 | 372 | Flusso aziende/account aziendali: dettaglio account azienda. |
-| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 19807 | 343 | Flusso aziende/account aziendali: form-azienda-save. |
-| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 27223 | 604 | Flusso aziende/account aziendali: form account azienda. |
+| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 20109 | 347 | Flusso aziende/account aziendali: form-azienda-save. |
+| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 27562 | 610 | Flusso aziende/account aziendali: form account azienda. |
 | `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 10044 | 265 | Flusso aziende/account aziendali: lista aziende. |
 | `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2731 | 70 | Flusso aziende/account aziendali: ma attachments. |
 | `Frontend/public/assets/js/modules/azienda/ma_cards.js` | JS | 16116 | 330 | Flusso aziende/account aziendali: ma cards. |
@@ -212,8 +214,8 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 9101 | 234 | Flusso profilo/account personali: dettaglio-privato-attachments. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 7460 | 161 | Flusso profilo/account personali: dettaglio-privato-sharing. |
 | `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 14163 | 332 | Flusso profilo/account personali: dettaglio account privato. |
-| `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 22946 | 413 | Flusso profilo/account personali: form-privato-save. |
-| `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 36192 | 769 | Flusso profilo/account personali: form account privato. |
+| `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 23416 | 419 | Flusso profilo/account personali: form-privato-save. |
+| `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 36489 | 774 | Flusso profilo/account personali: form account privato. |
 | `Frontend/public/assets/js/modules/privato/private-account-offline-policy.js` | JS | 615 | 17 | Flusso profilo/account personali: private-account-offline-policy. |
 | `Frontend/public/assets/js/modules/privato/profile-model.js` | JS | 10767 | 221 | Flusso profilo/account personali: profile-model. |
 | `Frontend/public/assets/js/modules/privato/profilo-actions.js` | JS | 12091 | 242 | Flusso profilo/account personali: profilo-actions. |
@@ -256,10 +258,10 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3468 | 93 | Impostazioni applicative: push-settings-controller. |
 | `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17243 | 320 | Impostazioni applicative: shared-credentials-controller. |
 | `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 6767 | 147 | Supporto frontend: account-banking-view. |
-| `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 19538 | 376 | Supporto frontend: account-embedded-widgets. |
+| `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 22753 | 429 | Supporto frontend: account-embedded-widgets. |
 | `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 7741 | 160 | Supporto frontend: account-list-view. |
 | `Frontend/public/assets/js/modules/shared/account-mode-model.js` | JS | 1828 | 40 | Supporto frontend: account-mode-model. |
-| `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 14393 | 260 | Supporto frontend: account-shared-credentials. |
+| `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 15612 | 281 | Supporto frontend: account-shared-credentials. |
 | `Frontend/public/assets/js/modules/shared/attachment-security.js` | JS | 5917 | 139 | Validazione e cifratura degli allegati prima di Storage. |
 | `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 2629 | 79 | Supporto frontend: banking-model. |
 | `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 9991 | 193 | Renderer condiviso per conti bancari e carte. |
@@ -294,8 +296,8 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/ui-components.js` | JS | 4122 | 101 | Supporto frontend: ui-components. |
 | `Frontend/public/assets/js/ui-core-v129.js` | JS | 19841 | 457 | Toast, modali, input protetti e componenti UI globali. |
 | `Frontend/public/assets/js/utils.js` | JS | 1481 | 48 | Supporto frontend: utils. |
-| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724606 | 70 | Supporto frontend: firebase-runtime. |
-| `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80549 | 8 | Supporto frontend: firebase-sw-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724675 | 70 | Supporto frontend: firebase-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80556 | 8 | Supporto frontend: firebase-sw-runtime. |
 | `Frontend/public/assets/js/vendor/qrcode.min.js` | JS | 19927 | 1 | Supporto frontend: qrcode.min. |
 | `Frontend/public/configurazione_automezzi.html` | HTML | 8287 | 159 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
 | `Frontend/public/configurazione_documenti.html` | HTML | 8298 | 159 | Struttura della pagina configurazione documenti; comportamento demandato ai moduli. |
@@ -306,8 +308,8 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/dettaglio_account_privato.html` | HTML | 24165 | 377 | Struttura della pagina dettaglio account privato; comportamento demandato ai moduli. |
 | `Frontend/public/dettaglio_scadenza.html` | HTML | 8890 | 176 | Struttura della pagina dettaglio scadenza; comportamento demandato ai moduli. |
 | `Frontend/public/firebase-messaging-sw.js` | JS | 2874 | 60 | File di progetto: firebase-messaging-sw. |
-| `Frontend/public/form_account_azienda.html` | HTML | 20994 | 321 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/form_account_privato.html` | HTML | 19281 | 301 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
+| `Frontend/public/form_account_azienda.html` | HTML | 21029 | 321 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/form_account_privato.html` | HTML | 19316 | 301 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
 | `Frontend/public/gestione_destinatari.html` | HTML | 4642 | 73 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
 | `Frontend/public/home_page.html` | HTML | 5909 | 133 | Struttura della pagina home page; comportamento demandato ai moduli. |
 | `Frontend/public/imposta_nuova_password.html` | HTML | 6128 | 132 | Struttura della pagina imposta nuova password; comportamento demandato ai moduli. |
@@ -317,7 +319,7 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 8139 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 67004 | 822 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 10018 | 237 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 10254 | 237 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13808 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15598 | 259 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
@@ -461,7 +463,7 @@ File censiti: **416**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 6466 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 6541 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
