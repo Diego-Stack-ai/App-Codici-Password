@@ -11,7 +11,7 @@
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { createProfileItemId } from './profile-model.js';
+import { createProfileItemId, hasLegacyEmailPassword } from './profile-model.js';
 import { showProfileModal } from './profilo-modal.js';
 
 let _getState = null;
@@ -20,7 +20,7 @@ let _callbacks = null;
 /**
  * Inizializza il modulo telefoni + email.
  * @param {Function} getState - () => { contactPhones, contactEmails, profileLabels, qrCodeInclusions }
- * @param {{ syncData: Function, toggleQRInclusion: Function, deletePhone: Function, deleteEmail: Function }} callbacks
+ * @param {{ syncData: Function, toggleQRInclusion: Function, deletePhone: Function, deleteEmail: Function, updateProfileLabelOptions: Function }} callbacks
  */
 export function initPhonesEmailsModule(getState, callbacks) {
     _getState = getState;
@@ -40,6 +40,47 @@ function createCopyBtn(text) {
         }
     }, [
         createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
+    ]);
+}
+
+function createLegacyPasswordRecovery(password) {
+    const maskedValue = '••••••••';
+    const value = createElement('span', {
+        className: 'data-value no-transform',
+        textContent: maskedValue
+    });
+    const icon = createElement('span', {
+        className: 'material-symbols-outlined',
+        textContent: 'visibility_off'
+    });
+    let revealed = false;
+    const toggle = createElement('button', {
+        className: 'btn-action-mini',
+        title: 'Mostra password legacy',
+        'aria-label': 'Mostra password legacy',
+        'aria-pressed': 'false',
+        onclick: (event) => {
+            event.stopPropagation();
+            revealed = !revealed;
+            value.textContent = revealed ? password : maskedValue;
+            icon.textContent = revealed ? 'visibility' : 'visibility_off';
+            toggle.title = revealed ? 'Nascondi password legacy' : 'Mostra password legacy';
+            toggle.setAttribute('aria-label', toggle.title);
+            toggle.setAttribute('aria-pressed', String(revealed));
+        }
+    }, [icon]);
+
+    const copy = createCopyBtn(password);
+    copy.title = 'Copia password legacy';
+    copy.setAttribute('aria-label', 'Copia password legacy');
+
+    return createElement('div', { className: 'card-field-group' }, [
+        createElement('span', { className: 'data-label', textContent: 'Password legacy' }),
+        createElement('div', { className: 'field-value-row' }, [value, toggle, copy]),
+        createElement('span', {
+            className: 'data-value-sub',
+            textContent: 'Recuperala qui e salvala in un Account dedicato. Rimane nel Profilo finché il nuovo Account non viene salvato.'
+        })
     ]);
 }
 // ─── PHONES ──────────────────────────────────────────────────────────────────
@@ -106,7 +147,7 @@ function _createPhoneCard(phone, idx) {
 async function _addPhone() {
     const { profileLabels, contactPhones } = _getState();
     const fields = [
-        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels', onOptionsChanged: _callbacks.updateProfileLabelOptions },
         { key: 'number', label: 'Numero', icon: 'call' },
         { key: 'primaryChoice', label: 'Telefono principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
@@ -132,7 +173,7 @@ export async function editPhone(idx) {
     const phone = contactPhones[idx];
     if (!phone.label) phone.label = profileLabels.phoneLabels[0];
     const fields = [
-        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels', onOptionsChanged: _callbacks.updateProfileLabelOptions },
         { key: 'number', label: 'Numero', icon: 'call' },
         { key: 'primaryChoice', label: 'Telefono principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
@@ -197,15 +238,17 @@ export function renderEmailsView() {
                 createElement('span', { className: 'data-value truncate', textContent: e.address || '-' }),
                 createCopyBtn(e.address)
             ]),
-            e.password && !e.linkedAccountId
-                ? createElement('span', { className: 'data-value-sub', textContent: 'Password legacy presente: collega un Account per centralizzare le credenziali e rimuoverla dal Profilo.' })
+            hasLegacyEmailPassword(e) && !e.linkedAccountId
+                ? createLegacyPasswordRecovery(e.password)
                 : createElement('span', { className: 'data-value-sub', textContent: e.linkedAccountId ? 'Credenziali gestite nell’Account collegato' : 'Nessuna credenziale nel Profilo' }),
             e.note ? createElement('div', {
                 className: 'note-display-lite profile-contact-note'
             }, [createElement('span', { textContent: e.note })]) : null,
             createElement('button', {
                 className: 'btn-upload-trigger',
-                textContent: e.linkedAccountId ? 'Apri Account collegato' : 'Collega un Account',
+                textContent: e.linkedAccountId
+                    ? 'Apri Account collegato'
+                    : (hasLegacyEmailPassword(e) ? 'Crea Account e trasferisci' : 'Collega un Account'),
                 onclick: () => e.linkedAccountId
                     ? _callbacks.openLinkedAccount(e.linkedAccountId)
                     : _callbacks.connectEmailAccount(e, _callbacks.syncData)
@@ -219,7 +262,7 @@ export function renderEmailsView() {
 async function _addEmail() {
     const { profileLabels, contactEmails } = _getState();
     const fields = [
-        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels', onOptionsChanged: _callbacks.updateProfileLabelOptions },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
         { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' },
         { key: 'primaryChoice', label: 'Email principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
@@ -248,7 +291,7 @@ export async function editEmail(idx) {
     const email = contactEmails[idx];
     if (!email.label) email.label = profileLabels.emailLabels[0];
     const fields = [
-        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels', onOptionsChanged: _callbacks.updateProfileLabelOptions },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
         { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' },
         { key: 'primaryChoice', label: 'Email principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
@@ -272,4 +315,3 @@ export async function editEmail(idx) {
 }
 
 // Fine modulo contatti profilo.
-

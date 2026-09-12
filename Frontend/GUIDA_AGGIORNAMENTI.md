@@ -197,6 +197,13 @@ Principi approvati:
 - [x] **P6 — Collegamenti**: Profilo ↔ Account e Documento ↔ Scadenza con riferimenti stabili e gestione dei riferimenti orfani.
 - [ ] **P7 — Migrazione e collaudo**: compatibilità legacy e controlli automatici completati; resta il collaudo autenticato su PC/tablet/telefono, tema chiaro/scuro e riapertura offline prima della pubblicazione.
 
+#### Correzione recupero password email legacy — settembre 2026
+
+- Le password email legacy già presenti nel Profilo restano decifrate esclusivamente nella sessione Vault sbloccata e sono mostrate inizialmente oscurate, con comandi espliciti per visualizzarle o copiarle.
+- La creazione guidata dell’Account trasferisce in `sessionStorage` soltanto ID stabile e indirizzo email, mai la password.
+- La password legacy viene rimossa dal Profilo esclusivamente nella stessa transazione che salva con successo il nuovo Account collegato; annullamento o errore conservano il dato originale.
+- I menu Etichetta di email e telefoni usano nuovamente `configKey`: dal menu si possono aggiungere, rinominare o eliminare le etichette personalizzate, conservando una sola configurazione in `settings/profileLabels`.
+
 ### Fuori ambito: cifratura completa
 
 La cifratura di nome, cognome, nascita, telefoni, indirizzi ed email attualmente

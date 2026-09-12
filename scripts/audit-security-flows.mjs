@@ -59,6 +59,7 @@ const privateArea = await read('Frontend/public/assets/js/modules/privato/area_p
 const profileActions = await read('Frontend/public/assets/js/modules/privato/profilo-actions.js');
 const profileDashboard = await read('Frontend/public/assets/js/modules/privato/profilo-dashboard.js');
 const profileLinks = await read('Frontend/public/assets/js/modules/privato/profilo-links.js');
+const profileModel = await read('Frontend/public/assets/js/modules/privato/profile-model.js');
 const functionsPackage = JSON.parse(await read('functions/package.json'));
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
@@ -168,8 +169,12 @@ assert.match(settingsHtml, /non la Master Password della Vault/, 'Il cambio pass
 assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2FA non è visibile');
 assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma cambio password ambigua');
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
-assert.match(profileLinks, /if \(String\(email\.password \|\| ''\)\.trim\(\)\)[\s\S]+collegamento è stato bloccato/,
-    'Il collegamento Profilo/Account può ancora cancellare una password email legacy');
+assert.match(profileLinks, /hasLegacyEmailPassword\(email\)[\s\S]+buildProfileAccountLinkDraft\(email\)/,
+    'La password email legacy non dispone di un passaggio esplicito alla creazione Account');
+assert.match(privateAccountSave, /linkProfileEmailToAccount\(email, targetId\)/,
+    'La password email legacy non viene rimossa nella transazione che salva il nuovo Account');
+assert.doesNotMatch(profileModel.match(/buildProfileAccountLinkDraft[\s\S]+?\n\}/)?.[0] || '', /password/,
+    'Il draft Profilo/Account non deve trasferire la password legacy in sessionStorage');
 assert.match(firebaseConfig, /firebaseapp\.com[\s\S]*?location\.replace[\s\S]*?CANONICAL_HOST/, 'Il dominio Firebase alternativo non viene ricondotto all origin canonico');
 assert.match(serviceWorker, /cache\.put\(request, response\.clone\(\)\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 

@@ -4,7 +4,13 @@ import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
 import {listDeadlines, listPrivateAccounts} from '../data/vault-repository.js';
-import {buildProfileDocumentDeadlineDraft, findCompatibleDocumentDeadlines} from './profile-model.js';
+import {
+    buildProfileAccountLinkDraft,
+    buildProfileDocumentDeadlineDraft,
+    findCompatibleDocumentDeadlines,
+    hasLegacyEmailPassword,
+    linkProfileEmailToAccount
+} from './profile-model.js';
 
 export function openLinkedAccount(accountId) {
     if (accountId) window.location.href = `dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`;
@@ -13,11 +19,17 @@ export function openLinkedAccount(accountId) {
 export async function connectEmailAccount(email, syncData) {
     const user = auth.currentUser;
     if (!user || !email?.id) return;
-    if (String(email.password || '').trim()) {
-        await showAlertModal(
-            'PASSWORD EMAIL DA PROTEGGERE',
-            'Questa email contiene ancora una password nel Profilo. Prima salvala nell’Account corretto e poi rimuovila manualmente dall’email. Il collegamento è stato bloccato per evitare la perdita della credenziale.'
+    if (hasLegacyEmailPassword(email)) {
+        const create = await showConfirmModal(
+            'Crea Account per questa email',
+            'Prima mostra o copia la password legacy dalla scheda Email. Nella pagina successiva inseriscila nel nuovo Account: verrà rimossa dal Profilo soltanto dopo il salvataggio riuscito.',
+            'Apri creazione Account',
+            'Annulla'
         );
+        if (!create) return;
+        await syncData();
+        sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
+        window.location.href = `form_account_privato.html?profileEmailId=${encodeURIComponent(email.id)}`;
         return;
     }
     const accountRecords = await listPrivateAccounts(user.uid);
@@ -31,7 +43,7 @@ export async function connectEmailAccount(email, syncData) {
         const create = await showConfirmModal('Account email assente', 'Non esiste ancora un Account collegabile. Vuoi aprire la creazione guidata?');
         if (!create) return;
         await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ profileEmailId: email.id, email: email.address || '' }));
+        sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
         window.location.href = `form_account_privato.html?profileEmailId=${encodeURIComponent(email.id)}`;
         return;
     }
@@ -44,8 +56,7 @@ export async function connectEmailAccount(email, syncData) {
         await updateDoc(doc(db, 'users', user.uid, 'accounts', selected.id), {
             linkedProfileField: { type: 'email', id: email.id }
         });
-        email.linkedAccountId = selected.id;
-        email.password = '';
+        Object.assign(email, linkProfileEmailToAccount(email, selected.id));
         await syncData();
         showToast('Email e Account collegati senza duplicare le credenziali.', 'success');
     });
