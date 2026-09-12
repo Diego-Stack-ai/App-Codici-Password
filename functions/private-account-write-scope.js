@@ -6,8 +6,9 @@ const emptyMap = value => value == null || (typeof value === 'object' && !Array.
 const emptyText = value => value == null || value === '';
 
 // Guard the actual document read inside the mutation transaction. This does not
-// establish the absence of reverse links, aliases, or related subcollections.
-// Those need a separate inventory/contract; never infer them from this result.
+// establish the absence of reverse links or related subcollections on its own.
+// Profile references are checked separately below; other domains remain outside
+// this bounded policy.
 function assertPrivateAccountWriteScope({uid, record}) {
   if (typeof uid !== 'string' || !uid || !record || typeof record !== 'object' || Array.isArray(record)) deny();
   // The Firestore path is already scoped to the authenticated UID. Legacy own
@@ -29,4 +30,50 @@ function assertPrivateAccountWriteScope({uid, record}) {
       !emptyList(record.linkedProfileFields) || !emptyList(record.linkedCompanyProfileFields)) deny();
 }
 
-module.exports = {assertPrivateAccountWriteScope};
+// Read-only scan of the actual profile documents, including hidden/archived
+// contacts. A stored legacy alias requires a separate identity resolution path.
+function assertPrivateAccountReferenceScope({recordId, record, profile, companies}) {
+  const map = value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) deny();
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== null && prototype.constructor?.name !== 'Object') deny();
+    return value;
+  };
+  const list = value => {
+    if (value === undefined) return [];
+    if (!Array.isArray(value)) deny();
+    return value;
+  };
+  const contact = value => {
+    map(value);
+    for (const field of ['linkedAccountId', 'linkedAccountCompanyId']) {
+      if (own(value, field) && typeof value[field] !== 'string') deny();
+    }
+    if (value.linkedAccountId === recordId && !value.linkedAccountCompanyId) deny();
+  };
+  if (typeof recordId !== 'string' || !recordId) deny();
+  if (record && own(record, 'id') && record.id !== recordId) deny();
+  map(profile);
+  for (const field of ['contactEmails', 'contactPhones', 'documenti']) list(profile[field]).forEach(contact);
+  for (const address of list(profile.userAddresses)) {
+    map(address); list(address.utilities).forEach(contact);
+  }
+  for (const company of list(companies)) {
+    map(company);
+    if (company.emails !== undefined) {
+      map(company.emails);
+      for (const slot of ['pec', 'amministrazione', 'personale']) {
+        if (company.emails[slot] !== undefined) contact(company.emails[slot]);
+      }
+      list(company.emails.extra).forEach(contact);
+    }
+    if (company.phoneAccountLinks !== undefined) {
+      map(company.phoneAccountLinks);
+      for (const slot of ['telefonoAzienda', 'faxAzienda', 'referenteCellulare']) {
+        if (company.phoneAccountLinks[slot] !== undefined) contact(company.phoneAccountLinks[slot]);
+      }
+    }
+  }
+}
+
+module.exports = {assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope};

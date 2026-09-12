@@ -81,3 +81,12 @@ Prova locale della nuova sessione, base `6432cad8`: aggiornamento cifrato sperim
 Verifica sul codice corrente, 12/09/2026: il wildcard proprietario delle Rules include operationResults anche in scrittura; la callable può accettare un esito precedente con dominio/recordId compatibili senza applicare il payload. La riconciliazione sperimentale non certifica la provenienza backend. Questo finding resta un gate, distinto dalle prove storiche della coda. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
 
 Candidato locale successivo, base `a795b462`: esiti privati/offline generici nel nuovo namespace backend `/mutationResults/{uid}/operations/{operationId}`, con controllo del payload e dell'identità prima del retry. Il vecchio namespace resta leggibile e viene chiuso alle scritture client; gli esiti pregressi non sono promossi ad attestazioni. Nessun deploy: recupero delle code legacy e rollback compatibile devono precedere l'attivazione. [Audit §32](./AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).
+
+
+### Controllo candidato dei riferimenti inversi — 12/09/2026
+
+Base `1ce18fe2`, ramo sperimentale. La mutazione privata legge nella stessa transazione il Profilo `users/{uid}` e tutti i documenti diretti `users/{uid}/aziende`. Controlla `contactEmails`, `contactPhones`, `documenti`, `userAddresses[].utilities`, le email aziendali fisse/extra e `phoneAccountLinks`; `linkedAccountCompanyId` assente o vuoto identifica il riferimento privato. Contatti senza valore e aziende archiviate sono inclusi. I backlink nel solo Account non erano sufficienti.
+
+Il percorso ridotto rifiuta dati malformati e un campo legacy `id` diverso dall'ID fisico, senza migrare alias. Un retry con ricevuta attendibile viene risolto prima di queste letture e non riscrive il record. L'esito legacy non verificabile resta distinto. I test sintetici dell'handler coprono riferimenti inversi, separazione dal namespace aziendale, alias e assenza di scritture dopo rifiuto.
+
+Costo: per ogni operazione nuova si aggiungono il Profilo e la query completa delle aziende; letture, dimensione e contesa crescono con il numero delle aziende. La soluzione non tronca la query per dichiarare falsamente assenti i link. Valutazione di scala e latenza prima del rilascio; altri domini e bonifica degli alias non certificati. Nessun indice, migrazione o deploy in questo blocco. Il rollback strutturale deve comunque conservare il registro attendibile degli esiti, come richiesto nell'audit Vault.

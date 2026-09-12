@@ -28,7 +28,7 @@ const {
 } = require("./recovery-security");
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
 const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require("./mutation-result-binding");
-const {assertPrivateAccountWriteScope} = require("./private-account-write-scope");
+const {assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope} = require("./private-account-write-scope");
 const {
     privateAccountMutationDecision, validatePrivateAccountMutation
 } = require("./private-account-mutation-service");
@@ -148,12 +148,18 @@ exports.applyPrivateAccountMutation = onCall(
             // A trusted retry reports its original result without mutating the
             // current document, even if its scope has legitimately changed since.
             if (previous) return {...previous, duplicate: true};
-            if (recordSnapshot.exists) {
-                try { assertPrivateAccountWriteScope({uid: request.auth.uid, record: recordSnapshot.data()}); }
-                catch {
-                    throw new HttpsError('failed-precondition', 'Questo Account richiede il percorso di modifica completo.',
-                        {reason: 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'});
-                }
+            const [profileSnapshot, companiesSnapshot] = await Promise.all([
+                transaction.get(userRef), transaction.get(userRef.collection('aziende'))
+            ]);
+            try {
+                if (recordSnapshot.exists) assertPrivateAccountWriteScope({uid: request.auth.uid, record: recordSnapshot.data()});
+                assertPrivateAccountReferenceScope({recordId: operation.recordId,
+                    record: recordSnapshot.exists ? recordSnapshot.data() : null,
+                    profile: profileSnapshot.exists ? profileSnapshot.data() : {},
+                    companies: companiesSnapshot.docs.map(snapshot => snapshot.data())});
+            } catch {
+                throw new HttpsError('failed-precondition', 'Questo Account richiede il percorso di modifica completo.',
+                    {reason: 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'});
             }
             const result = privateAccountMutationDecision({
                 exists: recordSnapshot.exists,

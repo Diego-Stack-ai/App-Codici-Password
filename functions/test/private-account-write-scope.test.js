@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
-const {assertPrivateAccountWriteScope} = require('../private-account-write-scope');
+const {assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope} = require('../private-account-write-scope');
 const {validatePrivateAccountMutation, privateAccountMutationDecision} = require('../private-account-mutation-service');
 const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require('../mutation-result-binding');
 
@@ -51,13 +51,15 @@ test('malformed declaration values are rejected while empty nullable link contai
 const index = readFileSync(require.resolve('../index.js'), 'utf8');
 const retrySource = index.slice(index.indexOf('function verifiedMutationRetry('), index.indexOf('exports.applyOfflineMutation'));
 const handlerSource = index.slice(index.indexOf('exports.applyPrivateAccountMutation'), index.indexOf('exports.manageSharedVaultData'));
-function handlerFixture({record = basic(), receipt = null, legacy = null} = {}) {
+function handlerFixture({record = basic(), receipt = null, legacy = null, profile = {}, companies = []} = {}) {
   const writes = [], refs = [];
   const reference = path => ({path, collection: name => reference(`${path}/${name}`), doc: id => reference(`${path}/${id}`)});
   const store = {collection: name => reference(name), runTransaction: async run => {
     const staged = [];
     const result = await run({get: async ref => {
       refs.push(ref.path);
+      if (ref.path === 'users/owner') return {exists: true, data: () => profile};
+      if (ref.path === 'users/owner/aziende') return {docs: companies.map(value => ({data: () => value}))};
       const value = ref.path.startsWith('mutationResults/') ? receipt : ref.path.includes('/operationResults/') ? legacy : record;
       return {exists: value !== null, data: () => value};
     }, set: (ref, value, options) => staged.push({path: ref.path, value, options})});
@@ -67,7 +69,7 @@ function handlerFixture({record = basic(), receipt = null, legacy = null} = {}) 
   const context = vm.createContext({exports: {}, onCall: (_options, handler) => handler,
     HttpsError, getFirestore: () => store, FieldValue: {serverTimestamp: () => 'synthetic-time'},
     validatePrivateAccountMutation, privateAccountMutationDecision, createMutationBinding, verifyMutationResult,
-    currentMutationRevision, assertPrivateAccountWriteScope});
+    currentMutationRevision, assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope});
   vm.runInContext(retrySource + handlerSource, context);
   return {writes, refs, run: (data = operation()) => context.exports.applyPrivateAccountMutation({auth: {uid: 'owner'}, data})};
 }
@@ -95,6 +97,46 @@ test('trusted retry remains idempotent after the record becomes shared or archiv
   const result = await f.run();
   assert.equal(result.status, 'applied'); assert.equal(result.duplicate, true); assert.equal(result.revision, 2);
   assert.deepEqual(f.writes, []);
+  assert.equal(f.refs.includes('users/owner'), false);
+  assert.equal(f.refs.includes('users/owner/aziende'), false);
+});
+
+test('inverse references on private and company profiles block without trusting missing Account backlinks', async () => {
+  const link = {linkedAccountId: 'record'};
+  const fixtures = [
+    ...['contactEmails', 'contactPhones', 'documenti'].map(field => ({profile: {[field]: [link]}})),
+    {profile: {userAddresses: [{utilities: [link]}]}},
+    ...['pec', 'amministrazione', 'personale'].map(slot => ({companies: [{emails: {[slot]: link}}]})),
+    {companies: [{emails: {extra: [link]}}]},
+    ...['telefonoAzienda', 'faxAzienda', 'referenteCellulare'].map(slot => ({companies: [{phoneAccountLinks: {[slot]: link}}]})),
+    {companies: [{isArchived: true, emails: {pec: {...link, email: ''}}}]}
+  ];
+  for (const fixture of fixtures) {
+    const before = structuredClone(fixture), f = handlerFixture(fixture);
+    await assert.rejects(f.run(), error => error.code === 'failed-precondition' && error.details.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+    assert.deepEqual(f.writes, []); assert.deepEqual(fixture, before);
+    assert.equal(f.refs.includes('users/owner'), true);
+    assert.equal(f.refs.includes('users/owner/aziende'), true);
+  }
+});
+
+test('same ID in a company account namespace is distinct, while malformed references and legacy aliases fail closed', async () => {
+  const link = {linkedAccountId: 'record', linkedAccountCompanyId: 'company'};
+  const allowed = handlerFixture({record: {...basic(), id: 'record'}, profile: {contactEmails: [link]},
+    companies: [{emails: {pec: link}, phoneAccountLinks: {telefonoAzienda: link}}]});
+  assert.equal((await allowed.run()).status, 'applied');
+  for (const fixture of [
+    {record: {...basic(), id: 'legacy-alias'}}, {record: {...basic(), id: null}},
+    {profile: {contactEmails: {}}}, {profile: {contactPhones: [null]}},
+    {profile: {documenti: [{linkedAccountId: 42}]}},
+    {profile: {userAddresses: [{utilities: null}]}},
+    {companies: [{emails: []}]}, {companies: [{emails: {extra: {}}}]},
+    {companies: [{phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'record', linkedAccountCompanyId: null}}}]}
+  ]) {
+    const f = handlerFixture(fixture);
+    await assert.rejects(f.run(), error => error.details?.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+    assert.deepEqual(f.writes, []);
+  }
 });
 
 test('legacy receipt reason is preserved before unsupported current scope is evaluated', async () => {
