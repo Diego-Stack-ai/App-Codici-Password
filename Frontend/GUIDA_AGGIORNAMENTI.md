@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Compatibilità legacy e anteprima offline — 12/09/2026
+
+Su base `553a35d5`, otto test dell’adattatore di sola lettura con crypto-utils reale e dati fittizi: verifier/envelope correnti, CPVK2, errori e cambi identità. Preparata anteprima Hosting separata di dieci file e verificato refresh/sblocco demo nel browser Windows con server fermo. Due test controllano inventario e worker. [Audit Vault §13](../docs/AUDIT_VAULT_SESSION_P0.md#13-compatibilità-e-anteprima-offline--12092026) conserva limiti e istruzioni; pubblicazione temporanea e collaudo iPhone ancora richiesti. App live invariata.
+
 ### Preparazione navigazione persistente — liste reali, 12/09/2026
 
 Su base `321fec0b`, corretto l’accumulo dei gestori SwipeList nelle liste Account condivise privato/azienda e nell’Archivio. Aggiunti smontaggio esplicito, cancellazione timer e invalidazione dei reveal pendenti. Il laboratorio usa ora il renderer reale con dati fittizi, ricerca e mostra/nascondi; non integra ancora le pagine complete. Cinque nuovi test e suite completa verde. [Audit Vault §12](../docs/AUDIT_VAULT_SESSION_P0.md#12-componenti-reali-delle-liste--12092026) registra perimetro, prove e rollback. Nessun deploy.

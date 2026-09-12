@@ -7,6 +7,11 @@ const view = document.querySelector('#view');
 const status = document.querySelector('#status');
 const unlock = document.querySelector('#unlock');
 const fixture = await createFixture();
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').then(() => navigator.serviceWorker.ready).then(() => {
+        document.querySelector('#offline').textContent = 'Demo disponibile anche offline';
+    }).catch(() => { document.querySelector('#offline').textContent = 'Demo offline non disponibile'; });
+} else document.querySelector('#offline').textContent = 'Browser senza supporto offline';
 let router, mounts = 0, cleanups = 0;
 const vault = createMemoryVault({
     unlockKey: fixture.unlockKey, decryptRecord,

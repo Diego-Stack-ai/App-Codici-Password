@@ -9,6 +9,8 @@
 
 Inventario M1 ricavato dalle chiamate a `encrypt`, `decrypt` ed `encryptAttachmentFile`. Il formato testuale è gestito da `crypto-utils.js`; gli allegati nuovi sono blob AES-GCM con wrapping per-file.
 
+Compatibilità sperimentale 12/09/2026, base `553a35d5`: verifier/envelope v2 e CPVK2 letti dal gestore in RAM su fixture sintetiche tramite le funzioni originali. Nessuna scrittura o trasformazione dei record. La cache offline dell’anteprima contiene solo file statici fittizi, non sessioni sbloccate o dati reali. [Evidenze](./AUDIT_VAULT_SESSION_P0.md#13-compatibilità-e-anteprima-offline--12092026).
+
 Laboratorio 12/09/2026, base `a6f756cc`: `persistent-vault-shell` usa due record fittizi AES-GCM solo in RAM. Nessun campo reale aggiunto o migrato; fixture e credenziale pubblica del laboratorio non sono un nuovo formato Vault produttivo. [Perimetro](./AUDIT_VAULT_SESSION_P0.md#11-prototipo-autorizzato--12092026).
 
 Seconda verifica di impatto 12/09/2026, base `67288cc3`: i contatori che invalidano sblocchi/salvataggi precedenti restano solo in RAM. Nessun campo aggiunto allo schema o allo storage. Il cambio Master Password conserva i contenitori cifrati di una scrittura già completata, ma non riapre la Vault dopo logout. [Prove e limiti](./AUDIT_VAULT_SESSION_P0.md#9-correzione-locale-del-12092026--operazioni-concorrenti).
