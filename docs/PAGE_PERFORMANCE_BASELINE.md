@@ -9,7 +9,7 @@ Pagine canoniche analizzate: **31**. Laboratori e redirect storici sono conserva
 | `profilo_privato.html` | 1 | 7 | 42 | 1180.4 KB | 335.7 KB |
 | `form_account_privato.html` | 1 | 6 | 42 | 1142.6 KB | 327.1 KB |
 | `form_account_azienda.html` | 1 | 6 | 41 | 1131.8 KB | 324.7 KB |
-| `dati_azienda.html` | 1 | 8 | 38 | 1096.6 KB | 317.6 KB |
+| `dati_azienda.html` | 1 | 8 | 38 | 1096.7 KB | 317.6 KB |
 | `aggiungi_scadenza.html` | 1 | 7 | 38 | 1094.6 KB | 315.9 KB |
 | `impostazioni.html` | 1 | 5 | 34 | 1093.8 KB | 312.1 KB |
 | `dettaglio_account_azienda.html` | 1 | 7 | 36 | 1074.2 KB | 310.6 KB |

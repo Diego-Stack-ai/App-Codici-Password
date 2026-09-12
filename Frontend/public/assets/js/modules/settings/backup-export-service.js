@@ -1,4 +1,4 @@
-import {storage} from '../../firebase-config.js?v=1.2.116';
+import {storage} from '../../firebase-config.js?v=1.2.117';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
