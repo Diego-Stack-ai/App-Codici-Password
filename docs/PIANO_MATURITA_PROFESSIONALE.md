@@ -394,3 +394,5 @@ M6: collaudato il collegamento browser IndexedDB–handler applyOfflineMutation 
 M6: esteso il collaudo browser al backend Account privato originale, inclusi riferimenti inversi Profilo/Azienda e retry dopo collegamento. Otto scenari privati più cinque generici passati in Chrome e Edge. Il collegamento UI e il rollout restano aperti; nessuna fase dichiarata conclusa.
 
 M6 UI: pannello note candidato con coda offline e retry collaudato in DOM reale/backend emulato. Dettaglio shell predisposto tramite provider opzionale sotto lifecycle; provider non ancora attivato nell’entry principale. Trentadue esecuzioni browser e 31 test vista/sessione superati. Restano attivazione controllata, aggiornamento dettaglio, recupero conflitti e rollout.
+
+M6: rinnovo opzionale del controllo della coda durante invii lunghi, con arresto alla chiusura. Verificati 24 scenari per browser e 73 test offline. Provider della shell, trasporto autenticato e rollout restano aperti; nessun deploy e nessuna fase globale dichiarata conclusa.

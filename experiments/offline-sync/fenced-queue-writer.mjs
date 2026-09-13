@@ -81,6 +81,7 @@ export async function createFencedQueueWriter({database, uid, vaultKeyMaterial, 
             return task(Object.freeze({
                 signal: context.signal,
                 checkCurrent: context.checkCurrent,
+                renew: context.renew,
                 async list() {
                     await context.checkCurrent();
                     const containers = await new Promise((resolve, reject) => {

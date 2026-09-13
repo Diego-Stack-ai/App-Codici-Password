@@ -177,3 +177,9 @@ Base 7beb3dbf. offline-save-panel.mjs espone nota, Salva e Riprova sincronizzazi
 Il dettaglio della shell emulata accetta un mountSavePanel opzionale solo sul dominio privato, governato dal proprio AbortController anche alla rimozione manuale; il provider non è ancora configurato dall’entry principale. Il pannello è montato e collaudato nella fixture browser privata con backend emulato. Non viene attivato automaticamente sui dati dell’utente.
 
 Undici scenari privati e cinque generici per ciascuno di Chrome ed Edge: 32 esecuzioni browser/emulatore complessive. Tre casi UI aggiunti: nota offline poi sincronizzata, chiusura durante avvio, chiusura durante preparazione. Trentuno test mirati vista/sessione passati, inclusi teardown manuale, inizializzatore tardivo e esclusione aziendale. Resta collegare il provider autorizzato alla shell principale, aggiornare la vista dopo conferma, implementare recupero esplicito dei conflitti, styling definitivo e rollout dello schema. Nessun deploy o dato reale modificato; produzione 1.2.124 invariata.
+
+### Rinnovo durante gli invii lunghi — candidato M6
+
+Base a7b7d1f8. Il client sperimentale accetta renewEveryMs opzionale, disabilitato per default e inferiore al TTL. Durante flush rinnova il lease senza sovrapporre rinnovi; errori impediscono conferme tardive. Timer rimossi a fine flush, abort o close. Un trasporto già avviato può terminare, ma la chiusura impedisce cancellazione della coda e aggiornamenti UI. Non è un servizio in background e non recupera lease scaduti.
+
+Ventiquattro scenari IndexedDB reali passati su Chrome ed Edge, inclusi invio oltre TTL e chiusura durante invio; 73 test offline superati. Il worker del test temporizzato legge Date.now al momento dell'operazione, evitando timestamp congelati durante il passaggio di messaggi. Restano provider protetto, trasporto autenticato, rollout schema e prove fisiche. Produzione 1.2.124 invariata.

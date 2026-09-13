@@ -660,3 +660,7 @@ Base 3b551a7a. Otto scenari privati per browser verificano ciphertext, revisioni
 ## 59. Pannello note sperimentale e teardown
 
 Base 7beb3dbf. UI candidata senza chiavi nel DOM, disattivata su abort e rimozione manuale della vista. Prove browser/emulatore di offline/retry e avvii tardivi; 31 test vista/sessione. Il dettaglio accetta un provider opzionale, ancora non configurato nel bootstrap principale. Nessuna attivazione produttiva.
+
+## 60. Rinnovo del lease durante sincronizzazione
+
+Base a7b7d1f8. Rinnovo opt-in nel client candidato, interrotto su fine operazione, abort e chiusura; nessuna conferma tardiva dopo invalidazione. 24 scenari per browser Chrome/Edge e 73 test offline passati. Non attivato nel runtime produttivo; dettagli e limiti nel contratto M6.

@@ -207,6 +207,31 @@ try {
     catch (error) { assert(error.code === 'HYBRID_SESSION_INACTIVE', 'CLOSED_REPLY_ERROR'); }
     assert(states.length === 0 && await read(db, 'encryptedOperations', `${uid}:sync-closed`), 'CLOSED_REPLY_REMOVED');
     passed.push('closing client during send suppresses stale UI states and preserves pending ciphertext');
+    await writer.run(async api => { for (const item of await api.list()) await api.remove(item); });
+    let slowOnline = false, finishSlow, startedSlow;
+    const realClockOptions = {database: db, uid, holderId: 'renewing-client', vaultKeyMaterial: 'SYNTHETIC-NOT-A-USER-KEY',
+        ttlMs: 600, renewEveryMs: 50, now: Date.now, locks: null, isOnline: () => slowOnline,
+        send: () => new Promise(resolve => { finishSlow = () => resolve({status: 'applied'}); startedSlow?.(); })};
+    const renewing = await createFencedQueueClient(realClockOptions);
+    await renewing.enqueue(syncOperation('renewal')); slowOnline = true;
+    const entered = new Promise(resolve => { startedSlow = resolve; });
+    const longSend = renewing.flush(); await entered;
+    await new Promise(resolve => setTimeout(resolve, 850));
+    assert((await probe({realClock: true, useLocks: false})).acquired === false, 'RENEWED_LEASE_STOLEN');
+    finishSlow(); await longSend;
+    assert(!(await read(db, 'encryptedOperations', `${uid}:sync-renewal`)), 'RENEWED_SEND_NOT_ACKED');
+    passed.push('periodic renewal keeps ownership during a send longer than the original lease');
+    slowOnline = false; await renewing.enqueue(syncOperation('renewal-close')); slowOnline = true;
+    const enteredClose = new Promise(resolve => { startedSlow = resolve; });
+    const pendingClose = renewing.flush().catch(error => error); await enteredClose;
+    await new Promise(resolve => setTimeout(resolve, 120)); renewing.close();
+    await new Promise(resolve => setTimeout(resolve, 40));
+    const stoppedLease = await read(db, 'queueLeases', uid);
+    await new Promise(resolve => setTimeout(resolve, 180));
+    assert((await read(db, 'queueLeases', uid)).expiresAt === stoppedLease.expiresAt, 'CLOSED_CLIENT_RENEWS');
+    finishSlow(); const closeError = await pendingClose;
+    assert(closeError.code === 'HYBRID_SESSION_INACTIVE' && await read(db, 'encryptedOperations', `${uid}:sync-renewal-close`), 'CLOSED_RENEWAL_ACK');
+    passed.push('client close stops renewal timers even while transport remains unresolved');
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, passed, browser: navigator.userAgent})});
 } catch (error) {
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: false, passed, code: error.code || error.message})});
