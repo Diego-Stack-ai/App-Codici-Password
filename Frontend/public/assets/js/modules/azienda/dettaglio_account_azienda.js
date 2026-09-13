@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.110';
+import { auth, db } from '../../firebase-config.js?v=1.2.118';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -222,14 +222,14 @@ async function loadAccount(mount = mounted) {
         }
         initProtocolUI(actionActive);
         render(loaded, actionActive);
-        const contactNames = await initDetailAccountMode({account: loaded, ownerId: loadOwnerId, accountId, aziendaId: companyId, readOnly: isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: loadOwnerId, accountId, aziendaId: companyId, readOnly: isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
         if (!active()) return;
         renderSharingMap(loaded, contactNames);
         await loadAttachments();
         if (!active()) return;
-        const widgetContext = {uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
+        const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.110`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.118`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();
@@ -246,6 +246,7 @@ async function loadAccount(mount = mounted) {
 }
 
 function render(acc, active) {
+    if (!active()) return;
     document.title = acc.nomeAccount || 'Dettaglio Azienda';
 
     // Accent Colors
@@ -303,7 +304,9 @@ function render(acc, active) {
         'detail-numero-iscrizione', 'detail-codice-societa'
     ].forEach(id => {
         const input = document.getElementById(id);
-        input?.closest('.glass-field-container')?.classList.toggle('hidden', !String(input.value || '').trim());
+        const value = String(input?.value || '');
+        const present = id === 'detail-password' ? value.length > 0 : Boolean(value.trim());
+        input?.closest('.glass-field-container')?.classList.toggle('hidden', !present);
         const grid = input?.closest('.form-grid-2');
         if (grid) compactGrids.add(grid);
     });

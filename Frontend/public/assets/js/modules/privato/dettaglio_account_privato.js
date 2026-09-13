@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.110';
+import { auth, db } from '../../firebase-config.js?v=1.2.118';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -257,20 +257,20 @@ async function loadAccount(mount = mounted) {
         setupEditAction(resolvedId, actionActive);
         if (!readOnly) updateDoc(docRef, {views: increment(1)}).catch(error => { if (active()) logError('UpdateViews', error); });
         renderAccount(loaded, actionActive);
-        const contactNames = await initDetailAccountMode({account: loaded, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
         if (!active()) return;
         renderPrivateSharingMap(loaded, contactNames);
         await loadPrivateAttachments();
         if (!active()) return;
-        const widgetContext = {uid: lookupUid, context: 'private', accountId: resolvedId, readOnly, active: actionActive, signal};
+        const widgetContext = {compactView: true, uid: lookupUid, context: 'private', accountId: resolvedId, readOnly, active: actionActive, signal};
         const initWidget = async (module, name) => {
             if (!active()) return;
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.110').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.118').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.110').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.118').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());
@@ -286,6 +286,7 @@ async function loadAccount(mount = mounted) {
  * RENDERING
  */
 function renderAccount(acc, active) {
+    if (!active()) return;
     const resolvedId = acc.id;
     const renderedVersion = loadVersion;
     document.title = acc.nomeAccount || 'Dettaglio';
@@ -339,7 +340,9 @@ function renderAccount(acc, active) {
     const compactGrids = new Set();
     ['detail-username', 'detail-account', 'detail-password', 'detail-website'].forEach(id => {
         const input = document.getElementById(id);
-        input?.closest('.glass-field-container')?.classList.toggle('hidden', !String(input.value || '').trim());
+        const value = String(input?.value || '');
+        const present = id === 'detail-password' ? value.length > 0 : Boolean(value.trim());
+        input?.closest('.glass-field-container')?.classList.toggle('hidden', !present);
         const grid = input?.closest('.form-grid-2');
         if (grid) compactGrids.add(grid);
     });

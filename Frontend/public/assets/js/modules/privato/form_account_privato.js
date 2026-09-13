@@ -1,5 +1,6 @@
+import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.110';
+import {auth} from '../../firebase-config.js?v=1.2.118';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -16,8 +17,8 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.110';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.110';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.118';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.118';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -47,7 +48,9 @@ const rerender = async () => {
     }
     try {
         const {renderBankAccounts} = await import('../shared/banking-renderer.js');
-        if (active()) renderBankAccounts(bankAccounts, rerender);
+        if (active()) renderBankAccounts(bankAccounts, rerender, {
+            onAddWidget: () => active() && accountWidgetController?.openNewWidget()
+        });
     } catch {
         if (active()) showToast('Impossibile visualizzare i dati bancari. Riprova ad aprire la sezione.', 'warning');
     }
@@ -448,20 +451,7 @@ async function loadData() {
         setVal('ref-mobile', data.referenteCellulare || ref.cellulare);
 
         // Banking & Cards (Normalize & Validate)
-        let loadedBanking = [];
-        if (Array.isArray(data.banking)) {
-            loadedBanking = data.banking;
-        } else if (data.banking) {
-            loadedBanking = [data.banking];
-        } else if (data.iban || (data.cards && data.cards.length > 0)) {
-            loadedBanking = [{
-                iban: data.iban || '',
-                passwordDispositiva: data.passwordDispositiva || '',
-                referenteTelefono: data.referenteTelefono || '',
-                referenteCellulare: data.referenteCellulare || '',
-                cards: data.cards || []
-            }];
-        }
+        let loadedBanking = normalizeEditableBankingAccounts(data);
 
         // Decrittazione Banking
         if (needsDecryption) {
@@ -477,13 +467,7 @@ async function loadData() {
             })));
         }
 
-        const hasRealData = loadedBanking.some(acc => {
-            const hasIban = acc.iban && acc.iban.trim().length > 0;
-            const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
-            const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-            const hasRef = (acc.referenteNome?.trim() || acc.numeroVerde?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
-            return hasIban || hasDisp || hasCards || hasRef;
-        });
+        const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData) {
             bankAccounts = loadedBanking;

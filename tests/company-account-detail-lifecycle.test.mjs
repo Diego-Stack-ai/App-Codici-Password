@@ -7,7 +7,7 @@ const source = await readFile(new URL('../Frontend/public/assets/js/modules/azie
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
 function fixture() {
     const writes = [], reads = [], errors = [], modules = [], classes = new Set(), listeners = new Set();
-    const nodes = Object.fromEntries(['detail-username','hero-title','detail-password','btn-call-ref-phone','ref-phone'].map(id=>[id,{value:'',textContent:'',children:[],classList:{add(){},remove(){},toggle(){}},onclick:null}]));
+    const nodes = Object.fromEntries(['detail-username','hero-title','detail-password','btn-call-ref-phone','ref-phone'].map(id=>[id,{closest:()=>null,value:'',textContent:'',children:[],classList:{add(){},remove(){},toggle(){}},onclick:null}]));
     const footer = {children: [], classList: {
         add: value => classes.add(value),
         toggle(value, enabled) { if (enabled) classes.add(value); else classes.delete(value); }

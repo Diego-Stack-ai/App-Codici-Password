@@ -6,15 +6,15 @@ import {readFile} from 'node:fs/promises';
 const root = new URL('../Frontend/public/assets/js/modules/privato/', import.meta.url);
 const strip = value => value.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const source = strip(await readFile(new URL('dettaglio_account_privato.js', root), 'utf8'))
-    .replace("import('../shared/account-shared-credentials.js?v=1.2.110')", 'loadCredentials()')
-    .replace("import('../shared/account-embedded-widgets.js?v=1.2.110')", 'loadWidgets()');
+    .replace(/import\('\.\.\/shared\/account-shared-credentials\.js\?v=\d+\.\d+\.\d+'\)/, 'loadCredentials()')
+    .replace(/import\('\.\.\/shared\/account-embedded-widgets\.js\?v=\d+\.\d+\.\d+'\)/, 'loadWidgets()');
 const attachments = strip(await readFile(new URL('dettaglio-privato-attachments.js', root), 'utf8'));
 const sharing = strip(await readFile(new URL('dettaglio-privato-sharing.js', root), 'utf8'));
 const tick = () => new Promise(setImmediate);
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 function node(props = {}) {
     const classes = new Set();
-    return {children: [], value: '', textContent: '', type: 'password', isConnected: true,
+    return {closest: () => null, children: [], value: '', textContent: '', type: 'password', isConnected: true,
         style: {setProperty() {}}, classList: {add: value => classes.add(value), remove: value => classes.delete(value),
             toggle(value, force) { if (force ?? !classes.has(value)) { classes.add(value); return true; } classes.delete(value); return false; }},
         appendChild(child) { this.children.push(child); }, prepend(child) { this.children.unshift(child); },

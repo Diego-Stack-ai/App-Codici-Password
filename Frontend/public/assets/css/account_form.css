@@ -620,6 +620,10 @@ input:checked+.base-switch::after {
     padding-top: 1rem;
 }
 
+.bank-widget-action {
+    margin-top: 0.25rem;
+}
+
 .bank-cards-header {
     display: flex;
     align-items: center;

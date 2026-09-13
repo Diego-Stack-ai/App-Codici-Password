@@ -46,6 +46,17 @@ function hasText(value) {
     return typeof value === 'string' && value.trim().length > 0;
 }
 
+// General account contacts are not evidence of a legacy bank account. Once
+// banking is established, preserve all its historical fields while editing.
+export function normalizeEditableBankingAccounts(account = {}) {
+    const canonical = Array.isArray(account.banking)
+        || Boolean(account.banking && typeof account.banking === 'object');
+    const legacy = account.isBanking === true || hasText(account.iban)
+        || hasText(account.passwordDispositiva) || hasText(account.numeroVerde)
+        || (Array.isArray(account.cards) && account.cards.some(hasRealCardData));
+    return canonical || legacy ? normalizeBankingAccounts(account) : [];
+}
+
 function hasRealCardData(card) {
     if (!card || typeof card !== 'object') return false;
     return ['cardNumber', 'cardType', 'type', 'pin', 'ccv']

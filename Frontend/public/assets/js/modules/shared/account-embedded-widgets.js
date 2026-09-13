@@ -405,13 +405,34 @@ export async function initAccountEmbeddedWidgets(context) {
     const emptyController = {
         destroy() {},
         hasPendingChanges: () => false,
-        savePendingChanges: async () => false
+        savePendingChanges: async () => false,
+        openNewWidget: async () => false
     };
     if (!section || !list || !context?.uid || !context.accountId) return emptyController;
     const lifecycle = createAccountWidgetLifecycle(context, {section, list, add});
     context = {...context, ...lifecycle};
     if (context.readOnly) { section.classList.add('hidden'); return {...emptyController, destroy: lifecycle.destroy}; }
     let readVersion = 0;
+    let availableTemplates = [];
+    const openNewWidget = async () => {
+        if (!context.editable || !context.active()) return false;
+        if (!navigator.onLine) {
+            showToast('La creazione dei Widget richiede internet.', 'warning');
+            return false;
+        }
+        try {
+            const [records, currentWidgets] = await Promise.all([
+                listSharedVaultDataConfirmed(context.uid), listAccountWidgetsConfirmed(context.uid)
+            ]);
+            if (!context.active()) return false;
+            await openEditor(null, context, refresh, availableTemplates,
+                availableCommonCredentials(records, currentWidgets, context));
+            return true;
+        } catch {
+            if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
+            return false;
+        }
+    };
     const refresh = async confirmed => {
         if (!context.active()) return;
         const reading = ++readVersion;
@@ -437,6 +458,7 @@ export async function initAccountEmbeddedWidgets(context) {
             if (context.editable) editableWidgets.flat().forEach(field => { field.value = ''; });
             return;
         }
+        availableTemplates = templates;
         for (const card of list.children) card.destroy?.();
         clearWidgetValues(list);
         clearElement(list);
@@ -447,26 +469,14 @@ export async function initAccountEmbeddedWidgets(context) {
         section.classList.toggle('hidden', !context.editable && widgets.length === 0);
         if (add) {
             add.classList.toggle('hidden', !context.editable);
-            add.onclick = async () => {
-                if (!context.editable || !context.active()) return;
-                if (!navigator.onLine) return showToast('La creazione dei Widget richiede internet.', 'warning');
-                try {
-                    const [records, currentWidgets] = await Promise.all([
-                        listSharedVaultDataConfirmed(context.uid), listAccountWidgetsConfirmed(context.uid)
-                    ]);
-                    if (!context.active()) return;
-                    await openEditor(null, context, refresh, templates,
-                        availableCommonCredentials(records, currentWidgets, context));
-                } catch {
-                    if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
-                }
-            };
+            add.onclick = openNewWidget;
         }
     };
     try { await refresh(false); } catch (error) { lifecycle.destroy(); throw error; }
     return {
         destroy: lifecycle.destroy,
         hasPendingChanges: () => context.active() && [...list.children].some(card => card.hasPendingChanges?.()),
+        openNewWidget,
         savePendingChanges: async () => {
             if (!context.active()) throw new Error('WIDGET_VIEW_DISPOSED');
             const pending = [...list.children].filter(card => card.hasPendingChanges?.());

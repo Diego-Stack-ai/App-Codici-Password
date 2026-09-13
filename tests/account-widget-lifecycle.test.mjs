@@ -109,3 +109,14 @@ test('parent context invalidation destroys child lifecycle without an AbortSigna
  const f=fixture();let active=true;const life=f.sandbox.createAccountWidgetLifecycle({...f.scope,active:()=>active},{section:f.roots['shared-credentials-section'],list:f.roots['shared-credentials-list'],add:f.roots['btn-link-shared-credential']});
  const pending=life.requestDecision('Review','message');active=false;assert.equal(life.active(),false);assert.equal(await pending,false);assert.equal(f.dialogs.length,0);assert.equal(f.listeners.size,0);
 });
+
+test('external banking shortcut uses owned editor and refuses reopening after lock',async()=>{
+ const f=fixture(2);const controller=await f.sandbox.initAccountEmbeddedWidgets(f.scope);
+ assert.equal(await controller.openNewWidget(),true);assert.equal(f.dialogs.length,1);
+ f.lock();assert.equal(f.dialogs.length,0);assert.equal(await controller.openNewWidget(),false);assert.equal(f.writes.length,0);
+});
+test('external shortcut late reads cannot open an editor after teardown',async()=>{
+ const f=fixture(2);const controller=await f.sandbox.initAccountEmbeddedWidgets(f.scope);const gate=deferred();
+ f.sandbox.listSharedVaultDataConfirmed=()=>gate.promise;const pending=controller.openNewWidget();controller.destroy();gate.resolve([]);
+ assert.equal(await pending,false);assert.equal(f.dialogs.length,0);assert.equal(f.writes.length,0);
+});
