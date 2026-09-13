@@ -476,3 +476,30 @@
         grid-template-columns: 1fr;
     }
 }
+
+.inline-note-dialog {
+    --modal-max: 640px;
+
+    overflow-y: auto;
+}
+
+.inline-note-input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 8rem;
+    height: 25dvh;
+    max-height: 45dvh;
+    padding: 1rem;
+    border: 1px solid var(--border-color, #94a3b8);
+    border-radius: 1rem;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    resize: vertical;
+    white-space: pre-wrap;
+}
+
+.inline-note-input:focus-visible {
+    outline: 2px solid var(--accent-hex, #1688f8);
+    outline-offset: 2px;
+}
