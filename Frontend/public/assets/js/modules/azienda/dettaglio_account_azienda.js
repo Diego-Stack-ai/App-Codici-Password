@@ -295,6 +295,25 @@ function render(acc, active) {
         if (el) el.value = val || '';
     }
 
+    // Compatta la sola pagina di consultazione: i campi vuoti non riservano
+    // spazio, mentre restano tutti disponibili nel modulo di modifica.
+    const compactGrids = new Set();
+    [
+        'detail-username', 'detail-account', 'detail-password', 'detail-website',
+        'detail-numero-iscrizione', 'detail-codice-societa'
+    ].forEach(id => {
+        const input = document.getElementById(id);
+        input?.closest('.glass-field-container')?.classList.toggle('hidden', !String(input.value || '').trim());
+        const grid = input?.closest('.form-grid-2');
+        if (grid) compactGrids.add(grid);
+    });
+    compactGrids.forEach(grid => {
+        const visibleChildren = [...grid.children].filter(child => !child.classList.contains('hidden'));
+        grid.classList.toggle('hidden', visibleChildren.length === 0);
+        grid.classList.toggle('detail-grid-single', visibleChildren.length === 1);
+    });
+    document.getElementById('section-notes')?.classList.toggle('hidden', !String(acc.note || '').trim());
+
     // Banking
     renderAccountBanking(acc, {
         isReadOnly, isActive: active,
@@ -319,6 +338,9 @@ function render(acc, active) {
     setF('ref-name', refNome);
     setF('ref-phone', refPhone);
     setF('ref-mobile', refMobile);
+    document.getElementById('section-referente')?.classList.toggle(
+        'hidden', ![refNome, refPhone, refMobile].some(value => String(value || '').trim())
+    );
 
     // Shared Management V3
     if (acc.visibility === 'shared') {
