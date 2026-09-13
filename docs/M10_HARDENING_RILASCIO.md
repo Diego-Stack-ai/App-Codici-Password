@@ -82,3 +82,9 @@ Gestione Scadenze ricevute candidata: anche manageReceivedDeadline richiede expe
 ## Candidata integrata — 13 settembre 2026
 
 Codice `4a431ec3`, versione 1.2.118: suite completa 887 test superati dopo integrazione UI Account/Vault e riconciliazione master 1.2.117. Versione, budget, Rules e Functions verificati localmente; nessuna pubblicazione o migrazione. Il risultato non sostituisce i gate reali elencati sopra. [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
+
+## Distribuzione Widget bancari — candidata 1.2.119, 13/09/2026
+
+Base a6699e8d: suite completa locale 352 test superati; budget invariati. La modifica backend riguarda solo manageAccountWidget e il validatore dedicato. Ordine previsto: pubblicare questa Function, poi Hosting; gli altri callable e Rules restano invariati. Vecchio client Widget che omette bankId conserva l'associazione via backend nuovo. Il frontend nuovo con backend vecchio non è una combinazione valida: il vecchio validatore scarterebbe bankId.
+
+Aggiornare la PWA prima di modificare i conti: i vecchi form aziendali possono omettere gli identificativi bancari aggiunti. Un Widget con target mancante resta recuperabile dalla sezione generica, può essere spostato o eliminato; non viene cancellato automaticamente. Il blocco UI dell'eliminazione del conto non è un vincolo globale contro vecchi writer concorrenti. Nessuna migrazione o lettura di dati reali eseguita. Per rollback del frontend conservare il backend compatibile: ripristinare un validatore precedente può perdere l'associazione al successivo salvataggio. L'autorizzazione precedente era limitata a Hosting 1.2.118; la distribuzione di questa Function richiede approvazione esplicita.

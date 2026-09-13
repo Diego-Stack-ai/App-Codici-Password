@@ -123,3 +123,15 @@ Importati gli orchestratori canonici delle due liste nella shell sperimentale, c
 ## Dettagli Account integrati — candidata 1.2.118, 13/09/2026
 
 Verifica sul ramo `codex/integrate-vault-account-v118`, base codice `4a431ec3`; integrazione della UI `d2ef897e` con il candidato Vault `3660a838`. Le pagine canoniche di consultazione nascondono i campi vuoti, mostrano gli allegati dopo le note e contengono un solo base-glow. Il normale editor conserva i campi e la gestione Widget; la scorciatoia bancaria apre lo stesso editor Widget dell'Account. I riferimenti generali restano distinti dal referente della banca e dal Numero verde. Conservati isolamento di sessione, caricamento bancario differito e sola lettura. Evidenze e limiti in [Audit §51](../docs/AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
+
+## Account UI 1.2.118 — 13/09/2026
+
+Rilascio UI isolato sulla base master 1.2.117 (`445b338d`), derivato da `d2ef897e`. In consultazione i campi vuoti vengono nascosti, gli allegati seguono le note e ogni dettaglio usa un solo base-glow. I riferimenti generali restano separati dai dati della banca. Numero verde e referente banca sono conservati alla riapertura; la scorciatoia bancaria apre il normale editor Widget Account. Il normale editor conserva i campi modificabili. Questo rilascio non include il ramo Vault sperimentale.
+
+## Widget del singolo conto — candidata 1.2.119, 13/09/2026
+
+Ogni conto bancario dei form privato/azienda contiene carte e una propria area Widget. Il pulsante + apre lo stesso editor con posizione preselezionata; il campo Posizione consente di spostare un Widget generico già esistente. Il collegamento usa bankId stabile, mai indice della lista o IBAN. Il conto deve essere salvato prima di creare il Widget. Le bozze dei Widget restano conservate quando si apre/chiude il conto. Per eliminare un conto con Widget occorre prima spostarli o eliminarli; non sono cancellati automaticamente. Candidata non distribuita.
+
+## Ordine interno del conto — candidata 1.2.121, 13/09/2026
+
+Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infine le carte associate. Ordine condiviso da Modifica e consultazione, nei contesti privato e aziendale. Il contenitore Widget rimane disponibile anche a conto chiuso, preservando le bozze al rerender. Nessuna modifica a dati, associazioni, backend o Rules.

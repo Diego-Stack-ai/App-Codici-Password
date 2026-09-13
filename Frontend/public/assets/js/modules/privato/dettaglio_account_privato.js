@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.118';
+import { auth, db } from '../../firebase-config.js?v=1.2.121';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -268,9 +268,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.118').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.121').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.118').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.121').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());

@@ -1,4 +1,4 @@
-import {auth, functions, storage} from '../../firebase-config.js?v=1.2.118';
+import {auth, functions, storage} from '../../firebase-config.js?v=1.2.121';
 import {httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';

@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.118';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.121';
 
 function createReadonlyField(label, value, icon, isPassword = false, isActive = () => true) {
     const id = `bank-field-${crypto.randomUUID()}`;
@@ -105,6 +105,8 @@ function createBankAccount(bank, index, isActive) {
         bank.referenteCellulare ? field('Cell. Banca', bank.referenteCellulare, 'smartphone') : null
     ].filter(Boolean);
 
+    if (bank.bankId) fields.push(createElement('div', {className: 'bank-widget-host flex-col-gap', dataset: {bankWidgetId: bank.bankId}}));
+
     if (bank.cards?.length) {
         fields.push(createElement('div', { className: 'bank-cards-section' }, [
             createElement('div', { className: 'bank-cards-header' }, [
@@ -150,6 +152,7 @@ export function renderAccountBanking(account, { isReadOnly = false, onAddBanking
 
     if (!content) return;
     clearElement(content);
-    if (!hasBanking) return;
-    setChildren(content, normalizeBankingAccounts(account).map((bank, index) => createBankAccount(bank, index, isActive)));
+    const banks = normalizeBankingAccounts(account);
+    if (!hasBanking && !banks.some(bank => bank.bankId)) return;
+    setChildren(content, banks.map((bank, index) => createBankAccount(bank, index, isActive)));
 }

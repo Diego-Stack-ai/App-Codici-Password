@@ -355,3 +355,11 @@ Le operazioni già inviate al server non sono annullabili da questo controllo: i
 ## Consolidamento Account — candidata 1.2.118, 13/09/2026
 
 Base codice `4a431ec3`: UI Account compatta, allegati sotto note, Numero verde e referente banca, scorciatoia al normale editor Widget integrati con i controlli sessione del candidato Vault. Conservate le correzioni master 1.2.111–1.2.117 per contatti, aggiornamento dopo scrittura, credenziali comuni e selettore Widget. I test coprono anche salvataggio/riapertura dei dati bancari e callback tardive. Non è una nuova migrazione dei Profili né una chiusura dei gate reali. [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
+
+## Widget dentro il conto — candidata 1.2.119, 13/09/2026
+
+Corretto il pulsante introdotto nella UI 1.2.118: la creazione dal conto ora seleziona una posizione bancaria specifica, persistita tramite bankId. Host separati mantengono i Widget dentro ciascun conto, anche dopo riapertura; generici invariati. Disponibile spostamento esplicito dall'editor per Widget creati prima della correzione. Il requisito richiede un aggiornamento compatibile del solo callable manageAccountWidget oltre a Hosting; lavoro Vault escluso. Candidata verificata con 352 test, non distribuita.
+
+## Prerequisito conto salvato — candidata 1.2.120, 13/09/2026
+
+Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consentiva di inviare il Widget prima che il conto fosse salvato. Il backend respingeva correttamente la richiesta con HTTP 400/failed-precondition. Ora i due form distinguono gli ID caricati da quelli appena generati; creazione e spostamento chiedono prima il salvataggio Account, senza inviare il comando fallito e conservando eventuali campi nel modale. Gestito anche il testo italiano del rifiuto server. Nessuna modifica backend, Rules, dati reali o ramo Vault.

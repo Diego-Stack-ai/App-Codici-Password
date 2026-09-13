@@ -70,6 +70,11 @@ export async function prepareEmbeddedAccountWidget(input = {}, account = {}, enc
         collapsed: input.collapsed === true,
         revision: Number.isInteger(input.revision) && input.revision >= 1 ? input.revision : 1
     };
+    if (Object.prototype.hasOwnProperty.call(input, 'bankId')) {
+        if (input.bankId === null) widget.bankId = null;
+        else if (typeof input.bankId === 'string' && /^[A-Za-z0-9._:-]{1,160}$/.test(input.bankId)) widget.bankId = input.bankId;
+        else throw new Error('Conto bancario del Widget non valido.');
+    }
     if (context === 'company') {
         widget.companyId = requiredText(account.companyId, 'Identificativo Azienda', 160);
     }

@@ -665,3 +665,19 @@ Release isolata su master v1.2.111 (`f4d9393b`), derivata dalla correzione local
 ## Integrazione candidata 1.2.118 — 13/09/2026
 
 Nel ramo `codex/integrate-vault-account-v118`, integrati i sette commit UI fino a `d2ef897e` sulla base sperimentale `3660a838`, poi ricongiunta la cronologia master `445b338d` senza modificare master. Codice risultante `4a431ec3`: 887 test della suite completa superati, 244 riferimenti asset coerenti e budget invariati. Gli MD descrivono vista compatta, campi banca e Widget; protezioni sessione conservate. Nessun deploy, migrazione o chiusura generale M0–M10. [Audit §51](../docs/AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
+
+## Rilascio UI isolato 1.2.118 — 13/09/2026
+
+Autorizzata la pubblicazione delle sole modifiche UI Account sulla base master `445b338d`. Ramo `release/account-ui-v118`, derivato da `d2ef897e`; inclusi fix UI per conservazione dei campi bancari, nomi della rubrica in consultazione e password di soli spazi. Vault, Rules, Functions, cifratura e protocolli backend produttivi invariati. Il ramo integrato `codex/integrate-vault-account-v118` resta separato. Rollback Hosting: ripubblicare i file di `445b338d`, senza migrazioni. Suite completa: 336 test superati, zero fallimenti, inclusi emulatori Firestore/Storage. Versione 1.2.118 e 245 riferimenti asset coerenti; budget delle 30 pagine rispettati. Hosting pubblicato e verificato il 13/09/2026 dal commit `bbf0d65d`: sei file pubblici confrontati con la build locale, inclusi entrambi i dettagli e il service worker. Anche la CI della PR #52 è passata. Master resta `445b338d`: il merge della PR richiede autorizzazione esplicita, secondo la revisione automatica. Nessun deploy backend.
+
+## Widget bancari — candidata 1.2.119, 13/09/2026
+
+Base a6699e8d, ramo fix/banking-widget-placement. Ogni conto conserva la propria area Widget e carte; posizione stabile nel form e in consultazione, spostamento esplicito dei Widget generici e conservazione delle bozze durante rerender. Il server verifica bankId nello stesso Account. Suite completa: 352 test superati, incluse 36 prove Functions, emulatori, cifratura, UI e budget. Nessuna pubblicazione: necessario aggiornare il solo callable manageAccountWidget prima di Hosting. Nessuna modifica Rules o integrazione Vault.
+
+## Prerequisito conto salvato — candidata 1.2.120, 13/09/2026
+
+Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consentiva di inviare il Widget prima che il conto fosse salvato. Il backend respingeva correttamente la richiesta con HTTP 400/failed-precondition. Ora i due form distinguono gli ID caricati da quelli appena generati; creazione e spostamento chiedono prima il salvataggio Account, senza inviare il comando fallito e conservando eventuali campi nel modale. Gestito anche il testo italiano del rifiuto server. Nessuna modifica backend, Rules, dati reali o ramo Vault.
+
+## Ordine interno del conto — candidata 1.2.121, 13/09/2026
+
+Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infine le carte associate. Ordine condiviso da Modifica e consultazione, nei contesti privato e aziendale. Il contenitore Widget rimane disponibile anche a conto chiuso, preservando le bozze al rerender. Nessuna modifica a dati, associazioni, backend o Rules.

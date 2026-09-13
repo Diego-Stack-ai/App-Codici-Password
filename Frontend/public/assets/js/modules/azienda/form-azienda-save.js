@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.118';
+import { auth, db } from '../../firebase-config.js?v=1.2.121';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -75,6 +75,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: await Promise.all(bankAccounts.map(async b => ({
+            ...(b.bankId ? {bankId: b.bankId} : {}),
             iban: (b.iban || '').trim(),
             passwordDispositiva: await encrypt((b.passwordDispositiva || '').trim(), vaultKeyMaterial),
             referenteNome: (b.referenteNome || '').trim(),

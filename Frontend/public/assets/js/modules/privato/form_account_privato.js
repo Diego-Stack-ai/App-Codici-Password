@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.118';
+import {auth} from '../../firebase-config.js?v=1.2.121';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,14 +17,15 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.118';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.118';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.121';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.121';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
 let currentUid = null;
 let currentDocId = null;
 let isEditing = false;
+let savedBankIds = new Set();
 let bankAccounts = []; // Inizialmente vuoto per nuovi account
 let profileContactLinkDraft = null;
 let myContacts = [];
@@ -49,7 +50,12 @@ const rerender = async () => {
     try {
         const {renderBankAccounts} = await import('../shared/banking-renderer.js');
         if (active()) renderBankAccounts(bankAccounts, rerender, {
-            onAddWidget: () => active() && accountWidgetController?.openNewWidget()
+            onAddWidget: bankId => {
+                if (!active()) return;
+                if (accountWidgetController) return accountWidgetController.openNewWidget(bankId);
+                showToast('Salva prima l’Account, poi aggiungi i Widget del conto.', 'warning');
+            },
+            onWidgetsMount: () => active() && accountWidgetController?.placeBankWidgets()
         });
     } catch {
         if (active()) showToast('Impossibile visualizzare i dati bancari. Riprova ad aprire la sezione.', 'warning');
@@ -174,6 +180,7 @@ async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevisio
  */
 
 export async function initFormAccountPrivato(user) {
+    savedBankIds = new Set();
     
     if (!user) return;
     currentUid = user.uid;
@@ -314,6 +321,7 @@ export async function initFormAccountPrivato(user) {
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true
         });
         accountWidgetController = await initAccountEmbeddedWidgets({
+            isBankSaved: bankId => savedBankIds.has(bankId),
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true,
             onSharedLinked: () => initAccountSharedCredentials({
                 uid: currentUid, context: 'private', accountId: currentDocId, editable: true
@@ -452,6 +460,7 @@ async function loadData() {
 
         // Banking & Cards (Normalize & Validate)
         let loadedBanking = normalizeEditableBankingAccounts(data);
+        savedBankIds = new Set(loadedBanking.map(bank => bank.bankId).filter(Boolean));
 
         // Decrittazione Banking
         if (needsDecryption) {
@@ -478,7 +487,8 @@ async function loadData() {
             // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
             document.getElementById('flag-banking').checked = false;
             document.getElementById('banking-section').classList.add('hidden');
-            bankAccounts = [];
+            bankAccounts = loadedBanking.filter(bank => bank.bankId);
+            await rerender();
         }
 
         isExplicitMemo = data.isExplicitMemo || false;

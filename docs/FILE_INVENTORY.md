@@ -610,4 +610,7 @@ File censiti: **509**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Duplicati esatti
 
+- `experiments/persistent-vault-shell/dist/emulator-site/assets/images/google-avatar.png` = `experiments/persistent-vault-shell/dist/site/assets/images/google-avatar.png` = `Frontend/public/assets/images/google-avatar.png`
+- `experiments/persistent-vault-shell/dist/emulator-site/symbols.woff2` = `experiments/persistent-vault-shell/dist/site/symbols.woff2` = `Frontend/public/assets/fonts/material-symbols/material-symbols-0.woff2`
+- `experiments/persistent-vault-shell/dist/real-lists.mjs` = `experiments/persistent-vault-shell/dist/site/real-lists.mjs`
 - `archive/home-experiments/home-v126.html` = `archive/home-experiments/home-v127.html`

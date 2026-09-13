@@ -60,3 +60,11 @@ Preparazione sperimentale, base `b792b1c0`: patch locale dei sei campi del detta
 ## Verifica circoscritta banking — candidata 1.2.118, 13/09/2026
 
 Codice `4a431ec3`, editor `form-privato-save.js` e `form-azienda-save.js`: `banking[].referenteNome` e `banking[].numeroVerde` sono metadati in chiaro, come i telefoni del referente. `passwordDispositiva`, `cards[].cardNumber`, `cards[].pin` e `cards[].ccv` continuano a essere cifrati dagli stessi writer. È una fotografia del codice, subordinata alla baseline: non approva nuovi usi di dati in chiaro e non chiude l'inventario globale P0. Nessun dato reale letto, cancellato o ricifrato durante l'integrazione. Dipendenze: contratto funzionale e [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
+
+## Verifica circoscritta UI 1.2.118 — 13/09/2026
+
+Base `445b338d`, UI `d2ef897e`: nei writer privato e aziendale `banking[].numeroVerde` e `banking[].referenteNome` sono metadati in chiaro, come i telefoni bancari. Password dispositiva, numero carta, PIN e CCV mantengono la cifratura esistente. È una descrizione del codice, non una chiusura dell’inventario globale o una nuova decisione di sicurezza. Nessuna lettura o riscrittura di dati reali durante la preparazione del rilascio.
+
+## Metadati posizione Widget — candidata 1.2.119, 13/09/2026
+
+banking[].bankId e accountWidgets.bankId sono identificativi tecnici non cifrati, privi di IBAN o dati personali. Cifratura e validazione dei valori Widget restano quelle esistenti. Il campo sensibile viene ancora inviato esclusivamente come valueEnc. Nessun dato reale letto o migrato; verifica circoscritta del codice su base a6699e8d, non chiusura dell'inventario globale.
