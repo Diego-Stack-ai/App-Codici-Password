@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.117';
+import { db } from '../../firebase-config.js?v=1.2.118';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -135,13 +135,13 @@ async function loadAccount() {
         }
 
         renderAccount(accountData);
-        const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
+        const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, compactView: true, onReload: loadAccount });
         renderPrivateSharingMap(accountData, contactNames);
         await loadPrivateAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.117').then(({initAccountSharedCredentials}) =>
-            initAccountSharedCredentials({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly})
+        import('../shared/account-shared-credentials.js?v=1.2.118').then(({initAccountSharedCredentials}) =>
+            initAccountSharedCredentials({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly, compactView: true})
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.117').then(({initAccountEmbeddedWidgets}) =>
+        import('../shared/account-embedded-widgets.js?v=1.2.118').then(({initAccountEmbeddedWidgets}) =>
             initAccountEmbeddedWidgets({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly})
         ).catch(error => console.warn('[ACCOUNT WIDGETS] Caricamento saltato.', error));
         setupActions();

@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.117';
+import { db } from '../../firebase-config.js?v=1.2.118';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -143,16 +143,16 @@ async function loadAccount() {
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
         render(originalData);
-        const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
+        const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, compactView: true, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.117').then(({initAccountSharedCredentials}) =>
+        import('../shared/account-shared-credentials.js?v=1.2.118').then(({initAccountSharedCredentials}) =>
             initAccountSharedCredentials({
                 uid: currentUid, context: 'company', accountId: currentId,
-                companyId: currentAziendaId, readOnly: isReadOnly
+                companyId: currentAziendaId, readOnly: isReadOnly, compactView: true
             })
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.117').then(({initAccountEmbeddedWidgets}) =>
+        import('../shared/account-embedded-widgets.js?v=1.2.118').then(({initAccountEmbeddedWidgets}) =>
             initAccountEmbeddedWidgets({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly

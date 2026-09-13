@@ -9,14 +9,14 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=account-ui-preview-5';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.118';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.117';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.117';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.118';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.118';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -33,7 +33,9 @@ let hasLinkedProfileField = false;
 let accountWidgetController = null;
 
 // Re-render callback per banking-renderer.js
-const rerender = () => renderBankAccounts(bankAccounts, rerender);
+const rerender = () => renderBankAccounts(bankAccounts, rerender, {
+    onAddWidget: () => accountWidgetController?.openNewWidget()
+});
 
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -453,7 +455,7 @@ async function loadData() {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         } else {
             // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
             document.getElementById('flag-banking').checked = false;
@@ -593,7 +595,7 @@ function setupUI() {
             if (bToggle.checked && bankAccounts.length === 0) {
                 bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', numeroVerde: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
             }
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         };
     }
 
@@ -612,7 +614,7 @@ function setupUI() {
                 cards: [],
                 _isOpen: true
             });
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         };
     }
 
