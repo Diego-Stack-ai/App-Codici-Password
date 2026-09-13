@@ -1,6 +1,7 @@
-import {createOfflineMutationQueue, openOfflineQueueDatabase} from './queue.js';
+import {createOfflineMutationQueue, openOfflineQueueDatabase, deriveOfflineQueueKey, openOfflineOperation} from './queue.js';
 import {createHybridQueueCoordinator} from './hybrid-queue-coordinator.mjs';
 import {readCompatibleQueue} from './compatible-queue-reader.mjs';
+import {createFencedQueueWriter} from './fenced-queue-writer.mjs';
 const passed = [], uid = `browser-${crypto.randomUUID()}`, name = `codex-offline-queue-${uid}`;
 const assert = (value, code) => { if (!value) throw new Error(code); };
 const requestValue = request => new Promise((resolve, reject) => {
@@ -68,6 +69,59 @@ try {
     }
     passed.push('malformed schema 2 and unknown schema 3 are refused without repairs');
     let clock = 1000;
+    const writer = await createFencedQueueWriter({database: db, uid, holderId: 'writer',
+        vaultKeyMaterial: 'SYNTHETIC-NOT-A-USER-KEY', now: () => clock, ttlMs: 100, locks: null});
+    const pending = {...operation, operationId: 'pending'}, replacement = {...operation, operationId: 'replacement'};
+    let retained;
+    await writer.run(async api => {
+        retained = api;
+        await api.enqueue(pending);
+        const initial = await read(db, 'encryptedOperations', `${uid}:pending`);
+        await api.enqueue(pending);
+        assert(JSON.stringify(await read(db, 'encryptedOperations', initial.id)) === JSON.stringify(initial), 'ENQUEUE_RESEALED');
+        const marked = await api.markForReview(pending, 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+        const reviewContainer = await read(db, 'encryptedOperations', initial.id);
+        const reviewKey = await deriveOfflineQueueKey('SYNTHETIC-NOT-A-USER-KEY', uid);
+        assert(JSON.stringify(await openOfflineOperation(reviewContainer, reviewKey, uid)) === JSON.stringify(marked), 'REVIEW_CIPHER_ROUNDTRIP');
+        assert(!JSON.stringify(reviewContainer).includes('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'), 'REVIEW_REASON_EXPOSED');
+        await api.replace(marked, replacement);
+        assert(!(await read(db, 'encryptedOperations', initial.id)), 'REPLACE_LEFT_OLD');
+        await api.remove(replacement);
+    });
+    assert(!(await read(db, 'encryptedOperations', `${uid}:replacement`)), 'REMOVE_FAILED');
+    passed.push('all four encrypted queue mutations use guarded transactions; identical enqueue preserves ciphertext');
+    try { await retained.enqueue(pending); throw new Error('RETAINED_WRITER_ACCEPTED'); }
+    catch (error) { assert(error.code === 'HYBRID_CONTEXT_CLOSED', 'RETAINED_WRITER_ERROR'); }
+    passed.push('retained queue writer cannot mutate after its lease context closes');
+    await writer.run(async api => {
+        await api.enqueue(pending); await api.enqueue(replacement);
+        for (const [run, code] of [
+            [() => api.enqueue({...pending, value: 'different'}), 'FENCED_QUEUE_CHANGED'],
+            [() => api.replace(pending, replacement), 'FENCED_QUEUE_COLLISION'],
+            [() => api.remove({...pending, value: 'different'}), 'FENCED_QUEUE_CHANGED']]) {
+            try { await run(); throw new Error('BAD_WRITE_ACCEPTED'); }
+            catch (error) { assert(error.code === code, 'BAD_WRITE_ERROR'); }
+        }
+        assert(await read(db, 'encryptedOperations', `${uid}:pending`), 'CONFLICT_REMOVED');
+    });
+    passed.push('reuse, replacement collision and stale acknowledgements preserve queued data');
+    let lost = false;
+    try {
+        await writer.run(async api => {
+            clock += 100;
+            assert((await probe({now: clock, useLocks: false})).acquired, 'WRITER_TAKEOVER_FAILED');
+            await api.remove(pending);
+        });
+    } catch (error) { lost = error.code === 'LEASE_LOST'; }
+    assert(lost && await read(db, 'encryptedOperations', `${uid}:pending`), 'STALE_WRITER_REMOVED_QUEUE');
+    passed.push('worker takeover fences a suspended encrypted queue writer');
+    const beforeCancel = await read(db, 'encryptedOperations', `${uid}:pending`);
+    let sessionActive = true, sessionRejected = false;
+    try {
+        await writer.run(async api => { sessionActive = false; await api.remove(pending); }, {isActive: () => sessionActive});
+    } catch (error) { sessionRejected = error.code === 'HYBRID_SESSION_INACTIVE'; }
+    assert(sessionRejected && JSON.stringify(await read(db, 'encryptedOperations', beforeCancel.id)) === JSON.stringify(beforeCancel), 'SESSION_QUEUE_CHANGED');
+    passed.push('session invalidation preserves ciphertext and refuses acknowledgement');
     for (const useLocks of [true, false]) {
         const coordinator = createHybridQueueCoordinator({database: db, uid, holderId: 'page', now: () => clock,
             ttlMs: 100, locks: useLocks ? navigator.locks : null});

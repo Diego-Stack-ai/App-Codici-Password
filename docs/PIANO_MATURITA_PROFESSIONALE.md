@@ -384,3 +384,5 @@ La PR #58 è unita in master 9e5335d9; Hosting è già 1.2.124. Il ramo experime
 
 
 Avanzamento M6 successivo: disponibile in laboratorio il lettore compatibile degli schemi 1 e 2, senza upgrade o scritture. Undici scenari browser superati in Chrome e Edge, con dati sintetici. Il recupero in lettura è un prerequisito; integrazione delle mutazioni, distribuzione preparatoria e collaudi fisici restano aperti. Il programma non è concluso.
+
+M6: aggiunto nel laboratorio il collegamento di tutte e quattro le mutazioni della coda cifrata al coordinatore ibrido, con confronto transazionale e protezione dal vecchio titolare. Sedici scenari browser passati su Chrome ed Edge, oltre alla suite offline esistente. Restano collegamento al client completo e rollout dello schema; nessun cutover o deploy.

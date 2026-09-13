@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **522**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **523**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4021 | 68 | File di progetto: compatible-queue-reader. |
+| `experiments/offline-sync/fenced-queue-writer.mjs` | MJS | 6308 | 93 | File di progetto: fenced-queue-writer. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -24,7 +24,8 @@ File censiti: **522**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
 | `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1266 | 23 | File di progetto: browser-coordination-worker. |
-| `experiments/offline-sync/browser-coordination.mjs` | MJS | 6965 | 100 | File di progetto: browser-coordination. |
+| `experiments/offline-sync/browser-coordination.mjs` | MJS | 10846 | 154 | File di progetto: browser-coordination. |
+| `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
 | `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
 | `experiments/offline-sync/hybrid-queue-coordinator.mjs` | MJS | 4154 | 79 | File di progetto: hybrid-queue-coordinator. |
 | `experiments/offline-sync/hybrid-queue-coordinator.test.mjs` | MJS | 9046 | 148 | File di progetto: hybrid-queue-coordinator.test. |
@@ -32,7 +33,7 @@ File censiti: **522**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8650 | 139 | File di progetto: indexeddb-queue-lease.test. |
 | `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
 | `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 3693 | 62 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 3923 | 64 | File di progetto: run-browser-tests. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2389 | 46 | File di progetto: account-detail-reader. |
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 6620 | 111 | File di progetto: account-detail-reader.test. |
 | `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
@@ -385,7 +386,7 @@ File censiti: **522**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 117105 | 643 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 117527 | 647 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10033 | 92 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
@@ -397,7 +398,7 @@ File censiti: **522**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 18889 | 140 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 20503 | 148 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 19242 | 142 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 4584 | 44 | Documentazione: M9 SALUTE CREDENZIALI. |
@@ -405,7 +406,7 @@ File censiti: **522**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 31595 | 387 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 31960 | 389 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 36464 | 366 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |

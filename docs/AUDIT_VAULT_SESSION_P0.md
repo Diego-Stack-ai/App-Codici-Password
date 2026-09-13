@@ -640,3 +640,7 @@ Tutti i rami del blocco appartengono alla stessa catena e vengono raccolti in ex
 
 Integrato master 9e5335d9 nel ramo experiment/vault-shell-v124, preservando i controlli di sessione di 80ec7837. Note con matita/cestino, listener Auth dedicato e confronto transazionale; nei dettagli sperimentali il modulo riceve signal e isActive della generazione corrente. Il valore cifrato precedente viene acquisito prima della decifratura; gli ID restano quelli fisici risolti dal repository. Test di avvio esteso al rifiuto della generazione invalidata e fixture dei dettagli aggiornate. Suite completa npm test superata, inclusi emulatori. Nessun rilascio strutturale: master e Hosting restano la release UI 1.2.124.
 
+
+## 55. Scritture offline protette nel laboratorio
+
+Base c82ceab0: createFencedQueueWriter riusa il formato cifrato canonico e protegge inserimento, sostituzione, riconciliazione e rimozione in transazioni con lease e CAS. Sedici scenari browser in Chrome ed Edge, suite offline superata. Il ramo è candidato: nessun import runtime o aggiornamento dello schema produttivo; limitazioni e prossimo passo nel contratto M6.
