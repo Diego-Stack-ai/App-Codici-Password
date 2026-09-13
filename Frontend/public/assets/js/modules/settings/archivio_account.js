@@ -401,7 +401,14 @@ async function handleRestore(key) {
         }
     } catch (e) {
         if (!active()) return;
-        showToast(t('error_generic') || "Errore", "error");
+        const message = e?.code === 'ARCHIVE_RESTORE_CONFLICT'
+            ? 'Questo elemento è stato modificato. Aggiorna l’Archivio prima di riprovare il ripristino.'
+            : e?.code === 'ARCHIVE_RESTORE_MISSING'
+                ? 'Questo elemento non è più disponibile. Aggiorna l’Archivio.'
+                : e?.code === 'ARCHIVE_RESTORE_REVISION_INVALID'
+                    ? 'I dati di questo elemento richiedono una verifica prima del ripristino.'
+                    : t('error_generic') || 'Ripristino non riuscito. Riprova.';
+        showToast(message, 'error');
     } finally { mutationPending = false; }
 }
 async function handleDeleteForever(key) {

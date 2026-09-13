@@ -1,5 +1,5 @@
 import { auth, db, functions } from '../../firebase-config.js?v=1.2.121';
-import { deleteField, doc, httpsCallable, onAuthStateChanged, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
+import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
     getCompany,
@@ -159,14 +159,37 @@ export async function loadArchivedAccounts(uid, context = 'all', options = {}) {
 export async function restoreArchivedAccount(uid, account, options = {}) {
     const target = accountIdentity(account);
     return withArchiveSession(uid, options, async check => {
-    check();
-    await updateDoc(accountReference(uid, target), {
-        isArchived: false,
-        archiveSchemaVersion: deleteField(),
-        archivedAt: deleteField(),
-        purgeAfter: deleteField(),
-        revision: Number.isInteger(target.revision) ? target.revision + 1 : 1
-    });
+        check();
+        const invalid = code => Object.assign(new Error(code), {code});
+        const revisionOf = value => {
+            // Legacy documents without revision represent version zero. Null,
+            // coercible strings and unsafe numbers are not legacy defaults.
+            if (value === undefined) return 0;
+            if (!Number.isSafeInteger(value) || value < 0 || value === Number.MAX_SAFE_INTEGER) {
+                throw invalid('ARCHIVE_RESTORE_REVISION_INVALID');
+            }
+            return value;
+        };
+        const expectedRevision = revisionOf(target.revision);
+        const reference = accountReference(uid, target);
+        // CAS protects the selected archived version. It does not coordinate the
+        // separate purge preparation/recursiveDelete protocol.
+        await runTransaction(db, async transaction => {
+            check();
+            const snapshot = await transaction.get(reference);
+            check();
+            if (!snapshot.exists()) throw invalid('ARCHIVE_RESTORE_MISSING');
+            const current = snapshot.data();
+            const currentRevision = revisionOf(current.revision);
+            if (current.isArchived !== true || currentRevision !== expectedRevision) throw invalid('ARCHIVE_RESTORE_CONFLICT');
+            transaction.update(reference, {
+                isArchived: false,
+                archiveSchemaVersion: deleteField(),
+                archivedAt: deleteField(),
+                purgeAfter: deleteField(),
+                revision: currentRevision + 1
+            });
+        });
     });
 }
 

@@ -46,6 +46,12 @@ function fixture(withUi = false) {
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         doc: (_db, ...path) => path.join('/'), deleteField: () => ({delete: true}),
         updateDoc: async (...args) => writes.push(args),
+        runTransaction: async (_db, callback) => {
+            const staged = [];
+            await callback({get: async () => ({exists: () => true, data: () => ({isArchived: true, revision: 1})}),
+                update: (...args) => staged.push(args)});
+            writes.push(...staged);
+        },
         respond: async () => ({data: {status: 'purged'}}),
         httpsCallable: () => async command => { calls.push(command); return context.respond(command); },
         listArchivedPrivateAccounts: async () => [account()], listCompanies: async () => [],
@@ -114,6 +120,90 @@ test('late company list cannot fan out reads after an owner change and restore c
     assert.equal(companyReads, 0); assert.equal(f.writes.length, 0);
 });
 
+function restoreFixture(record = {isArchived: true, revision: 1, password: 'synthetic-cipher'}) {
+    const f = fixture(), reads = [];
+    let server = record, afterRead = async () => {}, retry = false;
+    f.context.runTransaction = async (_db, callback) => {
+        for (;;) {
+            const staged = [];
+            await callback({
+                get: async reference => {
+                    reads.push(reference);
+                    const snapshot = structuredClone(server);
+                    await afterRead();
+                    return {exists: () => snapshot !== null, data: () => snapshot};
+                },
+                update: (reference, patch) => staged.push([reference, patch])
+            });
+            if (retry) { retry = false; continue; }
+            f.writes.push(...staged);
+            return;
+        }
+    };
+    return {...f, reads, set server(value) { server = value; }, set afterRead(callback) { afterRead = callback; },
+        set retry(value) { retry = value; }};
+}
+
+test('archive restore CAS preserves private/company identity and updates only archive state and revision', async () => {
+    for (const context of ['privato', 'company']) {
+        const f = restoreFixture(), selected = account('same', context);
+        const pending = f.context.restoreArchivedAccount('A', selected);
+        selected.id = 'changed'; selected.context = 'other'; selected.revision = 99;
+        await pending;
+        const expected = context === 'privato' ? 'users/A/accounts/same' : 'users/A/aziende/company/accounts/same';
+        assert.deepEqual(f.reads, [expected]); assert.equal(f.writes.length, 1);
+        const [path, patch] = f.writes[0]; assert.equal(path, expected);
+        assert.deepEqual(Object.keys(patch).sort(), ['archiveSchemaVersion', 'archivedAt', 'isArchived', 'purgeAfter', 'revision']);
+        assert.equal(patch.revision, 2); assert.equal(patch.isArchived, false);
+    }
+});
+
+test('archive restore refuses changed revision, already restored and missing records without writes', async () => {
+    for (const record of [{isArchived: true, revision: 2}, {isArchived: false, revision: 1}, {revision: 1}, null]) {
+        const f = restoreFixture(record);
+        await assert.rejects(f.context.restoreArchivedAccount('A', account()), /ARCHIVE_RESTORE_CONFLICT|ARCHIVE_RESTORE_MISSING/);
+        assert.equal(f.writes.length, 0); assert.equal(f.observers.size, 0);
+    }
+});
+
+test('archive restore rejects malformed, unsafe and exhausted revisions in selection and current snapshot', async () => {
+    for (const revision of [null, '1', -1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1]) {
+        const selection = restoreFixture();
+        await assert.rejects(selection.context.restoreArchivedAccount('A', {...account(), revision}), /ARCHIVE_RESTORE_REVISION_INVALID/);
+        assert.equal(selection.reads.length, 0); assert.equal(selection.writes.length, 0);
+        const current = restoreFixture({isArchived: true, revision});
+        await assert.rejects(current.context.restoreArchivedAccount('A', account()), /ARCHIVE_RESTORE_REVISION_INVALID/);
+        assert.equal(current.writes.length, 0);
+    }
+});
+
+test('archive restore recognizes only absent legacy revision as zero and still checks its current version', async () => {
+    const selected = account(); delete selected.revision;
+    const f = restoreFixture({isArchived: true});
+    await f.context.restoreArchivedAccount('A', selected);
+    assert.equal(f.writes[0][1].revision, 1);
+    const changed = restoreFixture({isArchived: true, revision: 1});
+    await assert.rejects(changed.context.restoreArchivedAccount('A', selected), /ARCHIVE_RESTORE_CONFLICT/);
+    assert.equal(changed.writes.length, 0);
+});
+
+test('archive restore rechecks current state on transaction retry and never commits first attempt', async () => {
+    const f = restoreFixture();
+    f.retry = true;
+    f.afterRead = async () => { f.server = {isArchived: true, revision: 2}; };
+    await assert.rejects(f.context.restoreArchivedAccount('A', account()), /ARCHIVE_RESTORE_CONFLICT/);
+    assert.equal(f.reads.length, 2); assert.equal(f.writes.length, 0);
+});
+
+test('archive restore lock or identity change during transaction read prevents all staged updates', async () => {
+    for (const event of ['lock', 'changeUid']) {
+        const f = restoreFixture();
+        f.afterRead = async () => f[event]('B');
+        await assert.rejects(f.context.restoreArchivedAccount('A', account()), /ARCHIVE_SESSION_INVALIDATED/);
+        assert.equal(f.writes.length, 0); assert.equal(f.observers.size, 0);
+    }
+});
+
 test('late archive read from previous mount cannot replace the next owner list', async () => {
     const f = fixture(true), gate = deferred(); f.context.listArchivedPrivateAccounts = () => gate.promise;
     const first = f.init(); await tick(); f.changeUid('B');
@@ -177,6 +267,27 @@ test('restore timer and retained swipe actions cannot modify a new mount', async
     f.context.listArchivedPrivateAccounts = async () => [account('new')]; await f.init();
     assert.equal(f.timers.size, 0); await swipe.options.onSwipeRight(row);
     assert.equal(f.writes.length, 1); assert.equal(f.nodes['accounts-container'].children[0].dataset.key, '["privato","new"]');
+});
+
+test('restore conflicts explain the next step and preserve the archived row without success', async () => {
+    for (const [record, expected] of [[{isArchived: true, revision: 2}, /modificato.*Aggiorna l’Archivio/],
+        [null, /non è più disponibile.*Aggiorna l’Archivio/],
+        [{isArchived: true, revision: null}, /richiedono una verifica/]]) {
+        const f = fixture(true);
+        f.context.runTransaction = async (_db, callback) => callback({
+            get: async () => ({exists: () => record !== null, data: () => record}),
+            update: () => assert.fail('conflicting restore must not update')
+        });
+        await f.init();
+        const row = f.nodes['accounts-container'].children[0];
+        await f.swipes.at(-1).options.onSwipeRight(row);
+        assert.match(f.toasts.at(-1)[0], expected);
+        assert.equal(f.toasts.at(-1)[1], 'error');
+        assert.equal(f.toasts.some(([, level]) => level === 'success'), false);
+        assert.equal(f.nodes['accounts-container'].children[0], row);
+        assert.equal(row.classList.contains('is-removing'), false);
+        assert.equal(f.timers.size, 0); assert.equal(f.writes.length, 0);
+    }
 });
 
 test('repeated delete gestures keep a single owned confirmation and a single submitted purge', async () => {

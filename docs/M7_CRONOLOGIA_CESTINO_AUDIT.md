@@ -99,3 +99,11 @@ Il planner puro archive-purge-reference-plan distingue widget incorporati, coppi
 
 Un piano coerente restituisce comunque applicable:false: non è collegato al purge. La completezza è dichiarata dal chiamante, non provata dal planner. Prima dell'attivazione occorre un blocco comune rispettato da ripristino Archivio, widget/link, inviti, Rules e ripristino backup; il solo controllo dell'esistenza dell'Account non basta. I grant M5 candidati non sono dedotti dagli ID legacy. I percorsi degli inviti possono contenere email: il piano è interno e non va scritto nei log o negli eventi audit.
 
+
+### Ripristino con confronto transazionale — candidata 13/09/2026
+
+Base `4fba54e7`, ramo `experiment/m7-archive-restore-cas`: il ripristino rilegge nella transazione l'identità selezionata e richiede Account esistente, ancora archiviato e revisione uguale a quella scelta. La revisione deve essere intera sicura e incrementabile; soltanto l'assenza legacy equivale a zero. Null, stringhe, revisioni negative o fuori intervallo sono rifiutate. Il cambio sessione dopo la lettura impedisce la scrittura. In caso di conflitto la riga rimane visibile e il messaggio chiede di aggiornare l'Archivio.
+
+25 test del servizio/UI superati. Il runner mutazioni include inoltre il servizio canonico con Auth/Firestore demo: successo, revisione obsoleta/stato già ripristinato, retry SDK dopo aggiornamento concorrente e invalidazione sessione dopo lettura. I casi negativi conservano contenuto e updateTime; i test usano esclusivamente dati sintetici. Il ripristino non retrocede più la revisione usando soltanto la snapshot UI.
+
+Il CAS non chiude la race purge/ripristino: la preparazione purge non marca ancora il documento e recursiveDelete resta fuori dalla transazione. Il futuro protocollo comune deve essere rispettato da tutti i writer, Rules, Widget/link, inviti e backup prima di attivare il planner residui. Nessuna modifica a retention, backend o dati reali in questo blocco.
