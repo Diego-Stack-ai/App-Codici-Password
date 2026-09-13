@@ -11,6 +11,11 @@ export function encodeFirestoreValue(value) {
     if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) return value;
     if (value instanceof Date) return {$type: 'date', value: value.toISOString()};
     if (value instanceof Uint8Array) return {$type: 'bytes', value: Array.from(value)};
+    if (value && typeof value.toUint8Array === 'function') {
+        const bytes = value.toUint8Array();
+        if (!(bytes instanceof Uint8Array)) throw new Error('BACKUP_VALUE_UNSUPPORTED');
+        return {$type: 'bytes', value: Array.from(bytes)};
+    }
     if (Array.isArray(value)) return value.map(item => item === undefined ? null : encodeFirestoreValue(item));
     if (value && typeof value.toMillis === 'function' &&
         Number.isInteger(value.seconds) && Number.isInteger(value.nanoseconds)) {

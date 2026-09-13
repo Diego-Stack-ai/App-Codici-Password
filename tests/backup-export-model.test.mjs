@@ -36,3 +36,13 @@ test('rifiuta oggetti Firestore non supportati invece di convertirli silenziosam
   const api = await loadModel();
   assert.throws(() => api.encodeFirestoreValue(new Map([['x', 1]])), /UNSUPPORTED/);
 });
+
+
+test('serializza Bytes restituito dal vero SDK Firestore, anche annidato', async () => {
+  const {Bytes} = await import('firebase/firestore');
+  const api = await loadModel();
+  const bytes = Bytes.fromUint8Array(new Uint8Array([0, 127, 255]));
+  assert.equal(bytes instanceof Uint8Array, false);
+  assert.deepEqual(api.encodeFirestoreValue({nested: [bytes]}), {nested: [{$type: 'bytes', value: [0, 127, 255]}]});
+  assert.throws(() => api.encodeFirestoreValue({toUint8Array: () => [1, 2]}), /BACKUP_VALUE_UNSUPPORTED/);
+});
