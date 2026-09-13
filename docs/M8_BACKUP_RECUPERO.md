@@ -122,3 +122,8 @@ Il piano privato conserva il digest crittografico dell'involucro di ciascun alle
 
 Le scritture Firestore precedenti possono essere già avvenute: l'errore conserva l'indicazione di ripristino parziale e blocca il retry generico Storage. Non è una transazione globale o uno staging. Suite backup: 61 test superati, inclusi tre nuovi casi sulla seconda lettura.
 
+
+### Transazioni nel database emulato — candidata 13/09/2026
+
+Il runner delle mutazioni include il callable originale restoreBackupChunk su Firestore/Auth demo locali: 32 test complessivi superati, inclusi sette test backup (contenitore e sei scenari). Verificati CAS su Profilo/Account, creazione/cancellazione concorrente, consenso, retry attendibile prima del CAS, isolamento proprietario, byte e timestamp reali e Rules delle ricevute. Il test invoca direttamente l'handler: non certifica trasporto HTTPS, App Check remoto, trigger o Storage distribuito.
+
