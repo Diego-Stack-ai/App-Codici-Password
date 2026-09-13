@@ -72,7 +72,12 @@ export function createIndexedDbQueueLease({database, storeName = 'queueLeases', 
                         const at = time(); validate(request.result, at);
                         if (!owned(request.result, token, at)) throw fail('LEASE_LOST');
                         const result = onValid();
-                        if (result && typeof result.then === 'function') throw fail('LEASE_ASYNC_MUTATION_FORBIDDEN');
+                        if (result && typeof result.then === 'function') {
+                            // Observe rejection from forbidden asynchronous callbacks;
+                            // this neither awaits nor cancels their external effects.
+                            Promise.resolve(result).catch(() => {});
+                            throw fail('LEASE_ASYNC_MUTATION_FORBIDDEN');
+                        }
                     } catch (error) {
                         tx.abort();
                         onInvalid(error);

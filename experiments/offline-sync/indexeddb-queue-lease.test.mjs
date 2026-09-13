@@ -78,6 +78,9 @@ test('guard rollback includes queued writes when callback throws or returns a pr
     const f = fixture(), lease = await f.client('A').acquire();
     await assert.rejects(f.guard(lease, store => { store.put({id: 'op'}); throw new Error('SYNTHETIC_FAILURE'); }), /SYNTHETIC_FAILURE/);
     await assert.rejects(f.guard(lease, store => { store.put({id: 'op'}); return Promise.resolve(); }), /ASYNC_MUTATION_FORBIDDEN/);
+    await assert.rejects(f.guard(lease, async store => { store.put({id: 'op'}); throw new Error('ASYNC_SYNTHETIC_FAILURE'); }), /ASYNC_MUTATION_FORBIDDEN/);
+    // Let the rejection microtask run: node:test fails on an unhandled rejection.
+    await new Promise(resolve => setImmediate(resolve));
     assert.equal(f.data.get('operations').size, 0);
 });
 
