@@ -681,3 +681,9 @@ Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consent
 ## Ordine interno del conto — candidata 1.2.121, 13/09/2026
 
 Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infine le carte associate. Ordine condiviso da Modifica e consultazione, nei contesti privato e aziendale. Il contenitore Widget rimane disponibile anche a conto chiuso, preservando le bozze al rerender. Nessuna modifica a dati, associazioni, backend o Rules.
+
+## Ripresa del programma guida — 13/09/2026
+
+Nuovo ramo `experiment/vault-shell-v121`: merge `e2edd2b9` conserva il lavoro Vault integrato e i rilasci Account/banca fino a master 1.2.121. Commit `8de71910`: coordinatore offline ibrido di laboratorio, ancora escluso dal runtime. Suite completa 913 test superati; dopo l'ultima correzione locale del coordinatore, suite offline 69 test superati. Audit Vault §52 registra perimetro, prove e limiti.
+
+Lo stato corrente sostituisce le indicazioni di preparazione storiche: Hosting 1.2.121 e il supporto bancario manageAccountWidget sono già pubblicati; le modifiche strutturali del ramo Vault non lo sono. Nessun deploy eseguito durante questa ripresa. I prossimi passi M6 sono compatibilità delle copie PWA, store comune e integrazione sulla coda cifrata prima del cutover; gli altri gate aperti del piano rimangono invariati.

@@ -111,3 +111,11 @@ Il laboratorio offline-sync contiene un lease transazionale con token crescente:
 
 Il modulo non è importato dall'app e non aggiorna IndexedDB. Prima dell'integrazione servono store condiviso con le operazioni cifrate, adozione anche dal percorso Web Locks, controlli prima/dopo le attese e compatibilità delle copie PWA. La protezione vale per le mutazioni nella transazione, non garantisce callback o invii rete esclusivi dopo sospensione: eventuali duplicati dello stesso comando devono restare idempotenti. Nessun timer o annullamento può ritirare una richiesta già inviata. Il gate fallback e le prove fisiche restano aperti.
 
+### Coordinatore comune ai due percorsi — candidato 13/09/2026
+
+`experiments/offline-sync/hybrid-queue-coordinator.mjs` acquisisce sempre il medesimo lease IndexedDB, anche quando Web Locks è disponibile. Web Locks occupato o fallito non provoca un tentativo alternativo che aggiri il blocco. Il contesto controlla sessione e titolarità dopo le attese, espone rinnovo esplicito e scritture protette nella stessa transazione, e viene invalidato al termine. Il rilascio del vecchio titolare non modifica il lease di chi gli è subentrato.
+
+Sette nuovi test sintetici verificano contesa fra percorsi misti in entrambe le direzioni, errori, annullamento durante acquisizione/esecuzione, scadenza e subentro, impossibilità di scrivere con il vecchio contesto e mancata conferma di un risultato tardivo. Insieme ai nove test del lease costituiscono 16 prove locali; non sono un collaudo IndexedDB su browser reale.
+
+Nessun import nel runtime, aggiornamento dello schema o cutover. Restano da realizzare l'adozione sulla coda cifrata, la gestione delle copie PWA precedenti e i collaudi di sospensione su dispositivi. Il controllo della transazione non garantisce esclusività degli effetti di rete: restano necessarie le ricevute server idempotenti. Questo passo non chiude M6.
+

@@ -615,3 +615,13 @@ Risolti i conflitti mantenendo lifecycle, proprietario e ID fisici legacy; rende
 Suite completa `npm test` codice 0: **887 test superati**, zero fallimenti; inclusi 121 Functions e 36 mutazioni su emulatori. Versione 1.2.118 coerente con 244 riferimenti asset; budget statici delle 30 pagine rispettati senza aumentarli. Le prove di integrazione usano fixture e dati sintetici. Questa verifica non include un nuovo collaudo fisico iPhone/iPad né dati produttivi.
 
 Master e Hosting non modificati; nessuna distribuzione di Rules/Functions. Restano aperti i gate descritti in §50, inclusi shell completa, fallback offline nel runtime, concorrenza globale Archivio, staging/journal backup, retention e prove reali. Il push del ramo candidato non certifica la chiusura M0–M10 e non autorizza il deploy.
+
+## 52. Ripresa del programma dopo UI 1.2.121 — candidata 13/09/2026
+
+Ramo `experiment/vault-shell-v121`: merge `e2edd2b9` fra il candidato integrato `41f63f33` e master `6fc3546e`, senza modificare i rami sorgente. Preservati i controlli Vault e i Widget bancari pubblicati fino alla 1.2.121: posizione sopra le carte, verifica degli identificativi salvati, normale editor e invalidazione delle azioni dopo cambio sessione. Il cleanup elimina anche le schede Widget trasferite nei contenitori bancari esterni, evitando residui visibili dopo blocco/logout.
+
+Il commit `8de71910` aggiunge soltanto nel laboratorio il coordinatore comune IndexedDB/Web Locks. Entrambi i percorsi devono acquisire lo stesso lease; un Web Lock occupato o fallito non viene aggirato. I controlli successivi alle attese e la transazione protetta rifiutano il vecchio titolare; il rilascio conserva un eventuale subentro. Nessuna esclusività di rete promessa, nessuna modifica allo schema o al runtime.
+
+Suite completa `npm test`: codice 0, **913 test superati**, inclusi 128 Functions e 36 mutazioni emulati. Dopo l'ultima correzione del coordinatore (conservare anche rifiuti JavaScript con valore falsy) rieseguita la suite offline: **69 test superati**, inclusi i 7 nuovi scenari ibridi e i 9 del lease. Fixture sintetiche per IndexedDB: nessun nuovo collaudo fisico o dato produttivo. Versione 1.2.121 coerente con 244 riferimenti asset; 30 pagine entro i budget invariati; inventario 514 file.
+
+Gli aggiornamenti UI/bancari risultano già pubblicati su master 1.2.121. Questo checkpoint Vault resta sperimentale e non distribuisce Hosting, Rules o Functions. M6 resta aperta per integrazione runtime, aggiornamento dello store, compatibilità PWA precedenti e prove su dispositivi. Restano inoltre i gate M7/M8, shell completa, retention e distribuzione strutturale: il numero dei test non equivale alla chiusura del programma.

@@ -347,3 +347,9 @@ Restano aperti journal durevole, staging/compensazione e memoria aggregata del b
 ## Consolidamento dei rami — 13/09/2026
 
 Candidata integrata 1.2.118, codice `4a431ec3`: preservato il checkpoint sperimentale `3660a838` e aggiunta la UI Account fino a `d2ef897e`; cronologia master 1.2.117 ricongiunta nel solo ramo di integrazione. Suite completa: 887 test superati. L'integrazione non chiude ulteriori fasi: rimangono i limiti del programma già registrati, i collaudi fisici e la distribuzione separata. [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
+
+## Ripresa dopo i rilasci UI 1.2.121 — 13/09/2026
+
+Il ramo `experiment/vault-shell-v121` conserva il candidato Vault e integra `origin/master` fino a `6fc3546e`, attraverso il merge `e2edd2b9`. Sono preservati i Widget specifici di ogni banca, il loro ordine prima delle carte e le protezioni di sessione; alla chiusura vengono rimossi anche i Widget montati nei contenitori bancari esterni.
+
+M6 avanza con un coordinatore sperimentale comune a Web Locks e fallback IndexedDB. Non è ancora collegato alla coda dell'app e non chiude il gate. Il prossimo passo richiede protocollo di aggiornamento dello store e compatibilità delle vecchie copie PWA, prima dell'attivazione. Restano inoltre aperti i lavori M7/M8, shell completa, prove fisiche e distribuzione strutturale già elencati. La produzione 1.2.121 contiene i rilasci UI/bancari; non contiene questi nuovi controlli Vault.
