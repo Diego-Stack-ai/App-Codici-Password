@@ -35,7 +35,7 @@ function fixture() {
         initSharingModule: options => modules.push(['sharing', options]),
         initDetailAccountMode: async options => { modules.push(['mode', options]); return {}; },
         renderSharingMap() {}, loadAttachments: async () => {}, renderAccountBanking() {},
-        loadModule: async () => ({initAccountSharedCredentials() {}, initAccountEmbeddedWidgets() {}}),
+        loadModule: async () => ({initAccountNoteEditor() {}, initAccountSharedCredentials() {}, initAccountEmbeddedWidgets() {}}),
         setTimeout() {}, history: {back() {}}
     });
     vm.runInContext(source.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export async function', 'async function').replace(/\bimport\(/g, 'loadModule('), context);

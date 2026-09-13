@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.121';
+import { auth, db } from '../../firebase-config.js?v=1.2.124';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -152,6 +152,7 @@ async function loadAccount(mount = mounted) {
         }
 
         const loaded = {...account};
+        const storedNote = loaded.note;
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
@@ -222,6 +223,17 @@ async function loadAccount(mount = mounted) {
         }
         initProtocolUI(actionActive);
         render(loaded, actionActive);
+        import('../shared/account-note-editor.js').then(module => {
+            if (!actionActive()) return;
+            module.initAccountNoteEditor({account: loaded, storedNote,
+                ownerId: loadOwnerId, accountId: accountId, companyId,
+                readOnly: isReadOnly, signal, isActive: actionActive});
+        }).catch(() => {
+            if (actionActive()) {
+                console.error('[Account note] Inizializzazione editor non riuscita.');
+                showToast('Editor note non disponibile.', 'error');
+            }
+        });
         const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: loadOwnerId, accountId, aziendaId: companyId, readOnly: isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
         if (!active()) return;
         renderSharingMap(loaded, contactNames);
@@ -229,7 +241,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.121`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.124`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();

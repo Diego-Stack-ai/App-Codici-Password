@@ -6,7 +6,7 @@
 
 import { SwipeList } from '../../swipe-list-v6.js';
 import { showToast } from '../../ui-core-v129.js';
-import { auth } from '../../firebase-config.js?v=1.2.121';
+import { auth } from '../../firebase-config.js?v=1.2.124';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { t } from '../../translations.js';

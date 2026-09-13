@@ -42,7 +42,8 @@ function fixture({missing = false, pending = null, directPending = null, search 
         loadWidgets: async () => ({initAccountEmbeddedWidgets: data => calls.push(['widgets', data])})
     });
     const transformed = source.replace(/^import[\s\S]*?;\r?$/gm, '').replace(/^export /gm, '')
-        .replace(/import\('\.\.\/shared\/account-shared-credentials\.js\?v=\d+\.\d+\.\d+'\)/, 'loadCredentials()')
+        .replaceAll("import('../shared/account-note-editor.js')", "Promise.resolve({initAccountNoteEditor() {}})")
+    .replace(/import\('\.\.\/shared\/account-shared-credentials\.js\?v=\d+\.\d+\.\d+'\)/, 'loadCredentials()')
         .replace(/import\('\.\.\/shared\/account-embedded-widgets\.js\?v=\d+\.\d+\.\d+'\)/, 'loadWidgets()');
     vm.runInContext(transformed, context);
     const findEdit = () => footer.children.flatMap(node => node.children || []).find(node => node.id === 'btn-edit-footer');

@@ -6,6 +6,7 @@ import {readFile} from 'node:fs/promises';
 const root = new URL('../Frontend/public/assets/js/modules/privato/', import.meta.url);
 const strip = value => value.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const source = strip(await readFile(new URL('dettaglio_account_privato.js', root), 'utf8'))
+    .replaceAll("import('../shared/account-note-editor.js')", "Promise.resolve({initAccountNoteEditor() {}})")
     .replace(/import\('\.\.\/shared\/account-shared-credentials\.js\?v=\d+\.\d+\.\d+'\)/, 'loadCredentials()')
     .replace(/import\('\.\.\/shared\/account-embedded-widgets\.js\?v=\d+\.\d+\.\d+'\)/, 'loadWidgets()');
 const attachments = strip(await readFile(new URL('dettaglio-privato-attachments.js', root), 'utf8'));

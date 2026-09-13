@@ -693,3 +693,18 @@ Lo stato corrente sostituisce le indicazioni di preparazione storiche: Hosting 1
 Ripresa dalla base `5b3cd4da`, codice `f47a55c9`: M6 apertura database e collaudi reali Chrome/Edge headless; M8 limiti cumulativi e unicità delle destinazioni del backup; M9 ciclo di vita dell'analisi; M7 ripristino transazionale dell'Archivio. I singoli rami experiment/m6-database-lifecycle, experiment/m8-restore-memory-budget, experiment/m6-browser-coordination, experiment/m8-backup-record-identities, experiment/m9-health-session ed experiment/m7-archive-restore-cas formano una sola catena. Il ramo principale sperimentale raccoglie tutti i commit verificati.
 
 Il piano di maturità distingue ora lavori tecnici aperti e decisioni/verifiche esterne: non occorre fermare l'intero progetto in attesa di un singolo gate. Non sono stati attivati schema IndexedDB 2, nuovo backend, controllo violazioni online o migrazioni. Master e Hosting restano 1.2.121; nessun deploy in questo blocco.
+
+## Note rapide — rilascio 1.2.122, 13/09/2026
+
+Base master `6fc3546e`, ramo release/inline-notes-v122. Portate solo le note rapide da `1c5aeec7`: comando Aggiungi/Modifica nei dettagli privato/azienda, dialogo cifrato, confronto transazionale, aggiornamento immediato e conservazione bozza in caso di errore. Il riquadro resta nascosto se vuoto; i form completi continuano a modificare lo stesso campo. L'editor della release segue Auth e annullamento del caricamento senza dipendere dalla shell sperimentale.
+
+Suite locale completa: 359 test superati, più sei test dedicati rieseguiti dopo l'aggiunta del caso cambio Auth. Versione coerente con 246 riferimenti; budget delle 31 pagine rispettati. Nessuna modifica Functions/Rules/formato cifrato o migrazione. Vecchi Account non marcati cifrati richiedono prima un salvataggio dal form completo. Il rilascio autorizzato riguarda solo Hosting; tutti i lavori Vault/M6–M9 restano fuori da master. Rollback: ripubblicare Hosting dalla base 6fc3546e, senza rimuovere le note salvate nel campo esistente.
+
+## Avvio note rapide — correzione 1.2.123, 13/09/2026
+
+Nei due dettagli Account mancava l’import esplicito di auth: il controllo sessione lanciava ReferenceError e il catch mostrava soltanto Editor note non disponibile. Ripristinato auth dalla configurazione Firebase condivisa; aggiunta diagnostica fissa senza contenuti Account. Un test verifica il binding importato ed esegue il callback di avvio di entrambe le pagine, oltre ai sei test del modulo note. Nessuna modifica a scritture, cifratura, Rules, Functions o dati. Rollback: Hosting 1.2.122 (con il difetto di avvio noto).
+
+
+## Azioni compatte note — rilascio 1.2.124
+
+In entrambi i dettagli Account il pulsante grande Aggiungi nota compare soltanto a nota vuota. Una nota presente mostra matita e cestino nella sua intestazione. Eliminazione con anteprima in sola lettura e conferma, sul medesimo salvataggio cifrato transazionale; conflitti conservano la nota. Focus riportato al comando visibile. Nove test note superati, inclusi cancellazione, annullamento, conflitto e blocco sessione; controlli HTML, sintassi e riferimenti superati. Pubblicazione Hosting richiesta; rami sperimentali esclusi. Rollback: versione 1.2.123, senza modificare i dati.

@@ -377,3 +377,8 @@ Base iniziale `5b3cd4da`, codice finale di questo blocco `f47a55c9`. I rami sott
 ### Passaggi che richiedono decisioni o verifiche esterne
 
 Restano le decisioni prodotto della baseline (fra cui retention e recupero), audit indipendente, matrice fisica dei dispositivi e approvazione della distribuzione coordinata. Questi passaggi non impediscono di continuare i lavori tecnici su rami sperimentali. Non sono concessi implicitamente da commit/push o dal superamento dei test. Nessuna fase viene marcata completa da questo blocco e la produzione resta 1.2.121.
+
+## Riallineamento alla produzione 1.2.124
+
+La PR #58 è unita in master 9e5335d9; Hosting è già 1.2.124. Il ramo experiment/vault-shell-v124 integra le note 1.2.122–124 nel ciclo Vault sperimentale, mantenendo i blocchi M6–M9 già consolidati. Suite completa superata. Ripresa tecnica da compatibilità del lettore della coda; restano i gate già elencati, senza nuovo deploy strutturale.
+

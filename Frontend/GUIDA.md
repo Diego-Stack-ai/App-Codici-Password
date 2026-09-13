@@ -135,3 +135,7 @@ Ogni conto bancario dei form privato/azienda contiene carte e una propria area W
 ## Ordine interno del conto — candidata 1.2.121, 13/09/2026
 
 Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infine le carte associate. Ordine condiviso da Modifica e consultazione, nei contesti privato e aziendale. Il contenitore Widget rimane disponibile anche a conto chiuso, preservando le bozze al rerender. Nessuna modifica a dati, associazioni, backend o Rules.
+
+### Note rapide nel dettaglio — 1.2.122
+
+Il riquadro Note si mostra solo se popolato. Per il proprietario resta sempre disponibile Aggiungi nota o Modifica nota, con dialogo dedicato e aggiornamento dopo conferma del salvataggio. Svuotando il contenuto torna il solo comando Aggiungi nota. La stessa nota rimane modificabile nel form completo. I destinatari in sola lettura non hanno il comando di modifica. Errori e conflitti conservano la bozza; blocco Vault e cambio utente dismettono il dialogo.

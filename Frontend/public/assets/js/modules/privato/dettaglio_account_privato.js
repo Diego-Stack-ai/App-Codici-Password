@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.121';
+import { auth, db } from '../../firebase-config.js?v=1.2.124';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -194,6 +194,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         if (!loaded) { showToast(t('account_not_found'), "error"); return; }
         loaded = {...loaded};
+        const storedNote = loaded.note;
         const resolvedId = loaded.id;
         mount.resolvedId = resolvedId;
         if (requireServerRefresh) {
@@ -257,6 +258,17 @@ async function loadAccount(mount = mounted) {
         setupEditAction(resolvedId, actionActive);
         if (!readOnly) updateDoc(docRef, {views: increment(1)}).catch(error => { if (active()) logError('UpdateViews', error); });
         renderAccount(loaded, actionActive);
+        import('../shared/account-note-editor.js').then(module => {
+            if (!actionActive()) return;
+            module.initAccountNoteEditor({account: loaded, storedNote,
+                ownerId: lookupOwner, accountId: resolvedId,
+                readOnly: readOnly, signal, isActive: actionActive});
+        }).catch(() => {
+            if (actionActive()) {
+                console.error('[Account note] Inizializzazione editor non riuscita.');
+                showToast('Editor note non disponibile.', 'error');
+            }
+        });
         const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
         if (!active()) return;
         renderPrivateSharingMap(loaded, contactNames);
@@ -268,9 +280,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.121').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.124').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.121').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.124').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());
