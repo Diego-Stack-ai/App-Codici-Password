@@ -652,3 +652,7 @@ Base 2a79917a. Client candidato con controlli prima/dopo invio e rimozione CAS; 
 ## 57. Coda browser e transazioni backend emulato
 
 Base 7f2886b9. Nuovo runner --fenced-browser: cinque scenari Chrome e cinque Edge con coda cifrata IndexedDB reale, handler generico originale invocato direttamente e Firestore demo. Nessuna simulazione delle ricevute in questi casi; risposta HTTP persa simulata dopo commit. Trasporto Firebase pubblico e handler privato non certificati da questo collaudo. Dettagli e comando nel contratto M6.
+
+## 58. Account privati tra coda browser e handler emulato
+
+Base 3b551a7a. Otto scenari privati per browser verificano ciphertext, revisioni, ricevute e riferimenti inversi con handler originale e Firestore demo. Conservazione del marker di riconciliazione e assenza di retry automatico dimostrate. Comando --fenced-browser: 26 esecuzioni complessive sui due domini/browser. Nessuna attivazione runtime o prova del trasporto pubblico.

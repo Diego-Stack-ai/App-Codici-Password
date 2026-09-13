@@ -6,9 +6,9 @@ import {spawn} from 'node:child_process';
 
 // Synthetic data and disposable browser profile. Optional backend is emulator-only.
 const browserPath = process.argv[2];
-const backendMode = process.argv[3] === '--backend';
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && backendMode))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend]');
-const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge() : null;
+const backendMode = ['--backend', '--private-backend'].includes(process.argv[3]);
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && backendMode))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend]');
+const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const paths = new Map([
     ['/suite.mjs', backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],

@@ -390,3 +390,5 @@ M6: aggiunto nel laboratorio il collegamento di tutte e quattro le mutazioni del
 M6: client di laboratorio collegato al sincronizzatore canonico, con conferme protette dal lease e conservazione dei retry. Ventidue scenari passati su Chrome/Edge e 59 test offline; backend simulato, integrazione Firebase emulata e attivazione UI ancora da completare. Nessuna nuova fase chiusa.
 
 M6: collaudato il collegamento browser IndexedDB–handler applyOfflineMutation originale–Firestore emulato. Cinque scenari passati in ciascuno di Chrome/Edge: applicazione, retry, conflitto, riuso ID e proprietario errato. Restano percorso privato completo, trasporto/Auth/App Check, UI e rollout. Nessun deploy.
+
+M6: esteso il collaudo browser al backend Account privato originale, inclusi riferimenti inversi Profilo/Azienda e retry dopo collegamento. Otto scenari privati più cinque generici passati in Chrome e Edge. Il collegamento UI e il rollout restano aperti; nessuna fase dichiarata conclusa.
