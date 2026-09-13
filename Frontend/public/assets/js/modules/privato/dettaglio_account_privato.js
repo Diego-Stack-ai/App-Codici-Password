@@ -201,6 +201,22 @@ function renderAccount(acc) {
         if (el) el.value = val || '';
     }
 
+    // La consultazione mostra solo i dati realmente presenti. Il modulo di
+    // modifica continua invece a offrire tutti i campi della struttura base.
+    const compactGrids = new Set();
+    ['detail-username', 'detail-account', 'detail-password', 'detail-website'].forEach(id => {
+        const input = document.getElementById(id);
+        input?.closest('.glass-field-container')?.classList.toggle('hidden', !String(input.value || '').trim());
+        const grid = input?.closest('.form-grid-2');
+        if (grid) compactGrids.add(grid);
+    });
+    compactGrids.forEach(grid => {
+        const visibleChildren = [...grid.children].filter(child => !child.classList.contains('hidden'));
+        grid.classList.toggle('hidden', visibleChildren.length === 0);
+        grid.classList.toggle('detail-grid-single', visibleChildren.length === 1);
+    });
+    document.getElementById('section-notes')?.classList.toggle('hidden', !String(acc.note || '').trim());
+
     // Toggle Referente Section visibility
     const hasRefData = !!(map['detail-referenteNome'] || map['detail-referenteTelefono'] || map['detail-referenteCellulare']);
     const secRef = document.getElementById('section-referente');
