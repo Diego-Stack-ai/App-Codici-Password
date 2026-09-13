@@ -6,6 +6,7 @@ const vm = require('node:vm');
 const {HttpsError} = require('firebase-functions/v2/https');
 const backupService = require('../backup-restore-service');
 const backupReceipt = require('../backup-restore-receipt');
+const previewApi = require('../backup-restore-preview');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const start = source.indexOf('exports.restoreBackupChunk =');
 const end = source.indexOf('exports.getAppPresentation =', start);
@@ -21,7 +22,7 @@ function fixture() {
       set: (...args) => writes.push(args),
     })};
   const context = vm.createContext({
-    exports: {}, HttpsError, ...backupService, ...backupReceipt, onCall: (_options, handler) => handler,
+    exports: {}, HttpsError, ...backupService, ...backupReceipt, ...previewApi, onCall: (_options, handler) => handler,
     getFirestore: () => { storeAccesses += 1; return store; },
     FieldValue: {serverTimestamp: () => 'synthetic-time'},
   });
@@ -30,7 +31,7 @@ function fixture() {
     run: (data, uid = 'A') => context.exports.restoreBackupChunk({auth: {uid}, data})};
 }
 const command = mode => ({expectedOwnerUid: 'A', operationId: 'restore:fixture:0', backupId: 'fixture', chunkIndex: 0, chunkCount: 1,
-  mode, confirmation: 'RESTORE_VALIDATED', records: [{scope: 'private-account', id: 'record', data: {password: 'synthetic-ciphertext'}}]});
+  mode, confirmation: 'RESTORE_VALIDATED', records: [{scope: 'private-account', id: 'record', data: {password: 'synthetic-ciphertext'}, expectedVersion: {exists: false}}]});
 
 for (const mode of ['preview', 'apply']) {
   test(`${mode}: missing or changed expected owner is rejected before any Firestore access`, async () => {

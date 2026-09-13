@@ -124,3 +124,14 @@ test('same-UID lock closes the selective preview without accepting its retained 
     f.lock(); await pending; await restore.click();
     assert.equal(restore.isConnected, false); assert.equal(f.executions.length, 0); assert.equal(f.plan.recoveryKey, '');
 });
+
+
+test('stale preview without applied chunks asks for a new comparison', async () => {
+    const f = fixture();
+    f.service.executeBackupRestore = async () => { const error = new Error('BACKUP_PREVIEW_STALE'); error.code = 'BACKUP_PREVIEW_STALE'; throw error; };
+    f.setup('A'); const pending = f.select();
+    f.confirm('synthetic recovery'); await tick(); f.confirm('RIPRISTINA'); await pending;
+    assert.equal(f.toasts.length, 1); assert.equal(f.toasts[0][1], 'warning');
+    assert.match(f.toasts[0][0], /cambiati dopo l’anteprima/);
+    assert.equal(f.plan.recoveryKey, '');
+});

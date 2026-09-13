@@ -23,12 +23,14 @@ function fixture(count = 1, attachment = false) {
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         parseBackupLine: JSON.parse, deriveBackupKey: async () => 'synthetic-key',
         decryptBackupEntry: async ({envelope}) => ({entry: envelope, digest: 'fixture'}),
-        collectOwnerBackup: async () => ({records: []}),
-        respond: async () => ({data: {status: 'applied', collisionCount: 0}}),
+        collectOwnerBackup: async () => { throw new Error('Separate snapshot must not be read'); },
+        respond: async command => ({data: command.mode === 'preview' ? {previewVersion: 1,
+            entries: command.records.map((_record, index) => ({index, status: 'missing', expectedVersion: {exists: false}}))
+        } : {status: 'applied'}}),
         httpsCallable: () => async command => { calls.push({uid: auth.currentUser?.uid, command}); return context.respond(command); },
         uploadBytes: async (...args) => uploads.push(args),
     });
-    vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,compareRestoreRecords,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
+    vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(service, context);
     return {context, file, calls, uploads, observers,
         prepare: () => context.prepareBackupRestore(file, 'A', 'synthetic-recovery'),
@@ -46,11 +48,11 @@ test('a prepared plan is immediately cleared on UID change and cannot write unde
     assert.equal(f.observers.size, 0);
 });
 
-test('a late current-Vault read after identity change cannot publish a preview', async () => {
+test('a late server snapshot after identity change cannot publish a preview', async () => {
     const f = fixture(), gate = deferred();
-    f.context.collectOwnerBackup = () => gate.promise;
+    f.context.respond = () => gate.promise;
     const pending = f.prepare(); await new Promise(setImmediate); f.changeUid('B'); gate.resolve({records: []});
-    await assert.rejects(pending, /SESSION_INVALIDATED/); assert.equal(f.calls.length, 0);
+    await assert.rejects(pending, /SESSION_INVALIDATED/); assert.equal(f.calls.length, 1);
 });
 
 test('same-UID lock during file decryption prevents a late preview and releases observers', async () => {
@@ -103,4 +105,98 @@ test('attachment failure remains a partial restore while normal restore preserve
     assert.equal(healthy.calls.length, 2);
     assert.ok(healthy.calls.every(call => call.command.expectedOwnerUid === 'A'));
     healthy.context.releaseBackupRestore(healthyPlan);
+});
+
+test('server comparison and versions stay paired through noncontiguous selection and rechunking', async () => {
+    const f = fixture(803);
+    f.context.respond = async command => ({data: command.mode === 'preview' ? {previewVersion: 1,
+        entries: command.records.map((record, index) => ({index, status: 'changed', expectedVersion: {
+            exists: true, updateTime: {seconds: 100, nanoseconds: Number(record.id.slice(1))}
+        }})).reverse()
+    } : {status: 'applied'}});
+    const plan = await f.prepare();
+    assert.equal(plan.comparison.counts.changed, 803);
+    assert.equal(plan.comparison.entries[802].description, 'Synthetic');
+    assert.equal('versions' in plan, false);
+    assert.equal('expectedVersion' in plan.records[802], false);
+    const selected = Array.from({length: 402}, (_, index) => index * 2);
+    const result = await f.context.executeBackupRestore(plan, selected);
+    assert.equal(result.recordCount, 402);
+    const applies = f.calls.filter(call => call.command.mode === 'apply');
+    assert.equal(applies.length, 2);
+    assert.equal(applies[0].command.records.length, 400);
+    assert.equal(applies[1].command.records.length, 2);
+    for (const record of applies.flatMap(call => call.command.records)) {
+        assert.equal(record.expectedVersion.updateTime.nanoseconds, Number(record.id.slice(1)));
+        assert.equal('expectedVersion' in record.data, false);
+    }
+    f.context.releaseBackupRestore(plan);
+});
+
+test('preview rejects old servers and incomplete, duplicate, inconsistent or malformed versions', async () => {
+    const missing = index => ({index, status: 'missing', expectedVersion: {exists: false}});
+    const changed = time => ({index: 0, status: 'changed', expectedVersion: {exists: true, updateTime: time}});
+    const invalid = [
+        {status: 'ready', collisionCount: 0},
+        {previewVersion: 2, entries: [missing(0), missing(1)]},
+        {previewVersion: 1, entries: [missing(0)]},
+        {previewVersion: 1, entries: [missing(0), missing(0)]},
+        {previewVersion: 1, entries: [missing(0), missing(2)]},
+        {previewVersion: 1, entries: [{...missing(0), status: 'changed'}, missing(1)]},
+        {previewVersion: 1, entries: [changed({seconds: 1, nanoseconds: 1e9}), missing(1)]},
+        {previewVersion: 1, entries: [changed({seconds: 1.5, nanoseconds: 0}), missing(1)]},
+        {previewVersion: 1, entries: [changed({seconds: 1, nanoseconds: 0, extra: true}), missing(1)]},
+        {previewVersion: 1, entries: [{...missing(0), expectedVersion: {exists: false, updateTime: null}}, missing(1)]},
+    ];
+    for (const data of invalid) {
+        const f = fixture(2);
+        f.context.respond = async () => ({data});
+        await assert.rejects(f.prepare(), /BACKUP_PREVIEW_INVALID/);
+        assert.equal(f.observers.size, 0);
+        assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0);
+    }
+});
+
+test('stale preview stops later chunks and uploads with accurate partial progress and invalidates the plan', async () => {
+    for (const firstStale of [true, false]) {
+        const f = fixture(801, true), plan = await f.prepare(); let sent = 0;
+        f.context.respond = async () => ({data: {status: ++sent === (firstStale ? 1 : 2) ? 'stale-preview' : 'applied'}});
+        await assert.rejects(f.context.executeBackupRestore(plan), error => {
+            assert.equal(error.code, 'BACKUP_PREVIEW_STALE');
+            assert.equal(error.progress.confirmedChunks, firstStale ? 0 : 1);
+            assert.equal(error.progress.attemptedChunks, firstStale ? 1 : 2);
+            assert.equal(error.progress.mayHaveApplied, !firstStale);
+            return true;
+        });
+        assert.equal(sent, firstStale ? 1 : 2);
+        assert.equal(f.uploads.length, 0);
+        assert.equal(plan.file, null);
+        await assert.rejects(f.context.executeBackupRestore(plan), /BACKUP_PLAN_INVALID/);
+    }
+});
+
+test('an existing profile requires manual overwrite selection and an unchanged profile cannot be selected', async () => {
+    for (const status of ['changed', 'unchanged']) {
+        const f = fixture();
+        const originalText = f.file.text;
+        f.file.text = async () => (await originalText()).replace('"scope":"private-account"', '"scope":"profile"');
+        f.context.respond = async command => ({data: command.mode === 'preview' ? {previewVersion: 1,
+            entries: [{index: 0, status, expectedVersion: {exists: true, updateTime: {seconds: 2, nanoseconds: 0}}}]
+        } : {status: 'applied'}});
+        const plan = await f.prepare();
+        assert.equal(plan.collisionCount, 1);
+        assert.equal(plan.comparison.entries[0].description, 'Profilo utente');
+        await assert.rejects(f.context.executeBackupRestore(plan), error => !error.progress.mayHaveApplied);
+        assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0);
+        if (status === 'changed') {
+            await f.context.executeBackupRestore(plan, [0]);
+            const command = f.calls.find(call => call.command.mode === 'apply').command;
+            assert.equal(command.overwriteExisting, true);
+            assert.equal(command.confirmation, 'RESTORE_SELECTED_OVERWRITE');
+        } else {
+            await assert.rejects(f.context.executeBackupRestore(plan, [0]), error => !error.progress.mayHaveApplied);
+            assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0);
+        }
+        f.context.releaseBackupRestore(plan);
+    }
 });

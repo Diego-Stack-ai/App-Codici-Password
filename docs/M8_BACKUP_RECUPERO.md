@@ -70,3 +70,16 @@ Il nuovo writer salva la ricevuta in `mutationResults/{uid}/operations/{operatio
 Le ricevute pregresse in `backupRestoreOperations` non vengono promosse: senza una ricevuta attendibile il writer rifiuta l'applicazione e richiede verifica. L'anteprima calcola le collisioni dai documenti effettivi. I test dell'handler reale con Firestore simulato coprono retry, payload cambiato, ricevute malformate e storiche; non certificano un ripristino end-to-end su Storage.
 
 Questo blocco non risolve ancora il confronto atomico fra anteprima e applicazione, staging, compensazione o atomicità tra blocchi. Nessuna migrazione dei dati o distribuzione eseguita. Il rollback deve conservare sia il vincolo proprietario sia questo registro: tornare al vecchio writer riaprirebbe la fiducia nelle ricevute storiche.
+
+
+## Confronto con l'anteprima — candidata 13/09/2026
+
+Dopo il checkpoint `dc985f64`, la callable produce classificazione e versione del documento dalla stessa snapshot transazionale. La risposta contiene soltanto indice, stato e versione (`exists`, secondi/nanosecondi di `updateTime`), senza restituire i dati correnti. Il client conserva le versioni nella sessione del piano e le associa agli indici originali prima della selezione e della suddivisione dei blocchi. Non usa più una raccolta precedente del Vault per decidere il confronto.
+
+In applicazione tutte le versioni, compreso il Profilo, vengono confrontate prima di scrivere. Creazione, cancellazione o modifica dopo l'anteprima fermano l'intero chunk con `stale-preview`, senza dati, ricevuta o audit scritti da quel chunk. La sostituzione confermata non aggira questo controllo. Il Profilo esistente richiede anch'esso la scelta e il consenso alla sostituzione. La ricevuta attendibile di un retry identico precede il confronto, perché il primo tentativo può aver già cambiato le versioni.
+
+Una nuova anteprima è obbligatoria dopo un esito obsoleto. Se blocchi precedenti sono stati applicati, la UI segnala il ripristino parziale; i successivi blocchi e upload non partono. Il formato del file e la cifratura restano invariati. Il protocollo callable cambia: backend vecchio senza `previewVersion: 1` viene rifiutato dal client; backend nuovo richiede `expectedVersion` per ogni record applicato. Rilascio coordinato e rollback che conservi tutti i controlli restano necessari.
+
+Questa è atomicità del singolo chunk Firestore, non dell'intero backup: staging, compensazione, ripresa fra esecuzioni e Storage restano aperti. Le prove automatiche con servizi simulati non sostituiscono il collaudo del ripristino sui dispositivi.
+
+Verifica dei tipi: i byte vengono ricostruiti come Buffer compatibile con Admin SDK; export e confronto rifiutano numeri non finiti anziché convertirli implicitamente in null. Nessun nuovo formato o conversione dei file precedenti.

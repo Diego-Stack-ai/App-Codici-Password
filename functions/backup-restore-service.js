@@ -1,4 +1,5 @@
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,160}$/;
+const {validateExpectedVersion} = require('./backup-restore-preview');
 const MAX_RECORDS_PER_CHUNK = 400;
 const MAX_RECORD_BYTES = 800 * 1024;
 const MAX_CHUNK_BYTES = 7 * 1024 * 1024;
@@ -95,7 +96,7 @@ function validateRestoreChunk(input = {}, uid) {
     if (recordBytes > MAX_RECORD_BYTES) {
       throw new Error("BACKUP_RECORD_TOO_LARGE");
     }
-    return {path, data};
+    return {path, data, ...(input.mode === 'apply' ? {expectedVersion: validateExpectedVersion(record.expectedVersion)} : {})};
   });
   if (chunkBytes > MAX_CHUNK_BYTES) throw new Error("BACKUP_CHUNK_TOO_LARGE");
   const mode = input.mode === "preview" ? "preview" : input.mode === "apply" ? "apply" : null;

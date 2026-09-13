@@ -4,14 +4,14 @@ const {validateRestoreChunk} = require('../backup-restore-service');
 const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require('../backup-restore-receipt');
 const command = () => validateRestoreChunk({expectedOwnerUid: 'owner', operationId: 'restore-op', backupId: 'backup',
   chunkIndex: 0, chunkCount: 2, mode: 'apply', confirmation: 'RESTORE_SELECTED_OVERWRITE', overwriteExisting: true,
-  records: [{scope: 'private-account', id: 'a1', data: {password: 'ciphertext', metadata: {x: 1, y: 2}}}]
+  records: [{scope: 'private-account', id: 'a1', data: {password: 'ciphertext', metadata: {x: 1, y: 2}}, expectedVersion: {exists: false}}]
 }, 'owner');
 const bindingFor = value => createBackupRestoreBinding({uid: 'owner', command: value});
 
 test('backup binding is stable across object order and receipt exposes only minimum result metadata', () => {
   const original = command(), before = structuredClone(original), binding = bindingFor(original);
   const reordered = Object.fromEntries(Object.entries(original).reverse());
-  reordered.records = original.records.map(record => ({data: {metadata: {y: 2, x: 1}, password: 'ciphertext'}, path: record.path}));
+  reordered.records = original.records.map(record => ({expectedVersion: record.expectedVersion, data: {metadata: {y: 2, x: 1}, password: 'ciphertext'}, path: record.path}));
   assert.deepEqual(bindingFor(reordered), binding);
   assert.deepEqual(original, before); assert.equal(Object.isFrozen(binding), true);
   assert.equal(JSON.stringify(binding).includes('ciphertext'), false);
@@ -46,7 +46,7 @@ test('legacy, malformed and non-applied receipts are never accepted', () => {
 
 test('the complete validated command binds future version preconditions and array order without coercion', () => {
   const original = command();
-  const versioned = {...original, records: [{...original.records[0], expectedVersion: {exists: false}}]};
+  const versioned = {...original, records: [{...original.records[0], expectedVersion: {exists: true, updateTime: {seconds: 1, nanoseconds: 0}}}]};
   assert.notEqual(bindingFor(versioned).operationHash, bindingFor(original).operationHash);
   const ordered = {...original, records: [...original.records, {path: 'users/owner/accounts/a2', data: {password: 'ciphertext2'}}]};
   assert.notEqual(bindingFor(ordered).operationHash, bindingFor({...ordered, records: [...ordered.records].reverse()}).operationHash);

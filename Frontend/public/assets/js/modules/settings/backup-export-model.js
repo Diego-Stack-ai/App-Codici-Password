@@ -7,6 +7,7 @@ function assertIdentifier(value) {
 }
 
 export function encodeFirestoreValue(value) {
+    if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('BACKUP_VALUE_UNSUPPORTED');
     if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) return value;
     if (value instanceof Date) return {$type: 'date', value: value.toISOString()};
     if (value instanceof Uint8Array) return {$type: 'bytes', value: Array.from(value)};

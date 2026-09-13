@@ -13,7 +13,7 @@ const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https")
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const { Bytes, FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
+const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { getStorage } = require("firebase-admin/storage");
 const nodemailer = require("nodemailer");
@@ -29,6 +29,7 @@ const {
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
 const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require("./mutation-result-binding");
 const {assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope} = require("./private-account-write-scope");
+const {buildRestorePreview, staleRestoreIndexes} = require('./backup-restore-preview');
 const {
     privateAccountMutationDecision, validatePrivateAccountMutation
 } = require("./private-account-mutation-service");
@@ -554,7 +555,7 @@ exports.restoreBackupChunk = onCall(
                 }
             }
             const collisions = snapshots
-                .map((snapshot, index) => snapshot.exists && command.records[index].path !== `users/${request.auth.uid}`
+                .map((snapshot, index) => snapshot.exists
                     ? command.records[index].path : null)
                 .filter(Boolean);
             const decision = restoreChunkDecision({
@@ -562,13 +563,15 @@ exports.restoreBackupChunk = onCall(
                 collisions,
                 overwriteExisting: command.mode === "apply" && command.overwriteExisting && command.overwriteConfirmed
             });
-            if (decision.duplicate || command.mode === "preview") return decision;
+            if (command.mode === "preview") return {...decision, ...buildRestorePreview(command.records, snapshots)};
             if (!command.confirmed) throw new HttpsError("failed-precondition", "Conferma ripristino mancante.");
+            const staleIndexes = staleRestoreIndexes(command.records, snapshots);
+            if (staleIndexes.length) return {status: 'stale-preview', duplicate: false, staleCount: staleIndexes.length, staleIndexes};
             if (decision.status !== "ready") return decision;
             command.records.forEach((record, index) => {
                 const data = decodeFirestoreValue(record.data, {
                     timestamp: (seconds, nanoseconds) => new Timestamp(seconds, nanoseconds),
-                    bytes: value => Bytes.fromUint8Array(value)
+                    bytes: value => Buffer.from(value)
                 });
                 transaction.set(references[index], data, {merge: record.path === `users/${request.auth.uid}`});
             });

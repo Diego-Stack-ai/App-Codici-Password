@@ -437,6 +437,10 @@ function setupEncryptedRestore(user) {
                 showToast('Ripristino interrotto: alcuni dati potrebbero essere già stati applicati. Verifica il Vault prima di riprovare.', 'warning');
                 return;
             }
+            if (error?.code === 'BACKUP_PREVIEW_STALE' || error?.message === 'BACKUP_PREVIEW_STALE') {
+                showToast('I dati sono cambiati dopo l’anteprima. Riapri il backup per confrontarli di nuovo prima del ripristino.', 'warning');
+                return;
+            }
             const collision = String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
             showToast(collision
                 ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
