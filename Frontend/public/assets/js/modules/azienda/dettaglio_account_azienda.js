@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.121';
+import { db } from '../../firebase-config.js?v=1.2.122';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -79,7 +79,11 @@ function initProtocolUI() {
     }
 }
 
+let noteLoadAbort = null;
 async function loadAccount() {
+    noteLoadAbort?.abort();
+    noteLoadAbort = new AbortController();
+    const noteSignal = noteLoadAbort.signal, noteOwner = ownerId, noteCompanyId = currentAziendaId, noteAccountId = currentId;
     try {
         const docRef = doc(db, "users", ownerId, "aziende", currentAziendaId, "accounts", currentId);
         const account = await (requireServerRefresh
@@ -93,6 +97,7 @@ async function loadAccount() {
         }
 
         originalData = account;
+        const storedNote = account.note;
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
@@ -143,16 +148,22 @@ async function loadAccount() {
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
         render(originalData);
+        const noteAccount = originalData;
+        import('../shared/account-note-editor.js').then(module => {
+            if (!noteSignal.aborted && auth.currentUser?.uid === noteOwner) module.initAccountNoteEditor({
+                account: noteAccount, storedNote, ownerId: noteOwner, accountId: noteAccountId, companyId: noteCompanyId,
+                readOnly: isReadOnly, signal: noteSignal});
+        }).catch(() => { if (!noteSignal.aborted) showToast('Editor note non disponibile.', 'error'); });
         const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, compactView: true, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.121').then(({initAccountSharedCredentials}) =>
+        import('../shared/account-shared-credentials.js?v=1.2.122').then(({initAccountSharedCredentials}) =>
             initAccountSharedCredentials({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly, compactView: true
             })
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.121').then(({initAccountEmbeddedWidgets}) =>
+        import('../shared/account-embedded-widgets.js?v=1.2.122').then(({initAccountEmbeddedWidgets}) =>
             initAccountEmbeddedWidgets({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly

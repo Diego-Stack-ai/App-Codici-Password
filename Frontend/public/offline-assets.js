@@ -168,6 +168,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/shared/account-embedded-widgets.js",
   "assets/js/modules/shared/account-list-view.js",
   "assets/js/modules/shared/account-mode-model.js",
+  "assets/js/modules/shared/account-note-editor.js",
   "assets/js/modules/shared/account-shared-credentials.js",
   "assets/js/modules/shared/attachment-security.js",
   "assets/js/modules/shared/banking-model.js",

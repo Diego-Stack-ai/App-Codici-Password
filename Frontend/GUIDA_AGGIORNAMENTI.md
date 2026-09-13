@@ -539,3 +539,9 @@ Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consent
 ## Ordine interno del conto — candidata 1.2.121, 13/09/2026
 
 Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infine le carte associate. Ordine condiviso da Modifica e consultazione, nei contesti privato e aziendale. Il contenitore Widget rimane disponibile anche a conto chiuso, preservando le bozze al rerender. Nessuna modifica a dati, associazioni, backend o Rules.
+
+## Note rapide — rilascio 1.2.122, 13/09/2026
+
+Base master `6fc3546e`, ramo release/inline-notes-v122. Portate solo le note rapide da `1c5aeec7`: comando Aggiungi/Modifica nei dettagli privato/azienda, dialogo cifrato, confronto transazionale, aggiornamento immediato e conservazione bozza in caso di errore. Il riquadro resta nascosto se vuoto; i form completi continuano a modificare lo stesso campo. L'editor della release segue Auth e annullamento del caricamento senza dipendere dalla shell sperimentale.
+
+Suite locale completa: 359 test superati, più sei test dedicati rieseguiti dopo l'aggiunta del caso cambio Auth. Versione coerente con 246 riferimenti; budget delle 31 pagine rispettati. Nessuna modifica Functions/Rules/formato cifrato o migrazione. Vecchi Account non marcati cifrati richiedono prima un salvataggio dal form completo. Il rilascio autorizzato riguarda solo Hosting; tutti i lavori Vault/M6–M9 restano fuori da master. Rollback: ripubblicare Hosting dalla base 6fc3546e, senza rimuovere le note salvate nel campo esistente.
