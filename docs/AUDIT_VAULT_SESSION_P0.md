@@ -523,3 +523,16 @@ Commit `59ebff4e`: widget e dialoghi appartengono al montaggio della vista; bloc
 Validazione complessiva: `npm test` codice 0, **669 test** superati; include 55 test Functions e 22 esiti delle mutazioni con Auth/Firestore emulati. Le nuove combinazioni dei riferimenti inversi sono verificate tramite handler reale con transazione simulata; la suite emulata verifica anche l'esecuzione delle nuove letture con SDK reale, senza certificare ogni combinazione o la concorrenza sotto carico. Budget di tutte le 30 pagine rispettati; versione candidata 1.2.110 e 240 riferimenti asset coerenti; 38 MD, 174 collegamenti relativi senza destinazioni mancanti (ancore/URL esclusi); inventario 482 file.
 
 Nessun dato reale, migrazione o deploy in questo checkpoint. Produzione resta 1.2.117. Il costo del controllo inverso cresce con tutte le aziende dell'utente; scala/contesa, prove fisiche, distribuzione e rollback strutturale restano aperti. Le richieste già inviate al server non vengono annullate dalla dismissione UI. Il programma completo non è dichiarato terminato.
+
+
+## 42. Ripresa continuativa: offline, purge e backup — 13/09/2026
+
+Base `141259d9`. Commit distinti:
+
+- `51f43532`: rifiuti permanenti del perimetro privato sospesi nella coda cifrata, senza retry automatici; scelte esplicite server/più tardi e test emulatori dei riferimenti inversi.
+- `1b8ada9d`: pulizia Profilo del purge distingue Account privati e aziendali, include telefoni/documenti/utenze/fonti aziendali e preserva il resto dei contatti. I marker legacy null di link rimossi non bloccano inutilmente M6. Query completa e limite 450 patch; fallimenti finali non dichiarano purged.
+- `273de41b`: ripristino backup legato alla sessione; dialoghi e piano ripuliti a blocco/cambio UID, nessun falso successo dopo interruzioni. `expectedOwnerUid` obbligatorio lato server prima di accedere a Firestore. Riprodotto con utenti sintetici l'ordine del metodo getToken dell'SDK installato: il token può essere scelto dopo un microtask, quindi il solo controllo client non bastava.
+
+Verifica finale della candidata a `273de41b`: suite completa `npm test` codice 0, **700 test** superati, inclusi 65 Functions, 24 esiti mutazioni Auth/Firestore emulati e 13 nuovi test client backup. Le prove della callable backup e del finale purge usano handler reali con servizi simulati; non sono un collaudo Storage/Functions di ripristino end-to-end. Budget di tutte le 30 pagine rispettato; versione candidata 1.2.110, 240 riferimenti asset coerenti. Nessun dato reale o deploy. Produzione invariata alla 1.2.117.
+
+Limiti mantenuti aperti: staging/compensazione backup, confronto atomico con anteprima, ricevute storiche degli altri domini, race purge/ripristino, widget e grant residui, dimensione/contesa delle scansioni, prove fisiche. Backend backup nuovo e client vecchio non sono compatibili: distribuzione coordinata e rollback che mantenga il vincolo proprietario sono gate, non operazioni eseguite. Il prossimo adattamento indipendente riguarda il ciclo di vita del dettaglio Account aziendale canonico.

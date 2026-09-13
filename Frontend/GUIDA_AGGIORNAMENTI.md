@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Blocchi offline, Archivio e backup verificati — 13/09/2026
+
+Commit `51f43532`, `1b8ada9d`, `273de41b`: modifica offline fuori perimetro sospesa con scelta esplicita, pulizia riferimenti dopo purge con distinzione privato/azienda, ripristino backup legato a sessione e proprietario verificato dal server. Suite completa 700 test. Produzione 1.2.117 invariata; nessuna migrazione o pubblicazione backend. Il vincolo `expectedOwnerUid` richiede distribuzione coordinata. Limiti e prossimo blocco nell'audit Vault §42.
+
 ### Checkpoint multi-commit verificato — 12/09/2026
 
 Commit `3f40efbc` e `59ebff4e`: riferimenti inversi dei Profili controllati prima della mutazione privata; ciclo di vita widget e dialoghi invalidato a blocco/logout/cambio vista; renderer bancario differito entro budget. Suite completa 669 test, 30 pagine entro budget. Produzione 1.2.117 invariata. Scala della scansione aziende, alias, dispositivi fisici e distribuzione/rollback restano aperti. Evidenze e limiti nell'audit Vault §41.
