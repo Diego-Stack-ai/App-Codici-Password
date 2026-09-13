@@ -45,10 +45,16 @@ function fixture({footerReady = true} = {}) {
         setChildren: (element, children) => { element.children = []; (Array.isArray(children) ? children : [children]).forEach(child => element.appendChild(child)); },
         db: {}, storage: {}, functions: {}, enableAppCheck() {}, doc: (_db, ...path) => path.join('/'), ref: (_storage, path) => path,
         deleteDoc: async path => writes.push(['delete', path]), updateDoc: async (path, data) => writes.push(['update', path, data]), serverTimestamp: () => 'time',
-        writeBatch: () => { const changes = []; return {delete: path => changes.push(['delete', path]), update: (path, value) => changes.push(['update', path, value]), commit: async () => batches.push(changes)}; },
+        readProfile: async () => ({exists: () => true, data: () => ({documenti: []})}),
+        runTransaction: async (_db, callback) => {
+            const changes = [];
+            await callback({get: async path => { calls.push(['profile-read', path]); return context.readProfile(); },
+                delete: path => changes.push(['delete', path]), update: (path, value) => changes.push(['update', path, value])});
+            if (changes.length) batches.push(changes);
+        },
         getDeadline: async (uid, id) => { calls.push(['read', uid, id]); return {title: id}; },
         getReceivedDeadline: async (uid, id) => { calls.push(['received', uid, id]); return {title: id, permission: 'manage', dueDate: '2027-03-04'}; },
-        getDeadlineNotification: async () => null, getUserProfile: async () => ({documenti: []}),
+        getDeadlineNotification: async () => null, getUserProfile: async () => { throw new Error('Cached profile must not be read'); },
         deadlineRecipientsFromRecord: record => record.recipients || [],
         respondConfirm: async () => true, cancelConfirm() {},
         showConfirmModal: (...args) => {
@@ -93,15 +99,15 @@ test('deadline delete confirmation is owned and cannot target a new user or dead
 
 test('late profile lookup cannot unlink the next deadline document, and normal delete preserves other links', async () => {
     const f = fixture(), gate = deferred(); f.context.getDeadline = async (_uid, id) => ({title: id, sourceRef: {type: 'profileDocument', id: `doc${id}`}});
-    f.context.getUserProfile = () => gate.promise; await f.init(); const pending = f.deleteButton().onclick(); await tick();
+    f.context.readProfile = () => gate.promise; await f.init(); const pending = f.deleteButton().onclick(); await tick();
     f.window.location.search = '?id=B'; await f.init();
-    gate.resolve({documenti: [{id: 'docA', expiryReference: 'A'}, {id: 'docB', expiryReference: 'B'}]}); await pending;
+    gate.resolve({exists: () => true, data: () => ({documenti: [{id: 'docA', expiryReference: {deadlineId: 'A'}}, {id: 'docB', expiryReference: {deadlineId: 'B'}}]})}); await pending;
     assert.equal(f.batches.length, 0);
     const healthy = fixture(); healthy.context.getDeadline = f.context.getDeadline;
-    healthy.context.getUserProfile = async () => ({documenti: [{id: 'docA', expiryReference: 'A'}, {id: 'docB', expiryReference: 'B'}]});
+    healthy.context.readProfile = async () => ({exists: () => true, data: () => ({documenti: [{id: 'docA', expiryReference: {deadlineId: 'A'}}, {id: 'docB', expiryReference: {deadlineId: 'B'}}]})});
     await healthy.init(); await healthy.deleteButton().onclick();
     const changes = healthy.batches[0]; assert.equal(changes[0][1], 'users/ownerA/scadenze/A');
-    assert.equal(changes[1][2].documenti[0].expiryReference, null); assert.equal(changes[1][2].documenti[1].expiryReference, 'B');
+    assert.equal(changes[1][2].documenti[0].expiryReference, null); assert.equal(changes[1][2].documenti[1].expiryReference.deadlineId, 'B');
 });
 
 test('deadline lock and pagehide clear optional data and invalidate retained URL/profile actions', async () => {
@@ -199,4 +205,90 @@ test('failed deadline reads or rendering clear partial data and never enable foo
         assert.equal(f.footer.center.querySelectorAll('button').length, 0); assert.equal(f.writes.length, 0);
         assert.equal(f.toasts.length, 1); assert.doesNotMatch(f.toasts[0][0], /provider detail/);
     }
+});
+
+test('profile transaction retry keeps concurrent document edits while deleting and unlinking together', async () => {
+    const f = fixture(); f.context.getDeadline = async () => ({title: 'A', sourceRef: {type: 'profileDocument', id: 'docA'}});
+    let profile = {name: 'Synthetic profile', documenti: [{id: 'docA', note: 'old', expiryReference: {deadlineId: 'A'}}]}, revision = 0, attempts = 0;
+    f.context.runTransaction = async (_db, callback) => {
+        for (;;) {
+            attempts++;
+            const before = revision, changes = [];
+            await callback({get: async () => {
+                const data = structuredClone(profile);
+                if (attempts === 1) {
+                    profile.documenti[0].note = 'new concurrent note'; profile.documenti.push({id: 'new', note: 'concurrent document'}); revision++;
+                }
+                return {exists: () => true, data: () => data};
+            }, delete: path => changes.push(['delete', path]), update: (path, value) => changes.push(['update', path, value])});
+            if (before !== revision) continue;
+            for (const [kind, , value] of changes) if (kind === 'update') profile = {...profile, ...value};
+            f.batches.push(changes); break;
+        }
+    };
+    await f.init(); await f.deleteButton().onclick();
+    assert.equal(attempts, 2); assert.equal(f.batches.length, 1); assert.equal(f.batches[0].length, 2);
+    assert.equal(f.batches[0][0][1], 'users/ownerA/scadenze/A');
+    assert.equal(profile.documenti[0].note, 'new concurrent note'); assert.equal(profile.documenti[0].expiryReference, null);
+    assert.equal(profile.documenti[1].id, 'new'); assert.equal(profile.name, 'Synthetic profile');
+});
+
+test('profile deletion preserves newer or unrelated links and never creates missing profile/documents', async () => {
+    const profiles = [null, {}, {documenti: []}, {documenti: [{id: 'docA', expiryReference: {deadlineId: 'newer'}}]},
+        {documenti: [{id: 'other-document', expiryReference: {deadlineId: 'A'}}]}, {documenti: [{id: 'docA'}]}];
+    for (const profile of profiles) {
+        const f = fixture(); f.context.getDeadline = async () => ({title: 'A', sourceRef: {type: 'profileDocument', id: 'docA'}});
+        f.context.readProfile = async () => ({exists: () => profile !== null, data: () => profile});
+        await f.init(); await f.deleteButton().onclick();
+        assert.equal(f.batches.length, 1); assert.equal(f.batches[0].length, 1);
+        assert.equal(f.batches[0][0][0], 'delete'); assert.equal(f.batches[0][0][1], 'users/ownerA/scadenze/A');
+        assert.equal(f.window.location.href, 'scadenze.html');
+    }
+});
+
+test('profile unlink requires both document identity and exact deadline reference', async () => {
+    const f = fixture(); f.context.getDeadline = async () => ({title: 'A', sourceRef: {type: 'profileDocument', id: 'docA'}});
+    f.context.readProfile = async () => ({exists: () => true, data: () => ({documenti: [
+        {id: 'docA', expiryReference: {deadlineId: 'A'}, note: 'match'},
+        {id: 'docA', expiryReference: {deadlineId: 'B'}, note: 'newer'},
+        {id: 'docB', expiryReference: {deadlineId: 'A'}, note: 'other'}
+    ]})});
+    await f.init(); await f.deleteButton().onclick();
+    const documents = f.batches[0][1][2].documenti;
+    assert.equal(documents[0].expiryReference, null); assert.equal(documents[0].note, 'match');
+    assert.equal(documents[1].expiryReference.deadlineId, 'B'); assert.equal(documents[2].expiryReference.deadlineId, 'A');
+});
+
+test('transaction retry after lock performs no reads or writes and does not navigate', async () => {
+    const f = fixture(); f.context.getDeadline = async () => ({title: 'A', sourceRef: {type: 'profileDocument', id: 'docA'}});
+    let reads = 0, attempts = 0, secondWrites = 0;
+    f.context.runTransaction = async (_db, callback) => {
+        attempts++;
+        await callback({get: async () => { reads++; return {exists: () => true, data: () => ({documenti: [{id: 'docA', expiryReference: {deadlineId: 'A'}}]})}; }, delete() {}, update() {}});
+        f.lock(); attempts++;
+        await callback({get: async () => { reads++; throw new Error('retry must stop before reading'); }, delete: () => secondWrites++, update: () => secondWrites++});
+    };
+    await f.init(); const pending = f.deleteButton().onclick(); await pending;
+    assert.equal(attempts, 2); assert.equal(reads, 1); assert.equal(secondWrites, 0);
+    assert.equal(f.batches.length, 0); assert.equal(f.window.location.href, '');
+});
+
+test('malformed profile document collections fail before any transaction mutation', async () => {
+    const f = fixture(); f.context.getDeadline = async () => ({title: 'A', sourceRef: {type: 'profileDocument', id: 'docA'}});
+    f.context.readProfile = async () => ({exists: () => true, data: () => ({documenti: 'invalid shape'})});
+    await f.init(); await f.deleteButton().onclick();
+    assert.equal(f.batches.length, 0); assert.equal(f.window.location.href, ''); assert.equal(f.toasts.length, 1);
+});
+
+test('offline profile-linked deletion explains the connection requirement before confirmation', async () => {
+    const f = fixture();
+    f.context.navigator = {onLine: false};
+    f.context.getDeadline = async () => ({title: 'A', sourceRef: {type: 'profileDocument', id: 'docA'}});
+    await f.init(); await f.deleteButton().onclick();
+    assert.equal(f.batches.length, 0);
+    assert.equal(f.calls.some(call => call[0] === 'confirm' || call[0] === 'profile-read'), false);
+    assert.match(f.toasts[0][0], /serve la connessione/);
+    f.context.navigator.onLine = true;
+    await f.deleteButton().onclick();
+    assert.equal(f.batches.length, 1);
 });

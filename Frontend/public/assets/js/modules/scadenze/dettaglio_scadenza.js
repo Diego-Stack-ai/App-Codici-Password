@@ -5,7 +5,7 @@
 
 import { getFooterReady } from '../../footer-state.js';
 import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.110';
-import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 
@@ -17,8 +17,7 @@ import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from
 import {
     getDeadline,
     getDeadlineNotification,
-    getReceivedDeadline,
-    getUserProfile
+    getReceivedDeadline
 } from '../data/vault-repository.js';
 import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
 import { deadlineDate, deadlineDateInputFields, deadlinePresentation } from './deadline-model.js';
@@ -32,17 +31,27 @@ async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
         return;
     }
     const profileRef = doc(db, 'users', userId);
-    const profile = await getUserProfile(userId);
-    if (!active()) return;
-    const documents = profile?.documenti || [];
-    const batch = writeBatch(db);
-    batch.delete(doc(db, 'users', userId, 'scadenze', scadenzaId));
-    batch.update(profileRef, {
-        documenti: documents.map(item => item.id === sourceRef.id
-            ? { ...item, expiryReference: null }
-            : item)
+    const deadlineRef = doc(db, 'users', userId, 'scadenze', scadenzaId);
+    const documentId = sourceRef.id;
+    await runTransaction(db, async transaction => {
+        if (!active()) return;
+        const snapshot = await transaction.get(profileRef);
+        if (!active()) return;
+        let changed = false, documents = [];
+        if (snapshot.exists()) {
+            documents = snapshot.data()?.documenti ?? [];
+            if (!Array.isArray(documents)) throw new Error('PROFILE_DOCUMENTS_INVALID');
+            documents = documents.map(item => {
+                if (typeof documentId === 'string' && documentId && item?.id === documentId && item.expiryReference?.deadlineId === scadenzaId) {
+                    changed = true;
+                    return {...item, expiryReference: null};
+                }
+                return item;
+            });
+        }
+        transaction.delete(deadlineRef);
+        if (changed) transaction.update(profileRef, {documenti: documents});
     });
-    await batch.commit();
 }
 
 function clearDeadline(view = document) {
@@ -206,6 +215,10 @@ function setupFooterActions(mount) {
 
 async function handleDelete(mount) {
     if (!mount.active() || mount.scope.receivedId || !mount.record || mount.actionPending) return;
+    if (mount.record.sourceRef?.type === 'profileDocument' && globalThis.navigator?.onLine === false) {
+        showToast('Per eliminare una scadenza collegata a un documento del Profilo serve la connessione.', 'warning');
+        return;
+    }
     mount.actionPending = true;
     const {uid, id} = mount.scope;
     const sourceRef = mount.record.sourceRef ? {...mount.record.sourceRef} : null;
