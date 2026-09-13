@@ -151,3 +151,14 @@ test('new creation and stale revision retain their existing behavior', async () 
   const stale = handlerFixture({record: {...basic(), revision: 4}});
   assert.equal((await stale.run()).status, 'conflict'); assert.deepEqual(stale.writes, []);
 });
+
+
+test('historical null unlink markers are empty but null company on a real link remains private', async () => {
+  const profile = {contactEmails: [{linkedAccountId: null, linkedAccountCompanyId: null, address: 'fixture@example.invalid'}]};
+  const f = handlerFixture({profile});
+  assert.equal((await f.run()).status, 'applied');
+  assert.equal(profile.contactEmails[0].linkedAccountId, null);
+  const linked = handlerFixture({profile: {contactEmails: [{linkedAccountId: 'record', linkedAccountCompanyId: null}]}});
+  await assert.rejects(linked.run(), error => error.details?.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+  assert.deepEqual(linked.writes, []);
+});

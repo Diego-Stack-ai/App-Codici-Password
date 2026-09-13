@@ -47,7 +47,8 @@ function assertPrivateAccountReferenceScope({recordId, record, profile, companie
   const contact = value => {
     map(value);
     for (const field of ['linkedAccountId', 'linkedAccountCompanyId']) {
-      if (own(value, field) && typeof value[field] !== 'string') deny();
+      // Historical purge writes null for an explicitly removed link.
+      if (own(value, field) && value[field] !== null && typeof value[field] !== 'string') deny();
     }
     if (value.linkedAccountId === recordId && !value.linkedAccountCompanyId) deny();
   };

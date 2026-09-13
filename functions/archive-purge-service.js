@@ -50,15 +50,70 @@ function purgeDecision({record, expectedRevision, confirmed, previous}) {
   return {status: "ready", duplicate: false, revision: currentRevision};
 }
 
-function unlinkProfileEmails(contactEmails, accountId) {
-  if (!Array.isArray(contactEmails)) return contactEmails;
-  return contactEmails.map(email => email?.linkedAccountId === accountId ? {...email, linkedAccountId: null} : email);
+function planProfileReferenceCleanup(source, command, {company = false} = {}) {
+  const invalid = () => { throw new Error('PROFILE_REFERENCE_SHAPE_UNSUPPORTED'); };
+  const object = value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) invalid();
+    return value;
+  };
+  object(source);
+  const targetCompany = command.context === 'private' ? '' : requireIdentifier(command.companyId);
+  if (!['private', 'company'].includes(command.context)) invalid();
+  const accountId = requireIdentifier(command.accountId);
+  const contact = value => {
+    object(value);
+    // Historical null means no link. Do not rewrite unrelated legacy contacts.
+    for (const field of ['linkedAccountId', 'linkedAccountCompanyId']) {
+      if (value[field] != null && typeof value[field] !== 'string') invalid();
+    }
+    return value.linkedAccountId === accountId && (value.linkedAccountCompanyId || '') === targetCompany ?
+      {...value, linkedAccountId: '', linkedAccountCompanyId: ''} : value;
+  };
+  const array = (values, transform) => {
+    if (!Array.isArray(values)) invalid();
+    const next = values.map(transform);
+    return next.some((value, index) => value !== values[index]) ? next : values;
+  };
+  const patch = {};
+  if (!company) {
+    for (const field of ['contactEmails', 'contactPhones', 'documenti']) {
+      if (source[field] === undefined) continue;
+      const next = array(source[field], contact);
+      if (next !== source[field]) patch[field] = next;
+    }
+    if (source.userAddresses !== undefined) {
+      const next = array(source.userAddresses, address => {
+        object(address);
+        if (address.utilities === undefined) return address;
+        const utilities = array(address.utilities, contact);
+        return utilities === address.utilities ? address : {...address, utilities};
+      });
+      if (next !== source.userAddresses) patch.userAddresses = next;
+    }
+  } else {
+    if (source.emails !== undefined) {
+      const emails = object(source.emails), next = {...emails};
+      for (const slot of ['pec', 'amministrazione', 'personale']) {
+        if (emails[slot] !== undefined) next[slot] = contact(emails[slot]);
+      }
+      if (emails.extra !== undefined) next.extra = array(emails.extra, contact);
+      if (Object.keys(next).some(key => next[key] !== emails[key])) patch.emails = next;
+    }
+    if (source.phoneAccountLinks !== undefined) {
+      const links = object(source.phoneAccountLinks), next = {...links};
+      for (const slot of ['telefonoAzienda', 'faxAzienda', 'referenteCellulare']) {
+        if (links[slot] !== undefined) next[slot] = contact(links[slot]);
+      }
+      if (Object.keys(next).some(key => next[key] !== links[key])) patch.phoneAccountLinks = next;
+    }
+  }
+  return patch;
 }
 
 module.exports = {
   accountPath,
   isSafeAttachmentPath,
   purgeDecision,
-  unlinkProfileEmails,
+  planProfileReferenceCleanup,
   validatePurgeCommand
 };

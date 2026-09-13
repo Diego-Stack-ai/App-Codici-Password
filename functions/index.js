@@ -36,7 +36,7 @@ const {
     RETENTION_MS, restoreDecision, safeAudit, trashDecision, validateRecoveryCommand
 } = require("./history-recovery-service");
 const {
-    accountPath, isSafeAttachmentPath, purgeDecision, unlinkProfileEmails, validatePurgeCommand
+    accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand
 } = require("./archive-purge-service");
 const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
@@ -476,12 +476,23 @@ exports.purgeArchivedAccount = onCall(
         await store.recursiveDelete(recordRef);
 
         await store.runTransaction(async transaction => {
-            const profileSnapshot = await transaction.get(userRef);
-            if (command.context === "private" && profileSnapshot.exists) {
-                const existingEmails = profileSnapshot.data()?.contactEmails;
-                const unlinkedEmails = unlinkProfileEmails(existingEmails, command.accountId);
-                if (Array.isArray(unlinkedEmails)) transaction.update(userRef, {contactEmails: unlinkedEmails});
-            }
+            // Full query: never silently truncate the set of referring companies.
+            // Reads and all planning precede writes; retries re-read current data.
+            const [profileSnapshot, companiesSnapshot] = await Promise.all([
+                transaction.get(userRef), transaction.get(userRef.collection('aziende'))
+            ]);
+            const cleanup = [];
+            const plan = (snapshot, reference, company) => {
+                if (!snapshot.exists) return;
+                const patch = planProfileReferenceCleanup(snapshot.data(), command, {company});
+                if (Object.keys(patch).length) cleanup.push({reference, patch});
+            };
+            plan(profileSnapshot, userRef, false);
+            for (const company of companiesSnapshot.docs) plan(company, company.ref, true);
+            // Conservative write budget including receipt/audit. An oversized or
+            // malformed plan leaves processing resumable, never falsely purged.
+            if (cleanup.length > 450) throw new HttpsError('failed-precondition', 'Pulizia riferimenti troppo estesa.');
+            for (const {reference, patch} of cleanup) transaction.update(reference, patch);
             transaction.set(operationRef, {status: "purged", updatedAt: FieldValue.serverTimestamp()}, {merge: true});
             transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
                 action: "account-purged", actorUid: ownerUid, accountId: command.accountId,

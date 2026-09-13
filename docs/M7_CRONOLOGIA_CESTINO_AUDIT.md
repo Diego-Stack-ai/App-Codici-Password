@@ -46,3 +46,26 @@ Per chiudere il requisito di retention della baseline occorre stabilire, senza a
 - prova che il dato non resti raggiungibile nei percorsi applicativi.
 
 La cifratura riduce l’esposizione ma non giustifica la conservazione illimitata.
+
+
+## Riesame dopo evoluzione Profili — 13/09/2026
+
+Base `141259d9`: la pulizia finale di `purgeArchivedAccount` considerava soltanto `contactEmails` privato e confrontava il solo ID. La stessa stringa ID in Account privato e aziendale non identifica lo stesso record: questa collisione può scollegare un contatto estraneo. Telefoni, documenti, utenze e riferimenti nelle aziende non erano inclusi. Il nuovo blocco candidato deve distinguere contesto/azienda e conservare dati del contatto, note e valori cifrati.
+
+Restano distinti e aperti:
+
+- `accountWidgets` e `sharedVaultLinks` sono collezioni sorelle del documento Account, quindi la cancellazione ricorsiva dell'Account non li include. La pulizia deve eliminare soltanto il collegamento dell'Account; il valore comune usato altrove va conservato.
+- Ripristino da Archivio e preparazione del purge non condividono un protocollo transazionale che impedisca il ripristino fra verifica iniziale e cancellazione. Il solo aggiornamento della pulizia finale non chiude questa race.
+- Ripristino e grant legacy richiedono una prova specifica di mancata riattivazione delle autorizzazioni precedenti.
+- Storage, cancellazione ricorsiva e transazione finale sono passaggi distinti: l'atomicità globale e la ripresa completa non sono certificate.
+
+L'audit finale attuale usa una allowlist di campi tecnici, senza segreti. Nessuna decisione di retention, operazione su dati reali o pubblicazione deriva da questo riesame.
+
+
+### Pulizia candidata dei collegamenti dopo purge — 13/09/2026
+
+Il pianificatore `planProfileReferenceCleanup` distingue `{context, companyId, accountId}` e aggiorna solo i campi che contengono un riferimento esatto. Copre i campi noti dei Profili privati e aziendali, mantenendo il resto del contatto. La transazione finale legge Profilo e tutte le aziende prima delle scritture; un retry rilegge i dati correnti. Il completamento avviene insieme alle patch e all'audit finale. Una precedente operazione `processing` senza Account riprende la pulizia; `purged` conserva il comportamento di retry esistente. Questo non certifica la provenienza storica delle ricevute `archiveOperations`, distinta dal nuovo registro M6.
+
+Limiti: scansione completa delle aziende, crescita dei costi e della contesa; massimo conservativo di 450 documenti modificati più ricevuta/audit. Un piano troppo ampio o malformato interrompe la transazione finale, lasciando `processing` e nessuna pulizia parziale; l'Account può però essere già stato eliminato dal passaggio precedente. Non è un rollback né una soluzione alla race purge/ripristino. Nessuna migrazione di alias o intervento sui dati reali.
+
+Compatibilità M6: il vecchio purge scriveva `linkedAccountId: null`. Il guard dei riferimenti accetta ora questo marker di collegamento assente, senza modificarlo. Un ID reale con `linkedAccountCompanyId: null` continua a essere trattato come collegamento privato e impedisce il writer ridotto. Il nuovo unlink usa stringhe vuote per entrambi i campi, come la UI corrente.
