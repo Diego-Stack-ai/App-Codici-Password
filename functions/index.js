@@ -43,7 +43,7 @@ const {
     revisionDecision, sharedVaultPaths, validateSharedVaultCommand
 } = require("./shared-vault-service");
 const {
-    accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand
+    accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData
 } = require("./account-widget-service");
 
 initializeApp();
@@ -308,10 +308,16 @@ exports.manageAccountWidget = onCall(
                 action: command.action
             });
             if (decision.duplicate || decision.status !== "applied") return decision;
+            let widgetData;
+            try {
+                widgetData = resolveAccountWidgetBankData(command, accountSnapshot.data(), widgetSnapshot.data());
+            } catch {
+                throw new HttpsError("failed-precondition", "Il conto bancario collegato al Widget non è disponibile.");
+            }
             const now = FieldValue.serverTimestamp();
             if (command.action === "delete") transaction.delete(widgetRef);
             else transaction.set(widgetRef, {
-                ...command.data,
+                ...widgetData,
                 context: command.context,
                 accountId: command.accountId,
                 ...(command.context === "company" ? {companyId: command.companyId} : {}),

@@ -987,3 +987,7 @@ Il Go-Live standardizza l'inserimento dei dati reali garantendo la massima sicur
 ## Account UI 1.2.118 — 13/09/2026
 
 Rilascio UI isolato sulla base master 1.2.117 (`445b338d`), derivato da `d2ef897e`. In consultazione i campi vuoti vengono nascosti, gli allegati seguono le note e ogni dettaglio usa un solo base-glow. I riferimenti generali restano separati dai dati della banca. Numero verde e referente banca sono conservati alla riapertura; la scorciatoia bancaria apre il normale editor Widget Account. Il normale editor conserva i campi modificabili. Questo rilascio non include il ramo Vault sperimentale.
+
+## Widget del singolo conto — candidata 1.2.119, 13/09/2026
+
+Ogni conto bancario dei form privato/azienda contiene carte e una propria area Widget. Il pulsante + apre lo stesso editor con posizione preselezionata; il campo Posizione consente di spostare un Widget generico già esistente. Il collegamento usa bankId stabile, mai indice della lista o IBAN. Il conto deve essere salvato prima di creare il Widget. Le bozze dei Widget restano conservate quando si apre/chiude il conto. Per eliminare un conto con Widget occorre prima spostarli o eliminarli; non sono cancellati automaticamente. Candidata non distribuita.

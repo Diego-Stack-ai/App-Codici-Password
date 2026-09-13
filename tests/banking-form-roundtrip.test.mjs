@@ -15,7 +15,7 @@ for (const area of ['privato', 'azienda']) {
     test(`${area}: numero verde e referente banca sopravvivono a carica/salva/ricarica`, async () => {
         for (const record of [
             {numeroVerde: '800 123 456', referenteNome: 'Referente generale'},
-            {banking: [{referenteNome: 'Referente banca', numeroVerde: '800 123 456'}]},
+            {banking: [{bankId: 'stable-synthetic-bank', referenteNome: 'Referente banca', numeroVerde: '800 123 456'}]},
             {banking: [{referenteNome: 'Solo referente banca'}]},
             {banking: {numeroVerde: '800 123 456'}}
         ]) {
@@ -31,6 +31,7 @@ for (const area of ['privato', 'azienda']) {
             assert.equal(second.hasRealData, true);
             assert.equal(second.loadedBanking[0].numeroVerde || '', first.loadedBanking[0].numeroVerde || '');
             assert.equal(second.loadedBanking[0].referenteNome || '', first.loadedBanking[0].referenteNome || '');
+            assert.equal(second.loadedBanking[0].bankId, first.loadedBanking[0].bankId);
             assert.equal(context.data.referenteNome, record.referenteNome);
         }
     });
