@@ -111,11 +111,11 @@ for (const scope of ['deadlines', 'sharing']) {
 }
 assert.match(pushSettings, /Promise\.all\(\[[\s\S]+setupPushToggle\(user, 'deadlines'\)[\s\S]+setupPushToggle\(user, 'sharing'\)/,
     'Le configurazioni Push non vengono inizializzate in parallelo');
-assert.match(archive, /loadArchivedAccounts\(currentUser\.uid, currentContext\)/,
+assert.match(archive, /loadArchivedAccounts\(uid, loadContext, \{signal: controller\.signal, isActive: loadActive\}\)/,
     'La pagina Archivio non delega il caricamento al servizio dedicato');
 assert.doesNotMatch(archive, /listCompanyAccounts|writeBatch|updateDoc|deleteDoc|\bdecrypt\(/,
     'La pagina Archivio contiene ancora accesso dati, mutazioni o decifratura');
-assert.match(archiveService, /Promise\.allSettled\(\[[\s\S]+loadPrivateArchive\(uid\)[\s\S]+loadAllCompanyArchives\(uid\)/,
+assert.match(archiveService, /Promise\.allSettled\(\[[\s\S]+loadPrivateArchive\(uid, check\)[\s\S]+loadAllCompanyArchives\(uid, check\)/,
     'Il servizio Archivio non carica in parallelo le sorgenti indipendenti');
 assert.doesNotMatch(archiveService, /decrypt\(account\.(?:password|account)/,
     'L’Archivio decifra segreti che non mostra né usa');
