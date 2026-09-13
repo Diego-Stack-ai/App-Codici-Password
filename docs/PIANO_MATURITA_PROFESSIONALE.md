@@ -382,3 +382,5 @@ Restano le decisioni prodotto della baseline (fra cui retention e recupero), aud
 
 La PR #58 è unita in master 9e5335d9; Hosting è già 1.2.124. Il ramo experiment/vault-shell-v124 integra le note 1.2.122–124 nel ciclo Vault sperimentale, mantenendo i blocchi M6–M9 già consolidati. Suite completa superata. Ripresa tecnica da compatibilità del lettore della coda; restano i gate già elencati, senza nuovo deploy strutturale.
 
+
+Avanzamento M6 successivo: disponibile in laboratorio il lettore compatibile degli schemi 1 e 2, senza upgrade o scritture. Undici scenari browser superati in Chrome e Edge, con dati sintetici. Il recupero in lettura è un prerequisito; integrazione delle mutazioni, distribuzione preparatoria e collaudi fisici restano aperti. Il programma non è concluso.

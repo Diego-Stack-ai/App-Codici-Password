@@ -1,5 +1,6 @@
 import {createOfflineMutationQueue, openOfflineQueueDatabase} from './queue.js';
 import {createHybridQueueCoordinator} from './hybrid-queue-coordinator.mjs';
+import {readCompatibleQueue} from './compatible-queue-reader.mjs';
 const passed = [], uid = `browser-${crypto.randomUUID()}`, name = `codex-offline-queue-${uid}`;
 const assert = (value, code) => { if (!value) throw new Error(code); };
 const requestValue = request => new Promise((resolve, reject) => {
@@ -22,6 +23,9 @@ try {
     passed.push('real IndexedDB encrypted queue roundtrip');
     const observer = await openOfflineQueueDatabase(uid);
     const original = await read(observer, 'encryptedOperations', `${uid}:synthetic-operation`);
+    const v1 = await readCompatibleQueue({uid});
+    assert(v1.version === 1 && JSON.stringify(v1.containers) === JSON.stringify([original]), 'COMPAT_V1');
+    passed.push('compatible reader preserves schema 1 ciphertext');
     const upgrade = indexedDB.open(name, 2);
     upgrade.onupgradeneeded = () => {
         upgrade.result.createObjectStore('queueLeases', {keyPath: 'id'});
@@ -36,6 +40,33 @@ try {
     try { await openOfflineQueueDatabase(uid); throw new Error('LEGACY_REOPEN_ALLOWED'); }
     catch (error) { assert(error.name === 'VersionError', 'LEGACY_REOPEN_NOT_VERSION_ERROR'); }
     passed.push('version 1 opener refuses upgraded schema without recreation or deletion');
+    const v2 = await readCompatibleQueue({uid});
+    assert(v2.version === 2 && JSON.stringify(v2.containers) === JSON.stringify([original]), 'COMPAT_V2');
+    passed.push('compatible reader reads schema 2 without downgrade and preserves ciphertext');
+    const absentUid = `${uid}-missing`;
+    try { await readCompatibleQueue({uid: absentUid}); throw new Error('MISSING_ACCEPTED'); }
+    catch (error) { assert(error.code === 'QUEUE_READER_MISSING', 'MISSING_ERROR'); }
+    assert(!(await indexedDB.databases()).some(item => item.name === `codex-offline-queue-${absentUid}`), 'MISSING_CREATED');
+    passed.push('compatible reader never creates an absent queue');
+    let checks = 0;
+    try { await readCompatibleQueue({uid, isActive: () => ++checks < 3}); throw new Error('SESSION_ACCEPTED'); }
+    catch (error) { assert(error.code === 'QUEUE_READER_SESSION', 'SESSION_ERROR'); }
+    assert(JSON.stringify(await read(db, 'encryptedOperations', original.id)) === JSON.stringify(original), 'SESSION_MUTATED');
+    passed.push('session invalidation rejects snapshot without mutating ciphertext');
+    for (const schema of [2, 3]) {
+        const invalidUid = `${uid}-schema-${schema}`;
+        const invalidRequest = indexedDB.open(`codex-offline-queue-${invalidUid}`, schema);
+        invalidRequest.onupgradeneeded = () => invalidRequest.result.createObjectStore('sentinel', {keyPath: 'id'});
+        const invalidDb = await requestValue(invalidRequest);
+        invalidDb.close();
+        try { await readCompatibleQueue({uid: invalidUid}); throw new Error('SCHEMA_ACCEPTED'); }
+        catch (error) { assert(error.code === 'QUEUE_READER_SCHEMA', 'SCHEMA_ERROR'); }
+        const unchanged = await requestValue(indexedDB.open(`codex-offline-queue-${invalidUid}`));
+        assert(unchanged.version === schema && unchanged.objectStoreNames.contains('sentinel') &&
+            !unchanged.objectStoreNames.contains('encryptedOperations'), 'SCHEMA_MUTATED');
+        unchanged.close();
+    }
+    passed.push('malformed schema 2 and unknown schema 3 are refused without repairs');
     let clock = 1000;
     for (const useLocks of [true, false]) {
         const coordinator = createHybridQueueCoordinator({database: db, uid, holderId: 'page', now: () => clock,

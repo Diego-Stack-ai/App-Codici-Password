@@ -10,6 +10,7 @@ if (!browserPath || process.argv.length !== 3) throw new Error('Usage: node run-
 const root = resolve(import.meta.dirname, '../..');
 const paths = new Map([
     ['/suite.mjs', 'experiments/offline-sync/browser-coordination.mjs'],
+    ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
     ['/worker.mjs', 'experiments/offline-sync/browser-coordination-worker.mjs'],
     ['/hybrid-queue-coordinator.mjs', 'experiments/offline-sync/hybrid-queue-coordinator.mjs'],
     ['/indexeddb-queue-lease.mjs', 'experiments/offline-sync/indexeddb-queue-lease.mjs'],
