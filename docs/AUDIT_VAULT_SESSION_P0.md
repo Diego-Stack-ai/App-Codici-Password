@@ -567,3 +567,10 @@ Le ricevute purge sono ora verificate nel registro protetto; conferma richiesta 
 Suite completa `npm test` codice 0: **771 test** superati, inclusi 106 Functions e 11 nuovi test Archivio frontend. Budget delle 30 pagine rispettato; candidata 1.2.110 e 240 riferimenti asset coerenti. Test ricevute con handler reale e servizi simulati; la suite emulata non certifica un purge distribuito end-to-end. Nessun dato reale, migrazione o deploy; produzione resta 1.2.117.
 
 Restano aperti concorrenza purge/ripristino, recupero UI delle operazioni incerte con stesso ID, pulizia widget/grant residui, retention, staging e compensazione backup, prove fisiche e distribuzione coordinata.
+
+
+## 46. Ripresa esplicita del backup nella sessione — candidata 13/09/2026
+
+Base `f67c8d7b`. Piano di esecuzione privato e immutabile, una sola esecuzione contemporanea, ID/comandi stabili e avanzamento conservato. Dopo una risposta Firestore persa, la UI propone una scelta esplicita prima di reinviare il chunk incerto. Chunk confermati non reinviati, risultato completato riutilizzato senza upload duplicati. Selezione alterata e rifiuti definitivi non consentono retry; incertezza Storage blocca la ripetizione generica. Logout/blocco/dismissione rilasciano il piano. L'eventualità di precedenti scritture non confermate rimane nel progresso anche dopo un successivo rifiuto certo.
+
+Suite completa `npm test` codice 0, **781 test** superati; inclusi 18 test servizio backup e 10 UI, 106 Functions. Budget delle 30 pagine e versione candidata 1.2.110/240 riferimenti coerenti. Prove di perdita risposta con server/ricevute simulate, senza dati reali. Nessun deploy; journal durevole, staging e compensazione restano aperti.

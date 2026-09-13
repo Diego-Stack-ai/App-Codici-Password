@@ -336,3 +336,10 @@ Avanzamento P0 base `6432cad8`: preparazione del payload M6 e prova locale di sa
 Avanzamento P0 base `1b6a13ed`: gestione dell’esito incerto in RAM e collaudo del retry. La provenienza dei risultati non è garantita dalle Rules correnti: correggere namespace degli esiti e legame risultato/operazione prima del salvataggio UI; integrazione della coda canonica ancora aperta. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
 
 Avanzamento candidato base `a795b462`: nuovo namespace backend degli esiti e legame del retry con l'operazione validata. Gli esiti storici non vengono convertiti automaticamente; recupero delle code pregresse, integrazione UI e rilascio restano gate separati. [Audit §32](./AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).
+
+
+## Consolidamento candidato — 13/09/2026
+
+La matrice delle fasi non cambia per il solo aumento dei test. I blocchi del ramo sperimentale aggiungono isolamento delle viste durante cambio sessione, verifica del proprietario nelle mutazioni, ricevute server attendibili per M6/backup/purge e confronto del backup con versioni effettive. Archivio verificato al checkpoint `f67c8d7b` con 771 test; [audit §45](./AUDIT_VAULT_SESSION_P0.md#45-archivio-sessione-proprietario-e-ricevute--candidata-13092026).
+
+La ripresa backup nella stessa sessione è un passo successivo candidato, descritto nel [contratto M8](./M8_BACKUP_RECUPERO.md). Non equivale a journal durevole, staging, compensazione o ripristino complessivo certificato. Restano separati: protocollo concorrente purge/ripristino, recupero degli esiti incerti dell'Archivio, riferimenti widget/grant residui, migrazione delle viste complete nella shell, dispositivi reali, retention e distribuzione strutturale. Nessuna fase M5–M10 viene chiusa da questo aggiornamento; nessun deploy di questi blocchi eseguito.

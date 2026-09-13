@@ -636,3 +636,5 @@ Avanzamento candidato 13/09/2026, checkpoint `99dabb19`: isolamento del dettagli
 Avanzamento candidato 13/09/2026: anteprima backup legata alle versioni effettive, confronto transazionale prima di scrivere, scelta esplicita anche per il Profilo; interruzioni e tipi binari verificati. [Audit §44](../docs/AUDIT_VAULT_SESSION_P0.md#44-anteprima-backup-e-confronto-transazionale--candidata-13092026). Staging e rilascio restano aperti.
 
 Avanzamento candidato Archivio 13/09/2026: sessione e identità complete protette, purge vincolato al proprietario, ricevute storiche non più attendibili e registro server verificato. Suite completa 771 test superati, nessun deploy. [Audit §45](../docs/AUDIT_VAULT_SESSION_P0.md#45-archivio-sessione-proprietario-e-ricevute--candidata-13092026).
+
+Ripresa backup candidata 13/09/2026: stessa operazione dopo risposta persa, scelta esplicita e blocco dei retry Storage incerti. Suite completa 781 test superati. [Audit §46](../docs/AUDIT_VAULT_SESSION_P0.md#46-ripresa-esplicita-del-backup-nella-sessione--candidata-13092026). Nessuna ripresa dopo refresh o pubblicazione dichiarata.
