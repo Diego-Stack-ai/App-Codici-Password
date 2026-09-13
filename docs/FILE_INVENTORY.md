@@ -2,46 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
-
-## functions
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `functions/backup-restore-preview.js` | JS | 3881 | 64 | File di progetto: backup-restore-preview. |
-| `functions/test/backup-restore-preview.test.js` | JS | 2173 | 31 | Test automatico: backup-restore-preview.test. |
-| `functions/.gitignore` | CONFIG | 22 | 2 | Esclusioni Git per file generati o locali. |
-| `functions/account-widget-service.js` | JS | 3461 | 86 | File di progetto: account-widget-service. |
-| `functions/archive-purge-service.js` | JS | 5265 | 120 | File di progetto: archive-purge-service. |
-| `functions/backup-restore-receipt.js` | JS | 3279 | 51 | File di progetto: backup-restore-receipt. |
-| `functions/backup-restore-service.js` | JS | 6211 | 152 | File di progetto: backup-restore-service. |
-| `functions/eslint.config.js` | JS | 606 | 26 | File di progetto: eslint.config. |
-| `functions/history-recovery-service.js` | JS | 1855 | 37 | File di progetto: history-recovery-service. |
-| `functions/index.js` | JS | 86365 | 1686 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
-| `functions/mutation-result-binding.js` | JS | 2942 | 49 | File di progetto: mutation-result-binding. |
-| `functions/offline-sync-service.js` | JS | 1628 | 34 | File di progetto: offline-sync-service. |
-| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
-| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
-| `functions/private-account-mutation-service.js` | JS | 3424 | 66 | File di progetto: private-account-mutation-service. |
-| `functions/private-account-write-scope.js` | JS | 4379 | 81 | File di progetto: private-account-write-scope. |
-| `functions/recovery-security.js` | JS | 1940 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
-| `functions/shared-vault-service.js` | JS | 7752 | 184 | File di progetto: shared-vault-service. |
-| `functions/test/account-widget-service.test.js` | JS | 2692 | 54 | Test automatico: account-widget-service.test. |
-| `functions/test/archive-purge-service.test.js` | JS | 5018 | 71 | Test automatico: archive-purge-service.test. |
-| `functions/test/backup-owner-handler.test.js` | JS | 4878 | 83 | Test automatico: backup-owner-handler.test. |
-| `functions/test/backup-receipt-handler.test.js` | JS | 8380 | 140 | Test automatico: backup-receipt-handler.test. |
-| `functions/test/backup-restore-receipt.test.js` | JS | 4202 | 58 | Test automatico: backup-restore-receipt.test. |
-| `functions/test/backup-restore-service.test.js` | JS | 4470 | 76 | Test automatico: backup-restore-service.test. |
-| `functions/test/history-recovery-service.test.js` | JS | 1425 | 19 | Test automatico: history-recovery-service.test. |
-| `functions/test/mutation-legacy-reason.test.js` | JS | 5055 | 98 | Test automatico: mutation-legacy-reason.test. |
-| `functions/test/mutation-owner-handler.test.js` | JS | 5060 | 78 | Test automatico: mutation-owner-handler.test. |
-| `functions/test/mutation-result-binding.test.js` | JS | 6178 | 93 | Test automatico: mutation-result-binding.test. |
-| `functions/test/offline-sync-service.test.js` | JS | 1296 | 24 | Test automatico: offline-sync-service.test. |
-| `functions/test/private-account-mutation-service.test.js` | JS | 2966 | 69 | Test automatico: private-account-mutation-service.test. |
-| `functions/test/private-account-write-scope.test.js` | JS | 10952 | 165 | Test automatico: private-account-write-scope.test. |
-| `functions/test/purge-profile-cleanup-handler.test.js` | JS | 4618 | 70 | Test automatico: purge-profile-cleanup-handler.test. |
-| `functions/test/recovery-security.test.js` | JS | 1432 | 35 | Test automatico: recovery-security.test. |
-| `functions/test/shared-vault-service.test.js` | JS | 3159 | 68 | Test automatico: shared-vault-service.test. |
+File censiti: **507**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -74,7 +35,7 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 14226 | 122 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 61701 | 637 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 63775 | 652 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -179,10 +140,10 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 3901 | 98 | Sessione Vault cifrata e limitata alla scheda/browser session. |
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7326 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
 | `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 3031 | 74 | Supporto frontend: account-widget-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 2684 | 63 | Supporto frontend: offline-mutation-client-core. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 2988 | 68 | Supporto frontend: offline-mutation-client-core. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1130 | 21 | Supporto frontend: offline-mutation-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 9771 | 205 | Supporto frontend: offline-mutation-queue. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 3854 | 78 | Supporto frontend: offline-mutation-sync. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 12309 | 245 | Supporto frontend: offline-mutation-queue. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 3934 | 79 | Supporto frontend: offline-mutation-sync. |
 | `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 3578 | 114 | Supporto frontend: private-account-offline-pilot. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 687 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
@@ -195,9 +156,9 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/home/home.js` | JS | 14430 | 355 | Supporto frontend: home. |
 | `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 18589 | 418 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 21560 | 514 | Flusso profilo/account personali: area privata. |
-| `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 9101 | 234 | Flusso profilo/account personali: dettaglio-privato-attachments. |
-| `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 7460 | 161 | Flusso profilo/account personali: dettaglio-privato-sharing. |
-| `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 15764 | 371 | Flusso profilo/account personali: dettaglio account privato. |
+| `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 11620 | 282 | Flusso profilo/account personali: dettaglio-privato-attachments. |
+| `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 8138 | 172 | Flusso profilo/account personali: dettaglio-privato-sharing. |
+| `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 21532 | 473 | Flusso profilo/account personali: dettaglio account privato. |
 | `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 25188 | 443 | Flusso profilo/account personali: form-privato-save. |
 | `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 39628 | 810 | Flusso profilo/account personali: form account privato. |
 | `Frontend/public/assets/js/modules/privato/private-account-offline-policy.js` | JS | 1719 | 31 | Flusso profilo/account personali: private-account-offline-policy. |
@@ -224,21 +185,21 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/scadenze/deadline-recipient-controller.js` | JS | 6176 | 105 | Flusso scadenze/configurazione: deadline-recipient-controller. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js` | JS | 2875 | 66 | Flusso scadenze/configurazione: deadline-recipient-model. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-save-service.js` | JS | 6847 | 180 | Flusso scadenze/configurazione: deadline-save-service. |
-| `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 17777 | 391 | Flusso scadenze/configurazione: dettaglio scadenza. |
+| `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 24045 | 506 | Flusso scadenze/configurazione: dettaglio scadenza. |
 | `Frontend/public/assets/js/modules/scadenze/scadenze.js` | JS | 15003 | 399 | Flusso scadenze/configurazione: scadenze. |
 | `Frontend/public/assets/js/modules/settings/account-field-usage-model.js` | JS | 6680 | 109 | Impostazioni applicative: account-field-usage-model. |
 | `Frontend/public/assets/js/modules/settings/account-field-usage-service.js` | JS | 8096 | 180 | Impostazioni applicative: account-field-usage-service. |
 | `Frontend/public/assets/js/modules/settings/archive-account-model.js` | JS | 283 | 9 | Impostazioni applicative: archive-account-model. |
-| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 4945 | 122 | Impostazioni applicative: archive-account-service. |
-| `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 10881 | 307 | Impostazioni applicative: archivio account. |
+| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 10609 | 262 | Impostazioni applicative: archive-account-service. |
+| `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 19886 | 464 | Impostazioni applicative: archivio account. |
 | `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 5314 | 125 | Impostazioni applicative: backup-crypto. |
-| `Frontend/public/assets/js/modules/settings/backup-export-model.js` | JS | 4215 | 88 | Impostazioni applicative: backup-export-model. |
+| `Frontend/public/assets/js/modules/settings/backup-export-model.js` | JS | 4473 | 93 | Impostazioni applicative: backup-export-model. |
 | `Frontend/public/assets/js/modules/settings/backup-export-service.js` | JS | 6918 | 143 | Impostazioni applicative: backup-export-service. |
 | `Frontend/public/assets/js/modules/settings/backup-import-model.js` | JS | 6892 | 141 | Impostazioni applicative: backup-import-model. |
-| `Frontend/public/assets/js/modules/settings/backup-import-service.js` | JS | 13946 | 288 | Impostazioni applicative: backup-import-service. |
+| `Frontend/public/assets/js/modules/settings/backup-import-service.js` | JS | 21763 | 456 | Impostazioni applicative: backup-import-service. |
 | `Frontend/public/assets/js/modules/settings/credential-health-model.js` | JS | 2589 | 68 | Impostazioni applicative: credential-health-model. |
 | `Frontend/public/assets/js/modules/settings/credential-health-service.js` | JS | 4715 | 122 | Impostazioni applicative: credential-health-service. |
-| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 58857 | 1186 | Impostazioni applicative: impostazioni. |
+| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 61715 | 1230 | Impostazioni applicative: impostazioni. |
 | `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3468 | 93 | Impostazioni applicative: push-settings-controller. |
 | `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17243 | 320 | Impostazioni applicative: shared-credentials-controller. |
 | `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 7091 | 154 | Supporto frontend: account-banking-view. |
@@ -339,27 +300,27 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21540 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 103902 | 559 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 110647 | 609 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3096 | 51 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 8917 | 84 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 7352 | 59 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 11217 | 100 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 11434 | 101 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 8588 | 152 | Documentazione: GUIDA PROGETTO. |
-| `docs/M10_HARDENING_RILASCIO.md` | MD | 7970 | 75 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M10_HARDENING_RILASCIO.md` | MD | 9045 | 82 | Documentazione: M10 HARDENING RILASCIO. |
 | `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 11881 | 100 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 6508 | 72 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 11520 | 86 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 13913 | 114 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 11005 | 102 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 16858 | 130 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 3377 | 38 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3211 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6577 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 25981 | 339 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 27190 | 346 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 34631 | 354 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
@@ -385,6 +346,8 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
 | `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
+| `experiments/offline-sync/indexeddb-queue-lease.mjs` | MJS | 5424 | 99 | File di progetto: indexeddb-queue-lease. |
+| `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8512 | 139 | File di progetto: indexeddb-queue-lease.test. |
 | `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
 | `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2344 | 46 | File di progetto: account-detail-reader. |
@@ -404,6 +367,8 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3280 | 52 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator.css` | CSS | 2023 | 19 | File di progetto: emulator. |
 | `experiments/persistent-vault-shell/emulator.html` | HTML | 1876 | 10 | Struttura della pagina emulator; comportamento demandato ai moduli. |
+| `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12762 | 175 | File di progetto: firebase-backup.test. |
+| `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10135 | 159 | File di progetto: firebase-deadline.test. |
 | `experiments/persistent-vault-shell/firebase-mutation.test.mjs` | MJS | 34864 | 480 | File di progetto: firebase-mutation.test. |
 | `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3110 | 54 | File di progetto: firebase-session. |
 | `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 11380 | 156 | File di progetto: firebase-session.test. |
@@ -457,6 +422,52 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `firestore.rules` | RULES | 8713 | 205 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
+## functions
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `functions/.gitignore` | CONFIG | 22 | 2 | Esclusioni Git per file generati o locali. |
+| `functions/account-widget-service.js` | JS | 3461 | 86 | File di progetto: account-widget-service. |
+| `functions/archive-purge-receipt.js` | JS | 4007 | 64 | File di progetto: archive-purge-receipt. |
+| `functions/archive-purge-reference-plan.js` | JS | 8221 | 138 | File di progetto: archive-purge-reference-plan. |
+| `functions/archive-purge-service.js` | JS | 5265 | 120 | File di progetto: archive-purge-service. |
+| `functions/backup-restore-preview.js` | JS | 3881 | 64 | File di progetto: backup-restore-preview. |
+| `functions/backup-restore-receipt.js` | JS | 3279 | 51 | File di progetto: backup-restore-receipt. |
+| `functions/backup-restore-service.js` | JS | 6211 | 152 | File di progetto: backup-restore-service. |
+| `functions/eslint.config.js` | JS | 606 | 26 | File di progetto: eslint.config. |
+| `functions/history-recovery-service.js` | JS | 1855 | 37 | File di progetto: history-recovery-service. |
+| `functions/index.js` | JS | 87485 | 1700 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
+| `functions/mutation-result-binding.js` | JS | 2942 | 49 | File di progetto: mutation-result-binding. |
+| `functions/offline-sync-service.js` | JS | 1628 | 34 | File di progetto: offline-sync-service. |
+| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
+| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
+| `functions/private-account-mutation-service.js` | JS | 3424 | 66 | File di progetto: private-account-mutation-service. |
+| `functions/private-account-write-scope.js` | JS | 4379 | 81 | File di progetto: private-account-write-scope. |
+| `functions/recovery-security.js` | JS | 1940 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
+| `functions/shared-vault-service.js` | JS | 7752 | 184 | File di progetto: shared-vault-service. |
+| `functions/test/account-widget-service.test.js` | JS | 2692 | 54 | Test automatico: account-widget-service.test. |
+| `functions/test/archive-owner-handler.test.js` | JS | 4188 | 72 | Test automatico: archive-owner-handler.test. |
+| `functions/test/archive-purge-receipt.test.js` | JS | 4551 | 70 | Test automatico: archive-purge-receipt.test. |
+| `functions/test/archive-purge-reference-plan.test.js` | JS | 9000 | 165 | Test automatico: archive-purge-reference-plan.test. |
+| `functions/test/archive-purge-service.test.js` | JS | 5018 | 71 | Test automatico: archive-purge-service.test. |
+| `functions/test/archive-receipt-handler.test.js` | JS | 8577 | 139 | Test automatico: archive-receipt-handler.test. |
+| `functions/test/backup-owner-handler.test.js` | JS | 4878 | 83 | Test automatico: backup-owner-handler.test. |
+| `functions/test/backup-receipt-handler.test.js` | JS | 8380 | 140 | Test automatico: backup-receipt-handler.test. |
+| `functions/test/backup-restore-preview.test.js` | JS | 2173 | 31 | Test automatico: backup-restore-preview.test. |
+| `functions/test/backup-restore-receipt.test.js` | JS | 4202 | 58 | Test automatico: backup-restore-receipt.test. |
+| `functions/test/backup-restore-service.test.js` | JS | 4470 | 76 | Test automatico: backup-restore-service.test. |
+| `functions/test/history-recovery-service.test.js` | JS | 1425 | 19 | Test automatico: history-recovery-service.test. |
+| `functions/test/mutation-legacy-reason.test.js` | JS | 5055 | 98 | Test automatico: mutation-legacy-reason.test. |
+| `functions/test/mutation-owner-handler.test.js` | JS | 5060 | 78 | Test automatico: mutation-owner-handler.test. |
+| `functions/test/mutation-result-binding.test.js` | JS | 6178 | 93 | Test automatico: mutation-result-binding.test. |
+| `functions/test/offline-sync-service.test.js` | JS | 1296 | 24 | Test automatico: offline-sync-service.test. |
+| `functions/test/private-account-mutation-service.test.js` | JS | 2966 | 69 | Test automatico: private-account-mutation-service.test. |
+| `functions/test/private-account-write-scope.test.js` | JS | 10952 | 165 | Test automatico: private-account-write-scope.test. |
+| `functions/test/purge-profile-cleanup-handler.test.js` | JS | 4900 | 72 | Test automatico: purge-profile-cleanup-handler.test. |
+| `functions/test/received-deadline-owner-handler.test.js` | JS | 4753 | 82 | Test automatico: received-deadline-owner-handler.test. |
+| `functions/test/recovery-security.test.js` | JS | 1432 | 35 | Test automatico: recovery-security.test. |
+| `functions/test/shared-vault-service.test.js` | JS | 3159 | 68 | Test automatico: shared-vault-service.test. |
+
 ## package-lock.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -467,7 +478,7 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 8793 | 82 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 8913 | 82 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -479,7 +490,7 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
 | `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
 | `scripts/audit-lightweight-features.mjs` | MJS | 2698 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 10509 | 132 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 10559 | 132 | Strumento manutenzione/test: audit-navigation-flows. |
 | `scripts/audit-offline-shell.mjs` | MJS | 3627 | 70 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 8127 | 146 | Strumento manutenzione/test: audit-page-performance. |
 | `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
@@ -498,7 +509,7 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1320 | 35 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 1403 | 20 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 1455 | 20 | Strumento manutenzione/test: run-vault-session-emulators. |
 | `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
 | `scripts/test-functions-emulator.mjs` | MJS | 2598 | 59 | Strumento manutenzione/test: test-functions-emulator. |
 | `scripts/test-vault-assistant.mjs` | MJS | 1397 | 21 | Strumento manutenzione/test: test-vault-assistant. |
@@ -533,12 +544,13 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/account-widget-session.test.mjs` | MJS | 2297 | 31 | Test automatico: account-widget-session.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
+| `tests/archive-session.test.mjs` | MJS | 20127 | 297 | Test automatico: archive-session.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
 | `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
-| `tests/backup-export-model.test.mjs` | MJS | 2125 | 39 | Test automatico: backup-export-model.test. |
+| `tests/backup-export-model.test.mjs` | MJS | 2662 | 49 | Test automatico: backup-export-model.test. |
 | `tests/backup-import-model.test.mjs` | MJS | 4358 | 75 | Test automatico: backup-import-model.test. |
-| `tests/backup-restore-session.test.mjs` | MJS | 13137 | 203 | Test automatico: backup-restore-session.test. |
-| `tests/backup-restore-ui.test.mjs` | MJS | 9350 | 138 | Test automatico: backup-restore-ui.test. |
+| `tests/backup-restore-session.test.mjs` | MJS | 36059 | 545 | Test automatico: backup-restore-session.test. |
+| `tests/backup-restore-ui.test.mjs` | MJS | 11989 | 176 | Test automatico: backup-restore-ui.test. |
 | `tests/banking-model.test.mjs` | MJS | 2712 | 63 | Test automatico: banking-model.test. |
 | `tests/company-account-detail-lifecycle.test.mjs` | MJS | 11957 | 109 | Test automatico: company-account-detail-lifecycle.test. |
 | `tests/company-detail-freshness.test.mjs` | MJS | 6864 | 102 | Test automatico: company-detail-freshness.test. |
@@ -549,6 +561,7 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/credential-health-runtime.test.mjs` | MJS | 2893 | 60 | Test automatico: credential-health-runtime.test. |
 | `tests/crypto-utils.test.mjs` | MJS | 1546 | 35 | Test automatico: crypto-utils.test. |
 | `tests/deadline-config-model.test.mjs` | MJS | 2122 | 45 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-detail-lifecycle.test.mjs` | MJS | 22432 | 295 | Test automatico: deadline-detail-lifecycle.test. |
 | `tests/deadline-model.test.mjs` | MJS | 2208 | 44 | Test automatico: deadline-model.test. |
 | `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
 | `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 7445 | 154 | Test automatico: firestore.profile-widgets.rules.test. |
@@ -558,14 +571,15 @@ File censiti: **493**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/legacy-email-audit-model.test.mjs` | MJS | 1989 | 41 | Test automatico: legacy-email-audit-model.test. |
 | `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
 | `tests/new-account-shared-link.test.mjs` | MJS | 2601 | 33 | Test automatico: new-account-shared-link.test. |
-| `tests/offline-mutation-client.test.mjs` | MJS | 5208 | 89 | Test automatico: offline-mutation-client.test. |
-| `tests/offline-mutation-queue.test.mjs` | MJS | 11695 | 192 | Test automatico: offline-mutation-queue.test. |
-| `tests/offline-mutation-sync.test.mjs` | MJS | 7067 | 112 | Test automatico: offline-mutation-sync.test. |
+| `tests/offline-mutation-client.test.mjs` | MJS | 5212 | 89 | Test automatico: offline-mutation-client.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 15457 | 253 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-mutation-sync.test.mjs` | MJS | 7092 | 112 | Test automatico: offline-mutation-sync.test. |
 | `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |
+| `tests/private-account-detail-lifecycle.test.mjs` | MJS | 17704 | 227 | Test automatico: private-account-detail-lifecycle.test. |
 | `tests/private-account-offline-pilot.test.mjs` | MJS | 2790 | 45 | Test automatico: private-account-offline-pilot.test. |
 | `tests/private-account-offline-policy.test.mjs` | MJS | 1352 | 23 | Test automatico: private-account-offline-policy.test. |
 | `tests/private-account-recovery.test.mjs` | MJS | 10661 | 112 | Test automatico: private-account-recovery.test. |
-| `tests/private-detail-legacy-id.test.mjs` | MJS | 13131 | 212 | Test automatico: private-detail-legacy-id.test. |
+| `tests/private-detail-legacy-id.test.mjs` | MJS | 13257 | 212 | Test automatico: private-detail-legacy-id.test. |
 | `tests/private-form-lazy-banking.test.mjs` | MJS | 2291 | 18 | Test automatico: private-form-lazy-banking.test. |
 | `tests/profile-account-management.test.mjs` | MJS | 5502 | 38 | Test automatico: profile-account-management.test. |
 | `tests/profile-contact-link.test.mjs` | MJS | 26376 | 346 | Test automatico: profile-contact-link.test. |

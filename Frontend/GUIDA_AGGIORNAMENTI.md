@@ -646,3 +646,6 @@ Checkpoint candidato 13/09/2026: isolamento dettaglio privato e lettura incremen
 
 Checkpoint candidato 13/09/2026: Scadenze isolate per sessione, conferma della coda offline tramite CAS e transazioni backup provate in emulatore. Suite completa 843 test superati. [Audit §49](../docs/AUDIT_VAULT_SESSION_P0.md#49-scadenze-e-conferma-della-coda-offline--candidata-13092026). Nessun deploy.
 
+
+Checkpoint candidato 13/09/2026: cancellazione Scadenza/Profilo transazionale provata con SDK reale; prerequisiti IndexedDB e pulizia Archivio preparati ma non attivati. Suite completa 873 test superati. [Audit §50](../docs/AUDIT_VAULT_SESSION_P0.md#50-transazioni-scadenze-e-prerequisiti--candidata-13092026). Nessun deploy o chiusura globale del programma.
+

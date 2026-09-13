@@ -597,3 +597,12 @@ Suite completa npm test codice 0: 843 test superati, inclusi 110 Functions, 12 l
 
 Restano distinti e successivi: confronto transazionale del collegamento documento Profilo durante cancellazione Scadenza, protocollo fallback senza Web Locks, concorrenza globale purge e ripristino/staging complessivo. Nessuna fase chiusa dai soli test automatici.
 
+
+## 50. Transazioni Scadenze e prerequisiti — candidata 13/09/2026
+
+Checkpoint d3bfadd5: la cancellazione Scadenza collegata al Profilo legge il documento nella transazione e scollega soltanto la coppia documentId/deadlineId esatta. Modifiche concorrenti e riferimenti più recenti restano conservati; Profilo mancante non viene creato. La UI spiega il requisito di connessione. Il vero SDK emulato ha ripetuto la transazione dopo un conflitto senza perdita di dati; il blocco prima del retry impedisce cancellazione e scollegamento.
+
+Disponibili due prerequisiti non attivati: lease IndexedDB con token e scritture nella stessa transazione, e planner dei riferimenti residui Archivio. Il primo non modifica il database/runtime e non garantisce invii di rete esclusivi; il secondo non autorizza cancellazioni, conserva le credenziali centrali e richiede un protocollo globale rispettato da tutti i writer.
+
+Suite completa npm test codice 0: 873 test superati, inclusi 121 Functions, 18 Scadenza lifecycle/CAS, 61 offline e 36 mutazioni emulatore. Budget delle 30 pagine e sintassi dei 156 moduli rispettati; candidata 1.2.110 con 240 riferimenti asset coerenti. Nessun dato reale, migrazione o deploy. L'integrazione dei prerequisiti, staging/journal backup, concorrenza globale, prove fisiche, retention e distribuzione restano aperti.
+
