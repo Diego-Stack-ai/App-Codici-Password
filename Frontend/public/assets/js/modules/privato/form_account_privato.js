@@ -10,20 +10,21 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.119';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.120';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.119';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.119';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.120';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.120';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
 let currentUid = null;
 let currentDocId = null;
 let isEditing = false;
+let savedBankIds = new Set();
 let bankAccounts = []; // Inizialmente vuoto per nuovi account
 let profileContactLinkDraft = null;
 let myContacts = [];
@@ -157,6 +158,7 @@ async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevisio
  */
 
 export async function initFormAccountPrivato(user) {
+    savedBankIds = new Set();
     
     if (!user) return;
     currentUid = user.uid;
@@ -291,6 +293,7 @@ export async function initFormAccountPrivato(user) {
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true
         });
         accountWidgetController = await initAccountEmbeddedWidgets({
+            isBankSaved: bankId => savedBankIds.has(bankId),
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true,
             onSharedLinked: () => initAccountSharedCredentials({
                 uid: currentUid, context: 'private', accountId: currentDocId, editable: true
@@ -420,6 +423,7 @@ async function loadData() {
 
         // Banking & Cards (Normalize & Validate)
         let loadedBanking = normalizeEditableBankingAccounts(data);
+        savedBankIds = new Set(loadedBanking.map(bank => bank.bankId).filter(Boolean));
 
         // Decrittazione Banking
         if (needsDecryption) {

@@ -8,7 +8,7 @@ import {
     listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.119';
+import {auth} from '../../firebase-config.js?v=1.2.120';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
 let mountVersion = 0;
@@ -175,6 +175,10 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
             } finally { save.disabled = false; }
             return;
         }
+        if (placement.value && context.isBankSaved && !context.isBankSaved(placement.value)) {
+            showToast('Salva prima l’Account per registrare il conto bancario, poi riapri Modifica e aggiungi il Widget. I campi inseriti qui restano disponibili.', 'warning');
+            return;
+        }
         const rows = [...fieldList.children];
         if (!title.value.trim() || !rows.length || rows.some(row => !row.getValue().label.trim())) {
             showToast('Inserisci titolo e nome di ogni campo.', 'warning');
@@ -197,7 +201,7 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
             await refresh(true);
             showToast(widget ? 'Widget aggiornato.' : 'Widget creato.', 'success');
         } catch (error) {
-            showToast(String(error.message || '').includes('ACCOUNT_WIDGET_BANK')
+            showToast((String(error.message || '').includes('ACCOUNT_WIDGET_BANK') || error.message?.includes('Il conto bancario collegato al Widget non è disponibile'))
                 ? 'Salva prima l’Account con questo conto bancario, poi aggiungi il Widget.'
                 : error.message || 'Salvataggio del Widget non riuscito.', 'error');
         } finally {
@@ -409,6 +413,10 @@ export async function initAccountEmbeddedWidgets(context) {
     };
     const openNewWidget = async (bankId = null) => {
         if (!context.editable || !context.active()) return false;
+        if (typeof bankId === 'string' && context.isBankSaved && !context.isBankSaved(bankId)) {
+            showToast('Salva prima l’Account per registrare questo conto bancario, poi riapri Modifica e aggiungi il Widget.', 'warning');
+            return false;
+        }
         if (!navigator.onLine) {
             showToast('La creazione dei Widget richiede internet.', 'warning');
             return false;

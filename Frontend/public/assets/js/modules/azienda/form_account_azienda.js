@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.119';
+import { db } from '../../firebase-config.js?v=1.2.120';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.119';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.120';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
@@ -21,14 +21,15 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.119';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.119';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.120';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.120';
 
 // --- STATE ---
 let currentUid = null;
 let currentDocId = null;
 let currentAziendaId = null;
 let isEditing = false;
+let savedBankIds = new Set();
 let bankAccounts = [];
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
@@ -51,6 +52,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
 
 // --- INITIALIZATION ---
 export async function initFormAccountAzienda(user) {
+    savedBankIds = new Set();
 
     if (!user) return;
     currentUid = user.uid;
@@ -129,6 +131,7 @@ export async function initFormAccountAzienda(user) {
             accountId: currentDocId, editable: true
         });
         accountWidgetController = await initAccountEmbeddedWidgets({
+            isBankSaved: bankId => savedBankIds.has(bankId),
             uid: currentUid, context: 'company', companyId: currentAziendaId,
             accountId: currentDocId, editable: true,
             onSharedLinked: () => initAccountSharedCredentials({
@@ -255,6 +258,7 @@ async function loadData() {
 
         // Banking Premium
         let loadedBanking = normalizeEditableBankingAccounts(data);
+        savedBankIds = new Set(loadedBanking.map(bank => bank.bankId).filter(Boolean));
 
         // Decrittazione Banking
         if (needsDecryption) {

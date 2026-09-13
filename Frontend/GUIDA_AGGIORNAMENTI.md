@@ -531,3 +531,7 @@ Autorizzata la pubblicazione delle sole modifiche UI Account sulla base master `
 ## Widget bancari — candidata 1.2.119, 13/09/2026
 
 Base a6699e8d, ramo fix/banking-widget-placement. Ogni conto conserva la propria area Widget e carte; posizione stabile nel form e in consultazione, spostamento esplicito dei Widget generici e conservazione delle bozze durante rerender. Il server verifica bankId nello stesso Account. Suite completa: 352 test superati, incluse 36 prove Functions, emulatori, cifratura, UI e budget. Nessuna pubblicazione: necessario aggiornare il solo callable manageAccountWidget prima di Hosting. Nessuna modifica Rules o integrazione Vault.
+
+## Prerequisito conto salvato — candidata 1.2.120, 13/09/2026
+
+Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consentiva di inviare il Widget prima che il conto fosse salvato. Il backend respingeva correttamente la richiesta con HTTP 400/failed-precondition. Ora i due form distinguono gli ID caricati da quelli appena generati; creazione e spostamento chiedono prima il salvataggio Account, senza inviare il comando fallito e conservando eventuali campi nel modale. Gestito anche il testo italiano del rifiuto server. Nessuna modifica backend, Rules, dati reali o ramo Vault.
