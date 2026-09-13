@@ -92,3 +92,10 @@ Questo blocco corregge la provenienza degli esiti, non il protocollo globale: un
 Dopo la conferma iniziale, il servizio prepara un piano opaco con comandi e identificativi immutabili. Se la risposta del purge non arriva, la UI propone «Verifica e riprendi»: solo quella scelta riutilizza il comando incerto. Nello svuotamento vengono saltati gli Account già confermati. Una sola operazione per volta; filtro e altre mutazioni non partono durante l'eliminazione. Rifiuti definitivi bloccano il piano; interrompere mantiene visibili gli elementi non confermati e segnala l'eventuale eliminazione parziale.
 
 Blocco Vault, logout e cambio montaggio eliminano il piano; i vecchi callback non possono ripartire. Le API precedenti del servizio restano utilizzabili senza retry automatico. Il recupero UI copre adesso la stessa sessione aperta, non un refresh o un nuovo accesso. Nessun journal durevole e nessuna soluzione implicita alla concorrenza globale purge/ripristino.
+
+### Piano dei riferimenti residui, non attivato — candidata 13/09/2026
+
+Il planner puro archive-purge-reference-plan distingue widget incorporati, coppie widget/link e inviti tramite identità esatte; non deduce i documenti dai prefissi. Le credenziali centrali sharedVaultData non vengono eliminate, anche se prive di altri collegamenti. Sono proposte soltanto revisioni esistenti e incrementabili. Coppie incomplete, riferimenti incrociati anche provenienti da altri Account, inventario non attestato o budget residuo insufficiente annullano tutta la proposta. Undici test dedicati e 121 test Functions superati.
+
+Un piano coerente restituisce comunque applicable:false: non è collegato al purge. La completezza è dichiarata dal chiamante, non provata dal planner. Prima dell'attivazione occorre un blocco comune rispettato da ripristino Archivio, widget/link, inviti, Rules e ripristino backup; il solo controllo dell'esistenza dell'Account non basta. I grant M5 candidati non sono dedotti dagli ID legacy. I percorsi degli inviti possono contenere email: il piano è interno e non va scritto nei log o negli eventi audit.
+
