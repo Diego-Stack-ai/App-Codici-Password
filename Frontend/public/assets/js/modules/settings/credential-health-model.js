@@ -42,12 +42,15 @@ function timestampMillis(value) {
 }
 
 export async function analyzeCredentialHealth(records, {
-    now = Date.now(), staleDays = 365, sessionKey = createCredentialHealthSessionKey()
+    now = Date.now(), staleDays = 365, sessionKey = createCredentialHealthSessionKey(), isActive = () => true
 } = {}) {
     const fingerprints = new Map();
     const internalResults = [];
 
+    const check = () => { if (!isActive()) throw new Error('CREDENTIAL_HEALTH_SESSION_CHANGED'); };
+    try {
     for (const record of records) {
+        check();
         const secret = String(record.password ?? '');
         const flags = [];
         const strength = classifyStrength(secret);
@@ -55,6 +58,7 @@ export async function analyzeCredentialHealth(records, {
         const changedAt = timestampMillis(record.passwordUpdatedAt ?? record.updatedAt);
         if (secret && changedAt !== null && now - changedAt >= staleDays * DAY_MS) flags.push('dated');
         const token = secret ? tokenToKey(await fingerprint(secret, sessionKey)) : null;
+        check();
         if (token) fingerprints.set(token, (fingerprints.get(token) ?? 0) + 1);
         internalResults.push({recordId: String(record.id), flags, strength, token});
     }
@@ -64,4 +68,5 @@ export async function analyzeCredentialHealth(records, {
         strength,
         flags: token && fingerprints.get(token) > 1 ? [...flags, 'duplicate'] : flags
     }));
+    } finally { fingerprints.clear(); internalResults.length = 0; }
 }

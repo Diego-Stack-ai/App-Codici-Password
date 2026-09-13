@@ -35,3 +35,9 @@ M9 non abilita automaticamente alcuna integrazione esterna.
 La certificazione iPhone della v1.2.90 ha confermato 9 password analizzate, 8 Account da verificare e il riconoscimento dell'Account di prova con password robusta come `Forte`. La finestra mostra soltanto nome, area e valutazioni: non espone password, hash o impronte.
 
 Per i record correnti la data dedicata `passwordUpdatedAt` ha precedenza. Nei record legacy che non la possiedono, `updatedAt` è usata soltanto come stima prudenziale dell'ultimo salvataggio delle credenziali; una futura modifica dello schema dovrà aggiornare la data dedicata esclusivamente quando cambia la password.
+
+### Ciclo di vita dell'analisi — candidata 13/09/2026
+
+Base `0586aa63`, ramo `experiment/m9-health-session`: l'analisi verifica proprietario e sessione dopo sblocco, letture, decifratura e HMAC. Blocco, pagehide e cambio UID invalidano i risultati pendenti, interrompono i passaggi successivi e rimuovono subito il dialogo già visibile. Gli errori non espongono più messaggi del provider nei log. I record decifrati trattenuti dal servizio vengono svuotati anche in caso di errore; impronte e risultati interni del modello vengono rilasciati nel finally. Non è possibile annullare un'operazione Web Crypto già partita né garantire la cancellazione fisica delle stringhe immutabili dal motore JS.
+
+Gli ID dei risultati includono contesto, azienda e Account: lo stesso ID Account in due aziende non scambia più le etichette. Test sintetici interrompono ogni attesa critica con blocco e cambio UID, verificano pulizia dopo errore, risultati aziendali distinti, rimozione immediata del dialogo e assenza di doppio avvio. Nessuna integrazione di rete, modifica alla cifratura o nuovo collaudo fisico M9; i gate del provider e dei dispositivi rimangono aperti.

@@ -63,7 +63,8 @@ function setupSharedCredentials(user) {
     });
 }
 
-function showCredentialHealthResults(report) {
+function showCredentialHealthResults(report, action) {
+    action.check();
     const flagLabels = {weak: 'Debole', duplicate: 'Duplicata', dated: 'Datata'};
     const strengthLabels = {weak: 'Debole', medium: 'Media', strong: 'Forte'};
     const modal = createElement('div', {
@@ -73,12 +74,17 @@ function showCredentialHealthResults(report) {
     const closeButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Chiudi'});
     const previouslyFocused = document.activeElement;
     const close = () => {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            modal.remove();
-            previouslyFocused?.focus?.();
-        }, 300);
+        const restoreFocus = action.active();
+        action.dispose();
+        if (restoreFocus && previouslyFocused?.isConnected) previouslyFocused.focus?.();
     };
+    const timer = setTimeout(() => {
+        if (!action.active()) return;
+        modal.classList.add('active'); closeButton.focus();
+    }, 10);
+    action.own(() => {
+        clearTimeout(timer); modal.replaceChildren(); modal.remove(); report.results.length = 0;
+    });
     closeButton.addEventListener('click', close);
     modal.addEventListener('keydown', event => {
         if (event.key === 'Escape') close();
@@ -132,36 +138,46 @@ function showCredentialHealthResults(report) {
         createElement('div', {className: 'modal-actions'}, [closeButton])
     ]));
     document.body.appendChild(modal);
-    setTimeout(() => {
-        modal.classList.add('active');
-        closeButton.focus();
-    }, 10);
 }
 
+let disposeCredentialHealthSetup = () => {};
 function setupCredentialHealth(user) {
+    disposeCredentialHealthSetup();
     const button = document.getElementById('btn-credential-health');
     if (!button) return;
-    button.addEventListener('click', async () => {
+    let action = null, running = false;
+    const click = async () => {
+        if (running || auth.currentUser?.uid !== user.uid) return;
+        action?.dispose();
+        const current = action = createBackupRestoreAction(user.uid, button);
+        running = true;
         button.disabled = true;
         const working = showBackupWorking(
             'Salute credenziali',
-            'Analisi locale delle credenziali in corso…'
+            'Analisi locale delle credenziali in corso…', current
         );
         try {
             const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.121');
-            const report = await inspectOwnerCredentialHealth(user.uid);
+            current.check();
+            const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
+            current.check();
             working.close();
-            showCredentialHealthResults(report);
+            showCredentialHealthResults(report, current);
         } catch (error) {
             working.close();
-            if (error?.message !== 'USER_CANCELLED') {
-                console.warn('[CREDENTIAL HEALTH] Analisi non disponibile.', error?.message);
+            if (current.active() && error?.message !== 'USER_CANCELLED') {
                 showToast('Controllo non completato. Nessun dato è stato salvato.', 'error');
             }
+            current.dispose();
         } finally {
-            button.disabled = false;
+            if (action === current) { button.disabled = false; running = false; }
         }
-    });
+    };
+    button.addEventListener('click', click);
+    disposeCredentialHealthSetup = () => {
+        action?.dispose(); action = null; running = false; button.disabled = false;
+        button.removeEventListener('click', click);
+    };
 }
 
 function usageReportText(report) {

@@ -8,7 +8,7 @@ const ui = source.slice(source.indexOf('let disposeRestoreSetup'), source.indexO
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 const tick = () => new Promise(setImmediate);
 
-function fixture() {
+function fixture({health = false} = {}) {
     const observers = new Set(), events = new EventTarget(), nodes = [], toasts = [], executions = [], timers = new Map();
     let body, activeElement, timerId = 0;
     class Node {
@@ -22,6 +22,7 @@ function fixture() {
         get isConnected() { return this === body || Boolean(this.parent?.isConnected); }
         appendChild(child) { child.parent = this; this.children.push(child); return child; }
         remove() { if (this.parent) this.parent.children = this.parent.children.filter(child => child !== this); this.parent = null; }
+        replaceChildren() { for (const child of this.children) child.parent = null; this.children = []; }
         addEventListener(name, callback) { if (!this.events.has(name)) this.events.set(name, new Set()); this.events.get(name).add(callback); }
         removeEventListener(name, callback) { this.events.get(name)?.delete(callback); }
         trigger(name, event = {}) { return Promise.all([...(this.events.get(name) || [])].map(callback => callback(event))); }
@@ -36,7 +37,7 @@ function fixture() {
     }
     const createElement = (...args) => new Node(...args);
     body = createElement('body');
-    const button = body.appendChild(createElement('button', {id: 'btn-restore-encrypted-backup'}));
+    const button = body.appendChild(createElement('button', {id: health ? 'btn-credential-health' : 'btn-restore-encrypted-backup'}));
     const auth = {currentUser: {uid: 'A'}};
     const plan = {recoveryKey: 'private-recovery', records: [{}], counts: {records: 1, attachments: 0}, collisionCount: 0, comparison: {entries: [], counts: {}}};
     const service = {
@@ -55,13 +56,15 @@ function fixture() {
         window: {location: {reload: () => { throw new Error('unexpected reload'); }}},
     });
     vm.runInContext(ui, context);
+    if (health) vm.runInContext(source.slice(source.indexOf('function showCredentialHealthResults'), source.indexOf('function usageReportText'))
+        .replace(/import\('\.\/credential-health-service\.js\?v=[^']+'\)/, 'loadImport()'), context);
     const confirm = value => {
         const form = body.querySelector('form'); assert.ok(form, 'owned input dialog exists');
         form.querySelector('input').value = value;
         form.onsubmit({preventDefault() {}});
     };
     return {context, body, button, nodes, observers, toasts, executions, service, plan, confirm,
-        setup: uid => context.setupEncryptedRestore({uid}),
+        setup: uid => health ? context.setupCredentialHealth({uid}) : context.setupEncryptedRestore({uid}),
         select: () => { const input = body.children.find(node => node.type === 'file'); input.files = [{}]; return input.trigger('change'); },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
         hide: () => events.dispatchEvent(new Event('pagehide')),
@@ -181,4 +184,25 @@ test('capacity failure explains that backup is retained and no restore has run',
     assert.equal(f.executions.length, 0); assert.equal(f.toasts.length, 1);
     assert.equal(f.toasts[0][1], 'warning'); assert.match(f.toasts[0][0], /capacità.*Nessun dato.*conserva il file/);
     assert.equal(f.button.disabled, false);
+});
+
+test('credential report is removed immediately on lock and late reports cannot reopen it', async () => {
+    const report = () => ({scanned: 1, atRisk: 1, results: [{title: 'Synthetic', area: 'privato', strength: 'weak', flags: ['weak']}]});
+    const f = fixture({health: true}), first = report(); f.service.inspectOwnerCredentialHealth = async () => first;
+    f.setup('A'); await f.button.click();
+    assert.ok(f.body.children.some(node => node.role === 'dialog'));
+    f.lock(); assert.equal(f.body.children.some(node => node.role === 'dialog'), false);
+    assert.equal(first.results.length, 0); assert.equal(f.observers.size, 0);
+    const late = deferred(); f.service.inspectOwnerCredentialHealth = () => late.promise;
+    const pending = f.button.click(); await tick(); f.changeUid('B'); late.resolve(report()); await pending;
+    assert.equal(f.body.children.some(node => node.role === 'dialog'), false); assert.equal(f.toasts.length, 0);
+});
+
+test('credential setup replacement removes old listeners and prevents duplicate analysis', async () => {
+    const f = fixture({health: true}); let calls = 0; const gate = deferred();
+    f.service.inspectOwnerCredentialHealth = () => { calls++; return gate.promise; };
+    f.setup('A'); f.setup('A');
+    const first = f.button.click(); await tick(); await f.button.click(); assert.equal(calls, 1);
+    f.lock(); gate.resolve({scanned: 0, atRisk: 0, results: []}); await first;
+    assert.equal(f.observers.size, 0);
 });

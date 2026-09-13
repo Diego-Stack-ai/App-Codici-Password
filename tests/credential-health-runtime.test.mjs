@@ -57,3 +57,11 @@ test('distingue password deboli, medie e forti', async () => {
     ]);
     assert.deepEqual(results.map(item => item.strength), ['weak', 'medium', 'strong']);
 });
+
+test('health model stops after in-flight HMAC when session becomes inactive', async () => {
+    const {analyzeCredentialHealth} = await loadModel();
+    let active = true;
+    const pending = analyzeCredentialHealth([{id: 'a', password: 'fixture'}, {id: 'b', password: 'later'}], {isActive: () => active});
+    active = false;
+    await assert.rejects(pending, /SESSION_CHANGED/);
+});
