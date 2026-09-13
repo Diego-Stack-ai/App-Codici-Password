@@ -7,6 +7,14 @@ const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
 const sessions = new WeakMap();
 
+function freezeRestoreValue(value) {
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+        Object.values(value).forEach(freezeRestoreValue);
+        Object.freeze(value);
+    }
+    return value;
+}
+
 function restoreSession(uid, {signal, isActive = () => true} = {}) {
     let invalidated = false, unsubscribe = () => {};
     const controller = new AbortController();
@@ -203,6 +211,19 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
             file, uid, recoveryKey, header: scan.header, records, chunks, counts: scan.counts,
             storagePaths: [...storagePaths], comparison, collisionCount: collisions
         };
+        session.source = {file, recoveryKey, backupId: scan.header.backupId,
+            records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
+            counts: freezeRestoreValue(scan.counts), collisionCount: collisions};
+        session.own(() => {
+            session.source = null;
+            if (session.execution) {
+                session.execution.commands = [];
+                session.execution.records = [];
+                session.execution.selection = null;
+                session.execution.result = null;
+            }
+            session.execution = null;
+        });
         sessions.set(plan, session);
         session.own(() => releaseBackupRestore(plan));
         return plan;
@@ -212,76 +233,145 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
     }
 }
 
-export async function executeBackupRestore(plan, selectedIndexes = null) {
+function restoreProgress(execution) {
+    return {attemptedChunks: execution?.attemptedChunks || 0, confirmedChunks: execution?.confirmedChunks || 0,
+        uploaded: execution?.uploaded || 0,
+        mayHaveApplied: Boolean(execution?.confirmedChunks || execution?.possiblyApplied || execution?.storageStarted)};
+}
+
+function restoreError(code, execution, retryable = false) {
+    const error = new Error(code);
+    error.code = code;
+    error.retryable = retryable;
+    error.progress = restoreProgress(execution);
+    return error;
+}
+
+function restoreSelection(selectedIndexes, recordCount) {
+    if (selectedIndexes === null) return null;
+    if (!Array.isArray(selectedIndexes) || selectedIndexes.some(index => !Number.isInteger(index) || index < 0 || index >= recordCount)) {
+        throw new Error('BACKUP_RESTORE_SELECTION_INVALID');
+    }
+    return [...new Set(selectedIndexes)].sort((left, right) => left - right);
+}
+
+function prepareRestoreExecution(session, selection) {
+    const source = session.source;
+    const selective = selection !== null;
+    const selected = new Set(selection || []);
+    const entries = source.comparison.entries.filter(entry => entry.status !== 'unchanged' && (!selective || selected.has(entry.index)));
+    if (!entries.length) throw restoreError('BACKUP_RESTORE_NOTHING_SELECTED');
+    if (!selective && source.collisionCount) throw restoreError('BACKUP_COLLISIONS');
+    const records = entries.map(entry => {
+        const expectedVersion = session.versions.get(entry.index);
+        if (!expectedVersion) throw restoreError('BACKUP_PREVIEW_INVALID');
+        return freezeRestoreValue({...source.records[entry.index], expectedVersion});
+    });
+    const chunks = chunkRestoreRecords(records);
+    const overwriteExisting = entries.some(entry => entry.status === 'changed');
+    const executionId = crypto.randomUUID();
+    const commands = freezeRestoreValue(chunks.map((chunk, index) => ({
+        expectedOwnerUid: session.uid,
+        operationId: `restore:${source.backupId}:${executionId}:${index}`, backupId: source.backupId,
+        chunkIndex: index, chunkCount: chunks.length, mode: 'apply', overwriteExisting,
+        confirmation: overwriteExisting ? 'RESTORE_SELECTED_OVERWRITE' : 'RESTORE_VALIDATED', records: chunk
+    })));
+    return {executionId, selection: freezeRestoreValue(selection), selective, records, commands,
+        attemptedChunks: 0, confirmedChunks: 0, uploaded: 0, uncertain: false, possiblyApplied: false, storageStarted: false,
+        inFlight: false, blocked: false, result: null};
+}
+
+export async function executeBackupRestore(plan, selectedIndexes = null, {retry = false} = {}) {
     const session = sessions.get(plan);
     if (!session || plan.uid !== session.uid) throw new Error('BACKUP_PLAN_INVALID');
     const check = session.check;
     check();
-    let attemptedChunks = 0, confirmedChunks = 0, uploaded = 0, rejectedChunks = 0;
+    const selection = restoreSelection(selectedIndexes, session.source.records.length);
+    let execution = session.execution;
+    if (execution && JSON.stringify(selection) !== JSON.stringify(execution.selection)) {
+        throw restoreError('BACKUP_RESTORE_SELECTION_CHANGED', execution);
+    }
+    if (execution?.inFlight) throw restoreError('BACKUP_RESTORE_IN_PROGRESS', execution);
+    if (execution?.result) return {...execution.result};
+    if (execution?.blocked) throw restoreError(execution.storageStarted ? 'BACKUP_STORAGE_RETRY_BLOCKED' : 'BACKUP_RESTORE_RETRY_BLOCKED', execution);
+    if (execution?.uncertain && !retry) throw restoreError('BACKUP_RETRY_REQUIRED', execution, true);
+    if (!execution) {
+        execution = prepareRestoreExecution(session, selection);
+        session.execution = execution;
+    }
+    execution.inFlight = true;
+    const source = session.source;
+    let stage = 'firestore';
+    let previouslyPossible = false;
     try {
-        const selective = Array.isArray(selectedIndexes);
-        const selected = selective ? new Set(selectedIndexes) : null;
-        const selectedEntries = selective
-            ? plan.comparison.entries.filter(entry => selected.has(entry.index) && entry.status !== 'unchanged')
-            : plan.comparison.entries.filter(entry => entry.status !== 'unchanged');
-        if (!selectedEntries.length) throw new Error('BACKUP_RESTORE_NOTHING_SELECTED');
-        if (!selective && plan.collisionCount) throw new Error(`BACKUP_COLLISIONS:${plan.collisionCount}`);
-        const records = selectedEntries.map(entry => {
-            const expectedVersion = session.versions.get(entry.index);
-            if (!expectedVersion) throw new Error('BACKUP_PREVIEW_INVALID');
-            return {...plan.records[entry.index], expectedVersion};
-        });
-        const chunks = chunkRestoreRecords(records);
-        const overwritesExisting = selectedEntries.some(entry => entry.status === 'changed');
-        const executionId = crypto.randomUUID();
         const restoreChunk = httpsCallable(functions, 'restoreBackupChunk');
-        for (let index = 0; index < chunks.length; index += 1) {
+        for (let index = execution.confirmedChunks; index < execution.commands.length; index += 1) {
             check();
-            attemptedChunks += 1;
-            const response = await restoreChunk({
-                expectedOwnerUid: session.uid,
-                operationId: `restore:${plan.header.backupId}:${executionId}:${index}`, backupId: plan.header.backupId,
-                chunkIndex: index, chunkCount: chunks.length, mode: 'apply', overwriteExisting: overwritesExisting,
-                confirmation: overwritesExisting ? 'RESTORE_SELECTED_OVERWRITE' : 'RESTORE_VALIDATED', records: chunks[index]
-            });
+            execution.attemptedChunks += 1;
+            previouslyPossible = execution.possiblyApplied;
+            execution.possiblyApplied = true;
+            execution.uncertain = true;
+            const response = await restoreChunk(execution.commands[index]);
             check();
             if (response.data?.status === 'stale-preview') {
-                rejectedChunks += 1;
-                const error = new Error('BACKUP_PREVIEW_STALE');
-                error.code = 'BACKUP_PREVIEW_STALE';
-                throw error;
+                execution.uncertain = false;
+                execution.possiblyApplied = previouslyPossible;
+                throw restoreError('BACKUP_PREVIEW_STALE', execution);
             }
-            if (!['applied'].includes(response.data?.status)) throw new Error('BACKUP_RESTORE_CHUNK_FAILED');
-            confirmedChunks += 1;
+            if (response.data?.status !== 'applied') {
+                if (response.data?.status === 'collision') {
+                    execution.uncertain = false;
+                    execution.possiblyApplied = previouslyPossible;
+                    execution.blocked = true;
+                }
+                throw restoreError('BACKUP_RESTORE_CHUNK_FAILED', execution);
+            }
+            execution.uncertain = false;
+            execution.possiblyApplied = false;
+            execution.confirmedChunks += 1;
         }
-        const selectedStoragePaths = new Set(records
+        stage = 'storage';
+        const selectedStoragePaths = new Set(execution.records
             .filter(record => record.scope === 'private-account-attachment' || record.scope === 'company-account-attachment')
             .map(record => record.data?.storagePath)
             .filter(Boolean)
-            .map(storagePath => validateRestoreStoragePath(storagePath, plan.uid)));
+            .map(storagePath => validateRestoreStoragePath(storagePath, session.uid)));
         check();
-        await scanBackup(plan.file, plan.uid, plan.recoveryKey, async entry => {
+        await scanBackup(source.file, session.uid, source.recoveryKey, async entry => {
             if (entry.kind !== 'attachment') return;
-            const storagePath = validateRestoreStoragePath(entry.storagePath, plan.uid);
-            if (selective && !selectedStoragePaths.has(storagePath)) return;
+            const storagePath = validateRestoreStoragePath(entry.storagePath, session.uid);
+            if (execution.selective && !selectedStoragePaths.has(storagePath)) return;
             const bytes = base64ToBytes(entry.content);
             if (!bytes.length || bytes.byteLength > MAX_ATTACHMENT_BYTES) throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
             check();
+            execution.storageStarted = true;
             await uploadBytes(ref(storage, storagePath), bytes, {
                 contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}
             });
             check();
-            uploaded += 1;
+            execution.uploaded += 1;
         }, check, session.signal);
         check();
-        const expectedAttachments = selective ? selectedStoragePaths.size : plan.counts.attachments;
-        if (uploaded !== expectedAttachments) throw new Error('BACKUP_ATTACHMENT_COUNT_INVALID');
-        return {recordCount: records.length, attachmentCount: uploaded};
+        const expectedAttachments = execution.selective ? selectedStoragePaths.size : source.counts.attachments;
+        if (execution.uploaded !== expectedAttachments) throw new Error('BACKUP_ATTACHMENT_COUNT_INVALID');
+        execution.result = freezeRestoreValue({recordCount: execution.records.length, attachmentCount: execution.uploaded});
+        return {...execution.result};
     } catch (cause) {
-        const error = new Error(attemptedChunks ? 'BACKUP_RESTORE_INTERRUPTED' : 'BACKUP_RESTORE_NOT_STARTED');
-        error.code = ['BACKUP_SESSION_INVALIDATED', 'BACKUP_PREVIEW_STALE'].includes(cause?.code) ? cause.code : error.message;
-        error.progress = {attemptedChunks, confirmedChunks, uploaded, mayHaveApplied: attemptedChunks > rejectedChunks};
-        if (cause?.code === 'BACKUP_PREVIEW_STALE') releaseBackupRestore(plan);
-        throw error;
-    }
+        if (cause?.code === 'BACKUP_SESSION_INVALIDATED' || cause?.code === 'BACKUP_PREVIEW_STALE') {
+            const error = restoreError(cause.code, execution);
+            if (cause.code === 'BACKUP_PREVIEW_STALE') releaseBackupRestore(plan);
+            throw error;
+        }
+        const definitiveRejection = ['invalid-argument', 'failed-precondition', 'permission-denied', 'unauthenticated', 'not-found', 'already-exists']
+            .includes(String(cause?.code || '').replace(/^functions\//, ''));
+        if (stage === 'firestore' && execution.uncertain && !definitiveRejection) {
+            throw restoreError('BACKUP_FIRESTORE_UNCERTAIN', execution, true);
+        }
+        if (definitiveRejection) {
+            execution.uncertain = false;
+            execution.possiblyApplied = previouslyPossible;
+        }
+        execution.blocked = true;
+        throw restoreError(execution.storageStarted ? 'BACKUP_STORAGE_RETRY_BLOCKED' : 'BACKUP_RESTORE_INTERRUPTED', execution);
+    } finally { execution.inFlight = false; }
 }

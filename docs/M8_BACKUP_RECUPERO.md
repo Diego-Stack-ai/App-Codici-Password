@@ -83,3 +83,12 @@ Una nuova anteprima è obbligatoria dopo un esito obsoleto. Se blocchi precedent
 Questa è atomicità del singolo chunk Firestore, non dell'intero backup: staging, compensazione, ripresa fra esecuzioni e Storage restano aperti. Le prove automatiche con servizi simulati non sostituiscono il collaudo del ripristino sui dispositivi.
 
 Verifica dei tipi: i byte vengono ricostruiti come Buffer compatibile con Admin SDK; export e confronto rifiutano numeri non finiti anziché convertirli implicitamente in null. Nessun nuovo formato o conversione dei file precedenti.
+
+
+## Ripresa nella stessa sessione — candidata 13/09/2026
+
+Dopo il checkpoint Archivio `f67c8d7b`, l'esecuzione Firestore conserva un piano privato immutabile: selezione, chunk, consenso, versioni e identificativi vengono preparati una sola volta. Una sola chiamata per piano può essere in corso. Dopo una risposta persa il client può reinviare il chunk incerto soltanto su scelta esplicita, con identico comando; quelli già confermati vengono saltati. Il server verifica la ricevuta protetta prima del CAS. Non si rigenerano silenziosamente versioni o identificatori.
+
+La UI mantiene piano e chiave soltanto mentre offre «Verifica e riprendi» nella sessione attiva. Interrompi, blocco Vault, cambio identità o dismissione chiudono il dialogo e rilasciano il piano. Nessun retry automatico. Rifiuti definitivi e anteprima obsoleta non vengono ritentati; un esito incerto dopo l'inizio di Storage blocca la ripetizione generica. Dopo successo una seconda chiamata restituisce il risultato già registrato, senza ripetere gli upload.
+
+Questo passo non salva un journal durevole, non riprende dopo refresh, non fornisce staging degli oggetti né compensazione globale. La retention delle eventuali copie intermedie richiede una decisione distinta prima di attivarle. Il formato cpbackup resta invariato.

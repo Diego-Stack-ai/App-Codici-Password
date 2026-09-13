@@ -135,3 +135,41 @@ test('stale preview without applied chunks asks for a new comparison', async () 
     assert.match(f.toasts[0][0], /cambiati dopo l’anteprima/);
     assert.equal(f.plan.recoveryKey, '');
 });
+
+
+test('uncertain Firestore waits for explicit resume and reuses the plan with retry permission', async () => {
+    const f = fixture(), calls = [];
+    f.service.executeBackupRestore = async (...args) => {
+        calls.push(args);
+        throw Object.assign(new Error('synthetic uncertain'), {code: calls.length === 1 ? 'BACKUP_FIRESTORE_UNCERTAIN' : 'BACKUP_STORAGE_RETRY_BLOCKED', retryable: calls.length === 1, progress: {mayHaveApplied: true}});
+    };
+    f.setup('A'); const pending = f.select();
+    f.confirm('synthetic recovery'); await tick(); f.confirm('RIPRISTINA'); await tick();
+    assert.equal(calls.length, 1); assert.equal(f.plan.recoveryKey, 'private-recovery');
+    const resume = f.nodes.find(node => node.textContent === 'Verifica e riprendi' && node.isConnected);
+    assert.ok(resume); await resume.click(); await pending;
+    assert.equal(calls.length, 2); assert.equal(calls[0][0], calls[1][0]);
+    assert.equal(calls[0][2].retry, false); assert.equal(calls[1][2].retry, true);
+    assert.equal(f.nodes.some(node => node.textContent === 'Verifica e riprendi' && node.isConnected), false);
+    assert.equal(f.plan.recoveryKey, '');
+});
+
+test('stopping an uncertain restore does not retry and releases the retained plan', async () => {
+    const f = fixture(); let calls = 0;
+    f.service.executeBackupRestore = async () => { calls++; throw Object.assign(new Error('uncertain'), {code: 'BACKUP_FIRESTORE_UNCERTAIN', retryable: true, progress: {mayHaveApplied: true}}); };
+    f.setup('A'); const pending = f.select();
+    f.confirm('synthetic recovery'); await tick(); f.confirm('RIPRISTINA'); await tick();
+    await f.nodes.find(node => node.textContent === 'Interrompi' && node.isConnected).click(); await pending;
+    assert.equal(calls, 1); assert.equal(f.plan.recoveryKey, '');
+    assert.equal(f.toasts[0][1], 'warning');
+});
+
+test('Vault lock closes retry choice and a retained resume callback cannot execute again', async () => {
+    const f = fixture(); let calls = 0;
+    f.service.executeBackupRestore = async () => { calls++; throw Object.assign(new Error('uncertain'), {code: 'BACKUP_FIRESTORE_UNCERTAIN', retryable: true, progress: {mayHaveApplied: true}}); };
+    f.setup('A'); const pending = f.select();
+    f.confirm('synthetic recovery'); await tick(); f.confirm('RIPRISTINA'); await tick();
+    const resume = f.nodes.find(node => node.textContent === 'Verifica e riprendi' && node.isConnected);
+    f.lock(); await pending; await resume.click();
+    assert.equal(calls, 1); assert.equal(f.plan.recoveryKey, ''); assert.equal(f.toasts.length, 0);
+});

@@ -200,3 +200,113 @@ test('an existing profile requires manual overwrite selection and an unchanged p
         f.context.releaseBackupRestore(plan);
     }
 });
+
+test('explicit retry reuses the uncertain command and skips confirmed chunks before or after a lost commit response', async () => {
+    for (const committedBeforeLoss of [false, true]) {
+        const f = fixture(401), plan = await f.prepare(), receipts = new Set();
+        let fail = true, applied = 0;
+        f.context.respond = async command => {
+            if (receipts.has(command.operationId)) return {data: {status: 'applied', duplicate: true}};
+            if (command.chunkIndex === 1 && fail) {
+                fail = false;
+                if (committedBeforeLoss) { receipts.add(command.operationId); applied++; }
+                throw new Error('lost response with private provider detail');
+            }
+            receipts.add(command.operationId); applied++;
+            return {data: {status: 'applied', duplicate: false}};
+        };
+        await assert.rejects(f.context.executeBackupRestore(plan), error => {
+            assert.equal(error.code, 'BACKUP_FIRESTORE_UNCERTAIN'); assert.equal(error.retryable, true);
+            assert.equal(error.progress.confirmedChunks, 1); assert.equal(error.progress.mayHaveApplied, true);
+            assert.doesNotMatch(error.message, /provider detail/); return true;
+        });
+        const firstCommands = f.calls.filter(call => call.command.mode === 'apply').map(call => call.command);
+        assert.equal(firstCommands.length, 2);
+        await assert.rejects(f.context.executeBackupRestore(plan), error => error.code === 'BACKUP_RETRY_REQUIRED' && error.retryable);
+        assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 2);
+        const result = await f.context.executeBackupRestore(plan, null, {retry: true});
+        const commands = f.calls.filter(call => call.command.mode === 'apply').map(call => call.command);
+        assert.equal(commands.length, 3); assert.equal(commands[2], firstCommands[1]);
+        assert.equal(JSON.stringify(commands[2]), JSON.stringify(firstCommands[1]));
+        assert.equal(applied, 2); assert.equal(result.recordCount, 401);
+        assert.ok(Object.isFrozen(commands[2])); assert.ok(Object.isFrozen(commands[2].records[0].data));
+        f.context.releaseBackupRestore(plan);
+    }
+});
+
+test('retry selection is immutable and replacing public plan fields cannot alter the captured payload', async () => {
+    const f = fixture(3), plan = await f.prepare(), selected = [2, 0];
+    f.context.respond = async () => { throw new Error('response lost'); };
+    await assert.rejects(f.context.executeBackupRestore(plan, selected), error => error.retryable);
+    const original = f.calls.find(call => call.command.mode === 'apply').command;
+    assert.throws(() => { plan.records[0].data.nomeAccount = 'changed'; }, /read only/);
+    selected.push(1);
+    await assert.rejects(f.context.executeBackupRestore(plan, selected, {retry: true}), error => error.code === 'BACKUP_RESTORE_SELECTION_CHANGED' && !error.retryable);
+    plan.records = []; plan.comparison = {entries: [], counts: {}}; plan.header.backupId = 'changed'; plan.recoveryKey = 'changed';
+    plan.file = null;
+    f.context.respond = async () => ({data: {status: 'applied'}});
+    const result = await f.context.executeBackupRestore(plan, [0, 2], {retry: true});
+    const commands = f.calls.filter(call => call.command.mode === 'apply').map(call => call.command);
+    assert.equal(commands.length, 2); assert.equal(commands[1], original);
+    assert.equal(commands[1].backupId, 'fixture'); assert.equal(result.recordCount, 2);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('single flight rejects concurrent executions without another Firestore call', async () => {
+    const f = fixture(), plan = await f.prepare(), gate = deferred();
+    f.context.respond = () => gate.promise;
+    const first = f.context.executeBackupRestore(plan);
+    await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => error.code === 'BACKUP_RESTORE_IN_PROGRESS' && !error.retryable);
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
+    gate.resolve({data: {status: 'applied'}}); await first;
+    f.context.releaseBackupRestore(plan);
+});
+
+test('completed execution returns its saved result without repeating Firestore or Storage', async () => {
+    const f = fixture(1, true), plan = await f.prepare();
+    const first = await f.context.executeBackupRestore(plan);
+    first.recordCount = 999;
+    const second = await f.context.executeBackupRestore(plan, null, {retry: true});
+    assert.equal(second.recordCount, 2); assert.equal(second.attachmentCount, 1);
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1); assert.equal(f.uploads.length, 1);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('Storage uncertainty blocks generic retry and cannot upload or send records a second time', async () => {
+    const f = fixture(1, true), plan = await f.prepare(); let uploadAttempts = 0;
+    f.context.uploadBytes = async () => { uploadAttempts++; throw new Error('upload response lost'); };
+    await assert.rejects(f.context.executeBackupRestore(plan), error => error.code === 'BACKUP_STORAGE_RETRY_BLOCKED' && !error.retryable && error.progress.mayHaveApplied);
+    await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => error.code === 'BACKUP_STORAGE_RETRY_BLOCKED' && !error.retryable);
+    assert.equal(uploadAttempts, 1); assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('logout after a lost response destroys the retry plan and cannot submit under a new identity', async () => {
+    const f = fixture(), plan = await f.prepare();
+    f.context.respond = async () => { throw new Error('response lost'); };
+    await assert.rejects(f.context.executeBackupRestore(plan), error => error.retryable);
+    f.changeUid('B');
+    assert.equal(plan.records.length, 0); assert.equal(plan.file, null); assert.equal(plan.recoveryKey, '');
+    await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), /BACKUP_PLAN_INVALID/);
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
+});
+
+test('definite RPC rejection blocks retries while retaining prior confirmed or uncertain writes', async () => {
+    for (const prior of ['none', 'confirmed', 'uncertain']) {
+        const f = fixture(prior === 'confirmed' ? 401 : 1), plan = await f.prepare(); let sent = 0;
+        const reject = () => { const error = new Error('private reason'); error.code = 'functions/failed-precondition'; throw error; };
+        if (prior === 'uncertain') {
+            f.context.respond = async () => { throw new Error('response lost'); };
+            await assert.rejects(f.context.executeBackupRestore(plan), error => error.retryable);
+        }
+        f.context.respond = async () => { if (prior === 'confirmed' && ++sent === 1) return {data: {status: 'applied'}}; return reject(); };
+        await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: prior === 'uncertain'}), error => {
+            assert.equal(error.retryable, false); assert.equal(error.progress.mayHaveApplied, prior !== 'none');
+            assert.doesNotMatch(error.message, /private reason/); return true;
+        });
+        const before = f.calls.length;
+        await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => !error.retryable);
+        assert.equal(f.calls.length, before);
+        f.context.releaseBackupRestore(plan);
+    }
+});

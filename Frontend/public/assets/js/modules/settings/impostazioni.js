@@ -359,6 +359,33 @@ function showBackupRestoreInput(action, title, placeholder, description, secret 
     });
 }
 
+function showBackupRestoreRetry(action) {
+    return new Promise(resolve => {
+        if (!action.active()) return resolve(false);
+        let settled = false, unregister = () => {};
+        const previousFocus = document.activeElement;
+        const close = value => {
+            if (settled) return;
+            settled = true; modal.remove(); unregister(); resolve(value);
+            if (action.active() && previousFocus?.isConnected) previousFocus.focus();
+        };
+        const retry = createElement('button', {type: 'button', className: 'btn-modal btn-primary',
+            textContent: 'Verifica e riprendi', onclick: () => { if (action.active()) close(true); }});
+        const modal = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('section', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Risposta non ricevuta'}, [
+                createElement('h3', {className: 'modal-title', textContent: 'Risposta non ricevuta'}),
+                createElement('p', {className: 'modal-text', textContent: 'Il server potrebbe aver già applicato una parte del ripristino. Puoi verificarne l’esito e riprendere gli elementi mancanti mantenendo la selezione confermata.'}),
+                createElement('div', {className: 'modal-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Interrompi', onclick: () => close(false)}), retry
+                ])
+            ])
+        ]);
+        modal.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); close(false); } });
+        unregister = action.own(() => close(false));
+        document.body.appendChild(modal); retry.focus();
+    });
+}
+
 function setupEncryptedRestore(user) {
     disposeRestoreSetup();
     const button = document.getElementById('btn-restore-encrypted-backup');
@@ -389,6 +416,23 @@ function setupEncryptedRestore(user) {
             if (!recoveryKey) return;
             working = showBackupWorking('Verifica completa del backup…', 'Il file viene aperto e controllato voce per voce.', currentAction);
             const {prepareBackupRestore, executeBackupRestore, releaseBackupRestore} = await import('./backup-import-service.js');
+            const executeWithRetry = async (selectedIndexes = null) => {
+                let retry = false;
+                while (true) {
+                    currentAction.check();
+                    try { return await executeBackupRestore(plan, selectedIndexes, {retry}); }
+                    catch (error) {
+                        currentAction.check();
+                        if (error?.retryable !== true || !['BACKUP_FIRESTORE_UNCERTAIN', 'BACKUP_RETRY_REQUIRED'].includes(error.code)) throw error;
+                        working?.close(); working = null;
+                        const resume = await showBackupRestoreRetry(currentAction);
+                        currentAction.check();
+                        if (!resume) throw error;
+                        retry = true;
+                        working = showBackupWorking('Verifica e ripresa del ripristino…', 'Gli elementi già applicati vengono riconosciuti prima di proseguire.', currentAction);
+                    }
+                }
+            };
             currentAction.check();
             release = () => { if (plan) releaseBackupRestore(plan); plan = null; recoveryKey = ''; };
             currentAction.own(release);
@@ -412,7 +456,7 @@ function setupEncryptedRestore(user) {
                 currentAction.check();
                 if (typed !== 'RIPRISTINA') return;
                 working = showBackupWorking('Ripristino selettivo in corso…', 'Il blocco ferma i passaggi successivi; le richieste già inviate possono completarsi.', currentAction);
-                const result = await executeBackupRestore(plan, selectedIndexes);
+                const result = await executeWithRetry(selectedIndexes);
                 currentAction.check();
                 working.close();
                 working = null;
@@ -426,7 +470,7 @@ function setupEncryptedRestore(user) {
             currentAction.check();
             if (typed !== 'RIPRISTINA') return;
             working = showBackupWorking('Ripristino in corso…', 'Il blocco ferma i passaggi successivi; le richieste già inviate possono completarsi.', currentAction);
-            const result = await executeBackupRestore(plan);
+            const result = await executeWithRetry();
             currentAction.check();
             working.close();
             working = null;
@@ -441,7 +485,7 @@ function setupEncryptedRestore(user) {
                 showToast('I dati sono cambiati dopo l’anteprima. Riapri il backup per confrontarli di nuovo prima del ripristino.', 'warning');
                 return;
             }
-            const collision = String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
+            const collision = error?.code === 'BACKUP_COLLISIONS' || String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
             showToast(collision
                 ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
                 : 'Backup non valido, incompleto o non applicabile.', 'error');
