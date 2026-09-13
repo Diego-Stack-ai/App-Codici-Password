@@ -56,3 +56,7 @@ Prova dettaglio base, 12/09/2026: nomeAccount, username e account su copie per l
 Fixture locale del dettaglio, 12/09/2026: sei campi cifrati per record (nomeAccount, username, account, password, note, url). URL visualizzato come testo copiabile; nessuna apertura esterna. Questo non certifica né converte eventuali URL in chiaro o alias nei dati produttivi. [Audit §24](./AUDIT_VAULT_SESSION_P0.md#24-identità-dei-record-e-campi-aggiuntivi-del-dettaglio--12092026).
 
 Preparazione sperimentale, base `b792b1c0`: patch locale dei sei campi del dettaglio tramite crypto-utils originale. Nessuna ricifratura o migrazione di dati persistiti; compatibilità del titolo/URL con il writer M6 ancora da risolvere. [Audit §25](./AUDIT_VAULT_SESSION_P0.md#25-preparazione-cifrata-delle-modifiche-nella-sessione-in-ram--12092026).
+
+## Verifica circoscritta banking — candidata 1.2.118, 13/09/2026
+
+Codice `4a431ec3`, editor `form-privato-save.js` e `form-azienda-save.js`: `banking[].referenteNome` e `banking[].numeroVerde` sono metadati in chiaro, come i telefoni del referente. `passwordDispositiva`, `cards[].cardNumber`, `cards[].pin` e `cards[].ccv` continuano a essere cifrati dagli stessi writer. È una fotografia del codice, subordinata alla baseline: non approva nuovi usi di dati in chiaro e non chiude l'inventario globale P0. Nessun dato reale letto, cancellato o ricifrato durante l'integrazione. Dipendenze: contratto funzionale e [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).

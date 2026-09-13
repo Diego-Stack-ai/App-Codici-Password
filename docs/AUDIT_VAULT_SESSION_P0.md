@@ -606,3 +606,12 @@ Disponibili due prerequisiti non attivati: lease IndexedDB con token e scritture
 
 Suite completa npm test codice 0: 873 test superati, inclusi 121 Functions, 18 Scadenza lifecycle/CAS, 61 offline e 36 mutazioni emulatore. Budget delle 30 pagine e sintassi dei 156 moduli rispettati; candidata 1.2.110 con 240 riferimenti asset coerenti. Nessun dato reale, migrazione o deploy. L'integrazione dei prerequisiti, staging/journal backup, concorrenza globale, prove fisiche, retention e distribuzione restano aperti.
 
+## 51. Integrazione Account UI e Vault — candidata 13/09/2026
+
+Codice verificato `4a431ec3`, ramo `codex/integrate-vault-account-v118`. Input: sperimentale `3660a8383e8b93ba4d982a2c3c4bb1d251fe75d3`, UI `d2ef897e0094a970944db6b8c19ed59c1d36dd22`, master `445b338dd9320f4854eb97bc2f3e90cb60a59a0f`. I sette commit UI sono stati applicati con provenienza cherry-pick; un merge interno al ramo di integrazione conserva l'ascendenza master. I rami sorgente restano invariati.
+
+Risolti i conflitti mantenendo lifecycle, proprietario e ID fisici legacy; renderer bancario caricato in differita nel form privato, azioni Widget invalidate su blocco/logout e stato sola lettura. La vista compatta conserva i nomi dei contatti del proprietario e non legge la sua Rubrica da una vista esterna. Allegati sotto note, un solo base-glow e password di soli spazi preservata. Aggiunti test per Numero verde e referente banca nei due form, dati legacy e accesso al normale editor Widget. I campi bancari nuovi sono metadati secondo i writer attuali: inventario aggiornato, nessuna migrazione.
+
+Suite completa `npm test` codice 0: **887 test superati**, zero fallimenti; inclusi 121 Functions e 36 mutazioni su emulatori. Versione 1.2.118 coerente con 244 riferimenti asset; budget statici delle 30 pagine rispettati senza aumentarli. Le prove di integrazione usano fixture e dati sintetici. Questa verifica non include un nuovo collaudo fisico iPhone/iPad né dati produttivi.
+
+Master e Hosting non modificati; nessuna distribuzione di Rules/Functions. Restano aperti i gate descritti in §50, inclusi shell completa, fallback offline nel runtime, concorrenza globale Archivio, staging/journal backup, retention e prove reali. Il push del ramo candidato non certifica la chiusura M0–M10 e non autorizza il deploy.

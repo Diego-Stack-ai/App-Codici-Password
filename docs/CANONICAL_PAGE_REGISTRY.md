@@ -48,3 +48,7 @@ Il laboratorio è escluso dagli audit che certificano la superficie applicativa.
 - informative: `privacy.html`, `termini.html`.
 
 Il nome storico `login-v115.html` viene mantenuto finché i flussi di autenticazione e i collegamenti installati non sono migrati con redirect verificato; non autorizza la creazione di nuove varianti.
+
+## Riscontro integrazione — 13/09/2026
+
+Candidata 1.2.118, codice `4a431ec3`: modificati i due dettagli Account e i relativi editor già censiti; nessuna pagina alternativa introdotta. Registro e budget restano sulle 30 pagine applicative canoniche. [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).

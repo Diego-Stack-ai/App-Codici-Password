@@ -661,3 +661,7 @@ Quattordici test mirati coprono cancellazione, mappe equivalenti, conflitti real
 Dopo salvataggio o creazione confermati, il modulo apre subito il dettaglio con afterWrite=1; il dettaglio attende il dato server prima di consumare il flag. Anche cambia/scollega Account richiedono un refresh confermato. Nessun ritardo artificiale o cache presentata come dato appena salvato; consultazione normale local-first e offline con avviso preservati. Richieste e callback restano vincolati alla vista, con possibilità di ritentare un refresh fallito.
 
 Release isolata su master v1.2.111 (`f4d9393b`), derivata dalla correzione locale `ca7736a5`. Ventuno test mirati e suite completa di 313 test superati; versione, asset, inventario e budget verificati. Pubblicazione da verificare dopo il workflow. Nessuna modifica a Rules, Functions o laboratorio Vault. Rollback: ripubblicare Hosting dal precedente master `f4d9393b`, senza migrazione dati.
+
+## Integrazione candidata 1.2.118 — 13/09/2026
+
+Nel ramo `codex/integrate-vault-account-v118`, integrati i sette commit UI fino a `d2ef897e` sulla base sperimentale `3660a838`, poi ricongiunta la cronologia master `445b338d` senza modificare master. Codice risultante `4a431ec3`: 887 test della suite completa superati, 244 riferimenti asset coerenti e budget invariati. Gli MD descrivono vista compatta, campi banca e Widget; protezioni sessione conservate. Nessun deploy, migrazione o chiusura generale M0–M10. [Audit §51](../docs/AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).

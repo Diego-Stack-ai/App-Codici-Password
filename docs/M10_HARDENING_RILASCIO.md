@@ -79,3 +79,6 @@ Il rollback del purge candidato deve conservare anche il registro protetto e la 
 
 Gestione Scadenze ricevute candidata: anche manageReceivedDeadline richiede expectedOwnerUid del destinatario autenticato prima di Firestore. I client precedenti privi del campo vengono rifiutati. Distribuzione e rollback devono conservare il vincolo e i controlli su destinatario, permesso manage e revoca. La correzione UI associata cattura il contesto prima della conferma; nessun fallback permissivo o deploy eseguito. Suite Functions: 110 test superati.
 
+## Candidata integrata — 13 settembre 2026
+
+Codice `4a431ec3`, versione 1.2.118: suite completa 887 test superati dopo integrazione UI Account/Vault e riconciliazione master 1.2.117. Versione, budget, Rules e Functions verificati localmente; nessuna pubblicazione o migrazione. Il risultato non sostituisce i gate reali elencati sopra. [Audit §51](./AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).

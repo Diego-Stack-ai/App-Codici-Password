@@ -119,3 +119,7 @@ Su base `0a807adb`, i moduli canonici privato/azienda espongono un montaggio con
 ### Montaggio reale nel laboratorio — 12/09/2026
 
 Importati gli orchestratori canonici delle due liste nella shell sperimentale, con template minimo e repository fittizio. Aggiunta opzione esplicita `readOnly` che sopprime UI e callback di scrittura; default produttivo invariato. [Audit §18](../docs/AUDIT_VAULT_SESSION_P0.md#18-orchestratori-canonici-nel-laboratorio--12092026) definisce perimetro e limiti; le pagine complete non sono ancora migrate.
+
+## Dettagli Account integrati — candidata 1.2.118, 13/09/2026
+
+Verifica sul ramo `codex/integrate-vault-account-v118`, base codice `4a431ec3`; integrazione della UI `d2ef897e` con il candidato Vault `3660a838`. Le pagine canoniche di consultazione nascondono i campi vuoti, mostrano gli allegati dopo le note e contengono un solo base-glow. Il normale editor conserva i campi e la gestione Widget; la scorciatoia bancaria apre lo stesso editor Widget dell'Account. I riferimenti generali restano distinti dal referente della banca e dal Numero verde. Conservati isolamento di sessione, caricamento bancario differito e sola lettura. Evidenze e limiti in [Audit §51](../docs/AUDIT_VAULT_SESSION_P0.md#51-integrazione-account-ui-e-vault--candidata-13092026).
