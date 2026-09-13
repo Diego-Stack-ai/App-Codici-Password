@@ -486,6 +486,10 @@ function setupEncryptedRestore(user) {
                 return;
             }
             const collision = error?.code === 'BACKUP_COLLISIONS' || String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
+            if (error?.message === 'BACKUP_PREVIEW_CAPACITY_EXCEEDED') {
+                showToast('Questo backup supera la capacità dell’anteprima. Nessun dato è stato ripristinato: conserva il file per un ripristino assistito.', 'warning');
+                return;
+            }
             showToast(collision
                 ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
                 : 'Backup non valido, incompleto o non applicabile.', 'error');

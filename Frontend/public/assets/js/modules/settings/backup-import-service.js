@@ -7,6 +7,11 @@ import {collectStoragePaths} from './backup-export-model.js';
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
 const BACKUP_READ_BYTES = 64 * 1024;
+// Admission bounds for retained preview data, not an exact browser heap quota.
+const MAX_RESTORE_RECORDS = 10000;
+const MAX_RESTORE_RECORD_CHARACTERS = 16 * 1024 * 1024;
+const MAX_RESTORE_ATTACHMENTS = 10000;
+const MAX_RESTORE_ATTACHMENT_CHARACTERS = 2 * 1024 * 1024;
 // Attachment bytes are Base64 inside encrypted JSON, then ciphertext is Base64
 // again. Allow metadata/escaped paths and the GCM tag at both JSON layers.
 const BACKUP_LINE_METADATA_BYTES = 64 * 1024;
@@ -233,10 +238,16 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const records = [];
         const storagePaths = new Set();
         const attachmentDigests = new Map();
+        let recordCharacters = 0, attachmentCharacters = 0;
         session.own(() => attachmentDigests.clear());
         const scan = await scanBackup(file, uid, recoveryKey, (entry, digest) => {
             if (entry.kind === 'record') {
                 chunkRestoreRecords([entry]);
+                const characters = JSON.stringify(entry).length;
+                if (records.length >= MAX_RESTORE_RECORDS || characters > MAX_RESTORE_RECORD_CHARACTERS - recordCharacters) {
+                    throw new Error('BACKUP_PREVIEW_CAPACITY_EXCEEDED');
+                }
+                recordCharacters += characters;
                 records.push(entry);
             }
             else {
@@ -244,6 +255,12 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
                 if (storagePaths.has(path)) throw new Error('BACKUP_ATTACHMENT_DUPLICATE');
                 attachmentBytes(entry.content);
                 if (typeof digest !== 'string' || !digest) throw new Error('BACKUP_ATTACHMENT_DIGEST_INVALID');
+                const characters = path.length + digest.length;
+                if (attachmentDigests.size >= MAX_RESTORE_ATTACHMENTS ||
+                    characters > MAX_RESTORE_ATTACHMENT_CHARACTERS - attachmentCharacters) {
+                    throw new Error('BACKUP_PREVIEW_CAPACITY_EXCEEDED');
+                }
+                attachmentCharacters += characters;
                 attachmentDigests.set(path, digest);
                 storagePaths.add(path);
             }

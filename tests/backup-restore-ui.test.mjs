@@ -173,3 +173,12 @@ test('Vault lock closes retry choice and a retained resume callback cannot execu
     f.lock(); await pending; await resume.click();
     assert.equal(calls, 1); assert.equal(f.plan.recoveryKey, ''); assert.equal(f.toasts.length, 0);
 });
+
+test('capacity failure explains that backup is retained and no restore has run', async () => {
+    const f = fixture();
+    f.service.prepareBackupRestore = async () => { throw new Error('BACKUP_PREVIEW_CAPACITY_EXCEEDED'); };
+    f.setup('A'); const pending = f.select(); f.confirm('synthetic recovery'); await pending;
+    assert.equal(f.executions.length, 0); assert.equal(f.toasts.length, 1);
+    assert.equal(f.toasts[0][1], 'warning'); assert.match(f.toasts[0][0], /capacità.*Nessun dato.*conserva il file/);
+    assert.equal(f.button.disabled, false);
+});

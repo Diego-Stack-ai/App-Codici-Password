@@ -127,3 +127,9 @@ Le scritture Firestore precedenti possono essere già avvenute: l'errore conserv
 
 Il runner delle mutazioni include il callable originale restoreBackupChunk su Firestore/Auth demo locali: 32 test complessivi superati, inclusi sette test backup (contenitore e sei scenari). Verificati CAS su Profilo/Account, creazione/cancellazione concorrente, consenso, retry attendibile prima del CAS, isolamento proprietario, byte e timestamp reali e Rules delle ricevute. Il test invoca direttamente l'handler: non certifica trasporto HTTPS, App Check remoto, trigger o Storage distribuito.
 
+
+### Limiti dell'anteprima in memoria — candidata 13/09/2026
+
+Base `b4bec892`, ramo `experiment/m8-restore-memory-budget`: durante la prima scansione vengono ammessi al massimo 10.000 record e 16 Mi caratteri JSON complessivi dei record, più 10.000 allegati e 2 Mi caratteri per percorsi/digest trattenuti. I limiti sono controllati prima dell'inserimento nelle strutture dell'anteprima e prima di qualsiasi chiamata di confronto/ripristino. Restano anche i limiti per riga, singolo record e allegato. Superamento: nessun ripristino, rilascio della sessione e messaggio che invita a conservare il file; non viene classificato come backup corrotto.
+
+Sono soglie conservative di ammissione, non una misura esatta dello heap: oggetti JS, descrizioni, confronto, decifratura del singolo elemento e copie temporanee hanno costi aggiuntivi. Il limite di 16 Mi caratteri rappresenta fino a 32 MiB per una sola rappresentazione UTF-16; non significa 32 MiB di RAM totali. Servono misurazioni sui dispositivi supportati prima di certificare il requisito memoria M8. Quattro nuove prove coprono superamento cumulativo, limite esatto, interruzione prima dei record successivi e messaggio UI; suite backup 65 test superati. Staging, journal durevole e compensazione restano aperti. Nessuna modifica al formato, al backend, ai backup esistenti o ai dati reali.

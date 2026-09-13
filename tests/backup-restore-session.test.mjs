@@ -10,7 +10,7 @@ const model = strip(await readFile(new URL('backup-import-model.js', root), 'utf
 const exportModel = strip(await readFile(new URL('backup-export-model.js', root), 'utf8'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 
-function fixture(count = 1, attachment = false, {lineLimit, readBytes} = {}) {
+function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLimits = {}} = {}) {
     const observers = new Set(), events = new EventTarget(), calls = [], uploads = [];
     const auth = {currentUser: {uid: 'A'}};
     const records = Array.from({length: count}, (_, index) => ({kind: 'record', scope: 'private-account', id: `r${index}`, data: {nomeAccount: 'Synthetic', password: 'cipher'}}));
@@ -38,6 +38,10 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes} = {}) {
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
     let testedService = service;
+    for (const [name, value] of Object.entries(previewLimits)) {
+        assert.match(name, /^MAX_RESTORE_(RECORDS|RECORD_CHARACTERS|ATTACHMENTS|ATTACHMENT_CHARACTERS)$/);
+        testedService = testedService.replace(new RegExp(`const ${name} = [^;]+;`), `const ${name} = ${value};`);
+    }
     if (lineLimit !== undefined) testedService = testedService.replace(/const MAX_BACKUP_LINE_CHARACTERS =[\s\S]*?;/, `const MAX_BACKUP_LINE_CHARACTERS = ${lineLimit};`);
     if (readBytes !== undefined) testedService = testedService.replace('const BACKUP_READ_BYTES = 64 * 1024;', `const BACKUP_READ_BYTES = ${readBytes};`);
     vm.runInContext(testedService, context);
@@ -541,4 +545,34 @@ test('changed duplicate or missing later selected attachment reports partial pro
         assert.deepEqual([...f.uploads[0][1]], [65]);
         f.context.releaseBackupRestore(plan);
     }
+});
+
+test('aggregate record count and serialized size fail before preview RPC or upload', async () => {
+    for (const previewLimits of [{MAX_RESTORE_RECORDS: 1}, {MAX_RESTORE_RECORD_CHARACTERS: 1}]) {
+        const f = fixture(2, false, {previewLimits});
+        await assert.rejects(f.prepare(), /BACKUP_PREVIEW_CAPACITY_EXCEEDED/);
+        assert.equal(f.calls.length, 0); assert.equal(f.uploads.length, 0); assert.equal(f.observers.size, 0);
+    }
+});
+
+test('aggregate attachment metadata count and characters are bounded before preview RPC', async () => {
+    for (const previewLimits of [{MAX_RESTORE_ATTACHMENTS: 1}, {MAX_RESTORE_ATTACHMENT_CHARACTERS: 1}]) {
+        const f = fixture(1, false, {previewLimits});
+        const paths = ['users/A/accounts/r0/attachments/a', 'users/A/accounts/r0/attachments/b'];
+        replaceBackupEntries(f, [{kind: 'record', scope: 'private-account', id: 'r0', data: {}}], paths.map(blob));
+        await assert.rejects(f.prepare(), /BACKUP_PREVIEW_CAPACITY_EXCEEDED/);
+        assert.equal(f.calls.length, 0); assert.equal(f.uploads.length, 0); assert.equal(f.observers.size, 0);
+    }
+});
+
+test('exact preview record capacity remains usable and one additional record stops scanning', async () => {
+    const record = {kind: 'record', scope: 'private-account', id: 'r0', data: {nomeAccount: 'Synthetic', password: 'cipher'}};
+    const previewLimits = {MAX_RESTORE_RECORDS: 1, MAX_RESTORE_RECORD_CHARACTERS: JSON.stringify(record).length};
+    const accepted = fixture(1, false, {previewLimits}), plan = await accepted.prepare();
+    assert.equal(plan.records.length, 1); accepted.context.releaseBackupRestore(plan);
+    const refused = fixture(3, false, {previewLimits}); let decrypted = 0;
+    const decrypt = refused.context.decryptBackupEntry;
+    refused.context.decryptBackupEntry = async options => { decrypted++; return decrypt(options); };
+    await assert.rejects(refused.prepare(), /BACKUP_PREVIEW_CAPACITY_EXCEEDED/);
+    assert.equal(decrypted, 2); assert.equal(refused.calls.length, 0);
 });
