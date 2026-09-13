@@ -6,6 +6,12 @@ import {collectStoragePaths} from './backup-export-model.js';
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
+const BACKUP_READ_BYTES = 64 * 1024;
+// Attachment bytes are Base64 inside encrypted JSON, then ciphertext is Base64
+// again. Allow metadata/escaped paths and the GCM tag at both JSON layers.
+const BACKUP_LINE_METADATA_BYTES = 64 * 1024;
+const MAX_BACKUP_LINE_CHARACTERS = Math.ceil((Math.ceil(MAX_ATTACHMENT_BYTES / 3) * 4 +
+    BACKUP_LINE_METADATA_BYTES + 16) / 3) * 4 + BACKUP_LINE_METADATA_BYTES;
 const sessions = new WeakMap();
 
 function freezeRestoreValue(value) {
@@ -62,37 +68,76 @@ export function releaseBackupRestore(plan) {
     }
 }
 
-async function* lines(file, check, signal) {
+async function* decodedBackupChunks(file, check, signal) {
     check();
-    if (file.size <= 0 || file.size > MAX_BACKUP_BYTES) throw new Error('BACKUP_FILE_SIZE_INVALID');
-    if (typeof TextDecoderStream === 'function' && file.stream) {
-        const reader = file.stream().pipeThrough(new TextDecoderStream()).getReader();
-        const cancel = () => { void reader.cancel().catch(() => {}); };
+    if (!Number.isSafeInteger(file?.size) || file.size <= 0 || file.size > MAX_BACKUP_BYTES) {
+        throw new Error('BACKUP_FILE_SIZE_INVALID');
+    }
+    if (typeof TextDecoderStream === 'function' && typeof file.stream === 'function') {
+        const reader = file.stream().pipeThrough(new TextDecoderStream('utf-8', {fatal: true})).getReader();
+        let finished = false, cancelled = false;
+        const cancel = () => {
+            if (cancelled) return;
+            cancelled = true;
+            void reader.cancel().catch(() => {});
+        };
         signal?.addEventListener('abort', cancel, {once: true});
-        let pending = '';
         try {
             while (true) {
                 check();
                 const {done, value} = await reader.read();
                 check();
-                if (done) break;
-                pending += value;
-                let newline;
-                while ((newline = pending.indexOf('\n')) >= 0) {
-                    const line = pending.slice(0, newline); pending = pending.slice(newline + 1);
-                    if (line.trim()) yield line;
-                }
+                if (done) { finished = true; break; }
+                yield value;
             }
-            if (pending.trim()) yield pending;
         } finally {
             signal?.removeEventListener('abort', cancel);
+            if (!finished) cancel();
             reader.releaseLock();
         }
         return;
     }
-    const text = await file.text();
+    if (typeof file.slice !== 'function' || typeof TextDecoder !== 'function') throw new Error('BACKUP_STREAM_UNAVAILABLE');
+    const decoder = new TextDecoder('utf-8', {fatal: true});
+    for (let offset = 0; offset < file.size; offset += BACKUP_READ_BYTES) {
+        check();
+        const end = Math.min(offset + BACKUP_READ_BYTES, file.size);
+        const buffer = await file.slice(offset, end).arrayBuffer();
+        check();
+        if (buffer.byteLength !== end - offset) throw new Error('BACKUP_FILE_READ_INVALID');
+        yield decoder.decode(buffer, {stream: true});
+    }
     check();
-    for (const line of text.split(/\r?\n/)) if (line.trim()) yield line;
+    const tail = decoder.decode();
+    if (tail) yield tail;
+}
+
+async function* lines(file, check, signal) {
+    let fragments = [], length = 0;
+    try {
+        for await (const chunk of decodedBackupChunks(file, check, signal)) {
+            let offset = 0;
+            while (offset < chunk.length) {
+                check();
+                const newline = chunk.indexOf('\n', offset);
+                const end = newline < 0 ? chunk.length : newline;
+                const segmentLength = end - offset;
+                if (length + segmentLength > MAX_BACKUP_LINE_CHARACTERS) throw new Error('BACKUP_LINE_TOO_LARGE');
+                if (segmentLength) fragments.push(chunk.slice(offset, end));
+                length += segmentLength;
+                if (newline < 0) break;
+                const line = fragments.join('');
+                fragments = []; length = 0;
+                if (line.trim()) yield line;
+                offset = newline + 1;
+            }
+        }
+        check();
+        if (length) {
+            const line = fragments.join('');
+            if (line.trim()) yield line;
+        }
+    } finally { fragments = []; }
 }
 
 function base64ToBytes(value) {
@@ -188,7 +233,10 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const records = [];
         const storagePaths = new Set();
         const scan = await scanBackup(file, uid, recoveryKey, entry => {
-            if (entry.kind === 'record') records.push(entry);
+            if (entry.kind === 'record') {
+                chunkRestoreRecords([entry]);
+                records.push(entry);
+            }
             else {
                 const path = validateRestoreStoragePath(entry.storagePath, uid);
                 if (storagePaths.has(path)) throw new Error('BACKUP_ATTACHMENT_DUPLICATE');

@@ -9,15 +9,18 @@ const model = strip(await readFile(new URL('backup-import-model.js', root), 'utf
 const exportModel = strip(await readFile(new URL('backup-export-model.js', root), 'utf8'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 
-function fixture(count = 1, attachment = false) {
+function fixture(count = 1, attachment = false, {lineLimit, readBytes} = {}) {
     const observers = new Set(), events = new EventTarget(), calls = [], uploads = [];
     const auth = {currentUser: {uid: 'A'}};
     const records = Array.from({length: count}, (_, index) => ({kind: 'record', scope: 'private-account', id: `r${index}`, data: {nomeAccount: 'Synthetic', password: 'cipher'}}));
     if (attachment) records.push({kind: 'record', scope: 'private-account-attachment', id: 'file', accountId: 'r0', data: {storagePath: 'users/A/accounts/r0/attachments/file'}});
     const entries = [...records, ...(attachment ? [{kind: 'attachment', storagePath: 'users/A/accounts/r0/attachments/file', content: 'QQ=='}] : [])];
-    const file = {size: 100, text: async () => [JSON.stringify({backupId: 'fixture'}), ...entries.map(JSON.stringify), JSON.stringify({kind: 'footer', entryCount: entries.length, recordCount: records.length, attachmentCount: attachment ? 1 : 0})].join('\n')};
+    let backupBlob = new Blob([[JSON.stringify({backupId: 'fixture'}), ...entries.map(JSON.stringify),
+        JSON.stringify({kind: 'footer', entryCount: entries.length, recordCount: records.length, attachmentCount: attachment ? 1 : 0})].join('\n')]);
+    const file = {get size() { return backupBlob.size; }, text: () => backupBlob.text(), stream: () => backupBlob.stream(),
+        slice: (start, end) => backupBlob.slice(start, end)};
     const context = vm.createContext({
-        auth, AbortController, TextEncoder, Uint8Array, crypto: {randomUUID: () => 'execution'},
+        auth, AbortController, TextEncoder, TextDecoder, Uint8Array, crypto: {randomUUID: () => 'execution'},
         functions: {}, storage: {}, ref: (_storage, path) => path,
         atob: value => Buffer.from(value, 'base64').toString('binary'),
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
@@ -33,8 +36,11 @@ function fixture(count = 1, attachment = false) {
     });
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
-    vm.runInContext(service, context);
-    return {context, file, calls, uploads, observers,
+    let testedService = service;
+    if (lineLimit !== undefined) testedService = testedService.replace(/const MAX_BACKUP_LINE_CHARACTERS =[\s\S]*?;/, `const MAX_BACKUP_LINE_CHARACTERS = ${lineLimit};`);
+    if (readBytes !== undefined) testedService = testedService.replace('const BACKUP_READ_BYTES = 64 * 1024;', `const BACKUP_READ_BYTES = ${readBytes};`);
+    vm.runInContext(testedService, context);
+    return {context, file, calls, uploads, observers, setFileContent: value => { backupBlob = new Blob([value]); },
         prepare: () => context.prepareBackupRestore(file, 'A', 'synthetic-recovery'),
         changeUid: uid => { auth.currentUser = {uid}; for (const callback of [...observers]) callback(auth.currentUser); },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
@@ -180,8 +186,7 @@ test('stale preview stops later chunks and uploads with accurate partial progres
 test('an existing profile requires manual overwrite selection and an unchanged profile cannot be selected', async () => {
     for (const status of ['changed', 'unchanged']) {
         const f = fixture();
-        const originalText = f.file.text;
-        f.file.text = async () => (await originalText()).replace('"scope":"private-account"', '"scope":"profile"');
+        f.setFileContent((await f.file.text()).replace('"scope":"private-account"', '"scope":"profile"'));
         f.context.respond = async command => ({data: command.mode === 'preview' ? {previewVersion: 1,
             entries: [{index: 0, status, expectedVersion: {exists: true, updateTime: {seconds: 2, nanoseconds: 0}}}]
         } : {status: 'applied'}});
@@ -315,8 +320,8 @@ test('definite RPC rejection blocks retries while retaining prior confirmed or u
 
 function replaceBackupEntries(f, records, attachments) {
     const entries = [...records, ...attachments];
-    f.file.text = async () => [JSON.stringify({backupId: 'fixture'}), ...entries.map(JSON.stringify),
-        JSON.stringify({kind: 'footer', entryCount: entries.length, recordCount: records.length, attachmentCount: attachments.length})].join('\n');
+    f.setFileContent([JSON.stringify({backupId: 'fixture'}), ...entries.map(JSON.stringify),
+        JSON.stringify({kind: 'footer', entryCount: entries.length, recordCount: records.length, attachmentCount: attachments.length})].join('\n'));
 }
 const blob = storagePath => ({kind: 'attachment', storagePath, content: 'QQ=='});
 
@@ -392,4 +397,95 @@ test('nested attachment manifest remains stable through explicit Firestore retry
     assert.equal(result.attachmentCount, 1); assert.equal(f.uploads[0][0], path);
     const commands = f.calls.filter(call => call.command.mode === 'apply').map(call => call.command);
     assert.equal(commands[0], commands[1]); f.context.releaseBackupRestore(plan);
+});
+
+test('slice fallback avoids whole-file text and preserves UTF-8 across byte boundaries and CRLF', async () => {
+    for (const readBytes of [1, 2, 7]) {
+        const f = fixture(1, false, {readBytes});
+        f.setFileContent((await f.file.text()).replace('Synthetic', 'Città 😀 終').replaceAll('\n', '\r\n'));
+        const originalSlice = f.file.slice, sizes = [];
+        f.file.slice = (start, end) => { sizes.push(end - start); return originalSlice(start, end); };
+        f.file.text = () => { throw new Error('whole-file read forbidden'); };
+        f.file.stream = () => { throw new Error('TextDecoderStream unavailable'); };
+        const plan = await f.prepare();
+        assert.equal(plan.records[0].data.nomeAccount, 'Città 😀 終');
+        assert.ok(sizes.length > 1); assert.ok(sizes.every(size => size > 0 && size <= readBytes));
+        f.context.releaseBackupRestore(plan);
+    }
+});
+
+test('native decoder stream and slice fallback enforce the same line limit before parsing oversized payloads', async () => {
+    for (const streamed of [false, true]) for (const newline of ['', '\n']) {
+        const f = fixture(1, false, {lineLimit: 64, readBytes: 7});
+        f.setFileContent(`${JSON.stringify({backupId: 'fixture'})}\n${'X'.repeat(65)}${newline}`);
+        if (streamed) f.context.TextDecoderStream = TextDecoderStream;
+        let parsed = 0, decrypted = 0;
+        f.context.parseBackupLine = line => { parsed++; return JSON.parse(line); };
+        f.context.decryptBackupEntry = async () => { decrypted++; throw new Error('must not decrypt oversized line'); };
+        await assert.rejects(f.prepare(), /BACKUP_LINE_TOO_LARGE/);
+        assert.equal(parsed, 1); assert.equal(decrypted, 0); assert.equal(f.calls.length, 0);
+        assert.equal(f.observers.size, 0);
+    }
+});
+
+test('line parser accepts the exact boundary and handles multiple lines in one decoded chunk', async () => {
+    for (const streamed of [false, true]) {
+        const f = fixture(1, false, {lineLimit: 64, readBytes: 5});
+        f.setFileContent(`${'A'.repeat(64)}\n\nB\r\n終`);
+        if (streamed) f.context.TextDecoderStream = TextDecoderStream;
+        const collected = [];
+        for await (const line of f.context.lines(f.file, () => {})) collected.push(line);
+        assert.deepEqual(collected, ['A'.repeat(64), 'B\r', '終']);
+    }
+});
+
+test('lock or owner change during slice read prevents parsing and subsequent reads', async () => {
+    for (const action of ['lock', 'changeUid']) {
+        const f = fixture(), gate = deferred(); let reads = 0, parsed = 0;
+        const slice = f.file.slice;
+        f.file.slice = (start, end) => ({arrayBuffer: async () => { reads++; await gate.promise; return slice(start, end).arrayBuffer(); }});
+        f.context.parseBackupLine = line => { parsed++; return JSON.parse(line); };
+        const pending = f.prepare(); f[action]('B'); gate.resolve();
+        await assert.rejects(pending, /BACKUP_SESSION_INVALIDATED/);
+        assert.equal(reads, 1); assert.equal(parsed, 0); assert.equal(f.calls.length, 0); assert.equal(f.observers.size, 0);
+    }
+});
+
+test('early exit, parse error and decrypt error cancel and release the stream reader', async () => {
+    for (const failure of ['return', 'parse', 'decrypt']) {
+        const f = fixture(); let cancelled = 0, released = 0, read = false;
+        const text = failure === 'parse' ? '{invalid}\n' : await f.file.text();
+        f.context.TextDecoderStream = class {};
+        f.file.stream = () => ({pipeThrough: () => ({getReader: () => ({
+            read: async () => { if (read) return {done: true}; read = true; return {done: false, value: text}; },
+            cancel: async () => { cancelled++; }, releaseLock: () => { released++; }
+        })})});
+        if (failure === 'return') {
+            const reader = f.context.lines(f.file, () => {});
+            await reader.next(); await reader.return();
+        } else {
+            if (failure === 'decrypt') f.context.decryptBackupEntry = async () => { throw new Error('synthetic decrypt failure'); };
+            await assert.rejects(f.prepare());
+        }
+        assert.equal(cancelled, 1); assert.equal(released, 1); assert.equal(f.calls.length, 0);
+    }
+});
+
+test('oversized record is rejected before retaining it or decrypting later records', async () => {
+    const f = fixture();
+    replaceBackupEntries(f, [{kind: 'record', scope: 'company', id: 'large', data: {value: 'x'.repeat(800 * 1024)}},
+        {kind: 'record', scope: 'company', id: 'later', data: {}}], []);
+    let decrypted = 0;
+    f.context.decryptBackupEntry = async ({envelope}) => { decrypted++; return {entry: envelope, digest: 'fixture'}; };
+    await assert.rejects(f.prepare(), /BACKUP_RECORD_TOO_LARGE/);
+    assert.equal(decrypted, 1); assert.equal(f.calls.length, 0); assert.equal(f.observers.size, 0);
+});
+
+test('invalid UTF-8, truncated slices and unsupported readers fail before server access', async () => {
+    const malformed = fixture(); malformed.setFileContent(new Uint8Array([0xc3, 0x28]));
+    await assert.rejects(malformed.prepare()); assert.equal(malformed.calls.length, 0);
+    const truncated = fixture(); truncated.file.slice = () => new Blob(['']);
+    await assert.rejects(truncated.prepare(), /BACKUP_FILE_READ_INVALID/); assert.equal(truncated.calls.length, 0);
+    const unsupported = fixture(); unsupported.file.slice = undefined;
+    await assert.rejects(unsupported.prepare(), /BACKUP_STREAM_UNAVAILABLE/); assert.equal(unsupported.calls.length, 0);
 });

@@ -108,3 +108,10 @@ Correzione export candidata `630972ec`: supportato il tipo Bytes restituito dal 
 L'importazione riusa la raccolta ricorsiva dei percorsi dell'export: include riferimenti annidati in aziende/scadenze e altri scope, deduplicando gli oggetti. Il manifest dell'esecuzione rimane immutabile nei retry. Prima delle scritture, ogni oggetto selezionato deve essere presente nel backup; upload e conteggio seguono soltanto quel manifest, senza creare oggetti orfani non referenziati.
 
 La prima lettura rifiuta oggetti duplicati, percorsi di altri proprietari e contenuti mancanti, vuoti, base64 malformati o eccessivi. La lunghezza viene limitata prima della conversione base64; i byte non vengono conservati nel piano. Il recupero selettivo degli elementi validi resta possibile se il file manca per un record non selezionato. Nessuno staging remoto o cambio implicito degli URL legacy.
+
+### Lettura incrementale del file — candidata 13/09/2026
+
+Il percorso alternativo senza TextDecoderStream legge porzioni da 64 KiB con decodifica UTF-8 incrementale e rigorosa. Entrambi i percorsi limitano la riga prima della concatenazione, interrompono la lettura al blocco del Vault e rifiutano record oltre il limite prima di accumularli nel piano. Le prove backup passano: 58 test.
+
+Il limite per riga tiene conto della doppia codifica base64 degli allegati. Questo non limita ancora la memoria aggregata dei record né i temporanei crittografici del singolo allegato; il completamento del requisito memoria M8 resta aperto.
+
