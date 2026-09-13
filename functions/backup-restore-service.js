@@ -66,6 +66,11 @@ function restorePath(uid, record) {
 }
 
 function validateRestoreChunk(input = {}, uid) {
+  if (typeof input?.expectedOwnerUid !== "string" || !uid || input.expectedOwnerUid !== uid) {
+    const error = new Error("BACKUP_OWNER_MISMATCH");
+    error.code = "BACKUP_OWNER_MISMATCH";
+    throw error;
+  }
   const operationId = identifier(input.operationId);
   const backupId = identifier(input.backupId);
   const chunkIndex = Number(input.chunkIndex);

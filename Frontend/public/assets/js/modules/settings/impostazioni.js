@@ -4,7 +4,7 @@
  */
 
 import { auth, db } from '../../firebase-config.js?v=1.2.110';
-import { signOut } from "/assets/js/vendor/firebase-runtime.js";
+import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
@@ -289,80 +289,186 @@ function setupAccountFieldUsage(user) {
     });
 }
 
+let disposeRestoreSetup = () => {};
+
+function createBackupRestoreAction(uid, button) {
+    const controller = new AbortController();
+    const cleanups = new Set();
+    let unsubscribe = () => {};
+    const dispose = () => {
+        if (controller.signal.aborted) return;
+        controller.abort();
+        unsubscribe();
+        globalThis.removeEventListener('vault-session-locked', dispose);
+        globalThis.removeEventListener('pagehide', dispose);
+        for (const cleanup of [...cleanups]) cleanup();
+        cleanups.clear();
+    };
+    const active = () => {
+        if (!controller.signal.aborted && (auth.currentUser?.uid !== uid || button.isConnected === false)) dispose();
+        return !controller.signal.aborted;
+    };
+    const check = () => { if (!active()) throw new Error('BACKUP_SESSION_INVALIDATED'); };
+    const own = cleanup => {
+        if (!active()) { cleanup(); return () => {}; }
+        cleanups.add(cleanup);
+        return () => cleanups.delete(cleanup);
+    };
+    globalThis.addEventListener('vault-session-locked', dispose);
+    globalThis.addEventListener('pagehide', dispose);
+    unsubscribe = onAuthStateChanged(auth, user => { if (user?.uid !== uid) dispose(); });
+    if (controller.signal.aborted) unsubscribe();
+    return {active, check, own, dispose, signal: controller.signal};
+}
+
+function showBackupRestoreInput(action, title, placeholder, description, secret = false) {
+    return new Promise(resolve => {
+        if (!action.active()) return resolve(null);
+        let settled = false, unregister = () => {};
+        const previousFocus = document.activeElement;
+        const input = createElement('input', {
+            type: 'text', value: '', placeholder, autocomplete: 'off', autocapitalize: 'off',
+            spellcheck: false, 'data-form-type': 'other', 'data-1p-ignore': 'true', 'data-lpignore': 'true',
+            className: `glass-field modal-input-glass${secret ? ' vault-secret-input' : ''}`,
+            'aria-label': title
+        });
+        const close = value => {
+            if (settled) return;
+            settled = true;
+            input.value = '';
+            modal.remove();
+            unregister();
+            resolve(value);
+            if (action.active() && previousFocus?.isConnected) previousFocus.focus();
+        };
+        const modal = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('form', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': title,
+                onsubmit: event => { event.preventDefault(); if (action.active()) close(input.value); }}, [
+                createElement('h3', {className: 'modal-title', textContent: title}),
+                createElement('p', {className: 'modal-text', textContent: description}), input,
+                createElement('div', {className: 'modal-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => close(null)}),
+                    createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Conferma'})
+                ])
+            ])
+        ]);
+        modal.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); close(null); } });
+        unregister = action.own(() => close(null));
+        document.body.appendChild(modal);
+        input.focus();
+    });
+}
+
 function setupEncryptedRestore(user) {
+    disposeRestoreSetup();
     const button = document.getElementById('btn-restore-encrypted-backup');
-    if (!button) return;
+    if (!button || auth.currentUser?.uid !== user.uid) return;
+    button.disabled = false;
     const input = createElement('input', {
         type: 'file', accept: '.cpbackup,application/x-codici-password-backup', className: 'hidden'
     });
     document.body.appendChild(input);
-    button.addEventListener('click', () => input.click());
+    let action = null, running = false, setupDisposed = false;
+    const selectFile = () => { if (!setupDisposed && !running && auth.currentUser?.uid === user.uid) input.click(); };
+    button.addEventListener('click', selectFile);
+    disposeRestoreSetup = () => { setupDisposed = true; action?.dispose(); input.remove(); button.removeEventListener('click', selectFile); };
     input.addEventListener('change', async () => {
         const file = input.files?.[0];
         input.value = '';
-        if (!file) return;
-        const recoveryKey = await showInputModal(
-            'Recovery Key del backup', '', 'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx',
-            'La chiave viene usata soltanto in memoria per verificare e aprire questo file.',
-            {vaultSecret: true}
-        );
-        if (!recoveryKey) return;
+        if (!file || setupDisposed || running || auth.currentUser?.uid !== user.uid) return;
+        running = true;
+        action = createBackupRestoreAction(user.uid, button);
+        const currentAction = action;
         button.disabled = true;
-        let working = showBackupWorking('Verifica completa del backup…', 'Il file viene aperto e controllato voce per voce. Non chiudere la pagina.');
+        let working = null, plan = null, release = () => {}, recoveryKey = '';
         try {
-            const {prepareBackupRestore, executeBackupRestore} = await import('./backup-import-service.js');
-            const plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase());
+            recoveryKey = await showBackupRestoreInput(currentAction, 'Recovery Key del backup',
+                'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx',
+                'La chiave viene usata soltanto in memoria per verificare e aprire questo file.', true);
+            currentAction.check();
+            if (!recoveryKey) return;
+            working = showBackupWorking('Verifica completa del backup…', 'Il file viene aperto e controllato voce per voce.', currentAction);
+            const {prepareBackupRestore, executeBackupRestore, releaseBackupRestore} = await import('./backup-import-service.js');
+            currentAction.check();
+            release = () => { if (plan) releaseBackupRestore(plan); plan = null; recoveryKey = ''; };
+            currentAction.own(release);
+            plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase(), {
+                signal: currentAction.signal, isActive: currentAction.active
+            });
+            recoveryKey = '';
+            currentAction.check();
             working.close();
             working = null;
             if (plan.collisionCount) {
-                const selectedIndexes = await showBackupRestorePreview(plan);
+                const selectedIndexes = await showBackupRestorePreview(plan, currentAction);
+                currentAction.check();
                 if (!selectedIndexes.length) return;
                 const selectedEntries = plan.comparison.entries.filter(entry => selectedIndexes.includes(entry.index));
                 const changedCount = selectedEntries.filter(entry => entry.status === 'changed').length;
-                const typed = await showInputModal(
-                    'Conferma ripristino selettivo', '', 'RIPRISTINA',
+                const typed = await showBackupRestoreInput(currentAction,
+                    'Conferma ripristino selettivo', 'RIPRISTINA',
                     `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Scrivi RIPRISTINA per continuare.`
                 );
+                currentAction.check();
                 if (typed !== 'RIPRISTINA') return;
-                working = showBackupWorking('Ripristino selettivo in corso…', 'Sto recuperando gli elementi scelti. Non chiudere la pagina.');
+                working = showBackupWorking('Ripristino selettivo in corso…', 'Il blocco ferma i passaggi successivi; le richieste già inviate possono completarsi.', currentAction);
                 const result = await executeBackupRestore(plan, selectedIndexes);
+                currentAction.check();
                 working.close();
                 working = null;
-                reloadAfterBackupRestore(result);
+                await reloadAfterBackupRestore(result, currentAction);
                 return;
             }
-            const typed = await showInputModal(
-                'Conferma ripristino', '', 'RIPRISTINA',
+            const typed = await showBackupRestoreInput(currentAction,
+                'Conferma ripristino', 'RIPRISTINA',
                 `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Scrivi RIPRISTINA per applicare i dati.`
             );
+            currentAction.check();
             if (typed !== 'RIPRISTINA') return;
-            working = showBackupWorking('Ripristino in corso…', 'Sto recuperando record e allegati. Non chiudere la pagina.');
+            working = showBackupWorking('Ripristino in corso…', 'Il blocco ferma i passaggi successivi; le richieste già inviate possono completarsi.', currentAction);
             const result = await executeBackupRestore(plan);
+            currentAction.check();
             working.close();
             working = null;
-            reloadAfterBackupRestore(result);
+            await reloadAfterBackupRestore(result, currentAction);
         } catch (error) {
-            console.error('[BACKUP] Ripristino non riuscito.', error?.message);
+            if (!currentAction.active()) return;
+            if (error?.progress?.mayHaveApplied) {
+                showToast('Ripristino interrotto: alcuni dati potrebbero essere già stati applicati. Verifica il Vault prima di riprovare.', 'warning');
+                return;
+            }
             const collision = String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
             showToast(collision
                 ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
                 : 'Backup non valido, incompleto o non applicabile.', 'error');
         } finally {
             working?.close();
-            button.disabled = false;
+            release();
+            if (currentAction.active()) button.disabled = false;
+            currentAction.dispose();
+            running = false;
         }
     });
 }
 
-function reloadAfterBackupRestore(result) {
+function reloadAfterBackupRestore(result, action) {
+    action.check();
     showToast(
         `Ripristino completato: ${result.recordCount} elementi e ${result.attachmentCount} allegati. Aggiornamento dati…`,
         'success'
     );
-    setTimeout(() => window.location.reload(), 900);
+    return new Promise(resolve => {
+        let unregister = () => {};
+        const timer = setTimeout(() => {
+            unregister();
+            if (action.active()) window.location.reload();
+            resolve();
+        }, 900);
+        unregister = action.own(() => { clearTimeout(timer); resolve(); });
+    });
 }
 
-function showBackupWorking(title, message) {
+function showBackupWorking(title, message, action) {
     const modal = createElement('div', {
         className: 'modal-overlay backup-working-overlay', role: 'alertdialog',
         'aria-modal': 'true', 'aria-live': 'polite', 'aria-busy': 'true'
@@ -378,18 +484,24 @@ function showBackupWorking(title, message) {
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('active'));
     let closed = false;
-    return {
+    let unregister = () => {};
+    const working = {
         close() {
             if (closed) return;
             closed = true;
             modal.classList.remove('active');
-            setTimeout(() => modal.remove(), 300);
+            modal.remove();
+            unregister();
         }
     };
+    unregister = action?.own(() => working.close()) || unregister;
+    return working;
 }
 
-function showBackupRestorePreview(plan) {
+function showBackupRestorePreview(plan, action) {
     return new Promise(resolve => {
+        if (!action.active()) return resolve([]);
+        let settled = false, unregister = () => {};
         const modal = createElement('div', {className: 'modal-overlay'});
         const closeButton = createElement('button', {
             className: 'btn-modal btn-secondary', textContent: 'Chiudi anteprima'
@@ -441,8 +553,11 @@ function showBackupRestorePreview(plan) {
             ]);
         });
         const close = result => {
-            modal.classList.remove('active');
-            setTimeout(() => { modal.remove(); resolve(result); }, 300);
+            if (settled) return;
+            settled = true;
+            modal.remove();
+            unregister();
+            resolve(result);
         };
         const updateRestoreButton = () => {
             const count = selectable.filter(item => item.checkbox.checked).length;
@@ -451,9 +566,9 @@ function showBackupRestorePreview(plan) {
         };
         selectable.forEach(item => item.checkbox.addEventListener('change', updateRestoreButton));
         closeButton.addEventListener('click', () => close([]));
-        restoreButton.addEventListener('click', () => close(selectable
+        restoreButton.addEventListener('click', () => { if (action.active()) close(selectable
             .filter(item => item.checkbox.checked)
-            .map(item => item.entry.index)));
+            .map(item => item.entry.index)); });
         updateRestoreButton();
         const summaryContent = createElement('div', {className: 'backup-preview-summary-content'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'preview'}),
@@ -479,7 +594,8 @@ function showBackupRestorePreview(plan) {
             createElement('div', {className: 'modal-actions'}, [closeButton, restoreButton])
         ]));
         document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
+        unregister = action.own(() => close([]));
+        setTimeout(() => { if (!settled && action.active()) modal.classList.add('active'); }, 10);
     });
 }
 

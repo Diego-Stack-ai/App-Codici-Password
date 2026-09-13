@@ -49,3 +49,15 @@ Sul commit applicativo indicato, `executeBackupRestore` applica transazioni sepa
 - [ ] misurare memoria e dimensioni su iPhone e Windows.
 
 L’export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.
+
+
+## Protezioni candidate della sessione di ripristino — 13/09/2026
+
+Base `141259d9`, ramo sperimentale. Prima il piano conservava lo UID del backup mentre la callable usava l'identità Firebase corrente: un cambio utente durante anteprima o conferma poteva far proseguire l'operazione nel contesto sbagliato. Il piano ora appartiene alla sessione che lo ha preparato; importazione, anteprima, invio dei blocchi e upload ricontrollano identità e validità prima/dopo le attese. Blocco Vault anche a UID invariato, logout, pagehide e dismissione annullano i passi successivi. I dialoghi di ripristino sono posseduti dall'azione e la chiave viene rimossa dagli input e dal piano alla chiusura. Un reader di file in attesa viene annullato quando possibile.
+
+La protezione non annulla richieste callable o upload già iniziati, non è una transazione globale e non garantisce azzeramento fisico delle stringhe JavaScript in memoria. Dopo un tentativo di scrittura, un errore espone soltanto contatori tecnici e `mayHaveApplied`; la UI segnala un possibile ripristino parziale e richiede di verificare il Vault prima di ritentare, senza dichiarare semplicemente il backup non valido. Nessun retry automatico o compensazione.
+
+Formato v2, parametri crittografici e schema dei dati restano invariati. Il comando callable richiede ora `expectedOwnerUid`, confrontato con lo UID autenticato prima di accedere a Firestore: copre anche il cambio identità durante il recupero asincrono del token SDK. Campo mancante o discordante produce `BACKUP_OWNER_MISMATCH`, senza fallback permissivo. Nessuna migrazione dei backup. Staging, confronto atomico rispetto all'anteprima, ricevute pregresse, ripresa complessiva e prove su dispositivi reali restano gate aperti.
+
+
+Compatibilità e distribuzione: il nuovo backend rifiuta anche i client vecchi senza `expectedOwnerUid`; il vecchio backend non applica il controllo aggiunto. Servono ambiente di collaudo e distribuzione coordinata client/backend, con gestione delle copie PWA precedenti. Non distribuire soltanto il client dichiarando risolta la race del token. Un rollback non deve ripristinare un writer che accetta silenziosamente l'identità corrente al posto del proprietario previsto. Questo rilascio backend resta non eseguito e soggetto al gate strutturale esistente.

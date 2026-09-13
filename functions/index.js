@@ -508,7 +508,12 @@ exports.restoreBackupChunk = onCall(
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
         let command;
-        try { command = validateRestoreChunk(request.data, request.auth.uid); } catch {
+        try { command = validateRestoreChunk(request.data, request.auth.uid); } catch (error) {
+            if (error.code === "BACKUP_OWNER_MISMATCH") {
+                throw new HttpsError("failed-precondition", "La sessione del ripristino è cambiata. Riapri il backup.", {
+                    reason: "BACKUP_OWNER_MISMATCH"
+                });
+            }
             throw new HttpsError("invalid-argument", "Chunk di ripristino non valido.");
         }
         const store = getFirestore();

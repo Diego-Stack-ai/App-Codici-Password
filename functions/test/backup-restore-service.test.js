@@ -19,24 +19,33 @@ test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
 
 test("valida chunk limitati senza duplicati o prototipi speciali", () => {
   const chunk = validateRestoreChunk({
+    expectedOwnerUid: "owner",
     operationId: "device:restore:1", backupId: "backup-1", chunkIndex: 0, chunkCount: 1,
     mode: "preview", records: [{scope: "settings", id: "generalConfig", data: {schemaVersion: 1}}]
   }, "owner");
   assert.equal(chunk.records[0].path, "users/owner/settings/generalConfig");
   assert.equal(chunk.overwriteConfirmed, false);
   const overwrite = validateRestoreChunk({
+    expectedOwnerUid: "owner",
     operationId: "device:restore:2", backupId: "backup-1", chunkIndex: 0, chunkCount: 1,
     mode: "apply", overwriteExisting: true, confirmation: "RESTORE_SELECTED_OVERWRITE",
     records: [{scope: "private-account", id: "a1", data: {nomeAccount: "Account"}}]
   }, "owner");
   assert.equal(overwrite.overwriteConfirmed, true);
   assert.throws(() => validateRestoreChunk({
+    expectedOwnerUid: "owner",
     operationId: "op", backupId: "b", chunkIndex: 0, chunkCount: 1,
     mode: "preview", records: [
       {scope: "contact", id: "c1", data: {}},
       {scope: "contact", id: "c1", data: {}}
     ]
   }, "owner"), /DUPLICATE/);
+});
+
+test("il proprietario atteso è obbligatorio e non viene convertito implicitamente", () => {
+  for (const expectedOwnerUid of [undefined, null, "", "other", false, 42, {toString: () => "owner"}]) {
+    assert.throws(() => validateRestoreChunk({expectedOwnerUid}, "owner"), {code: "BACKUP_OWNER_MISMATCH"});
+  }
 });
 
 test("ricostruisce tipi Firestore soltanto tramite factory esplicite", () => {
