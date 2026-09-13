@@ -16,7 +16,7 @@ assert.ok(start >= 0 && end > start);
 const mutationSource = source.slice(start, end);
 const uid = 'synthetic-owner';
 const cipher = 'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB';
-const base = {schemaVersion: 1, operationId: 'device:legacy-review', deviceId: 'device', recordId: 'record', expectedRevision: 2};
+const base = {schemaVersion: 1, uid, operationId: 'device:legacy-review', deviceId: 'device', recordId: 'record', expectedRevision: 2};
 
 function harness({domain, input, trusted, legacy, revision = 2}) {
   const writes = [];

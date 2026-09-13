@@ -24,7 +24,9 @@ function fixture() {
 test('prepared envelope passes the real M6 validator and preserves every unchanged payload field', async () => {
     const f = fixture(), before = structuredClone(f.args.source);
     const operation = await f.prepare();
-    assert.deepEqual(validatePrivateAccountMutation(operation), operation);
+    const {uid, ...normalized} = operation;
+    assert.equal(uid, f.args.uid);
+    assert.deepEqual(validatePrivateAccountMutation(operation), normalized);
     assert.equal(operation.record.note, cipher('Updated note'));
     for (const [field, value] of Object.entries(before)) {
         if (!['id', 'ownerId', 'schemaVersion', 'revision', 'note'].includes(field)) assert.deepEqual(operation.record[field], value);
@@ -78,7 +80,7 @@ test('snapshots source nested metadata and changes before encryption yields', as
     assert.deepEqual(encrypted, ['Initial note', 'Initial password']);
     assert.equal(operation.record.nomeAccount, 'Existing title'); assert.equal(operation.record.createdAt.seconds, 123);
     assert.deepEqual(operation.record.banking, []);
-    assert.deepEqual(validatePrivateAccountMutation(operation), operation);
+    assert.deepEqual(validatePrivateAccountMutation(operation), Object.fromEntries(Object.entries(operation).filter(([key]) => key !== 'uid')));
 });
 
 test('abort while encrypting returns no operation and prevents subsequent encryption', async () => {
@@ -121,5 +123,5 @@ test('backend updatedAt Timestamp stays untouched and is explicitly excluded fro
     const operation = await f.prepare();
     assert.equal(f.args.source.updatedAt, updatedAt); assert.equal(updatedAt.seconds, 123);
     assert.equal(conversions, 0); assert.equal(Object.hasOwn(operation.record, 'updatedAt'), false);
-    assert.deepEqual(validatePrivateAccountMutation(operation), operation);
+    assert.deepEqual(validatePrivateAccountMutation(operation), Object.fromEntries(Object.entries(operation).filter(([key]) => key !== 'uid')));
 });

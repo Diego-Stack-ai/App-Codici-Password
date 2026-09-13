@@ -7,7 +7,7 @@ const {validatePrivateAccountMutation, privateAccountMutationDecision} = require
 const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require('../mutation-result-binding');
 
 const cipher = 'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB';
-const operation = () => ({schemaVersion: 1, recordId: 'record', operationId: 'device:scope', deviceId: 'device', expectedRevision: 1,
+const operation = () => ({schemaVersion: 1, uid: 'owner', recordId: 'record', operationId: 'device:scope', deviceId: 'device', expectedRevision: 1,
   record: {type: 'account', visibility: 'private', _encrypted: true, nomeAccount: 'Synthetic account',
     username: cipher, account: cipher, password: cipher, note: cipher}});
 const basic = () => ({ownerId: 'owner', revision: 1, type: 'account', visibility: 'private'});

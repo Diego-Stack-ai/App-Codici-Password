@@ -8,9 +8,10 @@ import {
 
 const manageAccountWidget = httpsCallable(functions, 'manageAccountWidget');
 
-async function send(command) {
+async function send(command, uid = auth.currentUser?.uid) {
+    if (!uid || auth.currentUser?.uid !== uid) throw new Error('WIDGET_SESSION_CHANGED');
     if (!navigator.onLine) throw new Error('I Widget Account si modificano soltanto online.');
-    const response = await manageAccountWidget(command);
+    const response = await manageAccountWidget({...command, expectedOwnerUid: uid});
     if (response.data?.status !== 'applied') {
         const error = new Error(response.data?.status === 'conflict'
             ? 'Il Widget è stato modificato altrove. Aggiorna e riprova.'
@@ -46,7 +47,7 @@ export async function createAccountWidget(data, account, widgetId) {
     const ids = createEmbeddedWidgetIdentifiers(widgetId);
     const widget = await prepare(data, account);
     assertSession(account, uid);
-    const result = await send({...ids, action: 'create', ...contextFields(widget), data: widget});
+    const result = await send({...ids, action: 'create', ...contextFields(widget), data: widget}, uid);
     return {...result, widgetId: ids.widgetId};
 }
 
@@ -59,7 +60,7 @@ export async function updateAccountWidget(widgetId, expectedRevision, data, acco
     return send({
         ...ids, action: 'update', expectedRevision,
         ...contextFields(widget), data: widget
-    });
+    }, uid);
 }
 
 export async function deleteAccountWidget(widget, account) {

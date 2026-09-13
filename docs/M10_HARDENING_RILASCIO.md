@@ -50,3 +50,19 @@ Prima di implementare tale evoluzione è stato aggiunto il blocco di coerenza Pr
 ## Gate aggiuntivo Auth/Vault — 12/09/2026
 
 `npm run test:vault-emulators` verifica il collegamento SDK Authentication/Firestore e lettore v2 su progetto demo locale, con una copia identica delle Rules correnti. Undici test superati. Integrato nella suite completa; non modifica il canale pubblicato né dimostra enforcement remoto, MFA/PRF, App Check o recupero completo. [Audit §20](./AUDIT_VAULT_SESSION_P0.md#20-sdk-firebase-e-sessione-protetta-in-emulatore--12092026).
+
+
+## Compatibilità dei controlli proprietario — candidata 13/09/2026
+
+La protezione delle chiamate differite deve essere verificata su entrambi i lati: il token Firebase può essere acquisito dopo l'invocazione del client. Il confronto locale prima di chiamare `httpsCallable` non sostituisce la validazione del proprietario previsto nel backend. Il blocco backup è verificato al commit `273de41b`; l'estensione M6/widget è un blocco successivo, non inclusa nei 700 test di quel commit: i due ingressi M6 confrontano `data.uid`, mentre widget e Credenziali comuni richiedono `expectedOwnerUid`. I client M6 canonici già conservavano lo UID nella coda; il laboratorio è stato riallineato. I vecchi client widget/shared senza il nuovo campo vengono respinti.
+
+| Combinazione backup | Esito atteso |
+|---|---|
+| Client nuovo + backend nuovo | `expectedOwnerUid` obbligatorio, confronto prima di Firestore |
+| Client nuovo + backend vecchio | Campo ignorato dal backend: protezione completa non dimostrata |
+| Client vecchio + backend nuovo | Campo mancante: ripristino respinto, Vault non modificato |
+| Client vecchio + backend vecchio | Comportamento precedente, inclusa la race identificata |
+
+Il rilascio deve prevedere aggiornamento delle copie PWA e un messaggio comprensibile durante eventuale incompatibilità temporanea. Non inserire un fallback che accetti il comando senza proprietario. Prima del deploy: provare entrambe le identità, chiamate in attesa, missing/mismatch e nessuna lettura/scrittura dopo rifiuto; collaudare anche il client già installato prima dell'aggiornamento.
+
+Il rollback backend deve conservare sia il confronto proprietario sia il registro attendibile M6; una vecchia build integrale non soddisfa questo requisito. Un'eventuale disabilitazione temporanea del ripristino è diversa da una perdita di dati e va dichiarata. Nessun deploy o rollback eseguito da questa registrazione; resta necessaria approvazione esplicita per il backend di produzione.

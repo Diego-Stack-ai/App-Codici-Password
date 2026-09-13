@@ -64,6 +64,24 @@ test('original private-account handler persists prepared ciphertext in the demo 
     const operation = await prepare(a, 'UPDATED-SYNTHETIC-A', 'mutation-a');
     const run = (client, data) => applyPrivateAccountMutation.run({auth: {uid: client.uid}, data});
 
+    await t.test('commands captured for A cannot create records or receipts when the transport authenticates B', async () => {
+        for (const [domain, handler, collection] of [
+            ['private', applyPrivateAccountMutation, 'accounts'], ['offline', applyOfflineMutation, 'syncRecords']
+        ]) {
+            const recordId = `owner-bound-${domain}`, operationId = `owner-mismatch-${domain}`;
+            const data = domain === 'private'
+                ? {...operation, uid: a.uid, recordId, operationId, expectedRevision: 0}
+                : {schemaVersion: 1, uid: a.uid, recordId, operationId, deviceId: operation.deviceId, expectedRevision: 0, encryptedPayload: operation.record.password};
+            await assert.rejects(handler.run({auth: {uid: b.uid}, data}),
+                error => error.code === 'failed-precondition' && error.details?.reason === 'MUTATION_OWNER_MISMATCH');
+            for (const uid of [a.uid, b.uid]) {
+                for (const path of [`users/${uid}/${collection}/${recordId}`, `mutationResults/${uid}/operations/${operationId}`, `users/${uid}/operationResults/${operationId}`]) {
+                    assert.equal((await getAdminFirestore().doc(path).get()).exists, false);
+                }
+            }
+        }
+    });
+
     await t.test('preparation alone does not write; the original handler applies ciphertext and increments revision', async () => {
         assert.equal((await stored(a)).password, a.originalPassword);
         const result = await run(a, operation);
@@ -260,7 +278,7 @@ test('original private-account handler persists prepared ciphertext in the demo 
     });
 
     await t.test('private and generic offline mutations cannot reuse each other operation identities', async () => {
-        const offline = {schemaVersion: 1, operationId: operation.operationId, recordId: 'sync-fixture',
+        const offline = {schemaVersion: 1, uid: a.uid, operationId: operation.operationId, recordId: 'sync-fixture',
             deviceId: operation.deviceId, expectedRevision: 0, encryptedPayload: operation.record.password};
         const runOffline = data => applyOfflineMutation.run({auth: {uid: a.uid}, data});
         await assert.rejects(runOffline(offline), error => error.code === 'already-exists');
@@ -446,7 +464,7 @@ test('original private-account handler persists prepared ciphertext in the demo 
                 const original = domain === 'private' ? {...operation.record, revision} : {revision, encryptedPayload: operation.record.password};
                 await reference.set(original);
                 const request = domain === 'private' ? {...operation, recordId, operationId, expectedRevision: 0} : {
-                    schemaVersion: 1, operationId, recordId, deviceId: operation.deviceId, expectedRevision: 0,
+                    schemaVersion: 1, uid: a.uid, operationId, recordId, deviceId: operation.deviceId, expectedRevision: 0,
                     encryptedPayload: operation.record.password
                 };
                 const handler = domain === 'private' ? applyPrivateAccountMutation : applyOfflineMutation;

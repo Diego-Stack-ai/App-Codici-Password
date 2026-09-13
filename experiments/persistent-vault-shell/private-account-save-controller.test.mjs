@@ -7,7 +7,7 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const input = () => ({uid: 'owner', domain: 'private', recordId: 'record', operationId: 'operation', deviceId: 'device', expectedRevision: 1,
     changes: {password: 'SYNTHETIC-PLAINTEXT'}});
-const envelope = value => Object.freeze({schemaVersion: 1, operationId: value.operationId, recordId: value.recordId,
+const envelope = value => Object.freeze({schemaVersion: 1, uid: value.uid, operationId: value.operationId, recordId: value.recordId,
     deviceId: value.deviceId, expectedRevision: value.expectedRevision, record: Object.freeze({password: 'SYNTHETIC-CIPHERTEXT'})});
 const applied = () => ({status: 'applied', revision: 2, duplicate: false});
 const receipt = () => ({...applied(), domain: 'private-account', ownerUid: 'owner', recordId: 'record', deviceId: 'device', operationId: 'operation'});

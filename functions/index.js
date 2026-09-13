@@ -81,10 +81,19 @@ function verifiedCurrentRevision(recordSnapshot) {
     catch { throw new HttpsError('failed-precondition', 'Revisione record non valida.'); }
 }
 
+function requireMutationOwner(request, field = 'uid') {
+    if (typeof request.data?.[field] !== 'string' || request.data[field] !== request.auth.uid) {
+        throw new HttpsError('failed-precondition', 'La sessione della modifica è cambiata. Riapri il modulo.', {
+            reason: 'MUTATION_OWNER_MISMATCH'
+        });
+    }
+}
+
 exports.applyOfflineMutation = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async (request) => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request);
         let operation;
         try {
             operation = validateOfflineMutation(request.data);
@@ -130,6 +139,7 @@ exports.applyPrivateAccountMutation = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request);
         let operation;
         try { operation = validatePrivateAccountMutation(request.data); } catch {
             throw new HttpsError("invalid-argument", "Account privato offline non valido.");
@@ -188,6 +198,7 @@ exports.manageSharedVaultData = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
         let command;
         try {
             command = validateSharedVaultCommand(request.data);
@@ -309,6 +320,7 @@ exports.manageAccountWidget = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
         let command;
         try {
             command = validateAccountWidgetCommand(request.data);

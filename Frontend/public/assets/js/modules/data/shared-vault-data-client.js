@@ -14,9 +14,10 @@ async function encryptedPayload(data) {
     return prepareSharedVaultData(data, value => encrypt(value, vaultKeyMaterial));
 }
 
-async function send(command) {
+async function send(command, uid = auth.currentUser?.uid) {
+    if (!uid || auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata. Riapri la modifica.');
     if (!navigator.onLine) throw new Error('Le Credenziali comuni si modificano soltanto online.');
-    const response = await manageSharedVaultData(command);
+    const response = await manageSharedVaultData({...command, expectedOwnerUid: uid});
     if (response.data?.status !== 'applied') {
         const error = new Error(response.data?.status === 'conflict'
             ? 'La Credenziale comune è stata modificata altrove. Aggiorna e riprova.'
@@ -33,7 +34,7 @@ export async function createSharedCredential(data, sharedDataId, {isActive = () 
     const ids = createSharedVaultIdentifiers(sharedDataId);
     const payload = await encryptedPayload(data);
     if (auth.currentUser?.uid !== uid || !isActive()) throw new Error('Sessione cambiata. Riapri la modifica.');
-    return send({...ids, action: 'create', data: payload});
+    return send({...ids, action: 'create', data: payload}, uid);
 }
 
 export async function updateSharedCredential(sharedDataId, expectedRevision, data, {isActive = () => true} = {}) {
@@ -44,7 +45,7 @@ export async function updateSharedCredential(sharedDataId, expectedRevision, dat
     return send({
         ...createSharedVaultIdentifiers(sharedDataId), action: 'update', expectedRevision,
         data: payload
-    });
+    }, uid);
 }
 
 export async function linkSharedCredential(sharedDataId, expectedRevision, link) {

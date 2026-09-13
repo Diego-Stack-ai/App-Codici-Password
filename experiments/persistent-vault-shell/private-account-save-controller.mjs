@@ -53,7 +53,7 @@ export function createPrivateAccountSaveController({context, getUser, prepare, s
             typeof input.deviceId !== 'string' || !operationPattern.test(input.deviceId) ||
             !Number.isSafeInteger(input.expectedRevision) || input.expectedRevision < 0 ||
             input.expectedRevision >= Number.MAX_SAFE_INTEGER) fail('SAVE_INPUT_INVALID');
-        return {recordId: input.recordId, operationId: input.operationId, deviceId: input.deviceId, expectedRevision: input.expectedRevision};
+        return {uid, recordId: input.recordId, operationId: input.operationId, deviceId: input.deviceId, expectedRevision: input.expectedRevision};
     }
     function validOperation(value, expected) {
         return value && immutableData(value) && value.schemaVersion === 1 &&

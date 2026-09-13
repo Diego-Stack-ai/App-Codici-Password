@@ -88,5 +88,5 @@ export async function preparePrivateAccountMutation({context, source, changes, d
     assertActive();
     const updatedRecord = {...record, ...patch};
     validateRecord(updatedRecord);
-    return freezeDeep({schemaVersion: 1, operationId, deviceId, recordId, expectedRevision, record: updatedRecord});
+    return freezeDeep({schemaVersion: 1, uid, operationId, deviceId, recordId, expectedRevision, record: updatedRecord});
 }
