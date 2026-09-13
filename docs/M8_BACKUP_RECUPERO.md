@@ -92,3 +92,19 @@ Dopo il checkpoint Archivio `f67c8d7b`, l'esecuzione Firestore conserva un piano
 La UI mantiene piano e chiave soltanto mentre offre «Verifica e riprendi» nella sessione attiva. Interrompi, blocco Vault, cambio identità o dismissione chiudono il dialogo e rilasciano il piano. Nessun retry automatico. Rifiuti definitivi e anteprima obsoleta non vengono ritentati; un esito incerto dopo l'inizio di Storage blocca la ripetizione generica. Dopo successo una seconda chiamata restituisce il risultato già registrato, senza ripetere gli upload.
 
 Questo passo non salva un journal durevole, non riprende dopo refresh, non fornisce staging degli oggetti né compensazione globale. La retention delle eventuali copie intermedie richiede una decisione distinta prima di attivarle. Il formato cpbackup resta invariato.
+
+
+### Prerequisiti verificati per lo staging degli allegati — 13/09/2026
+
+Il runtime allegati v1 usa AAD costante `CodiciPassword-Attachment-v1`: percorso Storage, nome e ID Account non entrano nella cifratura o nel wrapping. Il prototipo di condivisione lega invece recordId/attachmentId, che devono restare invariati, ma non storagePath. Il contenitore backup v2 è distinto dal formato dell'allegato. I legacy senza `encryption` vengono aperti tramite URL e richiedono classificazione separata: nessuna riscrittura automatica.
+
+Una futura promozione deve verificare digest/dimensione/generazione dello staging e copiare su un nuovo percorso finale nel prefisso dell'Account: un riferimento permanente sotto restoreStaging sarebbe rifiutato dal purge. Le Rules attuali consentono al proprietario di modificare gli oggetti, quindi un controllo iniziale non prova immutabilità. Staging e promozione non sono implementati da questa annotazione.
+
+Correzione export candidata `630972ec`: supportato il tipo Bytes restituito dal vero SDK Web Firestore, oltre a Uint8Array. Il test usa la classe SDK installata e conserva il tag bytes esistente; nessun nuovo formato di backup.
+
+
+### Manifest degli allegati selezionati — candidata 13/09/2026
+
+L'importazione riusa la raccolta ricorsiva dei percorsi dell'export: include riferimenti annidati in aziende/scadenze e altri scope, deduplicando gli oggetti. Il manifest dell'esecuzione rimane immutabile nei retry. Prima delle scritture, ogni oggetto selezionato deve essere presente nel backup; upload e conteggio seguono soltanto quel manifest, senza creare oggetti orfani non referenziati.
+
+La prima lettura rifiuta oggetti duplicati, percorsi di altri proprietari e contenuti mancanti, vuoti, base64 malformati o eccessivi. La lunghezza viene limitata prima della conversione base64; i byte non vengono conservati nel piano. Il recupero selettivo degli elementi validi resta possibile se il file manca per un record non selezionato. Nessuno staging remoto o cambio implicito degli URL legacy.

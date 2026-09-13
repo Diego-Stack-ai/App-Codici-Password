@@ -6,6 +6,7 @@ const root = new URL('../Frontend/public/assets/js/modules/settings/', import.me
 const strip = source => source.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const service = strip(await readFile(new URL('backup-import-service.js', root), 'utf8'));
 const model = strip(await readFile(new URL('backup-import-model.js', root), 'utf8'));
+const exportModel = strip(await readFile(new URL('backup-export-model.js', root), 'utf8'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 
 function fixture(count = 1, attachment = false) {
@@ -31,6 +32,7 @@ function fixture(count = 1, attachment = false) {
         uploadBytes: async (...args) => uploads.push(args),
     });
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
+    vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
     vm.runInContext(service, context);
     return {context, file, calls, uploads, observers,
         prepare: () => context.prepareBackupRestore(file, 'A', 'synthetic-recovery'),
@@ -309,4 +311,85 @@ test('definite RPC rejection blocks retries while retaining prior confirmed or u
         assert.equal(f.calls.length, before);
         f.context.releaseBackupRestore(plan);
     }
+});
+
+function replaceBackupEntries(f, records, attachments) {
+    const entries = [...records, ...attachments];
+    f.file.text = async () => [JSON.stringify({backupId: 'fixture'}), ...entries.map(JSON.stringify),
+        JSON.stringify({kind: 'footer', entryCount: entries.length, recordCount: records.length, attachmentCount: attachments.length})].join('\n');
+}
+const blob = storagePath => ({kind: 'attachment', storagePath, content: 'QQ=='});
+
+test('selective company and deadline restore includes nested Storage references exactly once', async () => {
+    const f = fixture(), shared = 'users/A/aziende/company/shared', deadline = 'users/A/scadenze/deadline/file', other = 'users/A/other/file';
+    replaceBackupEntries(f, [
+        {kind: 'record', scope: 'company', id: 'company', data: {documents: [{files: [{storagePath: shared}, {storagePath: shared}]}]}},
+        {kind: 'record', scope: 'deadline', id: 'deadline', data: {attachments: [{nested: {storagePath: deadline}}, {storagePath: shared}]}},
+        {kind: 'record', scope: 'company', id: 'other', data: {document: {storagePath: other}}}
+    ], [blob(shared), blob(deadline), blob(other)]);
+    const plan = await f.prepare();
+    const result = await f.context.executeBackupRestore(plan, [0, 1]);
+    assert.equal(result.recordCount, 2); assert.equal(result.attachmentCount, 2);
+    assert.deepEqual(f.uploads.map(args => args[0]).sort(), [shared, deadline].sort());
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply')[0].command.records.length, 2);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('cross-owner nested reference is rejected before preview or apply', async () => {
+    const f = fixture();
+    replaceBackupEntries(f, [{kind: 'record', scope: 'deadline', id: 'deadline', data: {attachments: [{storagePath: 'users/B/file'}]}}], []);
+    await assert.rejects(f.prepare(), /BACKUP_STORAGE_PATH_INVALID/);
+    assert.equal(f.calls.length, 0); assert.equal(f.uploads.length, 0);
+});
+
+test('missing selected blob fails preflight before writes and public manifest cannot bypass it', async () => {
+    const f = fixture(), missing = 'users/A/missing', available = 'users/A/available';
+    replaceBackupEntries(f, [
+        {kind: 'record', scope: 'company', id: 'missing', data: {files: [{storagePath: missing}]}},
+        {kind: 'record', scope: 'deadline', id: 'available', data: {files: [{storagePath: available}]}}
+    ], [blob(available)]);
+    const plan = await f.prepare(); plan.storagePaths.push(missing);
+    await assert.rejects(f.context.executeBackupRestore(plan, [0]), error => error.code === 'BACKUP_ATTACHMENT_MISSING' && !error.progress.mayHaveApplied);
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0);
+    const result = await f.context.executeBackupRestore(plan, [1]);
+    assert.equal(result.attachmentCount, 1); assert.equal(f.uploads[0][0], available);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('duplicate attachment paths or invalid contents fail the initial scan with no writes', async () => {
+    const path = 'users/A/file';
+    for (const attachments of [[blob(path), blob(path)], ...[undefined, '', 'not base64', 'Q===', 'QQ', 'QQ=Q'].map(content => [{...blob(path), content}])]) {
+        const f = fixture();
+        replaceBackupEntries(f, [{kind: 'record', scope: 'company', id: 'company', data: {storagePath: path}}], attachments);
+        await assert.rejects(f.prepare(), /BACKUP_ATTACHMENT_(DUPLICATE|SIZE_INVALID|CONTENT_INVALID)/);
+        assert.equal(f.calls.length, 0); assert.equal(f.uploads.length, 0); assert.equal(f.observers.size, 0);
+    }
+});
+
+test('oversized base64 is rejected before decoding and upload count follows referenced manifest', async () => {
+    const oversized = fixture(); let decoded = 0;
+    oversized.context.atob = () => { decoded++; throw new Error('must not decode oversized content'); };
+    oversized.context.parseBackupLine = value => { const parsed = JSON.parse(value); if (parsed.kind === 'attachment') parsed.content = 'A'.repeat(Math.ceil((25 * 1024 * 1024 + 1024) / 3) * 4 + 4); return parsed; };
+    replaceBackupEntries(oversized, [{kind: 'record', scope: 'company', id: 'company', data: {storagePath: 'users/A/file'}}], [blob('users/A/file')]);
+    await assert.rejects(oversized.prepare(), /BACKUP_ATTACHMENT_SIZE_INVALID/);
+    assert.equal(decoded, 0); assert.equal(oversized.calls.length, 0);
+    const f = fixture(), referenced = 'users/A/selected', extra = 'users/A/unreferenced';
+    replaceBackupEntries(f, [{kind: 'record', scope: 'company', id: 'company', data: {files: [{storagePath: referenced}]}}], [blob(referenced), blob(extra)]);
+    const plan = await f.prepare(), result = await f.context.executeBackupRestore(plan);
+    assert.equal(plan.counts.attachments, 2); assert.equal(result.attachmentCount, 1); assert.equal(f.uploads[0][0], referenced);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('nested attachment manifest remains stable through explicit Firestore retry', async () => {
+    const f = fixture(), path = 'users/A/company/file';
+    replaceBackupEntries(f, [{kind: 'record', scope: 'company', id: 'company', data: {files: [{storagePath: path}]}}], [blob(path)]);
+    const plan = await f.prepare(); f.context.respond = async () => { throw new Error('response lost'); };
+    await assert.rejects(f.context.executeBackupRestore(plan, [0]), error => error.retryable);
+    assert.equal(f.uploads.length, 0);
+    plan.storagePaths = [];
+    f.context.respond = async () => ({data: {status: 'applied', duplicate: true}});
+    const result = await f.context.executeBackupRestore(plan, [0], {retry: true});
+    assert.equal(result.attachmentCount, 1); assert.equal(f.uploads[0][0], path);
+    const commands = f.calls.filter(call => call.command.mode === 'apply').map(call => call.command);
+    assert.equal(commands[0], commands[1]); f.context.releaseBackupRestore(plan);
 });

@@ -2,6 +2,7 @@ import {auth, functions, storage} from '../../firebase-config.js?v=1.2.110';
 import {httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
+import {collectStoragePaths} from './backup-export-model.js';
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
@@ -56,6 +57,7 @@ export function releaseBackupRestore(plan) {
         plan.file = null;
         plan.records = [];
         plan.chunks = [];
+        plan.storagePaths = [];
         plan.comparison = null;
     }
 }
@@ -96,6 +98,18 @@ async function* lines(file, check, signal) {
 function base64ToBytes(value) {
     const binary = atob(String(value));
     return Uint8Array.from(binary, character => character.charCodeAt(0));
+}
+
+function attachmentBytes(content) {
+    if (typeof content !== 'string' || !content.length || content.length > Math.ceil(MAX_ATTACHMENT_BYTES / 3) * 4) {
+        throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
+    }
+    if (content.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(content)) {
+        throw new Error('BACKUP_ATTACHMENT_CONTENT_INVALID');
+    }
+    const bytes = base64ToBytes(content);
+    if (!bytes.length || bytes.byteLength > MAX_ATTACHMENT_BYTES) throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
+    return bytes;
 }
 
 async function scanBackup(file, uid, recoveryKey, visit = null, check = () => {}, signal) {
@@ -175,9 +189,15 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const storagePaths = new Set();
         const scan = await scanBackup(file, uid, recoveryKey, entry => {
             if (entry.kind === 'record') records.push(entry);
-            else storagePaths.add(validateRestoreStoragePath(entry.storagePath, uid));
+            else {
+                const path = validateRestoreStoragePath(entry.storagePath, uid);
+                if (storagePaths.has(path)) throw new Error('BACKUP_ATTACHMENT_DUPLICATE');
+                attachmentBytes(entry.content);
+                storagePaths.add(path);
+            }
         }, check, session.signal);
         check();
+        collectStoragePaths(records, uid);
         const chunks = chunkRestoreRecords(records);
         if (!chunks.length) throw new Error('BACKUP_EMPTY');
         const descriptions = describeRestoreRecords(records);
@@ -213,12 +233,14 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         };
         session.source = {file, recoveryKey, backupId: scan.header.backupId,
             records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
-            counts: freezeRestoreValue(scan.counts), collisionCount: collisions};
+            counts: freezeRestoreValue(scan.counts), collisionCount: collisions,
+            storagePaths: freezeRestoreValue([...storagePaths])};
         session.own(() => {
             session.source = null;
             if (session.execution) {
                 session.execution.commands = [];
                 session.execution.records = [];
+                session.execution.storagePaths = [];
                 session.execution.selection = null;
                 session.execution.result = null;
             }
@@ -267,6 +289,9 @@ function prepareRestoreExecution(session, selection) {
         if (!expectedVersion) throw restoreError('BACKUP_PREVIEW_INVALID');
         return freezeRestoreValue({...source.records[entry.index], expectedVersion});
     });
+    const storagePaths = freezeRestoreValue(collectStoragePaths(records, session.uid));
+    const availablePaths = new Set(source.storagePaths);
+    if (storagePaths.some(path => !availablePaths.has(path))) throw restoreError('BACKUP_ATTACHMENT_MISSING');
     const chunks = chunkRestoreRecords(records);
     const overwriteExisting = entries.some(entry => entry.status === 'changed');
     const executionId = crypto.randomUUID();
@@ -276,7 +301,7 @@ function prepareRestoreExecution(session, selection) {
         chunkIndex: index, chunkCount: chunks.length, mode: 'apply', overwriteExisting,
         confirmation: overwriteExisting ? 'RESTORE_SELECTED_OVERWRITE' : 'RESTORE_VALIDATED', records: chunk
     })));
-    return {executionId, selection: freezeRestoreValue(selection), selective, records, commands,
+    return {executionId, selection: freezeRestoreValue(selection), selective, records, commands, storagePaths,
         attemptedChunks: 0, confirmedChunks: 0, uploaded: 0, uncertain: false, possiblyApplied: false, storageStarted: false,
         inFlight: false, blocked: false, result: null};
 }
@@ -331,18 +356,13 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
             execution.confirmedChunks += 1;
         }
         stage = 'storage';
-        const selectedStoragePaths = new Set(execution.records
-            .filter(record => record.scope === 'private-account-attachment' || record.scope === 'company-account-attachment')
-            .map(record => record.data?.storagePath)
-            .filter(Boolean)
-            .map(storagePath => validateRestoreStoragePath(storagePath, session.uid)));
+        const selectedStoragePaths = new Set(execution.storagePaths);
         check();
         await scanBackup(source.file, session.uid, source.recoveryKey, async entry => {
             if (entry.kind !== 'attachment') return;
             const storagePath = validateRestoreStoragePath(entry.storagePath, session.uid);
-            if (execution.selective && !selectedStoragePaths.has(storagePath)) return;
-            const bytes = base64ToBytes(entry.content);
-            if (!bytes.length || bytes.byteLength > MAX_ATTACHMENT_BYTES) throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
+            if (!selectedStoragePaths.has(storagePath)) return;
+            const bytes = attachmentBytes(entry.content);
             check();
             execution.storageStarted = true;
             await uploadBytes(ref(storage, storagePath), bytes, {
@@ -352,7 +372,7 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
             execution.uploaded += 1;
         }, check, session.signal);
         check();
-        const expectedAttachments = execution.selective ? selectedStoragePaths.size : source.counts.attachments;
+        const expectedAttachments = selectedStoragePaths.size;
         if (execution.uploaded !== expectedAttachments) throw new Error('BACKUP_ATTACHMENT_COUNT_INVALID');
         execution.result = freezeRestoreValue({recordCount: execution.records.length, attachmentCount: execution.uploaded});
         return {...execution.result};
