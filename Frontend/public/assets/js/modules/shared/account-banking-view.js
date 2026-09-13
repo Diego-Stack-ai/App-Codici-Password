@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=account-ui-preview-4';
 
 function createReadonlyField(label, value, icon, isPassword = false, isActive = () => true) {
     const id = `bank-field-${crypto.randomUUID()}`;
@@ -99,6 +99,7 @@ function createBankAccount(bank, index, isActive) {
     const fields = [
         bank.iban ? field('IBAN', bank.iban, 'account_balance') : null,
         bank.passwordDispositiva ? field('Pass. Disp.', bank.passwordDispositiva, 'lock', true) : null,
+        bank.referenteNome ? field('Referente banca', bank.referenteNome, 'person') : null,
         bank.referenteTelefono ? field('Tel. Banca', bank.referenteTelefono, 'call') : null,
         bank.referenteCellulare ? field('Cell. Banca', bank.referenteCellulare, 'smartphone') : null
     ].filter(Boolean);
