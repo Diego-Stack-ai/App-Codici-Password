@@ -97,3 +97,10 @@ Costo: per ogni operazione nuova si aggiungono il Profilo e la query completa de
 Base `141259d9`, candidato sperimentale. `PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED` non viene più presentato come errore temporaneo di rete: la coda conserva dentro il contenitore cifrato il motivo e il marker di riconciliazione, arrestando i retry automatici anche alla riapertura. La UI spiega che il record richiede la modifica completa. Consente di conservare la copia per decidere più tardi oppure eliminarla esplicitamente mantenendo il server; non la applica con il writer ridotto e non dichiara un salvataggio riuscito. Nessuna conversione automatica verso il percorso complesso.
 
 Verifiche locali: 31 test coda/sync/recupero, più 24 esiti nella suite Auth/Firestore emulata. I due nuovi scenari emulati comprendono 12 combinazioni di riferimenti inversi, inclusi contatti vuoti e aziende archiviate, namespace aziendale distinto, retry attendibile e assenza di variazioni a record, revisioni, updateTime e ricevute dopo rifiuto. Nessun dato reale. La scala della scansione e il recupero guidato della copia nel percorso complesso restano aperti. Nessuna migrazione o distribuzione backend.
+
+### Conferma locale del comando applicato — candidata 13/09/2026
+
+La coda elimina soltanto il comando effettivamente inviato: decifra la versione attesa in memoria e confronta nuovamente il contenitore nella transazione IndexedDB finale. Se nel frattempo un'altra azione lo ha sostituito o marcato da riconciliare, conserva la coda e restituisce errore recuperabile senza dichiarare salvato. Enqueue non sovrascrive un ID già associato a contenuti diversi; il reinserimento identico conserva il contenitore esistente. Anche lo scarto esplicito usa una snapshot acquisita sotto lease e il controllo della sessione.
+
+Suite offline: 52 test superati, inclusa la regressione riprodotta della risposta tardiva che cancellava una riconciliazione. Nessun formato o schema IndexedDB modificato. Questo è un prerequisito del fallback senza Web Locks: lease con scadenza, fencing e coordinamento fra copie PWA richiedono un protocollo distinto; il gate resta aperto.
+

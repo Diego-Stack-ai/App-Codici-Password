@@ -4,6 +4,8 @@ import test from 'node:test';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-queue.js', import.meta.url), 'utf8');
 const queue = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const syncSource = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-sync.js', import.meta.url), 'utf8');
+const {createOfflineMutationSynchronizer} = await import(`data:text/javascript;base64,${Buffer.from(syncSource).toString('base64')}`);
 
 test('il contenitore runtime è cifrato, autenticato e legato allo UID', async () => {
     const key = await queue.deriveOfflineQueueKey('FIXTURE-NON-SEGRETO', 'owner-a');
@@ -98,6 +100,65 @@ async function replacementFixture() {
     await instance.enqueue(oldOperation);
     return {idb,instance};
 }
+
+test('a stale acknowledgement cannot remove an operation marked for reconciliation while send was pending', async () => {
+    const {instance} = await replacementFixture();
+    const sent = (await instance.list())[0];
+    let marked;
+    const states = [];
+    const sync = createOfflineMutationSynchronizer({uid: 'owner-a', queue: instance,
+        withLease: async (_uid, task) => task(), isOnline: () => true, onState: state => states.push(state),
+        send: async () => { marked = await instance.markForReview(sent); return {status: 'applied'}; }});
+    assert.equal((await sync.flush()).status, 'recoverable-error');
+    assert.deepEqual(await instance.list(), [marked]);
+    assert.equal(states.some(state => state.state === 'saved'), false);
+});
+
+test('ack final transaction rejects changed container, missing record and session invalidation', async () => {
+    for (const mode of ['change', 'remove', 'session']) {
+        const {idb, instance} = await replacementFixture();
+        let active = true;
+        idb.beforeWrite = data => {
+            const id = `owner-a:${oldOperation.operationId}`;
+            if (mode === 'change') data.set(id, {...data.get(id), queuedAt: 0});
+            if (mode === 'remove') data.delete(id);
+            if (mode === 'session') active = false;
+        };
+        await assert.rejects(instance.remove(oldOperation, {isActive: () => active}), mode === 'session' ? /SESSION_CHANGED/ : /ACK_CHANGED/);
+        assert.equal(idb.data.size, mode === 'remove' ? 0 : 1);
+    }
+    const {instance} = await replacementFixture();
+    await assert.rejects(instance.remove(oldOperation.operationId), /SCOPE_INVALID/);
+    await instance.remove(oldOperation);
+    await assert.rejects(instance.remove(oldOperation), /ACK_MISSING/);
+});
+
+test('enqueue identical ID is a no-op preserving ciphertext/order, changed command cannot overwrite', async () => {
+    const {idb, instance} = await replacementFixture();
+    const original = structuredClone([...idb.data.values()][0]);
+    await instance.enqueue(structuredClone(oldOperation));
+    assert.deepEqual([...idb.data.values()][0], original);
+    await assert.rejects(instance.enqueue({...oldOperation, record: {password: 'changed'}}), /ID_REUSED/);
+    assert.deepEqual(await instance.list(), [oldOperation]);
+    const marked = await instance.markForReview(oldOperation);
+    await assert.rejects(instance.enqueue(oldOperation), /ID_REUSED/);
+    assert.deepEqual(await instance.list(), [marked]);
+    assert.equal(JSON.stringify([...idb.data.values()]).includes('cipher-old'), false);
+});
+
+test('concurrent same-ID enqueue cannot replace a winner, and final session guard prevents insertion', async () => {
+    const idb = indexedFixture();
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: idb.indexedDb});
+    const other = {...oldOperation, record: {password: 'different'}};
+    const outcomes = await Promise.allSettled([instance.enqueue(oldOperation), instance.enqueue(other)]);
+    assert.equal(outcomes.filter(result => result.status === 'fulfilled').length, 1);
+    assert.equal(outcomes.filter(result => result.status === 'rejected').length, 1);
+    assert.equal((await instance.list()).length, 1);
+    let active = true;
+    idb.beforeWrite = () => { active = false; };
+    await assert.rejects(instance.enqueue(newOperation, {isActive: () => active}), /SESSION_CHANGED/);
+    assert.equal((await instance.list()).length, 1);
+});
 test('replace atomically substitutes encrypted operation and keeps original queue order',async()=>{
     const {idb,instance}=await replacementFixture();const queuedAt=[...idb.data.values()][0].queuedAt;
     assert.equal(await instance.replace(oldOperation,newOperation),'device:new');
@@ -112,7 +173,7 @@ test('replace rejects wrong UID, record, same ID, changed expected and absent or
     }
     await assert.rejects(instance.replace({...oldOperation,expectedRevision:99},newOperation),/CHANGED/);
     assert.deepEqual(await instance.list(),[oldOperation]);
-    await instance.remove(oldOperation.operationId);
+    await instance.remove(oldOperation);
     await assert.rejects(instance.replace(oldOperation,newOperation),/MISSING/);
 });
 test('CAS rejects concurrent change/removal and replacement ID collision without losing queued data',async()=>{

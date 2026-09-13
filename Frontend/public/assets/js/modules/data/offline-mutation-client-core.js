@@ -29,7 +29,8 @@ export async function createOfflineMutationClientCore({
         async enqueue(operation) {
             assertActive();
             if (operation?.uid !== uid) throw new Error('OFFLINE_OPERATION_SCOPE_INVALID');
-            await queue.enqueue(operation);
+            await queue.enqueue(operation, {isActive: active});
+            assertActive();
             channel.notify();
             return synchronizer.flush();
         },
@@ -52,9 +53,13 @@ export async function createOfflineMutationClientCore({
             if (!operationId) throw new Error('OFFLINE_OPERATION_ID_REQUIRED');
             const result = await withLease(uid, async () => {
                 assertActive();
-                await queue.remove(operationId);
+                const expected = (await queue.list()).find(operation => operation.operationId === operationId);
+                assertActive();
+                if (!expected) throw new Error('OFFLINE_ACK_MISSING');
+                await queue.remove(expected, {isActive: active});
             });
             if (result?.acquired === false) throw new Error('OFFLINE_QUEUE_BUSY');
+            assertActive();
             channel.notify();
         },
         close() { closed = true; channel.close(); queue.close?.(); }

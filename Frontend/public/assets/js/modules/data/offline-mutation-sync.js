@@ -46,7 +46,8 @@ export function createOfflineMutationSynchronizer({
                     if (result.status !== 'applied') {
                         throw new Error('OFFLINE_SYNC_RESULT_INVALID');
                     }
-                    await queue.remove(operation.operationId);
+                    await queue.remove(operation, {isActive});
+                    if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED');
                     completed += 1;
                 } catch (error) {
                     if (isActive() && ['failed-precondition', 'functions/failed-precondition'].includes(error?.code) && ['LEGACY_MUTATION_RESULT_UNVERIFIED', 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'].includes(error?.details?.reason)) {

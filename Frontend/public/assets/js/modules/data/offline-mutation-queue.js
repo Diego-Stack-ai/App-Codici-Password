@@ -145,12 +145,31 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             return sealed.operationId;
     }
     return {
-        async enqueue(operation) {
-            assertIdentity(uid, operation);
-            const container = await sealOfflineOperation(operation, key);
+        async enqueue(operation, {isActive = () => true} = {}) {
+            const check = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
+            check();
+            const expected = JSON.parse(JSON.stringify(operation));
+            assertIdentity(uid, expected);
+            const read = database.transaction(STORE, 'readonly');
+            const readDone = transactionDone(read);
+            const [original] = await Promise.all([requestResult(read.objectStore(STORE).get(`${uid}:${expected.operationId}`)), readDone]);
+            check();
+            if (original && comparableJson(await openOfflineOperation(original, key, uid)) !== comparableJson(expected)) {
+                throw new Error('OFFLINE_OPERATION_ID_REUSED');
+            }
+            const container = original || await sealOfflineOperation(expected, key);
+            check();
             const tx = database.transaction(STORE, 'readwrite');
-            tx.objectStore(STORE).put(container);
-            await transactionDone(tx);
+            const done = transactionDone(tx), store = tx.objectStore(STORE), current = store.get(container.id);
+            let failure;
+            current.onsuccess = () => {
+                try { check(); } catch (error) { failure = error; return tx.abort(); }
+                if (comparableJson(current.result) !== comparableJson(original)) {
+                    failure = new Error('OFFLINE_OPERATION_CHANGED'); return tx.abort();
+                }
+                if (!original) store.add(container);
+            };
+            try { await done; } catch (error) { throw failure || error; }
             return container.operationId;
         },
         replace(expectedOperation, replacement, options) {
@@ -174,10 +193,31 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             for (const container of containers) operations.push(await openOfflineOperation(container, key, uid));
             return operations;
         },
-        async remove(operationId) {
+        async remove(expectedOperation, {isActive = () => true} = {}) {
+            const check = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
+            check();
+            const expected = JSON.parse(JSON.stringify(expectedOperation));
+            assertIdentity(uid, expected);
+            const read = database.transaction(STORE, 'readonly');
+            const readDone = transactionDone(read);
+            const [original] = await Promise.all([requestResult(read.objectStore(STORE).get(`${uid}:${expected.operationId}`)), readDone]);
+            check();
+            if (!original) throw new Error('OFFLINE_ACK_MISSING');
+            if (comparableJson(await openOfflineOperation(original, key, uid)) !== comparableJson(expected)) {
+                throw new Error('OFFLINE_ACK_CHANGED');
+            }
+            check();
             const tx = database.transaction(STORE, 'readwrite');
-            tx.objectStore(STORE).delete(`${uid}:${operationId}`);
-            await transactionDone(tx);
+            const done = transactionDone(tx), store = tx.objectStore(STORE), current = store.get(original.id);
+            let failure;
+            current.onsuccess = () => {
+                try { check(); } catch (error) { failure = error; return tx.abort(); }
+                if (!current.result || comparableJson(current.result) !== comparableJson(original)) {
+                    failure = new Error('OFFLINE_ACK_CHANGED'); return tx.abort();
+                }
+                store.delete(original.id);
+            };
+            try { await done; } catch (error) { throw failure || error; }
         },
         close() { database.close(); }
     };

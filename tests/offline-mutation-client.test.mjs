@@ -10,8 +10,8 @@ function dependencies() {
   const queue = {
     enqueue: async operation => queued.push(operation),
     list: async () => queued,
-    remove: async operationId => {
-      const index = queued.findIndex(operation => operation.operationId === operationId);
+    remove: async expected => {
+      const index = queued.findIndex(operation => operation.operationId === expected.operationId);
       if (index >= 0) queued.splice(index, 1);
     },
     close: () => { closed += 1; }

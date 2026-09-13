@@ -10,7 +10,7 @@ function fixture({online = true, results = []} = {}) {
     const removed = []; const states = []; let calls = 0;
     const sync = createOfflineMutationSynchronizer({
         uid: 'owner-a',
-        queue: {list: async () => [...operations], remove: async id => removed.push(id)},
+        queue: {list: async () => [...operations], remove: async operation => removed.push(operation.operationId)},
         send: async () => results[calls++] || {status: 'applied'},
         withLease: async (_uid, task) => ({acquired: true, value: await task()}),
         isOnline: () => online,
