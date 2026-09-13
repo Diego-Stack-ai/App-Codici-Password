@@ -93,7 +93,7 @@ export async function initAccountPrivati(user) {
 }
 
 export async function initFormAccountPrivato(user) {
-    const module = await import('./modules/privato/form_account_privato.js?v=account-ui-preview-4');
+    const module = await import('./modules/privato/form_account_privato.js?v=account-ui-preview-5');
     await module.initFormAccountPrivato(user);
 }
 
@@ -146,6 +146,6 @@ export async function initDettaglioAccountAzienda(user) {
 }
 
 export async function initFormAccountAzienda(user) {
-    const module = await import('./modules/azienda/form_account_azienda.js?v=account-ui-preview-4');
+    const module = await import('./modules/azienda/form_account_azienda.js?v=account-ui-preview-5');
     if (module.initFormAccountAzienda) await module.initFormAccountAzienda(user);
 }

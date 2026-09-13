@@ -39,7 +39,15 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         return;
     }
 
-    const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));
+    const hasBankingData = bankAccounts.some(acc => (
+        acc.iban?.trim()
+        || acc.passwordDispositiva?.trim()
+        || acc.referenteNome?.trim()
+        || acc.numeroVerde?.trim()
+        || acc.referenteTelefono?.trim()
+        || acc.referenteCellulare?.trim()
+        || (acc.cards && acc.cards.length > 0)
+    ));
 
     // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
     let vaultKeyMaterial;
@@ -70,6 +78,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             iban: (b.iban || '').trim(),
             passwordDispositiva: await encrypt((b.passwordDispositiva || '').trim(), vaultKeyMaterial),
             referenteNome: (b.referenteNome || '').trim(),
+            numeroVerde: (b.numeroVerde || '').trim(),
             referenteTelefono: (b.referenteTelefono || '').trim(),
             referenteCellulare: (b.referenteCellulare || '').trim(),
             cards: await Promise.all((b.cards || []).map(async c => ({

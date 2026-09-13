@@ -9,7 +9,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=account-ui-preview-4';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=account-ui-preview-5';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
@@ -445,7 +445,7 @@ async function loadData() {
             const hasIban = acc.iban && acc.iban.trim().length > 0;
             const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
             const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-            const hasRef = (acc.referenteNome?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
+            const hasRef = (acc.referenteNome?.trim() || acc.numeroVerde?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
             return hasIban || hasDisp || hasCards || hasRef;
         });
 
@@ -591,7 +591,7 @@ function setupUI() {
         bToggle.onchange = () => {
             document.getElementById('banking-section').classList.toggle('hidden', !bToggle.checked);
             if (bToggle.checked && bankAccounts.length === 0) {
-                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
+                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', numeroVerde: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
             }
             renderBankAccounts(bankAccounts, rerender);
         };
@@ -606,6 +606,7 @@ function setupUI() {
                 iban: '',
                 passwordDispositiva: '',
                 referenteNome: '',
+                numeroVerde: '',
                 referenteTelefono: '',
                 referenteCellulare: '',
                 cards: [],

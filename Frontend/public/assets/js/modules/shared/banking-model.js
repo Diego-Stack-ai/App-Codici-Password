@@ -8,6 +8,7 @@ const LEGACY_BANKING_FIELDS = [
     'cards',
     'passwordDispositiva',
     'referenteNome',
+    'numeroVerde',
     'referenteTelefono',
     'referenteCellulare'
 ];
@@ -35,6 +36,7 @@ export function normalizeBankingAccounts(account = {}) {
         cards: Array.isArray(account.cards) ? account.cards : [],
         passwordDispositiva: account.passwordDispositiva || '',
         referenteNome: account.referenteNome || '',
+        numeroVerde: account.numeroVerde || '',
         referenteTelefono: account.referenteTelefono || '',
         referenteCellulare: account.referenteCellulare || ''
     }];
@@ -51,10 +53,13 @@ function hasRealCardData(card) {
 }
 
 export function hasRealBankingData(account = {}) {
+    const hasCanonicalBanking = Array.isArray(account.banking)
+        || Boolean(account.banking && typeof account.banking === 'object');
     return normalizeBankingAccounts(account).some(bank => (
         hasText(bank.iban)
         || hasText(bank.passwordDispositiva)
-        || hasText(bank.referenteNome)
+        || (hasCanonicalBanking && hasText(bank.referenteNome))
+        || hasText(bank.numeroVerde)
         || hasText(bank.referenteTelefono)
         || hasText(bank.referenteCellulare)
         || (Array.isArray(bank.cards) && bank.cards.some(hasRealCardData))

@@ -40,7 +40,7 @@ export async function savePrivateAccount({
         const hasIban = acc.iban && acc.iban.trim().length > 0;
         const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
         const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-        const hasRef = (acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
+        const hasRef = (acc.referenteNome?.trim() || acc.numeroVerde?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
         return hasIban || hasDisp || hasCards || hasRef;
     });
 

@@ -15,6 +15,7 @@ const FIELD_DEFINITIONS = Object.freeze([
     {key: 'iban', label: 'IBAN', group: 'Banca', areas: ['privato', 'azienda']},
     {key: 'passwordDispositiva', label: 'Password dispositiva', group: 'Banca', areas: ['privato', 'azienda']},
     {key: 'bankReferenteNome', label: 'Nome referente banca', group: 'Banca', areas: ['privato', 'azienda']},
+    {key: 'bankNumeroVerde', label: 'Numero verde banca', group: 'Banca', areas: ['privato', 'azienda']},
     {key: 'bankReferenteTelefono', label: 'Telefono referente banca', group: 'Banca', areas: ['privato', 'azienda']},
     {key: 'bankReferenteCellulare', label: 'Cellulare referente banca', group: 'Banca', areas: ['privato', 'azienda']},
     {key: 'cardType', label: 'Tipo carta', group: 'Carta', areas: ['privato', 'azienda']},
