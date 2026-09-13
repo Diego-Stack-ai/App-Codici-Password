@@ -27,7 +27,7 @@ test('decifratura fallita o cambio sessione lasciano modulo e copia recupero int
  }
 });
 
-async function saveFixture(status,{recover=true,active=true,expireBeforeNavigation=false}={}){
+async function saveFixture(status,{recover=true,active=true,expireBeforeNavigation=false,reviewReason}={}){
  let replaced=0,enqueued=0,handoffs=0;const messages=[],navigations=[];
  const button={disabled:false,dataset:{},setAttribute(){}};
  const nodes={'btn-save-footer':button,'account-name':{value:'Fixture'}};
@@ -41,7 +41,7 @@ async function saveFixture(status,{recover=true,active=true,expireBeforeNavigati
  source=source.replace(/^import[\s\S]*?;\r?\n/gm,'').replace('export async function','async function').replace("await import('../data/private-account-offline-pilot.js')",'pilotFixture');
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
  await sandbox.savePrivateAccount({bankAccounts:[],invitedEmails:[],currentUid:'owner',currentDocId:'record',isEditing:true,baseRevision:1,
-  recoveryOperation:recover?{uid:'owner',operationId:'old',recordId:'record'}:null,isActive:()=>active});
+  recoveryOperation:recover?{uid:'owner',operationId:'old',recordId:'record',_reviewReason:reviewReason}:null,isActive:()=>active});
  return {replaced,enqueued,handoffs,messages,navigations,button};
 }
 
@@ -79,4 +79,33 @@ test('scelta locale o più tardi non elimina la coda; solo scelta server la scar
 test('sessione chiusa dopo conferma non naviga dal timer del vecchio modulo',async()=>{
  const f=await saveFixture({status:'saved'},{expireBeforeNavigation:true});
  assert.equal(f.replaced,1);assert.equal(f.handoffs,1);assert.deepEqual(f.navigations,[]);
+});
+
+test('scope unsupported explains full edit in immediate result and reopened marker, without success or retry',async()=>{
+ for(const result of [{status:'reconciliation-required',reason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'},{status:'reconciliation-required',operation:{_reviewReason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'}}]){
+  const f=await saveFixture(result);assert.ok(f.messages.some(message=>message.includes('modifica completa')));assert.equal(f.handoffs,0);assert.equal(f.navigations.length,0);assert.equal(f.messages.some(message=>message.includes('temporaneamente')),false);
+ }
+ const marked=await saveFixture({status:'saved'},{reviewReason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'});
+ assert.equal(marked.enqueued+marked.replaced,0);assert.equal(marked.handoffs,0);assert.equal(marked.button.disabled,true);
+});
+test('unsupported review offers no local recovery and only explicit server choice discards encrypted copy',async()=>{
+ const start=formSource.indexOf('            const reconciliation =');const end=formSource.indexOf("            } else if (lastState?.state === 'recoverable-error'",start);
+ const flow='async function resume(){'+formSource.slice(start,end)+'}}';
+ for(const choice of ['local','server',null]){
+  let discarded=0,restored=0,readServer=0;const operation={uid:'owner',operationId:'old',recordId:'record',_reviewReason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED',record:{type:'account'}};
+  const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',active:()=>true,document:{getElementById:()=>({})},showToast(){},showM6ConflictChoice:async(reconcile,unsupported)=>{assert.equal(unsupported,true);return choice},pilot:{discardPrivateAccountPilotOperation:async()=>discarded++},getPrivateAccountConfirmed:async()=>{readServer++;return{}},restoreM6ConflictDraft:async()=>restored++,setTimeout(){}};
+  vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,0);assert.equal(readServer,0);
+ }
+});
+test('unsupported modal exposes later/server actions and states that server choice removes offline copy',async()=>{
+ const source=formSource.slice(formSource.indexOf('function showM6ConflictChoice'),formSource.indexOf('function showM6ForeignConflictChoice'));const nodes=[];
+ const createElement=(tag,props={},children=[])=>{const node={tag,...props,children:children.filter(Boolean),classList:{add(){},remove(){}},remove(){},addEventListener(){}};nodes.push(node);return node};
+ const sandbox={createElement,setChildren(){},document:{getElementById:()=>null,body:{appendChild(){}}},setTimeout:fn=>fn()};vm.createContext(sandbox);vm.runInContext(source,sandbox);
+ const result=sandbox.showM6ConflictChoice(true,true);assert.equal(nodes.some(n=>n.textContent==='Recupera locale'),false);assert.ok(nodes.some(n=>n.textContent?.includes('elimina questa copia offline')));nodes.find(n=>n.textContent==='Decidi più tardi').onclick();assert.equal(await result,null);
+});
+test('bootstrap completion timer does not navigate after form context expires',async()=>{
+ const start=formSource.indexOf('            const reconciliation =');const end=formSource.indexOf('        } catch (error)',start);
+ let active=true,navigated=0;
+ const sandbox={lastState:null,outcome:{completed:1},active:()=>active,showToast(){},setTimeout:fn=>{active=false;fn()},window:{location:{replace:()=>navigated++}},getPrivateAccountListDestination:()=> 'fixture'};
+ vm.createContext(sandbox);vm.runInContext('async function resume(){'+formSource.slice(start,end)+'}',sandbox);await sandbox.resume();assert.equal(navigated,0);
 });

@@ -177,3 +177,15 @@ test('failed review write or changed session keeps original unmarked',async()=>{
         assert.deepEqual(await instance.list(),[oldOperation]);
     }
 });
+
+
+test('scope review reason stays inside encrypted payload and survives reopening',async()=>{
+    const {idb,instance}=await replacementFixture();
+    const reason='PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED';
+    const marked=await instance.markForReview(oldOperation,{reviewReason:reason});
+    assert.equal(marked._reviewReason,reason);
+    assert.deepEqual(await instance.list(),[marked]);
+    assert.equal(JSON.stringify([...idb.data.values()]).includes(reason),false);
+    await assert.rejects(instance.markForReview(marked,{reviewReason:'unknown'}),/REASON_INVALID/);
+    assert.deepEqual(await instance.list(),[marked]);
+});

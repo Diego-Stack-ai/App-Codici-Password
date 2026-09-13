@@ -49,9 +49,9 @@ export function createOfflineMutationSynchronizer({
                     await queue.remove(operation.operationId);
                     completed += 1;
                 } catch (error) {
-                    if (isActive() && ['failed-precondition', 'functions/failed-precondition'].includes(error?.code) && error?.details?.reason === 'LEGACY_MUTATION_RESULT_UNVERIFIED') {
+                    if (isActive() && ['failed-precondition', 'functions/failed-precondition'].includes(error?.code) && ['LEGACY_MUTATION_RESULT_UNVERIFIED', 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'].includes(error?.details?.reason)) {
                         let heldOperation;
-                        try { heldOperation = await queue.markForReview(operation, {isActive}); }
+                        try { heldOperation = await queue.markForReview(operation, {isActive, reviewReason: error.details.reason}); }
                         catch (storageError) {
                             emit('recoverable-error', {operationId: operation.operationId, pending: operations.length - completed});
                             return {status: 'recoverable-error', error: storageError, completed};

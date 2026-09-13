@@ -368,6 +368,75 @@ test('original private-account handler persists prepared ciphertext in the demo 
         assert.equal((await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/scope-new-write`).get()).exists, false);
     });
 
+    await t.test('real profile and company inverse references reject private mutations without changing records, sources or receipts', async () => {
+        const client = await seed('inverse');
+        const envelope = await prepare(client, 'INVERSE-MUST-NOT-APPLY', 'inverse-base');
+        const admin = getAdminFirestore();
+        const profileRef = admin.doc(`users/${client.uid}`);
+        const companyRef = profileRef.collection('aziende').doc('inverse-company');
+        const targetRef = profileRef.collection('accounts').doc('fixture');
+        const link = {linkedAccountId: 'fixture', linkedAccountCompanyId: ''};
+        const cases = [
+            ...['contactEmails', 'contactPhones', 'documenti'].map(field => ({profile: {[field]: [link]}})),
+            {profile: {userAddresses: [{id: 'synthetic-address', utilities: [link]}]}},
+            ...['pec', 'amministrazione', 'personale'].map(slot => ({company: {emails: {[slot]: link}}})),
+            {company: {emails: {extra: [link]}}},
+            ...['telefonoAzienda', 'faxAzienda', 'referenteCellulare'].map(slot => ({company: {phoneAccountLinks: {[slot]: link}}})),
+            {company: {isArchived: true, emails: {pec: {...link, email: ''}}}}
+        ];
+        try {
+            for (const [index, fixture] of cases.entries()) {
+                await profileRef.set(fixture.profile || {});
+                await companyRef.set(fixture.company || {});
+                const before = await Promise.all([targetRef.get(), profileRef.get(), companyRef.get()]);
+                const operationId = `inverse-reject-${index}`;
+                await assert.rejects(run(client, {...envelope, operationId}), error =>
+                    error.code === 'failed-precondition' && error.details?.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+                const after = await Promise.all([targetRef.get(), profileRef.get(), companyRef.get()]);
+                for (let position = 0; position < before.length; position++) {
+                    assert.deepEqual(after[position].data(), before[position].data());
+                    assert.equal(after[position].updateTime.isEqual(before[position].updateTime), true);
+                }
+                assert.equal(after[0].data().revision, 1);
+                assert.equal((await admin.doc(`mutationResults/${client.uid}/operations/${operationId}`).get()).exists, false);
+                assert.equal((await profileRef.collection('operationResults').doc(operationId).get()).exists, false);
+            }
+        } finally { await companyRef.delete(); await profileRef.delete(); }
+    });
+
+    await t.test('company namespace references are distinct and trusted retry precedes newly added inverse private links', async () => {
+        const client = await seed('inverse-retry');
+        const envelope = await prepare(client, 'INVERSE-ISOLATED-APPLIED', 'inverse-trusted');
+        const admin = getAdminFirestore(), profileRef = admin.doc(`users/${client.uid}`);
+        const companyRef = profileRef.collection('aziende').doc('source-company');
+        const targetRef = profileRef.collection('accounts').doc('fixture');
+        const receiptRef = admin.doc(`mutationResults/${client.uid}/operations/${envelope.operationId}`);
+        const companyLink = {linkedAccountId: 'fixture', linkedAccountCompanyId: 'different-company'};
+        try {
+            await profileRef.set({contactEmails: [companyLink]});
+            await companyRef.set({emails: {pec: companyLink}, phoneAccountLinks: {telefonoAzienda: companyLink}});
+            const applied = await run(client, envelope);
+            assert.equal(applied.status, 'applied'); assert.equal(applied.revision, 2); assert.equal(applied.duplicate, false);
+            assert.equal((await targetRef.get()).data().password, envelope.record.password);
+            const privateLink = {linkedAccountId: 'fixture'};
+            await profileRef.set({contactPhones: [privateLink]});
+            await companyRef.set({emails: {pec: privateLink}});
+            const refs = [targetRef, profileRef, companyRef, receiptRef];
+            const before = await Promise.all(refs.map(reference => reference.get()));
+            const retried = await run(client, envelope);
+            assert.equal(retried.status, 'applied'); assert.equal(retried.revision, 2); assert.equal(retried.duplicate, true);
+            await assert.rejects(run(client, {...envelope, operationId: 'inverse-new-write', expectedRevision: 2}),
+                error => error.code === 'failed-precondition' && error.details?.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+            const after = await Promise.all(refs.map(reference => reference.get()));
+            for (let index = 0; index < refs.length; index++) {
+                assert.deepEqual(after[index].data(), before[index].data());
+                assert.equal(after[index].updateTime.isEqual(before[index].updateTime), true);
+            }
+            assert.equal((await admin.doc(`mutationResults/${client.uid}/operations/inverse-new-write`).get()).exists, false);
+            assert.equal((await profileRef.collection('operationResults').doc('inverse-new-write').get()).exists, false);
+        } finally { await companyRef.delete(); await profileRef.delete(); }
+    });
+
     await t.test('malformed existing revisions are rejected without record changes or receipts in both mutation domains', async () => {
         for (const [index, revision] of [null, '0', -1, 0.5, Number.MAX_SAFE_INTEGER + 1].entries()) {
             for (const domain of ['private', 'offline']) {

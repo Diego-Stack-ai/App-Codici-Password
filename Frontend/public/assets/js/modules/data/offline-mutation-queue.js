@@ -158,7 +158,11 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
         },
         async markForReview(expectedOperation, options) {
             const expected = JSON.parse(JSON.stringify(expectedOperation));
-            const marked = {...expected, _queueState: 'reconciliation-required'};
+            const reason = options?.reviewReason;
+            if (reason !== undefined && !['LEGACY_MUTATION_RESULT_UNVERIFIED', 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'].includes(reason)) {
+                throw new Error('OFFLINE_REVIEW_REASON_INVALID');
+            }
+            const marked = {...expected, _queueState: 'reconciliation-required', ...(reason ? {_reviewReason: reason} : {})};
             await swap(expected, marked, options, true);
             return marked;
         },

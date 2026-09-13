@@ -30,6 +30,10 @@ export async function savePrivateAccount({
     const get = id => document.getElementById(id)?.value.trim() || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
+    if (recoveryOperation?._reviewReason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED') {
+        showToast('Questo Account richiede una modifica completa. Riaprilo per scegliere: la copia offline resta cifrata e non viene applicata dal salvataggio ridotto.', 'warning');
+        return;
+    }
     let savedAccountId = currentDocId;
 
     if (hasInvalidCardExpiry(bankAccounts)) {
@@ -191,7 +195,9 @@ export async function savePrivateAccount({
             if (!isActive()) return;
             const outcome = result?.value || result;
             if (lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required') {
-                showToast('Vecchia modifica da verificare. Riapri l’Account: la copia cifrata resta conservata.', 'warning');
+                const operation = outcome?.operation || lastState?.operation;
+                const unsupported = [operation?._reviewReason, outcome?.reason, lastState?.reason].includes('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+                showToast(unsupported ? 'Questo Account ora richiede una modifica completa. Riaprilo per scegliere: la copia offline resta cifrata e non sarà reinviata automaticamente.' : 'Vecchia modifica da verificare. Riapri l’Account: la copia cifrata resta conservata.', 'warning');
                 if (btnSave) { btnSave.disabled = true; btnSave.dataset.m6Queued = 'true'; }
                 return;
             }

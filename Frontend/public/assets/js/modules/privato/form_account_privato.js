@@ -63,7 +63,7 @@ function getPrivateAccountListDestination({refresh = false} = {}) {
     return `account_privati.html?${params.toString()}`;
 }
 
-function showM6ConflictChoice(reconciliation = false) {
+function showM6ConflictChoice(reconciliation = false, unsupported = false) {
     return new Promise(resolve => {
         document.getElementById('m6-conflict-modal')?.remove();
         const modal = createElement('div', {id: 'm6-conflict-modal', className: 'modal-overlay'});
@@ -76,7 +76,7 @@ function showM6ConflictChoice(reconciliation = false) {
             textContent: 'Mantieni server',
             onclick: () => close('server')
         });
-        const recoverLocal = createElement('button', {
+        const recoverLocal = unsupported ? null : createElement('button', {
             className: 'btn-modal btn-secondary',
             textContent: 'Recupera locale',
             onclick: () => close('local')
@@ -88,10 +88,10 @@ function showM6ConflictChoice(reconciliation = false) {
         });
         setChildren(modal, createElement('div', {className: 'modal-box'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
-            createElement('h3', {className: 'modal-title', textContent: reconciliation ? 'Salvataggio precedente da verificare' : 'Conflitto di sincronizzazione'}),
+            createElement('h3', {className: 'modal-title', textContent: unsupported ? 'Account da modificare nel modulo completo' : reconciliation ? 'Salvataggio precedente da verificare' : 'Conflitto di sincronizzazione'}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: reconciliation ? 'Non possiamo confermare l’esito di una vecchia modifica. La copia cifrata resta conservata: scegli il server oppure recuperala nel modulo per controllarla e salvarla di nuovo.' : 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
+                textContent: unsupported ? 'Questo Account ora richiede una modifica completa: la copia offline non può essere applicata con il salvataggio ridotto. Decidi più tardi conserva la copia cifrata. Mantieni server elimina questa copia offline e conserva i dati del server.' : reconciliation ? 'Non possiamo confermare l’esito di una vecchia modifica. La copia cifrata resta conservata: scegli il server oppure recuperala nel modulo per controllarla e salvarla di nuovo.' : 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
             }),
             createElement('div', {className: 'modal-actions'}, [decideLater, recoverLocal, keepServer])
         ]));
@@ -336,11 +336,12 @@ export async function initFormAccountPrivato(user) {
             const reconciliation = lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required';
             if (reconciliation || lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 const operation = outcome?.operation || lastState?.operation;
+                const unsupported = [operation?._reviewReason, outcome?.reason, lastState?.reason].includes('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
                 const saveButton = document.getElementById('btn-save-footer');
                 if (saveButton) saveButton.disabled = true;
-                showToast('Una modifica offline richiede una verifica. La copia cifrata è conservata.', 'warning');
+                showToast(unsupported ? 'Questo Account richiede una modifica completa. La copia offline resta cifrata e non sarà reinviata automaticamente.' : 'Una modifica offline richiede una verifica. La copia cifrata è conservata.', 'warning');
                 if (operation?.operationId && operation.uid === user.uid && operation.recordId === currentDocId) {
-                    const choice = await showM6ConflictChoice(reconciliation);
+                    const choice = await showM6ConflictChoice(reconciliation, unsupported);
                     if (!active()) return;
                     if (choice === 'server') {
                         await pilot.discardPrivateAccountPilotOperation({
@@ -349,7 +350,7 @@ export async function initFormAccountPrivato(user) {
                         if (!active()) return;
                         showToast('Versione del server mantenuta.', 'success');
                         setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 600);
-                    } else if (choice === 'local') {
+                    } else if (choice === 'local' && !unsupported) {
                         const server = await getPrivateAccountConfirmed(user.uid, operation.recordId);
                         if (!active()) return;
                         if (!canRecoverPrivateAccount(server, user.uid) || server.type !== operation.record?.type) {
@@ -377,9 +378,10 @@ export async function initFormAccountPrivato(user) {
                     });
                 }
                 showToast('Sincronizzazione M6 completata.', 'success');
-                setTimeout(() => window.location.replace(getPrivateAccountListDestination({refresh: true})), 800);
+                setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 800);
             }
         } catch (error) {
+            if (!active()) return;
             logError('M6PilotResume', error);
             showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
         }

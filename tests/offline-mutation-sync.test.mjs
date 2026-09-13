@@ -96,3 +96,16 @@ test('operazione marcata resta sospesa nei flush successivi senza invio automati
     for(let i=0;i<3;i++)assert.equal((await sync.flush()).status,'reconciliation-required');
     assert.equal(calls,0);
 });
+
+
+test('scope rejection is held persistently and never retried as a network failure',async()=>{
+    let operation={uid:'owner',operationId:'held',recordId:'record'},calls=0;
+    const queue={list:async()=>[operation],remove:async()=>assert.fail('remove'),
+        markForReview:async(op,options)=>(operation={...op,_queueState:'reconciliation-required',_reviewReason:options.reviewReason})};
+    const options={uid:'owner',queue,send:async()=>{calls++;throw Object.assign(new Error('scope'),{code:'functions/failed-precondition',details:{reason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'}})},withLease:async(_uid,task)=>task(),isOnline:()=>true};
+    const first=await createOfflineMutationSynchronizer(options).flush();
+    assert.equal(first.status,'reconciliation-required');
+    assert.equal(first.operation._reviewReason,'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+    const reopened=await createOfflineMutationSynchronizer(options).flush();
+    assert.equal(reopened.status,'reconciliation-required');assert.equal(calls,1);
+});
