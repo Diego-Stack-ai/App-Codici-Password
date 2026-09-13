@@ -76,3 +76,6 @@ Compatibilità CAS backup candidata: il client richiede una risposta preview ver
 Il candidato purge richiede anch’esso `expectedOwnerUid` prima di ogni accesso. Includere nelle prove di distribuzione e rollback i client Archivio precedenti, il cambio Auth durante conferma/token e lo svuotamento interrotto. Nessun fallback senza proprietario e nessun deploy eseguito.
 
 Il rollback del purge candidato deve conservare anche il registro protetto e la verifica completa delle ricevute. Provare legacy processing/purged, binding diverso, ricevuta finale assente/alterata e interruzione dopo recursiveDelete. Non ripristinare un writer che considera attendibili gli esiti creati dal client.
+
+Gestione Scadenze ricevute candidata: anche manageReceivedDeadline richiede expectedOwnerUid del destinatario autenticato prima di Firestore. I client precedenti privi del campo vengono rifiutati. Distribuzione e rollback devono conservare il vincolo e i controlli su destinatario, permesso manage e revoca. La correzione UI associata cattura il contesto prima della conferma; nessun fallback permissivo o deploy eseguito. Suite Functions: 110 test superati.
+

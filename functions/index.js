@@ -1104,6 +1104,7 @@ exports.manageReceivedDeadline = onCall(
     { region: "europe-west1", enforceAppCheck: true },
     async (request) => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
         const shareId = String(request.data?.receivedDeadlineId || "");
         const action = String(request.data?.action || "");
         const nextDueDate = String(request.data?.nextDueDate || "");
