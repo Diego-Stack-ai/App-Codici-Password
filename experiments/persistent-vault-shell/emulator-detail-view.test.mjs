@@ -59,6 +59,33 @@ test('detail reads visible fields through capability and defers password until r
     assert.deepEqual(reads, ['nomeAccount', 'username', 'account', 'password']);
 });
 
+test('optional private save panel follows manual detail teardown without receiving keys', async () => {
+    const f = fixture(); let boundary, disposed = 0;
+    const cleanup = await f.mount(async () => ({has: () => false}), {mountSavePanel: async (_root, value) => {
+        boundary = value; return () => { disposed++; };
+    }});
+    assert.deepEqual(Object.keys(boundary).sort(), ['isActive', 'selection', 'signal']);
+    assert.equal(boundary.isActive(), true);
+    cleanup();
+    assert.equal(boundary.signal.aborted, true); assert.equal(boundary.isActive(), false);
+    assert.equal(disposed, 1); assert.equal(f.root.children.length, 0);
+});
+
+test('late save panel initializer is disposed after navigation and cannot retain old view', async () => {
+    const f = fixture(), gate = deferred(); let disposed = 0;
+    const mounting = f.mount(async () => ({has: () => false}), {mountSavePanel: () => gate.promise});
+    await tick(); f.controller.abort(); gate.resolve(() => { disposed++; });
+    await assert.rejects(mounting, {name: 'AbortError'});
+    assert.equal(disposed, 1); assert.equal(f.root.children.length, 0);
+});
+
+test('company detail never activates private save panel', async () => {
+    const f = fixture();
+    const cleanup = await f.mount(async () => ({has: () => false}), {selection: {domain: 'company', id: 'fixture'},
+        mountSavePanel: () => assert.fail('private save panel on company')});
+    cleanup();
+});
+
 test('aborted open removes only its own wrapper and cannot render over the next view', async () => {
     const f = fixture(), pending = deferred();
     const mounting = f.mount(() => pending.promise);

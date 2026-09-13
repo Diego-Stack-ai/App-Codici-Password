@@ -1,6 +1,7 @@
 import {createFencedQueueClient} from './fenced-queue-client.mjs';
 import {createFencedQueueWriter} from './fenced-queue-writer.mjs';
 import {encrypt} from './crypto-utils.js';
+import {mountOfflineSavePanel} from './offline-save-panel.mjs';
 const passed = [], assert = (value, code) => { if (!value) throw new Error(code); };
 let db, client;
 try {
@@ -84,6 +85,46 @@ try {
         assert(replies.at(-1).duplicate === true && !(await pending()).length &&
             (await snapshot(retry)).updateTime === afterRetry.updateTime, 'TRUSTED_RETRY_AFTER_LINK');
         passed.push('trusted private retry remains authoritative after a new profile link without rewriting record');
+        await post('/scope', {operation, scope: 'none'});
+        const root = document.createElement('div'); document.body.append(root);
+        const page = new AbortController(); online = false;
+        let preparedNote;
+        const disposePanel = await mountOfflineSavePanel(root, {signal: page.signal,
+            createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => online,
+                send: async command => {
+                    const response = await post('/mutation', {operation: command}), result = await response.json();
+                    if (!response.ok) throw Object.assign(new Error('TRANSPORT_ERROR'), result);
+                    return result;
+                }}),
+            prepare: async value => {
+                preparedNote = await encrypt(value, 'SYNTHETIC-VAULT-KEY');
+                return {...operation, operationId: 'bridge-ui', expectedRevision: 2, record: {...operation.record, note: preparedNote}};
+            }});
+        const input = root.querySelector('textarea'), buttons = root.querySelectorAll('button');
+        input.value = 'SYNTHETIC-NOTE-FROM-UI'; await buttons[0].onclick();
+        assert(root.textContent.includes('In attesa di connessione') && input.value === '' && buttons[0].disabled, 'UI_OFFLINE_STATE');
+        online = true; await buttons[1].onclick();
+        const uiSaved = await snapshot({...operation, operationId: 'bridge-ui'});
+        assert(root.textContent.includes('Nota salvata') && uiSaved.record.note === preparedNote && uiSaved.record.revision === 3, 'UI_SAVE_STATE');
+        page.abort(); assert(root.children.length === 0 && buttons[0].onclick === null, 'UI_ABORT_CLEANUP');
+        disposePanel();
+        passed.push('note panel queues offline and retries online against private backend, then detaches on page abort');
+        const openingPage = new AbortController(); let resolveOpening, lateClosed = false;
+        const opening = mountOfflineSavePanel(root, {signal: openingPage.signal, initialNote: 'SYNTHETIC-DRAFT',
+            createClient: () => new Promise(resolve => { resolveOpening = resolve; }), prepare: async () => operation});
+        const openingInput = root.querySelector('textarea');
+        openingPage.abort(); resolveOpening({close() { lateClosed = true; }}); await opening;
+        assert(lateClosed && root.children.length === 0 && openingInput.value === '', 'LATE_CLIENT_RETAINED');
+        passed.push('page closed during client initialization clears draft and closes late client');
+        const preparingPage = new AbortController(); let resolvePrepare, enqueued = 0;
+        await mountOfflineSavePanel(root, {signal: preparingPage.signal,
+            createClient: async () => ({close() {}, enqueue: async () => { enqueued++; }}),
+            prepare: () => new Promise(resolve => { resolvePrepare = resolve; })});
+        const retainedInput = root.querySelector('textarea'); retainedInput.value = 'SYNTHETIC-DRAFT';
+        const preparation = root.querySelector('button').onclick(); preparingPage.abort(); resolvePrepare(operation); await preparation;
+        assert(enqueued === 0 && retainedInput.value === '' && !root.children.length, 'LATE_PREPARE_ENQUEUED');
+        root.remove();
+        passed.push('page abort during encryption preparation prevents enqueue and clears visible draft');
     }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});
 } catch (error) {

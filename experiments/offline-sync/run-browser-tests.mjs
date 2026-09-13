@@ -15,6 +15,7 @@ const paths = new Map([
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
     ['/fenced-queue-writer.mjs', 'experiments/offline-sync/fenced-queue-writer.mjs'],
     ['/fenced-queue-client.mjs', 'experiments/offline-sync/fenced-queue-client.mjs'],
+    ['/offline-save-panel.mjs', 'experiments/offline-sync/offline-save-panel.mjs'],
     ['/Frontend/public/assets/js/modules/data/offline-mutation-sync.js', 'Frontend/public/assets/js/modules/data/offline-mutation-sync.js'],
     ['/Frontend/public/assets/js/modules/data/offline-mutation-queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
     ['/worker.mjs', 'experiments/offline-sync/browser-coordination-worker.mjs'],

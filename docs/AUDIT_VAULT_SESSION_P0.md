@@ -656,3 +656,7 @@ Base 7f2886b9. Nuovo runner --fenced-browser: cinque scenari Chrome e cinque Edg
 ## 58. Account privati tra coda browser e handler emulato
 
 Base 3b551a7a. Otto scenari privati per browser verificano ciphertext, revisioni, ricevute e riferimenti inversi con handler originale e Firestore demo. Conservazione del marker di riconciliazione e assenza di retry automatico dimostrate. Comando --fenced-browser: 26 esecuzioni complessive sui due domini/browser. Nessuna attivazione runtime o prova del trasporto pubblico.
+
+## 59. Pannello note sperimentale e teardown
+
+Base 7beb3dbf. UI candidata senza chiavi nel DOM, disattivata su abort e rimozione manuale della vista. Prove browser/emulatore di offline/retry e avvii tardivi; 31 test vista/sessione. Il dettaglio accetta un provider opzionale, ancora non configurato nel bootstrap principale. Nessuna attivazione produttiva.
