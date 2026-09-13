@@ -574,3 +574,10 @@ Restano aperti concorrenza purge/ripristino, recupero UI delle operazioni incert
 Base `f67c8d7b`. Piano di esecuzione privato e immutabile, una sola esecuzione contemporanea, ID/comandi stabili e avanzamento conservato. Dopo una risposta Firestore persa, la UI propone una scelta esplicita prima di reinviare il chunk incerto. Chunk confermati non reinviati, risultato completato riutilizzato senza upload duplicati. Selezione alterata e rifiuti definitivi non consentono retry; incertezza Storage blocca la ripetizione generica. Logout/blocco/dismissione rilasciano il piano. L'eventualità di precedenti scritture non confermate rimane nel progresso anche dopo un successivo rifiuto certo.
 
 Suite completa `npm test` codice 0, **781 test** superati; inclusi 18 test servizio backup e 10 UI, 106 Functions. Budget delle 30 pagine e versione candidata 1.2.110/240 riferimenti coerenti. Prove di perdita risposta con server/ricevute simulate, senza dati reali. Nessun deploy; journal durevole, staging e compensazione restano aperti.
+
+
+## 47. Manifest backup e ripresa Archivio — candidata 13/09/2026
+
+Base `bf3bb010`, correzione Bytes SDK `630972ec`. Allegati selezionati raccolti ricorsivamente e verificati prima di applicare i dati; oggetti duplicati, mancanti o malformati non producono una scrittura parziale iniziale. Nell'Archivio il recupero UI usa piano opaco e comandi stabili dopo scelta esplicita, salta Account confermati e blocca azioni concorrenti. Nessuna ripresa dopo refresh.
+
+Suite completa `npm test` codice 0, **795 test** superati: inclusi 24 servizio backup, 18 Archivio e test della classe Bytes SDK reale. Budget delle 30 pagine rispettato. Nessun dato reale, migrazione o deploy. Staging/persistenza/retention e concorrenza globale restano aperti. Un audit successivo ha riprodotto la mescolanza dei riferimenti A/B nel dettaglio privato durante conferma allegato: è il prossimo blocco, non una correzione inclusa nei 795 test.
