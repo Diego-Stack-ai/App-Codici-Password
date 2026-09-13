@@ -43,6 +43,7 @@ const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
 const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./backup-restore-receipt");
+const {createArchivePurgeBinding, verifyArchivePurgeReceipt} = require("./archive-purge-receipt");
 const {
     revisionDecision, sharedVaultPaths, validateSharedVaultCommand
 } = require("./shared-vault-service");
@@ -447,19 +448,29 @@ exports.purgeArchivedAccount = onCall(
         try { command = validatePurgeCommand(request.data); } catch {
             throw new HttpsError("invalid-argument", "Comando di eliminazione non valido.");
         }
-        const store = getFirestore();
+        if (!command.confirmation) throw new HttpsError("failed-precondition", "Conferma eliminazione mancante.");
         const ownerUid = request.auth.uid;
+        let binding;
+        try { binding = createArchivePurgeBinding({uid: ownerUid, command}); }
+        catch { throw new HttpsError("invalid-argument", "Comando di eliminazione non verificabile."); }
+        const verifyReceipt = snapshot => {
+            try { return verifyArchivePurgeReceipt(snapshot.exists ? snapshot.data() : null, binding); }
+            catch { throw new HttpsError("failed-precondition", "Esito della cancellazione non verificabile.",
+                {reason: "ARCHIVE_RESULT_UNVERIFIED"}); }
+        };
+        const store = getFirestore();
         const userRef = store.collection("users").doc(ownerUid);
         const recordRef = store.doc(accountPath(ownerUid, command));
-        const operationRef = userRef.collection("archiveOperations").doc(command.operationId);
+        const operationRef = store.collection("mutationResults").doc(ownerUid).collection("operations").doc(command.operationId);
+        const legacyRef = userRef.collection("archiveOperations").doc(command.operationId);
         const preparation = await store.runTransaction(async transaction => {
-            const [recordSnapshot, operationSnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(operationRef)
+            const [recordSnapshot, operationSnapshot, legacySnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(operationRef), transaction.get(legacyRef)
             ]);
-            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
-            if (previous && (previous.accountId !== command.accountId ||
-                previous.context !== command.context || previous.companyId !== command.companyId)) {
-                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            const previous = operationSnapshot.exists ? verifyReceipt(operationSnapshot) : null;
+            if (!previous && legacySnapshot.exists) {
+                throw new HttpsError("failed-precondition", "La precedente cancellazione richiede una verifica.",
+                    {reason: "LEGACY_ARCHIVE_RESULT_UNVERIFIED"});
             }
             const decision = purgeDecision({
                 record: recordSnapshot.exists ? recordSnapshot.data() : null,
@@ -470,9 +481,8 @@ exports.purgeArchivedAccount = onCall(
             if (decision.duplicate || !["ready", "resume"].includes(decision.status)) return decision;
             if (decision.status === "resume") return decision;
             transaction.set(operationRef, {
-                status: "processing", ownerUid, accountId: command.accountId,
-                context: command.context, companyId: command.companyId,
-                createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+                ...binding, status: "processing",
+                ...(previous ? {} : {createdAt: FieldValue.serverTimestamp()}), updatedAt: FieldValue.serverTimestamp()
             }, {merge: true});
             return decision;
         });
@@ -490,12 +500,14 @@ exports.purgeArchivedAccount = onCall(
         await Promise.all(storagePaths.map(path => bucket.file(path).delete({ignoreNotFound: true})));
         await store.recursiveDelete(recordRef);
 
-        await store.runTransaction(async transaction => {
+        return store.runTransaction(async transaction => {
             // Full query: never silently truncate the set of referring companies.
             // Reads and all planning precede writes; retries re-read current data.
-            const [profileSnapshot, companiesSnapshot] = await Promise.all([
-                transaction.get(userRef), transaction.get(userRef.collection('aziende'))
+            const [profileSnapshot, companiesSnapshot, receiptSnapshot] = await Promise.all([
+                transaction.get(userRef), transaction.get(userRef.collection('aziende')), transaction.get(operationRef)
             ]);
+            const receipt = verifyReceipt(receiptSnapshot);
+            if (receipt.status === 'purged') return receipt;
             const cleanup = [];
             const plan = (snapshot, reference, company) => {
                 if (!snapshot.exists) return;
@@ -513,8 +525,8 @@ exports.purgeArchivedAccount = onCall(
                 action: "account-purged", actorUid: ownerUid, accountId: command.accountId,
                 context: command.context, at: FieldValue.serverTimestamp()
             });
+            return {status: "purged", duplicate: false};
         });
-        return {status: "purged", duplicate: false};
     }
 );
 

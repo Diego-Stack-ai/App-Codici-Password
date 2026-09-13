@@ -69,3 +69,19 @@ Il pianificatore `planProfileReferenceCleanup` distingue `{context, companyId, a
 Limiti: scansione completa delle aziende, crescita dei costi e della contesa; massimo conservativo di 450 documenti modificati più ricevuta/audit. Un piano troppo ampio o malformato interrompe la transazione finale, lasciando `processing` e nessuna pulizia parziale; l'Account può però essere già stato eliminato dal passaggio precedente. Non è un rollback né una soluzione alla race purge/ripristino. Nessuna migrazione di alias o intervento sui dati reali.
 
 Compatibilità M6: il vecchio purge scriveva `linkedAccountId: null`. Il guard dei riferimenti accetta ora questo marker di collegamento assente, senza modificarlo. Un ID reale con `linkedAccountCompanyId: null` continua a essere trattato come collegamento privato e impedisce il writer ridotto. Il nuovo unlink usa stringhe vuote per entrambi i campi, come la UI corrente.
+
+
+### Proprietario e sessione dell'Archivio — candidata 13/09/2026
+
+Il purge richiede `expectedOwnerUid`, confrontato con Auth prima della validazione del comando e di qualunque accesso a Firestore o Storage. Questo impedisce che un token scelto dall'SDK dopo il cambio utente esegua il comando nel Vault successivo. I client precedenti senza proprietario atteso sono rifiutati: il rilascio richiede aggiornamento coordinato e rollback che mantenga il controllo.
+
+Il lavoro sul ciclo di vita UI/servizio accompagna il controllo server: acquisire Account e proprietario prima dei dialoghi, annullare le azioni ancora in attesa dopo blocco/cambio sessione, fermare lo svuotamento prima del record successivo e distinguere Account con ID uguali in contesti diversi. Una richiesta già inviata può comunque completarsi. Il vincolo proprietario non risolve le ricevute `archiveOperations` storicamente scrivibili dal client né la race globale purge/ripristino.
+
+
+### Ricevute protette del purge — candidata 13/09/2026
+
+Il registro di avanzamento si sposta in `mutationResults/{uid}/operations/{operationId}`, storicamente negato alle scritture client. Il binding server comprende proprietario, dominio, Account/contesto/azienda, revisione, conferma e hash dell'intero comando normalizzato. Conferma obbligatoria anche per riprese e duplicati. Le vecchie ricevute `archiveOperations`, da sole, provocano un rifiuto esplicito; non sono promosse. Un esito protetto valido prevale sul legacy, mentre un esito protetto malformato non autorizza fallback.
+
+La transazione iniziale accetta soltanto ricevute verificate: `processing` consente ripresa del comando identico, mantenendo i controlli archivio/revisione se l'Account esiste; `purged` restituisce solo stato e indicatore duplicato. La transazione finale rilegge e verifica il binding prima delle patch dei Profili, della ricevuta finale e dell'audit. Il timestamp iniziale viene conservato nei retry.
+
+Questo blocco corregge la provenienza degli esiti, non il protocollo globale: una richiesta già partita, la race purge/ripristino e i widget/grant residui restano problemi separati. La UI genera ancora un nuovo identificatore ad ogni operazione: ripresa backend con lo stesso ID collaudata, recupero UI degli esiti incerti non ancora implementato. Nessuna migrazione delle ricevute pregresse o cancellazione reale.

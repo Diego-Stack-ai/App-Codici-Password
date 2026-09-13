@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const {readFileSync} = require('node:fs');
 const policy = require('../archive-purge-service');
+const receipts = require('../archive-purge-receipt');
 const source = readFileSync(require.resolve('../index.js'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
@@ -10,11 +11,11 @@ const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), sou
 function fixture({previous = null, companies = 1, malformed = false} = {}) {
   const command = {expectedOwnerUid: 'owner', accountId: 'account', operationId: 'operation', context: 'private', expectedRevision: 1, confirmation: 'DELETE_FOREVER'};
   const states = new Map();
-  const root = 'users/owner', operationPath = `${root}/archiveOperations/operation`;
+  const root = 'users/owner', operationPath = 'mutationResults/owner/operations/operation';
   const link = {linkedAccountId: 'account', linkedAccountCompanyId: '', note: 'preserve'};
   states.set(root, {contactPhones: [link]});
   if (!previous) states.set(`${root}/accounts/account`, {isArchived: true, revision: 1});
-  if (previous) states.set(operationPath, {...previous, accountId: 'account', context: 'private', companyId: null});
+  if (previous) states.set(operationPath, {...receipts.createArchivePurgeBinding({uid: 'owner', command: policy.validatePurgeCommand(command)}), ...previous});
   for (let index = 0; index < companies; index++) states.set(`${root}/aziende/c${index}`, {emails: {pec: link}});
   if (malformed) states.set(`${root}/aziende/c0`, {emails: []});
   let deletions = 0, transactions = 0;
@@ -35,7 +36,7 @@ function fixture({previous = null, companies = 1, malformed = false} = {}) {
       return result;
     }};
   class HttpsError extends Error { constructor(code, message) { super(message); this.code = code; } }
-  const context = vm.createContext({...policy, exports: {}, onCall: (_config, run) => run, HttpsError,
+  const context = vm.createContext({...policy, ...receipts, exports: {}, onCall: (_config, run) => run, HttpsError,
     getFirestore: () => store, getStorage: () => ({bucket: () => ({})}), FieldValue: {serverTimestamp: () => 'time'}});
   vm.runInContext(ownerGuard + handler, context);
   return {states, counters: () => ({deletions, transactions}), run: () => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data: command})};
@@ -63,7 +64,7 @@ test('malformed or oversized final plan never partially cleans or records purged
   for (const options of [{malformed: true}, {companies: 450}]) {
     const f = fixture(options);
     await assert.rejects(f.run());
-    assert.equal(f.states.get('users/owner/archiveOperations/operation').status, 'processing');
+    assert.equal(f.states.get('mutationResults/owner/operations/operation').status, 'processing');
     assert.equal(f.states.get('users/owner').contactPhones[0].linkedAccountId, 'account');
     assert.equal(f.states.has('users/owner/auditEvents/operation'), false);
   }

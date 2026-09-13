@@ -4,6 +4,7 @@ const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
 const {HttpsError} = require('firebase-functions/v2/https');
 const policy = require('../archive-purge-service');
+const receipts = require('../archive-purge-receipt');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
@@ -13,6 +14,7 @@ const command = {expectedOwnerUid: 'A', accountId: 'account', operationId: 'oper
 function fixture() {
   const accesses = {validation: 0, firestore: 0, storage: 0, recursiveDelete: 0};
   const reads = [], writes = [];
+  const states = new Map();
   const ref = path => ({path, collection: key => ref(`${path}/${key}`), doc: key => ref(`${path}/${key}`),
     get: async () => { reads.push(path); return {docs: []}; }});
   const store = {collection: ref, doc: ref,
@@ -20,12 +22,13 @@ function fixture() {
     runTransaction: async callback => callback({
       get: async reference => {
         reads.push(reference.path);
-        const exists = reference.path === 'users/A/accounts/account';
-        return {exists, data: () => exists ? {isArchived: true, revision: 1} : undefined, docs: []};
+        const record = reference.path === 'users/A/accounts/account' ? {isArchived: true, revision: 1} : states.get(reference.path);
+        return {exists: !!record, data: () => record, docs: []};
       },
-      set: reference => writes.push(reference.path), update: reference => writes.push(reference.path),
+      set: (reference, value) => { writes.push(reference.path); states.set(reference.path, {...states.get(reference.path), ...value}); },
+      update: reference => writes.push(reference.path),
     })};
-  const context = vm.createContext({...policy, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...policy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
     validatePurgeCommand: data => { accesses.validation++; return policy.validatePurgeCommand(data); },
     getFirestore: () => { accesses.firestore++; return store; },
     getStorage: () => { accesses.storage++; return {bucket: () => ({})}; },
@@ -64,5 +67,5 @@ test('matching owner preserves purge and constrains all paths to that owner', as
   assert.equal((await f.run()).status, 'purged');
   assert.deepEqual(f.accesses, {validation: 1, firestore: 1, storage: 1, recursiveDelete: 1});
   assert.ok(f.reads.length > 0); assert.ok(f.writes.length > 0);
-  assert.ok([...f.reads, ...f.writes].every(path => /^users\/A(?:\/|$)/.test(path)));
+  assert.ok([...f.reads, ...f.writes].every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path)));
 });
