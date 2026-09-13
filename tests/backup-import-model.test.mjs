@@ -72,3 +72,21 @@ test('descrive widget e credenziali comuni senza esporre valori protetti', async
   assert.equal(descriptions.join(' ').includes('segreto'), false);
   assert.equal(descriptions.join(' ').includes('vietato'), false);
 });
+
+test('record identity matches backend destination equality across all scopes and ambiguous IDs', async () => {
+  const api = await loadModel();
+  const {restorePath} = await import('../functions/backup-restore-service.js');
+  const scopes = ['profile', 'settings', 'private-account', 'company', 'company-account',
+    'private-account-attachment', 'company-account-attachment', 'private-account-widget',
+    'company-account-widget', 'shared-vault-data', 'shared-vault-data-link', 'deadline', 'contact', 'profile-widget'];
+  const records = scopes.flatMap(scope => [
+    {scope, id: 'x', companyId: 'a:b', accountId: 'c', sharedDataId: 's'},
+    {scope, id: 'x', companyId: 'a', accountId: 'b:c', sharedDataId: 't'},
+    {scope, id: ' y ', companyId: 'a', accountId: 'c', sharedDataId: 's'}
+  ]);
+  for (const a of records) for (const b of records) {
+    assert.equal(api.restoreRecordKey(a) === api.restoreRecordKey(b), restorePath('owner', a) === restorePath('owner', b));
+  }
+  assert.throws(() => api.restoreRecordKey({scope: 'unknown', id: 'x'}), /SCOPE/);
+  assert.throws(() => api.restoreRecordKey({scope: 'company-account', id: 'x', companyId: '../other'}), /IDENTIFIER/);
+});

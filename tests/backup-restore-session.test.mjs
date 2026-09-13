@@ -35,7 +35,7 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
         httpsCallable: () => async command => { calls.push({uid: auth.currentUser?.uid, command}); return context.respond(command); },
         uploadBytes: async (...args) => uploads.push(args),
     });
-    vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
+    vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,restoreRecordKey,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
     let testedService = service;
     for (const [name, value] of Object.entries(previewLimits)) {
@@ -575,4 +575,23 @@ test('exact preview record capacity remains usable and one additional record sto
     refused.context.decryptBackupEntry = async options => { decrypted++; return decrypt(options); };
     await assert.rejects(refused.prepare(), /BACKUP_PREVIEW_CAPACITY_EXCEEDED/);
     assert.equal(decrypted, 2); assert.equal(refused.calls.length, 0);
+});
+
+test('duplicate destinations across chunk boundary fail before any server comparison', async () => {
+    const f = fixture();
+    const records = Array.from({length: 400}, (_, index) => ({kind: 'record', scope: 'private-account', id: `r${index}`, data: {}}));
+    records.push({...records[0], data: {changed: true}});
+    replaceBackupEntries(f, records, []);
+    await assert.rejects(f.prepare(), /BACKUP_RECORD_DUPLICATE/);
+    assert.equal(f.calls.length, 0); assert.equal(f.uploads.length, 0); assert.equal(f.observers.size, 0);
+});
+
+test('shared physical widget destination and profile aliases cannot appear twice in a backup', async () => {
+    for (const pair of [
+        [{scope: 'private-account-widget', id: 'w', accountId: 'a'}, {scope: 'company-account-widget', id: 'w', accountId: 'b', companyId: 'c'}],
+        [{scope: 'profile', id: 'first'}, {scope: 'profile', id: 'second'}]
+    ]) {
+        const f = fixture(); replaceBackupEntries(f, pair.map(record => ({...record, kind: 'record', data: {}})), []);
+        await assert.rejects(f.prepare(), /BACKUP_RECORD_DUPLICATE/); assert.equal(f.calls.length, 0);
+    }
 });

@@ -35,10 +35,29 @@ export function validateBackupFooter(footer, counts) {
     return true;
 }
 
-function restoreRecordKey(record = {}) {
-    return [
-        record.scope, record.id, record.companyId || '', record.accountId || '', record.sharedDataId || ''
-    ].join(':');
+export function restoreRecordKey(record = {}) {
+    const id = value => {
+        const normalized = String(value || '').trim();
+        if (!/^[A-Za-z0-9._:-]{1,160}$/.test(normalized)) throw new Error('BACKUP_IDENTIFIER_INVALID');
+        return normalized;
+    };
+    // Match backend destination identity, including shared widget collection.
+    // JSON tuples avoid collisions when valid identifiers contain colons.
+    const key = (...parts) => JSON.stringify(parts);
+    if (record.scope === 'profile') return key('profile');
+    const recordId = id(record.id);
+    switch (record.scope) {
+        case 'settings': case 'private-account': case 'company': case 'deadline':
+        case 'contact': case 'profile-widget': case 'shared-vault-data':
+            return key(record.scope, recordId);
+        case 'company-account': return key(record.scope, id(record.companyId), recordId);
+        case 'private-account-attachment': return key(record.scope, id(record.accountId), recordId);
+        case 'company-account-attachment': return key(record.scope, id(record.companyId), id(record.accountId), recordId);
+        case 'company-account-widget': id(record.companyId); // fall through: both contexts use accountWidgets
+        case 'private-account-widget': id(record.accountId); return key('account-widget', recordId);
+        case 'shared-vault-data-link': id(record.sharedDataId); return key(record.scope, recordId);
+        default: throw new Error('BACKUP_SCOPE_INVALID');
+    }
 }
 
 function canonicalJson(value) {

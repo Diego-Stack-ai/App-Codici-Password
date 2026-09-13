@@ -1,7 +1,7 @@
 import {auth, functions, storage} from '../../firebase-config.js?v=1.2.121';
 import {httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
-import {chunkRestoreRecords, describeRestoreRecords, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
+import {chunkRestoreRecords, describeRestoreRecords, restoreRecordKey, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
 import {collectStoragePaths} from './backup-export-model.js';
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
@@ -238,6 +238,8 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const records = [];
         const storagePaths = new Set();
         const attachmentDigests = new Map();
+        const recordKeys = new Set();
+        session.own(() => recordKeys.clear());
         let recordCharacters = 0, attachmentCharacters = 0;
         session.own(() => attachmentDigests.clear());
         const scan = await scanBackup(file, uid, recoveryKey, (entry, digest) => {
@@ -248,6 +250,9 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
                     throw new Error('BACKUP_PREVIEW_CAPACITY_EXCEEDED');
                 }
                 recordCharacters += characters;
+                const identity = restoreRecordKey(entry);
+                if (recordKeys.has(identity)) throw new Error('BACKUP_RECORD_DUPLICATE');
+                recordKeys.add(identity);
                 records.push(entry);
             }
             else {
