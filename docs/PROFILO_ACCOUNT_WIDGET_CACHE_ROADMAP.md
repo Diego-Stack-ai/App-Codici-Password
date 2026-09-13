@@ -329,3 +329,7 @@ Registrare decisioni, schema effettivo, compatibilità, eventuali migrazioni, te
 ## Widget dentro il conto — candidata 1.2.119, 13/09/2026
 
 Corretto il pulsante introdotto nella UI 1.2.118: la creazione dal conto ora seleziona una posizione bancaria specifica, persistita tramite bankId. Host separati mantengono i Widget dentro ciascun conto, anche dopo riapertura; generici invariati. Disponibile spostamento esplicito dall'editor per Widget creati prima della correzione. Il requisito richiede un aggiornamento compatibile del solo callable manageAccountWidget oltre a Hosting; lavoro Vault escluso. Candidata verificata con 352 test, non distribuita.
+
+## Prerequisito conto salvato — candidata 1.2.120, 13/09/2026
+
+Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consentiva di inviare il Widget prima che il conto fosse salvato. Il backend respingeva correttamente la richiesta con HTTP 400/failed-precondition. Ora i due form distinguono gli ID caricati da quelli appena generati; creazione e spostamento chiedono prima il salvataggio Account, senza inviare il comando fallito e conservando eventuali campi nel modale. Gestito anche il testo italiano del rifiuto server. Nessuna modifica backend, Rules, dati reali o ramo Vault.

@@ -7,8 +7,8 @@ Pagine canoniche analizzate: **31**. Laboratori e redirect storici sono conserva
 | Pagina | HTML | CSS | Moduli JS | Peso grezzo | Stima gzip |
 |---|---:|---:|---:|---:|---:|
 | `profilo_privato.html` | 1 | 7 | 42 | 1180.3 KB | 335.7 KB |
-| `form_account_privato.html` | 1 | 6 | 42 | 1146.8 KB | 328.3 KB |
-| `form_account_azienda.html` | 1 | 6 | 41 | 1136.8 KB | 326.1 KB |
+| `form_account_privato.html` | 1 | 6 | 42 | 1148.4 KB | 328.5 KB |
+| `form_account_azienda.html` | 1 | 6 | 41 | 1138.2 KB | 326.3 KB |
 | `dati_azienda.html` | 1 | 8 | 38 | 1096.5 KB | 317.5 KB |
 | `aggiungi_scadenza.html` | 1 | 7 | 38 | 1094.5 KB | 315.8 KB |
 | `impostazioni.html` | 1 | 5 | 34 | 1093.6 KB | 312.1 KB |
@@ -27,7 +27,7 @@ Pagine canoniche analizzate: **31**. Laboratori e redirect storici sono conserva
 | `configurazione_documenti.html` | 1 | 6 | 27 | 957.2 KB | 280.2 KB |
 | `lista_aziende.html` | 1 | 6 | 28 | 939.3 KB | 278.4 KB |
 | `gestione_destinatari.html` | 1 | 6 | 26 | 941.5 KB | 277.8 KB |
-| `registrati.html` | 1 | 5 | 25 | 933.7 KB | 277.0 KB |
+| `registrati.html` | 1 | 5 | 25 | 933.7 KB | 276.9 KB |
 | `reset_password.html` | 1 | 4 | 25 | 927.3 KB | 275.6 KB |
 | `regole_scadenze.html` | 1 | 6 | 23 | 925.9 KB | 274.0 KB |
 | `imposta_nuova_password.html` | 1 | 4 | 24 | 921.3 KB | 273.4 KB |
@@ -41,8 +41,8 @@ Pagine canoniche analizzate: **31**. Laboratori e redirect storici sono conserva
 ## Pagine con il maggiore carico statico
 
 - `profilo_privato.html`: 335.7 KB gzip stimati, 42 moduli JS e 7 fogli CSS.
-- `form_account_privato.html`: 328.3 KB gzip stimati, 42 moduli JS e 6 fogli CSS.
-- `form_account_azienda.html`: 326.1 KB gzip stimati, 41 moduli JS e 6 fogli CSS.
+- `form_account_privato.html`: 328.5 KB gzip stimati, 42 moduli JS e 6 fogli CSS.
+- `form_account_azienda.html`: 326.3 KB gzip stimati, 41 moduli JS e 6 fogli CSS.
 - `dati_azienda.html`: 317.5 KB gzip stimati, 38 moduli JS e 8 fogli CSS.
 - `aggiungi_scadenza.html`: 315.8 KB gzip stimati, 38 moduli JS e 7 fogli CSS.
 - `impostazioni.html`: 312.1 KB gzip stimati, 34 moduli JS e 5 fogli CSS.

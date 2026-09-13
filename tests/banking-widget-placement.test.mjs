@@ -33,7 +33,7 @@ function fixture(editable = true) {
     vm.createContext(sandbox); vm.runInContext(source,sandbox);
     return {all, ids, widgets, updates, sandbox, get hosts(){return hosts;},
         remount() {hosts = hosts.map(h=>element('div',{dataset:{...h.dataset}}));},
-        init:()=>sandbox.initAccountEmbeddedWidgets({uid:'owner',context:'private',accountId:'account',editable})};
+        init:(extra={})=>sandbox.initAccountEmbeddedWidgets({...extra,uid:'owner',context:'private',accountId:'account',editable})};
 }
 test('bank widgets belong to their bank; remount preserves dirty card and main save includes it', async()=>{
     const f=fixture(); const controller=await f.init();
@@ -68,4 +68,20 @@ test('widget preparation preserves bank binding, explicit detach and encrypted v
     assert.equal(Object.hasOwn(widget.fields[0],'value'),false);
     assert.equal((await prepareEmbeddedAccountWidget({...data,bankId:null},account,async()=> 'encrypted')).bankId,null);
     await assert.rejects(prepareEmbeddedAccountWidget({...data,bankId:'bad/path'},account,async()=> 'encrypted'));
+});
+
+test('new or legacy unsaved bank never opens the editor or sends a request',async()=>{
+    const f=fixture(); const controller=await f.init({isBankSaved:id=>id==='bank-a'});
+    assert.equal(await controller.openNewWidget('bank-b'),false);
+    assert.equal(f.all.some(n=>n.tag==='form'),false); assert.equal(f.updates.length,0);
+    assert.equal(await controller.openNewWidget('bank-a'),true);
+});
+test('moving an existing widget to an unsaved bank preserves editor and avoids the failed write',async()=>{
+    const f=fixture(); const controller=await f.init({isBankSaved:()=>false});
+    await controller.openNewWidget();
+    f.all.find(n=>n['aria-label']==='Posizione del Widget').value='bank-b';
+    const title=f.all.find(n=>n.placeholder==='Titolo del widget');title.value='Draft preserved';
+    await f.all.find(n=>n.tag==='form').onsubmit({preventDefault(){}});
+    assert.equal(f.updates.length,0);assert.equal(title.value,'Draft preserved');
+    assert.ok(f.sandbox.document.body.children.length);
 });
