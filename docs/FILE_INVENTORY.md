@@ -81,8 +81,8 @@ File censiti: **442**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/GUIDA.md` | MD | 63385 | 994 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 49064 | 538 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA.md` | MD | 63788 | 998 | Documentazione: GUIDA. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 49467 | 542 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -249,14 +249,14 @@ File censiti: **442**. Duplicati byte-per-byte: **4 gruppi**.
 | `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 52562 | 1066 | Impostazioni applicative: impostazioni. |
 | `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3468 | 93 | Impostazioni applicative: push-settings-controller. |
 | `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17243 | 320 | Impostazioni applicative: shared-credentials-controller. |
-| `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 7039 | 151 | Supporto frontend: account-banking-view. |
+| `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 7196 | 152 | Supporto frontend: account-banking-view. |
 | `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 25798 | 483 | Supporto frontend: account-embedded-widgets. |
 | `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 7741 | 160 | Supporto frontend: account-list-view. |
 | `Frontend/public/assets/js/modules/shared/account-mode-model.js` | JS | 1828 | 40 | Supporto frontend: account-mode-model. |
 | `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 15719 | 282 | Supporto frontend: account-shared-credentials. |
 | `Frontend/public/assets/js/modules/shared/attachment-security.js` | JS | 5917 | 139 | Validazione e cifratura degli allegati prima di Storage. |
 | `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 3715 | 103 | Supporto frontend: banking-model. |
-| `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 11571 | 219 | Renderer condiviso per conti bancari e carte. |
+| `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 11799 | 219 | Renderer condiviso per conti bancari e carte. |
 | `Frontend/public/assets/js/modules/shared/card-secret.js` | JS | 706 | 17 | Supporto frontend: card-secret. |
 | `Frontend/public/assets/js/modules/shared/company-area-preference.js` | JS | 840 | 24 | Supporto frontend: company-area-preference. |
 | `Frontend/public/assets/js/modules/shared/contact-card-model.js` | JS | 4264 | 71 | Supporto frontend: contact-card-model. |
@@ -497,7 +497,7 @@ File censiti: **442**. Duplicati byte-per-byte: **4 gruppi**.
 | `tests/backup-import-model.test.mjs` | MJS | 4358 | 75 | Test automatico: backup-import-model.test. |
 | `tests/banking-form-roundtrip.test.mjs` | MJS | 3041 | 45 | Test automatico: banking-form-roundtrip.test. |
 | `tests/banking-model.test.mjs` | MJS | 2985 | 68 | Test automatico: banking-model.test. |
-| `tests/banking-widget-hosts.test.mjs` | MJS | 6339 | 100 | Test automatico: banking-widget-hosts.test. |
+| `tests/banking-widget-hosts.test.mjs` | MJS | 6897 | 105 | Test automatico: banking-widget-hosts.test. |
 | `tests/banking-widget-placement.test.mjs` | MJS | 6884 | 88 | Test automatico: banking-widget-placement.test. |
 | `tests/company-detail-freshness.test.mjs` | MJS | 6864 | 102 | Test automatico: company-detail-freshness.test. |
 | `tests/company-form-freshness.test.mjs` | MJS | 5121 | 70 | Test automatico: company-form-freshness.test. |

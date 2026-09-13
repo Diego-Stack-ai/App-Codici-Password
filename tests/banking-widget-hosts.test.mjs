@@ -31,6 +31,8 @@ test('bank identities survive reorder and collapse, and each plus targets its ow
     });
     render();
     assert.equal(banks[0].bankId, 'bank-1');
+    const order = descendants(container.children[0]);
+    assert.ok(order.findIndex(n => n.dataset?.bankWidgetId) < order.findIndex(n => n.className === 'bank-cards-section'));
     const plus = descendants(container).filter(n => n['aria-label'] === 'Aggiungi Widget');
     plus.forEach(button => button.onclick());
     assert.deepEqual(calls, ['bank-1', 'saved-bank']);
@@ -57,6 +59,9 @@ test('detail creates widget-only bank hosts without treating a bank identity as 
     realm.renderAccountBanking(account);
     assert.equal(visibility.get('hidden'), true);
     assert.ok(descendants(content).some(n => n.dataset?.bankWidgetId === 'saved-only'));
+    realm.renderAccountBanking({banking: [{bankId: 'bank', iban: 'synthetic', cards: [{cardType: 'synthetic'}]}]});
+    const order = descendants(content);
+    assert.ok(order.findIndex(n => n.dataset?.bankWidgetId) < order.findIndex(n => n.className === 'bank-cards-section'));
 });
 
 test('deleting a bank blocks only its own widgets and rechecks after confirmation', async () => {

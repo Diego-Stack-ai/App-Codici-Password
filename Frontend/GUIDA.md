@@ -991,3 +991,7 @@ Rilascio UI isolato sulla base master 1.2.117 (`445b338d`), derivato da `d2ef897
 ## Widget del singolo conto — candidata 1.2.119, 13/09/2026
 
 Ogni conto bancario dei form privato/azienda contiene carte e una propria area Widget. Il pulsante + apre lo stesso editor con posizione preselezionata; il campo Posizione consente di spostare un Widget generico già esistente. Il collegamento usa bankId stabile, mai indice della lista o IBAN. Il conto deve essere salvato prima di creare il Widget. Le bozze dei Widget restano conservate quando si apre/chiude il conto. Per eliminare un conto con Widget occorre prima spostarli o eliminarli; non sono cancellati automaticamente. Candidata non distribuita.
+
+## Ordine interno del conto — candidata 1.2.121, 13/09/2026
+
+Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infine le carte associate. Ordine condiviso da Modifica e consultazione, nei contesti privato e aziendale. Il contenitore Widget rimane disponibile anche a conto chiuso, preservando le bozze al rerender. Nessuna modifica a dati, associazioni, backend o Rules.

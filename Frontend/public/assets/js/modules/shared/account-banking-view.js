@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.120';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.121';
 
 function createReadonlyField(label, value, icon, isPassword = false) {
     const id = `bank-field-${crypto.randomUUID()}`;
@@ -99,6 +99,8 @@ function createBankAccount(bank, index) {
         bank.referenteCellulare ? createReadonlyField('Cell. Banca', bank.referenteCellulare, 'smartphone') : null
     ].filter(Boolean);
 
+    if (bank.bankId) fields.push(createElement('div', {className: 'bank-widget-host flex-col-gap', dataset: {bankWidgetId: bank.bankId}}));
+
     if (bank.cards?.length) {
         fields.push(createElement('div', { className: 'bank-cards-section' }, [
             createElement('div', { className: 'bank-cards-header' }, [
@@ -121,8 +123,7 @@ function createBankAccount(bank, index) {
                 })
             ])
         ]),
-        createElement('div', { className: 'bank-details' }, fields),
-        bank.bankId ? createElement('div', {className: 'bank-widget-host flex-col-gap', dataset: {bankWidgetId: bank.bankId}}) : null
+        createElement('div', { className: 'bank-details' }, fields)
     ]);
 }
 
