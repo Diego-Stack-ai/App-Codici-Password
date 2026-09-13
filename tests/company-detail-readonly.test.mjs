@@ -20,7 +20,7 @@ function fixture() {
     };
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({URLSearchParams, window, navigator: {onLine: true}, console,
+    const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: true}, console,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),
@@ -41,7 +41,7 @@ function fixture() {
     vm.runInContext(source.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export async function', 'async function').replace(/\bimport\(/g, 'loadModule('), context);
     return {writes, reads, errors, modules, footer, classes, window,
         button: () => find(footer.children, 'btn-edit-footer'),
-        read: value => { read = value; }, init: uid => context.initDettaglioAccountAzienda({uid})};
+        read: value => { read = value; }, init: uid => {context.auth.currentUser={uid};return context.initDettaglioAccountAzienda({uid})}};
 }
 
 test('guest never gets an edit footer, including while fetch is pending, and submits no view write', async () => {

@@ -4,17 +4,20 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js';
 
-function createReadonlyField(label, value, icon, isPassword = false) {
+function createReadonlyField(label, value, icon, isPassword = false, isActive = () => true) {
     const id = `bank-field-${crypto.randomUUID()}`;
     const copyButton = createElement('button', {
         className: 'btn-icon-header copy-btn cursor-pointer',
         type: 'button',
         onclick: async event => {
             event.stopPropagation();
+            if (!isActive()) return;
             try {
                 await navigator.clipboard.writeText(value);
+                if (!isActive()) return;
                 showToast(t('copied') || 'Copiato!');
             } catch (error) {
+                if (!isActive()) return;
                 logError('CopyBankingValue', error);
                 showToast(t('error_generic'), 'error');
             }
@@ -33,6 +36,7 @@ function createReadonlyField(label, value, icon, isPassword = false) {
             type: 'button',
             onclick: event => {
                 event.stopPropagation();
+            if (!isActive()) return;
                 const input = document.getElementById(id);
                 if (!input) return;
                 const hidden = input.classList.contains('base-shield');
@@ -65,7 +69,8 @@ function createReadonlyField(label, value, icon, isPassword = false) {
     ]);
 }
 
-function createBankCard(card, index) {
+function createBankCard(card, index, isActive) {
+    const field = (label, value, icon, secret = false) => createReadonlyField(label, value, icon, secret, isActive);
     return createElement('div', { className: 'card-entry border-glow' }, [
         createElement('div', { className: 'card-entry-header cursor-default' }, [
             createElement('div', { className: 'card-entry-title-row' }, [
@@ -80,21 +85,22 @@ function createBankCard(card, index) {
             ])
         ]),
         createElement('div', { className: 'flex-col-gap' }, [
-            card.titolare ? createReadonlyField('Intestatario', card.titolare, 'person') : null,
-            card.cardNumber ? createReadonlyField('Numero', card.cardNumber, 'credit_card') : null,
-            card.expiry ? createReadonlyField('Scadenza', card.expiry, 'calendar_month') : null,
-            card.pin ? createReadonlyField('PIN', card.pin, 'dialpad', true) : null,
-            card.ccv ? createReadonlyField('CCV', card.ccv, 'shield', true) : null
+            card.titolare ? field('Intestatario', card.titolare, 'person') : null,
+            card.cardNumber ? field('Numero', card.cardNumber, 'credit_card') : null,
+            card.expiry ? field('Scadenza', card.expiry, 'calendar_month') : null,
+            card.pin ? field('PIN', card.pin, 'dialpad', true) : null,
+            card.ccv ? field('CCV', card.ccv, 'shield', true) : null
         ].filter(Boolean))
     ]);
 }
 
-function createBankAccount(bank, index) {
+function createBankAccount(bank, index, isActive) {
+    const field = (label, value, icon, secret = false) => createReadonlyField(label, value, icon, secret, isActive);
     const fields = [
-        bank.iban ? createReadonlyField('IBAN', bank.iban, 'account_balance') : null,
-        bank.passwordDispositiva ? createReadonlyField('Pass. Disp.', bank.passwordDispositiva, 'lock', true) : null,
-        bank.referenteTelefono ? createReadonlyField('Tel. Banca', bank.referenteTelefono, 'call') : null,
-        bank.referenteCellulare ? createReadonlyField('Cell. Banca', bank.referenteCellulare, 'smartphone') : null
+        bank.iban ? field('IBAN', bank.iban, 'account_balance') : null,
+        bank.passwordDispositiva ? field('Pass. Disp.', bank.passwordDispositiva, 'lock', true) : null,
+        bank.referenteTelefono ? field('Tel. Banca', bank.referenteTelefono, 'call') : null,
+        bank.referenteCellulare ? field('Cell. Banca', bank.referenteCellulare, 'smartphone') : null
     ].filter(Boolean);
 
     if (bank.cards?.length) {
@@ -102,7 +108,7 @@ function createBankAccount(bank, index) {
             createElement('div', { className: 'bank-cards-header' }, [
                 createElement('span', { className: 'bank-cards-title', textContent: 'Carte Associate' })
             ]),
-            createElement('div', { className: 'flex-col-gap' }, bank.cards.map(createBankCard))
+            createElement('div', { className: 'flex-col-gap' }, bank.cards.map((card, index) => createBankCard(card, index, isActive)))
         ]));
     }
 
@@ -123,7 +129,8 @@ function createBankAccount(bank, index) {
     ]);
 }
 
-export function renderAccountBanking(account, { isReadOnly = false, onAddBanking, promptText } = {}) {
+export function renderAccountBanking(account, { isReadOnly = false, onAddBanking, promptText, isActive = () => true } = {}) {
+    if (!isActive()) return;
     const section = document.getElementById('section-banking');
     const content = document.getElementById('banking-content');
     const prompt = document.getElementById('add-banking-prompt');
@@ -136,11 +143,11 @@ export function renderAccountBanking(account, { isReadOnly = false, onAddBanking
     if (infoButton && !hasBanking && !isReadOnly) {
         const infoText = infoButton.querySelector('.info-text');
         if (infoText && promptText) infoText.textContent = promptText;
-        infoButton.onclick = onAddBanking;
+        infoButton.onclick = () => { if (isActive()) onAddBanking?.(); };
     }
 
     if (!content) return;
     clearElement(content);
     if (!hasBanking) return;
-    setChildren(content, normalizeBankingAccounts(account).map(createBankAccount));
+    setChildren(content, normalizeBankingAccounts(account).map((bank, index) => createBankAccount(bank, index, isActive)));
 }

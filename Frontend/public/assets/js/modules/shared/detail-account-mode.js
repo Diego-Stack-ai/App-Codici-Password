@@ -9,7 +9,9 @@ import { accountModeFromRecord, hasAccountCredentials, validateAccountMode } fro
 const fullName = contact => [contact?.nome, contact?.cognome].filter(Boolean).join(' ').trim() || contact?.email || '';
 const normalizeEmail = email => String(email || '').trim().toLowerCase();
 
-export async function initDetailAccountMode({ account, ownerId, accountId, aziendaId = null, readOnly = false, onReload }) {
+export async function initDetailAccountMode({ account, ownerId, accountId, aziendaId = null, readOnly = false, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+    const active = () => !signal?.aborted && isActive();
+    if (!active()) return;
     const section = document.getElementById('account-mode-section');
     const options = document.getElementById('account-mode-options');
     const contactArea = document.getElementById('account-mode-contacts');
@@ -32,9 +34,11 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
             .filter(item => item.active !== false && normalizeEmail(item.email))
             .sort((a, b) => fullName(a).localeCompare(fullName(b), 'it'));
     } catch (error) {
+        if (!active()) return;
         console.warn('[AccountMode] Rubrica non disponibile', error);
     }
 
+    if (!active()) return;
     const definitions = [
         ['account-private', 'Account', 'lock'],
         ['account-shared', 'Account condiviso', 'group'],
@@ -44,6 +48,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
 
     const hasCredentials = () => hasAccountCredentials(account);
     const render = () => {
+        if (!active()) return;
         clearElement(options);
         definitions.forEach(([key, label, icon]) => {
             options.appendChild(createElement('button', {
@@ -51,6 +56,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 className: `account-mode-option${selectedMode === key ? ' is-active' : ''}`,
                 dataset: { mode: key },
                 onclick: () => {
+                    if (!active()) return;
                     const validation = validateAccountMode(key, account);
                     if (validation.reason === 'memo-has-credentials') {
                         showToast('Per passare a Memorandum apri Modifica e cancella manualmente Utente, Account/Codice e Password.', 'warning');
@@ -105,13 +111,14 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     };
 
     saveButton.onclick = async () => {
+        if (!active()) return;
         const isShared = selectedMode.endsWith('-shared');
         const isMemo = selectedMode.startsWith('memo-');
         if (isMemo && hasCredentials()) return showToast('Cancella manualmente le tre credenziali dal form Modifica prima di usare Memorandum.', 'warning');
         if (isShared && !selectedEmails.size) return showToast('Seleziona almeno un destinatario per la condivisione.', 'warning');
         if (!isShared && Object.keys(account.sharedWith || {}).length) {
-            const ok = await showConfirmModal('Interrompere la condivisione?', 'Gli accessi attivi e gli inviti pendenti saranno revocati.', 'Continua');
-            if (!ok) return;
+            const ok = await confirmAction('Interrompere la condivisione?', 'Gli accessi attivi e gli inviti pendenti saranno revocati.', 'Continua');
+            if (!active() || !ok) return;
         }
 
         saveButton.disabled = true;
@@ -120,8 +127,11 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 ? ['users', ownerId, 'aziende', aziendaId, 'accounts', accountId]
                 : ['users', ownerId, 'accounts', accountId];
             const accountRef = doc(db, ...path);
+            if (!active()) return;
             await runTransaction(db, async transaction => {
+                if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
                 const snap = await transaction.get(accountRef);
+                if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
                 if (!snap.exists()) throw new Error('Account non trovato');
                 const stored = snap.data();
                 const sharedWith = { ...(stored.sharedWith || {}) };
@@ -169,13 +179,15 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                     updatedAt: new Date().toISOString()
                 });
             });
+            if (!active()) return;
             showToast('Tipologia e condivisione aggiornate.');
             await onReload?.();
         } catch (error) {
+            if (!active()) return;
             console.error('[AccountMode] Salvataggio fallito', error);
             showToast('Impossibile salvare la modifica.', 'error');
         } finally {
-            saveButton.disabled = false;
+            if (active()) saveButton.disabled = false;
         }
     };
 

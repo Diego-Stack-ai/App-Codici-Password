@@ -19,6 +19,7 @@ let _currentUid = null;
 let _currentAziendaId = null;
 let _currentId = null;
 let _isReadOnly = false;
+let _active = () => true, _version = 0, _confirm = showConfirmModal;
 let _onReload = null; // callback per ricaricare i dati dal modulo principale
 
 /**
@@ -27,7 +28,10 @@ let _onReload = null; // callback per ricaricare i dati dal modulo principale
  * @param {Object} ctx
  * @param {Function} ctx.onReload - callback asincrono per ricaricare loadAccount()
  */
-export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload }) {
+export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+    _confirm = confirmAction;
+    const version = ++_version;
+    _active = () => version === _version && !signal?.aborted && isActive();
     _currentUid = currentUid;
     _currentAziendaId = currentAziendaId;
     _currentId = currentId;
@@ -39,6 +43,8 @@ export function initSharingModule({ currentUid, currentAziendaId, currentId, isR
  * Renderizza la mappa di condivisione dell'account (sezione sharedWith).
  */
 export function renderSharingMap(account, contactNames = new Map()) {
+    const active = _active, confirmAction = _confirm;
+    if (!active()) return;
     const listContainer = document.getElementById('guests-list');
     const mgmtSection = document.getElementById('shared-management-section');
 
@@ -76,7 +82,7 @@ export function renderSharingMap(account, contactNames = new Map()) {
         if (!_isReadOnly) {
             items.push(createElement('button', {
                 className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
-                onclick: () => revokeRecipientV3(inv.email)
+                onclick: () => active() && revokeRecipientV3(inv.email)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
             ]));
@@ -100,6 +106,8 @@ export function renderSharingMap(account, contactNames = new Map()) {
  * Renderizza la lista ospiti con verifica live dello stato invito (legacy/alternativo).
  */
 export async function renderGuests(guests) {
+    const active = _active, confirmAction = _confirm;
+    if (!active()) return;
     const list = document.getElementById('guests-list');
     if (!list) return;
     clearElement(list);
@@ -127,6 +135,7 @@ export async function renderGuests(guests) {
             try {
                 const inviteId = `${_currentId}_${sanitizeEmail(displayEmail)}`;
                 const invData = await getInvite(inviteId);
+                if (!active()) return;
 
                 if (invData) {
                     if (invData.status === 'accepted') {
@@ -141,7 +150,7 @@ export async function renderGuests(guests) {
                         continue;
                     }
                 }
-            } catch (e) { console.warn("LiveCheck failed", e); }
+            } catch (e) { if (!active()) return; console.warn("LiveCheck failed", e); }
         } else {
             displayStatus = t('status_accepted') || 'Accettato';
             statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
@@ -174,10 +183,11 @@ export async function renderGuests(guests) {
         list.appendChild(div);
     }
 
-    if (needsUpdate) {
+    if (needsUpdate && !_isReadOnly && active()) {
         try {
             const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId);
             const { updateDoc } = await import("/assets/js/vendor/firebase-runtime.js");
+            if (!active()) return;
             await updateDoc(docRef, { sharedWith: updatedGuests });
         } catch (e) { console.error("Auto-Healing di Stato update failed", e); }
     }
@@ -187,22 +197,27 @@ export async function renderGuests(guests) {
  * Revoca l'accesso di un singolo ospite tramite transazione atomica (V3.1).
  */
 async function revokeRecipientV3(email) {
+    const active = _active, confirmAction = _confirm;
+    if (!active() || _isReadOnly) return;
+    const uid = _currentUid, company = _currentAziendaId, account = _currentId, reload = _onReload;
     if (!email) return;
-    const ok = await showConfirmModal(
+    const ok = await confirmAction(
         t('confirm_revoke_title') || "REVOCA ACCESSO",
         `${t('confirm_revoke_msg') || "Vuoi rimuovere l'accesso per"} ${email}?`,
         t('revoke') || "Revoca"
     );
-    if (!ok) return;
+    if (!active() || !ok) return;
 
     try {
         await runTransaction(db, async (transaction) => {
-            const accRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId);
+            if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
+            const accRef = doc(db, "users", uid, "aziende", company, "accounts", account);
             const targetSanitized = sanitizeEmail(email);
-            const inviteId = `${_currentId}_${targetSanitized}`;
+            const inviteId = `${account}_${targetSanitized}`;
             const invRef = doc(db, "invites", inviteId);
 
             const accSnap = await transaction.get(accRef);
+            if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
             if (!accSnap.exists()) return;
 
             const data = accSnap.data();
@@ -237,13 +252,13 @@ async function revokeRecipientV3(email) {
             transaction.delete(invRef);
 
             // 3. Notifica al proprietario
-            const ownerNotifRef = doc(collection(db, "users", _currentUid, "notifications"));
+            const ownerNotifRef = doc(collection(db, "users", uid, "notifications"));
             transaction.set(ownerNotifRef, {
                 title: "Accesso Revocato",
                 message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
                 accountName: data.nomeAccount || 'Account',
                 type: "share_revoked",
-                accountId: _currentId,
+                accountId: account,
                 guestEmail: email,
                 timestamp: new Date().toISOString(),
                 read: false
@@ -266,9 +281,11 @@ async function revokeRecipientV3(email) {
             }
         });
 
+        if (!active()) return;
         showToast("Accesso revocato con successo");
-        if (_onReload) await _onReload();
+        if (reload) await reload();
     } catch (e) {
+        if (!active()) return;
         console.error("RevokeRecipient failed", e);
         showToast(t('error_generic'), 'error');
     }

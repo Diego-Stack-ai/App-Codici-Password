@@ -87,7 +87,9 @@ for (const [name, source] of [['privato', privateDetail], ['aziendale', companyD
 }
 assert.match(accountBankingView, /hasRealBankingData\(account\)/,
     'La vista bancaria non applica il modello comune ai dati legacy e canonici');
-assert.match(accountBankingView, /card\.pin \? createReadonlyField\('PIN',[^\n]+true\)/,
+assert.match(accountBankingView, /const field = \(label, value, icon, secret = false\) => createReadonlyField\(label, value, icon, secret, isActive\);/,
+    'La vista bancaria non propaga protezione e validità del contesto ai campi');
+assert.match(accountBankingView, /card\.pin \? field\('PIN', card\.pin, 'dialpad', true\)/,
     'La vista bancaria non protegge visivamente il PIN');
 assert.match(privateAccount, /savePrivateAccount\(\{/,
     'Il form privato non delega il salvataggio al servizio dedicato');

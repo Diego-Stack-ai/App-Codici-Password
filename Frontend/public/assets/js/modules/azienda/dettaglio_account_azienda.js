@@ -6,10 +6,10 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.110';
-import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
+import { auth, db } from '../../firebase-config.js?v=1.2.110';
+import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -33,10 +33,24 @@ let isReadOnly = false;
 let ownerId = null;
 let requireServerRefresh = false;
 
+let mounted = null;
+function clearDetail(document = globalThis.document) {
+    for (const id of ['detail-nomeAccount','detail-username','detail-account','detail-password','detail-website','detail-numero-iscrizione','detail-codice-societa','ref-name','ref-phone','ref-mobile','input-camera','input-gallery','input-file']) {
+        const node = document.getElementById(id); if (node) { node.value = ''; node.onchange = null; }
+    }
+    for (const id of ['hero-title','detail-note','attachments-list','guests-list','banking-content','footer-center-actions']) {
+        const node = document.getElementById(id); if (node) { for (const input of node.querySelectorAll?.('input') || []) input.value = ''; clearElement(node); }
+    }
+    for (const node of document.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle, #btn-call-ref-phone, #btn-call-ref-mobile, #btn-cancel-source, #source-selector-modal')) node.onclick = null;
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) { modal.classList.remove('active'); modal.classList.add('hidden'); }
+    if (document.body) document.body.style.overflow = '';
+}
+
 // --- INITIALIZATION ---
-export async function initDettaglioAccountAzienda(user) {
-    
-    if (!user) return;
+export async function initDettaglioAccountAzienda(user, options = {}) {
+    mounted?.destroy();
+    if (!user) return {destroy() {}};
     currentUid = user.uid;
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -45,23 +59,51 @@ export async function initDettaglioAccountAzienda(user) {
     ownerId = urlParams.get('ownerId') || user.uid; // V3 Add owner parameter
     requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('serverRefresh') === '1') && navigator.onLine;
 
+    const scope = {uid: currentUid, owner: ownerId, company: currentAziendaId, id: currentId};
+    const root = document.querySelector('.base-container');
+    const owned = new Map();
+    const ownedDocument = {getElementById(id) { if (!owned.has(id)) owned.set(id, document.getElementById(id)); return owned.get(id); }, querySelectorAll: selector => document.querySelectorAll(selector), body: document.body};
+    clearDetail(ownedDocument);
+    const handlers = [...document.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle, #btn-call-ref-phone, #btn-call-ref-mobile, #btn-cancel-source, #source-selector-modal')];
+    ownedDocument.querySelectorAll = () => handlers;
+    let disposed = false, unsubscribe = () => {};
+    const mount = {scope, fileInputs: new Set(), version: 0, loaded: false, loadAbort: new AbortController(),
+        active() {
+            if (!disposed && (mounted !== mount || options.signal?.aborted || root?.isConnected === false ||
+                auth.currentUser?.uid !== scope.uid || (options.active && !options.active()))) mount.destroy();
+            return !disposed;
+        },
+        destroy() {
+            if (disposed) return;
+            disposed = true; mount.loaded = false;
+            for (const input of mount.fileInputs) { input.value = ''; input.onchange = null; }
+            mount.fileInputs.clear(); mount.loadAbort.abort(); unsubscribe();
+            options.signal?.removeEventListener('abort', mount.destroy);
+            globalThis.removeEventListener?.('vault-session-locked', mount.destroy);
+            globalThis.removeEventListener?.('pagehide', mount.destroy);
+            if (mounted === mount) { originalData = null; clearDetail(ownedDocument); }
+        }
+    };
+    mounted = mount;
+    clearDetail();
+    options.signal?.addEventListener('abort', mount.destroy, {once: true});
+    globalThis.addEventListener?.('vault-session-locked', mount.destroy, {once: true});
+    globalThis.addEventListener?.('pagehide', mount.destroy, {once: true});
+    unsubscribe = onAuthStateChanged(auth, user => { if (user?.uid !== scope.uid) mount.destroy(); });
+    if (!mount.active()) return mount;
     if (!currentId || !currentAziendaId) {
-        showToast("Parametri mancanti", "error");
-        setTimeout(() => history.back(), 1000);
-        return;
+        showToast('Parametri mancanti', 'error');
+        setTimeout(() => { if (mount.active()) history.back(); }, 1000);
+        return mount;
     }
-
-    isReadOnly = (ownerId !== currentUid);
-
-    // Inizializza moduli estratti con il contesto corrente
-    initAttachmentModule({ ownerUid: ownerId, currentAziendaId, currentId, readOnly: isReadOnly });
-    initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload: () => loadAccount() });
-
-    initProtocolUI(); // Sync UI setup
-    setupActions();
-    await loadAccount();
+    isReadOnly = ownerId !== currentUid;
+    const footer = document.getElementById('footer-center-actions');
+    if (footer) footer.classList.toggle('hidden', isReadOnly);
+    await loadAccount(mount);
+    return mount;
 }
-function initProtocolUI() {
+
+function initProtocolUI(active) {
     // Pulsante Edit nel Footer Center (Floating Action Button)
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
@@ -74,7 +116,7 @@ function initProtocolUI() {
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
                 onclick: () => {
-                    if (isReadOnly || ownerId !== currentUid) return;
+                    if (!active() || isReadOnly || ownerId !== currentUid) return;
                     window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`;
                 }
             }, [
@@ -84,22 +126,32 @@ function initProtocolUI() {
     }
 }
 
-async function loadAccount() {
+async function loadAccount(mount = mounted) {
+    if (!mount?.active()) return;
+    mount.loadAbort.abort();
+    mount.loadAbort = new AbortController();
+    const signal = mount.loadAbort.signal;
+    const version = ++mount.version;
+    mount.loaded = false;
+    clearDetail();
+    setupActions(() => mount.active() && mount.loaded);
+    const active = () => mount.active() && version === mount.version && !signal.aborted;
+    setupActions(() => active() && mount.loaded, mount.fileInputs);
+    const {uid: loadViewerId, owner: loadOwnerId, company: companyId, id: accountId} = mount.scope;
     try {
-        const loadOwnerId = ownerId;
-        const loadViewerId = currentUid;
-        const docRef = doc(db, "users", ownerId, "aziende", currentAziendaId, "accounts", currentId);
+        const docRef = doc(db, "users", loadOwnerId, "aziende", companyId, "accounts", accountId);
         const account = await (requireServerRefresh
-            ? getCompanyAccountConfirmed(ownerId, currentAziendaId, currentId)
-            : getCompanyAccount(ownerId, currentAziendaId, currentId));
+            ? getCompanyAccountConfirmed(loadOwnerId, companyId, accountId)
+            : getCompanyAccount(loadOwnerId, companyId, accountId));
 
+        if (!active()) return;
         if (!account) {
             showToast(t('account_not_found'), "error");
-            setTimeout(() => history.back(), 1000);
+            setTimeout(() => { if (active()) history.back(); }, 1000);
             return;
         }
 
-        originalData = account;
+        const loaded = {...account};
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
@@ -110,27 +162,29 @@ async function loadAccount() {
         }
 
         // 🔐 DECRIPTAZIONE (Auto-Unlock Compliant)
-        if (originalData._encrypted) {
+        if (loaded._encrypted) {
             try {
                 const vaultKeyMaterial = await ensureVaultKeyMaterial();
+                if (!active()) return;
                 [
-                    originalData.username,
-                    originalData.account,
-                    originalData.password,
-                    originalData.numeroIscrizione,
-                    originalData.codiceSocieta,
-                    originalData.note
+                    loaded.username,
+                    loaded.account,
+                    loaded.password,
+                    loaded.numeroIscrizione,
+                    loaded.codiceSocieta,
+                    loaded.note
                 ] = await Promise.all([
-                    decryptIfPossible(originalData.username, vaultKeyMaterial),
-                    decryptIfPossible(originalData.account, vaultKeyMaterial),
-                    decryptIfPossible(originalData.password, vaultKeyMaterial),
-                    decryptIfPossible(originalData.numeroIscrizione, vaultKeyMaterial),
-                    decryptIfPossible(originalData.codiceSocieta, vaultKeyMaterial),
-                    decryptIfPossible(originalData.note, vaultKeyMaterial)
+                    decryptIfPossible(loaded.username, vaultKeyMaterial),
+                    decryptIfPossible(loaded.account, vaultKeyMaterial),
+                    decryptIfPossible(loaded.password, vaultKeyMaterial),
+                    decryptIfPossible(loaded.numeroIscrizione, vaultKeyMaterial),
+                    decryptIfPossible(loaded.codiceSocieta, vaultKeyMaterial),
+                    decryptIfPossible(loaded.note, vaultKeyMaterial)
                 ]);
 
-                if (Array.isArray(originalData.banking)) {
-                    originalData.banking = await Promise.all(originalData.banking.map(async b => ({
+                if (!active()) return;
+                if (Array.isArray(loaded.banking)) {
+                    loaded.banking = await Promise.all(loaded.banking.map(async b => ({
                         ...b,
                         passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, vaultKeyMaterial),
                         cards: await Promise.all((b.cards || []).map(async c => ({
@@ -142,41 +196,56 @@ async function loadAccount() {
                     })));
                 }
             } catch (e) {
+                if (!active()) return;
                 console.warn("[Dettaglio Azienda] Decrittazione saltata o annullata.");
                 showToast("Dati cifrati: sbloccare la Vault per visualizzare.", "warning");
             }
         }
 
-        if (!isReadOnly && loadOwnerId === loadViewerId && ownerId === loadOwnerId && currentUid === loadViewerId) {
-            updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
+        if (!active()) return;
+        originalData = loaded;
+        mount.loaded = true;
+        const actionActive = () => active() && mount.loaded;
+        const confirm = (...args) => {
+            if (!active()) return Promise.resolve(false);
+            const pending = showConfirmModal(...args);
+            const modal = document.getElementById('protocol-confirm-modal');
+            const cancel = () => { modal?.querySelector('#confirm-cancel-btn')?.click(); modal?.remove(); };
+            signal.addEventListener('abort', cancel, {once: true});
+            return pending.finally(() => signal.removeEventListener('abort', cancel));
+        };
+        const reload = () => mount.active() && loadAccount(mount);
+        initAttachmentModule({ownerUid: loadOwnerId, currentAziendaId: companyId, currentId: accountId, readOnly: isReadOnly, isActive: actionActive, signal, confirm});
+        initSharingModule({currentUid: loadViewerId, currentAziendaId: companyId, currentId: accountId, isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        if (!isReadOnly && loadOwnerId === loadViewerId) {
+            updateDoc(docRef, {views: increment(1)}).catch(e => { if (active()) logError('UpdateViews', e); });
         }
-
-        render(originalData);
-        const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
-        renderSharingMap(originalData, contactNames);
+        initProtocolUI(actionActive);
+        render(loaded, actionActive);
+        const contactNames = await initDetailAccountMode({account: loaded, ownerId: loadOwnerId, accountId, aziendaId: companyId, readOnly: isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        if (!active()) return;
+        renderSharingMap(loaded, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.110').then(({initAccountSharedCredentials}) =>
-            initAccountSharedCredentials({
-                uid: currentUid, context: 'company', accountId: currentId,
-                companyId: currentAziendaId, readOnly: isReadOnly
-            })
-        ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.110').then(({initAccountEmbeddedWidgets}) =>
-            initAccountEmbeddedWidgets({
-                uid: currentUid, context: 'company', accountId: currentId,
-                companyId: currentAziendaId, readOnly: isReadOnly
-            })
-        ).catch(error => console.warn('[ACCOUNT WIDGETS] Caricamento saltato.', error));
-
+        if (!active()) return;
+        const widgetContext = {uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
+        for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
+            import(`../shared/${path}.js?v=1.2.110`).then(async module => {
+                if (!active()) return;
+                const controller = await module[initializer](widgetContext);
+                if (!active()) controller?.destroy();
+            }).catch(error => { if (active()) logError('AccountWidgets', error); });
+        }
         if (isReadOnly) setupReadOnlyUI();
 
     } catch (e) {
+        if (!active()) return;
+        mount.loaded = false;
         logError("LoadAccount", e);
         showToast(t('error_generic'), "error");
     }
 }
 
-function render(acc) {
+function render(acc, active) {
     document.title = acc.nomeAccount || 'Dettaglio Azienda';
 
     // Accent Colors
@@ -228,8 +297,9 @@ function render(acc) {
 
     // Banking
     renderAccountBanking(acc, {
-        isReadOnly,
+        isReadOnly, isActive: active,
         onAddBanking: () => {
+            if (!active()) return;
             window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`;
         }
     });
@@ -263,25 +333,31 @@ function render(acc) {
     // --- ALLEGATI: Aggancio Listener ---
     const btnAdd = document.getElementById('btn-add-attachment');
     if (btnAdd) {
-        btnAdd.onclick = openSourceSelector;
+        btnAdd.classList.toggle('hidden', isReadOnly);
+        btnAdd.onclick = () => { if (active() && !isReadOnly) openSourceSelector(); };
     }
 }
 
-function setupActions() {
+function setupActions(active, fileInputs = new Set()) {
     // Phone Call Buttons (CSP Compliant)
-    document.getElementById('btn-call-ref-phone')?.addEventListener('click', () => {
+    const phone = document.getElementById('btn-call-ref-phone');
+    if (phone) phone.onclick = () => {
+        if (!active()) return;
         const val = document.getElementById('ref-phone')?.value;
         if (val) window.location.href = `tel:${val.replace(/\s+/g, '')}`;
-    });
+    };
 
-    document.getElementById('btn-call-ref-mobile')?.addEventListener('click', () => {
+    const mobile = document.getElementById('btn-call-ref-mobile');
+    if (mobile) mobile.onclick = () => {
+        if (!active()) return;
         const val = document.getElementById('ref-mobile')?.value;
         if (val) window.location.href = `tel:${val.replace(/\s+/g, '')}`;
-    });
+    };
 
     // Copy Buttons logic
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.onclick = () => {
+            if (!active()) return;
             const fieldId = btn.dataset.field;
             const input = document.getElementById(fieldId);
             if (input && input.value) {
@@ -295,6 +371,7 @@ function setupActions() {
     const toggleBtn = document.getElementById('toggle-password');
     if (toggleBtn) {
         toggleBtn.onclick = () => {
+            if (!active()) return;
             const input = document.getElementById('detail-password');
             if (input) {
                 const isPass = input.type === 'password';
@@ -309,6 +386,7 @@ function setupActions() {
     const openWebBtn = document.getElementById('open-website');
     if (openWebBtn) {
         openWebBtn.onclick = () => {
+            if (!active()) return;
             const url = document.getElementById('detail-website')?.value;
             if (url && !openExternalUrl(url)) showToast('Indirizzo non valido.', 'error');
         };
@@ -318,6 +396,7 @@ function setupActions() {
     const copyNoteBtn = document.getElementById('copy-note');
     if (copyNoteBtn) {
         copyNoteBtn.onclick = () => {
+            if (!active()) return;
             const note = document.getElementById('detail-note')?.textContent;
             if (note && note !== '-') {
                 navigator.clipboard.writeText(note);
@@ -332,6 +411,7 @@ function setupActions() {
     const bankChevron = document.getElementById('banking-chevron');
     if (bankToggle && bankContent) {
         bankToggle.onclick = () => {
+            if (!active()) return;
             const isHidden = bankContent.classList.toggle('hidden');
             if (bankChevron) {
                 bankChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
@@ -345,6 +425,7 @@ function setupActions() {
     const btnCancel = document.getElementById('btn-cancel-source');
     if (btnCancel) {
         btnCancel.onclick = (e) => {
+            if (!active()) return;
             e.preventDefault();
             closeSourceSelector();
         };
@@ -353,13 +434,20 @@ function setupActions() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.onclick = (e) => {
+            if (!active()) return;
             if (e.target === modal) closeSourceSelector();
         };
     }
 
     // Hidden inputs listeners
     ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', (e) => handleFileUpload(e.target));
+        let input = document.getElementById(id);
+        if (input?.cloneNode && input.parentNode) {
+            const fresh = input.cloneNode(true); fresh.value = '';
+            input.parentNode.replaceChild(fresh, input); input = fresh;
+        }
+        if (input) fileInputs.add(input);
+        if (input) input.onchange = e => { if (active() && !isReadOnly) handleFileUpload(e.target); };
     });
 }
 
