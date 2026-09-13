@@ -481,7 +481,7 @@ async function loadData() {
             const hasIban = acc.iban && acc.iban.trim().length > 0;
             const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
             const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-            const hasRef = (acc.referenteNome?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
+            const hasRef = (acc.referenteNome?.trim() || acc.numeroVerde?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
             return hasIban || hasDisp || hasCards || hasRef;
         });
 
@@ -627,7 +627,7 @@ function setupUI() {
         bToggle.onchange = () => {
             document.getElementById('banking-section').classList.toggle('hidden', !bToggle.checked);
             if (bToggle.checked && bankAccounts.length === 0) {
-                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
+                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', numeroVerde: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
             }
             rerender();
         };
@@ -642,6 +642,7 @@ function setupUI() {
                 iban: '',
                 passwordDispositiva: '',
                 referenteNome: '',
+                numeroVerde: '',
                 referenteTelefono: '',
                 referenteCellulare: '',
                 cards: [],

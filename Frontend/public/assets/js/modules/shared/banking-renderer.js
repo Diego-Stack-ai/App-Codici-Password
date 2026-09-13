@@ -70,6 +70,7 @@ export function renderBankAccounts(bankAccounts, rerender) {
                 _createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
                 _createInputField('Pass. Dispositiva', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
                 _createInputField('Referente banca', acc.referenteNome, (val) => bankAccounts[idx].referenteNome = val, 'person'),
+                _createInputField('Numero verde', acc.numeroVerde, (val) => bankAccounts[idx].numeroVerde = val, 'support_agent'),
                 _createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
                 _createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
 
