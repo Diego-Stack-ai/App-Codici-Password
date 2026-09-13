@@ -536,3 +536,14 @@ Base `141259d9`. Commit distinti:
 Verifica finale della candidata a `273de41b`: suite completa `npm test` codice 0, **700 test** superati, inclusi 65 Functions, 24 esiti mutazioni Auth/Firestore emulati e 13 nuovi test client backup. Le prove della callable backup e del finale purge usano handler reali con servizi simulati; non sono un collaudo Storage/Functions di ripristino end-to-end. Budget di tutte le 30 pagine rispettato; versione candidata 1.2.110, 240 riferimenti asset coerenti. Nessun dato reale o deploy. Produzione invariata alla 1.2.117.
 
 Limiti mantenuti aperti: staging/compensazione backup, confronto atomico con anteprima, ricevute storiche degli altri domini, race purge/ripristino, widget e grant residui, dimensione/contesa delle scansioni, prove fisiche. Backend backup nuovo e client vecchio non sono compatibili: distribuzione coordinata e rollback che mantenga il vincolo proprietario sono gate, non operazioni eseguite. Il prossimo adattamento indipendente riguarda il ciclo di vita del dettaglio Account aziendale canonico.
+
+
+## 43. Dettaglio aziendale e ricevute backup — candidata 13/09/2026
+
+Il dettaglio Account aziendale canonico cattura proprietario, visitatore, azienda e Account per ogni montaggio. Cambio vista, logout, blocco Vault e pagehide invalidano letture, decifratura, import differiti e callback ancora in attesa; rimuovono dati e azioni della vista precedente. Allegati, condivisioni, selettore sorgente, file picker e copia bancaria rispettano lo stesso contesto. I dialoghi sono personalizzati e appartengono alla vista. I controlli statici sono riallineati ai callback senza aumentare baseline o budget.
+
+Sedici test mirati sul dettaglio e sui permessi ospite passati; la suite completa è registrata nel checkpoint successivo. La preparazione riguarda la pagina canonica: non abilita una nuova rotta nella shell. Richieste già iniziate non sono annullate dal solo teardown.
+
+Il writer backup usa ora ricevute attendibili vincolate al comando; le ricevute storiche non autorizzano successo o ripetizione. I nuovi test helper/handler e quelli sul proprietario passano con servizi simulati. Il confronto atomico con l'anteprima e la compensazione rimangono da implementare. Nessun dato reale, migrazione o deploy in questa sezione.
+
+Checkpoint `99dabb19`: **731 test** superati nella suite completa (`npm test`, codice 0), inclusi 82 Functions e 25 esiti mutazioni con Auth/Firestore emulati. Controlli statici, budget delle 30 pagine e dipendenze superati. Commit `7063b9b3` vincola anche M6/widget al proprietario; `e3882995` isola il dettaglio aziendale; `99dabb19` verifica le ricevute backup. Produzione invariata, versione candidata 1.2.110.

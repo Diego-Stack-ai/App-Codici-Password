@@ -629,3 +629,6 @@ Rilasciata separatamente la correzione contatti azienda v1.2.111 tramite PR #45,
 Avanzamento P0 base `1b6a13ed`: controller sperimentale per esito incerto, retry con stesso payload e ricerca del risultato. Individuato gate operationResults scrivibile dal proprietario; nessuna attivazione UI o modifica Rules/Functions. [Audit §29](../docs/AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
 
 Dati azienda, aggiornamento dopo scrittura: creazione/modifica tornano subito al dettaglio con afterWrite; server confermato per mostrare il dato aggiornato, anche dopo cambio/scollegamento Account. Consultazione ordinaria local-first preservata. [Audit §30](../docs/AUDIT_VAULT_SESSION_P0.md#30-dati-azienda-aggiornati-dopo-il-salvataggio--12092026).
+
+
+Avanzamento candidato 13/09/2026, checkpoint `99dabb19`: isolamento del dettaglio Account aziendale durante cambio contesto e vincolo proprietario delle mutazioni; ricevute backup verificate nel registro non scrivibile dai client. Suite completa 731 test superati. Nessun deploy; confronto atomico con anteprima, staging/compensazione e gate fisici restano aperti. [Audit §43](../docs/AUDIT_VAULT_SESSION_P0.md#43-dettaglio-aziendale-e-ricevute-backup--candidata-13092026).
