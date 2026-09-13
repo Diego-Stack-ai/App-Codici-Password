@@ -85,3 +85,10 @@ Il registro di avanzamento si sposta in `mutationResults/{uid}/operations/{opera
 La transazione iniziale accetta soltanto ricevute verificate: `processing` consente ripresa del comando identico, mantenendo i controlli archivio/revisione se l'Account esiste; `purged` restituisce solo stato e indicatore duplicato. La transazione finale rilegge e verifica il binding prima delle patch dei Profili, della ricevuta finale e dell'audit. Il timestamp iniziale viene conservato nei retry.
 
 Questo blocco corregge la provenienza degli esiti, non il protocollo globale: una richiesta già partita, la race purge/ripristino e i widget/grant residui restano problemi separati. La UI genera ancora un nuovo identificatore ad ogni operazione: ripresa backend con lo stesso ID collaudata, recupero UI degli esiti incerti non ancora implementato. Nessuna migrazione delle ricevute pregresse o cancellazione reale.
+
+
+### Ripresa dell'eliminazione nella stessa sessione — candidata 13/09/2026
+
+Dopo la conferma iniziale, il servizio prepara un piano opaco con comandi e identificativi immutabili. Se la risposta del purge non arriva, la UI propone «Verifica e riprendi»: solo quella scelta riutilizza il comando incerto. Nello svuotamento vengono saltati gli Account già confermati. Una sola operazione per volta; filtro e altre mutazioni non partono durante l'eliminazione. Rifiuti definitivi bloccano il piano; interrompere mantiene visibili gli elementi non confermati e segnala l'eventuale eliminazione parziale.
+
+Blocco Vault, logout e cambio montaggio eliminano il piano; i vecchi callback non possono ripartire. Le API precedenti del servizio restano utilizzabili senza retry automatico. Il recupero UI copre adesso la stessa sessione aperta, non un refresh o un nuovo accesso. Nessun journal durevole e nessuna soluzione implicita alla concorrenza globale purge/ripristino.

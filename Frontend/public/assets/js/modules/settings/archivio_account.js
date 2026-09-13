@@ -11,8 +11,9 @@ import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import {
-    deleteArchivedAccount,
-    emptyArchivedAccounts,
+    prepareArchiveDeletion,
+    executeArchiveDeletion,
+    releaseArchiveDeletion,
     listArchiveContexts,
     loadArchivedAccounts,
     restoreArchivedAccount
@@ -32,7 +33,7 @@ export async function initArchivioAccount(user, options = {}) {
     if (!user) return;
     const uid = user.uid;
     let allArchived = [], currentSwipeList = null, currentContext = 'all';
-    let destroyed = false, generation = 0, unsubscribe = () => {}, pendingConfirmation = null;
+    let destroyed = false, generation = 0, unsubscribe = () => {}, pendingConfirmation = null, mutationPending = false;
     const controller = new AbortController(), cleanups = new Set();
     const container = document.getElementById('accounts-container');
     const searchInput = document.querySelector('input[type="search"]');
@@ -131,6 +132,52 @@ export async function initArchivioAccount(user, options = {}) {
         cleanups.add(cancel); document.body.appendChild(overlay); input.focus();
     });
 
+    const askDeletionRetry = () => new Promise(resolve => {
+        if (!active() || pendingConfirmation) return resolve(false);
+        let settled = false;
+        const previousFocus = document.activeElement;
+        const close = value => {
+            if (settled) return;
+            settled = true; pendingConfirmation = null;
+            overlay.remove(); cleanups.delete(cancel); resolve(value);
+            if (active() && previousFocus?.isConnected) previousFocus.focus();
+        };
+        const cancel = () => close(false);
+        pendingConfirmation = cancel;
+        const resume = createElement('button', {type: 'button', className: 'btn-modal btn-primary',
+            textContent: 'Verifica e riprendi', onclick: () => { if (active()) close(true); }});
+        const overlay = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('section', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Esito eliminazione non ricevuto'}, [
+                createElement('h3', {className: 'modal-title', textContent: 'Esito eliminazione non ricevuto'}),
+                createElement('p', {className: 'modal-text', textContent: 'L’eliminazione potrebbe essere già avvenuta. Puoi verificarne l’esito e riprendere gli Account mancanti mantenendo la selezione confermata.'}),
+                createElement('div', {className: 'modal-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Interrompi', onclick: cancel}), resume
+                ])
+            ])
+        ]);
+        overlay.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); cancel(); } });
+        cleanups.add(cancel); document.body.appendChild(overlay); resume.focus();
+    });
+
+    const deleteWithRetry = async targets => {
+        const plan = prepareArchiveDeletion(uid, targets, serviceOptions);
+        const release = () => releaseArchiveDeletion(plan);
+        cleanups.add(release);
+        let retry = false;
+        try {
+            while (active()) {
+                try { return await executeArchiveDeletion(plan, {retry}); }
+                catch (error) {
+                    if (!active()) throw error;
+                    if (error?.retryable !== true || !['ARCHIVE_PURGE_UNCERTAIN', 'ARCHIVE_RETRY_REQUIRED'].includes(error.code)) throw error;
+                    if (!await askDeletionRetry() || !active()) throw error;
+                    retry = true;
+                }
+            }
+            throw new Error('ARCHIVE_SESSION_INVALIDATED');
+        } finally { release(); cleanups.delete(release); }
+    };
+
     if (filterBtn && filterMenu) {
         filterBtn.onclick = (e) => {
             if (!active()) return;
@@ -143,7 +190,7 @@ export async function initArchivioAccount(user, options = {}) {
         cleanups.add(() => document.removeEventListener('click', closeMenu));
 
         filterMenu.onclick = async (e) => {
-            if (!active()) return;
+            if (!active() || mutationPending) return;
             const item = e.target.closest('.base-dropdown-item');
             if (item) {
                 currentContext = item.dataset.value;
@@ -335,10 +382,11 @@ function setupSwipe() {
 
 
 async function handleRestore(key) {
-    if (!active()) return;
+    if (!active() || mutationPending) return;
     const item = allArchived.find(account => identity(account) === key);
     if (!item) return;
 
+    mutationPending = true;
     try {
         await restoreArchivedAccount(uid, {...item}, serviceOptions);
         if (!active()) return;
@@ -354,54 +402,62 @@ async function handleRestore(key) {
     } catch (e) {
         if (!active()) return;
         showToast(t('error_generic') || "Errore", "error");
-    }
+    } finally { mutationPending = false; }
 }
 async function handleDeleteForever(key) {
-    if (!active()) return;
+    if (!active() || mutationPending) return;
     const selected = allArchived.find(account => identity(account) === key);
     if (!selected) return;
     const item = {...selected};
-    const confirmReq = await askConfirmation(
-        t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE",
-        t('confirm_delete_forever_msg') || "Scrivi 'SI' per confermare l'eliminazione definitiva."
-    );
-    if (!active()) return;
-    // Accetta 'SI' o 'YES' in base alla lingua (o entrambi per sicurezza)
-    if (confirmReq !== 'SI' && confirmReq !== 'YES') return filterAndRender();
-
+    mutationPending = true;
     try {
-        await deleteArchivedAccount(uid, item, serviceOptions);
+        const confirmReq = await askConfirmation(
+            t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE",
+            t('confirm_delete_forever_msg') || "Scrivi 'SI' per confermare l'eliminazione definitiva."
+        );
+        if (!active()) return;
+        // Accetta 'SI' o 'YES' in base alla lingua (o entrambi per sicurezza)
+        if (confirmReq !== 'SI' && confirmReq !== 'YES') return filterAndRender();
+
+        await deleteWithRetry([item]);
         if (!active()) return;
         showToast(t('success_deleted_forever') || "Eliminato definitivamente", "success");
         allArchived = allArchived.filter(account => identity(account) !== key);
         filterAndRender();
     } catch (e) {
         if (!active()) return;
-        showToast(t('error_generic') || "Errore", "error");
-    }
+        showToast(e?.progress?.mayHaveApplied
+            ? 'Eliminazione interrotta: l’Account potrebbe essere già stato eliminato. Verifica l’archivio.'
+            : (t('error_generic') || 'Errore'), e?.progress?.mayHaveApplied ? 'warning' : 'error');
+    } finally { mutationPending = false; }
 }
 
 async function handleEmptyTrash() {
-    if (!active() || allArchived.length === 0) return;
+    if (!active() || mutationPending || allArchived.length === 0) return;
     const selected = allArchived.map(account => ({...account}));
     const selectedKeys = new Set(selected.map(identity));
-
-    const confirmReq = await askConfirmation(
-        t('confirm_empty_trash_title') || "SVUOTA CESTINO",
-        t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto definitivamente."
-    );
-    if (!active()) return;
-    if (confirmReq !== 'SVUOTA' && confirmReq !== 'EMPTY') return;
-
+    mutationPending = true;
     try {
-        await emptyArchivedAccounts(uid, selected, serviceOptions);
+        const confirmReq = await askConfirmation(
+            t('confirm_empty_trash_title') || "SVUOTA CESTINO",
+            t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto definitivamente."
+        );
+        if (!active()) return;
+        if (confirmReq !== 'SVUOTA' && confirmReq !== 'EMPTY') return;
+
+        await deleteWithRetry(selected);
         if (!active()) return;
         showToast(t('success_trash_emptied') || "Cestino svuotato", "success");
         allArchived = allArchived.filter(account => !selectedKeys.has(identity(account)));
         filterAndRender();
     } catch (e) {
         if (!active()) return;
-        showToast(t('error_generic') || "Errore", "error");
-    }
+        const confirmed = new Set(selected.slice(0, e?.progress?.confirmedCount || 0).map(identity));
+        allArchived = allArchived.filter(account => !confirmed.has(identity(account)));
+        filterAndRender();
+        showToast(e?.progress?.mayHaveApplied
+            ? 'Svuotamento interrotto: alcuni Account potrebbero essere già stati eliminati. Verifica l’archivio.'
+            : (t('error_generic') || 'Errore'), e?.progress?.mayHaveApplied ? 'warning' : 'error');
+    } finally { mutationPending = false; }
 }
 }

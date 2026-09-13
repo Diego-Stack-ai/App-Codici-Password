@@ -10,12 +10,16 @@ import {
 
 function archiveSession(uid, {signal, isActive = () => true} = {}) {
     let invalid = false, unsubscribe = () => {};
+    const cleanups = new Set();
     const dispose = () => {
+        if (invalid) return;
         invalid = true;
         unsubscribe();
         signal?.removeEventListener('abort', dispose);
         globalThis.removeEventListener?.('vault-session-locked', dispose);
         globalThis.removeEventListener?.('pagehide', dispose);
+        for (const cleanup of cleanups) cleanup();
+        cleanups.clear();
     };
     const check = () => {
         if (invalid || !uid || auth.currentUser?.uid !== uid || signal?.aborted || !isActive()) {
@@ -31,7 +35,7 @@ function archiveSession(uid, {signal, isActive = () => true} = {}) {
     globalThis.addEventListener?.('pagehide', dispose, {once: true});
     unsubscribe = onAuthStateChanged(auth, user => { if (user?.uid !== uid) dispose(); });
     if (invalid) unsubscribe();
-    return {check, dispose};
+    return {check, dispose, own: cleanup => { if (invalid) cleanup(); else cleanups.add(cleanup); }};
 }
 
 async function withArchiveSession(uid, options, operation) {
@@ -166,31 +170,92 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
     });
 }
 
-async function purgeAccountForSession(uid, account, check) {
+const deletionPlans = new WeakMap();
+
+function deletionError(code, state, retryable = false) {
+    const error = new Error(code);
+    error.code = code;
+    error.retryable = retryable;
+    error.progress = {confirmedCount: state.confirmedCount, totalCount: state.totalCount,
+        mayHaveApplied: state.attemptedCount > 0};
+    return error;
+}
+
+// Created only after the UI's deletion confirmation. The opaque plan retains
+// the original commands in memory; retries cannot replace targets or IDs.
+export function prepareArchiveDeletion(uid, accounts, options = {}) {
+    const targets = accounts.map(accountIdentity);
+    if (!targets.length) throw new Error('ARCHIVE_DELETION_EMPTY');
+    const keys = new Set(targets.map(target => JSON.stringify([target.context, target.id])));
+    if (keys.size !== targets.length) throw new Error('ARCHIVE_DELETION_DUPLICATE');
+    const session = archiveSession(uid, options);
+    const plan = Object.freeze({});
+    const state = {session, commands: [], confirmedCount: 0, totalCount: targets.length,
+        attemptedCount: 0, uncertain: false, inFlight: false, blocked: false};
+    try {
+        state.commands = Object.freeze(targets.map(account => {
+            const isPrivate = account.context === 'privato';
+            return Object.freeze({expectedOwnerUid: uid, accountId: account.id, operationId: crypto.randomUUID(),
+                context: isPrivate ? 'private' : 'company', companyId: isPrivate ? null : account.context,
+                expectedRevision: Number.isInteger(account.revision) ? account.revision : 0, confirmation: 'DELETE_FOREVER'});
+        }));
+        deletionPlans.set(plan, state);
+        session.own(() => { state.commands = []; deletionPlans.delete(plan); });
+        session.check();
+        return plan;
+    } catch (error) { session.dispose(); throw error; }
+}
+
+export function releaseArchiveDeletion(plan) {
+    deletionPlans.get(plan)?.session.dispose();
+    deletionPlans.delete(plan);
+}
+
+export async function executeArchiveDeletion(plan, {retry = false} = {}) {
+    const state = deletionPlans.get(plan);
+    if (!state) throw new Error('ARCHIVE_PLAN_INVALID');
+    const {check} = state.session;
     check();
-    const purgeAccount = httpsCallable(functions, 'purgeArchivedAccount');
-    const isPrivate = account.context === 'privato';
-    const result = await purgeAccount({
-        expectedOwnerUid: uid,
-        accountId: account.id,
-        operationId: crypto.randomUUID(),
-        context: isPrivate ? 'private' : 'company',
-        companyId: isPrivate ? null : account.context,
-        expectedRevision: Number.isInteger(account.revision) ? account.revision : 0,
-        confirmation: 'DELETE_FOREVER'
-    });
-    check();
-    if (result.data?.status !== 'purged') throw new Error('Eliminazione definitiva non completata.');
+    if (state.inFlight) throw deletionError('ARCHIVE_DELETION_IN_PROGRESS', state);
+    if (state.blocked) throw deletionError('ARCHIVE_DELETION_BLOCKED', state);
+    if (state.uncertain && retry !== true) throw deletionError('ARCHIVE_RETRY_REQUIRED', state, true);
+    state.inFlight = true;
+    try {
+        const purgeAccount = httpsCallable(functions, 'purgeArchivedAccount');
+        while (state.confirmedCount < state.totalCount) {
+            check();
+            state.attemptedCount++;
+            state.uncertain = true;
+            const result = await purgeAccount(state.commands[state.confirmedCount]);
+            check();
+            if (result.data?.status !== 'purged') {
+                state.blocked = true;
+                state.uncertain = false;
+                throw deletionError('ARCHIVE_DELETION_FAILED', state);
+            }
+            state.uncertain = false;
+            state.confirmedCount++;
+        }
+        return {status: 'purged', confirmedCount: state.confirmedCount};
+    } catch (cause) {
+        check();
+        const definitive = ['invalid-argument', 'failed-precondition', 'permission-denied', 'unauthenticated', 'not-found', 'already-exists']
+            .includes(String(cause?.code || '').replace(/^functions\//, ''));
+        if (state.uncertain && !definitive) throw deletionError('ARCHIVE_PURGE_UNCERTAIN', state, true);
+        state.uncertain = false;
+        state.blocked = true;
+        throw deletionError('ARCHIVE_DELETION_FAILED', state);
+    } finally { state.inFlight = false; }
 }
 
 export async function deleteArchivedAccount(uid, account, options = {}) {
-    const target = accountIdentity(account);
-    return withArchiveSession(uid, options, check => purgeAccountForSession(uid, target, check));
+    const plan = prepareArchiveDeletion(uid, [account], options);
+    try { return await executeArchiveDeletion(plan); }
+    finally { releaseArchiveDeletion(plan); }
 }
 
 export async function emptyArchivedAccounts(uid, accounts, options = {}) {
-    const targets = accounts.map(accountIdentity);
-    return withArchiveSession(uid, options, async check => {
-        for (const account of targets) await purgeAccountForSession(uid, account, check);
-    });
+    const plan = prepareArchiveDeletion(uid, accounts, options);
+    try { return await executeArchiveDeletion(plan); }
+    finally { releaseArchiveDeletion(plan); }
 }

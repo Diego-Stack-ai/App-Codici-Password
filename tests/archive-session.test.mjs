@@ -39,8 +39,9 @@ function fixture(withUi = false) {
         .map(id => [id, new Element('div', {id})]));
     const search = new Element('input'), body = new Element('body'), document = new EventTarget();
     Object.assign(document, {body, activeElement: search, getElementById: id => nodes[id], querySelector: () => search});
+    let operationCount = 0;
     const context = vm.createContext({
-        auth, db: {}, functions: {}, AbortController, crypto: {randomUUID: () => 'operation'}, console: {warn() {}},
+        auth, db: {}, functions: {}, AbortController, crypto: {randomUUID: () => `operation-${++operationCount}`}, console: {warn() {}},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         doc: (_db, ...path) => path.join('/'), deleteField: () => ({delete: true}),
@@ -186,4 +187,110 @@ test('repeated delete gestures keep a single owned confirmation and a single sub
     assert.equal(input.autocapitalize, 'off'); assert.equal(input.spellcheck, 'false'); assert.ok(input['aria-label']);
     f.confirm(); await Promise.all([first, second]);
     assert.equal(f.calls.length, 1); assert.equal(f.body.children.length, 0);
+});
+
+test('explicit purge retry reuses the exact command after response loss before or after server deletion', async () => {
+    for (const deletedBeforeFailure of [false, true]) {
+        const f = fixture(), receipts = new Set(); let deletions = 0, attempts = 0;
+        f.context.respond = async command => {
+            attempts++;
+            if (attempts === 1 && !deletedBeforeFailure) throw Object.assign(new Error('synthetic'), {code: 'functions/unavailable'});
+            if (!receipts.has(command.operationId)) { receipts.add(command.operationId); deletions++; }
+            if (attempts === 1) throw Object.assign(new Error('synthetic'), {code: 'functions/deadline-exceeded'});
+            return {data: {status: 'purged', duplicate: true}};
+        };
+        const target = account('original'), targets = [target];
+        const plan = f.context.prepareArchiveDeletion('A', targets);
+        target.id = 'changed'; target.context = 'company'; target.revision = 999; targets.push(account('extra'));
+        await assert.rejects(f.context.executeArchiveDeletion(plan), error => error.code === 'ARCHIVE_PURGE_UNCERTAIN' && error.retryable);
+        await assert.rejects(f.context.executeArchiveDeletion(plan), error => error.code === 'ARCHIVE_RETRY_REQUIRED');
+        assert.equal(f.calls.length, 1);
+        assert.equal((await f.context.executeArchiveDeletion(plan, {retry: true})).confirmedCount, 1);
+        assert.equal(f.calls.length, 2); assert.equal(f.calls[0], f.calls[1]);
+        assert.equal(f.calls[1].accountId, 'original'); assert.equal(f.calls[1].context, 'private'); assert.equal(f.calls[1].expectedRevision, 1);
+        assert.equal(Object.isFrozen(f.calls[1]), true); assert.equal(deletions, 1);
+        await f.context.executeArchiveDeletion(plan); assert.equal(f.calls.length, 2);
+        f.context.releaseArchiveDeletion(plan); assert.equal(f.observers.size, 0);
+    }
+});
+
+test('empty retry skips confirmed accounts and keeps separate operation IDs for remaining targets', async () => {
+    const f = fixture(); let fail = true;
+    f.context.respond = async command => {
+        if (command.accountId === 'two' && fail) { fail = false; throw new Error('synthetic response loss'); }
+        return {data: {status: 'purged'}};
+    };
+    const plan = f.context.prepareArchiveDeletion('A', [account('one'), account('two'), account('three')]);
+    await assert.rejects(f.context.executeArchiveDeletion(plan), error => error.progress.confirmedCount === 1 && error.progress.totalCount === 3);
+    assert.equal((await f.context.executeArchiveDeletion(plan, {retry: true})).confirmedCount, 3);
+    assert.deepEqual(f.calls.map(command => command.accountId), ['one', 'two', 'two', 'three']);
+    assert.equal(f.calls[1], f.calls[2]);
+    assert.equal(new Set(f.calls.map(command => command.operationId)).size, 3);
+    f.context.releaseArchiveDeletion(plan);
+});
+
+test('single flight prevents duplicate calls and session invalidation permanently removes the plan', async () => {
+    const f = fixture(), gate = deferred(); f.context.respond = () => gate.promise;
+    const plan = f.context.prepareArchiveDeletion('A', [account()]);
+    const pending = f.context.executeArchiveDeletion(plan);
+    await assert.rejects(f.context.executeArchiveDeletion(plan, {retry: true}), /ARCHIVE_DELETION_IN_PROGRESS/);
+    assert.equal(f.calls.length, 1);
+    f.lock(); gate.resolve({data: {status: 'purged'}});
+    await assert.rejects(pending, /ARCHIVE_SESSION_INVALIDATED/);
+    await assert.rejects(f.context.executeArchiveDeletion(plan, {retry: true}), /ARCHIVE_PLAN_INVALID/);
+    assert.equal(f.calls.length, 1); assert.equal(f.observers.size, 0);
+});
+
+test('definitive rejection blocks retries and sanitizes provider messages', async () => {
+    for (const code of ['functions/failed-precondition', 'functions/permission-denied', 'functions/invalid-argument']) {
+        const f = fixture();
+        f.context.respond = async () => { throw Object.assign(new Error('synthetic private provider details'), {code}); };
+        const plan = f.context.prepareArchiveDeletion('A', [account()]);
+        await assert.rejects(f.context.executeArchiveDeletion(plan), error => error.retryable === false && !error.message.includes('private'));
+        await assert.rejects(f.context.executeArchiveDeletion(plan, {retry: true}), /ARCHIVE_DELETION_BLOCKED/);
+        assert.equal(f.calls.length, 1); f.context.releaseArchiveDeletion(plan);
+    }
+});
+
+test('UI waits for explicit retry and prevents competing mutations while its choice is open', async () => {
+    const f = fixture(true); let attempts = 0;
+    f.context.respond = async () => { if (++attempts === 1) throw new Error('response lost'); return {data: {status: 'purged', duplicate: true}}; };
+    await f.init(); const swipe = f.swipes.at(-1), row = f.nodes['accounts-container'].children[0];
+    const pending = swipe.options.onSwipeLeft(row); f.confirm(); await tick();
+    assert.equal(f.calls.length, 1); assert.equal(f.body.children.length, 1);
+    await swipe.options.onSwipeLeft(row); await swipe.options.onSwipeRight(row); await f.nodes['btn-empty-trash'].onclick();
+    assert.equal(f.body.children.length, 1); assert.equal(f.writes.length, 0); assert.equal(f.calls.length, 1);
+    const resume = f.body.querySelectorAll('button').find(button => button.textContent === 'Verifica e riprendi');
+    resume.onclick(); await pending;
+    assert.equal(f.calls.length, 2); assert.equal(f.calls[0], f.calls[1]);
+    assert.equal(f.body.children.length, 0); assert.equal(f.toasts.at(-1)[1], 'success');
+});
+
+test('lock and stopping retry release the owned dialog and cannot resubmit a retained callback', async () => {
+    for (const action of ['lock', 'stop']) {
+        const f = fixture(true); f.context.respond = async () => { throw new Error('response lost'); };
+        await f.init(); const row = f.nodes['accounts-container'].children[0];
+        const pending = f.swipes.at(-1).options.onSwipeLeft(row); f.confirm(); await tick();
+        const buttons = f.body.querySelectorAll('button');
+        const resume = buttons.find(button => button.textContent === 'Verifica e riprendi');
+        if (action === 'lock') f.lock(); else buttons.find(button => button.textContent === 'Interrompi').onclick();
+        await pending; resume.onclick(); await tick();
+        assert.equal(f.calls.length, 1); assert.equal(f.body.children.length, 0);
+        assert.equal(f.toasts.length, action === 'lock' ? 0 : 1);
+        if (action === 'stop') assert.equal(f.toasts[0][1], 'warning');
+    }
+});
+
+test('empty UI removes confirmed targets after interrupted second account without claiming completion', async () => {
+    const f = fixture(true);
+    f.context.listArchivedPrivateAccounts = async () => [account('one'), account('two')];
+    f.context.respond = async command => {
+        if (command.accountId === 'two') throw new Error('response lost');
+        return {data: {status: 'purged'}};
+    };
+    await f.init(); const pending = f.nodes['btn-empty-trash'].onclick(); f.confirm('SVUOTA'); await tick();
+    assert.equal(f.calls.length, 2);
+    f.body.querySelectorAll('button').find(button => button.textContent === 'Interrompi').onclick(); await pending;
+    assert.deepEqual(f.nodes['accounts-container'].children.map(row => row.dataset.key), ['["privato","two"]']);
+    assert.equal(f.toasts.at(-1)[1], 'warning');
 });
