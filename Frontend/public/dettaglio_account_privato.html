@@ -7,20 +7,20 @@
     <title>Dettaglio Account Privato - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.117" />
+    <link rel="manifest" href="manifest.json?v=1.2.118" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.117">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.118">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.117">
-    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.117">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.117">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.117">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.118">
+    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.118">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.118">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.118">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -30,8 +30,6 @@
     <!-- 1. CONTENITORE PRINCIPALE -->
     <div class="base-container relative">
         <!-- Ambient Glow -->
-        <div class="base-glow"></div>
-        <!-- 2. FARO ANIMATO -->
         <div class="base-glow"></div>
 
         <!-- HEADER FISSO (Protocollo v3.6 Placeholder) -->
@@ -266,6 +264,21 @@
                         <div id="shared-credentials-list" class="shared-account-credentials content-spacing"></div>
                     </section>
 
+                    <!-- NOTE -->
+                    <section id="section-notes" class="section-spacing">
+                        <div class="detail-section-header">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                            <h3 class="detail-section-title" data-t="notes">Note</h3>
+                        </div>
+                        <div class="glass-field note-box border-glow content-spacing">
+                            <p id="detail-note" class="note-text no-transform">-</p>
+                            <button id="copy-note" class="btn-icon-header" type="button">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
+                        </div>
+                    </section>
+
                     <!-- ALLEGATI (Sezione Dinamica) -->
                     <section id="section-attachments" class="section-spacing">
                         <div class="detail-section-header detail-section-header-spread">
@@ -281,21 +294,6 @@
                         <div id="attachments-list" class="flex-col-gap content-spacing">
                             <!-- Injected via JS -->
                             <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
-                        </div>
-                    </section>
-
-                    <!-- NOTE -->
-                    <section class="section-spacing">
-                        <div class="detail-section-header">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
-                            <h3 class="detail-section-title" data-t="notes">Note</h3>
-                        </div>
-                        <div class="glass-field note-box border-glow content-spacing">
-                            <p id="detail-note" class="note-text no-transform">-</p>
-                            <button id="copy-note" class="btn-icon-header" type="button">
-                                <span class="material-symbols-outlined">content_copy</span>
-                            </button>
                         </div>
                     </section>
 

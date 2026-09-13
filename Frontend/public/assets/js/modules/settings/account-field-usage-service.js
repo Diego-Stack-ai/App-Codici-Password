@@ -101,6 +101,7 @@ async function accountStates(account, area, vaultKeyMaterial) {
         iban: await bankState('iban'),
         passwordDispositiva: await bankState('passwordDispositiva', true),
         bankReferenteNome: await bankState('referenteNome'),
+        bankNumeroVerde: await bankState('numeroVerde'),
         bankReferenteTelefono: await bankState('referenteTelefono'),
         bankReferenteCellulare: await bankState('referenteCellulare'),
         cardType: await cardState('cardType'),

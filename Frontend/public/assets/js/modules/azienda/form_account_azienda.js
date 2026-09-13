@@ -1,3 +1,4 @@
+import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -7,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.117';
+import { db } from '../../firebase-config.js?v=1.2.118';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.118';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
@@ -20,8 +21,8 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.117';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.117';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.118';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.118';
 
 // --- STATE ---
 let currentUid = null;
@@ -37,7 +38,9 @@ let profileContactLinkDraft = null;
 let baseUpdatedAt = '';
 
 // Funzione di re-render locale per banking-renderer
-const rerender = () => renderBankAccounts(bankAccounts, rerender);
+const rerender = () => renderBankAccounts(bankAccounts, rerender, {
+    onAddWidget: () => accountWidgetController?.openNewWidget()
+});
 
 // Utility per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -247,14 +250,7 @@ async function loadData() {
         setVal('ref-mobile', data.referenteCellulare || data.referente?.cellulare);
 
         // Banking Premium
-        let loadedBanking = [];
-        if (Array.isArray(data.banking)) {
-            loadedBanking = data.banking;
-        } else if (data.banking) {
-            loadedBanking = [data.banking];
-        } else if (data.iban) {
-            loadedBanking = [{ iban: data.iban, cards: [] }];
-        }
+        let loadedBanking = normalizeEditableBankingAccounts(data);
 
         // Decrittazione Banking
         if (needsDecryption) {
@@ -270,15 +266,13 @@ async function loadData() {
             })));
         }
 
-        const hasRealData = loadedBanking.some(acc => {
-            return (acc.iban?.trim() || acc.passwordDispositiva?.trim() || (acc.cards && acc.cards.length > 0));
-        });
+        const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData || data.isBanking) {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         }
 
         isExplicitMemo = data.isExplicitMemo || false;
@@ -408,8 +402,8 @@ function setupUI() {
         flagBanking.onchange = () => {
             document.getElementById('banking-section')?.classList.toggle('hidden', !flagBanking.checked);
             if (flagBanking.checked && bankAccounts.length === 0) {
-                bankAccounts = [{ iban: '', cards: [], _isOpen: true }];
-                renderBankAccounts(bankAccounts, rerender);
+                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', numeroVerde: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
+                rerender();
             }
         };
     }
@@ -418,8 +412,8 @@ function setupUI() {
     if (btnAddIban) {
         btnAddIban.onclick = () => {
             bankAccounts.forEach(b => b._isOpen = false);
-            bankAccounts.push({ iban: '', cards: [], _isOpen: true });
-            renderBankAccounts(bankAccounts, rerender);
+            bankAccounts.push({ iban: '', passwordDispositiva: '', referenteNome: '', numeroVerde: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true });
+            rerender();
         };
     }
 
@@ -600,7 +594,7 @@ function setupImageUploader() {
 async function removeIban(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_remove_account') || "Rimuovere conto?")) return;
     bankAccounts.splice(idx, 1);
-    renderBankAccounts(bankAccounts, rerender);
+    rerender();
 }
 
 function toggleLoading(show) {

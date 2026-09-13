@@ -30,7 +30,7 @@ import { formatCardExpiry } from './banking-model.js';
  * @param {Array} bankAccounts - Array di oggetti conto bancario (mutabile)
  * @param {Function} rerender - Callback da chiamare per ri-rendere dopo ogni cambio di stato
  */
-export function renderBankAccounts(bankAccounts, rerender) {
+export function renderBankAccounts(bankAccounts, rerender, options = {}) {
     const container = document.getElementById('iban-list-container');
     if (!container) return;
     clearElement(container);
@@ -69,8 +69,19 @@ export function renderBankAccounts(bankAccounts, rerender) {
             isOpen ? createElement('div', { className: 'bank-details' }, [
                 _createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
                 _createInputField('Pass. Dispositiva', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
+                _createInputField('Numero verde', acc.numeroVerde, (val) => bankAccounts[idx].numeroVerde = val, 'support_agent'),
+                _createInputField('Referente banca', acc.referenteNome, (val) => bankAccounts[idx].referenteNome = val, 'person'),
                 _createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
                 _createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
+
+                options.onAddWidget ? createElement('div', { className: 'detail-section-header bank-widget-action' }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'widgets' }),
+                    createElement('span', { className: 'section-title', textContent: 'Campi personalizzati' }),
+                    createElement('button', {
+                        type: 'button', className: 'btn-icon-header', title: 'Aggiungi Widget',
+                        'aria-label': 'Aggiungi Widget', onclick: options.onAddWidget
+                    }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })])
+                ]) : null,
 
                 createElement('div', { className: 'bank-cards-section' }, [
                     createElement('div', { className: 'bank-cards-header' }, [

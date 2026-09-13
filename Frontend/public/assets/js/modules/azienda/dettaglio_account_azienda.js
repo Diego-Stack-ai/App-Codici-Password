@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.117';
+import { db } from '../../firebase-config.js?v=1.2.118';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -143,16 +143,16 @@ async function loadAccount() {
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
         render(originalData);
-        const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
+        const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, compactView: true, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.117').then(({initAccountSharedCredentials}) =>
+        import('../shared/account-shared-credentials.js?v=1.2.118').then(({initAccountSharedCredentials}) =>
             initAccountSharedCredentials({
                 uid: currentUid, context: 'company', accountId: currentId,
-                companyId: currentAziendaId, readOnly: isReadOnly
+                companyId: currentAziendaId, readOnly: isReadOnly, compactView: true
             })
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.117').then(({initAccountEmbeddedWidgets}) =>
+        import('../shared/account-embedded-widgets.js?v=1.2.118').then(({initAccountEmbeddedWidgets}) =>
             initAccountEmbeddedWidgets({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly
@@ -217,6 +217,27 @@ function render(acc) {
         if (el) el.value = val || '';
     }
 
+    // Compatta la sola pagina di consultazione: i campi vuoti non riservano
+    // spazio, mentre restano tutti disponibili nel modulo di modifica.
+    const compactGrids = new Set();
+    [
+        'detail-username', 'detail-account', 'detail-password', 'detail-website',
+        'detail-numero-iscrizione', 'detail-codice-societa'
+    ].forEach(id => {
+        const input = document.getElementById(id);
+        const value = String(input?.value || '');
+        const present = id === 'detail-password' ? value.length > 0 : Boolean(value.trim());
+        input?.closest('.glass-field-container')?.classList.toggle('hidden', !present);
+        const grid = input?.closest('.form-grid-2');
+        if (grid) compactGrids.add(grid);
+    });
+    compactGrids.forEach(grid => {
+        const visibleChildren = [...grid.children].filter(child => !child.classList.contains('hidden'));
+        grid.classList.toggle('hidden', visibleChildren.length === 0);
+        grid.classList.toggle('detail-grid-single', visibleChildren.length === 1);
+    });
+    document.getElementById('section-notes')?.classList.toggle('hidden', !String(acc.note || '').trim());
+
     // Banking
     renderAccountBanking(acc, {
         isReadOnly,
@@ -240,6 +261,9 @@ function render(acc) {
     setF('ref-name', refNome);
     setF('ref-phone', refPhone);
     setF('ref-mobile', refMobile);
+    document.getElementById('section-referente')?.classList.toggle(
+        'hidden', ![refNome, refPhone, refMobile].some(value => String(value || '').trim())
+    );
 
     // Shared Management V3
     if (acc.visibility === 'shared') {

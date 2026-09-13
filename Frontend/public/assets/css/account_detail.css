@@ -69,6 +69,11 @@
     align-items: flex-start;
 }
 
+/* Quando una coppia contiene un solo dato, il dato occupa tutta la riga. */
+.form-grid-2.detail-grid-single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .field-input {
     width: 100%;
     flex: 1;

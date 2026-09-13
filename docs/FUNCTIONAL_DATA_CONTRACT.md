@@ -88,3 +88,7 @@ La diagnostica runtime è attivabile nelle Impostazioni del singolo dispositivo.
 ## Gate reale per le scadenze ricevute
 
 Prima di dichiarare concluso il flusso condiviso occorre un collaudo con due account reali distinti: creare una scadenza con Email e Push attivi; verificare la copia in `receivedDeadlines`; aprire sia il deep link Push sia quello email; controllare il caso sola lettura; ripetere con `canManage`; completare o rinviare dal destinatario; verificare l'aggiornamento dell'originale e della copia; revocare il permesso; confermare il blocco delle modifiche successive. Le vecchie notifiche prive di `receivedDeadlineId` possono aprire la lista come compatibilità, ma non certificano il nuovo percorso.
+
+## Account UI 1.2.118 — 13/09/2026
+
+Base `445b338d`, UI `d2ef897e` con correzioni di compatibilità. I campi facoltativi `banking[].numeroVerde` e `banking[].referenteNome` sono conservati nei due form; oggetto bancario singolo e formati legacy restano leggibili. Un referente generale da solo non crea una banca. Nessuna migrazione del database. I campi vuoti sono nascosti in consultazione; una password composta di spazi resta presente. Il selettore Widget usa i servizi già pubblicati, senza cambiamenti ai protocolli backend.

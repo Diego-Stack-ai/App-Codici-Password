@@ -8,7 +8,7 @@ import {
     listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.117';
+import {auth} from '../../firebase-config.js?v=1.2.118';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
 let mountVersion = 0;
@@ -368,10 +368,31 @@ export async function initAccountEmbeddedWidgets(context) {
     const add = document.getElementById('btn-add-account-widget');
     const emptyController = {
         hasPendingChanges: () => false,
-        savePendingChanges: async () => false
+        savePendingChanges: async () => false,
+        openNewWidget: async () => false
     };
     if (!section || !list || !context?.uid || !context.accountId) return emptyController;
     if (context.readOnly) { section.classList.add('hidden'); return emptyController; }
+    let availableTemplates = [];
+    const openNewWidget = async () => {
+        if (!context.editable || !context.active()) return false;
+        if (!navigator.onLine) {
+            showToast('La creazione dei Widget richiede internet.', 'warning');
+            return false;
+        }
+        try {
+            const [records, currentWidgets] = await Promise.all([
+                listSharedVaultDataConfirmed(context.uid), listAccountWidgetsConfirmed(context.uid)
+            ]);
+            if (!context.active()) return false;
+            await openEditor(null, context, refresh, availableTemplates,
+                availableCommonCredentials(records, currentWidgets, context));
+            return true;
+        } catch {
+            if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
+            return false;
+        }
+    };
     const refresh = async confirmed => {
         const read = confirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
         const allWidgets = await read(context.uid);
@@ -387,6 +408,7 @@ export async function initAccountEmbeddedWidgets(context) {
             seenTemplates.add(signature);
             return true;
         });
+        availableTemplates = templates;
         clearElement(list);
         const editableWidgets = context.editable
             ? await Promise.all(widgets.map(editableFields))
@@ -398,24 +420,12 @@ export async function initAccountEmbeddedWidgets(context) {
         section.classList.toggle('hidden', !context.editable && widgets.length === 0);
         if (add) {
             add.classList.toggle('hidden', !context.editable);
-            add.onclick = async () => {
-                if (!context.editable || !context.active()) return;
-                if (!navigator.onLine) return showToast('La creazione dei Widget richiede internet.', 'warning');
-                try {
-                    const [records, currentWidgets] = await Promise.all([
-                        listSharedVaultDataConfirmed(context.uid), listAccountWidgetsConfirmed(context.uid)
-                    ]);
-                    if (!context.active()) return;
-                    await openEditor(null, context, refresh, templates,
-                        availableCommonCredentials(records, currentWidgets, context));
-                } catch {
-                    if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
-                }
-            };
+            add.onclick = openNewWidget;
         }
     };
     await refresh(false);
     return {
+        openNewWidget,
         hasPendingChanges: () => [...list.children].some(card => card.hasPendingChanges?.()),
         savePendingChanges: async () => {
             const pending = [...list.children].filter(card => card.hasPendingChanges?.());

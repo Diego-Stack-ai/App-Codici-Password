@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.117';
+import { auth, db } from '../../firebase-config.js?v=1.2.118';
 import { collection, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -9,7 +9,7 @@ import { accountModeFromRecord, hasAccountCredentials, validateAccountMode } fro
 const fullName = contact => [contact?.nome, contact?.cognome].filter(Boolean).join(' ').trim() || contact?.email || '';
 const normalizeEmail = email => String(email || '').trim().toLowerCase();
 
-export async function initDetailAccountMode({ account, ownerId, accountId, aziendaId = null, readOnly = false, onReload }) {
+export async function initDetailAccountMode({ account, ownerId, accountId, aziendaId = null, readOnly = false, compactView = false, onReload }) {
     const section = document.getElementById('account-mode-section');
     const options = document.getElementById('account-mode-options');
     const contactArea = document.getElementById('account-mode-contacts');
@@ -17,12 +17,16 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     const saveButton = document.getElementById('btn-save-account-mode');
     if (!section || !options || !contactArea || !contactList || !saveButton) return;
 
-    if (readOnly) {
+    if (readOnly || compactView) {
         section.classList.add('hidden');
-        return;
+        saveButton.onclick = null;
+        clearElement(options);
+        clearElement(contactList);
+        // A received account does not grant access to its owner's address book.
+        if (readOnly) return;
+    } else {
+        section.classList.remove('hidden');
     }
-
-    section.classList.remove('hidden');
     const initialMode = accountModeFromRecord(account);
     let selectedMode = initialMode;
     let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean));
@@ -35,6 +39,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
         console.warn('[AccountMode] Rubrica non disponibile', error);
     }
 
+    if (compactView) return new Map(contacts.map(contact => [normalizeEmail(contact.email), fullName(contact)]));
     const definitions = [
         ['account-private', 'Account', 'lock'],
         ['account-shared', 'Account condiviso', 'group'],

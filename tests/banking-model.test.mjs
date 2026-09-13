@@ -50,6 +50,11 @@ test('riconosce i dati reali delle carte nei formati compatibili', () => {
     assert.equal(hasRealBankingData({ cards: [{ pin: '1234' }] }), true);
 });
 
+test('riconosce il numero verde come dato del modulo bancario', () => {
+    assert.equal(hasRealBankingData({banking: [{numeroVerde: '800 123 456'}]}), true);
+    assert.equal(normalizeBankingAccounts({numeroVerde: '800 123 456'})[0].numeroVerde, '800 123 456');
+});
+
 test('formatta e valida la scadenza carta come MM/AA', () => {
     assert.equal(formatCardExpiry('12-26'), '12/26');
     assert.equal(formatCardExpiry('1226'), '12/26');

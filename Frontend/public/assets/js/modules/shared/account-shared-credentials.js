@@ -6,7 +6,7 @@ import {
     listSharedVaultData, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential, unlinkSharedCredential, updateSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.117';
+import {auth} from '../../firebase-config.js?v=1.2.118';
 
 let mountVersion = 0;
 
@@ -243,9 +243,10 @@ export async function initAccountSharedCredentials(context) {
             const record = recordsById.get(widget.sharedDataId);
             if (record) list.appendChild(credentialCard(record, widget, context, refresh));
         }
-        section.classList.toggle('hidden', (!context.editable || context.readOnly) && !list.children.length);
-        if (add) { add.classList.toggle('hidden', !context.editable || context.readOnly); add.onclick = null; }
-        if (add && context.editable && !context.readOnly) {
+        const compactView = context.compactView === true;
+        section.classList.toggle('hidden', ((!context.editable || context.readOnly) || compactView) && !list.children.length);
+        if (add) { add.classList.toggle('hidden', !context.editable || context.readOnly || compactView); add.onclick = null; }
+        if (add && context.editable && !context.readOnly && !compactView) {
             add.onclick = () => {
                 if (!context.active()) return;
                 if (!navigator.onLine) {

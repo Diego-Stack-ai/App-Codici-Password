@@ -1,3 +1,4 @@
+import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -9,14 +10,14 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.118';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.117';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.117';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.118';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.118';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -33,7 +34,9 @@ let hasLinkedProfileField = false;
 let accountWidgetController = null;
 
 // Re-render callback per banking-renderer.js
-const rerender = () => renderBankAccounts(bankAccounts, rerender);
+const rerender = () => renderBankAccounts(bankAccounts, rerender, {
+    onAddWidget: () => accountWidgetController?.openNewWidget()
+});
 
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -412,20 +415,7 @@ async function loadData() {
         setVal('ref-mobile', data.referenteCellulare || ref.cellulare);
 
         // Banking & Cards (Normalize & Validate)
-        let loadedBanking = [];
-        if (Array.isArray(data.banking)) {
-            loadedBanking = data.banking;
-        } else if (data.banking) {
-            loadedBanking = [data.banking];
-        } else if (data.iban || (data.cards && data.cards.length > 0)) {
-            loadedBanking = [{
-                iban: data.iban || '',
-                passwordDispositiva: data.passwordDispositiva || '',
-                referenteTelefono: data.referenteTelefono || '',
-                referenteCellulare: data.referenteCellulare || '',
-                cards: data.cards || []
-            }];
-        }
+        let loadedBanking = normalizeEditableBankingAccounts(data);
 
         // Decrittazione Banking
         if (needsDecryption) {
@@ -441,19 +431,13 @@ async function loadData() {
             })));
         }
 
-        const hasRealData = loadedBanking.some(acc => {
-            const hasIban = acc.iban && acc.iban.trim().length > 0;
-            const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
-            const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-            const hasRef = (acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
-            return hasIban || hasDisp || hasCards || hasRef;
-        });
+        const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData) {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         } else {
             // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
             document.getElementById('flag-banking').checked = false;
@@ -591,9 +575,9 @@ function setupUI() {
         bToggle.onchange = () => {
             document.getElementById('banking-section').classList.toggle('hidden', !bToggle.checked);
             if (bToggle.checked && bankAccounts.length === 0) {
-                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
+                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', numeroVerde: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
             }
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         };
     }
 
@@ -606,12 +590,13 @@ function setupUI() {
                 iban: '',
                 passwordDispositiva: '',
                 referenteNome: '',
+                numeroVerde: '',
                 referenteTelefono: '',
                 referenteCellulare: '',
                 cards: [],
                 _isOpen: true
             });
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         };
     }
 
