@@ -640,3 +640,6 @@ Avanzamento candidato Archivio 13/09/2026: sessione e identità complete protett
 Ripresa backup candidata 13/09/2026: stessa operazione dopo risposta persa, scelta esplicita e blocco dei retry Storage incerti. Suite completa 781 test superati. [Audit §46](../docs/AUDIT_VAULT_SESSION_P0.md#46-ripresa-esplicita-del-backup-nella-sessione--candidata-13092026). Nessuna ripresa dopo refresh o pubblicazione dichiarata.
 
 Checkpoint candidato 13/09/2026: manifest allegati completo, Bytes SDK e recupero esplicito delle eliminazioni, 795 test superati. [Audit §47](../docs/AUDIT_VAULT_SESSION_P0.md#47-manifest-backup-e-ripresa-archivio--candidata-13092026). Prossimo intervento: isolamento del dettaglio privato e limitazione della lettura backup; nessun deploy.
+
+Checkpoint candidato 13/09/2026: isolamento dettaglio privato e lettura incrementale backup, suite completa 813 test superati. Vincolo successivo fra digest anteprima/upload verificato con 61 test backup. [Audit §48](../docs/AUDIT_VAULT_SESSION_P0.md#48-dettaglio-privato-e-lettura-backup--candidata-13092026). Nessun deploy; dettaglio Scadenza in lavorazione.
+

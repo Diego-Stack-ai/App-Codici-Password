@@ -581,3 +581,10 @@ Suite completa `npm test` codice 0, **781 test** superati; inclusi 18 test servi
 Base `bf3bb010`, correzione Bytes SDK `630972ec`. Allegati selezionati raccolti ricorsivamente e verificati prima di applicare i dati; oggetti duplicati, mancanti o malformati non producono una scrittura parziale iniziale. Nell'Archivio il recupero UI usa piano opaco e comandi stabili dopo scelta esplicita, salta Account confermati e blocca azioni concorrenti. Nessuna ripresa dopo refresh.
 
 Suite completa `npm test` codice 0, **795 test** superati: inclusi 24 servizio backup, 18 Archivio e test della classe Bytes SDK reale. Budget delle 30 pagine rispettato. Nessun dato reale, migrazione o deploy. Staging/persistenza/retention e concorrenza globale restano aperti. Un audit successivo ha riprodotto la mescolanza dei riferimenti A/B nel dettaglio privato durante conferma allegato: è il prossimo blocco, non una correzione inclusa nei 795 test.
+
+## 48. Dettaglio privato e lettura backup — candidata 13/09/2026
+
+Il dettaglio privato cattura identità e documento fisico, invalida conferme, selettori file, import e decifratura dopo blocco/cambio pagina. Il test riproduceva Storage A e metadati B nella stessa eliminazione: ora il cambio contesto impedisce la prosecuzione. Conservati tutti i 12 test degli ID legacy, aggiunti 11 test di ciclo di vita.
+
+Suite completa npm test codice 0: 813 test superati sul blocco privato e sulla lettura incrementale backup (31 test servizio). Il successivo vincolo dei digest fra le scansioni è verificato separatamente nella suite backup: 61 test, di cui 34 servizio. Nessun dato reale o deploy; candidata 1.2.110, 240 riferimenti asset coerenti. L'audit successivo individua gli stessi rischi nel dettaglio Scadenza: intervento in corso, non incluso in questo checkpoint.
+
