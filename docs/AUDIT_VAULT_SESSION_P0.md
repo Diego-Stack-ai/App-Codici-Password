@@ -547,3 +547,12 @@ Sedici test mirati sul dettaglio e sui permessi ospite passati; la suite complet
 Il writer backup usa ora ricevute attendibili vincolate al comando; le ricevute storiche non autorizzano successo o ripetizione. I nuovi test helper/handler e quelli sul proprietario passano con servizi simulati. Il confronto atomico con l'anteprima e la compensazione rimangono da implementare. Nessun dato reale, migrazione o deploy in questa sezione.
 
 Checkpoint `99dabb19`: **731 test** superati nella suite completa (`npm test`, codice 0), inclusi 82 Functions e 25 esiti mutazioni con Auth/Firestore emulati. Controlli statici, budget delle 30 pagine e dipendenze superati. Commit `7063b9b3` vincola anche M6/widget al proprietario; `e3882995` isola il dettaglio aziendale; `99dabb19` verifica le ricevute backup. Produzione invariata, versione candidata 1.2.110.
+
+
+## 44. Anteprima backup e confronto transazionale — candidata 13/09/2026
+
+Base `dc985f64`. Classificazione e versione sono prodotte dalla stessa snapshot server; applicazione condizionata a tutte le versioni del chunk, incluso il Profilo, con consenso per sostituire gli esistenti. Il client mantiene gli indici originali nelle selezioni non contigue, rifiuta risposte incomplete o vecchie e interrompe i passi successivi a `stale-preview`. La UI distingue una nuova anteprima necessaria da un possibile ripristino parziale.
+
+Suite completa `npm test` codice 0, **742 test** superati. La revisione successiva dei tipi ha corretto il metodo binario non disponibile nell'Admin SDK e il confronto di numeri non finiti: suite Functions ripetuta sul risultato finale, **89 test** superati, più test mirati export/encoder/UI. Sintassi dei 156 moduli e budget di tutte le 30 pagine rispettati; candidata 1.2.110, 239 riferimenti asset coerenti (rimosso l'import dal servizio export nel percorso import). I test handler usano Firestore simulato; nessuna pretesa di ripristino Storage end-to-end.
+
+Il protocollo richiede rilascio coordinato e rollback che conservi proprietario, ricevute e precondizioni. Nessun dato reale, migrazione o deploy. Staging globale, compensazione, ripresa fra esecuzioni e dispositivi restano aperti.

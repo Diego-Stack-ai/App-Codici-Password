@@ -632,3 +632,5 @@ Dati azienda, aggiornamento dopo scrittura: creazione/modifica tornano subito al
 
 
 Avanzamento candidato 13/09/2026, checkpoint `99dabb19`: isolamento del dettaglio Account aziendale durante cambio contesto e vincolo proprietario delle mutazioni; ricevute backup verificate nel registro non scrivibile dai client. Suite completa 731 test superati. Nessun deploy; confronto atomico con anteprima, staging/compensazione e gate fisici restano aperti. [Audit §43](../docs/AUDIT_VAULT_SESSION_P0.md#43-dettaglio-aziendale-e-ricevute-backup--candidata-13092026).
+
+Avanzamento candidato 13/09/2026: anteprima backup legata alle versioni effettive, confronto transazionale prima di scrivere, scelta esplicita anche per il Profilo; interruzioni e tipi binari verificati. [Audit §44](../docs/AUDIT_VAULT_SESSION_P0.md#44-anteprima-backup-e-confronto-transazionale--candidata-13092026). Staging e rilascio restano aperti.
