@@ -66,3 +66,6 @@ La protezione delle chiamate differite deve essere verificata su entrambi i lati
 Il rilascio deve prevedere aggiornamento delle copie PWA e un messaggio comprensibile durante eventuale incompatibilità temporanea. Non inserire un fallback che accetti il comando senza proprietario. Prima del deploy: provare entrambe le identità, chiamate in attesa, missing/mismatch e nessuna lettura/scrittura dopo rifiuto; collaudare anche il client già installato prima dell'aggiornamento.
 
 Il rollback backend deve conservare sia il confronto proprietario sia il registro attendibile M6; una vecchia build integrale non soddisfa questo requisito. Un'eventuale disabilitazione temporanea del ripristino è diversa da una perdita di dati e va dichiarata. Nessun deploy o rollback eseguito da questa registrazione; resta necessaria approvazione esplicita per il backend di produzione.
+
+
+Il candidato backup del 13/09 aggiunge ricevute vincolate al comando nel registro `mutationResults`, non scrivibile dai client. La matrice di collaudo e il rollback devono preservare anche questa verifica, oltre al proprietario: testare retry identico, riuso dell'ID con contenuti diversi, ricevuta storica e ricevuta malformata. Non migrare automaticamente gli esiti pregressi. Il gate di distribuzione backend resta aperto.

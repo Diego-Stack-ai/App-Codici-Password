@@ -41,6 +41,7 @@ const {
 const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
+const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./backup-restore-receipt");
 const {
     revisionDecision, sharedVaultPaths, validateSharedVaultCommand
 } = require("./shared-vault-service");
@@ -530,16 +531,26 @@ exports.restoreBackupChunk = onCall(
         }
         const store = getFirestore();
         const userRef = store.collection("users").doc(request.auth.uid);
-        const operationRef = userRef.collection("backupRestoreOperations").doc(command.operationId);
+        const operationRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(command.operationId);
+        const legacyRef = userRef.collection("backupRestoreOperations").doc(command.operationId);
+        const binding = command.mode === "apply" ? createBackupRestoreBinding({uid: request.auth.uid, command}) : null;
         return store.runTransaction(async transaction => {
             const references = command.records.map(record => store.doc(record.path));
-            const [previous, ...snapshots] = await Promise.all([
-                transaction.get(operationRef), ...references.map(reference => transaction.get(reference))
+            const [previous, legacy, ...snapshots] = await Promise.all([
+                transaction.get(operationRef), transaction.get(legacyRef),
+                ...references.map(reference => transaction.get(reference))
             ]);
-            if (previous.exists) {
-                const data = previous.data();
-                if (data.backupId !== command.backupId || data.chunkIndex !== command.chunkIndex) {
-                    throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            if (command.mode === "apply") {
+                if (previous.exists) {
+                    try { return verifyBackupRestoreReceipt(previous.data(), binding); }
+                    catch {
+                        throw new HttpsError("failed-precondition", "Esito del ripristino non compatibile con la richiesta.",
+                            {reason: "BACKUP_RESULT_UNVERIFIED"});
+                    }
+                }
+                if (legacy.exists) {
+                    throw new HttpsError("failed-precondition", "Il precedente ripristino richiede una verifica.",
+                        {reason: "LEGACY_BACKUP_RESULT_UNVERIFIED"});
                 }
             }
             const collisions = snapshots
@@ -547,7 +558,7 @@ exports.restoreBackupChunk = onCall(
                     ? command.records[index].path : null)
                 .filter(Boolean);
             const decision = restoreChunkDecision({
-                previous: previous.exists ? previous.data() : null,
+                previous: null,
                 collisions,
                 overwriteExisting: command.mode === "apply" && command.overwriteExisting && command.overwriteConfirmed
             });
@@ -563,8 +574,7 @@ exports.restoreBackupChunk = onCall(
             });
             const result = {status: "applied", duplicate: false, recordCount: command.records.length};
             transaction.set(operationRef, {
-                ...result, backupId: command.backupId, chunkIndex: command.chunkIndex,
-                chunkCount: command.chunkCount, ownerUid: request.auth.uid,
+                ...result, ...binding,
                 appliedAt: FieldValue.serverTimestamp()
             });
             transaction.set(userRef.collection("auditEvents").doc(command.operationId), {

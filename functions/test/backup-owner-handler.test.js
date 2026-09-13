@@ -5,6 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const {HttpsError} = require('firebase-functions/v2/https');
 const backupService = require('../backup-restore-service');
+const backupReceipt = require('../backup-restore-receipt');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const start = source.indexOf('exports.restoreBackupChunk =');
 const end = source.indexOf('exports.getAppPresentation =', start);
@@ -20,7 +21,7 @@ function fixture() {
       set: (...args) => writes.push(args),
     })};
   const context = vm.createContext({
-    exports: {}, HttpsError, ...backupService, onCall: (_options, handler) => handler,
+    exports: {}, HttpsError, ...backupService, ...backupReceipt, onCall: (_options, handler) => handler,
     getFirestore: () => { storeAccesses += 1; return store; },
     FieldValue: {serverTimestamp: () => 'synthetic-time'},
   });
@@ -50,9 +51,9 @@ test('matching expected owner preserves preview and apply behavior under the aut
   for (const mode of ['preview', 'apply']) {
     const f = fixture(), result = await f.run(command(mode));
     assert.equal(result.status, mode === 'preview' ? 'ready' : 'applied');
-    assert.ok(f.reads.every(value => value.startsWith('users/A/')));
+    assert.ok(f.reads.every(value => (value.startsWith('users/A/') || value.startsWith('mutationResults/A/'))));
     assert.equal(f.writes.length, mode === 'preview' ? 0 : 3);
-    assert.ok(f.writes.every(([ref]) => ref.path.startsWith('users/A/')));
+    assert.ok(f.writes.every(([ref]) => (ref.path.startsWith('users/A/') || ref.path.startsWith('mutationResults/A/'))));
   }
 });
 

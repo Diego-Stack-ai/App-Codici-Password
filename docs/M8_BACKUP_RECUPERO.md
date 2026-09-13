@@ -61,3 +61,12 @@ Formato v2, parametri crittografici e schema dei dati restano invariati. Il coma
 
 
 Compatibilità e distribuzione: il nuovo backend rifiuta anche i client vecchi senza `expectedOwnerUid`; il vecchio backend non applica il controllo aggiunto. Servono ambiente di collaudo e distribuzione coordinata client/backend, con gestione delle copie PWA precedenti. Non distribuire soltanto il client dichiarando risolta la race del token. Un rollback non deve ripristinare un writer che accetta silenziosamente l'identità corrente al posto del proprietario previsto. Questo rilascio backend resta non eseguito e soggetto al gate strutturale esistente.
+
+
+## Ricevute attendibili del ripristino — candidata 13/09/2026
+
+Il nuovo writer salva la ricevuta in `mutationResults/{uid}/operations/{operationId}`, registro storicamente non scrivibile dai client. Un digest SHA-256 del comando normalizzato completo vincola proprietario, dominio, contenuti, consenso e suddivisione in blocchi. Un retry identico restituisce soltanto stato e conteggio verificati, prima di valutare le collisioni; non riscrive record cambiati dopo il primo ripristino. Una richiesta diversa con lo stesso identificatore viene respinta.
+
+Le ricevute pregresse in `backupRestoreOperations` non vengono promosse: senza una ricevuta attendibile il writer rifiuta l'applicazione e richiede verifica. L'anteprima calcola le collisioni dai documenti effettivi. I test dell'handler reale con Firestore simulato coprono retry, payload cambiato, ricevute malformate e storiche; non certificano un ripristino end-to-end su Storage.
+
+Questo blocco non risolve ancora il confronto atomico fra anteprima e applicazione, staging, compensazione o atomicità tra blocchi. Nessuna migrazione dei dati o distribuzione eseguita. Il rollback deve conservare sia il vincolo proprietario sia questo registro: tornare al vecchio writer riaprirebbe la fiducia nelle ricevute storiche.
