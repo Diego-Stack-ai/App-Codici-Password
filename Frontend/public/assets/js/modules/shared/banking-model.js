@@ -54,6 +54,7 @@ export function hasRealBankingData(account = {}) {
     return normalizeBankingAccounts(account).some(bank => (
         hasText(bank.iban)
         || hasText(bank.passwordDispositiva)
+        || hasText(bank.referenteNome)
         || hasText(bank.referenteTelefono)
         || hasText(bank.referenteCellulare)
         || (Array.isArray(bank.cards) && bank.cards.some(hasRealCardData))

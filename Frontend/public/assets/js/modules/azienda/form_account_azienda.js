@@ -12,7 +12,7 @@ import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=account-ui-preview-4';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
@@ -408,7 +408,7 @@ function setupUI() {
         flagBanking.onchange = () => {
             document.getElementById('banking-section')?.classList.toggle('hidden', !flagBanking.checked);
             if (flagBanking.checked && bankAccounts.length === 0) {
-                bankAccounts = [{ iban: '', cards: [], _isOpen: true }];
+                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteNome: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
                 renderBankAccounts(bankAccounts, rerender);
             }
         };
@@ -418,7 +418,7 @@ function setupUI() {
     if (btnAddIban) {
         btnAddIban.onclick = () => {
             bankAccounts.forEach(b => b._isOpen = false);
-            bankAccounts.push({ iban: '', cards: [], _isOpen: true });
+            bankAccounts.push({ iban: '', passwordDispositiva: '', referenteNome: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true });
             renderBankAccounts(bankAccounts, rerender);
         };
     }
