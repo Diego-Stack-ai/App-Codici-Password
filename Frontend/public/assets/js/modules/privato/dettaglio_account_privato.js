@@ -194,6 +194,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         if (!loaded) { showToast(t('account_not_found'), "error"); return; }
         loaded = {...loaded};
+        const storedNote = loaded.note;
         const resolvedId = loaded.id;
         mount.resolvedId = resolvedId;
         if (requireServerRefresh) {
@@ -257,6 +258,10 @@ async function loadAccount(mount = mounted) {
         setupEditAction(resolvedId, actionActive);
         if (!readOnly) updateDoc(docRef, {views: increment(1)}).catch(error => { if (active()) logError('UpdateViews', error); });
         renderAccount(loaded, actionActive);
+        import('../shared/account-note-editor.js').then(module => {
+            if (actionActive()) module.initAccountNoteEditor({account: loaded, storedNote,
+                ownerId: lookupOwner, accountId: resolvedId, readOnly, isActive: actionActive, signal});
+        }).catch(() => { if (actionActive()) showToast('Editor note non disponibile.', 'error'); });
         const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
         if (!active()) return;
         renderPrivateSharingMap(loaded, contactNames);

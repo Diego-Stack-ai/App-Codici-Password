@@ -222,6 +222,10 @@ async function loadAccount(mount = mounted) {
         }
         initProtocolUI(actionActive);
         render(loaded, actionActive);
+        import('../shared/account-note-editor.js').then(module => {
+            if (actionActive()) module.initAccountNoteEditor({account: loaded, storedNote: account.note,
+                ownerId: loadOwnerId, accountId, companyId, readOnly: isReadOnly, isActive: actionActive, signal});
+        }).catch(() => { if (actionActive()) showToast('Editor note non disponibile.', 'error'); });
         const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: loadOwnerId, accountId, aziendaId: companyId, readOnly: isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
         if (!active()) return;
         renderSharingMap(loaded, contactNames);
