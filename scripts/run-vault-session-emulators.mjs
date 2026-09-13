@@ -12,7 +12,7 @@ copyFileSync(resolve(root, 'firestore.rules'), resolve(laboratory, 'dist/emulato
 // A demo project cannot fall through to real Firebase resources.
 const result = spawnSync(process.execPath, [cli, 'emulators:exec', '--project', 'demo-vault-shell',
     '--only', 'auth,firestore', '--config', 'firebase.emulators.json',
-    browser ? 'node emulator-browser.mjs' : mutation ? 'node --test firebase-mutation.test.mjs firebase-backup.test.mjs' : 'node --test firebase-session.test.mjs'],
+    browser ? 'node emulator-browser.mjs' : mutation ? 'node --test firebase-mutation.test.mjs firebase-backup.test.mjs firebase-deadline.test.mjs' : 'node --test firebase-session.test.mjs'],
     {cwd: laboratory, env: {...process.env, GCLOUD_PROJECT: 'demo-vault-shell', GOOGLE_CLOUD_PROJECT: 'demo-vault-shell',
         METADATA_SERVER_DETECTION: 'none'}, stdio: 'inherit', shell: false});
 if (result.error) throw result.error;

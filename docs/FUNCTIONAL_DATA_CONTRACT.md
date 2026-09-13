@@ -85,6 +85,7 @@ I nominativi digitati nelle Scadenze restano suggerimenti storici nelle configur
 | Scaricare un allegato mai aperto | no |
 | Inviare email/Push, risolvere destinatari o accettare inviti | no; ripresa con rete |
 | Scrivere/modificare record | solo per i domini adottati da M6; non è una garanzia generale per tutti i record |
+| Eliminare una Scadenza collegata a un documento del Profilo (candidato) | richiede rete: cancellazione e scollegamento esatto avvengono nella stessa transazione, preservando modifiche e collegamenti più recenti |
 
 ## Gate per le rifattorizzazioni
 
