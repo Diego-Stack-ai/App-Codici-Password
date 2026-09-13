@@ -643,3 +643,6 @@ Checkpoint candidato 13/09/2026: manifest allegati completo, Bytes SDK e recuper
 
 Checkpoint candidato 13/09/2026: isolamento dettaglio privato e lettura incrementale backup, suite completa 813 test superati. Vincolo successivo fra digest anteprima/upload verificato con 61 test backup. [Audit §48](../docs/AUDIT_VAULT_SESSION_P0.md#48-dettaglio-privato-e-lettura-backup--candidata-13092026). Nessun deploy; dettaglio Scadenza in lavorazione.
 
+
+Checkpoint candidato 13/09/2026: Scadenze isolate per sessione, conferma della coda offline tramite CAS e transazioni backup provate in emulatore. Suite completa 843 test superati. [Audit §49](../docs/AUDIT_VAULT_SESSION_P0.md#49-scadenze-e-conferma-della-coda-offline--candidata-13092026). Nessun deploy.
+

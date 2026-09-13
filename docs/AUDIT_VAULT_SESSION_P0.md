@@ -588,3 +588,12 @@ Il dettaglio privato cattura identità e documento fisico, invalida conferme, se
 
 Suite completa npm test codice 0: 813 test superati sul blocco privato e sulla lettura incrementale backup (31 test servizio). Il successivo vincolo dei digest fra le scansioni è verificato separatamente nella suite backup: 61 test, di cui 34 servizio. Nessun dato reale o deploy; candidata 1.2.110, 240 riferimenti asset coerenti. L'audit successivo individua gli stessi rischi nel dettaglio Scadenza: intervento in corso, non incluso in questo checkpoint.
 
+
+## 49. Scadenze e conferma della coda offline — candidata 13/09/2026
+
+Checkpoint 2b306403: il dettaglio Scadenza invalida letture, conferme, allegati, notifiche e footer dopo cambio contesto. Ripristinato l'import della data per le ricevute gestibili; il backend verifica il destinatario atteso prima di accedere ai dati. La coda offline non elimina una versione locale diversa dal comando applicato e non sovrascrive identificatori già usati. Il backup è verificato anche attraverso il callable originale e transazioni Firestore emulati.
+
+Suite completa npm test codice 0: 843 test superati, inclusi 110 Functions, 12 lifecycle Scadenza, 52 offline e 32 mutazioni emulatore (7 backup). Versione candidata 1.2.110, 240 riferimenti asset coerenti; budget rispettati. Verificati 38 MD e 181 collegamenti relativi senza destinazioni mancanti (URL/ancore non verificati). Nessun deploy o dato reale.
+
+Restano distinti e successivi: confronto transazionale del collegamento documento Profilo durante cancellazione Scadenza, protocollo fallback senza Web Locks, concorrenza globale purge e ripristino/staging complessivo. Nessuna fase chiusa dai soli test automatici.
+
