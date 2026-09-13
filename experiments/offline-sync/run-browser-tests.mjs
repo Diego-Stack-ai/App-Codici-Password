@@ -4,12 +4,14 @@ import {resolve, relative, dirname, sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawn} from 'node:child_process';
 
-// Local synthetic data only; dedicated disposable browser profile, no Firebase.
+// Synthetic data and disposable browser profile. Optional backend is emulator-only.
 const browserPath = process.argv[2];
-if (!browserPath || process.argv.length !== 3) throw new Error('Usage: node run-browser-tests.mjs <browser-executable>');
+const backendMode = process.argv[3] === '--backend';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && backendMode))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend]');
+const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge() : null;
 const root = resolve(import.meta.dirname, '../..');
 const paths = new Map([
-    ['/suite.mjs', 'experiments/offline-sync/browser-coordination.mjs'],
+    ['/suite.mjs', backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
     ['/fenced-queue-writer.mjs', 'experiments/offline-sync/fenced-queue-writer.mjs'],
     ['/fenced-queue-client.mjs', 'experiments/offline-sync/fenced-queue-client.mjs'],
@@ -18,12 +20,14 @@ const paths = new Map([
     ['/worker.mjs', 'experiments/offline-sync/browser-coordination-worker.mjs'],
     ['/hybrid-queue-coordinator.mjs', 'experiments/offline-sync/hybrid-queue-coordinator.mjs'],
     ['/indexeddb-queue-lease.mjs', 'experiments/offline-sync/indexeddb-queue-lease.mjs'],
-    ['/queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js']
+    ['/queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
+    ['/crypto-utils.js', 'Frontend/public/assets/js/modules/core/crypto-utils.js']
 ]);
 let accept, reject, child, timer;
 const result = new Promise((resolveResult, rejectResult) => { accept = resolveResult; reject = rejectResult; });
 const server = createServer(async (request, response) => {
     try {
+        if (bridge && await bridge.handle(request, response)) return;
         if (request.url === '/result' && request.method === 'POST') {
             let body = '';
             for await (const chunk of request) { body += chunk; if (body.length > 16000) throw new Error('RESULT_TOO_LARGE'); }
@@ -55,6 +59,7 @@ try {
     clearTimeout(timer);
     child?.kill();
     await new Promise(done => server.close(done));
+    await bridge?.close();
     const local = relative(tempRoot, profile);
     // The only recursive removal is the exact temporary profile created above.
     if (dirname(profile) === tempRoot && local.startsWith('codex-offline-browser-') && !local.includes(sep)) {

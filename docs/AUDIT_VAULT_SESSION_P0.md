@@ -648,3 +648,7 @@ Base c82ceab0: createFencedQueueWriter riusa il formato cifrato canonico e prote
 ## 56. Sincronizzatore collegato alla coda protetta
 
 Base 2a79917a. Client candidato con controlli prima/dopo invio e rimozione CAS; stati tardivi soppressi dopo chiusura o perdita del lease. Ventidue scenari browser Chrome/Edge, 59 test offline. Risposte server simulate: il risultato non sostituisce le prove backend. Nessun dato reale, schema runtime o deploy modificato.
+
+## 57. Coda browser e transazioni backend emulato
+
+Base 7f2886b9. Nuovo runner --fenced-browser: cinque scenari Chrome e cinque Edge con coda cifrata IndexedDB reale, handler generico originale invocato direttamente e Firestore demo. Nessuna simulazione delle ricevute in questi casi; risposta HTTP persa simulata dopo commit. Trasporto Firebase pubblico e handler privato non certificati da questo collaudo. Dettagli e comando nel contratto M6.

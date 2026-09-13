@@ -388,3 +388,5 @@ Avanzamento M6 successivo: disponibile in laboratorio il lettore compatibile deg
 M6: aggiunto nel laboratorio il collegamento di tutte e quattro le mutazioni della coda cifrata al coordinatore ibrido, con confronto transazionale e protezione dal vecchio titolare. Sedici scenari browser passati su Chrome ed Edge, oltre alla suite offline esistente. Restano collegamento al client completo e rollout dello schema; nessun cutover o deploy.
 
 M6: client di laboratorio collegato al sincronizzatore canonico, con conferme protette dal lease e conservazione dei retry. Ventidue scenari passati su Chrome/Edge e 59 test offline; backend simulato, integrazione Firebase emulata e attivazione UI ancora da completare. Nessuna nuova fase chiusa.
+
+M6: collaudato il collegamento browser IndexedDB–handler applyOfflineMutation originale–Firestore emulato. Cinque scenari passati in ciascuno di Chrome/Edge: applicazione, retry, conflitto, riuso ID e proprietario errato. Restano percorso privato completo, trasporto/Auth/App Check, UI e rollout. Nessun deploy.

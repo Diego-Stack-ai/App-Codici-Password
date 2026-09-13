@@ -6,13 +6,14 @@ const laboratory = resolve(root, 'experiments/persistent-vault-shell');
 const cli = resolve(root, 'node_modules/firebase-tools/lib/bin/firebase.js');
 const browser = process.argv.includes('--browser');
 const mutation = process.argv.includes('--mutation');
-if (process.argv.length > 3 || process.argv.slice(2).some(arg => !['--browser', '--mutation'].includes(arg))) throw new Error('INVALID_ARGUMENT');
+const fencedBrowser = process.argv.includes('--fenced-browser');
+if (process.argv.length > 3 || process.argv.slice(2).some(arg => !['--browser', '--mutation', '--fenced-browser'].includes(arg))) throw new Error('INVALID_ARGUMENT');
 mkdirSync(resolve(laboratory, 'dist/emulators'), {recursive: true});
 copyFileSync(resolve(root, 'firestore.rules'), resolve(laboratory, 'dist/emulators/firestore.rules'));
 // A demo project cannot fall through to real Firebase resources.
 const result = spawnSync(process.execPath, [cli, 'emulators:exec', '--project', 'demo-vault-shell',
     '--only', 'auth,firestore', '--config', 'firebase.emulators.json',
-    browser ? 'node emulator-browser.mjs' : mutation ? 'node --test firebase-mutation.test.mjs firebase-backup.test.mjs firebase-deadline.test.mjs firebase-archive.test.mjs' : 'node --test firebase-session.test.mjs'],
+    fencedBrowser ? 'node ../offline-sync/run-emulated-browsers.mjs' : browser ? 'node emulator-browser.mjs' : mutation ? 'node --test firebase-mutation.test.mjs firebase-backup.test.mjs firebase-deadline.test.mjs firebase-archive.test.mjs' : 'node --test firebase-session.test.mjs'],
     {cwd: laboratory, env: {...process.env, GCLOUD_PROJECT: 'demo-vault-shell', GOOGLE_CLOUD_PROJECT: 'demo-vault-shell',
         METADATA_SERVER_DETECTION: 'none'}, stdio: 'inherit', shell: false});
 if (result.error) throw result.error;
