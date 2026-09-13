@@ -15,7 +15,7 @@ function fixture({missing = false, pending = null, directPending = null, search 
     const window = {location: {search, pathname: '/dettaglio_account_privato.html', href: ''}, history: {replaceState() {}}};
     const physical = () => ({id: 'physical-document', nomeAccount: 'Synthetic account'});
     const createElement = (tag, props = {}, children = []) => ({tag, ...props, children});
-    const context = vm.createContext({window, URLSearchParams,
+    const context = vm.createContext({window, URLSearchParams, AbortController, auth: {currentUser: null}, onAuthStateChanged: () => () => {},
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError: (...args) => calls.push(['error', ...args]),
         document: {getElementById: id => id === 'footer-center-actions' ? footer : id === 'btn-add-attachment' ? attachmentButton : null,
             querySelector: () => null, querySelectorAll: () => []},
@@ -48,7 +48,7 @@ function fixture({missing = false, pending = null, directPending = null, search 
     const findEdit = () => footer.children.flatMap(node => node.children || []).find(node => node.id === 'btn-edit-footer');
     return {calls, footer, window, findEdit, attachmentButton, attachmentClasses,
         failNextRead: () => { failNextRead = true; },
-        init: (uid = 'owner-fixture') => context.initDettaglioAccountPrivato({uid})};
+        init: (uid = 'owner-fixture') => { context.auth.currentUser = {uid}; return context.initDettaglioAccountPrivato({uid}); }};
 }
 
 test('legacy resolution binds views, edit, attachments, sharing, mode and widgets to the physical ID', async () => {

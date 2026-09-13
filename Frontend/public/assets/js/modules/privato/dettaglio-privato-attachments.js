@@ -7,67 +7,94 @@ import { db, storage } from '../../firebase-config.js?v=1.2.110';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showAlertModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 
-let ownerId = null;
-let accountId = null;
-let readOnly = true;
-let initialized = false;
+let mounted = null;
 
 export function initPrivateAttachmentModule(context) {
-    ownerId = context.ownerId;
-    accountId = context.accountId;
-    readOnly = Boolean(context.readOnly);
-
-    if (initialized) return;
-    initialized = true;
-
+    mounted?.destroy();
     const modal = document.getElementById('source-selector-modal');
-    document.getElementById('btn-cancel-source')?.addEventListener('click', closeSourceSelector);
-    modal?.addEventListener('click', event => {
-        if (event.target === modal) closeSourceSelector();
-    });
-
+    const cancelButton = document.getElementById('btn-cancel-source');
+    let destroyed = false;
+    const cleanups = new Set();
+    const mount = {ownerId: context.ownerId, accountId: context.accountId, readOnly: Boolean(context.readOnly),
+        confirm: context.confirm || showConfirmModal,
+        active() {
+            if (!destroyed && (mounted !== mount || context.signal?.aborted || (context.isActive && !context.isActive()))) mount.destroy();
+            return !destroyed;
+        },
+        destroy() {
+            if (destroyed) return;
+            destroyed = true;
+            context.signal?.removeEventListener('abort', mount.destroy);
+            for (const cleanup of cleanups) cleanup();
+            cleanups.clear();
+            if (mounted === mount) {
+                if (modal) { modal.onclick = null; modal.classList.remove('active'); modal.classList.add('hidden'); }
+                if (cancelButton) cancelButton.onclick = null;
+                if (document.body) document.body.style.overflow = '';
+            }
+        },
+        later(callback, milliseconds) {
+            const timer = setTimeout(() => { cleanups.delete(cancel); if (mount.active()) callback(); }, milliseconds);
+            const cancel = () => clearTimeout(timer);
+            cleanups.add(cancel);
+        }
+    };
+    mounted = mount;
+    context.signal?.addEventListener('abort', mount.destroy, {once: true});
+    if (!mount.active()) return mount;
+    if (cancelButton) cancelButton.onclick = () => closeSourceSelector(mount);
+    if (modal) modal.onclick = event => { if (event.target === modal) closeSourceSelector(mount); };
     ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
-        const input = document.getElementById(id);
-        input?.addEventListener('change', () => handleFileUpload(input));
+        const previous = document.getElementById(id);
+        const input = previous?.cloneNode ? previous.cloneNode(true) : previous;
+        if (!input) return;
+        if (input !== previous) previous.parentNode?.replaceChild(input, previous);
+        input.value = '';
+        input.onchange = () => handleFileUpload(input, mount);
+        cleanups.add(() => { input.value = ''; input.onchange = null; });
     });
+    return mount;
 }
 
-export function openSourceSelector() {
-    if (readOnly) return;
+export function openSourceSelector(mount = mounted) {
+    if (!mount?.active() || mount.readOnly) return;
     const modal = document.getElementById('source-selector-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
-    setTimeout(() => modal.classList.add('active'), 10);
+    mount.later(() => modal.classList.add('active'), 10);
     document.body.style.overflow = 'hidden';
 }
 
-export function closeSourceSelector() {
+export function closeSourceSelector(mount = mounted) {
+    if (!mount?.active()) return;
     const modal = document.getElementById('source-selector-modal');
     if (!modal) return;
     modal.classList.remove('active');
-    setTimeout(() => {
+    mount.later(() => {
         modal.classList.add('hidden');
         document.body.style.overflow = '';
     }, 300);
 }
 
-export async function handleFileUpload(input) {
-    closeSourceSelector();
-    if (readOnly) return;
+export async function handleFileUpload(input, mount = mounted) {
+    if (!mount?.active() || mount.readOnly) return;
+    const {ownerId, accountId} = mount;
+    const confirmAction = mount.confirm;
+    closeSourceSelector(mount);
 
     if (!navigator.onLine) {
-        await showAlertModal(
+        await confirmAction(
             'CONNESSIONE NECESSARIA',
             'Per caricare un allegato devi essere online. Nessun file è stato modificato.'
         );
-        input.value = '';
+        if (mount.active()) input.value = '';
         return;
     }
 
@@ -82,14 +109,13 @@ export async function handleFileUpload(input) {
     }
 
     showToast(`File selezionato: ${file.name}`, 'info');
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const confirmed = await showConfirmModal(
+    const confirmed = await confirmAction(
         'CARICA ALLEGATO',
         `Vuoi caricare il file ${file.name}?`,
         'Carica',
         t('cancel') || 'Annulla'
     );
+    if (!mount.active()) return;
     if (!confirmed) {
         input.value = '';
         return;
@@ -100,12 +126,16 @@ export async function handleFileUpload(input) {
         const storagePath = `users/${ownerId}/accounts/${accountId}/attachments/${createStorageObjectName(file)}`;
         const storageRef = ref(storage, storagePath);
         const vaultKey = await ensureVaultKeyMaterial();
+        if (!mount.active()) return;
         const encryptedFile = await encryptAttachmentFile(file, vaultKey);
+        if (!mount.active()) return;
         const snapshot = await uploadBytes(storageRef, encryptedFile.blob, {
             contentType: 'application/octet-stream',
             customMetadata: { encrypted: 'v1' }
         });
+        if (!mount.active()) return;
         const url = await getDownloadURL(snapshot.ref);
+        if (!mount.active()) return;
 
         await addDoc(collection(db, 'users', ownerId, 'accounts', accountId, 'attachments'), {
             name: file.name,
@@ -116,10 +146,11 @@ export async function handleFileUpload(input) {
             encryption: encryptedFile.metadata,
             createdAt: serverTimestamp()
         });
-
+        if (!mount.active()) return;
         showToast('Allegato caricato!', 'success');
-        await loadPrivateAttachments();
+        await loadPrivateAttachments(mount);
     } catch (error) {
+        if (!mount.active()) return;
         logError('UploadAttachment', error);
         showToast('Errore durante il caricamento', 'error');
     } finally {
@@ -127,18 +158,23 @@ export async function handleFileUpload(input) {
     }
 }
 
-export async function loadPrivateAttachments() {
+export async function loadPrivateAttachments(mount = mounted) {
+    if (!mount?.active()) return;
+    const {ownerId, accountId} = mount;
     const container = document.getElementById('attachments-list');
     if (!container) return;
 
     try {
-        renderAttachments(await listPrivateAccountAttachments(ownerId, accountId));
+        const attachments = await listPrivateAccountAttachments(ownerId, accountId);
+        if (mount.active()) renderAttachments(attachments, mount);
     } catch (error) {
+        if (!mount.active()) return;
         logError('LoadAttachments', error);
     }
 }
 
-function renderAttachments(list) {
+function renderAttachments(list, mount) {
+    if (!mount.active()) return;
     const container = document.getElementById('attachments-list');
     if (!container) return;
     clearElement(container);
@@ -167,7 +203,7 @@ function renderAttachments(list) {
         return createElement('div', { className: 'attachment-item animate-in slide-in-from-left-2' }, [
             createElement('div', {
                 className: 'attachment-info cursor-pointer',
-                onclick: () => openAttachment(attachment)
+                onclick: () => openAttachment(attachment, mount)
             }, [
                 createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                 createElement('div', { className: 'attachment-meta' }, [
@@ -175,19 +211,21 @@ function renderAttachments(list) {
                     createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
                 ])
             ]),
-            !readOnly ? createElement('button', {
+            !mount.readOnly ? createElement('button', {
                 type: 'button',
                 className: 'btn-delete-attachment',
                 onclick: event => {
                     event.stopPropagation();
-                    deleteAttachment(attachment);
+                    deleteAttachment(attachment, mount);
                 }
             }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })]) : null
         ]);
     }));
 }
 
-async function openAttachment(attachment) {
+async function openAttachment(attachment, mount = mounted) {
+    if (!mount?.active()) return;
+    attachment = {...attachment, encryption: attachment.encryption ? {...attachment.encryption} : null};
     try {
         if (!attachment.encryption) {
             if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
@@ -195,38 +233,48 @@ async function openAttachment(attachment) {
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
+        if (!mount.active()) return;
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        if (!mount.active()) return;
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        if (!mount.active()) return;
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
+        if (!mount.active()) return;
         logError('OpenEncryptedAttachment', error);
         showToast('Impossibile aprire l’allegato cifrato.', 'error');
     }
 }
 
-async function deleteAttachment(attachment) {
-    if (readOnly) return;
+async function deleteAttachment(attachment, mount = mounted) {
+    if (!mount?.active() || mount.readOnly) return;
+    const {ownerId, accountId} = mount;
+    const confirmAction = mount.confirm;
+    const {id, name, storagePath} = attachment;
     if (!navigator.onLine) {
-        await showAlertModal(
+        await confirmAction(
             'CONNESSIONE NECESSARIA',
             'Per eliminare un allegato devi essere online. Il file resta conservato.'
         );
         return;
     }
-    const confirmed = await showConfirmModal(
+    const confirmed = await confirmAction(
         'ELIMINA',
-        `Sei sicuro di voler eliminare l'allegato ${attachment.name}?`,
+        `Sei sicuro di voler eliminare l'allegato ${name}?`,
         'Elimina',
         t('cancel') || 'Annulla'
     );
-    if (!confirmed) return;
+    if (!mount.active() || !confirmed) return;
 
     try {
-        if (attachment.storagePath) await deleteObject(ref(storage, attachment.storagePath));
-        await deleteDoc(doc(db, 'users', ownerId, 'accounts', accountId, 'attachments', attachment.id));
+        if (storagePath) await deleteObject(ref(storage, storagePath));
+        if (!mount.active()) return;
+        await deleteDoc(doc(db, 'users', ownerId, 'accounts', accountId, 'attachments', id));
+        if (!mount.active()) return;
         showToast('Allegato eliminato', 'success');
-        await loadPrivateAttachments();
+        await loadPrivateAttachments(mount);
     } catch (error) {
+        if (!mount.active()) return;
         logError('DeleteAttachment', error);
         showToast('Errore durante l’eliminazione', 'error');
     }
