@@ -104,3 +104,10 @@ La coda elimina soltanto il comando effettivamente inviato: decifra la versione 
 
 Suite offline: 52 test superati, inclusa la regressione riprodotta della risposta tardiva che cancellava una riconciliazione. Nessun formato o schema IndexedDB modificato. Questo è un prerequisito del fallback senza Web Locks: lease con scadenza, fencing e coordinamento fra copie PWA richiedono un protocollo distinto; il gate resta aperto.
 
+
+### Coordinamento IndexedDB candidato, non attivato — 13/09/2026
+
+Il laboratorio offline-sync contiene un lease transazionale con token crescente: acquisizione, rinnovo e rilascio non permettono a un vecchio titolare di modificare il lease subentrato. La protezione della scrittura richiede la stessa transazione readwrite e lo stesso database della coda; errori, dati malformati, overflow e inversione dell'orologio interrompono la transazione. Nove test dedicati passano, 61 nella suite offline complessiva.
+
+Il modulo non è importato dall'app e non aggiorna IndexedDB. Prima dell'integrazione servono store condiviso con le operazioni cifrate, adozione anche dal percorso Web Locks, controlli prima/dopo le attese e compatibilità delle copie PWA. La protezione vale per le mutazioni nella transazione, non garantisce callback o invii rete esclusivi dopo sospensione: eventuali duplicati dello stesso comando devono restare idempotenti. Nessun timer o annullamento può ritirare una richiesta già inviata. Il gate fallback e le prove fisiche restano aperti.
+
