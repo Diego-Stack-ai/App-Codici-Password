@@ -115,3 +115,10 @@ Il percorso alternativo senza TextDecoderStream legge porzioni da 64 KiB con dec
 
 Il limite per riga tiene conto della doppia codifica base64 degli allegati. Questo non limita ancora la memoria aggregata dei record né i temporanei crittografici del singolo allegato; il completamento del requisito memoria M8 resta aperto.
 
+
+### Identità degli allegati fra le due letture — candidata 13/09/2026
+
+Il piano privato conserva il digest crittografico dell'involucro di ciascun allegato già calcolato durante la verifica iniziale. Prima di ogni upload la seconda scansione deve produrre lo stesso digest per il percorso selezionato; duplicati e contenuti cambiati interrompono il ripristino. Non vengono caricati byte diversi da quelli verificati nell'anteprima. I digest vengono rilasciati con la sessione.
+
+Le scritture Firestore precedenti possono essere già avvenute: l'errore conserva l'indicazione di ripristino parziale e blocca il retry generico Storage. Non è una transazione globale o uno staging. Suite backup: 61 test superati, inclusi tre nuovi casi sulla seconda lettura.
+

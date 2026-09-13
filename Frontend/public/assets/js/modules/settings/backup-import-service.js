@@ -187,7 +187,7 @@ async function scanBackup(file, uid, recoveryKey, visit = null, check = () => {}
         if (opened.entry.kind === 'record') counts.records += 1;
         else if (opened.entry.kind === 'attachment') counts.attachments += 1;
         else throw new Error('BACKUP_ENTRY_KIND_INVALID');
-        if (visit) await visit(opened.entry);
+        if (visit) await visit(opened.entry, opened.digest);
         check();
     }
     if (!header || !footer) throw new Error('BACKUP_FOOTER_MISSING');
@@ -232,7 +232,9 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
     try {
         const records = [];
         const storagePaths = new Set();
-        const scan = await scanBackup(file, uid, recoveryKey, entry => {
+        const attachmentDigests = new Map();
+        session.own(() => attachmentDigests.clear());
+        const scan = await scanBackup(file, uid, recoveryKey, (entry, digest) => {
             if (entry.kind === 'record') {
                 chunkRestoreRecords([entry]);
                 records.push(entry);
@@ -241,6 +243,8 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
                 const path = validateRestoreStoragePath(entry.storagePath, uid);
                 if (storagePaths.has(path)) throw new Error('BACKUP_ATTACHMENT_DUPLICATE');
                 attachmentBytes(entry.content);
+                if (typeof digest !== 'string' || !digest) throw new Error('BACKUP_ATTACHMENT_DIGEST_INVALID');
+                attachmentDigests.set(path, digest);
                 storagePaths.add(path);
             }
         }, check, session.signal);
@@ -282,7 +286,7 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         session.source = {file, recoveryKey, backupId: scan.header.backupId,
             records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
             counts: freezeRestoreValue(scan.counts), collisionCount: collisions,
-            storagePaths: freezeRestoreValue([...storagePaths])};
+            storagePaths: freezeRestoreValue([...storagePaths]), attachmentDigests};
         session.own(() => {
             session.source = null;
             if (session.execution) {
@@ -405,11 +409,17 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
         }
         stage = 'storage';
         const selectedStoragePaths = new Set(execution.storagePaths);
+        const visitedStoragePaths = new Set();
         check();
-        await scanBackup(source.file, session.uid, source.recoveryKey, async entry => {
+        await scanBackup(source.file, session.uid, source.recoveryKey, async (entry, digest) => {
             if (entry.kind !== 'attachment') return;
             const storagePath = validateRestoreStoragePath(entry.storagePath, session.uid);
             if (!selectedStoragePaths.has(storagePath)) return;
+            if (visitedStoragePaths.has(storagePath)) throw new Error('BACKUP_ATTACHMENT_DUPLICATE');
+            if (!source.attachmentDigests.has(storagePath) || source.attachmentDigests.get(storagePath) !== digest) {
+                throw new Error('BACKUP_ATTACHMENT_SOURCE_CHANGED');
+            }
+            visitedStoragePaths.add(storagePath);
             const bytes = attachmentBytes(entry.content);
             check();
             execution.storageStarted = true;

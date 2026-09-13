@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 const root = new URL('../Frontend/public/assets/js/modules/settings/', import.meta.url);
 const strip = source => source.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const service = strip(await readFile(new URL('backup-import-service.js', root), 'utf8'));
@@ -26,7 +27,7 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes} = {}) {
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         parseBackupLine: JSON.parse, deriveBackupKey: async () => 'synthetic-key',
-        decryptBackupEntry: async ({envelope}) => ({entry: envelope, digest: 'fixture'}),
+        decryptBackupEntry: async ({envelope}) => ({entry: envelope, digest: createHash('sha256').update(JSON.stringify(envelope)).digest('base64')}),
         collectOwnerBackup: async () => { throw new Error('Separate snapshot must not be read'); },
         respond: async command => ({data: command.mode === 'preview' ? {previewVersion: 1,
             entries: command.records.map((_record, index) => ({index, status: 'missing', expectedVersion: {exists: false}}))
@@ -488,4 +489,56 @@ test('invalid UTF-8, truncated slices and unsupported readers fail before server
     await assert.rejects(truncated.prepare(), /BACKUP_FILE_READ_INVALID/); assert.equal(truncated.calls.length, 0);
     const unsupported = fixture(); unsupported.file.slice = undefined;
     await assert.rejects(unsupported.prepare(), /BACKUP_STREAM_UNAVAILABLE/); assert.equal(unsupported.calls.length, 0);
+});
+
+test('changed attachment at the same path between scans cannot be uploaded or retried generically', async () => {
+    const f = fixture(), path = 'users/A/original';
+    const records = [{kind: 'record', scope: 'company', id: 'company', data: {storagePath: path}}];
+    replaceBackupEntries(f, records, [blob(path)]);
+    const plan = await f.prepare();
+    replaceBackupEntries(f, records, [{...blob(path), content: 'Qg=='}]);
+    // Public fields cannot replace the private manifest captured on preparation.
+    plan.attachmentDigests = new Map([[path, 'replacement']]);
+    await assert.rejects(f.context.executeBackupRestore(plan), error => {
+        assert.equal(error.retryable, false); assert.equal(error.progress.confirmedChunks, 1);
+        assert.equal(error.progress.uploaded, 0); assert.equal(error.progress.mayHaveApplied, true);
+        return true;
+    });
+    assert.equal(f.uploads.length, 0);
+    const calls = f.calls.length;
+    replaceBackupEntries(f, records, [blob(path)]);
+    await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => !error.retryable);
+    assert.equal(f.calls.length, calls); assert.equal(f.uploads.length, 0);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('unchanged attachment envelope preserves the previewed bytes and successful count', async () => {
+    const f = fixture(), path = 'users/A/unchanged';
+    const records = [{kind: 'record', scope: 'company', id: 'company', data: {storagePath: path}}];
+    const attachments = [{...blob(path), content: 'AAECAw=='}];
+    replaceBackupEntries(f, records, attachments);
+    const plan = await f.prepare();
+    replaceBackupEntries(f, records, attachments);
+    const result = await f.context.executeBackupRestore(plan);
+    assert.equal(result.attachmentCount, 1); assert.equal(f.uploads.length, 1);
+    assert.deepEqual([...f.uploads[0][1]], [0, 1, 2, 3]);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('changed duplicate or missing later selected attachment reports partial progress without a wrong second upload', async () => {
+    const first = 'users/A/first', second = 'users/A/second';
+    const records = [{kind: 'record', scope: 'company', id: 'company', data: {files: [{storagePath: first}, {storagePath: second}]}}];
+    for (const attachments of [
+        [blob(first), {...blob(second), content: 'Qg=='}],
+        [blob(first), blob(first), blob(second)],
+        [blob(first)]
+    ]) {
+        const f = fixture(); replaceBackupEntries(f, records, [blob(first), blob(second)]);
+        const plan = await f.prepare(); replaceBackupEntries(f, records, attachments);
+        await assert.rejects(f.context.executeBackupRestore(plan), error => error.retryable === false &&
+            error.progress.uploaded === 1 && error.progress.mayHaveApplied);
+        assert.deepEqual(f.uploads.map(args => args[0]), [first]);
+        assert.deepEqual([...f.uploads[0][1]], [65]);
+        f.context.releaseBackupRestore(plan);
+    }
 });
