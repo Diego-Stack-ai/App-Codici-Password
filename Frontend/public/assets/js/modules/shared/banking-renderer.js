@@ -96,6 +96,7 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                     }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })])
                 ]) : null,
 
+                widgetHost,
                 createElement('div', { className: 'bank-cards-section' }, [
                     createElement('div', { className: 'bank-cards-header' }, [
                         createElement('span', { className: 'bank-cards-title', textContent: 'Carte Associate' }),
@@ -123,8 +124,7 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                         (acc.cards || []).map((card, cIdx) => _renderCardEntry(bankAccounts, idx, cIdx, card, rerender))
                     )
                 ])
-            ]) : null,
-            widgetHost
+            ]) : widgetHost
         ]);
         container.appendChild(div);
     });
