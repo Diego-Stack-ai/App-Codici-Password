@@ -19,10 +19,14 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
 
     if (readOnly || compactView) {
         section.classList.add('hidden');
-        return;
+        saveButton.onclick = null;
+        clearElement(options);
+        clearElement(contactList);
+        // A received account does not grant access to its owner's address book.
+        if (readOnly) return;
+    } else {
+        section.classList.remove('hidden');
     }
-
-    section.classList.remove('hidden');
     const initialMode = accountModeFromRecord(account);
     let selectedMode = initialMode;
     let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean));
@@ -35,6 +39,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
         console.warn('[AccountMode] Rubrica non disponibile', error);
     }
 
+    if (compactView) return new Map(contacts.map(contact => [normalizeEmail(contact.email), fullName(contact)]));
     const definitions = [
         ['account-private', 'Account', 'lock'],
         ['account-shared', 'Account condiviso', 'group'],

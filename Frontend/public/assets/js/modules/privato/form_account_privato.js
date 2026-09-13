@@ -1,3 +1,4 @@
+import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -414,20 +415,7 @@ async function loadData() {
         setVal('ref-mobile', data.referenteCellulare || ref.cellulare);
 
         // Banking & Cards (Normalize & Validate)
-        let loadedBanking = [];
-        if (Array.isArray(data.banking)) {
-            loadedBanking = data.banking;
-        } else if (data.banking) {
-            loadedBanking = [data.banking];
-        } else if (data.iban || (data.cards && data.cards.length > 0)) {
-            loadedBanking = [{
-                iban: data.iban || '',
-                passwordDispositiva: data.passwordDispositiva || '',
-                referenteTelefono: data.referenteTelefono || '',
-                referenteCellulare: data.referenteCellulare || '',
-                cards: data.cards || []
-            }];
-        }
+        let loadedBanking = normalizeEditableBankingAccounts(data);
 
         // Decrittazione Banking
         if (needsDecryption) {
@@ -443,13 +431,7 @@ async function loadData() {
             })));
         }
 
-        const hasRealData = loadedBanking.some(acc => {
-            const hasIban = acc.iban && acc.iban.trim().length > 0;
-            const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
-            const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-            const hasRef = (acc.referenteNome?.trim() || acc.numeroVerde?.trim() || acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
-            return hasIban || hasDisp || hasCards || hasRef;
-        });
+        const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData) {
             bankAccounts = loadedBanking;

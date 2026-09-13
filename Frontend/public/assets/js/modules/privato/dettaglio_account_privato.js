@@ -206,7 +206,9 @@ function renderAccount(acc) {
     const compactGrids = new Set();
     ['detail-username', 'detail-account', 'detail-password', 'detail-website'].forEach(id => {
         const input = document.getElementById(id);
-        input?.closest('.glass-field-container')?.classList.toggle('hidden', !String(input.value || '').trim());
+        const value = String(input?.value || '');
+        const present = id === 'detail-password' ? value.length > 0 : Boolean(value.trim());
+        input?.closest('.glass-field-container')?.classList.toggle('hidden', !present);
         const grid = input?.closest('.form-grid-2');
         if (grid) compactGrids.add(grid);
     });

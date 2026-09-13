@@ -1,3 +1,4 @@
+import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -249,14 +250,7 @@ async function loadData() {
         setVal('ref-mobile', data.referenteCellulare || data.referente?.cellulare);
 
         // Banking Premium
-        let loadedBanking = [];
-        if (Array.isArray(data.banking)) {
-            loadedBanking = data.banking;
-        } else if (data.banking) {
-            loadedBanking = [data.banking];
-        } else if (data.iban) {
-            loadedBanking = [{ iban: data.iban, cards: [] }];
-        }
+        let loadedBanking = normalizeEditableBankingAccounts(data);
 
         // Decrittazione Banking
         if (needsDecryption) {
@@ -272,9 +266,7 @@ async function loadData() {
             })));
         }
 
-        const hasRealData = loadedBanking.some(acc => {
-            return (acc.iban?.trim() || acc.passwordDispositiva?.trim() || (acc.cards && acc.cards.length > 0));
-        });
+        const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData || data.isBanking) {
             bankAccounts = loadedBanking;

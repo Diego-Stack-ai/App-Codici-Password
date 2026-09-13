@@ -30,3 +30,7 @@ Restano leggibili dal modello applicativo date e metadati necessari alle liste, 
 - `_encrypted` segnala i documenti che richiedono decifratura selettiva.
 - `decrypt` prova la chiave primaria e, quando presente, il fallback del keyring legacy.
 - M1 non riscrive documenti, non rimuove fallback e non cambia lo schema Firestore.
+
+## Verifica circoscritta UI 1.2.118 — 13/09/2026
+
+Base `445b338d`, UI `d2ef897e`: nei writer privato e aziendale `banking[].numeroVerde` e `banking[].referenteNome` sono metadati in chiaro, come i telefoni bancari. Password dispositiva, numero carta, PIN e CCV mantengono la cifratura esistente. È una descrizione del codice, non una chiusura dell’inventario globale o una nuova decisione di sicurezza. Nessuna lettura o riscrittura di dati reali durante la preparazione del rilascio.
