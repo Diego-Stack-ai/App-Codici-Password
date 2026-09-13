@@ -2,6 +2,7 @@ import {createOfflineMutationQueue, openOfflineQueueDatabase, deriveOfflineQueue
 import {createHybridQueueCoordinator} from './hybrid-queue-coordinator.mjs';
 import {readCompatibleQueue} from './compatible-queue-reader.mjs';
 import {createFencedQueueWriter} from './fenced-queue-writer.mjs';
+import {createFencedQueueClient} from './fenced-queue-client.mjs';
 const passed = [], uid = `browser-${crypto.randomUUID()}`, name = `codex-offline-queue-${uid}`;
 const assert = (value, code) => { if (!value) throw new Error(code); };
 const requestValue = request => new Promise((resolve, reject) => {
@@ -147,6 +148,65 @@ try {
     } catch (error) { rejected = error.code === 'LEASE_LOST'; }
     assert(rejected && (await read(db, 'effects', 'effect')).holder === 'worker', 'STALE_WRITE_NOT_FENCED');
     passed.push('expired page cannot overwrite worker takeover in a real multi-store transaction');
+    await writer.run(async api => { for (const item of await api.list()) await api.remove(item); });
+    const states = [], receipts = new Map();
+    let online = false, mode = 'applied', sends = 0, applied = 0, releaseSend, activeClient = true;
+    const clientOptions = {database: db, uid, holderId: 'sync-client', vaultKeyMaterial: 'SYNTHETIC-NOT-A-USER-KEY',
+        now: () => clock, ttlMs: 100, locks: null, isOnline: () => online, isActive: () => activeClient,
+        onState: state => states.push(state.state), send: async command => {
+            sends++;
+            if (mode === 'conflict') return {status: 'conflict'};
+            if (mode === 'scope') throw Object.assign(new Error('scope'), {code: 'functions/failed-precondition', details: {reason: 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'}});
+            if (mode === 'pending') await new Promise(resolve => { releaseSend = resolve; });
+            if (!receipts.has(command.operationId)) { applied++; receipts.set(command.operationId, {status: 'applied'}); }
+            if (mode === 'lost-response') { mode = 'applied'; throw new Error('NETWORK_RESPONSE_LOST'); }
+            return receipts.get(command.operationId);
+        }};
+    let client = await createFencedQueueClient(clientOptions);
+    const syncOperation = suffix => ({...operation, operationId: `sync-${suffix}`});
+    await client.enqueue(syncOperation('offline'));
+    assert(sends === 0 && states.at(-1) === 'offline', 'OFFLINE_SENT');
+    online = true; await client.flush();
+    assert(states.at(-1) === 'saved' && !(await read(db, 'encryptedOperations', `${uid}:sync-offline`)), 'SYNC_NOT_ACKED');
+    passed.push('canonical synchronizer sends offline queue after reconnect and acknowledges under lease');
+    mode = 'lost-response';
+    await client.enqueue(syncOperation('retry'));
+    assert(states.at(-1) === 'recoverable-error' && await read(db, 'encryptedOperations', `${uid}:sync-retry`), 'LOST_RESPONSE_REMOVED');
+    const effects = applied;
+    await client.flush();
+    assert(applied === effects && !(await read(db, 'encryptedOperations', `${uid}:sync-retry`)), 'RETRY_DUPLICATED');
+    passed.push('simulated lost response retains command; trusted idempotent retry acknowledges once');
+    mode = 'conflict'; await client.enqueue(syncOperation('conflict'));
+    assert(states.at(-1) === 'conflict' && await read(db, 'encryptedOperations', `${uid}:sync-conflict`), 'CONFLICT_NOT_RETAINED');
+    await client.discard(syncOperation('conflict'));
+    passed.push('server conflict retains encrypted command until explicit discard');
+    mode = 'scope'; await client.enqueue(syncOperation('scope'));
+    assert(states.at(-1) === 'reconciliation-required', 'SCOPE_NOT_MARKED');
+    client.close(); client = await createFencedQueueClient(clientOptions);
+    const beforeReopen = sends;
+    await client.flush();
+    assert(sends === beforeReopen && states.at(-1) === 'reconciliation-required', 'REVIEW_RESENT');
+    await writer.run(async api => { for (const item of await api.list()) await api.remove(item); });
+    passed.push('persisted scope-review marker blocks automatic resend after client reopen');
+    mode = 'pending'; online = false; await client.enqueue(syncOperation('takeover')); online = true;
+    const inFlight = client.flush();
+    assert(client.flush() === inFlight, 'PARALLEL_FLUSH');
+    while (!releaseSend) await new Promise(resolve => setTimeout(resolve, 0));
+    clock += 100; assert((await probe({now: clock, useLocks: false})).acquired, 'SYNC_TAKEOVER_FAILED');
+    states.length = 0; releaseSend();
+    try { await inFlight; throw new Error('LATE_REPLY_ACCEPTED'); }
+    catch (error) { assert(['LEASE_LOST', 'HYBRID_CONTEXT_CLOSED'].includes(error.code), 'LATE_REPLY_ERROR'); }
+    assert(!states.includes('saved') && await read(db, 'encryptedOperations', `${uid}:sync-takeover`), 'LATE_REPLY_REMOVED');
+    passed.push('worker takeover during send prevents late acknowledgement and saved state');
+    mode = 'applied'; await client.flush();
+    mode = 'pending'; releaseSend = null; online = false; await client.enqueue(syncOperation('closed')); online = true;
+    const closing = client.flush();
+    while (!releaseSend) await new Promise(resolve => setTimeout(resolve, 0));
+    client.close(); states.length = 0; releaseSend();
+    try { await closing; throw new Error('CLOSED_REPLY_ACCEPTED'); }
+    catch (error) { assert(error.code === 'HYBRID_SESSION_INACTIVE', 'CLOSED_REPLY_ERROR'); }
+    assert(states.length === 0 && await read(db, 'encryptedOperations', `${uid}:sync-closed`), 'CLOSED_REPLY_REMOVED');
+    passed.push('closing client during send suppresses stale UI states and preserves pending ciphertext');
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, passed, browser: navigator.userAgent})});
 } catch (error) {
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: false, passed, code: error.code || error.message})});

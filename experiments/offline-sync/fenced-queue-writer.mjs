@@ -79,6 +79,28 @@ export async function createFencedQueueWriter({database, uid, vaultKeyMaterial, 
                 return next || expected;
             }
             return task(Object.freeze({
+                signal: context.signal,
+                checkCurrent: context.checkCurrent,
+                async list() {
+                    await context.checkCurrent();
+                    const containers = await new Promise((resolve, reject) => {
+                        const tx = database.transaction('encryptedOperations', 'readonly');
+                        const request = tx.objectStore('encryptedOperations').getAll();
+                        tx.oncomplete = () => resolve(request.result);
+                        tx.onabort = tx.onerror = () => reject(tx.error || fail('FENCED_QUEUE_READ'));
+                    });
+                    await context.checkCurrent();
+                    containers.sort((a, b) => a.queuedAt - b.queuedAt || a.id.localeCompare(b.id));
+                    const operations = [];
+                    try {
+                        for (const container of containers) {
+                            await context.checkCurrent();
+                            operations.push(await openOfflineOperation(container, key, uid));
+                            await context.checkCurrent();
+                        }
+                        return operations;
+                    } catch (error) { operations.length = 0; throw error; }
+                },
                 enqueue: operation => mutate('enqueue', operation),
                 remove: expected => mutate('remove', expected),
                 replace: (expected, replacement) => mutate('replace', expected, replacement),

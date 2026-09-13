@@ -644,3 +644,7 @@ Integrato master 9e5335d9 nel ramo experiment/vault-shell-v124, preservando i co
 ## 55. Scritture offline protette nel laboratorio
 
 Base c82ceab0: createFencedQueueWriter riusa il formato cifrato canonico e protegge inserimento, sostituzione, riconciliazione e rimozione in transazioni con lease e CAS. Sedici scenari browser in Chrome ed Edge, suite offline superata. Il ramo è candidato: nessun import runtime o aggiornamento dello schema produttivo; limitazioni e prossimo passo nel contratto M6.
+
+## 56. Sincronizzatore collegato alla coda protetta
+
+Base 2a79917a. Client candidato con controlli prima/dopo invio e rimozione CAS; stati tardivi soppressi dopo chiusura o perdita del lease. Ventidue scenari browser Chrome/Edge, 59 test offline. Risposte server simulate: il risultato non sostituisce le prove backend. Nessun dato reale, schema runtime o deploy modificato.
