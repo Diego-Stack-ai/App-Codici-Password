@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
+File censiti: **442**. Duplicati byte-per-byte: **4 gruppi**.
 
 ## experiments
 
@@ -51,12 +51,40 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
 | `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
 
+## functions
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `functions/test/account-widget-bank-handler.test.js` | JS | 5329 | 93 | Test automatico: account-widget-bank-handler.test. |
+| `functions/.gitignore` | CONFIG | 22 | 2 | Esclusioni Git per file generati o locali. |
+| `functions/account-widget-service.js` | JS | 4786 | 115 | File di progetto: account-widget-service. |
+| `functions/archive-purge-service.js` | JS | 2724 | 65 | File di progetto: archive-purge-service. |
+| `functions/backup-restore-service.js` | JS | 5828 | 146 | File di progetto: backup-restore-service. |
+| `functions/eslint.config.js` | JS | 606 | 26 | File di progetto: eslint.config. |
+| `functions/history-recovery-service.js` | JS | 1855 | 37 | File di progetto: history-recovery-service. |
+| `functions/index.js` | JS | 81626 | 1611 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
+| `functions/offline-sync-service.js` | JS | 1484 | 34 | File di progetto: offline-sync-service. |
+| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
+| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
+| `functions/private-account-mutation-service.js` | JS | 3280 | 66 | File di progetto: private-account-mutation-service. |
+| `functions/recovery-security.js` | JS | 1940 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
+| `functions/shared-vault-service.js` | JS | 7752 | 184 | File di progetto: shared-vault-service. |
+| `functions/test/account-widget-service.test.js` | JS | 4686 | 84 | Test automatico: account-widget-service.test. |
+| `functions/test/archive-purge-service.test.js` | JS | 2847 | 46 | Test automatico: archive-purge-service.test. |
+| `functions/test/backup-restore-service.test.js` | JS | 4032 | 67 | Test automatico: backup-restore-service.test. |
+| `functions/test/history-recovery-service.test.js` | JS | 1425 | 19 | Test automatico: history-recovery-service.test. |
+| `functions/test/offline-sync-service.test.js` | JS | 1296 | 24 | Test automatico: offline-sync-service.test. |
+| `functions/test/private-account-mutation-service.test.js` | JS | 2966 | 69 | Test automatico: private-account-mutation-service.test. |
+| `functions/test/recovery-security.test.js` | JS | 1432 | 35 | Test automatico: recovery-security.test. |
+| `functions/test/shared-vault-service.test.js` | JS | 3159 | 68 | Test automatico: shared-vault-service.test. |
+
 ## tests
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
+| `tests/banking-widget-hosts.test.mjs` | MJS | 6339 | 100 | Test automatico: banking-widget-hosts.test. |
+| `tests/banking-widget-placement.test.mjs` | MJS | 5839 | 72 | Test automatico: banking-widget-placement.test. |
 | `tests/account-detail-compact.test.mjs` | MJS | 5674 | 83 | Test automatico: account-detail-compact.test. |
-| `tests/banking-form-roundtrip.test.mjs` | MJS | 2919 | 44 | Test automatico: banking-form-roundtrip.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
@@ -65,6 +93,7 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
 | `tests/backup-export-model.test.mjs` | MJS | 2125 | 39 | Test automatico: backup-export-model.test. |
 | `tests/backup-import-model.test.mjs` | MJS | 4358 | 75 | Test automatico: backup-import-model.test. |
+| `tests/banking-form-roundtrip.test.mjs` | MJS | 3041 | 45 | Test automatico: banking-form-roundtrip.test. |
 | `tests/banking-model.test.mjs` | MJS | 2985 | 68 | Test automatico: banking-model.test. |
 | `tests/company-detail-freshness.test.mjs` | MJS | 6864 | 102 | Test automatico: company-detail-freshness.test. |
 | `tests/company-form-freshness.test.mjs` | MJS | 5121 | 70 | Test automatico: company-form-freshness.test. |
@@ -106,7 +135,7 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
 | `tests/storage.rules.test.mjs` | MJS | 4149 | 99 | Test automatico: storage.rules.test. |
 | `tests/vault-session.test.mjs` | MJS | 1865 | 39 | Test automatico: vault-session.test. |
-| `tests/widget-common-picker.test.mjs` | MJS | 4479 | 40 | Test automatico: widget-common-picker.test. |
+| `tests/widget-common-picker.test.mjs` | MJS | 4620 | 40 | Test automatico: widget-common-picker.test. |
 
 ## .firebaserc
 
@@ -138,8 +167,8 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/GUIDA.md` | MD | 62759 | 990 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 47406 | 530 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA.md` | MD | 63385 | 994 | Documentazione: GUIDA. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 48454 | 534 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -227,8 +256,8 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 8844 | 222 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 12707 | 276 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 16769 | 396 | Flusso aziende/account aziendali: dettaglio account azienda. |
-| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 20395 | 356 | Flusso aziende/account aziendali: form-azienda-save. |
-| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 26886 | 604 | Flusso aziende/account aziendali: form account azienda. |
+| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 20093 | 357 | Flusso aziende/account aziendali: form-azienda-save. |
+| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 27221 | 611 | Flusso aziende/account aziendali: form account azienda. |
 | `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 10044 | 265 | Flusso aziende/account aziendali: lista aziende. |
 | `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2731 | 70 | Flusso aziende/account aziendali: ma attachments. |
 | `Frontend/public/assets/js/modules/azienda/ma_cards.js` | JS | 16116 | 330 | Flusso aziende/account aziendali: ma cards. |
@@ -252,7 +281,7 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 687 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
 | `Frontend/public/assets/js/modules/data/shared-vault-data-client.js` | JS | 2739 | 65 | Supporto frontend: shared-vault-data-client. |
-| `Frontend/public/assets/js/modules/data/shared-vault-data-model.js` | JS | 4356 | 99 | Supporto frontend: shared-vault-data-model. |
+| `Frontend/public/assets/js/modules/data/shared-vault-data-model.js` | JS | 4690 | 104 | Supporto frontend: shared-vault-data-model. |
 | `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 10133 | 176 | Supporto frontend: vault-repository. |
 | `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 2748 | 67 | Supporto frontend: home-deadline-dashboard. |
 | `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3459 | 71 | Supporto frontend: home-deadline-inbox. |
@@ -264,7 +293,7 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 7460 | 161 | Flusso profilo/account personali: dettaglio-privato-sharing. |
 | `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 15296 | 350 | Flusso profilo/account personali: dettaglio account privato. |
 | `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 23472 | 419 | Flusso profilo/account personali: form-privato-save. |
-| `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 34875 | 759 | Flusso profilo/account personali: form account privato. |
+| `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 35162 | 764 | Flusso profilo/account personali: form account privato. |
 | `Frontend/public/assets/js/modules/privato/private-account-offline-policy.js` | JS | 615 | 17 | Flusso profilo/account personali: private-account-offline-policy. |
 | `Frontend/public/assets/js/modules/privato/profile-model.js` | JS | 10767 | 221 | Flusso profilo/account personali: profile-model. |
 | `Frontend/public/assets/js/modules/privato/profilo-actions.js` | JS | 12091 | 242 | Flusso profilo/account personali: profilo-actions. |
@@ -306,14 +335,14 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 52562 | 1066 | Impostazioni applicative: impostazioni. |
 | `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3468 | 93 | Impostazioni applicative: push-settings-controller. |
 | `Frontend/public/assets/js/modules/settings/shared-credentials-controller.js` | JS | 17243 | 320 | Impostazioni applicative: shared-credentials-controller. |
-| `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 6991 | 149 | Supporto frontend: account-banking-view. |
-| `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 22953 | 439 | Supporto frontend: account-embedded-widgets. |
+| `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 7039 | 151 | Supporto frontend: account-banking-view. |
+| `Frontend/public/assets/js/modules/shared/account-embedded-widgets.js` | JS | 25123 | 475 | Supporto frontend: account-embedded-widgets. |
 | `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 7741 | 160 | Supporto frontend: account-list-view. |
 | `Frontend/public/assets/js/modules/shared/account-mode-model.js` | JS | 1828 | 40 | Supporto frontend: account-mode-model. |
 | `Frontend/public/assets/js/modules/shared/account-shared-credentials.js` | JS | 15719 | 282 | Supporto frontend: account-shared-credentials. |
 | `Frontend/public/assets/js/modules/shared/attachment-security.js` | JS | 5917 | 139 | Validazione e cifratura degli allegati prima di Storage. |
-| `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 3598 | 96 | Supporto frontend: banking-model. |
-| `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 10989 | 204 | Renderer condiviso per conti bancari e carte. |
+| `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 3715 | 103 | Supporto frontend: banking-model. |
+| `Frontend/public/assets/js/modules/shared/banking-renderer.js` | JS | 11571 | 219 | Renderer condiviso per conti bancari e carte. |
 | `Frontend/public/assets/js/modules/shared/card-secret.js` | JS | 706 | 17 | Supporto frontend: card-secret. |
 | `Frontend/public/assets/js/modules/shared/company-area-preference.js` | JS | 840 | 24 | Supporto frontend: company-area-preference. |
 | `Frontend/public/assets/js/modules/shared/contact-card-model.js` | JS | 4264 | 71 | Supporto frontend: contact-card-model. |
@@ -406,10 +435,10 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 7174 | 105 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2437 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 4159 | 61 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 3078 | 37 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 10865 | 95 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 3523 | 41 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 11712 | 99 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 7701 | 145 | Documentazione: GUIDA PROGETTO. |
-| `docs/M10_HARDENING_RILASCIO.md` | MD | 4552 | 49 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M10_HARDENING_RILASCIO.md` | MD | 5787 | 55 | Documentazione: M10 HARDENING RILASCIO. |
 | `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
@@ -420,11 +449,11 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 4398 | 38 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 3149 | 35 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2550 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5603 | 85 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5519 | 85 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5911 | 100 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
 | `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 19822 | 310 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 32085 | 328 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 32666 | 332 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10659 | 124 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
@@ -448,43 +477,17 @@ File censiti: **439**. Duplicati byte-per-byte: **4 gruppi**.
 |---|---:|---:|---:|---|
 | `firestore.rules` | RULES | 8113 | 190 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
-## functions
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `functions/.gitignore` | CONFIG | 22 | 2 | Esclusioni Git per file generati o locali. |
-| `functions/account-widget-service.js` | JS | 3461 | 86 | File di progetto: account-widget-service. |
-| `functions/archive-purge-service.js` | JS | 2724 | 65 | File di progetto: archive-purge-service. |
-| `functions/backup-restore-service.js` | JS | 5828 | 146 | File di progetto: backup-restore-service. |
-| `functions/eslint.config.js` | JS | 606 | 26 | File di progetto: eslint.config. |
-| `functions/history-recovery-service.js` | JS | 1855 | 37 | File di progetto: history-recovery-service. |
-| `functions/index.js` | JS | 81285 | 1605 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
-| `functions/offline-sync-service.js` | JS | 1484 | 34 | File di progetto: offline-sync-service. |
-| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
-| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
-| `functions/private-account-mutation-service.js` | JS | 3280 | 66 | File di progetto: private-account-mutation-service. |
-| `functions/recovery-security.js` | JS | 1940 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
-| `functions/shared-vault-service.js` | JS | 7752 | 184 | File di progetto: shared-vault-service. |
-| `functions/test/account-widget-service.test.js` | JS | 2692 | 54 | Test automatico: account-widget-service.test. |
-| `functions/test/archive-purge-service.test.js` | JS | 2847 | 46 | Test automatico: archive-purge-service.test. |
-| `functions/test/backup-restore-service.test.js` | JS | 4032 | 67 | Test automatico: backup-restore-service.test. |
-| `functions/test/history-recovery-service.test.js` | JS | 1425 | 19 | Test automatico: history-recovery-service.test. |
-| `functions/test/offline-sync-service.test.js` | JS | 1296 | 24 | Test automatico: offline-sync-service.test. |
-| `functions/test/private-account-mutation-service.test.js` | JS | 2966 | 69 | Test automatico: private-account-mutation-service.test. |
-| `functions/test/recovery-security.test.js` | JS | 1432 | 35 | Test automatico: recovery-security.test. |
-| `functions/test/shared-vault-service.test.js` | JS | 3159 | 68 | Test automatico: shared-vault-service.test. |
-
 ## package-lock.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package-lock.json` | JSON | 455321 | 12562 | Lockfile riproducibile delle dipendenze npm. |
+| `package-lock.json` | JSON | 442760 | 12562 | Lockfile riproducibile delle dipendenze npm. |
 
 ## package.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 6689 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 6693 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

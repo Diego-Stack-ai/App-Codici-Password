@@ -13,6 +13,13 @@ const LEGACY_BANKING_FIELDS = [
     'referenteCellulare'
 ];
 
+export function ensureBankIds(banks) {
+    for (const bank of banks) {
+        if (typeof bank.bankId !== 'string' || !bank.bankId.trim()) bank.bankId = crypto.randomUUID();
+    }
+    return banks;
+}
+
 function hasLegacyBankingFields(account) {
     return LEGACY_BANKING_FIELDS.some(field => {
         const value = account?.[field];

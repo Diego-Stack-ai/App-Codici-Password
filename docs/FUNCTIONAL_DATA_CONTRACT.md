@@ -92,3 +92,7 @@ Prima di dichiarare concluso il flusso condiviso occorre un collaudo con due acc
 ## Account UI 1.2.118 — 13/09/2026
 
 Base `445b338d`, UI `d2ef897e` con correzioni di compatibilità. I campi facoltativi `banking[].numeroVerde` e `banking[].referenteNome` sono conservati nei due form; oggetto bancario singolo e formati legacy restano leggibili. Un referente generale da solo non crea una banca. Nessuna migrazione del database. I campi vuoti sono nascosti in consultazione; una password composta di spazi resta presente. Il selettore Widget usa i servizi già pubblicati, senza cambiamenti ai protocolli backend.
+
+## Posizione dei Widget bancari — candidata 1.2.119, 13/09/2026
+
+Sul ramo fix/banking-widget-placement, base master a6699e8d, banking[].bankId identifica stabilmente un conto all'interno dello stesso Account; accountWidgets.bankId opzionale collega un Widget embedded a quel conto. Il servizio manageAccountWidget verifica il target nella transazione, solo in banking[] dello stesso Account privato o aziendale e senza duplicati. Omissione in update conserva l'associazione precedente, null esplicito la rimuove; delete di un Widget orfano resta consentito. Nessuna assegnazione retroattiva ai Widget generici: la posizione si modifica esplicitamente nell'editor. Nuovo conto e formati legacy acquisiscono bankId al normale salvataggio del form; nessuna migrazione batch. Credenziali comuni mantengono il collegamento generale all'Account.

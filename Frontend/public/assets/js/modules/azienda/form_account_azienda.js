@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.118';
+import { db } from '../../firebase-config.js?v=1.2.119';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.118';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.119';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
@@ -21,8 +21,8 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.118';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.118';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.119';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.119';
 
 // --- STATE ---
 let currentUid = null;
@@ -39,7 +39,11 @@ let baseUpdatedAt = '';
 
 // Funzione di re-render locale per banking-renderer
 const rerender = () => renderBankAccounts(bankAccounts, rerender, {
-    onAddWidget: () => accountWidgetController?.openNewWidget()
+    onAddWidget: bankId => {
+        if (accountWidgetController) return accountWidgetController.openNewWidget(bankId);
+        showToast('Salva prima l’Account, poi aggiungi i Widget del conto.', 'warning');
+    },
+    onWidgetsMount: () => accountWidgetController?.placeBankWidgets()
 });
 
 // Utility per recupero rapido valori
@@ -272,6 +276,9 @@ async function loadData() {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
+            rerender();
+        } else {
+            bankAccounts = loadedBanking.filter(bank => bank.bankId);
             rerender();
         }
 

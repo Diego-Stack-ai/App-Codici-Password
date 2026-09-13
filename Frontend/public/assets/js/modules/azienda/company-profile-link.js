@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.118';
+import { auth, db } from '../../firebase-config.js?v=1.2.119';
 import { doc } from '/assets/js/vendor/firebase-runtime.js';
 import { getCompany } from '../data/vault-repository.js';
 import { findCompanyProfileContact, companyContactLinkPatch, companyAccountReferences } from './company-profile-model.js';

@@ -325,3 +325,7 @@ La suite completa è superata. Il gate finale del blocco richiede una prova fisi
 ## E — Documentazione e gate di chiusura
 
 Registrare decisioni, schema effettivo, compatibilità, eventuali migrazioni, test e problemi aperti negli MD pertinenti. Il blocco si chiude solo quando la proprietà read-your-writes è verificata, l'isolamento aziendale è provato e ogni intervento sui dati legacy ha un inventario e un rollback documentati.
+
+## Widget dentro il conto — candidata 1.2.119, 13/09/2026
+
+Corretto il pulsante introdotto nella UI 1.2.118: la creazione dal conto ora seleziona una posizione bancaria specifica, persistita tramite bankId. Host separati mantengono i Widget dentro ciascun conto, anche dopo riapertura; generici invariati. Disponibile spostamento esplicito dall'editor per Widget creati prima della correzione. Il requisito richiede un aggiornamento compatibile del solo callable manageAccountWidget oltre a Hosting; lavoro Vault escluso. Candidata verificata con 352 test, non distribuita.

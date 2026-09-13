@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.118';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.119';
 
 function createReadonlyField(label, value, icon, isPassword = false) {
     const id = `bank-field-${crypto.randomUUID()}`;
@@ -121,7 +121,8 @@ function createBankAccount(bank, index) {
                 })
             ])
         ]),
-        createElement('div', { className: 'bank-details' }, fields)
+        createElement('div', { className: 'bank-details' }, fields),
+        bank.bankId ? createElement('div', {className: 'bank-widget-host flex-col-gap', dataset: {bankWidgetId: bank.bankId}}) : null
     ]);
 }
 
@@ -143,6 +144,7 @@ export function renderAccountBanking(account, { isReadOnly = false, onAddBanking
 
     if (!content) return;
     clearElement(content);
-    if (!hasBanking) return;
-    setChildren(content, normalizeBankingAccounts(account).map(createBankAccount));
+    const banks = normalizeBankingAccounts(account);
+    if (!hasBanking && !banks.some(bank => bank.bankId)) return;
+    setChildren(content, banks.map(createBankAccount));
 }

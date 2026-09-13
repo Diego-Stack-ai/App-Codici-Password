@@ -46,3 +46,9 @@ Prima di implementare tale evoluzione è stato aggiunto il blocco di coerenza Pr
 6. piano di rollback identificato prima del deploy produzione;
 7. monitoraggio errori tecnici senza contenuti del Vault;
 8. chiusura o rollback immediato se autenticazione, cifratura, sync o recupero regrediscono.
+
+## Distribuzione Widget bancari — candidata 1.2.119, 13/09/2026
+
+Base a6699e8d: suite completa locale 352 test superati; budget invariati. La modifica backend riguarda solo manageAccountWidget e il validatore dedicato. Ordine previsto: pubblicare questa Function, poi Hosting; gli altri callable e Rules restano invariati. Vecchio client Widget che omette bankId conserva l'associazione via backend nuovo. Il frontend nuovo con backend vecchio non è una combinazione valida: il vecchio validatore scarterebbe bankId.
+
+Aggiornare la PWA prima di modificare i conti: i vecchi form aziendali possono omettere gli identificativi bancari aggiunti. Un Widget con target mancante resta recuperabile dalla sezione generica, può essere spostato o eliminato; non viene cancellato automaticamente. Il blocco UI dell'eliminazione del conto non è un vincolo globale contro vecchi writer concorrenti. Nessuna migrazione o lettura di dati reali eseguita. Per rollback del frontend conservare il backend compatibile: ripristinare un validatore precedente può perdere l'associazione al successivo salvataggio. L'autorizzazione precedente era limitata a Hosting 1.2.118; la distribuzione di questa Function richiede approvazione esplicita.

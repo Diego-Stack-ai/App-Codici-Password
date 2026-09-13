@@ -21,9 +21,9 @@
  */
 
 import { createElement, clearElement } from '../../dom-utils.js';
-import { showConfirmModal } from '../../ui-core-v129.js';
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { formatCardExpiry } from './banking-model.js';
+import { formatCardExpiry, ensureBankIds } from './banking-model.js';
 
 /**
  * Renderizza la lista dei conti bancari nel container #iban-list-container.
@@ -33,10 +33,15 @@ import { formatCardExpiry } from './banking-model.js';
 export function renderBankAccounts(bankAccounts, rerender, options = {}) {
     const container = document.getElementById('iban-list-container');
     if (!container) return;
+    ensureBankIds(bankAccounts);
     clearElement(container);
 
     bankAccounts.forEach((acc, idx) => {
         const isOpen = acc._isOpen !== false;
+        const widgetHost = createElement('div', {
+            className: `bank-widget-host flex-col-gap${isOpen ? '' : ' hidden'}`,
+            dataset: {bankWidgetId: acc.bankId}
+        });
 
         const div = createElement('div', { className: 'bank-account-card border-glow' }, [
             createElement('div', { className: 'bank-header' }, [
@@ -57,8 +62,16 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                     className: 'btn-delete-bank',
                     onclick: async (e) => {
                         e.stopPropagation();
+                        if (widgetHost.children.length) {
+                            showToast('Sposta o elimina prima i Widget di questo conto.', 'warning');
+                            return;
+                        }
                         const ok = await showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
                         if (ok) {
+                            if (widgetHost.children.length) {
+                                showToast('Sposta o elimina prima i Widget di questo conto.', 'warning');
+                                return;
+                            }
                             bankAccounts.splice(idx, 1);
                             rerender();
                         }
@@ -79,7 +92,7 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                     createElement('span', { className: 'section-title', textContent: 'Campi personalizzati' }),
                     createElement('button', {
                         type: 'button', className: 'btn-icon-header', title: 'Aggiungi Widget',
-                        'aria-label': 'Aggiungi Widget', onclick: options.onAddWidget
+                        'aria-label': 'Aggiungi Widget', onclick: () => options.onAddWidget(acc.bankId)
                     }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })])
                 ]) : null,
 
@@ -110,10 +123,12 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                         (acc.cards || []).map((card, cIdx) => _renderCardEntry(bankAccounts, idx, cIdx, card, rerender))
                     )
                 ])
-            ]) : null
+            ]) : null,
+            widgetHost
         ]);
         container.appendChild(div);
     });
+    options.onWidgetsMount?.();
 }
 
 /**

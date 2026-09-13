@@ -34,3 +34,7 @@ Restano leggibili dal modello applicativo date e metadati necessari alle liste, 
 ## Verifica circoscritta UI 1.2.118 — 13/09/2026
 
 Base `445b338d`, UI `d2ef897e`: nei writer privato e aziendale `banking[].numeroVerde` e `banking[].referenteNome` sono metadati in chiaro, come i telefoni bancari. Password dispositiva, numero carta, PIN e CCV mantengono la cifratura esistente. È una descrizione del codice, non una chiusura dell’inventario globale o una nuova decisione di sicurezza. Nessuna lettura o riscrittura di dati reali durante la preparazione del rilascio.
+
+## Metadati posizione Widget — candidata 1.2.119, 13/09/2026
+
+banking[].bankId e accountWidgets.bankId sono identificativi tecnici non cifrati, privi di IBAN o dati personali. Cifratura e validazione dei valori Widget restano quelle esistenti. Il campo sensibile viene ancora inviato esclusivamente come valueEnc. Nessun dato reale letto o migrato; verifica circoscritta del codice su base a6699e8d, non chiusura dell'inventario globale.

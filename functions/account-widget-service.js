@@ -29,6 +29,11 @@ function widgetContext(input = {}) {
 
 function widgetData(input = {}) {
   if (!input || Object.getPrototypeOf(input) !== Object.prototype) throw new Error("ACCOUNT_WIDGET_DATA_INVALID");
+  let bankId;
+  if (Object.hasOwn(input, "bankId")) {
+    if (input.bankId !== null && typeof input.bankId !== "string") throw new Error("ACCOUNT_WIDGET_BANK_INVALID");
+    bankId = input.bankId === null ? null : identifier(input.bankId, "ACCOUNT_WIDGET_BANK_INVALID");
+  }
   return {
     kind: "embedded",
     title: text(input.title, 120, "ACCOUNT_WIDGET_TITLE_INVALID", true),
@@ -38,7 +43,8 @@ function widgetData(input = {}) {
     order: Number.isInteger(input.order) && input.order >= 0 ? input.order : 0,
     collapsed: input.collapsed === true,
     fields: validateFields(input.fields),
-    schemaVersion: 1
+    schemaVersion: 1,
+    ...(bankId === undefined ? {} : {bankId})
   };
 }
 
@@ -77,9 +83,32 @@ function widgetBelongsToCommand(widget = {}, command) {
     (command.context !== "company" || widget.companyId === command.companyId);
 }
 
+function resolveAccountWidgetBankData(command, account = {}, previousWidget = {}) {
+  if (command.action === "delete") return null;
+  const data = {...command.data};
+  // Older clients do not send placement metadata. Omission must not silently
+  // detach an existing bank widget when those clients save its fields.
+  if (!Object.hasOwn(data, "bankId") && Object.hasOwn(previousWidget, "bankId")) {
+    data.bankId = previousWidget.bankId;
+  }
+  if (!Object.hasOwn(data, "bankId")) return data;
+  if (data.bankId === null && Object.hasOwn(command.data, "bankId")) {
+    delete data.bankId;
+    return data;
+  }
+  if (typeof data.bankId !== "string" || !IDENTIFIER_PATTERN.test(data.bankId)) {
+    throw new Error("ACCOUNT_WIDGET_BANK_INVALID");
+  }
+  const matches = Array.isArray(account.banking)
+    ? account.banking.filter(bank => bank && bank.bankId === data.bankId) : [];
+  if (matches.length !== 1) throw new Error("ACCOUNT_WIDGET_BANK_TARGET_INVALID");
+  return data;
+}
+
 module.exports = {
   accountWidgetPaths,
   revisionDecision,
+  resolveAccountWidgetBankData,
   validateAccountWidgetCommand,
   widgetBelongsToCommand
 };
