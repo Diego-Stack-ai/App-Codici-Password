@@ -687,3 +687,9 @@ Ogni conto mostra prima i dati bancari, poi i Widget specifici del conto e infin
 Nuovo ramo `experiment/vault-shell-v121`: merge `e2edd2b9` conserva il lavoro Vault integrato e i rilasci Account/banca fino a master 1.2.121. Commit `8de71910`: coordinatore offline ibrido di laboratorio, ancora escluso dal runtime. Suite completa 913 test superati; dopo l'ultima correzione locale del coordinatore, suite offline 69 test superati. Audit Vault §52 registra perimetro, prove e limiti.
 
 Lo stato corrente sostituisce le indicazioni di preparazione storiche: Hosting 1.2.121 e il supporto bancario manageAccountWidget sono già pubblicati; le modifiche strutturali del ramo Vault non lo sono. Nessun deploy eseguito durante questa ripresa. I prossimi passi M6 sono compatibilità delle copie PWA, store comune e integrazione sulla coda cifrata prima del cutover; gli altri gate aperti del piano rimangono invariati.
+
+## Sei blocchi del programma guida — 13/09/2026
+
+Ripresa dalla base `5b3cd4da`, codice `f47a55c9`: M6 apertura database e collaudi reali Chrome/Edge headless; M8 limiti cumulativi e unicità delle destinazioni del backup; M9 ciclo di vita dell'analisi; M7 ripristino transazionale dell'Archivio. I singoli rami experiment/m6-database-lifecycle, experiment/m8-restore-memory-budget, experiment/m6-browser-coordination, experiment/m8-backup-record-identities, experiment/m9-health-session ed experiment/m7-archive-restore-cas formano una sola catena. Il ramo principale sperimentale raccoglie tutti i commit verificati.
+
+Il piano di maturità distingue ora lavori tecnici aperti e decisioni/verifiche esterne: non occorre fermare l'intero progetto in attesa di un singolo gate. Non sono stati attivati schema IndexedDB 2, nuovo backend, controllo violazioni online o migrazioni. Master e Hosting restano 1.2.121; nessun deploy in questo blocco.

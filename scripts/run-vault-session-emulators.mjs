@@ -17,4 +17,3 @@ const result = spawnSync(process.execPath, [cli, 'emulators:exec', '--project', 
         METADATA_SERVER_DETECTION: 'none'}, stdio: 'inherit', shell: false});
 if (result.error) throw result.error;
 process.exit(result.status ?? 1);
-

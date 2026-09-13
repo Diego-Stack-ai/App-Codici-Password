@@ -353,3 +353,27 @@ Candidata integrata 1.2.118, codice `4a431ec3`: preservato il checkpoint sperime
 Il ramo `experiment/vault-shell-v121` conserva il candidato Vault e integra `origin/master` fino a `6fc3546e`, attraverso il merge `e2edd2b9`. Sono preservati i Widget specifici di ogni banca, il loro ordine prima delle carte e le protezioni di sessione; alla chiusura vengono rimossi anche i Widget montati nei contenitori bancari esterni.
 
 M6 avanza con un coordinatore sperimentale comune a Web Locks e fallback IndexedDB. Non è ancora collegato alla coda dell'app e non chiude il gate. Il prossimo passo richiede protocollo di aggiornamento dello store e compatibilità delle vecchie copie PWA, prima dell'attivazione. Restano inoltre aperti i lavori M7/M8, shell completa, prove fisiche e distribuzione strutturale già elencati. La produzione 1.2.121 contiene i rilasci UI/bancari; non contiene questi nuovi controlli Vault.
+
+## Avanzamento autonomo M6–M9 — 13/09/2026
+
+Base iniziale `5b3cd4da`, codice finale di questo blocco `f47a55c9`. I rami sottostanti sono checkpoint **in sequenza**, ciascuno discendente del precedente: non sono sei implementazioni divergenti da fondere separatamente. Il ramo `experiment/vault-shell-v121` raccoglie l'insieme dopo verifica.
+
+| Area | Passaggio completato | Commit |
+|---|---|---|
+| M6 | Chiusura connessioni, apertura annullata/bloccata e timeout, senza upgrade runtime | `b4bec892` |
+| M8 | Limiti cumulativi dell'anteprima e messaggio dedicato | `44c7f077` |
+| M6 | Sei prove reali IndexedDB/Web Locks in Chrome ed Edge headless, profili temporanei | `5fa297ab` |
+| M8 | Identità fisiche e duplicati anche fra chunk | `0586aa63` |
+| M9 | Invalida analisi/dialoghi su blocco, cambio utente e pagehide; etichette aziendali distinte | `4fba54e7` |
+| M7 | Ripristino CAS, messaggi di conflitto e transazioni emulatore | `f47a55c9` |
+
+### Lavori tecnici ancora aperti
+
+- **M6:** lettore compatibile col futuro schema, upgrade dello store, integrazione del lease in tutte le scritture della coda e gestione delle copie PWA precedenti. Il test reale conferma che il lettore v1 rifiuta lo schema 2: non cancellare il database per aggirarlo.
+- **M7:** protocollo condiviso fra purge/ripristino, writer Account/Widget/link/inviti, Rules e backup; solo dopo collegare il planner dei riferimenti residui.
+- **M8:** journal durevole, staging/compensazione e collaudi della memoria effettiva sui dispositivi. Le soglie limitano i dati ammessi ma non misurano lo heap.
+- **Shell e M5:** viste complete e integrazione dei flussi di scrittura/condivisione, compatibilità del formato e gate crittografici.
+
+### Passaggi che richiedono decisioni o verifiche esterne
+
+Restano le decisioni prodotto della baseline (fra cui retention e recupero), audit indipendente, matrice fisica dei dispositivi e approvazione della distribuzione coordinata. Questi passaggi non impediscono di continuare i lavori tecnici su rami sperimentali. Non sono concessi implicitamente da commit/push o dal superamento dei test. Nessuna fase viene marcata completa da questo blocco e la produzione resta 1.2.121.
