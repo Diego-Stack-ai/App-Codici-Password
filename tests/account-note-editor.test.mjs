@@ -2,6 +2,27 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+const {parse} = createRequire(import.meta.url)('@babel/parser');
+
+test('entrambi i dettagli usano auth importato da Firebase per avviare le note', async () => {
+    for (const area of ['privato', 'azienda']) {
+        const code = await readFile(new URL(`../Frontend/public/assets/js/modules/${area}/dettaglio_account_${area}.js`, import.meta.url), 'utf8');
+        const ast = parse(code, {sourceType: 'module'});
+        const configuration = ast.program.body.find(node => node.type === 'ImportDeclaration' && node.source.value.includes('/firebase-config.js'));
+        assert.ok(configuration?.specifiers.some(node => node.type === 'ImportSpecifier' && node.imported.name === 'auth' && node.local.name === 'auth'), `${area}: auth deve essere un import, non una variabile globale implicita`);
+        const start = code.indexOf("import('../shared/account-note-editor.js')");
+        assert.ok(start >= 0);
+        const end = code.indexOf('const contactNames', start);
+        let initialized = false;
+        const context = vm.createContext({auth: {currentUser: {uid: 'owner'}}, noteSignal: {aborted: false}, noteOwner: 'owner',
+            noteAccount: {}, storedNote: '', noteAccountId: 'account', noteCompanyId: 'company', isReadOnly: false,
+            console, showToast: () => assert.fail(`${area}: inizializzazione fallita`),
+            loadEditor: async () => ({initAccountNoteEditor: () => { initialized = true; }})});
+        await vm.runInContext(code.slice(start, end).replace("import('../shared/account-note-editor.js')", 'loadEditor()'), context);
+        assert.equal(initialized, true, area);
+    }
+});
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-note-editor.js', import.meta.url), 'utf8'))
     .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const gate = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
