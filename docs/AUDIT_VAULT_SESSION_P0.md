@@ -556,3 +556,14 @@ Base `dc985f64`. Classificazione e versione sono prodotte dalla stessa snapshot 
 Suite completa `npm test` codice 0, **742 test** superati. La revisione successiva dei tipi ha corretto il metodo binario non disponibile nell'Admin SDK e il confronto di numeri non finiti: suite Functions ripetuta sul risultato finale, **89 test** superati, più test mirati export/encoder/UI. Sintassi dei 156 moduli e budget di tutte le 30 pagine rispettati; candidata 1.2.110, 239 riferimenti asset coerenti (rimosso l'import dal servizio export nel percorso import). I test handler usano Firestore simulato; nessuna pretesa di ripristino Storage end-to-end.
 
 Il protocollo richiede rilascio coordinato e rollback che conservi proprietario, ricevute e precondizioni. Nessun dato reale, migrazione o deploy. Staging globale, compensazione, ripresa fra esecuzioni e dispositivi restano aperti.
+
+
+## 45. Archivio: sessione, proprietario e ricevute — candidata 13/09/2026
+
+Base `bdc0d5f8`. Il commit `df8243a5` vincola il purge al proprietario atteso prima degli accessi. Il blocco UI/servizio successivo cattura UID e identità completa dell'Account, invalida letture/decifratura/dialoghi/azioni a blocco o cambio montaggio, distingue ID coincidenti nei contesti e interrompe lo svuotamento prima dell'elemento successivo dopo invalidazione. Un solo dialogo di conferma per vista; pulizia di nomi, filtro e timer precedenti.
+
+Le ricevute purge sono ora verificate nel registro protetto; conferma richiesta anche per riprese/duplicati. Il finale transazionale verifica nuovamente la ricevuta prima di attestare il completamento. Legacy non promosso, nessun fallback permissivo.
+
+Suite completa `npm test` codice 0: **771 test** superati, inclusi 106 Functions e 11 nuovi test Archivio frontend. Budget delle 30 pagine rispettato; candidata 1.2.110 e 240 riferimenti asset coerenti. Test ricevute con handler reale e servizi simulati; la suite emulata non certifica un purge distribuito end-to-end. Nessun dato reale, migrazione o deploy; produzione resta 1.2.117.
+
+Restano aperti concorrenza purge/ripristino, recupero UI delle operazioni incerte con stesso ID, pulizia widget/grant residui, retention, staging e compensazione backup, prove fisiche e distribuzione coordinata.
