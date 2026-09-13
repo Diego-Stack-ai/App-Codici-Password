@@ -81,23 +81,56 @@ function transactionDone(transaction) {
     });
 }
 
-async function openDatabase(uid, indexedDb = globalThis.indexedDB) {
+export async function openOfflineQueueDatabase(uid, indexedDb = globalThis.indexedDB,
+    {signal, isActive = () => true, timeoutMs = 10000} = {}) {
     if (!indexedDb) throw new Error('INDEXED_DB_UNAVAILABLE');
-    const request = indexedDb.open(`codex-offline-queue-${uid}`, DB_VERSION);
-    request.onupgradeneeded = () => {
-        if (!request.result.objectStoreNames.contains(STORE)) {
-            const store = request.result.createObjectStore(STORE, {keyPath: 'id'});
-            store.createIndex('queuedAt', 'queuedAt');
-        }
+    if (!uid || typeof isActive !== 'function' || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1) {
+        throw new Error('OFFLINE_QUEUE_CONFIG_INVALID');
+    }
+    const check = () => {
+        if (signal?.aborted || !isActive()) throw new Error('OFFLINE_SESSION_CHANGED');
     };
-    return requestResult(request);
+    check();
+    return new Promise((resolve, reject) => {
+        let settled = false;
+        const request = indexedDb.open(`codex-offline-queue-${uid}`, DB_VERSION);
+        const finish = (error, database) => {
+            if (settled) { database?.close(); return; }
+            settled = true;
+            clearTimeout(timer);
+            signal?.removeEventListener('abort', abort);
+            if (error) reject(error); else resolve(database);
+        };
+        const abort = () => finish(new Error('OFFLINE_SESSION_CHANGED'));
+        const timer = setTimeout(() => finish(new Error('OFFLINE_QUEUE_OPEN_TIMEOUT')), timeoutMs);
+        signal?.addEventListener('abort', abort, {once: true});
+        request.onblocked = () => finish(new Error('OFFLINE_QUEUE_DATABASE_BLOCKED'));
+        request.onerror = () => finish(request.error || new Error('INDEXED_DB_REQUEST_FAILED'));
+        request.onupgradeneeded = () => {
+            try {
+                if (settled) { request.transaction.abort(); return; }
+                check();
+                if (!request.result.objectStoreNames.contains(STORE)) {
+                    const store = request.result.createObjectStore(STORE, {keyPath: 'id'});
+                    store.createIndex('queuedAt', 'queuedAt');
+                }
+            } catch (error) { request.transaction.abort(); finish(error); }
+        };
+        request.onsuccess = () => {
+            const database = request.result;
+            // Cooperate with a future upgrade; old handles cannot start new transactions.
+            database.onversionchange = () => database.close();
+            try { check(); } catch (error) { database.close(); finish(error); return; }
+            finish(null, database);
+        };
+    });
 }
 
-export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexedDb} = {}) {
+export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexedDb, signal, isActive = () => true} = {}) {
     if (!uid) throw new Error('OFFLINE_QUEUE_UID_REQUIRED');
-    const [database, key] = await Promise.all([
-        openDatabase(uid, indexedDb), deriveOfflineQueueKey(vaultKeyMaterial, uid)
-    ]);
+    // Derive first: a failed key must not leave an unowned DB connection open.
+    const key = await deriveOfflineQueueKey(vaultKeyMaterial, uid);
+    const database = await openOfflineQueueDatabase(uid, indexedDb, {signal, isActive});
     async function swap(expectedOperation, replacement, {isActive = () => true} = {}, sameId = false) {
             const checkActive = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
             checkActive();

@@ -250,3 +250,51 @@ test('scope review reason stays inside encrypted payload and survives reopening'
     await assert.rejects(instance.markForReview(marked,{reviewReason:'unknown'}),/REASON_INVALID/);
     assert.deepEqual(await instance.list(),[marked]);
 });
+
+function openingFixture() {
+    const request = {}, database = {closed: 0, close() { this.closed++; }};
+    const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, 1); return request; }};
+    return {request, database, indexedDb, succeed() { request.result = database; request.onsuccess(); }};
+}
+
+test('database lifecycle closes on version change without deleting or upgrading queued data', async () => {
+    const f = openingFixture();
+    const pending = queue.openOfflineQueueDatabase('owner-a', f.indexedDb);
+    f.succeed(); assert.equal(await pending, f.database);
+    assert.equal(f.database.closed, 0);
+    f.database.onversionchange({newVersion: 2});
+    assert.equal(f.database.closed, 1);
+});
+
+test('blocked and timed-out opens reject and close late success instead of leaking a handle', async () => {
+    for (const mode of ['blocked', 'timeout']) {
+        const f = openingFixture();
+        const pending = queue.openOfflineQueueDatabase('owner-a', f.indexedDb, {timeoutMs: 10});
+        const rejected = assert.rejects(pending, mode === 'blocked' ? /DATABASE_BLOCKED/ : /OPEN_TIMEOUT/);
+        if (mode === 'blocked') f.request.onblocked();
+        await rejected; f.succeed(); assert.equal(f.database.closed, 1);
+    }
+});
+
+test('cancelled or stale opens cannot initialize a database or return a late handle', async () => {
+    for (const mode of ['abort', 'session']) {
+        const f = openingFixture(), controller = new AbortController(); let active = true, aborted = false;
+        const pending = queue.openOfflineQueueDatabase('owner-a', f.indexedDb, {signal: controller.signal, isActive: () => active});
+        const rejected = assert.rejects(pending, /SESSION_CHANGED/);
+        if (mode === 'abort') controller.abort(); else active = false;
+        f.request.transaction = {abort() { aborted = true; }};
+        f.request.onupgradeneeded();
+        await rejected; assert.equal(aborted, true);
+        f.succeed(); assert.equal(f.database.closed, 1);
+    }
+});
+
+test('database open errors propagate and invalid key or inactive session does not open a connection', async () => {
+    const f = openingFixture();
+    const pending = queue.openOfflineQueueDatabase('owner-a', f.indexedDb);
+    const error = new Error('VersionError'); f.request.error = error; f.request.onerror();
+    await assert.rejects(pending, failure => failure === error);
+    const noOpen = {open() { assert.fail('database must not open'); }};
+    await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: '', indexedDb: noOpen}), /KEY_REQUIRED/);
+    await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'fixture', indexedDb: noOpen, isActive: () => false}), /SESSION_CHANGED/);
+});

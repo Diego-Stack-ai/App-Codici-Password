@@ -119,3 +119,9 @@ Sette nuovi test sintetici verificano contesa fra percorsi misti in entrambe le 
 
 Nessun import nel runtime, aggiornamento dello schema o cutover. Restano da realizzare l'adozione sulla coda cifrata, la gestione delle copie PWA precedenti e i collaudi di sospensione su dispositivi. Il controllo della transazione non garantisce esclusività degli effetti di rete: restano necessarie le ricevute server idempotenti. Questo passo non chiude M6.
 
+
+### Apertura e durata delle connessioni — candidata 13/09/2026
+
+Base `5b3cd4da`, ramo `experiment/m6-database-lifecycle`: l'apertura della coda runtime resta alla versione IndexedDB 1. Una connessione chiude su `versionchange`; apertura bloccata, annullata o oltre 10 secondi restituisce errore recuperabile, senza lasciare utilizzabile una connessione arrivata tardi. Una richiesta già abbandonata non inizializza successivamente lo store. La derivazione della chiave precede l'apertura: un errore crittografico non lascia una connessione senza proprietario. Il client passa il proprio controllo di sessione anche all'apertura.
+
+Suite offline: 73 test superati, inclusi quattro nuovi scenari del ciclo di vita con fixture transazionali. Non viene cancellato il database, modificato il formato cifrato o installato lo store dei lease. Queste protezioni cooperano soltanto nelle copie dell'app che le includono; una PWA precedente può ancora bloccare l'upgrade. Prima di un futuro schema 2 servono distribuzione preparatoria, chiusura delle copie precedenti, collaudo browser reale e rollback che sappia leggere lo schema aggiornato. M6 rimane aperta.

@@ -21,7 +21,7 @@ export async function createOfflineMutationClientCore({
     const active = () => !closed && isActive();
     const assertActive = () => { if (!active()) throw new Error('OFFLINE_SESSION_CHANGED'); };
     assertActive();
-    const queue = await createQueue({uid, vaultKeyMaterial});
+    const queue = await createQueue({uid, vaultKeyMaterial, isActive: active});
     if (!active()) { queue.close?.(); throw new Error('OFFLINE_SESSION_CHANGED'); }
     const synchronizer = createSynchronizer({uid, queue, send, withLease, onState, isOnline, isActive: active});
     const channel = createChannel?.(uid, () => synchronizer.flush()) ?? {notify() {}, close() {}};
