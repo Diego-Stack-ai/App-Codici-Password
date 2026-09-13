@@ -4,10 +4,11 @@ const vm = require('node:vm');
 const {readFileSync} = require('node:fs');
 const policy = require('../archive-purge-service');
 const source = readFileSync(require.resolve('../index.js'), 'utf8');
+const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
 
 function fixture({previous = null, companies = 1, malformed = false} = {}) {
-  const command = {accountId: 'account', operationId: 'operation', context: 'private', expectedRevision: 1, confirmation: 'DELETE_FOREVER'};
+  const command = {expectedOwnerUid: 'owner', accountId: 'account', operationId: 'operation', context: 'private', expectedRevision: 1, confirmation: 'DELETE_FOREVER'};
   const states = new Map();
   const root = 'users/owner', operationPath = `${root}/archiveOperations/operation`;
   const link = {linkedAccountId: 'account', linkedAccountCompanyId: '', note: 'preserve'};
@@ -36,7 +37,7 @@ function fixture({previous = null, companies = 1, malformed = false} = {}) {
   class HttpsError extends Error { constructor(code, message) { super(message); this.code = code; } }
   const context = vm.createContext({...policy, exports: {}, onCall: (_config, run) => run, HttpsError,
     getFirestore: () => store, getStorage: () => ({bucket: () => ({})}), FieldValue: {serverTimestamp: () => 'time'}});
-  vm.runInContext(handler, context);
+  vm.runInContext(ownerGuard + handler, context);
   return {states, counters: () => ({deletions, transactions}), run: () => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data: command})};
 }
 

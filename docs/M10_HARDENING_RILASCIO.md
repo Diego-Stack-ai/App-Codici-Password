@@ -72,3 +72,5 @@ Il candidato backup del 13/09 aggiunge ricevute vincolate al comando nel registr
 
 
 Compatibilità CAS backup candidata: il client richiede una risposta preview versione 1 completa e coerente; il backend richiede la versione attesa per ciascun record applicato. Provare anche vecchio client/nuovo backend e nuovo client/vecchio backend: devono interrompere il ripristino, senza fallback alla scrittura senza precondizioni. Il rollback conserva proprietario, ricevute attendibili e confronto con anteprima. Staging e Storage non diventano atomici per effetto di questo controllo.
+
+Il candidato purge richiede anch’esso `expectedOwnerUid` prima di ogni accesso. Includere nelle prove di distribuzione e rollback i client Archivio precedenti, il cambio Auth durante conferma/token e lo svuotamento interrotto. Nessun fallback senza proprietario e nessun deploy eseguito.

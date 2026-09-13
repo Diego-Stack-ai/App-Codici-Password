@@ -442,6 +442,7 @@ exports.purgeArchivedAccount = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
         let command;
         try { command = validatePurgeCommand(request.data); } catch {
             throw new HttpsError("invalid-argument", "Comando di eliminazione non valido.");
