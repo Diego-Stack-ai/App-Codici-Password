@@ -81,3 +81,11 @@ Prova locale base `1b6a13ed`: riconciliazione di una singola operazione in RAM t
 Candidato base `a795b462`: il lookup emulato usa il nuovo percorso backend `/mutationResults/{uid}/operations/{operationId}` e richiede anche l'identità dell'operazione. Le conferme storiche non vengono usate come prova o replicate automaticamente. Integrazione repository/UI e recupero pregresso ancora aperti; nessun nuovo percorso attivato sul sito pubblico. [Audit §32](./AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).
 
 Dati azienda dopo scrittura: afterWrite e callback di modifica collegamenti richiedono getCompanyConfirmed. Il flag è consumato dopo rendering riuscito; errore o offline non dichiarano aggiornata una copia vecchia. Richieste e callback sono vincolati alla vista. [Audit §30](./AUDIT_VAULT_SESSION_P0.md#30-dati-azienda-aggiornati-dopo-il-salvataggio--12092026).
+
+### Modulo azienda: base aggiornata per la modifica — v1.2.111
+
+Online il modulo modifica azienda usa `getCompanyConfirmed`, una lettura confermata dal server attraverso il repository, prima di abilitare Salva. Una risposta mancante o fallita non viene sostituita dalla copia obsoleta. Offline resta `getCompany`; liste e consultazione mantengono il percorso local-first. Il controllo transazionale confronta i valori dei contatti senza dipendere dall’ordine delle chiavi delle mappe, preservando conflitti reali e collegamenti Account. Nessuna modifica del mapper degli identificativi o dei dati persistiti.
+
+### Dati azienda dopo scrittura — v1.2.112
+
+Dopo creazione/modifica il dettaglio usa getCompanyConfirmed su afterWrite=1, consumato soltanto dopo rendering riuscito. Callback dei collegamenti usano la stessa lettura confermata; errori e offline preservano la richiesta di refresh senza dichiarare aggiornata la vecchia cache. Navigazione ordinaria invariata. Generazione della vista e delle richieste distinte impediscono aggiornamenti tardivi senza bloccare il retry nella stessa vista.
