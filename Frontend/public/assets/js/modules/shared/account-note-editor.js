@@ -44,6 +44,8 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
     isActive = () => true, signal}) {
     const button = document.getElementById('btn-edit-account-note');
     if (!button) return;
+    const editButton = document.getElementById('btn-modify-account-note');
+    const deleteButton = document.getElementById('btn-delete-account-note');
     mounted.get(button)?.();
     let disposed = false, busy = false, modal = null, input = null;
     let unsubscribe = () => {};
@@ -53,6 +55,9 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
     const dispose = () => {
         if (disposed) return;
         disposed = true; close(); button.onclick = null; button.classList.add('hidden'); unsubscribe();
+        for (const action of [editButton, deleteButton]) {
+            if (action) { action.onclick = null; action.classList.add('hidden'); }
+        }
         signal?.removeEventListener('abort', dispose);
         globalThis.removeEventListener?.('vault-session-locked', dispose);
         globalThis.removeEventListener?.('pagehide', dispose);
@@ -69,11 +74,13 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
         const present = Boolean(note?.trim());
         document.getElementById('section-notes')?.classList.toggle('hidden', !present);
         const text = document.getElementById('detail-note'); if (text) text.textContent = note || '';
-        button.textContent = present ? 'Modifica nota' : 'Aggiungi nota';
-        button.classList.remove('hidden');
+        button.textContent = 'Aggiungi nota';
+        button.classList.toggle('hidden', present);
+        for (const action of [editButton, deleteButton]) action?.classList.toggle('hidden', !present);
     };
     refresh(account.note);
-    button.onclick = async () => {
+    const focusAction = () => (account.note?.trim() ? editButton : button)?.focus();
+    const openEditor = async (deleting = false) => {
         if (!active() || busy || modal) return;
         busy = true;
         try {
@@ -83,18 +90,18 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
             if (!active()) return;
             if (clear === '--ERRORE--') throw failure('NOTE_UNREADABLE');
             input = createElement('textarea', {id: 'inline-account-note', className: 'inline-note-input',
-                value: clear || '', maxLength: 100000, autocomplete: 'off', 'data-form-type': 'other',
+                value: clear || '', readOnly: deleting, maxLength: 100000, autocomplete: 'off', 'data-form-type': 'other',
                 'data-1p-ignore': 'true', 'data-lpignore': 'true', 'aria-label': 'Nota Account'});
             const errorText = createElement('p', {className: 'modal-text', role: 'status'});
-            const save = createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: 'Salva'});
+            const save = createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: deleting ? 'Elimina nota' : 'Salva'});
             const cancel = createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla'});
-            cancel.onclick = () => { if (!busy) close(); };
+            cancel.onclick = () => { if (!busy) { close(); focusAction(); } };
             modal = createElement('div', {className: 'modal-overlay active', role: 'dialog', 'aria-modal': 'true',
                 'aria-labelledby': 'inline-note-title'}, [createElement('div', {className: 'modal-box inline-note-dialog'}, [
-                createElement('h3', {id: 'inline-note-title', className: 'modal-title', textContent: 'Nota Account'}), input,
+                createElement('h3', {id: 'inline-note-title', className: 'modal-title', textContent: deleting ? 'Eliminare questa nota?' : 'Nota Account'}), input,
                 errorText, createElement('div', {className: 'modal-actions'}, [cancel, save])])]);
             modal.addEventListener('keydown', event => {
-                if (event.key === 'Escape' && !busy) { close(); button.focus(); }
+                if (event.key === 'Escape' && !busy) { close(); focusAction(); }
                 if (event.key === 'Tab') {
                     const controls = [input, cancel, save].filter(node => node && !node.disabled);
                     const index = controls.indexOf(document.activeElement);
@@ -107,11 +114,11 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
                 busy = true; save.disabled = true; cancel.disabled = true; input.readOnly = true;
                 try {
                     const result = await saveAccountNote({ownerId, accountId, companyId, expectedRevision: revision,
-                        expectedNote, note: input.value, isActive: active, signal});
+                        expectedNote, note: deleting ? '' : input.value, isActive: active, signal});
                     if (!active()) return;
                     revision = result.revision; expectedNote = result.storedNote;
                     account.note = result.note; account.revision = result.revision;
-                    refresh(result.note); close(); button.focus(); showToast('Nota salvata.', 'success');
+                    refresh(result.note); close(); focusAction(); showToast(deleting ? 'Nota eliminata.' : 'Nota salvata.', 'success');
                 } catch (error) {
                     if (!active()) return;
                     errorText.textContent = error.code === 'NOTE_CONFLICT' ? 'L’Account è cambiato. Copia la bozza e riapri la pagina prima di salvare.'
@@ -119,7 +126,7 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
                             : 'Nota non salvata. La bozza è ancora qui: puoi riprovare.';
                 } finally {
                     busy = false;
-                    if (active() && input) { save.disabled = false; cancel.disabled = false; input.readOnly = false; }
+                    if (active() && input) { save.disabled = false; cancel.disabled = false; input.readOnly = deleting; }
                 }
             };
             document.body.appendChild(modal); input.focus();
@@ -127,5 +134,8 @@ export function initAccountNoteEditor({account, storedNote, ownerId, accountId, 
             if (active()) showToast('Impossibile aprire la nota. Verifica lo sblocco del Vault.', 'error');
         } finally { busy = false; }
     };
+    button.onclick = () => openEditor();
+    if (editButton) editButton.onclick = () => openEditor();
+    if (deleteButton) deleteButton.onclick = () => openEditor(true);
     return {destroy: dispose};
 }

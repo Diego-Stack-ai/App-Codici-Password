@@ -550,3 +550,7 @@ Suite locale completa: 359 test superati, più sei test dedicati rieseguiti dopo
 
 Nei due dettagli Account mancava l’import esplicito di auth: il controllo sessione lanciava ReferenceError e il catch mostrava soltanto Editor note non disponibile. Ripristinato auth dalla configurazione Firebase condivisa; aggiunta diagnostica fissa senza contenuti Account. Un test verifica il binding importato ed esegue il callback di avvio di entrambe le pagine, oltre ai sei test del modulo note. Nessuna modifica a scritture, cifratura, Rules, Functions o dati. Rollback: Hosting 1.2.122 (con il difetto di avvio noto).
 
+
+## Azioni compatte note — candidata dopo 1.2.123
+
+In entrambi i dettagli Account il pulsante grande Aggiungi nota compare soltanto a nota vuota. Una nota presente mostra matita e cestino nella sua intestazione. Eliminazione con anteprima in sola lettura e conferma, sul medesimo salvataggio cifrato transazionale; conflitti conservano la nota. Focus riportato al comando visibile. Nove test note superati, inclusi cancellazione, annullamento, conflitto e blocco sessione; controlli HTML, sintassi e riferimenti superati. Nessun deploy in questa fase.

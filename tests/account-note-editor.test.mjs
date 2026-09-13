@@ -42,6 +42,8 @@ function fixture() {
         focus() { context.document.activeElement = this; }
     }
     const button = new Node('button', {id: 'btn-edit-account-note'});
+    const editButton = new Node('button', {id: 'btn-modify-account-note'});
+    const deleteButton = new Node('button', {id: 'btn-delete-account-note'});
     const section = new Node('section', {id: 'section-notes'}), text = new Node('p', {id: 'detail-note'});
     const stored = {_encrypted: true, revision: 2, note: '', password: 'preserved'};
     const context = vm.createContext({auth: {currentUser: {uid: 'owner'}}, db: {},
@@ -62,7 +64,7 @@ function fixture() {
     const options = {ownerId: 'owner', accountId: 'account', expectedRevision: 2, expectedNote: '', note: 'new note'};
     const init = (extra = {}) => context.initAccountNoteEditor({account: {...stored, note: ''}, storedNote: stored.note,
         ownerId: 'owner', accountId: 'account', ...extra});
-    return {context, nodes, stored, writes, toasts, options, init, button, section, text,
+    return {context, nodes, stored, writes, toasts, options, init, button, editButton, deleteButton, section, text,
         changeUser: () => { context.auth.currentUser = {uid: 'other'}; for (const callback of observers) callback(context.auth.currentUser); },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
         latest: label => nodes.filter(n => n.textContent === label).at(-1),
@@ -92,12 +94,43 @@ test('add edit and erase update the visible note immediately without a page relo
     const f = fixture(); f.init();
     assert.equal(f.button.textContent, 'Aggiungi nota'); assert.equal(f.section.classList.contains('hidden'), true);
     for (const value of ['First note', 'Changed note', '']) {
-        await f.button.onclick(); f.input().value = value; await f.latest('Salva').onclick();
+        await (f.button.classList.contains('hidden') ? f.editButton : f.button).onclick(); f.input().value = value; await f.latest('Salva').onclick();
         assert.equal(f.text.textContent, value); assert.equal(f.section.classList.contains('hidden'), !value);
-        assert.equal(f.button.textContent, value ? 'Modifica nota' : 'Aggiungi nota');
+        assert.equal(f.button.textContent, 'Aggiungi nota');
+        assert.equal(f.button.classList.contains('hidden'), Boolean(value));
+        assert.equal(f.editButton.classList.contains('hidden'), !value);
+        assert.equal(f.deleteButton.classList.contains('hidden'), !value);
         assert.equal(f.input().value, '');
     }
     assert.equal(f.stored.revision, 5); assert.equal(f.toasts.length, 3);
+});
+
+test('existing note uses icons; delete requires confirmation and returns to add', async () => {
+    const f = fixture(); f.stored.note = 'sealed:Existing';
+    f.init({account: {...f.stored, note: 'Existing'}});
+    assert.equal(f.button.classList.contains('hidden'), true);
+    assert.equal(f.editButton.classList.contains('hidden'), false);
+    await f.deleteButton.onclick();
+    assert.equal(f.input().readOnly, true);
+    assert.equal(f.writes.length, 0);
+    await f.latest('Annulla').onclick();
+    assert.equal(f.stored.note, 'sealed:Existing');
+    await f.deleteButton.onclick(); await f.latest('Elimina nota').onclick();
+    assert.equal(f.stored.note, '');
+    assert.equal(f.button.classList.contains('hidden'), false);
+    assert.equal(f.deleteButton.classList.contains('hidden'), true);
+    assert.equal(f.context.document.activeElement, f.button);
+});
+
+test('delete conflict preserves note and session lock removes both actions', async () => {
+    const f = fixture(); f.stored.note = 'sealed:Existing';
+    f.init({account: {...f.stored, note: 'Existing'}});
+    await f.deleteButton.onclick(); f.stored.revision++;
+    await f.latest('Elimina nota').onclick();
+    assert.equal(f.stored.note, 'sealed:Existing'); assert.equal(f.writes.length, 0);
+    f.lock();
+    assert.equal(f.deleteButton.onclick, null); assert.equal(f.editButton.onclick, null);
+    assert.equal(f.input().value, '');
 });
 
 test('conflict preserves draft and readonly recipient has no editor action', async () => {
