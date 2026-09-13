@@ -5,7 +5,7 @@
 
 import { getFooterReady } from '../../footer-state.js';
 import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.110';
-import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 
@@ -21,81 +21,146 @@ import {
     getUserProfile
 } from '../data/vault-repository.js';
 import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
-import { deadlineDate, deadlinePresentation } from './deadline-model.js';
+import { deadlineDate, deadlineDateInputFields, deadlinePresentation } from './deadline-model.js';
 
-let currentScadenza = null;
-let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
-let currentReceivedDeadlineId = new URLSearchParams(window.location.search).get('received');
+let mountedDeadline = null;
 
-async function deleteScadenza(userId, scadenzaId) {
-    if (currentScadenza?.sourceRef?.type !== 'profileDocument') {
+async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
+    if (!active()) return;
+    if (sourceRef?.type !== 'profileDocument') {
         await deleteDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
         return;
     }
     const profileRef = doc(db, 'users', userId);
     const profile = await getUserProfile(userId);
+    if (!active()) return;
     const documents = profile?.documenti || [];
     const batch = writeBatch(db);
     batch.delete(doc(db, 'users', userId, 'scadenze', scadenzaId));
     batch.update(profileRef, {
-        documenti: documents.map(item => item.id === currentScadenza.sourceRef.id
+        documenti: documents.map(item => item.id === sourceRef.id
             ? { ...item, expiryReference: null }
             : item)
     });
     await batch.commit();
 }
 
+function clearDeadline(view = document) {
+    for (const id of ['detail-title', 'detail-intestatario', 'detail-category', 'detail-date-day', 'detail-date-year',
+        'display-veicolo', 'detail-note-body', 'detail-email1', 'detail-email2', 'detail-preavviso', 'detail-frequenza', 'detail-template',
+        'detail-page-actions', 'display-attachments', 'display-reference-url']) {
+        const element = view.getElementById(id);
+        if (element) {
+            for (const input of element.querySelectorAll?.('input') || []) input.value = '';
+            clearElement(element);
+        }
+    }
+    for (const id of ['section-vehicle', 'section-attachments', 'section-reference-url', 'section-emails', 'section-planning', 'section-template']) {
+        view.getElementById(id)?.classList.add('hidden');
+    }
+}
+
 /**
  * DETTAGLIO SCADENZA MODULE (V5.0 ADAPTER) - RESET NOTIFICHE
  */
-export async function initDettaglioScadenza(user) {
-    if (!user) return;
+export async function initDettaglioScadenza(user, options = {}) {
+    mountedDeadline?.destroy();
+    if (!user) return {destroy() {}};
     const params = new URLSearchParams(window.location.search);
-    currentScadenzaId = params.get('id');
-    currentReceivedDeadlineId = params.get('received');
-    if (!currentScadenzaId && !currentReceivedDeadlineId) {
+    const scope = Object.freeze({uid: user.uid, id: params.get('id'), receivedId: params.get('received'), notificationId: params.get('notification')});
+    if (!scope.id && !scope.receivedId) {
         window.location.href = 'scadenze.html';
         return;
     }
-    await loadScadenza(user.uid);
-    setupFooterActions();
+    const root = document.querySelector('.base-container');
+    const owned = new Map(), footers = new Set(), cleanups = new Set();
+    const view = {getElementById(id) { if (!owned.has(id)) owned.set(id, document.getElementById(id)); return owned.get(id); }};
+    clearDeadline(view);
+    let destroyed = false, unsubscribe = () => {}, confirmationPending = false;
+    const mount = {scope, record: null, actionPending: false, renderVersion: 0, signal: new AbortController(),
+        active() {
+            if (!destroyed && (mountedDeadline !== mount || auth.currentUser?.uid !== scope.uid || options.signal?.aborted ||
+                root?.isConnected === false || (options.isActive && !options.isActive()))) mount.destroy();
+            return !destroyed;
+        },
+        destroy() {
+            if (destroyed) return;
+            destroyed = true; mount.record = null; mount.signal.abort(); unsubscribe();
+            options.signal?.removeEventListener('abort', mount.destroy);
+            globalThis.removeEventListener?.('vault-session-locked', mount.destroy);
+            globalThis.removeEventListener?.('pagehide', mount.destroy);
+            for (const cleanup of cleanups) cleanup();
+            cleanups.clear();
+            if (mountedDeadline === mount) { clearDeadline(view); for (const footer of footers) clearElement(footer); }
+        },
+        own: cleanup => { if (destroyed) cleanup(); else cleanups.add(cleanup); },
+        ownFooter: footer => footers.add(footer),
+        clearFooters: () => { for (const footer of footers) clearElement(footer); },
+        confirmAction(...args) {
+            if (!mount.active() || confirmationPending) return Promise.resolve(false);
+            confirmationPending = true;
+            const pending = showConfirmModal(...args);
+            const modal = document.getElementById('protocol-confirm-modal');
+            const cancel = () => { modal?.querySelector('#confirm-cancel-btn')?.click(); modal?.remove(); };
+            mount.signal.signal.addEventListener('abort', cancel, {once: true});
+            return pending.finally(() => { confirmationPending = false; mount.signal.signal.removeEventListener('abort', cancel); });
+        }
+    };
+    mountedDeadline = mount;
+    options.signal?.addEventListener('abort', mount.destroy, {once: true});
+    globalThis.addEventListener?.('vault-session-locked', mount.destroy, {once: true});
+    globalThis.addEventListener?.('pagehide', mount.destroy, {once: true});
+    unsubscribe = onAuthStateChanged(auth, current => { if (current?.uid !== scope.uid) mount.destroy(); });
+    if (!mount.active()) { unsubscribe(); return mount; }
+    const existingFooter = getFooterReady();
+    if (existingFooter?.center) { mount.ownFooter(existingFooter.center); clearElement(existingFooter.center); }
+    await loadScadenza(mount);
+    if (mount.active()) setupFooterActions(mount);
+    return mount;
 }
 
-async function loadScadenza(uid) {
+async function loadScadenza(mount) {
+    const {uid, id, receivedId} = mount.scope;
     try {
-        currentScadenza = currentReceivedDeadlineId
-            ? await getReceivedDeadline(uid, currentReceivedDeadlineId)
-            : await getDeadline(uid, currentScadenzaId);
-        if (!currentScadenza) {
+        const record = receivedId ? await getReceivedDeadline(uid, receivedId) : await getDeadline(uid, id);
+        if (!mount.active()) return;
+        if (!record) {
             showToast("Scadenza non trovata", "error");
             return;
         }
-        if (currentReceivedDeadlineId) currentScadenza.received = true;
-        renderScadenza(currentScadenza);
-        if (!currentReceivedDeadlineId) await markOpenedDeadlineNotification(uid);
+        mount.record = {...record, received: Boolean(receivedId)};
+        if (!renderScadenza(mount.record, mount)) return;
+        if (!receivedId) await markOpenedDeadlineNotification(mount);
     } catch (e) {
-        console.error(e);
+        if (mount.active()) {
+            mount.record = null; mount.renderVersion++;
+            clearDeadline(); mount.clearFooters();
+            showToast('Impossibile caricare la scadenza.', 'error');
+        }
     }
 }
 
-async function markOpenedDeadlineNotification(uid) {
-    const notificationId = new URLSearchParams(window.location.search).get('notification');
+async function markOpenedDeadlineNotification(mount) {
+    const {uid, id, notificationId} = mount.scope;
     if (!notificationId) return;
     try {
         const notificationRef = doc(db, 'users', uid, 'deadlineNotifications', notificationId);
         const notification = await getDeadlineNotification(uid, notificationId);
-        if (notification?.deadlineId === currentScadenzaId && notification.status === 'unread') {
+        if (!mount.active()) return;
+        if (notification?.deadlineId === id && notification.status === 'unread') {
             await updateDoc(notificationRef, { status: 'viewed', readAt: serverTimestamp() });
         }
     } catch (error) {
-        console.warn('[SCADENZE] Impossibile aggiornare lo stato della notifica', error);
+        if (mount.active()) console.warn('[SCADENZE] Impossibile aggiornare lo stato della notifica');
     }
 }
 
-function setupFooterActions() {
+function setupFooterActions(mount) {
     function initFooterFromDetail(detail) {
         const { center: footerCenter, right: footerRight } = detail;
-        if (!footerRight || !footerCenter || !currentScadenza) return;
+        if (!mount.active() || !footerRight || !footerCenter || !mount.record) return;
+        mount.ownFooter(footerCenter);
+        mount.ownFooter(footerRight);
 
         const settLink = createElement('div', { id: 'footer-settings-link' });
         settLink.appendChild(
@@ -109,18 +174,18 @@ function setupFooterActions() {
         clearElement(footerRight);
         footerRight.appendChild(settLink);
 
-        if (currentReceivedDeadlineId) {
+        if (mount.scope.receivedId) {
             clearElement(footerCenter);
             return;
         }
 
         const deleteBtn = createElement('button', {
-            className: 'btn-fab-action btn-fab-danger', onclick: handleDelete
+            className: 'btn-fab-action btn-fab-danger', onclick: () => handleDelete(mount)
         }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })]);
 
         const editBtn = createElement('button', {
             className: 'btn-fab-action btn-fab-scadenza',
-            onclick: () => window.location.href = `aggiungi_scadenza.html?id=${currentScadenzaId}`
+            onclick: () => { if (mount.active()) window.location.href = `aggiungi_scadenza.html?id=${encodeURIComponent(mount.scope.id)}`; }
         }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]);
 
         const fabWrapper = createElement('div', { className: 'fab-group' }, [deleteBtn, editBtn]);
@@ -133,53 +198,66 @@ function setupFooterActions() {
     if (_footerState) {
         initFooterFromDetail(_footerState);
     } else {
-        document.addEventListener('footer:ready', (e) => initFooterFromDetail(e.detail), { once: true });
+        const onReady = event => initFooterFromDetail(event.detail);
+        document.addEventListener('footer:ready', onReady, {once: true});
+        mount.own(() => document.removeEventListener('footer:ready', onReady));
     }
 }
 
-async function handleDelete() {
+async function handleDelete(mount) {
+    if (!mount.active() || mount.scope.receivedId || !mount.record || mount.actionPending) return;
+    mount.actionPending = true;
+    const {uid, id} = mount.scope;
+    const sourceRef = mount.record.sourceRef ? {...mount.record.sourceRef} : null;
     try {
-        const ok = await showConfirmModal("ELIMINA SCADENZA", "Sei sicuro?", "Elimina", true);
-        if (ok) {
-            await deleteScadenza(auth.currentUser.uid, currentScadenzaId);
-            window.location.href = 'scadenze.html';
+        const ok = await mount.confirmAction('ELIMINA SCADENZA', 'Sei sicuro?', 'Elimina', t('cancel') || 'Annulla');
+        if (mount.active() && ok) {
+            await deleteScadenza(uid, id, sourceRef, () => mount.active());
+            if (mount.active()) window.location.href = 'scadenze.html';
         }
-    } catch (error) { showToast("Errore", "error"); }
+    } catch (error) { if (mount.active()) showToast('Eliminazione della scadenza non riuscita.', 'error'); }
+    finally { mount.actionPending = false; }
 }
 
-async function handleReceivedDeadlineAction(action, nextDueDate = '') {
-    if (!currentReceivedDeadlineId || !currentScadenza) return;
-    if (action === 'complete') {
-        const confirmed = await showConfirmModal(
-            'SCADENZA GESTITA',
-            'Confermi di aver gestito questa scadenza? Il proprietario riceverà un avviso.',
-            'Conferma'
-        );
-        if (!confirmed) return;
-    }
+async function handleReceivedDeadlineAction(action, nextDueDate, mount, active) {
+    if (!active() || !mount.scope.receivedId || mount.record?.permission !== 'manage' || mount.actionPending) return;
+    mount.actionPending = true;
+    const {uid, receivedId} = mount.scope;
+    const record = mount.record;
     try {
+        if (action === 'complete') {
+            const confirmed = await mount.confirmAction(
+                'SCADENZA GESTITA',
+                'Confermi di aver gestito questa scadenza? Il proprietario riceverà un avviso.',
+                'Conferma'
+            );
+            if (!active() || !confirmed) return;
+        }
+        if (!active() || mount.record?.permission !== 'manage') return;
         document.querySelectorAll('#detail-page-actions button').forEach(button => { button.disabled = true; });
         enableAppCheck();
         const result = (await httpsCallable(functions, 'manageReceivedDeadline')({
-            receivedDeadlineId: currentReceivedDeadlineId,
+            expectedOwnerUid: uid,
+            receivedDeadlineId: receivedId,
             action,
             nextDueDate
         })).data;
-        currentScadenza.completed = action === 'complete';
-        if (result?.dueDate) currentScadenza.dueDate = result.dueDate;
-        renderScadenza(currentScadenza);
+        if (!active()) return;
+        mount.record = {...record, completed: action === 'complete', ...(result?.dueDate ? {dueDate: result.dueDate} : {})};
+        if (!renderScadenza(mount.record, mount)) return;
         showToast(
             action === 'complete' ? 'Scadenza segnata come gestita' : 'Prossima scadenza aggiornata',
             'success'
         );
     } catch (error) {
-        console.error('[RECEIVED DEADLINE]', error);
-        showToast(error?.message || 'Aggiornamento della scadenza non riuscito', 'error');
-        renderReceivedDeadlineActions(currentScadenza);
-    }
+        if (!active()) return;
+        showToast('Aggiornamento della scadenza non riuscito', 'error');
+        renderScadenza(mount.record, mount);
+    } finally { mount.actionPending = false; }
 }
 
-function renderReceivedDeadlineActions(scadenza) {
+function renderReceivedDeadlineActions(scadenza, mount, active) {
+    if (!active()) return;
     const actions = document.getElementById('detail-page-actions');
     if (!actions) return;
     const canManage = scadenza.permission === 'manage';
@@ -216,7 +294,7 @@ function renderReceivedDeadlineActions(scadenza) {
                 className: 'btn-modal btn-secondary',
                 type: 'button',
                 textContent: 'Segna come gestita',
-                onclick: () => handleReceivedDeadlineAction('complete')
+                onclick: () => handleReceivedDeadlineAction('complete', '', mount, active)
             }));
         }
         managementButtons.push(createElement('button', {
@@ -224,11 +302,12 @@ function renderReceivedDeadlineActions(scadenza) {
             type: 'button',
             textContent: 'Conferma e aggiorna',
             onclick: () => {
+                if (!active()) return;
                 if (!nextDate.value) {
                     showToast('Inserisci la prossima data', 'error');
                     return;
                 }
-                handleReceivedDeadlineAction('renew', nextDate.value);
+                return handleReceivedDeadlineAction('renew', nextDate.value, mount, active);
             }
         }));
         children.push(createElement('label', {
@@ -240,7 +319,25 @@ function renderReceivedDeadlineActions(scadenza) {
     setChildren(actions, children);
 }
 
-function renderScadenza(scadenza) {
+function renderScadenza(scadenza, mount) {
+    if (!mount.active()) return false;
+    try {
+        renderDeadlineContents(scadenza, mount);
+        return true;
+    } catch (error) {
+        if (mount.active()) {
+            mount.record = null; mount.renderVersion++;
+            clearDeadline(); mount.clearFooters();
+            showToast('Impossibile visualizzare la scadenza.', 'error');
+        }
+        return false;
+    }
+}
+
+function renderDeadlineContents(scadenza, mount) {
+    const version = ++mount.renderVersion;
+    const active = () => mount.active() && mount.record === scadenza && version === mount.renderVersion;
+    clearDeadline();
     const presentation = deadlinePresentation(scadenza);
     const pageLabel = document.querySelector('.detail-page-label');
     if (pageLabel) pageLabel.textContent = scadenza.received ? 'Scadenza ricevuta' : 'Oggetto Scadenza';
@@ -254,6 +351,7 @@ function renderScadenza(scadenza) {
             className: 'btn-modal btn-secondary',
             textContent: 'Apri documento nel Profilo',
             onclick: () => {
+                if (!active()) return;
                 window.location.href = `profilo_privato.html?profileTab=documents&profileDocumentId=${encodeURIComponent(scadenza.sourceRef.id)}`;
             }
         }));
@@ -277,8 +375,8 @@ function renderScadenza(scadenza) {
         attSec?.classList.remove('hidden');
         clearElement(attCont);
         const items = scadenza.attachments.map(a => {
-            const ext = a.name.split('.').pop().toLowerCase();
-            return createElement('button', { type: 'button', onclick: () => openDeadlineAttachment(a), className: 'detail-list-item clickable' }, [
+            const attachment = {...a, encryption: a.encryption ? {...a.encryption} : null};
+            return createElement('button', { type: 'button', onclick: () => openDeadlineAttachment(attachment, active), className: 'detail-list-item clickable' }, [
                 createElement('div', { className: 'detail-list-item-left' }, [
                     createElement('div', { className: 'detail-list-icon-box' }, [
                         createElement('span', { className: `material-symbols-outlined`, textContent: 'description' })
@@ -299,7 +397,7 @@ function renderScadenza(scadenza) {
         const linkButton = createElement('button', {
             type: 'button',
             className: 'detail-list-item clickable',
-            onclick: () => openExternalUrl(referenceUrl)
+            onclick: () => { if (active()) openExternalUrl(referenceUrl); }
         }, [
             createElement('div', { className: 'detail-list-item-left' }, [
                 createElement('div', { className: 'detail-list-icon-box' }, [
@@ -316,7 +414,7 @@ function renderScadenza(scadenza) {
     if (scadenza.notes && noteBody) noteBody.textContent = scadenza.notes;
 
     if (scadenza.received) {
-        renderReceivedDeadlineActions(scadenza);
+        renderReceivedDeadlineActions(scadenza, mount, active);
         return;
     }
 
@@ -372,7 +470,8 @@ function renderScadenza(scadenza) {
     }
 }
 
-async function openDeadlineAttachment(attachment) {
+async function openDeadlineAttachment(attachment, active) {
+    if (!active()) return;
     try {
         if (!attachment.encryption) {
             if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
@@ -380,11 +479,14 @@ async function openDeadlineAttachment(attachment) {
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
+        if (!active()) return;
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        if (!active()) return;
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        if (!active()) return;
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
-        console.error('[DeadlineAttachment]', error);
+        if (!active()) return;
         showToast('Impossibile aprire l’allegato cifrato.', 'error');
     }
 }
