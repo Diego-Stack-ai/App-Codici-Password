@@ -417,6 +417,6 @@ Toolchain e Firestore reali presenti; fixture setup superata. Emersi due soli pr
 
 ### Chiusura del trasferimento Linux cloud — 14/09/2026
 
-Sul nuovo ambiente basato su `3070d01d` sono stati verificati Chrome, Edge, Java e i JAR Firestore/Storage; fixture setup, suite completa e 34 esecuzioni fenced-browser sono passate dopo una sola correzione locale al runner Storage per escludere dai proxy le comunicazioni loopback fra emulatori. Il collaudo del trasferimento cloud è concluso con fixture sintetiche e progetti demo, senza account o servizi reali.
+Sul nuovo ambiente basato su `3070d01d` sono stati verificati Chrome, Edge, Java e i JAR Firestore/Storage; fixture setup, suite completa e 34 esecuzioni fenced-browser sono passate dopo una sola correzione locale al runner Storage per instradare direttamente soltanto gli host loopback esatti fra emulatori e conservare il proxy originale per ogni altra destinazione. Il collaudo del trasferimento cloud è concluso con fixture sintetiche e progetti demo, senza account o servizi reali.
 
 Lo stato di maturità M6 non cambia: shell persistente e Vault Key solo in RAM restano la direzione scelta, mentre provider bootstrap, trasporto autenticato/App Check, recupero delle code dopo riapertura, rollout e prove fisiche sono gate aperti. Nessun gate è chiuso dal solo trasferimento dell’ambiente e nessuna modifica è stata distribuita.

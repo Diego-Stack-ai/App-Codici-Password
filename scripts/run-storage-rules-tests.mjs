@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 const projectRoot = resolve(import.meta.dirname, '..');
 const configRoot = resolve(projectRoot, '.codex-tmp', 'firebase-config');
 const firebaseCli = resolve(projectRoot, 'node_modules', 'firebase-tools', 'lib', 'bin', 'firebase.js');
+const loopbackPreload = resolve(projectRoot, 'scripts', 'storage-emulator-loopback-dispatcher.cjs');
 const productionTest = resolve(projectRoot, 'tests', 'storage.rules.test.mjs');
 const sharingTest = resolve(projectRoot, 'tests', 'sharing-prototype.storage.rules.test.mjs');
 
@@ -21,18 +22,13 @@ function run(projectId, emulators, testFile) {
     `${JSON.stringify(process.execPath)} --test ${JSON.stringify(testFile)}`,
   ], {
     cwd: projectRoot,
-    // The Storage rules runtime resolves firestore.get()/exists() through the
-    // loopback Firestore emulator. Keep that traffic out of cloud HTTP proxies;
-    // otherwise an inherited uppercase NO_PROXY can override no_proxy and make
-    // valid cross-service reads fail closed.
+    // firebase-tools apiv2 creates ProxyAgent directly and ignores NO_PROXY.
+    // The preload sends only exact loopback origins directly; every other
+    // destination keeps using the original ProxyAgent and inherited settings.
     env: {
       ...process.env,
-      HTTP_PROXY: '',
-      HTTPS_PROXY: '',
-      http_proxy: '',
-      https_proxy: '',
-      NO_PROXY: '127.0.0.1,localhost,::1',
-      no_proxy: '127.0.0.1,localhost,::1',
+      NODE_OPTIONS: [process.env.NODE_OPTIONS, `--require=${JSON.stringify(loopbackPreload)}`].filter(Boolean).join(' '),
+      STORAGE_EMULATOR_LOOPBACK_DIRECT: '1',
       XDG_CONFIG_HOME: configRoot,
     },
     stdio: 'inherit',
