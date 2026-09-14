@@ -55,6 +55,33 @@ echo "Installazione dipendenze bloccate dai package-lock..."
 npm ci --prefix "$ROOT"
 npm ci --prefix "$ROOT/functions"
 
+BROWSER_LIBRARY_PATH=''
+prepare_browser_libraries() {
+    [[ -z "$BROWSER_LIBRARY_PATH" ]] || return 0
+    for tool in apt-cache apt-get dpkg-query; do require_tool "$tool"; done
+    local packages_dir="$TOOLS_DIR/browser-library-packages" library_root="$TOOLS_DIR/browser-libraries"
+    mkdir -p "$packages_dir" "$library_root"
+    # Ubuntu 24.04 universal image. Read existing apt metadata; download and
+    # extract missing dependencies locally, never install system packages.
+    local dependency package
+    local -a missing=()
+    local dependencies
+    dependencies="$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances \
+        libatk1.0-0t64 libatk-bridge2.0-0t64 libnss3 libnspr4 libcups2t64 libasound2t64 \
+        libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2)"
+    while IFS= read -r dependency; do
+        [[ "$dependency" =~ ^[a-z0-9][a-z0-9+.-]*(:[a-z0-9]+)?$ ]] || continue
+        if [[ "$(dpkg-query -W -f='${db:Status-Status}' "$dependency" 2>/dev/null || true)" != installed ]]; then
+            missing+=("$dependency")
+        fi
+    done <<< "$dependencies"
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        (cd "$packages_dir" && apt-get download "${missing[@]}")
+        for package in "$packages_dir"/*.deb; do dpkg-deb --extract "$package" "$library_root"; done
+    fi
+    BROWSER_LIBRARY_PATH="$library_root/usr/lib/x86_64-linux-gnu:$library_root/lib/x86_64-linux-gnu"
+}
+
 download_deb() {
     local name="$1" url="$2" destination="$3"
     local archive="$TOOLS_DIR/$name.deb" extract_dir="$TOOLS_DIR/$name"
@@ -72,11 +99,29 @@ download_deb() {
         dpkg-deb --extract "$archive" "$extract_dir"
         [[ -x "$destination" ]] || { echo "Eseguibile $name non trovato dopo l'estrazione." >&2; exit 1; }
     fi
-    "$destination" --version
+    if ! "$destination" --version; then
+        prepare_browser_libraries
+        LD_LIBRARY_PATH="$BROWSER_LIBRARY_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$destination" --version
+    fi
 }
 
 download_deb chrome "${CHROME_DEB_URL:-https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb}" "$CHROME_PATH"
 download_deb edge "${EDGE_DEB_URL:-https://go.microsoft.com/fwlink/?linkid=2149051}" "$EDGE_PATH"
+
+if [[ -n "$BROWSER_LIBRARY_PATH" ]]; then
+    mkdir -p "$TOOLS_DIR/bin"
+    for browser_name in chrome edge; do
+        if [[ "$browser_name" == chrome ]]; then browser_binary="$CHROME_PATH"; else browser_binary="$EDGE_PATH"; fi
+        {
+            echo '#!/usr/bin/env bash'
+            printf 'export LD_LIBRARY_PATH=%q\n' "$BROWSER_LIBRARY_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            printf 'exec %q "$@"\n' "$browser_binary"
+        } >"$TOOLS_DIR/bin/$browser_name"
+        chmod +x "$TOOLS_DIR/bin/$browser_name"
+    done
+    CHROME_PATH="$TOOLS_DIR/bin/chrome"
+    EDGE_PATH="$TOOLS_DIR/bin/edge"
+fi
 
 echo "Preparazione della cache Firestore verificata dalla Firebase CLI locale..."
 node "$ROOT/node_modules/firebase-tools/lib/bin/firebase.js" setup:emulators:firestore
