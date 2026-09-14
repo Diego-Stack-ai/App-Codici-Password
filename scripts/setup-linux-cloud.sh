@@ -38,10 +38,13 @@ report() {
         node - "$FIRESTORE_INFO" "$FIREBASE_EMULATORS_PATH" <<'NODE'
 const fs = require('node:fs'), path = require('node:path');
 const [infoPath, cache] = process.argv.slice(2);
-const info = require(infoPath).firestore;
-const jar = path.join(cache, info.downloadPathRelativeToCacheDir);
-console.log(`Firestore emulator: ${fs.existsSync(jar) ? 'PRESENTE' : 'MANCANTE'} (${jar})`);
-console.log(`Risorsa richiesta: ${info.remoteUrl}`);
+const metadata = require(infoPath);
+for (const [label, name] of [['Firestore', 'firestore'], ['Storage', 'storage']]) {
+    const info = metadata[name];
+    const jar = path.join(cache, info.downloadPathRelativeToCacheDir);
+    console.log(`${label} emulator: ${fs.existsSync(jar) ? 'PRESENTE' : 'MANCANTE'} (${jar})`);
+    console.log(`Risorsa richiesta: ${info.remoteUrl}`);
+}
 NODE
     else
         echo "Metadati Firebase CLI mancanti: eseguire prima npm ci." >&2
@@ -138,8 +141,9 @@ if [[ -n "$BROWSER_LIBRARY_PATH" ]]; then
     EDGE_PATH="$TOOLS_DIR/bin/edge"
 fi
 
-echo "Preparazione della cache Firestore verificata dalla Firebase CLI locale..."
+echo "Preparazione delle cache Firestore e Storage verificate dalla Firebase CLI locale..."
 node "$ROOT/node_modules/firebase-tools/lib/bin/firebase.js" setup:emulators:firestore
+node "$ROOT/node_modules/firebase-tools/lib/bin/firebase.js" setup:emulators:storage
 
 {
     echo '# Generato da scripts/setup-linux-cloud.sh; file workspace-local ignorato da Git.'

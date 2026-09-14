@@ -408,3 +408,8 @@ M6 conflitti: aggiunto confronto read-only nota locale/online con provider espli
 M6 conflitti: preparatore della riproposizione della sola nota implementato e verificato, con conferma e revisione fissata al confronto. Restano collegamento UI, sostituzione della coda e collaudo integrato backend; nessun nuovo gate globale chiuso.
 
 Aggiornamento PR #59, audit 68: collegamento UI, replace transazionale e collaudo backend della riproposizione note completati nel candidato e verificati localmente con Chrome/Edge ed emulatori. Suite completa superata. Setup Linux revisionato e provato con fixture; installazione effettiva cloud ancora da verificare. Prossimi gate M6: recupero della coda dopo riapertura, provider protetto del bootstrap, trasporto autenticato e rollout. Shell persistente confermata come direzione scelta; nessun ritorno al wrapping della Vault Key in sessionStorage, nessuna fase globale dichiarata conclusa.
+
+
+### Collaudo cloud finale — 14/09/2026
+
+Toolchain e Firestore reali presenti; fixture setup superata. Emersi due soli prerequisiti container: cache Storage assente dalla fase setup e avvio browser root senza flag dedicato. Le correzioni candidate precaricano Storage con la CLI bloccata e applicano `--no-sandbox` soltanto a Linux root; il runner corretto passa su entrambi i browser. La rete disattivata impedisce in questa fase di scaricare il JAR mancante e quindi di certificare la suite completa; nessun altro gate M6 viene anticipato.

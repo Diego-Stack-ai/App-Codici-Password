@@ -51,7 +51,8 @@ const tempRoot = resolve(tmpdir());
 const profile = await mkdtemp(resolve(tempRoot, 'codex-offline-browser-'));
 try {
     await new Promise(done => server.listen(0, '127.0.0.1', done));
-    child = spawn(browserPath, ['--headless=new', '--disable-gpu', '--no-first-run', '--disable-sync',
+    const sandboxArgs = process.platform === 'linux' && process.getuid?.() === 0 ? ['--no-sandbox'] : [];
+    child = spawn(browserPath, ['--headless=new', ...sandboxArgs, '--disable-gpu', '--no-first-run', '--disable-sync',
         '--disable-background-networking', `--user-data-dir=${profile}`, `http://127.0.0.1:${server.address().port}/`],
     {windowsHide: true, stdio: 'ignore'});
     child.on('error', reject);

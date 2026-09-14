@@ -716,3 +716,8 @@ Base 790d3d26. Due passaggi consecutivi: conferme correlate a operationId/record
 ## Revisione del trasferimento cloud — 14/09/2026
 
 PR #59, base pubblicata `a3f7f28`, destinazione esclusiva `experiment/vault-shell-v124`. Riproposizione note collegata alla UI candidata, corretti lifecycle ed esiti incerti del replace; setup Linux corretto senza cancellazioni ricorsive. Suite completa e Chrome/Edge con backend emulato passati localmente. Audit 68 e `docs/SETUP_LINUX_CLOUD.md` distinguono il codice verificato dall'installazione cloud ancora da collaudare. Nessuna importazione dei rami documentali errati, nuova versione, modifica a master o deploy. Restano aperti i gate runtime elencati nel piano M6.
+
+
+## Collaudo ambiente Linux cloud — 14/09/2026
+
+Su discendente verificato di `bdb95236`, toolchain, Chrome, Edge, Java e Firestore sono presenti e la fixture setup passa. La suite completa raggiunge Storage Rules, dove manca il JAR Storage perché la fase setup consolidata precaricava soltanto Firestore; la rete agente disattivata impedisce il recupero tardivo. Il runner browser richiedeva inoltre il flag previsto da Chromium quando Linux gira come root. Correzione candidata circoscritta: cache Firestore e Storage durante setup e `--no-sandbox` soltanto per Linux root; dopo la modifica Chrome ed Edge superano i 17 scenari sintetici ciascuno. Riesecuzione della suite completa bloccata fino a un nuovo setup con rete; nessun gate M6 aggiuntivo, deploy, versione o dato reale coinvolto.

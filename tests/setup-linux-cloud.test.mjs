@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve, join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -61,6 +61,9 @@ test('Linux setup shell handles first install, repeat, quoting, check and custom
         const first = run(); assert.equal(first.status, 0, first.stderr);
         assert.equal(existsSync(sentinel), true);
         assert.match(first.stdout, /Chrome: Browser-fixture/);
+        const calls = readFileSync(env.FIXTURE_LOG, 'utf8');
+        assert.match(calls, /setup:emulators:firestore/);
+        assert.match(calls, /setup:emulators:storage/);
         const repeated = run(); assert.equal(repeated.status, 0, repeated.stderr);
         assert.doesNotMatch(repeated.stdout, /Download/);
         const exports = spawnSync(bash, ['-c', 'source "$1"; printf "%s\\n" "$FIREBASE_EMULATORS_PATH" "$CHROME_PATH"',
