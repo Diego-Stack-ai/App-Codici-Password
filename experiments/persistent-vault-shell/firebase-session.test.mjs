@@ -45,9 +45,16 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
     const a = client('a'), b = client('b');
     const ownerA = await seed(a, masterA, 'A');
     const ownerB = await seed(b, masterB, 'B');
-    let password = masterA, context;
+    let password = masterA, context, queueScope, queueClosed = 0;
     session = createFirebaseSession({auth: a.auth, db: a.db, cryptoApi,
         requestPassword: async () => password,
+        createQueueClient: async scope => {
+            assert.equal(await cryptoApi.decryptRequiredValue(ownerA.ciphertext, scope.vaultKeyMaterial), 'SECRET-FITTIZIO-A');
+            queueScope = {uid: scope.uid, signal: scope.signal};
+            const client = {close() { queueClosed++; }};
+            for (const name of ['enqueue', 'flush', 'pendingForRecord', 'discard', 'replace']) client[name] = async () => ({ok: true});
+            return client;
+        },
         routes: {overview: value => { context = value; }, private: value => { context = value; }}
     });
 
@@ -61,6 +68,13 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
         const stored = (await getDocFromServer(doc(a.db, 'users', ownerA.uid, 'accounts', 'private'))).data();
         assert.equal(stored.password, ownerA.ciphertext);
         assert.notEqual(stored.password, 'SECRET-FITTIZIO-A');
+    });
+    await t.test('bootstrap queue factory receives the unwrapped key and route change closes its capability', async () => {
+        const queue = await session.openMutationQueue({signal: context.signal, domain: 'private-account'});
+        assert.equal(queueScope.uid, ownerA.uid); assert.equal(context.openMutationQueue, undefined);
+        assert.equal(queue.vaultKeyMaterial, undefined); assert.deepEqual(await queue.flush(), {ok: true});
+        await session.navigate('overview'); assert.equal(queueScope.signal.aborted, true); assert.equal(queueClosed, 1);
+        await assert.rejects(queue.flush()); await session.navigate('private');
     });
     await t.test('route encryption round-trips through the protected reader without writing the source document', async () => {
         const reference = doc(a.db, 'users', ownerA.uid, 'accounts', 'private');

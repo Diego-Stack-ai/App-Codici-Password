@@ -13,10 +13,12 @@ const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs'
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
     stdin: {resolveDir: root, contents: `export {initializeApp, deleteApp} from 'firebase/app';
-        export {initializeAuth, inMemoryPersistence, connectAuthEmulator, signInWithEmailAndPassword, signOut} from 'firebase/auth';
+        export {initializeAuth, inMemoryPersistence, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
         export {getFunctions, connectFunctionsEmulator} from 'firebase/functions';
         export {initializeAppCheck, CustomProvider} from 'firebase/app-check';
-        export {createFirebaseFencedQueueClient} from './experiments/offline-sync/firebase-fenced-queue-client.mjs';`}})).outputFiles[0].text : null;
+        export {createFirebaseFencedQueueClient} from './experiments/offline-sync/firebase-fenced-queue-client.mjs';
+        export {createProtectedSession} from './experiments/persistent-vault-shell/protected-session.mjs';
+        export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
     ['/suite.mjs', backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],

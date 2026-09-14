@@ -754,3 +754,9 @@ Base `3ed53656`, ramo `experiment/m9-health-keyboard`. Regione risultati nominat
 Base `82ab2002`, ramo `experiment/m6-firebase-queue-adapter`. Adattatore concreto con Auth/Functions della stessa app, allowlist di due domini/callable, UID verificato, snapshot del comando e dismissione su Auth/abort. Sette regressioni dell'adattatore; 113 test offline e suite completa superati (l'ultima regressione è inclusa nella riesecuzione offline successiva).
 
 52 esecuzioni Chrome/Edge con dati sintetici e backend demo: SDK callable reale, Auth emulato con verifica del JWT, header App Check sintetico richiesto dal bridge; comando accettato, ricevuta, logout e risposta trattenuta dopo commit. L'abort conserva la coda e la sessione successiva verifica la ricevuta senza riscrivere. Nessuna attestazione remota/App Check reale né certificazione del middleware onCall; la richiesta SDK già invocata non è annullabile retroattivamente. Provider e rollout restano aperti; nessun deploy o modifica a master.
+
+## 78. Proprietà della coda nel Vault della shell — 14/09/2026
+
+Base `32db005f`, ramo `experiment/m6-shell-owned-queue`. Factory crittografica iniettata dal bootstrap, facciata di operazioni senza key/DB/SDK, assente dai contesti route. Dismissione immediata su lock, timeout, Auth, segnale della vista, dispose e logout fallito; chiusura dei client tardivi e rifiuto di risposte fuori sessione.
+
+npm test completo superato; 165 test shell e 15 test Firebase emulati inclusi. Chrome/Edge: 52 esecuzioni demo, con apertura della coda attraverso la sessione, commit remoto seguito da lock e retry dopo nuovo unlock senza aggiornare il record una seconda volta. Materiale estratto dall'envelope verificato nella prova Firebase; nessuna chiave restituita alla vista. App Check sintetico e middleware remoto non certificato. Provider UI/entry e rollout restano aperti, nessuna attivazione o migrazione.

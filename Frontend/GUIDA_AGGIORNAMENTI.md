@@ -755,3 +755,7 @@ Ramo experiment/m9-health-keyboard: elenco raggiungibile e focus confinato al di
 ## Adattatore Firebase M6 — candidata 14/09/2026
 
 Da 82ab2002, sul ramo experiment/m6-firebase-queue-adapter: client della coda collegato al vero SDK callable, con proprietario, dominio e durata della sessione controllati. 113 test offline, suite completa e 52 esecuzioni Chrome/Edge/backend demo superati. La risposta persa dopo commit si recupera con la ricevuta esistente. Il test usa attestazione sintetica: non chiude App Check remoto, bootstrap, rollout o prove fisiche. Dettagli in M6/audit 77; aggiornamento destinato alla PR #62, senza master, versione o deploy.
+
+## Coda posseduta dalla shell — candidata 14/09/2026
+
+Ramo experiment/m6-shell-owned-queue, base 32db005f: la shell apre la coda tramite factory fidata e ne revoca operazioni/riferimenti alla chiusura del Vault o della vista. Suite completa, 165 test shell, 15 test Firebase emulati e 52 esecuzioni browser demo superati. Nessun key/DB/SDK alle route. Provider UI/entry e rollout restano aperti; M6/audit 78 registrano i limiti. Checkpoint destinato alla stessa PR #62, senza deploy.

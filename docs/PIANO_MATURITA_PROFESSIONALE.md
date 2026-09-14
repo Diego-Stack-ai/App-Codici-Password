@@ -434,3 +434,5 @@ M6, audit 75: chiusura esplicita del writer, rilascio dei riferimenti crittograf
 M9, audit 76: corretta navigazione da tastiera dell'elenco e del dialogo; 20 test UI, CSS e suite completa finale superati. Questo non sostituisce Windows/Narrator o altri dispositivi fisici. Provider esterno ancora disattivato.
 
 M6, audit 77: disponibile l'adattatore fenced per i callable Firebase canonici, con durata vincolata a UID e Vault/vista. Verificato con SDK, Auth e Firestore demo in Chrome/Edge: 52 esecuzioni, compreso abort dopo commit e retry senza riscrittura. 113 test offline e suite completa superati. App Check nel bridge è sintetico; bootstrap, attestazione/middleware remoti, rollout e matrice fisica restano gate distinti.
+
+M6, audit 78: completata la proprietà della coda nel Vault della shell e il passaggio al factory Firebase senza chiavi nelle route. Suite completa superata, 165 test shell, 15 test Firebase e 52 esecuzioni Chrome/Edge demo. Sono ancora da collegare provider UI circoscritto al record ed entry principale; rollout e verifiche remote/fisiche restano separati.
