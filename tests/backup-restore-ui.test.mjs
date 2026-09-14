@@ -111,6 +111,15 @@ test('late export completion cannot enable a newer export after remount', async 
     assert.equal(f.button.disabled, true); f.lock(); assert.equal(f.button.disabled, false);
 });
 
+test('export capacity failure gives a direct-file alternative without showing a key', async () => {
+    const f = fixture({exporting: true});
+    f.service.exportOwnerBackup = async () => { throw {code: 'BACKUP_EXPORT_CAPACITY_EXCEEDED'}; };
+    f.setup('A'); await f.button.click(); await tick();
+    await f.nodes.find(n => n.textContent === 'Scegli file e crea backup').click();
+    assert.match(f.toasts.at(-1)[0], /salvataggio diretto su file/);
+    assert.equal(f.nodes.some(n => n.textContent === 'Copia chiave'), false); assert.equal(f.button.disabled, false);
+});
+
 test('export preparation disposed by lock does not reopen from a stale start button', async () => {
     const f = fixture({exporting: true}); let calls = 0;
     f.service.exportOwnerBackup = async () => { calls++; };

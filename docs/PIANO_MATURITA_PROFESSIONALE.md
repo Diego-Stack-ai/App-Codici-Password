@@ -424,3 +424,5 @@ Lo stato di maturità M6 non cambia: shell persistente e Vault Key solo in RAM r
 Ripresa M6 su `b5ab595c`: recupero candidato della nota da una coda riaperta, con sola identità restituita alla vista e ripresa esplicita senza nuova operazione. Test DOM e Chrome/Edge con IndexedDB chiuso/riaperto e backend emulato passati. È avanzato il recupero nel laboratorio; provider bootstrap, riapertura fisica PWA, trasporto e rollout restano aperti. Nessuna fase globale conclusa.
 
 M8, audit 72: esportazione e finestra Recovery Key ora vincolate alla sessione del proprietario, con arresto dopo Vault lock/cambio utente e protezione dalle risposte tardive. Suite completa e prove mirate superate sul ramo experiment/m8-export-session. Restano limiti aggregati export, staging, journal durevole, compensazione e collaudi fisici; nessuna fase globale conclusa.
+
+M8, audit 73: limitato il buffer delle righe cifrate nel download alternativo Blob; overflow interrompe prima di creare un file parziale. 90 test backup e controlli statici superati. Raccolta iniziale, memoria reale sui dispositivi, staging e journal restano aperti; nessuna chiusura globale.

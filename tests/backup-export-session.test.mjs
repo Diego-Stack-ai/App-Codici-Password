@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+const bufferSource = await readFile(new URL('../Frontend/public/assets/js/modules/settings/backup-export-buffer.js', import.meta.url), 'utf8');
+const {createBackupExportBuffer} = await import(`data:text/javascript;base64,${Buffer.from(bufferSource).toString('base64')}`);
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/settings/backup-export-service.js', import.meta.url), 'utf8'))
     .replace(/import\s+[\s\S]*?from\s+['"][^'"]+['"];?/g, '').replace(/export /g, '');
 
@@ -11,7 +13,7 @@ function fixture(stopAt) {
     const stop = phase => { if (phase === stopAt) events.dispatchEvent(new Event('vault-session-locked')); };
     const writable = {write: async value => { writes.push(value); stop('write'); }, close: async () => { closed++; stop('close'); }, abort: async () => { aborted++; }};
     const context = {
-        auth: {currentUser: {uid: 'A'}}, navigator: {onLine: true},
+        auth: {currentUser: {uid: 'A'}}, navigator: {onLine: true}, createBackupExportBuffer,
         onAuthStateChanged: (_auth, fn) => { observers.add(fn); return () => observers.delete(fn); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         window: {showSaveFilePicker: async () => { stop('picker'); return {createWritable: async () => { stop('writable'); return writable; }}; }},
@@ -58,4 +60,38 @@ test('provider failure does not disclose provider details', async () => {
     const f = fixture(); f.context.deriveBackupKey = async () => { throw new Error('sensitive provider detail'); };
     await assert.rejects(f.context.exportOwnerBackup('A'), {message: 'BACKUP_EXPORT_FAILED', code: 'BACKUP_EXPORT_FAILED'});
     assert.equal(f.observers.size, 0);
+});
+
+test('buffer admits exact cumulative boundary and can only release one complete Blob', async () => {
+    const buffer = createBackupExportBuffer(8); buffer.append('abc'); buffer.append('defgh');
+    const blob = buffer.takeBlob(); assert.equal(await blob.text(), 'abcdefgh');
+    assert.equal(blob.type, 'application/x-codici-password-backup');
+    assert.throws(() => buffer.takeBlob(), /BACKUP_BUFFER_CLOSED/);
+    assert.throws(() => buffer.append('x'), /BACKUP_BUFFER_CLOSED/);
+});
+
+test('overflow discards the partial buffer and prevents a truncated download', () => {
+    const buffer = createBackupExportBuffer(8); buffer.append('abc');
+    assert.throws(() => buffer.append('defghi'), {code: 'BACKUP_EXPORT_CAPACITY_EXCEEDED'});
+    assert.throws(() => buffer.takeBlob(), /BACKUP_BUFFER_CLOSED/);
+    buffer.clear(); assert.throws(() => buffer.append('x'), /BACKUP_BUFFER_CLOSED/);
+});
+
+test('fallback capacity failure creates no URL or download and retains its safe error code', async () => {
+    const f = fixture(); delete f.context.window.showSaveFilePicker;
+    f.context.createBackupExportBuffer = () => createBackupExportBuffer(20);
+    f.context.URL = {createObjectURL: () => assert.fail('partial download')};
+    await assert.rejects(f.context.exportOwnerBackup('A'), {code: 'BACKUP_EXPORT_CAPACITY_EXCEEDED'});
+    assert.equal(f.observers.size, 0);
+});
+
+test('fallback success downloads the same complete line sequence', async () => {
+    const f = fixture(); delete f.context.window.showSaveFilePicker;
+    let blob, clicks = 0, revoke;
+    f.context.URL = {createObjectURL: value => { blob = value; return 'blob:synthetic'; }, revokeObjectURL: value => { revoke = value; }};
+    f.context.document = {createElement: () => ({click() { clicks++; }})};
+    f.context.setTimeout = callback => callback();
+    const result = await f.context.exportOwnerBackup('A');
+    assert.equal(result.streamed, false); assert.equal(clicks, 1); assert.equal(revoke, 'blob:synthetic');
+    assert.match(await blob.text(), /footer/); assert.equal(f.observers.size, 0);
 });

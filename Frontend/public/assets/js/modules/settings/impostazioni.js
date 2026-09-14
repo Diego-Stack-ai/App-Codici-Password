@@ -763,7 +763,9 @@ function setupEncryptedBackup(user) {
                 await showRecoveryKeyOnce(result.recoveryKey, result, action);
             } catch (error) {
                 if (action.active() && error?.name !== 'AbortError') {
-                    showToast('Backup non completato. Nessun dato è stato modificato.', 'error');
+                    showToast(error?.code === 'BACKUP_EXPORT_CAPACITY_EXCEEDED'
+                        ? 'Backup troppo grande per il download in memoria. Ripeti da un browser che consente il salvataggio diretto su file. Nessun dato è stato modificato.'
+                        : 'Backup non completato. Nessun dato è stato modificato.', 'error');
                 }
             } finally {
                 if (result) result.recoveryKey = '';

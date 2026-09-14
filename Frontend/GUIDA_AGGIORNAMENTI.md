@@ -735,3 +735,7 @@ Primo incremento da `b5ab595c`: il pannello candidato recupera l'identità della
 ## Backup e ciclo della sessione — candidata 14/09/2026
 
 Su experiment/m8-export-session, base 4dd2f0a2, il backup interrompe i passaggi successivi al blocco del Vault o cambio utente; conferma e Recovery Key vengono dismesse insieme alla sessione. Suite completa npm test e regressioni mirate superate. Dettagli e limiti in M8 e audit 72. Produzione invariata; nessun deploy.
+
+## Limite del backup in memoria — candidata 14/09/2026
+
+Il ramo experiment/m8-export-buffer-limit limita il download Blob e indica quando usare il salvataggio diretto. Formato invariato, nessun download troncato in caso di superamento. 90 prove backup e controlli statici superati; manifest offline aggiornato. Limiti e attività residue in M8 e audit 73. Nessuna distribuzione.

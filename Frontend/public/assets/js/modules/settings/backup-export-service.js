@@ -1,4 +1,5 @@
 import {auth, storage} from '../../firebase-config.js?v=1.2.124';
+import {createBackupExportBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
@@ -125,18 +126,17 @@ async function openSink(fileName, check) {
             streamed: true
         };
     }
-    const chunks = [];
+    const buffer = createBackupExportBuffer();
     return {
-        write(value) { chunks.push(value); },
+        write(value) { buffer.append(value); },
         close() {
             check();
-            const url = URL.createObjectURL(new Blob(chunks, {type: 'application/x-codici-password-backup'}));
+            const url = URL.createObjectURL(buffer.takeBlob());
             const link = document.createElement('a');
             link.href = url; link.download = fileName; link.click();
             setTimeout(() => URL.revokeObjectURL(url), 30000);
-            chunks.length = 0;
         },
-        abort() { chunks.length = 0; },
+        abort() { buffer.clear(); },
         streamed: false
     };
 }
@@ -188,7 +188,7 @@ export async function exportOwnerBackup(uid, options = {}) {
         return {recoveryKey, recordCount: records.length, attachmentCount: storagePaths.length, streamed: sink.streamed};
     } catch (error) {
         try { await sink?.abort(); } catch {}
-        const code = ['BACKUP_SESSION_INVALIDATED', 'BACKUP_REQUIRES_ONLINE'].includes(error?.code || error?.message)
+        const code = ['BACKUP_SESSION_INVALIDATED', 'BACKUP_REQUIRES_ONLINE', 'BACKUP_EXPORT_CAPACITY_EXCEEDED'].includes(error?.code || error?.message)
             ? error.code || error.message : 'BACKUP_EXPORT_FAILED';
         if (error?.name === 'AbortError') throw Object.assign(new Error('BACKUP_EXPORT_CANCELLED'), {name: 'AbortError'});
         throw Object.assign(new Error(code), {code});
