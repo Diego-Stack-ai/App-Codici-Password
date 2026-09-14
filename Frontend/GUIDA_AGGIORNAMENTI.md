@@ -763,3 +763,9 @@ Ramo experiment/m6-shell-owned-queue, base 32db005f: la shell apre la coda trami
 ## Provider della nota privata — candidata 14/09/2026
 
 Da c4e1a1a8 consolidato, ramo experiment/m6-private-note-provider: collegamento del pannello alla coda posseduta dalla shell, preparazione della sola nota sulla revisione visualizzata, callback protetti da UID e durata della vista. Suite completa superata, 178 test shell finali e 52 esecuzioni browser della catena preesistente. Il nuovo provider è verificato in fixture/DOM simulato; entry con lettore fidato, prova browser dedicata e rollout restano da completare. M6/audit 79 descrivono limiti e recupero senza riproposta automatica. Nessuna versione o pubblicazione in produzione.
+
+## Lettore e prova browser della nota — candidata 14/09/2026
+
+Sullo stesso ramo experiment/m6-private-note-provider, base 840128de: lettura server di Account/profili/aziende, riuso della policy backend per i collegamenti inversi e prova del provider reale nel browser. Assenza di prove o sorgenti troncate impediscono l'editor; il backend conserva il controllo finale in transazione. Entry del laboratorio e apertura iniziale offline ancora da completare. Dettagli in M6/audit 80; nessuna versione, migrazione o distribuzione.
+
+Validazione finale audit 80: npm test completo superato (183 test shell e 114 offline inclusi); Chrome/Edge superati, 9 scenari generici e 20 privati per browser, 58 esecuzioni totali. Compresi lettore Firebase reale, blocco dei link inversi e salvataggio del provider. App Check resta sintetico e il laboratorio principale non è ancora attivato.

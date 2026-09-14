@@ -766,3 +766,11 @@ npm test completo superato; 165 test shell e 15 test Firebase emulati inclusi. C
 Base c4e1a1a8, ramo experiment/m6-private-note-provider. Pannello collegato alla capability della shell con record e UID fissi, revisione catturata alla visualizzazione, preparazione canonica della sola nota e observer revocati insieme alla sessione. Comandi recuperati o alterati non vengono dichiarati note-only: confronto disponibile senza riproposta automatica. Richiesta esplicita evidenza dei collegamenti inversi dal lettore fidato, mai dedotta dal documento incompleto.
 
 Suite completa superata; suite shell finale 178 test dopo l'ulteriore integrazione del pannello DOM simulato. 52 esecuzioni Chrome/Edge della catena coda/sessione/SDK superate. Queste prove browser non coprono ancora il nuovo provider. Entry principale non attivata, lettore fidato concreto e prova browser dedicata ancora aperti; restano rollout e verifiche remote/fisiche. Nessun deploy, migrazione o modifica di master. Dettagli e limiti nel checkpoint corrispondente di M6.
+
+## 80. Lettore fidato e browser del provider nota — 14/09/2026
+
+Da 840128de, stessa PR #63. Lettura server di Account, profilo e aziende con identità controllata prima e dopo le attese. Riutilizzo della policy pura backend; nessuna assenza di link dedotta da cache, scritture pendenti o query troncate. Limite candidato di 200 aziende verificato con il documento aggiuntivo. Metadati id/ownerId derivati dal percorso, senza modificare i documenti.
+
+Il browser monta il provider reale e salva con SDK Firestore/callable e backend emulato; verificati anche rifiuti per link inversi personali/aziendali prima dell'editor. L'entry principale del laboratorio resta da collegare e la prima apertura offline non è coperta; il controllo transazionale server resta autorevole. Nessuna chiusura dei gate di rollout o App Check remoto, nessuna modifica a master o deploy. Esiti finali riportati nel checkpoint di validazione seguente.
+
+Validazione finale audit 80: npm test completo superato (183 test shell e 114 offline inclusi); Chrome/Edge superati, 9 scenari generici e 20 privati per browser, 58 esecuzioni totali. Compresi lettore Firebase reale, blocco dei link inversi e salvataggio del provider. App Check resta sintetico e il laboratorio principale non è ancora attivato.
