@@ -840,3 +840,17 @@ Il nuovo processo recupera l'identità ma mantiene il Vault bloccato. Dopo nuova
 Limiti: arresto dopo conferma dell'accodamento locale, non durante una transazione IndexedDB o un commit backend in volo; non simula perdita di alimentazione, corruzione del disco, eviction o riavvio del sistema operativo. Nessuna certificazione iPhone/Safari, PWA installata, tutte le UI, precaricamento completo o contenuto Storage. Nota privata isolata, non nuovi domini di scrittura. Nessun master, versione, deploy o dato reale modificato.
 
 Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.
+
+### 88. Bootstrap privato bloccato da refresh Auth offline — 14/09/2026
+
+Segnalazione dell'utente: PWA installata sulla Home di iPhone, versione pubblicata 1.2.124; Account visitati online, ritorno alla Home, modalità aereo, lista Account non visualizzata. La sequenza è valida e il gate fisico resta non superato. Non sono stati cancellati dati o cache e non è stata richiesta una reinstallazione.
+
+Confronto con master 9e5335d9: main-v129.js esegueva sempre await user.reload() prima di inizializzare qualunque pagina privata. Senza rete il rifiuto interrompeva l'intero bootstrap nel catch globale, prima della lettura della lista dalla cache. Lo stesso codice era presente sul ramo sperimentale. I collaudi precedenti della shell usano un bootstrap distinto e non coprivano questo passaggio della PWA 1.2.124.
+
+Correzione candidata da 1b341c74, stessa PR #63: il refresh Auth viene richiesto online; offline si usa l'identità Firebase già ripristinata, controllando ancora UID corrente e email verificata prima di continuare. Errori online non degradano a verifica in cache. Logout o cambio UID durante il refresh interrompono il vecchio bootstrap. Non si aggiungono flag di autenticazione, chiavi persistenti o bypass dello sblocco Vault.
+
+Il test esegue il blocco di controllo estratto dal sorgente reale del bootstrap. Sul codice precedente falliscono la navigazione offline e i controlli delle risposte tardive (4 scenari); sulla correzione passano tutti i 7 scenari: utente verificato offline, utente non verificato, verifica aggiornata online, errore online senza fallback, logout/cambio identità durante attesa e successo online. Inclusi nella suite security. È una riproduzione del blocco compatibile con il sintomo, non una nuova certificazione iPhone o prova completa dell'interfaccia sul dispositivo.
+
+Restano disponibilità effettiva della cache e delle dipendenze sul telefono, retest Home → modalità aereo → lista dopo pubblicazione autorizzata, gate iPhone e altri limiti M6. Nessun master, bump di versione o deploy; app pubblicata ancora 1.2.124.
+
+Validazione finale audit 88: npm test completo superato, inclusi 88 controlli statici sicurezza, 11 test security (7 nuovi sul bootstrap), 194 test shell e 116 offline. Inventario aggiornato e controllo whitespace superato. I 196 scenari browser dell'audit 87 non sono stati rieseguiti né attribuiti a questa modifica del bootstrap produttivo; retest iPhone ancora necessario dopo rilascio autorizzato.

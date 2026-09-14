@@ -352,3 +352,11 @@ Audit 87, base 1947b5c1, stessa PR #63. Il collaudo --crash-browser termina forz
 Si supera questo scenario di arresto dopo conservazione locale confermata. Restano arresto durante scritture in volo, spegnimento/riavvio dispositivo, corruzione/eviction, PWA iPhone, preparazione completa, file Storage e rollout. Nessuna estensione delle mutazioni o deploy; dettagli nell'audit 87.
 
 Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.
+
+### Segnalazione iPhone 1.2.124 e bootstrap Auth — candidata 14/09/2026
+
+Audit 88, base 1b341c74, stessa PR #63. L'utente riferisce lista non visibile dopo Account online → Home → modalità aereo nella PWA iPhone 1.2.124. Identificato nel bootstrap reale un refresh Auth obbligatorio anche offline che interrompeva l'inizializzazione prima della cache. Il candidato conserva il refresh online e offline richiede l'identità Firebase corrente già verificata, senza bypass della Master Password; protegge anche dal cambio UID durante attesa.
+
+Sette regressioni sul blocco reale, con fallimenti riprodotti prima della correzione. I test precedenti del laboratorio non eseguivano questo bootstrap: non sostituiscono il retest iPhone, che resta aperto fino a pubblicazione autorizzata e verifica. Nessun deploy o modifica ai dati dell'utente.
+
+Validazione finale audit 88: npm test completo superato, inclusi 88 controlli statici sicurezza, 11 test security (7 nuovi sul bootstrap), 194 test shell e 116 offline. Inventario aggiornato e controllo whitespace superato. I 196 scenari browser dell'audit 87 non sono stati rieseguiti né attribuiti a questa modifica del bootstrap produttivo; retest iPhone ancora necessario dopo rilascio autorizzato.

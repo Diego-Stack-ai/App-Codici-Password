@@ -811,3 +811,9 @@ Validazione finale audit 86: npm test completo superato (194 test shell e 116 of
 Base 1947b5c1, stessa PR #63. Comando node scripts/run-vault-session-emulators.mjs --crash-browser: nota fittizia accodata offline, terminazione forzata del solo browser temporaneo, recupero dopo nuova Master Password e sincronizzazione esplicita. 50 verifiche Chrome/Edge Windows superate. La rete non viene riattivata prima dell'interruzione. Limiti in M6/audit 87; nessun deploy o dato reale.
 
 Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.
+
+## Lista offline dalla Home su iPhone — candidata 14/09/2026
+
+Base 1b341c74, stessa PR #63. Corretto il controllo iniziale delle pagine private: refresh Auth solo online, identità corrente verificata richiesta anche offline e arresto del vecchio bootstrap su cambio UID. Riprodotto il blocco presente nella 1.2.124; 7 test dedicati. La PWA sull'iPhone resta alla release pubblicata: non chiedere di ripetere la prova prima di una pubblicazione autorizzata. Dettagli in M6/audit 88; nessun deploy.
+
+Validazione finale audit 88: npm test completo superato, inclusi 88 controlli statici sicurezza, 11 test security (7 nuovi sul bootstrap), 194 test shell e 116 offline. Inventario aggiornato e controllo whitespace superato. I 196 scenari browser dell'audit 87 non sono stati rieseguiti né attribuiti a questa modifica del bootstrap produttivo; retest iPhone ancora necessario dopo rilascio autorizzato.
