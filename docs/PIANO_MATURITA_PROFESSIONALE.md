@@ -464,3 +464,7 @@ Programma: avanzamento della verifica M6, senza chiusura globale. Restano avvio 
 M6, audit 85: superato il ricaricamento offline del laboratorio con cache Auth/Firestore persistente e nuovo sblocco obbligatorio (44 verifiche Chrome/Edge). La matrice dei dati caricati resta consultabile; logout la blocca. Avvio da processo terminato, PWA fisica, cache completa/eviction e Storage restano aperti. Nessuna fase globale chiusa, master o deploy.
 
 Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.
+
+M6, audit 86: riavvio controllato del processo browser con rete bloccata prima della navigazione superato nel laboratorio (46 verifiche Chrome/Edge). Il Vault richiede nuovamente la Master Password. Restano arresto forzato/dispositivo, PWA fisica, cache completa/eviction, Storage e rollout. Nessuna chiusura globale del programma o deploy.
+
+Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.

@@ -336,3 +336,11 @@ Audit 85, base 613dece6, stessa PR #63. Nuovo collaudo `node scripts/run-vault-s
 Questo supera il prerequisito di ricaricamento del documento con cache già popolata; non chiude avvio da processo terminato/dispositivo riavviato, collaudo PWA fisico, preparazione automatica di tutti i dati o contenuto degli allegati. Nessuna estensione delle scritture offline e nessun deploy. Dettagli e diagnosi DevTools nell'audit 85.
 
 Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.
+
+### Riavvio del browser con cache persistente — candidata 14/09/2026
+
+Audit 86, base ba529553, stessa PR #63. Nuovo comando `node scripts/run-vault-session-emulators.mjs --restart-browser`: preparazione online, chiusura controllata e uscita del processo, nuovo processo sullo stesso profilo temporaneo con rete bloccata prima della navigazione. Identità recuperata, Vault bloccato, nuovo sblocco obbligatorio e lettura della matrice già caricata. Chrome/Edge: 46 verifiche superate. Ritorno online e logout collaudati.
+
+Questo supera il prerequisito di riavvio controllato del processo nel laboratorio. Non equivale ad arresto forzato, riavvio dispositivo o PWA fisica/iPhone. Restano preparazione deterministica completa, eviction, file Storage, compatibilità delle UI, rollout e altri gate del programma. Nessun dato reale o deploy.
+
+Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.

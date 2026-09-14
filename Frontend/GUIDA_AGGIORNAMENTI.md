@@ -799,3 +799,9 @@ Programma: avanzamento della verifica M6, senza chiusura globale. Restano avvio 
 Base 613dece6, stessa PR #63: comando di collaudo node scripts/run-vault-session-emulators.mjs --cold-browser. Usa esclusivamente demo locali e browser temporanei, prepara i dati, ricarica senza rete e richiede un nuovo sblocco. 44 verifiche Chrome/Edge superate; limiti e rete DevTools documentati in M6/audit 85. Il normale laboratorio non cambia persistenza; nessun deploy o test sui dati reali. La chiusura forzata della PWA e il riavvio fisico restano da provare.
 
 Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.
+
+## Riavvio offline del browser — candidata 14/09/2026
+
+Base ba529553, stessa PR #63. Il comando node scripts/run-vault-session-emulators.mjs --restart-browser prepara le fixture, termina il browser di prova e lo riapre senza rete sullo stesso profilo temporaneo. Nuovo sblocco richiesto e matrice cache leggibile; 46 verifiche Chrome/Edge superate. M6/audit 86 distinguono questa chiusura controllata da arresto forzato, riavvio fisico e PWA iPhone. Produzione invariata.
+
+Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.

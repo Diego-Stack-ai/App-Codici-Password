@@ -816,3 +816,15 @@ Il primo collaudo ha individuato una particolarità DevTools: dopo reload naviga
 Esito del nuovo collaudo: 22 verifiche per browser, 44 esecuzioni superate in Chrome ed Edge. È una prova di reload del documento con dati persistenti, non di terminazione del processo o riavvio fisico del dispositivo. Cache preparata esplicitamente, nessuna prova di pre-caricamento automatico completo, eviction, Safari/iPhone, UI bancaria completa, file Storage o foto/QR. Il gate iPhone del 10/09 resta aperto. Nessun master, bump, deploy o dato reale.
 
 Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.
+
+### 86. Riavvio del processo browser senza rete — 14/09/2026
+
+Base ba529553, stessa PR #63. Il comando `node scripts/run-vault-session-emulators.mjs --restart-browser` esegue due processi distinti per ciascun browser. La prima fase autentica e sblocca la fixture, prepara la cache persistente e gli asset statici e comunica soltanto lo stato prepared al runner. Il runner chiude il browser tramite DevTools e attende l'evento di uscita del processo prima di riaprire lo stesso profilo temporaneo.
+
+Il secondo processo parte da about:blank: il controllo DevTools blocca la rete prima della navigazione verso il laboratorio. La fase del test viene passata al nuovo documento dal runner; non si conserva alcuna chiave o contenuto decifrato per trasferire lo sblocco fra processi. La shell viene recuperata dalla cache, l'identità Firebase è ripristinata, il Vault rimane bloccato e la consultazione è rifiutata fino alla nuova Master Password. Vengono verificati i quindici campioni cifrati già caricati, una risorsa HTTP non in cache irraggiungibile, ritorno online e logout.
+
+Nuova prova superata in Chrome ed Edge: 23 verifiche per browser, 46 esecuzioni complessive. Il runner rifiuta una fase di preparazione non confermata e una chiusura che non termina entro il limite. Restano i percorsi ordinari e il collaudo del solo reload; profili esclusivamente temporanei, senza interferire con i browser dell'utente.
+
+Limiti: chiusura controllata del processo, non arresto forzato o spegnimento del dispositivo. La prova non certifica Safari/iPhone/PWA installata, eviction della cache, archivio interamente precaricato, tutte le UI o contenuto dei file Storage. Il gate bancario fisico del 10/09 resta aperto. Nessun runtime produttivo, master, bump, deploy o dato reale modificato.
+
+Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.

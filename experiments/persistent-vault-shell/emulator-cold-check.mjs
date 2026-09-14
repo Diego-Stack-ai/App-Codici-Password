@@ -22,7 +22,8 @@ const unlock = async () => {
 try {
     const {runOfflineConsultationProbe} = await import('/emulator.js');
     // Only a phase marker survives reload; no Vault key or decrypted data.
-    const resumed = sessionStorage.getItem('synthetic-cold-phase') === 'reload';
+    const restartPhase = window.__entryRestartPhase;
+    const resumed = restartPhase === 'resume' || sessionStorage.getItem('synthetic-cold-phase') === 'reload';
     if (!resumed) {
         await wait(() => byId('login') && !byId('login').disabled, 'LOGIN');
         byId('login').click();
@@ -32,16 +33,20 @@ try {
         await navigator.serviceWorker.register('/emulator-cold-sw.js');
         await navigator.serviceWorker.ready;
         await wait(() => navigator.serviceWorker.controller, 'SW_CONTROLLER');
-        sessionStorage.setItem('synthetic-cold-phase', 'reload');
-        await network(true);
-        location.reload();
+        if (restartPhase === 'prepare') {
+            await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, phase: 'prepared'})});
+        } else {
+            sessionStorage.setItem('synthetic-cold-phase', 'reload');
+            await network(true);
+            location.reload();
+        }
     } else {
         // DevTools keeps requests blocked across reload, but Chromium can reset
         // navigator.onLine in the new context. Reapply the same network state.
         await network(true);
         assert(!navigator.onLine, 'RELOAD_WAS_ONLINE');
         assert(navigator.serviceWorker.controller, 'NO_CACHED_SHELL');
-        assert(performance.getEntriesByType('navigation')[0]?.type === 'reload', 'NOT_A_REAL_RELOAD');
+        assert(performance.getEntriesByType('navigation')[0]?.type === (restartPhase ? 'navigate' : 'reload'), 'UNEXPECTED_NAVIGATION');
         await wait(() => byId('status').textContent.includes('bloccato') && !byId('unlock').disabled, 'RESTORED_AUTH');
         assert(!byId('content').children.length, 'RESTORED_UNLOCKED_VIEW');
         let denied = false;
@@ -61,7 +66,7 @@ try {
         assert(denied && !byId('content').children.length, 'LOGOUT_CACHE_ACCESS');
         sessionStorage.removeItem('synthetic-cold-phase');
         await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, browser: navigator.userAgent,
-            passed: ['static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
+            passed: [restartPhase ? 'static laboratory shell starts offline in a new browser process' : 'static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
                 'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required',
                 ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

@@ -1,6 +1,7 @@
 // Test runner only. DevTools affects this disposable browser target, never the
 // host connection. The control channel remains available while HTTP is offline.
-export async function attachEntryNetworkControl(child) {
+export async function attachEntryNetworkControl(child, {restartPhase} = {}) {
+    if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
     const endpoint = await new Promise((resolve, reject) => {
         let output = '';
         const finish = (error, value) => { clearTimeout(timer); child.stderr.off('data', read); child.off('error', fail); error ? reject(error) : resolve(value); };
@@ -14,7 +15,7 @@ export async function attachEntryNetworkControl(child) {
     const host = address.host;
     let target;
     for (let i = 0; i < 100 && !target; i++) {
-        target = (await (await fetch(`http://${host}/json/list`)).json()).find(item => item.type === 'page' && item.url === 'http://127.0.0.1:4188/');
+        target = (await (await fetch(`http://${host}/json/list`)).json()).find(item => item.type === 'page' && item.url === (restartPhase ? 'about:blank' : 'http://127.0.0.1:4188/'));
         if (!target) await new Promise(done => setTimeout(done, 50));
     }
     if (!target) throw new Error('DEVTOOLS_TARGET_MISSING');
@@ -44,7 +45,14 @@ export async function attachEntryNetworkControl(child) {
     });
     await send('Network.enable'); await send('Runtime.enable');
     await send('Runtime.addBinding', {name: '__entryNetworkControl'});
+    if (restartPhase) {
+        await send('Page.enable');
+        await send('Page.addScriptToEvaluateOnNewDocument', {source: `window.__entryRestartPhase = ${JSON.stringify(restartPhase)};`});
+        if (restartPhase === 'resume') await send('Network.emulateNetworkConditions', {offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
+        await send('Page.navigate', {url: 'http://127.0.0.1:4188/'});
+    }
     const close = () => socket.close();
+    close.quitBrowser = () => send('Browser.close');
     close.inspect = async () => ({state: (await send('Runtime.evaluate', {expression: `JSON.stringify({ready:document.readyState, online:navigator.onLine, controlled:Boolean(navigator.serviceWorker?.controller), status:document.getElementById('status')?.textContent, message:document.getElementById('message')?.textContent, phase:sessionStorage.getItem('synthetic-cold-phase'), failure:window.__coldFailure})`, returnByValue: true})).result?.value, exceptions});
     return close;
 }
