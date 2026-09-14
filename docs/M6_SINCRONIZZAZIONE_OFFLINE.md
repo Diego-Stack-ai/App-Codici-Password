@@ -201,3 +201,11 @@ Base ec8ced7d. Il dettaglio passa al provider opzionale onSaved, che rilegge l'A
 Base 7471d3c8. Il pannello propone Mantieni i dati online solo per il proprio operationId/recordId in conflitto o riconciliazione. Una seconda conferma elimina il comando locale tramite discard con lease e confronto del contenuto atteso; Annulla conserva la coda. Non modifica il record online e non invia altre operazioni. Marker di revisione inclusi nello snapshot; blocco o cambiamento della coda non vengono presentati come eliminazione riuscita. Chiusura della vista sopprime callback e notifiche tardive. onDiscarded rilegge il dettaglio attraverso la stessa capability protetta.
 
 83 test offline e 155 test shell superati. Runner --fenced-browser: 12 scenari privati e 5 generici per ciascuno di Chrome ed Edge, 34 esecuzioni complessive. Il nuovo caso dimostra annullamento, eliminazione del solo comando e uguaglianza di record/timestamp Firestore emulati. Resta da costruire confronto completo e riproposizione esplicita della copia locale; nessun merge automatico, nuova migrazione o attivazione del provider nel bootstrap. Produzione 1.2.124 invariata.
+
+### Confronto delle note in conflitto — candidato M6
+
+Base 12d4e3f9. readConflictNotes confronta soltanto la nota cifrata del comando e quella del record corrente, attraverso lettore proprietario e capability di decifratura. Verifica UID, ID fisico, schema, dominio privato e revisione; cattura il ciphertext prima delle attese e interrompe il risultato su blocco o cambio sessione. Non prepara sostituzioni o scritture.
+
+Il pannello offre Confronta le note soltanto con provider esplicito e conflitto del proprio comando. Presenta i testi con textContent, distingue la nota online al momento della lettura e svuota il confronto su chiusura, conferma o variazione del conflitto. Una nuova notifica richiede nuovamente conferma prima dello scarto. Il provider principale resta non attivato.
+
+90 test offline superati; 34 esecuzioni browser/backend emulato Chrome/Edge, con confronto reale delle note cifrate e verifica della coda intatta. Inventario aggiornato. Riproposizione della copia locale con nuova revisione, confronto degli altri campi, riapertura delle code pregresse e trasporto autenticato restano aperti. Nessun deploy, migrazione o mutazione dei dati reali.

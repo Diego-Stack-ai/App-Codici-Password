@@ -402,3 +402,5 @@ M6 UI: conferma della singola operazione e callback di rilettura separato dal ri
 M6 UI: dettaglio predisposto per rilettura protetta dopo conferma, senza ricaricare il documento. Verificati errori e risposte tardive; 155 test shell e npm test completo superati. L'integrazione effettiva del provider nel bootstrap, trasporto autenticato, recupero conflitti e rollout restano da completare.
 
 M6 conflitti: implementata nel candidato la scelta confermata di scartare la propria modifica locale mantenendo i dati online. Verificati annullamento, identità, lease e dati backend invariati. Restano confronto/riproposizione locale e attivazione completa; la fase M6 non è conclusa.
+
+M6 conflitti: aggiunto confronto read-only nota locale/online con provider esplicito e cancellazione del testo dalla vista su chiusura. Test offline e browser/backend emulato passati. Riproporre la modifica sulla revisione aggiornata e recuperare le code da una nuova sessione restano attività aperte; nessuna fase globale chiusa.

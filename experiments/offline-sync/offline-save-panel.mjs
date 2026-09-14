@@ -1,5 +1,5 @@
 // Candidate view boundary. No key, SDK, raw database or unscoped writer reaches the DOM.
-export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, onSaved = () => {}, onDiscarded = () => {}, initialNote = ''}) {
+export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, readConflict, onSaved = () => {}, onDiscarded = () => {}, initialNote = ''}) {
     if (!signal || typeof createClient !== 'function' || typeof prepare !== 'function' || typeof onSaved !== 'function' || typeof onDiscarded !== 'function') throw new Error('SAVE_PANEL_CONFIG');
     const section = document.createElement('section');
     const label = document.createElement('label'); label.textContent = 'Nota';
@@ -13,11 +13,20 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
     const confirm = document.createElement('button'); confirm.type = 'button'; confirm.textContent = 'Conferma: elimina questa modifica locale'; confirm.hidden = true;
     const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Annulla'; cancel.hidden = true;
     section.append(discard, confirm, cancel);
+    const compare = document.createElement('button'); compare.type = 'button'; compare.textContent = 'Confronta le note'; compare.hidden = true;
+    const comparison = document.createElement('section'); comparison.hidden = true;
+    const localTitle = document.createElement('h3'); localTitle.textContent = 'Nota locale in attesa';
+    const localText = document.createElement('pre');
+    const onlineTitle = document.createElement('h3'); onlineTitle.textContent = 'Nota online al momento del confronto';
+    const onlineText = document.createElement('pre');
+    comparison.append(localTitle, localText, onlineTitle, onlineText); section.append(compare, comparison);
+    const clearComparison = () => { localText.textContent = onlineText.textContent = ''; comparison.hidden = true; };
     let disposed = false, busy = false, client, operation, accepted = false, submitted, confirmed = false, refresh, held;
     const active = () => !disposed && !signal.aborted && isActive();
     const dispose = () => {
         if (disposed) return;
         disposed = true; input.value = ''; operation = null; submitted = null; held = null; client?.close(); client = null;
+        clearComparison(); compare.onclick = null;
         signal.removeEventListener('abort', dispose); save.onclick = retry.onclick = discard.onclick = confirm.onclick = cancel.onclick = null; section.remove();
     };
     const states = {idle: 'Nessuna modifica in attesa.', offline: 'Modifica conservata sul dispositivo. In attesa di connessione.',
@@ -36,6 +45,7 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
         input.readOnly = busy || accepted || Boolean(operation);
         retry.disabled = !client || busy;
         discard.disabled = confirm.disabled = cancel.disabled = !client || busy;
+        compare.disabled = !client || busy;
     };
     signal.addEventListener('abort', dispose, {once: true});
     if (!active()) { dispose(); return dispose; }
@@ -46,16 +56,19 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
             if (['conflict', 'reconciliation-required'].includes(event.state)) {
                 if (!submitted || event.operation?.operationId !== submitted.operationId || event.operation?.recordId !== submitted.recordId) {
                     status.textContent = 'Un’altra modifica blocca la coda. Questa nota resta in attesa.';
-                    retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = true; held = null;
+                    retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = true; held = null; clearComparison();
                     return;
                 }
                 held = structuredClone(event.operation); discard.hidden = false;
+                confirm.hidden = cancel.hidden = true;
+                compare.hidden = typeof readConflict !== 'function'; clearComparison();
             }
             update(event.state);
         },
             onCommitted: event => {
                 if (!active() || confirmed || !submitted || event.operationId !== submitted.operationId || event.recordId !== submitted.recordId) return;
                 confirmed = accepted = true; operation = held = null; input.value = ''; retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = true;
+                compare.hidden = true; clearComparison();
                 status.textContent = states.saved; controls();
                 refresh = Promise.resolve().then(() => {
                     if (active()) return onSaved({signal, isActive: active});
@@ -87,6 +100,19 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
         finally { busy = false; controls(); }
     };
     save.onclick = run; retry.onclick = run;
+    compare.onclick = async () => {
+        if (!active() || busy || !held || typeof readConflict !== 'function') return;
+        busy = true; controls(); clearComparison();
+        try {
+            const snapshot = held;
+            const result = await readConflict(structuredClone(snapshot), {signal, isActive: active});
+            if (!active() || held !== snapshot) return;
+            if (typeof result?.localNote !== 'string' || typeof result?.onlineNote !== 'string' ||
+                result.localNote.length > 100000 || result.onlineNote.length > 100000) throw new Error('REVIEW_INVALID');
+            localText.textContent = result.localNote; onlineText.textContent = result.onlineNote; comparison.hidden = false;
+        } catch { if (active()) status.textContent = 'Confronto non disponibile. La modifica locale è conservata.'; }
+        finally { busy = false; controls(); }
+    };
     discard.onclick = () => {
         if (!active() || busy || !held) return;
         status.textContent = 'Eliminare solo questa modifica in attesa? I dati online non saranno modificati.';
@@ -106,6 +132,7 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
             if (result?.acquired !== true) throw new Error('DISCARD_NOT_CONFIRMED');
             confirmed = accepted = true; held = operation = submitted = null; input.value = '';
             retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = true;
+            compare.hidden = true; clearComparison();
             status.textContent = 'Modifica locale eliminata. I dati online sono invariati.';
             try { await onDiscarded({signal, isActive: active}); }
             catch { if (active()) status.textContent = 'Modifica locale eliminata. Riapri il dettaglio per aggiornare la visualizzazione.'; }

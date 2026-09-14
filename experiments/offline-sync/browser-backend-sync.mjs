@@ -1,6 +1,7 @@
 import {createFencedQueueClient} from './fenced-queue-client.mjs';
 import {createFencedQueueWriter} from './fenced-queue-writer.mjs';
-import {encrypt} from './crypto-utils.js';
+import {encrypt, decrypt} from './crypto-utils.js';
+import {readConflictNotes} from './conflict-note-review.mjs';
 import {mountOfflineSavePanel} from './offline-save-panel.mjs';
 const passed = [], assert = (value, code) => { if (!value) throw new Error(code); };
 let db, client;
@@ -132,6 +133,10 @@ try {
         const conflictPage = new AbortController(); let discardedRefresh = 0;
         const conflictedNote = {...operation, operationId: 'bridge-ui-conflict', expectedRevision: 2};
         await mountOfflineSavePanel(root, {signal: conflictPage.signal,
+            readConflict: command => readConflictNotes({operation: command,
+                context: {user: {uid}, signal: conflictPage.signal, unlocked: true,
+                    read: ({ciphertext}) => decrypt(ciphertext, 'SYNTHETIC-VAULT-KEY')},
+                readLatest: async () => ({...(await snapshot(command)).record, id: command.recordId, ownerId: uid})}),
             createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => true,
                 send: async command => {
                     const response = await post('/mutation', {operation: command}), result = await response.json();
@@ -141,6 +146,10 @@ try {
         const conflictButtons = root.querySelectorAll('button');
         await conflictButtons[0].onclick();
         assert(!conflictButtons[2].hidden && (await pending()).length === 1, 'UI_CONFLICT_MISSING');
+        await conflictButtons[5].onclick();
+        const compared = root.querySelectorAll('pre');
+        assert(compared.length === 2 && compared[0].textContent === '' && compared[1].textContent === 'SYNTHETIC-NOTE-FROM-UI' &&
+            (await pending()).length === 1, 'UI_COMPARISON_CHANGED_QUEUE');
         conflictButtons[2].onclick(); conflictButtons[4].onclick();
         assert((await pending()).length === 1 && discardedRefresh === 0, 'UI_CANCEL_DISCARDED');
         const beforeDiscard = await snapshot(conflictedNote);
@@ -149,7 +158,8 @@ try {
         assert(!(await pending()).length && discardedRefresh === 1 && beforeDiscard.updateTime === afterDiscard.updateTime &&
             JSON.stringify(beforeDiscard.record) === JSON.stringify(afterDiscard.record) &&
             root.textContent.includes('dati online sono invariati'), 'UI_DISCARD_CHANGED_SERVER');
-        conflictPage.abort(); root.remove();
+        conflictPage.abort();
+        assert([...compared].every(node => node.textContent === ''), 'UI_COMPARISON_RETAINED'); root.remove();
         passed.push('explicit conflict discard removes only queued command; cancellation and online record remain unchanged');
     }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});

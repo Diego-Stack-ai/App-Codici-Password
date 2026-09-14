@@ -676,3 +676,7 @@ Base ec8ced7d. Callback onSaved del provider opzionale rilegge la capability, pr
 ## 63. Scarto confermato della modifica locale
 
 Base 7471d3c8. Il pannello consente scarto solo del proprio comando in conflitto, con conferma separata e CAS sotto lease. Annullamento e chiusura preservano i confini della vista; il backend non viene modificato dallo scarto. 83 test offline, 155 shell e 34 esecuzioni browser/emulatore superati. Confronto e riproposizione locale restano aperti.
+
+## 64. Confronto protetto delle note
+
+Base 12d4e3f9. Capability di confronto read-only tra comando e record corrente; identità e lifecycle verificati. UI senza HTML interpretato, testo svuotato alla chiusura e coda invariata. 90 test offline e 34 esecuzioni browser/backend emulato superati. Nessuna riproposizione automatica o attivazione nel bootstrap principale.

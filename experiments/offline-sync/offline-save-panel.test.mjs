@@ -11,11 +11,11 @@ class Node {
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(node => node !== this); }
 }
 const operation = {operationId: 'own-note', recordId: 'account-a'};
-async function fixture({send, discard, onSaved = () => {}, onDiscarded = () => {}} = {}) {
+async function fixture({send, discard, readConflict, onSaved = () => {}, onDiscarded = () => {}} = {}) {
     const realm = vm.createContext({structuredClone, document: {createElement: () => new Node()}});
     vm.runInContext(source.replace('export async function', 'async function'), realm);
     const root = new Node(), page = new AbortController(); let config;
-    await realm.mountOfflineSavePanel(root, {signal: page.signal, onSaved, onDiscarded,
+    await realm.mountOfflineSavePanel(root, {signal: page.signal, onSaved, onDiscarded, readConflict,
         prepare: async () => operation,
         createClient: async value => {
             config = value;
@@ -24,7 +24,8 @@ async function fixture({send, discard, onSaved = () => {}, onDiscarded = () => {
     const [label, status, save, retry] = root.children[0].children;
     const input = label.children[0]; input.value = 'Synthetic note';
     const [, , , , keepOnline, confirm, cancel] = root.children[0].children;
-    return {root, page, config, input, status, save, retry, keepOnline, confirm, cancel};
+    const compare = root.children[0].children[7], comparison = root.children[0].children[8];
+    return {root, page, config, input, status, save, retry, keepOnline, confirm, cancel, compare, comparison};
 }
 
 test('a different operation or record cannot confirm this editor', async () => {
@@ -126,4 +127,21 @@ test('abort during discard suppresses late refresh and status', async () => {
     await f.save.onclick(); f.keepOnline.onclick(); const pending = f.confirm.onclick();
     f.page.abort(); resolve({acquired: true}); await pending;
     assert.equal(refreshed, 0); assert.equal(f.root.children.length, 0);
+});
+
+test('comparison displays literal text, does not discard and clears on abort', async () => {
+    let discarded = 0;
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        discard: async () => discarded++, readConflict: async () => ({localNote: '<script>literal</script>', onlineNote: 'Online'})});
+    await f.save.onclick(); await f.compare.onclick();
+    assert.equal(f.comparison.hidden, false); assert.equal(f.comparison.children[1].textContent, '<script>literal</script>');
+    assert.equal(discarded, 0); f.page.abort(); assert.equal(f.comparison.children[1].textContent, '');
+});
+test('comparison arriving after abort cannot restore plaintext', async () => {
+    let resolve;
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        readConflict: () => new Promise(done => { resolve = done; })});
+    await f.save.onclick(); const pending = f.compare.onclick(); f.page.abort();
+    resolve({localNote: 'Late local', onlineNote: 'Late online'}); await pending;
+    assert.equal(f.comparison.hidden, true); assert.equal(f.comparison.children[1].textContent, '');
 });
