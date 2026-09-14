@@ -769,3 +769,9 @@ Da c4e1a1a8 consolidato, ramo experiment/m6-private-note-provider: collegamento 
 Sullo stesso ramo experiment/m6-private-note-provider, base 840128de: lettura server di Account/profili/aziende, riuso della policy backend per i collegamenti inversi e prova del provider reale nel browser. Assenza di prove o sorgenti troncate impediscono l'editor; il backend conserva il controllo finale in transazione. Entry del laboratorio e apertura iniziale offline ancora da completare. Dettagli in M6/audit 80; nessuna versione, migrazione o distribuzione.
 
 Validazione finale audit 80: npm test completo superato (183 test shell e 114 offline inclusi); Chrome/Edge superati, 9 scenari generici e 20 privati per browser, 58 esecuzioni totali. Compresi lettore Firebase reale, blocco dei link inversi e salvataggio del provider. App Check resta sintetico e il laboratorio principale non è ancora attivato.
+
+## Entry locale della nota — candidata 14/09/2026
+
+Ramo experiment/m6-private-note-provider, base 8343282e, stessa PR #63: editor attivo nel laboratorio per Alfa privato con trasporto emulato, code nuove e conferma server. Risolta la nota vecchia dopo salvataggio: il dettaglio rilegge dal repository confermato. Zeta incompatibile resta consultabile. Test dedicato --entry-browser; dettagli e gate residui in M6/audit 81. Nessuna versione o pubblicazione in produzione.
+
+Validazione finale audit 81: suite completa npm test superata, inclusi 189 test shell e 114 offline. Regressioni Chrome/Edge della coda: 58 esecuzioni superate. Nuovo collaudo dell'entry: 5 verifiche per browser, 10 esecuzioni superate (68 totali). Dopo le ultime guardie di chiusura, rieseguiti i 21 test mirati di coda/dettaglio e il collaudo dell'entry. Nessuna prova App Check remota o su dispositivo fisico.

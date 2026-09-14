@@ -1,7 +1,7 @@
 import {mountOfflineSavePanel} from '../offline-sync/offline-save-panel.mjs';
 import {readConflictNotes} from '../offline-sync/conflict-note-review.mjs';
 import {createConflictNoteProposal} from '../offline-sync/conflict-note-proposal.mjs';
-import {capturePrivateAccountSource, preparePrivateAccountMutation} from './prepare-private-account-mutation.mjs';
+import {capturePrivateAccountSource, preparePrivateAccountMutation, assertPrivateNoteSourceCompatible} from './prepare-private-account-mutation.mjs';
 
 // Candidate bootstrap provider. readSource must return the complete owner-bound
 // document and explicit reverse-link evidence. No SDK/key/database goes to UI.
@@ -46,6 +46,7 @@ export function createPrivateNotePanelProvider({context, getUser, readSource, op
             check(); const initial = await current();
             if (initial.hasProfileLink !== false) throw new Error('NOTE_PROVIDER_SCOPE');
             source = initial.source;
+            assertPrivateNoteSourceCompatible(source);
             const initialNote = source.note === '' ? '' : await ownedContext.read({ownerId: uid, ciphertext: source.note});
             if (typeof initialNote !== 'string' || initialNote.length > 100000) throw new Error('NOTE_PROVIDER_VALUE');
             const mounted = await mountPanel(root, {signal: lifetime.signal, isActive: active, initialNote,

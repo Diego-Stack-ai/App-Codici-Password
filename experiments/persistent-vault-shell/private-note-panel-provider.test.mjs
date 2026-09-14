@@ -111,3 +111,8 @@ test('only the exact prepared command supports note reproposal; recovered or alt
     assert.equal((await g.panel.readConflict(operation)).localNote, 'local');
     proposal.close(); f.page.abort(); g.page.abort();
 });
+
+test('incompatible source is rejected before mounting an editor or preparing encryption', async () => {
+    const f = fixture(); delete f.source.schemaVersion;
+    await assert.rejects(f.mount(), /PREPARATION_INVALID/); assert.equal(f.panel, undefined);
+});

@@ -18,7 +18,7 @@ export async function mountEmulatorList(root, context, {state = {}, onRemember =
     const sort = document.createElement('button'); sort.id = 'sort-btn'; sort.setAttribute('aria-label', 'Cambia ordinamento');
     const sortLabel = document.createElement('span'); sortLabel.id = 'sort-label'; sort.append(sortLabel);
     const info = document.createElement('p');
-    info.textContent = 'Liste e repository dell’app, collegati agli emulatori. Apri una card per il dettaglio base. Salvataggi non disponibili.';
+    info.textContent = 'Dati fittizi negli emulatori. Apri una card per il dettaglio. La nota di Alfa privato è modificabile; gli altri Account restano in consultazione.';
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, search, sort, info, container); root.append(wrapper);
     const mount = company ? mountAccountAziendaList : mountAccountPrivati;

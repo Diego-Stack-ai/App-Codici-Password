@@ -60,6 +60,13 @@ export function capturePrivateAccountSource(source) {
     return snapshot(Object.fromEntries(Object.entries(source).filter(([field]) => field !== 'updatedAt')));
 }
 
+export function assertPrivateNoteSourceCompatible(source) {
+    const captured = capturePrivateAccountSource(source);
+    if (captured.schemaVersion !== 1 || !Number.isSafeInteger(captured.revision) || captured.revision < 0 ||
+        captured.revision >= Number.MAX_SAFE_INTEGER) fail();
+    validateRecord(Object.fromEntries(Object.entries(captured).filter(([field]) => fields.has(field))));
+}
+
 // Candidate M6 envelope only; no network or storage. Source must be the complete
 // private document read under the caller's UID. Reverse profile-link evidence is
 // supplied by the caller, never established by this helper. Existing title/URL

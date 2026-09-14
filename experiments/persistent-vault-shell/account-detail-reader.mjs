@@ -18,15 +18,16 @@ export function createAccountDetailReader({context, getUser, repository}) {
     const checkField = field => {
         if (!fields.includes(field)) throw new Error('FIELD_NOT_ALLOWED');
     };
-    return async function open(selection) {
+    return async function open(selection, {confirmed = false} = {}) {
         assertActive();
         if (!selection || !['private', 'company'].includes(selection.domain)) throw new Error('INVALID_ACCOUNT_DOMAIN');
         const id = segment(selection.id);
         if (selection.domain === 'private' && selection.companyId !== undefined) throw new Error('INVALID_ACCOUNT_DOMAIN');
         const companyId = selection.domain === 'company' ? segment(selection.companyId) : undefined;
+        if (typeof confirmed !== 'boolean') throw new Error('INVALID_READ_MODE');
         const record = companyId === undefined
-            ? await repository.getPrivateAccount(uid, id)
-            : await repository.getCompanyAccount(uid, companyId, id);
+            ? await repository[confirmed ? 'getPrivateAccountConfirmed' : 'getPrivateAccount'](uid, id)
+            : await repository[confirmed ? 'getCompanyAccountConfirmed' : 'getCompanyAccount'](uid, companyId, id);
         assertActive();
         if (!record) throw new Error('RECORD_NOT_FOUND');
         if (Object.hasOwn(record, 'ownerId') && record.ownerId !== uid) throw new Error('OWNER_MISMATCH');

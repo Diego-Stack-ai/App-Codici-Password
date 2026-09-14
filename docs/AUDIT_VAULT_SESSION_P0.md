@@ -774,3 +774,11 @@ Da 840128de, stessa PR #63. Lettura server di Account, profilo e aziende con ide
 Il browser monta il provider reale e salva con SDK Firestore/callable e backend emulato; verificati anche rifiuti per link inversi personali/aziendali prima dell'editor. L'entry principale del laboratorio resta da collegare e la prima apertura offline non è coperta; il controllo transazionale server resta autorevole. Nessuna chiusura dei gate di rollout o App Check remoto, nessuna modifica a master o deploy. Esiti finali riportati nel checkpoint di validazione seguente.
 
 Validazione finale audit 80: npm test completo superato (183 test shell e 114 offline inclusi); Chrome/Edge superati, 9 scenari generici e 20 privati per browser, 58 esecuzioni totali. Compresi lettore Firebase reale, blocco dei link inversi e salvataggio del provider. App Check resta sintetico e il laboratorio principale non è ancora attivato.
+
+## 81. Entry del laboratorio e refresh confermato — 14/09/2026
+
+Da 8343282e, stessa PR #63: attivati provider e trasporto esclusivamente su loopback/emulatori per la fixture alfa. Code nuove create in schema 2, nessun upgrade delle esistenti; chiusura su dismissione. Il bridge limita utenti, origine e record e richiede JWT emulato e attestazione sintetica. Gli Account incompatibili mantengono la consultazione.
+
+Il collaudo end-to-end dell'entry ha rilevato e corretto il refresh da cache: dopo la ricevuta viene usata la lettura canonica server-confirmed, senza fallback. Aggiunte regressioni su dettaglio consultabile, prevalidazione, modalità confermata e apertura/chiusura della coda demo. Prova ripetibile con --entry-browser; nessuna attivazione nella PWA pubblicata. Gate offline iniziale, rollout e verifiche remote/fisiche restano aperti.
+
+Validazione finale audit 81: suite completa npm test superata, inclusi 189 test shell e 114 offline. Regressioni Chrome/Edge della coda: 58 esecuzioni superate. Nuovo collaudo dell'entry: 5 verifiche per browser, 10 esecuzioni superate (68 totali). Dopo le ultime guardie di chiusura, rieseguiti i 21 test mirati di coda/dettaglio e il collaudo dell'entry. Nessuna prova App Check remota o su dispositivo fisico.
