@@ -760,3 +760,9 @@ Base `82ab2002`, ramo `experiment/m6-firebase-queue-adapter`. Adattatore concret
 Base `32db005f`, ramo `experiment/m6-shell-owned-queue`. Factory crittografica iniettata dal bootstrap, facciata di operazioni senza key/DB/SDK, assente dai contesti route. Dismissione immediata su lock, timeout, Auth, segnale della vista, dispose e logout fallito; chiusura dei client tardivi e rifiuto di risposte fuori sessione.
 
 npm test completo superato; 165 test shell e 15 test Firebase emulati inclusi. Chrome/Edge: 52 esecuzioni demo, con apertura della coda attraverso la sessione, commit remoto seguito da lock e retry dopo nuovo unlock senza aggiornare il record una seconda volta. Materiale estratto dall'envelope verificato nella prova Firebase; nessuna chiave restituita alla vista. App Check sintetico e middleware remoto non certificato. Provider UI/entry e rollout restano aperti, nessuna attivazione o migrazione.
+
+## 79. Provider del pannello nota privata — 14/09/2026
+
+Base c4e1a1a8, ramo experiment/m6-private-note-provider. Pannello collegato alla capability della shell con record e UID fissi, revisione catturata alla visualizzazione, preparazione canonica della sola nota e observer revocati insieme alla sessione. Comandi recuperati o alterati non vengono dichiarati note-only: confronto disponibile senza riproposta automatica. Richiesta esplicita evidenza dei collegamenti inversi dal lettore fidato, mai dedotta dal documento incompleto.
+
+Suite completa superata; suite shell finale 178 test dopo l'ulteriore integrazione del pannello DOM simulato. 52 esecuzioni Chrome/Edge della catena coda/sessione/SDK superate. Queste prove browser non coprono ancora il nuovo provider. Entry principale non attivata, lettore fidato concreto e prova browser dedicata ancora aperti; restano rollout e verifiche remote/fisiche. Nessun deploy, migrazione o modifica di master. Dettagli e limiti nel checkpoint corrispondente di M6.

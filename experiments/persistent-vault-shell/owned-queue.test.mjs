@@ -59,3 +59,23 @@ test('expiration closes the queue, and one failing disposer cannot prevent the o
     time = 60001; await assert.rejects(queue.flush()); assert.equal(f.closed, 2);
     await assert.rejects(second.flush()); f.session.dispose();
 });
+
+for (const boundary of ['lock', 'delayed-identity', 'navigation']) test(`queue observers stop after ${boundary}`, async () => {
+    const f = fixture(); await f.open(); let events = 0;
+    await f.session.openMutationQueue({signal: f.context.signal, domain: 'private-account',
+        onState: () => events++, onCommitted: () => events++});
+    const scope = f.supplied.scope;
+    scope.onState({state: 'offline'}); scope.onCommitted({operationId: 'own'}); assert.equal(events, 2);
+    if (boundary === 'lock') f.session.lock();
+    if (boundary === 'delayed-identity') f.change('B', false);
+    if (boundary === 'navigation') await f.session.navigate('other');
+    scope.onState({state: 'saved'}); scope.onCommitted({operationId: 'late'});
+    assert.equal(events, 2); f.session.dispose();
+});
+
+test('invalid observers are rejected before opening a queue', async () => {
+    const f = fixture(); await f.open();
+    for (const name of ['onState', 'onCommitted']) await assert.rejects(f.session.openMutationQueue({
+        signal: f.context.signal, domain: 'private-account', [name]: 'invalid'}), /OBSERVER_INVALID/);
+    f.session.dispose();
+});

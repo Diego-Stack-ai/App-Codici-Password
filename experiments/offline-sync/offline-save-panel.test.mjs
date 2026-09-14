@@ -276,3 +276,12 @@ for (const mode of ['flush-lock-refused', 'uncertain-transaction']) {
         assert.equal(f.status.textContent, 'Nota salvata.'); f.page.abort();
     });
 }
+
+test('recovered command with no proven note-only proposal retains comparison without replacement controls', async () => {
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        createConflictProposal: async () => null,
+        readConflict: async () => ({localNote: 'local', onlineNote: 'online'})});
+    await f.save.onclick(); await f.compare.onclick();
+    assert.equal(f.comparison.hidden, false); assert.equal(f.propose.hidden, true);
+    assert.equal(f.confirmProposal.hidden, true); f.page.abort();
+});

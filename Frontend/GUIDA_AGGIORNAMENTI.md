@@ -759,3 +759,7 @@ Da 82ab2002, sul ramo experiment/m6-firebase-queue-adapter: client della coda co
 ## Coda posseduta dalla shell — candidata 14/09/2026
 
 Ramo experiment/m6-shell-owned-queue, base 32db005f: la shell apre la coda tramite factory fidata e ne revoca operazioni/riferimenti alla chiusura del Vault o della vista. Suite completa, 165 test shell, 15 test Firebase emulati e 52 esecuzioni browser demo superati. Nessun key/DB/SDK alle route. Provider UI/entry e rollout restano aperti; M6/audit 78 registrano i limiti. Checkpoint destinato alla stessa PR #62, senza deploy.
+
+## Provider della nota privata — candidata 14/09/2026
+
+Da c4e1a1a8 consolidato, ramo experiment/m6-private-note-provider: collegamento del pannello alla coda posseduta dalla shell, preparazione della sola nota sulla revisione visualizzata, callback protetti da UID e durata della vista. Suite completa superata, 178 test shell finali e 52 esecuzioni browser della catena preesistente. Il nuovo provider è verificato in fixture/DOM simulato; entry con lettore fidato, prova browser dedicata e rollout restano da completare. M6/audit 79 descrivono limiti e recupero senza riproposta automatica. Nessuna versione o pubblicazione in produzione.

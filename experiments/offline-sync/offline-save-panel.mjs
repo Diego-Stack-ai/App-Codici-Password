@@ -141,8 +141,8 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
             let result;
             if (typeof createConflictProposal === 'function') {
                 openedProposal = await createConflictProposal(structuredClone(snapshot), {signal, isActive: active});
-                if (!active() || held !== snapshot) { openedProposal.close(); openedProposal = null; return; }
-                result = openedProposal.comparison;
+                if (!active() || held !== snapshot) { openedProposal?.close(); openedProposal = null; return; }
+                result = openedProposal ? openedProposal.comparison : await readConflict(structuredClone(snapshot), {signal, isActive: active});
             } else result = await readConflict(structuredClone(snapshot), {signal, isActive: active});
             if (!active() || held !== snapshot) return;
             if (typeof result?.localNote !== 'string' || typeof result?.onlineNote !== 'string' ||

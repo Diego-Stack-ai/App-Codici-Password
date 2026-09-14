@@ -24,12 +24,12 @@ export function createMemoryVault({unlockKey, decryptRecord, encryptValue, openQ
     return Object.freeze({
         lock,
         isUnlocked,
-        async openQueue(owner, {signal, domain} = {}) {
+        async openQueue(owner, {signal, domain, onState = () => {}, onCommitted = () => {}} = {}) {
             const epoch = generation;
             assertCurrent(owner, epoch);
             if (typeof openQueueWithKey !== 'function') throw new Error('QUEUE_UNAVAILABLE');
             if (!signal || typeof signal.addEventListener !== 'function' ||
-                !['private-account', 'offline-sync'].includes(domain)) throw new Error('QUEUE_CONTEXT_INVALID');
+                !['private-account', 'offline-sync'].includes(domain) || typeof onState !== 'function' || typeof onCommitted !== 'function') throw new Error('QUEUE_CONTEXT_INVALID');
             const controller = new AbortController();
             let resource, closed = false;
             const close = () => {
@@ -46,6 +46,8 @@ export function createMemoryVault({unlockKey, decryptRecord, encryptValue, openQ
             try {
                 check();
                 const opened = await openQueueWithKey(key, {uid: owner, domain, signal: controller.signal,
+                    onState: event => { try { check(); } catch { return; } return onState(event); },
+                    onCommitted: event => { try { check(); } catch { return; } return onCommitted(event); },
                     isActive: () => { try { check(); return true; } catch { close(); return false; } }});
                 if (closed) { disposeQueue(opened); throw new Error('QUEUE_DISPOSED'); }
                 resource = opened; check();
