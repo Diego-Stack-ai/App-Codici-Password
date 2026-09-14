@@ -694,3 +694,11 @@ Il caso browser candidato attraversa la coda IndexedDB, il replace e il backend 
 ## 67. Setup locale del runner cloud — 14/09/2026
 
 Base `3018e202`. Aggiunto setup Linux x86_64 senza privilegi globali: installa dai lock npm, estrae Chrome ed Edge sotto `.codex-tmp`, prepara con la Firebase CLI bloccata la cache Firestore e genera gli export dei tre percorsi. La guida elenca domini, file e punto di allowlist richiesti. La modalità `--check` non usa rete. Il commit base non risultava verificabile su GitHub dal workspace: clone privo di remote e GitHub CLI non autenticata; non viene quindi dichiarato pubblicato. Nessun deploy o dato Firebase reale.
+
+## 68. Revisione e collaudo locale della PR #59 — 14/09/2026
+
+Verificato su origin lo snapshot `a3f7f28`, derivato da `65a5d0e7`, sul ramo `codex/trasferire-codici-e-password-su-cloud` verso `experiment/vault-shell-v124`. Nessun contributo dai checkout documentali estranei. La prima prova browser ha riprodotto `UI_REPROPOSAL_NOT_APPLIED`: fixture privata incompleta (URL mancante) e confronto scorretto fra ciphertext prima/dopo una nuova cifratura. Corrette entrambe le aspettative senza allentare il preparatore canonico.
+
+Chiusa la capability di proposta arrivata dopo abort prima di accedere al plaintext; azioni e proposta eliminate dopo scarto. Distinto il mancato lease della sostituzione da quello del flush successivo: dopo esito incerto si conserva l'identità nuova per la ricevuta e si riprova soltanto la coda esistente. Aggiunte quattro regressioni e rafforzata quella sul mancato lease iniziale. Corretto e provato con fixture senza rete lo script Linux, eliminando la cancellazione ricorsiva derivata da un percorso personalizzato.
+
+Esiti locali Windows: 101 test offline, 155 shell nella suite completa `npm test`, Functions, Firestore/Storage Rules ed emulatori superati; runner Chrome/Edge `--fenced-browser` superato (5 scenari generici e 12 privati per browser, incluso scarto verificato nello scenario privato). Sintassi Bash e fixture di setup superate. Il collaudo Linux cloud con download effettivi resta distinto e aperto. Rollback del candidato al checkpoint `65a5d0e7`, senza migrazione. Provider bootstrap, trasporto autenticato, recupero dopo riapertura e rollout non sono attivati da questo lavoro; produzione 1.2.124 invariata.

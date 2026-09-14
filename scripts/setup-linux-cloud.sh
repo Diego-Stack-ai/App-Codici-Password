@@ -8,8 +8,11 @@ TOOLS_DIR="${CLOUD_TOOLS_DIR:-$ROOT/.codex-tmp/cloud-tools}"
 export FIREBASE_EMULATORS_PATH="${FIREBASE_EMULATORS_PATH:-$ROOT/.codex-tmp/firebase-emulators}"
 ENV_FILE="$TOOLS_DIR/environment.sh"
 CHECK_ONLY=false
-[[ "${1:-}" == "--check" ]] && CHECK_ONLY=true
-[[ $# -le 1 ]] || { echo "Uso: $0 [--check]" >&2; exit 64; }
+case "$#:${1:-}" in
+    0:) ;;
+    1:--check) CHECK_ONLY=true ;;
+    *) echo "Uso: $0 [--check]" >&2; exit 64 ;;
+esac
 
 require_tool() {
     command -v "$1" >/dev/null || { echo "Strumento richiesto non disponibile: $1" >&2; return 1; }
@@ -29,7 +32,7 @@ report() {
     java -version 2>&1 | head -n 1
     for item in "Chrome:$CHROME_PATH" "Edge:$EDGE_PATH"; do
         name="${item%%:*}"; path="${item#*:}"
-        [[ -x "$path" ]] && echo "$name: $($path --version)" || echo "$name: MANCANTE ($path)"
+        [[ -x "$path" ]] && echo "$name: $("$path" --version)" || echo "$name: MANCANTE ($path)"
     done
     if [[ -f "$FIRESTORE_INFO" ]]; then
         node - "$FIRESTORE_INFO" "$FIREBASE_EMULATORS_PATH" <<'NODE'
@@ -53,14 +56,20 @@ npm ci --prefix "$ROOT"
 npm ci --prefix "$ROOT/functions"
 
 download_deb() {
-    local name="$1" url="$2" destination="$3" archive="$TOOLS_DIR/$name.deb"
+    local name="$1" url="$2" destination="$3"
+    local archive="$TOOLS_DIR/$name.deb" extract_dir="$TOOLS_DIR/$name"
     if [[ ! -x "$destination" ]]; then
+        # A custom executable is used as-is; never derive an extraction/deletion
+        # directory from an arbitrary executable path.
+        case "$name:$destination" in
+            "chrome:$TOOLS_DIR/chrome/opt/google/chrome/google-chrome"|"edge:$TOOLS_DIR/edge/opt/microsoft/msedge/msedge") ;;
+            *) echo "Eseguibile personalizzato non disponibile: $destination" >&2; return 1 ;;
+        esac
         echo "Download $name da $url"
         curl --fail --location --retry 3 --connect-timeout 20 --output "$archive.part" "$url"
         mv "$archive.part" "$archive"
-        rm -rf "${destination%%/opt/*}"
-        mkdir -p "${destination%%/opt/*}"
-        dpkg-deb --extract "$archive" "${destination%%/opt/*}"
+        mkdir -p "$extract_dir"
+        dpkg-deb --extract "$archive" "$extract_dir"
         [[ -x "$destination" ]] || { echo "Eseguibile $name non trovato dopo l'estrazione." >&2; exit 1; }
     fi
     "$destination" --version
@@ -72,11 +81,11 @@ download_deb edge "${EDGE_DEB_URL:-https://go.microsoft.com/fwlink/?linkid=21490
 echo "Preparazione della cache Firestore verificata dalla Firebase CLI locale..."
 node "$ROOT/node_modules/firebase-tools/lib/bin/firebase.js" setup:emulators:firestore
 
-cat >"$ENV_FILE" <<EOF
-# Generato da scripts/setup-linux-cloud.sh; file workspace-local ignorato da Git.
-export CHROME_PATH='$CHROME_PATH'
-export EDGE_PATH='$EDGE_PATH'
-export FIREBASE_EMULATORS_PATH='$FIREBASE_EMULATORS_PATH'
-EOF
+{
+    echo '# Generato da scripts/setup-linux-cloud.sh; file workspace-local ignorato da Git.'
+    printf 'export CHROME_PATH=%q\n' "$CHROME_PATH"
+    printf 'export EDGE_PATH=%q\n' "$EDGE_PATH"
+    printf 'export FIREBASE_EMULATORS_PATH=%q\n' "$FIREBASE_EMULATORS_PATH"
+} >"$ENV_FILE"
 echo "Setup completato. Prima dei test: source '$ENV_FILE'"
 report

@@ -68,8 +68,8 @@ export async function createFencedQueueClient({send, isOnline = () => navigator.
         },
         async replace(expected, replacement) {
             const result = await underLease(api => api.replace(expected, replacement));
-            if (!result.acquired) return result;
-            return client.flush();
+            if (!result.acquired) return {...result, replacementApplied: false};
+            return {...await client.flush(), replacementApplied: true};
         },
         discard(operation) { return underLease(api => api.remove(operation)); },
         close() { closed = true; for (const stop of [...renewalStops]) stop(); }

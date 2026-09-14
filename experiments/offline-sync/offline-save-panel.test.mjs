@@ -170,8 +170,55 @@ test('failed replacement preserves the conflict and requires a fresh comparison'
     const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
         createConflictProposal: async () => ({comparison: {localNote: 'Local', onlineNote: 'Online', onlineRevision: 7},
             close: () => closed++, prepareReplacement: async () => ({operationId: 'replacement-note', recordId: operation.recordId})}),
-        replace: async () => ({acquired: false})});
+        replace: async () => ({acquired: false, replacementApplied: false})});
     await f.save.onclick(); await f.compare.onclick(); f.propose.onclick(); await f.confirmProposal.onclick();
     assert.match(f.status.textContent, /non confermata/); assert.equal(f.keepOnline.hidden, false);
+    assert.equal(f.propose.hidden, true); assert.equal(f.confirmProposal.hidden, true);
     f.page.abort(); assert.equal(closed, 1);
 });
+
+test('late proposal is closed without reading plaintext after page abort', async () => {
+    let resolve, closed = 0;
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        createConflictProposal: () => new Promise(done => { resolve = done; })});
+    await f.save.onclick(); const pending = f.compare.onclick(); f.page.abort();
+    resolve({close: () => closed++, get comparison() { assert.fail('late plaintext accessed'); }});
+    await pending; assert.equal(closed, 1); assert.equal(f.root.children.length, 0);
+});
+
+test('discarding a reviewed conflict closes the proposal and hides all proposal actions', async () => {
+    let closed = 0;
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        createConflictProposal: async () => ({comparison: {localNote: 'Local', onlineNote: 'Online'}, close: () => closed++}),
+        discard: async () => ({acquired: true})});
+    await f.save.onclick(); await f.compare.onclick(); f.propose.onclick();
+    f.keepOnline.onclick(); await f.confirm.onclick();
+    assert.equal(closed, 1); assert.equal(f.propose.hidden, true); assert.equal(f.confirmProposal.hidden, true);
+    assert.equal(f.cancelProposal.hidden, true); f.page.abort(); assert.equal(closed, 1);
+});
+
+for (const mode of ['flush-lock-refused', 'uncertain-transaction']) {
+    test(`replacement identity survives ${mode} and retry accepts only its receipt`, async () => {
+        let retrying = false, refreshed = 0, replacements = 0;
+        const replacement = {operationId: 'replacement-note', recordId: operation.recordId};
+        const f = await fixture({onSaved: () => refreshed++,
+            send: async config => {
+                if (!retrying) config.onState({state: 'conflict', operation});
+                else {
+                    await config.onCommitted(operation); assert.equal(refreshed, 0);
+                    await config.onCommitted(replacement);
+                }
+            },
+            createConflictProposal: async () => ({comparison: {localNote: 'Local', onlineNote: 'Online'}, close() {},
+                prepareReplacement: async () => replacement}),
+            replace: async () => {
+                replacements++;
+                if (mode === 'uncertain-transaction') throw new Error('LEASE_LOST_AFTER_COMMIT');
+                return {acquired: false, replacementApplied: true};
+            }});
+        await f.save.onclick(); await f.compare.onclick(); f.propose.onclick(); await f.confirmProposal.onclick();
+        assert.equal(f.keepOnline.hidden, true); assert.equal(f.confirmProposal.hidden, true); assert.equal(f.retry.hidden, false);
+        retrying = true; await f.retry.onclick(); assert.equal(refreshed, 1); assert.equal(replacements, 1);
+        assert.equal(f.status.textContent, 'Nota salvata.'); f.page.abort();
+    });
+}

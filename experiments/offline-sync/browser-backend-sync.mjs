@@ -34,7 +34,7 @@ try {
         expectedRevision: 0, encryptedPayload: await encrypt('SYNTHETIC-PAYLOAD', 'SYNTHETIC-VAULT-KEY')};
     if (privateAccounts) {
         operation.record = {nomeAccount: 'Synthetic isolated account', type: 'account', visibility: 'private', _encrypted: true,
-            username: '', account: '', password: operation.encryptedPayload, note: ''};
+            username: '', account: '', url: '', password: operation.encryptedPayload, note: ''};
         delete operation.encryptedPayload;
     }
     await client.enqueue(operation);
@@ -163,7 +163,7 @@ try {
         assert((await pending()).length === 1, 'UI_REPROPOSAL_CANCEL_CHANGED_QUEUE');
         conflictButtons[6].onclick(); await conflictButtons[7].onclick();
         const reproposed = await snapshot({...conflictedNote, operationId: 'bridge-ui-reproposal'});
-        assert(!(await pending()).length && reproposed.record.revision === 4 && reproposed.record.note === localConflictNote &&
+        assert(!(await pending()).length && reproposed.record.revision === 4 && reproposed.record.note !== localConflictNote &&
             (await decrypt(reproposed.record.note, 'SYNTHETIC-VAULT-KEY')) === 'SYNTHETIC-LOCAL-CONFLICT-NOTE', 'UI_REPROPOSAL_NOT_APPLIED');
         conflictPage.abort(); assert([...compared].every(node => node.textContent === ''), 'UI_COMPARISON_RETAINED');
         passed.push('confirmed note reproposal atomically replaces the conflicted command and applies through the private emulator backend');

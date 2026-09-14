@@ -712,3 +712,7 @@ In entrambi i dettagli Account il pulsante grande Aggiungi nota compare soltanto
 ## Conferme e rilettura nella shell sperimentale — 14/09/2026
 
 Base 790d3d26. Due passaggi consecutivi: conferme correlate a operationId/recordId e rilettura del dettaglio tramite capability protetta. Il pannello distingue salvataggio confermato da errore di aggiornamento della vista; logout e navigazione impediscono risposte tardive. 79 test offline, 155 test shell, 32 esecuzioni browser/backend emulato e suite npm test completa superati. Provider principale e trasporto autenticato restano aperti; Hosting 1.2.124 invariato. Nessuna migrazione, master non modificato. Dettagli nei checkpoint 61–62 dell'audit Vault e nel contratto M6.
+
+## Revisione del trasferimento cloud — 14/09/2026
+
+PR #59, base pubblicata `a3f7f28`, destinazione esclusiva `experiment/vault-shell-v124`. Riproposizione note collegata alla UI candidata, corretti lifecycle ed esiti incerti del replace; setup Linux corretto senza cancellazioni ricorsive. Suite completa e Chrome/Edge con backend emulato passati localmente. Audit 68 e `docs/SETUP_LINUX_CLOUD.md` distinguono il codice verificato dall'installazione cloud ancora da collaudare. Nessuna importazione dei rami documentali errati, nuova versione, modifica a master o deploy. Restano aperti i gate runtime elencati nel piano M6.
