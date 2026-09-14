@@ -40,6 +40,8 @@ try {
     await backToList();
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => content.querySelector('textarea') && [...content.querySelectorAll('button')].some(button => button.textContent === 'Salva nota' && !button.disabled), 'SECOND_EDITOR');
+    const {runOfflineConsultationProbe} = await import('/emulator.js');
+    const loadedDomains = await runOfflineConsultationProbe();
     const offlineInput = content.querySelector('textarea');
     await network(true);
     let httpBlocked = false; try { await fetch('/emulator.css', {cache: 'no-store'}); } catch { httpBlocked = true; }
@@ -51,6 +53,8 @@ try {
     byId('unlock').click(); await wait(() => byId('master-dialog').open, 'OFFLINE_PROMPT');
     byId('unlock-value').value = 'MASTER-FITTIZIA-A!123'; byId('master-dialog').querySelector('form').requestSubmit();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'OFFLINE_UNLOCK_LIST');
+    const cachedDomains = await runOfflineConsultationProbe();
+    assert(JSON.stringify(cachedDomains) === JSON.stringify(loadedDomains), 'OFFLINE_DOMAIN_MATRIX');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => content.textContent.includes('già conservata sul dispositivo'), 'OFFLINE_RECOVERY');
     const recoveredInput = content.querySelector('textarea');
@@ -73,6 +77,7 @@ try {
         passed: ['unauthenticated local transport rejected', 'entry login and Vault unlock', 'private note save and detail refresh without reload',
             'DevTools offline blocks HTTP without disconnecting the host', 'offline note survives view reopening without a new editor',
             'offline Vault lock and unlock recover the existing encrypted queue', 'online return and explicit retry refresh the recovered note',
+            ...cachedDomains.map(domain => `cached repository and protected decryption: ${domain}`), 'uncached document remains unavailable offline',
             'incompatible account remains readable', 'lock clears the view and prior draft']})});
 } catch (error) {
     if (!navigator.onLine) await network(false).catch(() => {});

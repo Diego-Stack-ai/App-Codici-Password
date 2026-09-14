@@ -5,7 +5,7 @@ import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
-import { getPrivateAccountConfirmed, getCompanyAccountConfirmed, listPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
+import { getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed, listPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
 import { showProfileAccountPicker } from '../privato/profilo-modal.js';
 import { profileAccountUrl } from '../privato/profile-model.js';
 import { companyProfileContacts, companyProfileDraft, findCompanyProfileContact, companyContactLinkPatch, companyAccountReferences } from './company-profile-model.js';
@@ -37,8 +37,12 @@ async function readLinkedPassword(contact) {
     const uid = auth.currentUser?.uid;
     const key = await ensureVaultKeyMaterial();
     if (!uid || auth.currentUser?.uid !== uid || !key) throw new Error('Vault bloccato');
-    const account = contact.linkedAccountCompanyId ? await getCompanyAccountConfirmed(uid, contact.linkedAccountCompanyId, contact.linkedAccountId) : await getPrivateAccountConfirmed(uid, contact.linkedAccountId);
+    const offline = globalThis.navigator?.onLine === false;
+    const account = contact.linkedAccountCompanyId
+        ? await (offline ? getCompanyAccount : getCompanyAccountConfirmed)(uid, contact.linkedAccountCompanyId, contact.linkedAccountId)
+        : await (offline ? getPrivateAccount : getPrivateAccountConfirmed)(uid, contact.linkedAccountId);
     if (!account || account.isArchived) throw new Error('Account mancante');
+    if (auth.currentUser?.uid !== uid || (Object.hasOwn(account, 'ownerId') && account.ownerId !== uid)) throw new Error('Sessione cambiata');
     const value = await decryptRequiredValue(account.password, key);
     if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata');
     return value;

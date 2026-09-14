@@ -790,3 +790,11 @@ Da 48b1eae6, stessa PR #63: apertura del solo recupero coda in assenza di rete, 
 DevTools disabilita la rete del browser di prova, confermata dal fallimento di HTTP. La sequenza comprende salvataggio offline, blocco e nuovo sblocco del Vault, riapertura del record, retry offline conservativo, ritorno online e aggiornamento della nota dopo ricevuta. Cache e autenticazione erano già disponibili nella stessa sessione; avvio a freddo e riapertura fisica PWA restano non certificati. Nessuna persistenza della chiave, migrazione o deploy.
 
 Validazione finale audit 82: npm test completo superato, inclusi 191 test shell e 116 offline. Chrome/Edge: 58 regressioni coda/provider e 18 verifiche dell'entry (9 per browser), 76 esecuzioni totali. La rete viene disabilitata dal protocollo DevTools, con HTTP effettivamente bloccato; superati recupero, nuovo sblocco offline e retry al ritorno online. Questa prova non certifica avvio a freddo o PWA fisica.
+
+## 83. Consultazione dei domini in cache e password dei profili — 14/09/2026
+
+Da 3af7006b, stessa PR #63. Corretta la sola lettura delle password collegate nei profili privati/aziendali: cache offline, server confermato online, controllo UID e proprietario prima della decifratura. Test dei quattro incroci profilo/Account e del mancato accesso a record assenti o discordanti.
+
+Matrice sintetica del repository canonico e della decifratura protetta: Account personali/aziendali, profili, contatti, indirizzi, dati documenti, IBAN/PIN/CCV, widget del profilo, scadenze e metadati allegati. Caricamento online esplicito prima della rete DevTools disabilitata; documento mai caricato correttamente indisponibile. Non è collaudo di tutte le schermate: file Storage, foto/QR, Widget Account, credenziali condivise, avvio a freddo e gate fisico bancario rimangono distinti. Matrice e limiti dettagliati in M6; nessun deploy.
+
+Validazione finale audit 83: npm test completo superato (inclusi 191 test shell, 116 offline e 65 test dei collegamenti dei profili). Collaudo entry su Chrome ed Edge: 25 verifiche per browser, 50 esecuzioni superate, con rete DevTools disabilitata e ripristinata. Questa matrice certifica letture dei dati sintetici già caricati nella sessione del laboratorio, non avvio a freddo, tutte le UI o file Storage offline.

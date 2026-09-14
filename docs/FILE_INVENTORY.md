@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **555**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 3211 | 47 | File di progetto: emulator-network-control. |
+| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 3333 | 45 | File di progetto: offline-consultation-probe. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -56,14 +56,15 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
 | `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 5712 | 78 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 7173 | 90 | File di progetto: emulator-browser. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6041 | 119 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 6533 | 81 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 6983 | 86 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 2138 | 34 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 5172 | 89 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 5489 | 94 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1113 | 16 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3355 | 52 | File di progetto: emulator-list-view. |
+| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 3211 | 47 | File di progetto: emulator-network-control. |
 | `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 2214 | 33 | File di progetto: emulator-queue. |
 | `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 2883 | 40 | File di progetto: emulator-queue.test. |
@@ -144,7 +145,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 83244 | 784 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 84118 | 790 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -225,7 +226,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/company-list-service.js` | JS | 423 | 11 | Flusso aziende/account aziendali: company-list-service. |
 | `Frontend/public/assets/js/modules/azienda/company-profile-link.js` | JS | 2761 | 25 | Flusso aziende/account aziendali: company-profile-link. |
 | `Frontend/public/assets/js/modules/azienda/company-profile-model.js` | JS | 2642 | 37 | Flusso aziende/account aziendali: company-profile-model. |
-| `Frontend/public/assets/js/modules/azienda/company-profile-ui.js` | JS | 16580 | 171 | Flusso aziende/account aziendali: company-profile-ui. |
+| `Frontend/public/assets/js/modules/azienda/company-profile-ui.js` | JS | 16898 | 175 | Flusso aziende/account aziendali: company-profile-ui. |
 | `Frontend/public/assets/js/modules/azienda/company-vcard.js` | JS | 4377 | 106 | Flusso aziende/account aziendali: company-vcard. |
 | `Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js` | JS | 2522 | 51 | Flusso aziende/account aziendali: dati-azienda-attachments. |
 | `Frontend/public/assets/js/modules/azienda/dati_azienda.js` | JS | 15850 | 371 | Flusso aziende/account aziendali: dati azienda. |
@@ -275,7 +276,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/privato/profilo-actions.js` | JS | 12091 | 242 | Flusso profilo/account personali: profilo-actions. |
 | `Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js` | JS | 18827 | 296 | Flusso profilo/account personali: profilo-addresses-docs. |
 | `Frontend/public/assets/js/modules/privato/profilo-dashboard.js` | JS | 9971 | 167 | Flusso profilo/account personali: profilo-dashboard. |
-| `Frontend/public/assets/js/modules/privato/profilo-links.js` | JS | 8206 | 141 | Flusso profilo/account personali: profilo-links. |
+| `Frontend/public/assets/js/modules/privato/profilo-links.js` | JS | 8507 | 143 | Flusso profilo/account personali: profilo-links. |
 | `Frontend/public/assets/js/modules/privato/profilo-modal.js` | JS | 20243 | 375 | Flusso profilo/account personali: profilo-modal. |
 | `Frontend/public/assets/js/modules/privato/profilo-phones-emails.js` | JS | 21177 | 403 | Flusso profilo/account personali: profilo-phones-emails. |
 | `Frontend/public/assets/js/modules/privato/profilo-qr.js` | JS | 6005 | 136 | Flusso profilo/account personali: profilo-qr. |
@@ -411,7 +412,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 139249 | 793 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 140593 | 801 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10033 | 92 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
@@ -423,7 +424,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 51464 | 306 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 54089 | 325 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 22561 | 160 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
@@ -431,7 +432,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 42727 | 453 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 43643 | 457 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 36464 | 366 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
@@ -627,7 +628,7 @@ File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/private-detail-legacy-id.test.mjs` | MJS | 13607 | 213 | Test automatico: private-detail-legacy-id.test. |
 | `tests/private-form-lazy-banking.test.mjs` | MJS | 2846 | 22 | Test automatico: private-form-lazy-banking.test. |
 | `tests/profile-account-management.test.mjs` | MJS | 5502 | 38 | Test automatico: profile-account-management.test. |
-| `tests/profile-contact-link.test.mjs` | MJS | 26376 | 346 | Test automatico: profile-contact-link.test. |
+| `tests/profile-contact-link.test.mjs` | MJS | 28723 | 374 | Test automatico: profile-contact-link.test. |
 | `tests/profile-deadline-link-model.test.mjs` | MJS | 2286 | 47 | Test automatico: profile-deadline-link-model.test. |
 | `tests/profile-label-management.test.mjs` | MJS | 1039 | 19 | Test automatico: profile-label-management.test. |
 | `tests/profile-lazy-editor.test.mjs` | MJS | 3248 | 73 | Test automatico: profile-lazy-editor.test. |

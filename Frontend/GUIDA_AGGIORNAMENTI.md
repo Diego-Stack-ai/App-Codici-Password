@@ -781,3 +781,9 @@ Validazione finale audit 81: suite completa npm test superata, inclusi 189 test 
 Ramo experiment/m6-private-note-provider, base 48b1eae6: il dettaglio aperto offline recupera soltanto la modifica esistente, senza nuovo editor o prove server inventate. Prova Chrome/Edge con rete effettivamente disabilitata tramite DevTools, blocco/sblocco Vault e ritorno online con ricevuta. Sessione e cache erano già disponibili: avvio a freddo e PWA fisica restano gate distinti. Dettagli in M6/audit 82; nessun master o deploy.
 
 Validazione finale audit 82: npm test completo superato, inclusi 191 test shell e 116 offline. Chrome/Edge: 58 regressioni coda/provider e 18 verifiche dell'entry (9 per browser), 76 esecuzioni totali. La rete viene disabilitata dal protocollo DevTools, con HTTP effettivamente bloccato; superati recupero, nuovo sblocco offline e retry al ritorno online. Questa prova non certifica avvio a freddo o PWA fisica.
+
+## Consultazione offline dei domini — candidata 14/09/2026
+
+Base 3af7006b, stessa PR #63. Le password collegate nei profili usano la cache quando offline, mantenendo server confermato online e controlli d'identità. Ampliata la prova a dati bancari e altri domini sintetici già caricati. Il test riguarda repository e decifratura, non tutte le UI o i file Storage; M6/audit 83 riportano la matrice e i gate aperti. Nessuna versione o distribuzione.
+
+Validazione finale audit 83: npm test completo superato (inclusi 191 test shell, 116 offline e 65 test dei collegamenti dei profili). Collaudo entry su Chrome ed Edge: 25 verifiche per browser, 50 esecuzioni superate, con rete DevTools disabilitata e ripristinata. Questa matrice certifica letture dei dati sintetici già caricati nella sessione del laboratorio, non avvio a freddo, tutte le UI o file Storage offline.

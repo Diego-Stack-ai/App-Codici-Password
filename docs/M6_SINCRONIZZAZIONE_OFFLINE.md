@@ -303,3 +303,22 @@ Il collaudo --entry-browser usa il protocollo DevTools sul solo target temporane
 Il test parte da una sessione autenticata e una cache già popolata: non certifica avvio a freddo senza rete, nuova autenticazione offline, riapertura fisica della PWA, consultazione bancaria o migrazione delle code. Non viene persistita alcuna Vault Key e non si aggiunge una cache di prove sui collegamenti. Restano rollout schema/PWA, compatibilità estesa e verifiche remote/fisiche; nessuna modifica a master, versione o deploy.
 
 Validazione finale audit 82: npm test completo superato, inclusi 191 test shell e 116 offline. Chrome/Edge: 58 regressioni coda/provider e 18 verifiche dell'entry (9 per browser), 76 esecuzioni totali. La rete viene disabilitata dal protocollo DevTools, con HTTP effettivamente bloccato; superati recupero, nuovo sblocco offline e retry al ritorno online. Questa prova non certifica avvio a freddo o PWA fisica.
+
+### Matrice di consultazione dei domini già caricati — candidata 14/09/2026
+
+Base 3af7006b, stessa PR #63. L'audit dei lettori ha rilevato che le password degli Account collegati ai contatti nei profili privati e aziendali usavano sempre il server. La sola consultazione ora usa il repository ordinario/cache quando il browser è offline; online conserva la lettura confermata. Account assenti, archiviati, proprietario discordante o cambio sessione non vengono decifrati/esposti. I percorsi di modifica e verifica dei collegamenti non sono trasformati in letture offline.
+
+Il laboratorio carica esplicitamente una matrice sintetica, poi disabilita la rete tramite DevTools e legge gli stessi dati dal repository canonico, decifrandoli attraverso la capability del Vault dopo nuovo sblocco. La query e il campo devono essere già disponibili. Una lettura di documento mai caricato deve fallire: non viene presentata come dato vuoto valido.
+
+| Area | Esito coperto dalla matrice | Limite ancora aperto |
+|---|---|---|
+| Account personali e aziendali | Presenza nelle liste e password cifrate già caricate | Non tutte le schermate/categorie o installazioni reali |
+| Profili, email, telefoni, indirizzi e documenti | Lettura e decifratura dei campi sintetici del profilo | Non certifica foto, tessera QR e contenuto dei documenti |
+| Banca e carte | IBAN personale/aziendale, PIN e CCV già presenti nel documento | Gate iPhone e rendering bancario completo restano aperti |
+| Widget del profilo e scadenze | Dati sintetici letti dal repository/cache | Widget Account, credenziali condivise e altre varianti non inclusi |
+| Allegati | Nome e metadati Firestore già caricati | I byte su Storage usano getBytes e non hanno cache offline esplicita |
+| Avvio da app chiusa | Non coperto | Autenticazione, asset e cache persistente devono essere collaudati insieme |
+
+La matrice verifica disponibilità e decifratura, non tutte le UI di produzione. Il laboratorio usa dati fittizi e la sessione già autenticata; non garantisce preparazione automatica dell'intero archivio o assenza di espulsione della cache sul telefono. Nessuna cache aggiuntiva di chiavi o file, migrazione, master, versione o deploy.
+
+Validazione finale audit 83: npm test completo superato (inclusi 191 test shell, 116 offline e 65 test dei collegamenti dei profili). Collaudo entry su Chrome ed Edge: 25 verifiche per browser, 50 esecuzioni superate, con rete DevTools disabilitata e ripristinata. Questa matrice certifica letture dei dati sintetici già caricati nella sessione del laboratorio, non avvio a freddo, tutte le UI o file Storage offline.

@@ -11,12 +11,15 @@ import {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCom
 import * as cryptoApi from '../../Frontend/public/assets/js/modules/core/crypto-utils.js';
 import {createFirebaseSession} from './firebase-session.mjs';
 import {requestMaster} from './master-prompt.mjs';
+import {probeOfflineConsultation} from './offline-consultation-probe.mjs';
 
 const byId = id => document.getElementById(id);
 const content = byId('content'), status = byId('status'), message = byId('message');
 let selectedRoute = 'private', busy = false;
 let selectedAccount = null;
 let listStates = {};
+let probeContext;
+export const runOfflineConsultationProbe = () => probeOfflineConsultation({context: probeContext, getUser: () => auth.currentUser});
 function refreshControls() {
     byId('login').disabled = busy || Boolean(auth.currentUser);
     byId('identity').disabled = busy || Boolean(auth.currentUser);
@@ -37,10 +40,11 @@ function openDetail(destination) {
         selectedRoute = 'detail'; void session.navigate('detail');
     } catch (error) { showError(error); }
 }
-const mount = context => mountEmulatorList(content, context, {
+const mount = context => { probeContext = context; return mountEmulatorList(content, context, {
     state: listStates[context.route], onRemember: state => { listStates[context.route] = state; }, onOpen: openDetail
-});
+}); };
 const mountDetail = context => {
+    probeContext = context;
     if (!selectedAccount || !context.unlocked) { content.replaceChildren(); return; }
     const selection = selectedAccount;
     const openAccount = createAccountDetailReader({context, getUser: () => auth.currentUser,
@@ -57,6 +61,7 @@ const session = createFirebaseSession({auth, db, cryptoApi,
     onState({state}) {
         status.textContent = state === 'unlocked' ? 'Vault sbloccato' : state === 'locked' ? 'Accesso effettuato · Vault bloccato' : 'Accesso non effettuato';
         if (state !== 'unlocked') {
+            probeContext = null;
             content.replaceChildren(); listStates = {};
             if (selectedRoute === 'detail') selectedRoute = selectedAccount?.domain || 'private';
             selectedAccount = null;

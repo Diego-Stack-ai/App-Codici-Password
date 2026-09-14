@@ -343,3 +343,31 @@ test('Eliminare un telefono conserva i riferimenti di email, utenze e documenti 
  const ctrl=await loadController('privato/profilo-links.js',{...model,auth:{currentUser:{uid:'owner'}},db:{},doc:(db,...parts)=>parts.join('/'),deleteField:()=> 'DELETE',showToast:()=>{},runTransaction:async(db,cb)=>cb({get:async ref=>({exists:()=>true,data:()=>ref==='users/owner'?profile:{linkedProfileField:{type:'phone',id:'removed'}}}),update:(ref,data)=>{patch=data;}})},['refreshProfileAccountReferences']);
  await ctrl.refreshProfileAccountReferences('a');assert.deepEqual(patch.linkedProfileFields.map(x=>x.type),['email','document','utility']);assert.deepEqual(patch.linkedProfileField,{type:'email',id:'e'});
 });
+
+for (const sourceCompany of [false, true]) for (const company of [false, true]) test(`consultazione offline password collegata: profilo aziendale=${sourceCompany}, Account aziendale=${company}`, async () => {
+    const calls = [];
+    const fn = sourceCompany ? 'readLinkedPassword' : 'readLinkedEmailAccountPassword';
+    const controller = await loadController(sourceCompany ? 'azienda/company-profile-ui.js' : 'privato/profilo-links.js', {
+        globalThis: {navigator: {onLine: false}}, auth: {currentUser: {uid: 'owner'}}, ensureVaultKeyMaterial: async () => 'vault',
+        getPrivateAccount: async (...args) => { calls.push(args); return {ownerId: 'owner', password: 'cached-cipher'}; },
+        getCompanyAccount: async (...args) => { calls.push(args); return {ownerId: 'owner', password: 'cached-cipher'}; },
+        getPrivateAccountConfirmed: async () => { throw new Error('SERVER_MUST_NOT_BE_USED'); },
+        getCompanyAccountConfirmed: async () => { throw new Error('SERVER_MUST_NOT_BE_USED'); },
+        decryptRequiredValue: async value => { assert.equal(value, 'cached-cipher'); return 'synthetic-secret'; }
+    }, [fn]);
+    assert.equal(await controller[fn]({linkedAccountId: 'account', ...(company ? {linkedAccountCompanyId: 'company'} : {})}), 'synthetic-secret');
+    assert.deepEqual(calls, [company ? ['owner', 'company', 'account'] : ['owner', 'account']]);
+});
+
+for (const sourceCompany of [false, true]) test(`cache mancante o proprietario discordante non espongono password, profilo aziendale=${sourceCompany}`, async () => {
+    let record = null, decrypted = 0;
+    const fn = sourceCompany ? 'readLinkedPassword' : 'readLinkedEmailAccountPassword';
+    const controller = await loadController(sourceCompany ? 'azienda/company-profile-ui.js' : 'privato/profilo-links.js', {
+        globalThis: {navigator: {onLine: false}}, auth: {currentUser: {uid: 'owner'}}, ensureVaultKeyMaterial: async () => 'vault',
+        getPrivateAccount: async () => record, getCompanyAccount: async () => record,
+        decryptRequiredValue: async () => { decrypted++; return 'secret'; }
+    }, [fn]);
+    await assert.rejects(controller[fn]({linkedAccountId: 'account'}));
+    record = {ownerId: 'other', password: 'cipher'}; await assert.rejects(controller[fn]({linkedAccountId: 'account'}));
+    assert.equal(decrypted, 0);
+});

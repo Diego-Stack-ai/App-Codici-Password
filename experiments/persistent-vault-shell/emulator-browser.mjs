@@ -26,14 +26,26 @@ for (const suffix of ['A', 'B']) {
         fixtureUids.push(user.uid);
         await setDoc(doc(db, 'users', user.uid), {});
         const key = cryptoApi.generateVaultKey(), master = `MASTER-FITTIZIA-${suffix}!123`;
+        const encrypted = value => cryptoApi.encrypt(value, key);
+        await setDoc(doc(db, 'users', user.uid), {nome: await encrypted('Nome fittizio'),
+            contactEmails: [{id: 'email', address: await encrypted('fixture@example.invalid'), linkedAccountId: 'zeta'}],
+            contactPhones: [{id: 'phone', value: await encrypted('000000000')}],
+            userAddresses: [{id: 'address', street: await encrypted('Via fittizia')}],
+            documenti: [{id: 'document', numero: await encrypted('DOC-FITTIZIO')}]});
+        await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia')});
+        await setDoc(doc(db, 'users', user.uid, 'profileWidgets', 'fixture'), {title: 'Widget fittizio', description: '', tab: 'personal',
+            order: 0, size: 'medium', collapsed: false, schemaVersion: 1, fields: [{id: 'field', encrypted: true, value: await encrypted('WIDGET-FITTIZIO')}]});
+        await setDoc(doc(db, 'users', user.uid, 'scadenze', 'fixture'), {note: await encrypted('SCADENZA-FITTIZIA')});
+        await setDoc(doc(db, 'users', user.uid, 'accounts', 'banca', 'attachments', 'fixture'), {name: await encrypted('ALLEGATO-FITTIZIO'), createdAt: 1});
         await setDoc(doc(db, 'users', user.uid, 'settings', 'security'), {
             verifier: await cryptoApi.createVaultVerifier('APP_CODICI_PASSWORD_VAULT_VERIFIER_V1', master),
             vaultKeyEnvelope: await cryptoApi.wrapVaultKey(key, master)
         });
-        for (const domain of ['private', 'company']) for (const title of ['Alfa', 'Zeta']) {
+        for (const domain of ['private', 'company']) for (const title of ['Alfa', 'Zeta', 'Banca']) {
             const fields = {nomeAccount: `${title} ${domain === 'private' ? 'privato' : 'azienda'} ${suffix}`, username: `${title.toLowerCase()}-${suffix.toLowerCase()}@example.invalid`, account: `CODICE-FITTIZIO-${suffix}`, password: `SEGRETO-FITTIZIO-${domain}-${title}-${suffix}`,
                 note: `Nota fittizia per ${title} ${suffix}\nSeconda riga della nota.`, url: `https://example.invalid/${domain}/${title.toLowerCase()}`};
             const record = {ownerId: user.uid, _encrypted: true};
+            if (title === 'Banca') Object.assign(record, {isBanking: true, banking: [{bankId: 'fixture', iban: await encrypted('IBAN-FITTIZIO'), cards: [{pin: await encrypted('1234'), ccv: await encrypted('000')}]}]});
             if (domain === 'private' && title === 'Alfa') Object.assign(record, {schemaVersion: 1, revision: 0, type: 'account', visibility: 'private'});
             for (const [field, value] of Object.entries(fields)) record[field] = await cryptoApi.encrypt(value, key);
             const path = ['users', user.uid];
