@@ -50,6 +50,9 @@ try {
     [...content.querySelectorAll('button')].find(button => button.textContent === 'Salva nota').click();
     await wait(() => content.textContent.includes('Modifica conservata sul dispositivo'), 'OFFLINE_QUEUED');
     byId('lock').click(); await wait(() => !content.children.length, 'OFFLINE_LOCK');
+    let offlineLocked = false;
+    try { await runOfflineConsultationProbe(); } catch (error) { offlineLocked = error.message === 'PROBE_SESSION'; }
+    assert(offlineLocked, 'OFFLINE_LOCKED_DATA_ACCESS');
     byId('unlock').click(); await wait(() => byId('master-dialog').open, 'OFFLINE_PROMPT');
     byId('unlock-value').value = 'MASTER-FITTIZIA-A!123'; byId('master-dialog').querySelector('form').requestSubmit();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'OFFLINE_UNLOCK_LIST');
@@ -65,6 +68,7 @@ try {
     [...content.querySelectorAll('button')].find(button => button.textContent === 'Riprova sincronizzazione').click();
     await wait(() => content.textContent.includes('Nota salvata.') && [...content.querySelectorAll('pre')].some(node => node.textContent === offlineNote), 'ONLINE_RECOVERED');
     assert(document === marker, 'OFFLINE_RELOADED_DOCUMENT');
+    assert(JSON.stringify(await runOfflineConsultationProbe()) === JSON.stringify(loadedDomains), 'RECONNECTED_DOMAIN_MATRIX');
     await backToList();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="zeta"]'), 'BACK');
     document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
@@ -73,11 +77,15 @@ try {
     byId('lock').click();
     await wait(() => !content.children.length, 'LOCK');
     assert(input.value === '', 'OLD_DRAFT_RETAINED');
+    let onlineLocked = false;
+    try { await runOfflineConsultationProbe(); } catch (error) { onlineLocked = error.message === 'PROBE_SESSION'; }
+    assert(onlineLocked, 'ONLINE_LOCKED_DATA_ACCESS');
     await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, browser: navigator.userAgent,
         passed: ['unauthenticated local transport rejected', 'entry login and Vault unlock', 'private note save and detail refresh without reload',
             'DevTools offline blocks HTTP without disconnecting the host', 'offline note survives view reopening without a new editor',
             'offline Vault lock and unlock recover the existing encrypted queue', 'online return and explicit retry refresh the recovered note',
             ...cachedDomains.map(domain => `cached repository and protected decryption: ${domain}`), 'uncached document remains unavailable offline',
+            'offline lock denies cached data access', 'online lock denies cached data access', 'domain matrix remains readable after reconnect',
             'incompatible account remains readable', 'lock clears the view and prior draft']})});
 } catch (error) {
     if (!navigator.onLine) await network(false).catch(() => {});

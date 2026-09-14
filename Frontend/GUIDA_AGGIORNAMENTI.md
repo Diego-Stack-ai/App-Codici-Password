@@ -787,3 +787,9 @@ Validazione finale audit 82: npm test completo superato, inclusi 191 test shell 
 Base 3af7006b, stessa PR #63. Le password collegate nei profili usano la cache quando offline, mantenendo server confermato online e controlli d'identità. Ampliata la prova a dati bancari e altri domini sintetici già caricati. Il test riguarda repository e decifratura, non tutte le UI o i file Storage; M6/audit 83 riportano la matrice e i gate aperti. Nessuna versione o distribuzione.
 
 Validazione finale audit 83: npm test completo superato (inclusi 191 test shell, 116 offline e 65 test dei collegamenti dei profili). Collaudo entry su Chrome ed Edge: 25 verifiche per browser, 50 esecuzioni superate, con rete DevTools disabilitata e ripristinata. Questa matrice certifica letture dei dati sintetici già caricati nella sessione del laboratorio, non avvio a freddo, tutte le UI o file Storage offline.
+
+### Audit 84 — ciclo online/offline e blocco della consultazione (14/09/2026)
+
+Base 2dc18daa, stessa PR #63. Il collaudo dell'entry verifica esplicitamente che la matrice dei dati già caricati sia ancora consultabile dopo il ritorno online e che il probe protetto rifiuti la lettura dopo blocco del Vault, sia offline sia online. Chrome ed Edge: 28 verifiche per browser, 56 esecuzioni superate con emulatori e fixture locali. Modifica limitata al collaudo: nessun cambiamento runtime produttivo. La suite completa resta quella superata sul checkpoint precedente; non viene dichiarata rieseguita in questo incremento.
+
+Programma: avanzamento della verifica M6, senza chiusura globale. Restano avvio a freddo/cache persistente, file Storage, copertura delle UI e compatibilità estesa, rollout e prove fisiche/remoti. M8 conserva staging/journal e verifiche memoria/dispositivi; M9 conserva le prove fisiche di accessibilità. Nessun master, versione o deploy.
