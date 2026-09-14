@@ -19,6 +19,8 @@ const unlock = async () => {
     byId('master-dialog').querySelector('form').requestSubmit();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="banca"]'), 'BANK_LIST');
 };
+const pendingNote = 'Nota sintetica conservata prima di arresto forzato';
+const button = label => [...byId('content').querySelectorAll('button')].find(item => item.textContent === label);
 try {
     const {runOfflineConsultationProbe} = await import('/emulator.js');
     // Only a phase marker survives reload; no Vault key or decrypted data.
@@ -34,7 +36,16 @@ try {
         await navigator.serviceWorker.ready;
         await wait(() => navigator.serviceWorker.controller, 'SW_CONTROLLER');
         if (restartPhase === 'prepare') {
-            await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, phase: 'prepared'})});
+            if (window.__entryForced) {
+                document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
+                await wait(() => byId('content').querySelector('textarea') && button('Salva nota') && !button('Salva nota').disabled, 'CRASH_EDITOR');
+                await network(true);
+                byId('content').querySelector('textarea').value = pendingNote;
+                button('Salva nota').click();
+                await wait(() => byId('content').textContent.includes('Modifica conservata sul dispositivo'), 'CRASH_QUEUE');
+                // Out-of-band test report: no network restoration before termination.
+                window.__entryResult(JSON.stringify({ok: true, phase: 'prepared'}));
+            } else await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, phase: 'prepared'})});
         } else {
             sessionStorage.setItem('synthetic-cold-phase', 'reload');
             await network(true);
@@ -57,7 +68,17 @@ try {
         assert(blocked, 'NETWORK_NOT_BLOCKED');
         await unlock();
         const domains = await runOfflineConsultationProbe();
+        if (window.__entryForced) {
+            document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
+            await wait(() => byId('content').textContent.includes('già conservata sul dispositivo'), 'CRASH_QUEUE_RECOVERY');
+            assert(byId('content').querySelector('textarea').readOnly && button('Salva nota').hidden, 'CRASH_NEW_COMMAND');
+        }
         await network(false);
+        if (window.__entryForced) {
+            button('Riprova sincronizzazione').click();
+            await wait(() => byId('content').textContent.includes('Nota salvata.') &&
+                [...byId('content').querySelectorAll('pre')].some(item => item.textContent === pendingNote), 'CRASH_QUEUE_SYNC');
+        }
         assert(JSON.stringify(await runOfflineConsultationProbe()) === JSON.stringify(domains), 'RECONNECT_MATRIX');
         byId('logout').click();
         await wait(() => byId('status').textContent === 'Accesso non effettuato' && !byId('login').disabled, 'LOGOUT');
@@ -69,6 +90,7 @@ try {
             passed: [restartPhase ? 'static laboratory shell starts offline in a new browser process' : 'static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
                 'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required',
                 ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
+                ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});
     }
 } catch (error) {

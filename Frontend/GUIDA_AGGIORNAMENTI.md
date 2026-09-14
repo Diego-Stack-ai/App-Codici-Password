@@ -805,3 +805,9 @@ Validazione finale audit 85: npm test completo superato, inclusi 194 test shell 
 Base ba529553, stessa PR #63. Il comando node scripts/run-vault-session-emulators.mjs --restart-browser prepara le fixture, termina il browser di prova e lo riapre senza rete sullo stesso profilo temporaneo. Nuovo sblocco richiesto e matrice cache leggibile; 46 verifiche Chrome/Edge superate. M6/audit 86 distinguono questa chiusura controllata da arresto forzato, riavvio fisico e PWA iPhone. Produzione invariata.
 
 Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.
+
+## Arresto forzato e nota pendente — candidata 14/09/2026
+
+Base 1947b5c1, stessa PR #63. Comando node scripts/run-vault-session-emulators.mjs --crash-browser: nota fittizia accodata offline, terminazione forzata del solo browser temporaneo, recupero dopo nuova Master Password e sincronizzazione esplicita. 50 verifiche Chrome/Edge Windows superate. La rete non viene riattivata prima dell'interruzione. Limiti in M6/audit 87; nessun deploy o dato reale.
+
+Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.

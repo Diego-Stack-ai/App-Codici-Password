@@ -468,3 +468,7 @@ Validazione finale audit 85: npm test completo superato, inclusi 194 test shell 
 M6, audit 86: riavvio controllato del processo browser con rete bloccata prima della navigazione superato nel laboratorio (46 verifiche Chrome/Edge). Il Vault richiede nuovamente la Master Password. Restano arresto forzato/dispositivo, PWA fisica, cache completa/eviction, Storage e rollout. Nessuna chiusura globale del programma o deploy.
 
 Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.
+
+M6, audit 87: arresto forzato del browser dopo conferma della nota accodata offline, nuovo sblocco, recupero e retry online superati su Chrome/Edge Windows (50 verifiche). Restano transazioni in volo, dispositivo/PWA fisica, eviction, Storage e rollout; nessuna fase globale chiusa.
+
+Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.

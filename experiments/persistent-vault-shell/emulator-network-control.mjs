@@ -1,6 +1,6 @@
 // Test runner only. DevTools affects this disposable browser target, never the
 // host connection. The control channel remains available while HTTP is offline.
-export async function attachEntryNetworkControl(child, {restartPhase} = {}) {
+export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport} = {}) {
     if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
     const endpoint = await new Promise((resolve, reject) => {
         let output = '';
@@ -30,6 +30,9 @@ export async function attachEntryNetworkControl(child, {restartPhase} = {}) {
         if (message.id) {
             const entry = pending.get(message.id); pending.delete(message.id);
             if (message.error) entry?.reject(new Error(message.error.message)); else entry?.resolve(message.result);
+        } else if (message.method === 'Runtime.bindingCalled' && message.params.name === '__entryResult' && forced) {
+            if (message.params.payload.length > 10000) return;
+            try { onReport?.(JSON.parse(message.params.payload)); } catch { /* Ignore malformed laboratory reports. */ }
         } else if (message.method === 'Runtime.exceptionThrown') {
             exceptions.push(message.params.exceptionDetails?.exception?.description || message.params.exceptionDetails?.text);
         } else if (message.method === 'Runtime.bindingCalled' && message.params.name === '__entryNetworkControl') {
@@ -45,9 +48,10 @@ export async function attachEntryNetworkControl(child, {restartPhase} = {}) {
     });
     await send('Network.enable'); await send('Runtime.enable');
     await send('Runtime.addBinding', {name: '__entryNetworkControl'});
+    if (forced) await send('Runtime.addBinding', {name: '__entryResult'});
     if (restartPhase) {
         await send('Page.enable');
-        await send('Page.addScriptToEvaluateOnNewDocument', {source: `window.__entryRestartPhase = ${JSON.stringify(restartPhase)};`});
+        await send('Page.addScriptToEvaluateOnNewDocument', {source: `window.__entryRestartPhase = ${JSON.stringify(restartPhase)}; window.__entryForced = ${JSON.stringify(forced)};`});
         if (restartPhase === 'resume') await send('Network.emulateNetworkConditions', {offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
         await send('Page.navigate', {url: 'http://127.0.0.1:4188/'});
     }

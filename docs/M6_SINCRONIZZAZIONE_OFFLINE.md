@@ -344,3 +344,11 @@ Audit 86, base ba529553, stessa PR #63. Nuovo comando `node scripts/run-vault-se
 Questo supera il prerequisito di riavvio controllato del processo nel laboratorio. Non equivale ad arresto forzato, riavvio dispositivo o PWA fisica/iPhone. Restano preparazione deterministica completa, eviction, file Storage, compatibilità delle UI, rollout e altri gate del programma. Nessun dato reale o deploy.
 
 Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.
+
+### Arresto forzato con nota in attesa — candidata 14/09/2026
+
+Audit 87, base 1947b5c1, stessa PR #63. Il collaudo --crash-browser termina forzatamente il browser temporaneo dopo la conferma di accodamento di una nota offline e lo riapre senza rete. Nuovo sblocco obbligatorio, matrice cache leggibile, recupero della coda senza ricreare la modifica e retry esplicito online verificati. Chrome/Edge Windows: 50 verifiche superate.
+
+Si supera questo scenario di arresto dopo conservazione locale confermata. Restano arresto durante scritture in volo, spegnimento/riavvio dispositivo, corruzione/eviction, PWA iPhone, preparazione completa, file Storage e rollout. Nessuna estensione delle mutazioni o deploy; dettagli nell'audit 87.
+
+Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.

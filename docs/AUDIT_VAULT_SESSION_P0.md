@@ -828,3 +828,15 @@ Nuova prova superata in Chrome ed Edge: 23 verifiche per browser, 46 esecuzioni 
 Limiti: chiusura controllata del processo, non arresto forzato o spegnimento del dispositivo. La prova non certifica Safari/iPhone/PWA installata, eviction della cache, archivio interamente precaricato, tutte le UI o contenuto dei file Storage. Il gate bancario fisico del 10/09 resta aperto. Nessun runtime produttivo, master, bump, deploy o dato reale modificato.
 
 Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.
+
+### 87. Arresto forzato e recupero della nota pendente — 14/09/2026
+
+Base 1947b5c1, stessa PR #63. Aggiunto `node scripts/run-vault-session-emulators.mjs --crash-browser`. Il runner verifica PID vivo e profilo temporaneo del processo da lui creato; su Windows termina forzatamente quell'albero di processi e ne attende l'uscita. Il percorso Linux usa un gruppo dedicato, ma non è stato collaudato fisicamente in questo incremento. Non vengono cercati o chiusi i browser dell'utente.
+
+La preparazione carica la matrice cifrata, apre l'editor della nota privata compatibile online, disattiva la rete e attende la conferma della conservazione locale della modifica. Un messaggio di controllo DevTools segnala prepared senza ripristinare la rete e senza trasferire chiavi o contenuto della nota. Il runner interrompe quindi il browser senza chiusura applicativa e riapre lo stesso profilo con rete bloccata prima della navigazione.
+
+Il nuovo processo recupera l'identità ma mantiene il Vault bloccato. Dopo nuova Master Password legge i dati già caricati e recupera la nota dalla coda esistente: nuovo editor disabilitato, nessun reinserimento. Il retry esplicito al ritorno online applica la nota e aggiorna il dettaglio con il testo atteso; logout nega nuovamente la consultazione. Chrome ed Edge su Windows: 25 verifiche per browser, 50 esecuzioni superate.
+
+Limiti: arresto dopo conferma dell'accodamento locale, non durante una transazione IndexedDB o un commit backend in volo; non simula perdita di alimentazione, corruzione del disco, eviction o riavvio del sistema operativo. Nessuna certificazione iPhone/Safari, PWA installata, tutte le UI, precaricamento completo o contenuto Storage. Nota privata isolata, non nuovi domini di scrittura. Nessun master, versione, deploy o dato reale modificato.
+
+Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.

@@ -10,7 +10,8 @@ import {getFirestore, connectFirestoreEmulator, doc, setDoc, terminate} from 'fi
 assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099');
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
 const base = import.meta.dirname;
-const restart = process.argv.includes('--test-restart');
+const forced = process.argv.includes('--test-crash');
+const restart = process.argv.includes('--test-restart') || forced;
 const cold = process.argv.includes('--test-cold') || restart;
 const automated = process.argv.includes('--test') || cold;
 let reportResult;
@@ -90,7 +91,7 @@ const server = createServer(async (request, response) => {
 await new Promise(done => server.listen(4188, '127.0.0.1', done));
 console.log('Laboratorio pronto: http://127.0.0.1:4188 — solo fixture locali');
 if (automated) {
-    try { await (await import('./emulator-entry-runner.mjs')).runEntryBrowsers(() => new Promise(resolve => { reportResult = resolve; }), {restart}); }
+    try { await (await import('./emulator-entry-runner.mjs')).runEntryBrowsers(() => new Promise(resolve => { reportResult = resolve; }), {restart, forced}); }
     finally { server.closeAllConnections(); await new Promise(done => server.close(done)); }
     process.exit(0);
 }
