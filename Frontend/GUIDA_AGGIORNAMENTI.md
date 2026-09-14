@@ -743,3 +743,7 @@ Il ramo experiment/m8-export-buffer-limit limita il download Blob e indica quand
 ## Raccolta backup limitata — candidata 14/09/2026
 
 Su experiment/m8-export-record-limits, limite record e caratteri coerente con l'import; stop esplicito prima di altre letture, senza produrre un backup completo impropriamente. 93 test backup, budget e sintassi superati. Dettagli e limiti in M8/audit 74; nessuna pubblicazione produttiva.
+
+## Dismissione coda M6 — candidata 14/09/2026
+
+Sul ramo experiment/m6-queue-client-disposal, chiusura writer e abort client rilasciano i riferimenti alle chiavi e impediscono altre mutazioni locali. 106 prove offline e 44 esecuzioni Chrome/Edge con backend emulato superate. Limiti in M6/audit 75; nessun deploy o attivazione bootstrap.

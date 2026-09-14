@@ -740,3 +740,7 @@ Base `fc3927d2`, ramo `experiment/m8-export-buffer-limit`: fallback Blob con sog
 ## 74. Raccolta dei descrittori backup limitata — 14/09/2026
 
 Base `29263519`, ramo `experiment/m8-export-record-limits`. Ammessi 10.000 record/16 Mi caratteri JSON come nell'import; controllo incrementale prima dell'accumulo, eliminato l'array intermedio per Account. 93 prove backup, budget e sintassi superati; prova overflow impedisce letture aziendali successive, cifratura e chiusura dello stream. Le snapshot SDK e i temporanei non sono inclusi nel limite, quindi nessuna certificazione dello heap o completamento M8. Nessun deploy.
+
+## 75. Chiusura della capability della coda — 14/09/2026
+
+Base `d4d2e644`, ramo `experiment/m6-queue-client-disposal`. Chiavi derivate rilasciate dal writer su close, opzioni client prive del materiale dopo derivazione, abort collegato a close. Writer chiuso e callback sospesi non possono leggere/scrivere la coda. 106 test offline e 44 esecuzioni Chrome/Edge/backend demo superati; la successiva guardia isActive rientra nella suite finale. Nessuna migrazione o attivazione del provider, nessuna garanzia di cancellazione fisica delle stringhe o annullamento di effetti remoti già avviati.

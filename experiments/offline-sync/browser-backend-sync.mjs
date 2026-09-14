@@ -50,6 +50,24 @@ try {
     assert(ambiguous && (await pending()).length === 2 && sendCount === 0, 'PENDING_AMBIGUOUS');
     await client.discard(duplicatePending);
     passed.push('pending recovery exposes only record identity and refuses ambiguous commands without sending or deleting');
+    const disposableWriter = await createFencedQueueWriter({...options, holderId: 'disposable'});
+    let began, resume;
+    const started = new Promise(resolve => { began = resolve; });
+    const release = new Promise(resolve => { resume = resolve; });
+    const writing = disposableWriter.run(async api => { began(); await release; return api.remove(operation); });
+    await started; disposableWriter.close(); resume();
+    let stopped = false;
+    try { await writing; } catch { stopped = true; }
+    let denied = false;
+    try { await disposableWriter.run(api => api.list()); } catch (error) { denied = error.code === 'FENCED_QUEUE_CLOSED'; }
+    assert(stopped && denied && (await pending()).length === 1, 'DISPOSED_WRITER_MUTATED');
+    const lifetime = new AbortController();
+    const disposableClient = await createFencedQueueClient({...options, holderId: 'disposable-client', signal: lifetime.signal,
+        send: () => { throw new Error('DISPOSED_CLIENT_SENT'); }, isOnline: () => true});
+    lifetime.abort(); let clientDenied = false;
+    try { await disposableClient.flush(); } catch { clientDenied = true; }
+    assert(clientDenied && (await pending()).length === 1, 'ABORTED_CLIENT_MUTATED');
+    passed.push('closing writer during work and aborting client prevent retained callbacks from changing the encrypted queue');
     online = true; await client.flush();
     const saved = await snapshot(operation);
     assert(saved.record?.revision === 1 && (privateAccounts ? saved.record.password === operation.record.password : saved.record.encryptedPayload === operation.encryptedPayload) &&

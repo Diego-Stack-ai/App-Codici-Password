@@ -428,3 +428,5 @@ M8, audit 72: esportazione e finestra Recovery Key ora vincolate alla sessione d
 M8, audit 73: limitato il buffer delle righe cifrate nel download alternativo Blob; overflow interrompe prima di creare un file parziale. 90 test backup e controlli statici superati. Raccolta iniziale, memoria reale sui dispositivi, staging e journal restano aperti; nessuna chiusura globale.
 
 M8, audit 74: anche i descrittori raccolti dall'export hanno soglie cumulative coerenti con l'import, con errore esplicito prima di proseguire. 93 prove backup superate. Snapshot SDK, paginazione, manifest percorsi e memoria fisica restano distinti dai limiti implementati; staging/journal ancora aperti.
+
+M6, audit 75: chiusura esplicita del writer, rilascio dei riferimenti crittografici e arresto dei callback sospesi; 106 test offline e 44 esecuzioni browser/backend demo superati. Si rafforza il candidato, senza anticipare provider, trasporto, rollout o collaudo fisico.
