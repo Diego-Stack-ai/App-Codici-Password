@@ -230,3 +230,10 @@ Revisione locale PR #59 (base `a3f7f28`, audit 68): la conservazione della copia
 ### Collaudo finale dell'ambiente Linux cloud
 
 Su discendente verificato di `bdb95236`, setup e fixture effettivi confermano browser, Java e cache Firestore. La suite completa arriva al gate Storage ma la cache Storage non era inclusa nello setup consolidato; la rete già disattivata impedisce di recuperarla durante la fase agente. Il runner Chrome/Edge ha inoltre richiesto `--no-sandbox` perché il container esegue come root. Entrambe le compatibilità sono corrette nel candidato: cache Storage durante il setup con rete e flag browser limitato a Linux root. Il runner corretto supera 34 scenari sintetici complessivi su Chrome ed Edge. La riesecuzione completa dopo un nuovo setup resta il solo blocco del collaudo ambiente; provider, trasporto, riapertura e rollout restano gate M6 separati e non avviati.
+
+
+### Chiusura del trasferimento Linux cloud — ambiente nuovo
+
+Base iniziale `3070d01d`, ambiente ricaricato nella stessa shell e cache Firestore/Storage entrambe presenti. Dopo aver confinato fuori dai proxy le sole chiamate loopback tra emulatori del runner Storage, la suite completa è passata realmente su Linux. Il runner fenced ha superato 34 esecuzioni complessive, 5 generiche e 12 private per ciascuno di Chrome 153 ed Edge 153, usando esclusivamente fixture sintetiche, Auth/Firestore demo e handler originali emulati.
+
+Questo esito chiude il trasferimento del laboratorio cloud, non M6. Restano aperti provider protetto del bootstrap della shell persistente, trasporto autenticato e App Check, recupero delle code dopo riapertura, rollout dello schema e collaudi fisici. La direzione resta la shell persistente con Vault Key esclusivamente in memoria; nessun deploy, migrazione o dato reale.

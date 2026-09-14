@@ -21,7 +21,20 @@ function run(projectId, emulators, testFile) {
     `${JSON.stringify(process.execPath)} --test ${JSON.stringify(testFile)}`,
   ], {
     cwd: projectRoot,
-    env: {...process.env, XDG_CONFIG_HOME: configRoot},
+    // The Storage rules runtime resolves firestore.get()/exists() through the
+    // loopback Firestore emulator. Keep that traffic out of cloud HTTP proxies;
+    // otherwise an inherited uppercase NO_PROXY can override no_proxy and make
+    // valid cross-service reads fail closed.
+    env: {
+      ...process.env,
+      HTTP_PROXY: '',
+      HTTPS_PROXY: '',
+      http_proxy: '',
+      https_proxy: '',
+      NO_PROXY: '127.0.0.1,localhost,::1',
+      no_proxy: '127.0.0.1,localhost,::1',
+      XDG_CONFIG_HOME: configRoot,
+    },
     stdio: 'inherit',
     shell: false,
   });
