@@ -775,3 +775,9 @@ Validazione finale audit 80: npm test completo superato (183 test shell e 114 of
 Ramo experiment/m6-private-note-provider, base 8343282e, stessa PR #63: editor attivo nel laboratorio per Alfa privato con trasporto emulato, code nuove e conferma server. Risolta la nota vecchia dopo salvataggio: il dettaglio rilegge dal repository confermato. Zeta incompatibile resta consultabile. Test dedicato --entry-browser; dettagli e gate residui in M6/audit 81. Nessuna versione o pubblicazione in produzione.
 
 Validazione finale audit 81: suite completa npm test superata, inclusi 189 test shell e 114 offline. Regressioni Chrome/Edge della coda: 58 esecuzioni superate. Nuovo collaudo dell'entry: 5 verifiche per browser, 10 esecuzioni superate (68 totali). Dopo le ultime guardie di chiusura, rieseguiti i 21 test mirati di coda/dettaglio e il collaudo dell'entry. Nessuna prova App Check remota o su dispositivo fisico.
+
+## Recupero offline della nota — candidata 14/09/2026
+
+Ramo experiment/m6-private-note-provider, base 48b1eae6: il dettaglio aperto offline recupera soltanto la modifica esistente, senza nuovo editor o prove server inventate. Prova Chrome/Edge con rete effettivamente disabilitata tramite DevTools, blocco/sblocco Vault e ritorno online con ricevuta. Sessione e cache erano già disponibili: avvio a freddo e PWA fisica restano gate distinti. Dettagli in M6/audit 82; nessun master o deploy.
+
+Validazione finale audit 82: npm test completo superato, inclusi 191 test shell e 116 offline. Chrome/Edge: 58 regressioni coda/provider e 18 verifiche dell'entry (9 per browser), 76 esecuzioni totali. La rete viene disabilitata dal protocollo DevTools, con HTTP effettivamente bloccato; superati recupero, nuovo sblocco offline e retry al ritorno online. Questa prova non certifica avvio a freddo o PWA fisica.

@@ -116,3 +116,15 @@ test('incompatible source is rejected before mounting an editor or preparing enc
     const f = fixture(); delete f.source.schemaVersion;
     await assert.rejects(f.mount(), /PREPARATION_INVALID/); assert.equal(f.panel, undefined);
 });
+
+test('offline mount skips server evidence and remains recovery-only even after the network returns', async () => {
+    let online = false, reads = 0;
+    const f = fixture({isOnline: () => online, readSource: async () => { reads++; throw new Error('OFFLINE'); }});
+    const close = await f.mount(); assert.equal(reads, 0); assert.equal(f.panel.recoveryOnly, true); assert.equal(f.panel.initialNote, '');
+    online = true; await assert.rejects(f.panel.prepare('new draft'), /RECOVERY_ONLY/); assert.equal(reads, 0); close();
+});
+
+test('a failed online server check is not silently treated as offline evidence', async () => {
+    const f = fixture({isOnline: () => true, readSource: async () => { throw new Error('PERMISSION_DENIED'); }});
+    await assert.rejects(f.mount(), /PERMISSION_DENIED/); assert.equal(f.panel, undefined);
+});

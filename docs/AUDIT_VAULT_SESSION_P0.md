@@ -782,3 +782,11 @@ Da 8343282e, stessa PR #63: attivati provider e trasporto esclusivamente su loop
 Il collaudo end-to-end dell'entry ha rilevato e corretto il refresh da cache: dopo la ricevuta viene usata la lettura canonica server-confirmed, senza fallback. Aggiunte regressioni su dettaglio consultabile, prevalidazione, modalità confermata e apertura/chiusura della coda demo. Prova ripetibile con --entry-browser; nessuna attivazione nella PWA pubblicata. Gate offline iniziale, rollout e verifiche remote/fisiche restano aperti.
 
 Validazione finale audit 81: suite completa npm test superata, inclusi 189 test shell e 114 offline. Regressioni Chrome/Edge della coda: 58 esecuzioni superate. Nuovo collaudo dell'entry: 5 verifiche per browser, 10 esecuzioni superate (68 totali). Dopo le ultime guardie di chiusura, rieseguiti i 21 test mirati di coda/dettaglio e il collaudo dell'entry. Nessuna prova App Check remota o su dispositivo fisico.
+
+## 82. Recupero offline con rete realmente disabilitata — 14/09/2026
+
+Da 48b1eae6, stessa PR #63: apertura del solo recupero coda in assenza di rete, senza letture server o preparazione di nuovi comandi. Coda vuota e ritorno online non abilitano implicitamente l'editor. Le verifiche online fallite restano fallimenti, senza fallback che inventi assenza di link.
+
+DevTools disabilita la rete del browser di prova, confermata dal fallimento di HTTP. La sequenza comprende salvataggio offline, blocco e nuovo sblocco del Vault, riapertura del record, retry offline conservativo, ritorno online e aggiornamento della nota dopo ricevuta. Cache e autenticazione erano già disponibili nella stessa sessione; avvio a freddo e riapertura fisica PWA restano non certificati. Nessuna persistenza della chiave, migrazione o deploy.
+
+Validazione finale audit 82: npm test completo superato, inclusi 191 test shell e 116 offline. Chrome/Edge: 58 regressioni coda/provider e 18 verifiche dell'entry (9 per browser), 76 esecuzioni totali. La rete viene disabilitata dal protocollo DevTools, con HTTP effettivamente bloccato; superati recupero, nuovo sblocco offline e retry al ritorno online. Questa prova non certifica avvio a freddo o PWA fisica.

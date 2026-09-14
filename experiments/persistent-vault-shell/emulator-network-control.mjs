@@ -1,0 +1,46 @@
+// Test runner only. DevTools affects this disposable browser target, never the
+// host connection. The control channel remains available while HTTP is offline.
+export async function attachEntryNetworkControl(child) {
+    const endpoint = await new Promise((resolve, reject) => {
+        let output = '';
+        const finish = (error, value) => { clearTimeout(timer); child.stderr.off('data', read); child.off('error', fail); error ? reject(error) : resolve(value); };
+        const fail = error => finish(error);
+        const read = chunk => { output = (output + chunk).slice(-16384); const match = output.match(/DevTools listening on (ws:\/\/[^\s]+)/); if (match) finish(null, match[1]); };
+        const timer = setTimeout(() => finish(new Error('DEVTOOLS_ENDPOINT_TIMEOUT')), 10000);
+        child.stderr.on('data', read); child.on('error', fail);
+    });
+    const address = new URL(endpoint);
+    if (address.hostname !== '127.0.0.1') throw new Error('DEVTOOLS_NONLOCAL');
+    const host = address.host;
+    let target;
+    for (let i = 0; i < 100 && !target; i++) {
+        target = (await (await fetch(`http://${host}/json/list`)).json()).find(item => item.type === 'page' && item.url === 'http://127.0.0.1:4188/');
+        if (!target) await new Promise(done => setTimeout(done, 50));
+    }
+    if (!target) throw new Error('DEVTOOLS_TARGET_MISSING');
+    const socket = new WebSocket(target.webSocketDebuggerUrl), pending = new Map(); let serial = 0;
+    await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, {once: true}); socket.addEventListener('error', reject, {once: true}); });
+    const send = (method, params = {}) => new Promise((resolve, reject) => {
+        const id = ++serial; pending.set(id, {resolve, reject}); socket.send(JSON.stringify({id, method, params}));
+    });
+    socket.addEventListener('close', () => { for (const entry of pending.values()) entry.reject(new Error('DEVTOOLS_CLOSED')); pending.clear(); });
+    socket.addEventListener('message', async event => {
+        const message = JSON.parse(event.data);
+        if (message.id) {
+            const entry = pending.get(message.id); pending.delete(message.id);
+            if (message.error) entry?.reject(new Error(message.error.message)); else entry?.resolve(message.result);
+        } else if (message.method === 'Runtime.bindingCalled' && message.params.name === '__entryNetworkControl') {
+            const request = JSON.parse(message.params.payload);
+            if (!Number.isSafeInteger(request.id) || typeof request.offline !== 'boolean') return;
+            try {
+                await send('Network.emulateNetworkConditions', {offline: request.offline, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
+                await send('Runtime.evaluate', {expression: `window.__entryNetworkDone(${request.id}, true)`});
+            } catch {
+                await send('Runtime.evaluate', {expression: `window.__entryNetworkDone(${request.id}, false)`}).catch(() => {});
+            }
+        }
+    });
+    await send('Network.enable'); await send('Runtime.enable');
+    await send('Runtime.addBinding', {name: '__entryNetworkControl'});
+    return () => socket.close();
+}

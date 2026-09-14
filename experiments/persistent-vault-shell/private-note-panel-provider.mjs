@@ -6,10 +6,11 @@ import {capturePrivateAccountSource, preparePrivateAccountMutation, assertPrivat
 // Candidate bootstrap provider. readSource must return the complete owner-bound
 // document and explicit reverse-link evidence. No SDK/key/database goes to UI.
 export function createPrivateNotePanelProvider({context, getUser, readSource, openQueue, deviceId,
-    newOperationId = () => crypto.randomUUID(), mountPanel = mountOfflineSavePanel}) {
+    newOperationId = () => crypto.randomUUID(), mountPanel = mountOfflineSavePanel,
+    isOnline = () => globalThis.navigator?.onLine !== false}) {
     const uid = context?.user?.uid;
     if (!uid || !context.signal || !context.unlocked ||
-        ![getUser, readSource, openQueue, newOperationId, mountPanel, context.read, context.encrypt].every(fn => typeof fn === 'function')) throw new Error('NOTE_PROVIDER_CONFIG');
+        ![getUser, readSource, openQueue, newOperationId, mountPanel, isOnline, context.read, context.encrypt].every(fn => typeof fn === 'function')) throw new Error('NOTE_PROVIDER_CONFIG');
     return async (root, {selection, signal, isActive = () => true, onSaved, onDiscarded} = {}) => {
         const recordId = selection?.id;
         if (selection?.domain !== 'private' || !/^[A-Za-z0-9_-]{1,180}$/.test(recordId || '') || !signal) throw new Error('NOTE_PROVIDER_SCOPE');
@@ -43,16 +44,22 @@ export function createPrivateNotePanelProvider({context, getUser, readSource, op
         };
         signal.addEventListener('abort', close, {once: true}); context.signal.addEventListener('abort', close, {once: true});
         try {
-            check(); const initial = await current();
-            if (initial.hasProfileLink !== false) throw new Error('NOTE_PROVIDER_SCOPE');
-            source = initial.source;
-            assertPrivateNoteSourceCompatible(source);
-            const initialNote = source.note === '' ? '' : await ownedContext.read({ownerId: uid, ciphertext: source.note});
+            check();
+            const recoveryOnly = !isOnline();
+            let initialNote = '';
+            if (!recoveryOnly) {
+                const initial = await current();
+                if (initial.hasProfileLink !== false) throw new Error('NOTE_PROVIDER_SCOPE');
+                source = initial.source;
+                assertPrivateNoteSourceCompatible(source);
+                initialNote = source.note === '' ? '' : await ownedContext.read({ownerId: uid, ciphertext: source.note});
+            }
             if (typeof initialNote !== 'string' || initialNote.length > 100000) throw new Error('NOTE_PROVIDER_VALUE');
-            const mounted = await mountPanel(root, {signal: lifetime.signal, isActive: active, initialNote,
+            const mounted = await mountPanel(root, {signal: lifetime.signal, isActive: active, initialNote, recoveryOnly,
                 recoveryRecordId: recordId, onSaved, onDiscarded,
                 prepare: async note => {
                     check();
+                    if (recoveryOnly) throw new Error('NOTE_PROVIDER_RECOVERY_ONLY');
                     const operation = await preparePrivateAccountMutation({context: ownedContext, source, changes: {note},
                         domain: 'private', uid, recordId, expectedRevision: source.revision, operationId: newOperationId(), deviceId, hasProfileLink: false});
                     check(); prepared = operation; return operation;

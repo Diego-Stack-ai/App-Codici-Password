@@ -2,17 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **554**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 3110 | 41 | File di progetto: emulator-entry-check. |
-| `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 1916 | 32 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
-| `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 2214 | 33 | File di progetto: emulator-queue. |
-| `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 2883 | 40 | File di progetto: emulator-queue.test. |
+| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 3211 | 47 | File di progetto: emulator-network-control. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -47,8 +43,8 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8650 | 139 | File di progetto: indexeddb-queue-lease.test. |
 | `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
 | `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/offline-sync/offline-save-panel.mjs` | MJS | 16653 | 231 | File di progetto: offline-save-panel. |
-| `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 18211 | 288 | File di progetto: offline-save-panel.test. |
+| `experiments/offline-sync/offline-save-panel.mjs` | MJS | 17064 | 235 | File di progetto: offline-save-panel. |
+| `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
 | `experiments/offline-sync/run-browser-tests.mjs` | MJS | 6988 | 93 | File di progetto: run-browser-tests. |
 | `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1196 | 21 | File di progetto: run-emulated-browsers. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2584 | 47 | File di progetto: account-detail-reader. |
@@ -63,9 +59,14 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 5712 | 78 | File di progetto: emulator-browser. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6041 | 119 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 6533 | 81 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 2138 | 34 | File di progetto: emulator-entry-runner. |
 | `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 5172 | 89 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1113 | 16 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3355 | 52 | File di progetto: emulator-list-view. |
+| `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
+| `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 2214 | 33 | File di progetto: emulator-queue. |
+| `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 2883 | 40 | File di progetto: emulator-queue.test. |
 | `experiments/persistent-vault-shell/emulator.css` | CSS | 2039 | 19 | File di progetto: emulator. |
 | `experiments/persistent-vault-shell/emulator.html` | HTML | 1885 | 10 | Struttura della pagina emulator; comportamento demandato ai moduli. |
 | `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
@@ -94,8 +95,8 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4504 | 74 | File di progetto: preview.test. |
 | `experiments/persistent-vault-shell/private-account-save-controller.mjs` | MJS | 7242 | 135 | File di progetto: private-account-save-controller. |
 | `experiments/persistent-vault-shell/private-account-save-controller.test.mjs` | MJS | 12949 | 189 | File di progetto: private-account-save-controller.test. |
-| `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 7441 | 97 | File di progetto: private-note-panel-provider. |
-| `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 8405 | 119 | File di progetto: private-note-panel-provider.test. |
+| `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 7765 | 104 | File di progetto: private-note-panel-provider. |
+| `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 9243 | 131 | File di progetto: private-note-panel-provider.test. |
 | `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
 | `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
 | `experiments/persistent-vault-shell/protected-session.mjs` | MJS | 5790 | 117 | File di progetto: protected-session. |
@@ -143,7 +144,7 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 82333 | 778 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 83244 | 784 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3885 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3834 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20619 | 349 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -410,7 +411,7 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 138008 | 785 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 139249 | 793 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10033 | 92 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
@@ -422,7 +423,7 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 49403 | 296 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 51464 | 306 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 22561 | 160 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
@@ -430,7 +431,7 @@ File censiti: **553**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 41865 | 449 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 42727 | 453 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 36464 | 366 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
