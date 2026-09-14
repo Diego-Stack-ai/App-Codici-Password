@@ -88,8 +88,12 @@ try {
         await post('/scope', {operation, scope: 'none'});
         const root = document.createElement('div'); document.body.append(root);
         const page = new AbortController(); online = false;
-        let preparedNote;
+        let preparedNote, refreshedRecord, refreshCount = 0;
         const disposePanel = await mountOfflineSavePanel(root, {signal: page.signal,
+            onSaved: async ({isActive}) => {
+                const result = await snapshot({...operation, operationId: 'bridge-ui'});
+                if (isActive()) { refreshedRecord = result.record; refreshCount++; }
+            },
             createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => online,
                 send: async command => {
                     const response = await post('/mutation', {operation: command}), result = await response.json();
@@ -102,10 +106,11 @@ try {
             }});
         const input = root.querySelector('textarea'), buttons = root.querySelectorAll('button');
         input.value = 'SYNTHETIC-NOTE-FROM-UI'; await buttons[0].onclick();
-        assert(root.textContent.includes('In attesa di connessione') && input.value === '' && buttons[0].disabled, 'UI_OFFLINE_STATE');
+        assert(root.textContent.includes('In attesa di connessione') && input.value === '' && buttons[0].disabled && refreshCount === 0, 'UI_OFFLINE_STATE');
         online = true; await buttons[1].onclick();
         const uiSaved = await snapshot({...operation, operationId: 'bridge-ui'});
-        assert(root.textContent.includes('Nota salvata') && uiSaved.record.note === preparedNote && uiSaved.record.revision === 3, 'UI_SAVE_STATE');
+        assert(root.textContent.includes('Nota salvata') && uiSaved.record.note === preparedNote && uiSaved.record.revision === 3 &&
+            refreshCount === 1 && refreshedRecord.note === preparedNote, 'UI_SAVE_STATE');
         page.abort(); assert(root.children.length === 0 && buttons[0].onclick === null, 'UI_ABORT_CLEANUP');
         disposePanel();
         passed.push('note panel queues offline and retries online against private backend, then detaches on page abort');

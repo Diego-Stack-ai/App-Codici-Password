@@ -4,9 +4,9 @@ import {createOfflineMutationSynchronizer} from '../../Frontend/public/assets/js
 // Laboratory integration. Existing schema 2 supplied by caller; no DB migration,
 // Firebase import, background wakeup or UI cutover. send must use server receipts.
 export async function createFencedQueueClient({send, isOnline = () => navigator.onLine,
-    isActive = () => true, signal, onState = () => {}, renewEveryMs = 0, ...options}) {
+    isActive = () => true, signal, onState = () => {}, onCommitted = () => {}, renewEveryMs = 0, ...options}) {
     if (typeof send !== 'function' || typeof isActive !== 'function' || typeof isOnline !== 'function' ||
-        typeof onState !== 'function') throw new Error('FENCED_CLIENT_CONFIG');
+        typeof onState !== 'function' || typeof onCommitted !== 'function') throw new Error('FENCED_CLIENT_CONFIG');
     if (!Number.isSafeInteger(renewEveryMs) || renewEveryMs < 0 || renewEveryMs >= (options.ttlMs ?? 30000)) throw new Error('FENCED_CLIENT_RENEWAL_CONFIG');
     let closed = false, running;
     const renewalStops = new Set();
@@ -36,7 +36,15 @@ export async function createFencedQueueClient({send, isOnline = () => navigator.
                     if (renewalFailure) throw renewalFailure;
                 };
                 const synchronizer = createOfflineMutationSynchronizer({uid: options.uid,
-                    queue: {list: () => api.list(), remove: operation => api.remove(operation),
+                    queue: {list: () => api.list(), remove: async operation => {
+                        const removed = await api.remove(operation);
+                        if (active() && !api.signal.aborted && !renewalFailure) {
+                            // A view failure must not turn an acknowledged write into a retry.
+                            try { Promise.resolve(onCommitted(Object.freeze({operationId: operation.operationId,
+                                recordId: operation.recordId}))).catch(() => {}); } catch {}
+                        }
+                        return removed;
+                    },
                         markForReview: (operation, config) => api.markForReview(operation, config.reviewReason)},
                     send: async operation => {
                         await check();

@@ -664,3 +664,7 @@ Base 7beb3dbf. UI candidata senza chiavi nel DOM, disattivata su abort e rimozio
 ## 60. Rinnovo del lease durante sincronizzazione
 
 Base a7b7d1f8. Rinnovo opt-in nel client candidato, interrotto su fine operazione, abort e chiusura; nessuna conferma tardiva dopo invalidazione. 24 scenari per browser Chrome/Edge e 73 test offline passati. Non attivato nel runtime produttivo; dettagli e limiti nel contratto M6.
+
+## 61. Conferme UI correlate all'operazione
+
+Base 790d3d26. Il pannello candidato usa la conferma del proprio operationId/recordId dopo rimozione protetta, senza confondere esiti di altri Account nella coda. Refresh fallito distinto da salvataggio fallito. 79 test offline e 32 esecuzioni browser/backend emulato superati; nessun cutover.

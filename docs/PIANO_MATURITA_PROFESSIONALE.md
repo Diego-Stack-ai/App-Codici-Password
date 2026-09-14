@@ -396,3 +396,5 @@ M6: esteso il collaudo browser al backend Account privato originale, inclusi rif
 M6 UI: pannello note candidato con coda offline e retry collaudato in DOM reale/backend emulato. Dettaglio shell predisposto tramite provider opzionale sotto lifecycle; provider non ancora attivato nell’entry principale. Trentadue esecuzioni browser e 31 test vista/sessione superati. Restano attivazione controllata, aggiornamento dettaglio, recupero conflitti e rollout.
 
 M6: rinnovo opzionale del controllo della coda durante invii lunghi, con arresto alla chiusura. Verificati 24 scenari per browser e 73 test offline. Provider della shell, trasporto autenticato e rollout restano aperti; nessun deploy e nessuna fase globale dichiarata conclusa.
+
+M6 UI: conferma della singola operazione e callback di rilettura separato dal risultato di scrittura. Gestiti altri Account nella coda, refresh fallito e chiusura della vista. Verificati 79 test offline e 32 esecuzioni browser/backend emulato; attivazione nella shell e rollout ancora aperti.

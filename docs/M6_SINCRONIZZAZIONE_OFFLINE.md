@@ -183,3 +183,9 @@ Undici scenari privati e cinque generici per ciascuno di Chrome ed Edge: 32 esec
 Base a7b7d1f8. Il client sperimentale accetta renewEveryMs opzionale, disabilitato per default e inferiore al TTL. Durante flush rinnova il lease senza sovrapporre rinnovi; errori impediscono conferme tardive. Timer rimossi a fine flush, abort o close. Un trasporto già avviato può terminare, ma la chiusura impedisce cancellazione della coda e aggiornamenti UI. Non è un servizio in background e non recupera lease scaduti.
 
 Ventiquattro scenari IndexedDB reali passati su Chrome ed Edge, inclusi invio oltre TTL e chiusura durante invio; 73 test offline superati. Il worker del test temporizzato legge Date.now al momento dell'operazione, evitando timestamp congelati durante il passaggio di messaggi. Restano provider protetto, trasporto autenticato, rollout schema e prove fisiche. Produzione 1.2.124 invariata.
+
+### Conferma della singola nota — candidato M6
+
+Base 790d3d26. Il client emette onCommitted con soli operationId e recordId dopo conferma backend e rimozione protetta dalla coda. Errori del consumatore non riaccodano una scrittura confermata. Il pannello associa la conferma al proprio comando: uno stato saved dell'intera coda o il conflitto di un altro Account non possono confermare o smentire la nota. onSaved riceve solo lifecycle per rileggere il dettaglio; un errore di lettura indica che la nota è salvata e richiede riapertura, senza proporre un secondo invio.
+
+79 test offline superati, inclusi sei casi su identità, conferma singola, offline, errore refresh e abort. Il runner --fenced-browser supera ancora 32 esecuzioni Chrome/Edge e verifica la rilettura della nota dal backend privato emulato dopo conferma. Il provider principale rimane da attivare; nessuna modifica produttiva.
