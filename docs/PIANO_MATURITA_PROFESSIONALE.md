@@ -420,3 +420,19 @@ Toolchain e Firestore reali presenti; fixture setup superata. Emersi due soli pr
 Sul nuovo ambiente basato su `3070d01d` sono stati verificati Chrome, Edge, Java e i JAR Firestore/Storage; fixture setup, suite completa e 34 esecuzioni fenced-browser sono passate dopo una sola correzione locale al runner Storage per instradare direttamente soltanto gli host loopback esatti fra emulatori e conservare il proxy originale per ogni altra destinazione. Il collaudo del trasferimento cloud è concluso con fixture sintetiche e progetti demo, senza account o servizi reali.
 
 Lo stato di maturità M6 non cambia: shell persistente e Vault Key solo in RAM restano la direzione scelta, mentre provider bootstrap, trasporto autenticato/App Check, recupero delle code dopo riapertura, rollout e prove fisiche sono gate aperti. Nessun gate è chiuso dal solo trasferimento dell’ambiente e nessuna modifica è stata distribuita.
+
+Ripresa M6 su `b5ab595c`: recupero candidato della nota da una coda riaperta, con sola identità restituita alla vista e ripresa esplicita senza nuova operazione. Test DOM e Chrome/Edge con IndexedDB chiuso/riaperto e backend emulato passati. È avanzato il recupero nel laboratorio; provider bootstrap, riapertura fisica PWA, trasporto e rollout restano aperti. Nessuna fase globale conclusa.
+
+M8, audit 72: esportazione e finestra Recovery Key ora vincolate alla sessione del proprietario, con arresto dopo Vault lock/cambio utente e protezione dalle risposte tardive. Suite completa e prove mirate superate sul ramo experiment/m8-export-session. Restano limiti aggregati export, staging, journal durevole, compensazione e collaudi fisici; nessuna fase globale conclusa.
+
+M8, audit 73: limitato il buffer delle righe cifrate nel download alternativo Blob; overflow interrompe prima di creare un file parziale. 90 test backup e controlli statici superati. Raccolta iniziale, memoria reale sui dispositivi, staging e journal restano aperti; nessuna chiusura globale.
+
+M8, audit 74: anche i descrittori raccolti dall'export hanno soglie cumulative coerenti con l'import, con errore esplicito prima di proseguire. 93 prove backup superate. Snapshot SDK, paginazione, manifest percorsi e memoria fisica restano distinti dai limiti implementati; staging/journal ancora aperti.
+
+M6, audit 75: chiusura esplicita del writer, rilascio dei riferimenti crittografici e arresto dei callback sospesi; 106 test offline e 44 esecuzioni browser/backend demo superati. Si rafforza il candidato, senza anticipare provider, trasporto, rollout o collaudo fisico.
+
+M9, audit 76: corretta navigazione da tastiera dell'elenco e del dialogo; 20 test UI, CSS e suite completa finale superati. Questo non sostituisce Windows/Narrator o altri dispositivi fisici. Provider esterno ancora disattivato.
+
+M6, audit 77: disponibile l'adattatore fenced per i callable Firebase canonici, con durata vincolata a UID e Vault/vista. Verificato con SDK, Auth e Firestore demo in Chrome/Edge: 52 esecuzioni, compreso abort dopo commit e retry senza riscrittura. 113 test offline e suite completa superati. App Check nel bridge è sintetico; bootstrap, attestazione/middleware remoti, rollout e matrice fisica restano gate distinti.
+
+M6, audit 78: completata la proprietà della coda nel Vault della shell e il passaggio al factory Firebase senza chiavi nelle route. Suite completa superata, 165 test shell, 15 test Firebase e 52 esecuzioni Chrome/Edge demo. Sono ancora da collegare provider UI circoscritto al record ed entry principale; rollout e verifiche remote/fisiche restano separati.

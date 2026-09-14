@@ -2,7 +2,7 @@ import {createMemoryVault} from './memory-vault.mjs';
 
 // Candidate cryptographic bridge. Firebase/UI/crypto dependencies are explicit;
 // no provisioning, legacy migration, persistence or production activation.
-export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, requestPassword, cryptoApi, onLock, now, timeoutMs}) {
+export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, requestPassword, cryptoApi, openQueueWithKey, onLock, now, timeoutMs}) {
     let disposed = false, observedUid = getUser()?.uid || null;
     const owner = () => {
         const uid = getUser()?.uid;
@@ -11,7 +11,7 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
     };
     const assertOwner = uid => { if (owner() !== uid) throw new Error('AUTH_CHANGED'); };
     const vault = createMemoryVault({
-        onLock, now, timeoutMs,
+        onLock, now, timeoutMs, openQueueWithKey,
         async unlockKey(uid, {signal}) {
             const assertActive = () => {
                 assertOwner(uid);
@@ -53,6 +53,11 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
     return Object.freeze({
         unlock: () => vault.unlock(owner()),
         lock: () => vault.lock(),
+        async openQueue(options) {
+            const uid = owner(), queue = await vault.openQueue(uid, options);
+            try { assertOwner(uid); return queue; }
+            catch (error) { queue.close(); throw error; }
+        },
         async read(record) {
             const uid = owner();
             if (record.ownerId !== uid) throw new Error('OWNER_MISMATCH');

@@ -5,7 +5,7 @@ import {createProtectedSession} from './protected-session.mjs';
 
 // Candidate integration, not imported by the published application or preview.
 // The caller supplies initialized SDK instances and an abortable password UI.
-export function createFirebaseSession({auth, db, cryptoApi, requestPassword, routes, onState, onError}) {
+export function createFirebaseSession({auth, db, cryptoApi, requestPassword, routes, createQueueClient, onState, onError}) {
     const getUser = () => auth.currentUser;
     const subscribeUser = listener => onAuthStateChanged(auth, listener);
     const assertActive = (signal, uid) => {
@@ -37,6 +37,8 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
     const session = createProtectedSession({getUser, subscribeUser, routes: boundRoutes, onState, onError,
         createVault: callbacks => {
             const adapter = createLegacyAdapter({getUser, subscribeUser, cryptoApi, requestPassword, ...callbacks,
+                openQueueWithKey: typeof createQueueClient === 'function'
+                    ? (vaultKeyMaterial, scope) => createQueueClient({...scope, vaultKeyMaterial}) : undefined,
                 async loadSecurity(uid, {signal}) {
                     assertActive(signal, uid);
                     const snapshot = await getDoc(doc(db, 'users', uid, 'settings', 'security'));
@@ -46,6 +48,7 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
             });
             return {unlock: () => adapter.unlock(), read: (uid, record) => adapter.read(record),
                 encrypt: (uid, value) => adapter.encrypt(value),
+                openQueue: (uid, options) => adapter.openQueue(options),
                 lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
         }
     });

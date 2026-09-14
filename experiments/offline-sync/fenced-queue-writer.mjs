@@ -22,9 +22,17 @@ export async function createFencedQueueWriter({database, uid, vaultKeyMaterial, 
         const store = schema.objectStore(name);
         if (store.keyPath !== 'id' || store.autoIncrement) throw fail('FENCED_QUEUE_SCHEMA');
     }
-    const key = await deriveOfflineQueueKey(vaultKeyMaterial, uid);
+    let key;
+    try { key = await deriveOfflineQueueKey(vaultKeyMaterial, uid); }
+    finally { vaultKeyMaterial = null; }
+    let closed = false;
     const coordinator = createHybridQueueCoordinator({database, uid, ...coordination});
-    return Object.freeze({run(task, options) {
+    return Object.freeze({
+        close() { closed = true; key = null; },
+        run(task, options = {}) {
+        if (closed) return Promise.reject(fail('FENCED_QUEUE_CLOSED'));
+        const {isActive = () => true} = options;
+        if (typeof isActive !== 'function') return Promise.reject(fail('FENCED_QUEUE_CONFIG'));
         return coordinator.run(async context => {
             async function mutate(kind, supplied, replacement) {
                 const expected = clone(supplied), next = replacement == null ? null : clone(replacement);
@@ -110,6 +118,6 @@ export async function createFencedQueueWriter({database, uid, vaultKeyMaterial, 
                     return mutate('review', expected, {...expected, _queueState: 'reconciliation-required', _reviewReason: reason});
                 }
             }));
-        }, options);
+        }, {...options, isActive: () => !closed && isActive()});
     }});
 }

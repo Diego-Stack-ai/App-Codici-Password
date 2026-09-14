@@ -50,6 +50,26 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
     const unsubscribe = subscribeUser(() => { if (!disposed) synchronize(); });
     synchronize();
     return Object.freeze({
+        // Bootstrap-only capability: intentionally absent from route contexts.
+        async openMutationQueue(options) {
+            const uid = synchronize(), epoch = revision;
+            assertOwner(uid, epoch);
+            if (!vault.isUnlocked()) throw new Error('VAULT_LOCKED');
+            if (typeof vault.openQueue !== 'function') throw new Error('QUEUE_UNAVAILABLE');
+            const queue = await vault.openQueue(uid, options);
+            const check = () => {
+                assertOwner(uid, epoch);
+                if (options?.signal?.aborted || !vault.isUnlocked()) throw new Error('VIEW_DISPOSED');
+            };
+            try {
+                check();
+                return Object.freeze({close: () => queue.close(), ...Object.fromEntries(
+                    ['enqueue', 'flush', 'pendingForRecord', 'discard', 'replace'].map(name => [name, async (...args) => {
+                        check(); const result = await queue[name](...args); check(); return result;
+                    }]))});
+            }
+            catch (error) { queue.close(); throw error; }
+        },
         navigate(route) {
             if (disposed) return Promise.resolve();
             synchronize();

@@ -155,6 +155,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/settings/archive-account-service.js",
   "assets/js/modules/settings/archivio_account.js",
   "assets/js/modules/settings/backup-crypto.js",
+  "assets/js/modules/settings/backup-export-buffer.js",
   "assets/js/modules/settings/backup-export-model.js",
   "assets/js/modules/settings/backup-export-service.js",
   "assets/js/modules/settings/backup-import-model.js",

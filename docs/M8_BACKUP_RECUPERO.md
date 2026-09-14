@@ -139,3 +139,21 @@ Sono soglie conservative di ammissione, non una misura esatta dello heap: oggett
 Base `5fa297ab`: la prima scansione identifica le destinazioni con tuple non ambigue e le rifiuta se duplicate, anche fra chunk diversi. Profilo con ID descrittivi diversi e Widget privati/aziendali con lo stesso ID fisico non costituiscono record separati. I separatori contenuti negli ID non provocano false collisioni; campi di contesto ignorati dal backend non creano false identità. Il confronto locale usa la stessa identità. Il server resta responsabile della validazione e delle autorizzazioni.
 
 Suite backup: 68 test superati. Il test di equivalenza confronta le identità client con restorePath del backend per tutti i domini; due regressioni verificano duplicati oltre 400 record e alias Profilo/Widget, senza chiamate server o upload. L'insieme delle identità è limitato dalle soglie d'anteprima e rilasciato con la sessione. Non rende atomico il ripristino: staging/journal e concorrenza globale restano aperti.
+
+### Esportazione vincolata alla sessione — candidata 14/09/2026
+
+Base `4dd2f0a2`, ramo `experiment/m8-export-session`: export e raccolta dati verificano proprietario, abort, blocco Vault e pagehide ai confini asincroni. Dopo invalidazione non iniziano nuovi download, cifrature o scritture; il sink viene annullato quando il passaggio in corso restituisce il controllo. Errori del provider non vengono riportati con dettagli sensibili. Conferma e Recovery Key appartengono alla stessa azione: chiusura e cambio sessione rimuovono il valore dal DOM; risposte tardive non riaprono finestre né riabilitano un'esportazione nuova.
+
+Suite completa npm test superata; 11 prove servizio e 17 prove UI superate (l'ultima regressione UI sul rimontaggio eseguita separatamente dopo l'avvio della suite). Prove sintetiche, non collaudi fisici. Non si può annullare retroattivamente un file già chiuso, un download già avviato o una richiesta clipboard già consegnata al browser; picker nativo e operazioni pendenti non sono resi interrompibili. Le variabili rilasciate non provano azzeramento fisico della memoria JavaScript. Formato e parametri crittografici invariati; staging, journal durevole, compensazione e limiti aggregati dell'export restano aperti. Nessun deploy.
+
+### Limite del download in memoria — candidata 14/09/2026
+
+Base `fc3927d2`, ramo `experiment/m8-export-buffer-limit`: il fallback senza File System Access ammette fino a 64 Mi caratteri di righe JSON già cifrate. Il controllo cumulativo precede l'accumulo; superamento o annullamento rilasciano i frammenti e impediscono la creazione di un download parziale. La UI propone un browser con salvataggio diretto su file. Il percorso progressivo non usa questo buffer e il formato non cambia.
+
+È una soglia conservativa del solo contenuto trattenuto, non un limite certificato di RAM: raccolta dei record, cifratura del singolo elemento, conversioni, Blob e copie del browser hanno costi ulteriori. Le misure fisiche e il limite della raccolta iniziale restano aperti. Suite backup: 90 prove superate, comprese frontiera esatta, overflow cumulativo, assenza di download troncato, successo fallback e messaggio UI. Manifest offline rigenerato; controlli offline, riferimenti statici, budget delle 30 pagine e sintassi superati. Nessun deploy.
+
+### Ammissione dei record raccolti — candidata 14/09/2026
+
+Base `29263519`, ramo `experiment/m8-export-record-limits`: massimo 10.000 descrittori e 16 Mi caratteri JSON cumulativi, coerenti con le soglie record dell'anteprima di ripristino. Ogni descrittore è controllato prima dell'inserimento; gli Account e allegati non creano più un secondo array aggregato per Account. Su superamento la raccolta si interrompe, non prosegue con altre letture e non cifra record o footer; lo stream aperto viene annullato. Messaggio distinto dal limite del download Blob: cambiare browser non aggira il limite dei record.
+
+93 prove backup superate; budget statici e sintassi superati. Sono limiti di ammissione dei descrittori trattenuti, non delle snapshot SDK già ricevute o della serializzazione temporanea del singolo record. Paginazione delle letture, manifest percorsi, memoria sui dispositivi, staging e journal restano aperti. Nessun formato, soglia import, versione o deploy modificato.

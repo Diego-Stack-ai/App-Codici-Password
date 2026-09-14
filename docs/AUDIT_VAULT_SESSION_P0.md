@@ -720,3 +720,43 @@ HEAD iniziale `3070d01db3786463c4f7dc833af0c92e4eb7671c`, discendente richiesto 
 La prima suite completa ha individuato un errore reale al gate Storage condiviso: il runtime inoltrava attraverso il proxy ereditato le proprie letture Firestore loopback, che venivano annullate e producevano rifiuti impropri per proprietario e destinatario. La correzione è confinata al runner Storage: una entry preload seleziona il dispatcher diretto soltanto per gli host esatti `127.0.0.1`, `[::1]` e `localhost`; tutte le altre destinazioni usano il `ProxyAgent` originale e conservano integralmente l'ambiente proxy. Non modifica `node_modules` o configurazioni globali. Due test con dispatcher finti provano sia i loopback ammessi sia host esterni, falsi suffissi localhost, indirizzi diversi e protocolli non HTTP(S). Il test Storage mirato e la successiva `npm test` completa sono terminati con codice 0.
 
 Il runner `--fenced-browser` è poi passato con 5 scenari generici e 12 privati in Chrome e altrettanti in Edge: 34 esecuzioni su Auth/Firestore `demo-vault-shell`, dati sintetici e backend originali emulati. Il trasferimento dell’ambiente Linux è pertanto collaudato. Rimangono aperti, senza avanzamento implicito, provider bootstrap della shell persistente, trasporto autenticato/App Check, recupero dopo riapertura, rollout e prove fisiche M6. Vault Key soltanto in RAM; nessun account reale, deploy, migrazione, bump o master modificato.
+
+## 71. Recupero candidato della nota alla riapertura — 14/09/2026
+
+Base `b5ab595c`. Ispezione della coda cifrata sotto lease, selezione del record senza payload restituito alla vista e rifiuto delle identità ambigue. Il pannello impedisce una seconda preparazione quando esiste un comando pendente e non invia automaticamente all'apertura. Errore di lettura o lock negato conserva la coda e lascia l'editor bloccato; abort chiude il client anche durante l'ispezione. Nessuna modifica del formato o upgrade del database.
+
+23 test pannello superati; suite offline superata prima dell'ultimo test aggiunto, poi pannello rieseguito integralmente. Runner Chrome/Edge con backend emulato superato: 6 scenari generici e 14 privati per browser, inclusi ambiguità e chiusura/riapertura IndexedDB con nuova istanza del pannello. Nessuna prova fisica PWA o attivazione bootstrap. Rollback del solo candidato al commit base, senza trasformazioni persistenti.
+
+## 72. Esportazione vincolata alla sessione — 14/09/2026
+
+Base `4dd2f0a2`, ramo `experiment/m8-export-session`. Export e raccolta dati verificano UID, abort, Vault lock e pagehide prima e dopo le operazioni asincrone. Il sink viene annullato dopo il ritorno dell'operazione pendente; errori provider sanitizzati. La Recovery Key viene rimossa dal dialogo su chiusura o invalidazione, senza riaperture tardive o interferenze fra azioni successive.
+
+Suite completa npm test superata, inclusi emulatori demo; 11 prove servizio e 17 prove UI superate. L'ultima regressione UI sul rimontaggio è passata separatamente dopo l'avvio della suite. Picker nativo, operazioni pendenti e clipboard già avviata non sono annullabili retroattivamente. Nessuna garanzia di azzeramento fisico dello heap, nuovo formato, migrazione o deploy. Limiti aggregati export, staging, journal e compensazione restano aperti.
+
+## 73. Buffer cifrato di esportazione limitato — 14/09/2026
+
+Base `fc3927d2`, ramo `experiment/m8-export-buffer-limit`: fallback Blob con soglia cumulativa di 64 Mi caratteri, rilascio su overflow e nessun download parziale. Percorso progressivo invariato; messaggio di capacità distinto dall'errore generico. 90 prove backup superate; manifest offline aggiornato e controlli offline, riferimenti, performance e sintassi superati. La prima verifica offline ha rilevato il nuovo modulo non ancora inventariato: risolto rigenerando il manifest, senza allentare il controllo. Non certifica lo heap totale o la raccolta iniziale; gate fisici/staging/journal aperti. Nessun nuovo formato o deploy.
+
+## 74. Raccolta dei descrittori backup limitata — 14/09/2026
+
+Base `29263519`, ramo `experiment/m8-export-record-limits`. Ammessi 10.000 record/16 Mi caratteri JSON come nell'import; controllo incrementale prima dell'accumulo, eliminato l'array intermedio per Account. 93 prove backup, budget e sintassi superati; prova overflow impedisce letture aziendali successive, cifratura e chiusura dello stream. Le snapshot SDK e i temporanei non sono inclusi nel limite, quindi nessuna certificazione dello heap o completamento M8. Nessun deploy.
+
+## 75. Chiusura della capability della coda — 14/09/2026
+
+Base `d4d2e644`, ramo `experiment/m6-queue-client-disposal`. Chiavi derivate rilasciate dal writer su close, opzioni client prive del materiale dopo derivazione, abort collegato a close. Writer chiuso e callback sospesi non possono leggere/scrivere la coda. 106 test offline e 44 esecuzioni Chrome/Edge/backend demo superati; la successiva guardia isActive rientra nella suite finale. Nessuna migrazione o attivazione del provider, nessuna garanzia di cancellazione fisica delle stringhe o annullamento di effetti remoti già avviati.
+
+## 76. Navigazione da tastiera Salute credenziali — 14/09/2026
+
+Base `3ed53656`, ramo `experiment/m9-health-keyboard`. Regione risultati nominata/focalizzabile, indicatore focus, ciclo Tab/Shift+Tab ed Escape con ritorno al comando iniziale. Listener rimosso alla chiusura e callback inattivi dopo lock. 20 test UI, CSS e suite completa finale npm test superati, inclusi tutti i checkpoint 71–76. Nessun collaudo fisico attribuito alle fixture DOM, provider di rete o deploy.
+
+## 77. Collegamento candidato del client fenced al callable Firebase — 14/09/2026
+
+Base `82ab2002`, ramo `experiment/m6-firebase-queue-adapter`. Adattatore concreto con Auth/Functions della stessa app, allowlist di due domini/callable, UID verificato, snapshot del comando e dismissione su Auth/abort. Sette regressioni dell'adattatore; 113 test offline e suite completa superati (l'ultima regressione è inclusa nella riesecuzione offline successiva).
+
+52 esecuzioni Chrome/Edge con dati sintetici e backend demo: SDK callable reale, Auth emulato con verifica del JWT, header App Check sintetico richiesto dal bridge; comando accettato, ricevuta, logout e risposta trattenuta dopo commit. L'abort conserva la coda e la sessione successiva verifica la ricevuta senza riscrivere. Nessuna attestazione remota/App Check reale né certificazione del middleware onCall; la richiesta SDK già invocata non è annullabile retroattivamente. Provider e rollout restano aperti; nessun deploy o modifica a master.
+
+## 78. Proprietà della coda nel Vault della shell — 14/09/2026
+
+Base `32db005f`, ramo `experiment/m6-shell-owned-queue`. Factory crittografica iniettata dal bootstrap, facciata di operazioni senza key/DB/SDK, assente dai contesti route. Dismissione immediata su lock, timeout, Auth, segnale della vista, dispose e logout fallito; chiusura dei client tardivi e rifiuto di risposte fuori sessione.
+
+npm test completo superato; 165 test shell e 15 test Firebase emulati inclusi. Chrome/Edge: 52 esecuzioni demo, con apertura della coda attraverso la sessione, commit remoto seguito da lock e retry dopo nuovo unlock senza aggiornare il record una seconda volta. Materiale estratto dall'envelope verificato nella prova Firebase; nessuna chiave restituita alla vista. App Check sintetico e middleware remoto non certificato. Provider UI/entry e rollout restano aperti, nessuna attivazione o migrazione.

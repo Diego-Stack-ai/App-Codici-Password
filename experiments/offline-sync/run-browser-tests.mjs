@@ -3,6 +3,7 @@ import {readFile, mkdtemp, rm} from 'node:fs/promises';
 import {resolve, relative, dirname, sep} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawn} from 'node:child_process';
+import {build} from 'esbuild';
 
 // Synthetic data and disposable browser profile. Optional backend is emulator-only.
 const browserPath = process.argv[2];
@@ -10,6 +11,14 @@ const backendMode = ['--backend', '--private-backend'].includes(process.argv[3])
 if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && backendMode))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
+const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
+    stdin: {resolveDir: root, contents: `export {initializeApp, deleteApp} from 'firebase/app';
+        export {initializeAuth, inMemoryPersistence, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
+        export {getFunctions, connectFunctionsEmulator} from 'firebase/functions';
+        export {initializeAppCheck, CustomProvider} from 'firebase/app-check';
+        export {createFirebaseFencedQueueClient} from './experiments/offline-sync/firebase-fenced-queue-client.mjs';
+        export {createProtectedSession} from './experiments/persistent-vault-shell/protected-session.mjs';
+        export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
     ['/suite.mjs', backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
@@ -33,6 +42,9 @@ const result = new Promise((resolveResult, rejectResult) => { accept = resolveRe
 const server = createServer(async (request, response) => {
     try {
         if (bridge && await bridge.handle(request, response)) return;
+        if (request.url === '/firebase-queue.mjs' && sdkBundle) {
+            response.setHeader('Content-Type', 'text/javascript'); response.end(sdkBundle); return;
+        }
         if (request.url === '/result' && request.method === 'POST') {
             let body = '';
             for await (const chunk of request) { body += chunk; if (body.length > 16000) throw new Error('RESULT_TOO_LARGE'); }
@@ -64,6 +76,7 @@ try {
 } finally {
     clearTimeout(timer);
     child?.kill();
+    server.closeAllConnections(); // Also release deliberately held SDK test responses on failure.
     await new Promise(done => server.close(done));
     await bridge?.close();
     const local = relative(tempRoot, profile);

@@ -7,7 +7,7 @@ import {mountOfflineSavePanel} from './offline-save-panel.mjs';
 const passed = [], assert = (value, code) => { if (!value) throw new Error(code); };
 let db, client;
 try {
-    const {uid, privateAccounts} = await (await fetch('/fixture')).json();
+    const {uid, privateAccounts, email, password} = await (await fetch('/fixture')).json();
     db = await new Promise((resolve, reject) => {
         const request = indexedDB.open(`codex-offline-queue-${uid}`, 2);
         request.onupgradeneeded = () => {
@@ -27,7 +27,7 @@ try {
             if (!response.ok) throw Object.assign(new Error('TRANSPORT_ERROR'), result);
             replies.push(result); return result;
         }});
-    const writer = await createFencedQueueWriter({...options, holderId: 'inspector'});
+    let writer = await createFencedQueueWriter({...options, holderId: 'inspector'});
     const pending = async () => (await writer.run(api => api.list())).value;
     const snapshot = async operation => (await post('/snapshot', {operation})).json();
     const operation = {schemaVersion: 1, uid, operationId: 'bridge-first', recordId: 'fixture', deviceId: 'browser-test',
@@ -39,6 +39,35 @@ try {
     }
     await client.enqueue(operation);
     assert((await pending()).length === 1 && !(await snapshot(operation)).record, 'OFFLINE_WRITE');
+    const recoveredIdentity = await client.pendingForRecord(operation.recordId);
+    assert(recoveredIdentity.acquired && JSON.stringify(recoveredIdentity.value) ===
+        JSON.stringify({operationId: operation.operationId, recordId: operation.recordId}) &&
+        (await client.pendingForRecord('another-record')).value === null, 'PENDING_SCOPE');
+    const duplicatePending = {...operation, operationId: 'duplicate-pending'};
+    await writer.run(api => api.enqueue(duplicatePending));
+    let ambiguous = false;
+    try { await client.pendingForRecord(operation.recordId); } catch (error) { ambiguous = error.message === 'FENCED_CLIENT_PENDING_AMBIGUOUS'; }
+    assert(ambiguous && (await pending()).length === 2 && sendCount === 0, 'PENDING_AMBIGUOUS');
+    await client.discard(duplicatePending);
+    passed.push('pending recovery exposes only record identity and refuses ambiguous commands without sending or deleting');
+    const disposableWriter = await createFencedQueueWriter({...options, holderId: 'disposable'});
+    let began, resume;
+    const started = new Promise(resolve => { began = resolve; });
+    const release = new Promise(resolve => { resume = resolve; });
+    const writing = disposableWriter.run(async api => { began(); await release; return api.remove(operation); });
+    await started; disposableWriter.close(); resume();
+    let stopped = false;
+    try { await writing; } catch { stopped = true; }
+    let denied = false;
+    try { await disposableWriter.run(api => api.list()); } catch (error) { denied = error.code === 'FENCED_QUEUE_CLOSED'; }
+    assert(stopped && denied && (await pending()).length === 1, 'DISPOSED_WRITER_MUTATED');
+    const lifetime = new AbortController();
+    const disposableClient = await createFencedQueueClient({...options, holderId: 'disposable-client', signal: lifetime.signal,
+        send: () => { throw new Error('DISPOSED_CLIENT_SENT'); }, isOnline: () => true});
+    lifetime.abort(); let clientDenied = false;
+    try { await disposableClient.flush(); } catch { clientDenied = true; }
+    assert(clientDenied && (await pending()).length === 1, 'ABORTED_CLIENT_MUTATED');
+    passed.push('closing writer during work and aborting client prevent retained callbacks from changing the encrypted queue');
     online = true; await client.flush();
     const saved = await snapshot(operation);
     assert(saved.record?.revision === 1 && (privateAccounts ? saved.record.password === operation.record.password : saved.record.encryptedPayload === operation.encryptedPayload) &&
@@ -89,7 +118,7 @@ try {
         passed.push('trusted private retry remains authoritative after a new profile link without rewriting record');
         await post('/scope', {operation, scope: 'none'});
         const root = document.createElement('div'); document.body.append(root);
-        const page = new AbortController(); online = false;
+        let page = new AbortController(); online = false;
         let preparedNote, refreshedRecord, refreshCount = 0;
         const disposePanel = await mountOfflineSavePanel(root, {signal: page.signal,
             onSaved: async ({isActive}) => {
@@ -106,9 +135,34 @@ try {
                 preparedNote = await encrypt(value, 'SYNTHETIC-VAULT-KEY');
                 return {...operation, operationId: 'bridge-ui', expectedRevision: 2, record: {...operation.record, note: preparedNote}};
             }});
-        const input = root.querySelector('textarea'), buttons = root.querySelectorAll('button');
+        const input = root.querySelector('textarea'); let buttons = root.querySelectorAll('button');
         input.value = 'SYNTHETIC-NOTE-FROM-UI'; await buttons[0].onclick();
         assert(root.textContent.includes('In attesa di connessione') && input.value === '' && buttons[0].disabled && refreshCount === 0, 'UI_OFFLINE_STATE');
+        page.abort(); disposePanel(); client.close(); db.close();
+        db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open(`codex-offline-queue-${uid}`);
+            request.onupgradeneeded = () => { request.transaction.abort(); reject(new Error('RECOVERY_MUST_NOT_UPGRADE')); };
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        options.database = db; writer = await createFencedQueueWriter({...options, holderId: 'reopened-inspector'});
+        page = new AbortController(); let resumedSends = 0;
+        await mountOfflineSavePanel(root, {signal: page.signal, recoveryRecordId: operation.recordId,
+            prepare: () => { throw new Error('RECOVERY_CREATED_SECOND_OPERATION'); },
+            createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => online,
+                send: async command => {
+                    resumedSends++;
+                    const response = await post('/mutation', {operation: command}), result = await response.json();
+                    if (!response.ok) throw Object.assign(new Error('TRANSPORT_ERROR'), result);
+                    return result;
+                }}),
+            onSaved: async ({isActive}) => {
+                const result = await snapshot({...operation, operationId: 'bridge-ui'});
+                if (isActive()) { refreshedRecord = result.record; refreshCount++; }
+            }});
+        buttons = root.querySelectorAll('button');
+        assert(buttons[0].disabled && !buttons[1].hidden && root.querySelector('textarea').value === '' &&
+            resumedSends === 0 && refreshCount === 0 && (await pending()).length === 1, 'UI_REOPEN_PENDING');
+        passed.push('closed encrypted database and editor reopen with the original queued identity and no automatic send');
         online = true; await buttons[1].onclick();
         const uiSaved = await snapshot({...operation, operationId: 'bridge-ui'});
         assert(root.textContent.includes('Nota salvata') && uiSaved.record.note === preparedNote && uiSaved.record.revision === 3 &&
@@ -180,6 +234,53 @@ try {
             JSON.stringify(beforeDiscard.record) === JSON.stringify(afterDiscard.record), 'UI_DISCARD_CHANGED_SERVER');
         discardPage.abort(); root.remove();
     }
+    const sdk = await import('/firebase-queue.mjs');
+    const app = sdk.initializeApp({projectId: 'demo-vault-shell', apiKey: 'demo-key', appId: 'synthetic-offline-browser'});
+    const auth = sdk.initializeAuth(app, {persistence: sdk.inMemoryPersistence});
+    sdk.connectAuthEmulator(auth, 'http://127.0.0.1:9099', {disableWarnings: true});
+    sdk.initializeAppCheck(app, {provider: new sdk.CustomProvider({getToken: async () => ({token: 'synthetic-app-check', expireTimeMillis: Date.now() + 3600000})}), isTokenAutoRefreshEnabled: false});
+    const functions = sdk.getFunctions(app, 'europe-west1'); sdk.connectFunctionsEmulator(functions, '127.0.0.1', Number(location.port));
+    let sdkClient, queueSession, queueContext;
+    try {
+        await sdk.signInWithEmailAndPassword(auth, email, password);
+        queueSession = sdk.createProtectedSession({getUser: () => auth.currentUser,
+            subscribeUser: fn => sdk.onAuthStateChanged(auth, fn), routes: {queue: context => { queueContext = context; }},
+            createVault: callbacks => sdk.createMemoryVault({...callbacks, unlockKey: async () => 'SYNTHETIC-QUEUE-KEY',
+                openQueueWithKey: (vaultKeyMaterial, scope) => sdk.createFirebaseFencedQueueClient({...options, ...scope, vaultKeyMaterial,
+                    database: db, holderId: 'shell-firebase-sdk', auth, functions, isOnline: () => true})})});
+        await queueSession.unlock(); await queueSession.navigate('queue');
+        assert(queueContext.openMutationQueue === undefined && queueContext.key === undefined, 'QUEUE_EXPOSED_TO_ROUTE');
+        const before = await snapshot(operation);
+        const command = {...operation, operationId: 'bridge-sdk', expectedRevision: before.record.revision};
+        const missing = await fetch(`/demo-vault-shell/europe-west1/${privateAccounts ? 'applyPrivateAccountMutation' : 'applyOfflineMutation'}`, {
+            method: 'POST', headers: {'Content-Type': 'application/json', Authorization: `Bearer ${await auth.currentUser.getIdToken()}`}, body: JSON.stringify({data: command})});
+        assert(missing.status === 401 && (await snapshot(command)).updateTime === before.updateTime, 'SDK_MISSING_ATTESTATION_ACCEPTED');
+        sdkClient = await queueSession.openMutationQueue({domain: privateAccounts ? 'private-account' : 'offline-sync', signal: queueContext.signal});
+        await sdkClient.enqueue(command);
+        const after = await snapshot(command);
+        assert(after.record.revision === before.record.revision + 1 && after.receipt?.bindingVersion === 1 && !(await pending()).length, 'SDK_QUEUE_NOT_COMMITTED');
+        const late = {...command, operationId: 'bridge-sdk-late', expectedRevision: after.record.revision};
+        const sending = sdkClient.enqueue(late).catch(() => null);
+        let committed;
+        for (let attempt = 0; attempt < 100; attempt++) {
+            committed = await snapshot(late);
+            if (committed.receipt) break;
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        assert(committed.receipt && committed.record.revision === after.record.revision + 1, 'SDK_DELAYED_NOT_COMMITTED');
+        queueSession.lock(); await post('/release-sdk', {operation: late}); await sending;
+        assert((await pending()).length === 1, 'SDK_LATE_ACK_REMOVED_QUEUE');
+        await queueSession.unlock(); await queueSession.navigate('queue');
+        sdkClient = await queueSession.openMutationQueue({domain: privateAccounts ? 'private-account' : 'offline-sync', signal: queueContext.signal});
+        await sdkClient.flush();
+        const resumed = await snapshot(late);
+        assert(!(await pending()).length && resumed.updateTime === committed.updateTime, 'SDK_RESUME_REWROTE_RECORD');
+        passed.push('shell-owned Vault lock after server commit retains the queue; unlock opens a new scoped SDK client and retries without rewriting');
+        await sdk.signOut(auth);
+        let denied = false; try { await sdkClient.enqueue({...command, operationId: 'bridge-sdk-signed-out'}); } catch { denied = true; }
+        assert(denied && (await snapshot(command)).updateTime === resumed.updateTime && !(await pending()).length, 'SDK_LOGOUT_WRITE');
+        passed.push('Firebase callable SDK sends Auth emulator identity and synthetic App Check header; receipt clears queue and logout prevents reuse');
+    } finally { sdkClient?.close(); queueSession?.dispose(); await sdk.deleteApp(app); }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});
 } catch (error) {
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: false, passed, code: error.code || error.message})});

@@ -727,3 +727,35 @@ Su discendente verificato di `bdb95236`, toolchain, Chrome, Edge, Java e Firesto
 Il nuovo ambiente ha completato setup e suite `npm test` su Linux, oltre alla fixture setup e alle 34 esecuzioni Chrome/Edge con backend emulato. Il precedente blocco Storage è risolto: entrambi i JAR sono precaricati e il runner instrada direttamente soltanto gli host loopback ammessi, conservando proxy e impostazioni ereditate per gli altri host. La correzione definitiva della PR #61 è pubblicata in `4894bd23`; il gate Storage, inclusi i nuovi test senza rete del dispatcher, è passato anche su Windows dopo il recupero da GitHub.
 
 Base unica di prosecuzione: `experiment/vault-shell-v124`, con i contributi delle PR #59, #60 e #61. Per il prossimo lavoro cloud selezionare questo ramo in una nuova task: un follow-up di una task precedente può conservare il vecchio checkout e non riesegue automaticamente il setup. Audit 70 e guida Linux registrano gli esiti effettivi. Il trasferimento è concluso; provider bootstrap, trasporto autenticato/App Check, recupero delle code dopo riapertura, rollout e prove fisiche restano attività M6 separate. Produzione 1.2.124 e master invariati; nessun deploy o migrazione.
+
+## Ripresa del programma M6 — 14/09/2026
+
+Primo incremento da `b5ab595c`: il pannello candidato recupera l'identità della nota pendente prima di consentire un nuovo salvataggio. Riprende soltanto la coda esistente su comando esplicito; ambiguità, lock negato e cambio sessione non provocano cancellazioni. Verificati DOM e Chrome/Edge con chiusura/riapertura IndexedDB e backend emulato. Dettagli e limiti nell'audit 71 e in M6; nessuna attivazione della shell o distribuzione produttiva.
+
+## Backup e ciclo della sessione — candidata 14/09/2026
+
+Su experiment/m8-export-session, base 4dd2f0a2, il backup interrompe i passaggi successivi al blocco del Vault o cambio utente; conferma e Recovery Key vengono dismesse insieme alla sessione. Suite completa npm test e regressioni mirate superate. Dettagli e limiti in M8 e audit 72. Produzione invariata; nessun deploy.
+
+## Limite del backup in memoria — candidata 14/09/2026
+
+Il ramo experiment/m8-export-buffer-limit limita il download Blob e indica quando usare il salvataggio diretto. Formato invariato, nessun download troncato in caso di superamento. 90 prove backup e controlli statici superati; manifest offline aggiornato. Limiti e attività residue in M8 e audit 73. Nessuna distribuzione.
+
+## Raccolta backup limitata — candidata 14/09/2026
+
+Su experiment/m8-export-record-limits, limite record e caratteri coerente con l'import; stop esplicito prima di altre letture, senza produrre un backup completo impropriamente. 93 test backup, budget e sintassi superati. Dettagli e limiti in M8/audit 74; nessuna pubblicazione produttiva.
+
+## Dismissione coda M6 — candidata 14/09/2026
+
+Sul ramo experiment/m6-queue-client-disposal, chiusura writer e abort client rilasciano i riferimenti alle chiavi e impediscono altre mutazioni locali. 106 prove offline e 44 esecuzioni Chrome/Edge con backend emulato superate. Limiti in M6/audit 75; nessun deploy o attivazione bootstrap.
+
+## Tastiera Salute credenziali — candidata 14/09/2026
+
+Ramo experiment/m9-health-keyboard: elenco raggiungibile e focus confinato al dialogo, Escape con ritorno al comando iniziale nella sessione valida. 20 test UI, CSS e npm test finale superati sui checkpoint 71–76. Nessun collaudo fisico o deploy; M9 registra i gate rimasti aperti.
+
+## Adattatore Firebase M6 — candidata 14/09/2026
+
+Da 82ab2002, sul ramo experiment/m6-firebase-queue-adapter: client della coda collegato al vero SDK callable, con proprietario, dominio e durata della sessione controllati. 113 test offline, suite completa e 52 esecuzioni Chrome/Edge/backend demo superati. La risposta persa dopo commit si recupera con la ricevuta esistente. Il test usa attestazione sintetica: non chiude App Check remoto, bootstrap, rollout o prove fisiche. Dettagli in M6/audit 77; aggiornamento destinato alla PR #62, senza master, versione o deploy.
+
+## Coda posseduta dalla shell — candidata 14/09/2026
+
+Ramo experiment/m6-shell-owned-queue, base 32db005f: la shell apre la coda tramite factory fidata e ne revoca operazioni/riferimenti alla chiusura del Vault o della vista. Suite completa, 165 test shell, 15 test Firebase emulati e 52 esecuzioni browser demo superati. Nessun key/DB/SDK alle route. Provider UI/entry e rollout restano aperti; M6/audit 78 registrano i limiti. Checkpoint destinato alla stessa PR #62, senza deploy.

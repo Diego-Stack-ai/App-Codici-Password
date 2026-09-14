@@ -1,7 +1,8 @@
 // Candidate view boundary. No key, SDK, raw database or unscoped writer reaches the DOM.
 export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, readConflict,
-    createConflictProposal, onSaved = () => {}, onDiscarded = () => {}, initialNote = ''}) {
+    createConflictProposal, onSaved = () => {}, onDiscarded = () => {}, initialNote = '', recoveryRecordId}) {
     if (!signal || typeof createClient !== 'function' || typeof prepare !== 'function' || typeof onSaved !== 'function' || typeof onDiscarded !== 'function') throw new Error('SAVE_PANEL_CONFIG');
+    if (recoveryRecordId !== undefined && (typeof recoveryRecordId !== 'string' || !recoveryRecordId)) throw new Error('SAVE_PANEL_CONFIG');
     const section = document.createElement('section');
     const label = document.createElement('label'); label.textContent = 'Nota';
     const input = document.createElement('textarea'); input.value = initialNote; input.autocomplete = 'off'; input.maxLength = 100000;
@@ -87,8 +88,28 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
                 return refresh;
             }});
         if (!active()) { opened.close(); dispose(); return dispose; }
-        client = opened; status.textContent = 'Modifica la nota e salva.'; controls();
-    } catch { if (active()) status.textContent = 'Editor non disponibile. Riapri la pagina.'; return dispose; }
+        client = opened;
+        if (recoveryRecordId !== undefined) {
+            const result = await client.pendingForRecord(recoveryRecordId);
+            if (!active()) { dispose(); return dispose; }
+            if (result?.acquired !== true || (result.value !== null &&
+                (result.value?.recordId !== recoveryRecordId || typeof result.value.operationId !== 'string' || !result.value.operationId))) {
+                throw new Error('SAVE_PANEL_PENDING_UNAVAILABLE');
+            }
+            if (result.value) {
+                submitted = {operationId: result.value.operationId, recordId: recoveryRecordId};
+                accepted = true; input.value = ''; retry.hidden = false;
+                status.textContent = 'Una modifica di questo Account è già conservata sul dispositivo. Riprendi la sincronizzazione per verificarne l’esito.';
+            }
+        }
+        if (!accepted) status.textContent = 'Modifica la nota e salva.';
+        controls();
+    } catch {
+        client?.close(); client = null;
+        if (active()) { input.value = ''; input.readOnly = true; save.disabled = true; retry.hidden = true;
+            status.textContent = 'Editor non disponibile. La coda locale è conservata: riapri la pagina.'; }
+        return dispose;
+    }
     const run = async () => {
         if (!active() || busy) return;
         busy = true; controls();

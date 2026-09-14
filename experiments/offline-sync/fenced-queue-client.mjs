@@ -11,9 +11,23 @@ export async function createFencedQueueClient({send, isOnline = () => navigator.
     let closed = false, running;
     const renewalStops = new Set();
     const active = () => !closed && !signal?.aborted && isActive();
-    const writer = await createFencedQueueWriter(options);
+    let writer;
+    try { writer = await createFencedQueueWriter(options); }
+    finally { options.vaultKeyMaterial = null; }
     const underLease = task => writer.run(task, {isActive: active, signal});
     const client = {
+        pendingForRecord(recordId) {
+            if (typeof recordId !== 'string' || !recordId) throw new Error('FENCED_CLIENT_RECORD');
+            return underLease(async api => {
+                const operations = await api.list();
+                try {
+                    const matches = operations.filter(operation => operation.recordId === recordId);
+                    if (matches.length > 1) throw new Error('FENCED_CLIENT_PENDING_AMBIGUOUS');
+                    const pending = matches[0];
+                    return pending ? Object.freeze({operationId: pending.operationId, recordId: pending.recordId}) : null;
+                } finally { operations.length = 0; }
+            });
+        },
         flush() {
             if (!running) running = underLease(async api => {
                 let renewalFailure, renewing = false;
@@ -72,7 +86,13 @@ export async function createFencedQueueClient({send, isOnline = () => navigator.
             return {...await client.flush(), replacementApplied: true};
         },
         discard(operation) { return underLease(api => api.remove(operation)); },
-        close() { closed = true; for (const stop of [...renewalStops]) stop(); }
+        close() {
+            closed = true; writer.close();
+            signal?.removeEventListener('abort', client.close);
+            for (const stop of [...renewalStops]) stop();
+        }
     };
+    signal?.addEventListener('abort', client.close, {once: true});
+    if (!active()) client.close();
     return Object.freeze(client);
 }
