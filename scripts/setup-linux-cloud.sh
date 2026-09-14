@@ -60,26 +60,37 @@ prepare_browser_libraries() {
     [[ -z "$BROWSER_LIBRARY_PATH" ]] || return 0
     for tool in apt-cache apt-get; do require_tool "$tool"; done
     local packages_dir="$TOOLS_DIR/browser-library-packages" library_root="$TOOLS_DIR/browser-libraries"
-    mkdir -p "$packages_dir" "$library_root"
-    # Ubuntu 24.04 universal image. Read existing apt metadata; download and
-    # extract dependencies locally, never install system packages. Minimal
-    # images can retain dpkg metadata after stripping files: do not infer
-    # that a library is available merely because dpkg calls it installed.
+    local apt_root="$TOOLS_DIR/browser-apt"
+    mkdir -p "$packages_dir" "$library_root" "$apt_root/lists/partial" "$apt_root/cache/archives/partial" "$apt_root/empty-config" "$apt_root/log"
+    # Ubuntu 24.04 universal image has installed-package metadata but no usable
+    # download indexes. Refresh signed indexes in a private apt directory.
+    # Ignore system apt hooks and never install/upgrade the host packages.
+    : >"$apt_root/status"
+    cat >"$apt_root/sources.list" <<'APT'
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe
+APT
+    local -a apt_options=(-o "Dir::State::lists=$apt_root/lists" -o "Dir::State::status=$apt_root/status"
+        -o "Dir::Cache=$apt_root/cache" -o "Dir::Log=$apt_root/log" -o "Dir::Etc::main=/dev/null"
+        -o "Dir::Etc::parts=$apt_root/empty-config" -o "Dir::Etc::sourcelist=$apt_root/sources.list"
+        -o "Dir::Etc::sourceparts=$apt_root/empty-config")
+    apt-get "${apt_options[@]}" update
     local dependency package
     local -a packages=()
     local dependencies
-    dependencies="$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances \
+    dependencies="$(apt-cache "${apt_options[@]}" depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances \
         libatk1.0-0t64 libatk-bridge2.0-0t64 libnss3 libnspr4 libcups2t64 libasound2t64 \
         libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2)"
     while IFS= read -r dependency; do
         [[ "$dependency" =~ ^[a-z0-9][a-z0-9+.-]*(:[a-z0-9]+)?$ ]] || continue
         # Keep the host loader and its matching core runtime together.
-        case "$dependency" in libc6|libc-bin|gcc-*-base|libgcc-s1|libstdc++6) continue ;; esac
+        case "${dependency%%:*}" in libc6|libc-bin|gcc-*-base|libgcc-s1|libstdc++6) continue ;; esac
         packages+=("$dependency")
     done <<< "$dependencies"
     [[ ${#packages[@]} -gt 0 ]] || { echo 'Metadati apt delle librerie browser non disponibili.' >&2; return 1; }
     if [[ ${#packages[@]} -gt 0 ]]; then
-        (cd "$packages_dir" && apt-get download "${packages[@]}")
+        (cd "$packages_dir" && apt-get "${apt_options[@]}" download "${packages[@]}")
         for package in "$packages_dir"/*.deb; do dpkg-deb --extract "$package" "$library_root"; done
     fi
     BROWSER_LIBRARY_PATH="$library_root/usr/lib/x86_64-linux-gnu:$library_root/lib/x86_64-linux-gnu"

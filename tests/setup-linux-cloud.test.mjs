@@ -17,7 +17,12 @@ java() { echo 'java fixture'; }
 md5sum() { return 90; }
 apt-cache() { printf 'libatk1.0-0t64\n  Depends: libc6\nlibc6\n'; }
 dpkg-query() { if [[ "$3" == libc6 ]]; then printf installed; fi; }
-apt-get() { [[ "$1" == download ]] || return 93; printf fixture > libfixture.deb; }
+apt-get() {
+    while [[ "$1" == -o ]]; do shift 2; done
+    if [[ "$1" == update ]]; then return; fi
+    [[ "$1" == download ]] || return 93
+    printf fixture > libfixture.deb
+}
 curl() {
     echo download >> "$FIXTURE_LOG"
     while [[ $# -gt 0 ]]; do
