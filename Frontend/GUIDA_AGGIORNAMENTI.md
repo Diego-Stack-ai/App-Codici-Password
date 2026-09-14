@@ -747,3 +747,7 @@ Su experiment/m8-export-record-limits, limite record e caratteri coerente con l'
 ## Dismissione coda M6 — candidata 14/09/2026
 
 Sul ramo experiment/m6-queue-client-disposal, chiusura writer e abort client rilasciano i riferimenti alle chiavi e impediscono altre mutazioni locali. 106 prove offline e 44 esecuzioni Chrome/Edge con backend emulato superate. Limiti in M6/audit 75; nessun deploy o attivazione bootstrap.
+
+## Tastiera Salute credenziali — candidata 14/09/2026
+
+Ramo experiment/m9-health-keyboard: elenco raggiungibile e focus confinato al dialogo, Escape con ritorno al comando iniziale nella sessione valida. 20 test UI, CSS e npm test finale superati sui checkpoint 71–76. Nessun collaudo fisico o deploy; M9 registra i gate rimasti aperti.

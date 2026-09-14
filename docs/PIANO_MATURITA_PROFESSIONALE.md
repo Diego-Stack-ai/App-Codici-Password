@@ -430,3 +430,5 @@ M8, audit 73: limitato il buffer delle righe cifrate nel download alternativo Bl
 M8, audit 74: anche i descrittori raccolti dall'export hanno soglie cumulative coerenti con l'import, con errore esplicito prima di proseguire. 93 prove backup superate. Snapshot SDK, paginazione, manifest percorsi e memoria fisica restano distinti dai limiti implementati; staging/journal ancora aperti.
 
 M6, audit 75: chiusura esplicita del writer, rilascio dei riferimenti crittografici e arresto dei callback sospesi; 106 test offline e 44 esecuzioni browser/backend demo superati. Si rafforza il candidato, senza anticipare provider, trasporto, rollout o collaudo fisico.
+
+M9, audit 76: corretta navigazione da tastiera dell'elenco e del dialogo; 20 test UI, CSS e suite completa finale superati. Questo non sostituisce Windows/Narrator o altri dispositivi fisici. Provider esterno ancora disattivato.

@@ -68,6 +68,7 @@ function fixture({health = false, exporting = false} = {}) {
         form.onsubmit({preventDefault() {}});
     };
     return {context, body, button, nodes, observers, toasts, executions, service, plan, confirm,
+        runTimers: () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } },
         setup: uid => exporting ? context.setupEncryptedBackup({uid}) : health ? context.setupCredentialHealth({uid}) : context.setupEncryptedRestore({uid}),
         select: () => { const input = body.children.find(node => node.type === 'file'); input.files = [{}]; return input.trigger('change'); },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
@@ -253,6 +254,35 @@ test('credential report is removed immediately on lock and late reports cannot r
     const late = deferred(); f.service.inspectOwnerCredentialHealth = () => late.promise;
     const pending = f.button.click(); await tick(); f.changeUid('B'); late.resolve(report()); await pending;
     assert.equal(f.body.children.some(node => node.role === 'dialog'), false); assert.equal(f.toasts.length, 0);
+});
+
+test('credential dialog keeps keyboard focus in results and close, then restores the opener on Escape', async () => {
+    const f = fixture({health: true});
+    f.service.inspectOwnerCredentialHealth = async () => ({scanned: 0, atRisk: 0, results: []});
+    f.setup('A'); f.button.focus(); await f.button.click(); f.runTimers();
+    const modal = f.body.children.find(n => n.role === 'dialog');
+    const close = f.nodes.find(n => n.textContent === 'Chiudi' && n.isConnected);
+    const list = f.nodes.find(n => n.className === 'credential-health-list' && n.isConnected);
+    assert.equal(list.tabIndex, 0); assert.equal(list['aria-label'], 'Risultati del controllo credenziali');
+    assert.equal(f.context.document.activeElement, close);
+    let prevented = 0;
+    const key = (value, shiftKey = false) => modal.trigger('keydown', {key: value, shiftKey, preventDefault() { prevented++; }, stopPropagation() {}});
+    await key('Tab'); assert.equal(f.context.document.activeElement, list);
+    await key('Tab'); assert.equal(f.context.document.activeElement, close);
+    await key('Tab', true); assert.equal(f.context.document.activeElement, list);
+    await key('Tab', true); assert.equal(f.context.document.activeElement, close);
+    await key('Escape'); assert.equal(f.context.document.activeElement, f.button);
+    assert.equal(modal.isConnected, false); assert.equal(prevented, 5); assert.equal(modal.events.get('keydown').size, 0);
+});
+
+test('locked credential dialog cannot steal focus through a retained keyboard handler', async () => {
+    const f = fixture({health: true});
+    f.service.inspectOwnerCredentialHealth = async () => ({scanned: 0, atRisk: 0, results: []});
+    f.setup('A'); await f.button.click(); f.runTimers();
+    const modal = f.body.children.find(n => n.role === 'dialog');
+    const handler = [...modal.events.get('keydown')][0];
+    f.lock(); f.button.focus(); handler({key: 'Tab', preventDefault() { assert.fail('stale keyboard action'); }});
+    assert.equal(f.context.document.activeElement, f.button);
 });
 
 test('credential setup replacement removes old listeners and prevents duplicate analysis', async () => {

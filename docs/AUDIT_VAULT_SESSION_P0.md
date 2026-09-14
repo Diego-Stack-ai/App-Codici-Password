@@ -744,3 +744,7 @@ Base `29263519`, ramo `experiment/m8-export-record-limits`. Ammessi 10.000 recor
 ## 75. Chiusura della capability della coda — 14/09/2026
 
 Base `d4d2e644`, ramo `experiment/m6-queue-client-disposal`. Chiavi derivate rilasciate dal writer su close, opzioni client prive del materiale dopo derivazione, abort collegato a close. Writer chiuso e callback sospesi non possono leggere/scrivere la coda. 106 test offline e 44 esecuzioni Chrome/Edge/backend demo superati; la successiva guardia isActive rientra nella suite finale. Nessuna migrazione o attivazione del provider, nessuna garanzia di cancellazione fisica delle stringhe o annullamento di effetti remoti già avviati.
+
+## 76. Navigazione da tastiera Salute credenziali — 14/09/2026
+
+Base `3ed53656`, ramo `experiment/m9-health-keyboard`. Regione risultati nominata/focalizzabile, indicatore focus, ciclo Tab/Shift+Tab ed Escape con ritorno al comando iniziale. Listener rimosso alla chiusura e callback inattivi dopo lock. 20 test UI, CSS e suite completa finale npm test superati, inclusi tutti i checkpoint 71–76. Nessun collaudo fisico attribuito alle fixture DOM, provider di rete o deploy.

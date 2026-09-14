@@ -41,3 +41,9 @@ Per i record correnti la data dedicata `passwordUpdatedAt` ha precedenza. Nei re
 Base `0586aa63`, ramo `experiment/m9-health-session`: l'analisi verifica proprietario e sessione dopo sblocco, letture, decifratura e HMAC. Blocco, pagehide e cambio UID invalidano i risultati pendenti, interrompono i passaggi successivi e rimuovono subito il dialogo già visibile. Gli errori non espongono più messaggi del provider nei log. I record decifrati trattenuti dal servizio vengono svuotati anche in caso di errore; impronte e risultati interni del modello vengono rilasciati nel finally. Non è possibile annullare un'operazione Web Crypto già partita né garantire la cancellazione fisica delle stringhe immutabili dal motore JS.
 
 Gli ID dei risultati includono contesto, azienda e Account: lo stesso ID Account in due aziende non scambia più le etichette. Test sintetici interrompono ogni attesa critica con blocco e cambio UID, verificano pulizia dopo errore, risultati aziendali distinti, rimozione immediata del dialogo e assenza di doppio avvio. Nessuna integrazione di rete, modifica alla cifratura o nuovo collaudo fisico M9; i gate del provider e dei dispositivi rimangono aperti.
+
+### Tastiera nel pannello dei risultati — candidata 14/09/2026
+
+Base `3ed53656`, ramo `experiment/m9-health-keyboard`: elenco scorrevole raggiungibile da tastiera con nome accessibile e focus visibile; Tab e Shift+Tab restano fra elenco e Chiudi. Escape chiude e restituisce il focus al comando precedente soltanto se la sessione è ancora valida. Alla dismissione il listener viene rimosso e un callback trattenuto non sposta il focus.
+
+20 test UI superati, inclusi ciclo nei due sensi, Escape, ritorno del focus e invalidazione; CSS e suite completa npm test superati. Sono verifiche automatiche del comportamento, non collaudo fisico Windows/Narrator o iPhone/VoiceOver. Provider esterno ancora disattivato, senza nuove richieste di rete; nessun deploy.

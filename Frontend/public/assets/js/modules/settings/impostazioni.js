@@ -86,10 +86,21 @@ function showCredentialHealthResults(report, action) {
         clearTimeout(timer); modal.replaceChildren(); modal.remove(); report.results.length = 0;
     });
     closeButton.addEventListener('click', close);
-    modal.addEventListener('keydown', event => {
-        if (event.key === 'Escape') close();
+    const list = createElement('div', {
+        className: 'credential-health-list', tabIndex: 0,
+        role: 'region', 'aria-label': 'Risultati del controllo credenziali'
     });
-    const list = createElement('div', {className: 'credential-health-list'});
+    const onKeydown = event => {
+        if (!action.active()) return;
+        if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }
+        else if (event.key === 'Tab') {
+            event.preventDefault();
+            const controls = [list, closeButton], index = controls.indexOf(document.activeElement);
+            controls[event.shiftKey ? (index <= 0 ? controls.length - 1 : index - 1) : (index + 1) % controls.length].focus();
+        }
+    };
+    modal.addEventListener('keydown', onKeydown);
+    action.own(() => modal.removeEventListener('keydown', onKeydown));
     if (!report.results.length) {
         list.appendChild(createElement('p', {
             className: 'credential-health-empty',
