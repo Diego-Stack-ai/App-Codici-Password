@@ -748,3 +748,9 @@ Base `d4d2e644`, ramo `experiment/m6-queue-client-disposal`. Chiavi derivate ril
 ## 76. Navigazione da tastiera Salute credenziali — 14/09/2026
 
 Base `3ed53656`, ramo `experiment/m9-health-keyboard`. Regione risultati nominata/focalizzabile, indicatore focus, ciclo Tab/Shift+Tab ed Escape con ritorno al comando iniziale. Listener rimosso alla chiusura e callback inattivi dopo lock. 20 test UI, CSS e suite completa finale npm test superati, inclusi tutti i checkpoint 71–76. Nessun collaudo fisico attribuito alle fixture DOM, provider di rete o deploy.
+
+## 77. Collegamento candidato del client fenced al callable Firebase — 14/09/2026
+
+Base `82ab2002`, ramo `experiment/m6-firebase-queue-adapter`. Adattatore concreto con Auth/Functions della stessa app, allowlist di due domini/callable, UID verificato, snapshot del comando e dismissione su Auth/abort. Sette regressioni dell'adattatore; 113 test offline e suite completa superati (l'ultima regressione è inclusa nella riesecuzione offline successiva).
+
+52 esecuzioni Chrome/Edge con dati sintetici e backend demo: SDK callable reale, Auth emulato con verifica del JWT, header App Check sintetico richiesto dal bridge; comando accettato, ricevuta, logout e risposta trattenuta dopo commit. L'abort conserva la coda e la sessione successiva verifica la ricevuta senza riscrivere. Nessuna attestazione remota/App Check reale né certificazione del middleware onCall; la richiesta SDK già invocata non è annullabile retroattivamente. Provider e rollout restano aperti; nessun deploy o modifica a master.

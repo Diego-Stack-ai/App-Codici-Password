@@ -7,7 +7,7 @@ import {mountOfflineSavePanel} from './offline-save-panel.mjs';
 const passed = [], assert = (value, code) => { if (!value) throw new Error(code); };
 let db, client;
 try {
-    const {uid, privateAccounts} = await (await fetch('/fixture')).json();
+    const {uid, privateAccounts, email, password} = await (await fetch('/fixture')).json();
     db = await new Promise((resolve, reject) => {
         const request = indexedDB.open(`codex-offline-queue-${uid}`, 2);
         request.onupgradeneeded = () => {
@@ -234,6 +234,48 @@ try {
             JSON.stringify(beforeDiscard.record) === JSON.stringify(afterDiscard.record), 'UI_DISCARD_CHANGED_SERVER');
         discardPage.abort(); root.remove();
     }
+    const sdk = await import('/firebase-queue.mjs');
+    const app = sdk.initializeApp({projectId: 'demo-vault-shell', apiKey: 'demo-key', appId: 'synthetic-offline-browser'});
+    const auth = sdk.initializeAuth(app, {persistence: sdk.inMemoryPersistence});
+    sdk.connectAuthEmulator(auth, 'http://127.0.0.1:9099', {disableWarnings: true});
+    sdk.initializeAppCheck(app, {provider: new sdk.CustomProvider({getToken: async () => ({token: 'synthetic-app-check', expireTimeMillis: Date.now() + 3600000})}), isTokenAutoRefreshEnabled: false});
+    const functions = sdk.getFunctions(app, 'europe-west1'); sdk.connectFunctionsEmulator(functions, '127.0.0.1', Number(location.port));
+    let sdkClient;
+    try {
+        await sdk.signInWithEmailAndPassword(auth, email, password);
+        const before = await snapshot(operation), lifetime = new AbortController();
+        const command = {...operation, operationId: 'bridge-sdk', expectedRevision: before.record.revision};
+        const missing = await fetch(`/demo-vault-shell/europe-west1/${privateAccounts ? 'applyPrivateAccountMutation' : 'applyOfflineMutation'}`, {
+            method: 'POST', headers: {'Content-Type': 'application/json', Authorization: `Bearer ${await auth.currentUser.getIdToken()}`}, body: JSON.stringify({data: command})});
+        assert(missing.status === 401 && (await snapshot(command)).updateTime === before.updateTime, 'SDK_MISSING_ATTESTATION_ACCEPTED');
+        sdkClient = await sdk.createFirebaseFencedQueueClient({...options, database: db, holderId: 'firebase-sdk', auth, functions,
+            domain: privateAccounts ? 'private-account' : 'offline-sync', signal: lifetime.signal, isOnline: () => true});
+        await sdkClient.enqueue(command);
+        const after = await snapshot(command);
+        assert(after.record.revision === before.record.revision + 1 && after.receipt?.bindingVersion === 1 && !(await pending()).length, 'SDK_QUEUE_NOT_COMMITTED');
+        const late = {...command, operationId: 'bridge-sdk-late', expectedRevision: after.record.revision};
+        const sending = sdkClient.enqueue(late).catch(() => null);
+        let committed;
+        for (let attempt = 0; attempt < 100; attempt++) {
+            committed = await snapshot(late);
+            if (committed.receipt) break;
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        assert(committed.receipt && committed.record.revision === after.record.revision + 1, 'SDK_DELAYED_NOT_COMMITTED');
+        lifetime.abort(); await post('/release-sdk', {operation: late}); await sending;
+        assert((await pending()).length === 1, 'SDK_LATE_ACK_REMOVED_QUEUE');
+        const resumedLifetime = new AbortController();
+        sdkClient = await sdk.createFirebaseFencedQueueClient({...options, database: db, holderId: 'firebase-sdk-resume', auth, functions,
+            domain: privateAccounts ? 'private-account' : 'offline-sync', signal: resumedLifetime.signal, isOnline: () => true});
+        await sdkClient.flush();
+        const resumed = await snapshot(late);
+        assert(!(await pending()).length && resumed.updateTime === committed.updateTime, 'SDK_RESUME_REWROTE_RECORD');
+        passed.push('Vault abort after server commit retains the queue; a new SDK client retries the same identity without rewriting');
+        await sdk.signOut(auth);
+        let denied = false; try { await sdkClient.enqueue({...command, operationId: 'bridge-sdk-signed-out'}); } catch { denied = true; }
+        assert(denied && (await snapshot(command)).updateTime === resumed.updateTime && !(await pending()).length, 'SDK_LOGOUT_WRITE');
+        passed.push('Firebase callable SDK sends Auth emulator identity and synthetic App Check header; receipt clears queue and logout prevents reuse');
+    } finally { sdkClient?.close(); await sdk.deleteApp(app); }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});
 } catch (error) {
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: false, passed, code: error.code || error.message})});

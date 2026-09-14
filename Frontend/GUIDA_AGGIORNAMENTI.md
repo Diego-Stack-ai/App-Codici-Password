@@ -751,3 +751,7 @@ Sul ramo experiment/m6-queue-client-disposal, chiusura writer e abort client ril
 ## Tastiera Salute credenziali — candidata 14/09/2026
 
 Ramo experiment/m9-health-keyboard: elenco raggiungibile e focus confinato al dialogo, Escape con ritorno al comando iniziale nella sessione valida. 20 test UI, CSS e npm test finale superati sui checkpoint 71–76. Nessun collaudo fisico o deploy; M9 registra i gate rimasti aperti.
+
+## Adattatore Firebase M6 — candidata 14/09/2026
+
+Da 82ab2002, sul ramo experiment/m6-firebase-queue-adapter: client della coda collegato al vero SDK callable, con proprietario, dominio e durata della sessione controllati. 113 test offline, suite completa e 52 esecuzioni Chrome/Edge/backend demo superati. La risposta persa dopo commit si recupera con la ricevuta esistente. Il test usa attestazione sintetica: non chiude App Check remoto, bootstrap, rollout o prove fisiche. Dettagli in M6/audit 77; aggiornamento destinato alla PR #62, senza master, versione o deploy.
