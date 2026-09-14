@@ -1,5 +1,6 @@
 // Candidate view boundary. No key, SDK, raw database or unscoped writer reaches the DOM.
-export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, readConflict, onSaved = () => {}, onDiscarded = () => {}, initialNote = ''}) {
+export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, readConflict,
+    createConflictProposal, onSaved = () => {}, onDiscarded = () => {}, initialNote = ''}) {
     if (!signal || typeof createClient !== 'function' || typeof prepare !== 'function' || typeof onSaved !== 'function' || typeof onDiscarded !== 'function') throw new Error('SAVE_PANEL_CONFIG');
     const section = document.createElement('section');
     const label = document.createElement('label'); label.textContent = 'Nota';
@@ -20,14 +21,19 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
     const onlineTitle = document.createElement('h3'); onlineTitle.textContent = 'Nota online al momento del confronto';
     const onlineText = document.createElement('pre');
     comparison.append(localTitle, localText, onlineTitle, onlineText); section.append(compare, comparison);
+    const propose = document.createElement('button'); propose.type = 'button'; propose.textContent = 'Riproporre la nota locale'; propose.hidden = true;
+    const confirmProposal = document.createElement('button'); confirmProposal.type = 'button'; confirmProposal.textContent = 'Conferma: riproponi solo questa nota'; confirmProposal.hidden = true;
+    const cancelProposal = document.createElement('button'); cancelProposal.type = 'button'; cancelProposal.textContent = 'Annulla riproposizione'; cancelProposal.hidden = true;
+    section.append(propose, confirmProposal, cancelProposal);
     const clearComparison = () => { localText.textContent = onlineText.textContent = ''; comparison.hidden = true; };
-    let disposed = false, busy = false, client, operation, accepted = false, submitted, confirmed = false, refresh, held;
+    let disposed = false, busy = false, client, operation, accepted = false, submitted, confirmed = false, refresh, held, proposal;
     const active = () => !disposed && !signal.aborted && isActive();
     const dispose = () => {
         if (disposed) return;
-        disposed = true; input.value = ''; operation = null; submitted = null; held = null; client?.close(); client = null;
+        disposed = true; input.value = ''; operation = null; submitted = null; held = null; proposal?.close(); proposal = null; client?.close(); client = null;
         clearComparison(); compare.onclick = null;
-        signal.removeEventListener('abort', dispose); save.onclick = retry.onclick = discard.onclick = confirm.onclick = cancel.onclick = null; section.remove();
+        signal.removeEventListener('abort', dispose); save.onclick = retry.onclick = discard.onclick = confirm.onclick = cancel.onclick = null;
+        propose.onclick = confirmProposal.onclick = cancelProposal.onclick = null; section.remove();
     };
     const states = {idle: 'Nessuna modifica in attesa.', offline: 'Modifica conservata sul dispositivo. In attesa di connessione.',
         syncing: 'Sincronizzazione in corso…', saved: 'Nota salvata.', conflict: 'Account modificato altrove. La copia locale è conservata.',
@@ -46,6 +52,7 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
         retry.disabled = !client || busy;
         discard.disabled = confirm.disabled = cancel.disabled = !client || busy;
         compare.disabled = !client || busy;
+        propose.disabled = confirmProposal.disabled = cancelProposal.disabled = !client || busy;
     };
     signal.addEventListener('abort', dispose, {once: true});
     if (!active()) { dispose(); return dispose; }
@@ -56,19 +63,21 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
             if (['conflict', 'reconciliation-required'].includes(event.state)) {
                 if (!submitted || event.operation?.operationId !== submitted.operationId || event.operation?.recordId !== submitted.recordId) {
                     status.textContent = 'Un’altra modifica blocca la coda. Questa nota resta in attesa.';
-                    retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = true; held = null; clearComparison();
+                    retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = true;
+                    propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; proposal?.close(); proposal = null; held = null; clearComparison();
                     return;
                 }
                 held = structuredClone(event.operation); discard.hidden = false;
                 confirm.hidden = cancel.hidden = true;
-                compare.hidden = typeof readConflict !== 'function'; clearComparison();
+                compare.hidden = typeof readConflict !== 'function' && typeof createConflictProposal !== 'function';
+                propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; proposal?.close(); proposal = null; clearComparison();
             }
             update(event.state);
         },
             onCommitted: event => {
                 if (!active() || confirmed || !submitted || event.operationId !== submitted.operationId || event.recordId !== submitted.recordId) return;
                 confirmed = accepted = true; operation = held = null; input.value = ''; retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = true;
-                compare.hidden = true; clearComparison();
+                compare.hidden = propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; proposal?.close(); proposal = null; clearComparison();
                 status.textContent = states.saved; controls();
                 refresh = Promise.resolve().then(() => {
                     if (active()) return onSaved({signal, isActive: active});
@@ -101,17 +110,52 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
     };
     save.onclick = run; retry.onclick = run;
     compare.onclick = async () => {
-        if (!active() || busy || !held || typeof readConflict !== 'function') return;
+        if (!active() || busy || !held || (typeof readConflict !== 'function' && typeof createConflictProposal !== 'function')) return;
         busy = true; controls(); clearComparison();
         try {
             const snapshot = held;
-            const result = await readConflict(structuredClone(snapshot), {signal, isActive: active});
+            proposal?.close(); proposal = null;
+            const result = typeof createConflictProposal === 'function'
+                ? (proposal = await createConflictProposal(structuredClone(snapshot), {signal, isActive: active})).comparison
+                : await readConflict(structuredClone(snapshot), {signal, isActive: active});
             if (!active() || held !== snapshot) return;
             if (typeof result?.localNote !== 'string' || typeof result?.onlineNote !== 'string' ||
                 result.localNote.length > 100000 || result.onlineNote.length > 100000) throw new Error('REVIEW_INVALID');
             localText.textContent = result.localNote; onlineText.textContent = result.onlineNote; comparison.hidden = false;
+            propose.hidden = !proposal;
         } catch { if (active()) status.textContent = 'Confronto non disponibile. La modifica locale è conservata.'; }
         finally { busy = false; controls(); }
+    };
+    propose.onclick = () => {
+        if (!active() || busy || !held || !proposal) return;
+        status.textContent = 'Riproporre solo la nota locale sulla revisione confrontata?';
+        propose.hidden = true; confirmProposal.hidden = cancelProposal.hidden = false;
+    };
+    cancelProposal.onclick = () => {
+        if (!active() || busy || !held || !proposal) return;
+        confirmProposal.hidden = cancelProposal.hidden = true; propose.hidden = false;
+        status.textContent = 'La modifica locale è ancora conservata.';
+    };
+    confirmProposal.onclick = async () => {
+        if (!active() || busy || !held || !proposal || confirmProposal.hidden) return;
+        busy = true; controls();
+        const expected = held, previousSubmitted = submitted, activeProposal = proposal;
+        try {
+            const replacement = await proposal.prepareReplacement({confirmed: true});
+            if (!active() || held !== expected) return;
+            submitted = {operationId: replacement.operationId, recordId: replacement.recordId};
+            const result = await client.replace(expected, replacement);
+            if (!active()) return;
+            if (confirmed) return; // The bound receipt already completed the view.
+            if (result?.acquired === false) { submitted = previousSubmitted; throw new Error('REPLACE_NOT_CONFIRMED'); }
+            if (held?.operationId === replacement.operationId && held?.recordId === replacement.recordId) return; // A newer server revision conflicted.
+            held = null; activeProposal.close(); if (proposal === activeProposal) proposal = null;
+            discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true;
+            clearComparison(); status.textContent = 'Nota riproposta. Sincronizzazione in corso o in attesa di rete.';
+        } catch {
+            submitted = previousSubmitted;
+            if (active()) status.textContent = 'Riproposizione non confermata. La modifica locale è conservata: confronta di nuovo prima di riprovare.';
+        } finally { busy = false; controls(); }
     };
     discard.onclick = () => {
         if (!active() || busy || !held) return;

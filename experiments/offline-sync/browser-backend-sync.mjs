@@ -2,6 +2,7 @@ import {createFencedQueueClient} from './fenced-queue-client.mjs';
 import {createFencedQueueWriter} from './fenced-queue-writer.mjs';
 import {encrypt, decrypt} from './crypto-utils.js';
 import {readConflictNotes} from './conflict-note-review.mjs';
+import {createConflictNoteProposal} from './conflict-note-proposal.mjs';
 import {mountOfflineSavePanel} from './offline-save-panel.mjs';
 const passed = [], assert = (value, code) => { if (!value) throw new Error(code); };
 let db, client;
@@ -131,12 +132,20 @@ try {
         assert(enqueued === 0 && retainedInput.value === '' && !root.children.length, 'LATE_PREPARE_ENQUEUED');
         passed.push('page abort during encryption preparation prevents enqueue and clears visible draft');
         const conflictPage = new AbortController(); let discardedRefresh = 0;
-        const conflictedNote = {...operation, operationId: 'bridge-ui-conflict', expectedRevision: 2};
+        const localConflictNote = await encrypt('SYNTHETIC-LOCAL-CONFLICT-NOTE', 'SYNTHETIC-VAULT-KEY');
+        const conflictedNote = {...operation, operationId: 'bridge-ui-conflict', expectedRevision: 2,
+            record: {...operation.record, note: localConflictNote}};
+        const proposalContext = {user: {uid}, signal: conflictPage.signal, unlocked: true,
+            read: ({ciphertext}) => decrypt(ciphertext, 'SYNTHETIC-VAULT-KEY'),
+            encrypt: value => encrypt(value, 'SYNTHETIC-VAULT-KEY')};
+        const readLatest = async command => ({source: {...(await snapshot(command)).record, id: command.recordId, ownerId: uid}, hasProfileLink: false});
         await mountOfflineSavePanel(root, {signal: conflictPage.signal,
             readConflict: command => readConflictNotes({operation: command,
                 context: {user: {uid}, signal: conflictPage.signal, unlocked: true,
                     read: ({ciphertext}) => decrypt(ciphertext, 'SYNTHETIC-VAULT-KEY')},
                 readLatest: async () => ({...(await snapshot(command)).record, id: command.recordId, ownerId: uid})}),
+            createConflictProposal: command => createConflictNoteProposal({context: proposalContext, operation: command,
+                readLatest: () => readLatest(command), noteOnly: true, deviceId: 'browser-test', newOperationId: () => 'bridge-ui-reproposal'}),
             createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => true,
                 send: async command => {
                     const response = await post('/mutation', {operation: command}), result = await response.json();
@@ -148,19 +157,28 @@ try {
         assert(!conflictButtons[2].hidden && (await pending()).length === 1, 'UI_CONFLICT_MISSING');
         await conflictButtons[5].onclick();
         const compared = root.querySelectorAll('pre');
-        assert(compared.length === 2 && compared[0].textContent === '' && compared[1].textContent === 'SYNTHETIC-NOTE-FROM-UI' &&
+        assert(compared.length === 2 && compared[0].textContent === 'SYNTHETIC-LOCAL-CONFLICT-NOTE' && compared[1].textContent === 'SYNTHETIC-NOTE-FROM-UI' &&
             (await pending()).length === 1, 'UI_COMPARISON_CHANGED_QUEUE');
-        conflictButtons[2].onclick(); conflictButtons[4].onclick();
-        assert((await pending()).length === 1 && discardedRefresh === 0, 'UI_CANCEL_DISCARDED');
+        await conflictButtons[6].onclick(); conflictButtons[8].onclick();
+        assert((await pending()).length === 1, 'UI_REPROPOSAL_CANCEL_CHANGED_QUEUE');
+        conflictButtons[6].onclick(); await conflictButtons[7].onclick();
+        const reproposed = await snapshot({...conflictedNote, operationId: 'bridge-ui-reproposal'});
+        assert(!(await pending()).length && reproposed.record.revision === 4 && reproposed.record.note === localConflictNote &&
+            (await decrypt(reproposed.record.note, 'SYNTHETIC-VAULT-KEY')) === 'SYNTHETIC-LOCAL-CONFLICT-NOTE', 'UI_REPROPOSAL_NOT_APPLIED');
+        conflictPage.abort(); assert([...compared].every(node => node.textContent === ''), 'UI_COMPARISON_RETAINED');
+        passed.push('confirmed note reproposal atomically replaces the conflicted command and applies through the private emulator backend');
+        const discardPage = new AbortController();
+        await mountOfflineSavePanel(root, {signal: discardPage.signal,
+            createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => true,
+                send: async command => { const response = await post('/mutation', {operation: command}); return response.json(); }}),
+            prepare: async () => ({...conflictedNote, operationId: 'bridge-ui-discard', expectedRevision: 3})});
+        const discardButtons = root.querySelectorAll('button'); await discardButtons[0].onclick();
         const beforeDiscard = await snapshot(conflictedNote);
-        conflictButtons[2].onclick(); await conflictButtons[3].onclick();
+        discardButtons[2].onclick(); await discardButtons[3].onclick();
         const afterDiscard = await snapshot(conflictedNote);
-        assert(!(await pending()).length && discardedRefresh === 1 && beforeDiscard.updateTime === afterDiscard.updateTime &&
-            JSON.stringify(beforeDiscard.record) === JSON.stringify(afterDiscard.record) &&
-            root.textContent.includes('dati online sono invariati'), 'UI_DISCARD_CHANGED_SERVER');
-        conflictPage.abort();
-        assert([...compared].every(node => node.textContent === ''), 'UI_COMPARISON_RETAINED'); root.remove();
-        passed.push('explicit conflict discard removes only queued command; cancellation and online record remain unchanged');
+        assert(!(await pending()).length && beforeDiscard.updateTime === afterDiscard.updateTime &&
+            JSON.stringify(beforeDiscard.record) === JSON.stringify(afterDiscard.record), 'UI_DISCARD_CHANGED_SERVER');
+        discardPage.abort(); root.remove();
     }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});
 } catch (error) {

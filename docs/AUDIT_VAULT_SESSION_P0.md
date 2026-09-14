@@ -684,3 +684,13 @@ Base 12d4e3f9. Capability di confronto read-only tra comando e record corrente; 
 ## 65. Preparazione controllata della riproposizione
 
 Base cc067a12. Proposta della sola nota con conferma, nuova identità stabile e revisione confrontata; altri campi preservati dal preparatore canonico. 95 test offline e 155 shell passati. La proposta non è ancora collegata alla UI o alla sostituzione in coda: nessuna attivazione runtime.
+
+## 66. Riproposizione UI con replace transazionale — 14/09/2026
+
+Base iniziale verificata `65a5d0e7a7de0fe561b1d26b60b7b15ae4fbe93b`, ramo candidato dedicato. Il pannello collega la proposta della sola nota alla UI con confronto e consenso separato; la sostituzione usa il CAS cifrato sotto lease già esistente e registra la nuova identità prima del flush. Errori, annullamento, cambio comando e teardown non eliminano la copia locale né rilasciano testo decifrato. La vista riceve soltanto capability, mai chiavi Vault, SDK o writer non circoscritti.
+
+Il caso browser candidato attraversa la coda IndexedDB, il replace e il backend privato originale emulato, oltre a conservare lo scarto esplicito senza scrittura server. Il runner non dipende più esclusivamente dai percorsi Windows: supporta variabili `CHROME_PATH`/`EDGE_PATH` e candidati Linux. Nel cloud erano assenti entrambi i browser, quindi nessuna prova browser/dispositivo è attribuita a questo checkpoint. `npm ci` e `npm ci --prefix functions` completati; OpenJDK 25 disponibile; 97 test offline e 155 shell superati. Il tentativo sull'emulatore `demo-vault-shell` non ha avviato Firestore perché il JAR non era presente e la rete non ne ha consentito il download. Nessun Firebase reale, deploy, migrazione o attivazione runtime. Restano provider bootstrap, trasporto autenticato, recupero dopo riapertura e rollout.
+
+## 67. Setup locale del runner cloud — 14/09/2026
+
+Base `3018e202`. Aggiunto setup Linux x86_64 senza privilegi globali: installa dai lock npm, estrae Chrome ed Edge sotto `.codex-tmp`, prepara con la Firebase CLI bloccata la cache Firestore e genera gli export dei tre percorsi. La guida elenca domini, file e punto di allowlist richiesti. La modalità `--check` non usa rete. Il commit base non risultava verificabile su GitHub dal workspace: clone privo di remote e GitHub CLI non autenticata; non viene quindi dichiarato pubblicato. Nessun deploy o dato Firebase reale.

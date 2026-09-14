@@ -11,21 +11,22 @@ class Node {
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(node => node !== this); }
 }
 const operation = {operationId: 'own-note', recordId: 'account-a'};
-async function fixture({send, discard, readConflict, onSaved = () => {}, onDiscarded = () => {}} = {}) {
+async function fixture({send, discard, replace, readConflict, createConflictProposal, onSaved = () => {}, onDiscarded = () => {}} = {}) {
     const realm = vm.createContext({structuredClone, document: {createElement: () => new Node()}});
     vm.runInContext(source.replace('export async function', 'async function'), realm);
     const root = new Node(), page = new AbortController(); let config;
-    await realm.mountOfflineSavePanel(root, {signal: page.signal, onSaved, onDiscarded, readConflict,
+    await realm.mountOfflineSavePanel(root, {signal: page.signal, onSaved, onDiscarded, readConflict, createConflictProposal,
         prepare: async () => operation,
         createClient: async value => {
             config = value;
-            return {close() {}, discard, enqueue: async () => send?.(config), flush: async () => send?.(config)};
+            return {close() {}, discard, replace, enqueue: async () => send?.(config), flush: async () => send?.(config)};
         }});
     const [label, status, save, retry] = root.children[0].children;
     const input = label.children[0]; input.value = 'Synthetic note';
     const [, , , , keepOnline, confirm, cancel] = root.children[0].children;
     const compare = root.children[0].children[7], comparison = root.children[0].children[8];
-    return {root, page, config, input, status, save, retry, keepOnline, confirm, cancel, compare, comparison};
+    const propose = root.children[0].children[9], confirmProposal = root.children[0].children[10], cancelProposal = root.children[0].children[11];
+    return {root, page, config, input, status, save, retry, keepOnline, confirm, cancel, compare, comparison, propose, confirmProposal, cancelProposal};
 }
 
 test('a different operation or record cannot confirm this editor', async () => {
@@ -144,4 +145,33 @@ test('comparison arriving after abort cannot restore plaintext', async () => {
     await f.save.onclick(); const pending = f.compare.onclick(); f.page.abort();
     resolve({localNote: 'Late local', onlineNote: 'Late online'}); await pending;
     assert.equal(f.comparison.hidden, true); assert.equal(f.comparison.children[1].textContent, '');
+});
+
+test('confirmed note proposal atomically replaces the compared command with its stable identity', async () => {
+    const replacement = {operationId: 'replacement-note', recordId: operation.recordId, expectedRevision: 7};
+    let confirmations = 0, replacements = 0, closed = 0;
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        createConflictProposal: async expected => {
+            assert.deepEqual(expected, operation);
+            return {comparison: {localNote: 'Local', onlineNote: 'Online', onlineRevision: 7}, close: () => closed++,
+                prepareReplacement: async ({confirmed}) => { assert.equal(confirmed, true); confirmations++; return replacement; }};
+        },
+        replace: async (expected, next) => { assert.deepEqual(expected, operation); assert.deepEqual(next, replacement); replacements++; return {state: 'offline'}; }});
+    await f.save.onclick(); await f.compare.onclick();
+    assert.equal(f.propose.hidden, false); f.propose.onclick(); f.cancelProposal.onclick();
+    assert.equal(replacements, 0); f.propose.onclick(); await f.confirmProposal.onclick();
+    assert.equal(confirmations, 1); assert.equal(replacements, 1); assert.equal(closed, 1);
+    assert.match(f.status.textContent, /Nota riproposta/); assert.equal(f.comparison.children[1].textContent, '');
+    f.page.abort();
+});
+
+test('failed replacement preserves the conflict and requires a fresh comparison', async () => {
+    let closed = 0;
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        createConflictProposal: async () => ({comparison: {localNote: 'Local', onlineNote: 'Online', onlineRevision: 7},
+            close: () => closed++, prepareReplacement: async () => ({operationId: 'replacement-note', recordId: operation.recordId})}),
+        replace: async () => ({acquired: false})});
+    await f.save.onclick(); await f.compare.onclick(); f.propose.onclick(); await f.confirmProposal.onclick();
+    assert.match(f.status.textContent, /non confermata/); assert.equal(f.keepOnline.hidden, false);
+    f.page.abort(); assert.equal(closed, 1);
 });
