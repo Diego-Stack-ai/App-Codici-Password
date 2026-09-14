@@ -14,6 +14,18 @@ export async function createFencedQueueClient({send, isOnline = () => navigator.
     const writer = await createFencedQueueWriter(options);
     const underLease = task => writer.run(task, {isActive: active, signal});
     const client = {
+        pendingForRecord(recordId) {
+            if (typeof recordId !== 'string' || !recordId) throw new Error('FENCED_CLIENT_RECORD');
+            return underLease(async api => {
+                const operations = await api.list();
+                try {
+                    const matches = operations.filter(operation => operation.recordId === recordId);
+                    if (matches.length > 1) throw new Error('FENCED_CLIENT_PENDING_AMBIGUOUS');
+                    const pending = matches[0];
+                    return pending ? Object.freeze({operationId: pending.operationId, recordId: pending.recordId}) : null;
+                } finally { operations.length = 0; }
+            });
+        },
         flush() {
             if (!running) running = underLease(async api => {
                 let renewalFailure, renewing = false;

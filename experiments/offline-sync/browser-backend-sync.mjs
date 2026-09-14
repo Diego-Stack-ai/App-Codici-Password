@@ -27,7 +27,7 @@ try {
             if (!response.ok) throw Object.assign(new Error('TRANSPORT_ERROR'), result);
             replies.push(result); return result;
         }});
-    const writer = await createFencedQueueWriter({...options, holderId: 'inspector'});
+    let writer = await createFencedQueueWriter({...options, holderId: 'inspector'});
     const pending = async () => (await writer.run(api => api.list())).value;
     const snapshot = async operation => (await post('/snapshot', {operation})).json();
     const operation = {schemaVersion: 1, uid, operationId: 'bridge-first', recordId: 'fixture', deviceId: 'browser-test',
@@ -39,6 +39,17 @@ try {
     }
     await client.enqueue(operation);
     assert((await pending()).length === 1 && !(await snapshot(operation)).record, 'OFFLINE_WRITE');
+    const recoveredIdentity = await client.pendingForRecord(operation.recordId);
+    assert(recoveredIdentity.acquired && JSON.stringify(recoveredIdentity.value) ===
+        JSON.stringify({operationId: operation.operationId, recordId: operation.recordId}) &&
+        (await client.pendingForRecord('another-record')).value === null, 'PENDING_SCOPE');
+    const duplicatePending = {...operation, operationId: 'duplicate-pending'};
+    await writer.run(api => api.enqueue(duplicatePending));
+    let ambiguous = false;
+    try { await client.pendingForRecord(operation.recordId); } catch (error) { ambiguous = error.message === 'FENCED_CLIENT_PENDING_AMBIGUOUS'; }
+    assert(ambiguous && (await pending()).length === 2 && sendCount === 0, 'PENDING_AMBIGUOUS');
+    await client.discard(duplicatePending);
+    passed.push('pending recovery exposes only record identity and refuses ambiguous commands without sending or deleting');
     online = true; await client.flush();
     const saved = await snapshot(operation);
     assert(saved.record?.revision === 1 && (privateAccounts ? saved.record.password === operation.record.password : saved.record.encryptedPayload === operation.encryptedPayload) &&
@@ -89,7 +100,7 @@ try {
         passed.push('trusted private retry remains authoritative after a new profile link without rewriting record');
         await post('/scope', {operation, scope: 'none'});
         const root = document.createElement('div'); document.body.append(root);
-        const page = new AbortController(); online = false;
+        let page = new AbortController(); online = false;
         let preparedNote, refreshedRecord, refreshCount = 0;
         const disposePanel = await mountOfflineSavePanel(root, {signal: page.signal,
             onSaved: async ({isActive}) => {
@@ -106,9 +117,34 @@ try {
                 preparedNote = await encrypt(value, 'SYNTHETIC-VAULT-KEY');
                 return {...operation, operationId: 'bridge-ui', expectedRevision: 2, record: {...operation.record, note: preparedNote}};
             }});
-        const input = root.querySelector('textarea'), buttons = root.querySelectorAll('button');
+        const input = root.querySelector('textarea'); let buttons = root.querySelectorAll('button');
         input.value = 'SYNTHETIC-NOTE-FROM-UI'; await buttons[0].onclick();
         assert(root.textContent.includes('In attesa di connessione') && input.value === '' && buttons[0].disabled && refreshCount === 0, 'UI_OFFLINE_STATE');
+        page.abort(); disposePanel(); client.close(); db.close();
+        db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open(`codex-offline-queue-${uid}`);
+            request.onupgradeneeded = () => { request.transaction.abort(); reject(new Error('RECOVERY_MUST_NOT_UPGRADE')); };
+            request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+        });
+        options.database = db; writer = await createFencedQueueWriter({...options, holderId: 'reopened-inspector'});
+        page = new AbortController(); let resumedSends = 0;
+        await mountOfflineSavePanel(root, {signal: page.signal, recoveryRecordId: operation.recordId,
+            prepare: () => { throw new Error('RECOVERY_CREATED_SECOND_OPERATION'); },
+            createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => online,
+                send: async command => {
+                    resumedSends++;
+                    const response = await post('/mutation', {operation: command}), result = await response.json();
+                    if (!response.ok) throw Object.assign(new Error('TRANSPORT_ERROR'), result);
+                    return result;
+                }}),
+            onSaved: async ({isActive}) => {
+                const result = await snapshot({...operation, operationId: 'bridge-ui'});
+                if (isActive()) { refreshedRecord = result.record; refreshCount++; }
+            }});
+        buttons = root.querySelectorAll('button');
+        assert(buttons[0].disabled && !buttons[1].hidden && root.querySelector('textarea').value === '' &&
+            resumedSends === 0 && refreshCount === 0 && (await pending()).length === 1, 'UI_REOPEN_PENDING');
+        passed.push('closed encrypted database and editor reopen with the original queued identity and no automatic send');
         online = true; await buttons[1].onclick();
         const uiSaved = await snapshot({...operation, operationId: 'bridge-ui'});
         assert(root.textContent.includes('Nota salvata') && uiSaved.record.note === preparedNote && uiSaved.record.revision === 3 &&

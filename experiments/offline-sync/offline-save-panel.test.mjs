@@ -11,18 +11,19 @@ class Node {
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(node => node !== this); }
 }
 const operation = {operationId: 'own-note', recordId: 'account-a'};
-async function fixture({send, discard, replace, readConflict, createConflictProposal, onSaved = () => {}, onDiscarded = () => {}} = {}) {
+async function fixture({send, discard, replace, readConflict, createConflictProposal, pendingForRecord, recoveryRecordId,
+    prepare = async () => operation, onSaved = () => {}, onDiscarded = () => {}} = {}) {
     const realm = vm.createContext({structuredClone, document: {createElement: () => new Node()}});
     vm.runInContext(source.replace('export async function', 'async function'), realm);
     const root = new Node(), page = new AbortController(); let config;
     await realm.mountOfflineSavePanel(root, {signal: page.signal, onSaved, onDiscarded, readConflict, createConflictProposal,
-        prepare: async () => operation,
+        prepare, recoveryRecordId,
         createClient: async value => {
             config = value;
-            return {close() {}, discard, replace, enqueue: async () => send?.(config), flush: async () => send?.(config)};
+            return {close() {}, discard, replace, pendingForRecord, enqueue: async () => send?.(config), flush: async () => send?.(config)};
         }});
     const [label, status, save, retry] = root.children[0].children;
-    const input = label.children[0]; input.value = 'Synthetic note';
+    const input = label.children[0]; if (!input.readOnly) input.value = 'Synthetic note';
     const [, , , , keepOnline, confirm, cancel] = root.children[0].children;
     const compare = root.children[0].children[7], comparison = root.children[0].children[8];
     const propose = root.children[0].children[9], confirmProposal = root.children[0].children[10], cancelProposal = root.children[0].children[11];
@@ -39,6 +40,59 @@ test('a different operation or record cannot confirm this editor', async () => {
     await f.save.onclick();
     assert.equal(refreshed, 0); assert.notEqual(f.status.textContent, 'Nota salvata.');
     f.page.abort();
+});
+
+test('reopened editor resumes the existing identity only after explicit retry', async () => {
+    let prepares = 0, sends = 0, refreshed = 0;
+    const f = await fixture({recoveryRecordId: operation.recordId,
+        pendingForRecord: async id => { assert.equal(id, operation.recordId); return {acquired: true, value: operation}; },
+        prepare: () => { prepares++; throw new Error('SECOND_OPERATION'); },
+        send: config => { sends++; config.onCommitted(operation); }, onSaved: () => refreshed++});
+    assert.equal(sends, 0); assert.equal(prepares, 0); assert.equal(refreshed, 0);
+    assert.equal(f.save.disabled, true); assert.equal(f.input.readOnly, true); assert.equal(f.input.value, '');
+    assert.equal(f.retry.hidden, false);
+    await f.retry.onclick();
+    assert.equal(sends, 1); assert.equal(prepares, 0); assert.equal(refreshed, 1);
+    assert.equal(f.status.textContent, 'Nota salvata.'); f.page.abort();
+});
+
+test('reopened reconciliation keeps explicit compare and discard choices', async () => {
+    const marked = {...operation, _queueState: 'reconciliation-required', _reviewReason: 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'};
+    const f = await fixture({recoveryRecordId: operation.recordId,
+        pendingForRecord: async () => ({acquired: true, value: operation}),
+        send: config => config.onState({state: 'reconciliation-required', operation: marked})});
+    await f.retry.onclick();
+    assert.equal(f.keepOnline.hidden, false); assert.equal(f.confirm.hidden, true);
+    assert.equal(f.save.disabled, true); assert.match(f.status.textContent, /modifica completa/); f.page.abort();
+});
+
+test('unavailable or mismatched recovery never opens a second editor', async () => {
+    for (const result of [{acquired: false}, {acquired: true}, {acquired: true, value: {...operation, recordId: 'other'}}]) {
+        const f = await fixture({recoveryRecordId: operation.recordId, pendingForRecord: async () => result});
+        assert.equal(f.save.disabled, true); assert.equal(f.input.readOnly, true);
+        assert.equal(f.retry.hidden, true); assert.equal(f.save.onclick, undefined);
+        assert.match(f.status.textContent, /coda locale è conservata/); f.page.abort();
+    }
+});
+
+test('verified empty recovery permits a new note', async () => {
+    let prepares = 0;
+    const f = await fixture({recoveryRecordId: operation.recordId,
+        pendingForRecord: async () => ({acquired: true, value: null}),
+        prepare: async () => { prepares++; return operation; }});
+    assert.equal(f.save.disabled, false); await f.save.onclick(); assert.equal(prepares, 1); f.page.abort();
+});
+
+test('page closed during pending inspection cannot reopen or retain the client', async () => {
+    const realm = vm.createContext({structuredClone, document: {createElement: () => new Node()}});
+    vm.runInContext(source.replace('export async function', 'async function'), realm);
+    const root = new Node(), page = new AbortController(); let resolve, closed = 0;
+    const opening = realm.mountOfflineSavePanel(root, {signal: page.signal, recoveryRecordId: operation.recordId,
+        prepare: () => { throw new Error('NOT_ALLOWED'); }, createClient: async () => ({
+            pendingForRecord: () => new Promise(done => { resolve = done; }), close: () => closed++})});
+    while (!resolve) await new Promise(done => setImmediate(done));
+    page.abort(); resolve({acquired: true, value: operation}); await opening;
+    assert.equal(root.children.length, 0); assert.equal(closed, 1);
 });
 
 test('own receipt refreshes once even if another queued operation conflicts later', async () => {
