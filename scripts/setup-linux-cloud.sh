@@ -81,7 +81,8 @@ APT
     local dependencies
     dependencies="$(apt-cache "${apt_options[@]}" depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances \
         libatk1.0-0t64 libatk-bridge2.0-0t64 libnss3 libnspr4 libcups2t64 libasound2t64 \
-        libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2)"
+        libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libx11-xcb1 libxcb-dri3-0 libxss1 libxtst6 \
+        libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2)"
     while IFS= read -r dependency; do
         [[ "$dependency" =~ ^[a-z0-9][a-z0-9+.-]*(:[a-z0-9]+)?$ ]] || continue
         # Keep the host loader and its matching core runtime together.
