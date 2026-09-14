@@ -426,3 +426,5 @@ Ripresa M6 su `b5ab595c`: recupero candidato della nota da una coda riaperta, co
 M8, audit 72: esportazione e finestra Recovery Key ora vincolate alla sessione del proprietario, con arresto dopo Vault lock/cambio utente e protezione dalle risposte tardive. Suite completa e prove mirate superate sul ramo experiment/m8-export-session. Restano limiti aggregati export, staging, journal durevole, compensazione e collaudi fisici; nessuna fase globale conclusa.
 
 M8, audit 73: limitato il buffer delle righe cifrate nel download alternativo Blob; overflow interrompe prima di creare un file parziale. 90 test backup e controlli statici superati. Raccolta iniziale, memoria reale sui dispositivi, staging e journal restano aperti; nessuna chiusura globale.
+
+M8, audit 74: anche i descrittori raccolti dall'export hanno soglie cumulative coerenti con l'import, con errore esplicito prima di proseguire. 93 prove backup superate. Snapshot SDK, paginazione, manifest percorsi e memoria fisica restano distinti dai limiti implementati; staging/journal ancora aperti.

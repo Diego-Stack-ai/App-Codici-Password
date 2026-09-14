@@ -739,3 +739,7 @@ Su experiment/m8-export-session, base 4dd2f0a2, il backup interrompe i passaggi 
 ## Limite del backup in memoria — candidata 14/09/2026
 
 Il ramo experiment/m8-export-buffer-limit limita il download Blob e indica quando usare il salvataggio diretto. Formato invariato, nessun download troncato in caso di superamento. 90 prove backup e controlli statici superati; manifest offline aggiornato. Limiti e attività residue in M8 e audit 73. Nessuna distribuzione.
+
+## Raccolta backup limitata — candidata 14/09/2026
+
+Su experiment/m8-export-record-limits, limite record e caratteri coerente con l'import; stop esplicito prima di altre letture, senza produrre un backup completo impropriamente. 93 test backup, budget e sintassi superati. Dettagli e limiti in M8/audit 74; nessuna pubblicazione produttiva.

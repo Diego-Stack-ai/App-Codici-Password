@@ -1,5 +1,5 @@
 import {auth, storage} from '../../firebase-config.js?v=1.2.124';
-import {createBackupExportBuffer} from './backup-export-buffer.js';
+import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
@@ -39,23 +39,21 @@ function createExportSession(uid, {signal, isActive = () => true} = {}) {
     return {check, dispose};
 }
 
-async function accountRecords(uid, accounts, companyId = null, check = () => {}) {
-    const records = [];
+async function accountRecords(uid, accounts, companyId, check, append) {
     const scope = companyId ? 'company-account' : 'private-account';
     for (const account of accounts) {
         check();
-        records.push(createRecordDescriptorFromData(scope, account, companyId ? {companyId} : {}));
+        append(createRecordDescriptorFromData(scope, account, companyId ? {companyId} : {}));
         const attachments = companyId
             ? await listBackupCompanyAttachments(uid, companyId, account.id)
             : await listBackupPrivateAttachments(uid, account.id);
         check();
         for (const attachment of attachments) {
-            records.push(createRecordDescriptorFromData(attachmentRecordScope(companyId ? 'company' : 'private'), attachment, {
+            append(createRecordDescriptorFromData(attachmentRecordScope(companyId ? 'company' : 'private'), attachment, {
                 companyId, accountId: account.id
             }));
         }
     }
-    return records;
 }
 
 async function collectRecords(uid, check) {
@@ -66,41 +64,46 @@ async function collectRecords(uid, check) {
         listBackupCompanies(uid), listBackupDeadlines(uid), listBackupContacts(uid), listBackupProfileWidgets(uid)
     ]);
     check();
-    const records = [createProfileDescriptorFromData(uid, profile)];
-    records.push(...settings.map(item => createRecordDescriptorFromData('settings', item)));
-    records.push(...await accountRecords(uid, privateAccounts, null, check));
-    check();
-    records.push(...deadlines.map(item => createRecordDescriptorFromData('deadline', item)));
-    records.push(...contacts.map(item => createRecordDescriptorFromData('contact', item)));
-    records.push(...widgets.map(item => createRecordDescriptorFromData('profile-widget', item)));
-    for (const company of companies) {
+    const buffer = createBackupRecordBuffer(), append = buffer.append;
+    try {
+        append(createProfileDescriptorFromData(uid, profile));
+        for (const item of settings) append(createRecordDescriptorFromData('settings', item));
+        await accountRecords(uid, privateAccounts, null, check, append);
         check();
-        records.push(createRecordDescriptorFromData('company', company));
-        const accounts = await listBackupCompanyAccounts(uid, company.id);
+        for (const item of deadlines) append(createRecordDescriptorFromData('deadline', item));
+        for (const item of contacts) append(createRecordDescriptorFromData('contact', item));
+        for (const item of widgets) append(createRecordDescriptorFromData('profile-widget', item));
+        for (const company of companies) {
+            check();
+            append(createRecordDescriptorFromData('company', company));
+            const accounts = await listBackupCompanyAccounts(uid, company.id);
+            check();
+            await accountRecords(uid, accounts, company.id, check, append);
+        }
         check();
-        records.push(...await accountRecords(uid, accounts, company.id, check));
-    }
-    check();
-    const [accountWidgets, sharedVaultData, sharedVaultLinks] = await Promise.all([
-        listBackupAccountWidgets(uid), listBackupSharedVaultData(uid), listBackupSharedVaultLinks(uid)
-    ]);
-    check();
-    for (const widget of accountWidgets) {
-        const companyId = widget.context === 'company' ? widget.companyId : null;
-        const scope = companyId ? 'company-account-widget' : 'private-account-widget';
-        records.push(createRecordDescriptorFromData(scope, widget, {
-            companyId, accountId: widget.accountId
-        }));
-    }
-    for (const sharedData of sharedVaultData) {
-        records.push(createRecordDescriptorFromData('shared-vault-data', sharedData));
-    }
-    for (const link of sharedVaultLinks) {
-        records.push(createRecordDescriptorFromData('shared-vault-data-link', link, {
-            sharedDataId: link.sharedDataId
-        }));
-    }
-    return {records, storagePaths: collectStoragePaths(records, uid)};
+        const [accountWidgets, sharedVaultData, sharedVaultLinks] = await Promise.all([
+            listBackupAccountWidgets(uid), listBackupSharedVaultData(uid), listBackupSharedVaultLinks(uid)
+        ]);
+        check();
+        for (const widget of accountWidgets) {
+            const companyId = widget.context === 'company' ? widget.companyId : null;
+            const scope = companyId ? 'company-account-widget' : 'private-account-widget';
+            append(createRecordDescriptorFromData(scope, widget, {
+                companyId, accountId: widget.accountId
+            }));
+        }
+        for (const sharedData of sharedVaultData) {
+            append(createRecordDescriptorFromData('shared-vault-data', sharedData));
+        }
+        for (const link of sharedVaultLinks) {
+            append(createRecordDescriptorFromData('shared-vault-data-link', link, {
+                sharedDataId: link.sharedDataId
+            }));
+        }
+        const records = buffer.takeRecords();
+        try { return {records, storagePaths: collectStoragePaths(records, uid)}; }
+        catch (error) { records.length = 0; throw error; }
+    } finally { buffer.clear(); }
 }
 
 export async function collectOwnerBackup(uid, options = {}) {
@@ -188,7 +191,7 @@ export async function exportOwnerBackup(uid, options = {}) {
         return {recoveryKey, recordCount: records.length, attachmentCount: storagePaths.length, streamed: sink.streamed};
     } catch (error) {
         try { await sink?.abort(); } catch {}
-        const code = ['BACKUP_SESSION_INVALIDATED', 'BACKUP_REQUIRES_ONLINE', 'BACKUP_EXPORT_CAPACITY_EXCEEDED'].includes(error?.code || error?.message)
+        const code = ['BACKUP_SESSION_INVALIDATED', 'BACKUP_REQUIRES_ONLINE', 'BACKUP_EXPORT_CAPACITY_EXCEEDED', 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'].includes(error?.code || error?.message)
             ? error.code || error.message : 'BACKUP_EXPORT_FAILED';
         if (error?.name === 'AbortError') throw Object.assign(new Error('BACKUP_EXPORT_CANCELLED'), {name: 'AbortError'});
         throw Object.assign(new Error(code), {code});

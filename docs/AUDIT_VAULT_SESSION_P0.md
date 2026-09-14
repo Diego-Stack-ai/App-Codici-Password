@@ -736,3 +736,7 @@ Suite completa npm test superata, inclusi emulatori demo; 11 prove servizio e 17
 ## 73. Buffer cifrato di esportazione limitato — 14/09/2026
 
 Base `fc3927d2`, ramo `experiment/m8-export-buffer-limit`: fallback Blob con soglia cumulativa di 64 Mi caratteri, rilascio su overflow e nessun download parziale. Percorso progressivo invariato; messaggio di capacità distinto dall'errore generico. 90 prove backup superate; manifest offline aggiornato e controlli offline, riferimenti, performance e sintassi superati. La prima verifica offline ha rilevato il nuovo modulo non ancora inventariato: risolto rigenerando il manifest, senza allentare il controllo. Non certifica lo heap totale o la raccolta iniziale; gate fisici/staging/journal aperti. Nessun nuovo formato o deploy.
+
+## 74. Raccolta dei descrittori backup limitata — 14/09/2026
+
+Base `29263519`, ramo `experiment/m8-export-record-limits`. Ammessi 10.000 record/16 Mi caratteri JSON come nell'import; controllo incrementale prima dell'accumulo, eliminato l'array intermedio per Account. 93 prove backup, budget e sintassi superati; prova overflow impedisce letture aziendali successive, cifratura e chiusura dello stream. Le snapshot SDK e i temporanei non sono inclusi nel limite, quindi nessuna certificazione dello heap o completamento M8. Nessun deploy.

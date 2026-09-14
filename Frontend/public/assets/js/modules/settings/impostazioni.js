@@ -765,6 +765,8 @@ function setupEncryptedBackup(user) {
                 if (action.active() && error?.name !== 'AbortError') {
                     showToast(error?.code === 'BACKUP_EXPORT_CAPACITY_EXCEEDED'
                         ? 'Backup troppo grande per il download in memoria. Ripeti da un browser che consente il salvataggio diretto su file. Nessun dato è stato modificato.'
+                        : error?.code === 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'
+                            ? 'Il Vault supera la capacità di esportazione attualmente supportata. Il backup non è stato completato; nessun dato è stato modificato.'
                         : 'Backup non completato. Nessun dato è stato modificato.', 'error');
                 }
             } finally {

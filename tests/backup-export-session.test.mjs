@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 const bufferSource = await readFile(new URL('../Frontend/public/assets/js/modules/settings/backup-export-buffer.js', import.meta.url), 'utf8');
-const {createBackupExportBuffer} = await import(`data:text/javascript;base64,${Buffer.from(bufferSource).toString('base64')}`);
+const {createBackupExportBuffer, createBackupRecordBuffer} = await import(`data:text/javascript;base64,${Buffer.from(bufferSource).toString('base64')}`);
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/settings/backup-export-service.js', import.meta.url), 'utf8'))
     .replace(/import\s+[\s\S]*?from\s+['"][^'"]+['"];?/g, '').replace(/export /g, '');
 
@@ -13,7 +13,7 @@ function fixture(stopAt) {
     const stop = phase => { if (phase === stopAt) events.dispatchEvent(new Event('vault-session-locked')); };
     const writable = {write: async value => { writes.push(value); stop('write'); }, close: async () => { closed++; stop('close'); }, abort: async () => { aborted++; }};
     const context = {
-        auth: {currentUser: {uid: 'A'}}, navigator: {onLine: true}, createBackupExportBuffer,
+        auth: {currentUser: {uid: 'A'}}, navigator: {onLine: true}, createBackupExportBuffer, createBackupRecordBuffer,
         onAuthStateChanged: (_auth, fn) => { observers.add(fn); return () => observers.delete(fn); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         window: {showSaveFilePicker: async () => { stop('picker'); return {createWritable: async () => { stop('writable'); return writable; }}; }},
@@ -94,4 +94,29 @@ test('fallback success downloads the same complete line sequence', async () => {
     const result = await f.context.exportOwnerBackup('A');
     assert.equal(result.streamed, false); assert.equal(clicks, 1); assert.equal(revoke, 'blob:synthetic');
     assert.match(await blob.text(), /footer/); assert.equal(f.observers.size, 0);
+});
+
+test('record buffer enforces count before accepting the next record and clears partial state', () => {
+    const buffer = createBackupRecordBuffer({maxRecords: 2});
+    buffer.append({id: 1}); buffer.append({id: 2});
+    assert.throws(() => buffer.append({id: 3}), {code: 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'});
+    assert.throws(() => buffer.takeRecords(), /BACKUP_BUFFER_CLOSED/);
+});
+
+test('record character budget admits exact sum and rejects the next cumulative character', () => {
+    const record = {id: 'synthetic'}, size = JSON.stringify(record).length;
+    const exact = createBackupRecordBuffer({maxCharacters: 2 * size});
+    exact.append(record); exact.append(record); assert.equal(exact.takeRecords().length, 2);
+    const short = createBackupRecordBuffer({maxCharacters: 2 * size - 1});
+    short.append(record); assert.throws(() => short.append(record), {code: 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'});
+});
+
+test('collection overflow prevents downstream company reads and any encrypted record write', async () => {
+    const f = fixture();
+    f.context.createBackupRecordBuffer = () => createBackupRecordBuffer({maxRecords: 1});
+    f.context.listBackupCompanies = async () => [{id: 'company'}];
+    f.context.createRecordDescriptorFromData = (_scope, value) => ({kind: 'record', ...value});
+    f.context.listBackupCompanyAccounts = () => assert.fail('read after capacity exceeded');
+    await assert.rejects(f.context.exportOwnerBackup('A'), {code: 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'});
+    assert.equal(f.writes.length, 1); assert.equal(f.stats().encrypted, 0); assert.equal(f.stats().aborted, 1);
 });
