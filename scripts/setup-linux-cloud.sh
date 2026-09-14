@@ -58,25 +58,28 @@ npm ci --prefix "$ROOT/functions"
 BROWSER_LIBRARY_PATH=''
 prepare_browser_libraries() {
     [[ -z "$BROWSER_LIBRARY_PATH" ]] || return 0
-    for tool in apt-cache apt-get dpkg-query; do require_tool "$tool"; done
+    for tool in apt-cache apt-get; do require_tool "$tool"; done
     local packages_dir="$TOOLS_DIR/browser-library-packages" library_root="$TOOLS_DIR/browser-libraries"
     mkdir -p "$packages_dir" "$library_root"
     # Ubuntu 24.04 universal image. Read existing apt metadata; download and
-    # extract missing dependencies locally, never install system packages.
+    # extract dependencies locally, never install system packages. Minimal
+    # images can retain dpkg metadata after stripping files: do not infer
+    # that a library is available merely because dpkg calls it installed.
     local dependency package
-    local -a missing=()
+    local -a packages=()
     local dependencies
     dependencies="$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances \
         libatk1.0-0t64 libatk-bridge2.0-0t64 libnss3 libnspr4 libcups2t64 libasound2t64 \
         libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2)"
     while IFS= read -r dependency; do
         [[ "$dependency" =~ ^[a-z0-9][a-z0-9+.-]*(:[a-z0-9]+)?$ ]] || continue
-        if [[ "$(dpkg-query -W -f='${db:Status-Status}' "$dependency" 2>/dev/null || true)" != installed ]]; then
-            missing+=("$dependency")
-        fi
+        # Keep the host loader and its matching core runtime together.
+        case "$dependency" in libc6|libc-bin|gcc-*-base|libgcc-s1|libstdc++6) continue ;; esac
+        packages+=("$dependency")
     done <<< "$dependencies"
-    if [[ ${#missing[@]} -gt 0 ]]; then
-        (cd "$packages_dir" && apt-get download "${missing[@]}")
+    [[ ${#packages[@]} -gt 0 ]] || { echo 'Metadati apt delle librerie browser non disponibili.' >&2; return 1; }
+    if [[ ${#packages[@]} -gt 0 ]]; then
+        (cd "$packages_dir" && apt-get download "${packages[@]}")
         for package in "$packages_dir"/*.deb; do dpkg-deb --extract "$package" "$library_root"; done
     fi
     BROWSER_LIBRARY_PATH="$library_root/usr/lib/x86_64-linux-gnu:$library_root/lib/x86_64-linux-gnu"
