@@ -731,3 +731,7 @@ Base unica di prosecuzione: `experiment/vault-shell-v124`, con i contributi dell
 ## Ripresa del programma M6 — 14/09/2026
 
 Primo incremento da `b5ab595c`: il pannello candidato recupera l'identità della nota pendente prima di consentire un nuovo salvataggio. Riprende soltanto la coda esistente su comando esplicito; ambiguità, lock negato e cambio sessione non provocano cancellazioni. Verificati DOM e Chrome/Edge con chiusura/riapertura IndexedDB e backend emulato. Dettagli e limiti nell'audit 71 e in M6; nessuna attivazione della shell o distribuzione produttiva.
+
+## Backup e ciclo della sessione — candidata 14/09/2026
+
+Su experiment/m8-export-session, base 4dd2f0a2, il backup interrompe i passaggi successivi al blocco del Vault o cambio utente; conferma e Recovery Key vengono dismesse insieme alla sessione. Suite completa npm test e regressioni mirate superate. Dettagli e limiti in M8 e audit 72. Produzione invariata; nessun deploy.

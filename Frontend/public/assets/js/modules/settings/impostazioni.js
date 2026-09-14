@@ -667,8 +667,10 @@ function showBackupRestorePreview(plan, action) {
     });
 }
 
-function showRecoveryKeyOnce(recoveryKey, summary) {
+function showRecoveryKeyOnce(recoveryKey, summary, action) {
     return new Promise(resolve => {
+        if (!action.active()) return resolve();
+        let settled = false, unregister = () => {};
         const modal = createElement('div', {className: 'modal-overlay'});
         const keyField = createElement('input', {
             className: 'glass-field modal-input-glass backup-recovery-key-field', value: recoveryKey, readOnly: true,
@@ -679,20 +681,26 @@ function showRecoveryKeyOnce(recoveryKey, summary) {
             className: 'btn-modal btn-primary', textContent: 'Ho salvato la chiave', disabled: true
         });
         const copyButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Copia chiave'});
-        acknowledged.addEventListener('change', () => { closeButton.disabled = !acknowledged.checked; });
+        const close = () => {
+            if (settled) return;
+            settled = true; recoveryKey = ''; keyField.value = ''; copyButton.disabled = closeButton.disabled = true;
+            modal.remove(); unregister(); resolve();
+        };
+        acknowledged.addEventListener('change', () => { if (!settled && action.active()) closeButton.disabled = !acknowledged.checked; });
         copyButton.addEventListener('click', async () => {
+            if (settled || !action.active()) return;
             try {
                 await navigator.clipboard.writeText(recoveryKey);
-                showToast('Recovery Key copiata', 'success');
+                if (!settled && action.active()) showToast('Recovery Key copiata', 'success');
             } catch {
+                if (settled || !action.active()) return;
                 keyField.focus(); keyField.select();
                 showToast('Seleziona e copia manualmente la Recovery Key', 'info');
             }
         });
         closeButton.addEventListener('click', () => {
-            if (!acknowledged.checked) return;
-            modal.classList.remove('active');
-            setTimeout(() => { modal.remove(); resolve(); }, 300);
+            if (!acknowledged.checked || !action.active()) return;
+            close();
         });
         const confirmation = createElement('label', {className: 'backup-key-confirmation'}, [
             acknowledged,
@@ -710,43 +718,56 @@ function showRecoveryKeyOnce(recoveryKey, summary) {
             createElement('div', {className: 'modal-actions'}, [copyButton, closeButton])
         ]));
         document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
+        unregister = action.own(close);
+        setTimeout(() => { if (!settled && action.active()) modal.classList.add('active'); }, 10);
     });
 }
 
+let disposeExportSetup = () => {};
 function setupEncryptedBackup(user) {
+    disposeExportSetup();
     const button = document.getElementById('btn-export-encrypted-backup');
     if (!button) return;
-    button.addEventListener('click', () => {
+    let currentAction;
+    const click = () => {
+        if (button.disabled || auth.currentUser?.uid !== user.uid) return;
+        const action = createBackupRestoreAction(user.uid, button); currentAction = action;
+        button.disabled = true;
         const modal = createElement('div', {className: 'modal-overlay'});
         const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
         const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Preparazione…', disabled: true});
         const modulePromise = import('./backup-export-service.js');
         modulePromise.then(() => {
+            if (!action.active()) return;
             startButton.disabled = false;
             startButton.textContent = 'Scegli file e crea backup';
         }).catch(() => {
-            startButton.textContent = 'Backup non disponibile';
+            if (action.active()) startButton.textContent = 'Backup non disponibile';
         });
-        const close = () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); };
-        cancelButton.addEventListener('click', close);
+        const close = () => modal.remove();
+        action.own(() => { close(); if (currentAction === action) button.disabled = false; });
+        cancelButton.addEventListener('click', () => { if (action.active()) action.dispose(); });
         startButton.addEventListener('click', async () => {
+            if (!action.active() || startButton.disabled) return;
             startButton.disabled = true;
+            let result;
             try {
                 const {exportOwnerBackup} = await modulePromise;
-                const exportPromise = exportOwnerBackup(user.uid);
+                action.check();
+                const exportPromise = exportOwnerBackup(user.uid, {signal: action.signal, isActive: action.active});
                 close();
                 button.disabled = true;
                 showToast('Preparazione backup in corso…', 'info');
-                const result = await exportPromise;
-                await showRecoveryKeyOnce(result.recoveryKey, result);
+                result = await exportPromise;
+                action.check();
+                await showRecoveryKeyOnce(result.recoveryKey, result, action);
             } catch (error) {
-                if (error?.name !== 'AbortError') {
-                    console.error('[BACKUP] Esportazione non riuscita.', error?.message);
+                if (action.active() && error?.name !== 'AbortError') {
                     showToast('Backup non completato. Nessun dato è stato modificato.', 'error');
                 }
             } finally {
-                button.disabled = false;
+                if (result) result.recoveryKey = '';
+                action.dispose();
             }
         });
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
@@ -759,8 +780,10 @@ function setupEncryptedBackup(user) {
             createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
         ]));
         document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
-    });
+        setTimeout(() => { if (action.active()) modal.classList.add('active'); }, 10);
+    };
+    button.addEventListener('click', click);
+    disposeExportSetup = () => { currentAction?.dispose(); button.removeEventListener('click', click); button.disabled = false; };
 }
 
 async function setupSettingsProfileQr(user) {

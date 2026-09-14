@@ -726,3 +726,9 @@ Il runner `--fenced-browser` è poi passato con 5 scenari generici e 12 privati 
 Base `b5ab595c`. Ispezione della coda cifrata sotto lease, selezione del record senza payload restituito alla vista e rifiuto delle identità ambigue. Il pannello impedisce una seconda preparazione quando esiste un comando pendente e non invia automaticamente all'apertura. Errore di lettura o lock negato conserva la coda e lascia l'editor bloccato; abort chiude il client anche durante l'ispezione. Nessuna modifica del formato o upgrade del database.
 
 23 test pannello superati; suite offline superata prima dell'ultimo test aggiunto, poi pannello rieseguito integralmente. Runner Chrome/Edge con backend emulato superato: 6 scenari generici e 14 privati per browser, inclusi ambiguità e chiusura/riapertura IndexedDB con nuova istanza del pannello. Nessuna prova fisica PWA o attivazione bootstrap. Rollback del solo candidato al commit base, senza trasformazioni persistenti.
+
+## 72. Esportazione vincolata alla sessione — 14/09/2026
+
+Base `4dd2f0a2`, ramo `experiment/m8-export-session`. Export e raccolta dati verificano UID, abort, Vault lock e pagehide prima e dopo le operazioni asincrone. Il sink viene annullato dopo il ritorno dell'operazione pendente; errori provider sanitizzati. La Recovery Key viene rimossa dal dialogo su chiusura o invalidazione, senza riaperture tardive o interferenze fra azioni successive.
+
+Suite completa npm test superata, inclusi emulatori demo; 11 prove servizio e 17 prove UI superate. L'ultima regressione UI sul rimontaggio è passata separatamente dopo l'avvio della suite. Picker nativo, operazioni pendenti e clipboard già avviata non sono annullabili retroattivamente. Nessuna garanzia di azzeramento fisico dello heap, nuovo formato, migrazione o deploy. Limiti aggregati export, staging, journal e compensazione restano aperti.
