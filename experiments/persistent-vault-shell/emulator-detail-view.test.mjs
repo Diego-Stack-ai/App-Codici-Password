@@ -64,7 +64,7 @@ test('optional private save panel follows manual detail teardown without receivi
     const cleanup = await f.mount(async () => ({has: () => false}), {mountSavePanel: async (_root, value) => {
         boundary = value; return () => { disposed++; };
     }});
-    assert.deepEqual(Object.keys(boundary).sort(), ['isActive', 'onSaved', 'selection', 'signal']);
+    assert.deepEqual(Object.keys(boundary).sort(), ['isActive', 'onDiscarded', 'onSaved', 'selection', 'signal']);
     assert.equal(boundary.isActive(), true);
     cleanup();
     assert.equal(boundary.signal.aborted, true); assert.equal(boundary.isActive(), false);

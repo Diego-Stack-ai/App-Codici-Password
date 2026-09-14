@@ -97,7 +97,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         assertActive();
         if (mountSavePanel && selection.domain === 'private') {
             saveCleanup = await mountSavePanel(wrapper, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
-                onSaved: refreshDetail});
+                onSaved: refreshDetail, onDiscarded: refreshDetail});
             if (disposed) saveCleanup?.();
             assertActive();
         }

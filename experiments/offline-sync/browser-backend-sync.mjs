@@ -128,8 +128,29 @@ try {
         const retainedInput = root.querySelector('textarea'); retainedInput.value = 'SYNTHETIC-DRAFT';
         const preparation = root.querySelector('button').onclick(); preparingPage.abort(); resolvePrepare(operation); await preparation;
         assert(enqueued === 0 && retainedInput.value === '' && !root.children.length, 'LATE_PREPARE_ENQUEUED');
-        root.remove();
         passed.push('page abort during encryption preparation prevents enqueue and clears visible draft');
+        const conflictPage = new AbortController(); let discardedRefresh = 0;
+        const conflictedNote = {...operation, operationId: 'bridge-ui-conflict', expectedRevision: 2};
+        await mountOfflineSavePanel(root, {signal: conflictPage.signal,
+            createClient: config => createFencedQueueClient({...options, ...config, isOnline: () => true,
+                send: async command => {
+                    const response = await post('/mutation', {operation: command}), result = await response.json();
+                    if (!response.ok) throw Object.assign(new Error('TRANSPORT_ERROR'), result);
+                    return result;
+                }}), prepare: async () => conflictedNote, onDiscarded: () => { discardedRefresh++; }});
+        const conflictButtons = root.querySelectorAll('button');
+        await conflictButtons[0].onclick();
+        assert(!conflictButtons[2].hidden && (await pending()).length === 1, 'UI_CONFLICT_MISSING');
+        conflictButtons[2].onclick(); conflictButtons[4].onclick();
+        assert((await pending()).length === 1 && discardedRefresh === 0, 'UI_CANCEL_DISCARDED');
+        const beforeDiscard = await snapshot(conflictedNote);
+        conflictButtons[2].onclick(); await conflictButtons[3].onclick();
+        const afterDiscard = await snapshot(conflictedNote);
+        assert(!(await pending()).length && discardedRefresh === 1 && beforeDiscard.updateTime === afterDiscard.updateTime &&
+            JSON.stringify(beforeDiscard.record) === JSON.stringify(afterDiscard.record) &&
+            root.textContent.includes('dati online sono invariati'), 'UI_DISCARD_CHANGED_SERVER');
+        conflictPage.abort(); root.remove();
+        passed.push('explicit conflict discard removes only queued command; cancellation and online record remain unchanged');
     }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});
 } catch (error) {

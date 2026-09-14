@@ -400,3 +400,5 @@ M6: rinnovo opzionale del controllo della coda durante invii lunghi, con arresto
 M6 UI: conferma della singola operazione e callback di rilettura separato dal risultato di scrittura. Gestiti altri Account nella coda, refresh fallito e chiusura della vista. Verificati 79 test offline e 32 esecuzioni browser/backend emulato; attivazione nella shell e rollout ancora aperti.
 
 M6 UI: dettaglio predisposto per rilettura protetta dopo conferma, senza ricaricare il documento. Verificati errori e risposte tardive; 155 test shell e npm test completo superati. L'integrazione effettiva del provider nel bootstrap, trasporto autenticato, recupero conflitti e rollout restano da completare.
+
+M6 conflitti: implementata nel candidato la scelta confermata di scartare la propria modifica locale mantenendo i dati online. Verificati annullamento, identità, lease e dati backend invariati. Restano confronto/riproposizione locale e attivazione completa; la fase M6 non è conclusa.

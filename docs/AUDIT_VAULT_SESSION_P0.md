@@ -672,3 +672,7 @@ Base 790d3d26. Il pannello candidato usa la conferma del proprio operationId/rec
 ## 62. Rilettura protetta del dettaglio
 
 Base ec8ced7d. Callback onSaved del provider opzionale rilegge la capability, prepara i nuovi campi e invalida risposte segrete della versione precedente. Cinque regressioni su aggiornamento/errori/teardown; 155 test shell e suite npm test completa passati. Nessun deploy o nuova migrazione. Provider del bootstrap resta aperto.
+
+## 63. Scarto confermato della modifica locale
+
+Base 7471d3c8. Il pannello consente scarto solo del proprio comando in conflitto, con conferma separata e CAS sotto lease. Annullamento e chiusura preservano i confini della vista; il backend non viene modificato dallo scarto. 83 test offline, 155 shell e 34 esecuzioni browser/emulatore superati. Confronto e riproposizione locale restano aperti.
