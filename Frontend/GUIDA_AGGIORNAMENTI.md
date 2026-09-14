@@ -708,3 +708,7 @@ Nei due dettagli Account mancava l’import esplicito di auth: il controllo sess
 ## Azioni compatte note — rilascio 1.2.124
 
 In entrambi i dettagli Account il pulsante grande Aggiungi nota compare soltanto a nota vuota. Una nota presente mostra matita e cestino nella sua intestazione. Eliminazione con anteprima in sola lettura e conferma, sul medesimo salvataggio cifrato transazionale; conflitti conservano la nota. Focus riportato al comando visibile. Nove test note superati, inclusi cancellazione, annullamento, conflitto e blocco sessione; controlli HTML, sintassi e riferimenti superati. Pubblicazione Hosting richiesta; rami sperimentali esclusi. Rollback: versione 1.2.123, senza modificare i dati.
+
+## Conferme e rilettura nella shell sperimentale — 14/09/2026
+
+Base 790d3d26. Due passaggi consecutivi: conferme correlate a operationId/recordId e rilettura del dettaglio tramite capability protetta. Il pannello distingue salvataggio confermato da errore di aggiornamento della vista; logout e navigazione impediscono risposte tardive. 79 test offline, 155 test shell, 32 esecuzioni browser/backend emulato e suite npm test completa superati. Provider principale e trasporto autenticato restano aperti; Hosting 1.2.124 invariato. Nessuna migrazione, master non modificato. Dettagli nei checkpoint 61–62 dell'audit Vault e nel contratto M6.

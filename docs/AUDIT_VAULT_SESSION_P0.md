@@ -668,3 +668,7 @@ Base a7b7d1f8. Rinnovo opt-in nel client candidato, interrotto su fine operazion
 ## 61. Conferme UI correlate all'operazione
 
 Base 790d3d26. Il pannello candidato usa la conferma del proprio operationId/recordId dopo rimozione protetta, senza confondere esiti di altri Account nella coda. Refresh fallito distinto da salvataggio fallito. 79 test offline e 32 esecuzioni browser/backend emulato superati; nessun cutover.
+
+## 62. Rilettura protetta del dettaglio
+
+Base ec8ced7d. Callback onSaved del provider opzionale rilegge la capability, prepara i nuovi campi e invalida risposte segrete della versione precedente. Cinque regressioni su aggiornamento/errori/teardown; 155 test shell e suite npm test completa passati. Nessun deploy o nuova migrazione. Provider del bootstrap resta aperto.

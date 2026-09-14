@@ -64,7 +64,7 @@ test('optional private save panel follows manual detail teardown without receivi
     const cleanup = await f.mount(async () => ({has: () => false}), {mountSavePanel: async (_root, value) => {
         boundary = value; return () => { disposed++; };
     }});
-    assert.deepEqual(Object.keys(boundary).sort(), ['isActive', 'selection', 'signal']);
+    assert.deepEqual(Object.keys(boundary).sort(), ['isActive', 'onSaved', 'selection', 'signal']);
     assert.equal(boundary.isActive(), true);
     cleanup();
     assert.equal(boundary.signal.aborted, true); assert.equal(boundary.isActive(), false);
@@ -178,4 +178,70 @@ test('real extra URL failure removes the rendered card and partial note without 
     assert.equal(getEventListeners(copy, 'click').length, 0);
     assert.equal(getEventListeners(f.controller.signal, 'abort').length, 0);
     await copy.handlers.click(); assert.deepEqual(f.copies, []);
+});
+
+test('confirmed save rereads protected fields and replaces note without document reload', async () => {
+    const f = fixture({realExtra: true}); let boundary, opened = 0;
+    const cleanup = await f.mount(async () => {
+        const values = ++opened === 1 ? {nomeAccount: 'Before', note: 'Old note'} : {nomeAccount: 'After', note: 'New note'};
+        return {has: field => field in values, read: async field => values[field]};
+    }, {mountSavePanel: async (_root, value) => { boundary = value; return () => {}; }});
+    const wrapper = f.root.children[0], oldText = wrapper.children[3].children[0].children[1];
+    await boundary.onSaved();
+    assert.equal(opened, 2); assert.equal(f.views.length, 1);
+    assert.equal(f.views[0].renders.at(-1)[0].nomeAccount, 'After');
+    assert.equal(oldText.textContent, '');
+    assert.equal(wrapper.children.at(-1).children[0].children[0].children[1].textContent, 'New note');
+    cleanup(); assert.equal(f.root.children.length, 0);
+});
+
+test('failed refresh preserves current fields and allows a later reread', async () => {
+    const f = fixture(); let boundary, opened = 0;
+    const cleanup = await f.mount(async () => {
+        if (++opened === 2) throw new Error('READ_FAILED');
+        return {has: field => field === 'nomeAccount', read: async () => 'Current'};
+    }, {mountSavePanel: async (_root, value) => { boundary = value; return () => {}; }});
+    await assert.rejects(boundary.onSaved(), /READ_FAILED/);
+    assert.equal(f.views[0].renders.length, 1); assert.equal(f.root.children.length, 1);
+    await boundary.onSaved(); assert.equal(f.views[0].renders.length, 2);
+    cleanup();
+});
+
+test('concurrent refresh calls share a read and manual teardown rejects its late result', async () => {
+    const f = fixture(), gate = deferred(); let boundary, opened = 0;
+    const reader = {has: () => false};
+    const cleanup = await f.mount(async () => ++opened === 1 ? reader : gate.promise,
+        {mountSavePanel: async (_root, value) => { boundary = value; return () => {}; }});
+    const first = boundary.onSaved(), second = boundary.onSaved();
+    assert.equal(first, second); assert.equal(opened, 2);
+    cleanup(); gate.resolve(reader);
+    await assert.rejects(first, {name: 'AbortError'});
+    assert.equal(f.views[0].renders.length, 1); assert.equal(f.root.children.length, 0);
+    assert.throws(() => boundary.onSaved(), {name: 'AbortError'});
+});
+
+test('pending password from old detail cannot display after refresh', async () => {
+    const f = fixture(), password = deferred(); let boundary, opened = 0;
+    const cleanup = await f.mount(async () => {
+        const old = ++opened === 1;
+        return {has: field => field === 'password', read: async () => old ? password.promise : 'New secret'};
+    }, {mountSavePanel: async (_root, value) => { boundary = value; return () => {}; }});
+    const oldRead = f.views[0].options.resolveSecret();
+    await boundary.onSaved(); password.resolve('Old secret');
+    await assert.rejects(oldRead, {name: 'AbortError'});
+    assert.equal(await f.views[0].options.resolveSecret(), 'New secret');
+    cleanup();
+});
+
+test('refresh closed during note decryption leaves no detached plaintext', async () => {
+    const f = fixture({realExtra: true}), note = deferred(); let boundary, opened = 0, started = false;
+    const cleanup = await f.mount(async () => {
+        const old = ++opened === 1;
+        return {has: field => !old && field === 'note', read: async () => { started = true; return note.promise; }};
+    }, {mountSavePanel: async (_root, value) => { boundary = value; return () => {}; }});
+    const refresh = boundary.onSaved();
+    while (!started) await tick();
+    cleanup(); note.resolve('Late note');
+    await assert.rejects(refresh, {name: 'AbortError'});
+    assert.equal(f.root.children.length, 0); assert.equal(f.views[0].renders.length, 1);
 });

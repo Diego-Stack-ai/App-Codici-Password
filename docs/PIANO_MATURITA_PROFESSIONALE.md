@@ -398,3 +398,5 @@ M6 UI: pannello note candidato con coda offline e retry collaudato in DOM reale/
 M6: rinnovo opzionale del controllo della coda durante invii lunghi, con arresto alla chiusura. Verificati 24 scenari per browser e 73 test offline. Provider della shell, trasporto autenticato e rollout restano aperti; nessun deploy e nessuna fase globale dichiarata conclusa.
 
 M6 UI: conferma della singola operazione e callback di rilettura separato dal risultato di scrittura. Gestiti altri Account nella coda, refresh fallito e chiusura della vista. Verificati 79 test offline e 32 esecuzioni browser/backend emulato; attivazione nella shell e rollout ancora aperti.
+
+M6 UI: dettaglio predisposto per rilettura protetta dopo conferma, senza ricaricare il documento. Verificati errori e risposte tardive; 155 test shell e npm test completo superati. L'integrazione effettiva del provider nel bootstrap, trasporto autenticato, recupero conflitti e rollout restano da completare.

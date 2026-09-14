@@ -12,9 +12,44 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
     const back = document.createElement('button'); back.type = 'button'; back.textContent = 'Torna alla lista';
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, back, container);
-    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null;
+    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, refreshPending;
+    let revision = 0;
     const assertActive = () => {
         if (disposed || context.signal.aborted) throw new DOMException('View disposed', 'AbortError');
+    };
+    const readVisible = async reader => {
+        const visible = {id: selection.id, isOwner: true, _encrypted: true};
+        for (const field of ['nomeAccount', 'username', 'account']) {
+            assertActive();
+            if (reader.has(field)) {
+                visible[field] = await reader.read(field);
+                assertActive();
+            }
+        }
+        if (reader.has('password')) visible.password = 'protected-field-present';
+        return visible;
+    };
+    const refreshDetail = () => {
+        assertActive();
+        if (!refreshPending) refreshPending = (async () => {
+            const staging = document.createElement('div'); let nextCleanup;
+            try {
+                const nextAccount = await openAccount(selection); assertActive();
+                const visible = await readVisible(nextAccount); assertActive();
+                nextCleanup = await mountDetailExtraFields(staging, {account: nextAccount, signal: lifecycle.signal,
+                    copyText: value => navigator.clipboard.writeText(value),
+                    onError: () => { if (!disposed) title.textContent = 'Dettaglio Account · copia non riuscita'; }});
+                assertActive();
+                view.render([visible]);
+                revision++; account = nextAccount;
+                extraCleanup?.();
+                wrapper.append(staging);
+                extraCleanup = () => { try { nextCleanup?.(); } finally { staging.remove(); } };
+            } catch (error) {
+                nextCleanup?.(); staging.remove(); throw error;
+            }
+        })().finally(() => { refreshPending = null; });
+        return refreshPending;
     };
     const cleanup = () => {
         if (disposed) return;
@@ -34,18 +69,9 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         const opened = await openAccount(selection);
         assertActive();
         account = opened;
-        const visible = {id: selection.id, isOwner: true, _encrypted: true};
-        for (const field of ['nomeAccount', 'username', 'account']) {
-            assertActive();
-            if (account.has(field)) {
-                const value = await account.read(field);
-                assertActive();
-                visible[field] = value;
-            }
-        }
+        const visible = await readVisible(account);
         // Presence marker only: the canonical renderer delegates every password
         // request to the capability; it receives neither key nor ciphertext.
-        if (account.has('password')) visible.password = 'protected-field-present';
         view = createAccountListView({
             readOnly: true,
             themes: {standard: {accent: 'theme-accent-standard', text: 'theme-text-standard'}},
@@ -54,21 +80,24 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
             emptyStateClass: 'empty-state-box', emptyTextClass: 'empty-state-text',
             async resolveSecret() {
                 assertActive();
+                const requestedRevision = revision;
                 const value = await account.read('password');
                 assertActive();
+                if (requestedRevision !== revision) throw new DOMException('Detail refreshed', 'AbortError');
                 return value;
             }
         });
         assertActive();
         view.render([visible]);
-        extraCleanup = await mountDetailExtraFields(wrapper, {account, signal: context.signal,
+        extraCleanup = await mountDetailExtraFields(wrapper, {account, signal: lifecycle.signal,
             copyText: value => navigator.clipboard.writeText(value),
             onError: () => { if (!disposed) title.textContent = 'Dettaglio Account · copia non riuscita'; }
         });
         if (disposed) extraCleanup?.();
         assertActive();
         if (mountSavePanel && selection.domain === 'private') {
-            saveCleanup = await mountSavePanel(wrapper, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted});
+            saveCleanup = await mountSavePanel(wrapper, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
+                onSaved: refreshDetail});
             if (disposed) saveCleanup?.();
             assertActive();
         }
