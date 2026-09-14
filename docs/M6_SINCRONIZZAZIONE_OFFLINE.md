@@ -328,3 +328,11 @@ Validazione finale audit 83: npm test completo superato (inclusi 191 test shell,
 Base 2dc18daa, stessa PR #63. Il collaudo dell'entry verifica esplicitamente che la matrice dei dati già caricati sia ancora consultabile dopo il ritorno online e che il probe protetto rifiuti la lettura dopo blocco del Vault, sia offline sia online. Chrome ed Edge: 28 verifiche per browser, 56 esecuzioni superate con emulatori e fixture locali. Modifica limitata al collaudo: nessun cambiamento runtime produttivo. La suite completa resta quella superata sul checkpoint precedente; non viene dichiarata rieseguita in questo incremento.
 
 Programma: avanzamento della verifica M6, senza chiusura globale. Restano avvio a freddo/cache persistente, file Storage, copertura delle UI e compatibilità estesa, rollout e prove fisiche/remoti. M8 conserva staging/journal e verifiche memoria/dispositivi; M9 conserva le prove fisiche di accessibilità. Nessun master, versione o deploy.
+
+### Ricaricamento offline persistente — candidata 14/09/2026
+
+Audit 85, base 613dece6, stessa PR #63. Nuovo collaudo `node scripts/run-vault-session-emulators.mjs --cold-browser`: Auth e Firestore persistenti, worker con soli asset statici, reload con rete bloccata, nuovo sblocco obbligatorio, decifratura della matrice e ritorno online/logout. Chrome ed Edge: 44 verifiche superate. Il laboratorio ordinario resta in memoria. Il marker di fase non contiene dati o chiavi.
+
+Questo supera il prerequisito di ricaricamento del documento con cache già popolata; non chiude avvio da processo terminato/dispositivo riavviato, collaudo PWA fisico, preparazione automatica di tutti i dati o contenuto degli allegati. Nessuna estensione delle scritture offline e nessun deploy. Dettagli e diagnosi DevTools nell'audit 85.
+
+Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.

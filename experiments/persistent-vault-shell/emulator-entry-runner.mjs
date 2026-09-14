@@ -19,7 +19,11 @@ export async function runEntryBrowsers(nextReport) {
                 '--disable-gpu', '--no-first-run', '--disable-sync', '--disable-background-networking', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'http://127.0.0.1:4188/'], {windowsHide: true, stdio: ['ignore', 'ignore', 'pipe']});
             closeNetwork = await attachEntryNetworkControl(child);
             const result = await Promise.race([report, new Promise((_, reject) => {
-                child.on('error', reject); timer = setTimeout(() => reject(new Error('ENTRY_BROWSER_TIMEOUT')), 60000);
+                child.on('error', reject); timer = setTimeout(async () => {
+                    const state = await Promise.race([closeNetwork?.inspect?.().catch(() => 'unavailable'),
+                        new Promise(resolve => setTimeout(() => resolve('unavailable'), 1000))]);
+                    reject(new Error(`ENTRY_BROWSER_TIMEOUT: ${JSON.stringify(state)}`));
+                }, 60000);
             })]);
             if (!result.ok) throw new Error(JSON.stringify(result));
             console.log(JSON.stringify(result));

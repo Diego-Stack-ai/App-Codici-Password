@@ -18,7 +18,7 @@ export async function attachEntryNetworkControl(child) {
         if (!target) await new Promise(done => setTimeout(done, 50));
     }
     if (!target) throw new Error('DEVTOOLS_TARGET_MISSING');
-    const socket = new WebSocket(target.webSocketDebuggerUrl), pending = new Map(); let serial = 0;
+    const socket = new WebSocket(target.webSocketDebuggerUrl), pending = new Map(), exceptions = []; let serial = 0;
     await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, {once: true}); socket.addEventListener('error', reject, {once: true}); });
     const send = (method, params = {}) => new Promise((resolve, reject) => {
         const id = ++serial; pending.set(id, {resolve, reject}); socket.send(JSON.stringify({id, method, params}));
@@ -29,6 +29,8 @@ export async function attachEntryNetworkControl(child) {
         if (message.id) {
             const entry = pending.get(message.id); pending.delete(message.id);
             if (message.error) entry?.reject(new Error(message.error.message)); else entry?.resolve(message.result);
+        } else if (message.method === 'Runtime.exceptionThrown') {
+            exceptions.push(message.params.exceptionDetails?.exception?.description || message.params.exceptionDetails?.text);
         } else if (message.method === 'Runtime.bindingCalled' && message.params.name === '__entryNetworkControl') {
             const request = JSON.parse(message.params.payload);
             if (!Number.isSafeInteger(request.id) || typeof request.offline !== 'boolean') return;
@@ -42,5 +44,7 @@ export async function attachEntryNetworkControl(child) {
     });
     await send('Network.enable'); await send('Runtime.enable');
     await send('Runtime.addBinding', {name: '__entryNetworkControl'});
-    return () => socket.close();
+    const close = () => socket.close();
+    close.inspect = async () => ({state: (await send('Runtime.evaluate', {expression: `JSON.stringify({ready:document.readyState, online:navigator.onLine, controlled:Boolean(navigator.serviceWorker?.controller), status:document.getElementById('status')?.textContent, message:document.getElementById('message')?.textContent, phase:sessionStorage.getItem('synthetic-cold-phase'), failure:window.__coldFailure})`, returnByValue: true})).result?.value, exceptions});
+    return close;
 }

@@ -10,9 +10,10 @@ import {getFirestore, connectFirestoreEmulator, doc, setDoc, terminate} from 'fi
 assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099');
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
 const base = import.meta.dirname;
-const automated = process.argv.includes('--test');
+const cold = process.argv.includes('--test-cold');
+const automated = process.argv.includes('--test') || cold;
 let reportResult;
-await buildEmulator();
+await buildEmulator({persistent: cold});
 const source = await readFile(`${base}/../../Frontend/public/assets/js/modules/core/crypto-utils.js`, 'utf8');
 const cryptoApi = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const fixtureUids = [];
@@ -65,16 +66,21 @@ const server = createServer(async (request, response) => {
         reportResult?.(JSON.parse(body)); response.end('{}'); return;
     }
     if (automated && request.url === '/entry-check.mjs') {
-        response.setHeader('Content-Type', 'text/javascript'); response.end(await readFile(`${base}/emulator-entry-check.mjs`)); return;
+        response.setHeader('Content-Type', 'text/javascript'); response.end(await readFile(`${base}/${cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs'}`)); return;
+    }
+    if (cold && request.method === 'GET' && request.url === '/emulator-cold-sw.js') {
+        response.setHeader('Content-Type', 'text/javascript'); response.setHeader('Cache-Control', 'no-store');
+        response.end(await readFile(`${base}/emulator-cold-sw.js`)); return;
     }
     const asset = assets.get(request.url);
     if (request.method !== 'GET' || !asset) { response.writeHead(404).end(); return; }
     response.setHeader('Cache-Control', 'no-store');
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader('Referrer-Policy', 'no-referrer');
-    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' http://127.0.0.1:9099 http://127.0.0.1:8085; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
+    response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' http://127.0.0.1:9099 http://127.0.0.1:8085; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
     try {
         let body = await readFile(`${base}/dist/emulator-site/${asset[0]}`);
+        if (cold && request.url === '/') body = body.toString().replace('Al ricaricamento serve un nuovo accesso.', 'Prova cache persistente: al ricaricamento il Vault torna bloccato.');
         if (automated && request.url === '/') body = body.toString().replace('</body>', '<script type="module" src="/entry-check.mjs"></script></body>');
         response.writeHead(200, {'Content-Type': `${asset[1]}; charset=utf-8`}).end(body);
     }

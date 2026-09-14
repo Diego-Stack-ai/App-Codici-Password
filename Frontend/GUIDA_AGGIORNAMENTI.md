@@ -793,3 +793,9 @@ Validazione finale audit 83: npm test completo superato (inclusi 191 test shell,
 Base 2dc18daa, stessa PR #63. Il collaudo dell'entry verifica esplicitamente che la matrice dei dati già caricati sia ancora consultabile dopo il ritorno online e che il probe protetto rifiuti la lettura dopo blocco del Vault, sia offline sia online. Chrome ed Edge: 28 verifiche per browser, 56 esecuzioni superate con emulatori e fixture locali. Modifica limitata al collaudo: nessun cambiamento runtime produttivo. La suite completa resta quella superata sul checkpoint precedente; non viene dichiarata rieseguita in questo incremento.
 
 Programma: avanzamento della verifica M6, senza chiusura globale. Restano avvio a freddo/cache persistente, file Storage, copertura delle UI e compatibilità estesa, rollout e prove fisiche/remoti. M8 conserva staging/journal e verifiche memoria/dispositivi; M9 conserva le prove fisiche di accessibilità. Nessun master, versione o deploy.
+
+## Reload con cache persistente — candidata 14/09/2026
+
+Base 613dece6, stessa PR #63: comando di collaudo node scripts/run-vault-session-emulators.mjs --cold-browser. Usa esclusivamente demo locali e browser temporanei, prepara i dati, ricarica senza rete e richiede un nuovo sblocco. 44 verifiche Chrome/Edge superate; limiti e rete DevTools documentati in M6/audit 85. Il normale laboratorio non cambia persistenza; nessun deploy o test sui dati reali. La chiusura forzata della PWA e il riavvio fisico restano da provare.
+
+Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.
