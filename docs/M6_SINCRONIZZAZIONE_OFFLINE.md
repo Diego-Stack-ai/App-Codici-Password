@@ -209,3 +209,9 @@ Base 12d4e3f9. readConflictNotes confronta soltanto la nota cifrata del comando 
 Il pannello offre Confronta le note soltanto con provider esplicito e conflitto del proprio comando. Presenta i testi con textContent, distingue la nota online al momento della lettura e svuota il confronto su chiusura, conferma o variazione del conflitto. Una nuova notifica richiede nuovamente conferma prima dello scarto. Il provider principale resta non attivato.
 
 90 test offline superati; 34 esecuzioni browser/backend emulato Chrome/Edge, con confronto reale delle note cifrate e verifica della coda intatta. Inventario aggiornato. Riproposizione della copia locale con nuova revisione, confronto degli altri campi, riapertura delle code pregresse e trasporto autenticato restano aperti. Nessun deploy, migrazione o mutazione dei dati reali.
+
+### Preparazione della riproposizione della sola nota — candidato M6
+
+Base cc067a12. createConflictNoteProposal prepara, senza inviarla, una nuova operazione dopo confronto e conferma esplicita. Richiede evidenza noteOnly e assenza di riferimenti Profilo; rifiuta marker di riconciliazione e cancellazione tramite nota vuota, fuori dal preparatore corrente. Snapshot della fonte completa tramite la stessa validazione del preparatore canonico, revisione fissata a quella confrontata, nuovo operationId stabile nei retry. Cambia soltanto la nota e conserva gli altri campi della fonte aggiornata. Una nuova modifica online dopo il confronto dovrà essere rifiutata dal CAS backend, non incorporata implicitamente.
+
+95 test offline e 155 shell superati, inclusi validatore backend originale, snapshot, consenso, identità, perimetro e chiusura durante cifratura. Non collegato al pulsante UI, alla sostituzione transazionale della coda o al backend nel browser: questi passaggi e il recupero delle operazioni dopo riapertura restano da realizzare. Nessuna scrittura reale, migrazione o deploy.

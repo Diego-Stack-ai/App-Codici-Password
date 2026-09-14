@@ -55,6 +55,11 @@ function validateRecord(record) {
         Number(record.acceptedCount || 0) !== 0 || new TextEncoder().encode(JSON.stringify(record)).length > 300000) fail();
 }
 
+export function capturePrivateAccountSource(source) {
+    if (!dataKeys(source, new Set([...fields, ...metadata]))) fail();
+    return snapshot(Object.fromEntries(Object.entries(source).filter(([field]) => field !== 'updatedAt')));
+}
+
 // Candidate M6 envelope only; no network or storage. Source must be the complete
 // private document read under the caller's UID. Reverse profile-link evidence is
 // supplied by the caller, never established by this helper. Existing title/URL
@@ -79,7 +84,7 @@ export async function preparePrivateAccountMutation({context, source, changes, d
     // Snapshot ordinary JSON data before encryption yields. Typed createdAt
     // timestamps, Dates, accessors and custom serializers are rejected, not
     // transformed. Backend-controlled updatedAt is excluded before traversal.
-    const capturedSource = snapshot(Object.fromEntries(Object.entries(source).filter(([field]) => field !== 'updatedAt')));
+    const capturedSource = capturePrivateAccountSource(source);
     const capturedChanges = snapshot(changes);
     const record = Object.fromEntries(Object.entries(capturedSource).filter(([field]) => fields.has(field)));
     validateRecord(record);

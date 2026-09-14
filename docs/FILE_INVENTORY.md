@@ -2,14 +2,14 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **533**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/offline-sync/conflict-note-review.mjs` | MJS | 1943 | 28 | File di progetto: conflict-note-review. |
-| `experiments/offline-sync/conflict-note-review.test.mjs` | MJS | 2629 | 40 | File di progetto: conflict-note-review.test. |
+| `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3141 | 54 | File di progetto: conflict-note-proposal. |
+| `experiments/offline-sync/conflict-note-proposal.test.mjs` | MJS | 4383 | 62 | File di progetto: conflict-note-proposal.test. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -24,10 +24,12 @@ File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/history-recovery/firestore.candidate.rules` | RULES | 644 | 20 | File di progetto: firestore.candidate. |
 | `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
-| `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 13485 | 169 | File di progetto: browser-backend-sync. |
+| `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 13499 | 169 | File di progetto: browser-backend-sync. |
 | `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1294 | 23 | File di progetto: browser-coordination-worker. |
 | `experiments/offline-sync/browser-coordination.mjs` | MJS | 17832 | 239 | File di progetto: browser-coordination. |
 | `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
+| `experiments/offline-sync/conflict-note-review.mjs` | MJS | 1970 | 28 | File di progetto: conflict-note-review. |
+| `experiments/offline-sync/conflict-note-review.test.mjs` | MJS | 2668 | 40 | File di progetto: conflict-note-review.test. |
 | `experiments/offline-sync/emulated-backend-bridge.mjs` | MJS | 3844 | 55 | File di progetto: emulated-backend-bridge. |
 | `experiments/offline-sync/fenced-queue-client.mjs` | MJS | 4758 | 79 | File di progetto: fenced-queue-client. |
 | `experiments/offline-sync/fenced-queue-writer.mjs` | MJS | 7747 | 116 | File di progetto: fenced-queue-writer. |
@@ -38,9 +40,9 @@ File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8650 | 139 | File di progetto: indexeddb-queue-lease.test. |
 | `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
 | `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/offline-sync/offline-save-panel.mjs` | MJS | 10120 | 145 | File di progetto: offline-save-panel. |
-| `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 8482 | 148 | File di progetto: offline-save-panel.test. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 4925 | 73 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/offline-save-panel.mjs` | MJS | 10156 | 145 | File di progetto: offline-save-panel. |
+| `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 8505 | 148 | File di progetto: offline-save-panel.test. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 4927 | 73 | File di progetto: run-browser-tests. |
 | `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 773 | 14 | File di progetto: run-emulated-browsers. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2389 | 46 | File di progetto: account-detail-reader. |
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 6620 | 111 | File di progetto: account-detail-reader.test. |
@@ -76,7 +78,7 @@ File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/master-prompt.test.mjs` | MJS | 3590 | 64 | File di progetto: master-prompt.test. |
 | `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 2437 | 60 | File di progetto: memory-vault. |
 | `experiments/persistent-vault-shell/prepare-preview.mjs` | MJS | 2144 | 32 | File di progetto: prepare-preview. |
-| `experiments/persistent-vault-shell/prepare-private-account-mutation.mjs` | MJS | 6157 | 93 | File di progetto: prepare-private-account-mutation. |
+| `experiments/persistent-vault-shell/prepare-private-account-mutation.mjs` | MJS | 6329 | 98 | File di progetto: prepare-private-account-mutation. |
 | `experiments/persistent-vault-shell/prepare-private-account-mutation.test.mjs` | MJS | 8547 | 128 | File di progetto: prepare-private-account-mutation.test. |
 | `experiments/persistent-vault-shell/prepare-private-account-patch.mjs` | MJS | 4145 | 63 | File di progetto: prepare-private-account-patch. |
 | `experiments/persistent-vault-shell/prepare-private-account-patch.test.mjs` | MJS | 6482 | 103 | File di progetto: prepare-private-account-patch.test. |
@@ -394,7 +396,7 @@ File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
 | `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 120623 | 679 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 121342 | 687 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10033 | 92 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
@@ -406,7 +408,7 @@ File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 30871 | 204 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 33149 | 218 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 19242 | 142 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 4584 | 44 | Documentazione: M9 SALUTE CREDENZIALI. |
@@ -414,7 +416,7 @@ File censiti: **531**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7559 | 211 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 34429 | 405 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 35016 | 409 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 36464 | 366 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |

@@ -680,3 +680,7 @@ Base 7471d3c8. Il pannello consente scarto solo del proprio comando in conflitto
 ## 64. Confronto protetto delle note
 
 Base 12d4e3f9. Capability di confronto read-only tra comando e record corrente; identità e lifecycle verificati. UI senza HTML interpretato, testo svuotato alla chiusura e coda invariata. 90 test offline e 34 esecuzioni browser/backend emulato superati. Nessuna riproposizione automatica o attivazione nel bootstrap principale.
+
+## 65. Preparazione controllata della riproposizione
+
+Base cc067a12. Proposta della sola nota con conferma, nuova identità stabile e revisione confrontata; altri campi preservati dal preparatore canonico. 95 test offline e 155 shell passati. La proposta non è ancora collegata alla UI o alla sostituzione in coda: nessuna attivazione runtime.

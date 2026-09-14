@@ -404,3 +404,5 @@ M6 UI: dettaglio predisposto per rilettura protetta dopo conferma, senza ricaric
 M6 conflitti: implementata nel candidato la scelta confermata di scartare la propria modifica locale mantenendo i dati online. Verificati annullamento, identità, lease e dati backend invariati. Restano confronto/riproposizione locale e attivazione completa; la fase M6 non è conclusa.
 
 M6 conflitti: aggiunto confronto read-only nota locale/online con provider esplicito e cancellazione del testo dalla vista su chiusura. Test offline e browser/backend emulato passati. Riproporre la modifica sulla revisione aggiornata e recuperare le code da una nuova sessione restano attività aperte; nessuna fase globale chiusa.
+
+M6 conflitti: preparatore della riproposizione della sola nota implementato e verificato, con conferma e revisione fissata al confronto. Restano collegamento UI, sostituzione della coda e collaudo integrato backend; nessun nuovo gate globale chiuso.
