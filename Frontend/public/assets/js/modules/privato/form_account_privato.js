@@ -10,14 +10,14 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.124';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.125';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.124';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.124';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.125';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.125';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---

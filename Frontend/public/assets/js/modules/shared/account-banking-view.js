@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.124';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.125';
 
 function createReadonlyField(label, value, icon, isPassword = false) {
     const id = `bank-field-${crypto.randomUUID()}`;
