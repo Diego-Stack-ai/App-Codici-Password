@@ -8,6 +8,8 @@ const CORE_COLLECTIONS = [
     'contacts',
     'deadlineNotifications',
     'profileWidgets',
+    'accountWidgets',
+    'sharedVaultData',
     'scadenze',
     'settings'
 ];
@@ -68,7 +70,7 @@ async function syncOfflineData(user, currentPage) {
     if (!user?.uid || !navigator.onLine) return getOfflineReadiness(user?.uid);
 
     const previous = getOfflineReadiness(user.uid);
-    if (previous?.complete && previous.profileIncluded === true && Date.now() - previous.syncedAt < SYNC_TTL_MS) return previous;
+    if (previous?.complete && previous.profileIncluded === true && previous.widgetsIncluded === true && Date.now() - previous.syncedAt < SYNC_TTL_MS) return previous;
 
     startMetric('offline-sync');
     const priority = PAGE_PRIORITIES[currentPage] || [];
@@ -108,6 +110,7 @@ async function syncOfflineData(user, currentPage) {
     const readiness = {
         complete: failedCollections.length === 0,
         profileIncluded: profileResult.status === 'fulfilled',
+        widgetsIncluded: !failedCollections.some(name => ['accountWidgets', 'sharedVaultData'].includes(name)),
         syncedAt: Date.now(),
         failedCollections
     };

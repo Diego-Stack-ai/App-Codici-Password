@@ -376,3 +376,13 @@ Correzione candidata sulla PR #63: la preparazione online include esplicitamente
 Non occorre visitare il profilo per prepararlo dopo questa correzione, ma occorrono rete e completamento del caricamento automatico. Nessuna nuova cache di chiavi o dati decifrati, nessun cambiamento a scritture, allegati o Rules. Candidato non pubblicato: produzione resta 1.2.125; PR #63 resta da riallineare prima di un futuro rilascio.
 
 Validazione: npm test completo superato, inclusi sei nuovi test su preparazione profilo, marker precedente, lettura fallita/assente, assenza rete e classificazione degli errori. Gli ambienti dei test delle pagine caricano il nuovo gestore condiviso. Il candidato non è stato ancora collaudato su iPhone né distribuito.
+
+### Audit 90 — Widget Account e credenziali comuni offline (15/09/2026)
+
+Base 9f769aab, stessa PR #63. Su richiesta dell'utente la verifica riguarda Widget Account e credenziali comuni; foto e byte degli allegati sono esplicitamente esclusi dal requisito di consultazione offline, per evitare carichi eccessivi nella cache. Non chiedere il loro caricamento offline come condizione per chiudere questo requisito. L'utente intende mantenere la sessione autenticata (nessun logout), anche chiudendo e riaprendo l'app.
+
+Riscontro: i componenti di consultazione già leggono accountWidgets e sharedVaultData tramite il repository con cache e decifrano localmente dopo sblocco. Queste due raccolte mancavano però dalla preparazione automatica. Ora sono incluse; un nuovo marker widgetsIncluded impedisce che il precedente stato completo salti il caricamento. Un fallimento di una delle due mantiene la preparazione incompleta. I riferimenti condivisi usati nelle schede Account risiedono in accountWidgets; non occorre scaricare file Storage.
+
+Validazione: test:data-access, test:offline, test:js-syntax e controllo whitespace superati. Sette nuove regressioni: tre sulla preparazione (inclusione senza visita, fallimento di ciascuna raccolta) e quattro sulla UI reale eseguita in ambiente simulato, con letture server vietate offline, per Widget/credenziali e Account personali/aziendali. Verificati rendering, rivelazione del valore e rimozione al blocco; zero scritture. Crittografia nei test UI simulata: non attribuire una nuova prova fisica iPhone o end-to-end a questi risultati. La suite completa era passata su 9f769aab; questo incremento ha eseguito i controlli mirati indicati.
+
+Nessun deploy, bump, modifica a master, scrittura dati o estensione delle modifiche offline. Produzione resta 1.2.125; il candidato sperimentale richiede il riallineamento già previsto prima del rilascio.

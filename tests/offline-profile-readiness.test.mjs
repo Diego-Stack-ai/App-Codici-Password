@@ -7,7 +7,7 @@ const source = await readFile(new URL('../Frontend/public/assets/js/offline-sync
 const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
 const { readErrorMessage } = await import(`data:text/javascript;base64,${Buffer.from(messageSource).toString('base64')}`);
 
-function harness({ previous = null, profileFails = false, profileExists = true, online = true } = {}) {
+function harness({ previous = null, profileFails = false, profileExists = true, online = true, failedCollection = null } = {}) {
     const calls = [];
     const storage = new Map(previous ? [['codex_offline_ready_test', JSON.stringify(previous)]] : []);
     const context = vm.createContext({
@@ -21,7 +21,7 @@ function harness({ previous = null, profileFails = false, profileExists = true, 
             if (profileFails) throw Object.assign(new Error('offline'), { code: 'unavailable' });
             return { exists: () => profileExists };
         },
-        getDocsFromServer: async path => { calls.push(path); return { size: 0, docs: [] }; }
+        getDocsFromServer: async path => { calls.push(path); if (path.endsWith('/' + failedCollection)) throw new Error('unavailable'); return { size: 0, docs: [] }; }
     });
     vm.runInContext(source.replace(/^import .*;\r?\n/gm, '').replace(/export /g, ''), context);
     return { calls, run: () => vm.runInContext("prepareOfflineData({uid: 'test'}, 'home')", context) };
@@ -46,7 +46,7 @@ for (const options of [{ profileFails: true }, { profileExists: false }]) {
 }
 
 test('fresh readiness including profile avoids repeating preparation', async () => {
-    const fixture = harness({ previous: { complete: true, profileIncluded: true, syncedAt: Date.now() } });
+    const fixture = harness({ previous: { complete: true, profileIncluded: true, widgetsIncluded: true, syncedAt: Date.now() } });
     await fixture.run();
     assert.equal(fixture.calls.length, 0);
 });
@@ -65,3 +65,21 @@ test('offline connectivity error has a useful message; permission and crypto fai
     }
     assert.equal(readErrorMessage({ code: 'unavailable' }, 'fallback', true), 'fallback');
 });
+
+test('Home prepares account widgets and common credentials without visiting details or downloading media', async () => {
+    const fixture = harness({ previous: { complete: true, profileIncluded: true, syncedAt: Date.now() } });
+    const result = await fixture.run();
+    assert.ok(fixture.calls.includes('users/test/accountWidgets'));
+    assert.ok(fixture.calls.includes('users/test/sharedVaultData'));
+    assert.equal(result.widgetsIncluded, true);
+    assert.equal(result.complete, true);
+    assert.ok(fixture.calls.every(path => !/attachments|photo|storage/i.test(path)));
+});
+for (const failedCollection of ['accountWidgets', 'sharedVaultData']) {
+    test(failedCollection + ' failure keeps readiness incomplete', async () => {
+        const result = await harness({ failedCollection }).run();
+        assert.equal(result.complete, false);
+        assert.equal(result.widgetsIncluded, false);
+        assert.ok(result.failedCollections.includes(failedCollection));
+    });
+}

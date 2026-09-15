@@ -120,3 +120,26 @@ test('external shortcut late reads cannot open an editor after teardown',async()
  f.sandbox.listSharedVaultDataConfirmed=()=>gate.promise;const pending=controller.openNewWidget();controller.destroy();gate.resolve([]);
  assert.equal(await pending,false);assert.equal(f.dialogs.length,0);assert.equal(f.writes.length,0);
 });
+
+for (const company of [false, true]) {
+ for (const which of [1, 2]) {
+  test((company ? 'company' : 'private') + ': offline ' + (which === 1 ? 'common credential' : 'embedded widget') + ' renders cached fields, reveals and clears on lock', async () => {
+   const f = fixture(which);
+   f.sandbox.navigator.onLine = false;
+   const scope = {...f.scope, editable: false, context: company ? 'company' : 'private', ...(company ? {companyId:'company-one'} : {})};
+   const field = {label:'PIN', encrypted:true, valueEnc:'cipher', order:0};
+   const widget = {id:'widget', kind:which === 1 ? 'shared-reference' : 'embedded', context:scope.context, companyId:scope.companyId, accountId:'one', sharedDataId:'common', title:'Test widget', fields:[field], order:0};
+   f.sandbox.listAccountWidgets = async () => [widget];
+   f.sandbox.listSharedVaultData = async () => [{id:'common', title:'Common', fields:[field]}];
+   f.sandbox.listAccountWidgetsConfirmed = f.sandbox.listSharedVaultDataConfirmed = async () => { throw new Error('Unexpected server read offline'); };
+   await (which === 1 ? f.sandbox.initAccountSharedCredentials : f.sandbox.initAccountEmbeddedWidgets)(scope);
+   const reveal = f.nodes.find(node => node['aria-label'] === 'Mostra PIN');
+   assert.ok(reveal, 'cached field is rendered');
+   await reveal.click();
+   assert.equal(reveal.previousElementSibling.textContent, 'secret');
+   f.lock();
+   assert.notEqual(reveal.previousElementSibling?.textContent, 'secret');
+   assert.equal(f.writes.length, 0);
+  });
+ }
+}
