@@ -10,6 +10,7 @@ import {auth, db, functions} from './emulator-firebase.mjs';
 import {openEmulatorQueue} from './emulator-queue.mjs';
 import {createFirebasePrivateNoteSource} from './firebase-private-note-source.mjs';
 import {createPrivateNotePanelProvider} from './private-note-panel-provider.mjs';
+import {createAccountNotePanelRouter} from './account-note-panel-router.mjs';
 import {mountEmulatorList} from './emulator-list-view.mjs';
 import {mountEmulatorDetail} from './emulator-detail-view.mjs';
 import {createAccountDetailReader} from './account-detail-reader.mjs';
@@ -102,10 +103,20 @@ const mountDetail = context => {
     const mountSavePanel = createPrivateNotePanelProvider({context, getUser: () => auth.currentUser,
         readSource: createFirebasePrivateNoteSource({auth, db}), deviceId: 'loopback-laboratory',
         openQueue: options => session.openMutationQueue(options)});
+    const mountNotePanel = createAccountNotePanelRouter({context, getUser: () => auth.currentUser,
+        openQueue: options => session.openMutationQueue(options), legacyProvider: mountSavePanel,
+        repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed, getCompany, getCompanyConfirmed},
+        isEncryptedValue: cryptoApi.isEncryptedValue,
+        hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+        submit: async request => {
+            if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+            context.assertUnlocked(); if (context.signal.aborted || auth.currentUser?.uid !== context.user.uid) throw Error('VIEW_DISPOSED');
+            return (await httpsCallable(functions, 'applyAccountNoteMutation')(request)).data;
+        }});
     const widgetReader = createAccountWidgetReader({context, getUser: () => auth.currentUser, selection,
         repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed,
             listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed}});
-    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel,
+    return mountEmulatorDetail(content, context, {selection, openAccount, mountNotePanel,
         mountWidgets: async root => {
             const generic = await mountAccountWidgetView(root, context, {reader: {
                 list: async () => (await widgetReader.list()).filter(widget => !widget.bankId), read: (...args) => widgetReader.read(...args)}});

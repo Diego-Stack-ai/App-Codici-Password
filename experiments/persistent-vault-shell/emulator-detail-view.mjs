@@ -3,7 +3,7 @@ import {mountDetailExtraFields} from './detail-extra-fields.mjs';
 
 // Basic experimental detail: reuse the canonical card without activating the
 // legacy detail orchestrators, their writes, or their security manager.
-export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, mountWidgets, backLabel = 'Torna alla lista'}) {
+export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, mountNotePanel, mountWidgets, backLabel = 'Torna alla lista'}) {
     if (context.signal.aborted) return () => {};
     if (!context.unlocked) throw new Error('VAULT_LOCKED');
     const lifecycle = new AbortController();
@@ -100,11 +100,12 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
             if (disposed) widgetCleanup?.();
             assertActive();
         }
-        if (mountSavePanel && selection.domain === 'private') {
+        const mountPanel = mountNotePanel || (selection.domain === 'private' ? mountSavePanel : null);
+        if (mountPanel) {
             const editorHost = document.createElement('div'); wrapper.append(editorHost);
             try {
-                saveCleanup = await mountSavePanel(editorHost, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
-                    onSaved: refreshDetail, onDiscarded: refreshDetail});
+                saveCleanup = await mountPanel(editorHost, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
+                    hasNote: () => {assertActive(); return account.has('note');}, onSaved: refreshDetail, onDiscarded: refreshDetail});
             } catch {
                 assertActive();
                 editorHost.remove();

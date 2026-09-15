@@ -13,6 +13,29 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+async function checkAccountNote(mode, scope) {
+    const content = byId('content'), action = () => content.querySelector('[data-account-note-action]');
+    await wait(() => action() && !action().hidden, 'ACCOUNT_NOTE_ACTION'); action().click();
+    await wait(() => content.querySelector('textarea'), 'ACCOUNT_NOTE_EDITOR');
+    const area = content.querySelector('textarea'), original = area.value;
+    const button = label => [...content.querySelectorAll('button')].find(node => node.textContent === label);
+    if (mode === 'online') {
+        const updated = 'Nota collegata sintetica ' + scope;
+        area.value = updated; button('Salva nota').click();
+        await wait(() => action() && !action().hidden && [...content.querySelectorAll('pre')].some(node => node.textContent === updated), 'ACCOUNT_NOTE_REFRESH');
+        assert(area.value === '', 'ACCOUNT_NOTE_DRAFT_CLEAR');
+        action().click(); await wait(() => content.querySelector('textarea'), 'ACCOUNT_NOTE_REOPEN');
+        content.querySelector('textarea').value = ''; button('Salva nota').click();
+        await wait(() => action()?.textContent === 'Aggiungi nota' && !action().hidden, 'ACCOUNT_NOTE_CLEARED');
+        action().click(); await wait(() => content.querySelector('textarea'), 'ACCOUNT_NOTE_EMPTY_EDITOR');
+        content.querySelector('textarea').value = original; button('Salva nota').click();
+        await wait(() => action()?.textContent === '✎' && !action().hidden && [...content.querySelectorAll('pre')].some(node => node.textContent === original), 'ACCOUNT_NOTE_RESTORED');
+    } else {
+        assert(area.readOnly && button('Salva nota').disabled, 'ACCOUNT_NOTE_OFFLINE');
+        button('Annulla').click(); assert(area.value === '', 'ACCOUNT_NOTE_CANCEL_CLEAR');
+    }
+    profileChecks.push(`${scope} Account note ${mode}: scoped editor, refresh and cleanup`);
+}
 async function checkAnagraphic(mode, company) {
     const button = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
     document.querySelector('[data-profile-section="personal"]').click();
@@ -95,6 +118,7 @@ async function checkCompanyProfile(mode) {
     await wait(()=>byId('content').textContent.includes('Zeta seconda A'),'SECOND_ACCOUNTS');
     document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
     await wait(()=>byId('content').textContent.includes('Dettaglio Account')&&byId('content').textContent.includes('Zeta seconda A'),'SECOND_DETAIL');
+    await checkAccountNote(mode, 'second-company');
     const widgetValues = await checkWidgets('second-company', mode);
     [...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Torna alla lista').click();
     await wait(()=>document.querySelector('[data-action="navigate"][data-id="zeta"]'),'SECOND_DETAIL_BACK');
@@ -114,6 +138,7 @@ async function checkCompanyProfile(mode) {
     assert(values.some(node=>node.textContent==='SEGRETO-FITTIZIO-private-Zeta-A'),'COMPANY_PRIVATE_DESTINATION');
     buttons('Apri Account collegato')[1].click();
     await wait(()=>byId('content').textContent.includes('Zeta privato A')&&buttons('Torna al profilo').length,'COMPANY_OPEN');
+    await checkAccountNote(mode, 'private-linked');
     assert(values.every(node=>node.textContent===''),'COMPANY_CLEAR');
     buttons('Torna al profilo')[0].click();await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_BACK');
     for(const [section,value] of [['addresses','Filiale fittizia'],['documents','Visura fittizia']]) {
@@ -246,7 +271,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }
@@ -314,8 +339,8 @@ try {
     await backToList();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="zeta"]'), 'BACK');
     document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
-    await wait(() => content.textContent.includes('Modifica non disponibile'), 'READ_ONLY');
-    assert(!content.querySelector('textarea') && content.textContent.includes('Zeta'), 'READ_ONLY_DETAIL_LOST');
+    await checkAccountNote('online', 'private-linked-after-recovery');
+    assert(content.textContent.includes('Zeta'), 'LINKED_DETAIL_LOST');
     byId('lock').click();
     await wait(() => !content.children.length, 'LOCK');
     assert(input.value === '', 'OLD_DRAFT_RETAINED');

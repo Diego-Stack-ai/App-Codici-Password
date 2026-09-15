@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Note montate dopo `e21202ac`: nuovo editor nel dettaglio per Account personali collegati/aziendali, penna o Aggiungi nota, salvataggio/svuotamento con rilettura immediata. Coda M6 consultata senza invio, recupero pendente mantenuto e vecchio editor isolato invariato. Chrome 99 verifiche online/offline/riavvio superate; quattordici nuove prove unitarie. Prossimo montaggio azioni di collegamento nei profili; limiti e gate nella roadmap, nessun deploy.
+
 Editor nota dopo `713127a1`: sorgente/provider per Account personali/aziendali, sola consultazione offline, salvataggio/svuotamento online e pulizia del testo. Impone controllo esplicito della coda pendente, senza modificarla; dieci prove aggiunte. Da collegare adapter reale della coda, dettaglio e azioni di collegamento; nuovo provider non ancora montato nel browser. Nessun deploy.
 
 Compatibilità note dopo `053440f7`: servizio candidato aggiorna solo la nota cifrata, revisione/schema/timestamp e ricevuta; conserva collegamenti, banca e campi sconosciuti. UID atteso e impronta della nota proteggono cambio utente e modifiche legacy. Vecchio percorso M6 invariato; montaggio editor e recupero della coda ancora da integrare. Otto prove unitarie e test Firestore dedicato, nessuna UI produttiva o deploy.

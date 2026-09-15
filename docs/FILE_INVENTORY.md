@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **669**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 116479 | 970 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 116934 | 972 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -325,8 +325,8 @@ File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 74216 | 608 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 90656 | 612 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 74765 | 610 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 93674 | 624 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -383,6 +383,10 @@ File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-note-editor-source.mjs` | MJS | 3779 | 54 | File di progetto: account-note-editor-source. |
 | `experiments/persistent-vault-shell/account-note-editor.test.mjs` | MJS | 8949 | 101 | File di progetto: account-note-editor.test. |
 | `experiments/persistent-vault-shell/account-note-handler.mjs` | MJS | 2846 | 39 | File di progetto: account-note-handler. |
+| `experiments/persistent-vault-shell/account-note-panel-router.mjs` | MJS | 3627 | 58 | File di progetto: account-note-panel-router. |
+| `experiments/persistent-vault-shell/account-note-panel-router.test.mjs` | MJS | 4732 | 56 | File di progetto: account-note-panel-router.test. |
+| `experiments/persistent-vault-shell/account-note-queue-access.mjs` | MJS | 2088 | 37 | File di progetto: account-note-queue-access. |
+| `experiments/persistent-vault-shell/account-note-queue-access.test.mjs` | MJS | 4124 | 49 | File di progetto: account-note-queue-access.test. |
 | `experiments/persistent-vault-shell/account-note.test.mjs` | MJS | 7167 | 85 | File di progetto: account-note.test. |
 | `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
 | `experiments/persistent-vault-shell/account-route.test.mjs` | MJS | 4424 | 80 | File di progetto: account-route.test. |
@@ -432,16 +436,16 @@ File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
-| `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6301 | 124 | File di progetto: emulator-detail-view. |
-| `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 28762 | 336 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6440 | 125 | File di progetto: emulator-detail-view. |
+| `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15289 | 260 | File di progetto: emulator-detail-view.test. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 30695 | 361 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 5034 | 70 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 18370 | 230 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 19462 | 241 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 5184 | 64 | File di progetto: emulator-network-control. |
 | `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
-| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 3487 | 50 | File di progetto: emulator-qr-bridge. |
+| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 3665 | 52 | File di progetto: emulator-qr-bridge. |
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
 | `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 3845 | 54 | File di progetto: emulator-queue.test. |
 | `experiments/persistent-vault-shell/emulator.css` | CSS | 2754 | 26 | File di progetto: emulator. |
@@ -482,8 +486,8 @@ File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/private-account-save-controller.test.mjs` | MJS | 12949 | 189 | File di progetto: private-account-save-controller.test. |
 | `experiments/persistent-vault-shell/private-digital-card-reader.mjs` | MJS | 6184 | 100 | File di progetto: private-digital-card-reader. |
 | `experiments/persistent-vault-shell/private-digital-card-reader.test.mjs` | MJS | 4731 | 56 | File di progetto: private-digital-card-reader.test. |
-| `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 7765 | 104 | File di progetto: private-note-panel-provider. |
-| `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 9243 | 131 | File di progetto: private-note-panel-provider.test. |
+| `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 8117 | 107 | File di progetto: private-note-panel-provider. |
+| `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 10005 | 144 | File di progetto: private-note-panel-provider.test. |
 | `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
 | `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
 | `experiments/persistent-vault-shell/private-qr-editor-provider.mjs` | MJS | 1098 | 17 | File di progetto: private-qr-editor-provider. |
@@ -620,7 +624,7 @@ File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 12928 | 93 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 13068 | 93 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
