@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * DETTAGLIO ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
@@ -253,7 +254,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         mount.loaded = false;
         logError("LoadAccount", e);
-        showToast(t('error_generic'), "error");
+        showToast(readErrorMessage(e, t('error_generic')), "error");
     }
 }
 

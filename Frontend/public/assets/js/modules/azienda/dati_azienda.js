@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 import { buildCompanyVCard as buildVCard } from './company-vcard.js';
 import { initCompanyProfile } from './company-profile-ui.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
@@ -218,7 +219,7 @@ async function loadData(uid, {afterWrite = false} = {}) {
     } catch (e) {
         if (version !== loadVersion) return;
         logError("LoadData", e);
-        if (needsRefresh) showToast('Impossibile aggiornare i dati: ricarica per vedere le ultime modifiche.', 'warning');
+        showToast(readErrorMessage(e, needsRefresh ? 'Impossibile aggiornare i dati: ricarica per vedere le ultime modifiche.' : 'Impossibile caricare i dati aziendali. Riprova.'), 'warning');
     }
 }
 

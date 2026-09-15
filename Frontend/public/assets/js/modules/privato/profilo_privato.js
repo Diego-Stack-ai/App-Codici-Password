@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 const changeProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.changeProfileAccount(...args));
 const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /**
@@ -338,7 +339,7 @@ async function loadUserData(user, renderImmediately = true) {
         }
     } catch (e) {
         logError('LoadProfile', e);
-        showToast(t('error_generic'), 'error');
+        showToast(readErrorMessage(e, t('error_generic')), 'error');
         throw e;
     }
 }

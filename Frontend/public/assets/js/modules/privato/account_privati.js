@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * ACCOUNT PRIVATI MODULE (V4.2)
  * Gestione liste account: personali, condivisi, memorandum.
@@ -303,7 +304,7 @@ export function mountAccountPrivati(user, options = {}) {
         } catch (e) {
             if (signal.aborted) return;
             logError("LoadAccounts", e);
-            showToast(t('error_generic'), "error");
+            showToast(readErrorMessage(e, t('error_generic')), "error");
         }
     }
 

@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
@@ -21,7 +24,7 @@ function fixture() {
     };
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
+    const context = vm.createContext({readErrorMessage, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : nodes[id] || find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),
@@ -90,7 +93,7 @@ test('real sharing revoke confirmation cannot submit after parent context change
 
 
 test('banking renderer rejects retained copy callback after teardown and keeps legacy default',async()=>{
- const text=await moduleText('shared/account-banking-view.js');let active=true,copies=0;const nodes=[];const realm=vm.createContext({crypto:{randomUUID:()=> 'fixture'},createElement:(tag,props,children)=>{const n={tag,...props,children,prepend(){}};nodes.push(n);return n},navigator:{clipboard:{writeText:async()=>copies++}},showToast(){},t:()=>'',document:{getElementById:()=>null}});vm.runInContext(text,realm);
+ const text=await moduleText('shared/account-banking-view.js');let active=true,copies=0;const nodes=[];const realm=vm.createContext({readErrorMessage, crypto:{randomUUID:()=> 'fixture'},createElement:(tag,props,children)=>{const n={tag,...props,children,prepend(){}};nodes.push(n);return n},navigator:{clipboard:{writeText:async()=>copies++}},showToast(){},t:()=>'',document:{getElementById:()=>null}});vm.runInContext(text,realm);
  realm.createBankAccount({iban:'fixture'},0,()=>active);const copy=nodes.find(n=>n.className?.includes('copy-btn'));active=false;await copy.onclick({stopPropagation(){}});assert.equal(copies,0);
  nodes.length=0;realm.createReadonlyField('legacy','fixture','bank');await nodes.find(n=>n.className?.includes('copy-btn')).onclick({stopPropagation(){}});assert.equal(copies,1);
 });

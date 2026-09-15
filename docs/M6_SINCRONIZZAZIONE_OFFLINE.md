@@ -366,3 +366,13 @@ Validazione finale audit 88: npm test completo superato, inclusi 88 controlli st
 PR #64 unita in master 263355f261c0fe0661089e2c65782edf1d13527a; release 6b36ae2d, backport isolato del controllo Auth offline. npm test locale e workflow GitHub 34931928458 superati. Deploy Hosting completato; verificati via HTTP gli hash di Home, env-v126.js, sw.js e main-v129.js rispetto al rilascio testato. Functions, Rules e dati non distribuiti/modificati. Prova iPhone Home → modalità aereo → lista ancora da ripetere dopo aggiornamento alla 1.2.125.
 
 La PR #63 resta sperimentale e separata: non è stata unita o distribuita. Prima di un suo futuro rilascio occorre riallinearne la base/versione al nuovo master; non distribuire direttamente il vecchio numero 1.2.124 del ramo. Il programma generale e i gate fisici restano aperti.
+
+### Verifiche fisiche e preparazione profilo — 15/09/2026
+
+L'utente conferma su iPhone 1.2.125 la consultazione degli Account e dei dati già caricati, anche dopo chiusura completa, riapertura offline e nuovo sblocco del Vault. Precisa però che il profilo utente inizialmente mostrava un errore generico: dopo averlo visitato online i suoi dati diventano leggibili offline. Queste prove non certificano l'intero archivio, file Storage, riavvio del dispositivo o cache espulsa.
+
+Correzione candidata sulla PR #63: la preparazione online include esplicitamente il documento users/{uid}, oltre alle raccolte già previste. Il vecchio marker completo non evita il nuovo caricamento del profilo; una lettura fallita o un documento assente mantengono la preparazione incompleta. Le pagine principali di profilo, aziende, liste e dettagli Account distinguono i fallimenti di connettività offline dagli altri errori. Permessi, autenticazione e decifratura non vengono riclassificati come cache mancante. Le query vuote offline restano ambigue: non equivalgono a prova di archivio vuoto o completo.
+
+Non occorre visitare il profilo per prepararlo dopo questa correzione, ma occorrono rete e completamento del caricamento automatico. Nessuna nuova cache di chiavi o dati decifrati, nessun cambiamento a scritture, allegati o Rules. Candidato non pubblicato: produzione resta 1.2.125; PR #63 resta da riallineare prima di un futuro rilascio.
+
+Validazione: npm test completo superato, inclusi sei nuovi test su preparazione profilo, marker precedente, lettura fallita/assente, assenza rete e classificazione degli errori. Gli ambienti dei test delle pagine caricano il nuovo gestore condiviso. Il candidato non è stato ancora collaudato su iPhone né distribuito.
