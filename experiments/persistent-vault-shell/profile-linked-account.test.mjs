@@ -54,3 +54,31 @@ test('malformed paths and unsupported profile sources cannot create a link capab
     for (const id of ['../other', 'other/user', '%2f', 7]) assert.throws(() => profileAccountLink({id: 'contact', linkedAccountId: id}, 'contactEmails', 'owner'));
     assert.throws(() => profileAccountLink({id: 'contact', linkedAccountId: 'account'}, 'settings', 'owner'));
 });
+test('utility IDs are resolved inside exactly one parent address', async () => {
+    const f = fixture();
+    const first={id:'utility',linkedAccountId:'account'},second={id:'utility',linkedAccountId:'different'};
+    f.profile.userAddresses=[{id:'home',utilities:[first]},{id:'office',utilities:[second]}];
+    const link=profileAccountLink(first,'utilities','owner','home');
+    assert.equal(await f.reader.readPassword(link),'synthetic-password');
+    await assert.rejects(f.reader.readPassword({...link,parentAddressId:'office'}),/PROFILE_LINK_CHANGED/);
+    f.profile.userAddresses.push({id:'home',utilities:[first]});
+    await assert.rejects(f.reader.readPassword(link),/PROFILE_LINK_UNAVAILABLE/);
+    assert.throws(()=>profileAccountLink(first,'utilities','owner'),/PROFILE_LINK_INVALID/);
+});
+test('removed parent or duplicate utility rejects a link before reading an Account', async () => {
+    for(const mode of ['removed','duplicate']) {
+        const f=fixture(),item={id:'utility',linkedAccountId:'account'};
+        f.profile.userAddresses=mode==='removed'?[]:[{id:'home',utilities:[item,item]}];
+        await assert.rejects(f.reader.readPassword(profileAccountLink(item,'utilities','owner','home')),/PROFILE_LINK_UNAVAILABLE/);
+        assert.ok(f.calls.every(call=>call[0].startsWith('getUserProfile')));
+    }
+});
+test('removing an address during decryption suppresses the pending utility password',async()=>{
+    const f=fixture(),item={id:'utility',linkedAccountId:'account'};let release;
+    f.profile.userAddresses=[{id:'home',utilities:[item]}];
+    f.context.read=()=>new Promise(resolve=>{release=resolve;});
+    const pending=f.reader.readPassword(profileAccountLink(item,'utilities','owner','home'));
+    const denied=assert.rejects(pending,/PROFILE_LINK_UNAVAILABLE/);
+    while(!release)await new Promise(resolve=>setImmediate(resolve));
+    f.profile.userAddresses=[];release('late');await denied;
+});

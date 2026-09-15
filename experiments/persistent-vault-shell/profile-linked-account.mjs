@@ -1,15 +1,16 @@
 import {parseAccountDestination} from './account-route.mjs';
-const sources = new Set(['contactEmails', 'contactPhones', 'documenti']);
+const sources = new Set(['contactEmails', 'contactPhones', 'documenti', 'utilities']);
 
-export function profileAccountLink(item, collection, uid) {
+export function profileAccountLink(item, collection, uid, parentAddressId) {
     if (!item?.linkedAccountId) return null;
     if (!sources.has(collection) || typeof item.id !== 'string' || !item.id) throw new Error('PROFILE_LINK_INVALID');
+    if (collection === 'utilities' && (typeof parentAddressId !== 'string' || !parentAddressId)) throw new Error('PROFILE_LINK_INVALID');
     if (typeof item.linkedAccountId !== 'string' || (item.linkedAccountCompanyId && typeof item.linkedAccountCompanyId !== 'string')) throw new Error('PROFILE_LINK_INVALID');
     const companyId = item.linkedAccountCompanyId || undefined;
     const url = `dettaglio_account_${companyId ? 'azienda' : 'privato'}.html?id=${encodeURIComponent(item.linkedAccountId)}` +
         (companyId ? `&aziendaId=${encodeURIComponent(companyId)}` : '');
     const selection = parseAccountDestination(url, {uid, companyId});
-    return Object.freeze({collection, sourceId: item.id, selection});
+    return Object.freeze({collection, sourceId: item.id, selection, ...(collection === 'utilities' ? {parentAddressId} : {})});
 }
 
 export function createProfileLinkedAccountReader({context, getUser, repository, source, isOnline = () => globalThis.navigator?.onLine !== false}) {
@@ -26,11 +27,17 @@ export function createProfileLinkedAccountReader({context, getUser, repository, 
         check();
         if (!raw || (Object.hasOwn(raw, 'ownerId') && raw.ownerId !== uid)) throw new Error('PROFILE_LINK_UNAVAILABLE');
         const profile = source ? source.normalize(raw) : raw;
-        const items = profile[link.collection];
+        let items = profile[link.collection];
+        if (link.collection === 'utilities') {
+            if (typeof link.parentAddressId !== 'string' || !link.parentAddressId || !Array.isArray(profile.userAddresses)) throw new Error('PROFILE_LINK_UNAVAILABLE');
+            const addresses = profile.userAddresses.filter(item => item?.id === link.parentAddressId);
+            if (addresses.length !== 1) throw new Error('PROFILE_LINK_UNAVAILABLE');
+            items = addresses[0].utilities;
+        }
         if (!Array.isArray(items)) throw new Error('PROFILE_LINK_UNAVAILABLE');
         const matches = items.filter(item => item?.id === link.sourceId);
         if (matches.length !== 1) throw new Error('PROFILE_LINK_UNAVAILABLE');
-        const current = profileAccountLink(matches[0], link.collection, uid)?.selection;
+        const current = profileAccountLink(matches[0], link.collection, uid, link.parentAddressId)?.selection;
         if (!current || current.domain !== link.selection?.domain || current.id !== link.selection?.id ||
             current.companyId !== link.selection?.companyId) throw new Error('PROFILE_LINK_CHANGED');
         return current;

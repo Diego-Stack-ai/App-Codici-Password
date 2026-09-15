@@ -7,7 +7,7 @@ export async function mountProfileShell(root, context, {readSection, linkedAccou
     let disposed = false, revision = 0, sectionControls;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
     const title = document.createElement('h2'); title.textContent = profileTitle;
-    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati. Modifiche ai dati e ai collegamenti, utenze e tessera digitale non sono ancora integrate in questa vista di prova.';
+    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. Modifiche ai dati e ai collegamenti e tessera digitale non sono ancora integrate in questa vista di prova.';
     const navigation = document.createElement('nav'); navigation.setAttribute('aria-label', 'Sezioni del profilo');
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];

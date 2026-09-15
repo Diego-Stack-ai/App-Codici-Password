@@ -43,6 +43,15 @@ async function checkProfile(mode) {
     for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {
         document.querySelector('[data-profile-section="'+section+'"]').click();
         await wait(() => byId('content').textContent.includes(expected), 'PROFILE_'+section);
+        if (section === 'addresses' || section === 'documents') {
+            if (section === 'addresses') assert(byId('content').textContent.includes('POD-FITTIZIO'), 'PROFILE_UTILITY_VALUE');
+            const toggle=[...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password');
+            assert(toggle, 'PROFILE_NESTED_LINK'); toggle.click();
+            await wait(()=>toggle.textContent==='Nascondi password'&&!toggle.disabled,'PROFILE_NESTED_PASSWORD');
+            assert(byId('content').textContent.includes(section==='addresses'?'SEGRETO-FITTIZIO-company-Zeta-A':'SEGRETO-FITTIZIO-private-Zeta-A'),'PROFILE_NESTED_TARGET');
+            toggle.click(); await wait(()=>!byId('content').textContent.includes('SEGRETO-FITTIZIO'),'PROFILE_NESTED_MASK');
+            profileChecks.push(section+' linked credential rendered and masked '+mode);
+        }
         if (section === 'contacts') {
             assert(byId('content').textContent.includes('000000000'), 'PROFILE_PHONE_CANONICAL_FIELD');
             const buttons = label => [...byId('content').querySelectorAll('button')].filter(button => button.textContent === label);

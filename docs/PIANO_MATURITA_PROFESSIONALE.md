@@ -11,6 +11,25 @@
 
 ## 1. Obiettivo
 
+### Proseguimento autonomo — stato 15/09/2026 dopo 17a1236a
+
+La decisione dell'utente è proseguire tutte le attività autonome, lasciando aperti i soli gate che richiedono intervento e passando alle attività indipendenti. Questo stato aggiorna il checkpoint documentale sotto, senza chiudere M0–M10. Ramo unico `integration/vault-shell-v127-security`, bozza PR #67; produzione 1.2.127 invariata.
+
+- Completato `2686b48e`: consultazione aziendale con la stessa vista del profilo privato, schema canonico e collegamenti distinti per origine/destinazione. CI GitHub 34948919828 superata.
+- Completato `17a1236a`: preparazione offline automatica della shell, richieste separate per UID e stato UI invalidabile. Prima visita ai profili dopo riavvio offline verificata senza probe preliminare. CI GitHub 34949481504 superata.
+- Incremento successivo verificato: utenze personali e credenziali collegate; documenti collegati provati nel browser. Suite completa, 253 test shell e 146 verifiche browser superati. Dettagli nella roadmap profili; il commit dell'incremento è riportato nella PR.
+
+Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
+
+1. Selezione di aziende arbitrarie nella shell: il laboratorio monta ancora l'azienda fittizia scelta dal bootstrap.
+2. Consultazione dei Widget Account e delle credenziali comuni nella UI della shell con lettori revocabili; fixture non vuote e test offline. Le letture del probe non equivalgono a una UI integrata.
+3. Parità profili: panoramica, note, Widget e tessera digitale; editor e creazione/cambio/dissociazione dei collegamenti tramite percorso conforme alla matrice di autorizzazione. Le scritture multi-documento non vanno copiate implicitamente in un nuovo writer client.
+4. Parità dei dettagli/editor Account, moduli bancari e altri percorsi canonici; integrare poi scadenze, impostazioni, archivio, backup e salute credenziali nel bootstrap unico.
+5. Gate tecnici ancora aperti nei contratti M5–M10, compresi staging/ripresa del ripristino M8, retry e riferimenti orfani su copie sintetiche. I collaudi fisici, audit indipendente e configurazioni esterne non verificabili restano separati.
+6. Solo a parità e collaudi completati: preparare sostituzione del percorso multipagina, rimozione della persistenza legacy e piano di rilascio/rollback. Nessun deploy, bump o merge master autorizzato da questa prosecuzione.
+
+Foto e byte allegati restano esclusi dall'offline. La completezza automatica è provata sui domini sintetici indicati in M6; eviction, disco e iPhone fisico del nuovo ramo rimangono da verificare. VS-P0-01 resta aperto sul runtime produttivo legacy.
+
 ### Chiusura documentale dell'incremento 054b045d — 15/09/2026
 
 Questo riepilogo chiude il lavoro verificato dell'incremento, non l'intero programma M0–M10. Sostituisce i precedenti riepiloghi operativi per lo stato della candidata; audit e collaudi storici restano riferiti alle proprie basi. Baseline sicurezza e contratti specialistici invariati.

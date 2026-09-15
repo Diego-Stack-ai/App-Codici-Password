@@ -33,8 +33,8 @@ for (const suffix of ['A', 'B']) {
         await setDoc(doc(db, 'users', user.uid), {nome: await encrypted('Nome fittizio'),
             contactEmails: [{id: 'email', address: await encrypted('fixture@example.invalid'), linkedAccountId: 'zeta'}],
             contactPhones: [{id: 'phone', number: await encrypted('000000000'), linkedAccountId: 'zeta'}, {id: 'company-phone', number: await encrypted('000000001'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}],
-            userAddresses: [{id: 'address', address: await encrypted('Via fittizia')}],
-            documenti: [{id: 'document', num_serie: await encrypted('DOC-FITTIZIO')}]});
+            userAddresses: [{id: 'address', address: await encrypted('Via fittizia'), utilities: [{id: 'utility', type: 'Energia', value: await encrypted('POD-FITTIZIO'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}]}],
+            documenti: [{id: 'document', num_serie: await encrypted('DOC-FITTIZIO'), linkedAccountId: 'zeta'}]});
         await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia'),
             partitaIva: await encrypted('IVA-FITTIZIA'), emails: {pec: {email: await encrypted('pec@example.invalid'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}, personale: {email: await encrypted('personale@example.invalid'), linkedAccountId: 'zeta'}},
             telefonoAzienda: await encrypted('111111111'), phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}},

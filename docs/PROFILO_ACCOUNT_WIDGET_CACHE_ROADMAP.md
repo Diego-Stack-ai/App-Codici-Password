@@ -27,6 +27,12 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Utenze personali nella shell — candidata 15/09/2026
+
+Base `17a1236a`, stessa PR #67. La linguetta Indirizzi proietta anche `utilities[].type/value`; i collegamenti usano la coppia `parentAddressId` e ID utenza. La lettura richiede esattamente un indirizzo e una utenza corrispondenti e li ricontrolla dopo la decifratura. ID utenza ripetuti in indirizzi diversi non vengono confusi; indirizzo rimosso, duplicati o destinazione cambiata impediscono la restituzione della password. Nessuna lettura delle vecchie password contenute nell'utenza.
+
+Suite completa superata, 253 test shell. Browser Chrome/Edge: 88 verifiche entry online/offline e 58 arresto/riapertura superate; incluse credenziali collegate a utenze e documenti. Le utenze personali risultano leggibili dopo preparazione automatica, senza visita preventiva. Solo fixture; nessuna modifica a dati reali, Rules, Functions o formati. Creazione, modifica e dissociazione restano da integrare, così come eventuali utenze aziendali con schema diverso: non vengono inventate equivalenze.
+
 ### Candidata shell: profilo aziendale in consultazione — 15/09/2026
 
 Base `199441d0`, stessa PR #67. Profilo privato e aziendale montano la stessa vista a quattro linguette. L'adattatore aziendale riusa `companyProfileContacts` canonico per email fisse/extra e telefoni, proietta anagrafica, sede legale/altre sedi e nomi dei documenti incorporati. Legge l'azienda di origine sotto l'UID autenticato, distinta dall'eventuale azienda dell'Account collegato. Apertura, password lazy e ritorno al profilo condividono i controlli di sessione e provenienza già introdotti. Nessuna lettura di file/foto, password legacy o URL degli allegati.

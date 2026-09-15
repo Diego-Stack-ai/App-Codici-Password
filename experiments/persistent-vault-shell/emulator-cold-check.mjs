@@ -88,6 +88,11 @@ try {
         byId('private').click();
         await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_PROFILE_RETURN');
         assert(linkedValues.every(node => node.textContent === ''), 'COLD_PROFILE_PASSWORD_CLEARED');
+        byId('profile').click();await wait(()=>byId('content').textContent.includes('Nome fittizio'),'COLD_UTILITY_PROFILE');
+        document.querySelector('[data-profile-section="addresses"]').click();
+        await wait(()=>byId('content').textContent.includes('POD-FITTIZIO'),'COLD_UTILITY');
+        button('Mostra password').click();
+        await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_UTILITY_PASSWORD');
         byId('companyProfile').click();
         await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COLD_COMPANY_PROFILE');
         document.querySelector('[data-profile-section="contacts"]').click();
@@ -122,6 +127,7 @@ try {
                   'linked shared private and company credentials readable after offline restart and cleared on exit',
                   'company profile and linked credential readable on first offline visit after restart',
                   'normal shell startup prepared textual domains without a probe or prior page visits',
+                  'address utility and its linked credential readable offline after restart',
                   ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

@@ -6,6 +6,7 @@ const fields = {
         ['codiceSDI', 'Codice SDI'], ['numeroCCIAA', 'CCIAA'], ['dataIscrizione', 'Data iscrizione'],
         ['referenteNome', 'Nome referente'], ['referenteCognome', 'Cognome referente'], ['referenteTitolo', 'Ruolo referente'], ['note', 'Note']],
     emails: [['address', 'Email']], phones: [['number', 'Telefono']],
+    utilities: [['type', 'Tipo utenza'], ['value', 'Codice utenza']],
     addresses: [['address', 'Indirizzo'], ['civic', 'Numero civico'], ['city', 'Città'], ['cap', 'CAP'], ['province', 'Provincia']],
     documents: [['name', 'Nome documento'], ['num_serie', 'Numero documento'], ['cf_value', 'Codice fiscale'], ['id_number', 'Identificativo'],
         ['license_number', 'Numero patente'], ['cf', 'Codice fiscale'], ['rilasciato_da', 'Rilasciato da'],
@@ -29,9 +30,9 @@ export function createProfileSectionReader({context, getUser, repository, isEncr
         if (Object.hasOwn(raw, 'ownerId') && raw.ownerId !== uid) throw new Error('OWNER_MISMATCH');
         const record = source ? source.normalize(raw) : raw;
         const rows = [];
-        async function project(item, shape, group, collection) {
+        async function project(item, shape, group, collection, parentAddressId) {
             if (!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('PROFILE_SHAPE_INVALID');
-            const link = profileAccountLink(item, collection, uid);
+            const link = profileAccountLink(item, collection, uid, parentAddressId);
             let first = true;
             for (const [field, label] of fields[shape]) {
                 check();
@@ -51,7 +52,14 @@ export function createProfileSectionReader({context, getUser, repository, isEncr
         async function list(name, shape, label) {
             const items = record[name] ?? [];
             if (!Array.isArray(items)) throw new Error('PROFILE_SHAPE_INVALID');
-            for (let i = 0; i < items.length; i++) await project(items[i], shape, `${label} ${i + 1}`, name);
+            for (let i = 0; i < items.length; i++) {
+                await project(items[i], shape, `${label} ${i + 1}`, name);
+                if (shape === 'addresses') {
+                    const utilities = items[i].utilities ?? [];
+                    if (!Array.isArray(utilities)) throw new Error('PROFILE_SHAPE_INVALID');
+                    for (let j = 0; j < utilities.length; j++) await project(utilities[j], 'utilities', `${label} ${i + 1} · Utenza ${j + 1}`, 'utilities', items[i].id);
+                }
+            }
         }
         if (section === 'personal') await project(record, source?.domain === 'company' ? 'company' : 'personal', 'Anagrafica');
         if (section === 'contacts') { await list('contactEmails', 'emails', 'Email'); await list('contactPhones', 'phones', 'Telefono'); }

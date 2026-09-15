@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **578**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 102429 | 910 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 103528 | 914 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -228,7 +228,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/shared/ui-state-view.js` | JS | 1334 | 45 | Supporto frontend: ui-state-view. |
 | `Frontend/public/assets/js/offline-firestore.js` | JS | 2035 | 58 | Supporto frontend: offline-firestore. |
 | `Frontend/public/assets/js/offline-status.js` | JS | 813 | 23 | Supporto frontend: offline-status. |
-| `Frontend/public/assets/js/offline-sync.js` | JS | 4960 | 133 | Supporto frontend: offline-sync. |
+| `Frontend/public/assets/js/offline-sync.js` | JS | 5030 | 132 | Supporto frontend: offline-sync. |
 | `Frontend/public/assets/js/pages-init.js` | JS | 5697 | 152 | Router con import dinamici dei moduli pagina. |
 | `Frontend/public/assets/js/performance-metrics.js` | JS | 4160 | 111 | Supporto frontend: performance-metrics. |
 | `Frontend/public/assets/js/private-auth-gate.js` | JS | 2070 | 44 | Supporto frontend: private-auth-gate. |
@@ -307,7 +307,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10033 | 92 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 8776 | 152 | Documentazione: GUIDA PROGETTO. |
@@ -317,7 +317,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 67142 | 407 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 68786 | 415 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 22561 | 160 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
@@ -325,8 +325,8 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 57330 | 543 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 36464 | 366 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 60014 | 562 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 38614 | 378 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -384,17 +384,19 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
 | `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 3734 | 41 | File di progetto: build-emulator. |
 | `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
+| `experiments/persistent-vault-shell/company-profile-source.mjs` | MJS | 2096 | 31 | File di progetto: company-profile-source. |
+| `experiments/persistent-vault-shell/company-profile-source.test.mjs` | MJS | 5210 | 60 | File di progetto: company-profile-source.test. |
 | `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 8078 | 98 | File di progetto: emulator-browser. |
-| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 8560 | 121 | File di progetto: emulator-cold-check. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 8873 | 102 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 10367 | 141 | File di progetto: emulator-cold-check. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1032 | 17 | File di progetto: emulator-cold-sw. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2171 | 35 | File di progetto: emulator-cold-sw.test. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6062 | 119 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 10946 | 137 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 13908 | 171 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 4733 | 67 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 6749 | 106 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 8266 | 120 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3355 | 52 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 5030 | 63 | File di progetto: emulator-network-control. |
@@ -402,7 +404,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 2214 | 33 | File di progetto: emulator-queue. |
 | `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 2883 | 40 | File di progetto: emulator-queue.test. |
 | `experiments/persistent-vault-shell/emulator.css` | CSS | 2039 | 19 | File di progetto: emulator. |
-| `experiments/persistent-vault-shell/emulator.html` | HTML | 1929 | 10 | Struttura della pagina emulator; comportamento demandato ai moduli. |
+| `experiments/persistent-vault-shell/emulator.html` | HTML | 2023 | 11 | Struttura della pagina emulator; comportamento demandato ai moduli. |
 | `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
 | `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12936 | 175 | File di progetto: firebase-backup.test. |
 | `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10293 | 159 | File di progetto: firebase-deadline.test. |
@@ -420,7 +422,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/master-prompt.mjs` | MJS | 1415 | 29 | File di progetto: master-prompt. |
 | `experiments/persistent-vault-shell/master-prompt.test.mjs` | MJS | 3590 | 64 | File di progetto: master-prompt.test. |
 | `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 5197 | 99 | File di progetto: memory-vault. |
-| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 3590 | 48 | File di progetto: offline-consultation-probe. |
+| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 3697 | 48 | File di progetto: offline-consultation-probe. |
 | `experiments/persistent-vault-shell/owned-queue.test.mjs` | MJS | 5666 | 82 | File di progetto: owned-queue.test. |
 | `experiments/persistent-vault-shell/prepare-preview.mjs` | MJS | 2144 | 32 | File di progetto: prepare-preview. |
 | `experiments/persistent-vault-shell/prepare-private-account-mutation.mjs` | MJS | 6732 | 105 | File di progetto: prepare-private-account-mutation. |
@@ -434,11 +436,11 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 9243 | 131 | File di progetto: private-note-panel-provider.test. |
 | `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
 | `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
-| `experiments/persistent-vault-shell/profile-linked-account.mjs` | MJS | 3582 | 59 | File di progetto: profile-linked-account. |
-| `experiments/persistent-vault-shell/profile-linked-account.test.mjs` | MJS | 4726 | 57 | File di progetto: profile-linked-account.test. |
-| `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 3704 | 59 | File di progetto: profile-section-reader. |
-| `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 4025 | 49 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 6272 | 102 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-linked-account.mjs` | MJS | 4382 | 67 | File di progetto: profile-linked-account. |
+| `experiments/persistent-vault-shell/profile-linked-account.test.mjs` | MJS | 6660 | 85 | File di progetto: profile-linked-account.test. |
+| `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 4761 | 71 | File di progetto: profile-section-reader. |
+| `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 4760 | 58 | File di progetto: profile-section-reader.test. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 6338 | 102 | File di progetto: profile-shell-view. |
 | `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 8016 | 93 | File di progetto: profile-shell-view.test. |
 | `experiments/persistent-vault-shell/protected-session.mjs` | MJS | 6028 | 122 | File di progetto: protected-session. |
 | `experiments/persistent-vault-shell/protected-session.test.mjs` | MJS | 8780 | 164 | File di progetto: protected-session.test. |
@@ -446,6 +448,8 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2355 | 40 | File di progetto: real-lists-entry. |
 | `experiments/persistent-vault-shell/router.mjs` | MJS | 1210 | 33 | File di progetto: router. |
 | `experiments/persistent-vault-shell/serve.mjs` | MJS | 1577 | 21 | File di progetto: serve. |
+| `experiments/persistent-vault-shell/shell-offline-preparation.mjs` | MJS | 1891 | 31 | File di progetto: shell-offline-preparation. |
+| `experiments/persistent-vault-shell/shell-offline-preparation.test.mjs` | MJS | 2935 | 36 | File di progetto: shell-offline-preparation.test. |
 | `experiments/persistent-vault-shell/style.css` | CSS | 2766 | 36 | File di progetto: style. |
 | `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2077 | 50 | File di progetto: firestore.candidate. |
 | `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2662 | 81 | File di progetto: migration-simulator. |
@@ -529,7 +533,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 10120 | 85 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 10257 | 85 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -636,7 +640,7 @@ File censiti: **574**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/offline-mutation-client.test.mjs` | MJS | 5214 | 89 | Test automatico: offline-mutation-client.test. |
 | `tests/offline-mutation-queue.test.mjs` | MJS | 18379 | 301 | Test automatico: offline-mutation-queue.test. |
 | `tests/offline-mutation-sync.test.mjs` | MJS | 7093 | 112 | Test automatico: offline-mutation-sync.test. |
-| `tests/offline-profile-readiness.test.mjs` | MJS | 4763 | 86 | Test automatico: offline-profile-readiness.test. |
+| `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
 | `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |
 | `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18090 | 228 | Test automatico: private-account-detail-lifecycle.test. |
 | `tests/private-account-offline-pilot.test.mjs` | MJS | 2790 | 45 | Test automatico: private-account-offline-pilot.test. |

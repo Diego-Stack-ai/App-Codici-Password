@@ -46,3 +46,12 @@ test('decrypt failure is not displayed as ciphertext or treated as legacy plaint
     const f = fixture({nome: 'enc:corrupt'}, {context: {read: async () => { throw new Error('DECRYPT_FAILED'); }}});
     await assert.rejects(f.read('personal'), /DECRYPT_FAILED/);
 });
+test('utility projection includes parent identity and omits legacy secret properties',async()=>{
+    const f=fixture({userAddresses:[{id:'home',address:'enc:Via',utilities:[{id:'u',type:'Energia',value:'enc:POD',linkedAccountId:'account',password:'enc:LEGACY'}]}]});
+    const rows=await f.read('addresses');assert.deepEqual(rows.map(row=>row.value),['Via','Energia','POD']);
+    const link=rows.find(row=>row.link).link;assert.equal(link.parentAddressId,'home');assert.equal(link.sourceId,'u');
+    assert.deepEqual(f.reads,['enc:Via','enc:POD']);
+});
+test('malformed nested utilities fail closed',async()=>{
+    await assert.rejects(fixture({userAddresses:[{id:'home',utilities:{}}]}).read('addresses'),/PROFILE_SHAPE_INVALID/);
+});
