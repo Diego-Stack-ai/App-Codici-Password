@@ -12,7 +12,10 @@ import * as cryptoApi from '../../Frontend/public/assets/js/modules/core/crypto-
 import {createFirebaseSession} from './firebase-session.mjs';
 import {createProfileSectionReader} from './profile-section-reader.mjs';
 import {createProfileOverviewReader} from './profile-overview-reader.mjs';
-import {buildProfileOverview, resolvePrimary} from '../../Frontend/public/assets/js/modules/privato/profile-model.js';
+import {buildProfileOverview, resolvePrimary, validateProfileWidget} from '../../Frontend/public/assets/js/modules/privato/profile-model.js';
+import {createProfileWidgetReader} from './profile-widget-reader.mjs';
+import {mountProfileWidgetView} from './profile-widget-view.mjs';
+import {listProfileWidgets, listProfileWidgetsConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {mountProfileShell} from './profile-shell-view.mjs';
 import {createProfileLinkedAccountReader} from './profile-linked-account.mjs';
 import {createCompanyProfileSource} from './company-profile-source.mjs';
@@ -110,6 +113,11 @@ const mountProfile = context => {
         getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
         readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue, buildProfileOverview, resolvePrimary}),
+        mountWidgets: company ? undefined : (root, {section, signal}) => {
+            const scoped = {...context, signal};
+            return mountProfileWidgetView(root, scoped, {reader: createProfileWidgetReader({context: scoped, getUser: () => auth.currentUser,
+                repository: {listProfileWidgets, listProfileWidgetsConfirmed}, tab: section, validateProfileWidget})});
+        },
         linkedAccounts: createProfileLinkedAccountReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}}),
         onOpenAccount(selection) { context.assertUnlocked(); selectedAccount = selection; detailReturnRoute = context.route; selectedRoute = 'detail'; void session.navigate('detail'); }});

@@ -2,9 +2,9 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Read-only migration slice: changes to links, utilities and QR are not enabled.
-export async function mountProfileShell(root, context, {readSection, readOverview, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
-    let disposed = false, revision = 0, sectionControls;
+    let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
     const title = document.createElement('h2'); title.textContent = profileTitle;
     const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. Modifiche ai dati e ai collegamenti e tessera digitale non sono ancora integrate in questa vista di prova.';
@@ -12,7 +12,7 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];
     const current = ticket => !disposed && !context.signal.aborted && ticket === revision;
-    const clear = () => { sectionControls?.abort(); for (const tag of ['dd', 'dt', 'h3']) for (const node of panel.querySelectorAll(tag)) node.textContent = ''; panel.replaceChildren(); };
+    const clear = () => { sectionControls?.abort(); widgetCleanup?.(); widgetCleanup = null; for (const tag of ['dd', 'dt', 'h3']) for (const node of panel.querySelectorAll(tag)) node.textContent = ''; panel.replaceChildren(); };
     const dispose = () => {
         if (disposed) return;
         disposed = true; revision++; controls.abort(); context.signal.removeEventListener('abort', dispose);
@@ -68,7 +68,7 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
             const rows = await (section === 'overview' && readOverview ? readOverview() : readSection(section));
             if (!current(ticket)) return;
             context.assertUnlocked(); clear();
-            if (!rows.length) { panel.textContent = 'Nessun dato presente.'; return; }
+            if (!rows.length) panel.textContent = 'Nessun dato presente.';
             sectionControls = new AbortController();
             let group, list;
             for (const row of rows) {
@@ -85,6 +85,10 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                     const actions = document.createElement('dd'); actions.append(action); list.append(actions);
                 }
                 if (row.link) addLinkedAccount(list, row.link, ticket);
+            }
+            if (mountWidgets && Object.hasOwn(PROFILE_SECTIONS, section)) {
+                const mounted = await mountWidgets(panel, {section, signal: sectionControls.signal});
+                if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
             }
         } catch (error) {
             if (current(ticket)) {

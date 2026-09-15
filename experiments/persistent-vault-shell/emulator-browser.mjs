@@ -45,7 +45,8 @@ for (const suffix of ['A', 'B']) {
         await setDoc(doc(db, 'users', user.uid, 'aziende', 'second-company'), {ragioneSociale: await encrypted('Seconda azienda fittizia'), partitaIva: await encrypted('IVA-SECONDA'),
             emails: {pec: {email: await encrypted('seconda@example.invalid'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'second-company'}}});
         await setDoc(doc(db, 'users', user.uid, 'profileWidgets', 'fixture'), {title: 'Widget fittizio', description: '', tab: 'personal',
-            order: 0, size: 'medium', collapsed: false, schemaVersion: 1, fields: [{id: 'field', encrypted: true, value: await encrypted('WIDGET-FITTIZIO')}]});
+            order: 0, size: 'medium', collapsed: true, schemaVersion: 1, fields: [{id: 'field', label: 'PIN profilo', type: 'sensitive', encrypted: true, valueEnc: await encrypted('WIDGET-FITTIZIO')},
+                {id: 'hidden', label: 'Testo senza anteprima', type: 'text', encrypted: false, value: 'ANTEPRIMA-FITTIZIA', preview: false, copyable: true}]});
         await setDoc(doc(db, 'users', user.uid, 'scadenze', 'fixture'), {note: await encrypted('SCADENZA-FITTIZIA')});
         await setDoc(doc(db, 'users', user.uid, 'accounts', 'banca', 'attachments', 'fixture'), {name: await encrypted('ALLEGATO-FITTIZIO'), createdAt: 1});
         await setDoc(doc(db, 'users', user.uid, 'settings', 'security'), {

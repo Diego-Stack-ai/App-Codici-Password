@@ -109,10 +109,18 @@ async function checkProfile(mode) {
     await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'PROFILE_OVERVIEW_NAVIGATION');
     const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
     assert(profileNote, 'PROFILE_NOTE');
+    await wait(() => document.querySelector('[data-profile-widget="fixture"] > button'), 'PROFILE_WIDGET_MOUNT');
+    document.querySelector('[data-profile-widget="fixture"] > button').click();
+    await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Mostra PIN profilo'), 'PROFILE_WIDGET_EXPAND');
+    assert(!byId('content').textContent.includes('WIDGET-FITTIZIO') && !byId('content').textContent.includes('ANTEPRIMA-FITTIZIA'), 'PROFILE_WIDGET_PREVIEW');
+    [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN profilo').click();
+    await wait(() => byId('content').textContent.includes('WIDGET-FITTIZIO'), 'PROFILE_WIDGET_REVEAL');
+    const profileWidgetValues = [...byId('content').querySelectorAll('.shared-account-value')];
     for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {
         document.querySelector('[data-profile-section="'+section+'"]').click();
         await wait(() => byId('content').textContent.includes(expected), 'PROFILE_'+section);
         assert(profileNote.textContent === '', 'PROFILE_NOTE_CLEAR');
+        assert(profileWidgetValues.every(node => node.textContent === ''), 'PROFILE_WIDGET_TAB_CLEAR');
         if (section === 'addresses' || section === 'documents') {
             if (section === 'addresses') assert(byId('content').textContent.includes('POD-FITTIZIO'), 'PROFILE_UTILITY_VALUE');
             const toggle=[...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password');

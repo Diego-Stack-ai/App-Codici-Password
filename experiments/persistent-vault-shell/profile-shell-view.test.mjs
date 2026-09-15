@@ -30,6 +30,29 @@ test('overview is the initial tab when provided and its action clears values bef
     f.root.querySelectorAll('button').find(node => node.textContent === 'Apri Contatti').dispatchEvent(new Event('click'));
     await tick(); assert.equal(value.textContent, ''); assert.equal(label.textContent, ''); assert.deepEqual(reads, ['contacts']); cleanup();
 });
+
+test('Widgets mount in an empty section and are disposed before a new tab starts', async () => {
+    const f = fixture(); let stopped = false, oldSignal;
+    const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+        readSection: async () => [], mountWidgets: async (_root, {section, signal}) => {
+            if (section === 'personal') {oldSignal = signal; return () => {stopped = true;};}
+            assert.ok(stopped); assert.ok(oldSignal.aborted); return () => {};
+        }
+    });
+    assert.ok(oldSignal); f.root.querySelectorAll('button').find(node => node.textContent === 'Contatti').dispatchEvent(new Event('click'));
+    await tick(); assert.ok(stopped); cleanup();
+});
+
+test('a late Widget mount is disposed without replacing the next section cleanup', async () => {
+    const f = fixture(); let release, oldClosed = 0, nextClosed = 0;
+    const mounting = mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+        readSection: async () => [], mountWidgets: (_root, {section}) => section === 'personal'
+            ? new Promise(resolve => {release = resolve;}) : Promise.resolve(() => {nextClosed++;})
+    });
+    await tick(); f.root.querySelectorAll('button').find(node => node.textContent === 'Contatti').dispatchEvent(new Event('click')); await tick();
+    release(() => {oldClosed++;}); const cleanup = await mounting;
+    assert.equal(oldClosed, 1); assert.equal(nextClosed, 0); cleanup(); assert.equal(nextClosed, 1);
+});
 test('safe text rendering and disposal clear detached plaintext and do not remove another view', async () => {
     const f = fixture();
     const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {readSection: async () => [{group: 'Anagrafica', label: 'Nome', value: '<img onerror=bad>'}]});

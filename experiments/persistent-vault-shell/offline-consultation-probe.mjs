@@ -30,7 +30,7 @@ export async function probeOfflineConsultation({context, getUser, includeAttachm
         ['card PIN', privateAccounts.find(record => record.id === 'banca').banking[0].cards[0].pin, '1234'],
         ['card CCV', privateAccounts.find(record => record.id === 'banca').banking[0].cards[0].ccv, '000'],
         ['company bank IBAN', companyAccounts.find(record => record.id === 'banca').banking[0].iban, 'IBAN-FITTIZIO'],
-        ['widget data', widgets.find(record => record.id === 'fixture').fields[0].value, 'WIDGET-FITTIZIO'],
+        ['widget data', widgets.find(record => record.id === 'fixture').fields[0].valueEnc, 'WIDGET-FITTIZIO'],
         ['deadline data', deadlines.find(record => record.id === 'fixture').note, 'SCADENZA-FITTIZIA'],
         ...(includeAttachmentMetadata ? [['attachment metadata', attachments.find(record => record.id === 'fixture').name, 'ALLEGATO-FITTIZIO']] : [])
     ];

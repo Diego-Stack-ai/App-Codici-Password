@@ -38,9 +38,10 @@ export async function mountAccountWidgetView(root, context, {reader, allowSecret
                 const row = document.createElement('div'); row.className = 'shared-account-field';
                 const value = document.createElement('span'); value.className = 'shared-account-value';
                 value.dataset.widgetField = field.id; values.push(value);
-                const initial = field.encrypted ? '••••••••' : await reader.read(widget.id, field.id, {expectedEncrypted: false});
+                const masked = field.encrypted || field.preview === false;
+                const initial = masked ? '••••••••' : await reader.read(widget.id, field.id, {expectedEncrypted: false});
                 check(); value.textContent = initial; row.append(label('strong', field.label), value);
-                if (field.encrypted) {
+                if (masked) {
                     const reveal = document.createElement('button'); reveal.type = 'button';
                     let shown = false, pending = false;
                     const refreshLabel = () => { reveal.textContent = `${shown ? 'Nascondi' : 'Mostra'} ${field.label}`; reveal.setAttribute('aria-label', reveal.textContent); };
@@ -51,7 +52,7 @@ export async function mountAccountWidgetView(root, context, {reader, allowSecret
                             check(); pending = true; reveal.disabled = true;
                             if (shown) { value.textContent = '••••••••'; shown = false; }
                             else {
-                                const decoded = await reader.read(widget.id, field.id, {expectedEncrypted: true}); check();
+                                const decoded = await reader.read(widget.id, field.id, {expectedEncrypted: field.encrypted}); check();
                                 value.textContent = decoded; shown = true;
                             }
                             refreshLabel();

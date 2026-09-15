@@ -27,6 +27,16 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Widget del profilo nella shell — candidata 15/09/2026
+
+Successiva a `16dae6f1`: i Widget personali sono montati nella linguetta canonica, anche quando la sezione non contiene altri dati. Lettore dedicato su `users/{uid}/profileWidgets`, con nuova lettura repository confermata online e cache offline; nessun editor/gestore chiave legacy. Modello canonico e validazione puntuale dei campi, ID duplicati, proprietario, contesto e tipi sensibili; letture rivalidate dopo la decifratura e invalidate da modifica/spostamento/rimozione o cambio sessione. Il metadato conserva ordine, collasso, anteprima e copia senza valori o ciphertext.
+
+Il collasso nella shell è solo locale alla vista: aprire/comprimere non scrive nel database. Widget chiusi e campi con anteprima disabilitata non vengono letti anticipatamente. Mostra/nascondi è esplicito; copia solo per campi non cifrati con autorizzazione nel modello corrente. Collapse, cambio linguetta e blocco invalidano letture pendenti e cancellano i nodi trattenuti. Nessuna inclusione automatica nel QR. La fixture è stata corretta al formato canonico `valueEnc` con etichetta/tipo, sostituendo soltanto il precedente dato sintetico non canonico `value`; nessuna migrazione reale.
+
+Dieci prove del lettore, due della vista e due sulla durata del montaggio nelle linguette. Suite completa superata (341 shell), poi suite shell finale con le due ulteriori regressioni di montaggio superata (343). Chrome: 58 entry + 32 arresto/riapertura superati, con Widget cifrato non vuoto, espansione, anteprima nascosta, lettura e pulizia online/offline e dopo riavvio. Nessuna nuova prova Edge o iPhone attribuita all'incremento.
+
+**Parità aziendale ancora aperta:** la pagina/modello aziendale e le Rules verificate non hanno una raccolta equivalente ai Widget del profilo privato. Non si mostrano i Widget personali dentro un'azienda e non si inventa un namespace con permessi impliciti. L'estensione richiede contratto dati e Rules dedicati in un blocco successivo; i Widget degli Account aziendali sono già distinti e non sono questa funzione. Restano anche editor, modifica persistente dell'ordine/collasso e layout produttivo. Proseguire con tessera digitale, lasciando questa estensione esplicita nel piano. Nessun dato reale, master, bump, deploy o ampliamento Rules; rollback limitato ai moduli/montaggio sperimentali e all'export repository aggiuntivo.
+
 ### Panoramica dei profili nella shell — candidata 15/09/2026
 
 Successiva a `530c991a`: Panoramica è la linguetta iniziale in entrambi i profili e apre internamente Anagrafica, Contatti, Indirizzi e Documenti. Il lettore riusa `buildProfileOverview` e `resolvePrimary` canonici: identità, codice fiscale/Partita IVA, contatto e indirizzo principali, documenti personali in scadenza entro 90 giorni oppure numero degli allegati aziendali. Non modifica i record né crea nuovi collegamenti. La normalizzazione aziendale resta l'adattatore canonico già integrato.

@@ -118,6 +118,8 @@ export const listContacts = uid => readRecords(`contacts:${uid}`,
 
 export const listProfileWidgets = uid => readRecords(`profile-widgets:${uid}`,
     collection(db, 'users', uid, 'profileWidgets'));
+export const listProfileWidgetsConfirmed = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'profileWidgets'));
 export const listSharedVaultData = uid => readRecords(`shared-vault-data:${uid}`,
     collection(db, 'users', uid, 'sharedVaultData'));
 export const listSharedVaultDataConfirmed = uid => readConfirmedRecords(
