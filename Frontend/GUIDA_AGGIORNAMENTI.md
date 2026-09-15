@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Sorgente collegamenti dopo `8d5be66d`: relazione consultabile offline e preparazione online revocabile, con confronto di revisione/impronta e richieste immutabili senza decifrare credenziali. Sei nuove prove; selettore e montaggio ancora da completare. Verificata e documentata incompatibilità del vecchio editor M6 con i metadati dei collegamenti, da risolvere senza scartarli. Prossimo selettore/adattatori e compatibilità editor; nessun deploy.
+
 Collegamenti dopo `520aafd2`: preparato servizio atomico per origine, vecchio/nuovo Account e ricevuta, preservando credenziali e altri riferimenti. Undici prove unitarie ed emulatori dedicati; suite completa npm test superata (456 test shell). Nessun writer produttivo o UI montata. Prossimo sorgente/selettore Collega/Cambia/Scollega, con limiti di schema e compatibilità metadati nella roadmap profili; nessun deploy.
 
 Editor anagrafica dopo `6cca03f5`: testi/note modificabili nei due profili del laboratorio, con cifratura, refresh confermato e pulizia dei controlli. Offline in sola consultazione. Undici nuove prove unitarie; suite completa npm test superata (445 test shell) e 94 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Proseguire collegamenti e restanti editor; perimetro e gate nella roadmap profili, nessun deploy.

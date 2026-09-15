@@ -7,6 +7,14 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Sorgente revocabile dei collegamenti — laboratorio 15/09/2026
+
+Successivo a `8d5be66d`: sorgente candidata per caricare la relazione e preparare Collega/Cambia/Scollega, riusando la proiezione canonica del servizio. Conserva in RAM solo identità, revisione e impronta; nessuna decifratura del contatto o delle credenziali. La lettura online è confermata, quella offline consultiva. Prima di preparare la richiesta rilegge l'origine e verifica anche modifiche legacy senza revisione. Richiesta e destinazione sono copie immutabili; revoca, cambio UID, alias aziendale e caricamenti concorrenti invalidano il lavoro. Il backend resta responsabile dell'idoneità della destinazione nella transazione.
+
+Compatibilità verificata nel codice: `prepare-private-account-patch.mjs` e `prepare-private-account-mutation.mjs` ammettono un sottoinsieme chiuso che esclude i nuovi metadati e riferimenti; `private-note-panel-provider.mjs` richiede assenza esplicita di relazioni. Anche `functions/private-account-write-scope.js` rifiuta relazioni attive e controlla le origini inverse. Nessuna rimozione di questi controlli o filtraggio dei metadati per aggirarli. Dopo una dissociazione, i metadati persistenti richiedono comunque evoluzione del contratto editor: non basta che gli array siano vuoti. Il montaggio UI resta da completare insieme alla compatibilità del writer.
+
+Sei nuove prove automatiche della sorgente: entrambi i domini, richiesta immutabile senza segreti, dissociazione, offline, modifiche concorrenti/legacy, proprietà e revoca. Suite completa npm test superata (462 test shell), inclusi emulatori. Primo avvio bloccato dai permessi sandbox del compilatore, rieseguito con permessi approvati; nessuna correzione runtime per aggirare il limite ambientale. Nessuna nuova prova browser: sorgente non ancora montata. CI precedente `8d5be66d` superata, run 35022208948. Nessun dato reale, master, bump o deploy. Prossimo blocco: selettore ricercabile e adattatori della shell, con compatibilità editor esplicita; invariati gli altri gate sotto.
+
 ### Collegamenti Account: transazione e riferimenti inversi — laboratorio 15/09/2026
 
 Successivo a `520aafd2`: preparato un servizio candidato per collegare un Account esistente, cambiarlo o dissociarlo. Origini private: email, telefono, documento e utenza con ID persistito e, per l'utenza, ID dell'indirizzo. Origini aziendali di questo incremento: tre slot email fissi e telefono/fax/cellulare referente. Destinazioni personali o aziendali del medesimo UID; un Account già usato da un altro contatto resta selezionabile. Nessuna creazione Account o copia di username/password.
