@@ -13,6 +13,29 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+async function checkCompanyProfile(mode) {
+    const marker=document;
+    byId('companyProfile').click();
+    await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_PROFILE');
+    const buttons=label=>[...byId('content').querySelectorAll('button')].filter(node=>node.textContent===label);
+    document.querySelector('[data-profile-section="contacts"]').click();
+    await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COMPANY_CONTACTS');
+    assert(buttons('Mostra password').length===3,'COMPANY_LINK_COUNT');
+    for(const node of buttons('Mostra password')) {node.click();await wait(()=>node.textContent==='Nascondi password'&&!node.disabled,'COMPANY_PASSWORD');}
+    const values=[...byId('content').querySelectorAll('dd')];
+    assert(values.filter(node=>node.textContent==='SEGRETO-FITTIZIO-company-Zeta-A').length===2,'COMPANY_SHARED_DESTINATION');
+    assert(values.some(node=>node.textContent==='SEGRETO-FITTIZIO-private-Zeta-A'),'COMPANY_PRIVATE_DESTINATION');
+    buttons('Apri Account collegato')[1].click();
+    await wait(()=>byId('content').textContent.includes('Zeta privato A')&&buttons('Torna al profilo').length,'COMPANY_OPEN');
+    assert(values.every(node=>node.textContent===''),'COMPANY_CLEAR');
+    buttons('Torna al profilo')[0].click();await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_BACK');
+    for(const [section,value] of [['addresses','Filiale fittizia'],['documents','Visura fittizia']]) {
+        document.querySelector('[data-profile-section="'+section+'"]').click();await wait(()=>byId('content').textContent.includes(value),'COMPANY_'+section);
+    }
+    byId('private').click();await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COMPANY_EXIT');
+    assert(document===marker,'COMPANY_RELOAD');
+    profileChecks.push('company canonical profile tabs rendered '+mode,'company shared and private linked credentials with safe navigation '+mode);
+}
 async function checkProfile(mode) {
     const originalDocument = document;
     byId('profile').click();
@@ -65,6 +88,7 @@ try {
     byId('master-dialog').querySelector('form').requestSubmit();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'LIST');
     await checkProfile('online');
+    await checkCompanyProfile('online');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => document.querySelector('#content textarea'), 'NOTE_EDITOR');
     const content = byId('content'), input = content.querySelector('textarea'), marker = document;
@@ -101,6 +125,7 @@ try {
     const cachedDomains = await runOfflineConsultationProbe();
     assert(JSON.stringify(cachedDomains) === JSON.stringify(loadedDomains), 'OFFLINE_DOMAIN_MATRIX');
     await checkProfile('offline');
+    await checkCompanyProfile('offline');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => content.textContent.includes('già conservata sul dispositivo'), 'OFFLINE_RECOVERY');
     const recoveredInput = content.querySelector('textarea');

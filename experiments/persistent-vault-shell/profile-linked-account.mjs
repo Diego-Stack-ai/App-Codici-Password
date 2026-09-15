@@ -12,7 +12,7 @@ export function profileAccountLink(item, collection, uid) {
     return Object.freeze({collection, sourceId: item.id, selection});
 }
 
-export function createProfileLinkedAccountReader({context, getUser, repository, isOnline = () => globalThis.navigator?.onLine !== false}) {
+export function createProfileLinkedAccountReader({context, getUser, repository, source, isOnline = () => globalThis.navigator?.onLine !== false}) {
     const uid = context.user?.uid;
     const check = () => {
         if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
@@ -22,9 +22,10 @@ export function createProfileLinkedAccountReader({context, getUser, repository, 
     async function resolve(link) {
         check();
         if (!link || !sources.has(link.collection) || typeof link.sourceId !== 'string' || !link.sourceId) throw new Error('PROFILE_LINK_INVALID');
-        const profile = await repository[isOnline() ? 'getUserProfileConfirmed' : 'getUserProfile'](uid);
+        const raw = await (source ? source.read(uid, isOnline()) : repository[isOnline() ? 'getUserProfileConfirmed' : 'getUserProfile'](uid));
         check();
-        if (!profile || (Object.hasOwn(profile, 'ownerId') && profile.ownerId !== uid)) throw new Error('PROFILE_LINK_UNAVAILABLE');
+        if (!raw || (Object.hasOwn(raw, 'ownerId') && raw.ownerId !== uid)) throw new Error('PROFILE_LINK_UNAVAILABLE');
+        const profile = source ? source.normalize(raw) : raw;
         const items = profile[link.collection];
         if (!Array.isArray(items)) throw new Error('PROFILE_LINK_UNAVAILABLE');
         const matches = items.filter(item => item?.id === link.sourceId);

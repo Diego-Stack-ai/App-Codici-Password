@@ -27,6 +27,12 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Candidata shell: profilo aziendale in consultazione — 15/09/2026
+
+Base `199441d0`, stessa PR #67. Profilo privato e aziendale montano la stessa vista a quattro linguette. L'adattatore aziendale riusa `companyProfileContacts` canonico per email fisse/extra e telefoni, proietta anagrafica, sede legale/altre sedi e nomi dei documenti incorporati. Legge l'azienda di origine sotto l'UID autenticato, distinta dall'eventuale azienda dell'Account collegato. Apertura, password lazy e ritorno al profilo condividono i controlli di sessione e provenienza già introdotti. Nessuna lettura di file/foto, password legacy o URL degli allegati.
+
+Suite completa superata, 240 test shell, 80 verifiche entry e 56 arresto/riapertura Chrome/Edge superate, tutte su fixture. L'azienda del laboratorio è selezionata dal bootstrap; il selettore generale aziende, editor, azioni sui collegamenti, utenze, Widget, panoramica e tessera digitale non sono completati. Documenti aziendali qui significa nomi degli allegati incorporati, non apertura dei file. Nessuna migrazione, formato, deploy o chiusura VS-P0-01.
+
 Questa attività precede l'evoluzione funzionale dell'Agente Codex. Deve stabilizzare il modello dati che l'Agente dovrà successivamente descrivere e utilizzare.
 
 Stato: **audit statico completato; piano applicativo e verifica aggregata dei dati reali ancora da approvare; nessuna migrazione autorizzata**.

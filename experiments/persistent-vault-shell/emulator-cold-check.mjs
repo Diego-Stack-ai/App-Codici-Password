@@ -86,6 +86,16 @@ try {
         byId('private').click();
         await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_PROFILE_RETURN');
         assert(linkedValues.every(node => node.textContent === ''), 'COLD_PROFILE_PASSWORD_CLEARED');
+        byId('companyProfile').click();
+        await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COLD_COMPANY_PROFILE');
+        document.querySelector('[data-profile-section="contacts"]').click();
+        await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COLD_COMPANY_CONTACTS');
+        button('Mostra password').click();
+        await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_COMPANY_PASSWORD');
+        const companyValues=[...byId('content').querySelectorAll('dd')];
+        byId('private').click();
+        await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COLD_COMPANY_RETURN');
+        assert(companyValues.every(node=>node.textContent===''),'COLD_COMPANY_CLEARED');
         if (window.__entryForced) {
             document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
             await wait(() => byId('content').textContent.includes('già conservata sul dispositivo'), 'CRASH_QUEUE_RECOVERY');
@@ -108,6 +118,7 @@ try {
             passed: [restartPhase ? 'static laboratory shell starts offline in a new browser process' : 'static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
                 'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required', 'profile identity and contacts render offline after restart without a prior profile visit',
                   'linked shared private and company credentials readable after offline restart and cleared on exit',
+                  'company profile and linked credential readable on first offline visit after restart',
                   ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

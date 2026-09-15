@@ -2,11 +2,11 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Read-only migration slice: changes to links, utilities and QR are not enabled.
-export async function mountProfileShell(root, context, {readSection, linkedAccounts, onOpenAccount}) {
+export async function mountProfileShell(root, context, {readSection, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
-    const title = document.createElement('h2'); title.textContent = 'Profilo utente';
+    const title = document.createElement('h2'); title.textContent = profileTitle;
     const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati. Modifiche ai dati e ai collegamenti, utenze e tessera digitale non sono ancora integrate in questa vista di prova.';
     const navigation = document.createElement('nav'); navigation.setAttribute('aria-label', 'Sezioni del profilo');
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');

@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Proseguimento autorizzato dall'utente: portare avanti autonomamente le attività lavorabili degli MD e annotare i gate che richiedono intervento, continuando sulle attività indipendenti. Incremento azienda successivo a `199441d0`: stessa vista profilo per i due domini, adapter canonico e credenziali collegate; suite completa, 240 test shell e 136 verifiche browser superati. Perimetro e residui in [Roadmap profili](../docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md#candidata-shell-profilo-aziendale-in-consultazione--15092026). La chiusura sotto è il checkpoint precedente, non il termine del programma.
+
 Chiuso e pubblicato l'incremento `054b045d` della candidata shell; CI GitHub 34947029981 riuscita. Voci completate, gate ancora aperti e prossimo lavoro sono nel [riepilogo autorevole del programma](../docs/PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). Nessun deploy o chiusura complessiva del programma; VS-P0-01 resta aperto in produzione. La revisione documentale corregge intestazioni obsolete, senza cambiare requisiti o riscrivere gli audit passati.
 
 ## Fotografia storica — riallineamento documentale 12/09/2026, v1.2.110

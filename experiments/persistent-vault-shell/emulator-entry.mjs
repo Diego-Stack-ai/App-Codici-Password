@@ -13,6 +13,9 @@ import {createFirebaseSession} from './firebase-session.mjs';
 import {createProfileSectionReader} from './profile-section-reader.mjs';
 import {mountProfileShell} from './profile-shell-view.mjs';
 import {createProfileLinkedAccountReader} from './profile-linked-account.mjs';
+import {createCompanyProfileSource} from './company-profile-source.mjs';
+import {companyProfileContacts} from '../../Frontend/public/assets/js/modules/azienda/company-profile-model.js';
+import {getCompany, getCompanyConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {getUserProfile, getUserProfileConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {requestMaster} from './master-prompt.mjs';
 import {probeOfflineConsultation} from './offline-consultation-probe.mjs';
@@ -56,20 +59,22 @@ const mountDetail = context => {
     const mountSavePanel = createPrivateNotePanelProvider({context, getUser: () => auth.currentUser,
         readSource: createFirebasePrivateNoteSource({auth, db}), deviceId: 'loopback-laboratory',
         openQueue: options => session.openMutationQueue(options)});
-    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel, backLabel: detailReturnRoute === 'profile' ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
+    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel, backLabel: ['profile', 'companyProfile'].includes(detailReturnRoute) ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
 };
 const mountProfile = context => {
     probeContext = context;
-    return mountProfileShell(content, context, {readSection: createProfileSectionReader({context,
+    const company = context.route === 'companyProfile';
+    const source = company ? createCompanyProfileSource({uid: context.user.uid, companyId: 'company', repository: {getCompany, getCompanyConfirmed}, normalizeContacts: companyProfileContacts}) : undefined;
+    return mountProfileShell(content, context, {profileTitle: company ? 'Profilo aziendale' : 'Profilo utente', readSection: createProfileSectionReader({context, source,
         getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
-        linkedAccounts: createProfileLinkedAccountReader({context, getUser: () => auth.currentUser,
+        linkedAccounts: createProfileLinkedAccountReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}}),
-        onOpenAccount(selection) { context.assertUnlocked(); selectedAccount = selection; detailReturnRoute = 'profile'; selectedRoute = 'detail'; void session.navigate('detail'); }});
+        onOpenAccount(selection) { context.assertUnlocked(); selectedAccount = selection; detailReturnRoute = context.route; selectedRoute = 'detail'; void session.navigate('detail'); }});
 };
 const session = createFirebaseSession({auth, db, cryptoApi,
     createQueueClient: scope => openEmulatorQueue({auth, functions, ...scope}),
     requestPassword: options => requestMaster(byId('master-dialog'), options),
-    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile},
+    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile, companyProfile: mountProfile},
     onState({state}) {
         status.textContent = state === 'unlocked' ? 'Vault sbloccato' : state === 'locked' ? 'Accesso effettuato · Vault bloccato' : 'Accesso non effettuato';
         if (state !== 'unlocked') {
@@ -94,7 +99,7 @@ byId('login').addEventListener('click', () => run(async () => {
 byId('unlock').addEventListener('click', () => run(async () => { await session.unlock(); await session.navigate(selectedRoute); }));
 byId('lock').addEventListener('click', () => session.lock());
 byId('logout').addEventListener('click', () => run(() => session.logout()));
-for (const route of ['private', 'company', 'profile']) byId(route).addEventListener('click', () => {
+for (const route of ['private', 'company', 'profile', 'companyProfile']) byId(route).addEventListener('click', () => {
     navigateList(route);
 });
 document.addEventListener('pointerdown', () => session.touch());

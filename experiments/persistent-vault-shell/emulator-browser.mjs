@@ -35,7 +35,11 @@ for (const suffix of ['A', 'B']) {
             contactPhones: [{id: 'phone', number: await encrypted('000000000'), linkedAccountId: 'zeta'}, {id: 'company-phone', number: await encrypted('000000001'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}],
             userAddresses: [{id: 'address', address: await encrypted('Via fittizia')}],
             documenti: [{id: 'document', num_serie: await encrypted('DOC-FITTIZIO')}]});
-        await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia')});
+        await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia'),
+            partitaIva: await encrypted('IVA-FITTIZIA'), emails: {pec: {email: await encrypted('pec@example.invalid'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}, personale: {email: await encrypted('personale@example.invalid'), linkedAccountId: 'zeta'}},
+            telefonoAzienda: await encrypted('111111111'), phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}},
+            indirizzoSede: await encrypted('Sede fittizia'), altreSedi: [{indirizzo: await encrypted('Filiale fittizia')}],
+            allegati: [{name: await encrypted('Visura fittizia')}]});
         await setDoc(doc(db, 'users', user.uid, 'profileWidgets', 'fixture'), {title: 'Widget fittizio', description: '', tab: 'personal',
             order: 0, size: 'medium', collapsed: false, schemaVersion: 1, fields: [{id: 'field', encrypted: true, value: await encrypted('WIDGET-FITTIZIO')}]});
         await setDoc(doc(db, 'users', user.uid, 'scadenze', 'fixture'), {note: await encrypted('SCADENZA-FITTIZIA')});
