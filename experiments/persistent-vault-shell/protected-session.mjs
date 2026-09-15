@@ -28,6 +28,11 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
         const unlocked = Boolean(uid && vault.isUnlocked());
         if (context.signal.aborted) return;
         return mount({...context, user: uid ? Object.freeze({uid}) : null, unlocked,
+            assertUnlocked() {
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                assertOwner(uid, epoch);
+                if (!vault.isUnlocked()) throw new Error('VAULT_LOCKED');
+            },
             async read(record) {
                 if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
                 assertOwner(uid, epoch);

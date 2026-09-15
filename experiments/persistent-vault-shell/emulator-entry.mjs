@@ -10,6 +10,9 @@ import {parseAccountDestination} from './account-route.mjs';
 import {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import * as cryptoApi from '../../Frontend/public/assets/js/modules/core/crypto-utils.js';
 import {createFirebaseSession} from './firebase-session.mjs';
+import {createProfileSectionReader} from './profile-section-reader.mjs';
+import {mountProfileShell} from './profile-shell-view.mjs';
+import {getUserProfile} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {requestMaster} from './master-prompt.mjs';
 import {probeOfflineConsultation} from './offline-consultation-probe.mjs';
 
@@ -54,10 +57,15 @@ const mountDetail = context => {
         openQueue: options => session.openMutationQueue(options)});
     return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel, onBack: () => navigateList(selection.domain)});
 };
+const mountProfile = context => {
+    probeContext = context;
+    return mountProfileShell(content, context, {readSection: createProfileSectionReader({context,
+        getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue})});
+};
 const session = createFirebaseSession({auth, db, cryptoApi,
     createQueueClient: scope => openEmulatorQueue({auth, functions, ...scope}),
     requestPassword: options => requestMaster(byId('master-dialog'), options),
-    routes: {overview: mount, private: mount, company: mount, detail: mountDetail},
+    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile},
     onState({state}) {
         status.textContent = state === 'unlocked' ? 'Vault sbloccato' : state === 'locked' ? 'Accesso effettuato · Vault bloccato' : 'Accesso non effettuato';
         if (state !== 'unlocked') {
@@ -82,7 +90,7 @@ byId('login').addEventListener('click', () => run(async () => {
 byId('unlock').addEventListener('click', () => run(async () => { await session.unlock(); await session.navigate(selectedRoute); }));
 byId('lock').addEventListener('click', () => session.lock());
 byId('logout').addEventListener('click', () => run(() => session.logout()));
-for (const route of ['private', 'company']) byId(route).addEventListener('click', () => {
+for (const route of ['private', 'company', 'profile']) byId(route).addEventListener('click', () => {
     navigateList(route);
 });
 document.addEventListener('pointerdown', () => session.touch());

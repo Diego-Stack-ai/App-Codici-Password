@@ -68,6 +68,14 @@ try {
         assert(blocked, 'NETWORK_NOT_BLOCKED');
         await unlock();
         const domains = await runOfflineConsultationProbe();
+        const originalDocument = document;
+        byId('profile').click();
+        await wait(() => byId('content').textContent.includes('Nome fittizio'), 'COLD_PROFILE');
+        document.querySelector('[data-profile-section="contacts"]').click();
+        await wait(() => byId('content').textContent.includes('fixture@example.invalid') && byId('content').textContent.includes('000000000'), 'COLD_PROFILE_CONTACTS');
+        assert(document === originalDocument, 'COLD_PROFILE_RELOAD');
+        byId('private').click();
+        await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_PROFILE_RETURN');
         if (window.__entryForced) {
             document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
             await wait(() => byId('content').textContent.includes('già conservata sul dispositivo'), 'CRASH_QUEUE_RECOVERY');
@@ -88,7 +96,7 @@ try {
         sessionStorage.removeItem('synthetic-cold-phase');
         await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, browser: navigator.userAgent,
             passed: [restartPhase ? 'static laboratory shell starts offline in a new browser process' : 'static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
-                'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required',
+                'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required', 'profile identity and contacts render offline after restart without a prior profile visit',
                 ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

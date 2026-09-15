@@ -895,3 +895,7 @@ npm test completo superato sulla 1.2.127; dieci scenari browser locali Chrome/Ed
 ## Integrazione sicurezza e shell, 15/09/2026
 
 Riallineata la candidata al master 1.2.127 nel merge 1089cde8, mantenendo le protezioni di entrambi i rami. Rules distribuite confrontate e coincidenti con quelle testate. L'ingresso Firebase della shell ora elimina il materiale di sessione legacy senza riutilizzarlo e blocca/chiude la Vault agli eventi del browser o al rifiuto Auth. Evidenze e limiti nel capitolo finale di docs/AUDIT_VAULT_SESSION_P0.md. La shell resta parziale: produzione invariata, VS-P0-01 ancora aperto fino alla sostituzione del percorso multipagina e collaudo completo. Nessuna nuova autorizzazione architetturale da richiedere; nessun deploy effettuato.
+
+## Profilo nella shell: prima consultazione protetta — 15/09/2026
+
+PR #67: route locale per Anagrafica, Contatti, Indirizzi e Documenti, con repository canonico e chiave confinata alla sessione RAM. Navigazione senza reload e rimozione dei testi all'uscita. Fixture allineate ai nomi reali dei campi; lettura online/offline e dopo arresto del browser verificata su dati sintetici. Dettagli e limiti nell'ultimo capitolo di docs/AUDIT_VAULT_SESSION_P0.md. Editor, collegamenti, utenze e tessera digitale ancora da integrare; nessuna attivazione in produzione o chiusura del rischio legacy.

@@ -32,9 +32,9 @@ for (const suffix of ['A', 'B']) {
         const encrypted = value => cryptoApi.encrypt(value, key);
         await setDoc(doc(db, 'users', user.uid), {nome: await encrypted('Nome fittizio'),
             contactEmails: [{id: 'email', address: await encrypted('fixture@example.invalid'), linkedAccountId: 'zeta'}],
-            contactPhones: [{id: 'phone', value: await encrypted('000000000')}],
-            userAddresses: [{id: 'address', street: await encrypted('Via fittizia')}],
-            documenti: [{id: 'document', numero: await encrypted('DOC-FITTIZIO')}]});
+            contactPhones: [{id: 'phone', number: await encrypted('000000000')}],
+            userAddresses: [{id: 'address', address: await encrypted('Via fittizia')}],
+            documenti: [{id: 'document', num_serie: await encrypted('DOC-FITTIZIO')}]});
         await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia')});
         await setDoc(doc(db, 'users', user.uid, 'profileWidgets', 'fixture'), {title: 'Widget fittizio', description: '', tab: 'personal',
             order: 0, size: 'medium', collapsed: false, schemaVersion: 1, fields: [{id: 'field', encrypted: true, value: await encrypted('WIDGET-FITTIZIO')}]});

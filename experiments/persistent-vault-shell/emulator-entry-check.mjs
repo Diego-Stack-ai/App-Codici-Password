@@ -12,6 +12,23 @@ const network = async offline => {
     await new Promise((resolve, reject) => { const id = ++networkSerial; networkWaits.set(id, {resolve, reject}); window.__entryNetworkControl(JSON.stringify({id, offline})); });
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
+const profileChecks = [];
+async function checkProfile(mode) {
+    const originalDocument = document;
+    byId('profile').click();
+    await wait(() => byId('content').textContent.includes('Nome fittizio'), 'PROFILE_PERSONAL');
+    for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {
+        document.querySelector('[data-profile-section="'+section+'"]').click();
+        await wait(() => byId('content').textContent.includes(expected), 'PROFILE_'+section);
+        if (section === 'contacts') assert(byId('content').textContent.includes('000000000'), 'PROFILE_PHONE_CANONICAL_FIELD');
+    }
+    const oldValues = [...byId('content').querySelectorAll('dd')];
+    byId('private').click();
+    await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'PROFILE_RETURN');
+    assert(oldValues.every(node => node.textContent === ''), 'PROFILE_VALUES_RETAINED');
+    assert(document === originalDocument, 'PROFILE_RELOADED');
+    profileChecks.push('profile canonical identity contacts addresses documents rendered '+mode+' without reload', 'profile detached plaintext cleared '+mode);
+}
 try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
@@ -23,6 +40,7 @@ try {
     byId('unlock-value').value = 'MASTER-FITTIZIA-A!123';
     byId('master-dialog').querySelector('form').requestSubmit();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'LIST');
+    await checkProfile('online');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => document.querySelector('#content textarea'), 'NOTE_EDITOR');
     const content = byId('content'), input = content.querySelector('textarea'), marker = document;
@@ -58,6 +76,7 @@ try {
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'OFFLINE_UNLOCK_LIST');
     const cachedDomains = await runOfflineConsultationProbe();
     assert(JSON.stringify(cachedDomains) === JSON.stringify(loadedDomains), 'OFFLINE_DOMAIN_MATRIX');
+    await checkProfile('offline');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => content.textContent.includes('già conservata sul dispositivo'), 'OFFLINE_RECOVERY');
     const recoveredInput = content.querySelector('textarea');
@@ -81,7 +100,7 @@ try {
     try { await runOfflineConsultationProbe(); } catch (error) { onlineLocked = error.message === 'PROBE_SESSION'; }
     assert(onlineLocked, 'ONLINE_LOCKED_DATA_ACCESS');
     await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, browser: navigator.userAgent,
-        passed: ['unauthenticated local transport rejected', 'entry login and Vault unlock', 'private note save and detail refresh without reload',
+        passed: [...profileChecks, 'unauthenticated local transport rejected', 'entry login and Vault unlock', 'private note save and detail refresh without reload',
             'DevTools offline blocks HTTP without disconnecting the host', 'offline note survives view reopening without a new editor',
             'offline Vault lock and unlock recover the existing encrypted queue', 'online return and explicit retry refresh the recovered note',
             ...cachedDomains.map(domain => `cached repository and protected decryption: ${domain}`), 'uncached document remains unavailable offline',
