@@ -81,9 +81,11 @@ export function createAccountWidgetReader({context, getUser, repository, selecti
                     encrypted: field.encrypted, copyable: !field.encrypted && field.copyable !== false})))
             })));
         },
-        async read(widgetId, fieldId) {
+        async read(widgetId, fieldId, {expectedEncrypted, copy = false} = {}) {
             if (!identifier(widgetId) || !identifier(fieldId)) fail();
             const {row, field} = find(await load(), widgetId, fieldId); check();
+            if (expectedEncrypted !== undefined && field.encrypted !== expectedEncrypted) throw new Error('WIDGET_CHANGED');
+            if (copy && (field.encrypted || field.copyable === false)) throw new Error('WIDGET_COPY_FORBIDDEN');
             const fingerprint = JSON.stringify([row.widget, row.record]);
             const value = field.encrypted ? await context.read({ownerId: uid, ciphertext: field.valueEnc}) : plainValue(field.value ?? '');
             check();

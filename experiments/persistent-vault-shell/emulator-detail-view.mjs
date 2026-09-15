@@ -3,7 +3,7 @@ import {mountDetailExtraFields} from './detail-extra-fields.mjs';
 
 // Basic experimental detail: reuse the canonical card without activating the
 // legacy detail orchestrators, their writes, or their security manager.
-export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, backLabel = 'Torna alla lista'}) {
+export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, mountWidgets, backLabel = 'Torna alla lista'}) {
     if (context.signal.aborted) return () => {};
     if (!context.unlocked) throw new Error('VAULT_LOCKED');
     const lifecycle = new AbortController();
@@ -12,7 +12,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
     const back = document.createElement('button'); back.type = 'button'; back.textContent = backLabel;
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, back, container);
-    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, refreshPending;
+    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, widgetCleanup = null, refreshPending;
     let revision = 0;
     const assertActive = () => {
         if (disposed || context.signal.aborted) throw new DOMException('View disposed', 'AbortError');
@@ -58,7 +58,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         lifecycle.abort();
         account = null;
         try { saveCleanup?.(); } finally {
-            try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } }
+            try { widgetCleanup?.(); } finally { try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } } }
         }
     };
     context.signal.addEventListener('abort', cleanup, {once: true});
@@ -95,6 +95,11 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         });
         if (disposed) extraCleanup?.();
         assertActive();
+        if (mountWidgets) {
+            widgetCleanup = await mountWidgets(wrapper);
+            if (disposed) widgetCleanup?.();
+            assertActive();
+        }
         if (mountSavePanel && selection.domain === 'private') {
             const editorHost = document.createElement('div'); wrapper.append(editorHost);
             try {

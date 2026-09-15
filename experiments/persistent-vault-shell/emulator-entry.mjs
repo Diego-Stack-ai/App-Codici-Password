@@ -24,6 +24,9 @@ import {createShellOfflinePreparation} from './shell-offline-preparation.mjs';
 import {createCompanyDirectoryReader, mountCompanyDirectory, validateCompanyId} from './company-directory.mjs';
 import {listCompanies, listCompaniesConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
+import {createAccountWidgetReader} from './account-widget-reader.mjs';
+import {mountAccountWidgetView} from './account-widget-view.mjs';
+import {listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 
 const byId = id => document.getElementById(id);
 const content = byId('content'), status = byId('status'), message = byId('message');
@@ -78,7 +81,12 @@ const mountDetail = context => {
     const mountSavePanel = createPrivateNotePanelProvider({context, getUser: () => auth.currentUser,
         readSource: createFirebasePrivateNoteSource({auth, db}), deviceId: 'loopback-laboratory',
         openQueue: options => session.openMutationQueue(options)});
-    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel, backLabel: ['profile', 'companyProfile'].includes(detailReturnRoute) ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
+    const widgetReader = createAccountWidgetReader({context, getUser: () => auth.currentUser, selection,
+        repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed,
+            listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed}});
+    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel,
+        mountWidgets: root => mountAccountWidgetView(root, context, {reader: widgetReader}),
+        backLabel: ['profile', 'companyProfile'].includes(detailReturnRoute) ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
 };
 const mountProfile = context => {
     probeContext = context;

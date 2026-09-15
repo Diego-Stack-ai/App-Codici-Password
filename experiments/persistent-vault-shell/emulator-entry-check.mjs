@@ -13,6 +13,20 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+async function checkWidgets(scope, mode) {
+    await wait(() => document.querySelector(`[data-widget-id="widget-${scope}"] button`), 'WIDGET_MOUNT');
+    const card = document.querySelector(`[data-widget-id="widget-${scope}"]`);
+    const reveal = [...card.querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN Widget');
+    assert(reveal && !byId('content').textContent.includes('WIDGET-'), 'WIDGET_INITIAL_MASK');
+    reveal.click(); await wait(() => card.textContent.includes(`WIDGET-${scope}-A`), 'WIDGET_REVEAL');
+    reveal.click(); await wait(() => !card.textContent.includes('WIDGET-'), 'WIDGET_MASK');
+    const shared = document.querySelector(`[data-widget-id="link-${scope}"]`);
+    await wait(() => shared?.querySelector('button'), 'COMMON_MOUNT');
+    shared.querySelector('button').click(); await wait(() => shared.textContent.includes('COMMON-A'), 'COMMON_REVEAL');
+    assert(!byId('content').textContent.includes('COMMON-B'), 'COMMON_UID');
+    profileChecks.push(`Widget and common credential displayed and masked ${scope} ${mode}`);
+    return [...byId('content').querySelectorAll('.shared-account-value')];
+}
 async function checkCompanyProfile(mode) {
     const marker=document;
     byId('companies').click();
@@ -31,9 +45,11 @@ async function checkCompanyProfile(mode) {
     await wait(()=>byId('content').textContent.includes('Zeta seconda A'),'SECOND_ACCOUNTS');
     document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
     await wait(()=>byId('content').textContent.includes('Dettaglio Account')&&byId('content').textContent.includes('Zeta seconda A'),'SECOND_DETAIL');
+    const widgetValues = await checkWidgets('second-company', mode);
     [...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Torna alla lista').click();
     await wait(()=>document.querySelector('[data-action="navigate"][data-id="zeta"]'),'SECOND_DETAIL_BACK');
     assert(byId('content').textContent.includes('Zeta seconda A'),'SECOND_RETURN_SCOPE');
+    assert(widgetValues.every(node => node.textContent === ''), 'WIDGET_EXIT_CLEAR');
     byId('companies').click();await wait(()=>document.querySelector('[data-company-profile="company"]'),'COMPANY_DIRECTORY_BACK');
     document.querySelector('[data-company-profile="company"]').click();
     await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_PROFILE');
@@ -91,8 +107,10 @@ async function checkProfile(mode) {
                 buttons('Apri Account collegato')[index].click();
                 await wait(() => byId('content').textContent.includes(title) && buttons('Torna al profilo').length, 'PROFILE_LINK_DETAIL');
                 assert(detached.every(node => node.textContent === ''), 'PROFILE_LINK_DETACHED_VALUES');
+                const widgetValues = await checkWidgets(index === 0 ? 'private' : 'company', mode);
                 buttons('Torna al profilo')[0].click();
                 await wait(() => byId('content').textContent.includes('Nome fittizio'), 'PROFILE_LINK_BACK');
+                assert(widgetValues.every(node => node.textContent === ''), 'PROFILE_WIDGET_EXIT_CLEAR');
                 document.querySelector('[data-profile-section="contacts"]').click();
                 await wait(() => buttons('Apri Account collegato').length === 3, 'PROFILE_LINK_CONTACTS');
             }

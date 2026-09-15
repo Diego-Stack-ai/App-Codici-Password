@@ -27,6 +27,16 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Consultazione Widget nella shell — candidata 15/09/2026
+
+Base `0d31c777`, stessa PR #67. Il dettaglio Account monta ora `account-widget-view.mjs` con il lettore revocabile: Widget incorporati e credenziali comuni personali/aziendali, campi cifrati mascherati, mostra/nascondi espliciti e copia dei soli campi non cifrati abilitati dal modello. La richiesta di lettura vincola anche la classificazione del campo: un vecchio comando di copia non può esportare un campo nel frattempo diventato cifrato o non copiabile. Errori invalidano lo snapshot, scartano letture concorrenti e mostrano testo generico. Uscita/blocco cancellano valori, titoli, etichette e listener anche nei nodi trattenuti.
+
+Composizione di sola consultazione con nomi di classe canonici e CSS del laboratorio; nessun import dei vecchi editor, writer o gestori chiave. Il modulo bancario completo non è ancora montato: i Widget con `bankId` sono riconosciuti e rimandati esplicitamente a tale modulo, mai appiattiti tra i campi generici dell'Account. Non dichiarare parità completa, editing, ordine/collasso o layout produttivo conclusi. Le letture confermate ripetute proteggono la freschezza; il costo su archivi grandi resta da misurare prima del cutover.
+
+Verifiche finali: `npm test` completo, 296 test shell, 108 verifiche entry e 62 arresto/riapertura su Chrome/Edge (170 browser totali). Fixture non vuote in `accountWidgets` e `sharedVaultData`, inizializzate esclusivamente tramite amministratore dell'emulatore loopback con host verificati; Rules invariate. Tre contesti (privato, prima e seconda azienda) con lo stesso ID Account verificano isolamento online/offline. Il riavvio offline dopo preparazione automatica legge Widget e credenziale comune senza visita preventiva; uscita cancella i nodi. Prove fisiche iPhone/eviction restano aperte. Nessun dato reale, bump, master o deploy. Il precedente `0d31c777` ha superato CI GitHub 34953444888.
+
+Prossimo sottoblocco: lettore bancario revocabile e montaggio dei Widget nel conto identificato da `bankId`, tra i dati bancari e le carte, usando il modello canonico e preservando gli ID esistenti. Poi parità degli editor e dei profili secondo il piano. Il lettore base attuale espone soltanto sei campi Account: non aggirarne l'allowlist restituendo il record completo o una chiave al renderer. Rollback tramite rimozione del montaggio sperimentale; nessuna migrazione dati.
+
 ### Lettore Widget per la shell — candidata 15/09/2026
 
 Base `8a664499`, stessa PR #67. Primo sottoblocco della consultazione Widget: `account-widget-reader.mjs` espone metadati senza valori/ciphertext e letture puntuali attraverso la capability RAM. Account, dominio e azienda sono validati; online usa esclusivamente letture confermate, offline il repository locale. Ogni lettura rivalida Account, collegamento e record dopo la decifratura e rifiuta cambi, archiviazione, duplicati, riferimenti mancanti e proprietari discordanti. Blocco, cambio UID e uscita invalidano i risultati pendenti. Tipi semplici non cifrati compatibili con il servizio canonico; copia disabilitata nei metadati dei campi cifrati come previsto dal contratto corrente.

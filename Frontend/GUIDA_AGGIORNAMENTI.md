@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Widget, consultazione integrata dopo `0d31c777`: Widget Account e credenziali comuni presenti nel dettaglio della shell, letture revocabili e comandi legati alla classificazione corrente dei campi. Fixture non vuote, suite completa e 296 shell superati; 108 verifiche entry più 62 arresto/riapertura Chrome/Edge, 170 totali. Prossimo blocco: modulo bancario con Widget nel rispettivo conto, seguito dalla parità restante. Limiti nella roadmap profili; non è un rilascio né chiusura dell'intero programma.
+
 Excel, primo adeguamento dopo `45deb058`: verificato il ramo recuperato `40052515`, aggiunta proiezione sperimentale con mascheramento PUK/Widget e revoca sulla sessione. Suite completa superata, 290 shell. Servizio Excel originale non integrato; generazione/consenso/download e parità allegati ancora aperti. Perimetro e rischi in [M8](../docs/M8_BACKUP_RECUPERO.md#esportazione-excel-separata-dal-backup--candidata-15092026). Nessun deploy.
 
 Sottoblocco Widget successivo a `8a664499`: lettore revocabile per Widget incorporati e credenziali comuni, senza gestore legacy o valori restituiti nell'elenco. 15 test mirati e 278 shell finali superati; suite completa superata prima dell'ultimo affinamento, poi suite shell rieseguita. UI e fixture browser non vuote restano il prossimo lavoro, come descritto nella roadmap profili. CI della directory `8a664499` superata (34951205896); nessun deploy o chiusura del programma.

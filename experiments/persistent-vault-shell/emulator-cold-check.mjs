@@ -97,7 +97,18 @@ try {
         await wait(()=>document.querySelector('[data-company-accounts="second-company"]'),'COLD_COMPANY_DIRECTORY');
         document.querySelector('[data-company-accounts="second-company"]').click();
         await wait(()=>byId('content').textContent.includes('Zeta seconda A'),'COLD_SECOND_COMPANY_ACCOUNTS');
+        document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
+        await wait(() => document.querySelector('[data-widget-id="widget-second-company"] button'), 'COLD_WIDGET');
+        const widget = document.querySelector('[data-widget-id="widget-second-company"]');
+        [...widget.querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN Widget').click();
+        await wait(() => widget.textContent.includes('WIDGET-second-company-A'), 'COLD_WIDGET_VALUE');
+        const sharedWidget = document.querySelector('[data-widget-id="link-second-company"]');
+        await wait(() => sharedWidget?.querySelector('button'), 'COLD_COMMON');
+        sharedWidget.querySelector('button').click();
+        await wait(() => sharedWidget.textContent.includes('COMMON-A'), 'COLD_COMMON_VALUE');
+        const widgetValues = [...byId('content').querySelectorAll('.shared-account-value')];
         byId('companies').click();await wait(()=>document.querySelector('[data-company-profile="company"]'),'COLD_COMPANY_DIRECTORY_BACK');
+        assert(widgetValues.every(node => node.textContent === ''), 'COLD_WIDGET_CLEARED');
         document.querySelector('[data-company-profile="company"]').click();
         await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COLD_COMPANY_PROFILE');
         document.querySelector('[data-profile-section="contacts"]').click();
@@ -134,6 +145,7 @@ try {
                   'normal shell startup prepared textual domains without a probe or prior page visits',
                   'address utility and its linked credential readable offline after restart',
                   'company directory and second-company accounts available after automatic offline preparation',
+                  'nonempty Account Widget and common credential render after cold offline restart and clear on exit',
                   ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

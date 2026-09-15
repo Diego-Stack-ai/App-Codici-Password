@@ -108,3 +108,12 @@ test('canonical unencrypted boolean and number fields remain readable without co
         await assert.rejects(f.reader.list());
     }
 });
+
+test('stale public-field UI cannot reveal or copy a field that became secret', async () => {
+    const f = fixture(); await f.reader.list();
+    Object.assign(f.state.widgets[0].fields[1], {encrypted: true, valueEnc: 'enc:secret'});
+    await assert.rejects(f.reader.read('embedded', 'note', {expectedEncrypted: false}), /WIDGET_CHANGED/);
+    await assert.rejects(f.reader.read('embedded', 'note', {copy: true}), /COPY_FORBIDDEN/);
+    const g = fixture(); g.state.widgets[0].fields[1].copyable = false;
+    await assert.rejects(g.reader.read('embedded', 'note', {expectedEncrypted: false, copy: true}), /COPY_FORBIDDEN/);
+});

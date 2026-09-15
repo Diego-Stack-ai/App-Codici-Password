@@ -6,6 +6,7 @@ import {createEmulatorNoteBridge} from './emulator-note-bridge.mjs';
 import {initializeApp, deleteApp} from 'firebase/app';
 import {initializeAuth, inMemoryPersistence, connectAuthEmulator, createUserWithEmailAndPassword} from 'firebase/auth';
 import {getFirestore, connectFirestoreEmulator, doc, setDoc, terminate} from 'firebase/firestore';
+import {initializeTestEnvironment} from '@firebase/rules-unit-testing';
 
 assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099');
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
@@ -19,6 +20,7 @@ await buildEmulator({persistent: cold});
 const source = await readFile(`${base}/../../Frontend/public/assets/js/modules/core/crypto-utils.js`, 'utf8');
 const cryptoApi = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const fixtureUids = [];
+const widgetEnvironment = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085}});
 for (const suffix of ['A', 'B']) {
     const app = initializeApp({projectId: 'demo-vault-shell', apiKey: 'demo-key'}, suffix);
     const auth = initializeAuth(app, {persistence: inMemoryPersistence});
@@ -64,8 +66,24 @@ for (const suffix of ['A', 'B']) {
             if (domain === 'company' && title === 'Zeta') await setDoc(doc(db, 'users', user.uid, 'aziende', 'second-company', 'accounts', 'zeta'), {
                 ...record, nomeAccount: await encrypted('Zeta seconda ' + suffix), password: await encrypted('SEGRETO-FITTIZIO-second-company-Zeta-' + suffix)});
         }
+        // Function-only collections: seed only the loopback emulator via the
+        // test administrator; never weaken production Rules for these fixtures.
+        await widgetEnvironment.withSecurityRulesDisabled(async admin => {
+            const root = `users/${user.uid}`;
+            await admin.firestore().doc(`${root}/sharedVaultData/common`).set({ownerId: user.uid, title: 'Credenziale comune fittizia',
+                fields: [{id: 'common', label: 'Codice comune', encrypted: true, valueEnc: await encrypted('COMMON-' + suffix), copyable: false}]});
+            for (const scope of ['private', 'company', 'second-company']) {
+                const target = {context: scope === 'private' ? 'private' : 'company', accountId: 'zeta',
+                    ...(scope === 'private' ? {} : {companyId: scope})};
+                await admin.firestore().doc(`${root}/accountWidgets/widget-${scope}`).set({ownerId: user.uid, ...target, kind: 'embedded', title: 'Widget ' + scope,
+                    fields: [{id: 'pin', label: 'PIN Widget', encrypted: true, valueEnc: await encrypted(`WIDGET-${scope}-${suffix}`), copyable: false},
+                        {id: 'plain', label: 'Descrizione', encrypted: false, value: 'Campo fittizio ' + scope, copyable: true}]});
+                await admin.firestore().doc(`${root}/accountWidgets/link-${scope}`).set({ownerId: user.uid, ...target, kind: 'shared-reference', sharedDataId: 'common'});
+            }
+        });
     } finally { await terminate(db); await deleteApp(app); }
 }
+await widgetEnvironment.cleanup();
 const assets = new Map([['/', ['emulator.html', 'text/html']], ['/emulator.css', ['emulator.css', 'text/css']], ['/emulator.js', ['emulator.js', 'text/javascript']], ['/symbols.woff2', ['symbols.woff2', 'font/woff2']], ['/assets/images/google-avatar.png', ['assets/images/google-avatar.png', 'image/png']]]);
 const handleNote = createEmulatorNoteBridge(fixtureUids);
 const server = createServer(async (request, response) => {
