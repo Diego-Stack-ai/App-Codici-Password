@@ -899,3 +899,7 @@ Riallineata la candidata al master 1.2.127 nel merge 1089cde8, mantenendo le pro
 ## Profilo nella shell: prima consultazione protetta — 15/09/2026
 
 PR #67: route locale per Anagrafica, Contatti, Indirizzi e Documenti, con repository canonico e chiave confinata alla sessione RAM. Navigazione senza reload e rimozione dei testi all'uscita. Fixture allineate ai nomi reali dei campi; lettura online/offline e dopo arresto del browser verificata su dati sintetici. Dettagli e limiti nell'ultimo capitolo di docs/AUDIT_VAULT_SESSION_P0.md. Editor, collegamenti, utenze e tessera digitale ancora da integrare; nessuna attivazione in produzione o chiusura del rischio legacy.
+
+## Consultazione degli Account collegati nella shell — 15/09/2026
+
+Stessa PR #67: apertura e ritorno al profilo senza reload, password dell'Account collegato su richiesta con mostra/nascondi/copia, anche quando email e telefono condividono l'Account o il destinatario è aziendale. Controlli di provenienza e sessione ripetuti dopo le attese; nessun riuso delle vecchie password dei contatti. Suite completa superata, 232 test shell finali e 126 verifiche browser online/offline/arresto superate. Limiti del pre-caricamento della cache ed evidenze nell'ultimo capitolo di docs/AUDIT_VAULT_SESSION_P0.md. Modifica dei collegamenti e parità completa dei profili ancora da integrare; nessun deploy e rischio legacy produttivo ancora aperto.

@@ -18,6 +18,13 @@ test('canonical address and document fields work with explicitly supported legac
     assert.deepEqual((await f.read('addresses')).map(row => row.value), ['Via fittizia', '1']);
     assert.deepEqual((await f.read('documents')).map(row => row.value), ['ABC']);
 });
+test('contacts retain distinct source links to the same Account without reading profile passwords', async () => {
+    const f = fixture({contactEmails: [{id: 'email', address: 'enc:a@example.invalid', linkedAccountId: 'shared', password: 'enc:DO-NOT-READ'}],
+        contactPhones: [{id: 'phone', number: 'enc:000', linkedAccountId: 'shared'}]});
+    const rows = await f.read('contacts');
+    assert.deepEqual(rows.map(row => [row.link.sourceId, row.link.selection.id]), [['email', 'shared'], ['phone', 'shared']]);
+    assert.deepEqual(f.reads, ['enc:a@example.invalid', 'enc:000']);
+});
 test('locked Vault, wrong owner, unknown section and malformed data fail closed', async () => {
     const f = fixture({nome: 'legacy'}); f.lock(); await assert.rejects(f.read('personal'), /VAULT_LOCKED/);
     await assert.rejects(fixture({ownerId: 'other'}).read('personal'), /OWNER_MISMATCH/);

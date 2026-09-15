@@ -51,3 +51,42 @@ test('offline cache miss is explained without relabeling permission or decryptio
         cleanup();
     }
 });
+
+test('linked password is lazy, can be masked/copied and opens an Account through internal navigation', async t => {
+    const previous = Object.getOwnPropertyDescriptor(globalThis, 'navigator'), copies = [];
+    Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {clipboard: {writeText: async value => copies.push(value)}}});
+    t.after(() => { if (previous) Object.defineProperty(globalThis, 'navigator', previous); else delete globalThis.navigator; });
+    const f = fixture(), selection = {domain: 'company', id: 'account', companyId: 'company'};
+    let reads = 0, opened;
+    const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+        readSection: async () => [{group: 'Email', label: 'Email', value: 'fixture', link: {}}],
+        linkedAccounts: {readPassword: async () => { reads++; return 'synthetic-secret'; }, open: async () => selection},
+        onOpenAccount: value => { opened = value; }
+    });
+    const find = label => f.root.querySelectorAll('button').find(node => node.textContent === label);
+    const secret = f.root.querySelectorAll('dd').find(node => node.textContent === '••••••••');
+    assert.equal(reads, 0);
+    find('Mostra password').dispatchEvent(new Event('click')); await tick(); assert.equal(secret.textContent, 'synthetic-secret');
+    find('Nascondi password').dispatchEvent(new Event('click')); await tick(); assert.equal(secret.textContent, '••••••••'); assert.equal(reads, 1);
+    find('Copia password').dispatchEvent(new Event('click')); await tick(); assert.deepEqual(copies, ['synthetic-secret']); assert.equal(reads, 2);
+    find('Apri Account collegato').dispatchEvent(new Event('click')); await tick(); assert.equal(opened, selection);
+    cleanup(); assert.equal(secret.textContent, '');
+});
+
+for (const operation of ['Mostra password', 'Copia password', 'Apri Account collegato']) test(`late ${operation} has no effect after switching profile section`, async t => {
+    const previous = Object.getOwnPropertyDescriptor(globalThis, 'navigator'); let copies = 0, opened = 0, release;
+    Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {clipboard: {writeText: async () => { copies++; }}}});
+    t.after(() => { if (previous) Object.defineProperty(globalThis, 'navigator', previous); else delete globalThis.navigator; });
+    const f = fixture(), pending = () => new Promise(resolve => { release = resolve; });
+    const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+        readSection: async section => section === 'personal' ? [{group: 'Email', label: 'Email', value: 'fixture', link: {}}] : [],
+        linkedAccounts: {readPassword: pending, open: pending}, onOpenAccount: () => { opened++; }
+    });
+    const button = f.root.querySelectorAll('button').find(node => node.textContent === operation);
+    const oldSecret = f.root.querySelectorAll('dd').find(node => node.textContent === '••••••••');
+    button.dispatchEvent(new Event('click')); await tick();
+    f.root.querySelectorAll('button').find(node => node.textContent === 'Contatti').dispatchEvent(new Event('click'));
+    await tick(); release('late-secret'); await tick();
+    assert.equal(copies, 0); assert.equal(opened, 0); assert.equal(oldSecret.textContent, '');
+    cleanup();
+});

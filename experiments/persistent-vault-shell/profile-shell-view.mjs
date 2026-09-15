@@ -1,23 +1,64 @@
 import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
-// Read-only migration slice: editors, links, utilities and QR remain outside this view.
-export async function mountProfileShell(root, context, {readSection}) {
+// Read-only migration slice: changes to links, utilities and QR are not enabled.
+export async function mountProfileShell(root, context, {readSection, linkedAccounts, onOpenAccount}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
-    let disposed = false, revision = 0;
+    let disposed = false, revision = 0, sectionControls;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
     const title = document.createElement('h2'); title.textContent = 'Profilo utente';
-    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo. Modifiche, collegamenti, utenze e tessera digitale non sono ancora integrati in questa vista di prova.';
+    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati. Modifiche ai dati e ai collegamenti, utenze e tessera digitale non sono ancora integrate in questa vista di prova.';
     const navigation = document.createElement('nav'); navigation.setAttribute('aria-label', 'Sezioni del profilo');
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];
     const current = ticket => !disposed && !context.signal.aborted && ticket === revision;
-    const clear = () => { for (const node of panel.querySelectorAll('dd')) node.textContent = ''; panel.replaceChildren(); };
+    const clear = () => { sectionControls?.abort(); for (const node of panel.querySelectorAll('dd')) node.textContent = ''; panel.replaceChildren(); };
     const dispose = () => {
         if (disposed) return;
         disposed = true; revision++; controls.abort(); context.signal.removeEventListener('abort', dispose);
         clear(); host.remove();
     };
+    function addLinkedAccount(list, link, ticket) {
+        if (!linkedAccounts || typeof onOpenAccount !== 'function') return;
+        const caption = document.createElement('dt'), value = document.createElement('dd'), actions = document.createElement('dd');
+        caption.textContent = 'Password Account collegato'; value.textContent = '••••••••';
+        const result = document.createElement('span'); result.setAttribute('role', 'status');
+        let revealed = false;
+        const active = () => { if (!current(ticket)) return false; context.assertUnlocked(); return true; };
+        function button(label, action) {
+            const node = document.createElement('button'); node.type = 'button'; node.textContent = label;
+            node.addEventListener('click', async () => {
+                try {
+                    if (!active() || node.disabled) return;
+                    node.disabled = true; result.textContent = '';
+                    await action();
+                } catch (error) {
+                    if (current(ticket)) {
+                        value.textContent = '••••••••'; revealed = false; toggle.textContent = 'Mostra password';
+                        result.textContent = readErrorMessage(error, 'Account o password non disponibili. Aggiorna il profilo e verifica il collegamento.');
+                    }
+                } finally { if (current(ticket)) node.disabled = false; }
+            }, {signal: sectionControls.signal});
+            actions.append(node); return node;
+        }
+        button('Apri Account collegato', async () => {
+            const selection = await linkedAccounts.open(link);
+            if (active()) onOpenAccount(selection);
+        });
+        const toggle = button('Mostra password', async () => {
+            if (revealed) { value.textContent = '••••••••'; revealed = false; toggle.textContent = 'Mostra password'; return; }
+            const password = await linkedAccounts.readPassword(link);
+            if (!active()) return;
+            value.textContent = password || 'Nessuna password'; revealed = true; toggle.textContent = 'Nascondi password';
+        });
+        button('Copia password', async () => {
+            const password = await linkedAccounts.readPassword(link);
+            if (!active()) return;
+            await navigator.clipboard.writeText(password);
+            if (active()) result.textContent = 'Copiata.';
+        });
+        actions.append(result); list.append(caption, value, actions);
+    }
     async function select(section) {
         if (disposed || context.signal.aborted) return;
         const ticket = ++revision; clear();
@@ -28,6 +69,7 @@ export async function mountProfileShell(root, context, {readSection}) {
             if (!current(ticket)) return;
             context.assertUnlocked(); clear();
             if (!rows.length) { panel.textContent = 'Nessun dato presente.'; return; }
+            sectionControls = new AbortController();
             let group, list;
             for (const row of rows) {
                 if (row.group !== group) {
@@ -37,6 +79,7 @@ export async function mountProfileShell(root, context, {readSection}) {
                 }
                 const label = document.createElement('dt'), value = document.createElement('dd');
                 label.textContent = row.label; value.textContent = row.value; list.append(label, value);
+                if (row.link) addLinkedAccount(list, row.link, ticket);
             }
         } catch (error) {
             if (current(ticket)) {

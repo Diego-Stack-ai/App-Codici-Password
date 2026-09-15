@@ -143,6 +143,7 @@ export const listEmbeddedAccountWidgetsConfirmed = async (uid, account) =>
         .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
 
 export const getUserProfile = uid => readRecord(`profile:${uid}`, doc(db, 'users', uid));
+export const getUserProfileConfirmed = uid => readConfirmedRecord(doc(db, 'users', uid));
 
 // M8: fotografia server-confermata dei soli domini proprietari ammessi dal
 // contratto backup. Non usa cache perché un file incompleto sembrerebbe valido.

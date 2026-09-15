@@ -74,8 +74,18 @@ try {
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(() => byId('content').textContent.includes('fixture@example.invalid') && byId('content').textContent.includes('000000000'), 'COLD_PROFILE_CONTACTS');
         assert(document === originalDocument, 'COLD_PROFILE_RELOAD');
+        const linkedButtons = [...byId('content').querySelectorAll('button')].filter(node => node.textContent === 'Mostra password');
+        assert(linkedButtons.length === 3, 'COLD_PROFILE_LINKS');
+        for (const node of linkedButtons) {
+            node.click();
+            await wait(() => node.textContent === 'Nascondi password' && !node.disabled, 'COLD_PROFILE_PASSWORD');
+        }
+        const linkedValues = [...byId('content').querySelectorAll('dd')];
+        assert(linkedValues.filter(node => node.textContent === 'SEGRETO-FITTIZIO-private-Zeta-A').length === 2, 'COLD_SHARED_PASSWORD');
+        assert(linkedValues.some(node => node.textContent === 'SEGRETO-FITTIZIO-company-Zeta-A'), 'COLD_COMPANY_PASSWORD');
         byId('private').click();
         await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_PROFILE_RETURN');
+        assert(linkedValues.every(node => node.textContent === ''), 'COLD_PROFILE_PASSWORD_CLEARED');
         if (window.__entryForced) {
             document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
             await wait(() => byId('content').textContent.includes('già conservata sul dispositivo'), 'CRASH_QUEUE_RECOVERY');
@@ -97,7 +107,8 @@ try {
         await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, browser: navigator.userAgent,
             passed: [restartPhase ? 'static laboratory shell starts offline in a new browser process' : 'static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
                 'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required', 'profile identity and contacts render offline after restart without a prior profile visit',
-                ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
+                  'linked shared private and company credentials readable after offline restart and cleared on exit',
+                  ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});
     }

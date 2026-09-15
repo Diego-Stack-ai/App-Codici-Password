@@ -12,14 +12,15 @@ import * as cryptoApi from '../../Frontend/public/assets/js/modules/core/crypto-
 import {createFirebaseSession} from './firebase-session.mjs';
 import {createProfileSectionReader} from './profile-section-reader.mjs';
 import {mountProfileShell} from './profile-shell-view.mjs';
-import {getUserProfile} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
+import {createProfileLinkedAccountReader} from './profile-linked-account.mjs';
+import {getUserProfile, getUserProfileConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {requestMaster} from './master-prompt.mjs';
 import {probeOfflineConsultation} from './offline-consultation-probe.mjs';
 
 const byId = id => document.getElementById(id);
 const content = byId('content'), status = byId('status'), message = byId('message');
 let selectedRoute = 'private', busy = false;
-let selectedAccount = null;
+let selectedAccount = null, detailReturnRoute = 'private';
 let listStates = {};
 let probeContext;
 export const runOfflineConsultationProbe = () => probeOfflineConsultation({context: probeContext, getUser: () => auth.currentUser});
@@ -40,7 +41,7 @@ function navigateList(domain) {
 function openDetail(destination) {
     try {
         selectedAccount = parseAccountDestination(destination, {uid: auth.currentUser?.uid});
-        selectedRoute = 'detail'; void session.navigate('detail');
+        detailReturnRoute = selectedAccount.domain; selectedRoute = 'detail'; void session.navigate('detail');
     } catch (error) { showError(error); }
 }
 const mount = context => { probeContext = context; return mountEmulatorList(content, context, {
@@ -55,12 +56,15 @@ const mountDetail = context => {
     const mountSavePanel = createPrivateNotePanelProvider({context, getUser: () => auth.currentUser,
         readSource: createFirebasePrivateNoteSource({auth, db}), deviceId: 'loopback-laboratory',
         openQueue: options => session.openMutationQueue(options)});
-    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel, onBack: () => navigateList(selection.domain)});
+    return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel, backLabel: detailReturnRoute === 'profile' ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
 };
 const mountProfile = context => {
     probeContext = context;
     return mountProfileShell(content, context, {readSection: createProfileSectionReader({context,
-        getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue})});
+        getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
+        linkedAccounts: createProfileLinkedAccountReader({context, getUser: () => auth.currentUser,
+            repository: {getUserProfile, getUserProfileConfirmed, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}}),
+        onOpenAccount(selection) { context.assertUnlocked(); selectedAccount = selection; detailReturnRoute = 'profile'; selectedRoute = 'detail'; void session.navigate('detail'); }});
 };
 const session = createFirebaseSession({auth, db, cryptoApi,
     createQueueClient: scope => openEmulatorQueue({auth, functions, ...scope}),

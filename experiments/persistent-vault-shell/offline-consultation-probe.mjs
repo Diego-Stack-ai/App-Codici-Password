@@ -7,8 +7,11 @@ export async function probeOfflineConsultation({context, getUser}) {
     const uid = context?.user?.uid;
     const check = () => { if (!uid || context.signal.aborted || !context.unlocked || getUser()?.uid !== uid) throw new Error('PROBE_SESSION'); };
     check();
+    // Seed complete list snapshots online: a prior linked-detail read can leave
+    // only one document in the SDK cache, which is not a complete collection.
+    const suffix = navigator.onLine ? 'Confirmed' : '';
     const [privateAccounts, companies, companyAccounts, profile, company, widgets, deadlines, attachments] = await Promise.all([
-        repository.listPrivateAccounts(uid), repository.listCompanies(uid), repository.listCompanyAccounts(uid, 'company'),
+        repository['listPrivateAccounts' + suffix](uid), repository['listCompanies' + suffix](uid), repository['listCompanyAccounts' + suffix](uid, 'company'),
         repository.getUserProfile(uid), repository.getCompany(uid, 'company'), repository.listProfileWidgets(uid),
         repository.listDeadlines(uid), repository.listPrivateAccountAttachments(uid, 'banca')]);
     check();

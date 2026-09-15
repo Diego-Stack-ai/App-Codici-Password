@@ -3,13 +3,13 @@ import {mountDetailExtraFields} from './detail-extra-fields.mjs';
 
 // Basic experimental detail: reuse the canonical card without activating the
 // legacy detail orchestrators, their writes, or their security manager.
-export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel}) {
+export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, backLabel = 'Torna alla lista'}) {
     if (context.signal.aborted) return () => {};
     if (!context.unlocked) throw new Error('VAULT_LOCKED');
     const lifecycle = new AbortController();
     const wrapper = document.createElement('section');
     const title = document.createElement('h2'); title.textContent = 'Dettaglio Account';
-    const back = document.createElement('button'); back.type = 'button'; back.textContent = 'Torna alla lista';
+    const back = document.createElement('button'); back.type = 'button'; back.textContent = backLabel;
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, back, container);
     let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, refreshPending;

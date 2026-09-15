@@ -20,7 +20,31 @@ async function checkProfile(mode) {
     for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {
         document.querySelector('[data-profile-section="'+section+'"]').click();
         await wait(() => byId('content').textContent.includes(expected), 'PROFILE_'+section);
-        if (section === 'contacts') assert(byId('content').textContent.includes('000000000'), 'PROFILE_PHONE_CANONICAL_FIELD');
+        if (section === 'contacts') {
+            assert(byId('content').textContent.includes('000000000'), 'PROFILE_PHONE_CANONICAL_FIELD');
+            const buttons = label => [...byId('content').querySelectorAll('button')].filter(button => button.textContent === label);
+            assert(buttons('Mostra password').length === 3, 'PROFILE_LINK_COUNT');
+            for (const button of buttons('Mostra password')) {
+                button.click();
+                await wait(() => button.textContent === 'Nascondi password' && !button.disabled, 'PROFILE_REVEAL');
+            }
+            const values = [...byId('content').querySelectorAll('dd')];
+            assert(values.filter(node => node.textContent === 'SEGRETO-FITTIZIO-private-Zeta-A').length === 2, 'PROFILE_SHARED_PRIVATE_ACCOUNT');
+            assert(values.some(node => node.textContent === 'SEGRETO-FITTIZIO-company-Zeta-A'), 'PROFILE_COMPANY_ACCOUNT');
+            for (const button of buttons('Nascondi password')) button.click();
+            await wait(() => !byId('content').textContent.includes('SEGRETO-FITTIZIO'), 'PROFILE_MASK');
+            for (const [index, title] of [[0, 'Zeta privato A'], [2, 'Zeta azienda A']]) {
+                const detached = [...byId('content').querySelectorAll('dd')];
+                buttons('Apri Account collegato')[index].click();
+                await wait(() => byId('content').textContent.includes(title) && buttons('Torna al profilo').length, 'PROFILE_LINK_DETAIL');
+                assert(detached.every(node => node.textContent === ''), 'PROFILE_LINK_DETACHED_VALUES');
+                buttons('Torna al profilo')[0].click();
+                await wait(() => byId('content').textContent.includes('Nome fittizio'), 'PROFILE_LINK_BACK');
+                document.querySelector('[data-profile-section="contacts"]').click();
+                await wait(() => buttons('Apri Account collegato').length === 3, 'PROFILE_LINK_CONTACTS');
+            }
+            profileChecks.push('linked shared private and company passwords revealed and masked '+mode, 'linked Account navigation returns to profile '+mode);
+        }
     }
     const oldValues = [...byId('content').querySelectorAll('dd')];
     byId('private').click();
