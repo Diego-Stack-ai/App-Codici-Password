@@ -25,7 +25,7 @@ const PAGE_PRIORITIES = {
 };
 
 const SYNC_TTL_MS = 5 * 60 * 1000;
-let activeSync = null;
+const activeSync = new Map();
 
 function waitForIdle() {
     return new Promise(resolve => {
@@ -124,9 +124,8 @@ async function syncOfflineData(user, currentPage) {
 }
 
 export function prepareOfflineData(user, currentPage = '') {
-    if (activeSync) return activeSync;
-    activeSync = syncOfflineData(user, currentPage).finally(() => {
-        activeSync = null;
-    });
-    return activeSync;
+    const uid = user?.uid;
+    if (!uid) return Promise.resolve(null);
+    if (!activeSync.has(uid)) activeSync.set(uid, syncOfflineData(user, currentPage).finally(() => activeSync.delete(uid)));
+    return activeSync.get(uid);
 }

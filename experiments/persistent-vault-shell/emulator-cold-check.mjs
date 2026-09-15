@@ -22,7 +22,8 @@ const unlock = async () => {
 const pendingNote = 'Nota sintetica conservata prima di arresto forzato';
 const button = label => [...byId('content').querySelectorAll('button')].find(item => item.textContent === label);
 try {
-    const {runOfflineConsultationProbe} = await import('/emulator.js');
+    const {runOfflineConsultationProbe: probe} = await import('/emulator.js');
+    const runOfflineConsultationProbe = () => probe({includeAttachmentMetadata: false});
     // Only a phase marker survives reload; no Vault key or decrypted data.
     const restartPhase = window.__entryRestartPhase;
     const resumed = restartPhase === 'resume' || sessionStorage.getItem('synthetic-cold-phase') === 'reload';
@@ -31,7 +32,8 @@ try {
         byId('login').click();
         await wait(() => byId('status').textContent.includes('bloccato') && !byId('unlock').disabled, 'AUTH');
         await unlock();
-        await runOfflineConsultationProbe();
+        // No probe or page visits prime the cache: exercise normal shell startup.
+        await wait(() => byId('offline-status').dataset.state === 'ready', 'AUTOMATIC_OFFLINE_PREPARATION');
         await navigator.serviceWorker.register('/emulator-cold-sw.js');
         await navigator.serviceWorker.ready;
         await wait(() => navigator.serviceWorker.controller, 'SW_CONTROLLER');
@@ -119,6 +121,7 @@ try {
                 'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required', 'profile identity and contacts render offline after restart without a prior profile visit',
                   'linked shared private and company credentials readable after offline restart and cleared on exit',
                   'company profile and linked credential readable on first offline visit after restart',
+                  'normal shell startup prepared textual domains without a probe or prior page visits',
                   ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

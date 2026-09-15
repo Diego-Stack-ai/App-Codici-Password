@@ -11,6 +11,8 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 
 ## Percorso canonico
 
+Aggiornamento candidato 15/09/2026, base `2686b48e`: il preparatore offline canonico deduplica per UID e la shell lo avvia senza visita preventiva alle pagine. Nessuna cache aggiuntiva o decifratura nel preparatore. Prove e limiti nel [contratto M6](./M6_SINCRONIZZAZIONE_OFFLINE.md#preparazione-automatica-nella-shell--candidata-15092026).
+
 `pagina → vault-repository → offline-firestore → cache persistente Firestore / server`
 
 - La pagina richiede dati di dominio e non sceglie la sorgente.

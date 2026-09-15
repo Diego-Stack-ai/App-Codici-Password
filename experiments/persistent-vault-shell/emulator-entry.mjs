@@ -19,6 +19,8 @@ import {getCompany, getCompanyConfirmed} from '../../Frontend/public/assets/js/m
 import {getUserProfile, getUserProfileConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {requestMaster} from './master-prompt.mjs';
 import {probeOfflineConsultation} from './offline-consultation-probe.mjs';
+import {prepareOfflineData} from '../../Frontend/public/assets/js/offline-sync.js';
+import {createShellOfflinePreparation} from './shell-offline-preparation.mjs';
 
 const byId = id => document.getElementById(id);
 const content = byId('content'), status = byId('status'), message = byId('message');
@@ -26,7 +28,12 @@ let selectedRoute = 'private', busy = false;
 let selectedAccount = null, detailReturnRoute = 'private';
 let listStates = {};
 let probeContext;
-export const runOfflineConsultationProbe = () => probeOfflineConsultation({context: probeContext, getUser: () => auth.currentUser});
+export const runOfflineConsultationProbe = (options = {}) => probeOfflineConsultation({context: probeContext, getUser: () => auth.currentUser, ...options});
+const offlinePreparation = createShellOfflinePreparation({getUser: () => auth.currentUser, prepare: prepareOfflineData,
+    onState(state) {
+        byId('offline-status').dataset.state = state;
+        byId('offline-status').textContent = {idle: '', preparing: 'Preparazione dei dati per uso offline…', ready: 'Dati testuali pronti per uso offline.', incomplete: 'Preparazione offline incompleta. Riconnettiti e riprova.', offline: 'Offline: puoi consultare i dati già scaricati.'}[state];
+    }});
 function refreshControls() {
     byId('login').disabled = busy || Boolean(auth.currentUser);
     byId('identity').disabled = busy || Boolean(auth.currentUser);
@@ -76,6 +83,8 @@ const session = createFirebaseSession({auth, db, cryptoApi,
     requestPassword: options => requestMaster(byId('master-dialog'), options),
     routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile, companyProfile: mountProfile},
     onState({state}) {
+        if (state === 'unlocked') void offlinePreparation.refresh();
+        else offlinePreparation.clear();
         status.textContent = state === 'unlocked' ? 'Vault sbloccato' : state === 'locked' ? 'Accesso effettuato · Vault bloccato' : 'Accesso non effettuato';
         if (state !== 'unlocked') {
             probeContext = null;

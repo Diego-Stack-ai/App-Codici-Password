@@ -13,6 +13,14 @@ Le tappe di adozione e le checkbox registrano la sequenza storica; lo stato corr
 
 ## Stato iniziale
 
+### Preparazione automatica nella shell — candidata 15/09/2026
+
+Base `2686b48e`, stessa PR #67. Lo sblocco avvia in background `prepareOfflineData` canonico; non dipende dal montaggio delle pagine. La shell mostra preparazione, esito incompleto e modalità offline; ritorno online ritenta senza decifrare contenuti. Blocco/cambio UID/perdita rete invalidano i risultati tardivi della UI. Richieste SDK già inviate possono terminare nella cache cifrata del rispettivo UID. Il deduplicatore canonico è ora separato per UID: una preparazione precedente non può diventare la Promise dell'utente successivo.
+
+Suite completa superata, inclusi 248 test shell e dieci test della preparazione del profilo. Browser Chrome/Edge: 80 verifiche entry e 56 arresto/riapertura superate. Il test di riapertura non invoca più il probe né visita profili prima di andare offline: attende il normale stato pronto, termina il browser e verifica dopo nuovo sblocco profilo personale/aziendale, credenziali, dati bancari, Widget del profilo e scadenze fittizi. Gli allegati in sottocollezioni non vengono precaricati da questo test; foto e byte file restano esclusi. La preparazione di accountWidgets/sharedVaultData è verificata nei test del servizio, non va confusa con una nuova prova browser di record non vuoti in quelle raccolte.
+
+Questa prova chiude la dipendenza dal preload manuale del laboratorio per i domini testati. Non certifica eviction, quota disco, ogni pagina produttiva o iPhone fisico. Nessuna modifica a formati/Rules/Functions o nuove scritture offline, nessun deploy. La shell è ancora incompleta e VS-P0-01 resta aperto in produzione.
+
 L'app usa la cache persistente multi-tab di Firestore e preriscalda le raccolte principali. Le letture offline sono quindi parzialmente operative, ma la coda implicita dell'SDK non offre all'interfaccia un contratto esplicito per revisione, idempotenza, conflitto o recupero dopo chiusura forzata.
 
 ## Contratto candidato

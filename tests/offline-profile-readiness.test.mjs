@@ -24,8 +24,19 @@ function harness({ previous = null, profileFails = false, profileExists = true, 
         getDocsFromServer: async path => { calls.push(path); if (path.endsWith('/' + failedCollection)) throw new Error('unavailable'); return { size: 0, docs: [] }; }
     });
     vm.runInContext(source.replace(/^import .*;\r?\n/gm, '').replace(/export /g, ''), context);
-    return { calls, run: () => vm.runInContext("prepareOfflineData({uid: 'test'}, 'home')", context) };
+    return { calls, run: (uid = 'test') => vm.runInContext(`prepareOfflineData({uid: ${JSON.stringify(uid)}}, 'home')`, context) };
 }
+
+test('simultaneous preparations for different users never share a Promise or collection scope', async () => {
+    const fixture = harness();
+    const first = fixture.run('one'), same = fixture.run('one'), second = fixture.run('two');
+    assert.equal(first, same); assert.notEqual(first, second);
+    await Promise.all([first, second]);
+    for (const uid of ['one', 'two']) {
+        assert.ok(fixture.calls.includes('users/' + uid));
+        assert.ok(fixture.calls.includes('users/' + uid + '/accountWidgets'));
+    }
+});
 
 test('Home prepares the profile even without visiting its page; old complete markers are refreshed', async () => {
     const fixture = harness({ previous: { complete: true, syncedAt: Date.now() } });

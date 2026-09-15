@@ -2,7 +2,7 @@ import * as repository from '../../Frontend/public/assets/js/modules/data/vault-
 
 // Synthetic laboratory matrix. This checks repository/cache/decryption paths,
 // not the rendering of every production page or Storage file availability.
-export async function probeOfflineConsultation({context, getUser}) {
+export async function probeOfflineConsultation({context, getUser, includeAttachmentMetadata = true}) {
     if (location.origin !== 'http://127.0.0.1:4188') throw new Error('LOCAL_EMULATOR_ONLY');
     const uid = context?.user?.uid;
     const check = () => { if (!uid || context.signal.aborted || !context.unlocked || getUser()?.uid !== uid) throw new Error('PROBE_SESSION'); };
@@ -13,7 +13,7 @@ export async function probeOfflineConsultation({context, getUser}) {
     const [privateAccounts, companies, companyAccounts, profile, company, widgets, deadlines, attachments] = await Promise.all([
         repository['listPrivateAccounts' + suffix](uid), repository['listCompanies' + suffix](uid), repository['listCompanyAccounts' + suffix](uid, 'company'),
         repository.getUserProfile(uid), repository.getCompany(uid, 'company'), repository.listProfileWidgets(uid),
-        repository.listDeadlines(uid), repository.listPrivateAccountAttachments(uid, 'banca')]);
+        repository.listDeadlines(uid), includeAttachmentMetadata ? repository.listPrivateAccountAttachments(uid, 'banca') : []]);
     check();
     if (!privateAccounts.some(record => record.id === 'banca') || !companyAccounts.some(record => record.id === 'banca') ||
         !companies.some(record => record.id === 'company')) throw new Error('PROBE_LIST_MISSING');
@@ -32,7 +32,7 @@ export async function probeOfflineConsultation({context, getUser}) {
         ['company bank IBAN', companyAccounts.find(record => record.id === 'banca').banking[0].iban, 'IBAN-FITTIZIO'],
         ['widget data', widgets.find(record => record.id === 'fixture').fields[0].value, 'WIDGET-FITTIZIO'],
         ['deadline data', deadlines.find(record => record.id === 'fixture').note, 'SCADENZA-FITTIZIA'],
-        ['attachment metadata', attachments.find(record => record.id === 'fixture').name, 'ALLEGATO-FITTIZIO']
+        ...(includeAttachmentMetadata ? [['attachment metadata', attachments.find(record => record.id === 'fixture').name, 'ALLEGATO-FITTIZIO']] : [])
     ];
     for (const [label, ciphertext, expected] of samples) {
         check(); const decoded = await context.read({ownerId: uid, ciphertext}); check();
