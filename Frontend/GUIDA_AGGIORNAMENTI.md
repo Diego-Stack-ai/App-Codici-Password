@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Editor QR aziendale dopo `81cc50d6`: montati sorgente/provider revocabili, vista comune e trasporto limitato alle fixture. Otto nuove prove unitarie, integrazione con retry dopo conferma persa; suite completa npm test superata (422 test shell) e 90 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Selezione righe aggiuntive e gate produttivi ancora aperti; proseguire parità editor/collegamenti. Dettagli nella roadmap profili, nessun deploy.
+
 Selezione QR aziendale dopo `a2a0252a`: servizio transazionale candidato per i quattordici flag fissi, ricevuta idempotente e confronto delle modifiche legacy. Dieci test unitari ed emulatori superati, suite completa npm test superata (414 test shell). UI non montata; Rules produttive invariate, overlay solo laboratorio e flag delle righe aggiuntive ancora esclusi dal servizio. Riprendere sorgente/editor aziendale; nessun deploy. Perimetro e limiti nella roadmap profili.
 
 Scheda PDF aziendale dopo `d62e74d8`: scelta gruppi, generatore locale separato, anteprima testuale e download/condivisione con fallback. Sedici nuove prove, suite completa (404 shell), 90 verifiche Chrome e controllo visivo PDF sintetico di tre pagine superati. Nessun dato reale o invio; iPhone/WhatsApp/email reali ed Edge restano da collaudare. Dettagli e limiti nella roadmap profili; riprendere editor profili/collegamenti e residui MD, senza deploy.

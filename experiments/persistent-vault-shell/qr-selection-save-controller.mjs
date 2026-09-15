@@ -1,7 +1,12 @@
 // One save per editor. Unknown outcomes keep the exact request in RAM for an
 // idempotent retry. Disposal cannot cancel a write already accepted by backend.
+function privateRequest(prepared, operationId) {
+    if (!Object.isFrozen(prepared.selection) || ['phones', 'emails', 'addresses'].some(key =>
+        !Array.isArray(prepared.selection[key]) || !Object.isFrozen(prepared.selection[key]))) throw Error('PREPARATION_INVALID');
+    return Object.freeze({selection: prepared.selection, expectedRevision: prepared.expectedRevision, operationId});
+}
 export function createQrSelectionSaveController({context, getUser, prepare, submit, onState = () => {},
-    createOperationId = () => crypto.randomUUID()}) {
+    createOperationId = () => crypto.randomUUID(), createRequest = privateRequest}) {
     const uid = context.user?.uid;
     let disposed = false, busy = false, status = 'idle', operation = null;
     const dispose = () => {disposed = true; operation = null; context.signal.removeEventListener('abort', dispose);};
@@ -20,7 +25,7 @@ export function createQrSelectionSaveController({context, getUser, prepare, subm
         check(); emit('saving');
         if (!active()) {dispose(); return {status: 'detached'};}
         try {
-            const response = await submit(operation);
+            const response = await submit(operation.request);
             if (!active()) {dispose(); return {status: 'detached'};}
             if (response?.status !== 'confirmed' || response.revision !== operation.expectedRevision + 1) return emit('unknown');
             operation = null; return emit('saved');
@@ -38,11 +43,12 @@ export function createQrSelectionSaveController({context, getUser, prepare, subm
             try {
                 emit('preparing'); check();
                 const prepared = await prepare(selection); check();
-                if (!prepared || !Number.isSafeInteger(prepared.expectedRevision) || prepared.expectedRevision < 0 || prepared.expectedRevision >= Number.MAX_SAFE_INTEGER ||
-                    !Object.isFrozen(prepared.selection) || ['phones', 'emails', 'addresses'].some(key => !Array.isArray(prepared.selection[key]) || !Object.isFrozen(prepared.selection[key]))) throw new Error('PREPARATION_INVALID');
+                if (!prepared || !Number.isSafeInteger(prepared.expectedRevision) || prepared.expectedRevision < 0 || prepared.expectedRevision >= Number.MAX_SAFE_INTEGER) throw new Error('PREPARATION_INVALID');
                 const operationId = createOperationId();
                 if (typeof operationId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(operationId)) throw new Error('OPERATION_ID_INVALID');
-                operation = Object.freeze({selection: prepared.selection, expectedRevision: prepared.expectedRevision, operationId});
+                const request = createRequest(prepared, operationId);
+                if (!request || typeof request !== 'object' || Array.isArray(request) || !Object.isFrozen(request)) throw Error('REQUEST_INVALID');
+                operation = Object.freeze({request, expectedRevision: prepared.expectedRevision});
                 return await send();
             } catch {
                 if (!active()) {dispose(); return {status: 'detached'};}

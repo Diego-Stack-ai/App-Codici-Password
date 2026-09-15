@@ -1,6 +1,7 @@
 import {signInWithEmailAndPassword} from 'firebase/auth';
 import {httpsCallable} from 'firebase/functions';
 import {mountPrivateQrEditor} from './private-qr-editor-provider.mjs';
+import {mountCompanyQrEditor} from './company-qr-editor-provider.mjs';
 import {createCompanySummaryReader} from './company-summary-reader.mjs';
 import {mountCompanySummaryView} from './company-summary-view.mjs';
 import {createCompanyPdfActions} from './company-summary-browser.mjs';
@@ -140,7 +141,12 @@ const mountProfile = context => {
         mountDigitalCard: (root, {signal}) => {
             const scoped = {...context, signal};
             return mountDigitalCardView(root, scoped, {
-                mountEditor: company ? undefined : target => mountPrivateQrEditor(target, scoped, {
+                mountEditor: company ? target => mountCompanyQrEditor(target, scoped, {source, getUser: () => auth.currentUser,
+                    submit: async request => {
+                        if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                        scoped.assertUnlocked(); if (scoped.signal.aborted || auth.currentUser?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                        return (await httpsCallable(functions, 'applyCompanyQrSelection')(request)).data;
+                    }}) : target => mountPrivateQrEditor(target, scoped, {
                     getUser: () => auth.currentUser, repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
                     isEncryptedValue: cryptoApi.isEncryptedValue, submit: async request => {
                         if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');

@@ -7,6 +7,16 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Editor QR aziendale montato — laboratorio 15/09/2026
+
+Successivo a `81cc50d6`: Modifica selezione nella tessera aziendale apre lo stesso editor del profilo privato, con i quattordici flag aziendali. Sorgente dedicata e provider senza writer alternativo; nessun valore aziendale, password o foto viene decifrato per mostrare queste etichette. Consultazione della selezione in cache offline; preparazione del salvataggio solo online con rilettura confermata, controllo UID/proprietà/archivio, identità dell'azienda e confronto della configurazione precedente.
+
+Controller comune mantiene un solo tentativo in RAM e ritenta la stessa richiesta immutabile; formato aziendale separato da quello privato, senza array privati o revisione client aggiunta al payload. Revisione attesa verificata sulla configurazione precedente. Sorgente, etichette e richieste pendenti vengono revocate alla chiusura; una scrittura già accettata dal backend non viene presentata come annullabile. Il trasporto HTTP del laboratorio estende le stesse verifiche token/origine/UID delle fixture al servizio aziendale; overlay Rules aziendale applicato dopo il seed.
+
+Otto nuove prove unitarie di sorgente/vista, con regressioni del controller privato; integrazione Firestore demo estesa al percorso sorgente-controller-servizio aziendale con risposta persa, retry e rilettura. Suite completa npm test superata (422 test shell); Chrome 58 verifiche entry e 32 arresto/riapertura superate, incluse selezione/salvataggio/rilettura aziendale, QR col telefono scelto, consultazione editor offline anche dopo riavvio, pulizia e rifiuto di richieste anonime/token invalidi. Edge e iPhone restano aperti. CI del precedente `81cc50d6` superata, run 35016571406; distinta dai collaudi di questo incremento.
+
+Limiti invariati: selezione delle email aggiuntive e altre sedi non modificabile da questo editor, foto aziendale non implementata, nessun draft persistente offline. Callable/App Check produttivi e migrazione writer legacy restano aperti; il bridge sintetico non li sostituisce. Proseguire con parità dei profili/collegamenti e selezione delle righe aggiuntive secondo schema canonico, mantenendo Widget aziendali, Excel, Edge/iPhone e M5–M10. Nessun dato reale, master, bump o deploy. Rollback limitato a provider/sorgente, adattamento controller/vista, bridge e montaggio sperimentali.
+
 ### Selezione QR aziendale: confine transazionale — laboratorio 15/09/2026
 
 Incremento successivo alla scheda PDF `a2a0252a`: preparati contratto e servizio backend candidato per i quattordici flag fissi di `qrConfig`. Distinzione esplicita tra configurazione assente (nessuna scelta implicita) e configurazione legacy esistente; telefono aziendale, email amministrativa e personale mantengono opt-in. Payload solo booleani, identificatore azienda/operazione e configurazione precedente, mai valori di contatto o credenziali. Campi sconosciuti non vengono scartati: la richiesta viene rifiutata.

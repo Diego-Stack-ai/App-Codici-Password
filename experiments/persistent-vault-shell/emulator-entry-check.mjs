@@ -96,10 +96,22 @@ async function checkCompanyProfile(mode) {
     }
     document.querySelector('[data-profile-section="digital-card"]').click();
     await wait(()=>document.querySelector('[data-digital-card-preview]'),'COMPANY_DIGITAL_TAB');
+    buttons('Modifica selezione')[0].click();
+    await wait(()=>buttons('Salva selezione').length, 'COMPANY_QR_EDITOR');
+    const phoneChoice = () => [...byId('content').querySelectorAll('label')].find(node => node.textContent === 'Telefono aziendale').querySelector('input');
+    if (mode === 'online') {
+        phoneChoice().checked = true; buttons('Salva selezione')[0].click();
+        await wait(()=>byId('content').textContent.includes('Selezione salvata.'), 'COMPANY_QR_SAVED');
+        buttons('Modifica selezione')[0].click();
+        await wait(()=>buttons('Salva selezione').length && !buttons('Salva selezione')[0].disabled, 'COMPANY_QR_REOPENED');
+    }
+    assert(phoneChoice().checked, 'COMPANY_QR_SELECTION_PERSISTED');
+    const companyEditorLabels = [...byId('content').querySelectorAll('label span')];
     buttons('Genera QR dalla selezione salvata')[0].click();
     await wait(()=>byId('content').textContent.includes('QR pronto.'),'COMPANY_DIGITAL_READY');
     const companyQr = document.querySelector('[data-digital-card-preview]'), companyCanvas = companyQr.querySelector('canvas');
     assert(companyQr.title.includes('FN:Azienda fittizia') && companyQr.title.includes('pec@example.invalid'), 'COMPANY_DIGITAL_DATA');
+    assert(companyQr.title.includes('111111111'), 'COMPANY_DIGITAL_SELECTED_PHONE');
     assert(!/SEGRETO|personale@example.invalid|Visura/.test(companyQr.title), 'COMPANY_DIGITAL_EXCLUSION');
     document.querySelector('[data-profile-section="pdf-summary"]').click();
     await wait(()=>buttons('Prepara PDF').length, 'COMPANY_PDF_TAB');
@@ -111,6 +123,7 @@ async function checkCompanyProfile(mode) {
     assert(!buttons('Scarica PDF')[0].disabled, 'COMPANY_PDF_DOWNLOAD_READY');
     byId('private').click();await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COMPANY_EXIT');
     assert(companyCanvas.width === 0 && !companyQr.title, 'COMPANY_DIGITAL_CLEAR');
+    assert(companyEditorLabels.every(node => node.textContent === ''), 'COMPANY_QR_EDITOR_CLEAR');
     assert(pdfValues.every(node => node.textContent === ''), 'COMPANY_PDF_CLEAR');
     assert(document===marker,'COMPANY_RELOAD');
     profileChecks.push('company canonical profile tabs rendered '+mode,'company shared and private linked credentials with safe navigation '+mode);
@@ -207,8 +220,10 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        const qrDenied = await fetch('/demo-vault-shell/europe-west1/applyPrivateQrSelection', {method: 'POST', headers, body: '{}'});
-        assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection']) {
+            const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
+            assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
+        }
     }
     await wait(() => byId('login') && !byId('login').disabled, 'LOGIN');
     byId('login').click();

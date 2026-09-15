@@ -12,6 +12,8 @@ import {createQrSelectionSaveController} from './qr-selection-save-controller.mj
 import {withCompanyQrSelectionCandidateRules} from './company-qr-selection-candidate-rules.mjs';
 import {createCompanyQrSelectionHandler} from './company-qr-selection-handler.mjs';
 import {readCompanyQrSelection} from './company-qr-selection-contract.mjs';
+import {createCompanyQrEditorSource} from './company-qr-editor-source.mjs';
+import {createCompanyQrRequest} from './company-qr-editor-provider.mjs';
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
 assert.equal(process.env.GCLOUD_PROJECT, 'demo-vault-shell');
@@ -108,6 +110,20 @@ test('candidate QR selection transaction and closed direct-write Rules on synthe
         assert.equal(race.filter(result => result.status === 'fulfilled').length, 1);
         assert.equal(race.filter(result => result.status === 'rejected').length, 1);
         assert.equal((await db.doc(companyPath).get()).data().qrConfig._qrRevision, 2);
+        const companyAbort = new AbortController(), companyContext = {...context, signal: companyAbort.signal};
+        const companySource = createCompanyQrEditorSource({context: companyContext, getUser: () => ({uid}), isOnline: () => true,
+            source: {domain: 'company', companyId, read: async (requested, confirmed) => {
+                assert.equal(requested, uid); assert.equal(confirmed, true); return (await getDoc(doc(owner, companyPath))).data();
+            }}});
+        const companyView = await companySource.load(); let lost = true;
+        const companyController = createQrSelectionSaveController({context: companyContext, getUser: () => ({uid}),
+            prepare: value => companySource.prepare(value), createRequest: createCompanyQrRequest, createOperationId: () => 'company-editor',
+            submit: async request => {const result = await companyRun(request, trusted); if (lost) {lost = false; throw Error('RESPONSE_LOST');} return result;}});
+        assert.equal((await companyController.save({...companyView.selection, telefonoAzienda: true})).status, 'unknown');
+        assert.equal((await companyController.retry()).status, 'saved');
+        assert.equal((await companySource.load()).selection.telefonoAzienda, true);
+        assert.equal((await db.doc(companyPath).get()).data().qrConfig._qrRevision, 3);
+        companyController.dispose(); companySource.dispose(); companyAbort.abort();
         await db.doc(companyPath).update({qrConfig: {ragioneSociale: false}});
         await assert.rejects(companyRun({...companyData, operationId: 'company-legacy', expectedConfig: {ragioneSociale: true}}, trusted), /REVISION_CONFLICT/);
         assert.equal((await db.doc(`mutationResults/${uid}/operations/qr-company-company-legacy`).get()).exists, false);

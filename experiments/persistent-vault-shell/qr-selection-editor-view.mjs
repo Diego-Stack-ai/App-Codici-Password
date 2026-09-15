@@ -1,8 +1,12 @@
 import {PRIVATE_QR_SCALARS} from './qr-selection-contract.mjs';
+import {COMPANY_QR_SCALARS} from './company-qr-selection-contract.mjs';
 
 // Dependency-injected editor. Mount only after a trusted writer is available;
 // the module itself never imports Firebase or creates an alternate write path.
-export async function mountQrSelectionEditor(root, context, {load, createController}) {
+export async function mountQrSelectionEditor(root, context, {load, createController, domain = 'private'}) {
+    if (!['private', 'company'].includes(domain)) throw Error('INVALID_DOMAIN');
+    const scalarKeys = domain === 'company' ? COMPANY_QR_SCALARS : PRIVATE_QR_SCALARS;
+    const collectionKeys = domain === 'company' ? [] : ['phones', 'emails', 'addresses'];
     let disposed = false, controller;
     const abort = new AbortController(), host = document.createElement('section'), fields = document.createElement('fieldset');
     const status = document.createElement('p'), save = document.createElement('button'), retry = document.createElement('button');
@@ -23,8 +27,8 @@ export async function mountQrSelectionEditor(root, context, {load, createControl
         if (!snapshot || !Array.isArray(snapshot.choices) || snapshot.choices.length > 3005) throw Error('INVALID_CHOICES');
         const seen = new Set();
         for (const choice of snapshot.choices) {
-            const scalar = PRIVATE_QR_SCALARS.includes(choice.key), compound = `${choice.key}:${choice.id ?? ''}`;
-            if ((!scalar && !['phones', 'emails', 'addresses'].includes(choice.key)) || (scalar && choice.id != null) ||
+            const scalar = scalarKeys.includes(choice.key), compound = `${choice.key}:${choice.id ?? ''}`;
+            if ((!scalar && !collectionKeys.includes(choice.key)) || (scalar && choice.id != null) ||
                 (!scalar && (typeof choice.id !== 'string' || !choice.id)) || seen.has(compound) || typeof choice.label !== 'string' || choice.label.length > 100000) throw Error('INVALID_CHOICES');
             seen.add(compound);
             const label = document.createElement('label'), input = document.createElement('input'), text = document.createElement('span');
@@ -32,7 +36,7 @@ export async function mountQrSelectionEditor(root, context, {load, createControl
             text.textContent = choice.label; label.append(input, text); fields.append(label);
             rows.push({key: choice.key, id: choice.id, input, label: text});
         }
-        if (PRIVATE_QR_SCALARS.some(key => !seen.has(`${key}:`)) || ['phones', 'emails', 'addresses'].some(key =>
+        if (scalarKeys.some(key => !seen.has(`${key}:`)) || collectionKeys.some(key =>
             !Array.isArray(snapshot.selection[key]) || snapshot.selection[key].some(id => !seen.has(`${key}:${id}`)))) throw Error('INCOMPLETE_CHOICES');
         const onState = ({status: state}) => {
             if (disposed || context.signal.aborted) return;
@@ -44,10 +48,10 @@ export async function mountQrSelectionEditor(root, context, {load, createControl
         controller = createController({onState}); if (disposed) controller.dispose(); check();
         const act = async action => {try {check(); await action();} catch {if (!disposed) status.textContent = 'Operazione non disponibile. Riapri la tessera.';}};
         save.addEventListener('click', () => {void act(() => {
-            const selection = Object.fromEntries(PRIVATE_QR_SCALARS.map(key => [key, false]));
-            Object.assign(selection, {phones: [], emails: [], addresses: []});
+            const selection = Object.fromEntries(scalarKeys.map(key => [key, false]));
+            for (const key of collectionKeys) selection[key] = [];
             for (const row of rows) if (row.input.checked) {
-                if (PRIVATE_QR_SCALARS.includes(row.key)) selection[row.key] = true; else selection[row.key].push(row.id);
+                if (scalarKeys.includes(row.key)) selection[row.key] = true; else selection[row.key].push(row.id);
             }
             return controller.save(selection);
         });}, {signal: abort.signal});

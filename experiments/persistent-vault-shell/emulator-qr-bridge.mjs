@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
+import {createCompanyQrSelectionHandler} from './company-qr-selection-handler.mjs';
 
 export function createEmulatorQrBridge(uids) {
     assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
@@ -13,10 +14,14 @@ export function createEmulatorQrBridge(uids) {
     const {getAuth} = require('firebase-admin/auth'), {getFirestore, FieldValue} = require('firebase-admin/firestore');
     const {getApps, initializeApp} = require('firebase-admin/app');
     const app = getApps().find(item => item.name === '[DEFAULT]') || initializeApp({projectId: 'demo-vault-shell'});
-    const owners = new Set(uids), run = createPrivateQrSelectionHandler({db: getFirestore(app),
-        hash: value => createHash('sha256').update(value).digest('hex'), timestamp: () => FieldValue.serverTimestamp()});
+    const owners = new Set(uids), dependencies = {db: getFirestore(app),
+        hash: value => createHash('sha256').update(value).digest('hex'), timestamp: () => FieldValue.serverTimestamp()};
+    const handlers = new Map([
+        ['/demo-vault-shell/europe-west1/applyPrivateQrSelection', createPrivateQrSelectionHandler(dependencies)],
+        ['/demo-vault-shell/europe-west1/applyCompanyQrSelection', createCompanyQrSelectionHandler(dependencies)]
+    ]);
     return async (request, response) => {
-        if (request.url !== '/demo-vault-shell/europe-west1/applyPrivateQrSelection') return false;
+        const run = handlers.get(request.url); if (!run) return false;
         response.setHeader('Content-Type', 'application/json'); response.setHeader('Cache-Control', 'no-store');
         const deny = () => {response.writeHead(401).end(JSON.stringify({error: {status: 'UNAUTHENTICATED', message: 'Laboratory request rejected'}})); return true;};
         if (request.method !== 'POST' || request.headers.host !== '127.0.0.1:4188' || request.headers.origin !== 'http://127.0.0.1:4188' ||

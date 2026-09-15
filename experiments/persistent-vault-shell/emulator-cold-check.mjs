@@ -140,6 +140,10 @@ try {
         await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COLD_COMPANY_PROFILE');
         document.querySelector('[data-profile-section="digital-card"]').click();
         await wait(()=>document.querySelector('[data-digital-card-preview]'),'COLD_COMPANY_DIGITAL_TAB');
+        button('Modifica selezione').click();
+        await wait(()=>[...byId('content').querySelectorAll('button')].some(node=>node.textContent==='Salva selezione'), 'COLD_COMPANY_QR_EDITOR');
+        assert(byId('content').querySelectorAll('input[type="checkbox"]').length === 14, 'COLD_COMPANY_QR_CHOICES');
+        const companyEditorLabels = [...byId('content').querySelectorAll('label span')];
         button('Genera QR dalla selezione salvata').click();
         await wait(()=>byId('content').textContent.includes('QR pronto.'),'COLD_COMPANY_DIGITAL_READY');
         const companyQr = document.querySelector('[data-digital-card-preview]'), companyCanvas = companyQr.querySelector('canvas');
@@ -154,6 +158,7 @@ try {
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COLD_COMPANY_CONTACTS');
         assert(companyCanvas.width === 0 && !companyQr.title, 'COLD_COMPANY_DIGITAL_CLEAR');
+        assert(companyEditorLabels.every(node => node.textContent === ''), 'COLD_COMPANY_QR_EDITOR_CLEAR');
         assert(companyPdfValues.every(node => node.textContent === ''), 'COLD_COMPANY_PDF_CLEAR');
         button('Mostra password').click();
         await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_COMPANY_PASSWORD');

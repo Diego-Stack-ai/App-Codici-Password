@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mountQrSelectionEditor} from './qr-selection-editor-view.mjs';
 import {PRIVATE_QR_SCALARS, preparePrivateQrSelection} from './qr-selection-contract.mjs';
+import {COMPANY_QR_SCALARS, readCompanyQrSelection} from './company-qr-selection-contract.mjs';
 class Node extends EventTarget {
     constructor(tag) {super(); this.tag = tag; this.children = []; this.textContent = '';}
     append(...nodes) {for (const node of nodes) {node.parent = this; this.children.push(node);}}
@@ -39,4 +40,18 @@ test('missing selected contact in choices cannot silently remove it from the sav
     await assert.rejects(mountQrSelectionEditor(root, {signal: new AbortController().signal, assertUnlocked() {}}, {
         load: async () => value, createController() {throw Error('must not create');}}), /INCOMPLETE_CHOICES/);
     assert.equal(root.children.length, 0);
+});
+
+test('company mode uses the same editor but sends only company flags and clears retained nodes', async () => {
+    const root = new Node('root'), abort = new AbortController(); let sent;
+    const value = {selection: readCompanyQrSelection({}).selection,
+        choices: COMPANY_QR_SCALARS.map(key => ({key, label: key}))};
+    const cleanup = await mountQrSelectionEditor(root, {signal: abort.signal, assertUnlocked() {}}, {domain: 'company',
+        load: async () => value, createController: () => ({save: async selection => {sent = selection;}, dispose() {}})});
+    const inputs = root.all('input'), labels = root.all('span');
+    assert.equal(inputs.length, 14); inputs[9].checked = true;
+    root.all('button')[0].dispatchEvent(new Event('click')); await tick();
+    assert.equal(sent.telefonoAzienda, true); assert.equal(Object.keys(sent).length, 14); assert.equal(sent.phones, undefined);
+    cleanup(); assert.equal(root.children.length, 0); assert.ok(inputs.every(node => !node.checked));
+    assert.ok(labels.every(node => node.textContent === ''));
 });
