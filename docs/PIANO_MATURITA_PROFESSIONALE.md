@@ -508,3 +508,11 @@ npm test completo della release superato; GitHub Actions 34937232687, job valida
 Retest iPhone ancora richiesto sulla 1.2.126: app online fino a completamento preparazione, poi modalità aereo senza logout; profilo, Widget e credenziali comuni consultabili senza visita preventiva. Foto e allegati esclusi per decisione dell'utente. Non interpretare la nuova pubblicazione come test fisico riuscito o garanzia contro cache espulsa.
 
 PR #63 resta separata e aperta. Produzione ora 1.2.126: prima di un futuro rilascio sperimentale riallineare master, versioni e i due backport già distribuiti, evitando duplicazioni. Non distribuire direttamente la vecchia versione 1.2.124 del ramo sperimentale.
+
+## Rilascio isolato Auth 1.2.127 completato — 15/09/2026
+
+PR #66 unita in master 0ba2332b298d155f0afb1a4eb50c9659115fe321; release 94792d837cadd538e17aa67e439df1c68a09a23a. Pubblicazione Hosting autorizzata e completata. Le 22 pagine private rimangono nascoste fino alla conferma Auth; errore, timeout e logout mantengono il blocco. Pulizia locale/Vault prima del tentativo di signOut. Nessuna lettura o modifica di dati reali; Functions e Rules non distribuite.
+
+npm test completo e dieci scenari browser Chrome/Edge superati; GitHub Actions 34939530695 riuscita. Dopo il deploy, 31 file pubblicati corrispondono via SHA256 alla release. Prova Chrome con profilo isolato senza credenziali: nessuna struttura privata visibile e arrivo a /login-v115.html senza parametro di errore/timeout. Collaudo fisico iPhone ancora da eseguire, inclusa riapertura offline con sessione mantenuta e sblocco Vault.
+
+Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima di integrare, evitando duplicazioni dei backport offline e logout. La direzione shell persistente resta confermata; questo rilascio non chiude il P0 legacy del wrapping in sessionStorage né l'intero audit sicurezza. Dettagli implementativi e regressioni sono in docs/AUDIT_VAULT_SESSION_P0.md del ramo produttivo e nella PR #66.
