@@ -100,6 +100,10 @@ const qrRulesEnvironment = await initializeTestEnvironment({projectId: 'demo-vau
 await qrRulesEnvironment.cleanup();
 const assets = new Map([['/assets/js/vendor/qrcode.min.js', ['assets/js/vendor/qrcode.min.js', 'text/javascript']], ['/', ['emulator.html', 'text/html']], ['/emulator.css', ['emulator.css', 'text/css']], ['/emulator.js', ['emulator.js', 'text/javascript']], ['/symbols.woff2', ['symbols.woff2', 'font/woff2']], ['/assets/images/google-avatar.png', ['assets/images/google-avatar.png', 'image/png']]]);
 const handleNote = createEmulatorNoteBridge(fixtureUids);
+assets.set('/company-summary-pdf.js', ['company-summary-pdf.js', 'text/javascript']);
+for (const name of ['LiberationSans-Regular.ttf', 'LiberationSans-Bold.ttf', 'LICENSE_LIBERATION']) {
+    assets.set(`/assets/pdf/${name}`, [`assets/pdf/${name}`, name.endsWith('.ttf') ? 'font/ttf' : 'text/plain']);
+}
 const handleQr = createEmulatorQrBridge(fixtureUids);
 const server = createServer(async (request, response) => {
     if (request.headers.host !== '127.0.0.1:4188') { response.writeHead(403).end(); return; }

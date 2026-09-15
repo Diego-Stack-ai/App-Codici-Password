@@ -145,9 +145,16 @@ try {
         const companyQr = document.querySelector('[data-digital-card-preview]'), companyCanvas = companyQr.querySelector('canvas');
         assert(companyQr.title.includes('FN:Azienda fittizia') && companyQr.title.includes('pec@example.invalid'), 'COLD_COMPANY_DIGITAL_DATA');
         assert(!/SEGRETO|personale@example.invalid|Visura/.test(companyQr.title), 'COLD_COMPANY_DIGITAL_EXCLUSION');
+        document.querySelector('[data-profile-section="pdf-summary"]').click();
+        await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Prepara PDF'), 'COLD_COMPANY_PDF_TAB');
+        button('Prepara PDF').click();
+        await wait(() => byId('content').textContent.includes('PDF pronto.'), 'COLD_COMPANY_PDF_READY');
+        const companyPdfValues = [...document.querySelectorAll('[data-company-pdf-preview] dd')];
+        assert(companyPdfValues.some(node => node.textContent === 'Azienda fittizia') && !companyPdfValues.some(node => /SEGRETO|Visura/.test(node.textContent)), 'COLD_COMPANY_PDF_DATA');
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COLD_COMPANY_CONTACTS');
         assert(companyCanvas.width === 0 && !companyQr.title, 'COLD_COMPANY_DIGITAL_CLEAR');
+        assert(companyPdfValues.every(node => node.textContent === ''), 'COLD_COMPANY_PDF_CLEAR');
         button('Mostra password').click();
         await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_COMPANY_PASSWORD');
         const companyValues=[...byId('content').querySelectorAll('dd')];

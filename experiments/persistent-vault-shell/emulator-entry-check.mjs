@@ -101,8 +101,17 @@ async function checkCompanyProfile(mode) {
     const companyQr = document.querySelector('[data-digital-card-preview]'), companyCanvas = companyQr.querySelector('canvas');
     assert(companyQr.title.includes('FN:Azienda fittizia') && companyQr.title.includes('pec@example.invalid'), 'COMPANY_DIGITAL_DATA');
     assert(!/SEGRETO|personale@example.invalid|Visura/.test(companyQr.title), 'COMPANY_DIGITAL_EXCLUSION');
+    document.querySelector('[data-profile-section="pdf-summary"]').click();
+    await wait(()=>buttons('Prepara PDF').length, 'COMPANY_PDF_TAB');
+    buttons('Prepara PDF')[0].click();
+    await wait(()=>byId('content').textContent.includes('PDF pronto.'), 'COMPANY_PDF_READY');
+    const pdfValues = [...document.querySelectorAll('[data-company-pdf-preview] dd')];
+    assert(pdfValues.some(node => node.textContent === 'Azienda fittizia') && pdfValues.some(node => node.textContent === 'pec@example.invalid'), 'COMPANY_PDF_DATA');
+    assert(!pdfValues.some(node => /SEGRETO|Visura/.test(node.textContent)), 'COMPANY_PDF_EXCLUSION');
+    assert(!buttons('Scarica PDF')[0].disabled, 'COMPANY_PDF_DOWNLOAD_READY');
     byId('private').click();await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COMPANY_EXIT');
     assert(companyCanvas.width === 0 && !companyQr.title, 'COMPANY_DIGITAL_CLEAR');
+    assert(pdfValues.every(node => node.textContent === ''), 'COMPANY_PDF_CLEAR');
     assert(document===marker,'COMPANY_RELOAD');
     profileChecks.push('company canonical profile tabs rendered '+mode,'company shared and private linked credentials with safe navigation '+mode);
     profileChecks.push('company directory search and second profile '+mode,'same Account ID in different companies navigates with correct company scope '+mode);

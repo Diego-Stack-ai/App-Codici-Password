@@ -15,7 +15,17 @@ Corretto il caricamento dei metadati canonici: il repository aggiunge id al docu
 
 Gate produttivo ancora aperto: callable reale con App Check, transizione dei writer legacy, migrazione/rollback e collaudi Edge/iPhone. Nessuna promessa di draft persistente offline. Nessun dato reale, master, bump o deploy. Prossimo blocco richiesto: scheda PDF aziendale; mantenere separati i residui selezione aziendale, foto e altri editor del piano.
 
-### Scheda PDF aziendale — richiesta 15/09/2026, da implementare
+### Scheda PDF aziendale nella shell — candidata 15/09/2026
+
+Implementa la richiesta registrata in `45110a0e`, dopo il montaggio QR `d62e74d8`. Nuova linguetta Scheda PDF nel profilo aziendale con scelta per gruppi (azienda, fiscale, referente, contatti, sedi), preparazione esplicita, anteprima testuale dei dati selezionati, download e condivisione nativa del file quando supportata. Condivisione invocata dal clic dopo la preparazione, senza invio automatico; fallback download quando il dispositivo non condivide file.
+
+Lettore dedicato con UID, sessione, confronto finale del record e proiezione minima: non decifra né passa password, PIN, note riservate, dati bancari, link Account o allegati. PDF generato localmente con pdf-lib 1.17.1 e fontkit 1.1.1 fissati; font Liberation incorporati con licenza SIL inclusa. Generatore separato caricato su richiesta. Cache conserva solo codice/font pubblici; PDF e anteprime restano nella vista, buffer azzerati e URL revocati all'uscita/cambio selezione. File già scaricati/condivisi sono copie esterne, non revocabili dalla sessione.
+
+Sedici nuove prove, suite completa `npm test` superata (404 shell). Chrome 58 entry + 32 arresto/riapertura: generazione online/offline, prima visita dopo riavvio offline, esclusione segreti, download pronto e pulizia anteprima. Le azioni di download/condivisione sono verificate anche con adapter simulati; nessun messaggio reale inviato. PDF sintetico di tre pagine renderizzato e ispezionato integralmente; accenti e tutte le 75 frasi del testo lungo preservati. Output QA esclusi da Git. Risolto il recupero font nella seconda visita offline senza conservare dati utente.
+
+Limiti aperti: condivisione/download su iPhone reale e destinazioni WhatsApp/email, Edge locale, caratteri non presenti nel font (rifiutati, mai sostituiti silenziosamente). Anteprima in app testuale; il layout PDF è collaudato tramite fixture renderizzata. Selezione attuale per gruppi, non singoli campi. Nessun dato reale, master, bump o deploy. Rollback limitato ai moduli PDF, montaggio/assets sperimentali e dipendenze aggiunte. Riprendere il programma dal gate adapter/rollout QR e dagli editor profili/collegamenti, mantenendo aperti selezione aziendale, Widget aziendali ed Excel.
+
+### Scheda PDF aziendale — richiesta originaria 15/09/2026
 
 Diego richiede un PDF di riepilogo dei dati aziendali da salvare sul telefono o inviare tramite WhatsApp/email. Prevedere scelta dei campi, anteprima, download e condivisione nativa del file quando supportata; fallback download, nessun invio automatico o pubblicazione su URL pubblico. Contenuto: identità/dati fiscali, referente, sedi, email e telefoni. Password, PIN/PUK, credenziali degli Account collegati, chiavi, note riservate e allegati esclusi dalla proiezione; non basta mascherarli graficamente dopo averli caricati nel generatore.
 

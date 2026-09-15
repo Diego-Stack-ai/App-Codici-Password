@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **628**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -21,7 +21,7 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1618 | 85 | Esclusioni Git per file generati o locali. |
+| `.gitignore` | CONFIG | 1715 | 89 | Esclusioni Git per file generati o locali. |
 
 ## .vscode
 
@@ -35,7 +35,7 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 111965 | 950 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 112423 | 952 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -325,8 +325,8 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 68515 | 588 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 66101 | 508 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 69076 | 590 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 68352 | 518 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -384,13 +384,16 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5488 | 88 | File di progetto: account-widget-view. |
 | `experiments/persistent-vault-shell/account-widget-view.test.mjs` | MJS | 4309 | 60 | File di progetto: account-widget-view.test. |
 | `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
+| `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4414 | 103 | File di progetto: LICENSE LIBERATION. |
+| `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Bold.ttf` | TTF | 137052 | 1082 | File di progetto: LiberationSans-Bold. |
+| `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Regular.ttf` | TTF | 139512 | 906 | File di progetto: LiberationSans-Regular. |
 | `experiments/persistent-vault-shell/banking-reader.mjs` | MJS | 5045 | 80 | File di progetto: banking-reader. |
 | `experiments/persistent-vault-shell/banking-reader.test.mjs` | MJS | 5963 | 78 | File di progetto: banking-reader.test. |
 | `experiments/persistent-vault-shell/banking-view.mjs` | MJS | 3424 | 51 | File di progetto: banking-view. |
 | `experiments/persistent-vault-shell/banking-view.test.mjs` | MJS | 3714 | 52 | File di progetto: banking-view.test. |
 | `experiments/persistent-vault-shell/browser-session-boundary.mjs` | MJS | 998 | 21 | File di progetto: browser-session-boundary. |
 | `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
-| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 3944 | 43 | File di progetto: build-emulator. |
+| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 4534 | 49 | File di progetto: build-emulator. |
 | `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
 | `experiments/persistent-vault-shell/company-digital-card-reader.mjs` | MJS | 4087 | 64 | File di progetto: company-digital-card-reader. |
 | `experiments/persistent-vault-shell/company-digital-card-reader.test.mjs` | MJS | 3598 | 48 | File di progetto: company-digital-card-reader.test. |
@@ -398,19 +401,27 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/company-directory.test.mjs` | MJS | 5415 | 61 | File di progetto: company-directory.test. |
 | `experiments/persistent-vault-shell/company-profile-source.mjs` | MJS | 2096 | 31 | File di progetto: company-profile-source. |
 | `experiments/persistent-vault-shell/company-profile-source.test.mjs` | MJS | 5210 | 60 | File di progetto: company-profile-source.test. |
+| `experiments/persistent-vault-shell/company-summary-browser.mjs` | MJS | 2732 | 39 | File di progetto: company-summary-browser. |
+| `experiments/persistent-vault-shell/company-summary-browser.test.mjs` | MJS | 2121 | 28 | File di progetto: company-summary-browser.test. |
+| `experiments/persistent-vault-shell/company-summary-pdf.mjs` | MJS | 5829 | 95 | File di progetto: company-summary-pdf. |
+| `experiments/persistent-vault-shell/company-summary-pdf.test.mjs` | MJS | 2199 | 32 | File di progetto: company-summary-pdf.test. |
+| `experiments/persistent-vault-shell/company-summary-reader.mjs` | MJS | 5040 | 66 | File di progetto: company-summary-reader. |
+| `experiments/persistent-vault-shell/company-summary-reader.test.mjs` | MJS | 2890 | 35 | File di progetto: company-summary-reader.test. |
+| `experiments/persistent-vault-shell/company-summary-view.mjs` | MJS | 4722 | 52 | File di progetto: company-summary-view. |
+| `experiments/persistent-vault-shell/company-summary-view.test.mjs` | MJS | 2453 | 34 | File di progetto: company-summary-view.test. |
 | `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
 | `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
 | `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 12986 | 140 | File di progetto: emulator-browser. |
-| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 17123 | 206 | File di progetto: emulator-cold-check. |
-| `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1067 | 17 | File di progetto: emulator-cold-sw. |
-| `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2206 | 35 | File di progetto: emulator-cold-sw.test. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 13290 | 144 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 17880 | 213 | File di progetto: emulator-cold-check. |
+| `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
+| `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6301 | 124 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 24512 | 286 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 25310 | 295 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 5034 | 70 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 15654 | 201 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 16589 | 212 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 5184 | 64 | File di progetto: emulator-network-control. |
@@ -463,7 +474,7 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
 | `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 4790 | 71 | File di progetto: profile-section-reader. |
 | `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 7900 | 118 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 8091 | 118 | File di progetto: profile-shell-view. |
 | `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 10588 | 129 | File di progetto: profile-shell-view.test. |
 | `experiments/persistent-vault-shell/profile-widget-reader.mjs` | MJS | 4427 | 70 | File di progetto: profile-widget-reader. |
 | `experiments/persistent-vault-shell/profile-widget-reader.test.mjs` | MJS | 4399 | 50 | File di progetto: profile-widget-reader.test. |
@@ -484,6 +495,7 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/qr-selection-save-controller.mjs` | MJS | 3354 | 60 | File di progetto: qr-selection-save-controller. |
 | `experiments/persistent-vault-shell/qr-selection-save-controller.test.mjs` | MJS | 2915 | 41 | File di progetto: qr-selection-save-controller.test. |
 | `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2355 | 40 | File di progetto: real-lists-entry. |
+| `experiments/persistent-vault-shell/render-company-summary-fixture.mjs` | MJS | 1708 | 19 | File di progetto: render-company-summary-fixture. |
 | `experiments/persistent-vault-shell/router.mjs` | MJS | 1210 | 33 | File di progetto: router. |
 | `experiments/persistent-vault-shell/serve.mjs` | MJS | 1577 | 21 | File di progetto: serve. |
 | `experiments/persistent-vault-shell/shell-offline-preparation.mjs` | MJS | 1891 | 31 | File di progetto: shell-offline-preparation. |
@@ -565,13 +577,13 @@ File censiti: **616**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package-lock.json` | JSON | 455321 | 12562 | Lockfile riproducibile delle dipendenze npm. |
+| `package-lock.json` | JSON | 444970 | 12617 | Lockfile riproducibile delle dipendenze npm. |
 
 ## package.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 11518 | 86 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 11864 | 90 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

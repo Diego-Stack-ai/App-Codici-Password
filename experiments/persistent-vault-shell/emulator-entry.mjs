@@ -1,6 +1,9 @@
 import {signInWithEmailAndPassword} from 'firebase/auth';
 import {httpsCallable} from 'firebase/functions';
 import {mountPrivateQrEditor} from './private-qr-editor-provider.mjs';
+import {createCompanySummaryReader} from './company-summary-reader.mjs';
+import {mountCompanySummaryView} from './company-summary-view.mjs';
+import {createCompanyPdfActions} from './company-summary-browser.mjs';
 import {auth, db, functions} from './emulator-firebase.mjs';
 import {openEmulatorQueue} from './emulator-queue.mjs';
 import {createFirebasePrivateNoteSource} from './firebase-private-note-source.mjs';
@@ -121,6 +124,14 @@ const mountProfile = context => {
         getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
         readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue, buildProfileOverview, resolvePrimary}),
+        mountCompanySummary: !company ? undefined : (root, {signal}) => {
+            const scoped = {...context, signal};
+            const actions = createCompanyPdfActions({assertActive() {scoped.assertUnlocked(); if (signal.aborted || auth.currentUser?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');}});
+            signal.addEventListener('abort', () => actions.dispose(), {once: true});
+            const cleanup = mountCompanySummaryView(root, scoped, {...actions, read: createCompanySummaryReader({context: scoped,
+                getUser: () => auth.currentUser, source, isEncryptedValue: cryptoApi.isEncryptedValue})});
+            return () => {try {cleanup();} finally {actions.dispose();}};
+        },
         mountWidgets: company ? undefined : (root, {section, signal}) => {
             const scoped = {...context, signal};
             return mountProfileWidgetView(root, scoped, {reader: createProfileWidgetReader({context: scoped, getUser: () => auth.currentUser,

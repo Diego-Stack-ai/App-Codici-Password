@@ -2,7 +2,7 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Read-only migration slice: changes to links, utilities and QR are not enabled.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
@@ -65,9 +65,9 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
         for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.profileSection === section));
         panel.textContent = 'Caricamento…';
         try {
-            if (section === 'digital-card' && mountDigitalCard) {
+            if ((section === 'digital-card' && mountDigitalCard) || (section === 'pdf-summary' && mountCompanySummary)) {
                 context.assertUnlocked(); clear(); sectionControls = new AbortController();
-                const mounted = await mountDigitalCard(panel, {signal: sectionControls.signal});
+                const mounted = await (section === 'digital-card' ? mountDigitalCard : mountCompanySummary)(panel, {signal: sectionControls.signal});
                 if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
                 return;
             }
@@ -104,7 +104,7 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
         }
     }
     for (const [section, label] of Object.entries({...readOverview ? {overview: 'Panoramica'} : {}, ...PROFILE_SECTIONS,
-        ...mountDigitalCard ? {'digital-card': 'Tessera digitale'} : {}})) {
+        ...mountDigitalCard ? {'digital-card': 'Tessera digitale'} : {}, ...mountCompanySummary ? {'pdf-summary': 'Scheda PDF'} : {}})) {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
         button.dataset.profileSection = section;
         button.addEventListener('click', () => { void select(section); }, {signal: controls.signal});

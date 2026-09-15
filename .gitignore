@@ -82,3 +82,7 @@ translations.full.js
 # Documento locale riservato con credenziali (non versionare)
 Torna alla Login e accedi con.docx
 
+# PDF review outputs and rendered QA pages (never commit exported data).
+/output/pdf/
+/tmp/pdfs/
+

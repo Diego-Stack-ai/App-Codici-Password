@@ -5,6 +5,7 @@ const base = import.meta.dirname, publicRoot = resolve(base, '../../Frontend/pub
 export async function buildEmulator({persistent = false} = {}) {
     await mkdir(`${base}/dist/emulator-site/assets/images`, {recursive: true});
     await mkdir(`${base}/dist/emulator-site/assets/js/vendor`, {recursive: true});
+    await mkdir(`${base}/dist/emulator-site/assets/pdf`, {recursive: true});
     const deny = 'const deny = () => {throw new Error("EMULATOR_READ_ONLY")};';
     const boundaries = {
         'firebase-config.js': 'export {auth, db} from "./emulator-firebase.mjs";',
@@ -18,7 +19,7 @@ export async function buildEmulator({persistent = false} = {}) {
         'private-account-offline-pilot.js': `${deny} export {deny as consumePrivateAccountHandoff};`
     };
     const result = await build({entryPoints: [`${base}/emulator-entry.mjs`], outfile: `${base}/dist/emulator-site/emulator.js`,
-        bundle: true, format: 'esm', platform: 'browser', metafile: true, target: ['safari16', 'chrome110'], logLevel: 'warning',
+        bundle: true, format: 'esm', platform: 'browser', metafile: true, target: ['safari16', 'chrome110'], logLevel: 'warning', external: ['/company-summary-pdf.js'],
         define: {__EMULATOR_PERSISTENT_CACHE__: JSON.stringify(persistent)},
         plugins: [{name: 'emulator-boundaries', setup(builder) {
             builder.onResolve({filter: /\.js(?:\?.*)?$/}, args => {
@@ -39,4 +40,9 @@ export async function buildEmulator({persistent = false} = {}) {
     await copyFile(`${publicRoot}/assets/fonts/material-symbols/material-symbols-0.woff2`, `${base}/dist/emulator-site/symbols.woff2`);
     await copyFile(`${publicRoot}/assets/images/google-avatar.png`, `${base}/dist/emulator-site/assets/images/google-avatar.png`);
     await copyFile(`${publicRoot}/assets/js/vendor/qrcode.min.js`, `${base}/dist/emulator-site/assets/js/vendor/qrcode.min.js`);
+    await build({entryPoints: [`${base}/company-summary-pdf.mjs`], outfile: `${base}/dist/emulator-site/company-summary-pdf.js`,
+        bundle: true, minify: true, format: 'esm', platform: 'browser', target: ['safari16', 'chrome110'], logLevel: 'warning'});
+    for (const name of ['LiberationSans-Regular.ttf', 'LiberationSans-Bold.ttf', 'LICENSE_LIBERATION']) {
+        await copyFile(`${base}/assets/pdf/${name}`, `${base}/dist/emulator-site/assets/pdf/${name}`);
+    }
 }

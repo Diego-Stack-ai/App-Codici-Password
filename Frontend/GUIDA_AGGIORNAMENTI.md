@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Scheda PDF aziendale dopo `d62e74d8`: scelta gruppi, generatore locale separato, anteprima testuale e download/condivisione con fallback. Sedici nuove prove, suite completa (404 shell), 90 verifiche Chrome e controllo visivo PDF sintetico di tre pagine superati. Nessun dato reale o invio; iPhone/WhatsApp/email reali ed Edge restano da collaudare. Dettagli e limiti nella roadmap profili; riprendere editor profili/collegamenti e residui MD, senza deploy.
+
 Montaggio editor QR dopo `fb207a4e`: salvataggio/rilettura e consultazione offline verificati nel browser del laboratorio con trasporto limitato alle fixture e overlay Rules. Corretto il metadato id del repository; due regressioni, suite completa (388 shell) e 90 verifiche Chrome superate. Gate produttivo/App Check, writer legacy ed Edge/iPhone aperti. Proseguire con scheda PDF aziendale richiesta in `45110a0e`; nessun deploy.
 
 Editor QR dopo `686b1f1c`: sorgente, vista e controller con revoca/retry preparati; suite completa superata (386 shell), sedici nuove prove e integrazione Firestore demo con conferma persa. Provider non ancora montato nel browser: adapter attendibile, transizione Rules/writer legacy e collaudi UI restano aperti. Nessun deploy o nuova prova browser attribuita; dettagli nella roadmap profili.
