@@ -27,6 +27,14 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Lettore Widget per la shell — candidata 15/09/2026
+
+Base `8a664499`, stessa PR #67. Primo sottoblocco della consultazione Widget: `account-widget-reader.mjs` espone metadati senza valori/ciphertext e letture puntuali attraverso la capability RAM. Account, dominio e azienda sono validati; online usa esclusivamente letture confermate, offline il repository locale. Ogni lettura rivalida Account, collegamento e record dopo la decifratura e rifiuta cambi, archiviazione, duplicati, riferimenti mancanti e proprietari discordanti. Blocco, cambio UID e uscita invalidano i risultati pendenti. Tipi semplici non cifrati compatibili con il servizio canonico; copia disabilitata nei metadati dei campi cifrati come previsto dal contratto corrente.
+
+15 test mirati con fixture non vuote, 278 test shell finali superati. Suite `npm test` completa superata sulla prima revisione (277 shell); successiva correzione della compatibilità booleani/numeri e della proiezione `copyable` verificata con l'intera suite shell finale. Nessuna modifica a schema, Rules, Functions, chiavi, dati reali o runtime pubblicato; rollback tramite rimozione del solo lettore sperimentale, senza migrazione.
+
+**Non è ancora integrazione UI né prova browser di Widget offline.** Prossimo passo: collegare le viste tramite la capability, mantenere i Widget bancari nel rispettivo modulo e completare fixture browser non vuote di `accountWidgets`/`sharedVaultData`. Queste raccolte sono function-only: usare inizializzazione amministrativa del solo emulatore, senza allargare le Rules. I renderer canonici richiedono adattamento esplicito (`readOnly` negli incorporati nasconde la sezione, mentre `editable: false` esclude l'editor); non riattivare `ensureVaultKeyMaterial` legacy. Il lettore deve essere collegato e collaudato prima di chiudere il punto 2 del piano.
+
 ### Selezione aziende nella shell — candidata 15/09/2026
 
 Base `b3b07769`, stessa PR #67. La nuova route Aziende elenca le aziende attive dell'UID, consente ricerca locale e offre Apri profilo/Apri Account. Le liste sono confermate dal server online e lette dal repository/cache offline. Solo ragione sociale e ID validato vengono proiettati; aziende archiviate escluse, duplicati/proprietario errato/ID non valido rifiutati. Nessuna decifratura di altri campi del record.
