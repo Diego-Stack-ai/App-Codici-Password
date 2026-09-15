@@ -516,3 +516,7 @@ PR #66 unita in master 0ba2332b298d155f0afb1a4eb50c9659115fe321; release 94792d8
 npm test completo e dieci scenari browser Chrome/Edge superati; GitHub Actions 34939530695 riuscita. Dopo il deploy, 31 file pubblicati corrispondono via SHA256 alla release. Prova Chrome con profilo isolato senza credenziali: nessuna struttura privata visibile e arrivo a /login-v115.html senza parametro di errore/timeout. Collaudo fisico iPhone ancora da eseguire, inclusa riapertura offline con sessione mantenuta e sblocco Vault.
 
 Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima di integrare, evitando duplicazioni dei backport offline e logout. La direzione shell persistente resta confermata; questo rilascio non chiude il P0 legacy del wrapping in sessionStorage né l'intero audit sicurezza. Dettagli implementativi e regressioni sono in docs/AUDIT_VAULT_SESSION_P0.md del ramo produttivo e nella PR #66.
+
+### Candidata Auth prima del rendering — 15/09/2026
+
+Su master 1.2.126 riprodotta la Home generica visibile prima del redirect anonimo. Correzione isolata delle 22 pagine private, attesa Auth con errore/timeout chiusi e cleanup centralizzato logout. Il requisito era già previsto dal bootstrap protetto e dal contratto di pulizia; mancava il collaudo del primo frame produttivo. Dettagli, test e limiti nell'ultima sezione di AUDIT_VAULT_SESSION_P0.md. Nessun deploy, dato reale o certificazione complessiva della baseline. La shell persistente resta la direzione già scelta nel ramo sperimentale.

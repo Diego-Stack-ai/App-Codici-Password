@@ -1,28 +1,29 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it" data-i18n="loading">
 
 <head>
+  <script src="assets/js/private-auth-gate.js"></script>
     <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title data-t="account_private">Account Privati - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.124" />
+    <link rel="manifest" href="manifest.json?v=1.2.127" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
     <!-- CSS Stratificato (V5.0 compliant) -->
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.124">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.127">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
     <link rel="stylesheet" href="assets/css/core_pagine.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/account_privati.css?v=1.2.124">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/account_privati.css?v=1.2.127">
 </head>
 
-<body class="base-bg" data-ui-model="list">
+<body data-private-auth hidden inert class="base-bg" data-ui-model="list">
     <!-- 1. BASE CONTAINER (Design System V5.0) -->
     <div class="base-container">
         <!-- 2. BASE GLOW (Ambience Effect) -->

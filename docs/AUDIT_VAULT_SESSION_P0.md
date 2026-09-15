@@ -870,3 +870,30 @@ Riscontro: i componenti di consultazione già leggono accountWidgets e sharedVau
 Validazione: test:data-access, test:offline, test:js-syntax e controllo whitespace superati. Sette nuove regressioni: tre sulla preparazione (inclusione senza visita, fallimento di ciascuna raccolta) e quattro sulla UI reale eseguita in ambiente simulato, con letture server vietate offline, per Widget/credenziali e Account personali/aziendali. Verificati rendering, rivelazione del valore e rimozione al blocco; zero scritture. Crittografia nei test UI simulata: non attribuire una nuova prova fisica iPhone o end-to-end a questi risultati. La suite completa era passata su 9f769aab; questo incremento ha eseguito i controlli mirati indicati.
 
 Nessun deploy, bump, modifica a master, scrittura dati o estensione delle modifiche offline. Produzione resta 1.2.125; il candidato sperimentale richiede il riallineamento già previsto prima del rilascio.
+
+## Verifica della visibilità prima di Auth — candidata del 15/09/2026
+
+**Base pubblicata esaminata:** 1.2.126, master a14d0198. **Stato:** correzione candidata separata; nessun deploy e nessuna modifica ai dati utente.
+
+### Esito e requisito già previsto
+
+Riprodotta con Chrome headless in un profilo temporaneo nuovo, senza credenziali: la struttura della Home è visibile prima della conferma Auth e poi avviene il redirect a /login-v115.html. La verifica registra soltanto visibilità e pathname. Non è una dimostrazione di accesso a dati personali: la struttura statica è pubblica su Hosting e i controlli dei dati rimangono Firebase Rules e cifratura. La segnalazione è fondata sul rendering preventivo; in questa prova la Home non rimane accessibile dopo il controllo della sessione assente.
+
+Il Piano prevede già un bootstrap protetto unico; Architettura Sicurezza V1 §10 e Contratto Vault Key §3 richiedono pulizia del materiale sbloccato al logout/cambio identità. Mancava la regressione sul primo frame della pagina pubblicata. Le correzioni storiche nel ramo sperimentale non certificano la conformità di master: questa candidata parte dalla produzione e non importa la shell.
+
+### Correzione
+
+- Tutte le 22 pagine private nascono hidden e inert, con CSS che impedisce override del display; bootstrap sincrono nel head. Le nove eccezioni pubbliche (accesso/recupero, informazioni, contatto condiviso e laboratorio viewport) sono censite dal test.
+- private-auth-gate.js coordina attesa, identità verificata, timeout di 15 secondi, rifiuto delle risposte tardive e blocco al cambio UID. main-v129.js conferma la visibilità soltanto dopo onAuthStateChanged e il controllo esistente dell'email, prima delle letture dati. Offline resta valida l'identità Firebase restaurata e verificata senza reload di rete.
+- Errore/timeout vanno al login senza rivelare il contenuto. Un callback nullo reindirizza al percorso assoluto. pagehide nasconde la pagina e pageshow da BFCache ricontrolla tramite reload.
+- logout-session.js chiude il gate, notifica la pulizia RAM e rimuove i contenitori locali della sessione Vault prima di signOut; redirect anche su errore/timeout. Il marker non segreto della scheda impedisce auto-rientro dopo logout fallito e viene rimosso soltanto da un nuovo login esplicito riuscito. Header, logout comune, Impostazioni e cambio password usano la pulizia condivisa, conservando i redirect di riautenticazione.
+
+### Validazione e limiti
+
+Quattordici nuove regressioni Auth/logout e sette regressioni del precedente bootstrap offline superate. Dieci scenari browser locali, cinque ciascuno in Chrome ed Edge: anonimo, identità valida, errore, timeout reale e logout. Il browser usa l'HTML/CSS e la validazione Auth reali con identità sintetica; non legge Firestore. Test live separato in sola lettura sulla Home pubblicata. npm test completo comprende il nuovo gate.
+
+Il controllo sincrono aggiunge un modulo iniziale: tetti statici aggiornati esplicitamente da 42 a 43 moduli e da 336 a 337 KB gzip, con massimo misurato 336.8 KB; invariati limite CSS e altri criteri. Questo costo di difesa non è una riduzione di sicurezza per migliorare prestazioni.
+
+Restano il collaudo fisico iPhone/PWA dopo eventuale rilascio, la gestione della revoca remota in assenza rete e l'audit generale Vault. Il contenitore legacy di session wrapping della base produttiva NON viene dichiarato conforme né riprogettato qui: la shell persistente è già la direzione scelta sul ramo sperimentale. Il gate DOM non sostituisce Rules, cifratura o protezione XSS. Nessuna lettura/scrittura/cancellazione di dati reali; nessuna migrazione, bump, modifica Functions/Rules o deploy.
+
+Rollback: revert della candidata come insieme (HTML nascosto, bootstrap, CSS e cablaggio); non distribuire solo una parte, altrimenti la pagina potrebbe restare intenzionalmente bloccata.

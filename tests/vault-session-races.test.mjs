@@ -30,12 +30,13 @@ function sessionFixture() {
         name, (...args) => webcrypto.subtle[name](...args)
     ]));
     const context = vm.createContext({
+        window: {addEventListener() {}},
         sessionStorage, crypto: {subtle, getRandomValues: array => webcrypto.getRandomValues(array)},
         TextEncoder, TextDecoder, Uint8Array, Date,
         btoa: value => Buffer.from(value, 'binary').toString('base64'),
         atob: value => Buffer.from(value, 'base64').toString('binary'),
         Event: class { constructor(type) { this.type = type; } },
-        window: {dispatchEvent: event => events.push(event.type)},
+        window: {addEventListener() {}, dispatchEvent: event => events.push(event.type)},
         console: {warn() {}}
     });
     vm.runInContext(body(sessionSource), context);
@@ -96,7 +97,7 @@ function securityFixture(overrides = {}) {
     let authObserver;
     const saves = [];
     const context = vm.createContext({
-        localStorage: storage(), auth,
+        window: {addEventListener() {}}, localStorage: storage(), auth,
         onAuthStateChanged: (_auth, callback) => { authObserver = callback; },
         clearVaultSession() {},
         restoreVaultSession: async () => null,

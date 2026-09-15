@@ -861,3 +861,33 @@ PR #66 unita in master 0ba2332b298d155f0afb1a4eb50c9659115fe321; release 94792d8
 npm test completo e dieci scenari browser Chrome/Edge superati; GitHub Actions 34939530695 riuscita. Dopo il deploy, 31 file pubblicati corrispondono via SHA256 alla release. Prova Chrome con profilo isolato senza credenziali: nessuna struttura privata visibile e arrivo a /login-v115.html senza parametro di errore/timeout. Collaudo fisico iPhone ancora da eseguire, inclusa riapertura offline con sessione mantenuta e sblocco Vault.
 
 Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima di integrare, evitando duplicazioni dei backport offline e logout. La direzione shell persistente resta confermata; questo rilascio non chiude il P0 legacy del wrapping in sessionStorage né l'intero audit sicurezza. Dettagli implementativi e regressioni sono in docs/AUDIT_VAULT_SESSION_P0.md del ramo produttivo e nella PR #66.
+
+## Correzione candidata apertura offline su iPhone — 14/09/2026
+
+Ramo fix/iphone-offline-bootstrap, base pubblicata 9e5335d9 (1.2.124). Backport selettivo della correzione 291ce2bb: refresh dell'identità Firebase solo online, utente corrente verificato richiesto anche offline, arresto del bootstrap su cambio UID durante l'attesa. Nessuna integrazione della shell sperimentale. Sette regressioni dedicate incluse nella suite security; npm test completo superato su questa base.
+
+Rilascio non eseguito e versione invariata. Dopo pubblicazione autorizzata ripetere su PWA iPhone Account online → Home → modalità aereo → lista. Il retest fisico resta necessario; questo backport non certifica l'offline completo o gli allegati.
+
+## Apertura pagine private offline — rilascio 1.2.125, 15/09/2026
+
+Pubblicazione della sola correzione iPhone autorizzata dall'utente. Il refresh Auth avviene online; offline resta richiesto l'utente Firebase corrente verificato, seguito dal normale sblocco Vault. Aggiornati versione e riferimenti statici tramite lo script canonico; verificato che il diff di release contenga soltanto 1.2.124 → 1.2.125. npm test completo e sette regressioni dedicate superati. Destinazione: Hosting soltanto, senza Functions, Rules o dati; shell sperimentale esclusa. Dopo rilascio ripetere Home → modalità aereo → lista sulla PWA iPhone. Rollback Hosting: 1.2.124, con il blocco offline noto.
+
+## Candidata 1.2.126 — preparazione offline profilo, Widget e credenziali (15/09/2026)
+
+Backport isolato da 9f769aab e 61cd253e, sulla produzione 1.2.125 (master 263355f2). La preparazione online include il documento del profilo, accountWidgets e sharedVaultData senza visita preventiva delle singole pagine; marker precedenti invalidati e stato incompleto in caso di letture fallite. Messaggi di indisponibilità offline nelle principali pagine di profilo, aziende e Account, senza riclassificare errori di permessi o decifratura. Il profilo carica il gestore messaggi solo nel percorso di errore; intestazione del modulo abbreviata per mantenere il budget statico di apertura.
+
+Tredici test offline: nove sulla preparazione/classificazione e quattro sulla consultazione dei componenti della base produttiva (privato/azienda, Widget/credenziali), con server vietato offline e rivelazione/mascheramento simulati. Non attribuire a questo backport i test di lifecycle della shell sperimentale. Prima del rilascio sono richiesti npm test completo e controllo versione; budget statico delle 31 pagine verificato.
+
+Foto e allegati esclusi dall'offline per decisione dell'utente. Nessuna estensione delle scritture, Functions o Rules. La PR #63 e la shell persistente restano separate dal rilascio. Dopo pubblicazione verificare fisicamente iPhone: completare caricamento online, passare offline senza logout e consultare profilo, Widget e credenziali senza averne aperto prima le pagine.
+
+## Verifica della visibilità prima di Auth — candidata del 15/09/2026
+
+Sulla 1.2.126 pubblicata riprodotta in Chrome isolato la Home generica visibile prima del redirect al login; nessun accesso a dati reali. La candidata mantiene hidden/inert le 22 pagine private fino alla conferma Auth, gestisce errore/timeout e risposte tardive, centralizza la pulizia locale prima di signOut. Nessun bump o deploy.
+
+Il requisito generale era già previsto dagli MD; mancava il test del primo frame produttivo. Quattordici nuove regressioni, sette test offline precedenti, dieci scenari locali Chrome/Edge e npm test completo superati. Il costo del modulo sincrono è documentato: massimo 336.8 KB gzip, tetti 337 KB/43 moduli. Restano collaudo iPhone e audit generale Vault; la shell persistente rimane separata. Evidenze, file, minaccia, limiti e rollback nell'ultima sezione di [AUDIT_VAULT_SESSION_P0.md](../docs/AUDIT_VAULT_SESSION_P0.md).
+
+## Preparazione rilascio Auth 1.2.127 — 15/09/2026
+
+Rilascio isolato autorizzato dall'utente dopo revisione della PR #66. Base fa34e9d0, su master 1.2.126 a14d0198; nessuna integrazione della shell sperimentale. Aggiornamento tramite script canonico: 246 riferimenti asset in 94 file; verificato che le differenze runtime successive al candidato siano soltanto sostituzioni 1.2.126 → 1.2.127.
+
+npm test completo superato sulla 1.2.127; dieci scenari browser locali Chrome/Edge superati (anonimo, valido, errore, timeout e logout). CI precedente del candidato fa34e9d0: run 34939242389 riuscito; attendere anche il controllo del nuovo commit di release prima del merge. Dopo Hosting verificare hash dei file e accesso anonimo in browser isolato. Resta il collaudo fisico iPhone/PWA e il programma della shell; Functions, Rules, formati crittografici e dati utente esclusi dal rilascio.
