@@ -13,6 +13,30 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+async function checkAnagraphic(mode, company) {
+    const button = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
+    document.querySelector('[data-profile-section="personal"]').click();
+    await wait(() => button('Modifica anagrafica'), 'ANAGRAPHIC_TAB');
+    button('Modifica anagrafica').click();
+    await wait(() => document.querySelector('[data-profile-field="note"]'), 'ANAGRAPHIC_EDITOR');
+    const inputs = [...document.querySelectorAll('[data-profile-field]')], note = document.querySelector('[data-profile-field="note"]');
+    const original = note.value;
+    assert(!document.querySelector('[data-profile-text-editor] input[type="password"]'), 'ANAGRAPHIC_NOT_PASSWORD');
+    if (mode === 'online') {
+        note.value = 'Nota laboratorio aggiornata'; button('Salva anagrafica').click();
+        await wait(() => !document.querySelector('[data-profile-text-editor]') && [...byId('content').querySelectorAll('dd')].some(node => node.textContent === 'Nota laboratorio aggiornata'), 'ANAGRAPHIC_REFRESH');
+        assert(inputs.every(node => node.value === ''), 'ANAGRAPHIC_SAVE_CLEAR');
+        button('Modifica anagrafica').click(); await wait(() => document.querySelector('[data-profile-field="note"]'), 'ANAGRAPHIC_REOPEN');
+        assert(document.querySelector('[data-profile-field="note"]').value === 'Nota laboratorio aggiornata', 'ANAGRAPHIC_SAVED_VALUE');
+        document.querySelector('[data-profile-field="note"]').value = original; button('Salva anagrafica').click();
+        await wait(() => !document.querySelector('[data-profile-text-editor]') && button('Modifica anagrafica') && !byId('content').textContent.includes('Nota laboratorio aggiornata'), 'ANAGRAPHIC_RESTORE');
+    } else {
+        assert(note.readOnly && button('Salva anagrafica').disabled, 'ANAGRAPHIC_OFFLINE_READONLY');
+        button('Annulla').click(); await wait(() => !document.querySelector('[data-profile-text-editor]') && button('Modifica anagrafica'), 'ANAGRAPHIC_CANCEL');
+        assert(inputs.every(node => node.value === ''), 'ANAGRAPHIC_CANCEL_CLEAR');
+    }
+    profileChecks.push(`${company ? 'company' : 'private'} anagraphic editor ${mode}: values, refresh and revocation`);
+}
 async function checkBanking(mode) {
     for (const scope of ['private', 'company']) {
         if (scope === 'private') byId('private').click();
@@ -79,6 +103,7 @@ async function checkCompanyProfile(mode) {
     byId('companies').click();await wait(()=>document.querySelector('[data-company-profile="company"]'),'COMPANY_DIRECTORY_BACK');
     document.querySelector('[data-company-profile="company"]').click();
     await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_PROFILE');
+    await checkAnagraphic(mode, true);
     const buttons=label=>[...byId('content').querySelectorAll('button')].filter(node=>node.textContent===label);
     document.querySelector('[data-profile-section="contacts"]').click();
     await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COMPANY_CONTACTS');
@@ -137,6 +162,7 @@ async function checkProfile(mode) {
     assert(byId('content').textContent.includes('fixture@example.invalid') && !byId('content').textContent.includes('Nota anagrafica fittizia'), 'PROFILE_OVERVIEW_MINIMAL');
     [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Apri Anagrafica').click();
     await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'PROFILE_OVERVIEW_NAVIGATION');
+    await checkAnagraphic(mode, false);
     const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
     assert(profileNote, 'PROFILE_NOTE');
     await wait(() => document.querySelector('[data-profile-widget="fixture"] > button'), 'PROFILE_WIDGET_MOUNT');
@@ -220,7 +246,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }

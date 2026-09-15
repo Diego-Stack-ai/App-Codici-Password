@@ -7,6 +7,16 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Editor anagrafica nella shell — laboratorio 15/09/2026
+
+Successivo a `6cca03f5`: Modifica anagrafica apre un editor comune nel profilo privato e aziendale, con i soli campi del contratto testuale. Note tramite textarea, altri dati tramite normali campi testo; nessun campo password o valore di credenziali collegate. La sorgente legge la base confermata online/cache offline, decifra soltanto i campi anagrafici consentiti e confronta di nuovo la proiezione dopo le attese. Offline i valori restano consultabili, con salvataggio disabilitato e senza promessa di draft persistente.
+
+Invia solo i campi effettivamente cambiati, compreso lo svuotamento esplicito della nota. Il ciclo comune assegna l'identità del tentativo prima della preparazione, conserva soltanto la richiesta cifrata per retry e non cambia certezza dopo la revoca. Dopo conferma il pannello rilegge dal server la stessa linguetta senza reload del documento, mostrando subito la modifica; Annulla torna alla consultazione. Uscita/cambio linguetta/blocco cancellano valori correnti, defaultValue e originali trattenuti nei controlli. Risposte tardive non riaprono la vista.
+
+Provider e bridge limitati al laboratorio; overlay Rules applicato dopo il seed. Nessun nuovo export nelle Functions o modifica delle Rules produttive. Undici nuove prove unitarie di sorgente, vista e refresh; regressioni dei controller QR privato/aziendale. Suite completa npm test superata (445 test shell); Chrome 62 verifiche entry e 32 arresto/riapertura superate. Incluse modifica/rilettura immediata e svuotamento note nei due domini, controlli testuali, editor offline dopo riavvio, pulizia dei nodi e richieste anonime/token invalidi respinte. CI del precedente 6cca03f5 superata, run 35019009364. Il primo test browser anticipava la lettura della nota durante il caricamento dopo Annulla: corretta l'attesa del test fino al completamento della consultazione, senza ripristinare dati vecchi nell'interfaccia.
+
+Restano editor contatti/indirizzi/documenti e creazione/cambio/dissociazione dei collegamenti, selezione delle righe QR aggiuntive, Widget aziendali, Excel e M5–M10. Per i collegamenti riusare lo schema canonico e le verifiche inverse già esistenti, senza nuovo writer client multi-documento. Callable/App Check e transizione writer legacy, Edge/iPhone restano gate separati. Rollback limitato a sorgente/provider/vista, montaggio e adattamento del ciclo comune; nessun dato reale, master, bump o deploy.
+
 ### Anagrafica cifrata: preparazione e transazione — laboratorio 15/09/2026
 
 Successivo a `7bb38823`: preparato il confine per modificare i testi anagrafici già consultabili, incluse le note, senza coinvolgere contatti o collegamenti. Allowlist privata: nome, cognome, luogo/data di nascita e note. Allowlist aziendale: ragione sociale, forma giuridica, partita IVA, SDI, CCIAA, data iscrizione, nome/cognome/ruolo referente e note. Telefoni, email, indirizzi, documenti, permessi e relazioni Account restano fuori da questa mutazione.

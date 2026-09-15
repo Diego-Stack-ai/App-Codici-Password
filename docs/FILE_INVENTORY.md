@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 113382 | 956 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 113876 | 958 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -325,8 +325,8 @@ File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 70326 | 594 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 73195 | 540 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 71006 | 596 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 76330 | 554 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -421,20 +421,20 @@ File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
 | `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
 | `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 13425 | 145 | File di progetto: emulator-browser. |
-| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 18388 | 218 | File di progetto: emulator-cold-check. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 13403 | 145 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6301 | 124 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 26413 | 310 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 28729 | 336 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 5034 | 70 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 17229 | 218 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 18370 | 230 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 5184 | 64 | File di progetto: emulator-network-control. |
 | `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
-| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 3309 | 48 | File di progetto: emulator-qr-bridge. |
+| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 3487 | 50 | File di progetto: emulator-qr-bridge. |
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
 | `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 3845 | 54 | File di progetto: emulator-queue.test. |
 | `experiments/persistent-vault-shell/emulator.css` | CSS | 2754 | 26 | File di progetto: emulator. |
@@ -482,12 +482,16 @@ File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-linked-account.test.mjs` | MJS | 6660 | 85 | File di progetto: profile-linked-account.test. |
 | `experiments/persistent-vault-shell/profile-overview-reader.mjs` | MJS | 4584 | 66 | File di progetto: profile-overview-reader. |
 | `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
-| `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 4790 | 71 | File di progetto: profile-section-reader. |
+| `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 4872 | 71 | File di progetto: profile-section-reader. |
 | `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 8091 | 118 | File di progetto: profile-shell-view. |
-| `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 10588 | 129 | File di progetto: profile-shell-view.test. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 9204 | 131 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 11504 | 139 | File di progetto: profile-shell-view.test. |
 | `experiments/persistent-vault-shell/profile-text-candidate-rules.mjs` | MJS | 1766 | 24 | File di progetto: profile-text-candidate-rules. |
 | `experiments/persistent-vault-shell/profile-text-contract.mjs` | MJS | 4197 | 61 | File di progetto: profile-text-contract. |
+| `experiments/persistent-vault-shell/profile-text-editor-provider.mjs` | MJS | 1294 | 20 | File di progetto: profile-text-editor-provider. |
+| `experiments/persistent-vault-shell/profile-text-editor-source.mjs` | MJS | 3794 | 52 | File di progetto: profile-text-editor-source. |
+| `experiments/persistent-vault-shell/profile-text-editor-view.mjs` | MJS | 4889 | 57 | File di progetto: profile-text-editor-view. |
+| `experiments/persistent-vault-shell/profile-text-editor.test.mjs` | MJS | 6562 | 83 | File di progetto: profile-text-editor.test. |
 | `experiments/persistent-vault-shell/profile-text-handler.mjs` | MJS | 2515 | 38 | File di progetto: profile-text-handler. |
 | `experiments/persistent-vault-shell/profile-text.test.mjs` | MJS | 8087 | 99 | File di progetto: profile-text.test. |
 | `experiments/persistent-vault-shell/profile-widget-reader.mjs` | MJS | 4427 | 70 | File di progetto: profile-widget-reader. |
@@ -506,7 +510,7 @@ File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/qr-selection-editor-view.test.mjs` | MJS | 4595 | 58 | File di progetto: qr-selection-editor-view.test. |
 | `experiments/persistent-vault-shell/qr-selection-handler.mjs` | MJS | 4310 | 60 | File di progetto: qr-selection-handler. |
 | `experiments/persistent-vault-shell/qr-selection-handler.test.mjs` | MJS | 3374 | 48 | File di progetto: qr-selection-handler.test. |
-| `experiments/persistent-vault-shell/qr-selection-save-controller.mjs` | MJS | 3775 | 66 | File di progetto: qr-selection-save-controller. |
+| `experiments/persistent-vault-shell/qr-selection-save-controller.mjs` | MJS | 3788 | 66 | File di progetto: qr-selection-save-controller. |
 | `experiments/persistent-vault-shell/qr-selection-save-controller.test.mjs` | MJS | 2915 | 41 | File di progetto: qr-selection-save-controller.test. |
 | `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2355 | 40 | File di progetto: real-lists-entry. |
 | `experiments/persistent-vault-shell/render-company-summary-fixture.mjs` | MJS | 1708 | 19 | File di progetto: render-company-summary-fixture. |
@@ -597,7 +601,7 @@ File censiti: **642**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 12274 | 91 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 12338 | 91 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

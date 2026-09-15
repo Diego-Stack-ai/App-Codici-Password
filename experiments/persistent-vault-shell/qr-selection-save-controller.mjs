@@ -42,10 +42,10 @@ export function createQrSelectionSaveController({context, getUser, prepare, subm
             busy = true;
             try {
                 emit('preparing'); check();
-                const prepared = await prepare(selection); check();
-                if (!prepared || !Number.isSafeInteger(prepared.expectedRevision) || prepared.expectedRevision < 0 || prepared.expectedRevision >= Number.MAX_SAFE_INTEGER) throw new Error('PREPARATION_INVALID');
                 const operationId = createOperationId();
                 if (typeof operationId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(operationId)) throw new Error('OPERATION_ID_INVALID');
+                const prepared = await prepare(selection, operationId); check();
+                if (!prepared || !Number.isSafeInteger(prepared.expectedRevision) || prepared.expectedRevision < 0 || prepared.expectedRevision >= Number.MAX_SAFE_INTEGER) throw new Error('PREPARATION_INVALID');
                 const request = createRequest(prepared, operationId);
                 if (!request || typeof request !== 'object' || Array.isArray(request) || !Object.isFrozen(request)) throw Error('REQUEST_INVALID');
                 operation = Object.freeze({request, expectedRevision: prepared.expectedRevision});

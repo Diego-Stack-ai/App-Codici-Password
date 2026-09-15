@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Editor anagrafica dopo `6cca03f5`: testi/note modificabili nei due profili del laboratorio, con cifratura, refresh confermato e pulizia dei controlli. Offline in sola consultazione. Undici nuove prove unitarie; suite completa npm test superata (445 test shell) e 94 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Proseguire collegamenti e restanti editor; perimetro e gate nella roadmap profili, nessun deploy.
+
 Anagrafica dopo `7bb38823`: preparati patch cifrata e servizio transazionale per testi/note privati e aziendali, senza toccare contatti/collegamenti. Confronto revisioni e impronte, ricevuta idempotente e Rules candidate solo negli emulatori. Dodici nuove prove unitarie; suite completa npm test superata (434 test shell), senza nuova prova browser del servizio non montato. Editor e trasporto da montare nel laboratorio, nessuna modifica produttiva; perimetro e limiti nella roadmap profili.
 
 Editor QR aziendale dopo `81cc50d6`: montati sorgente/provider revocabili, vista comune e trasporto limitato alle fixture. Otto nuove prove unitarie, integrazione con retry dopo conferma persa; suite completa npm test superata (422 test shell) e 90 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Selezione righe aggiuntive e gate produttivi ancora aperti; proseguire parità editor/collegamenti. Dettagli nella roadmap profili, nessun deploy.

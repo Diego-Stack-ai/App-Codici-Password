@@ -1,13 +1,13 @@
 import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
-// Read-only migration slice: changes to links, utilities and QR are not enabled.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+// Optional editors are supplied by bootstrap; there is no fallback writer.
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
     const title = document.createElement('h2'); title.textContent = profileTitle;
-    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. Modifiche ai dati e ai collegamenti non sono ancora integrate in questa vista di prova.' + (mountDigitalCard ? '' : ' Tessera digitale non ancora integrata.');
+    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. ' + (mountAnagraphicEditor ? 'Puoi modificare l’anagrafica, comprese le note.' : 'Modifiche ai dati e ai collegamenti non sono ancora integrate in questa vista di prova.') + (mountDigitalCard ? '' : ' Tessera digitale non ancora integrata.');
     const navigation = document.createElement('nav'); navigation.setAttribute('aria-label', 'Sezioni del profilo');
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];
@@ -59,19 +59,27 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
         });
         actions.append(result); list.append(caption, value, actions);
     }
-    async function select(section) {
+    async function select(section, confirmed = false, editing = false) {
         if (disposed || context.signal.aborted) return;
         const ticket = ++revision; clear();
         for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.profileSection === section));
         panel.textContent = 'Caricamento…';
         try {
+            if (editing && section === 'personal' && mountAnagraphicEditor) {
+                context.assertUnlocked(); clear(); sectionControls = new AbortController();
+                const mounted = await mountAnagraphicEditor(panel, {signal: sectionControls.signal,
+                    onSaved: () => current(ticket) ? select('personal', true) : undefined,
+                    onCancel: () => current(ticket) ? select('personal') : undefined});
+                if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
+                return;
+            }
             if ((section === 'digital-card' && mountDigitalCard) || (section === 'pdf-summary' && mountCompanySummary)) {
                 context.assertUnlocked(); clear(); sectionControls = new AbortController();
                 const mounted = await (section === 'digital-card' ? mountDigitalCard : mountCompanySummary)(panel, {signal: sectionControls.signal});
                 if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
                 return;
             }
-            const rows = await (section === 'overview' && readOverview ? readOverview() : readSection(section));
+            const rows = await (section === 'overview' && readOverview ? readOverview() : readSection(section, {confirmed}));
             if (!current(ticket)) return;
             context.assertUnlocked(); clear();
             if (!rows.length) panel.textContent = 'Nessun dato presente.';
@@ -91,6 +99,11 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                     const actions = document.createElement('dd'); actions.append(action); list.append(actions);
                 }
                 if (row.link) addLinkedAccount(list, row.link, ticket);
+            }
+            if (section === 'personal' && mountAnagraphicEditor) {
+                const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Modifica anagrafica';
+                edit.addEventListener('click', () => {if (current(ticket)) void select('personal', false, true);}, {signal: sectionControls.signal});
+                panel.append(edit);
             }
             if (mountWidgets && Object.hasOwn(PROFILE_SECTIONS, section)) {
                 const mounted = await mountWidgets(panel, {section, signal: sectionControls.signal});

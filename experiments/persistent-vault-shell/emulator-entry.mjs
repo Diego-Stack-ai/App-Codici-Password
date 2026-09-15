@@ -2,6 +2,7 @@ import {signInWithEmailAndPassword} from 'firebase/auth';
 import {httpsCallable} from 'firebase/functions';
 import {mountPrivateQrEditor} from './private-qr-editor-provider.mjs';
 import {mountCompanyQrEditor} from './company-qr-editor-provider.mjs';
+import {mountProfileTextEditorProvider} from './profile-text-editor-provider.mjs';
 import {createCompanySummaryReader} from './company-summary-reader.mjs';
 import {mountCompanySummaryView} from './company-summary-view.mjs';
 import {createCompanyPdfActions} from './company-summary-browser.mjs';
@@ -122,7 +123,18 @@ const mountProfile = context => {
     const company = context.route === 'companyProfile';
     const source = company ? createCompanyProfileSource({uid: context.user.uid, companyId: selectedCompanyId, repository: {getCompany, getCompanyConfirmed}, normalizeContacts: companyProfileContacts}) : undefined;
     return mountProfileShell(content, context, {profileTitle: company ? 'Profilo aziendale' : 'Profilo utente', readSection: createProfileSectionReader({context, source,
-        getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
+        getUser: () => auth.currentUser, repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue}),
+        mountAnagraphicEditor: (root, {signal, onSaved, onCancel}) => {
+            const scoped = {...context, signal};
+            return mountProfileTextEditorProvider(root, scoped, {source, repository: {getUserProfile, getUserProfileConfirmed},
+                getUser: () => auth.currentUser, isEncryptedValue: cryptoApi.isEncryptedValue, onSaved, onCancel,
+                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                submit: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (scoped.signal.aborted || auth.currentUser?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, 'applyProfileTextMutation')(request)).data;
+                }});
+        },
         readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue, buildProfileOverview, resolvePrimary}),
         mountCompanySummary: !company ? undefined : (root, {signal}) => {

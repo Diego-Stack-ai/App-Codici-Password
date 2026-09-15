@@ -3,6 +3,7 @@ import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
 import {createCompanyQrSelectionHandler} from './company-qr-selection-handler.mjs';
+import {createProfileTextHandler} from './profile-text-handler.mjs';
 
 export function createEmulatorQrBridge(uids) {
     assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
@@ -18,7 +19,8 @@ export function createEmulatorQrBridge(uids) {
         hash: value => createHash('sha256').update(value).digest('hex'), timestamp: () => FieldValue.serverTimestamp()};
     const handlers = new Map([
         ['/demo-vault-shell/europe-west1/applyPrivateQrSelection', createPrivateQrSelectionHandler(dependencies)],
-        ['/demo-vault-shell/europe-west1/applyCompanyQrSelection', createCompanyQrSelectionHandler(dependencies)]
+        ['/demo-vault-shell/europe-west1/applyCompanyQrSelection', createCompanyQrSelectionHandler(dependencies)],
+        ['/demo-vault-shell/europe-west1/applyProfileTextMutation', createProfileTextHandler(dependencies)]
     ]);
     return async (request, response) => {
         const run = handlers.get(request.url); if (!run) return false;

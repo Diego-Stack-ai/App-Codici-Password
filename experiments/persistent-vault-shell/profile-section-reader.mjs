@@ -21,10 +21,10 @@ export function createProfileSectionReader({context, getUser, repository, isEncr
         if (!uid || getUser()?.uid !== uid) throw new Error('AUTH_CHANGED');
         context.assertUnlocked();
     };
-    return async section => {
+    return async (section, {confirmed = false} = {}) => {
         check();
         if (!Object.hasOwn(PROFILE_SECTIONS, section)) throw new Error('PROFILE_SECTION_INVALID');
-        const raw = await (source ? source.read(uid) : repository.getUserProfile(uid));
+        const raw = await (source ? source.read(uid, confirmed) : repository[confirmed ? 'getUserProfileConfirmed' : 'getUserProfile'](uid));
         check();
         if (!raw) throw new Error('PROFILE_NOT_FOUND');
         if (Object.hasOwn(raw, 'ownerId') && raw.ownerId !== uid) throw new Error('OWNER_MISMATCH');

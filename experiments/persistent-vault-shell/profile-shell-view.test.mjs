@@ -18,6 +18,16 @@ globalThis.document = {createElement: tag => new Node(tag)};
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture() { return {root: new Node('root'), control: new AbortController()}; }
 
+test('anagraphic editor refreshes the same tab with a confirmed read after saving', async () => {
+    const f = fixture(), reads = []; let saved, cancelled, disposed = 0;
+    const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+        readSection: async (section, options) => {reads.push(options.confirmed); return [{group: 'Anagrafica', label: 'Note', value: 'current'}];},
+        mountAnagraphicEditor: async (root, callbacks) => {saved = callbacks.onSaved; cancelled = callbacks.onCancel; return () => {disposed++;};}});
+    f.root.querySelectorAll('button').find(node => node.textContent === 'Modifica anagrafica').dispatchEvent(new Event('click')); await tick();
+    await saved(); assert.equal(reads.at(-1), true); assert.equal(disposed, 1);
+    const before = reads.length; await cancelled(); assert.equal(reads.length, before); cleanup();
+});
+
 test('overview is the initial tab when provided and its action clears values before internal navigation', async () => {
     const f = fixture(), reads = [];
     const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
