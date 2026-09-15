@@ -22,11 +22,30 @@ export async function openEmulatorQueue({auth, functions, ...scope}) {
         if (scope.signal.aborted || auth.currentUser?.uid !== scope.uid) throw new Error('DEMO_QUEUE_SESSION');
         if (database.version !== 2) throw new Error('DEMO_QUEUE_SCHEMA');
         client = await createFirebaseFencedQueueClient({...scope, database, auth, functions, holderId: crypto.randomUUID()});
-        let closed = false;
-        const close = () => { if (closed) return; closed = true; scope.signal.removeEventListener('abort', close); try { client.close(); } finally { database.close(); } };
+        let closed = false, pending = 0, databaseClosed = false;
+        const finishClose = () => {
+            if (closed && pending === 0 && !databaseClosed) { databaseClosed = true; database.close(); }
+        };
+        // Revoke immediately, but let interrupted operations release their IDB
+        // lease before closing the connection. Otherwise navigation strands a
+        // lease until expiry and the next Account cannot recover its queue.
+        const close = () => { if (closed) return; closed = true; scope.signal.removeEventListener('abort', close); try { client.close(); } finally { finishClose(); } };
+        const methods = {};
+        for (const name of ['pendingForRecord', 'flush', 'enqueue', 'replace', 'discard']) {
+            methods[name] = async (...args) => {
+                if (closed || scope.signal.aborted || auth.currentUser?.uid !== scope.uid) { close(); throw new Error('DEMO_QUEUE_SESSION'); }
+                pending++;
+                try {
+                    const result = await client[name](...args);
+                    if (closed || scope.signal.aborted || auth.currentUser?.uid !== scope.uid) { close(); throw new Error('DEMO_QUEUE_SESSION'); }
+                    return result;
+                }
+                finally { pending--; finishClose(); }
+            };
+        }
         database.onversionchange = close;
         scope.signal.addEventListener('abort', close, {once: true});
-        return Object.freeze({...client, close});
+        return Object.freeze({...client, ...methods, close});
     } catch (error) { database.close(); throw error; }
     finally { scope.vaultKeyMaterial = null; }
 }
