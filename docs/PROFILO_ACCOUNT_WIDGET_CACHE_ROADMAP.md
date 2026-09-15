@@ -7,6 +7,14 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Preparazione salvataggio selezione QR — laboratorio 15/09/2026
+
+Successiva a `5fc9c8f2`: contratto privato con soli flag booleani e riferimenti stabili, migrazione degli indici sullo snapshot dell'editor e rifiuto di righe rimosse/ambigue. Servizio backend candidato salva selezione e ricevuta nella stessa transazione, valida UID/App Check forniti dal futuro adapter attendibile, revisione, esistenza dei riferimenti e digest del tentativo. Ripetere lo stesso tentativo restituisce la conferma precedente; payload diverso, revisione obsoleta o configurazione sconosciuta non sovrascrivono dati. Nessun contenuto dei contatti o chiave entra nella richiesta/ricevuta.
+
+La matrice della baseline richiede un backend per questa operazione con ricevuta multi-documento. L'overlay Rules di laboratorio esclude settings dalla regola generica e vieta la scrittura diretta di qrCodeInclusions, mantenendo le altre preferenze proprietario. **Overlay non applicato a firestore.rules e servizio non esportato dalle Functions:** il writer produttivo legacy resta permissivo e non costituisce una barriera valida per il nuovo flusso. Prima di abilitare il salvataggio shell occorrono adapter callable con attestazione reale, chiusura dei writer legacy e piano di compatibilità/migrazione/rollback. Il test usa un contesto App Check sintetico, non dimostra enforcement HTTP.
+
+Sette test unitari aggiunti, suite completa `npm test` superata (370 shell), più test integrato Firestore demo: scrittura atomica, un solo vincitore fra due richieste concorrenti, retry invariato, contatto rimosso senza ricevuta, accessi altrui e scritture client negate, altre preferenze ancora utilizzabili. Test incluso nella suite tramite `test:qr-selection-emulators`. Nessuna nuova prova browser o modifica dei dati reali; nessun bump, master o deploy. Proseguire con controller/editor revocabili e preparazione dell'adapter, mantenendo esplicito il gate di attivazione. Foto e selezione aziendale restano aperte.
+
 ### Telefono aziendale nel QR — candidata 15/09/2026
 
 Successivo a `e7f70061`: il generatore canonico supporta `telefonoAzienda` con flag booleano esplicito omonimo. Il nuovo campo resta escluso nelle configurazioni precedenti e finché non viene selezionato; il lettore shell non lo decifra prima della selezione. Aggiunta la scelta alla pagina aziendale canonica, distinta dal cellulare referente. Escape CR/LF mantenuto, nessuna modifica ai dati o ai flag esistenti.

@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Preparazione selezione QR dopo `5fc9c8f2`: contratto privato e servizio transazionale candidato, sette nuove prove, suite completa (370 shell) e concorrenza/Rules su emulatori superate. Nessuna attivazione runtime: adapter callable, interfaccia e migrazione dei writer legacy restano da completare. Overlay Rules solo nel test; nessun enforcement HTTP dimostrato o deploy. Perimetro nella roadmap profili.
+
 QR dopo `e7f70061`: telefono aziendale selezionabile esplicitamente, escluso per default nelle configurazioni precedenti. Lettore shell non decifra il numero non selezionato. Due regressioni e suite completa superate (363 shell), senza nuova attribuzione di prove browser. Proseguire con editor selezione shell e Rules ristrette; foto aziendale e restanti gate aperti. Nessun deploy.
 
 Tessera aziendale dopo `104aefc9`: vista QR/download condivisa, lettore dedicato sulla selezione salvata e generatore canonico. Suite completa superata (362 shell), 90 verifiche Chrome online/offline e dopo riavvio. Restano editor selezione/profili e parità campi QR (telefono aziendale/foto non previsti dal generatore attuale), Widget aziendali, Edge/iPhone. Dettagli nella roadmap profili; nessun deploy.
