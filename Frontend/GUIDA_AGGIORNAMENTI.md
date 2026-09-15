@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Excel, primo adeguamento dopo `45deb058`: verificato il ramo recuperato `40052515`, aggiunta proiezione sperimentale con mascheramento PUK/Widget e revoca sulla sessione. Suite completa superata, 290 shell. Servizio Excel originale non integrato; generazione/consenso/download e parità allegati ancora aperti. Perimetro e rischi in [M8](../docs/M8_BACKUP_RECUPERO.md#esportazione-excel-separata-dal-backup--candidata-15092026). Nessun deploy.
+
 Sottoblocco Widget successivo a `8a664499`: lettore revocabile per Widget incorporati e credenziali comuni, senza gestore legacy o valori restituiti nell'elenco. 15 test mirati e 278 shell finali superati; suite completa superata prima dell'ultimo affinamento, poi suite shell rieseguita. UI e fixture browser non vuote restano il prossimo lavoro, come descritto nella roadmap profili. CI della directory `8a664499` superata (34951205896); nessun deploy o chiusura del programma.
 
 Incremento directory aziende successivo a `b3b07769`: selezione generica con ricerca e apertura di profilo/Account, contesto aziendale preservato anche con ID Account uguali. Suite completa, 263 test shell e 156 verifiche browser superati. Il commit precedente `b3b07769` ha superato CI GitHub 34950037514; il risultato del nuovo commit va verificato separatamente. Prossimo blocco autonomo: Widget e credenziali comuni nella shell. Produzione invariata, nessun deploy.

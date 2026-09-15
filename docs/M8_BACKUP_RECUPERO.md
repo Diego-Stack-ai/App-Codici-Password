@@ -21,6 +21,18 @@ Il ripristino usa un **Vault fantasma** in sola lettura prima di qualsiasi scrit
 
 ## Gate
 
+### Esportazione Excel separata dal backup — candidata 15/09/2026
+
+Richiesta aggiuntiva di Diego: recuperare il ramo `codex/real-excel-export-preview`, pubblicato a `40052515`, e integrarlo selettivamente nella candidata shell. L'Excel è una copia di consultazione modificabile e non sostituisce il backup cifrato o la sua procedura di ripristino. Nessuna modifica effettuata ai dati reali o al ramo Excel originale.
+
+Verifica del sorgente originale: `openValue()` non riconosce PUK e il contenuto cifrato dei Widget `fields[].valueEnc` tramite il solo nome del percorso; la modalità mascherata può quindi decifrarli. Il servizio mantiene inoltre la chiave legacy e non lega tutte le attese successive alla raccolta alla sessione; il collegamento XLSX ai campi aggiuntivi cerca il solo ID Account, ambiguo tra aziende. I menu Area/Azienda del prototipo non filtrano ancora il menu Account. Questi rilievi impediscono un'integrazione diretta senza correzioni.
+
+Primo sottoblocco su base `45deb058`: `experiments/persistent-vault-shell/excel-export-projection.mjs`, proiezione dati autonoma, senza scritture o download. Usa la capability RAM, valida UID e identità dei record, scarta risultati dopo blocco/uscita/cambio utente, maschera prima della decifratura PIN/PUK e campi protetti dei Widget. La modalità completa richiede un booleano esplicito, ma questo controllo non sostituisce conferma utente e riautenticazione nell'orchestratore da integrare. Errori crittografici interrompono la preparazione, senza fallback al ciphertext o file parziale. Limiti: 10.000 record, profondità 32 e budget di 16 Mi caratteri/valori proiettati, non stima del picco heap.
+
+12 test mirati e suite `npm test` completa superati, inclusi 290 test shell; sole fixture. Il modulo è ancora isolato: nessun file Excel finale, test di formule o download browser attribuito a questo incremento. Esclude conservativamente impostazioni tecniche, chiavi, foto e riferimenti/record allegati: la parità del progetto originale sugli allegati resta aperta, non dichiarata rimossa per decisione di prodotto. Il mascheramento usa nomi e metadati del modello corrente, non può riconoscere segreti scritti liberamente nelle note; il nome “copia protetta” non deve far credere che il file sia cifrato.
+
+Prossimi passi: riusare il generatore XLSX con identità composta dominio/azienda/Account e selettori funzionanti, normalizzare nomi e limiti Excel, testare le formule e l'assenza di formula injection nei valori, gestire metadati allegati senza esportare chiavi, integrare consenso/annullamento e controllo di sessione fino al download. Conservare separatamente il servizio originale finché il nuovo percorso non ha tutte queste prove. Rollback del sottoblocco: rimuovere solo modulo e test sperimentali, nessuna migrazione. Nessun bump, merge master, deploy o chiusura dei gate M8.
+
 - [x] formato cifrato e versionato;
 - [x] integrità e manomissione verificate automaticamente;
 - [x] Recovery Key distinta progettata e testata;
