@@ -66,7 +66,7 @@ for (const fails of [false, true]) {
         });
         vm.runInContext(moduleBody(securitySource), security);
         vm.runInContext("_vaultKeyMaterial = 'synthetic-fixture'; _vaultAutoUnlock = true;", security);
-        const calls = [];
+        const calls = [], beforeSignOut = [];
         const window = {dispatchEvent: events.dispatchEvent.bind(events), location: {href: 'home_page.html', replace(value) { this.href = value; }}};
         const helper = vm.createContext({window, sessionStorage, Event, setTimeout, clearTimeout, clearVaultSession: () => vm.runInContext('clearVaultSession()', session)});
         vm.runInContext(moduleBody(logoutSource), helper);
@@ -78,11 +78,8 @@ for (const fails of [false, true]) {
             },
             signOut: async () => {
                 calls.push('signOut');
-                assert.equal(vm.runInContext('_vaultKeyMaterial', security), null);
-                assert.equal(vm.runInContext('_vaultAutoUnlock', security), false);
-                for (const key of ['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry']) {
-                    assert.equal(sessionStorage.getItem(key), null);
-                }
+                beforeSignOut.push({key: vm.runInContext('_vaultKeyMaterial', security), auto: vm.runInContext('_vaultAutoUnlock', security),
+                    values: ['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry'].map(key => sessionStorage.getItem(key))});
                 if (fails) throw new Error('synthetic-signout-failure');
             },
             logError() { calls.push('error'); }, showToast() { calls.push('toast'); }
@@ -90,6 +87,7 @@ for (const fails of [false, true]) {
         vm.runInContext(moduleBody(authSource), context);
         await vm.runInContext('logout()', context);
         assert.deepEqual(calls, ['signOut']);
+        assert.deepEqual(beforeSignOut, [{key: null, auto: false, values: [null, null, null, null]}]);
         assert.equal(window.location.href, '/login-v115.html');
         assert.equal(sessionStorage.getItem('unrelated'), 'keep');
     });
