@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Lettore bancario successivo a `5f17a9a2`: capability revocabili per conti e carte, modello canonico, nessuna creazione di ID durante la consultazione. 13 prove mirate e contratto Vault completo superati (312 shell). La vista bancaria e gli host Widget sono il prossimo passo; questo sottoblocco non è ancora montato nel browser. Nessun deploy.
+
 Vincolo Widget/conto successivo a `6b952fe5`: letture rifiutate con genitore bancario assente o ambiguo e dopo rimozione/spostamento concorrente. 299 test shell superati. È un sottoblocco preparatorio: modulo bancario completo e restante programma MD ancora aperti. Proseguimento per commit verificati confermato da Diego; nessun deploy.
 
 Widget, consultazione integrata dopo `0d31c777`: Widget Account e credenziali comuni presenti nel dettaglio della shell, letture revocabili e comandi legati alla classificazione corrente dei campi. Fixture non vuote, suite completa e 296 shell superati; 108 verifiche entry più 62 arresto/riapertura Chrome/Edge, 170 totali. Prossimo blocco: modulo bancario con Widget nel rispettivo conto, seguito dalla parità restante. Limiti nella roadmap profili; non è un rilascio né chiusura dell'intero programma.

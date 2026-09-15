@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **586**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **588**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **586**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 105435 | 922 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 106121 | 926 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -325,8 +325,8 @@ File censiti: **586**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 62303 | 566 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 44347 | 404 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 62773 | 568 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 46602 | 416 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -379,11 +379,13 @@ File censiti: **586**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7387 | 121 | File di progetto: account-detail-reader.test. |
 | `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
 | `experiments/persistent-vault-shell/account-route.test.mjs` | MJS | 4424 | 80 | File di progetto: account-route.test. |
-| `experiments/persistent-vault-shell/account-widget-reader.mjs` | MJS | 5712 | 99 | File di progetto: account-widget-reader. |
-| `experiments/persistent-vault-shell/account-widget-reader.test.mjs` | MJS | 7371 | 120 | File di progetto: account-widget-reader.test. |
+| `experiments/persistent-vault-shell/account-widget-reader.mjs` | MJS | 6297 | 107 | File di progetto: account-widget-reader. |
+| `experiments/persistent-vault-shell/account-widget-reader.test.mjs` | MJS | 8841 | 144 | File di progetto: account-widget-reader.test. |
 | `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5364 | 87 | File di progetto: account-widget-view. |
 | `experiments/persistent-vault-shell/account-widget-view.test.mjs` | MJS | 4309 | 60 | File di progetto: account-widget-view.test. |
 | `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
+| `experiments/persistent-vault-shell/banking-reader.mjs` | MJS | 5045 | 80 | File di progetto: banking-reader. |
+| `experiments/persistent-vault-shell/banking-reader.test.mjs` | MJS | 5963 | 78 | File di progetto: banking-reader.test. |
 | `experiments/persistent-vault-shell/browser-session-boundary.mjs` | MJS | 998 | 21 | File di progetto: browser-session-boundary. |
 | `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
 | `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 3734 | 41 | File di progetto: build-emulator. |
@@ -541,7 +543,7 @@ File censiti: **586**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 10517 | 85 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 10576 | 85 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

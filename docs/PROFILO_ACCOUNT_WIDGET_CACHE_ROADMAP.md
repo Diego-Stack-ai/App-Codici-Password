@@ -27,6 +27,14 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Lettore bancario della shell — candidata 15/09/2026
+
+Base `5f17a9a2`: `banking-reader.mjs` espone descrittori e capability puntuali per campi del conto e carte. Riusa tramite iniezione `normalizeEditableBankingAccounts` canonico (provato con il sorgente reale), senza `ensureBankIds` o scritture. Conserva gli ID esistenti; i conti legacy senza ID restano leggibili con una capability legata alla posizione e alla fotografia del record. Il riordino di conti con ID stabili conserva la destinazione; modifica/rimozione del conto o spostamento delle carte invalida i lettori precedenti.
+
+UID, blocco e segnale della vista sono verificati prima/dopo letture e decifratura; online solo repository confermato, offline repository cache. Allowlist distinta conto/carta, nessuna chiave o record cifrato restituito alla UI. PIN, CCV e password dispositiva sono marcati come segreti anche per dati legacy in chiaro. Record archiviati, proprietari discordanti, ID duplicati, tipi invalidi e decifrature fallite sono rifiutati.
+
+13 prove mirate superate; `npm run test:vault-contract` completo superato, inclusi 312 test shell. Il lettore non è ancora montato nel browser: nessuna nuova prova browser o parità UI attribuita al sottoblocco. Prossimo passo: vista bancaria che riceve queste capability, host Widget per bankId tra dati del conto e carte, fixture con due conti e collaudo online/offline/arresto. Non anticipare una migrazione o assegnare ID in lettura. Nessun dato reale, schema, Rules, Functions, bump o deploy modificato. Rollback: rimozione del solo modulo/test sperimentale.
+
 ### Vincolo del Widget al conto — candidata 15/09/2026
 
 Sottoblocco successivo a `6b952fe5`: il lettore dei Widget verifica che `bankId` identifichi esattamente un conto canonico nell'Account corrente. Conto assente, ID duplicati o rimozione durante la decifratura impediscono la lettura; spostamento del Widget verso un altro conto invalida il risultato pendente. Nessun ID viene inventato per i dati legacy. Tre nuove prove e tutta la suite shell superate (299 test). Nessuna nuova verifica browser attribuita a questo sottoblocco. Il lettore bancario e il montaggio nel conto restano da completare; nessuna migrazione, modifica dei dati reali o distribuzione.
