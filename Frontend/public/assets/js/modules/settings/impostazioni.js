@@ -729,7 +729,8 @@ async function requireSecurityReauthentication(message) {
     sessionStorage.setItem('codex_security_notice', message);
     clearSession();
     try {
-        await signOut(auth);
+        window.privateAuthGate?.block();
+        await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
     } finally {
         window.location.replace('login-v115.html?reauth=security-settings');
     }
@@ -955,7 +956,8 @@ function initSettingsEvents() {
         const ok = await showConfirmModal(t('section_security') || 'Sicurezza', "Vuoi davvero uscire dall'account?", "Esci", "Annulla");
         if (ok) {
             clearSession(); // 🔐 Pulisce vaultKeyMaterial e sessionStorage
-            await signOut(auth);
+            window.privateAuthGate?.block();
+        await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
             window.location.href = 'login-v115.html';
         }
     });
@@ -992,7 +994,8 @@ function initSettingsEvents() {
         try {
             await revokeAllSessions();
             clearSession();
-            await signOut(auth);
+            window.privateAuthGate?.block();
+        await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
             window.location.replace('login-v115.html?reauth=sessions-revoked');
         } catch (error) {
             showToast(error.message || 'Revoca delle sessioni non riuscita.', 'error');

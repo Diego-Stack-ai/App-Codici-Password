@@ -207,8 +207,10 @@ export async function initComponents() {
                             onclick: async () => {
                                 const confirmed = await showLogoutModal();
                                 if (confirmed) {
-                                    await signOut(auth);
-                                    window.location.href = 'login-v115.html';
+                                    window.privateAuthGate?.block();
+                                    try { sessionStorage.setItem('codex_explicit_logout', '1'); } catch { /* Remain locked if storage is unavailable. */ }
+                                    const { logoutWithCleanup } = await import('./logout-session.js');
+                                    await logoutWithCleanup(() => signOut(auth));
                                 }
                             }
                         }, [

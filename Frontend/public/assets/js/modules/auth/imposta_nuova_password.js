@@ -119,7 +119,7 @@ function setupNewPasswordForm() {
             if (err.code === 'auth/requires-recent-login') {
                 showToast("Per sicurezza devi accedere di nuovo. Dopo il login tornerai qui.", "warning");
                 try {
-                    await signOut(auth);
+                    await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
                 } finally {
                     window.location.replace('login-v115.html?reauth=password-change');
                 }
@@ -182,7 +182,7 @@ function setupCancelLogic() {
         const isReset = urlParams.has('oobCode');
 
         if (isRequiredPolicyUpdate) {
-            await signOut(auth);
+            await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
             window.location.replace('login-v115.html');
             return;
         }

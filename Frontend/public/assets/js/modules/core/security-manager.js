@@ -551,6 +551,8 @@ export async function changeMasterPassword() {
     return true;
 }
 
+window.addEventListener('private-auth-blocked', () => clearSession());
+
 export function clearSession() {
     _vaultKeyMaterial = null;
     _vaultAutoUnlock = false;
