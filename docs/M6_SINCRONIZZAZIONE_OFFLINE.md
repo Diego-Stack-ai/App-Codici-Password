@@ -386,3 +386,13 @@ Riscontro: i componenti di consultazione già leggono accountWidgets e sharedVau
 Validazione: test:data-access, test:offline, test:js-syntax e controllo whitespace superati. Sette nuove regressioni: tre sulla preparazione (inclusione senza visita, fallimento di ciascuna raccolta) e quattro sulla UI reale eseguita in ambiente simulato, con letture server vietate offline, per Widget/credenziali e Account personali/aziendali. Verificati rendering, rivelazione del valore e rimozione al blocco; zero scritture. Crittografia nei test UI simulata: non attribuire una nuova prova fisica iPhone o end-to-end a questi risultati. La suite completa era passata su 9f769aab; questo incremento ha eseguito i controlli mirati indicati.
 
 Nessun deploy, bump, modifica a master, scrittura dati o estensione delle modifiche offline. Produzione resta 1.2.125; il candidato sperimentale richiede il riallineamento già previsto prima del rilascio.
+
+## Rilascio isolato 1.2.126 completato — 15/09/2026
+
+PR #65 unita in master a14d0198b37507b7c6fb0e7352fe8930d57a9f0d, candidato bb926671693f52348a4d2f9a6032d532170e7635 sulla base produttiva 1.2.125. Distribuite soltanto preparazione offline del profilo, accountWidgets/sharedVaultData e spiegazione degli errori di connettività nelle pagine principali. Il gestore del profilo viene importato su errore; intestazione del modulo abbreviata per il budget. Non sono stati importati i cambiamenti sperimentali dei componenti Widget.
+
+npm test completo della release superato; GitHub Actions 34937232687, job validate 104277695629 riuscito. Tredici test offline del ramo produttivo (preparazione/classificazione e quattro letture Widget/credenziali private/azienda con rivelazione e mascheramento simulati). Hosting distribuito con successo, 240 file. Verificati via HTTP gli hash SHA256 di Home, env-v126.js, sw.js, offline-sync.js, read-error-message.js, profilo_privato.js e offline-assets.js: corrispondono al candidato testato. Functions, Rules e dati invariati.
+
+Retest iPhone ancora richiesto sulla 1.2.126: app online fino a completamento preparazione, poi modalità aereo senza logout; profilo, Widget e credenziali comuni consultabili senza visita preventiva. Foto e allegati esclusi per decisione dell'utente. Non interpretare la nuova pubblicazione come test fisico riuscito o garanzia contro cache espulsa.
+
+PR #63 resta separata e aperta. Produzione ora 1.2.126: prima di un futuro rilascio sperimentale riallineare master, versioni e i due backport già distribuiti, evitando duplicazioni. Non distribuire direttamente la vecchia versione 1.2.124 del ramo sperimentale.
