@@ -117,3 +117,27 @@ test('stale public-field UI cannot reveal or copy a field that became secret', a
     const g = fixture(); g.state.widgets[0].fields[1].copyable = false;
     await assert.rejects(g.reader.read('embedded', 'note', {expectedEncrypted: false, copy: true}), /COPY_FORBIDDEN/);
 });
+
+test('bank Widget requires exactly one canonical parent, without inventing legacy IDs', async () => {
+    for (const banking of [undefined, [], [{bankId: 'other'}], [{bankId: 'bank'}, {bankId: 'bank'}]]) {
+        const f = fixture(); f.state.account.banking = banking; f.state.widgets[0].bankId = 'bank';
+        await assert.rejects(f.reader.list(), /WIDGET_BANK_UNAVAILABLE/);
+    }
+    for (const banking of [[{bankId: 'bank'}], {bankId: 'bank'}]) {
+        const f = fixture(); f.state.account.banking = banking; f.state.widgets[0].bankId = 'bank';
+        assert.equal((await f.reader.list())[0].bankId, 'bank');
+        assert.equal(await f.reader.read('embedded', 'pin'), '2076');
+    }
+});
+
+test('bank removal during Widget decryption suppresses the result', async () => {
+    const f = fixture(); f.state.account.banking = [{bankId: 'bank'}]; f.state.widgets[0].bankId = 'bank';
+    f.context.read = async () => {f.state.account.banking = []; return 'late';};
+    await assert.rejects(f.reader.read('embedded', 'pin'), /WIDGET_BANK_UNAVAILABLE/);
+});
+
+test('moving a Widget to another existing bank during decryption invalidates the original link', async () => {
+    const f = fixture(); f.state.account.banking = [{bankId: 'bank'}, {bankId: 'other'}]; f.state.widgets[0].bankId = 'bank';
+    f.context.read = async () => {f.state.widgets[0].bankId = 'other'; return 'late';};
+    await assert.rejects(f.reader.read('embedded', 'pin'), /WIDGET_CHANGED/);
+});

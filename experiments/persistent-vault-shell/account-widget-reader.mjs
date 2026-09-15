@@ -53,6 +53,14 @@ export function createAccountWidgetReader({context, getUser, repository, selecti
         return widgets.map(widget => {
             if (!['embedded', 'shared-reference'].includes(widget.kind)) fail();
             if (widget.bankId != null && !identifier(widget.bankId)) fail();
+            if (widget.bankId != null) {
+                // Bank-linked Widgets require a real, unique canonical parent.
+                // Legacy accounts without stable IDs cannot acquire a synthetic
+                // parent ID merely by being consulted.
+                const banks = Array.isArray(account.banking) ? account.banking :
+                    account.banking && typeof account.banking === 'object' ? [account.banking] : [];
+                if (banks.filter(bank => bank?.bankId === widget.bankId).length !== 1) throw new Error('WIDGET_BANK_UNAVAILABLE');
+            }
             if (widget.kind === 'shared-reference' && !identifier(widget.sharedDataId)) fail();
             const record = widget.kind === 'embedded' ? widget : owned(shared.find(item => item.id === widget.sharedDataId));
             unique(record.fields);

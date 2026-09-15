@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Vincolo Widget/conto successivo a `6b952fe5`: letture rifiutate con genitore bancario assente o ambiguo e dopo rimozione/spostamento concorrente. 299 test shell superati. È un sottoblocco preparatorio: modulo bancario completo e restante programma MD ancora aperti. Proseguimento per commit verificati confermato da Diego; nessun deploy.
+
 Widget, consultazione integrata dopo `0d31c777`: Widget Account e credenziali comuni presenti nel dettaglio della shell, letture revocabili e comandi legati alla classificazione corrente dei campi. Fixture non vuote, suite completa e 296 shell superati; 108 verifiche entry più 62 arresto/riapertura Chrome/Edge, 170 totali. Prossimo blocco: modulo bancario con Widget nel rispettivo conto, seguito dalla parità restante. Limiti nella roadmap profili; non è un rilascio né chiusura dell'intero programma.
 
 Excel, primo adeguamento dopo `45deb058`: verificato il ramo recuperato `40052515`, aggiunta proiezione sperimentale con mascheramento PUK/Widget e revoca sulla sessione. Suite completa superata, 290 shell. Servizio Excel originale non integrato; generazione/consenso/download e parità allegati ancora aperti. Perimetro e rischi in [M8](../docs/M8_BACKUP_RECUPERO.md#esportazione-excel-separata-dal-backup--candidata-15092026). Nessun deploy.

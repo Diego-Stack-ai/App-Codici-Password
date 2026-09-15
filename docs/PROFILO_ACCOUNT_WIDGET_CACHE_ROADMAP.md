@@ -27,6 +27,10 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Vincolo del Widget al conto — candidata 15/09/2026
+
+Sottoblocco successivo a `6b952fe5`: il lettore dei Widget verifica che `bankId` identifichi esattamente un conto canonico nell'Account corrente. Conto assente, ID duplicati o rimozione durante la decifratura impediscono la lettura; spostamento del Widget verso un altro conto invalida il risultato pendente. Nessun ID viene inventato per i dati legacy. Tre nuove prove e tutta la suite shell superate (299 test). Nessuna nuova verifica browser attribuita a questo sottoblocco. Il lettore bancario e il montaggio nel conto restano da completare; nessuna migrazione, modifica dei dati reali o distribuzione.
+
 ### Consultazione Widget nella shell — candidata 15/09/2026
 
 Base `0d31c777`, stessa PR #67. Il dettaglio Account monta ora `account-widget-view.mjs` con il lettore revocabile: Widget incorporati e credenziali comuni personali/aziendali, campi cifrati mascherati, mostra/nascondi espliciti e copia dei soli campi non cifrati abilitati dal modello. La richiesta di lettura vincola anche la classificazione del campo: un vecchio comando di copia non può esportare un campo nel frattempo diventato cifrato o non copiabile. Errori invalidano lo snapshot, scartano letture concorrenti e mostrano testo generico. Uscita/blocco cancellano valori, titoli, etichette e listener anche nei nodi trattenuti.
