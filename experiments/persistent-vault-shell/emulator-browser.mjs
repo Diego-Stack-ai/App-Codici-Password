@@ -40,6 +40,8 @@ for (const suffix of ['A', 'B']) {
             telefonoAzienda: await encrypted('111111111'), phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}},
             indirizzoSede: await encrypted('Sede fittizia'), altreSedi: [{indirizzo: await encrypted('Filiale fittizia')}],
             allegati: [{name: await encrypted('Visura fittizia')}]});
+        await setDoc(doc(db, 'users', user.uid, 'aziende', 'second-company'), {ragioneSociale: await encrypted('Seconda azienda fittizia'), partitaIva: await encrypted('IVA-SECONDA'),
+            emails: {pec: {email: await encrypted('seconda@example.invalid'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'second-company'}}});
         await setDoc(doc(db, 'users', user.uid, 'profileWidgets', 'fixture'), {title: 'Widget fittizio', description: '', tab: 'personal',
             order: 0, size: 'medium', collapsed: false, schemaVersion: 1, fields: [{id: 'field', encrypted: true, value: await encrypted('WIDGET-FITTIZIO')}]});
         await setDoc(doc(db, 'users', user.uid, 'scadenze', 'fixture'), {note: await encrypted('SCADENZA-FITTIZIA')});
@@ -59,6 +61,8 @@ for (const suffix of ['A', 'B']) {
             if (domain === 'company') path.push('aziende', 'company');
             path.push('accounts', title.toLowerCase());
             await setDoc(doc(db, ...path), record);
+            if (domain === 'company' && title === 'Zeta') await setDoc(doc(db, 'users', user.uid, 'aziende', 'second-company', 'accounts', 'zeta'), {
+                ...record, nomeAccount: await encrypted('Zeta seconda ' + suffix), password: await encrypted('SEGRETO-FITTIZIO-second-company-Zeta-' + suffix)});
         }
     } finally { await terminate(db); await deleteApp(app); }
 }

@@ -21,8 +21,8 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
-1. Selezione di aziende arbitrarie nella shell: il laboratorio monta ancora l'azienda fittizia scelta dal bootstrap.
-2. Consultazione dei Widget Account e delle credenziali comuni nella UI della shell con lettori revocabili; fixture non vuote e test offline. Le letture del probe non equivalgono a una UI integrata.
+1. Completata nella candidata successiva a `b3b07769`: directory aziende con ricerca, scelta del profilo o lista Account e contesto mantenuto nel dettaglio/ritorno. Suite completa, 263 test shell e 156 verifiche browser superati. Vedi [roadmap profili](./PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md#selezione-aziende-nella-shell--candidata-15092026).
+2. Prossimo blocco: consultazione dei Widget Account e delle credenziali comuni nella UI della shell con lettori revocabili; fixture non vuote e test offline. Le letture del probe non equivalgono a una UI integrata. I renderer canonici usano ancora `ensureVaultKeyMaterial`: adattare il confine di lettura senza reintrodurre il gestore della sessione legacy. Il flag `readOnly` degli Widget incorporati oggi nasconde la sezione: non confonderlo con la sola esclusione dei comandi di modifica.
 3. Parità profili: panoramica, note, Widget e tessera digitale; editor e creazione/cambio/dissociazione dei collegamenti tramite percorso conforme alla matrice di autorizzazione. Le scritture multi-documento non vanno copiate implicitamente in un nuovo writer client.
 4. Parità dei dettagli/editor Account, moduli bancari e altri percorsi canonici; integrare poi scadenze, impostazioni, archivio, backup e salute credenziali nel bootstrap unico.
 5. Gate tecnici ancora aperti nei contratti M5–M10, compresi staging/ripresa del ripristino M8, retry e riferimenti orfani su copie sintetiche. I collaudi fisici, audit indipendente e configurazioni esterne non verificabili restano separati.

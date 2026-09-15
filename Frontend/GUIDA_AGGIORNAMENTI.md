@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Incremento directory aziende successivo a `b3b07769`: selezione generica con ricerca e apertura di profilo/Account, contesto aziendale preservato anche con ID Account uguali. Suite completa, 263 test shell e 156 verifiche browser superati. Il commit precedente `b3b07769` ha superato CI GitHub 34950037514; il risultato del nuovo commit va verificato separatamente. Prossimo blocco autonomo: Widget e credenziali comuni nella shell. Produzione invariata, nessun deploy.
+
 Stato successivo: [proseguimento autonomo nel piano](../docs/PIANO_MATURITA_PROFESSIONALE.md#proseguimento-autonomo--stato-15092026-dopo-17a1236a). Completati consultazione aziendale, preparazione offline automatica e incremento utenze personali; ordine dei residui esplicito. Ultimo incremento: suite completa, 253 test shell e 146 verifiche browser superati. I risultati dei primi due commit sono confermati anche da CI GitHub. Nessun deploy, nessuna dichiarazione di programma completo.
 
 Proseguimento autorizzato dall'utente: portare avanti autonomamente le attività lavorabili degli MD e annotare i gate che richiedono intervento, continuando sulle attività indipendenti. Incremento azienda successivo a `199441d0`: stessa vista profilo per i due domini, adapter canonico e credenziali collegate; suite completa, 240 test shell e 136 verifiche browser superati. Perimetro e residui in [Roadmap profili](../docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md#candidata-shell-profilo-aziendale-in-consultazione--15092026). La chiusura sotto è il checkpoint precedente, non il termine del programma.

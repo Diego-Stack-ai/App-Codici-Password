@@ -21,11 +21,15 @@ import {requestMaster} from './master-prompt.mjs';
 import {probeOfflineConsultation} from './offline-consultation-probe.mjs';
 import {prepareOfflineData} from '../../Frontend/public/assets/js/offline-sync.js';
 import {createShellOfflinePreparation} from './shell-offline-preparation.mjs';
+import {createCompanyDirectoryReader, mountCompanyDirectory, validateCompanyId} from './company-directory.mjs';
+import {listCompanies, listCompaniesConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
+import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 const byId = id => document.getElementById(id);
 const content = byId('content'), status = byId('status'), message = byId('message');
 let selectedRoute = 'private', busy = false;
 let selectedAccount = null, detailReturnRoute = 'private';
+let selectedCompanyId = null;
 let listStates = {};
 let probeContext;
 export const runOfflineConsultationProbe = (options = {}) => probeOfflineConsultation({context: probeContext, getUser: () => auth.currentUser, ...options});
@@ -50,13 +54,21 @@ function navigateList(domain) {
 }
 function openDetail(destination) {
     try {
-        selectedAccount = parseAccountDestination(destination, {uid: auth.currentUser?.uid});
+        selectedAccount = parseAccountDestination(destination, {uid: auth.currentUser?.uid, companyId: selectedCompanyId});
         detailReturnRoute = selectedAccount.domain; selectedRoute = 'detail'; void session.navigate('detail');
     } catch (error) { showError(error); }
 }
-const mount = context => { probeContext = context; return mountEmulatorList(content, context, {
-    state: listStates[context.route], onRemember: state => { listStates[context.route] = state; }, onOpen: openDetail
+const mount = context => { probeContext = context; const key = context.route === 'company' ? `company:${selectedCompanyId}` : context.route; return mountEmulatorList(content, context, {
+    companyId: selectedCompanyId, state: listStates[key], onRemember: state => { listStates[key] = state; }, onOpen: openDetail
 }); };
+const mountCompanies = context => {
+    probeContext = context;
+    const open = (companyId, route) => { context.assertUnlocked(); if (context.signal.aborted) return; selectedCompanyId = validateCompanyId(context.user.uid, companyId); navigateList(route); };
+    return mountCompanyDirectory(content, context, {
+        readCompanies: createCompanyDirectoryReader({context, getUser: () => auth.currentUser, repository: {listCompanies, listCompaniesConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue}),
+        onOpenProfile: id => open(id, 'companyProfile'), onOpenAccounts: id => open(id, 'company'), errorMessage: error => readErrorMessage(error, 'Elenco aziende non disponibile.')
+    });
+};
 const mountDetail = context => {
     probeContext = context;
     if (!selectedAccount || !context.unlocked) { content.replaceChildren(); return; }
@@ -71,7 +83,7 @@ const mountDetail = context => {
 const mountProfile = context => {
     probeContext = context;
     const company = context.route === 'companyProfile';
-    const source = company ? createCompanyProfileSource({uid: context.user.uid, companyId: 'company', repository: {getCompany, getCompanyConfirmed}, normalizeContacts: companyProfileContacts}) : undefined;
+    const source = company ? createCompanyProfileSource({uid: context.user.uid, companyId: selectedCompanyId, repository: {getCompany, getCompanyConfirmed}, normalizeContacts: companyProfileContacts}) : undefined;
     return mountProfileShell(content, context, {profileTitle: company ? 'Profilo aziendale' : 'Profilo utente', readSection: createProfileSectionReader({context, source,
         getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
         linkedAccounts: createProfileLinkedAccountReader({context, source, getUser: () => auth.currentUser,
@@ -81,7 +93,7 @@ const mountProfile = context => {
 const session = createFirebaseSession({auth, db, cryptoApi,
     createQueueClient: scope => openEmulatorQueue({auth, functions, ...scope}),
     requestPassword: options => requestMaster(byId('master-dialog'), options),
-    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile, companyProfile: mountProfile},
+    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile, companyProfile: mountProfile, companies: mountCompanies},
     onState({state}) {
         if (state === 'unlocked') void offlinePreparation.refresh();
         else offlinePreparation.clear();
@@ -91,6 +103,8 @@ const session = createFirebaseSession({auth, db, cryptoApi,
             content.replaceChildren(); listStates = {};
             if (selectedRoute === 'detail') selectedRoute = selectedAccount?.domain || 'private';
             selectedAccount = null;
+            selectedCompanyId = null;
+            if (['company', 'companyProfile'].includes(selectedRoute)) selectedRoute = 'companies';
         }
         refreshControls();
     }, onError: showError
@@ -108,7 +122,7 @@ byId('login').addEventListener('click', () => run(async () => {
 byId('unlock').addEventListener('click', () => run(async () => { await session.unlock(); await session.navigate(selectedRoute); }));
 byId('lock').addEventListener('click', () => session.lock());
 byId('logout').addEventListener('click', () => run(() => session.logout()));
-for (const route of ['private', 'company', 'profile', 'companyProfile']) byId(route).addEventListener('click', () => {
+for (const route of ['private', 'profile', 'companies']) byId(route).addEventListener('click', () => {
     navigateList(route);
 });
 document.addEventListener('pointerdown', () => session.touch());

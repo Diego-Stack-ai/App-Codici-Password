@@ -27,6 +27,14 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Selezione aziende nella shell — candidata 15/09/2026
+
+Base `b3b07769`, stessa PR #67. La nuova route Aziende elenca le aziende attive dell'UID, consente ricerca locale e offre Apri profilo/Apri Account. Le liste sono confermate dal server online e lette dal repository/cache offline. Solo ragione sociale e ID validato vengono proiettati; aziende archiviate escluse, duplicati/proprietario errato/ID non valido rifiutati. Nessuna decifratura di altri campi del record.
+
+Il bootstrap conserva separatamente l'azienda selezionata e l'Account: il parametro della lista, il parser del dettaglio e il ritorno mantengono il contesto aziendale. La ricerca delle liste Account è distinta per azienda; blocco/logout cancellano selezione e filtri. La directory cancella nomi e input anche nei nodi trattenuti, rimuove listener e scarta letture tardive. Nessun ritorno ai gestori produttivi della chiave.
+
+Suite completa superata, 263 test shell; 96 verifiche entry e 60 arresto/riapertura Chrome/Edge, 156 totali. Due aziende fittizie con lo stesso ID Account verificano ricerca, profili, dettaglio e ritorno alla lista senza scambio di contesto. La seconda raccolta Account è disponibile offline dopo il solo avvio normale e nuova Master dopo riapertura. Nessun dato reale, foto, migrazione, bump o deploy; UI completa, editor e Widget restano da integrare. Il conteggio delle pagine canoniche resta invariato: nuova route nel laboratorio, nessuna nuova pagina produttiva.
+
 ### Utenze personali nella shell — candidata 15/09/2026
 
 Base `17a1236a`, stessa PR #67. La linguetta Indirizzi proietta anche `utilities[].type/value`; i collegamenti usano la coppia `parentAddressId` e ID utenza. La lettura richiede esattamente un indirizzo e una utenza corrispondenti e li ricontrolla dopo la decifratura. ID utenza ripetuti in indirizzi diversi non vengono confusi; indirizzo rimosso, duplicati o destinazione cambiata impediscono la restituzione della password. Nessuna lettura delle vecchie password contenute nell'utenza.

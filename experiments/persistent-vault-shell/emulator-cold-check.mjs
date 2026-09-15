@@ -93,7 +93,12 @@ try {
         await wait(()=>byId('content').textContent.includes('POD-FITTIZIO'),'COLD_UTILITY');
         button('Mostra password').click();
         await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_UTILITY_PASSWORD');
-        byId('companyProfile').click();
+        byId('companies').click();
+        await wait(()=>document.querySelector('[data-company-accounts="second-company"]'),'COLD_COMPANY_DIRECTORY');
+        document.querySelector('[data-company-accounts="second-company"]').click();
+        await wait(()=>byId('content').textContent.includes('Zeta seconda A'),'COLD_SECOND_COMPANY_ACCOUNTS');
+        byId('companies').click();await wait(()=>document.querySelector('[data-company-profile="company"]'),'COLD_COMPANY_DIRECTORY_BACK');
+        document.querySelector('[data-company-profile="company"]').click();
         await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COLD_COMPANY_PROFILE');
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COLD_COMPANY_CONTACTS');
@@ -128,6 +133,7 @@ try {
                   'company profile and linked credential readable on first offline visit after restart',
                   'normal shell startup prepared textual domains without a probe or prior page visits',
                   'address utility and its linked credential readable offline after restart',
+                  'company directory and second-company accounts available after automatic offline preparation',
                   ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

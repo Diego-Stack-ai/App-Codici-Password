@@ -15,7 +15,27 @@ const network = async offline => {
 const profileChecks = [];
 async function checkCompanyProfile(mode) {
     const marker=document;
-    byId('companyProfile').click();
+    byId('companies').click();
+    await wait(()=>document.querySelector('[data-company-profile="second-company"]'),'COMPANY_DIRECTORY');
+    const search=document.querySelector('[data-company-search]');search.value='Seconda';search.dispatchEvent(new Event('input'));
+    assert(document.querySelectorAll('[data-company-profile]').length===1,'COMPANY_SEARCH');
+    document.querySelector('[data-company-profile="second-company"]').click();
+    await wait(()=>byId('content').textContent.includes('IVA-SECONDA'),'SECOND_COMPANY_PROFILE');
+    assert(search.value==='','COMPANY_SEARCH_CLEARED');
+    document.querySelector('[data-profile-section="contacts"]').click();
+    await wait(()=>byId('content').textContent.includes('seconda@example.invalid'),'SECOND_CONTACT');
+    [...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password').click();
+    await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-second-company-Zeta-A'),'SECOND_PASSWORD');
+    byId('companies').click();await wait(()=>document.querySelector('[data-company-accounts="second-company"]'),'SECOND_ACCOUNTS_DIRECTORY');
+    document.querySelector('[data-company-accounts="second-company"]').click();
+    await wait(()=>byId('content').textContent.includes('Zeta seconda A'),'SECOND_ACCOUNTS');
+    document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
+    await wait(()=>byId('content').textContent.includes('Dettaglio Account')&&byId('content').textContent.includes('Zeta seconda A'),'SECOND_DETAIL');
+    [...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Torna alla lista').click();
+    await wait(()=>document.querySelector('[data-action="navigate"][data-id="zeta"]'),'SECOND_DETAIL_BACK');
+    assert(byId('content').textContent.includes('Zeta seconda A'),'SECOND_RETURN_SCOPE');
+    byId('companies').click();await wait(()=>document.querySelector('[data-company-profile="company"]'),'COMPANY_DIRECTORY_BACK');
+    document.querySelector('[data-company-profile="company"]').click();
     await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_PROFILE');
     const buttons=label=>[...byId('content').querySelectorAll('button')].filter(node=>node.textContent===label);
     document.querySelector('[data-profile-section="contacts"]').click();
@@ -35,6 +55,7 @@ async function checkCompanyProfile(mode) {
     byId('private').click();await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COMPANY_EXIT');
     assert(document===marker,'COMPANY_RELOAD');
     profileChecks.push('company canonical profile tabs rendered '+mode,'company shared and private linked credentials with safe navigation '+mode);
+    profileChecks.push('company directory search and second profile '+mode,'same Account ID in different companies navigates with correct company scope '+mode);
 }
 async function checkProfile(mode) {
     const originalDocument = document;
