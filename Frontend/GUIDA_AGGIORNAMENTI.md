@@ -554,3 +554,13 @@ Nei due dettagli Account mancava l’import esplicito di auth: il controllo sess
 ## Azioni compatte note — rilascio 1.2.124
 
 In entrambi i dettagli Account il pulsante grande Aggiungi nota compare soltanto a nota vuota. Una nota presente mostra matita e cestino nella sua intestazione. Eliminazione con anteprima in sola lettura e conferma, sul medesimo salvataggio cifrato transazionale; conflitti conservano la nota. Focus riportato al comando visibile. Nove test note superati, inclusi cancellazione, annullamento, conflitto e blocco sessione; controlli HTML, sintassi e riferimenti superati. Pubblicazione Hosting richiesta; rami sperimentali esclusi. Rollback: versione 1.2.123, senza modificare i dati.
+
+## Correzione candidata apertura offline su iPhone — 14/09/2026
+
+Ramo fix/iphone-offline-bootstrap, base pubblicata 9e5335d9 (1.2.124). Backport selettivo della correzione 291ce2bb: refresh dell'identità Firebase solo online, utente corrente verificato richiesto anche offline, arresto del bootstrap su cambio UID durante l'attesa. Nessuna integrazione della shell sperimentale. Sette regressioni dedicate incluse nella suite security; npm test completo superato su questa base.
+
+Rilascio non eseguito e versione invariata. Dopo pubblicazione autorizzata ripetere su PWA iPhone Account online → Home → modalità aereo → lista. Il retest fisico resta necessario; questo backport non certifica l'offline completo o gli allegati.
+
+## Apertura pagine private offline — rilascio 1.2.125, 15/09/2026
+
+Pubblicazione della sola correzione iPhone autorizzata dall'utente. Il refresh Auth avviene online; offline resta richiesto l'utente Firebase corrente verificato, seguito dal normale sblocco Vault. Aggiornati versione e riferimenti statici tramite lo script canonico; verificato che il diff di release contenga soltanto 1.2.124 → 1.2.125. npm test completo e sette regressioni dedicate superati. Destinazione: Hosting soltanto, senza Functions, Rules o dati; shell sperimentale esclusa. Dopo rilascio ripetere Home → modalità aereo → lista sulla PWA iPhone. Rollback Hosting: 1.2.124, con il blocco offline noto.

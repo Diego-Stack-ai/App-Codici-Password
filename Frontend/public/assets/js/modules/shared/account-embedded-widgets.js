@@ -8,7 +8,7 @@ import {
     listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.124';
+import {auth} from '../../firebase-config.js?v=1.2.125';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
 let mountVersion = 0;

@@ -6,7 +6,7 @@ import {
     listSharedVaultData, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential, unlinkSharedCredential, updateSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.124';
+import {auth} from '../../firebase-config.js?v=1.2.125';
 
 let mountVersion = 0;
 

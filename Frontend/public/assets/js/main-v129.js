@@ -27,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.124';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.125';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.124&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.125&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -172,7 +172,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 const isPrivatePage = !publicPages.includes(currentPage);
                 if (isPrivatePage) {
-                    await user.reload();
+                    // Offline navigation must not require a server request before
+                    // reading the cache. Firebase's restored identity must still
+                    // be the same verified user; online failures never fall back.
+                    if (navigator.onLine) await user.reload();
+                    if (auth.currentUser?.uid !== user.uid) return;
                     if (!auth.currentUser?.emailVerified) {
                         window.location.replace('/login-v115.html?verifyEmail=1');
                         return;
@@ -262,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.124');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.125');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
