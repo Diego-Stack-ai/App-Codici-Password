@@ -7,6 +7,20 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Anagrafica cifrata: preparazione e transazione — laboratorio 15/09/2026
+
+Successivo a `7bb38823`: preparato il confine per modificare i testi anagrafici già consultabili, incluse le note, senza coinvolgere contatti o collegamenti. Allowlist privata: nome, cognome, luogo/data di nascita e note. Allowlist aziendale: ragione sociale, forma giuridica, partita IVA, SDI, CCIAA, data iscrizione, nome/cognome/ruolo referente e note. Telefoni, email, indirizzi, documenti, permessi e relazioni Account restano fuori da questa mutazione.
+
+La preparazione usa la cifratura della sessione esistente, senza nuova crittografia o accesso alle chiavi. Controlli di UID/segnale/Vault prima e dopo gli await; input copiati prima dell'attesa. Limiti 1.000 caratteri per campo e 20.000 per nota, 200.000 caratteri cifrati complessivi. Il testo vuoto è una cancellazione esplicita del solo contenuto, non del record. I vecchi valori eventualmente in chiaro vengono confrontati mediante impronte calcolate localmente: né vecchio né nuovo plaintext entra nella richiesta.
+
+Servizio candidato con transazione del record e ricevuta: destinatario derivato da UID e dominio, revisione e schema separati per l'anagrafica, timestamp backend, impronte dei soli campi modificati e confronto anche contro writer legacy che non incrementano revisioni. Patch dei soli campi scelti, nessuna riscrittura di contatti o collegamenti; retry della stessa richiesta non duplica la revisione. Il server valida struttura/dimensioni del ciphertext, non può certificarne la decifrabilità senza la chiave.
+
+Overlay Rules solo nei test: campi anagrafici/metadati e cancellazione del record non scrivibili direttamente dal client. Mantiene distinti gli altri permessi legacy, che non sono certificati da questo blocco. Nuovo comando test:profile-text-emulators incluso in npm test, sempre sul progetto demo loopback. Dodici prove unitarie incluse revoche durante cifratura, vuoto, esclusione plaintext e round-trip con la cifratura reale dell'app; test emulatori privato/azienda con concorrenza, retry, scrittura diretta negata e modifiche legacy. Suite completa npm test superata (434 test shell); nessuna nuova prova browser attribuita al servizio non montato. CI del precedente 7bb38823 superata, run 35017732264.
+
+Nessun editor o adapter HTTP montato, nessun export produttivo nelle Functions. Prossimo blocco: sorgente/editor anagrafica revocabili e montaggio nel laboratorio, poi collegamenti e parità restante. Migrazione/rollback produttivi e transizione dei writer legacy restano da progettare prima dell'attivazione; nessuna migrazione automatica o modifica di dati reali. Rollback limitato ai moduli candidati e al runner/test. Nessun master, bump o deploy.
+
+Selezione QR delle righe aggiuntive ancora aperta: il form legacy usa fallback extra-indice/sede-indice quando manca un ID persistito; il nuovo writer non deve trattarli come identità stabili né assegnarli implicitamente. Verificare contratto/migrazione delle identità prima di completare quel sottoblocco. Continuare le attività indipendenti dell'anagrafica senza nascondere questo limite.
+
 ### Editor QR aziendale montato — laboratorio 15/09/2026
 
 Successivo a `81cc50d6`: Modifica selezione nella tessera aziendale apre lo stesso editor del profilo privato, con i quattordici flag aziendali. Sorgente dedicata e provider senza writer alternativo; nessun valore aziendale, password o foto viene decifrato per mostrare queste etichette. Consultazione della selezione in cache offline; preparazione del salvataggio solo online con rilettura confermata, controllo UID/proprietà/archivio, identità dell'azienda e confronto della configurazione precedente.

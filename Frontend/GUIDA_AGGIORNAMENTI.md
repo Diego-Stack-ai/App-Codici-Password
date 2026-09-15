@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Anagrafica dopo `7bb38823`: preparati patch cifrata e servizio transazionale per testi/note privati e aziendali, senza toccare contatti/collegamenti. Confronto revisioni e impronte, ricevuta idempotente e Rules candidate solo negli emulatori. Dodici nuove prove unitarie; suite completa npm test superata (434 test shell), senza nuova prova browser del servizio non montato. Editor e trasporto da montare nel laboratorio, nessuna modifica produttiva; perimetro e limiti nella roadmap profili.
+
 Editor QR aziendale dopo `81cc50d6`: montati sorgente/provider revocabili, vista comune e trasporto limitato alle fixture. Otto nuove prove unitarie, integrazione con retry dopo conferma persa; suite completa npm test superata (422 test shell) e 90 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Selezione righe aggiuntive e gate produttivi ancora aperti; proseguire parità editor/collegamenti. Dettagli nella roadmap profili, nessun deploy.
 
 Selezione QR aziendale dopo `a2a0252a`: servizio transazionale candidato per i quattordici flag fissi, ricevuta idempotente e confronto delle modifiche legacy. Dieci test unitari ed emulatori superati, suite completa npm test superata (414 test shell). UI non montata; Rules produttive invariate, overlay solo laboratorio e flag delle righe aggiuntive ancora esclusi dal servizio. Riprendere sorgente/editor aziendale; nessun deploy. Perimetro e limiti nella roadmap profili.
