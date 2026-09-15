@@ -2,12 +2,78 @@
 
 > **Stato:** registro operativo e cronologico.
 > **Autorità:** roadmap subordinata ai contratti, non certificazione; prevale la baseline sicurezza.
-> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Revisione:** 15/09/2026; incremento `054b045d`, PR #67, produzione 1.2.127. Le voci del diario conservano i riferimenti originali.
 > **Area:** release e attività aperte.
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
-## Stato corrente — riallineamento documentale 12/09/2026, v1.2.110
+## Stato corrente — chiusura documentale 15/09/2026
+
+Note montate dopo `e21202ac`: nuovo editor nel dettaglio per Account personali collegati/aziendali, penna o Aggiungi nota, salvataggio/svuotamento con rilettura immediata. Coda M6 consultata senza invio, recupero pendente mantenuto e vecchio editor isolato invariato. Chrome 99 verifiche online/offline/riavvio superate; quattordici nuove prove unitarie. Prossimo montaggio azioni di collegamento nei profili; limiti e gate nella roadmap, nessun deploy.
+
+Editor nota dopo `713127a1`: sorgente/provider per Account personali/aziendali, sola consultazione offline, salvataggio/svuotamento online e pulizia del testo. Impone controllo esplicito della coda pendente, senza modificarla; dieci prove aggiunte. Da collegare adapter reale della coda, dettaglio e azioni di collegamento; nuovo provider non ancora montato nel browser. Nessun deploy.
+
+Compatibilità note dopo `053440f7`: servizio candidato aggiorna solo la nota cifrata, revisione/schema/timestamp e ricevuta; conserva collegamenti, banca e campi sconosciuti. UID atteso e impronta della nota proteggono cambio utente e modifiche legacy. Vecchio percorso M6 invariato; montaggio editor e recupero della coda ancora da integrare. Otto prove unitarie e test Firestore dedicato, nessuna UI produttiva o deploy.
+
+Selettore dopo `0babf0c9`: ricerca per nome Account/azienda e filtro personali/azienda, identità distinta anche con ID uguali e possibilità di scegliere Account già collegati. Lettore e vista revocabili, soli nomi decifrati, dodici prove aggiunte. Chiuso anche il mancato rifiuto del flag `isExplicitMemo` nelle destinazioni del servizio candidato. Da completare compatibilità editor e montaggio integrato; nessuna nuova prova browser attribuita, nessun deploy.
+
+Sorgente collegamenti dopo `8d5be66d`: relazione consultabile offline e preparazione online revocabile, con confronto di revisione/impronta e richieste immutabili senza decifrare credenziali. Sei nuove prove; selettore e montaggio ancora da completare. Verificata e documentata incompatibilità del vecchio editor M6 con i metadati dei collegamenti, da risolvere senza scartarli. Prossimo selettore/adattatori e compatibilità editor; nessun deploy.
+
+Collegamenti dopo `520aafd2`: preparato servizio atomico per origine, vecchio/nuovo Account e ricevuta, preservando credenziali e altri riferimenti. Undici prove unitarie ed emulatori dedicati; suite completa npm test superata (456 test shell). Nessun writer produttivo o UI montata. Prossimo sorgente/selettore Collega/Cambia/Scollega, con limiti di schema e compatibilità metadati nella roadmap profili; nessun deploy.
+
+Editor anagrafica dopo `6cca03f5`: testi/note modificabili nei due profili del laboratorio, con cifratura, refresh confermato e pulizia dei controlli. Offline in sola consultazione. Undici nuove prove unitarie; suite completa npm test superata (445 test shell) e 94 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Proseguire collegamenti e restanti editor; perimetro e gate nella roadmap profili, nessun deploy.
+
+Anagrafica dopo `7bb38823`: preparati patch cifrata e servizio transazionale per testi/note privati e aziendali, senza toccare contatti/collegamenti. Confronto revisioni e impronte, ricevuta idempotente e Rules candidate solo negli emulatori. Dodici nuove prove unitarie; suite completa npm test superata (434 test shell), senza nuova prova browser del servizio non montato. Editor e trasporto da montare nel laboratorio, nessuna modifica produttiva; perimetro e limiti nella roadmap profili.
+
+Editor QR aziendale dopo `81cc50d6`: montati sorgente/provider revocabili, vista comune e trasporto limitato alle fixture. Otto nuove prove unitarie, integrazione con retry dopo conferma persa; suite completa npm test superata (422 test shell) e 90 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Selezione righe aggiuntive e gate produttivi ancora aperti; proseguire parità editor/collegamenti. Dettagli nella roadmap profili, nessun deploy.
+
+Selezione QR aziendale dopo `a2a0252a`: servizio transazionale candidato per i quattordici flag fissi, ricevuta idempotente e confronto delle modifiche legacy. Dieci test unitari ed emulatori superati, suite completa npm test superata (414 test shell). UI non montata; Rules produttive invariate, overlay solo laboratorio e flag delle righe aggiuntive ancora esclusi dal servizio. Riprendere sorgente/editor aziendale; nessun deploy. Perimetro e limiti nella roadmap profili.
+
+Scheda PDF aziendale dopo `d62e74d8`: scelta gruppi, generatore locale separato, anteprima testuale e download/condivisione con fallback. Sedici nuove prove, suite completa (404 shell), 90 verifiche Chrome e controllo visivo PDF sintetico di tre pagine superati. Nessun dato reale o invio; iPhone/WhatsApp/email reali ed Edge restano da collaudare. Dettagli e limiti nella roadmap profili; riprendere editor profili/collegamenti e residui MD, senza deploy.
+
+Montaggio editor QR dopo `fb207a4e`: salvataggio/rilettura e consultazione offline verificati nel browser del laboratorio con trasporto limitato alle fixture e overlay Rules. Corretto il metadato id del repository; due regressioni, suite completa (388 shell) e 90 verifiche Chrome superate. Gate produttivo/App Check, writer legacy ed Edge/iPhone aperti. Proseguire con scheda PDF aziendale richiesta in `45110a0e`; nessun deploy.
+
+Editor QR dopo `686b1f1c`: sorgente, vista e controller con revoca/retry preparati; suite completa superata (386 shell), sedici nuove prove e integrazione Firestore demo con conferma persa. Provider non ancora montato nel browser: adapter attendibile, transizione Rules/writer legacy e collaudi UI restano aperti. Nessun deploy o nuova prova browser attribuita; dettagli nella roadmap profili.
+
+Preparazione selezione QR dopo `5fc9c8f2`: contratto privato e servizio transazionale candidato, sette nuove prove, suite completa (370 shell) e concorrenza/Rules su emulatori superate. Nessuna attivazione runtime: adapter callable, interfaccia e migrazione dei writer legacy restano da completare. Overlay Rules solo nel test; nessun enforcement HTTP dimostrato o deploy. Perimetro nella roadmap profili.
+
+QR dopo `e7f70061`: telefono aziendale selezionabile esplicitamente, escluso per default nelle configurazioni precedenti. Lettore shell non decifra il numero non selezionato. Due regressioni e suite completa superate (363 shell), senza nuova attribuzione di prove browser. Proseguire con editor selezione shell e Rules ristrette; foto aziendale e restanti gate aperti. Nessun deploy.
+
+Tessera aziendale dopo `104aefc9`: vista QR/download condivisa, lettore dedicato sulla selezione salvata e generatore canonico. Suite completa superata (362 shell), 90 verifiche Chrome online/offline e dopo riavvio. Restano editor selezione/profili e parità campi QR (telefono aziendale/foto non previsti dal generatore attuale), Widget aziendali, Edge/iPhone. Dettagli nella roadmap profili; nessun deploy.
+
+Tessera privata successiva a `f439cb61`: QR e vCard dalla selezione salvata, letture revocabili e pulizia anteprima. Suite completa superata (355 shell), 90 verifiche Chrome online/offline e dopo riavvio. Restano tessera aziendale, editor della selezione/profili, Widget aziendali e collaudi Edge/iPhone; dettagli nella roadmap profili. Nessun deploy o chiusura del programma.
+
+Preparazione tessera dopo `cc6ff020`: generatore vCard limita autonomamente i tipi Widget esportabili, rifiuta classificazioni ambigue e impedisce nuove proprietà tramite CR/LF nei valori. Due regressioni, 141 test profilo e suite completa superati (343 shell). Tessera della shell ancora da montare; prossimi passi nella roadmap profili. Nessun dato reale o deploy.
+
+Widget personali dopo `16dae6f1`: consultazione nelle linguette, ordine conservato, collasso locale e anteprime protette. Suite completa superata (341 shell), suite shell finale 343 e 90 verifiche Chrome superati. Corretto solo il formato della fixture sintetica; nessuna migrazione. Widget di profilo aziendale ancora da progettare con schema/Rules propri: non riutilizzare quelli personali. Proseguire con tessera digitale mantenendo aperti editor, estensione aziendale ed Edge/iPhone. Dettagli nella roadmap profili; nessun deploy.
+
+Panoramica dopo `530c991a`: linguetta iniziale personale/azienda con modello canonico, contatti principali, riepilogo fiscale/documentale e aperture interne. Otto nuove prove, 329 shell, suite completa e 90 verifiche Chrome superati; limiti del collaudo e gate Edge/iPhone nella roadmap profili. Proseguire con Widget di profilo, tessera e parità editor. Nessuna modifica produzione o dichiarazione di programma concluso.
+
+Note anagrafiche dopo `1fc6e357`: campo canonico privato ora consultabile nella shell e cancellato dai nodi al cambio linguetta. Quattro prove aggiuntive, 321 shell e 90 verifiche Chrome superati, compresa prima visita offline dopo riavvio. Editor del profilo ancora aperto; proseguire con Panoramica, Widget e tessera. CI del precedente `1fc6e357` superata (34998077954); il workflow esegue `npm test` e non sostituisce la matrice browser/Edge. Dettagli nella roadmap profili; produzione invariata.
+
+Vista bancaria successiva a `33e4b1b1`: ogni conto contiene i propri Widget tra dati del conto e carte. Suite completa con 317 shell e 90 verifiche Chrome superati, incluso recupero note dopo navigazione e arresto/riapertura offline. Edge non verificato: il browser locale termina prima dell'endpoint DevTools; il runner conserva entrambi i browser per default e consente diagnosi mirata esplicita. Gate e limiti nella roadmap profili. Proseguire con parità profili, mantenendo aperta la verifica Edge. Nessun rilascio o chiusura del programma.
+
+Correzione della coda del laboratorio dopo `3d11e6eb`: la chiusura di una vista revoca subito il client, ma attende la conclusione delle operazioni pendenti prima di chiudere IndexedDB. Il coordinatore può così rilasciare il lease anche dopo un annullamento; chiudere prima la connessione poteva impedire tale rilascio e bloccare temporaneamente il recupero nella vista successiva. Due regressioni deterministiche (risoluzione e rifiuto pendenti), cinque test del modulo superati. Suite completa superata nel working tree che comprende anche la vista bancaria ancora da consolidare (317 shell): non attribuire la parità bancaria a questo solo fix. Le prove browser del nuovo incremento restano aperte: Chrome ha superato 58 verifiche entry prima del fix e 32 dopo arresto/riapertura con il fix; Edge ha incontrato un timeout di avvio DevTools nelle prove entry. Non è dimostrato che il problema intermittente dell'editor avesse questa sola causa. Nessuna modifica al database reale o alla produzione; rollback limitato al factory della coda sperimentale.
+
+Lettore bancario successivo a `5f17a9a2`: capability revocabili per conti e carte, modello canonico, nessuna creazione di ID durante la consultazione. 13 prove mirate e contratto Vault completo superati (312 shell). La vista bancaria e gli host Widget sono il prossimo passo; questo sottoblocco non è ancora montato nel browser. Nessun deploy.
+
+Vincolo Widget/conto successivo a `6b952fe5`: letture rifiutate con genitore bancario assente o ambiguo e dopo rimozione/spostamento concorrente. 299 test shell superati. È un sottoblocco preparatorio: modulo bancario completo e restante programma MD ancora aperti. Proseguimento per commit verificati confermato da Diego; nessun deploy.
+
+Widget, consultazione integrata dopo `0d31c777`: Widget Account e credenziali comuni presenti nel dettaglio della shell, letture revocabili e comandi legati alla classificazione corrente dei campi. Fixture non vuote, suite completa e 296 shell superati; 108 verifiche entry più 62 arresto/riapertura Chrome/Edge, 170 totali. Prossimo blocco: modulo bancario con Widget nel rispettivo conto, seguito dalla parità restante. Limiti nella roadmap profili; non è un rilascio né chiusura dell'intero programma.
+
+Excel, primo adeguamento dopo `45deb058`: verificato il ramo recuperato `40052515`, aggiunta proiezione sperimentale con mascheramento PUK/Widget e revoca sulla sessione. Suite completa superata, 290 shell. Servizio Excel originale non integrato; generazione/consenso/download e parità allegati ancora aperti. Perimetro e rischi in [M8](../docs/M8_BACKUP_RECUPERO.md#esportazione-excel-separata-dal-backup--candidata-15092026). Nessun deploy.
+
+Sottoblocco Widget successivo a `8a664499`: lettore revocabile per Widget incorporati e credenziali comuni, senza gestore legacy o valori restituiti nell'elenco. 15 test mirati e 278 shell finali superati; suite completa superata prima dell'ultimo affinamento, poi suite shell rieseguita. UI e fixture browser non vuote restano il prossimo lavoro, come descritto nella roadmap profili. CI della directory `8a664499` superata (34951205896); nessun deploy o chiusura del programma.
+
+Incremento directory aziende successivo a `b3b07769`: selezione generica con ricerca e apertura di profilo/Account, contesto aziendale preservato anche con ID Account uguali. Suite completa, 263 test shell e 156 verifiche browser superati. Il commit precedente `b3b07769` ha superato CI GitHub 34950037514; il risultato del nuovo commit va verificato separatamente. Prossimo blocco autonomo: Widget e credenziali comuni nella shell. Produzione invariata, nessun deploy.
+
+Stato successivo: [proseguimento autonomo nel piano](../docs/PIANO_MATURITA_PROFESSIONALE.md#proseguimento-autonomo--stato-15092026-dopo-17a1236a). Completati consultazione aziendale, preparazione offline automatica e incremento utenze personali; ordine dei residui esplicito. Ultimo incremento: suite completa, 253 test shell e 146 verifiche browser superati. I risultati dei primi due commit sono confermati anche da CI GitHub. Nessun deploy, nessuna dichiarazione di programma completo.
+
+Proseguimento autorizzato dall'utente: portare avanti autonomamente le attività lavorabili degli MD e annotare i gate che richiedono intervento, continuando sulle attività indipendenti. Incremento azienda successivo a `199441d0`: stessa vista profilo per i due domini, adapter canonico e credenziali collegate; suite completa, 240 test shell e 136 verifiche browser superati. Perimetro e residui in [Roadmap profili](../docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md#candidata-shell-profilo-aziendale-in-consultazione--15092026). La chiusura sotto è il checkpoint precedente, non il termine del programma.
+
+Chiuso e pubblicato l'incremento `054b045d` della candidata shell; CI GitHub 34947029981 riuscita. Voci completate, gate ancora aperti e prossimo lavoro sono nel [riepilogo autorevole del programma](../docs/PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). Nessun deploy o chiusura complessiva del programma; VS-P0-01 resta aperto in produzione. La revisione documentale corregge intestazioni obsolete, senza cambiare requisiti o riscrivere gli audit passati.
+
+## Fotografia storica — riallineamento documentale 12/09/2026, v1.2.110
 
 Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi preliminari e i conteggi valgono per la data o la versione indicata; non sono comandi da eseguire oggi. Le indicazioni operative sono nella [guida tecnica](./GUIDA.md) e nei contratti specialistici.
 
@@ -861,3 +927,45 @@ PR #66 unita in master 0ba2332b298d155f0afb1a4eb50c9659115fe321; release 94792d8
 npm test completo e dieci scenari browser Chrome/Edge superati; GitHub Actions 34939530695 riuscita. Dopo il deploy, 31 file pubblicati corrispondono via SHA256 alla release. Prova Chrome con profilo isolato senza credenziali: nessuna struttura privata visibile e arrivo a /login-v115.html senza parametro di errore/timeout. Collaudo fisico iPhone ancora da eseguire, inclusa riapertura offline con sessione mantenuta e sblocco Vault.
 
 Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima di integrare, evitando duplicazioni dei backport offline e logout. La direzione shell persistente resta confermata; questo rilascio non chiude il P0 legacy del wrapping in sessionStorage né l'intero audit sicurezza. Dettagli implementativi e regressioni sono in docs/AUDIT_VAULT_SESSION_P0.md del ramo produttivo e nella PR #66.
+
+## Correzione candidata apertura offline su iPhone — 14/09/2026
+
+Ramo fix/iphone-offline-bootstrap, base pubblicata 9e5335d9 (1.2.124). Backport selettivo della correzione 291ce2bb: refresh dell'identità Firebase solo online, utente corrente verificato richiesto anche offline, arresto del bootstrap su cambio UID durante l'attesa. Nessuna integrazione della shell sperimentale. Sette regressioni dedicate incluse nella suite security; npm test completo superato su questa base.
+
+Rilascio non eseguito e versione invariata. Dopo pubblicazione autorizzata ripetere su PWA iPhone Account online → Home → modalità aereo → lista. Il retest fisico resta necessario; questo backport non certifica l'offline completo o gli allegati.
+
+## Apertura pagine private offline — rilascio 1.2.125, 15/09/2026
+
+Pubblicazione della sola correzione iPhone autorizzata dall'utente. Il refresh Auth avviene online; offline resta richiesto l'utente Firebase corrente verificato, seguito dal normale sblocco Vault. Aggiornati versione e riferimenti statici tramite lo script canonico; verificato che il diff di release contenga soltanto 1.2.124 → 1.2.125. npm test completo e sette regressioni dedicate superati. Destinazione: Hosting soltanto, senza Functions, Rules o dati; shell sperimentale esclusa. Dopo rilascio ripetere Home → modalità aereo → lista sulla PWA iPhone. Rollback Hosting: 1.2.124, con il blocco offline noto.
+
+## Candidata 1.2.126 — preparazione offline profilo, Widget e credenziali (15/09/2026)
+
+Backport isolato da 9f769aab e 61cd253e, sulla produzione 1.2.125 (master 263355f2). La preparazione online include il documento del profilo, accountWidgets e sharedVaultData senza visita preventiva delle singole pagine; marker precedenti invalidati e stato incompleto in caso di letture fallite. Messaggi di indisponibilità offline nelle principali pagine di profilo, aziende e Account, senza riclassificare errori di permessi o decifratura. Il profilo carica il gestore messaggi solo nel percorso di errore; intestazione del modulo abbreviata per mantenere il budget statico di apertura.
+
+Tredici test offline: nove sulla preparazione/classificazione e quattro sulla consultazione dei componenti della base produttiva (privato/azienda, Widget/credenziali), con server vietato offline e rivelazione/mascheramento simulati. Non attribuire a questo backport i test di lifecycle della shell sperimentale. Prima del rilascio sono richiesti npm test completo e controllo versione; budget statico delle 31 pagine verificato.
+
+Foto e allegati esclusi dall'offline per decisione dell'utente. Nessuna estensione delle scritture, Functions o Rules. La PR #63 e la shell persistente restano separate dal rilascio. Dopo pubblicazione verificare fisicamente iPhone: completare caricamento online, passare offline senza logout e consultare profilo, Widget e credenziali senza averne aperto prima le pagine.
+
+## Verifica della visibilità prima di Auth — candidata del 15/09/2026
+
+Sulla 1.2.126 pubblicata riprodotta in Chrome isolato la Home generica visibile prima del redirect al login; nessun accesso a dati reali. La candidata mantiene hidden/inert le 22 pagine private fino alla conferma Auth, gestisce errore/timeout e risposte tardive, centralizza la pulizia locale prima di signOut. Nessun bump o deploy.
+
+Il requisito generale era già previsto dagli MD; mancava il test del primo frame produttivo. Quattordici nuove regressioni, sette test offline precedenti, dieci scenari locali Chrome/Edge e npm test completo superati. Il costo del modulo sincrono è documentato: massimo 336.8 KB gzip, tetti 337 KB/43 moduli. Restano collaudo iPhone e audit generale Vault; la shell persistente rimane separata. Evidenze, file, minaccia, limiti e rollback nell'ultima sezione di [AUDIT_VAULT_SESSION_P0.md](../docs/AUDIT_VAULT_SESSION_P0.md).
+
+## Preparazione rilascio Auth 1.2.127 — 15/09/2026
+
+Rilascio isolato autorizzato dall'utente dopo revisione della PR #66. Base fa34e9d0, su master 1.2.126 a14d0198; nessuna integrazione della shell sperimentale. Aggiornamento tramite script canonico: 246 riferimenti asset in 94 file; verificato che le differenze runtime successive al candidato siano soltanto sostituzioni 1.2.126 → 1.2.127.
+
+npm test completo superato sulla 1.2.127; dieci scenari browser locali Chrome/Edge superati (anonimo, valido, errore, timeout e logout). CI precedente del candidato fa34e9d0: run 34939242389 riuscito; attendere anche il controllo del nuovo commit di release prima del merge. Dopo Hosting verificare hash dei file e accesso anonimo in browser isolato. Resta il collaudo fisico iPhone/PWA e il programma della shell; Functions, Rules, formati crittografici e dati utente esclusi dal rilascio.
+
+## Integrazione sicurezza e shell, 15/09/2026
+
+Riallineata la candidata al master 1.2.127 nel merge 1089cde8, mantenendo le protezioni di entrambi i rami. Rules distribuite confrontate e coincidenti con quelle testate. L'ingresso Firebase della shell ora elimina il materiale di sessione legacy senza riutilizzarlo e blocca/chiude la Vault agli eventi del browser o al rifiuto Auth. Evidenze e limiti nel capitolo finale di docs/AUDIT_VAULT_SESSION_P0.md. La shell resta parziale: produzione invariata, VS-P0-01 ancora aperto fino alla sostituzione del percorso multipagina e collaudo completo. Nessuna nuova autorizzazione architetturale da richiedere; nessun deploy effettuato.
+
+## Profilo nella shell: prima consultazione protetta — 15/09/2026
+
+PR #67: route locale per Anagrafica, Contatti, Indirizzi e Documenti, con repository canonico e chiave confinata alla sessione RAM. Navigazione senza reload e rimozione dei testi all'uscita. Fixture allineate ai nomi reali dei campi; lettura online/offline e dopo arresto del browser verificata su dati sintetici. Dettagli e limiti nell'ultimo capitolo di docs/AUDIT_VAULT_SESSION_P0.md. Editor, collegamenti, utenze e tessera digitale ancora da integrare; nessuna attivazione in produzione o chiusura del rischio legacy.
+
+## Consultazione degli Account collegati nella shell — 15/09/2026
+
+Stessa PR #67: apertura e ritorno al profilo senza reload, password dell'Account collegato su richiesta con mostra/nascondi/copia, anche quando email e telefono condividono l'Account o il destinatario è aziendale. Controlli di provenienza e sessione ripetuti dopo le attese; nessun riuso delle vecchie password dei contatti. Suite completa superata, 232 test shell finali e 126 verifiche browser online/offline/arresto superate. Limiti del pre-caricamento della cache ed evidenze nell'ultimo capitolo di docs/AUDIT_VAULT_SESSION_P0.md. Modifica dei collegamenti e parità completa dei profili ancora da integrare; nessun deploy e rischio legacy produttivo ancora aperto.

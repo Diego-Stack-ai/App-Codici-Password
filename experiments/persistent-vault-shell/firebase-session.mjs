@@ -2,10 +2,13 @@ import {onAuthStateChanged, signOut} from 'firebase/auth';
 import {doc, getDoc} from 'firebase/firestore';
 import {createLegacyAdapter} from './legacy-adapter.mjs';
 import {createProtectedSession} from './protected-session.mjs';
+import {bindBrowserSession, clearLegacyUnlock} from './browser-session-boundary.mjs';
 
 // Candidate integration, not imported by the published application or preview.
 // The caller supplies initialized SDK instances and an abortable password UI.
 export function createFirebaseSession({auth, db, cryptoApi, requestPassword, routes, createQueueClient, onState, onError}) {
+    // Fail before creating a session if legacy storage cannot be cleared.
+    clearLegacyUnlock(globalThis.sessionStorage);
     const getUser = () => auth.currentUser;
     const subscribeUser = listener => onAuthStateChanged(auth, listener);
     const assertActive = (signal, uid) => {
@@ -52,5 +55,7 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
                 lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
         }
     });
-    return Object.freeze({...session, logout: () => session.logout(() => signOut(auth))});
+    const detach = bindBrowserSession(session);
+    return Object.freeze({...session, logout: () => session.logout(() => signOut(auth)),
+        dispose() { detach(); session.dispose(); }});
 }

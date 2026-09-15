@@ -14,6 +14,8 @@ L'audit del 08/09/2026 rileva zero vulnerabilità note nelle dipendenze di produ
 
 ## Gate che richiedono ambiente reale
 
+Aggiornamento documentale 15/09/2026, riferimento candidato `054b045d`: [riepilogo delle chiusure verificate](./PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). CI GitHub 34947029981 superata e controlli locali conclusi; non chiudono M10 né autorizzano il rilascio della shell. Il confronto delle Rules distribuite è documentato nell'audit Vault; non attesta App Check Enforcement o gli altri gate sotto elencati. Produzione 1.2.127 invariata.
+
 - verificare App Check Enforcement, Firestore Rules e Storage Rules dalla console del progetto pubblicato;
 - eseguire la matrice su iPhone, Windows e browser supportati, inclusi rete lenta, offline, riapertura e overscroll;
 - provare backup, cancellazione e ripristino esclusivamente su una copia non produttiva;

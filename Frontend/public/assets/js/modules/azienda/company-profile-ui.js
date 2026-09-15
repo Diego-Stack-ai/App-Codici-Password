@@ -1,5 +1,5 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.124';
+import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -114,11 +114,11 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
         ])
     ]);
     const qr=document.getElementById('company-digital-card');
-    const options=[['ragioneSociale','Ragione sociale'],['partitaIva','Partita IVA'],['codiceSDI','Codice SDI'],['numeroCCIAA','CCIAA'],['dataIscrizione','Data iscrizione'],['referenteNome','Nome referente'],['referenteCognome','Cognome referente'],['referenteTitolo','Ruolo referente'],['referenteCellulare','Cellulare referente'],['aziendaEmail','PEC'],['adminEmail','Email amministrazione'],['persEmail','Email personale'],['qrLegale','Sede legale']];
+    const options=[['ragioneSociale','Ragione sociale'],['partitaIva','Partita IVA'],['codiceSDI','Codice SDI'],['numeroCCIAA','CCIAA'],['dataIscrizione','Data iscrizione'],['referenteNome','Nome referente'],['referenteCognome','Cognome referente'],['referenteTitolo','Ruolo referente'],['referenteCellulare','Cellulare referente'],['telefonoAzienda','Telefono aziendale'],['aziendaEmail','PEC'],['adminEmail','Email amministrazione'],['persEmail','Email personale'],['qrLegale','Sede legale']];
     const preview=createElement('div',{className:'company-qr-preview'});
     const config={...data.qrConfig};
     const refresh=()=>{ const vcard=buildVCard({...data,qrConfig:config}); renderQRCode(preview,vcard,{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'}); const capacity=document.getElementById('company-qr-capacity'); if(capacity) { const bytes=new TextEncoder().encode(vcard).length; capacity.textContent=bytes>1200 ? `Il QR contiene ${bytes} byte: riduci i campi per renderlo più facile da leggere.` : `Capacità utilizzata: ${bytes} byte.`; capacity.classList.toggle('is-warning',bytes>1200); } };
-    const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
+    const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail','telefonoAzienda'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
     const save=button('Salva selezione',async()=>{try{save.disabled=true;await updateDoc(doc(db,'users',auth.currentUser.uid,'aziende',companyId),{qrConfig:config});showToast('Tessera aggiornata','success');await reload();}catch{showToast('Impossibile salvare la tessera','error');}finally{save.disabled=false;}});
     const download=button('Scarica contatto',()=>{const blob=new Blob([buildVCard({...data,qrConfig:config})],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
     setChildren(qr,[createElement('div',{className:'digital-card-layout'},[

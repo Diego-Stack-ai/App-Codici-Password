@@ -11,9 +11,9 @@ export function createPrivateNotePanelProvider({context, getUser, readSource, op
     const uid = context?.user?.uid;
     if (!uid || !context.signal || !context.unlocked ||
         ![getUser, readSource, openQueue, newOperationId, mountPanel, isOnline, context.read, context.encrypt].every(fn => typeof fn === 'function')) throw new Error('NOTE_PROVIDER_CONFIG');
-    return async (root, {selection, signal, isActive = () => true, onSaved, onDiscarded} = {}) => {
+    return async (root, {selection, signal, isActive = () => true, onSaved, onDiscarded, recoveryOnly: requestedRecoveryOnly = false} = {}) => {
         const recordId = selection?.id;
-        if (selection?.domain !== 'private' || !/^[A-Za-z0-9_-]{1,180}$/.test(recordId || '') || !signal) throw new Error('NOTE_PROVIDER_SCOPE');
+        if (selection?.domain !== 'private' || !/^[A-Za-z0-9_-]{1,180}$/.test(recordId || '') || !signal || typeof requestedRecoveryOnly !== 'boolean') throw new Error('NOTE_PROVIDER_SCOPE');
         const lifetime = new AbortController();
         let source, prepared, queue, cleanup, closed = false;
         const close = () => {
@@ -45,7 +45,10 @@ export function createPrivateNotePanelProvider({context, getUser, readSource, op
         signal.addEventListener('abort', close, {once: true}); context.signal.addEventListener('abort', close, {once: true});
         try {
             check();
-            const recoveryOnly = !isOnline();
+            // Recovery must remain reachable online even when a new profile
+            // link puts the current Account outside the old M6 editor scope.
+            // It can only retry/discard the existing queue, never prepare anew.
+            const recoveryOnly = requestedRecoveryOnly || !isOnline();
             let initialNote = '';
             if (!recoveryOnly) {
                 const initial = await current();

@@ -128,3 +128,16 @@ test('a failed online server check is not silently treated as offline evidence',
     const f = fixture({isOnline: () => true, readSource: async () => { throw new Error('PERMISSION_DENIED'); }});
     await assert.rejects(f.mount(), /PERMISSION_DENIED/); assert.equal(f.panel, undefined);
 });
+
+test('explicit online recovery never reads incompatible source or prepares a new full-record mutation', async () => {
+    let reads = 0;
+    const f = fixture({isOnline: () => true, readSource: async () => {reads++; throw Error('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');}});
+    const close = await f.mount({}, {recoveryOnly: true});
+    assert.equal(reads, 0); assert.equal(f.panel.recoveryOnly, true); assert.equal(f.panel.initialNote, '');
+    await assert.rejects(f.panel.prepare('new note'), /RECOVERY_ONLY/); assert.equal(reads, 0);
+    close();
+});
+
+test('ambiguous recovery mode cannot activate the old provider', async () => {
+    const f = fixture(); await assert.rejects(f.mount({}, {recoveryOnly: 'true'}), /SCOPE/); assert.equal(f.panel, undefined);
+});

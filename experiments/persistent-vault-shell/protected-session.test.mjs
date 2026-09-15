@@ -18,6 +18,25 @@ function fixture(options = {}) {
         change(uid, notify = true) { user = uid ? {uid} : null; if (notify) observer(user); }};
 }
 
+test('live authorization for legacy plaintext rejects expired and disposed route contexts', async () => {
+    let now = 0;
+    const f = fixture({now: () => now, timeoutMs: 10});
+    await f.session.unlock(); await f.session.navigate('private');
+    const context = f.contexts.at(-1);
+    context.assertUnlocked(); now = 11;
+    assert.throws(() => context.assertUnlocked(), /VAULT_LOCKED/);
+    assert.equal(context.signal.aborted, true);
+    assert.throws(() => context.assertUnlocked(), /VIEW_DISPOSED/);
+    f.session.dispose();
+});
+
+test('live authorization detects an identity change even before the Auth notification', async () => {
+    const f = fixture(); await f.session.unlock(); await f.session.navigate('private');
+    const context = f.contexts.at(-1); f.change('other', false);
+    assert.throws(() => context.assertUnlocked(), /AUTH_CHANGED/);
+    f.session.dispose();
+});
+
 test('one unlock across canonical route changes exposes a scoped reader without a key', async () => {
     let unlocks = 0;
     const f = fixture({unlockKey: async () => { unlocks++; return {}; }});

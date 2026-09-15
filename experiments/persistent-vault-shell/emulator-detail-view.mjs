@@ -3,16 +3,16 @@ import {mountDetailExtraFields} from './detail-extra-fields.mjs';
 
 // Basic experimental detail: reuse the canonical card without activating the
 // legacy detail orchestrators, their writes, or their security manager.
-export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel}) {
+export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, mountNotePanel, mountWidgets, backLabel = 'Torna alla lista'}) {
     if (context.signal.aborted) return () => {};
     if (!context.unlocked) throw new Error('VAULT_LOCKED');
     const lifecycle = new AbortController();
     const wrapper = document.createElement('section');
     const title = document.createElement('h2'); title.textContent = 'Dettaglio Account';
-    const back = document.createElement('button'); back.type = 'button'; back.textContent = 'Torna alla lista';
+    const back = document.createElement('button'); back.type = 'button'; back.textContent = backLabel;
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, back, container);
-    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, refreshPending;
+    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, widgetCleanup = null, refreshPending;
     let revision = 0;
     const assertActive = () => {
         if (disposed || context.signal.aborted) throw new DOMException('View disposed', 'AbortError');
@@ -58,7 +58,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         lifecycle.abort();
         account = null;
         try { saveCleanup?.(); } finally {
-            try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } }
+            try { widgetCleanup?.(); } finally { try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } } }
         }
     };
     context.signal.addEventListener('abort', cleanup, {once: true});
@@ -95,11 +95,17 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         });
         if (disposed) extraCleanup?.();
         assertActive();
-        if (mountSavePanel && selection.domain === 'private') {
+        if (mountWidgets) {
+            widgetCleanup = await mountWidgets(wrapper);
+            if (disposed) widgetCleanup?.();
+            assertActive();
+        }
+        const mountPanel = mountNotePanel || (selection.domain === 'private' ? mountSavePanel : null);
+        if (mountPanel) {
             const editorHost = document.createElement('div'); wrapper.append(editorHost);
             try {
-                saveCleanup = await mountSavePanel(editorHost, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
-                    onSaved: refreshDetail, onDiscarded: refreshDetail});
+                saveCleanup = await mountPanel(editorHost, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
+                    hasNote: () => {assertActive(); return account.has('note');}, onSaved: refreshDetail, onDiscarded: refreshDetail});
             } catch {
                 assertActive();
                 editorHost.remove();

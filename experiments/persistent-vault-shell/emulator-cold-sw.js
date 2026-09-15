@@ -2,7 +2,7 @@
 // callable responses, decrypted records or Vault material.
 if (self.location.origin !== 'http://127.0.0.1:4188') throw new Error('LOCAL_EMULATOR_ONLY');
 const cacheName = 'synthetic-vault-cold-assets-v1';
-const assets = ['/', '/emulator.js', '/emulator.css', '/entry-check.mjs', '/symbols.woff2', '/assets/images/google-avatar.png'];
+const assets = ['/company-summary-pdf.js', '/assets/pdf/LiberationSans-Regular.ttf', '/assets/pdf/LiberationSans-Bold.ttf', '/assets/js/vendor/qrcode.min.js', '/', '/emulator.js', '/emulator.css', '/entry-check.mjs', '/symbols.woff2', '/assets/images/google-avatar.png'];
 self.addEventListener('install', event => event.waitUntil((async () => {
     const cache = await caches.open(cacheName);
     await cache.addAll(assets);

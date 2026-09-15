@@ -46,6 +46,10 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
     const ownerA = await seed(a, masterA, 'A');
     const ownerB = await seed(b, masterB, 'B');
     let password = masterA, context, queueScope, queueClosed = 0;
+    const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'sessionStorage');
+    const legacyStorage = new Map(['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry', 'preference'].map(name => [name, 'synthetic-only']));
+    Object.defineProperty(globalThis, 'sessionStorage', {configurable: true, value: {removeItem: name => legacyStorage.delete(name)}});
+    t.after(() => { if (previousStorage) Object.defineProperty(globalThis, 'sessionStorage', previousStorage); else delete globalThis.sessionStorage; });
     session = createFirebaseSession({auth: a.auth, db: a.db, cryptoApi,
         requestPassword: async () => password,
         createQueueClient: async scope => {
@@ -57,6 +61,8 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
         },
         routes: {overview: value => { context = value; }, private: value => { context = value; }}
     });
+
+    assert.deepEqual([...legacyStorage.keys()], ['preference'], 'Firebase shell startup purges old unlock material');
 
     await t.test('login alone does not unlock; Master Password opens the original private ciphertext', async () => {
         await session.navigate('private');

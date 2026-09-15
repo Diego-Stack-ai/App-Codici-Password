@@ -1,4 +1,4 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.124';
+import {auth, storage} from '../../firebase-config.js?v=1.2.127';
 import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {

@@ -1,0 +1,76 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createProfileSectionReader} from './profile-section-reader.mjs';
+function fixture(record, overrides = {}) {
+    let uid = 'owner', locked = false; const signal = new AbortController(), reads = [];
+    const context = {user: {uid}, signal: signal.signal, assertUnlocked() { if (locked) throw new Error('VAULT_LOCKED'); },
+        read: async ({ciphertext}) => { reads.push(ciphertext); return ciphertext.slice(4); }, ...overrides.context};
+    const read = createProfileSectionReader({context, getUser: () => ({uid}), repository: {getUserProfile: overrides.load || (async requested => { assert.equal(requested, 'owner'); return record; })}, isEncryptedValue: value => value.startsWith('enc:')});
+    return {read, reads, signal, change: () => { uid = 'other'; }, lock: () => { locked = true; }};
+}
+test('canonical contact fields are projected, and credentials and arbitrary properties never decrypted', async () => {
+    const f = fixture({contactEmails: [{address: 'enc:a@example.invalid', password: 'enc:DO-NOT-READ'}], contactPhones: [{number: 'enc:000', value: 'enc:WRONG-FIELD', pin: 'enc:DO-NOT-READ'}]});
+    assert.deepEqual((await f.read('contacts')).map(row => row.value), ['a@example.invalid', '000']);
+    assert.deepEqual(f.reads, ['enc:a@example.invalid', 'enc:000']);
+});
+test('canonical address and document fields work with explicitly supported legacy plaintext', async () => {
+    const f = fixture({userAddresses: [{address: 'enc:Via fittizia', civic: '1', street: 'wrong'}], documenti: [{num_serie: 'enc:ABC', numero: 'wrong', pin: 'enc:secret'}]});
+    assert.deepEqual((await f.read('addresses')).map(row => row.value), ['Via fittizia', '1']);
+    assert.deepEqual((await f.read('documents')).map(row => row.value), ['ABC']);
+});
+test('contacts retain distinct source links to the same Account without reading profile passwords', async () => {
+    const f = fixture({contactEmails: [{id: 'email', address: 'enc:a@example.invalid', linkedAccountId: 'shared', password: 'enc:DO-NOT-READ'}],
+        contactPhones: [{id: 'phone', number: 'enc:000', linkedAccountId: 'shared'}]});
+    const rows = await f.read('contacts');
+    assert.deepEqual(rows.map(row => [row.link.sourceId, row.link.selection.id]), [['email', 'shared'], ['phone', 'shared']]);
+    assert.deepEqual(f.reads, ['enc:a@example.invalid', 'enc:000']);
+});
+test('locked Vault, wrong owner, unknown section and malformed data fail closed', async () => {
+    const f = fixture({nome: 'legacy'}); f.lock(); await assert.rejects(f.read('personal'), /VAULT_LOCKED/);
+    await assert.rejects(fixture({ownerId: 'other'}).read('personal'), /OWNER_MISMATCH/);
+    await assert.rejects(fixture({}).read('password'), /PROFILE_SECTION_INVALID/);
+    await assert.rejects(fixture({contactPhones: {}}).read('contacts'), /PROFILE_SHAPE_INVALID/);
+    await assert.rejects(fixture({nome: {nested: 'secret'}}).read('personal'), /PROFILE_VALUE_INVALID/);
+});
+test('a missing profile is distinct from a legitimately empty section', async () => {
+    await assert.rejects(fixture(null).read('personal'), /PROFILE_NOT_FOUND/);
+    assert.deepEqual(await fixture({}).read('contacts'), []);
+});
+for (const boundary of ['change', 'abort', 'lock']) test(`late profile read is discarded after ${boundary}`, async () => {
+    let release; const f = fixture(null, {load: () => new Promise(resolve => { release = resolve; })});
+    const pending = f.read('personal'); const rejected = assert.rejects(pending, /AUTH_CHANGED|VIEW_DISPOSED|VAULT_LOCKED/);
+    if (boundary === 'abort') f.signal.abort(); else f[boundary](); release({nome: 'enc:late'}); await rejected;
+    assert.deepEqual(f.reads, []);
+});
+test('decrypt failure is not displayed as ciphertext or treated as legacy plaintext', async () => {
+    const f = fixture({nome: 'enc:corrupt'}, {context: {read: async () => { throw new Error('DECRYPT_FAILED'); }}});
+    await assert.rejects(f.read('personal'), /DECRYPT_FAILED/);
+});
+test('utility projection includes parent identity and omits legacy secret properties',async()=>{
+    const f=fixture({userAddresses:[{id:'home',address:'enc:Via',utilities:[{id:'u',type:'Energia',value:'enc:POD',linkedAccountId:'account',password:'enc:LEGACY'}]}]});
+    const rows=await f.read('addresses');assert.deepEqual(rows.map(row=>row.value),['Via','Energia','POD']);
+    const link=rows.find(row=>row.link).link;assert.equal(link.parentAddressId,'home');assert.equal(link.sourceId,'u');
+    assert.deepEqual(f.reads,['enc:Via','enc:POD']);
+});
+test('malformed nested utilities fail closed',async()=>{
+    await assert.rejects(fixture({userAddresses:[{id:'home',utilities:{}}]}).read('addresses'),/PROFILE_SHAPE_INVALID/);
+});
+
+test('anagraphic notes use the canonical note field only and absent notes add no row', async () => {
+    const f = fixture({note: 'enc:Nota privata', notes: 'enc:WRONG', password: 'enc:SECRET'});
+    assert.deepEqual(await f.read('personal'), [{group: 'Anagrafica', label: 'Note anagrafica', value: 'Nota privata'}]);
+    assert.deepEqual(f.reads, ['enc:Nota privata']);
+    for (const note of [undefined, null, '']) assert.deepEqual(await fixture({note}).read('personal'), []);
+    assert.deepEqual((await fixture({note: 'Nota legacy'}).read('personal')).map(row => row.value), ['Nota legacy']);
+    await assert.rejects(fixture({note: {value: 'invalid'}}).read('personal'), /PROFILE_VALUE_INVALID/);
+});
+
+for (const boundary of ['change', 'abort', 'lock']) test(`pending note decryption is discarded after ${boundary}`, async () => {
+    let release;
+    const f = fixture({note: 'enc:note'}, {context: {read: () => new Promise(resolve => { release = resolve; })}});
+    const pending = f.read('personal');
+    await new Promise(setImmediate);
+    const rejected = assert.rejects(pending, /AUTH_CHANGED|VIEW_DISPOSED|VAULT_LOCKED/);
+    if (boundary === 'abort') f.signal.abort(); else f[boundary]();
+    release('late-private-note'); await rejected;
+});

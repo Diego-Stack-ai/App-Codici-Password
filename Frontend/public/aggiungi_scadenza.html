@@ -2,6 +2,7 @@
 <html lang="it" data-i18n="loading">
 
 <head>
+  <script src="assets/js/private-auth-gate.js"></script>
     <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
     <meta charset="utf-8" />
@@ -13,22 +14,22 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.124" />
+    <link rel="manifest" href="manifest.json?v=1.2.127" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.124">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.124&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.127&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
 
-<body class="base-bg" data-ui-model="form">
+<body data-private-auth hidden inert class="base-bg" data-ui-model="form">
     <div class="base-container">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>

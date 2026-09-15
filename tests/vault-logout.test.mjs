@@ -8,6 +8,7 @@ const read = file => readFile(new URL(file, root), 'utf8');
 const securitySource = await read('modules/core/security-manager.js');
 const sessionSource = await read('modules/core/vault-session.js');
 const authSource = await read('auth.js');
+const logoutSource = await read('logout-session.js');
 
 // Run the real module bodies with browser/Firebase boundaries replaced; no network.
 function moduleBody(source) {
@@ -38,10 +39,10 @@ test('every explicit application signOut has preceding Vault cleanup', async () 
     let count = 0;
     for (const file of await walk(root)) {
         const source = await readFile(file, 'utf8');
-        for (const match of source.matchAll(/\bawait signOut\(auth\)/g)) {
+        for (const match of source.matchAll(/\bsignOut\(auth\)/g)) {
             count++;
             const before = source.slice(0, match.index).replace(/\/\/[^\n]*/g, '');
-            assert.match(before, /clearSession\(\);\s*(?:try\s*\{\s*)?$/, file.pathname);
+            assert.match(before, /logoutWithCleanup\((?:async\s*)?\(\)\s*=>\s*(?:await\s*)?$/, file.pathname);
         }
     }
     assert.equal(count, 7, 'Review the logout inventory when adding/removing a route');
@@ -57,35 +58,37 @@ for (const fails of [false, true]) {
         sessionStorage.setItem('unrelated', 'keep');
         const session = vm.createContext({sessionStorage});
         vm.runInContext(moduleBody(sessionSource), session);
+        const events = new EventTarget();
         const security = vm.createContext({
+            window: {addEventListener: events.addEventListener.bind(events)},
             localStorage, auth: {}, onAuthStateChanged() {},
             clearVaultSession: () => vm.runInContext('clearVaultSession()', session)
         });
         vm.runInContext(moduleBody(securitySource), security);
         vm.runInContext("_vaultKeyMaterial = 'synthetic-fixture'; _vaultAutoUnlock = true;", security);
-        const calls = [];
-        const window = {location: {href: 'home_page.html'}};
+        const calls = [], beforeSignOut = [];
+        const window = {dispatchEvent: events.dispatchEvent.bind(events), location: {href: 'home_page.html', replace(value) { this.href = value; }}};
+        const helper = vm.createContext({window, sessionStorage, Event, setTimeout, clearTimeout, clearVaultSession: () => vm.runInContext('clearVaultSession()', session)});
+        vm.runInContext(moduleBody(logoutSource), helper);
         const context = vm.createContext({
             window, auth: {},
             loadModule: async path => {
-                assert.equal(path, './modules/core/security-manager.js');
-                return {clearSession: () => vm.runInContext('clearSession()', security)};
+                assert.equal(path, './logout-session.js');
+                return {logoutWithCleanup: vm.runInContext('logoutWithCleanup', helper)};
             },
             signOut: async () => {
                 calls.push('signOut');
-                assert.equal(vm.runInContext('_vaultKeyMaterial', security), null);
-                assert.equal(vm.runInContext('_vaultAutoUnlock', security), false);
-                for (const key of ['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry']) {
-                    assert.equal(sessionStorage.getItem(key), null);
-                }
+                beforeSignOut.push({key: vm.runInContext('_vaultKeyMaterial', security), auto: vm.runInContext('_vaultAutoUnlock', security),
+                    values: ['vault_session_v1', 'codex_vault_session_wrapping_key_v1', 'vault_s_key', 'vault_s_expiry'].map(key => sessionStorage.getItem(key))});
                 if (fails) throw new Error('synthetic-signout-failure');
             },
             logError() { calls.push('error'); }, showToast() { calls.push('toast'); }
         });
         vm.runInContext(moduleBody(authSource), context);
         await vm.runInContext('logout()', context);
-        assert.deepEqual(calls, fails ? ['signOut', 'error', 'toast'] : ['signOut']);
-        assert.equal(window.location.href, fails ? 'home_page.html' : 'login-v115.html');
+        assert.deepEqual(calls, ['signOut']);
+        assert.deepEqual(beforeSignOut, [{key: null, auto: false, values: [null, null, null, null]}]);
+        assert.equal(window.location.href, '/login-v115.html');
         assert.equal(sessionStorage.getItem('unrelated'), 'keep');
     });
 }

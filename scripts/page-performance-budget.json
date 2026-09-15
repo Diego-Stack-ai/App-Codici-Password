@@ -6,8 +6,8 @@
     "maxCssFileIncrease": 1
   },
   "absoluteStaticCeilings": {
-    "maxInitialLocalGzipKb": 336,
-    "maxJsModules": 42,
+    "maxInitialLocalGzipKb": 337,
+    "maxJsModules": 43,
     "maxCssFiles": 8
   },
   "runtimeTargets": {

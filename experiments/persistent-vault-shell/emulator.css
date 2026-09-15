@@ -16,3 +16,10 @@
 .detail-extra-field{padding:16px 0;border-top:1px solid #c8d8e6}
 .detail-extra-field pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.5}
 .detail-extra-field p{overflow-wrap:anywhere}
+.account-widgets-section{padding:0;margin-top:20px}
+.account-widgets-section .shared-account-card{padding:16px;border:1px solid #c8d8e6;border-radius:12px;margin:12px 0}
+.account-widgets-section .shared-account-field{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}
+.account-widgets-section .shared-account-field strong{flex-basis:100%}
+.account-widgets-section .shared-account-value{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.account-widgets-section button{max-width:100%;white-space:normal}
+.banking-shell{padding:0;margin-top:20px}.bank-account{border:1px solid #94afc4;border-radius:14px;padding:16px;margin:16px 0}.bank-account .account-widgets-section{margin-top:0}
