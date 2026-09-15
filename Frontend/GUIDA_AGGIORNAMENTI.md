@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Selettore dopo `0babf0c9`: ricerca per nome Account/azienda e filtro personali/azienda, identità distinta anche con ID uguali e possibilità di scegliere Account già collegati. Lettore e vista revocabili, soli nomi decifrati, dodici prove aggiunte. Chiuso anche il mancato rifiuto del flag `isExplicitMemo` nelle destinazioni del servizio candidato. Da completare compatibilità editor e montaggio integrato; nessuna nuova prova browser attribuita, nessun deploy.
+
 Sorgente collegamenti dopo `8d5be66d`: relazione consultabile offline e preparazione online revocabile, con confronto di revisione/impronta e richieste immutabili senza decifrare credenziali. Sei nuove prove; selettore e montaggio ancora da completare. Verificata e documentata incompatibilità del vecchio editor M6 con i metadati dei collegamenti, da risolvere senza scartarli. Prossimo selettore/adattatori e compatibilità editor; nessun deploy.
 
 Collegamenti dopo `520aafd2`: preparato servizio atomico per origine, vecchio/nuovo Account e ricevuta, preservando credenziali e altri riferimenti. Undici prove unitarie ed emulatori dedicati; suite completa npm test superata (456 test shell). Nessun writer produttivo o UI montata. Prossimo sorgente/selettore Collega/Cambia/Scollega, con limiti di schema e compatibilità metadati nella roadmap profili; nessun deploy.

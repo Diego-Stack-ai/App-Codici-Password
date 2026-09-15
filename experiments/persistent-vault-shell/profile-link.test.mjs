@@ -70,7 +70,7 @@ test('changed contact content, relation or revision fail without partial writes 
     }
 });
 test('shared, archived, memo, foreign and aliased destinations are rejected without changing the source', async () => {
-    for (const patch of [{isArchived: true}, {sharedWithUids: ['guest']}, {type: 'memo'}, {ownerId: 'other'}, {id: 'alias'}]) {
+    for (const patch of [{isArchived: true}, {sharedWithUids: ['guest']}, {type: 'memo'}, {isExplicitMemo: true}, {ownerId: 'other'}, {id: 'alias'}]) {
         const f = fixture(); Object.assign(f.records.get('users/owner/aziende/destination/accounts/next'), patch);
         const before = structuredClone([...f.records]); await assert.rejects(f.run(f.request(), f.trusted)); assert.deepEqual([...f.records], before);
     }

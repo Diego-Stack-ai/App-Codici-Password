@@ -70,7 +70,7 @@ export function profileLinkFingerprintInput(value) {
 export function assertProfileLinkAccount(record, uid, selection, {destination = false} = {}) {
     if (!object(record) || (record.ownerId !== undefined && record.ownerId !== uid) || (record.id !== undefined && record.id !== selection.id)) fail();
     if (!destination) return;
-    for (const field of ['isArchived', '_isGuest', 'shared', 'isMemo', 'hasMemo', 'isMemoShared']) if (record[field] !== undefined && record[field] !== false) fail();
+    for (const field of ['isArchived', '_isGuest', 'shared', 'isMemo', 'isExplicitMemo', 'hasMemo', 'isMemoShared']) if (record[field] !== undefined && record[field] !== false) fail();
     if ((record.visibility !== undefined && record.visibility !== 'private') || (record.type !== undefined && record.type !== 'account') ||
         (record.acceptedCount != null && record.acceptedCount !== 0) || (record.recipientEmail != null && record.recipientEmail !== '')) fail();
     for (const key of ['sharedWithUids', 'sharedWithEmails']) if (record[key] != null && (!Array.isArray(record[key]) || record[key].length)) fail();

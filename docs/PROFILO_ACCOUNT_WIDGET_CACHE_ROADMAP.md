@@ -7,6 +7,16 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Selettore Account personali e aziendali — laboratorio 15/09/2026
+
+Successivo a `0babf0c9`: lettore e vista separati per scegliere una destinazione esistente. Ricerca locale per nome Account/azienda, senza distinzione di accenti, e filtro canonico per personali o singola azienda. Nomi accompagnati dall'ambito, identità composta dominio/azienda/Account: ID uguali in raccolte diverse non vengono confusi. Un Account già collegato resta selezionabile; nessuna esclusione basata sui riferimenti inversi. La scelta consegna solo l'identità al chiamante, non salva né crea Account.
+
+Il lettore passa dal repository canonico, con liste confermate online e cache offline. Decifra solo nome Account/ragione sociale, mai username, password o dati dei Widget. Ricontrolla la proiezione delle destinazioni dopo le decifrature; cambio UID, blocco, revoca, titolo o idoneità cambiati impediscono l'esposizione tardiva. Il backend resta autorevole al salvataggio. Limiti espliciti: 1.000 aziende, 10.000 Account complessivi letti, nomi decifrati entro 1.000 caratteri; superamenti, duplicati e ID non supportati bloccano il caricamento, senza inventare identità. Grandi archivi/paginazione remota ancora da collaudare. La vista mostra 50 risultati per volta, cerca sull'intera lista e pulisce nomi/query e listener anche nei nodi trattenuti all'uscita.
+
+Corretto il validatore condiviso delle destinazioni: anche `isExplicitMemo` impedisce un collegamento, oltre ai flag memorandum già coperti. Verificato il rifiuto nella transazione senza modifiche parziali. Dodici nuove prove per lettore/vista e regressione backend estesa; suite completa npm test superata (474 test shell), inclusi emulatori. Nessun montaggio browser dichiarato. CI del precedente `0babf0c9` superata, run 35023283209.
+
+Prossimo blocco: compatibilità dell'editor Account con riferimenti/metadati, poi provider/azioni e collaudo integrato nel laboratorio. Non risolvere filtrando i campi fuori dal contratto M6 o indebolendo il controllo inverso. Restano creazione Account, righe legacy/extra, editor profilo restanti e gate sotto. Nessuna modifica produttiva, dati reali, master, bump o deploy. Rollback del selettore isolato; conservare il controllo aggiunto sui memorandum.
+
 ### Sorgente revocabile dei collegamenti — laboratorio 15/09/2026
 
 Successivo a `8d5be66d`: sorgente candidata per caricare la relazione e preparare Collega/Cambia/Scollega, riusando la proiezione canonica del servizio. Conserva in RAM solo identità, revisione e impronta; nessuna decifratura del contatto o delle credenziali. La lettura online è confermata, quella offline consultiva. Prima di preparare la richiesta rilegge l'origine e verifica anche modifiche legacy senza revisione. Richiesta e destinazione sono copie immutabili; revoca, cambio UID, alias aziendale e caricamenti concorrenti invalidano il lavoro. Il backend resta responsabile dell'idoneità della destinazione nella transazione.
