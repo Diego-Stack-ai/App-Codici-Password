@@ -4,6 +4,7 @@ import {resolve} from 'node:path';
 const base = import.meta.dirname, publicRoot = resolve(base, '../../Frontend/public');
 export async function buildEmulator({persistent = false} = {}) {
     await mkdir(`${base}/dist/emulator-site/assets/images`, {recursive: true});
+    await mkdir(`${base}/dist/emulator-site/assets/js/vendor`, {recursive: true});
     const deny = 'const deny = () => {throw new Error("EMULATOR_READ_ONLY")};';
     const boundaries = {
         'firebase-config.js': 'export {auth, db} from "./emulator-firebase.mjs";',
@@ -37,4 +38,5 @@ export async function buildEmulator({persistent = false} = {}) {
     for (const name of ['emulator.html', 'emulator.css']) await copyFile(`${base}/${name}`, `${base}/dist/emulator-site/${name}`);
     await copyFile(`${publicRoot}/assets/fonts/material-symbols/material-symbols-0.woff2`, `${base}/dist/emulator-site/symbols.woff2`);
     await copyFile(`${publicRoot}/assets/images/google-avatar.png`, `${base}/dist/emulator-site/assets/images/google-avatar.png`);
+    await copyFile(`${publicRoot}/assets/js/vendor/qrcode.min.js`, `${base}/dist/emulator-site/assets/js/vendor/qrcode.min.js`);
 }

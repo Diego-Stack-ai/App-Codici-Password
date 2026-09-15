@@ -116,11 +116,19 @@ async function checkProfile(mode) {
     [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN profilo').click();
     await wait(() => byId('content').textContent.includes('WIDGET-FITTIZIO'), 'PROFILE_WIDGET_REVEAL');
     const profileWidgetValues = [...byId('content').querySelectorAll('.shared-account-value')];
+    document.querySelector('[data-profile-section="digital-card"]').click();
+    await wait(() => document.querySelector('[data-digital-card-preview]'), 'DIGITAL_CARD_TAB');
+    assert(!document.querySelector('[data-digital-card-preview] canvas'), 'DIGITAL_CARD_EXPLICIT');
+    [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Genera QR dalla selezione salvata').click();
+    await wait(() => byId('content').textContent.includes('QR pronto.'), 'DIGITAL_CARD_GENERATED');
+    const qrPreview = document.querySelector('[data-digital-card-preview]'), qrCanvas = qrPreview.querySelector('canvas');
+    assert(qrPreview.title.includes('EMAIL:fixture@example.invalid') && !qrPreview.title.includes('SEGRETO') && !qrPreview.title.includes('WIDGET-FITTIZIO'), 'DIGITAL_CARD_PROJECTION');
     for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {
         document.querySelector('[data-profile-section="'+section+'"]').click();
         await wait(() => byId('content').textContent.includes(expected), 'PROFILE_'+section);
         assert(profileNote.textContent === '', 'PROFILE_NOTE_CLEAR');
         assert(profileWidgetValues.every(node => node.textContent === ''), 'PROFILE_WIDGET_TAB_CLEAR');
+        assert(qrCanvas.width === 0 && !qrPreview.title, 'DIGITAL_CARD_CLEAR');
         if (section === 'addresses' || section === 'documents') {
             if (section === 'addresses') assert(byId('content').textContent.includes('POD-FITTIZIO'), 'PROFILE_UTILITY_VALUE');
             const toggle=[...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password');

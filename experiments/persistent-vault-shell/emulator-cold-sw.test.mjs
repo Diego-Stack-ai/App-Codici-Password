@@ -19,7 +19,7 @@ test('cold laboratory installation caches only the exact static allowlist', asyn
     let installed;
     listeners.install({waitUntil: promise => { installed = promise; }});
     await installed;
-    assert.deepEqual(added, ['/', '/emulator.js', '/emulator.css', '/entry-check.mjs', '/symbols.woff2', '/assets/images/google-avatar.png']);
+    assert.deepEqual(added, ['/assets/js/vendor/qrcode.min.js', '/', '/emulator.js', '/emulator.css', '/entry-check.mjs', '/symbols.woff2', '/assets/images/google-avatar.png']);
 });
 test('cold laboratory worker never intercepts API, query, foreign or write requests', async () => {
     const {listeners} = fixture();

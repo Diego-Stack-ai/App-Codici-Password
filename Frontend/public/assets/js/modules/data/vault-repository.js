@@ -63,6 +63,8 @@ export const getCompanyAccount = (uid, companyId, accountId) =>
 export const getCompanyAccountConfirmed = (uid, companyId, accountId) => readConfirmedRecord(
     doc(db, 'users', uid, 'aziende', companyId, 'accounts', accountId));
 export const getUserSetting = (uid, settingId) => getRecordByPath(`users/${uid}/settings/${settingId}`);
+export const getUserSettingConfirmed = (uid, settingId) => readConfirmedRecord(
+    doc(db, 'users', uid, 'settings', settingId));
 
 export const listCompanies = uid => readRecords(`companies:${uid}`,
     collection(db, 'users', uid, 'aziende'));

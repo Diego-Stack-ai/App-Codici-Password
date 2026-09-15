@@ -37,6 +37,7 @@ for (const suffix of ['A', 'B']) {
             contactPhones: [{id: 'phone', number: await encrypted('000000000'), linkedAccountId: 'zeta'}, {id: 'company-phone', number: await encrypted('000000001'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}],
             userAddresses: [{id: 'address', address: await encrypted('Via fittizia'), utilities: [{id: 'utility', type: 'Energia', value: await encrypted('POD-FITTIZIO'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}]}],
             documenti: [{id: 'document', num_serie: await encrypted('DOC-FITTIZIO'), linkedAccountId: 'zeta'}]});
+        await setDoc(doc(db, 'users', user.uid, 'settings', 'qrCodeInclusions'), {nome: true, phones: ['phone'], emails: ['email'], addresses: ['address'], photo: false});
         await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia'),
             partitaIva: await encrypted('IVA-FITTIZIA'), emails: {pec: {email: await encrypted('pec@example.invalid'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}, personale: {email: await encrypted('personale@example.invalid'), linkedAccountId: 'zeta'}},
             telefonoAzienda: await encrypted('111111111'), phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}},
@@ -92,7 +93,7 @@ for (const suffix of ['A', 'B']) {
     } finally { await terminate(db); await deleteApp(app); }
 }
 await widgetEnvironment.cleanup();
-const assets = new Map([['/', ['emulator.html', 'text/html']], ['/emulator.css', ['emulator.css', 'text/css']], ['/emulator.js', ['emulator.js', 'text/javascript']], ['/symbols.woff2', ['symbols.woff2', 'font/woff2']], ['/assets/images/google-avatar.png', ['assets/images/google-avatar.png', 'image/png']]]);
+const assets = new Map([['/assets/js/vendor/qrcode.min.js', ['assets/js/vendor/qrcode.min.js', 'text/javascript']], ['/', ['emulator.html', 'text/html']], ['/emulator.css', ['emulator.css', 'text/css']], ['/emulator.js', ['emulator.js', 'text/javascript']], ['/symbols.woff2', ['symbols.woff2', 'font/woff2']], ['/assets/images/google-avatar.png', ['assets/images/google-avatar.png', 'image/png']]]);
 const handleNote = createEmulatorNoteBridge(fixtureUids);
 const server = createServer(async (request, response) => {
     if (request.headers.host !== '127.0.0.1:4188') { response.writeHead(403).end(); return; }

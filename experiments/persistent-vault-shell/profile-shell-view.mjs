@@ -2,12 +2,12 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Read-only migration slice: changes to links, utilities and QR are not enabled.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
     const title = document.createElement('h2'); title.textContent = profileTitle;
-    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. Modifiche ai dati e ai collegamenti e tessera digitale non sono ancora integrate in questa vista di prova.';
+    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. Modifiche ai dati e ai collegamenti non sono ancora integrate in questa vista di prova.' + (mountDigitalCard ? '' : ' Tessera digitale non ancora integrata.');
     const navigation = document.createElement('nav'); navigation.setAttribute('aria-label', 'Sezioni del profilo');
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];
@@ -65,6 +65,12 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
         for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.profileSection === section));
         panel.textContent = 'Caricamento…';
         try {
+            if (section === 'digital-card' && mountDigitalCard) {
+                context.assertUnlocked(); clear(); sectionControls = new AbortController();
+                const mounted = await mountDigitalCard(panel, {signal: sectionControls.signal});
+                if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
+                return;
+            }
             const rows = await (section === 'overview' && readOverview ? readOverview() : readSection(section));
             if (!current(ticket)) return;
             context.assertUnlocked(); clear();
@@ -97,7 +103,8 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
             }
         }
     }
-    for (const [section, label] of Object.entries({...readOverview ? {overview: 'Panoramica'} : {}, ...PROFILE_SECTIONS})) {
+    for (const [section, label] of Object.entries({...readOverview ? {overview: 'Panoramica'} : {}, ...PROFILE_SECTIONS,
+        ...mountDigitalCard ? {'digital-card': 'Tessera digitale'} : {}})) {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
         button.dataset.profileSection = section;
         button.addEventListener('click', () => { void select(section); }, {signal: controls.signal});

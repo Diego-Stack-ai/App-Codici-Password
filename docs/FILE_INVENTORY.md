@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **600**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 109189 | 936 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 109936 | 940 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -150,7 +150,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
 | `Frontend/public/assets/js/modules/data/shared-vault-data-client.js` | JS | 3256 | 70 | Supporto frontend: shared-vault-data-client. |
 | `Frontend/public/assets/js/modules/data/shared-vault-data-model.js` | JS | 4690 | 104 | Supporto frontend: shared-vault-data-model. |
-| `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 10251 | 178 | Supporto frontend: vault-repository. |
+| `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 10381 | 180 | Supporto frontend: vault-repository. |
 | `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 2748 | 67 | Supporto frontend: home-deadline-dashboard. |
 | `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3459 | 71 | Supporto frontend: home-deadline-inbox. |
 | `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3669 | 88 | Supporto frontend: home-presentation. |
@@ -222,7 +222,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/shared/gestione-destinatari.js` | JS | 7483 | 138 | Supporto frontend: gestione-destinatari. |
 | `Frontend/public/assets/js/modules/shared/profile-account-management.js` | JS | 7010 | 87 | Supporto frontend: profile-account-management. |
 | `Frontend/public/assets/js/modules/shared/push-manager.js` | JS | 12189 | 255 | Registrazione dispositivo FCM e preferenze push per ambito. |
-| `Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js` | JS | 7373 | 153 | Supporto frontend: qr code utils-v2. |
+| `Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js` | JS | 7707 | 155 | Supporto frontend: qr code utils-v2. |
 | `Frontend/public/assets/js/modules/shared/qr_code_utils.js` | JS | 5450 | 124 | Caricamento QR e generazione vCard. |
 | `Frontend/public/assets/js/modules/shared/read-error-message.js` | JS | 518 | 9 | Supporto frontend: read-error-message. |
 | `Frontend/public/assets/js/modules/shared/ui-state-view.js` | JS | 1334 | 45 | Supporto frontend: ui-state-view. |
@@ -325,8 +325,8 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 64692 | 574 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 54112 | 448 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 65122 | 576 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 57144 | 464 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -390,7 +390,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/banking-view.test.mjs` | MJS | 3714 | 52 | File di progetto: banking-view.test. |
 | `experiments/persistent-vault-shell/browser-session-boundary.mjs` | MJS | 998 | 21 | File di progetto: browser-session-boundary. |
 | `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
-| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 3734 | 41 | File di progetto: build-emulator. |
+| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 3944 | 43 | File di progetto: build-emulator. |
 | `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
 | `experiments/persistent-vault-shell/company-directory.mjs` | MJS | 5102 | 82 | File di progetto: company-directory. |
 | `experiments/persistent-vault-shell/company-directory.test.mjs` | MJS | 5415 | 61 | File di progetto: company-directory.test. |
@@ -398,15 +398,17 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/company-profile-source.test.mjs` | MJS | 5210 | 60 | File di progetto: company-profile-source.test. |
 | `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 12168 | 132 | File di progetto: emulator-browser. |
-| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 15065 | 186 | File di progetto: emulator-cold-check. |
-| `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1032 | 17 | File di progetto: emulator-cold-sw. |
-| `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2171 | 35 | File di progetto: emulator-cold-sw.test. |
+| `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3048 | 39 | File di progetto: digital-card-view. |
+| `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 2720 | 36 | File di progetto: digital-card-view.test. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 12432 | 133 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 15796 | 193 | File di progetto: emulator-cold-check. |
+| `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1067 | 17 | File di progetto: emulator-cold-sw. |
+| `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2206 | 35 | File di progetto: emulator-cold-sw.test. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6301 | 124 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 21510 | 253 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 22405 | 261 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 5034 | 70 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 12473 | 166 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 14336 | 189 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 5184 | 64 | File di progetto: emulator-network-control. |
@@ -444,6 +446,8 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4504 | 74 | File di progetto: preview.test. |
 | `experiments/persistent-vault-shell/private-account-save-controller.mjs` | MJS | 7242 | 135 | File di progetto: private-account-save-controller. |
 | `experiments/persistent-vault-shell/private-account-save-controller.test.mjs` | MJS | 12949 | 189 | File di progetto: private-account-save-controller.test. |
+| `experiments/persistent-vault-shell/private-digital-card-reader.mjs` | MJS | 6184 | 100 | File di progetto: private-digital-card-reader. |
+| `experiments/persistent-vault-shell/private-digital-card-reader.test.mjs` | MJS | 4731 | 56 | File di progetto: private-digital-card-reader.test. |
 | `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 7765 | 104 | File di progetto: private-note-panel-provider. |
 | `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 9243 | 131 | File di progetto: private-note-panel-provider.test. |
 | `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
@@ -454,7 +458,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
 | `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 4790 | 71 | File di progetto: profile-section-reader. |
 | `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 7384 | 111 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 7900 | 118 | File di progetto: profile-shell-view. |
 | `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 10588 | 129 | File di progetto: profile-shell-view.test. |
 | `experiments/persistent-vault-shell/profile-widget-reader.mjs` | MJS | 4427 | 70 | File di progetto: profile-widget-reader. |
 | `experiments/persistent-vault-shell/profile-widget-reader.test.mjs` | MJS | 4399 | 50 | File di progetto: profile-widget-reader.test. |
@@ -551,7 +555,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 10831 | 85 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 10965 | 85 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -674,7 +678,7 @@ File censiti: **596**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/profile-label-management.test.mjs` | MJS | 1039 | 19 | Test automatico: profile-label-management.test. |
 | `tests/profile-lazy-editor.test.mjs` | MJS | 3248 | 73 | Test automatico: profile-lazy-editor.test. |
 | `tests/profile-legacy-email-recovery.test.mjs` | MJS | 1871 | 42 | Test automatico: profile-legacy-email-recovery.test. |
-| `tests/profile-model.test.mjs` | MJS | 4327 | 79 | Test automatico: profile-model.test. |
+| `tests/profile-model.test.mjs` | MJS | 5718 | 96 | Test automatico: profile-model.test. |
 | `tests/profile-widget-zone.test.mjs` | MJS | 769 | 17 | Test automatico: profile-widget-zone.test. |
 | `tests/repository-record-identity.test.mjs` | MJS | 5191 | 86 | Test automatico: repository-record-identity.test. |
 | `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |

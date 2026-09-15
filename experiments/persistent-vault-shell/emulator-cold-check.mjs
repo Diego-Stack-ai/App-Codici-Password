@@ -86,10 +86,17 @@ try {
         [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN profilo').click();
         await wait(() => byId('content').textContent.includes('WIDGET-FITTIZIO'), 'COLD_WIDGET_VALUE');
         const profileWidgetValues = [...byId('content').querySelectorAll('.shared-account-value')];
+        document.querySelector('[data-profile-section="digital-card"]').click();
+        await wait(() => document.querySelector('[data-digital-card-preview]'), 'COLD_DIGITAL_TAB');
+        [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Genera QR dalla selezione salvata').click();
+        await wait(() => byId('content').textContent.includes('QR pronto.'), 'COLD_DIGITAL_GENERATED');
+        const qrPreview = document.querySelector('[data-digital-card-preview]'), qrCanvas = qrPreview.querySelector('canvas');
+        assert(qrPreview.title.includes('EMAIL:fixture@example.invalid'), 'COLD_DIGITAL_PROJECTION');
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(() => byId('content').textContent.includes('fixture@example.invalid') && byId('content').textContent.includes('000000000'), 'COLD_PROFILE_CONTACTS');
         assert(profileNote.textContent === '', 'COLD_PROFILE_NOTE_CLEAR');
         assert(profileWidgetValues.every(node => node.textContent === ''), 'COLD_WIDGET_CLEAR');
+        assert(qrCanvas.width === 0 && !qrPreview.title, 'COLD_DIGITAL_CLEAR');
         assert(document === originalDocument, 'COLD_PROFILE_RELOAD');
         const linkedButtons = [...byId('content').querySelectorAll('button')].filter(node => node.textContent === 'Mostra password');
         assert(linkedButtons.length === 3, 'COLD_PROFILE_LINKS');

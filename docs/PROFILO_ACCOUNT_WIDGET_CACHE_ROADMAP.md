@@ -7,6 +7,16 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Tessera digitale privata nella shell — candidata 15/09/2026
+
+Successiva a `f439cb61`: linguetta privata con generazione QR e download vCard come azioni esplicite sulla selezione già salvata. Lettore con sorgenti confermate online/cache offline, controllo UID/sblocco/segnale e confronto finale dei record. Selezione mancante, riferimenti ambigui o modifica concorrente impediscono il risultato. Solo campi selezionati vengono proiettati; i Widget segreti non vengono decifrati né esportati. Nessuna scrittura dei dati o della selezione.
+
+Anteprima con solo QR; uscita/blocco cancellano pixel, immagini e attributo title anche sui nodi trattenuti. La foto è inclusa solo se selezionata e tramite URL HTTPS del profilo, senza fallback alla foto Auth né caricamento dei byte. Il payload con foto usa il ricevitore pubblico canonico esistente: la generazione locale non apre il ricevitore, non carica dati sul server e non ne certifica il comportamento. Download e importazione rubrica su dispositivo fisico restano da collaudare.
+
+Dodici nuove prove, suite completa `npm test` superata (355 test shell). Chrome: 58 verifiche entry e 32 arresto/riapertura superate, con asserzioni QR online/offline, prima generazione dopo riavvio offline e pulizia al cambio linguetta. Edge e iPhone restano aperti. Nessun dato reale, master, bump o deploy. Rollback limitato ai moduli e al montaggio sperimentali, asset QR del laboratorio ed export repository aggiuntivo.
+
+Prossimi blocchi: tessera aziendale con modello/selezione canonici, editor della selezione e dei profili, estensione Widget aziendali con schema/Rules dedicati. Questo incremento non completa la parità né chiude il programma MD.
+
 ## Stato corrente verificato — 12/09/2026
 
 La fotografia del 10/09 e i blocchi successivi sono cronologia: le descrizioni “non esiste” o “non conosce” valgono per quella tappa, non per il runtime 1.2.110.

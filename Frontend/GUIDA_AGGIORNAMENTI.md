@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Tessera privata successiva a `f439cb61`: QR e vCard dalla selezione salvata, letture revocabili e pulizia anteprima. Suite completa superata (355 shell), 90 verifiche Chrome online/offline e dopo riavvio. Restano tessera aziendale, editor della selezione/profili, Widget aziendali e collaudi Edge/iPhone; dettagli nella roadmap profili. Nessun deploy o chiusura del programma.
+
 Preparazione tessera dopo `cc6ff020`: generatore vCard limita autonomamente i tipi Widget esportabili, rifiuta classificazioni ambigue e impedisce nuove proprietà tramite CR/LF nei valori. Due regressioni, 141 test profilo e suite completa superati (343 shell). Tessera della shell ancora da montare; prossimi passi nella roadmap profili. Nessun dato reale o deploy.
 
 Widget personali dopo `16dae6f1`: consultazione nelle linguette, ordine conservato, collasso locale e anteprime protette. Suite completa superata (341 shell), suite shell finale 343 e 90 verifiche Chrome superati. Corretto solo il formato della fixture sintetica; nessuna migrazione. Widget di profilo aziendale ancora da progettare con schema/Rules propri: non riutilizzare quelli personali. Proseguire con tessera digitale mantenendo aperti editor, estensione aziendale ed Edge/iPhone. Dettagli nella roadmap profili; nessun deploy.
