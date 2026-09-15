@@ -7,6 +7,14 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Editor selezione QR revocabile — laboratorio 15/09/2026
+
+Successivo a `686b1f1c`: sorgente dedicata carica solo etichette dei contatti e selezione, senza password, immagini o dati collegati. Risolve gli indici legacy in ID, verifica tutti i riferimenti e confronta snapshot/revisione/selezione prima della preparazione. La consultazione può usare cache offline; il salvataggio richiede connessione. Il controller conserva in RAM un solo tentativo immutabile, impedisce un secondo invio distinto con esito incerto e ripete lo stesso ID; revoca e cambio UID impediscono invii tardivi. Un invio già accettato dal backend può concludersi dopo l'uscita, senza aggiornare una vista dismessa.
+
+Vista con checkbox, Salva e Riprova, stati distinti e pulizia dei nodi trattenuti. Scelte incomplete non eliminano silenziosamente contatti selezionati. Provider composto pronto, ma **non montato nel bootstrap browser**: richiede esplicitamente un adapter attendibile e non ha writer alternativo. Restano adapter callable reale, attestazione HTTP, transizione Rules/writer legacy, montaggio e prove browser. Nessuna persistenza del draft offline o ripresa dopo arresto dichiarata.
+
+Sedici prove aggiuntive (sorgente/controller/vista), suite completa `npm test` superata (386 shell). Test Firestore demo esteso al percorso sorgente-controller-servizio: risposta persa dopo commit, retry idempotente, revisione incrementata una sola volta e rilettura della selezione aggiornata. Il contesto App Check resta sintetico. Nessun nuovo collaudo Chrome/Edge/iPhone attribuito all'editor. Nessun dato reale, master, bump o deploy; rollback dei moduli sperimentali e delle prove. Proseguire con adapter e collegamento browser senza dichiarare chiuso il gate di attivazione.
+
 ### Preparazione salvataggio selezione QR — laboratorio 15/09/2026
 
 Successiva a `5fc9c8f2`: contratto privato con soli flag booleani e riferimenti stabili, migrazione degli indici sullo snapshot dell'editor e rifiuto di righe rimosse/ambigue. Servizio backend candidato salva selezione e ricevuta nella stessa transazione, valida UID/App Check forniti dal futuro adapter attendibile, revisione, esistenza dei riferimenti e digest del tentativo. Ripetere lo stesso tentativo restituisce la conferma precedente; payload diverso, revisione obsoleta o configurazione sconosciuta non sovrascrivono dati. Nessun contenuto dei contatti o chiave entra nella richiesta/ricevuta.

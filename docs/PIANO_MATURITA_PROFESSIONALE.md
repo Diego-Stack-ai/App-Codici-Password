@@ -21,6 +21,8 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
+Editor QR dopo `686b1f1c`: sorgente, controller revocabile, vista e provider preparati; sedici nuove prove, suite completa (386 shell), percorso sorgente-controller-servizio su Firestore demo con risposta persa e retry superati. **Prossimo: adapter attendibile e montaggio browser**, con transizione Rules/writer legacy già richiesta; provider non montato né attivato in produzione. Dettagli nella roadmap profili. Restanti parità e gate invariati.
+
 Selezione QR dopo `5fc9c8f2`: contratto privato e transazione backend con ricevuta verificati nel laboratorio. Suite completa (370 shell), concorrenza/retry e overlay Rules negli emulatori superati. Non ancora collegati alla shell né esportati dalle Functions: Rules produttive legacy non modificate, enforcement HTTP/App Check da verificare. **Proseguire con controller/editor revocabili e adapter**, predisponendo migrazione dei writer legacy prima dell'attivazione. Dettagli e limiti nella roadmap profili; nessun deploy.
 
 Parità QR dopo `e7f70061`: telefono aziendale ora supportato dal generatore e dal lettore shell solo con selezione esplicita, senza ampliare le selezioni salvate. Suite completa superata (363 shell), due regressioni; nessuna nuova prova browser. **Prossimo blocco: editor della selezione nella shell**, con preferenze tipizzate e Rules ristrette secondo la matrice; non riusare il writer legacy permissivo. Foto aziendale e restante parità rimangono aperte.

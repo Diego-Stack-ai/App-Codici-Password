@@ -6,6 +6,8 @@ import {createRequire} from 'node:module';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
 import {doc, getDoc, setDoc} from 'firebase/firestore';
 import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
+import {createQrSelectionEditorSource} from './qr-selection-editor-source.mjs';
+import {createQrSelectionSaveController} from './qr-selection-save-controller.mjs';
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
 assert.equal(process.env.GCLOUD_PROJECT, 'demo-vault-shell');
@@ -51,7 +53,29 @@ test('candidate QR selection transaction and closed direct-write Rules on synthe
     assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
     assert.equal(results.filter(result => result.status === 'rejected').length, 1);
     assert.equal((await db.doc(settingPath).get()).data()._qrRevision, 2);
+    // Client reader/controller use Rules-protected reads; the test adapter calls
+    // the candidate service directly, never impersonating HTTP attestation.
+    const abort = new AbortController(), context = {user: {uid}, signal: abort.signal, assertUnlocked() {},
+        read() {throw Error('UNEXPECTED_DECRYPT');}};
+    const repository = {getUserProfileConfirmed: async requested => {
+        assert.equal(requested, uid); return (await getDoc(doc(owner, `users/${uid}`))).data();
+    }, getUserSettingConfirmed: async requested => {
+        assert.equal(requested, uid); return (await getDoc(doc(owner, settingPath))).data();
+    }};
+    const source = createQrSelectionEditorSource({context, getUser: () => ({uid}), repository, isEncryptedValue: () => false, isOnline: () => true});
+    const loaded = await source.load(); let firstResponse = true;
+    const controller = createQrSelectionSaveController({context, getUser: () => ({uid}), prepare: value => source.prepare(value),
+        createOperationId: () => 'editor-save', submit: async request => {
+            const result = await run(request, trusted);
+            if (firstResponse) {firstResponse = false; throw Error('SYNTHETIC_RESPONSE_LOST');}
+            return result;
+        }});
+    assert.equal((await controller.save({...loaded.selection, phones: []})).status, 'unknown');
+    assert.equal((await controller.retry()).status, 'saved');
+    const refreshed = await source.load(); assert.deepEqual(refreshed.selection.phones, []);
+    assert.equal((await db.doc(settingPath).get()).data()._qrRevision, 3);
+    controller.dispose(); source.dispose(); abort.abort();
     await db.doc(`users/${uid}`).update({contactPhones: []});
-    await assert.rejects(run({...data, operationId: 'deleted', expectedRevision: 2}, trusted));
+    await assert.rejects(run({...data, operationId: 'deleted', expectedRevision: 3}, trusted));
     assert.equal((await db.doc(`mutationResults/${uid}/operations/qr-private-deleted`).get()).exists, false);
 });

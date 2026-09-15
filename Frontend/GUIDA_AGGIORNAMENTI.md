@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Editor QR dopo `686b1f1c`: sorgente, vista e controller con revoca/retry preparati; suite completa superata (386 shell), sedici nuove prove e integrazione Firestore demo con conferma persa. Provider non ancora montato nel browser: adapter attendibile, transizione Rules/writer legacy e collaudi UI restano aperti. Nessun deploy o nuova prova browser attribuita; dettagli nella roadmap profili.
+
 Preparazione selezione QR dopo `5fc9c8f2`: contratto privato e servizio transazionale candidato, sette nuove prove, suite completa (370 shell) e concorrenza/Rules su emulatori superate. Nessuna attivazione runtime: adapter callable, interfaccia e migrazione dei writer legacy restano da completare. Overlay Rules solo nel test; nessun enforcement HTTP dimostrato o deploy. Perimetro nella roadmap profili.
 
 QR dopo `e7f70061`: telefono aziendale selezionabile esplicitamente, escluso per default nelle configurazioni precedenti. Lettore shell non decifra il numero non selezionato. Due regressioni e suite completa superate (363 shell), senza nuova attribuzione di prove browser. Proseguire con editor selezione shell e Rules ristrette; foto aziendale e restanti gate aperti. Nessun deploy.
