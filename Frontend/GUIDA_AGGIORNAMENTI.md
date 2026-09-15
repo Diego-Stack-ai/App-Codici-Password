@@ -817,3 +817,9 @@ Validazione finale audit 87: npm test completo superato (194 test shell e 116 of
 Base 1b341c74, stessa PR #63. Corretto il controllo iniziale delle pagine private: refresh Auth solo online, identità corrente verificata richiesta anche offline e arresto del vecchio bootstrap su cambio UID. Riprodotto il blocco presente nella 1.2.124; 7 test dedicati. La PWA sull'iPhone resta alla release pubblicata: non chiedere di ripetere la prova prima di una pubblicazione autorizzata. Dettagli in M6/audit 88; nessun deploy.
 
 Validazione finale audit 88: npm test completo superato, inclusi 88 controlli statici sicurezza, 11 test security (7 nuovi sul bootstrap), 194 test shell e 116 offline. Inventario aggiornato e controllo whitespace superato. I 196 scenari browser dell'audit 87 non sono stati rieseguiti né attribuiti a questa modifica del bootstrap produttivo; retest iPhone ancora necessario dopo rilascio autorizzato.
+
+## Rilascio isolato iPhone 1.2.125 — 15/09/2026
+
+PR #64 unita in master 263355f261c0fe0661089e2c65782edf1d13527a; release 6b36ae2d, backport isolato del controllo Auth offline. npm test locale e workflow GitHub 34931928458 superati. Deploy Hosting completato; verificati via HTTP gli hash di Home, env-v126.js, sw.js e main-v129.js rispetto al rilascio testato. Functions, Rules e dati non distribuiti/modificati. Prova iPhone Home → modalità aereo → lista ancora da ripetere dopo aggiornamento alla 1.2.125.
+
+La PR #63 resta sperimentale e separata: non è stata unita o distribuita. Prima di un suo futuro rilascio occorre riallinearne la base/versione al nuovo master; non distribuire direttamente il vecchio numero 1.2.124 del ramo. Il programma generale e i gate fisici restano aperti.
