@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Panoramica dopo `530c991a`: linguetta iniziale personale/azienda con modello canonico, contatti principali, riepilogo fiscale/documentale e aperture interne. Otto nuove prove, 329 shell, suite completa e 90 verifiche Chrome superati; limiti del collaudo e gate Edge/iPhone nella roadmap profili. Proseguire con Widget di profilo, tessera e parità editor. Nessuna modifica produzione o dichiarazione di programma concluso.
+
 Note anagrafiche dopo `1fc6e357`: campo canonico privato ora consultabile nella shell e cancellato dai nodi al cambio linguetta. Quattro prove aggiuntive, 321 shell e 90 verifiche Chrome superati, compresa prima visita offline dopo riavvio. Editor del profilo ancora aperto; proseguire con Panoramica, Widget e tessera. CI del precedente `1fc6e357` superata (34998077954); il workflow esegue `npm test` e non sostituisce la matrice browser/Edge. Dettagli nella roadmap profili; produzione invariata.
 
 Vista bancaria successiva a `33e4b1b1`: ogni conto contiene i propri Widget tra dati del conto e carte. Suite completa con 317 shell e 90 verifiche Chrome superati, incluso recupero note dopo navigazione e arresto/riapertura offline. Edge non verificato: il browser locale termina prima dell'endpoint DevTools; il runner conserva entrambi i browser per default e consente diagnosi mirata esplicita. Gate e limiti nella roadmap profili. Proseguire con parità profili, mantenendo aperta la verifica Edge. Nessun rilascio o chiusura del programma.

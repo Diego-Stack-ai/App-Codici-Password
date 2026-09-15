@@ -11,6 +11,8 @@ import {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCom
 import * as cryptoApi from '../../Frontend/public/assets/js/modules/core/crypto-utils.js';
 import {createFirebaseSession} from './firebase-session.mjs';
 import {createProfileSectionReader} from './profile-section-reader.mjs';
+import {createProfileOverviewReader} from './profile-overview-reader.mjs';
+import {buildProfileOverview, resolvePrimary} from '../../Frontend/public/assets/js/modules/privato/profile-model.js';
 import {mountProfileShell} from './profile-shell-view.mjs';
 import {createProfileLinkedAccountReader} from './profile-linked-account.mjs';
 import {createCompanyProfileSource} from './company-profile-source.mjs';
@@ -106,6 +108,8 @@ const mountProfile = context => {
     const source = company ? createCompanyProfileSource({uid: context.user.uid, companyId: selectedCompanyId, repository: {getCompany, getCompanyConfirmed}, normalizeContacts: companyProfileContacts}) : undefined;
     return mountProfileShell(content, context, {profileTitle: company ? 'Profilo aziendale' : 'Profilo utente', readSection: createProfileSectionReader({context, source,
         getUser: () => auth.currentUser, repository: {getUserProfile}, isEncryptedValue: cryptoApi.isEncryptedValue}),
+        readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,
+            repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue, buildProfileOverview, resolvePrimary}),
         linkedAccounts: createProfileLinkedAccountReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}}),
         onOpenAccount(selection) { context.assertUnlocked(); selectedAccount = selection; detailReturnRoute = context.route; selectedRoute = 'detail'; void session.navigate('detail'); }});

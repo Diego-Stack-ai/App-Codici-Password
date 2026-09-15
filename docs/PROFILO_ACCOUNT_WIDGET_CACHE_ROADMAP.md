@@ -27,6 +27,14 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Panoramica dei profili nella shell — candidata 15/09/2026
+
+Successiva a `530c991a`: Panoramica è la linguetta iniziale in entrambi i profili e apre internamente Anagrafica, Contatti, Indirizzi e Documenti. Il lettore riusa `buildProfileOverview` e `resolvePrimary` canonici: identità, codice fiscale/Partita IVA, contatto e indirizzo principali, documenti personali in scadenza entro 90 giorni oppure numero degli allegati aziendali. Non modifica i record né crea nuovi collegamenti. La normalizzazione aziendale resta l'adattatore canonico già integrato.
+
+Online legge la sorgente confermata, offline il repository locale. Decifra solo la proiezione ammessa: nessuna password del profilo, credenziale collegata, nota, Widget, URL o byte allegato entra nel riepilogo. Il documento fiscale viene scelto dal tipo; i numeri degli altri documenti non sono decifrati. UID/sblocco/segnale controllati prima e dopo gli await; assenza, archiviazione, proprietario discordante, forme invalide e decifratura fallita impediscono il risultato. Cambiando sezione vengono cancellati valori, etichette e titoli anche nei nodi trattenuti.
+
+Otto nuove prove, 329 shell e suite `npm test` completa superati. Chrome: 58 entry + 32 arresto/riapertura, 90 verifiche superate, con Panoramica iniziale, apertura interna dell'Anagrafica e prima visita offline dopo riavvio. L'ultimo affinamento della pulizia etichette è verificato dai test della vista e dalla suite completa; la precedente prova entry non va presentata come collaudo visivo di quell'affinamento. Edge e iPhone restano gate aperti; layout produttivo, modifica dati, tessera digitale e Widget di profilo non sono completati. Prossimo blocco: consultazione dei Widget del profilo e relativa parità aziendale; poi tessera/editor secondo il piano. Nessun dato reale, master, bump o deploy; rollback limitato al montaggio sperimentale di Panoramica.
+
 ### Note anagrafiche nella shell — candidata 15/09/2026
 
 Successiva a `1fc6e357`: la sezione Anagrafica privata include il campo canonico `users.note` con etichetta «Note anagrafica», come la pagina produttiva; l'azienda esponeva già il proprio `note`. Nessuna riga per valore assente, nessun accesso a campi arbitrari/password, nessun nuovo writer. Il lettore conserva autorizzazione RAM e revoca prima/dopo la decifratura; la vista tratta il testo come testo e lo cancella dai nodi trattenuti cambiando linguetta.

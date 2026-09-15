@@ -73,6 +73,10 @@ try {
         const originalDocument = document;
         byId('profile').click();
         await wait(() => byId('content').textContent.includes('Nome fittizio'), 'COLD_PROFILE');
+        assert(document.querySelector('[data-profile-section="overview"][aria-pressed="true"]'), 'COLD_OVERVIEW_DEFAULT');
+        assert(byId('content').textContent.includes('fixture@example.invalid'), 'COLD_OVERVIEW_CONTACT');
+        document.querySelector('[data-profile-section="personal"]').click();
+        await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'COLD_PERSONAL');
         assert(byId('content').textContent.includes('Nota anagrafica fittizia'), 'COLD_PROFILE_NOTE');
         const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
         document.querySelector('[data-profile-section="contacts"]').click();

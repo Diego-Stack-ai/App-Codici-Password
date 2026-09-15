@@ -2,7 +2,7 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Read-only migration slice: changes to links, utilities and QR are not enabled.
-export async function mountProfileShell(root, context, {readSection, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
@@ -12,7 +12,7 @@ export async function mountProfileShell(root, context, {readSection, linkedAccou
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];
     const current = ticket => !disposed && !context.signal.aborted && ticket === revision;
-    const clear = () => { sectionControls?.abort(); for (const node of panel.querySelectorAll('dd')) node.textContent = ''; panel.replaceChildren(); };
+    const clear = () => { sectionControls?.abort(); for (const tag of ['dd', 'dt', 'h3']) for (const node of panel.querySelectorAll(tag)) node.textContent = ''; panel.replaceChildren(); };
     const dispose = () => {
         if (disposed) return;
         disposed = true; revision++; controls.abort(); context.signal.removeEventListener('abort', dispose);
@@ -65,7 +65,7 @@ export async function mountProfileShell(root, context, {readSection, linkedAccou
         for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.profileSection === section));
         panel.textContent = 'Caricamento…';
         try {
-            const rows = await readSection(section);
+            const rows = await (section === 'overview' && readOverview ? readOverview() : readSection(section));
             if (!current(ticket)) return;
             context.assertUnlocked(); clear();
             if (!rows.length) { panel.textContent = 'Nessun dato presente.'; return; }
@@ -79,6 +79,11 @@ export async function mountProfileShell(root, context, {readSection, linkedAccou
                 }
                 const label = document.createElement('dt'), value = document.createElement('dd');
                 label.textContent = row.label; value.textContent = row.value; list.append(label, value);
+                if (section === 'overview' && Object.hasOwn(PROFILE_SECTIONS, row.target)) {
+                    const action = document.createElement('button'); action.type = 'button'; action.textContent = `Apri ${PROFILE_SECTIONS[row.target]}`;
+                    action.addEventListener('click', () => { if (current(ticket)) void select(row.target); }, {signal: sectionControls.signal});
+                    const actions = document.createElement('dd'); actions.append(action); list.append(actions);
+                }
                 if (row.link) addLinkedAccount(list, row.link, ticket);
             }
         } catch (error) {
@@ -88,7 +93,7 @@ export async function mountProfileShell(root, context, {readSection, linkedAccou
             }
         }
     }
-    for (const [section, label] of Object.entries(PROFILE_SECTIONS)) {
+    for (const [section, label] of Object.entries({...readOverview ? {overview: 'Panoramica'} : {}, ...PROFILE_SECTIONS})) {
         const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
         button.dataset.profileSection = section;
         button.addEventListener('click', () => { void select(section); }, {signal: controls.signal});
@@ -96,6 +101,6 @@ export async function mountProfileShell(root, context, {readSection, linkedAccou
     }
     host.append(title, notice, navigation, panel); root.append(host);
     context.signal.addEventListener('abort', dispose, {once: true});
-    if (context.signal.aborted) dispose(); else await select('personal');
+    if (context.signal.aborted) dispose(); else await select(readOverview ? 'overview' : 'personal');
     return dispose;
 }

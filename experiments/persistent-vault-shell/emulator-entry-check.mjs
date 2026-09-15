@@ -103,6 +103,10 @@ async function checkProfile(mode) {
     const originalDocument = document;
     byId('profile').click();
     await wait(() => byId('content').textContent.includes('Nome fittizio'), 'PROFILE_PERSONAL');
+    assert(document.querySelector('[data-profile-section="overview"][aria-pressed="true"]'), 'PROFILE_OVERVIEW_DEFAULT');
+    assert(byId('content').textContent.includes('fixture@example.invalid') && !byId('content').textContent.includes('Nota anagrafica fittizia'), 'PROFILE_OVERVIEW_MINIMAL');
+    [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Apri Anagrafica').click();
+    await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'PROFILE_OVERVIEW_NAVIGATION');
     const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
     assert(profileNote, 'PROFILE_NOTE');
     for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {

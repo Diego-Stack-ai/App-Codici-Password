@@ -17,6 +17,19 @@ class Node extends EventTarget {
 globalThis.document = {createElement: tag => new Node(tag)};
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture() { return {root: new Node('root'), control: new AbortController()}; }
+
+test('overview is the initial tab when provided and its action clears values before internal navigation', async () => {
+    const f = fixture(), reads = [];
+    const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+        readOverview: async () => [{group: 'Panoramica', label: 'Email', value: 'private@example.invalid', target: 'contacts'}],
+        readSection: async section => {reads.push(section); return [{group: section, label: 'Contatti', value: 'other'}];}
+    });
+    const value = f.root.querySelectorAll('dd').find(node => node.textContent === 'private@example.invalid');
+    const label = f.root.querySelectorAll('dt')[0];
+    assert.ok(value); assert.deepEqual(reads, []);
+    f.root.querySelectorAll('button').find(node => node.textContent === 'Apri Contatti').dispatchEvent(new Event('click'));
+    await tick(); assert.equal(value.textContent, ''); assert.equal(label.textContent, ''); assert.deepEqual(reads, ['contacts']); cleanup();
+});
 test('safe text rendering and disposal clear detached plaintext and do not remove another view', async () => {
     const f = fixture();
     const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {readSection: async () => [{group: 'Anagrafica', label: 'Nome', value: '<img onerror=bad>'}]});
