@@ -26,6 +26,9 @@ import {listCompanies, listCompaniesConfirmed} from '../../Frontend/public/asset
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 import {createAccountWidgetReader} from './account-widget-reader.mjs';
 import {mountAccountWidgetView} from './account-widget-view.mjs';
+import {createBankingReader} from './banking-reader.mjs';
+import {mountBankingView} from './banking-view.mjs';
+import {normalizeEditableBankingAccounts} from '../../Frontend/public/assets/js/modules/shared/banking-model.js';
 import {listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 
 const byId = id => document.getElementById(id);
@@ -85,7 +88,16 @@ const mountDetail = context => {
         repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed,
             listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed}});
     return mountEmulatorDetail(content, context, {selection, openAccount, mountSavePanel,
-        mountWidgets: root => mountAccountWidgetView(root, context, {reader: widgetReader}),
+        mountWidgets: async root => {
+            const generic = await mountAccountWidgetView(root, context, {reader: {
+                list: async () => (await widgetReader.list()).filter(widget => !widget.bankId), read: (...args) => widgetReader.read(...args)}});
+            try {
+                const banking = await mountBankingView(root, context, {widgetReader,
+                    listBanks: createBankingReader({context, getUser: () => auth.currentUser, selection, normalize: normalizeEditableBankingAccounts,
+                        isEncryptedValue: cryptoApi.isEncryptedValue, repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}})});
+                return () => {try {banking();} finally {generic();}};
+            } catch (error) {generic(); throw error;}
+        },
         backLabel: ['profile', 'companyProfile'].includes(detailReturnRoute) ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
 };
 const mountProfile = context => {

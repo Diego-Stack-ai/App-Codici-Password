@@ -4,11 +4,12 @@ export async function attachEntryNetworkControl(child, {restartPhase, forced = f
     if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
     const endpoint = await new Promise((resolve, reject) => {
         let output = '';
-        const finish = (error, value) => { clearTimeout(timer); child.stderr.off('data', read); child.off('error', fail); error ? reject(error) : resolve(value); };
+        const finish = (error, value) => { clearTimeout(timer); child.stderr.off('data', read); child.off('error', fail); child.off('exit', exited); error ? reject(error) : resolve(value); };
         const fail = error => finish(error);
+        const exited = code => finish(new Error(`DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:${code}`));
         const read = chunk => { output = (output + chunk).slice(-16384); const match = output.match(/DevTools listening on (ws:\/\/[^\s]+)/); if (match) finish(null, match[1]); };
         const timer = setTimeout(() => finish(new Error('DEVTOOLS_ENDPOINT_TIMEOUT')), 10000);
-        child.stderr.on('data', read); child.on('error', fail);
+        child.stderr.on('data', read); child.on('error', fail); child.on('exit', exited);
     });
     const address = new URL(endpoint);
     if (address.hostname !== '127.0.0.1') throw new Error('DEVTOOLS_NONLOCAL');

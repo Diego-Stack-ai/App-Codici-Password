@@ -27,6 +27,14 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Vista bancaria della shell — candidata 15/09/2026
+
+Successiva a `33e4b1b1`: dettaglio personale e aziendale compongono ogni conto nell'ordine dati bancari, Widget del relativo `bankId`, carte. I Widget bancari sono esclusi dal contenitore generico. La vista riceve solo capability del lettore canonico; PIN, CCV e password dispositiva richiedono un comando esplicito di visualizzazione/copia. La copia dei segreti bancari non abilita quella dei Widget cifrati, che conserva il contratto precedente. Uscita e blocco cancellano anche valori nei nodi trattenuti; nessun editor legacy o gestore chiave importato.
+
+Fixture con due conti, due Widget distinti e carte in entrambi i domini. Tre nuove prove della vista; suite completa superata con 317 shell. Chrome: 58 verifiche entry online/offline dopo il fix della coda, 32 arresto/riapertura con prima visita bancaria offline, 90 totali. Edge resta **non verificato** per questo incremento: il processo locale termina con codice 0 prima dell'endpoint DevTools anche con profilo temporaneo vuoto. Il runner segnala ora l'uscita anticipata e permette `VAULT_SHELL_BROWSER=chrome|edge` per diagnosi mirate; default e CI restano entrambi i browser. Non conteggiare Chrome come sostituto di Edge. Il precedente errore intermittente del recupero note non si è ripresentato nell'ultima prova Chrome; resta da rieseguire la matrice Edge quando disponibile.
+
+Non chiude editor, ordine/collasso interattivo, parità grafica produttiva, iPhone o il programma MD. Nessun dato reale, modifica Rules/Functions, migrazione, bump, master o deploy. Rollback: rimuovere il montaggio sperimentale della vista e il relativo adattatore; il modello dei dati rimane invariato. Prossimo blocco autonomo: parità del profilo (panoramica/note/Widget/tessera), conservando aperto il gate Edge.
+
 ### Lettore bancario della shell — candidata 15/09/2026
 
 Base `5f17a9a2`: `banking-reader.mjs` espone descrittori e capability puntuali per campi del conto e carte. Riusa tramite iniezione `normalizeEditableBankingAccounts` canonico (provato con il sorgente reale), senza `ensureBankIds` o scritture. Conserva gli ID esistenti; i conti legacy senza ID restano leggibili con una capability legata alla posizione e alla fotografia del record. Il riordino di conti con ID stabili conserva la destinazione; modifica/rimozione del conto o spostamento delle carte invalida i lettori precedenti.

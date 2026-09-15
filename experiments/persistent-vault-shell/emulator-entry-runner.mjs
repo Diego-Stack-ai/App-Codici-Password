@@ -7,9 +7,12 @@ import {attachEntryNetworkControl} from './emulator-network-control.mjs';
 
 export async function runEntryBrowsers(nextReport, {restart = false, forced = false} = {}) {
     if (forced && !restart) throw new Error('FORCED_RESTART_REQUIRED');
-    const browsers = process.platform === 'win32' ? [process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    const browserSelection = process.env.VAULT_SHELL_BROWSER || 'all';
+    if (!['all', 'chrome', 'edge'].includes(browserSelection)) throw new Error('ENTRY_BROWSER_SELECTION_INVALID');
+    const available = process.platform === 'win32' ? [process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         process.env.EDGE_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'] :
         [process.env.CHROME_PATH || '/usr/bin/google-chrome', process.env.EDGE_PATH || '/usr/bin/microsoft-edge'];
+    const browsers = browserSelection === 'all' ? available : [available[browserSelection === 'chrome' ? 0 : 1]];
     for (const browser of browsers) {
         if (!existsSync(browser)) throw new Error('ENTRY_BROWSER_MISSING');
         const temp = resolve(tmpdir()), profile = await mkdtemp(`${temp}/codex-entry-browser-`);

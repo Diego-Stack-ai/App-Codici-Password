@@ -119,6 +119,17 @@ try {
         byId('private').click();
         await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COLD_COMPANY_RETURN');
         assert(companyValues.every(node=>node.textContent===''),'COLD_COMPANY_CLEARED');
+        document.querySelector('[data-action="navigate"][data-id="banca"]').click();
+        await wait(() => document.querySelector('[data-bank-id="fixture-two"] [data-bank-part="cards"] button'), 'COLD_BANKS');
+        const bank = document.querySelector('[data-bank-id="fixture-two"]');
+        assert(bank.children[0].textContent.includes('IBAN-SECONDO') && bank.children[1].dataset.bankPart === 'widgets' && bank.children[2].dataset.bankPart === 'cards', 'COLD_BANK_ORDER');
+        bank.children[1].querySelector('button').click();
+        await wait(() => bank.textContent.includes('BANK-WIDGET-private-fixture-two-A'), 'COLD_BANK_WIDGET');
+        [...bank.children[2].querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN').click();
+        await wait(() => [...bank.children[2].querySelectorAll('.shared-account-value')].some(node => node.textContent === '5678'), 'COLD_BANK_PIN');
+        const bankValues = [...bank.querySelectorAll('.shared-account-value')];
+        byId('private').click(); await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_BANK_BACK');
+        assert(bankValues.every(node => node.textContent === ''), 'COLD_BANK_CLEAR');
         if (window.__entryForced) {
             document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
             await wait(() => byId('content').textContent.includes('già conservata sul dispositivo'), 'CRASH_QUEUE_RECOVERY');
@@ -146,6 +157,7 @@ try {
                   'address utility and its linked credential readable offline after restart',
                   'company directory and second-company accounts available after automatic offline preparation',
                   'nonempty Account Widget and common credential render after cold offline restart and clear on exit',
+                  'two banks and their Widget/card composition readable on first visit after offline restart',
                   ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});

@@ -56,7 +56,9 @@ for (const suffix of ['A', 'B']) {
             const fields = {nomeAccount: `${title} ${domain === 'private' ? 'privato' : 'azienda'} ${suffix}`, username: `${title.toLowerCase()}-${suffix.toLowerCase()}@example.invalid`, account: `CODICE-FITTIZIO-${suffix}`, password: `SEGRETO-FITTIZIO-${domain}-${title}-${suffix}`,
                 note: `Nota fittizia per ${title} ${suffix}\nSeconda riga della nota.`, url: `https://example.invalid/${domain}/${title.toLowerCase()}`};
             const record = {ownerId: user.uid, _encrypted: true};
-            if (title === 'Banca') Object.assign(record, {isBanking: true, banking: [{bankId: 'fixture', iban: await encrypted('IBAN-FITTIZIO'), cards: [{pin: await encrypted('1234'), ccv: await encrypted('000')}]}]});
+            if (title === 'Banca') Object.assign(record, {isBanking: true, banking: [
+                {bankId: 'fixture', iban: await encrypted('IBAN-FITTIZIO'), cards: [{pin: await encrypted('1234'), ccv: await encrypted('000')}]},
+                {bankId: 'fixture-two', iban: await encrypted('IBAN-SECONDO'), cards: [{pin: await encrypted('5678'), ccv: await encrypted('111')}]}]});
             if (domain === 'private' && title === 'Alfa') Object.assign(record, {schemaVersion: 1, revision: 0, type: 'account', visibility: 'private'});
             for (const [field, value] of Object.entries(fields)) record[field] = await cryptoApi.encrypt(value, key);
             const path = ['users', user.uid];
@@ -79,6 +81,11 @@ for (const suffix of ['A', 'B']) {
                     fields: [{id: 'pin', label: 'PIN Widget', encrypted: true, valueEnc: await encrypted(`WIDGET-${scope}-${suffix}`), copyable: false},
                         {id: 'plain', label: 'Descrizione', encrypted: false, value: 'Campo fittizio ' + scope, copyable: true}]});
                 await admin.firestore().doc(`${root}/accountWidgets/link-${scope}`).set({ownerId: user.uid, ...target, kind: 'shared-reference', sharedDataId: 'common'});
+                if (scope !== 'second-company') for (const bankId of ['fixture', 'fixture-two']) {
+                    await admin.firestore().doc(`${root}/accountWidgets/bank-${scope}-${bankId}`).set({ownerId: user.uid, ...target, accountId: 'banca', bankId, kind: 'embedded',
+                        title: 'Campi ' + bankId, fields: [{id: 'value', label: 'Dato banca', encrypted: true,
+                            valueEnc: await encrypted(`BANK-WIDGET-${scope}-${bankId}-${suffix}`), copyable: false}]});
+                }
             }
         });
     } finally { await terminate(db); await deleteApp(app); }

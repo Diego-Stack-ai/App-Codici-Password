@@ -1,6 +1,6 @@
 // Consultation-only shell composition: canonical Widget class names, capability reads,
 // no legacy session manager or editor/writer imports.
-export async function mountAccountWidgetView(root, context, {reader, copyText = value => navigator.clipboard.writeText(value)}) {
+export async function mountAccountWidgetView(root, context, {reader, allowSecretCopy = false, copyText = value => navigator.clipboard.writeText(value)}) {
     const host = document.createElement('section'); host.className = 'account-widgets-section';
     const status = document.createElement('p'); status.setAttribute('role', 'status');
     const controls = new AbortController(), values = [], texts = [];
@@ -60,11 +60,11 @@ export async function mountAccountWidgetView(root, context, {reader, copyText = 
                     }, {signal: controls.signal});
                     row.append(reveal);
                 }
-                if (!field.encrypted && field.copyable) {
+                if ((!field.encrypted || allowSecretCopy) && field.copyable) {
                     const copy = label('button', `Copia ${field.label}`); copy.type = 'button';
                     copy.addEventListener('click', async () => {
                         try {
-                            check(); const decoded = await reader.read(widget.id, field.id, {expectedEncrypted: false, copy: true}); check();
+                            check(); const decoded = await reader.read(widget.id, field.id, {expectedEncrypted: field.encrypted, copy: true}); check();
                             await copyText(decoded); check();
                             status.textContent = 'Copiato.';
                         } catch { if (!disposed && !context.signal.aborted) error(); }

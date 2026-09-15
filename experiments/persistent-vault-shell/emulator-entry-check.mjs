@@ -13,6 +13,32 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+async function checkBanking(mode) {
+    for (const scope of ['private', 'company']) {
+        if (scope === 'private') byId('private').click();
+        else {
+            byId('companies').click(); await wait(() => document.querySelector('[data-company-accounts="company"]'), 'BANK_COMPANY_DIRECTORY');
+            document.querySelector('[data-company-accounts="company"]').click();
+        }
+        await wait(() => document.querySelector('[data-action="navigate"][data-id="banca"]'), 'BANK_ACCOUNT');
+        document.querySelector('[data-action="navigate"][data-id="banca"]').click();
+        await wait(() => document.querySelector('[data-bank-id="fixture-two"] [data-bank-part="cards"] button'), 'BANK_MOUNT');
+        for (const [id, iban, pin] of [['fixture', 'IBAN-FITTIZIO', '1234'], ['fixture-two', 'IBAN-SECONDO', '5678']]) {
+            const bank = document.querySelector(`[data-bank-id="${id}"]`);
+            assert(bank.children[0].dataset.bankPart === 'fields' && bank.children[1].dataset.bankPart === 'widgets' && bank.children[2].dataset.bankPart === 'cards', 'BANK_ORDER');
+            assert(bank.children[0].textContent.includes(iban), 'BANK_IBAN');
+            const widget = bank.querySelector(`[data-widget-id="bank-${scope}-${id}"]`);
+            assert(widget, 'BANK_WIDGET_PARENT'); widget.querySelector('button').click();
+            await wait(() => widget.textContent.includes(`BANK-WIDGET-${scope}-${id}-A`), 'BANK_WIDGET_VALUE');
+            [...bank.children[2].querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN').click();
+            await wait(() => [...bank.children[2].querySelectorAll('.shared-account-value')].some(node => node.textContent === pin), 'BANK_PIN');
+        }
+        const values = [...byId('content').querySelectorAll('.shared-account-value')];
+        byId('private').click(); await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'BANK_BACK');
+        assert(values.every(node => node.textContent === ''), 'BANK_CLEAR');
+        profileChecks.push(`two ${scope} banks keep Widgets above cards and clear secrets ${mode}`);
+    }
+}
 async function checkWidgets(scope, mode) {
     await wait(() => document.querySelector(`[data-widget-id="widget-${scope}"] button`), 'WIDGET_MOUNT');
     const card = document.querySelector(`[data-widget-id="widget-${scope}"]`);
@@ -137,6 +163,7 @@ try {
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'LIST');
     await checkProfile('online');
     await checkCompanyProfile('online');
+    await checkBanking('online');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => document.querySelector('#content textarea'), 'NOTE_EDITOR');
     const content = byId('content'), input = content.querySelector('textarea'), marker = document;
@@ -174,6 +201,7 @@ try {
     assert(JSON.stringify(cachedDomains) === JSON.stringify(loadedDomains), 'OFFLINE_DOMAIN_MATRIX');
     await checkProfile('offline');
     await checkCompanyProfile('offline');
+    await checkBanking('offline');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => content.textContent.includes('già conservata sul dispositivo'), 'OFFLINE_RECOVERY');
     const recoveredInput = content.querySelector('textarea');
