@@ -7,6 +7,12 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Scheda PDF aziendale — richiesta 15/09/2026, da implementare
+
+Diego richiede un PDF di riepilogo dei dati aziendali da salvare sul telefono o inviare tramite WhatsApp/email. Prevedere scelta dei campi, anteprima, download e condivisione nativa del file quando supportata; fallback download, nessun invio automatico o pubblicazione su URL pubblico. Contenuto: identità/dati fiscali, referente, sedi, email e telefoni. Password, PIN/PUK, credenziali degli Account collegati, chiavi, note riservate e allegati esclusi dalla proiezione; non basta mascherarli graficamente dopo averli caricati nel generatore.
+
+Generazione sul dispositivo tramite lettore revocabile e proiezione consentita. Verificare pulizia di anteprime/URL temporanei, limiti, accenti, campi vuoti, testi lunghi, impaginazione e più pagine con fixture sintetiche. Le copie che l'utente scarica/condivide restano esterne alla revoca della sessione. Collaudo iPhone e destinazioni di condivisione separati dai test automatici. Implementazione ancora aperta; inserita dopo il consolidamento del montaggio QR, senza saltare il resto degli MD o autorizzare deploy.
+
 ### Editor selezione QR revocabile — laboratorio 15/09/2026
 
 Successivo a `686b1f1c`: sorgente dedicata carica solo etichette dei contatti e selezione, senza password, immagini o dati collegati. Risolve gli indici legacy in ID, verifica tutti i riferimenti e confronta snapshot/revisione/selezione prima della preparazione. La consultazione può usare cache offline; il salvataggio richiede connessione. Il controller conserva in RAM un solo tentativo immutabile, impedisce un secondo invio distinto con esito incerto e ripete lo stesso ID; revoca e cambio UID impediscono invii tardivi. Un invio già accettato dal backend può concludersi dopo l'uscita, senza aggiornare una vista dismessa.
