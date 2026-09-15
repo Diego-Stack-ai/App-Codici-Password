@@ -27,6 +27,12 @@ Il codice corrente è il riferimento per la disponibilità dei comandi, non una 
 
 ## Scopo e stato
 
+### Confine vCard prima della tessera shell — candidata 15/09/2026
+
+Successiva a `cc6ff020`: il generatore vCard condiviso applica autonomamente l'allowlist dei tipi testuali esportabili dei Widget. Non basta più `encrypted !== true`: esclude tipi segreti/allegati/foto/sconosciuti, sensibilità `secret`, cifratura ambigua e residui `valueEnc`; conserva il tipo testuale legacy senza flag di cifratura se privo di tali ambiguità. I valori non esportabili vengono omessi senza cambiare il record. I collegamenti strutturati Account/indirizzo non vengono esportati come testo libero: la loro eventuale rappresentazione richiede una proiezione esplicita successiva.
+
+Escape uniforme CR/LF anche per data di nascita e vecchi campi Contatti delle Impostazioni: un valore non può aggiungere nuove proprietà vCard. Due regressioni aggiunte, 141 test profilo e suite `npm test` completa superati (343 shell). Nessuna nuova prova browser attribuita a questa correzione pura. Non è ancora la tessera digitale montata nella shell: restano sorgente delle inclusioni, proiezione selettiva revocabile, foto online, generazione/anteprima, modifica selezione e download esplicito. Il comportamento cambia solo nella candidata, senza dati reali, Rules, bump, master o deploy. Proseguire da tale adapter, senza reintrodurre gli editor QR legacy.
+
 ### Widget del profilo nella shell — candidata 15/09/2026
 
 Successiva a `16dae6f1`: i Widget personali sono montati nella linguetta canonica, anche quando la sezione non contiene altri dati. Lettore dedicato su `users/{uid}/profileWidgets`, con nuova lettura repository confermata online e cache offline; nessun editor/gestore chiave legacy. Modello canonico e validazione puntuale dei campi, ID duplicati, proprietario, contesto e tipi sensibili; letture rivalidate dopo la decifratura e invalidate da modifica/spostamento/rimozione o cambio sessione. Il metadato conserva ordine, collasso, anteprima e copia senza valori o ciphertext.

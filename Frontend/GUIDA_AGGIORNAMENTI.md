@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Preparazione tessera dopo `cc6ff020`: generatore vCard limita autonomamente i tipi Widget esportabili, rifiuta classificazioni ambigue e impedisce nuove proprietà tramite CR/LF nei valori. Due regressioni, 141 test profilo e suite completa superati (343 shell). Tessera della shell ancora da montare; prossimi passi nella roadmap profili. Nessun dato reale o deploy.
+
 Widget personali dopo `16dae6f1`: consultazione nelle linguette, ordine conservato, collasso locale e anteprime protette. Suite completa superata (341 shell), suite shell finale 343 e 90 verifiche Chrome superati. Corretto solo il formato della fixture sintetica; nessuna migrazione. Widget di profilo aziendale ancora da progettare con schema/Rules propri: non riutilizzare quelli personali. Proseguire con tessera digitale mantenendo aperti editor, estensione aziendale ed Edge/iPhone. Dettagli nella roadmap profili; nessun deploy.
 
 Panoramica dopo `530c991a`: linguetta iniziale personale/azienda con modello canonico, contatti principali, riepilogo fiscale/documentale e aperture interne. Otto nuove prove, 329 shell, suite completa e 90 verifiche Chrome superati; limiti del collaudo e gate Edge/iPhone nella roadmap profili. Proseguire con Widget di profilo, tessera e parità editor. Nessuna modifica produzione o dichiarazione di programma concluso.

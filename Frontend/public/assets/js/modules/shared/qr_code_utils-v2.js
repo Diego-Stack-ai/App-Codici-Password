@@ -30,7 +30,7 @@ export function buildVCard(userData, inclusions, options = {}) {
     }
     const escapeVCard = (value) => String(value ?? '')
         .replace(/\\/g, '\\\\')
-        .replace(/\n/g, '\\n')
+        .replace(/\r\n|\r|\n/g, '\\n')
         .replace(/;/g, '\\;')
         .replace(/,/g, '\\,');
     const selected = (items, references) => (Array.isArray(references) ? references : [])
@@ -51,7 +51,7 @@ export function buildVCard(userData, inclusions, options = {}) {
         v.push(`X-CF:${escapeVCard(fiscalCode)}`);
     }
     if (inclusions.nascita && userData.birth_date) {
-        v.push(`BDAY:${userData.birth_date}`);
+        v.push(`BDAY:${escapeVCard(userData.birth_date)}`);
         if (userData.birth_place) v.push(`X-BIRTHPLACE:${escapeVCard(userData.birth_place)}`);
     }
     // Phones
@@ -74,13 +74,15 @@ export function buildVCard(userData, inclusions, options = {}) {
     }
     // impostazioni.js style (qr_personal)
     if (inclusions.contactPhones && Array.isArray(userData.contactPhones)) {
-        userData.contactPhones.forEach(p => { if (p.shareQr && p.number) v.push(`TEL;TYPE=CELL:${p.number}`); });
+        userData.contactPhones.forEach(p => { if (p.shareQr && p.number) v.push(`TEL;TYPE=CELL:${escapeVCard(p.number)}`); });
     }
     if (inclusions.contactEmails && Array.isArray(userData.contactEmails)) {
-        userData.contactEmails.forEach(e => { if (e.shareQr && e.address) v.push(`EMAIL;TYPE=INTERNET:${e.address}`); });
+        userData.contactEmails.forEach(e => { if (e.shareQr && e.address) v.push(`EMAIL;TYPE=INTERNET:${escapeVCard(e.address)}`); });
     }
     if (Array.isArray(options.customFields)) {
-        options.customFields.filter(field => field?.includeInQr === true && field.encrypted !== true)
+        options.customFields.filter(field => field?.includeInQr === true && (field.encrypted === false || field.encrypted === undefined) &&
+            field.sensitivity !== 'secret' && !field.valueEnc &&
+            ['text', 'textarea', 'number', 'date', 'phone', 'email', 'address', 'url', 'select', 'boolean', 'identifier', 'expiry'].includes(String(field.type || '').trim().toLowerCase()))
             .sort((a, b) => (a.qrOrder || 0) - (b.qrOrder || 0))
             .forEach(field => {
                 const value = escapeVCard(field.value || '');
