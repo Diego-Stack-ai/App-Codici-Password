@@ -7,6 +7,14 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Tessera digitale aziendale nella shell — candidata 15/09/2026
+
+Successiva a `104aefc9`: stessa linguetta e comandi QR/download del profilo privato, con lettore aziendale dedicato e generatore canonico `buildCompanyVCard`. Richiede una configurazione `qrConfig` salvata; al suo interno conserva i default legacy del modello (amministrazione/personale esclusi salvo selezione). Email extra e sedi rispettano il proprio flag `qr`. Configurazione assente o malformata impedisce la generazione: non viene creata una selezione implicita.
+
+Decifra solo la proiezione inclusa: identità aziendale/referente, email, sedi e dati fiscali scelti. Password, collegamenti, note libere e allegati non raggiungono il generatore. Sorgenti confermate online/cache offline, UID e revoca prima/dopo await, confronto finale del record per rifiutare modifiche concorrenti. Nessuna scrittura o fallback ai dati del profilo privato. Il modello aziendale corrente non comprende foto né telefono aziendale generico nel vCard: questo limite canonico rimane aperto per il successivo editor/parità, senza inventare nuovi flag in questo incremento.
+
+Sette test aggiunti, suite completa `npm test` superata (362 shell). Chrome: 58 entry + 32 arresto/riapertura, con QR aziendale online/offline, prima visita dopo riavvio, esclusione email non selezionata e pulizia canvas/title. Edge, iPhone e importazione/download fisici restano da collaudare. Nessun dato reale, modifica master, bump o deploy; rollback limitato a lettore e montaggio sperimentali. Proseguire con editor selezione/profili e parità dei campi, poi Widget aziendali con schema/Rules dedicati.
+
 ### Tessera digitale privata nella shell — candidata 15/09/2026
 
 Successiva a `f439cb61`: linguetta privata con generazione QR e download vCard come azioni esplicite sulla selezione già salvata. Lettore con sorgenti confermate online/cache offline, controllo UID/sblocco/segnale e confronto finale dei record. Selezione mancante, riferimenti ambigui o modifica concorrente impediscono il risultato. Solo campi selezionati vengono proiettati; i Widget segreti non vengono decifrati né esportati. Nessuna scrittura dei dati o della selezione.

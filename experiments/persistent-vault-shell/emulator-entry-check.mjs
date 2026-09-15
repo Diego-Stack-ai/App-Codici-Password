@@ -94,7 +94,15 @@ async function checkCompanyProfile(mode) {
     for(const [section,value] of [['addresses','Filiale fittizia'],['documents','Visura fittizia']]) {
         document.querySelector('[data-profile-section="'+section+'"]').click();await wait(()=>byId('content').textContent.includes(value),'COMPANY_'+section);
     }
+    document.querySelector('[data-profile-section="digital-card"]').click();
+    await wait(()=>document.querySelector('[data-digital-card-preview]'),'COMPANY_DIGITAL_TAB');
+    buttons('Genera QR dalla selezione salvata')[0].click();
+    await wait(()=>byId('content').textContent.includes('QR pronto.'),'COMPANY_DIGITAL_READY');
+    const companyQr = document.querySelector('[data-digital-card-preview]'), companyCanvas = companyQr.querySelector('canvas');
+    assert(companyQr.title.includes('FN:Azienda fittizia') && companyQr.title.includes('pec@example.invalid'), 'COMPANY_DIGITAL_DATA');
+    assert(!/SEGRETO|personale@example.invalid|Visura/.test(companyQr.title), 'COMPANY_DIGITAL_EXCLUSION');
     byId('private').click();await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COMPANY_EXIT');
+    assert(companyCanvas.width === 0 && !companyQr.title, 'COMPANY_DIGITAL_CLEAR');
     assert(document===marker,'COMPANY_RELOAD');
     profileChecks.push('company canonical profile tabs rendered '+mode,'company shared and private linked credentials with safe navigation '+mode);
     profileChecks.push('company directory search and second profile '+mode,'same Account ID in different companies navigates with correct company scope '+mode);

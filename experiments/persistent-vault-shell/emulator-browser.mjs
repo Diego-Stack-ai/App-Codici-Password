@@ -38,7 +38,7 @@ for (const suffix of ['A', 'B']) {
             userAddresses: [{id: 'address', address: await encrypted('Via fittizia'), utilities: [{id: 'utility', type: 'Energia', value: await encrypted('POD-FITTIZIO'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}]}],
             documenti: [{id: 'document', num_serie: await encrypted('DOC-FITTIZIO'), linkedAccountId: 'zeta'}]});
         await setDoc(doc(db, 'users', user.uid, 'settings', 'qrCodeInclusions'), {nome: true, phones: ['phone'], emails: ['email'], addresses: ['address'], photo: false});
-        await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia'),
+        await setDoc(doc(db, 'users', user.uid, 'aziende', 'company'), {ragioneSociale: await encrypted('Azienda fittizia'), qrConfig: {persEmail: false},
             partitaIva: await encrypted('IVA-FITTIZIA'), emails: {pec: {email: await encrypted('pec@example.invalid'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}, personale: {email: await encrypted('personale@example.invalid'), linkedAccountId: 'zeta'}},
             telefonoAzienda: await encrypted('111111111'), phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}},
             indirizzoSede: await encrypted('Sede fittizia'), altreSedi: [{indirizzo: await encrypted('Filiale fittizia')}],

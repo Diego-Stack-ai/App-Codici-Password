@@ -18,6 +18,8 @@ import {mountProfileWidgetView} from './profile-widget-view.mjs';
 import {listProfileWidgets, listProfileWidgetsConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {getUserSetting, getUserSettingConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {createPrivateDigitalCardReader} from './private-digital-card-reader.mjs';
+import {createCompanyDigitalCardReader} from './company-digital-card-reader.mjs';
+import {buildCompanyVCard} from '../../Frontend/public/assets/js/modules/azienda/company-vcard.js';
 import {mountDigitalCardView} from './digital-card-view.mjs';
 import {buildVCard, buildProfileQrPayload, ensureQRCodeLib, renderQRCode} from '../../Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js';
 import {mountProfileShell} from './profile-shell-view.mjs';
@@ -122,21 +124,22 @@ const mountProfile = context => {
             return mountProfileWidgetView(root, scoped, {reader: createProfileWidgetReader({context: scoped, getUser: () => auth.currentUser,
                 repository: {listProfileWidgets, listProfileWidgetsConfirmed}, tab: section, validateProfileWidget})});
         },
-        mountDigitalCard: company ? undefined : (root, {signal}) => {
+        mountDigitalCard: (root, {signal}) => {
             const scoped = {...context, signal};
             return mountDigitalCardView(root, scoped, {
-                generate: createPrivateDigitalCardReader({context: scoped, getUser: () => auth.currentUser,
+                generate: company ? createCompanyDigitalCardReader({context: scoped, source, getUser: () => auth.currentUser,
+                    isEncryptedValue: cryptoApi.isEncryptedValue, buildVCard: buildCompanyVCard}) : createPrivateDigitalCardReader({context: scoped, getUser: () => auth.currentUser,
                     repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed, listProfileWidgets, listProfileWidgetsConfirmed},
                     isEncryptedValue: cryptoApi.isEncryptedValue, buildVCard}),
                 // The loopback lab has no public receiver. Photo-bearing QR
                 // codes target the existing receiver; creating this fragment
                 // performs no request, upload or publication.
-                loadQr: ensureQRCodeLib, makePayload: card => buildProfileQrPayload(card, 'https://appcodici-password.web.app'),
+                loadQr: ensureQRCodeLib, makePayload: card => company ? card : buildProfileQrPayload(card, 'https://appcodici-password.web.app'),
                 renderQr: (target, payload) => renderQRCode(target, payload, {width: 220, height: 220}),
                 download: async (card, check) => {
                     check(); const url = URL.createObjectURL(new Blob([card], {type: 'text/vcard;charset=utf-8'}));
                     const anchor = document.createElement('a');
-                    try {check(); anchor.href = url; anchor.download = 'contatto.vcf'; anchor.click();}
+                    try {check(); anchor.href = url; anchor.download = company ? 'contatto-azienda.vcf' : 'contatto.vcf'; anchor.click();}
                     finally {anchor.removeAttribute('href'); URL.revokeObjectURL(url);}
                 }
             });
