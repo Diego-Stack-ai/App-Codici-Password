@@ -245,3 +245,15 @@ test('refresh closed during note decryption leaves no detached plaintext', async
     await assert.rejects(refresh, {name: 'AbortError'});
     assert.equal(f.root.children.length, 0); assert.equal(f.views[0].renders.length, 1);
 });
+
+test('unavailable note editor preserves readable detail and does not disclose provider errors', async () => {
+    const f = fixture();
+    const close = await f.mount(async () => ({has: field => field === 'nomeAccount', read: async () => 'Visible account'}), {
+        mountSavePanel: async () => { throw new Error('PRIVATE INTERNAL REASON'); }
+    });
+    assert.equal(f.views[0].destroyed, 0);
+    assert.equal(f.views[0].renders[0][0].nomeAccount, 'Visible account');
+    const notice = f.root.children[0].children.at(-1).textContent;
+    assert.match(notice, /Modifica non disponibile/); assert.doesNotMatch(notice, /INTERNAL/);
+    close(); assert.equal(f.root.children.length, 0);
+});

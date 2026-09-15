@@ -237,6 +237,7 @@ try {
     const sdk = await import('/firebase-queue.mjs');
     const app = sdk.initializeApp({projectId: 'demo-vault-shell', apiKey: 'demo-key', appId: 'synthetic-offline-browser'});
     const auth = sdk.initializeAuth(app, {persistence: sdk.inMemoryPersistence});
+    const firestore = sdk.getFirestore(app); sdk.connectFirestoreEmulator(firestore, '127.0.0.1', 8085);
     sdk.connectAuthEmulator(auth, 'http://127.0.0.1:9099', {disableWarnings: true});
     sdk.initializeAppCheck(app, {provider: new sdk.CustomProvider({getToken: async () => ({token: 'synthetic-app-check', expireTimeMillis: Date.now() + 3600000})}), isTokenAutoRefreshEnabled: false});
     const functions = sdk.getFunctions(app, 'europe-west1'); sdk.connectFunctionsEmulator(functions, '127.0.0.1', Number(location.port));
@@ -246,6 +247,8 @@ try {
         queueSession = sdk.createProtectedSession({getUser: () => auth.currentUser,
             subscribeUser: fn => sdk.onAuthStateChanged(auth, fn), routes: {queue: context => { queueContext = context; }},
             createVault: callbacks => sdk.createMemoryVault({...callbacks, unlockKey: async () => 'SYNTHETIC-QUEUE-KEY',
+                decryptRecord: (key, record) => decrypt(record.ciphertext, 'SYNTHETIC-VAULT-KEY'),
+                encryptValue: (key, value) => encrypt(value, 'SYNTHETIC-VAULT-KEY'),
                 openQueueWithKey: (vaultKeyMaterial, scope) => sdk.createFirebaseFencedQueueClient({...options, ...scope, vaultKeyMaterial,
                     database: db, holderId: 'shell-firebase-sdk', auth, functions, isOnline: () => true})})});
         await queueSession.unlock(); await queueSession.navigate('queue');
@@ -276,11 +279,40 @@ try {
         const resumed = await snapshot(late);
         assert(!(await pending()).length && resumed.updateTime === committed.updateTime, 'SDK_RESUME_REWROTE_RECORD');
         passed.push('shell-owned Vault lock after server commit retains the queue; unlock opens a new scoped SDK client and retries without rewriting');
+        let finalSnapshot = resumed;
+        if (privateAccounts) {
+            const root = document.createElement('div'); document.body.append(root);
+            const page = new AbortController(); let refreshed = 0;
+            const mount = sdk.createPrivateNotePanelProvider({context: queueContext, getUser: () => auth.currentUser,
+                deviceId: 'browser-test', newOperationId: () => 'bridge-provider-note',
+                readSource: sdk.createFirebasePrivateNoteSource({auth, db: firestore}),
+                openQueue: options => queueSession.openMutationQueue(options)});
+            for (const scope of ['profile', 'company']) {
+                await post('/scope', {operation: command, scope});
+                let blocked = false;
+                try { await mount(root, {selection: {domain: 'private', id: 'fixture'}, signal: page.signal}); }
+                catch { blocked = true; }
+                assert(blocked && !root.children.length && !(await pending()).length &&
+                    (await snapshot(command)).updateTime === resumed.updateTime, 'PROVIDER_LINK_NOT_BLOCKED');
+                passed.push(`private note source rejects ${scope} inverse links read through Firestore SDK before mounting or queueing`);
+            }
+            await post('/scope', {operation: command, scope: 'none'});
+            const close = await mount(root, {selection: {domain: 'private', id: 'fixture'}, signal: page.signal,
+                onSaved: () => { refreshed++; }});
+            const input = root.querySelector('textarea'), save = [...root.querySelectorAll('button')][0];
+            input.value = 'Synthetic provider note'; await save.onclick();
+            finalSnapshot = await snapshot({...command, operationId: 'bridge-provider-note'});
+            assert(refreshed === 1 && finalSnapshot.record.revision === resumed.record.revision + 1 &&
+                await decrypt(finalSnapshot.record.note, 'SYNTHETIC-VAULT-KEY') === 'Synthetic provider note' &&
+                !(await pending()).length, 'PROVIDER_NOTE_NOT_SAVED');
+            close(); assert(!root.children.length && input.value === '', 'PROVIDER_PLAINTEXT_RETAINED'); root.remove();
+            passed.push('private note provider mounts the real panel, prepares ciphertext, commits through shell/SDK and refreshes on its receipt');
+        }
         await sdk.signOut(auth);
         let denied = false; try { await sdkClient.enqueue({...command, operationId: 'bridge-sdk-signed-out'}); } catch { denied = true; }
-        assert(denied && (await snapshot(command)).updateTime === resumed.updateTime && !(await pending()).length, 'SDK_LOGOUT_WRITE');
+        assert(denied && (await snapshot(command)).updateTime === finalSnapshot.updateTime && !(await pending()).length, 'SDK_LOGOUT_WRITE');
         passed.push('Firebase callable SDK sends Auth emulator identity and synthetic App Check header; receipt clears queue and logout prevents reuse');
-    } finally { sdkClient?.close(); queueSession?.dispose(); await sdk.deleteApp(app); }
+    } finally { sdkClient?.close(); queueSession?.dispose(); await sdk.terminate(firestore); await sdk.deleteApp(app); }
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, domain: privateAccounts ? 'private-account' : 'offline-generic', passed, browser: navigator.userAgent})});
 } catch (error) {
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: false, passed, code: error.code || error.message})});

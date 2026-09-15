@@ -2,7 +2,7 @@ import {build} from 'esbuild';
 import {mkdir, copyFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const base = import.meta.dirname, publicRoot = resolve(base, '../../Frontend/public');
-export async function buildEmulator() {
+export async function buildEmulator({persistent = false} = {}) {
     await mkdir(`${base}/dist/emulator-site/assets/images`, {recursive: true});
     const deny = 'const deny = () => {throw new Error("EMULATOR_READ_ONLY")};';
     const boundaries = {
@@ -18,6 +18,7 @@ export async function buildEmulator() {
     };
     const result = await build({entryPoints: [`${base}/emulator-entry.mjs`], outfile: `${base}/dist/emulator-site/emulator.js`,
         bundle: true, format: 'esm', platform: 'browser', metafile: true, target: ['safari16', 'chrome110'], logLevel: 'warning',
+        define: {__EMULATOR_PERSISTENT_CACHE__: JSON.stringify(persistent)},
         plugins: [{name: 'emulator-boundaries', setup(builder) {
             builder.onResolve({filter: /\.js(?:\?.*)?$/}, args => {
                 const name = args.path.split('/').pop().split('?')[0];

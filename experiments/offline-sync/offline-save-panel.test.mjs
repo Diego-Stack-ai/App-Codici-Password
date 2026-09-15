@@ -11,13 +11,13 @@ class Node {
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(node => node !== this); }
 }
 const operation = {operationId: 'own-note', recordId: 'account-a'};
-async function fixture({send, discard, replace, readConflict, createConflictProposal, pendingForRecord, recoveryRecordId,
+async function fixture({send, discard, replace, readConflict, createConflictProposal, pendingForRecord, recoveryRecordId, recoveryOnly,
     prepare = async () => operation, onSaved = () => {}, onDiscarded = () => {}} = {}) {
     const realm = vm.createContext({structuredClone, document: {createElement: () => new Node()}});
     vm.runInContext(source.replace('export async function', 'async function'), realm);
     const root = new Node(), page = new AbortController(); let config;
     await realm.mountOfflineSavePanel(root, {signal: page.signal, onSaved, onDiscarded, readConflict, createConflictProposal,
-        prepare, recoveryRecordId,
+        prepare, recoveryRecordId, recoveryOnly,
         createClient: async value => {
             config = value;
             return {close() {}, discard, replace, pendingForRecord, enqueue: async () => send?.(config), flush: async () => send?.(config)};
@@ -276,3 +276,31 @@ for (const mode of ['flush-lock-refused', 'uncertain-transaction']) {
         assert.equal(f.status.textContent, 'Nota salvata.'); f.page.abort();
     });
 }
+
+test('recovered command with no proven note-only proposal retains comparison without replacement controls', async () => {
+    const f = await fixture({send: config => config.onState({state: 'conflict', operation}),
+        createConflictProposal: async () => null,
+        readConflict: async () => ({localNote: 'local', onlineNote: 'online'})});
+    await f.save.onclick(); await f.compare.onclick();
+    assert.equal(f.comparison.hidden, false); assert.equal(f.propose.hidden, true);
+    assert.equal(f.confirmProposal.hidden, true); f.page.abort();
+});
+
+test('offline recovery with an empty queue cannot prepare or send a new mutation', async () => {
+    let writes = 0;
+    const f = await fixture({recoveryOnly: true, recoveryRecordId: operation.recordId,
+        pendingForRecord: async () => ({acquired: true, value: null}), prepare: async () => { writes++; return operation; }, send: () => writes++});
+    assert.equal(f.save.hidden, true); assert.equal(f.save.disabled, true); assert.equal(f.input.readOnly, true);
+    assert.match(f.status.textContent, /Nessuna modifica in attesa/); assert.equal(f.retry.hidden, true);
+    await f.save.onclick(); await f.retry.onclick(); assert.equal(writes, 0); f.page.abort();
+});
+
+test('offline recovery keeps existing identity and sends only on explicit retry', async () => {
+    let sent = 0, prepared = 0;
+    const f = await fixture({recoveryOnly: true, recoveryRecordId: operation.recordId,
+        pendingForRecord: async () => ({acquired: true, value: operation}), prepare: async () => { prepared++; return operation; },
+        send: config => { sent++; config.onCommitted(operation); }});
+    assert.equal(sent, 0); assert.equal(f.save.hidden, true); assert.equal(f.input.readOnly, true);
+    await f.retry.onclick(); assert.equal(sent, 1); assert.equal(prepared, 0);
+    assert.equal(f.status.textContent, 'Nota salvata.'); f.page.abort();
+});

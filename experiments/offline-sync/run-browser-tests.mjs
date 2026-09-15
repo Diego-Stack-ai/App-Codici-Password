@@ -15,9 +15,12 @@ const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true,
     stdin: {resolveDir: root, contents: `export {initializeApp, deleteApp} from 'firebase/app';
         export {initializeAuth, inMemoryPersistence, connectAuthEmulator, signInWithEmailAndPassword, signOut, onAuthStateChanged} from 'firebase/auth';
         export {getFunctions, connectFunctionsEmulator} from 'firebase/functions';
+        export {getFirestore, connectFirestoreEmulator, terminate} from 'firebase/firestore';
         export {initializeAppCheck, CustomProvider} from 'firebase/app-check';
         export {createFirebaseFencedQueueClient} from './experiments/offline-sync/firebase-fenced-queue-client.mjs';
         export {createProtectedSession} from './experiments/persistent-vault-shell/protected-session.mjs';
+        export {createPrivateNotePanelProvider} from './experiments/persistent-vault-shell/private-note-panel-provider.mjs';
+        export {createFirebasePrivateNoteSource} from './experiments/persistent-vault-shell/firebase-private-note-source.mjs';
         export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
     ['/suite.mjs', backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],

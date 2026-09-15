@@ -14,7 +14,7 @@ function setup(record = {ownerId: 'A', nomeAccount: {encrypted: 'title'}, passwo
         return record.ciphertext.encrypted;
     };
     const context = {user, signal: controller.signal, unlocked: true, async read(value) { reads.push(value); return decrypt(value); }};
-    const repository = Object.fromEntries(['getPrivateAccount', 'getCompanyAccount'].map(name => [name, async (...args) => {
+    const repository = Object.fromEntries(['getPrivateAccount', 'getCompanyAccount', 'getPrivateAccountConfirmed', 'getCompanyAccountConfirmed'].map(name => [name, async (...args) => {
         calls.push([name, ...args]); return fetch();
     }]));
     return {open: createAccountDetailReader({context, getUser: () => user, repository}), controller, context, calls, reads,
@@ -107,4 +107,14 @@ test('identity change, lock or abort during decrypt suppresses plaintext deliver
         const result = detail.read('password'); invalidate(env); gate.resolve('secret');
         await assert.rejects(result, /AUTH_CHANGED|VAULT_LOCKED|VIEW_DISPOSED/);
     }
+});
+
+test('confirmed refresh uses only the server-confirmed repository and never falls back after failure', async () => {
+    const env = setup();
+    await env.open(privateSelection, {confirmed: true});
+    await env.open({domain: 'company', companyId: 'company', id: 'record'}, {confirmed: true});
+    assert.deepEqual(env.calls, [['getPrivateAccountConfirmed', 'A', 'record'], ['getCompanyAccountConfirmed', 'A', 'company', 'record']]);
+    env.fetch(async () => { throw new Error('SERVER_UNAVAILABLE'); });
+    await assert.rejects(env.open(privateSelection, {confirmed: true}), /SERVER_UNAVAILABLE/);
+    assert.equal(env.calls.length, 3); assert.equal(env.calls[2][0], 'getPrivateAccountConfirmed');
 });

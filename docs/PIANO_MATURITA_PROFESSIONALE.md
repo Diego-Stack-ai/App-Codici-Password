@@ -436,3 +436,83 @@ M9, audit 76: corretta navigazione da tastiera dell'elenco e del dialogo; 20 tes
 M6, audit 77: disponibile l'adattatore fenced per i callable Firebase canonici, con durata vincolata a UID e Vault/vista. Verificato con SDK, Auth e Firestore demo in Chrome/Edge: 52 esecuzioni, compreso abort dopo commit e retry senza riscrittura. 113 test offline e suite completa superati. App Check nel bridge è sintetico; bootstrap, attestazione/middleware remoti, rollout e matrice fisica restano gate distinti.
 
 M6, audit 78: completata la proprietà della coda nel Vault della shell e il passaggio al factory Firebase senza chiavi nelle route. Suite completa superata, 165 test shell, 15 test Firebase e 52 esecuzioni Chrome/Edge demo. Sono ancora da collegare provider UI circoscritto al record ed entry principale; rollout e verifiche remote/fisiche restano separati.
+
+M6, audit 79: provider candidato della nota privata collegato alla coda della shell, con controllo del record e observer revocabili. Suite completa superata, 178 test shell finali e 52 esecuzioni browser della catena esistente; nuovo provider provato in fixture/DOM simulato. Resta da attivarlo nell'entry tramite lettore fidato con evidenza dei collegamenti inversi e verificarlo nel browser; rollout e collaudi remoti/fisici non sono chiusi. Una nota recuperata senza provenienza durevole consente confronto, non riproposta automatica.
+
+M6, audit 80: aggiunto lettore fidato dei profili con SDK server e policy backend condivisa, collegato al provider nella prova browser. La prima apertura richiede rete e al massimo 200 aziende; oltre tale limite non viene certificata l'assenza di link. Restano collegamento dell'entry, apertura offline iniziale, rollout e prove remote/fisiche. Si continua nella stessa PR #63, senza altri rami o deploy.
+
+Validazione finale audit 80: npm test completo superato (183 test shell e 114 offline inclusi); Chrome/Edge superati, 9 scenari generici e 20 privati per browser, 58 esecuzioni totali. Compresi lettore Firebase reale, blocco dei link inversi e salvataggio del provider. App Check resta sintetico e il laboratorio principale non è ancora attivato.
+
+M6, audit 81: entry del laboratorio collegata al provider per la fixture privata compatibile, trasporto solo loopback e nessun upgrade delle code esistenti. Corretto il refresh da cache dopo salvataggio usando il repository confermato. Account incompatibili restano consultabili. Restano apertura iniziale offline, rollout schema/PWA, compatibilità estesa e collaudi remoti/fisici; produzione invariata.
+
+Validazione finale audit 81: suite completa npm test superata, inclusi 189 test shell e 114 offline. Regressioni Chrome/Edge della coda: 58 esecuzioni superate. Nuovo collaudo dell'entry: 5 verifiche per browser, 10 esecuzioni superate (68 totali). Dopo le ultime guardie di chiusura, rieseguiti i 21 test mirati di coda/dettaglio e il collaudo dell'entry. Nessuna prova App Check remota o su dispositivo fisico.
+
+M6, audit 82: recupero della coda disponibile senza nuove letture server, verificato con rete DevTools disabilitata e ripristinata. Include blocco/sblocco offline nella sessione già autenticata e cache popolata. Nessun nuovo editor o comando ricreato nel recupero; retry esplicito al ritorno online. Restano avvio a freddo, riapertura fisica PWA, rollout schema, compatibilità estesa e collaudi remoti/fisici. Si continua nella stessa PR #63.
+
+Validazione finale audit 82: npm test completo superato, inclusi 191 test shell e 116 offline. Chrome/Edge: 58 regressioni coda/provider e 18 verifiche dell'entry (9 per browser), 76 esecuzioni totali. La rete viene disabilitata dal protocollo DevTools, con HTTP effettivamente bloccato; superati recupero, nuovo sblocco offline e retry al ritorno online. Questa prova non certifica avvio a freddo o PWA fisica.
+
+M6, audit 83: ampliata la matrice di consultazione dei dati già caricati e corretta la password collegata nei profili, che richiedeva sempre il server. La prova ora copre repository/cache e decifratura di Account, profili, banca, widget profilo, scadenze e metadati allegati. Non equivale a tutte le schermate offline: restano avvio a freddo, byte Storage, foto/QR, Widget Account/condivisioni, preparazione deterministica completa e gate iPhone. Nessuna certificazione generale dell'offline.
+
+Validazione finale audit 83: npm test completo superato (inclusi 191 test shell, 116 offline e 65 test dei collegamenti dei profili). Collaudo entry su Chrome ed Edge: 25 verifiche per browser, 50 esecuzioni superate, con rete DevTools disabilitata e ripristinata. Questa matrice certifica letture dei dati sintetici già caricati nella sessione del laboratorio, non avvio a freddo, tutte le UI o file Storage offline.
+
+### Audit 84 — ciclo online/offline e blocco della consultazione (14/09/2026)
+
+Base 2dc18daa, stessa PR #63. Il collaudo dell'entry verifica esplicitamente che la matrice dei dati già caricati sia ancora consultabile dopo il ritorno online e che il probe protetto rifiuti la lettura dopo blocco del Vault, sia offline sia online. Chrome ed Edge: 28 verifiche per browser, 56 esecuzioni superate con emulatori e fixture locali. Modifica limitata al collaudo: nessun cambiamento runtime produttivo. La suite completa resta quella superata sul checkpoint precedente; non viene dichiarata rieseguita in questo incremento.
+
+Programma: avanzamento della verifica M6, senza chiusura globale. Restano avvio a freddo/cache persistente, file Storage, copertura delle UI e compatibilità estesa, rollout e prove fisiche/remoti. M8 conserva staging/journal e verifiche memoria/dispositivi; M9 conserva le prove fisiche di accessibilità. Nessun master, versione o deploy.
+
+M6, audit 85: superato il ricaricamento offline del laboratorio con cache Auth/Firestore persistente e nuovo sblocco obbligatorio (44 verifiche Chrome/Edge). La matrice dei dati caricati resta consultabile; logout la blocca. Avvio da processo terminato, PWA fisica, cache completa/eviction e Storage restano aperti. Nessuna fase globale chiusa, master o deploy.
+
+Validazione finale audit 85: npm test completo superato, inclusi 194 test shell e 116 offline. Nuovo collaudo persistente: 44 esecuzioni Chrome/Edge superate; regressione entry ordinaria: 56 esecuzioni superate, 100 verifiche browser complessive nei due collaudi. Nessuna certificazione di chiusura processo, riavvio dispositivo o PWA produttiva.
+
+M6, audit 86: riavvio controllato del processo browser con rete bloccata prima della navigazione superato nel laboratorio (46 verifiche Chrome/Edge). Il Vault richiede nuovamente la Master Password. Restano arresto forzato/dispositivo, PWA fisica, cache completa/eviction, Storage e rollout. Nessuna chiusura globale del programma o deploy.
+
+Validazione finale audit 86: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge: 46 verifiche del riavvio processo, 44 del reload e 56 dell'entry ordinaria, 146 esecuzioni complessive superate. Nessun test su dispositivo fisico o dati reali; nessun deploy.
+
+M6, audit 87: arresto forzato del browser dopo conferma della nota accodata offline, nuovo sblocco, recupero e retry online superati su Chrome/Edge Windows (50 verifiche). Restano transazioni in volo, dispositivo/PWA fisica, eviction, Storage e rollout; nessuna fase globale chiusa.
+
+Validazione finale audit 87: npm test completo superato (194 test shell e 116 offline inclusi). Chrome/Edge Windows: 50 verifiche arresto forzato/nota pendente, 46 riavvio controllato, 56 entry ordinaria e 44 reload; 196 esecuzioni browser superate. Percorso Linux di terminazione non collaudato in questo incremento. Nessun test su dati reali o deploy.
+
+M6, audit 88: la prova utente su PWA iPhone 1.2.124 non supera Home → modalità aereo → lista. Corretto nel candidato il refresh Auth obbligatorio offline del bootstrap reale, distinto da quello del laboratorio; 7 regressioni dedicate. Gate fisico ancora aperto, retest necessario dopo pubblicazione autorizzata. Nessuna fase globale chiusa o deploy.
+
+Validazione finale audit 88: npm test completo superato, inclusi 88 controlli statici sicurezza, 11 test security (7 nuovi sul bootstrap), 194 test shell e 116 offline. Inventario aggiornato e controllo whitespace superato. I 196 scenari browser dell'audit 87 non sono stati rieseguiti né attribuiti a questa modifica del bootstrap produttivo; retest iPhone ancora necessario dopo rilascio autorizzato.
+
+## Rilascio isolato iPhone 1.2.125 — 15/09/2026
+
+PR #64 unita in master 263355f261c0fe0661089e2c65782edf1d13527a; release 6b36ae2d, backport isolato del controllo Auth offline. npm test locale e workflow GitHub 34931928458 superati. Deploy Hosting completato; verificati via HTTP gli hash di Home, env-v126.js, sw.js e main-v129.js rispetto al rilascio testato. Functions, Rules e dati non distribuiti/modificati. Prova iPhone Home → modalità aereo → lista ancora da ripetere dopo aggiornamento alla 1.2.125.
+
+La PR #63 resta sperimentale e separata: non è stata unita o distribuita. Prima di un suo futuro rilascio occorre riallinearne la base/versione al nuovo master; non distribuire direttamente il vecchio numero 1.2.124 del ramo. Il programma generale e i gate fisici restano aperti.
+
+### Audit 89 — profilo nella preparazione offline e messaggi di lettura (15/09/2026)
+
+Base db329bee, stessa PR #63. La preparazione già prevista delle raccolte non includeva esplicitamente il documento principale users/{uid}. Ora lo legge online insieme alle priorità della pagina; la cache resta quella Firebase e la Vault Key resta in memoria. I marker precedenti senza profileIncluded non saltano il nuovo caricamento. Documento assente o lettura fallita non attestano completezza. Il gestore condiviso comunica l'indisponibilità offline solo per codici di connettività, preservando i fallimenti di permessi/autenticazione/decifratura. Integrato nelle pagine principali di profilo, liste aziende/Account e dettagli Account; dati aziendali non falliscono più soltanto nel log.
+
+npm test completo superato; sei nuove regressioni eseguono il preparatore reale con server/cache simulati e verificano la classificazione degli errori. Nessuna estensione alle scritture o certificazione degli allegati. Prove riferite dall'utente su iPhone 1.2.125: dati già caricati leggibili anche dopo chiusura/riapertura e nuovo sblocco; profilo prima non visitato falliva, poi leggibile dopo visita online. Nuovo candidato ancora da distribuire e collaudare fisicamente. Master e versione invariati.
+
+### Audit 90 — Widget Account e credenziali comuni offline (15/09/2026)
+
+Base 9f769aab, stessa PR #63. Su richiesta dell'utente la verifica riguarda Widget Account e credenziali comuni; foto e byte degli allegati sono esplicitamente esclusi dal requisito di consultazione offline, per evitare carichi eccessivi nella cache. Non chiedere il loro caricamento offline come condizione per chiudere questo requisito. L'utente intende mantenere la sessione autenticata (nessun logout), anche chiudendo e riaprendo l'app.
+
+Riscontro: i componenti di consultazione già leggono accountWidgets e sharedVaultData tramite il repository con cache e decifrano localmente dopo sblocco. Queste due raccolte mancavano però dalla preparazione automatica. Ora sono incluse; un nuovo marker widgetsIncluded impedisce che il precedente stato completo salti il caricamento. Un fallimento di una delle due mantiene la preparazione incompleta. I riferimenti condivisi usati nelle schede Account risiedono in accountWidgets; non occorre scaricare file Storage.
+
+Validazione: test:data-access, test:offline, test:js-syntax e controllo whitespace superati. Sette nuove regressioni: tre sulla preparazione (inclusione senza visita, fallimento di ciascuna raccolta) e quattro sulla UI reale eseguita in ambiente simulato, con letture server vietate offline, per Widget/credenziali e Account personali/aziendali. Verificati rendering, rivelazione del valore e rimozione al blocco; zero scritture. Crittografia nei test UI simulata: non attribuire una nuova prova fisica iPhone o end-to-end a questi risultati. La suite completa era passata su 9f769aab; questo incremento ha eseguito i controlli mirati indicati.
+
+Nessun deploy, bump, modifica a master, scrittura dati o estensione delle modifiche offline. Produzione resta 1.2.125; il candidato sperimentale richiede il riallineamento già previsto prima del rilascio.
+
+## Rilascio isolato 1.2.126 completato — 15/09/2026
+
+PR #65 unita in master a14d0198b37507b7c6fb0e7352fe8930d57a9f0d, candidato bb926671693f52348a4d2f9a6032d532170e7635 sulla base produttiva 1.2.125. Distribuite soltanto preparazione offline del profilo, accountWidgets/sharedVaultData e spiegazione degli errori di connettività nelle pagine principali. Il gestore del profilo viene importato su errore; intestazione del modulo abbreviata per il budget. Non sono stati importati i cambiamenti sperimentali dei componenti Widget.
+
+npm test completo della release superato; GitHub Actions 34937232687, job validate 104277695629 riuscito. Tredici test offline del ramo produttivo (preparazione/classificazione e quattro letture Widget/credenziali private/azienda con rivelazione e mascheramento simulati). Hosting distribuito con successo, 240 file. Verificati via HTTP gli hash SHA256 di Home, env-v126.js, sw.js, offline-sync.js, read-error-message.js, profilo_privato.js e offline-assets.js: corrispondono al candidato testato. Functions, Rules e dati invariati.
+
+Retest iPhone ancora richiesto sulla 1.2.126: app online fino a completamento preparazione, poi modalità aereo senza logout; profilo, Widget e credenziali comuni consultabili senza visita preventiva. Foto e allegati esclusi per decisione dell'utente. Non interpretare la nuova pubblicazione come test fisico riuscito o garanzia contro cache espulsa.
+
+PR #63 resta separata e aperta. Produzione ora 1.2.126: prima di un futuro rilascio sperimentale riallineare master, versioni e i due backport già distribuiti, evitando duplicazioni. Non distribuire direttamente la vecchia versione 1.2.124 del ramo sperimentale.
+
+## Rilascio isolato Auth 1.2.127 completato — 15/09/2026
+
+PR #66 unita in master 0ba2332b298d155f0afb1a4eb50c9659115fe321; release 94792d837cadd538e17aa67e439df1c68a09a23a. Pubblicazione Hosting autorizzata e completata. Le 22 pagine private rimangono nascoste fino alla conferma Auth; errore, timeout e logout mantengono il blocco. Pulizia locale/Vault prima del tentativo di signOut. Nessuna lettura o modifica di dati reali; Functions e Rules non distribuite.
+
+npm test completo e dieci scenari browser Chrome/Edge superati; GitHub Actions 34939530695 riuscita. Dopo il deploy, 31 file pubblicati corrispondono via SHA256 alla release. Prova Chrome con profilo isolato senza credenziali: nessuna struttura privata visibile e arrivo a /login-v115.html senza parametro di errore/timeout. Collaudo fisico iPhone ancora da eseguire, inclusa riapertura offline con sessione mantenuta e sblocco Vault.
+
+Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima di integrare, evitando duplicazioni dei backport offline e logout. La direzione shell persistente resta confermata; questo rilascio non chiude il P0 legacy del wrapping in sessionStorage né l'intero audit sicurezza. Dettagli implementativi e regressioni sono in docs/AUDIT_VAULT_SESSION_P0.md del ramo produttivo e nella PR #66.

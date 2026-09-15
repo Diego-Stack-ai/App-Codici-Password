@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * ACCOUNT AZIENDA MODULE (V5.0 Compliant)
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
@@ -101,7 +102,7 @@ export function mountAccountAziendaList(user, options = {}) {
                 clearElement(container);
                 setChildren(container, createElement('p', {
                     className: 'error-message-box',
-                    textContent: t('error_loading_accounts') || "Errore caricamento dati."
+                    textContent: readErrorMessage(e, t('error_loading_accounts') || "Errore caricamento dati.")
                 }));
             }
         }

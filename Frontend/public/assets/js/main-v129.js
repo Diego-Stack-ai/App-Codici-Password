@@ -172,7 +172,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 const isPrivatePage = !publicPages.includes(currentPage);
                 if (isPrivatePage) {
-                    await user.reload();
+                    // Offline navigation must not require a server request before
+                    // reading the cache. Firebase's restored identity must still
+                    // be the same verified user; online failures never fall back.
+                    if (navigator.onLine) await user.reload();
+                    if (auth.currentUser?.uid !== user.uid) return;
                     if (!auth.currentUser?.emailVerified) {
                         window.location.replace('/login-v115.html?verifyEmail=1');
                         return;

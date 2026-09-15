@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
@@ -290,7 +291,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         mount.loaded = false;
         logError("LoadAccount", e);
-        showToast(t('error_loading'), "error");
+        showToast(readErrorMessage(e, t('error_loading')), "error");
     }
 }
 

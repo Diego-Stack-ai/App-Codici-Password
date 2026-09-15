@@ -1,4 +1,4 @@
-import { collection, getDocsFromServer } from "/assets/js/vendor/firebase-runtime.js";
+import { collection, doc, getDocFromServer, getDocsFromServer } from "/assets/js/vendor/firebase-runtime.js";
 import { db } from './firebase-config.js?v=1.2.124';
 import { startMetric, endMetric } from './performance-metrics.js';
 
@@ -8,6 +8,8 @@ const CORE_COLLECTIONS = [
     'contacts',
     'deadlineNotifications',
     'profileWidgets',
+    'accountWidgets',
+    'sharedVaultData',
     'scadenze',
     'settings'
 ];
@@ -68,7 +70,7 @@ async function syncOfflineData(user, currentPage) {
     if (!user?.uid || !navigator.onLine) return getOfflineReadiness(user?.uid);
 
     const previous = getOfflineReadiness(user.uid);
-    if (previous?.complete && Date.now() - previous.syncedAt < SYNC_TTL_MS) return previous;
+    if (previous?.complete && previous.profileIncluded === true && previous.widgetsIncluded === true && Date.now() - previous.syncedAt < SYNC_TTL_MS) return previous;
 
     startMetric('offline-sync');
     const priority = PAGE_PRIORITIES[currentPage] || [];
@@ -78,7 +80,13 @@ async function syncOfflineData(user, currentPage) {
         return { name, count: snapshot.size, snapshot };
     }));
 
-    const priorityResults = await syncCollections(priority);
+    const [profileResult, priorityResults] = await Promise.all([
+        getDocFromServer(doc(db, 'users', user.uid)).then(
+            snapshot => ({ status: snapshot.exists() ? 'fulfilled' : 'rejected' }),
+            () => ({ status: 'rejected' })
+        ),
+        syncCollections(priority)
+    ]);
     await waitForIdle();
     if (!navigator.onLine) return getOfflineReadiness(user.uid);
     const remainingResults = await syncCollections(remaining);
@@ -97,9 +105,12 @@ async function syncOfflineData(user, currentPage) {
     if (companyAccounts.some(result => result.status === 'rejected')) {
         failedCollections.push('aziende/*/accounts');
     }
+    if (profileResult.status === 'rejected') failedCollections.push('profile');
 
     const readiness = {
         complete: failedCollections.length === 0,
+        profileIncluded: profileResult.status === 'fulfilled',
+        widgetsIncluded: !failedCollections.some(name => ['accountWidgets', 'sharedVaultData'].includes(name)),
         syncedAt: Date.now(),
         failedCollections
     };

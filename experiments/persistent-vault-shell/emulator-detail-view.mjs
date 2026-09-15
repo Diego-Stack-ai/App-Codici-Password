@@ -34,7 +34,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         if (!refreshPending) refreshPending = (async () => {
             const staging = document.createElement('div'); let nextCleanup;
             try {
-                const nextAccount = await openAccount(selection); assertActive();
+                const nextAccount = await openAccount(selection, {confirmed: true}); assertActive();
                 const visible = await readVisible(nextAccount); assertActive();
                 nextCleanup = await mountDetailExtraFields(staging, {account: nextAccount, signal: lifecycle.signal,
                     copyText: value => navigator.clipboard.writeText(value),
@@ -96,8 +96,17 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         if (disposed) extraCleanup?.();
         assertActive();
         if (mountSavePanel && selection.domain === 'private') {
-            saveCleanup = await mountSavePanel(wrapper, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
-                onSaved: refreshDetail, onDiscarded: refreshDetail});
+            const editorHost = document.createElement('div'); wrapper.append(editorHost);
+            try {
+                saveCleanup = await mountSavePanel(editorHost, {signal: lifecycle.signal, selection, isActive: () => !disposed && !context.signal.aborted,
+                    onSaved: refreshDetail, onDiscarded: refreshDetail});
+            } catch {
+                assertActive();
+                editorHost.remove();
+                const unavailable = document.createElement('p');
+                unavailable.textContent = 'Account consultabile. Modifica non disponibile in questo laboratorio per questo Account o senza connessione.';
+                wrapper.append(unavailable);
+            }
             if (disposed) saveCleanup?.();
             assertActive();
         }

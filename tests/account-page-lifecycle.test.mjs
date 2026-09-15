@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import {getEventListeners} from 'node:events';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+
 
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -14,7 +17,7 @@ async function fixture(company, overrides = {}) {
     }));
     const views = [], writes = [], toasts = [], navigations = [];
     const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
-    const context = vm.createContext({
+    const context = vm.createContext({readErrorMessage,
         window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError() {}, t: value => value,
         clearElement: node => { node.children = []; }, setChildren: (node, children) => { node.children = children; },

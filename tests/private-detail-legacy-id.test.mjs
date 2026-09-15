@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -15,7 +18,7 @@ function fixture({missing = false, pending = null, directPending = null, search 
     const window = {location: {search, pathname: '/dettaglio_account_privato.html', href: ''}, history: {replaceState() {}}};
     const physical = () => ({id: 'physical-document', nomeAccount: 'Synthetic account'});
     const createElement = (tag, props = {}, children = []) => ({tag, ...props, children});
-    const context = vm.createContext({window, URLSearchParams, AbortController, auth: {currentUser: null}, onAuthStateChanged: () => () => {},
+    const context = vm.createContext({readErrorMessage, window, URLSearchParams, AbortController, auth: {currentUser: null}, onAuthStateChanged: () => () => {},
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError: (...args) => calls.push(['error', ...args]),
         document: {getElementById: id => id === 'footer-center-actions' ? footer : id === 'btn-add-attachment' ? attachmentButton : null,
             querySelector: () => null, querySelectorAll: () => []},

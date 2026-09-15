@@ -1,14 +1,16 @@
 // Candidate view boundary. No key, SDK, raw database or unscoped writer reaches the DOM.
 export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, readConflict,
-    createConflictProposal, onSaved = () => {}, onDiscarded = () => {}, initialNote = '', recoveryRecordId}) {
+    createConflictProposal, onSaved = () => {}, onDiscarded = () => {}, initialNote = '', recoveryRecordId, recoveryOnly = false}) {
     if (!signal || typeof createClient !== 'function' || typeof prepare !== 'function' || typeof onSaved !== 'function' || typeof onDiscarded !== 'function') throw new Error('SAVE_PANEL_CONFIG');
     if (recoveryRecordId !== undefined && (typeof recoveryRecordId !== 'string' || !recoveryRecordId)) throw new Error('SAVE_PANEL_CONFIG');
+    if (typeof recoveryOnly !== 'boolean' || (recoveryOnly && recoveryRecordId === undefined)) throw new Error('SAVE_PANEL_CONFIG');
     const section = document.createElement('section');
     const label = document.createElement('label'); label.textContent = 'Nota';
     const input = document.createElement('textarea'); input.value = initialNote; input.autocomplete = 'off'; input.maxLength = 100000;
     label.append(input);
     const status = document.createElement('p'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
     const save = document.createElement('button'); save.type = 'button'; save.textContent = 'Salva nota';
+    save.hidden = label.hidden = recoveryOnly;
     const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Riprova sincronizzazione'; retry.hidden = true;
     section.append(label, status, save, retry);
     const discard = document.createElement('button'); discard.type = 'button'; discard.textContent = 'Mantieni i dati online'; discard.hidden = true;
@@ -48,8 +50,8 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
     };
     const controls = () => {
         if (!active()) return;
-        save.disabled = !client || busy || accepted;
-        input.readOnly = busy || accepted || Boolean(operation);
+        save.disabled = recoveryOnly || !client || busy || accepted;
+        input.readOnly = recoveryOnly || busy || accepted || Boolean(operation);
         retry.disabled = !client || busy;
         discard.disabled = confirm.disabled = cancel.disabled = !client || busy;
         compare.disabled = !client || busy;
@@ -102,7 +104,9 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
                 status.textContent = 'Una modifica di questo Account è già conservata sul dispositivo. Riprendi la sincronizzazione per verificarne l’esito.';
             }
         }
-        if (!accepted) status.textContent = 'Modifica la nota e salva.';
+        if (!accepted) status.textContent = recoveryOnly
+            ? 'Nessuna modifica in attesa per questo Account. Per modificare la nota, riapri il dettaglio quando sei online.'
+            : 'Modifica la nota e salva.';
         controls();
     } catch {
         client?.close(); client = null;
@@ -111,7 +115,7 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
         return dispose;
     }
     const run = async () => {
-        if (!active() || busy) return;
+        if (!active() || busy || (recoveryOnly && !accepted)) return;
         busy = true; controls();
         try {
             if (!accepted) {
@@ -141,8 +145,8 @@ export async function mountOfflineSavePanel(root, {signal, isActive = () => true
             let result;
             if (typeof createConflictProposal === 'function') {
                 openedProposal = await createConflictProposal(structuredClone(snapshot), {signal, isActive: active});
-                if (!active() || held !== snapshot) { openedProposal.close(); openedProposal = null; return; }
-                result = openedProposal.comparison;
+                if (!active() || held !== snapshot) { openedProposal?.close(); openedProposal = null; return; }
+                result = openedProposal ? openedProposal.comparison : await readConflict(structuredClone(snapshot), {signal, isActive: active});
             } else result = await readConflict(structuredClone(snapshot), {signal, isActive: active});
             if (!active() || held !== snapshot) return;
             if (typeof result?.localNote !== 'string' || typeof result?.onlineNote !== 'string' ||
