@@ -7,6 +7,12 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Telefono aziendale nel QR — candidata 15/09/2026
+
+Successivo a `e7f70061`: il generatore canonico supporta `telefonoAzienda` con flag booleano esplicito omonimo. Il nuovo campo resta escluso nelle configurazioni precedenti e finché non viene selezionato; il lettore shell non lo decifra prima della selezione. Aggiunta la scelta alla pagina aziendale canonica, distinta dal cellulare referente. Escape CR/LF mantenuto, nessuna modifica ai dati o ai flag esistenti.
+
+Due regressioni aggiuntive e suite completa `npm test` superata (363 shell). Nessuna nuova prova browser attribuita a questo piccolo incremento: i 90 controlli Chrome precedenti restano riferiti a `e7f70061`. Editor selezione nella shell, foto aziendale e prove fisiche restano aperti. Nessun bump, master o deploy; rollback dei cinque file di codice/test senza migrazioni.
+
 ### Tessera digitale aziendale nella shell — candidata 15/09/2026
 
 Successiva a `104aefc9`: stessa linguetta e comandi QR/download del profilo privato, con lettore aziendale dedicato e generatore canonico `buildCompanyVCard`. Richiede una configurazione `qrConfig` salvata; al suo interno conserva i default legacy del modello (amministrazione/personale esclusi salvo selezione). Email extra e sedi rispettano il proprio flag `qr`. Configurazione assente o malformata impedisce la generazione: non viene creata una selezione implicita.

@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+QR dopo `e7f70061`: telefono aziendale selezionabile esplicitamente, escluso per default nelle configurazioni precedenti. Lettore shell non decifra il numero non selezionato. Due regressioni e suite completa superate (363 shell), senza nuova attribuzione di prove browser. Proseguire con editor selezione shell e Rules ristrette; foto aziendale e restanti gate aperti. Nessun deploy.
+
 Tessera aziendale dopo `104aefc9`: vista QR/download condivisa, lettore dedicato sulla selezione salvata e generatore canonico. Suite completa superata (362 shell), 90 verifiche Chrome online/offline e dopo riavvio. Restano editor selezione/profili e parità campi QR (telefono aziendale/foto non previsti dal generatore attuale), Widget aziendali, Edge/iPhone. Dettagli nella roadmap profili; nessun deploy.
 
 Tessera privata successiva a `f439cb61`: QR e vCard dalla selezione salvata, letture revocabili e pulizia anteprima. Suite completa superata (355 shell), 90 verifiche Chrome online/offline e dopo riavvio. Restano tessera aziendale, editor della selezione/profili, Widget aziendali e collaudi Edge/iPhone; dettagli nella roadmap profili. Nessun deploy o chiusura del programma.

@@ -32,6 +32,12 @@ test('company QR rejects missing saved config, foreign owner and malformed selec
         const f = fixture(); mutate(f); await assert.rejects(f.generate());
     }
 });
+test('new company phone is neither decoded nor exported until opted in', async () => {
+    const f = fixture(); f.record.telefonoAzienda = 'enc:333';
+    assert.doesNotMatch(await f.generate(), /333/); assert.ok(!f.reads.includes('enc:333'));
+    f.record.qrConfig.telefonoAzienda = true;
+    assert.match(await f.generate(), /TEL;TYPE=WORK:333/);
+});
 for (const boundary of ['lock', 'change', 'abort', 'selection']) test(`company QR refuses late output after ${boundary}`, async () => {
     let release, first = true;
     const f = fixture({decrypt: value => first ? (first = false, new Promise(resolve => {release = resolve;})) : value.slice(4)});

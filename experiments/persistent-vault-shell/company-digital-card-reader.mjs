@@ -39,10 +39,10 @@ export function createCompanyDigitalCardReader({context, getUser, source, isEncr
         const record = await load(), fingerprint = JSON.stringify(record), saved = owned(record.qrConfig);
         const qrConfig = {}, result = {qrConfig, emails: {extra: []}, altreSedi: []};
         const scalars = ['ragioneSociale', 'partitaIva', 'codiceSDI', 'numeroCCIAA', 'dataIscrizione',
-            'referenteNome', 'referenteCognome', 'referenteTitolo', 'referenteCellulare'];
+            'referenteNome', 'referenteCognome', 'referenteTitolo', 'referenteCellulare', 'telefonoAzienda'];
         for (const key of [...scalars, 'aziendaEmail', 'adminEmail', 'persEmail', 'qrLegale']) {
             if (saved[key] !== undefined && typeof saved[key] !== 'boolean') fail();
-            qrConfig[key] = saved[key] ?? !['adminEmail', 'persEmail'].includes(key);
+            qrConfig[key] = saved[key] ?? !['adminEmail', 'persEmail', 'telefonoAzienda'].includes(key);
         }
         for (const key of scalars) if (qrConfig[key]) result[key] = await decode(record[key]);
         const emails = record.emails == null ? {} : owned(record.emails);

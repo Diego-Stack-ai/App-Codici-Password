@@ -21,6 +21,8 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
+Parità QR dopo `e7f70061`: telefono aziendale ora supportato dal generatore e dal lettore shell solo con selezione esplicita, senza ampliare le selezioni salvate. Suite completa superata (363 shell), due regressioni; nessuna nuova prova browser. **Prossimo blocco: editor della selezione nella shell**, con preferenze tipizzate e Rules ristrette secondo la matrice; non riusare il writer legacy permissivo. Foto aziendale e restante parità rimangono aperte.
+
 Tessera aziendale successiva a `104aefc9`: stessa vista privata, lettore e generatore aziendali separati, selezione salvata e revoca. Suite completa (362 shell) e 90 verifiche Chrome superate. **Proseguire con editor selezione/profili e parità dei campi QR**; il generatore aziendale canonico non include ancora telefono aziendale generico/foto. Widget aziendali con schema/Rules dedicati, Edge/iPhone e restante programma conservati aperti. Perimetro nella roadmap profili; nessun deploy.
 
 Tessera privata successiva a `f439cb61`: QR e vCard dalla selezione salvata, letture revocabili e pulizia anteprima. Suite completa superata (355 shell), 90 verifiche Chrome online/offline e dopo riavvio. **Proseguire con tessera aziendale**, poi editor della selezione/profili e Widget aziendali con schema/Rules dedicati. Collaudi Edge/iPhone conservati; dettagli nella roadmap profili. Nessun deploy o chiusura del programma.

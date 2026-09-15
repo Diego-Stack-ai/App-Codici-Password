@@ -5,6 +5,13 @@ const root=new URL('../Frontend/public/assets/js/modules/azienda/',import.meta.u
 async function moduleFile(file){return import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL(file,root),'utf8')).toString('base64'));}
 const model=await moduleFile('company-profile-model.js');
 const {buildCompanyVCard}=await moduleFile('company-vcard.js');
+test('telefono aziendale nel QR richiede consenso esplicito e non inietta proprietà', () => {
+ const data={telefonoAzienda:'111\r\nEMAIL:iniettata',referenteCellulare:'222'};
+ for (const value of [undefined,false,'true']) assert.doesNotMatch(buildCompanyVCard({...data,qrConfig:{telefonoAzienda:value}}),/111/);
+ const card=buildCompanyVCard({...data,qrConfig:{telefonoAzienda:true}});
+ assert.match(card,/TEL;TYPE=WORK:111\\nEMAIL:iniettata/);
+ assert.match(card,/TEL;TYPE=CELL:222/); assert.doesNotMatch(card,/\nEMAIL:iniettata/);
+});
 async function controller(file,deps,names){const src=(await readFile(new URL(file,root),'utf8')).replace(/import\s+(?!\()[\s\S]*?\sfrom\s*['"][^'"]+['"];?/g,'').replace(/export\s+(?=(async\s+)?function|const|let)/g,'').replace('await import("/assets/js/vendor/firebase-runtime.js")','fakeRuntime');return new Function(...Object.keys(deps),src+'\nreturn {'+names.join(',')+'};')(...Object.values(deps));}
 
 test('email legacy e aggiuntive: collegamento e scollegamento conservano credenziali e metadati',()=>{

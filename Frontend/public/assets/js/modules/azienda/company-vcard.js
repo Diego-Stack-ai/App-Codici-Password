@@ -24,6 +24,11 @@ export function buildCompanyVCard(input) {
     }
 
     // Cellulare Referente
+    // New fields require explicit opt-in: existing saved QR selections must
+    // not begin exposing additional contact data after an application update.
+    if (config.telefonoAzienda === true && data.telefonoAzienda) {
+        v += `TEL;TYPE=WORK:${data.telefonoAzienda}\n`;
+    }
     if (config.referenteCellulare !== false && data.referenteCellulare) {
         v += `TEL;TYPE=CELL:${data.referenteCellulare}\n`;
     }
