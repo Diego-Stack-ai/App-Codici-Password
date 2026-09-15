@@ -7,6 +7,18 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Selezione QR aziendale: confine transazionale — laboratorio 15/09/2026
+
+Incremento successivo alla scheda PDF `a2a0252a`: preparati contratto e servizio backend candidato per i quattordici flag fissi di `qrConfig`. Distinzione esplicita tra configurazione assente (nessuna scelta implicita) e configurazione legacy esistente; telefono aziendale, email amministrativa e personale mantengono opt-in. Payload solo booleani, identificatore azienda/operazione e configurazione precedente, mai valori di contatto o credenziali. Campi sconosciuti non vengono scartati: la richiesta viene rifiutata.
+
+Transazione su azienda e ricevuta: verifica UID attendibile, proprietà, archivio, revisione e configurazione precedente completa; il confronto canonico rileva anche modifiche legacy senza incremento di revisione, senza falsi conflitti per ordine delle chiavi. Aggiorna esclusivamente `qrConfig`, preservando email, sedi, password cifrate e gli altri dati. Ricevuta legata a UID, azienda e digest della richiesta; retry non incrementa nuovamente la revisione. Copia del payload prima del primo await per impedirne il cambio durante l'hash.
+
+Overlay Rules soltanto negli emulatori: chiude creazione, sostituzione, modifica annidata e rimozione client di `qrConfig`; conserva le autorizzazioni precedenti degli altri campi e delle sottoraccolte. **Non protegge ancora i flag `qr` dentro email aggiuntive e altre sedi**, che questo servizio non modifica. Nessuna esportazione nelle Functions, montaggio browser o modifica delle Rules produttive. Non è una chiusura generale dei writer aziendali.
+
+Dieci prove unitarie superate; test transazionale su Firestore demo superato con due salvataggi concorrenti (uno solo confermato), retry, conflitto legacy, isolamento proprietario, ricevuta non falsificabile e preservazione dei campi. Suite completa npm test superata (414 test shell); nessuna nuova prova browser attribuita. CI della precedente scheda PDF `a2a0252a` superata, run 35015683279: non sostituisce i test del nuovo incremento.
+
+Prossimo blocco: sorgente/editor revocabili e montaggio dei flag fissi aziendali; mantenere separati selezione delle righe aggiuntive, App Check/callable produttivi e transizione dei writer legacy. Migrazione dati non eseguita né necessaria per il laboratorio; rollback rimuove moduli candidati, overlay e prove. Nessun dato reale, master, bump o deploy. Restano editor/collegamenti, Widget aziendali, Excel e gli altri gate del piano.
+
 ### Editor QR montato nel browser — laboratorio 15/09/2026
 
 Successivo a `fb207a4e` (richiesta PDF registrata separatamente in `45110a0e`): Modifica selezione apre l'editor privato nella tessera. Il trasporto locale verifica token Firebase dell'emulatore, UID nella lista delle sole fixture, origine/host esatti e limite del corpo; attestazione sintetica confinata al laboratorio, senza valore di enforcement produttivo. Overlay Rules condiviso tra browser e test transazionali, applicato dopo il seed sintetico, impedisce scritture client della selezione. Nessun nuovo export nelle Functions o modifica di firestore.rules.

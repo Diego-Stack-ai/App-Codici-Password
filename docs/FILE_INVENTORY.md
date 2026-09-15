@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **628**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **633**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -384,7 +384,7 @@ File censiti: **628**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5488 | 88 | File di progetto: account-widget-view. |
 | `experiments/persistent-vault-shell/account-widget-view.test.mjs` | MJS | 4309 | 60 | File di progetto: account-widget-view.test. |
 | `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
-| `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4414 | 103 | File di progetto: LICENSE LIBERATION. |
+| `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4410 | 102 | File di progetto: LICENSE LIBERATION. |
 | `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Bold.ttf` | TTF | 137052 | 1082 | File di progetto: LiberationSans-Bold. |
 | `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Regular.ttf` | TTF | 139512 | 906 | File di progetto: LiberationSans-Regular. |
 | `experiments/persistent-vault-shell/banking-reader.mjs` | MJS | 5045 | 80 | File di progetto: banking-reader. |
@@ -401,6 +401,11 @@ File censiti: **628**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/company-directory.test.mjs` | MJS | 5415 | 61 | File di progetto: company-directory.test. |
 | `experiments/persistent-vault-shell/company-profile-source.mjs` | MJS | 2096 | 31 | File di progetto: company-profile-source. |
 | `experiments/persistent-vault-shell/company-profile-source.test.mjs` | MJS | 5210 | 60 | File di progetto: company-profile-source.test. |
+| `experiments/persistent-vault-shell/company-qr-selection-candidate-rules.mjs` | MJS | 1028 | 17 | File di progetto: company-qr-selection-candidate-rules. |
+| `experiments/persistent-vault-shell/company-qr-selection-contract.mjs` | MJS | 2614 | 48 | File di progetto: company-qr-selection-contract. |
+| `experiments/persistent-vault-shell/company-qr-selection-contract.test.mjs` | MJS | 2798 | 39 | File di progetto: company-qr-selection-contract.test. |
+| `experiments/persistent-vault-shell/company-qr-selection-handler.mjs` | MJS | 3304 | 47 | File di progetto: company-qr-selection-handler. |
+| `experiments/persistent-vault-shell/company-qr-selection-handler.test.mjs` | MJS | 5009 | 68 | File di progetto: company-qr-selection-handler.test. |
 | `experiments/persistent-vault-shell/company-summary-browser.mjs` | MJS | 2732 | 39 | File di progetto: company-summary-browser. |
 | `experiments/persistent-vault-shell/company-summary-browser.test.mjs` | MJS | 2121 | 28 | File di progetto: company-summary-browser.test. |
 | `experiments/persistent-vault-shell/company-summary-pdf.mjs` | MJS | 5829 | 95 | File di progetto: company-summary-pdf. |
@@ -438,7 +443,7 @@ File censiti: **628**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10293 | 159 | File di progetto: firebase-deadline.test. |
 | `experiments/persistent-vault-shell/firebase-mutation.test.mjs` | MJS | 35343 | 480 | File di progetto: firebase-mutation.test. |
 | `experiments/persistent-vault-shell/firebase-private-note-source.mjs` | MJS | 852 | 13 | File di progetto: firebase-private-note-source. |
-| `experiments/persistent-vault-shell/firebase-qr-selection.test.mjs` | MJS | 5818 | 77 | File di progetto: firebase-qr-selection.test. |
+| `experiments/persistent-vault-shell/firebase-qr-selection.test.mjs` | MJS | 9403 | 116 | File di progetto: firebase-qr-selection.test. |
 | `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3751 | 62 | File di progetto: firebase-session. |
 | `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 13223 | 176 | File di progetto: firebase-session.test. |
 | `experiments/persistent-vault-shell/firebase.emulators.json` | JSON | 359 | 12 | File di progetto: firebase.emulators. |
@@ -583,7 +588,7 @@ File censiti: **628**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 11864 | 90 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 12011 | 90 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
