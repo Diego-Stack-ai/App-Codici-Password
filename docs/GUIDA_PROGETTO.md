@@ -2,7 +2,7 @@
 
 > **Stato:** attivo.
 > **Autorità:** indice documentale centrale; prevale la baseline sicurezza.
-> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Revisione:** 15/09/2026; chiusura documentale dell'incremento `054b045d`, PR #67. Produzione 1.2.127; candidata sperimentale distinta.
 > **Area:** gerarchia e manutenzione documentale.
 > **Dipendenze:** [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e mappa dei contratti della sezione 4.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -74,7 +74,7 @@ Una dichiarazione più recente non prevale automaticamente: deve avere autorità
 | Attività aperte | [GUIDA_AGGIORNAMENTI.md](../Frontend/GUIDA_AGGIORNAMENTI.md) | Registro operativo |
 | Audit di riallineamento | [AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md](./AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md) | Evidenza 11/09/2026 |
 | Audit completo del progetto | [PIANO_AUDIT_COMPLETO_PROGETTO.md](./PIANO_AUDIT_COMPLETO_PROGETTO.md) | In esecuzione |
-| Sessione Vault | [AUDIT_VAULT_SESSION_P0.md](./AUDIT_VAULT_SESSION_P0.md) | Audit P0 completato; correzione da approvare |
+| Sessione Vault | [AUDIT_VAULT_SESSION_P0.md](./AUDIT_VAULT_SESSION_P0.md) | Direzione shell approvata; integrazione parziale, VS-P0-01 aperto in produzione |
 
 ## 5. Regole per aggiornare la documentazione
 

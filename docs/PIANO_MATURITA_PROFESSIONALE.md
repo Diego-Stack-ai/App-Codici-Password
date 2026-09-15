@@ -2,7 +2,7 @@
 
 > **Stato:** programma in corso; avanzamento riconciliato, gate aperti conservati.
 > **Autorità:** piano subordinato alla baseline e ai contratti specialistici; prevale la baseline sicurezza.
-> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Revisione:** 15/09/2026; incremento verificato `054b045d`, PR #67. Produzione 1.2.127; cronologia e gate specialistici conservati.
 > **Area:** maturità M0–M10 e post-M10.
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -10,6 +10,26 @@
 > Stato iniziale: versione locale 1.2.49. Documento di progetto, non autorizza migrazioni, cancellazioni, deploy o modifiche distruttive.
 
 ## 1. Obiettivo
+
+### Chiusura documentale dell'incremento 054b045d — 15/09/2026
+
+Questo riepilogo chiude il lavoro verificato dell'incremento, non l'intero programma M0–M10. Sostituisce i precedenti riepiloghi operativi per lo stato della candidata; audit e collaudi storici restano riferiti alle proprie basi. Baseline sicurezza e contratti specialistici invariati.
+
+| Voce | Stato verificato | Evidenza o condizione di chiusura |
+|---|---|---|
+| Scelta della shell persistente | Decisione chiusa, già approvata | Chiave nella memoria della shell, navigazione interna senza reload; non richiedere nuovamente questa scelta |
+| Riallineamento alla sicurezza 1.2.127 | Completato nella candidata | Merge `1089cde8`; confine browser e pulizia residui legacy `0fc581a0` |
+| Consultazione profilo | Incremento completato nella candidata | `3fff87bc`: Anagrafica, Contatti, Indirizzi, Documenti; non equivale alla parità completa |
+| Consultazione degli Account collegati | Incremento completato nella candidata | `054b045d`: apri/ritorna, mostra/nascondi/copia; stesso Account per più contatti, personale o aziendale |
+| Verifica dell'incremento | Completata | Suite locale completa, 232 test shell finali, 126 verifiche Chrome/Edge; CI GitHub/Linux [run 34947029981](https://github.com/Diego-Stack-ai/App-Codici-Password/actions/runs/34947029981) riuscita su `054b045d` |
+| Registrazione e pubblicazione Git | Completate per il codice | `054b045d` pubblicato in `integration/vault-shell-v127-security`, stessa bozza [PR #67](https://github.com/Diego-Stack-ai/App-Codici-Password/pull/67) |
+| Parità delle pagine nella shell | Aperta | Editor, creazione/cambio/dissociazione collegamenti, utenze, Widget, tessera digitale, profilo aziendale e restanti percorsi canonici |
+| Preparazione offline completa della shell | Aperta | Il probe prepara le liste online; verificare l'avvio normale senza visita preventiva. Foto e byte allegati esclusi per decisione dell'utente |
+| Collaudo fisico del nuovo candidato | Aperto | I risultati iPhone della produzione non sostituiscono le prove del nuovo ramo |
+| Sostituzione della sessione produttiva e VS-P0-01 | Aperta | Completare parità, rimuovere il wrapping legacy nel percorso produttivo e collaudare migrazione/rollback |
+| Gate specialistici M5–M10 | Restano quelli dei rispettivi contratti | Nessuna chiusura implicita per effetto dei test di questo incremento |
+
+Produzione invariata alla 1.2.127: nessun nuovo bump, merge in master o deploy. Nessun dato reale letto o modificato dalle prove dell'incremento. Dettagli e limiti in [Audit Vault](./AUDIT_VAULT_SESSION_P0.md#account-collegati-al-profilo-nella-shell--15092026). Prossimo lavoro: completare la parità dei profili e dei collegamenti mantenendo il bootstrap unico, poi verificare i percorsi rimanenti e la preparazione offline prima del cutover.
 
 Portare progressivamente Codici & Password alla qualità strutturale di un prodotto maturo, conservando tutte le funzioni utili, i dati esistenti, la compatibilità offline e le garanzie di sicurezza. Il piano non prevede una riscrittura totale non verificabile: definisce l'architettura che adotteremmo partendo oggi da zero e usa tale modello come destinazione della rifattorizzazione dell'app reale.
 

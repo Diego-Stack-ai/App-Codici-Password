@@ -1,10 +1,12 @@
 # Audit P0 — Sessione Vault
 
-> **Stato:** audit statico completato; correzione architetturale da approvare
+> **Stato:** audit iniziale completato; shell persistente approvata e parzialmente integrata. VS-P0-01 ancora aperto in produzione.
 > **Autorità:** evidenza subordinata a [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e [Contratto Vault Key](./VAULT_KEY_CONTRACT.md)
 > **Data:** 11 settembre 2026
 > **Commit esaminato:** `2b00336dfcf2a2c90e244263bca33fbf3db2d922`
 > **Codice esaminato:** `security-manager.js`, `vault-session.js`, `webauthn-manager.js`, `inactivity-timer.js`, chiamate di logout e test Vault
+
+> **Ultima verifica dello stato:** 15/09/2026, incremento `054b045d`, PR #67; produzione 1.2.127. Le sezioni iniziali descrivono l'audit storico del commit sopra indicato; per stato corrente e chiusure vedere il [riepilogo del programma](./PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). La scelta architetturale non è più in attesa di approvazione.
 
 ## 1. Esito
 

@@ -2,12 +2,16 @@
 
 > **Stato:** registro operativo e cronologico.
 > **Autorità:** roadmap subordinata ai contratti, non certificazione; prevale la baseline sicurezza.
-> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Revisione:** 15/09/2026; incremento `054b045d`, PR #67, produzione 1.2.127. Le voci del diario conservano i riferimenti originali.
 > **Area:** release e attività aperte.
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
-## Stato corrente — riallineamento documentale 12/09/2026, v1.2.110
+## Stato corrente — chiusura documentale 15/09/2026
+
+Chiuso e pubblicato l'incremento `054b045d` della candidata shell; CI GitHub 34947029981 riuscita. Voci completate, gate ancora aperti e prossimo lavoro sono nel [riepilogo autorevole del programma](../docs/PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). Nessun deploy o chiusura complessiva del programma; VS-P0-01 resta aperto in produzione. La revisione documentale corregge intestazioni obsolete, senza cambiare requisiti o riscrivere gli audit passati.
+
+## Fotografia storica — riallineamento documentale 12/09/2026, v1.2.110
 
 Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi preliminari e i conteggi valgono per la data o la versione indicata; non sono comandi da eseguire oggi. Le indicazioni operative sono nella [guida tecnica](./GUIDA.md) e nei contratti specialistici.
 

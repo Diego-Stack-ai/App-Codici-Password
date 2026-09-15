@@ -1,12 +1,12 @@
 # Contratto delle chiavi della Vault
 
-> **Stato:** attivo per terminologia e invarianti; implementazione runtime da verificare  
+> **Stato:** contratto attivo; candidata shell RAM verificata parzialmente, persistenza legacy produttiva ancora non conforme
 > **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
 > **Versione:** 1.0 riallineata  
-> **Ultima verifica documentale:** 11 settembre 2026  
+> **Ultima verifica documentale:** 15 settembre 2026, incremento `054b045d`, PR #67; invarianti e formati invariati
 > **Codice interessato:** `security-manager.js`, `vault-session.js`, `crypto-utils.js`, WebAuthn/PRF, backup e condivisione
 
-Questo documento definisce nomi e comportamento obiettivo. Quando descrive il formato esistente lo indica espressamente come **stato corrente da verificare**, non come garanzia di sicurezza.
+Questo documento definisce nomi e comportamento obiettivo. Le verifiche storiche conservano data e base originarie. La shell persistente è la direzione già approvata: nel candidato la chiave resta in RAM e l'ingresso elimina i residui legacy; la produzione 1.2.127 conserva ancora il percorso multipagina. Il rischio VS-P0-01 resta aperto fino alla sostituzione completa. Stato ed evidenze nel [riepilogo corrente](./PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026); nessuna nuova decisione sui formati o sulla crittografia.
 
 ## 1. Termini canonici
 
