@@ -1,3 +1,7 @@
+body[data-private-auth][hidden] {
+    display: none !important;
+}
+
 /* =======================
    ANTI-FLICKER SYSTEM (V3.9)
    ======================= */

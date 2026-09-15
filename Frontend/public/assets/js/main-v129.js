@@ -27,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.126';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.127';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.126&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.127&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -166,6 +166,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let inviteUnsubscribe = null;
 
     onAuthStateChanged(auth, async (user) => {
+        const gate = window.privateAuthGate;
+        const authAttempt = gate?.begin(user?.uid);
+        if (gate && authAttempt === null) { inviteUnsubscribe?.(); return; }
         if (user) {
             LOG('[AUTH-DEBUG] User logged in');
             try {
@@ -178,10 +181,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (navigator.onLine) await user.reload();
                     if (auth.currentUser?.uid !== user.uid) return;
                     if (!auth.currentUser?.emailVerified) {
+                        gate?.block();
                         window.location.replace('/login-v115.html?verifyEmail=1');
                         return;
                     }
                 }
+                if (isPrivatePage && !gate?.acceptIdentity(authAttempt, auth.currentUser)) return;
                 if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck?.();
 
                 // Avvia in parallelo il codice Vault, senza appesantire login e pagine pubbliche.
@@ -194,6 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (gate && !gate.active(authAttempt)) return;
                 const companyPages = new Set(['lista_aziende', 'modifica_azienda', 'dati_azienda', 'account_azienda', 'dettaglio_account_azienda', 'form_account_azienda']);
                 if (companyPages.has(currentPage) && userDoc.exists() && !getSyncedCompanyAreaPreference(userDoc.data(), user.uid)) {
                     showToast('L’area Azienda è disattivata. Puoi riattivarla dalle Impostazioni.', 'info');
@@ -226,6 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // o lasciare i dati cifrati (che verrebbero visti come "---").
                     }
 
+                    if (!gate.active(authAttempt)) { securityModules[0].clearSession(); return; }
                     // Le Push di scadenza devono essere visualizzate anche quando
                     // l'app è aperta su una pagina diversa dalle Impostazioni.
                     const pushScopes = localStorage.getItem('codex_push_active_scopes');
@@ -266,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.126');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.127');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -274,6 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
+                if (gate && !gate.active(authAttempt)) return;
                 // ROUTER - Step 2: Inizializza Pagina Privata
                 switch (currentPage) {
                     case 'home': await Pages.initHomePage(user); break;
@@ -326,6 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
             } catch (error) {
+                if (gate && !gate.isReady()) gate.reject('error');
                 console.error("Global Check Error:", error);
             }
         } else {
@@ -337,10 +346,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     && (deadlineParams.has('notification') || deadlineParams.has('received'))) {
                     sessionStorage.setItem('pending_deadline_link', `${window.location.pathname}${window.location.search}`);
                 }
-                window.location.href = 'login-v115.html';
+                gate?.reject();
+                if (!gate) window.location.replace('/login-v115.html');
             }
         }
-    });
+    }, () => { window.privateAuthGate?.reject('error'); });
 
     /**
      * INVITE SYSTEM (Global Receiver) - HARDENING V2

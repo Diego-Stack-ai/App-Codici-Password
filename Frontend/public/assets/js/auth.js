@@ -1,9 +1,9 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.126';
+import { auth, db } from './firebase-config.js?v=1.2.127';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.126';
+import { showToast } from './ui-core-v129.js?v=1.2.127';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 
@@ -142,6 +142,7 @@ async function finalizeLogin(user, email) {
         showToast("Login effettuato con successo!", "success");
     }
 
+    sessionStorage.removeItem('codex_explicit_logout');
     pendingMfaResolver = null;
     return { user: updatedUser, mfaRequired: false };
 }
@@ -194,17 +195,12 @@ async function completeTotpLogin(code, email) {
  * Logs the current user out.
  */
 async function logout() {
-    try {
-        // Cleanup proattivo sessione
-
-        await signOut(auth);
-        window.location.href = "login-v115.html";
-    } catch (error) {
-        logError("Auth Logout", error);
-        showToast("Errore durante il logout.", "error");
-    }
+    pendingMfaResolver = null;
+    window.privateAuthGate?.block();
+    try { sessionStorage.setItem('codex_explicit_logout', '1'); } catch { /* Remain locked if storage is unavailable. */ }
+    const { logoutWithCleanup } = await import('./logout-session.js');
+    await logoutWithCleanup(() => signOut(auth));
 }
-
 /**
  * Initiates the password reset process.
  * @param {string} email - The user's email.
@@ -226,6 +222,7 @@ function checkAuthState() {
 
         LOG(`[AUTH CHECK] State: ${user ? 'authenticated' : 'guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
+        if (sessionStorage.getItem('codex_explicit_logout') === '1' || new URLSearchParams(window.location.search).has('authCheck')) return;
         if (user) {
             try {
                 await user.reload();

@@ -572,3 +572,15 @@ Backport isolato da 9f769aab e 61cd253e, sulla produzione 1.2.125 (master 263355
 Tredici test offline: nove sulla preparazione/classificazione e quattro sulla consultazione dei componenti della base produttiva (privato/azienda, Widget/credenziali), con server vietato offline e rivelazione/mascheramento simulati. Non attribuire a questo backport i test di lifecycle della shell sperimentale. Prima del rilascio sono richiesti npm test completo e controllo versione; budget statico delle 31 pagine verificato.
 
 Foto e allegati esclusi dall'offline per decisione dell'utente. Nessuna estensione delle scritture, Functions o Rules. La PR #63 e la shell persistente restano separate dal rilascio. Dopo pubblicazione verificare fisicamente iPhone: completare caricamento online, passare offline senza logout e consultare profilo, Widget e credenziali senza averne aperto prima le pagine.
+
+## Verifica della visibilità prima di Auth — candidata del 15/09/2026
+
+Sulla 1.2.126 pubblicata riprodotta in Chrome isolato la Home generica visibile prima del redirect al login; nessun accesso a dati reali. La candidata mantiene hidden/inert le 22 pagine private fino alla conferma Auth, gestisce errore/timeout e risposte tardive, centralizza la pulizia locale prima di signOut. Nessun bump o deploy.
+
+Il requisito generale era già previsto dagli MD; mancava il test del primo frame produttivo. Quattordici nuove regressioni, sette test offline precedenti, dieci scenari locali Chrome/Edge e npm test completo superati. Il costo del modulo sincrono è documentato: massimo 336.8 KB gzip, tetti 337 KB/43 moduli. Restano collaudo iPhone e audit generale Vault; la shell persistente rimane separata. Evidenze, file, minaccia, limiti e rollback nell'ultima sezione di [AUDIT_VAULT_SESSION_P0.md](../docs/AUDIT_VAULT_SESSION_P0.md).
+
+## Preparazione rilascio Auth 1.2.127 — 15/09/2026
+
+Rilascio isolato autorizzato dall'utente dopo revisione della PR #66. Base fa34e9d0, su master 1.2.126 a14d0198; nessuna integrazione della shell sperimentale. Aggiornamento tramite script canonico: 246 riferimenti asset in 94 file; verificato che le differenze runtime successive al candidato siano soltanto sostituzioni 1.2.126 → 1.2.127.
+
+npm test completo superato sulla 1.2.127; dieci scenari browser locali Chrome/Edge superati (anonimo, valido, errore, timeout e logout). CI precedente del candidato fa34e9d0: run 34939242389 riuscito; attendere anche il controllo del nuovo commit di release prima del merge. Dopo Hosting verificare hash dei file e accesso anonimo in browser isolato. Resta il collaudo fisico iPhone/PWA e il programma della shell; Functions, Rules, formati crittografici e dati utente esclusi dal rilascio.

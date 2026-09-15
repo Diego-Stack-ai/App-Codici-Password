@@ -4,12 +4,12 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.126';
+import { auth } from '../../firebase-config.js?v=1.2.127';
 import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "/assets/js/vendor/firebase-runtime.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
-import { db } from '../../firebase-config.js?v=1.2.126';
+import { db } from '../../firebase-config.js?v=1.2.127';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 
@@ -119,7 +119,7 @@ function setupNewPasswordForm() {
             if (err.code === 'auth/requires-recent-login') {
                 showToast("Per sicurezza devi accedere di nuovo. Dopo il login tornerai qui.", "warning");
                 try {
-                    await signOut(auth);
+                    await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
                 } finally {
                     window.location.replace('login-v115.html?reauth=password-change');
                 }
@@ -182,7 +182,7 @@ function setupCancelLogic() {
         const isReset = urlParams.has('oobCode');
 
         if (isRequiredPolicyUpdate) {
-            await signOut(auth);
+            await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
             window.location.replace('login-v115.html');
             return;
         }

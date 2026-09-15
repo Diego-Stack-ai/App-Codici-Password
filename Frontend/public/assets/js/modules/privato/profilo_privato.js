@@ -2,7 +2,7 @@ const changeProfileAccount = (...args) => import('../shared/profile-account-mana
 const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /** Profilo privato: stato condiviso, inizializzazione dei moduli e caricamento progressivo. */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.126';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -22,7 +22,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.126';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.127';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
