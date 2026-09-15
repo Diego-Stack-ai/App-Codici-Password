@@ -21,6 +21,8 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
+Compatibilità note dopo `053440f7`: preparato percorso candidato della sola nota cifrata, per Account personali/aziendali anche collegati, con UID atteso, revisione nativa, impronta e ricevuta. Preserva riferimenti e altri campi, senza indebolire il vecchio M6. **Proseguire sorgente/provider note e montaggio delle azioni di collegamento**, mantenendo separato il recupero delle code M6 preesistenti. Servizio e overlay Rules solo laboratorio; dettagli e gate nella roadmap profili, nessun deploy.
+
 Selettore dopo `0babf0c9`: lettore/vista con ricerca canonica per Account/azienda, filtro personale/azienda e identità composta; Account già collegati restano selezionabili. Decifratura limitata ai nomi, revoca e verifica della proiezione dopo le attese. Dodici nuove prove, rifiuto backend di `isExplicitMemo` aggiunto. Non montato nel browser. **Proseguire compatibilità editor Account, poi provider/azioni e collaudo integrato**, conservando riferimenti e metadati; limiti e gate nella roadmap profili. Nessun deploy.
 
 Sorgente collegamenti dopo `8d5be66d`: preparazione revocabile e senza decifratura, lettura confermata e confronto origine prima della richiesta immutabile. Sei nuove prove; dettagli nella roadmap profili. Compatibilità editor verificata: il sottoinsieme M6 rifiuta riferimenti e nuovi metadati anche dopo dissociazione; non aggirare i controlli. **Proseguire selettore/adattatori e compatibilità editor**, prima del montaggio completo. Nessun deploy; restanti gate invariati.
