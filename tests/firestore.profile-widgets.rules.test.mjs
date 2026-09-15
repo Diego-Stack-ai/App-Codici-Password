@@ -1,7 +1,7 @@
 import {after, before, test} from 'node:test';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {deleteDoc, doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc} from 'firebase/firestore';
 
 const PROJECT_ID = 'codici-password-rules-test';
 const OWNER_UID = 'owner-user';
@@ -22,6 +22,48 @@ before(async () => {
 });
 
 after(async () => testEnv?.cleanup());
+
+test('profilo, Account personali e aziendali: anonimo e altro UID non leggono né scrivono', async () => {
+  const owner = testEnv.authenticatedContext(OWNER_UID).firestore();
+  const paths = [`users/${OWNER_UID}`, `users/${OWNER_UID}/accounts/isolation`,
+    `users/${OWNER_UID}/aziende/isolation`, `users/${OWNER_UID}/aziende/isolation/accounts/bank`,
+    `users/${OWNER_UID}/settings/security`];
+  for (const path of paths) {
+    await assertSucceeds(setDoc(doc(owner, path), {synthetic: true}));
+    await assertSucceeds(getDoc(doc(owner, path)));
+    for (const db of [testEnv.unauthenticatedContext().firestore(), testEnv.authenticatedContext(OTHER_UID).firestore()]) {
+      await assertFails(getDoc(doc(db, path)));
+      await assertFails(setDoc(doc(db, path), {synthetic: 'unauthorized'}));
+      await assertFails(updateDoc(doc(db, path), {sharedWithUids: [OTHER_UID]}));
+      await assertFails(deleteDoc(doc(db, path)));
+    }
+  }
+});
+
+test('liste Account e aziende non enumerabili da anonimo o altro UID', async () => {
+  for (const path of [`users/${OWNER_UID}/accounts`, `users/${OWNER_UID}/aziende`,
+    `users/${OWNER_UID}/aziende/isolation/accounts`, `users/${OWNER_UID}/accountWidgets`,
+    `users/${OWNER_UID}/sharedVaultData`]) {
+    await assertSucceeds(getDocs(collection(testEnv.authenticatedContext(OWNER_UID).firestore(), path)));
+    for (const db of [testEnv.unauthenticatedContext().firestore(), testEnv.authenticatedContext(OTHER_UID).firestore()]) {
+      await assertFails(getDocs(collection(db, path)));
+    }
+  }
+});
+
+test('ospite esplicitamente condiviso legge solo il record concesso e perde accesso dopo revoca', async () => {
+  const owner = testEnv.authenticatedContext(OWNER_UID).firestore();
+  const guest = testEnv.authenticatedContext(OTHER_UID).firestore();
+  for (const path of [`users/${OWNER_UID}/accounts/shared-isolation`, `users/${OWNER_UID}/aziende/isolation/accounts/shared-isolation`]) {
+    await setDoc(doc(owner, path), {synthetic: true, sharedWithUids: [OTHER_UID]});
+    await assertSucceeds(getDoc(doc(guest, path)));
+    await assertFails(updateDoc(doc(guest, path), {synthetic: false}));
+    await assertFails(deleteDoc(doc(guest, path)));
+    await assertFails(getDoc(doc(guest, `${path}/private/child`)));
+    await updateDoc(doc(owner, path), {sharedWithUids: []});
+    await assertFails(getDoc(doc(guest, path)));
+  }
+});
 
 test('solo il proprietario può creare, leggere ed eliminare un widget valido', async () => {
   const ownerDb = testEnv.authenticatedContext(OWNER_UID).firestore();
