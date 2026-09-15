@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **652**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 113876 | 958 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 114326 | 960 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -325,8 +325,8 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 71006 | 596 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 76330 | 554 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 71631 | 598 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 78807 | 564 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -427,7 +427,7 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6301 | 124 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15279 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 28729 | 336 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 28762 | 336 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 5034 | 70 | File di progetto: emulator-entry-runner. |
 | `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 18370 | 230 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
@@ -446,6 +446,7 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10293 | 159 | File di progetto: firebase-deadline.test. |
 | `experiments/persistent-vault-shell/firebase-mutation.test.mjs` | MJS | 35343 | 480 | File di progetto: firebase-mutation.test. |
 | `experiments/persistent-vault-shell/firebase-private-note-source.mjs` | MJS | 852 | 13 | File di progetto: firebase-private-note-source. |
+| `experiments/persistent-vault-shell/firebase-profile-link.test.mjs` | MJS | 6522 | 77 | File di progetto: firebase-profile-link.test. |
 | `experiments/persistent-vault-shell/firebase-profile-text.test.mjs` | MJS | 5016 | 63 | File di progetto: firebase-profile-text.test. |
 | `experiments/persistent-vault-shell/firebase-qr-selection.test.mjs` | MJS | 10982 | 132 | File di progetto: firebase-qr-selection.test. |
 | `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3751 | 62 | File di progetto: firebase-session. |
@@ -478,6 +479,11 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
 | `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
 | `experiments/persistent-vault-shell/private-qr-editor-provider.mjs` | MJS | 1098 | 17 | File di progetto: private-qr-editor-provider. |
+| `experiments/persistent-vault-shell/profile-link-candidate-rules.mjs` | MJS | 2564 | 31 | File di progetto: profile-link-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-link-contract.mjs` | MJS | 5778 | 79 | File di progetto: profile-link-contract. |
+| `experiments/persistent-vault-shell/profile-link-handler.mjs` | MJS | 4807 | 60 | File di progetto: profile-link-handler. |
+| `experiments/persistent-vault-shell/profile-link-plan.mjs` | MJS | 6061 | 80 | File di progetto: profile-link-plan. |
+| `experiments/persistent-vault-shell/profile-link.test.mjs` | MJS | 9937 | 118 | File di progetto: profile-link.test. |
 | `experiments/persistent-vault-shell/profile-linked-account.mjs` | MJS | 4382 | 67 | File di progetto: profile-linked-account. |
 | `experiments/persistent-vault-shell/profile-linked-account.test.mjs` | MJS | 6660 | 85 | File di progetto: profile-linked-account.test. |
 | `experiments/persistent-vault-shell/profile-overview-reader.mjs` | MJS | 4584 | 66 | File di progetto: profile-overview-reader. |
@@ -601,7 +607,7 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 12338 | 91 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 12532 | 92 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -632,7 +638,7 @@ File censiti: **646**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 2489 | 27 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 2629 | 28 | Strumento manutenzione/test: run-vault-session-emulators. |
 | `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
 | `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
 | `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |

@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Collegamenti dopo `520aafd2`: preparato servizio atomico per origine, vecchio/nuovo Account e ricevuta, preservando credenziali e altri riferimenti. Undici prove unitarie ed emulatori dedicati; suite completa npm test superata (456 test shell). Nessun writer produttivo o UI montata. Prossimo sorgente/selettore Collega/Cambia/Scollega, con limiti di schema e compatibilità metadati nella roadmap profili; nessun deploy.
+
 Editor anagrafica dopo `6cca03f5`: testi/note modificabili nei due profili del laboratorio, con cifratura, refresh confermato e pulizia dei controlli. Offline in sola consultazione. Undici nuove prove unitarie; suite completa npm test superata (445 test shell) e 94 verifiche Chrome online/offline e dopo riavvio superate; Edge/iPhone restano aperti. Proseguire collegamenti e restanti editor; perimetro e gate nella roadmap profili, nessun deploy.
 
 Anagrafica dopo `7bb38823`: preparati patch cifrata e servizio transazionale per testi/note privati e aziendali, senza toccare contatti/collegamenti. Confronto revisioni e impronte, ricevuta idempotente e Rules candidate solo negli emulatori. Dodici nuove prove unitarie; suite completa npm test superata (434 test shell), senza nuova prova browser del servizio non montato. Editor e trasporto da montare nel laboratorio, nessuna modifica produttiva; perimetro e limiti nella roadmap profili.
