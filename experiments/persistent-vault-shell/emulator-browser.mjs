@@ -3,6 +3,8 @@ import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {buildEmulator} from './build-emulator.mjs';
 import {createEmulatorNoteBridge} from './emulator-note-bridge.mjs';
+import {createEmulatorQrBridge} from './emulator-qr-bridge.mjs';
+import {withQrSelectionCandidateRules} from './qr-selection-candidate-rules.mjs';
 import {initializeApp, deleteApp} from 'firebase/app';
 import {initializeAuth, inMemoryPersistence, connectAuthEmulator, createUserWithEmailAndPassword} from 'firebase/auth';
 import {getFirestore, connectFirestoreEmulator, doc, setDoc, terminate} from 'firebase/firestore';
@@ -93,11 +95,16 @@ for (const suffix of ['A', 'B']) {
     } finally { await terminate(db); await deleteApp(app); }
 }
 await widgetEnvironment.cleanup();
+const qrRulesEnvironment = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085,
+    rules: withQrSelectionCandidateRules(await readFile(`${base}/../../firestore.rules`, 'utf8'))}});
+await qrRulesEnvironment.cleanup();
 const assets = new Map([['/assets/js/vendor/qrcode.min.js', ['assets/js/vendor/qrcode.min.js', 'text/javascript']], ['/', ['emulator.html', 'text/html']], ['/emulator.css', ['emulator.css', 'text/css']], ['/emulator.js', ['emulator.js', 'text/javascript']], ['/symbols.woff2', ['symbols.woff2', 'font/woff2']], ['/assets/images/google-avatar.png', ['assets/images/google-avatar.png', 'image/png']]]);
 const handleNote = createEmulatorNoteBridge(fixtureUids);
+const handleQr = createEmulatorQrBridge(fixtureUids);
 const server = createServer(async (request, response) => {
     if (request.headers.host !== '127.0.0.1:4188') { response.writeHead(403).end(); return; }
     if (await handleNote(request, response)) return;
+    if (await handleQr(request, response)) return;
     if (automated && request.url === '/entry-result' && request.method === 'POST' && request.headers.origin === 'http://127.0.0.1:4188') {
         let body = ''; for await (const chunk of request) { body += chunk; if (body.length > 10000) { response.writeHead(413).end(); return; } }
         reportResult?.(JSON.parse(body)); response.end('{}'); return;

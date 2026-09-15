@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
 import {doc, getDoc, setDoc} from 'firebase/firestore';
+import {withQrSelectionCandidateRules} from './qr-selection-candidate-rules.mjs';
 import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
 import {createQrSelectionEditorSource} from './qr-selection-editor-source.mjs';
 import {createQrSelectionSaveController} from './qr-selection-save-controller.mjs';
@@ -20,13 +21,7 @@ const {getFirestore, FieldValue} = requireFunctions('firebase-admin/firestore');
 test('candidate QR selection transaction and closed direct-write Rules on synthetic records', async t => {
     // Candidate overlay only: production rules and deployed Functions unchanged.
     const original = await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8');
-    assert.equal(original.split("collection != 'contacts' &&").length, 2);
-    const rules = original.replace("collection != 'contacts' &&", "collection != 'settings' && collection != 'contacts' &&")
-        .replace('    match /users/{userId} {', `    match /users/{userId}/settings/{settingId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId) && settingId != 'qrCodeInclusions';
-    }
-    match /users/{userId} {`);
+    const rules = withQrSelectionCandidateRules(original);
     const env = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085, rules}});
     const app = initializeApp({projectId: 'demo-vault-shell'}, 'qr-selection-test'), db = getFirestore(app);
     t.after(async () => {await db.terminate(); await deleteApp(app); await env.cleanup();});

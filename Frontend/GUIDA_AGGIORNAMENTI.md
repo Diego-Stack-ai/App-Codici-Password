@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Montaggio editor QR dopo `fb207a4e`: salvataggio/rilettura e consultazione offline verificati nel browser del laboratorio con trasporto limitato alle fixture e overlay Rules. Corretto il metadato id del repository; due regressioni, suite completa (388 shell) e 90 verifiche Chrome superate. Gate produttivo/App Check, writer legacy ed Edge/iPhone aperti. Proseguire con scheda PDF aziendale richiesta in `45110a0e`; nessun deploy.
+
 Editor QR dopo `686b1f1c`: sorgente, vista e controller con revoca/retry preparati; suite completa superata (386 shell), sedici nuove prove e integrazione Firestore demo con conferma persa. Provider non ancora montato nel browser: adapter attendibile, transizione Rules/writer legacy e collaudi UI restano aperti. Nessun deploy o nuova prova browser attribuita; dettagli nella roadmap profili.
 
 Preparazione selezione QR dopo `5fc9c8f2`: contratto privato e servizio transazionale candidato, sette nuove prove, suite completa (370 shell) e concorrenza/Rules su emulatori superate. Nessuna attivazione runtime: adapter callable, interfaccia e migrazione dei writer legacy restano da completare. Overlay Rules solo nel test; nessun enforcement HTTP dimostrato o deploy. Perimetro nella roadmap profili.

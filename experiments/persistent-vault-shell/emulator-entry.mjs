@@ -1,4 +1,6 @@
 import {signInWithEmailAndPassword} from 'firebase/auth';
+import {httpsCallable} from 'firebase/functions';
+import {mountPrivateQrEditor} from './private-qr-editor-provider.mjs';
 import {auth, db, functions} from './emulator-firebase.mjs';
 import {openEmulatorQueue} from './emulator-queue.mjs';
 import {createFirebasePrivateNoteSource} from './firebase-private-note-source.mjs';
@@ -127,6 +129,13 @@ const mountProfile = context => {
         mountDigitalCard: (root, {signal}) => {
             const scoped = {...context, signal};
             return mountDigitalCardView(root, scoped, {
+                mountEditor: company ? undefined : target => mountPrivateQrEditor(target, scoped, {
+                    getUser: () => auth.currentUser, repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
+                    isEncryptedValue: cryptoApi.isEncryptedValue, submit: async request => {
+                        if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                        scoped.assertUnlocked(); if (scoped.signal.aborted || auth.currentUser?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                        return (await httpsCallable(functions, 'applyPrivateQrSelection')(request)).data;
+                    }}),
                 generate: company ? createCompanyDigitalCardReader({context: scoped, source, getUser: () => auth.currentUser,
                     isEncryptedValue: cryptoApi.isEncryptedValue, buildVCard: buildCompanyVCard}) : createPrivateDigitalCardReader({context: scoped, getUser: () => auth.currentUser,
                     repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed, listProfileWidgets, listProfileWidgetsConfirmed},

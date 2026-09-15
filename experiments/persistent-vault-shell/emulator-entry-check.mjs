@@ -127,6 +127,18 @@ async function checkProfile(mode) {
     document.querySelector('[data-profile-section="digital-card"]').click();
     await wait(() => document.querySelector('[data-digital-card-preview]'), 'DIGITAL_CARD_TAB');
     assert(!document.querySelector('[data-digital-card-preview] canvas'), 'DIGITAL_CARD_EXPLICIT');
+    const qrButton = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
+    qrButton('Modifica selezione').click();
+    await wait(() => qrButton('Salva selezione'), 'QR_EDITOR_READY');
+    const birthChoice = () => [...byId('content').querySelectorAll('label')].find(node => node.textContent === 'Nascita').querySelector('input');
+    if (mode === 'online') {
+        birthChoice().checked = true; qrButton('Salva selezione').click();
+        await wait(() => byId('content').textContent.includes('Selezione salvata.'), 'QR_EDITOR_SAVED');
+        qrButton('Modifica selezione').click();
+        await wait(() => qrButton('Salva selezione') && !qrButton('Salva selezione').disabled, 'QR_EDITOR_REOPENED');
+    }
+    assert(birthChoice().checked, 'QR_EDITOR_PERSISTED');
+    const editorLabels = [...byId('content').querySelectorAll('label span')];
     [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Genera QR dalla selezione salvata').click();
     await wait(() => byId('content').textContent.includes('QR pronto.'), 'DIGITAL_CARD_GENERATED');
     const qrPreview = document.querySelector('[data-digital-card-preview]'), qrCanvas = qrPreview.querySelector('canvas');
@@ -137,6 +149,7 @@ async function checkProfile(mode) {
         assert(profileNote.textContent === '', 'PROFILE_NOTE_CLEAR');
         assert(profileWidgetValues.every(node => node.textContent === ''), 'PROFILE_WIDGET_TAB_CLEAR');
         assert(qrCanvas.width === 0 && !qrPreview.title, 'DIGITAL_CARD_CLEAR');
+        assert(editorLabels.every(node => node.textContent === ''), 'QR_EDITOR_CLEAR');
         if (section === 'addresses' || section === 'documents') {
             if (section === 'addresses') assert(byId('content').textContent.includes('POD-FITTIZIO'), 'PROFILE_UTILITY_VALUE');
             const toggle=[...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password');
@@ -184,6 +197,10 @@ async function checkProfile(mode) {
 try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
+    for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
+        const qrDenied = await fetch('/demo-vault-shell/europe-west1/applyPrivateQrSelection', {method: 'POST', headers, body: '{}'});
+        assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
+    }
     await wait(() => byId('login') && !byId('login').disabled, 'LOGIN');
     byId('login').click();
     await wait(() => byId('status').textContent.includes('bloccato') && !byId('unlock').disabled, 'AUTH');

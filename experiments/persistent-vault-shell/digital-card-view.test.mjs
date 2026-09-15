@@ -33,3 +33,13 @@ for (const action of [0, 1]) test(`late card cannot reach action ${action} after
     f.root.querySelectorAll('button')[action].dispatchEvent(new Event('click')); await tick(); f.abort.abort(); release('late'); await tick();
     assert.equal(f.renders, 0); assert.equal(f.downloads, 0); assert.equal(f.root.children.length, 0);
 });
+test('an editor completed after disposal is immediately cleaned up', async () => {
+    const root = new Node('root'), abort = new AbortController(); let release, cleaned = false;
+    mountDigitalCardView(root, {signal: abort.signal, assertUnlocked() {}}, {
+        generate: async () => '', loadQr: async () => {}, renderQr() {}, makePayload: value => value, download() {},
+        mountEditor: () => new Promise(resolve => {release = resolve;})
+    });
+    root.querySelectorAll('button')[2].dispatchEvent(new Event('click')); await tick();
+    abort.abort(); release(() => {cleaned = true;}); await tick();
+    assert.equal(cleaned, true); assert.equal(root.children.length, 0);
+});

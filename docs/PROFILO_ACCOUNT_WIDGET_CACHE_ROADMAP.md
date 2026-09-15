@@ -7,6 +7,14 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Editor QR montato nel browser — laboratorio 15/09/2026
+
+Successivo a `fb207a4e` (richiesta PDF registrata separatamente in `45110a0e`): Modifica selezione apre l'editor privato nella tessera. Il trasporto locale verifica token Firebase dell'emulatore, UID nella lista delle sole fixture, origine/host esatti e limite del corpo; attestazione sintetica confinata al laboratorio, senza valore di enforcement produttivo. Overlay Rules condiviso tra browser e test transazionali, applicato dopo il seed sintetico, impedisce scritture client della selezione. Nessun nuovo export nelle Functions o modifica di firestore.rules.
+
+Corretto il caricamento dei metadati canonici: il repository aggiunge id al documento, ora validato come qrCodeInclusions e rimosso dalla proiezione delle preferenze. La vista chiude anche editor completati dopo la revoca. Due regressioni, suite completa `npm test` superata (388 shell); Chrome 58 entry + 32 arresto/riapertura, incluse selezione/salvataggio/rilettura, consultazione editor offline e dopo riavvio, pulizia etichette e richieste senza credenziali/con token invalido respinte. CI del precedente `fb207a4e` superata, run 35010296381; non sostituisce i test browser del nuovo incremento.
+
+Gate produttivo ancora aperto: callable reale con App Check, transizione dei writer legacy, migrazione/rollback e collaudi Edge/iPhone. Nessuna promessa di draft persistente offline. Nessun dato reale, master, bump o deploy. Prossimo blocco richiesto: scheda PDF aziendale; mantenere separati i residui selezione aziendale, foto e altri editor del piano.
+
 ### Scheda PDF aziendale — richiesta 15/09/2026, da implementare
 
 Diego richiede un PDF di riepilogo dei dati aziendali da salvare sul telefono o inviare tramite WhatsApp/email. Prevedere scelta dei campi, anteprima, download e condivisione nativa del file quando supportata; fallback download, nessun invio automatico o pubblicazione su URL pubblico. Contenuto: identità/dati fiscali, referente, sedi, email e telefoni. Password, PIN/PUK, credenziali degli Account collegati, chiavi, note riservate e allegati esclusi dalla proiezione; non basta mascherarli graficamente dopo averli caricati nel generatore.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createQrSelectionEditorSource} from './qr-selection-editor-source.mjs';
 function fixture({decrypt} = {}) {
     let uid = 'owner', online = true, locked = false; const abort = new AbortController(), reads = [];
-    const profile = {contactPhones: [{id: 'phone', number: 'enc:111', password: 'enc:SECRET'}]}, setting = {phones: [0]};
+    const profile = {contactPhones: [{id: 'phone', number: 'enc:111', password: 'enc:SECRET'}]}, setting = {id: 'qrCodeInclusions', phones: [0]};
     const repository = {};
     for (const suffix of ['', 'Confirmed']) {
         repository['getUserProfile' + suffix] = async () => structuredClone(profile);
@@ -37,4 +37,9 @@ for (const boundary of ['abort', 'lock', 'change']) test(`label decryption canno
 });
 test('disposal prevents loading the source again', async () => {
     const f = fixture(); f.source.dispose(); await assert.rejects(f.source.load()); assert.equal(f.reads.length, 0);
+});
+test('repository metadata cannot redirect the setting identity or enter the save request', async () => {
+    const f = fixture(), loaded = await f.source.load();
+    assert.equal(Object.hasOwn((await f.source.prepare(loaded.selection)).selection, 'id'), false);
+    f.setting.id = 'security'; await assert.rejects(f.source.load());
 });

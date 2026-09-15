@@ -92,11 +92,16 @@ try {
         await wait(() => byId('content').textContent.includes('QR pronto.'), 'COLD_DIGITAL_GENERATED');
         const qrPreview = document.querySelector('[data-digital-card-preview]'), qrCanvas = qrPreview.querySelector('canvas');
         assert(qrPreview.title.includes('EMAIL:fixture@example.invalid'), 'COLD_DIGITAL_PROJECTION');
+        button('Modifica selezione').click();
+        await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Salva selezione'), 'COLD_QR_EDITOR');
+        const qrEditorLabels = [...byId('content').querySelectorAll('label span')];
+        assert(qrEditorLabels.some(node => node.textContent === 'fixture@example.invalid'), 'COLD_QR_EDITOR_DATA');
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(() => byId('content').textContent.includes('fixture@example.invalid') && byId('content').textContent.includes('000000000'), 'COLD_PROFILE_CONTACTS');
         assert(profileNote.textContent === '', 'COLD_PROFILE_NOTE_CLEAR');
         assert(profileWidgetValues.every(node => node.textContent === ''), 'COLD_WIDGET_CLEAR');
         assert(qrCanvas.width === 0 && !qrPreview.title, 'COLD_DIGITAL_CLEAR');
+        assert(qrEditorLabels.every(node => node.textContent === ''), 'COLD_QR_EDITOR_CLEAR');
         assert(document === originalDocument, 'COLD_PROFILE_RELOAD');
         const linkedButtons = [...byId('content').querySelectorAll('button')].filter(node => node.textContent === 'Mostra password');
         assert(linkedButtons.length === 3, 'COLD_PROFILE_LINKS');

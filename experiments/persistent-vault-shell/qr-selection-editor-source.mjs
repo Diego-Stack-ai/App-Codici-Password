@@ -17,6 +17,10 @@ export function createQrSelectionEditorSource({context, getUser, repository, isE
         if (!object(profile) || profile.isArchived || (profile.ownerId !== undefined && profile.ownerId !== uid) ||
             (setting != null && !object(setting))) fail();
         const config = {...(setting ?? {})}, revision = Object.hasOwn(config, '_qrRevision') ? config._qrRevision : 0;
+        // The canonical repository attaches the document ID to every read.
+        // Validate this transport metadata, then exclude it from preferences.
+        if (config.id !== undefined && config.id !== 'qrCodeInclusions') fail();
+        delete config.id;
         if (!Number.isSafeInteger(revision) || revision < 0 || (config._qrSchemaVersion !== undefined && config._qrSchemaVersion !== 1)) fail();
         delete config._qrRevision; delete config._qrSchemaVersion;
         const projection = {};
