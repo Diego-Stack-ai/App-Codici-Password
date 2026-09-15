@@ -1,9 +1,10 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * ACCOUNT PRIVATI MODULE (V4.2)
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.125';
+import { db } from '../../firebase-config.js?v=1.2.126';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -235,7 +236,7 @@ async function loadAccounts() {
         filterAndRender();
     } catch (e) {
         logError("LoadAccounts", e);
-        showToast(t('error_generic'), "error");
+        showToast(readErrorMessage(e, t('error_generic')), "error");
     }
 }
 

@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * LISTA AZIENDE MODULE (V5.0 ADAPTER)
  * Visualizzazione e gestione della lista delle aziende dell'utente.
@@ -61,7 +62,7 @@ export async function initListaAziende(user) {
         if (container) {
             setChildren(container, createUiState({
                 kind: 'error',
-                message: 'Errore durante il caricamento. Per favore ricarica la pagina.',
+                message: readErrorMessage(error, 'Errore durante il caricamento. Per favore ricarica la pagina.'),
                 actionLabel: 'Ricarica ora',
                 onAction: () => window.location.reload()
             }));

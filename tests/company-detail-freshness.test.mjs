@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
 const root = new URL('../Frontend/public/assets/js/', import.meta.url);
 const sources = await Promise.all(['offline-firestore.js', 'modules/data/request-coordinator.js',
     'modules/data/vault-repository.js', 'modules/azienda/dati_azienda.js'].map(path => readFile(new URL(path, root), 'utf8')));
@@ -16,7 +18,7 @@ function fixture({afterWrite = true, online = true, phone = '', failure = false,
     const document = {getElementById: id => id === 'telefono-azienda' ? phoneNode : id === 'btn-call-tel' ? callNode : null,
         querySelector: () => null};
     const snapshot = (data, exists = true) => ({id: 'company', exists: () => exists, data: () => structuredClone(data)});
-    const realm = vm.createContext({URLSearchParams, structuredClone, navigator, document,
+    const realm = vm.createContext({readErrorMessage, URLSearchParams, structuredClone, navigator, document,
         window: {location, history: {replaceState(_, __, path) { replaced.push(path); const url = new URL(path, 'https://example.invalid'); location.search = url.search; }}},
         db: {}, auth: {currentUser: {uid: 'owner'}}, doc: (_, ...path) => ({path: path.join('/')}),
         getDocFromCache: async reference => { reads.push(['cache', reference.path]); return snapshot(cached); },
