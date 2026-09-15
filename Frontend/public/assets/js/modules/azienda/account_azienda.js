@@ -1,9 +1,10 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * ACCOUNT AZIENDA MODULE (V5.0 Compliant)
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.125';
+import { db } from '../../firebase-config.js?v=1.2.126';
 import { doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -60,7 +61,7 @@ export async function initAccountAziendaList(user) {
             clearElement(container);
             setChildren(container, createElement('p', {
                 className: 'error-message-box',
-                textContent: t('error_loading_accounts') || "Errore caricamento dati."
+                textContent: readErrorMessage(e, t('error_loading_accounts') || "Errore caricamento dati.")
             }));
         }
     }

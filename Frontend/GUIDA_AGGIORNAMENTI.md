@@ -564,3 +564,11 @@ Rilascio non eseguito e versione invariata. Dopo pubblicazione autorizzata ripet
 ## Apertura pagine private offline — rilascio 1.2.125, 15/09/2026
 
 Pubblicazione della sola correzione iPhone autorizzata dall'utente. Il refresh Auth avviene online; offline resta richiesto l'utente Firebase corrente verificato, seguito dal normale sblocco Vault. Aggiornati versione e riferimenti statici tramite lo script canonico; verificato che il diff di release contenga soltanto 1.2.124 → 1.2.125. npm test completo e sette regressioni dedicate superati. Destinazione: Hosting soltanto, senza Functions, Rules o dati; shell sperimentale esclusa. Dopo rilascio ripetere Home → modalità aereo → lista sulla PWA iPhone. Rollback Hosting: 1.2.124, con il blocco offline noto.
+
+## Candidata 1.2.126 — preparazione offline profilo, Widget e credenziali (15/09/2026)
+
+Backport isolato da 9f769aab e 61cd253e, sulla produzione 1.2.125 (master 263355f2). La preparazione online include il documento del profilo, accountWidgets e sharedVaultData senza visita preventiva delle singole pagine; marker precedenti invalidati e stato incompleto in caso di letture fallite. Messaggi di indisponibilità offline nelle principali pagine di profilo, aziende e Account, senza riclassificare errori di permessi o decifratura. Il profilo carica il gestore messaggi solo nel percorso di errore; intestazione del modulo abbreviata per mantenere il budget statico di apertura.
+
+Tredici test offline: nove sulla preparazione/classificazione e quattro sulla consultazione dei componenti della base produttiva (privato/azienda, Widget/credenziali), con server vietato offline e rivelazione/mascheramento simulati. Non attribuire a questo backport i test di lifecycle della shell sperimentale. Prima del rilascio sono richiesti npm test completo e controllo versione; budget statico delle 31 pagine verificato.
+
+Foto e allegati esclusi dall'offline per decisione dell'utente. Nessuna estensione delle scritture, Functions o Rules. La PR #63 e la shell persistente restano separate dal rilascio. Dopo pubblicazione verificare fisicamente iPhone: completare caricamento online, passare offline senza logout e consultare profilo, Widget e credenziali senza averne aperto prima le pagine.

@@ -1,3 +1,4 @@
+import { readErrorMessage } from '../shared/read-error-message.js';
 /**
  * DETTAGLIO ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
@@ -6,7 +7,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db, auth } from '../../firebase-config.js?v=1.2.125';
+import { db, auth } from '../../firebase-config.js?v=1.2.126';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -162,13 +163,13 @@ async function loadAccount() {
         const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, compactView: true, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.125').then(({initAccountSharedCredentials}) =>
+        import('../shared/account-shared-credentials.js?v=1.2.126').then(({initAccountSharedCredentials}) =>
             initAccountSharedCredentials({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly, compactView: true
             })
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.125').then(({initAccountEmbeddedWidgets}) =>
+        import('../shared/account-embedded-widgets.js?v=1.2.126').then(({initAccountEmbeddedWidgets}) =>
             initAccountEmbeddedWidgets({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly
@@ -179,7 +180,7 @@ async function loadAccount() {
 
     } catch (e) {
         logError("LoadAccount", e);
-        showToast(t('error_generic'), "error");
+        showToast(readErrorMessage(e, t('error_generic')), "error");
     }
 }
 
