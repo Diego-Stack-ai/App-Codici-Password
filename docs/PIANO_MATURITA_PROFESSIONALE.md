@@ -21,6 +21,8 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
+Editor nota dopo `713127a1`: sorgente/provider revocabili, sola nota decifrata, consultazione offline e salvataggio online con retry immutabile. Dieci nuove prove; richiede conferma esplicita di assenza di operazioni pendenti prima di aprire/preparare. **Proseguire adapter reale della coda e recupero M6, quindi montaggio note/collegamenti nel dettaglio e test browser**. Non ancora montato; prove e limiti nella roadmap profili, nessun deploy.
+
 Compatibilità note dopo `053440f7`: preparato percorso candidato della sola nota cifrata, per Account personali/aziendali anche collegati, con UID atteso, revisione nativa, impronta e ricevuta. Preserva riferimenti e altri campi, senza indebolire il vecchio M6. **Proseguire sorgente/provider note e montaggio delle azioni di collegamento**, mantenendo separato il recupero delle code M6 preesistenti. Servizio e overlay Rules solo laboratorio; dettagli e gate nella roadmap profili, nessun deploy.
 
 Selettore dopo `0babf0c9`: lettore/vista con ricerca canonica per Account/azienda, filtro personale/azienda e identità composta; Account già collegati restano selezionabili. Decifratura limitata ai nomi, revoca e verifica della proiezione dopo le attese. Dodici nuove prove, rifiuto backend di `isExplicitMemo` aggiunto. Non montato nel browser. **Proseguire compatibilità editor Account, poi provider/azioni e collaudo integrato**, conservando riferimenti e metadati; limiti e gate nella roadmap profili. Nessun deploy.

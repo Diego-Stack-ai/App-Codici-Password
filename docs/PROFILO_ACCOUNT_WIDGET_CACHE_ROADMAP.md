@@ -7,6 +7,14 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Sorgente e provider dell'editor nota — laboratorio 15/09/2026
+
+Successivo a `713127a1`: sorgente della sola nota per Account personali/aziendali, con controllo del record completo e del padre aziendale prima della proiezione. Decifra soltanto la nota, confronta valore/revisione dopo le attese e prima della preparazione, invalida caricamenti concorrenti, cambio UID, blocco e revoca. Offline legge la cache in sola consultazione; disconnessione durante la preparazione impedisce la richiesta. Nessun passaggio della proiezione al vecchio writer M6.
+
+Il provider riusa la vista testuale con etichette della nota e il controller dei retry immutabili. Salvataggio/svuotamento, Annulla e revoca puliscono textarea, valore iniziale e sorgente; il callback di conferma è il punto per ricaricare il dettaglio. Impone un controllo esplicito della coda pendente all'apertura e prima della preparazione, con UID, dominio, azienda, Account e signal catturati. Solo `true` vale come conferma; controllo mancante o ambiguo blocca il nuovo editor. Non apre, converte, elimina né ripete autonomamente operazioni della coda M6.
+
+Dieci nuove prove per sorgente/provider/vista, comprese coda pendente, retry identico, svuotamento, scope, offline e testo trattenuto. Suite completa npm test superata (492 test shell), inclusi emulatori; nessuna nuova prova browser attribuita al provider non montato. La vista anagrafica mantiene le etichette predefinite e i test precedenti. CI precedente `713127a1` superata, run 35025323489. Provider ancora separato dal dettaglio: **prossimo adapter reale di consultazione/recupero coda, quindi montaggio note e azioni di collegamento con browser/emulatori**. Non dichiarare compatibilità finale prima di questi passaggi. Tutti i gate produttivi e gli altri residui restano aperti; nessun dato reale, master, bump o deploy.
+
 ### Note Account senza riscrittura dei collegamenti — laboratorio 15/09/2026
 
 Successivo a `053440f7`: contratto, preparazione cifrata e servizio candidato per aggiornare soltanto la nota di un Account personale/aziendale proprietario. Include svuotamento esplicito. Nessuna serializzazione del resto dell'Account: riferimenti inversi, metadati dei collegamenti, banca, credenziali e campi sconosciuti rimangono sul record. Funziona anche dopo dissociazione con array inversi vuoti e metadati persistenti. Il vecchio writer M6 e i suoi controlli di isolamento non vengono modificati.

@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **662**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **665**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **662**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 116092 | 968 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 116479 | 970 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -325,8 +325,8 @@ File censiti: **662**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 73769 | 606 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 88803 | 604 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 74216 | 608 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 90656 | 612 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -379,6 +379,9 @@ File censiti: **662**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7387 | 121 | File di progetto: account-detail-reader.test. |
 | `experiments/persistent-vault-shell/account-note-candidate-rules.mjs` | MJS | 728 | 12 | File di progetto: account-note-candidate-rules. |
 | `experiments/persistent-vault-shell/account-note-contract.mjs` | MJS | 2959 | 42 | File di progetto: account-note-contract. |
+| `experiments/persistent-vault-shell/account-note-editor-provider.mjs` | MJS | 2989 | 43 | File di progetto: account-note-editor-provider. |
+| `experiments/persistent-vault-shell/account-note-editor-source.mjs` | MJS | 3779 | 54 | File di progetto: account-note-editor-source. |
+| `experiments/persistent-vault-shell/account-note-editor.test.mjs` | MJS | 8949 | 101 | File di progetto: account-note-editor.test. |
 | `experiments/persistent-vault-shell/account-note-handler.mjs` | MJS | 2846 | 39 | File di progetto: account-note-handler. |
 | `experiments/persistent-vault-shell/account-note.test.mjs` | MJS | 7167 | 85 | File di progetto: account-note.test. |
 | `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
@@ -506,7 +509,7 @@ File censiti: **662**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-text-contract.mjs` | MJS | 4197 | 61 | File di progetto: profile-text-contract. |
 | `experiments/persistent-vault-shell/profile-text-editor-provider.mjs` | MJS | 1294 | 20 | File di progetto: profile-text-editor-provider. |
 | `experiments/persistent-vault-shell/profile-text-editor-source.mjs` | MJS | 3794 | 52 | File di progetto: profile-text-editor-source. |
-| `experiments/persistent-vault-shell/profile-text-editor-view.mjs` | MJS | 4889 | 57 | File di progetto: profile-text-editor-view. |
+| `experiments/persistent-vault-shell/profile-text-editor-view.mjs` | MJS | 5069 | 61 | File di progetto: profile-text-editor-view. |
 | `experiments/persistent-vault-shell/profile-text-editor.test.mjs` | MJS | 6562 | 83 | File di progetto: profile-text-editor.test. |
 | `experiments/persistent-vault-shell/profile-text-handler.mjs` | MJS | 2515 | 38 | File di progetto: profile-text-handler. |
 | `experiments/persistent-vault-shell/profile-text.test.mjs` | MJS | 8087 | 99 | File di progetto: profile-text.test. |
@@ -617,7 +620,7 @@ File censiti: **662**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 12864 | 93 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 12928 | 93 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

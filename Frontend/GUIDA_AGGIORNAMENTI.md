@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Editor nota dopo `713127a1`: sorgente/provider per Account personali/aziendali, sola consultazione offline, salvataggio/svuotamento online e pulizia del testo. Impone controllo esplicito della coda pendente, senza modificarla; dieci prove aggiunte. Da collegare adapter reale della coda, dettaglio e azioni di collegamento; nuovo provider non ancora montato nel browser. Nessun deploy.
+
 Compatibilità note dopo `053440f7`: servizio candidato aggiorna solo la nota cifrata, revisione/schema/timestamp e ricevuta; conserva collegamenti, banca e campi sconosciuti. UID atteso e impronta della nota proteggono cambio utente e modifiche legacy. Vecchio percorso M6 invariato; montaggio editor e recupero della coda ancora da integrare. Otto prove unitarie e test Firestore dedicato, nessuna UI produttiva o deploy.
 
 Selettore dopo `0babf0c9`: ricerca per nome Account/azienda e filtro personali/azienda, identità distinta anche con ID uguali e possibilità di scegliere Account già collegati. Lettore e vista revocabili, soli nomi decifrati, dodici prove aggiunte. Chiuso anche il mancato rifiuto del flag `isExplicitMemo` nelle destinazioni del servizio candidato. Da completare compatibilità editor e montaggio integrato; nessuna nuova prova browser attribuita, nessun deploy.

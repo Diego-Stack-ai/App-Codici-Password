@@ -1,11 +1,15 @@
 // Values remain only in this view. Exit/revocation clears both current and
 // default input values, including nodes retained by an external reference.
-export async function mountProfileTextEditor(root, context, {load, createController, onSaved, onCancel}) {
+export async function mountProfileTextEditor(root, context, {load, createController, onSaved, onCancel, labels = {}}) {
+    const text = {save: 'Salva anagrafica', saved: 'Anagrafica salvata.',
+        invalid: 'Dati cambiati o salvataggio non disponibile. Riapri l’anagrafica.',
+        unavailable: 'Operazione non disponibile. Riapri l’anagrafica.',
+        offline: 'Anagrafica disponibile offline in sola consultazione.', ...labels};
     const host = document.createElement('section'), fields = document.createElement('fieldset'), status = document.createElement('p');
     const save = document.createElement('button'), retry = document.createElement('button'), cancel = document.createElement('button');
     const controls = new AbortController(), rows = []; let disposed = false, controller, canSave = false;
     host.dataset.profileTextEditor = 'true'; status.setAttribute('role', 'status');
-    save.type = retry.type = cancel.type = 'button'; save.textContent = 'Salva anagrafica'; retry.textContent = 'Riprova salvataggio'; cancel.textContent = 'Annulla'; retry.hidden = true;
+    save.type = retry.type = cancel.type = 'button'; save.textContent = text.save; retry.textContent = 'Riprova salvataggio'; cancel.textContent = 'Annulla'; retry.hidden = true;
     const check = () => {if (disposed || context.signal.aborted) throw Error('VIEW_DISPOSED'); context.assertUnlocked();};
     const dispose = () => {
         if (disposed) return; disposed = true; controls.abort(); controller?.dispose(); context.signal.removeEventListener('abort', dispose);
@@ -33,16 +37,16 @@ export async function mountProfileTextEditor(root, context, {load, createControl
             if (disposed || context.signal.aborted) return;
             try {check();} catch {dispose(); return;}
             fields.disabled = state !== 'idle'; save.disabled = !canSave || state !== 'idle'; retry.hidden = state !== 'unknown';
-            status.textContent = ({preparing: 'Verifica e cifratura…', saving: 'Salvataggio in corso…', saved: 'Anagrafica salvata.',
-                unknown: 'Conferma non ricevuta. Riprova lo stesso salvataggio.', invalid: 'Dati cambiati o salvataggio non disponibile. Riapri l’anagrafica.'})[state] || '';
+            status.textContent = ({preparing: 'Verifica e cifratura…', saving: 'Salvataggio in corso…', saved: text.saved,
+                unknown: 'Conferma non ricevuta. Riprova lo stesso salvataggio.', invalid: text.invalid})[state] || '';
         }});
         if (disposed) controller.dispose(); check();
         const act = async operation => {
             try {check(); const result = await operation(); check(); if (result?.status === 'saved') await onSaved();}
-            catch {if (!disposed) status.textContent = 'Operazione non disponibile. Riapri l’anagrafica.';}
+            catch {if (!disposed) status.textContent = text.unavailable;}
         };
         save.disabled = !canSave;
-        if (!canSave) status.textContent = 'Anagrafica disponibile offline in sola consultazione.';
+        if (!canSave) status.textContent = text.offline;
         save.addEventListener('click', () => {if (!canSave) return; void act(() => {
             const changes = Object.fromEntries(rows.filter(row => row.input.value !== row.original).map(row => [row.key, row.input.value]));
             if (!Object.keys(changes).length) {status.textContent = 'Nessuna modifica da salvare.'; return {status: 'idle'};}
