@@ -1,7 +1,7 @@
 import {profileAccountLink} from './profile-linked-account.mjs';
 // Explicit projection. Linked credentials stay behind a separate live reader.
 const fields = {
-    personal: [['nome', 'Nome'], ['cognome', 'Cognome'], ['birth_place', 'Luogo di nascita'], ['birth_date', 'Data di nascita']],
+    personal: [['nome', 'Nome'], ['cognome', 'Cognome'], ['birth_place', 'Luogo di nascita'], ['birth_date', 'Data di nascita'], ['note', 'Note anagrafica']],
     company: [['ragioneSociale', 'Ragione sociale'], ['formaGiuridica', 'Forma giuridica'], ['partitaIva', 'Partita IVA'],
         ['codiceSDI', 'Codice SDI'], ['numeroCCIAA', 'CCIAA'], ['dataIscrizione', 'Data iscrizione'],
         ['referenteNome', 'Nome referente'], ['referenteCognome', 'Cognome referente'], ['referenteTitolo', 'Ruolo referente'], ['note', 'Note']],

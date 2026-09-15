@@ -55,3 +55,22 @@ test('utility projection includes parent identity and omits legacy secret proper
 test('malformed nested utilities fail closed',async()=>{
     await assert.rejects(fixture({userAddresses:[{id:'home',utilities:{}}]}).read('addresses'),/PROFILE_SHAPE_INVALID/);
 });
+
+test('anagraphic notes use the canonical note field only and absent notes add no row', async () => {
+    const f = fixture({note: 'enc:Nota privata', notes: 'enc:WRONG', password: 'enc:SECRET'});
+    assert.deepEqual(await f.read('personal'), [{group: 'Anagrafica', label: 'Note anagrafica', value: 'Nota privata'}]);
+    assert.deepEqual(f.reads, ['enc:Nota privata']);
+    for (const note of [undefined, null, '']) assert.deepEqual(await fixture({note}).read('personal'), []);
+    assert.deepEqual((await fixture({note: 'Nota legacy'}).read('personal')).map(row => row.value), ['Nota legacy']);
+    await assert.rejects(fixture({note: {value: 'invalid'}}).read('personal'), /PROFILE_VALUE_INVALID/);
+});
+
+for (const boundary of ['change', 'abort', 'lock']) test(`pending note decryption is discarded after ${boundary}`, async () => {
+    let release;
+    const f = fixture({note: 'enc:note'}, {context: {read: () => new Promise(resolve => { release = resolve; })}});
+    const pending = f.read('personal');
+    await new Promise(setImmediate);
+    const rejected = assert.rejects(pending, /AUTH_CHANGED|VIEW_DISPOSED|VAULT_LOCKED/);
+    if (boundary === 'abort') f.signal.abort(); else f[boundary]();
+    release('late-private-note'); await rejected;
+});

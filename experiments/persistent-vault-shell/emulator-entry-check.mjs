@@ -103,9 +103,12 @@ async function checkProfile(mode) {
     const originalDocument = document;
     byId('profile').click();
     await wait(() => byId('content').textContent.includes('Nome fittizio'), 'PROFILE_PERSONAL');
+    const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
+    assert(profileNote, 'PROFILE_NOTE');
     for (const [section, expected] of [['contacts','fixture@example.invalid'],['addresses','Via fittizia'],['documents','DOC-FITTIZIO']]) {
         document.querySelector('[data-profile-section="'+section+'"]').click();
         await wait(() => byId('content').textContent.includes(expected), 'PROFILE_'+section);
+        assert(profileNote.textContent === '', 'PROFILE_NOTE_CLEAR');
         if (section === 'addresses' || section === 'documents') {
             if (section === 'addresses') assert(byId('content').textContent.includes('POD-FITTIZIO'), 'PROFILE_UTILITY_VALUE');
             const toggle=[...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password');

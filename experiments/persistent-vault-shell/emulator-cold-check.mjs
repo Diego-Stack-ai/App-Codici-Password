@@ -73,8 +73,11 @@ try {
         const originalDocument = document;
         byId('profile').click();
         await wait(() => byId('content').textContent.includes('Nome fittizio'), 'COLD_PROFILE');
+        assert(byId('content').textContent.includes('Nota anagrafica fittizia'), 'COLD_PROFILE_NOTE');
+        const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
         document.querySelector('[data-profile-section="contacts"]').click();
         await wait(() => byId('content').textContent.includes('fixture@example.invalid') && byId('content').textContent.includes('000000000'), 'COLD_PROFILE_CONTACTS');
+        assert(profileNote.textContent === '', 'COLD_PROFILE_NOTE_CLEAR');
         assert(document === originalDocument, 'COLD_PROFILE_RELOAD');
         const linkedButtons = [...byId('content').querySelectorAll('button')].filter(node => node.textContent === 'Mostra password');
         assert(linkedButtons.length === 3, 'COLD_PROFILE_LINKS');

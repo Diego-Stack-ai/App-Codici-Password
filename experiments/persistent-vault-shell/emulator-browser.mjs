@@ -32,7 +32,7 @@ for (const suffix of ['A', 'B']) {
         await setDoc(doc(db, 'users', user.uid), {});
         const key = cryptoApi.generateVaultKey(), master = `MASTER-FITTIZIA-${suffix}!123`;
         const encrypted = value => cryptoApi.encrypt(value, key);
-        await setDoc(doc(db, 'users', user.uid), {nome: await encrypted('Nome fittizio'),
+        await setDoc(doc(db, 'users', user.uid), {nome: await encrypted('Nome fittizio'), note: await encrypted('Nota anagrafica fittizia'),
             contactEmails: [{id: 'email', address: await encrypted('fixture@example.invalid'), linkedAccountId: 'zeta'}],
             contactPhones: [{id: 'phone', number: await encrypted('000000000'), linkedAccountId: 'zeta'}, {id: 'company-phone', number: await encrypted('000000001'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}],
             userAddresses: [{id: 'address', address: await encrypted('Via fittizia'), utilities: [{id: 'utility', type: 'Energia', value: await encrypted('POD-FITTIZIO'), linkedAccountId: 'zeta', linkedAccountCompanyId: 'company'}]}],
