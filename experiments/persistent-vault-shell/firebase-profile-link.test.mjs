@@ -52,7 +52,7 @@ test('profile links and inverse references commit atomically in the demo emulato
         const record = (await db.doc(source.domain === 'private' ? root : company).get()).data();
         const selected = readProfileLinkContact(record, source, models);
         return {source, account, expectedAccount: selected.account, expectedFingerprint: hash(selected.fingerprintInput),
-            expectedRevision: record._profileLinkRevision || 0, operationId};
+            expectedRevision: record._profileLinkRevision || 0, operationId, expectedOwnerUid: uid};
     };
     const requests = await Promise.all([prepare(sourcePrivate, 'private'), prepare(sourceCompany, 'company')]);
     const results = await Promise.all(requests.map(request => run(request, trusted)));

@@ -10,6 +10,7 @@ export function createProfileLinkHandler({db, hash, timestamp, deleteField, mode
         if (typeof uid !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validateProfileLinkRequest(input), {source, expectedAccount, account, expectedRevision, operationId} = request;
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const digest = await hash(JSON.stringify({uid, ...request}));
         const sourcePath = source.domain === 'company' ? `users/${uid}/aziende/${source.companyId}` : `users/${uid}`;
         const accountPath = selection => selection.domain === 'company' ? `users/${uid}/aziende/${selection.companyId}/accounts/${selection.id}` : `users/${uid}/accounts/${selection.id}`;
@@ -24,7 +25,8 @@ export function createProfileLinkHandler({db, hash, timestamp, deleteField, mode
             const sourceRef = db.doc(sourcePath), sourceSnapshot = await transaction.get(sourceRef);
             if (!sourceSnapshot.exists) fail('PROFILE_UNAVAILABLE');
             const profile = sourceSnapshot.data(), revision = profileLinkRevision(profile);
-            if (profile.ownerId !== undefined && profile.ownerId !== uid) fail('OWNER_MISMATCH');
+            if ((profile.ownerId !== undefined && profile.ownerId !== uid) ||
+                (source.domain === 'company' && profile.id !== undefined && profile.id !== source.companyId)) fail('OWNER_MISMATCH');
             const current = readProfileLinkContact(profile, source, models);
             if (revision !== expectedRevision || JSON.stringify(current.account) !== JSON.stringify(expectedAccount) ||
                 await hash(current.fingerprintInput) !== request.expectedFingerprint) fail('LINK_CONFLICT');
@@ -38,7 +40,8 @@ export function createProfileLinkHandler({db, hash, timestamp, deleteField, mode
                 assertProfileLinkAccount(nextAccount, uid, account, {destination: true});
                 if (account.domain === 'company') {
                     const company = await transaction.get(db.doc(`users/${uid}/aziende/${account.companyId}`));
-                    if (!company.exists || company.data().isArchived || (company.data().ownerId !== undefined && company.data().ownerId !== uid)) fail('COMPANY_UNAVAILABLE');
+                    if (!company.exists || company.data().isArchived || (company.data().ownerId !== undefined && company.data().ownerId !== uid) ||
+                        (company.data().id !== undefined && company.data().id !== account.companyId)) fail('COMPANY_UNAVAILABLE');
                 }
             }
             const plan = planProfileLink({profile, source, account, oldAccount, nextAccount, models, deleteField});

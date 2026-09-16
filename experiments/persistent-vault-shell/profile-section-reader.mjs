@@ -14,7 +14,7 @@ const fields = {
 };
 export const PROFILE_SECTIONS = Object.freeze({personal: 'Anagrafica', contacts: 'Contatti', addresses: 'Indirizzi', documents: 'Documenti'});
 
-export function createProfileSectionReader({context, getUser, repository, isEncryptedValue, source}) {
+export function createProfileSectionReader({context, getUser, repository, isEncryptedValue, source, resolveLinkOrigin}) {
     const uid = context.user?.uid;
     const check = () => {
         if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
@@ -33,6 +33,7 @@ export function createProfileSectionReader({context, getUser, repository, isEncr
         async function project(item, shape, group, collection, parentAddressId) {
             if (!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('PROFILE_SHAPE_INVALID');
             const link = profileAccountLink(item, collection, uid, parentAddressId);
+            const linkOrigin = resolveLinkOrigin?.({raw, item, collection, parentAddressId});
             let first = true;
             for (const [field, label] of fields[shape]) {
                 check();
@@ -44,10 +45,11 @@ export function createProfileSectionReader({context, getUser, repository, isEncr
                 const decoded = isEncryptedValue(value) ? await context.read({ownerId: uid, ciphertext: value}) : value;
                 check();
                 if (typeof decoded !== 'string') throw new Error('PROFILE_VALUE_INVALID');
-                rows.push(Object.freeze({group, label, value: decoded, ...(first && link ? {link} : {})}));
+                rows.push(Object.freeze({group, label, value: decoded, ...(first && link ? {link} : {}), ...(first && linkOrigin ? {linkOrigin} : {})}));
                 first = false;
             }
-            if (first && link) rows.push(Object.freeze({group, label: 'Account', value: 'Account collegato', link}));
+            if (first && (link || linkOrigin)) rows.push(Object.freeze({group, label: 'Account', value: link ? 'Account collegato' : 'Nessun Account collegato',
+                ...(link ? {link} : {}), ...(linkOrigin ? {linkOrigin} : {})}));
         }
         async function list(name, shape, label) {
             const items = record[name] ?? [];

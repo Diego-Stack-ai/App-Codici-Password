@@ -18,6 +18,26 @@ globalThis.document = {createElement: tag => new Node(tag)};
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture() { return {root: new Node('root'), control: new AbortController()}; }
 
+test('profile link actions refresh after save and discard callbacks after navigation', async () => {
+    for (const linked of [false, true]) {
+        const f = fixture(), reads = []; let callbacks, closed = 0;
+        const origin = {domain: 'private', type: 'phone', id: 'phone'};
+        const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {
+            readSection: async (section, options) => {reads.push({section, confirmed: options.confirmed}); return [{group: 'Contatti', label: 'Telefono', value: '123', linkOrigin: origin,
+                ...(linked ? {link: {domain: 'private', id: 'account'}} : {})}];},
+            mountLinkEditor: async (_root, value) => {callbacks = value; return () => {closed++;};}
+        });
+        const actions = f.root.querySelectorAll('button').filter(node => node.dataset.profileLinkAction);
+        assert.deepEqual(actions.map(node => node.textContent), linked ? ['Cambia Account', 'Scollega Account'] : ['Collega Account']);
+        actions.at(-1).dispatchEvent(new Event('click')); await tick();
+        assert.deepEqual(callbacks.source, origin); assert.equal(callbacks.mode, linked ? 'unlink' : 'change');
+        const stale = callbacks;
+        await callbacks.onSaved(); assert.equal(reads.at(-1).confirmed, true); assert.equal(closed, 1);
+        const count = reads.length; await stale.onSaved(); assert.equal(reads.length, count);
+        cleanup();
+    }
+});
+
 test('anagraphic editor refreshes the same tab with a confirmed read after saving', async () => {
     const f = fixture(), reads = []; let saved, cancelled, disposed = 0;
     const cleanup = await mountProfileShell(f.root, {unlocked: true, signal: f.control.signal, assertUnlocked() {}}, {

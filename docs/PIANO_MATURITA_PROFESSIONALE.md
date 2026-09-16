@@ -21,6 +21,8 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
+Collegamenti montati dopo `781c7974`: azioni Collega/Cambia/Scollega nei contatti e nelle origini private supportate, selettore ricercabile personale/azienda, conferma e rilettura senza reload. Controllo delle code del vecchio/nuovo Account, revoca e UID atteso lungo la richiesta. Offline sola consultazione. Prove e limiti nella roadmap profili; creazione Account ed editor completi restano aperti, nessun deploy.
+
 Note montate dopo `e21202ac`: consultazione della coda tramite lease, recupero M6 esplicito per comandi pendenti, nuovo editor della sola nota per Account collegati/aziendali e mantenimento del percorso isolato precedente. Penna/Aggiungi nota, svuotamento e refresh confermato. Chrome 99 verifiche entry/riavvio superate; dettagli nella roadmap profili. **Proseguire montaggio Collega/Cambia/Scollega nei profili**, ora che le note dei riferimenti restano modificabili nel laboratorio. Restanti editor completi e gate ancora aperti, nessun deploy.
 
 Editor nota dopo `713127a1`: sorgente/provider revocabili, sola nota decifrata, consultazione offline e salvataggio online con retry immutabile. Dieci nuove prove; richiede conferma esplicita di assenza di operazioni pendenti prima di aprire/preparare. **Proseguire adapter reale della coda e recupero M6, quindi montaggio note/collegamenti nel dettaglio e test browser**. Non ancora montato; prove e limiti nella roadmap profili, nessun deploy.

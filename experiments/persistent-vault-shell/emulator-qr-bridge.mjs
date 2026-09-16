@@ -5,8 +5,10 @@ import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
 import {createCompanyQrSelectionHandler} from './company-qr-selection-handler.mjs';
 import {createProfileTextHandler} from './profile-text-handler.mjs';
 import {createAccountNoteHandler} from './account-note-handler.mjs';
+import {createProfileLinkHandler} from './profile-link-handler.mjs';
+import {readFile} from 'node:fs/promises';
 
-export function createEmulatorQrBridge(uids) {
+export async function createEmulatorQrBridge(uids) {
     assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
     assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099');
     assert.equal(process.env.GCLOUD_PROJECT, 'demo-vault-shell');
@@ -18,11 +20,16 @@ export function createEmulatorQrBridge(uids) {
     const app = getApps().find(item => item.name === '[DEFAULT]') || initializeApp({projectId: 'demo-vault-shell'});
     const owners = new Set(uids), dependencies = {db: getFirestore(app),
         hash: value => createHash('sha256').update(value).digest('hex'), timestamp: () => FieldValue.serverTimestamp()};
+    const models = {};
+    for (const path of ['privato/profile-model.js', 'azienda/company-profile-model.js']) {
+        Object.assign(models, await import('data:text/javascript;base64,' + Buffer.from(await readFile(new URL('../../Frontend/public/assets/js/modules/' + path, import.meta.url))).toString('base64')));
+    }
     const handlers = new Map([
         ['/demo-vault-shell/europe-west1/applyPrivateQrSelection', createPrivateQrSelectionHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyCompanyQrSelection', createCompanyQrSelectionHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyProfileTextMutation', createProfileTextHandler(dependencies)],
-        ['/demo-vault-shell/europe-west1/applyAccountNoteMutation', createAccountNoteHandler(dependencies)]
+        ['/demo-vault-shell/europe-west1/applyAccountNoteMutation', createAccountNoteHandler(dependencies)],
+        ['/demo-vault-shell/europe-west1/applyProfileLinkMutation', createProfileLinkHandler({...dependencies, models, deleteField: () => FieldValue.delete()})]
     ]);
     return async (request, response) => {
         const run = handlers.get(request.url); if (!run) return false;

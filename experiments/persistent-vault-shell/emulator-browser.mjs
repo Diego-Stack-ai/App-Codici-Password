@@ -105,7 +105,7 @@ assets.set('/company-summary-pdf.js', ['company-summary-pdf.js', 'text/javascrip
 for (const name of ['LiberationSans-Regular.ttf', 'LiberationSans-Bold.ttf', 'LICENSE_LIBERATION']) {
     assets.set(`/assets/pdf/${name}`, [`assets/pdf/${name}`, name.endsWith('.ttf') ? 'font/ttf' : 'text/plain']);
 }
-const handleQr = createEmulatorQrBridge(fixtureUids);
+const handleQr = await createEmulatorQrBridge(fixtureUids);
 const server = createServer(async (request, response) => {
     if (request.headers.host !== '127.0.0.1:4188') { response.writeHead(403).end(); return; }
     if (await handleNote(request, response)) return;

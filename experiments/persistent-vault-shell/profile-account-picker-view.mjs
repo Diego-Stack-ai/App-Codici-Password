@@ -28,7 +28,7 @@ export async function mountProfileAccountPicker(root, context, {load, filterAcco
             const button = document.createElement('button'); button.type = 'button';
             button.textContent = `${row.name} — ${row.companyId ? row.companyName : 'Personale'}`;
             button.addEventListener('click', () => {
-                try {check(); const selection = row.selection; dispose(); onSelect(selection);} catch {dispose();}
+                try {check(); const selection = row.selection; dispose(); onSelect(selection, {name: row.name, companyName: row.companyName});} catch {dispose();}
             }, {signal: renderControls.signal}); list.append(button);
         }
     };

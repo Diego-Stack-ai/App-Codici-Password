@@ -2,7 +2,7 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Optional editors are supplied by bootstrap; there is no fallback writer.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountLinkEditor, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
@@ -57,7 +57,7 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
             await navigator.clipboard.writeText(password);
             if (active()) result.textContent = 'Copiata.';
         });
-        actions.append(result); list.append(caption, value, actions);
+        actions.append(result); list.append(caption, value, actions); return actions;
     }
     async function select(section, confirmed = false, editing = false) {
         if (disposed || context.signal.aborted) return;
@@ -65,6 +65,14 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
         for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.profileSection === section));
         panel.textContent = 'Caricamento…';
         try {
+            if (editing?.linkOrigin && mountLinkEditor) {
+                context.assertUnlocked(); clear(); sectionControls = new AbortController();
+                const mounted = await mountLinkEditor(panel, {signal: sectionControls.signal, source: editing.linkOrigin, mode: editing.mode,
+                    onSaved: () => current(ticket) ? select(section, true) : undefined,
+                    onCancel: () => current(ticket) ? select(section) : undefined});
+                if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
+                return;
+            }
             if (editing && section === 'personal' && mountAnagraphicEditor) {
                 context.assertUnlocked(); clear(); sectionControls = new AbortController();
                 const mounted = await mountAnagraphicEditor(panel, {signal: sectionControls.signal,
@@ -98,7 +106,17 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                     action.addEventListener('click', () => { if (current(ticket)) void select(row.target); }, {signal: sectionControls.signal});
                     const actions = document.createElement('dd'); actions.append(action); list.append(actions);
                 }
-                if (row.link) addLinkedAccount(list, row.link, ticket);
+                const linkedActions = row.link ? addLinkedAccount(list, row.link, ticket) : null;
+                if (row.linkOrigin && mountLinkEditor) {
+                    const actions = linkedActions || document.createElement('dd');
+                    for (const [label, mode] of row.link ? [['Cambia Account', 'change'], ['Scollega Account', 'unlink']] : [['Collega Account', 'change']]) {
+                        const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
+                        button.dataset.profileLinkAction = mode; button.dataset.profileLinkSource = row.linkOrigin.id;
+                        button.addEventListener('click', () => {if (current(ticket)) void select(section, false, {linkOrigin: row.linkOrigin, mode});}, {signal: sectionControls.signal});
+                        actions.append(button);
+                    }
+                    if (!linkedActions) list.append(actions);
+                }
             }
             if (section === 'personal' && mountAnagraphicEditor) {
                 const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Modifica anagrafica';

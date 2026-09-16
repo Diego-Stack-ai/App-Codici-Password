@@ -7,6 +7,20 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
+### Azioni di collegamento montate — laboratorio 16/09/2026
+
+Successivo a `781c7974`: Collega/Cambia/Scollega usa sorgente revocabile, selettore personale/azienda con ricerca e servizio transazionale candidato. Account già associati ad altri dati restano selezionabili. Dopo conferma rilegge la stessa linguetta dal server; Annulla, navigazione e blocco puliscono selezione e risultati. Offline mostra il vincolo e non apre il selettore né salva.
+
+Origini abilitate solo dopo verifica canonica dell'identità persistita: email, telefono, documento e utenza privata (con indirizzo padre), slot fissi email/telefono aziendali. Nessun ID inventato per righe legacy, alias o duplicati. Extra aziendali, utenze/documenti aziendali senza schema persistito e creazione Account restano aperti. Non è l'editor completo di contatti/indirizzi/documenti.
+
+Prima della preparazione controlla la coda del vecchio e nuovo Account: stato ambiguo o pendente blocca la richiesta, senza invio/scarto automatico. Il dominio M6 rimane privato. Richiesta con UID atteso, impronta, revisione, identità composta e ricevuta; aggiunto rifiuto degli alias del padre aziendale. Retry conserva la stessa richiesta. Bridge solo loopback demo, App Check sintetico; nessuna Function produttiva esportata.
+
+Sette nuove prove unitarie coprono origini, alias/UID, montaggio, code vecchie/nuove, retry e offline. Chrome 152: 77 verifiche entry superate, incluse dissociazione/ripristino di email, telefono, utenza, documento privato e PEC aziendale; gli altri collegamenti e le credenziali restano presenti. Controlli HTTP anonimo/token invalido anche sul nuovo endpoint. Il cambio diretto di destinazione è coperto dai test provider/servizio; il browser esercita scollegamento e ricollegamento alla destinazione condivisa originale.
+
+Suite completa npm test superata, inclusi 513 test shell ed emulatori. Ulteriori 32 verifiche Chrome di arresto/riapertura offline superate: totale browser 109. CI del nuovo commit da verificare separatamente.
+
+Restano i gate di trasporto produttivo, writer legacy, concorrenza fra contesti della coda, Edge/iPhone, parità editor, Excel, Widget aziendali e M5–M10. VS-P0-01 non chiuso in produzione. Rollback: rimuovere il montaggio/bridge candidato conservando dati e code. Nessun dato reale, master, bump o deploy.
+
 ### Note montate nel dettaglio e recupero coda — laboratorio 15/09/2026
 
 Successivo a `e21202ac`: il dettaglio del laboratorio usa un selettore di percorso note. Consulta la coda privata mediante `pendingForRecord` e il lease esistente, chiude la connessione dopo la verifica e non invia/cancella nulla automaticamente. Risultato ambiguo, lease occupato, UID/Account/signal diversi e revoca non valgono come coda vuota. Per Account aziendali non consulta la coda privata omonima: il dominio M6 Account attuale è esclusivamente privato, da riesaminare quando si aggiungeranno code aziendali.

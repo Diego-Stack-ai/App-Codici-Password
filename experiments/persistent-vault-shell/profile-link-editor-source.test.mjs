@@ -63,3 +63,60 @@ test('overlapping loads invalidate previous work; incomplete load cannot prepare
     await assert.rejects(first, /PROFILE_LINK_CHANGED/);
     assert.equal((await f.editor.prepare(null, 'op')).operationId, 'op');
 });
+
+// Provider boundaries: no pending Account mutation may be bypassed by linking.
+const {mountProfileLinkEditor} = await import('./profile-link-editor-provider.mjs');
+class Element extends EventTarget {
+    constructor(tag) {super(); this.tag = tag; this.children = []; this.dataset = {}; this.textContent = '';}
+    append(...nodes) {for (const node of nodes) {node.parent = this; this.children.push(node);}}
+    remove() {if (this.parent) this.parent.children = this.parent.children.filter(node => node !== this);}
+    setAttribute() {}
+    all(tag) {return this.children.flatMap(node => [...(node.tag === tag ? [node] : []), ...node.all(tag)]);}
+}
+globalThis.document = {createElement: tag => new Element(tag)};
+const tick = () => new Promise(resolve => setImmediate(resolve));
+async function provider(overrides = {}) {
+    const f = fixture(), root = new Element('root'), sent = [], checked = [];
+    const context = {user: {uid: 'owner'}, signal: f.abort.signal, assertUnlocked() {}};
+    const options = {source: f.source, models, getUser: () => ({uid: f.state.uid}), mode: 'unlink',
+        readProfile: async () => structuredClone(f.state.profile), hash: value => createHash('sha256').update(value).digest('hex'),
+        isOnline: () => f.state.online, assertNoPendingAccount: async account => {checked.push(account); return true;},
+        submit: async request => {sent.push(request); return {status: 'confirmed', revision: 1};}, onSaved() {}, onCancel() {}, ...overrides};
+    await mountProfileLinkEditor(root, context, options);
+    return {...f, root, sent, checked, button: label => root.all('button').find(node => node.textContent === label)};
+}
+test('link provider checks old and new queues and clears selected labels on success', async () => {
+    let picker;
+    const f = await provider({mode: 'change', mountPicker: async (root, context, options) => {picker = options; return () => {};}});
+    picker.onSelect({domain: 'company', companyId: 'firm', id: 'new'}, {name: 'Selected', companyName: 'Firm'});
+    const labels = f.root.all('p');
+    f.button('Salva collegamento').dispatchEvent(new Event('click')); await tick();
+    assert.deepEqual(f.checked, [{domain: 'private', id: 'old'}, {domain: 'company', companyId: 'firm', id: 'new'}]);
+    assert.equal(f.sent.length, 1); assert.equal(f.root.children.length, 0);
+    assert.ok(labels.every(node => node.textContent === ''));
+});
+test('link provider blocks pending old/new queues before submitting', async () => {
+    for (const blocked of ['old', 'new']) {
+        let picker, sent = false;
+        const f = await provider({mode: 'change', mountPicker: async (root, context, options) => {picker = options; return () => {};},
+            assertNoPendingAccount: async account => account.id !== blocked, submit: async () => {sent = true;}});
+        picker.onSelect({domain: 'private', id: 'new'}, {name: 'New', companyName: ''});
+        f.button('Salva collegamento').dispatchEvent(new Event('click')); await tick();
+        assert.equal(sent, false); assert.equal(f.button('Salva collegamento').disabled, true); f.abort.abort();
+    }
+});
+test('link provider retries identical request after uncertain result and abort clears view', async () => {
+    const requests = [];
+    const f = await provider({submit: async request => {requests.push(request); if (requests.length === 1) throw Error('network'); return {status: 'confirmed', revision: 1};}});
+    f.button('Conferma scollegamento').dispatchEvent(new Event('click')); await tick();
+    assert.equal(f.button('Riprova collegamento').hidden, false);
+    f.button('Riprova collegamento').dispatchEvent(new Event('click')); await tick();
+    assert.equal(requests[0], requests[1]); assert.equal(f.root.children.length, 0);
+    const g = await provider(); g.abort.abort(); assert.equal(g.root.children.length, 0);
+});
+test('offline link provider never opens picker or submits', async () => {
+    let picked = false;
+    const f = await provider({isOnline: () => false, mode: 'change', mountPicker: async () => {picked = true;}});
+    assert.equal(picked, false); assert.equal(f.button('Salva collegamento').disabled, true);
+    f.button('Salva collegamento').dispatchEvent(new Event('click')); await tick(); assert.equal(f.sent.length, 0); f.abort.abort();
+});

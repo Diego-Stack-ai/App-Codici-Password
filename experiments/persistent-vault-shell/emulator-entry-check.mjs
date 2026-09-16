@@ -13,6 +13,35 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+async function checkProfileLink(mode, id, target) {
+    const action = kind => document.querySelector(`[data-profile-link-source="${id}"][data-profile-link-action="${kind}"]`);
+    const button = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
+    await wait(() => action('unlink'), 'LINK_ACTION_' + id);
+    const originalCount = byId('content').querySelectorAll('[data-profile-link-action="unlink"]').length;
+    action('unlink').click();
+    await wait(() => button('Conferma scollegamento'), 'LINK_EDITOR_' + id);
+    if (mode !== 'online') {
+        assert(button('Conferma scollegamento').disabled, 'LINK_OFFLINE_DISABLED');
+        button('Annulla collegamento').click();
+        await wait(() => action('unlink'), 'LINK_OFFLINE_CANCEL');
+    } else {
+        button('Conferma scollegamento').click();
+        await wait(() => action('change')?.textContent === 'Collega Account', 'LINK_UNLINK_' + id);
+        assert(byId('content').querySelectorAll('[data-profile-link-action="unlink"]').length === originalCount - 1, 'LINK_OTHER_CONTACTS_PRESERVED');
+        action('change').click();
+        await wait(() => document.querySelector('[data-profile-account-picker] input'), 'LINK_PICKER');
+        const search = document.querySelector('[data-profile-account-picker] input');
+        search.value = target; search.dispatchEvent(new Event('input'));
+        await wait(() => [...document.querySelectorAll('[data-profile-account-picker] button')].some(node => node.textContent.startsWith(target + ' — ')), 'LINK_TARGET');
+        [...document.querySelectorAll('[data-profile-account-picker] button')].find(node => node.textContent.startsWith(target + ' — ')).click();
+        assert(search.value === '', 'LINK_SEARCH_CLEAR');
+        await wait(() => button('Salva collegamento') && !button('Salva collegamento').disabled, 'LINK_SAVE');
+        button('Salva collegamento').click();
+        await wait(() => action('unlink'), 'LINK_RESTORED_' + id);
+        assert(byId('content').querySelectorAll('[data-profile-link-action="unlink"]').length === originalCount, 'LINK_ALL_RESTORED');
+    }
+    profileChecks.push(`profile link ${id} ${mode}: refresh, shared destination and offline guard`);
+}
 async function checkAccountNote(mode, scope) {
     const content = byId('content'), action = () => content.querySelector('[data-account-note-action]');
     await wait(() => action() && !action().hidden, 'ACCOUNT_NOTE_ACTION'); action().click();
@@ -131,6 +160,7 @@ async function checkCompanyProfile(mode) {
     const buttons=label=>[...byId('content').querySelectorAll('button')].filter(node=>node.textContent===label);
     document.querySelector('[data-profile-section="contacts"]').click();
     await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COMPANY_CONTACTS');
+    await checkProfileLink(mode, 'pec', 'Zeta azienda A');
     assert(buttons('Mostra password').length===3,'COMPANY_LINK_COUNT');
     for(const node of buttons('Mostra password')) {node.click();await wait(()=>node.textContent==='Nascondi password'&&!node.disabled,'COMPANY_PASSWORD');}
     const values=[...byId('content').querySelectorAll('dd')];
@@ -223,6 +253,8 @@ async function checkProfile(mode) {
         assert(profileWidgetValues.every(node => node.textContent === ''), 'PROFILE_WIDGET_TAB_CLEAR');
         assert(qrCanvas.width === 0 && !qrPreview.title, 'DIGITAL_CARD_CLEAR');
         assert(editorLabels.every(node => node.textContent === ''), 'QR_EDITOR_CLEAR');
+        await checkProfileLink(mode, section === 'contacts' ? 'email' : section === 'addresses' ? 'utility' : 'document', section === 'addresses' ? 'Zeta azienda A' : 'Zeta privato A');
+        if (section === 'contacts') await checkProfileLink(mode, 'phone', 'Zeta privato A');
         if (section === 'addresses' || section === 'documents') {
             if (section === 'addresses') assert(byId('content').textContent.includes('POD-FITTIZIO'), 'PROFILE_UTILITY_VALUE');
             const toggle=[...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Mostra password');
@@ -271,7 +303,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }

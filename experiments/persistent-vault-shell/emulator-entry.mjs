@@ -11,6 +11,13 @@ import {openEmulatorQueue} from './emulator-queue.mjs';
 import {createFirebasePrivateNoteSource} from './firebase-private-note-source.mjs';
 import {createPrivateNotePanelProvider} from './private-note-panel-provider.mjs';
 import {createAccountNotePanelRouter} from './account-note-panel-router.mjs';
+import {createProfileLinkOriginResolver} from './profile-link-origin.mjs';
+import {mountProfileLinkEditor} from './profile-link-editor-provider.mjs';
+import {createProfileAccountPickerReader} from './profile-account-picker-reader.mjs';
+import {createAccountNoteQueueAccess} from './account-note-queue-access.mjs';
+import * as privateProfileModel from '../../Frontend/public/assets/js/modules/privato/profile-model.js';
+import * as companyProfileModel from '../../Frontend/public/assets/js/modules/azienda/company-profile-model.js';
+import {listPrivateAccounts, listPrivateAccountsConfirmed, listCompanyAccounts, listCompanyAccountsConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 import {mountEmulatorList} from './emulator-list-view.mjs';
 import {mountEmulatorDetail} from './emulator-detail-view.mjs';
 import {createAccountDetailReader} from './account-detail-reader.mjs';
@@ -133,8 +140,25 @@ const mountProfile = context => {
     probeContext = context;
     const company = context.route === 'companyProfile';
     const source = company ? createCompanyProfileSource({uid: context.user.uid, companyId: selectedCompanyId, repository: {getCompany, getCompanyConfirmed}, normalizeContacts: companyProfileContacts}) : undefined;
+    const models = {...privateProfileModel, ...companyProfileModel};
     return mountProfileShell(content, context, {profileTitle: company ? 'Profilo aziendale' : 'Profilo utente', readSection: createProfileSectionReader({context, source,
-        getUser: () => auth.currentUser, repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue}),
+        getUser: () => auth.currentUser, repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue,
+        resolveLinkOrigin: createProfileLinkOriginResolver({domain: company ? 'company' : 'private', companyId: source?.companyId, models})}),
+        mountLinkEditor: (root, {signal, source: origin, mode, onSaved, onCancel}) => {
+            const scoped = {...context, signal}, getUser = () => auth.currentUser;
+            return mountProfileLinkEditor(root, scoped, {source: origin, models, mode, getUser, onSaved, onCancel,
+                readProfile: ({uid, confirmed}) => source ? source.read(uid, confirmed) : (confirmed ? getUserProfileConfirmed(uid) : getUserProfile(uid)),
+                readAccounts: createProfileAccountPickerReader({context: scoped, getUser, isEncryptedValue: cryptoApi.isEncryptedValue,
+                    repository: {listPrivateAccounts, listPrivateAccountsConfirmed, listCompanies, listCompaniesConfirmed, listCompanyAccounts, listCompanyAccountsConfirmed}}),
+                assertNoPendingAccount: async account => (await createAccountNoteQueueAccess({context: scoped, getUser, account,
+                    openQueue: options => session.openMutationQueue(options)}).inspect()).status === 'clear',
+                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                submit: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, 'applyProfileLinkMutation')(request)).data;
+                }});
+        },
         mountAnagraphicEditor: (root, {signal, onSaved, onCancel}) => {
             const scoped = {...context, signal};
             return mountProfileTextEditorProvider(root, scoped, {source, repository: {getUserProfile, getUserProfileConfirmed},

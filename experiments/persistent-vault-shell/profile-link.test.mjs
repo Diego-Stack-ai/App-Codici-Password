@@ -5,11 +5,29 @@ import {createHash} from 'node:crypto';
 import {validateProfileLinkRequest, profileLinkFingerprintInput} from './profile-link-contract.mjs';
 import {readProfileLinkContact} from './profile-link-plan.mjs';
 import {createProfileLinkHandler} from './profile-link-handler.mjs';
+import {createProfileLinkOriginResolver} from './profile-link-origin.mjs';
 const models = {};
 for (const path of ['privato/profile-model.js', 'azienda/company-profile-model.js']) {
     Object.assign(models, await import('data:text/javascript;base64,' + Buffer.from(await readFile(new URL('../../Frontend/public/assets/js/modules/' + path, import.meta.url))).toString('base64')));
 }
 const hash = value => createHash('sha256').update(value).digest('hex'), deleted = '__synthetic_delete__';
+test('origin capabilities require stable private identities and canonical company slots', () => {
+    const resolve = createProfileLinkOriginResolver({models});
+    for (const [collection, type] of [['contactEmails', 'email'], ['contactPhones', 'phone'], ['documenti', 'document']]) {
+        const item = {id: 'stable', value: 'cipher'}, raw = {[collection]: [item]};
+        assert.deepEqual(resolve({raw, item, collection}), {domain: 'private', type, id: 'stable'});
+        assert.equal(resolve({raw: {[collection]: [item, {...item}]}, item, collection}), null);
+        assert.equal(resolve({raw: {[collection]: [{value: 'legacy'}]}, item: {id: 'invented'}, collection}), null);
+    }
+    const item = {id: 'utility', value: 'cipher'};
+    assert.deepEqual(resolve({raw: {userAddresses: [{id: 'address', utilities: [item]}]}, item, collection: 'utilities', parentAddressId: 'address'}),
+        {domain: 'private', type: 'utility', id: 'utility', parentAddressId: 'address'});
+    const company = createProfileLinkOriginResolver({domain: 'company', companyId: 'firm', models});
+    assert.deepEqual(company({raw: {emails: {pec: {email: 'cipher'}}}, item: {id: 'pec'}, collection: 'contactEmails'}),
+        {domain: 'company', companyId: 'firm', type: 'email', id: 'pec'});
+    assert.equal(company({raw: {emails: {extra: [{email: 'cipher'}]}}, item: {id: 'extra-0'}, collection: 'contactEmails'}), null);
+    assert.equal(company({raw: {}, item, collection: 'utilities', parentAddressId: 'address'}), null);
+});
 function fixture(company = false) {
     const source = company ? {domain: 'company', companyId: 'origin', type: 'email', id: 'pec'} : {domain: 'private', type: 'phone', id: 'mobile'};
     const sourcePath = company ? 'users/owner/aziende/origin' : 'users/owner';
@@ -29,10 +47,21 @@ function fixture(company = false) {
         for (const [path, value] of staged) records.set(path, value); return result;
     }};
     const request = () => ({source, account: {domain: 'company', companyId: 'destination', id: 'next'}, expectedAccount: {domain: 'private', id: 'old'},
-        expectedRevision: 0, expectedFingerprint: hash(readProfileLinkContact(records.get(sourcePath), source, models).fingerprintInput), operationId: 'op'});
+        expectedRevision: 0, expectedFingerprint: hash(readProfileLinkContact(records.get(sourcePath), source, models).fingerprintInput), operationId: 'op', expectedOwnerUid: 'owner'});
     return {source, sourcePath, records, request, trusted: {auth: {uid: 'owner'}, app: {appId: 'synthetic'}},
         run: createProfileLinkHandler({db, hash, models, timestamp: () => 123, deleteField: () => deleted})};
 }
+test('wrong expected owner and aliased company parents reject without writes or receipts', async () => {
+    for (const kind of ['owner', 'source', 'destination']) {
+        const f = fixture(true), request = f.request();
+        if (kind === 'owner') request.expectedOwnerUid = 'other';
+        if (kind === 'source') f.records.get(f.sourcePath).id = 'alias';
+        if (kind === 'destination') f.records.get('users/owner/aziende/destination').id = 'alias';
+        const before = structuredClone([...f.records]);
+        await assert.rejects(f.run(request, f.trusted), kind === 'destination' ? /COMPANY_UNAVAILABLE/ : /OWNER_MISMATCH/);
+        assert.deepEqual([...f.records], before);
+    }
+});
 for (const company of [false, true]) test(`${company ? 'company' : 'private'} link replacement preserves credentials and unrelated inverse references atomically`, async () => {
     const f = fixture(company), request = f.request();
     assert.deepEqual(await f.run(request, f.trusted), {status: 'confirmed', revision: 1});

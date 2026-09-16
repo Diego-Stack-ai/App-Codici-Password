@@ -37,13 +37,13 @@ export function profileLinkRevision(record) {
     return revision;
 }
 export function validateProfileLinkRequest(value) {
-    if (!exact(value, ['source', 'expectedAccount', 'account', 'expectedFingerprint', 'expectedRevision', 'operationId']) ||
-        !id(value.operationId) || typeof value.expectedFingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(value.expectedFingerprint) ||
+    if (!exact(value, ['source', 'expectedAccount', 'account', 'expectedFingerprint', 'expectedRevision', 'operationId', 'expectedOwnerUid']) ||
+        !id(value.operationId) || !id(value.expectedOwnerUid) || typeof value.expectedFingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(value.expectedFingerprint) ||
         !Number.isSafeInteger(value.expectedRevision) || value.expectedRevision < 0 || value.expectedRevision >= Number.MAX_SAFE_INTEGER) fail();
     const source = profileLinkSource(value.source), expectedAccount = profileLinkAccount(value.expectedAccount), account = profileLinkAccount(value.account);
     if (JSON.stringify(expectedAccount) === JSON.stringify(account)) throw Error('PROFILE_LINK_UNCHANGED');
     return Object.freeze({source, expectedAccount, account, expectedFingerprint: value.expectedFingerprint,
-        expectedRevision: value.expectedRevision, operationId: value.operationId});
+        expectedRevision: value.expectedRevision, operationId: value.operationId, expectedOwnerUid: value.expectedOwnerUid});
 }
 
 // Stable hashing of supported stored JSON contact data. No legacy ID is created.

@@ -9,6 +9,8 @@
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
+Collegamenti montati dopo `781c7974`: azioni Collega/Cambia/Scollega nei contatti e nelle origini private supportate, selettore ricercabile personale/azienda, conferma e rilettura senza reload. Controllo delle code del vecchio/nuovo Account, revoca e UID atteso lungo la richiesta. Offline sola consultazione. Prove e limiti nella roadmap profili; creazione Account ed editor completi restano aperti, nessun deploy.
+
 Note montate dopo `e21202ac`: nuovo editor nel dettaglio per Account personali collegati/aziendali, penna o Aggiungi nota, salvataggio/svuotamento con rilettura immediata. Coda M6 consultata senza invio, recupero pendente mantenuto e vecchio editor isolato invariato. Chrome 99 verifiche online/offline/riavvio superate; quattordici nuove prove unitarie. Prossimo montaggio azioni di collegamento nei profili; limiti e gate nella roadmap, nessun deploy.
 
 Editor nota dopo `713127a1`: sorgente/provider per Account personali/aziendali, sola consultazione offline, salvataggio/svuotamento online e pulizia del testo. Impone controllo esplicito della coda pendente, senza modificarla; dieci prove aggiunte. Da collegare adapter reale della coda, dettaglio e azioni di collegamento; nuovo provider non ancora montato nel browser. Nessun deploy.

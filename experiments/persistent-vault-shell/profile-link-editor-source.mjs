@@ -42,7 +42,7 @@ export function createProfileLinkEditorSource({context, getUser, source, readPro
             // Destination eligibility and company ownership are checked inside
             // the atomic backend transaction, never trusted from picker labels.
             return validateProfileLinkRequest({source: origin, account: selection, expectedAccount: expected.account,
-                expectedFingerprint: expected.fingerprint, expectedRevision: expected.revision, operationId});
+                expectedFingerprint: expected.fingerprint, expectedRevision: expected.revision, operationId, expectedOwnerUid: uid});
         }
     });
 }
