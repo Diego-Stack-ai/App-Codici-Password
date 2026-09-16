@@ -2,7 +2,7 @@
 
 > **Stato:** registro operativo e cronologico.
 > **Autorità:** roadmap subordinata ai contratti, non certificazione; prevale la baseline sicurezza.
-> **Revisione:** 16/09/2026; consegna riconciliata. Produzione 1.2.128 (PR #68); candidata ebf1b1fa nella PR #67 ancora separata.
+> **Revisione:** 16/09/2026; consegna e cartelle locali riconciliate. Produzione 1.2.128 (PR #68); candidata applicativa ebf1b1fa nella PR #67 ancora separata.
 > **Area:** release e attività aperte.
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -15,7 +15,7 @@ Riferimento operativo: [relazione di consegna](../docs/PASSAGGIO_CONSEGNE_2026-0
 - **Candidata `ebf1b1fa`:** Collega/Cambia/Scollega montati; note e coda già integrate. Suite completa, 513 test shell e 109 verifiche Chrome; CI 35070097640 superata. Tutto committato e inviato prima di questa relazione, non pubblicato come shell completa.
 - **Prossimo:** riconciliare selettivamente il PDF produttivo con la candidata, poi creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
 - **Motivo:** parità incompleta, trasporti/Rules di laboratorio, transizione writer e migrazione/rollback non chiusi. VS-P0-01 resta aperto in produzione. Il deploy PDF non autorizza il deploy dell'intera PR #67.
-- **Cartella principale:** `C:/Users/Diego/Documents/Codex/2026-09-12/co/work/App-Codici-Password`. La cartella `Documents/Progetti/Codici&Password` è sul vecchio ramo Excel con modifiche non committate: conservarla, non usarla come base corrente. Ripresa automatica in pausa per il passaggio a un altro agente.
+- **Cartella principale unica:** `C:/Users/Diego/Documents/Progetti/App-Codici-Password`. Le vecchie copie e i worktree temporanei sono stati archiviati e rimossi; l'Excel resta disponibile sul ramo remoto `origin/codex/real-excel-export-preview` al commit `40052515`. Ripresa automatica in pausa per il passaggio a un altro agente.
 
 ## Stato corrente — chiusura documentale 15/09/2026
 
@@ -981,3 +981,9 @@ PR #67: route locale per Anagrafica, Contatti, Indirizzi e Documenti, con reposi
 ## Consultazione degli Account collegati nella shell — 15/09/2026
 
 Stessa PR #67: apertura e ritorno al profilo senza reload, password dell'Account collegato su richiesta con mostra/nascondi/copia, anche quando email e telefono condividono l'Account o il destinatario è aziendale. Controlli di provenienza e sessione ripetuti dopo le attese; nessun riuso delle vecchie password dei contatti. Suite completa superata, 232 test shell finali e 126 verifiche browser online/offline/arresto superate. Limiti del pre-caricamento della cache ed evidenze nell'ultimo capitolo di docs/AUDIT_VAULT_SESSION_P0.md. Modifica dei collegamenti e parità completa dei profili ancora da integrare; nessun deploy e rischio legacy produttivo ancora aperto.
+
+## Consegna e riordino locale — 16/09/2026
+
+La cartella operativa unica è `C:/Users/Diego/Documents/Progetti/App-Codici-Password`, ramo `integration/vault-shell-v127-security`. Le vecchie copie e i worktree temporanei sono stati inclusi in un archivio locale verificato e rimossi; il materiale Excel resta disponibile su `origin/codex/real-excel-export-preview` al commit `40052515`. Il checkpoint applicativo della candidata resta `ebf1b1fa`; i commit documentali successivi aggiornano consegna e percorsi senza cambiare il runtime.
+
+Produzione resta 1.2.128, master `4efda528`, PDF aziendale pubblicato tramite PR #68. La candidata è committata e inviata su GitHub, ma non è stata unita in master né distribuita perché mancano ancora parità funzionale, trasporto produttivo e App Check, transizione dei writer, migrazione/rollback e collaudi fisici. Inoltre deve essere riconciliata selettivamente con i commit produttivi successivi. Il comando di avvio e l'ordine operativo per un nuovo agente sono in `docs/PASSAGGIO_CONSEGNE_2026-09-16.md`; nessun deploy o modifica dati è stato eseguito durante il riordino documentale.

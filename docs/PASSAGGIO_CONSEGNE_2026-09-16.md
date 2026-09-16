@@ -7,7 +7,7 @@ Data: 16 settembre 2026. Relazione verificata su Git, cartelle locali, test e PR
 - Repository GitHub: https://github.com/Diego-Stack-ai/App-Codici-Password
 - **Cartella principale per continuare il programma MD:** `C:/Users/Diego/Documents/Progetti/App-Codici-Password`.
 - Ramo di lavoro: `integration/vault-shell-v127-security`.
-- Ultimo commit applicativo della candidata: **`ebf1b1fad55af1434cc202ed49d93354d4152e51`**, già inviato su GitHub. Questa relazione viene registrata in un successivo commit documentale: usare `git log -1` per il checkpoint più recente.
+- Ultimo commit applicativo della candidata: **`ebf1b1fad55af1434cc202ed49d93354d4152e51`**, già inviato su GitHub. Ultimo checkpoint documentale precedente a questo aggiornamento: **`68678e79`**. Usare sempre `git log -1` per il checkpoint effettivo.
 - PR sperimentale **#67**, ancora bozza: https://github.com/Diego-Stack-ai/App-Codici-Password/pull/67. Base **`experiment/m6-private-note-provider`**, NON master. Non cambiare base o unire tutta la PR per pubblicare una sola funzione.
 - Versione realmente online: **1.2.128**, Hosting `https://appcodici-password.web.app`.
 - Master remoto: **`4efda528b418d7cc15ad653ad179aaa55a2f396e`**, merge della PR #68; commit funzionale PDF **`9d0f70658e0d220ecb6c7404e6e2a76ce0749cf0`**.
@@ -64,7 +64,7 @@ Commit recenti utili: `ebf1b1fa` montaggio collegamenti; `781c7974` note e recup
 
 Commit significa lavoro registrato in Git; push significa copia su GitHub; PR significa proposta di integrazione; merge significa integrazione del ramo; deploy significa pubblicazione online. Nessuno di questi passaggi implica automaticamente il successivo. Il workflow di produzione prevede deploy manuale; il rilascio PDF è stato eseguito esplicitamente, solo Hosting.
 
-Al checkpoint prima di questa relazione, #67 aveva **48 commit rispetto alla propria base**. `origin/master..HEAD` mostrava 189 commit, ma include storia divergente, merge e lavori già portati selettivamente: NON significa 189 funzioni nuove da pubblicare. Non usare conteggio commit o numero di MD come percentuale di completamento.
+La PR #67 e il ramo di integrazione hanno una storia molto più ampia di master e non sono una coda lineare di funzioni da pubblicare. Il confronto verificato il 16/09/2026 indicava anche commit produttivi mancanti nella candidata, inclusa la release PDF 1.2.128. Ricalcolare sempre la divergenza dopo `git fetch`: il numero di commit include merge, laboratori, documentazione e lavori già portati selettivamente, quindi non misura la percentuale di completamento.
 
 ## 6. Prossime attività, in ordine
 
@@ -77,35 +77,21 @@ Al checkpoint prima di questa relazione, #67 aveva **48 commit rispetto alla pro
 
 Quando una voce dipende da Diego, registrarla e proseguire una voce indipendente. Nuovo ramo solo se serve un isolamento reale; evitare altri rami per il solo fatto di aver terminato un turno.
 
-## 7. Cartelle controllate in Documenti
+## 7. Cartelle locali dopo il riordino
 
-Ricognizione delle directory fino a otto livelli, escludendo dipendenze/cache e senza seguire junction. Confrontati Git, ramo, commit e package.json dei repository pertinenti; nessuna cartella spostata/cancellata, nessun contenuto di dati personali aperto.
+Il riordino locale è stato completato il 16/09/2026. La sola cartella operativa di questo progetto è:
 
-| Cartella | Stato verificato | Cosa farne |
-|---|---|---|
-| `Documents/Progetti/App-Codici-Password` | Ramo candidata `integration/vault-shell-v127-security`, `ebf1b1fa` prima del commit di consegna | **Riferimento principale per continuare il programma MD** |
-| `Documents/Codex/2026-09-12/co/work/company-pdf-release` | Worktree `release/company-pdf-summary`, `9d0f7065`, versione 1.2.128; PR #68 merged | Riferimento locale del PDF rilasciato. Master remoto `4efda528` è l'autorità per la produzione |
-| `Documents/Progetti/Codici&Password` | Clone separato, ramo `codex/real-excel-export-preview`, `40052515`, package 1.2.99 | **Non usarlo come base aggiornata generale. Conservare** per lavoro Excel e modifiche locali |
-| `Documents/Progetti/Codici&Password/.codex-worktrees/account-detail-ui-preview` | `codex/account-detail-ui-v118`, `d2ef897e`, 1.2.118 | Worktree storico; non base corrente |
-| `Documents/Progetti/Codici&Password/.codex-worktrees/ui-redesign` | `codex/redesign-ui-typography`, `098110aa`, 1.2.26 | Worktree storico; non base corrente |
-| `Documents/antigravity/elegant-goodall` | Repository senza origin, commit iniziale `9608609`, directory backend non tracciata | Non verificato come clone di Codici & Password; non usarlo come riferimento |
+`C:/Users/Diego/Documents/Progetti/App-Codici-Password`
 
-Nella cartella Progetti ci sono **modifiche NON committate** a `docs/PIANO_MATURITA_PROFESSIONALE.md` (3 righe aggiunte, 7 rimosse) e directory non tracciate `.qwen/`, `outputs/`. Non sono state importate o sovrascritte. Il commit Excel `40052515dd493279c0f49118205b9405eef05376` è già disponibile su `origin/codex/real-excel-export-preview` nel repository principale, ma questo non salva le modifiche locali sopra.
+La vecchia copia `Documents/Progetti/Codici&Password`, i worktree temporanei e le cartelle datate di Codex sono stati rimossi dopo la creazione e verifica di un archivio locale. Non cercare né ricreare il progetto sotto `Documents/Codex`.
 
-### Chiarimento sul recupero Excel
+L'archivio del riordino si trova sotto `_archivio_locale/` nella cartella principale ed è escluso localmente da Git. Il file ZIP è stato verificato con SHA-256 `3E328786B9B861498D4A63487655172B9B8FEC193F9D1FE74B72A8CFFA33A692`. Contiene le copie precedenti e i materiali locali; non va importato nel ramo né pubblicato.
 
-**Il codice Excel è già stato recuperato nel repository principale**, come ramo remoto `origin/codex/real-excel-export-preview` al commit `40052515`. Non è necessario ripartire dal vecchio clone per recuperare quel codice. La presenza dell'oggetto/ramo Git non significa che i suoi file siano già montati nel ramo attualmente aperto né che la funzione sia online: la nuova shell contiene per ora l'adattamento della proiezione, non l'integrazione XLSX completa.
+Il codice Excel resta recuperabile dal ramo remoto `origin/codex/real-excel-export-preview`, commit `40052515dd493279c0f49118205b9405eef05376`. Non è montato integralmente nella shell e non è online. Gli output dimostrativi e le configurazioni locali del vecchio clone sono conservati soltanto nell'archivio verificato.
 
-Verifica precisa delle differenze della vecchia cartella:
+Gli altri progetti locali sono separati in `Documents/Progetti/LogiDesk`, `Documents/Progetti/Traduttore` e `Documents/Progetti/auditkit`; non fanno parte di Codici & Password.
 
-- L'unica modifica a file già tracciati riguarda l'MD del piano: toglie dal post-M10 il censimento e collaudo dei lucchetti/campi protetti, riducendo il titolo e l'uscita a lingue/Impostazioni. Non è codice Excel e non è stata trasferita come nuova decisione; i controlli di sicurezza rimangono richiesti. Non è possibile attribuire l'autore di una modifica non committata dalla sola differenza Git.
-- `.qwen/settings.json` è un file di configurazione locale non tracciato. Non è stato aperto né copiato: può contenere preferenze o dati d'ambiente non destinati al repository.
-- `outputs/excel-export-prototype/` contiene un XLSX dimostrativo, anteprima-consultazione.png, errors.ndjson, inspection.ndjson e anteprime PNG di Account, Allegati, Aziende, Campi-account, Collegamenti, Contatti, Documenti, Indirizzi, Profilo, Scadenze e Utenze. Sono file di output/prova, non modifiche al sorgente; il contenuto dei dati non è stato letto in questa ricognizione.
-- **Non risultano modifiche locali non committate al codice Excel.** Configurazioni e output non tracciati non viaggiano con fetch/push. Conservarli nella vecchia cartella finché non si decide se archiviarli, senza importarli ciecamente nell'app.
-
-Le altre directory sotto `co/work` sono worktree dello stesso repository, non tutte copie da aggiornare: `account-bridges-release`, `common-widget-picker-release`, `company-contact-release`, `company-refresh-release`, `company-tabs-release`, `iphone-offline-bootstrap`, `offline-profile-widgets-release`, `shared-widget-release`, `widget-picker-style-release`. `git worktree list` ne descrive il legame. Non cancellarle con Explorer: prima verificare stato, patch non pubblicate e rimozione tramite Git. Nessuna pulizia autorizzata/eseguita in questa consegna.
-
-La cartella principale NON contiene automaticamente il codice identico all'app online: contiene la candidata più avanzata. Per un correttivo produttivo partire da master aggiornato in un worktree dedicato. Non spostare ora tutto in Progetti: prima salvare e riconciliare il lavoro Excel.
+La cartella principale contiene la candidata più avanzata, non il codice identico all'app online. Per un correttivo produttivo partire da `origin/master` aggiornato in un worktree dedicato. Per il programma MD continuare sul ramo di integrazione dopo aver verificato lo stato remoto e la PR.
 
 ## 8. Come leggere e aggiornare gli MD
 
@@ -124,6 +110,18 @@ Windows/PowerShell, Node 24 locale; CI Node 22 e Java 21. Emulatori solo progett
 
 Comandi dalla cartella principale: `npm test`, `node scripts/run-vault-session-emulators.mjs --entry-browser`, `node scripts/run-vault-session-emulators.mjs --crash-browser` con `VAULT_SHELL_BROWSER=chrome`; `git diff --check`, `node scripts/audit-project-inventory.mjs`. Adattare i test al cambiamento; evitare ripetizioni senza nuove modifiche o dubbi.
 
-Log locali delle ultime prove: nella cartella padre `co/work`, `profile-link-mounted-full.log`, `profile-link-mounted-entry.log`, `profile-link-mounted-crash.log`; rilascio PDF `pdf-release-full.log`, `pdf-release-browser.log`, `pdf-release-deploy.log`. Non allegare log grezzi senza controllare eventuali segreti. Non stampare l'output JSON di login Firebase: può includere token; usare soltanto stato filtrato.
+I vecchi log locali sono nell'archivio del riordino, non più nella cartella datata `co/work`. Non allegare log grezzi senza controllare eventuali segreti. Non stampare l'output JSON di login Firebase: può includere token; usare soltanto stato filtrato.
 
 Prima di lavorare: controllare directory, branch, status e processi propri. Non modificare master/deploy nella prosecuzione MD; il consenso del PDF riguardava quel rilascio isolato. Non integrare ramo documentale cloud `3a8e5a2` o patch `851b788` come base della shell. Non fare nuove migrazioni/distruzioni né cancellare code senza autorizzazione specifica. Commit coerenti e push sulla PR #67, documentando test e limiti. Il nuovo agente deve riferire prima ciò che ha verificato, poi proseguire il blocco concordato.
+
+## 10. Comando pronto per il nuovo agente
+
+```text
+Lavora sul progetto Codici & Password nella sola cartella C:/Users/Diego/Documents/Progetti/App-Codici-Password. Prima di modificare file verifica directory, git status, ramo, ultimo commit, origin e stato della PR #67. Leggi integralmente docs/PASSAGGIO_CONSEGNE_2026-09-16.md, poi docs/GUIDA_PROGETTO.md, docs/ARCHITETTURA_SICUREZZA_V1.md e docs/PIANO_MATURITA_PROFESSIONALE.md; consulta i contratti specialistici indicati per l'area che tocchi. La direzione approvata è la shell persistente con Vault Key solo in RAM.
+
+Produzione è 1.2.128 su origin/master, con PDF aziendale già pubblicato separatamente. La candidata integration/vault-shell-v127-security è pubblicata su GitHub ma non distribuita: contiene molto lavoro sperimentale e non ha ancora parità completa, trasporto produttivo/App Check, transizione dei writer, migrazione/rollback e collaudi fisici sufficienti. Non confondere commit o push con merge e deploy. Non modificare master, non fare bump e non distribuire Hosting, Functions o Rules senza nuova autorizzazione esplicita.
+
+Aggiorna prima i riferimenti remoti e confronta selettivamente origin/master con la candidata, iniziando dalla riconciliazione della release PDF 1.2.128 senza merge o cherry-pick cieco. Poi prosegui il primo blocco autonomo ancora aperto nel piano: parità degli editor profilo e Account, contatti/indirizzi/documenti, Widget/banca e creazione Account dal collegamento. Conserva sicurezza, compatibilità legacy, UID, revisioni, ricevute, riferimenti inversi e code pendenti. Il ramo Excel origin/codex/real-excel-export-preview@40052515 è materiale da integrare selettivamente più avanti; non è online.
+
+Usa soltanto dati sintetici ed emulatori. Non leggere o modificare dati reali. Esegui test proporzionati al blocco, poi suite completa e browser/emulatori quando il cambiamento lo richiede. Aggiorna nello stesso commit gli MD autorevoli interessati, distinguendo fatto verificato, laboratorio, produzione e gate aperti. Crea commit piccoli e coerenti e pubblicali sul ramo sperimentale/PR #67. Se una prova richiede Diego o un dispositivo reale, registrala come gate e continua con un'attività indipendente. Fermati prima di qualsiasi merge in master, deploy, migrazione o operazione distruttiva e riferisci esattamente il risultato.
+```
