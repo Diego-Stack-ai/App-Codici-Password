@@ -5,6 +5,12 @@ import {COMPANY_SUMMARY_GROUPS} from './company-summary-reader.mjs';
 export function mountCompanySummaryView(root, context, {read, generate, download, share, canShare}) {
     const host = document.createElement('section'), choices = document.createElement('fieldset'), preview = document.createElement('div');
     const status = document.createElement('p'), prepare = document.createElement('button'), save = document.createElement('button'), send = document.createElement('button');
+    host.className = 'company-pdf-card form-card'; choices.className = 'company-pdf-choices'; preview.className = 'company-pdf-preview';
+    const title = document.createElement('h2'), legend = document.createElement('legend'), description = document.createElement('p'), actionBar = document.createElement('div');
+    title.textContent = 'Scheda PDF aziendale'; title.className = 'form-section-title'; legend.textContent = 'Dati da includere';
+    description.textContent = 'Scegli i dati da condividere. Password, PIN, note riservate e allegati sono esclusi. Il PDF scaricato o condiviso rimane fuori dall’app.';
+    description.className = 'company-pdf-description'; choices.append(legend); actionBar.className = 'company-pdf-actions';
+    for (const node of [prepare, save, send]) node.className = 'company-profile-action';
     const controls = new AbortController(), inputs = [];
     let disposed = false, busy = false, bytes = null;
     prepare.type = save.type = send.type = 'button'; prepare.textContent = 'Prepara PDF'; save.textContent = 'Scarica PDF'; send.textContent = 'Condividi PDF';
@@ -45,7 +51,7 @@ export function mountCompanySummaryView(root, context, {read, generate, download
     };
     save.addEventListener('click', () => act(download), {signal: controls.signal});
     send.addEventListener('click', () => act(share), {signal: controls.signal});
-    host.append(choices, prepare, save, send, preview, status); context.signal.addEventListener('abort', dispose, {once: true});
+    actionBar.append(prepare, save, send); host.append(title, description, choices, actionBar, preview, status); context.signal.addEventListener('abort', dispose, {once: true});
     if (context.signal.aborted) dispose(); else root.append(host);
     return dispose;
 }

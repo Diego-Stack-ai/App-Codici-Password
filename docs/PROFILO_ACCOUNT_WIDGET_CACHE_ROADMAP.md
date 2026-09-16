@@ -2,7 +2,7 @@
 
 > **Stato:** blocchi implementati; inventario e gate reali ancora aperti.
 > **Autorità:** roadmap specialistica; prevale la baseline sicurezza.
-> **Revisione:** 16/09/2026; consegna riconciliata. Produzione 1.2.128 (PR #68); candidata ebf1b1fa nella PR #67 ancora separata.
+> **Revisione:** 16/09/2026; consegna riconciliata e riconciliazione PDF 1.2.128 documentata. Produzione 1.2.128 (PR #68); candidata ebf1b1fa nella PR #67 ancora separata.
 > **Area:** profili, collegamenti e widget.
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -13,10 +13,20 @@ Riferimento operativo: [relazione di consegna](./PASSAGGIO_CONSEGNE_2026-09-16.m
 
 - **Produzione 1.2.128:** PDF aziendale pubblicato separatamente, commit `9d0f7065`, merge `4efda528`, PR #68. Suite completa, 23 test PDF e verifiche browser/asset online superati; CI 35071328912. Nessuna nuova Rules/Function o migrazione.
 - **Candidata `ebf1b1fa`:** Collega/Cambia/Scollega montati; note e coda già integrate. Suite completa, 513 test shell e 109 verifiche Chrome; CI 35070097640 superata. Tutto committato e inviato prima di questa relazione, non pubblicato come shell completa.
-- **Prossimo:** riconciliare selettivamente il PDF produttivo con la candidata, poi creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
+- **Riconciliazione PDF:** completata il 16/09/2026 con confronto selettivo e senza merge. La candidata mancava solo del rilascio `9d0f7065`; generatore e lettore erano già byte-identici, riallineate la vista e il CSS `.company-pdf-*`. Dettagli nella sezione di laboratorio sotto.
+- **Prossimo:** creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
 - **Motivo:** parità incompleta, trasporti/Rules di laboratorio, transizione writer e migrazione/rollback non chiusi. VS-P0-01 resta aperto in produzione. Il deploy PDF non autorizza il deploy dell'intera PR #67.
-- **Cartella principale:** `C:/Users/Diego/Documents/Codex/2026-09-12/co/work/App-Codici-Password`. La cartella `Documents/Progetti/Codici&Password` è sul vecchio ramo Excel con modifiche non committate: conservarla, non usarla come base corrente. Ripresa automatica in pausa per il passaggio a un altro agente.
+- **Cartella principale unica:** `C:/Users/Diego/Documents/Progetti/App-Codici-Password`. Le cartelle datate di Codex, i worktree temporanei e la copia `Documents/Progetti/Codici&Password` sono stati archiviati e rimossi; il file Excel resta sul ramo remoto `origin/codex/real-excel-export-preview` al commit `40052515`. Ripresa automatica in pausa per il passaggio a un altro agente.
 
+### Riconciliazione PDF 1.2.128 — laboratorio 16/09/2026
+
+Confronto selettivo con la produzione, senza merge né cherry-pick: rispetto a `origin/master` (`4efda528`, merge della PR #68) la candidata mancava **solo** del rilascio PDF `9d0f7065`. Gli altri file di quel rilascio divergono unicamente per il numero di versione (`?v=1.2.128` produttivo contro `?v=1.2.127` della candidata, che resta invariata per scelta e non riceve bump).
+
+Il core era già riconciliato: generatore e lettore del laboratorio sono **byte-identici** alle controparti produttive — blob `e5cf212597c51dad3263a8b20eb77e2cd5ecc538` (`company-summary-pdf.mjs` = `scripts/pdf/company-summary-pdf.mjs`) e `8739aa92703282290a270ead73a9942eb66aec04` (`company-summary-reader.mjs` = `Frontend/public/assets/js/modules/azienda/pdf/company-summary-reader.js`). Restavano due soli delta reali, entrambi di presentazione: la vista e il relativo CSS `.company-pdf-*`. Riallineati nel laboratorio conservando i percorsi `.mjs` e la chiave Vault esclusivamente in RAM; il CSS usa i colori del laboratorio, non le variabili applicative assenti nel foglio locale.
+
+Deliberatamente **non** portati: `company-summary-entry.js` e `company-summary-panel.js` (adapter del percorso produttivo), il bundle `vendor/company-summary-pdf.js` e il bundler `scripts/build-company-pdf.mjs`. Le differenze di percorso in `company-summary-browser.mjs` e nel test PDF sono strutturali, non funzionali. Il duplicato generatore/lettore va eliminato al cutover, quando il percorso produttivo sarà sostituito dalla shell.
+
+Prove: 16 test PDF del laboratorio (generatore 4, lettore 7, browser 3, vista 2) e suite shell completa **513 test, 0 fallimenti** (56 file). Ambiente di test ripristinato con `npm ci` sulla cartella principale e su `functions/`: entrambi i `node_modules` erano vuoti dopo il riordino. **Nessuna nuova verifica browser/emulatore** è attribuita a questo riallineamento, che è di sola presentazione; Edge, iPhone e i gate produttivi restano invariati. Nessun dato reale, master, bump o deploy. Rollback: ripristinare i due file di laboratorio.
 ### Azioni di collegamento montate — laboratorio 16/09/2026
 
 Successivo a `781c7974`: Collega/Cambia/Scollega usa sorgente revocabile, selettore personale/azienda con ricerca e servizio transazionale candidato. Account già associati ad altri dati restano selezionabili. Dopo conferma rilegge la stessa linguetta dal server; Annulla, navigazione e blocco puliscono selezione e risultati. Offline mostra il vincolo e non apre il selettore né salva.

@@ -2,7 +2,7 @@
 
 > **Stato:** registro operativo e cronologico.
 > **Autorità:** roadmap subordinata ai contratti, non certificazione; prevale la baseline sicurezza.
-> **Revisione:** 16/09/2026; consegna e cartelle locali riconciliate. Produzione 1.2.128 (PR #68); candidata applicativa ebf1b1fa nella PR #67 ancora separata.
+> **Revisione:** 16/09/2026; consegna e cartelle locali riconciliate; riconciliazione PDF 1.2.128 documentata. Produzione 1.2.128 (PR #68); candidata applicativa ebf1b1fa nella PR #67 ancora separata.
 > **Area:** release e attività aperte.
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -12,6 +12,7 @@
 Riferimento operativo: [relazione di consegna](../docs/PASSAGGIO_CONSEGNE_2026-09-16.md), con obiettivo, lavori fatti/aperti, motivi del mancato rilascio complessivo, cartelle verificate e istruzioni per il nuovo agente. Questo riepilogo aggiorna lo stato; le sezioni successive conservano la cronologia e non sono tutte istruzioni ancora da eseguire.
 
 - **Produzione 1.2.128:** PDF aziendale pubblicato separatamente, commit `9d0f7065`, merge `4efda528`, PR #68. Suite completa, 23 test PDF e verifiche browser/asset online superati; CI 35071328912. Nessuna nuova Rules/Function o migrazione.
+- **Riconciliazione PDF 1.2.128 (16/09/2026):** confronto selettivo con `origin/master`/`9d0f7065`, nessun merge né cherry-pick; generatore e lettore già byte-identici (`e5cf2125`, `8739aa92`); riallineate vista e CSS `.company-pdf-*` nel laboratorio. Non portati adapter `entry`/`panel`, bundle vendor e bundler. 16 test PDF e 513 test shell superati; `npm ci` ripristinato su cartella principale e `functions/`. Nessuna verifica browser/emulatore attribuita.
 - **Candidata `ebf1b1fa`:** Collega/Cambia/Scollega montati; note e coda già integrate. Suite completa, 513 test shell e 109 verifiche Chrome; CI 35070097640 superata. Tutto committato e inviato prima di questa relazione, non pubblicato come shell completa.
 - **Prossimo:** riconciliare selettivamente il PDF produttivo con la candidata, poi creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
 - **Motivo:** parità incompleta, trasporti/Rules di laboratorio, transizione writer e migrazione/rollback non chiusi. VS-P0-01 resta aperto in produzione. Il deploy PDF non autorizza il deploy dell'intera PR #67.

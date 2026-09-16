@@ -2,7 +2,7 @@
 
 > **Stato:** programma in corso; avanzamento riconciliato, gate aperti conservati.
 > **Autorità:** piano subordinato alla baseline e ai contratti specialistici; prevale la baseline sicurezza.
-> **Revisione:** 16/09/2026; consegna e cartelle locali riconciliate. Produzione 1.2.128 (PR #68); candidata applicativa ebf1b1fa nella PR #67 ancora separata.
+> **Revisione:** 16/09/2026; consegna e cartelle locali riconciliate; riconciliazione PDF 1.2.128 chiusa in laboratorio. Produzione 1.2.128 (PR #68); candidata applicativa ebf1b1fa nella PR #67 ancora separata.
 > **Area:** maturità M0–M10 e post-M10.
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -15,7 +15,8 @@ Riferimento operativo: [relazione di consegna](./PASSAGGIO_CONSEGNE_2026-09-16.m
 
 - **Produzione 1.2.128:** PDF aziendale pubblicato separatamente, commit `9d0f7065`, merge `4efda528`, PR #68. Suite completa, 23 test PDF e verifiche browser/asset online superati; CI 35071328912. Nessuna nuova Rules/Function o migrazione.
 - **Candidata `ebf1b1fa`:** Collega/Cambia/Scollega montati; note e coda già integrate. Suite completa, 513 test shell e 109 verifiche Chrome; CI 35070097640 superata. Tutto committato e inviato prima di questa relazione, non pubblicato come shell completa.
-- **Prossimo:** riconciliare selettivamente il PDF produttivo con la candidata, poi creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
+- **Riconciliazione PDF:** completata il 16/09/2026 con confronto selettivo e senza merge. La candidata mancava solo del rilascio `9d0f7065`; generatore e lettore erano già byte-identici, riallineate la vista e il CSS `.company-pdf-*`. Dettagli nella sezione di laboratorio sotto.
+- **Prossimo:** creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
 - **Motivo:** parità incompleta, trasporti/Rules di laboratorio, transizione writer e migrazione/rollback non chiusi. VS-P0-01 resta aperto in produzione. Il deploy PDF non autorizza il deploy dell'intera PR #67.
 - **Cartella principale unica:** `C:/Users/Diego/Documents/Progetti/App-Codici-Password`. Le vecchie copie e i worktree temporanei sono stati archiviati e rimossi; l'Excel resta disponibile sul ramo remoto `origin/codex/real-excel-export-preview` al commit `40052515`. Ripresa automatica in pausa per il passaggio a un altro agente.
 
@@ -31,6 +32,7 @@ La decisione dell'utente è proseguire tutte le attività autonome, lasciando ap
 
 Ordine dei prossimi blocchi autonomi, verificando ogni volta gli ultimi commit per evitare duplicazioni:
 
+Riconciliazione PDF dopo `4e624046`: confronto selettivo con `origin/master`, senza merge né cherry-pick; la candidata mancava solo del rilascio `9d0f7065` e gli altri file divergevano per il solo numero di versione. Generatore e lettore erano già byte-identici (blob `e5cf2125`, `8739aa92`); riallineate la vista e il CSS `.company-pdf-*`, senza portare adapter `entry`/`panel`, bundle vendor o bundler, e senza bump (candidata 1.2.127). Sedici test PDF e suite shell 513/0; ambiente di test ripristinato con `npm ci` su cartella principale e `functions/`. **Proseguire con gli editor contatti, indirizzi e documenti, quindi la creazione Account dal collegamento**; verifica browser/emulatori di questo delta di presentazione non ancora eseguita.
 Collegamenti montati dopo `781c7974`: azioni Collega/Cambia/Scollega nei contatti e nelle origini private supportate, selettore ricercabile personale/azienda, conferma e rilettura senza reload. Controllo delle code del vecchio/nuovo Account, revoca e UID atteso lungo la richiesta. Offline sola consultazione. Prove e limiti nella roadmap profili; creazione Account ed editor completi restano aperti, nessun deploy.
 
 Note montate dopo `e21202ac`: consultazione della coda tramite lease, recupero M6 esplicito per comandi pendenti, nuovo editor della sola nota per Account collegati/aziendali e mantenimento del percorso isolato precedente. Penna/Aggiungi nota, svuotamento e refresh confermato. Chrome 99 verifiche entry/riavvio superate; dettagli nella roadmap profili. **Proseguire montaggio Collega/Cambia/Scollega nei profili**, ora che le note dei riferimenti restano modificabili nel laboratorio. Restanti editor completi e gate ancora aperti, nessun deploy.

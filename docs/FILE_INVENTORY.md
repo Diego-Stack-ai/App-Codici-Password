@@ -4,45 +4,6 @@
 
 File censiti: **672**. Duplicati byte-per-byte: **1 gruppi**.
 
-## docs
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 17406 | 130 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
-| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
-| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/GUIDA_PROGETTO.md` | MD | 10528 | 162 | Documentazione: GUIDA PROGETTO. |
-| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
-| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
-| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 68786 | 415 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
-| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3258 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 76938 | 622 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 97757 | 648 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
-| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
-
 ## .firebaserc
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -74,7 +35,7 @@ File censiti: **672**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 119113 | 984 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 121792 | 991 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -334,6 +295,45 @@ File censiti: **672**. Duplicati byte-per-byte: **1 gruppi**.
 | `archive/home-experiments/home_confronto_legacy.css` | CSS | 2717 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_nebbia.html` | HTML | 605 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 
+## docs
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
+| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
+| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
+| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 68786 | 415 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3258 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
+| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 78626 | 624 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 100490 | 658 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
+
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -427,7 +427,7 @@ File censiti: **672**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/company-summary-pdf.test.mjs` | MJS | 2199 | 32 | File di progetto: company-summary-pdf.test. |
 | `experiments/persistent-vault-shell/company-summary-reader.mjs` | MJS | 5040 | 66 | File di progetto: company-summary-reader. |
 | `experiments/persistent-vault-shell/company-summary-reader.test.mjs` | MJS | 2890 | 35 | File di progetto: company-summary-reader.test. |
-| `experiments/persistent-vault-shell/company-summary-view.mjs` | MJS | 4722 | 52 | File di progetto: company-summary-view. |
+| `experiments/persistent-vault-shell/company-summary-view.mjs` | MJS | 5600 | 58 | File di progetto: company-summary-view. |
 | `experiments/persistent-vault-shell/company-summary-view.test.mjs` | MJS | 2453 | 34 | File di progetto: company-summary-view.test. |
 | `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
@@ -449,7 +449,7 @@ File censiti: **672**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 4268 | 59 | File di progetto: emulator-qr-bridge. |
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
 | `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 3845 | 54 | File di progetto: emulator-queue.test. |
-| `experiments/persistent-vault-shell/emulator.css` | CSS | 2754 | 26 | File di progetto: emulator. |
+| `experiments/persistent-vault-shell/emulator.css` | CSS | 3719 | 39 | File di progetto: emulator. |
 | `experiments/persistent-vault-shell/emulator.html` | HTML | 1961 | 11 | Struttura della pagina emulator; comportamento demandato ai moduli. |
 | `experiments/persistent-vault-shell/excel-export-projection.mjs` | MJS | 6288 | 96 | File di progetto: excel-export-projection. |
 | `experiments/persistent-vault-shell/excel-export-projection.test.mjs` | MJS | 6413 | 105 | File di progetto: excel-export-projection.test. |
