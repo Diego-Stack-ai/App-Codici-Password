@@ -5,7 +5,7 @@ Data: 16 settembre 2026. Relazione verificata su Git, cartelle locali, test e PR
 ## 1. Punto di partenza per il nuovo agente
 
 - Repository GitHub: https://github.com/Diego-Stack-ai/App-Codici-Password
-- **Cartella principale per continuare il programma MD:** `C:/Users/Diego/Documents/Codex/2026-09-12/co/work/App-Codici-Password`.
+- **Cartella principale per continuare il programma MD:** `C:/Users/Diego/Documents/Progetti/App-Codici-Password`.
 - Ramo di lavoro: `integration/vault-shell-v127-security`.
 - Ultimo commit applicativo della candidata: **`ebf1b1fad55af1434cc202ed49d93354d4152e51`**, già inviato su GitHub. Questa relazione viene registrata in un successivo commit documentale: usare `git log -1` per il checkpoint più recente.
 - PR sperimentale **#67**, ancora bozza: https://github.com/Diego-Stack-ai/App-Codici-Password/pull/67. Base **`experiment/m6-private-note-provider`**, NON master. Non cambiare base o unire tutta la PR per pubblicare una sola funzione.
@@ -83,7 +83,7 @@ Ricognizione delle directory fino a otto livelli, escludendo dipendenze/cache e 
 
 | Cartella | Stato verificato | Cosa farne |
 |---|---|---|
-| `Documents/Codex/2026-09-12/co/work/App-Codici-Password` | Ramo candidata `integration/vault-shell-v127-security`, `ebf1b1fa` prima del commit di consegna | **Riferimento principale per continuare il programma MD** |
+| `Documents/Progetti/App-Codici-Password` | Ramo candidata `integration/vault-shell-v127-security`, `ebf1b1fa` prima del commit di consegna | **Riferimento principale per continuare il programma MD** |
 | `Documents/Codex/2026-09-12/co/work/company-pdf-release` | Worktree `release/company-pdf-summary`, `9d0f7065`, versione 1.2.128; PR #68 merged | Riferimento locale del PDF rilasciato. Master remoto `4efda528` è l'autorità per la produzione |
 | `Documents/Progetti/Codici&Password` | Clone separato, ramo `codex/real-excel-export-preview`, `40052515`, package 1.2.99 | **Non usarlo come base aggiornata generale. Conservare** per lavoro Excel e modifiche locali |
 | `Documents/Progetti/Codici&Password/.codex-worktrees/account-detail-ui-preview` | `codex/account-detail-ui-v118`, `d2ef897e`, 1.2.118 | Worktree storico; non base corrente |
