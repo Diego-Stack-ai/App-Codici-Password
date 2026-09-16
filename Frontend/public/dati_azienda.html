@@ -8,22 +8,22 @@
     <title>Profilo aziendale</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.127" />
+    <link rel="manifest" href="manifest.json?v=1.2.128" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.128">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.127">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.127">
-    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.128">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.128">
+    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.128">
 
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.127">
-    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.127">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.128">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.128">
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
 </head>
@@ -81,10 +81,12 @@
 <button type="button" class="profile-tab" role="tab" data-company-tab="addresses" aria-selected="false">Indirizzi</button>
 <button type="button" class="profile-tab" role="tab" data-company-tab="documents" aria-selected="false">Documenti</button>
 <button type="button" class="profile-tab" role="tab" data-company-tab="digital-card" aria-selected="false">Tessera digitale</button>
+<button type="button" class="profile-tab" role="tab" data-company-tab="pdf-summary" aria-selected="false">Scheda PDF</button>
 </nav>
 <div class="detail-content-wrap">
 <section data-company-panel="overview" class="detail-section" id="company-overview"></section>
 <section data-company-panel="digital-card" class="detail-section hidden" id="company-digital-card"></section>
+<section data-company-panel="pdf-summary" class="detail-section hidden" id="company-pdf-summary"></section>
 
 
                     <section data-company-panel="personal" class="detail-section hidden">

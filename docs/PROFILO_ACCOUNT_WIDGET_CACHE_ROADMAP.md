@@ -1,5 +1,15 @@
 # Profilo, Account, Widget e Cache — roadmap di coerenza dati
 
+## Scheda PDF aziendale — rilascio isolato 1.2.128 (16/09/2026)
+
+Porting selettivo del generatore sperimentale `a2a0252a` sulla base produttiva `0ba2332b`, ramo `release/company-pdf-summary`. Non include la PR #67 né la shell sperimentale. Nuova linguetta Scheda PDF in Dati azienda: scelta gruppi, anteprima testuale, generazione locale A4, download e condivisione file solo su gesto esplicito. Esclusi password, PIN/PUK, note riservate, banca e allegati. Nessuna scrittura Firebase o migrazione.
+
+Proiezione riletta con UID/azienda e stato coerenti. Preparazione richiede Vault sbloccato; cambio linguetta, logout/blocco, cambio UID e pagehide revocano vista, buffer e URL. Il security manager espone solo un booleano e un evento di stato, nessun materiale crittografico. Questo incremento non risolve né modifica il wrapping legacy: VS-P0-01 e il programma MD restano aperti. Il modulo PDF è caricato su richiesta; font locali e dipendenze fissate, font inclusi nella cache statica.
+
+23 prove PDF: proiezione minima, proprietario/alias, revoca durante le attese, bytes invalidati, share/download, impaginazione e glifi. Chrome desktop e viewport mobile: download effettivo, selezione, nessun overflow orizzontale e pulizia al blocco. PDF sintetico A4 di due pagine renderizzato e ispezionato; accenti e tutte le 75 frasi lunghe conservati, segreti esclusi. Viewport mobile non equivale a Safari iPhone: condivisione nativa WhatsApp/email da provare sul dispositivo, download disponibile come alternativa. Glifi non supportati rifiutati senza sostituzioni silenziose. Copie scaricate/condivise non revocabili dall'app.
+
+Rollback: ripubblicare Hosting 1.2.127; nessun rollback dati necessario. Suite completa e stato pubblicazione riportati nel commit/PR di rilascio.
+
 > **Stato:** roadmap in evoluzione; contiene blocchi implementati e gate ancora aperti  
 > **Autorità:** roadmap specialistica subordinata ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
 > **Ultima revisione documentale:** 11 settembre 2026

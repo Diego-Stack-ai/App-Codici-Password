@@ -24,7 +24,7 @@ for (const file of textFiles) {
     for (const match of text.matchAll(/\b(?:src|href)=["']([^"']+)["']/g)) references.push({ value: match[1], base: path.dirname(file) });
   }
   if (file.endsWith('.js')) {
-    for (const match of text.matchAll(/(?:from\s*|import\s*\()["']([^"']+)["']/g)) references.push({ value: match[1], base: path.dirname(file) });
+    for (const match of text.matchAll(/(?:\b(?:import|export)\s+(?:\{[^}]*\}|[\w$*][\w$\s,*{}]*?)\s+from\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g)) references.push({ value: match[1], base: path.dirname(file) });
     for (const match of text.matchAll(/["'`]([A-Za-z0-9_./-]+\.html)(?:[?#][^"'`]*)?["'`]/g)) references.push({ value: match[1], base: publicRoot });
   }
   if (file.endsWith('.css')) {

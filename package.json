@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.127",
+  "version": "1.2.128",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -23,9 +23,9 @@
     "build:offline-runtime": "node scripts/build-offline-runtime.mjs",
     "build:card-importer-prototype": "node scripts/build-card-importer-prototype.mjs",
     "migrate:offline-reads": "node scripts/migrate-offline-firestore-reads.mjs",
-    "pretest": "npm run build:offline-runtime",
+    "pretest": "npm run build:company-pdf && npm run build:offline-runtime",
     "release:patch": "npm run version:patch && npm test",
-    "test": "npm run test:offline && npm run test:security && npm run test:vault-contract && npm run test:data-access && npm run test:navigation && npm run test:page-shells && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:lightweight && npm run test:performance-budget && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:maturity-fixture && npm run test:crypto && npm run test:attachments && npm run test:sharing-prototype && npm run test:offline-write-prototype && npm run test:history-prototype && npm run test:backup-prototype && npm run test:credential-health-prototype && npm run test:release-hardening && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",
+    "test": "npm run test:offline && npm run test:security && npm run test:vault-contract && npm run test:data-access && npm run test:navigation && npm run test:page-shells && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:lightweight && npm run test:performance-budget && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:maturity-fixture && npm run test:crypto && npm run test:attachments && npm run test:sharing-prototype && npm run test:offline-write-prototype && npm run test:history-prototype && npm run test:backup-prototype && npm run test:credential-health-prototype && npm run test:release-hardening && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules && npm run test:company-pdf",
     "test:offline": "node scripts/audit-offline-shell.mjs && node --test tests/offline-profile-readiness.test.mjs tests/offline-account-widgets.test.mjs",
     "test:auth-browser": "node scripts/test-private-auth-browser.mjs",
     "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs tests/private-bootstrap-offline.test.mjs tests/private-auth-gate.test.mjs",
@@ -56,7 +56,9 @@
     "test:css": "node node_modules/stylelint/bin/stylelint.mjs \"Frontend/public/assets/css/**/*.css\"",
     "test:dependencies": "node node_modules/madge/bin/cli.js Frontend/public/assets/js --extensions js --circular",
     "audit:inventory": "node scripts/audit-project-inventory.mjs",
-    "audit:pages": "node scripts/audit-page-performance.mjs"
+    "audit:pages": "node scripts/audit-page-performance.mjs",
+    "build:company-pdf": "node scripts/build-company-pdf.mjs",
+    "test:company-pdf": "node --test tests/company-summary*.test.mjs"
   },
   "repository": {
     "type": "git",
@@ -69,5 +71,9 @@
   "bugs": {
     "url": "https://github.com/Diego-Stack-ai/App-Codici-Password/issues"
   },
-  "homepage": "https://github.com/Diego-Stack-ai/App-Codici-Password#readme"
+  "homepage": "https://github.com/Diego-Stack-ai/App-Codici-Password#readme",
+  "dependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
+    "pdf-lib": "1.17.1"
+  }
 }
