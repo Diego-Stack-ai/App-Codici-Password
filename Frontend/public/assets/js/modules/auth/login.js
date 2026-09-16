@@ -7,11 +7,11 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.127';
-import { initComponents } from '../../components-v129.js?v=1.2.127';
+} from '../../auth.js?v=1.2.128';
+import { initComponents } from '../../components-v129.js?v=1.2.128';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.127';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.128';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 
 /**

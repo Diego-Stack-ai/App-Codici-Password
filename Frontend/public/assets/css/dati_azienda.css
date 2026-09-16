@@ -860,3 +860,21 @@ html:not(.dark) .location-tab-btn.active {
 .company-profile-page .profile-overview-heading:has(> .form-section-header) { flex-wrap: nowrap; gap: 8px; }
 .company-profile-page .profile-overview-heading > .form-section-header { flex: 1; width: auto; margin: 0; min-width: 0; }
 .company-profile-page .settings-icon-box .detail-section-icon { color: inherit; }
+
+/* Scheda esportabile: stessa superficie e azioni degli altri pannelli. */
+.company-pdf-card { display: grid; gap: 20px; }
+.company-pdf-description { color: var(--text-secondary); line-height: 1.6; margin: 0; }
+.company-pdf-choices { display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; }
+.company-pdf-choices legend { padding: 0 8px; font-weight: 600; }
+.company-pdf-choices label { display: flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; }
+.company-pdf-choices input { width: 18px; height: 18px; accent-color: var(--primary-color, #007aff); }
+.company-pdf-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.company-pdf-preview { overflow-wrap: anywhere; }
+.company-pdf-preview h3 { margin: 20px 0 12px; }
+.company-pdf-preview dl { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(0, 2fr); gap: 10px 20px; margin: 0; }
+.company-pdf-preview dt { color: var(--text-secondary); }
+.company-pdf-preview dd { margin: 0; white-space: pre-wrap; }
+@media (max-width: 600px) {
+    .company-pdf-preview dl { grid-template-columns: 1fr; gap: 6px; }
+    .company-pdf-preview dd { margin-bottom: 10px; }
+}
