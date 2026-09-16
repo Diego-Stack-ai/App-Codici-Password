@@ -2,10 +2,20 @@
 
 > **Stato:** blocchi implementati; inventario e gate reali ancora aperti.
 > **Autorità:** roadmap specialistica; prevale la baseline sicurezza.
-> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Revisione:** 16/09/2026; consegna riconciliata. Produzione 1.2.128 (PR #68); candidata ebf1b1fa nella PR #67 ancora separata.
 > **Area:** profili, collegamenti e widget.
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+## Stato corrente e consegna — 16/09/2026
+
+Riferimento operativo: [relazione di consegna](./PASSAGGIO_CONSEGNE_2026-09-16.md), con obiettivo, lavori fatti/aperti, motivi del mancato rilascio complessivo, cartelle verificate e istruzioni per il nuovo agente. Questo riepilogo aggiorna lo stato; le sezioni successive conservano la cronologia e non sono tutte istruzioni ancora da eseguire.
+
+- **Produzione 1.2.128:** PDF aziendale pubblicato separatamente, commit `9d0f7065`, merge `4efda528`, PR #68. Suite completa, 23 test PDF e verifiche browser/asset online superati; CI 35071328912. Nessuna nuova Rules/Function o migrazione.
+- **Candidata `ebf1b1fa`:** Collega/Cambia/Scollega montati; note e coda già integrate. Suite completa, 513 test shell e 109 verifiche Chrome; CI 35070097640 superata. Tutto committato e inviato prima di questa relazione, non pubblicato come shell completa.
+- **Prossimo:** riconciliare selettivamente il PDF produttivo con la candidata, poi creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
+- **Motivo:** parità incompleta, trasporti/Rules di laboratorio, transizione writer e migrazione/rollback non chiusi. VS-P0-01 resta aperto in produzione. Il deploy PDF non autorizza il deploy dell'intera PR #67.
+- **Cartella principale:** `C:/Users/Diego/Documents/Codex/2026-09-12/co/work/App-Codici-Password`. La cartella `Documents/Progetti/Codici&Password` è sul vecchio ramo Excel con modifiche non committate: conservarla, non usarla come base corrente. Ripresa automatica in pausa per il passaggio a un altro agente.
 
 ### Azioni di collegamento montate — laboratorio 16/09/2026
 
