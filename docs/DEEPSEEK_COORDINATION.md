@@ -191,22 +191,40 @@ Test indipendenti superati: mirati **42/42**, Firestore Emulator **6/6**, shell 
 - **Rischi residui:** Firestore e Storage non sono atomici: la prova sull'oggetto è una lettura immediatamente precedente alla scrittura, non una transazione, e un trasporto che non riporta la dimensione restringe la prova al solo digest. `recover()` richiede ricevute canoniche: una ricevuta scritta dal candidato precedente (senza `objectSize`) resta bloccata senza migrazione implicita. Lo Storage della suite emulatore è un doppio in memoria: presenza e semantica di `digest`/`size` di Firebase Storage reale restano da provare in DS-002B, che deve implementare il contratto `probe/putIfAbsent/remove`. `firestore.rules:106-118` continua ad ammettere la scrittura diretta del proprietario su `profileDocumentAttachments` e `storage.rules:12-20` richiede il marcatore `encrypted='v1'` con 25 MiB e formati non immagine: nessuna modifica autorizzata in questo incremento. La cifratura binaria reale non è implementata (sigillo iniettato), non esistono prove su dispositivi e il candidato resta **non montato**. La riga dell'inventario per questo file di coordinamento è per costruzione leggermente stantia dopo questo rapporto.
 - **Note per Codex:** le sette correzioni richieste sono tracciate punto per punto in `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` §3.2. Le ricevute sono ora l'unica autorità di recupero: `documentAttachmentUploadReceipt` e `documentAttachmentDeleteReceipt` applicano allowlist esatta per tipo (solo l'`id` di trasporto è tollerato, e deve coincidere con `profile-document-attachment-<operationId>`), percorso ricalcolato da proprietario/documento/allegato, digest di operazione e digest dell'oggetto, `objectSize`, stato ammesso e `readyAt`/`removedAt` presenti solo nello stato che li possiede; `documentAttachmentEnvelopeEquals` confronta gli otto campi dell'envelope e il record deve essere coerente con il comando campo per campo (proprietario, documento, allegato derivato, percorso, MIME, dimensione, digest, stato). La finestra TOCTOU è resa riproducibile nel fake unitario con un hook che muta record, ricevuta o oggetto esattamente fra la prova e la transazione: caricamento, cancellazione e recupero restano bloccati senza promuovere né cancellare. Base, ramo e working tree verificati prima di iniziare; `master` `4efda528`, versione `1.2.127`, nessun deploy e nessun dato reale. **DS-002B non è stato avviato**; watcher `watch-2` attivo e affiancato da `watch-3` (polling a 20 s con confronto SHA-256, perché il tail perde il segnale quando git sostituisce il file).
 
+## Verifica Codex — DS-002A-R2
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-17.
+- **Revisione:** validatori canonici, riletture transazionali, mutazioni concorrenti e prove digest/dimensione risultano coerenti con il perimetro candidato di DS-002A.
+- **Test indipendenti:** mirati **53/53**, `npm run test:vault-shell` **617/617**, Firestore Emulator **8/8**, `npm test` completo **superato** con exit 0; working tree pulita prima dell'aggiornamento di coordinamento.
+- **Condizione trasferita a DS-002B:** Firebase Storage non è transazionale con Firestore. Il trasporto reale deve usare precondizioni native di generazione/metagenerazione per creazione e cancellazione; una sequenza semplice `probe()` → `remove()` non è sufficiente per il montaggio produttivo.
+
 ## Coda approvata dal proprietario
 
 ### DS-002B — Allegati dei documenti digitali privati nell'interfaccia
 
 Nella linguetta **Documenti digitali** del Profilo utente, accanto alle azioni Modifica e Cestino, aggiungere **Allegato**. Ogni documento deve poter avere una o più immagini del documento stesso.
 
-Questo incarico sarà dettagliato da Codex dopo l'approvazione di DS-002A. Dovrà rispettare almeno questi vincoli già decisi negli MD:
+**Base obbligatoria:** `76693bd5f1e858124cd2160860fbd2e07b5a66c6`, con i soli commit documentali di rapporto e coordinamento successivi.
 
-- cifratura locale prima dell'upload;
+**Perimetro eseguibile:** completare il candidato nella shell sperimentale e negli emulatori. Non montare ancora il codice in `Frontend/public/**` e non eseguire bump, merge su `master`, deploy o operazioni su dati reali.
+
+Implementare:
+
+- cifratura binaria locale reale prima dell'upload, tramite capacità revocabile legata alla sessione Vault e AAD contestuale definita in DS-002A, senza esporre o persistere la Vault Key;
+- adattatori Firestore e Firebase Storage reali per il contratto DS-002A; il trasporto Storage deve usare precondizioni native di generazione/metagenerazione per `putIfAbsent` e cancellazione condizionata, restituire digest, dimensione e versione dell'oggetto e rifiutare un oggetto cambiato dopo la verifica;
+- Rules candidate e test emulatori che confinino record, ricevute e oggetti allo UID autenticato, impediscano scritture dirette non attestate e applichino i limiti JPEG/PNG/WebP/HEIC/HEIF, 10 MiB e 10 immagini per documento;
+- pulsante **Allegato** accanto a Modifica e Cestino per ogni documento con ID persistente univoco; documenti legacy mancanti o duplicati restano consultabili ma senza allegati e con messaggio comprensibile;
+- selezione di una o più immagini, stato di caricamento, galleria, apertura e cancellazione; nessun nome originale o URL pubblico persistente nei metadati;
 - allegati disponibili online e non inclusi automaticamente nella cache offline;
 - percorsi Storage e metadati confinati al proprietario;
 - nessun URL pubblico persistente usato come autorizzazione;
 - limiti di tipo, dimensione e quantità;
-- anteprima e Object URL revocati alla chiusura/lock/logout;
+- byte in chiaro e anteprima eliminati dopo l'uso; Object URL revocati alla chiusura, cambio linguetta, navigazione, lock, logout e cambio UID, anche durante operazioni asincrone;
 - cancellazione coordinata fra riferimento del documento, metadati Firestore e oggetto Storage;
 - nessun dato reale nei test;
-- nessun riuso automatico del modello allegati Account finché compatibilità, AAD e proprietà non sono dimostrate.
+- nessun riuso automatico del modello allegati Account finché compatibilità, AAD e proprietà non sono dimostrate;
+- test unitari, browser sintetici ed emulatori per upload, retry, concorrenza, limite 10, oggetto sostituito, cancellazione condizionata, offline, lock/logout/cambio UID e revoca delle anteprime; rieseguire `npm run test:vault-shell`, `npm test` e `git diff --check`.
 
-**Stato coda:** IN ATTESA DI DS-002A, non ancora eseguibile.
+Separare i commit in blocchi revisionabili: trasporto/cifratura e Rules; interfaccia; documentazione e rapporto. Se un blocco richiede una decisione non coperta dagli MD, fermare soltanto quel blocco e proseguire con le parti indipendenti.
+
+**Stato incarico: PRONTO**
