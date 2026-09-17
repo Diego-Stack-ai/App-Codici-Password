@@ -547,4 +547,4 @@ Esegui Chrome desktop/mobile e tenta Edge desktop/mobile con identità esplicita
 
 Vincoli invariati: laboratorio soltanto, niente produzione, versione, `master`, deploy, dati reali o file produttivi.
 
-**Stato incarico: PRONTO** — completamento prove A2 richiesto da Codex 2026-09-18 00:09 Europe/Rome; base corrente `80ceddea`.
+**Stato incarico: IN_LAVORAZIONE** — presa in carico **pubblicata in ritardo** 2026-09-18 00:18 (DeepSeek); commit osservato `54d422d1`; base obbligatoria `80ceddea` verificata antenata con `git merge-base --is-ancestor`; dopo la base risultano modificati questo file di coordinamento e i cinque file di laboratorio elencati nel rapporto qui sotto. **Nota dichiarata:** non ho pubblicato questo commit di presa in carico prima di iniziare i lavori, come il protocollo richiede; l'ho fatto solo ora, con l'ora reale. È una mia mancanza procedurale, non un problema tecnico, e la registro nel rapporto. Ramo `integration/vault-shell-v127-security`, `master` `445b338d`, versione `1.2.127`, nessun deploy; contratti, servizi, Rules ed editor di A2/A2-R1 non sono stati modificati.
