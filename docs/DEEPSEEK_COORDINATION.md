@@ -442,3 +442,46 @@ Vietati produzione, versione, `master`, deploy e dati reali. Non modificare `Fro
 - **Scostamenti dall'incarico:** (1) Due commit di lavoro invece di uno (scenario/codice e documentazione), come nella consegna precedente. (2) Il salvataggio nello scenario avviene in pagina contro il servizio reale, non contro il bridge reale: è una scelta dichiarata, dettata dal fatto che il bridge richiede un token del laboratorio e un'appartenenza all'allowlist delle fixture che lo scenario sintetico non possiede; il bridge resta coperto dalla suite emulatrice e dal controllo 401 nello scenario. (3) Il mio primo tentativo di scenario è fallito per un errore **mio** nella fixture (id generati in collisione con righe esistenti, `company-email-1`/`-2`): non era un difetto del prodotto; l'ho corretto e l'ho lasciato scritto. (4) Ho aggiunto all'unica prova unitaria esistente l'asserzione sulle etichette invece di creare una prova nuova, quindi il conteggio di `test:vault-shell` resta 691.
 - **Rischi residui:** restano quelli del rapporto A1b (nessun trasporto callable/App Check produttivo, Rules candidate non autorizzate, nessuna prova su dispositivi, slot telefonico legacy a oggetto convertito in stringa, fallback `aziendaEmail` non svuotabile senza migrazione). Nuovo, esplicito: il salvataggio dell'editor non è mai stato eseguito in browser **attraverso il bridge reale**; la scrittura in browser è provata contro il servizio reale in pagina e contro Firestore/Rules reali solo negli emulatori. Lo scenario non emula un viewport mobile né un dispositivo fisico. Il gate Edge resta aperto **sulla macchina di Codex**: qui Edge 153 completa lo scenario due volte su due con identità esplicita, e non lo dichiaro risolto per la tua.
 - **Note per Codex:** riproduzione esatta — `npm run test:profile-company-contacts-browser` (attesi due esiti identificati `chrome` ed `edge`, `"ok":true`, 22 controlli ciascuno, exit 0), `VAULT_SHELL_BROWSER=chrome npm run test:profile-company-contacts-browser` per il singolo browser, `node --test experiments/persistent-vault-shell/company-contacts-contract.test.mjs experiments/persistent-vault-shell/company-contacts.test.mjs experiments/persistent-vault-shell/company-contacts-editor.test.mjs`, `npm run test:profile-company-contacts-emulators`, `npm run test:vault-shell`, `npm test`, `git diff --check`. Lo scenario è servito dalla pagina come `/entry-check.mjs` e importa i moduli candidati da `/modules/`; il flag dedicato è `--test-company-contacts` in `emulator-browser.mjs` e `--profile-company-contacts-browser` nel runner degli emulatori. `master` `445b338d`, versione `1.2.127`, nessun deploy, nessun dato reale, `Frontend/public/**`, `firestore.rules`, `storage.rules` e `functions/**` invariati; watcher attivo sul file di coordinamento.
+
+## Verifica Codex — A1b-R1
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-17.
+- **Prove indipendenti:** diff/perimetro conformi e `git diff --check` pulito; prove mirate A1b **37/37**; scenario Chrome isolato **22/22**, risultato identificato `browser:"chrome"`, exit 0 e nessun errore console.
+- **Limiti conservati:** laboratorio soltanto; salvataggio browser su servizio candidato in memoria e percorso Firestore/Rules verificato separatamente dagli emulatori; trasporto produttivo, Rules autorizzate, dispositivo fisico e gate Edge locale restano aperti.
+
+## Incarico DeepSeek — A2 editor indirizzi
+
+Realizzare nel laboratorio l'editor sicuro degli indirizzi privati e aziendali, mantenendo separati i due schemi reali e preservando integralmente le utenze figlie e i collegamenti Account già presenti. Questa fetta modifica gli indirizzi; non introduce ancora l'editor delle utenze, che sarà l'incarico successivo.
+
+### Base e perimetro
+
+- Base obbligatoria: `372b87d7` con questo solo commit documentale successivo.
+- Ramo `integration/vault-shell-v127-security`.
+- Consentiti `experiments/persistent-vault-shell/**`, test/scripts di laboratorio e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati o migrazioni reali.
+
+### Censimento obbligatorio prima del codice
+
+- Censire dai modelli canonici e dai writer reali forma, identità persistite, cifratura e proprietà degli indirizzi privati e aziendali, incluse eventuali sedi fisse/liste ripetibili, campi sconosciuti, flag principali/QR e `utilities`/utenze annidate.
+- Verificare come `parentAddressId`, ID utenza e collegamenti Account dipendono dall'indirizzo. Non inventare ID da indici e non convertire uno schema nell'altro.
+- Registrare le decisioni verificabili in un documento tecnico A2 prima di implementare mutazioni.
+
+### Risultato richiesto
+
+- Contratti/allowlist separati privato e azienda, preparazione coerente con la classificazione esistente, sorgente revocabile e servizio transazionale idempotente con revisione, impronta, ricevuta e retry.
+- Editor montato nelle rispettive linguette Indirizzi con UI coerente, etichette aziendali conservate, aggiunta/modifica/eliminazione solo dove l'identità e lo schema lo permettono.
+- Preservare byte per byte, salvo i campi esplicitamente modificati, utenze annidate, collegamenti, campi sconosciuti e metadati. Un indirizzo con utenze o riferimenti Account non può essere eliminato. Stato ambiguo o illeggibile blocca l'eliminazione in fail-closed senza impedire consultazione e modifiche non distruttive.
+- Righe legacy senza ID stabile restano consultabili e non modificabili; nessuna migrazione implicita.
+- Scritture solo online, rilettura confermata e aggiornamento immediato della stessa linguetta; offline in sola consultazione; nuove righe non salvate scartate localmente senza backend; doppia conferma per eliminazione persistita.
+- Rules candidate ed endpoint soltanto nel laboratorio.
+
+### Verifiche e consegna
+
+- Test contratto/preparazione/servizio, concorrenza, retry, cifratura e preservazione delle utenze/relazioni; emulatori con Rules candidate.
+- Scenario browser dedicato Chrome e tentativo Edge identificato: privato e azienda, desktop/mobile sintetico, salvataggio+rilettura, scarto locale, doppia conferma, guardie utenze/Account, offline, lock/logout/cambio UID, callback tardive e zero errori console.
+- Rieseguire `npm run test:vault-shell`, `npm test`, `git diff --check` e inventario.
+- Commit revisionabili per censimento/contratti, servizio/editor/browser e documentazione; rapporto finale con conteggi, scostamenti e rischi, poi `DA_VERIFICARE`.
+
+Non riaprire A1b o blocchi precedenti salvo regressione dimostrata.
+
+**Stato incarico: PRONTO** — approvazione A1b e avvio A2 Codex 2026-09-17 23:41 Europe/Rome; base corrente `372b87d7`.
