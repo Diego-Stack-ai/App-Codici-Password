@@ -61,7 +61,7 @@ Diff conforme: due soli file di laboratorio, nessun writer o confine produttivo.
 ## Incarico attivo
 
 - **ID:** DS-002A
-- **Stato incarico:** DA_VERIFICARE
+- **Stato incarico:** DA_CORREGGERE — revisione Codex 17/09/2026
 - **Presa in carico:** 2026-09-17 10:42 (DeepSeek); commit osservato `a3c7e54e`, base obbligatoria `58aaa625` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Rapporto DS-001 lasciato intatto. Consegna: 2026-09-17 11:05.
 - **Base di codice obbligatoria:** `58aaa625c264ca23db4998eb2f26561707e58dbe` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
@@ -108,6 +108,50 @@ Preparare il confine sicuro e testabile che consentirà a ogni elemento persisti
 - **Scostamenti dall'incarico:** (1) oltre al commit di lavoro ci sono due commit che toccano **solo** questo file di coordinamento (`a7db2ae6` presa in carico, l'ultimo per rapporto e `DA_VERIFICARE`), come già in DS-001: il commit dedicato al lavoro resta uno. (2) Ai metadati candidati ho aggiunto `ownerId` e `status` rispetto all'elenco dell'incarico: servono al controllo di proprietà e alla macchina a stati richiesta, e sono dichiarati nel documento tecnico. (3) `FILE_INVENTORY.md` è stato rigenerato perché l'elenco dei file censiti è cambiato, come previsto dall'incarico; di conseguenza la riga di inventario di questo stesso file di coordinamento risulta di qualche riga datata dopo la scrittura del rapporto.
 - **Rischi residui:** il contratto è più restrittivo delle Rules attuali e l'irrigidimento vive nel client finché non è autorizzato — `firestore.rules:106-118` ammette ancora la scrittura diretta del proprietario su `profileDocumentAttachments`, `storage.rules:12-20` consente 25 MiB e formati non immagine e richiede il marcatore `encrypted='v1'` per `application/octet-stream` (decisione rinviata); la cifratura binaria reale non è implementata, il sigillo è iniettato e i test usano un'implementazione sintetica; `recover()` dipende da ricevute complete (incluso `operationId`) e da un trasporto che sappia elencare `mutationResults/{uid}/operations`; nessuna prova su emulatori, dispositivi o byte reali; il percorso Storage non è vincolato dalle Rules, il confinamento è nel contratto; restano aperte le decisioni su cestino/retention (M7), backup/ripristino (M8), revoca degli Object URL e gate §16.
 - **Note per Codex:** i test hanno scoperto due difetti reali, corretti prima del commit: il servizio scriveva `readyAt` nei metadati (fuori dall'allowlist, rendendoli non verificabili per la cancellazione e per la proiezione) e la ricevuta non conservava il proprio `operationId`, quindi `recover()` non riusciva a ricostruirne il percorso. Ora la macchina a stati vive solo nella ricevuta e i metadati restano esattamente nell'allowlist del contratto. Il modello **non** riusa gli allegati Account (AAD costante `CodiciPassword-Attachment-v1`, `url` persistente): `attachment-security.js` è stato letto solo come fotografia dei limiti legacy. Base, ramo e working tree verificati prima di iniziare (dopo `58aaa625` solo questo file modificato); `master` `4efda528`, versione `1.2.127`, nessun deploy e nessun dato reale. **DS-002B non è stato avviato**: resta in coda non eseguibile finché non lo dettagli.
+
+### Revisione Codex — DS-002A
+
+Test rieseguiti indipendentemente: mirati **35/35**, shell **599/599**. Il perimetro è rispettato, ma il candidato non è ancora approvabile:
+
+1. `drop()`, la finalizzazione della cancellazione e i due rami di `recover()` leggono la ricevuta dopo una `delete/update` nella stessa transazione. Firestore reale richiede tutte le letture prima delle scritture; i mock non rilevano il difetto.
+2. `upload()` non legge il profilo autorevole e non verifica che `documentId` identifichi esattamente una riga persistita. Il limite di dieci immagini è controllato soltanto dal client e non è protetto dalla concorrenza sul server.
+3. Il servizio ricontrolla il digest del comando, ma non calcola il digest dei byte ricevuti: payload diverso, retry o sovrascrittura possono produrre metadati e oggetto incoerenti.
+4. `remove()` confronta soltanto `record.digest`; deve validare l'intero record autorevole (owner, documentId, attachmentId derivato, storagePath, stato, schema ed envelope) prima di rimuovere metadato e oggetto.
+5. `recover()` considera sufficiente l'esistenza dell'oggetto e può promuovere `ready` senza verificarne integrità e coerenza con i metadati.
+
+## Incarico attivo
+
+- **ID:** DS-002A-R1
+- **Stato incarico:** PRONTO
+- **Base di codice obbligatoria:** `62fb8d6928ceef921ffa178b45ea6cf6428efba8`
+- **Ramo:** `integration/vault-shell-v127-security`
+- **Perimetro:** sola correzione del candidato DS-002A; nessuna interfaccia o produzione
+
+### Correzioni richieste
+
+- Riordinare ogni transazione affinché completi tutte le letture prima di qualsiasi scrittura; aggiungere un fake che rifiuti read-after-write e almeno una prova con Firestore Emulator se il trasporto candidato lo consente.
+- Rendere il profilo autorevole parte della prenotazione: proprietario corretto e `documentId` unico/persistito devono essere verificati nella stessa decisione server.
+- Applicare il limite massimo sul server con un meccanismo atomico resistente a due upload concorrenti; non fidarsi dell'elenco allegati fornito dal client. Documentare l'indice/contatore scelto e la relativa compensazione.
+- Validare il payload come copia binaria immutabile, calcolarne SHA-256 nel confine fidato e confrontarlo con `command.digest` prima della scrittura Storage. Un retry non deve sovrascrivere alla cieca un oggetto esistente: usare creazione condizionata oppure verificarne identità e digest.
+- In cancellazione validare il record completo tramite il contratto canonico e richiedere corrispondenza di owner, documento, ID, percorso, digest, schema, stato ed envelope.
+- In recupero non promuovere un oggetto a `ready` sulla sola esistenza: verificare dimensione/digest e coerenza con record/ricevuta; configurazioni incomplete o malformate restano bloccate o vengono compensate senza cancellare oggetti non dimostrati propri.
+- Aggiungere regressioni per comando valido con documento inesistente/duplicato, undicesimo upload e corsa concorrente, payload alterato, retry con oggetto già diverso, record con stesso digest ma path/documento differente, ricevuta/record malformati e read-after-write.
+- Rieseguire test mirati, `npm run test:vault-shell`, eventuali emulatori, `npm test` e `git diff --check`; aggiornare rapporto tecnico e MD senza avviare DS-002B.
+
+### Divieti
+
+- Nessuna modifica a `Frontend/public/**`, Rules/Functions produttive, `master`, versione o deploy.
+- Nessun dato reale, nessuna migrazione e nessun pulsante Allegato.
+
+## Rapporto DeepSeek — DS-002A-R1
+
+- **Stato:** IN ATTESA
+- **Commit finale:**
+- **File modificati:**
+- **Test eseguiti e risultati:**
+- **Scostamenti dall'incarico:**
+- **Rischi residui:**
+- **Note per Codex:**
 
 ## Coda approvata dal proprietario
 
