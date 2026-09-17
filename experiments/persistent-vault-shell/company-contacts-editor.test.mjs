@@ -69,6 +69,11 @@ test('the company editor renders slots, repeatable rows and telephones without c
             ['phone-slot', 'telefonoAzienda'], ['phone-slot', 'faxAzienda'], ['phone-slot', 'referenteCellulare']]);
     assert.equal(byField(container, 'pec', 'email').value, 'pec@example.invalid');
     assert.equal(byField(container, 'pec', 'password').type, 'password', 'the stored cipher field is a secret input');
+    // The label of the row is what tells the fixed slots apart: the schema label
+    // wins when the record carries one, otherwise the company label is used.
+    assert.deepEqual(rows(container).map(row => walk(row).find(node => node.dataset?.companyLabel === 'true').textContent),
+        ['PEC', 'Amministrazione', 'Email personale', 'Ufficio', 'Magazzino', 'Senza id',
+            'Telefono azienda', 'Fax', 'Cellulare referente']);
     assert.equal(byField(container, 'pec', 'password').value, 'segreta');
     assert.equal(byField(container, 'telefonoAzienda', 'number').value, '0110000000');
     assert.equal(byField(container, 'company-email-2', 'qr').type, 'checkbox');

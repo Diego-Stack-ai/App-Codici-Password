@@ -78,7 +78,15 @@ export async function mountCompanyContactsEditor(root, context, {load, createCon
         set.dataset.companyRow = 'true'; set.dataset.companyKind = kind;
         set.dataset.companyId = typeof id === 'string' ? id : '';
         if (created) set.dataset.companyNew = 'true';
-        retained.push(set);
+        // The company label of the row is what distinguishes the fixed slots from
+        // each other ('PEC', 'Telefono azienda', ...): without it the editor would
+        // show three identical groups of fields. A label the schema already
+        // carries (`tipo`) keeps priority and stays editable as a field.
+        const legend = document.createElement('legend');
+        legend.dataset.companyLabel = 'true';
+        legend.textContent = typeof label === 'string' ? label : '';
+        set.append(legend);
+        retained.push(set, legend);
         for (const field of fields) {
             const caption = document.createElement('span'), input = document.createElement('input');
             caption.textContent = field.label;
