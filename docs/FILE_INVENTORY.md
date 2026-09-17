@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **708**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -308,8 +308,8 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 38594 | 237 | Documentazione: DEEPSEEK COORDINATION. |
-| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 27866 | 153 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 51203 | 301 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
@@ -328,8 +328,8 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 92804 | 656 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 115809 | 694 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 93842 | 658 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 116890 | 696 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -435,7 +435,8 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
 | `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
 | `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 13409 | 145 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-attachments-check.mjs` | MJS | 8327 | 126 | File di progetto: emulator-attachments-check. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 14311 | 159 | File di progetto: emulator-browser. |
 | `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
@@ -520,12 +521,14 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-document-attachment-seal.test.mjs` | MJS | 10932 | 170 | File di progetto: profile-document-attachment-seal.test. |
 | `experiments/persistent-vault-shell/profile-document-attachment-storage-rules.mjs` | MJS | 3448 | 48 | File di progetto: profile-document-attachment-storage-rules. |
 | `experiments/persistent-vault-shell/profile-document-attachments-contract.mjs` | MJS | 18911 | 255 | File di progetto: profile-document-attachments-contract. |
-| `experiments/persistent-vault-shell/profile-document-attachments-editor.test.mjs` | MJS | 16165 | 267 | File di progetto: profile-document-attachments-editor.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-editor.test.mjs` | MJS | 16307 | 269 | File di progetto: profile-document-attachments-editor.test. |
 | `experiments/persistent-vault-shell/profile-document-attachments-handler.mjs` | MJS | 32023 | 464 | File di progetto: profile-document-attachments-handler. |
 | `experiments/persistent-vault-shell/profile-document-attachments-handler.test.mjs` | MJS | 35867 | 543 | File di progetto: profile-document-attachments-handler.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-provider.mjs` | MJS | 3950 | 57 | File di progetto: profile-document-attachments-provider. |
+| `experiments/persistent-vault-shell/profile-document-attachments-provider.test.mjs` | MJS | 12525 | 179 | File di progetto: profile-document-attachments-provider.test. |
 | `experiments/persistent-vault-shell/profile-document-attachments-reader.mjs` | MJS | 3087 | 54 | File di progetto: profile-document-attachments-reader. |
 | `experiments/persistent-vault-shell/profile-document-attachments-reader.test.mjs` | MJS | 7593 | 110 | File di progetto: profile-document-attachments-reader.test. |
-| `experiments/persistent-vault-shell/profile-document-attachments-source.mjs` | MJS | 7733 | 138 | File di progetto: profile-document-attachments-source. |
+| `experiments/persistent-vault-shell/profile-document-attachments-source.mjs` | MJS | 8169 | 144 | File di progetto: profile-document-attachments-source. |
 | `experiments/persistent-vault-shell/profile-document-attachments-view.mjs` | MJS | 7265 | 151 | File di progetto: profile-document-attachments-view. |
 | `experiments/persistent-vault-shell/profile-document-attachments.test.mjs` | MJS | 22388 | 299 | File di progetto: profile-document-attachments.test. |
 | `experiments/persistent-vault-shell/profile-link-candidate-rules.mjs` | MJS | 2638 | 31 | File di progetto: profile-link-candidate-rules. |
@@ -543,7 +546,7 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
 | `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 5155 | 73 | File di progetto: profile-section-reader. |
 | `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 11934 | 164 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 12564 | 174 | File di progetto: profile-shell-view. |
 | `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 12980 | 159 | File di progetto: profile-shell-view.test. |
 | `experiments/persistent-vault-shell/profile-text-candidate-rules.mjs` | MJS | 1766 | 24 | File di progetto: profile-text-candidate-rules. |
 | `experiments/persistent-vault-shell/profile-text-contract.mjs` | MJS | 4197 | 61 | File di progetto: profile-text-contract. |
@@ -660,7 +663,7 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 14214 | 96 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 14432 | 97 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -691,7 +694,7 @@ File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 3700 | 34 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 3934 | 35 | Strumento manutenzione/test: run-vault-session-emulators. |
 | `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
 | `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
 | `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |

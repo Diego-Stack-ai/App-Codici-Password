@@ -3,7 +3,7 @@
 > **Stato:** candidato, **non montato** e non attivo in produzione: nessun pulsante, nessun upload reale, nessuna modifica a Rules o Functions produttive.
 > **Autorità:** contratto candidato di laboratorio; prevale la baseline sicurezza ([Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) §11) e l'incarico DS-002A in [DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md).
 > **Riferimento di codice:** ramo `integration/vault-shell-v127-security`; base `dbb7bdb3`; modulo `experiments/persistent-vault-shell/profile-document-attachments-contract.mjs` e collegati.
-> **Ultima verifica:** 17/09/2026 — 80 prove unitarie della fetta (`test:vault-shell` **644/644**), 8 prove su Firestore Emulator e 9 prove sulla suite emulatrice `auth,firestore,storage`; nessuna verifica browser: il pannello non è ancora montato in una pagina di laboratorio.
+> **Ultima verifica:** 17/09/2026 — 80 prove unitarie della fetta (`test:vault-shell` **649/649**), 8 prove su Firestore Emulator, 9 prove sulla suite emulatrice `auth,firestore,storage` e **13 controlli dello scenario browser sintetico su Chrome ed Edge** (superati, nessun errore di console).
 > **Area:** profilo privato, `users/{uid}.documenti[]`, allegati immagine.
 > **Dipendenze:** `profile-document-attachments-contract.mjs`, `profile-document-attachment-capability.mjs`, `prepare-profile-document-attachment.mjs`, `profile-document-attachments-handler.mjs`, `profile-document-attachments-reader.mjs`.
 > **Sostituisce:** nessun documento; non sostituisce la sezione allegati dell'architettura né i contratti M5–M8, che restano autorevoli.
@@ -111,7 +111,8 @@ La revisione Codex di DS-002A-R1 ha rilevato **finestre TOCTOU** fra la verifica
 
 - `profile-document-attachments-source.mjs`: una sola anteprima per volta; l'Object URL è revocato e il plaintext azzerato a chiusura, blocco, logout, cambio UID, annullamento della vista e `dispose`; caricamento file per file con esito distinto per ciascuno; il nome originale del file scelto vive solo nel risultato transiente e non entra in comandi, record o ricevute; nessuna scrittura offline; la cancellazione revoca l'anteprima dell'allegato rimosso.
 - `profile-document-attachments-view.mjs`: azione **Allegato** accanto a Modifica e Cestino, selezione multipla, galleria con Apri e Cancella, anteprima con Chiudi, stato leggibile per offline e sola consultazione, e messaggio esplicito per i documenti senza ID persistito univoco (consultabili, senza allegati).
-- **Non compreso nei due blocchi pubblicati**: il montaggio nella pagina di laboratorio e lo scenario browser sintetico, che restano un debito dichiarato (§7, punto 5).
+- **Montaggio e browser (DS-002C, fatto):** la sezione Documenti della pagina di laboratorio monta la superficie con il provider `profile-document-attachments-provider.mjs`, che riusa capacità, lettore, sorgente, vista e pianificatori senza duplicare decisioni; `emulator-browser.mjs --test-attachments` serve i moduli alla pagina ed esegue uno scenario sintetico **su Chrome ed Edge** (13 controlli: due righe con Modifica/Cestino/Allegato, messaggio del documento senza ID, focus da tastiera, selezione multipla, caricamento con sigillo reale nel browser, galleria aggiornata, anteprima con Object URL e sua revoca, offline in sola consultazione, cancellazione, revoca al cambio vista, nessun errore di console). Lo scenario gira su **fixture** e sul sigillo reale: il trasporto Firestore/Storage resta provato dalle suite emulatrici. Non sono state verificate l'emulazione mobile né una prova su dispositivo reale.
+- **Non ancora coperto**: trasporto di produzione (callable con Auth/App Check), applicazione autorizzata delle Rules candidate e verifica delle precondizioni di generazione su Cloud Storage reale.
 
 ## 4. Limiti e rifiuti
 
@@ -139,7 +140,7 @@ L'incremento non tocca dati reali, Rules, Functions, versione o produzione: il r
 1. **Trasporto di produzione**: callable con Auth e App Check reali (l'architettura indica una Cloud Function per la cancellazione coordinata) e verifica delle precondizioni di generazione su **Cloud Storage reale**, che l'emulatore non applica.
 2. **Rules autorizzate**: applicare le due trasformazioni candidate è una decisione di deploy; il limite noto del §3.3 punto 6 richiede di sostituire la regola generica del proprietario con un modello esplicito per collezione.
 3. **Doppio lettore e non regressione**: la cifratura reale è provata in laboratorio, ma non esiste ancora una prova di compatibilità con i dati già cifrati dall'applicazione né su dispositivi.
-4. **Montaggio e browser**: la pagina di laboratorio non monta ancora il pannello e non esiste lo scenario browser sintetico; entrambi restano da fare prima di qualunque valutazione di interfaccia.
+4. **Montaggio e browser (fatto in DS-002C)**: il pannello è montato nella sezione Documenti della pagina di laboratorio e lo scenario sintetico gira su Chrome ed Edge; restano l'emulazione mobile e la prova su dispositivo reale.
 5. **Decisioni aperte**: cestino/retention e rapporto con lo storico (M7), interazione con backup/ripristino (M8: limiti 10.000 allegati e 2 Mi caratteri), scansione locale e formati ammessi al rilascio, gate §16 dell'architettura (threat model, inventario, prove su dispositivi, migrazione e rollback, approvazione del proprietario, audit indipendente).
 
 ## 8. Divergenze e contraddizioni registrate (non risolte qui)
