@@ -61,8 +61,8 @@ Diff conforme: due soli file di laboratorio, nessun writer o confine produttivo.
 ## Incarico attivo
 
 - **ID:** DS-002A
-- **Stato incarico:** IN_LAVORAZIONE
-- **Presa in carico:** 2026-09-17 10:42 (DeepSeek); commit osservato `a3c7e54e`, base obbligatoria `58aaa625` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Rapporto DS-001 lasciato intatto.
+- **Stato incarico:** DA_VERIFICARE
+- **Presa in carico:** 2026-09-17 10:42 (DeepSeek); commit osservato `a3c7e54e`, base obbligatoria `58aaa625` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Rapporto DS-001 lasciato intatto. Consegna: 2026-09-17 11:05.
 - **Base di codice obbligatoria:** `58aaa625c264ca23db4998eb2f26561707e58dbe` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** laboratorio della shell persistente; contratto e modello candidato per le immagini dei documenti digitali privati
@@ -101,13 +101,13 @@ Preparare il confine sicuro e testabile che consentirà a ogni elemento persisti
 
 ## Rapporto DeepSeek — DS-002A
 
-- **Stato:** IN ATTESA
-- **Commit finale:**
-- **File modificati:**
-- **Test eseguiti e risultati:**
-- **Scostamenti dall'incarico:**
-- **Rischi residui:**
-- **Note per Codex:**
+- **Stato:** COMPLETATO — in attesa di verifica Codex
+- **Commit finale:** `864021f6c3bf30b745960a616a3494c17bcca901` (`feat(shell): prepare the private document image contract`); presa in carico pubblicata con `a7db2ae6`; base obbligatoria `58aaa625` intatta; rapporto DS-001 non modificato.
+- **File modificati:** 14 file (+1620 / −338). Nuovi: cinque moduli candidati (`profile-document-attachments-contract.mjs`, `profile-document-attachment-capability.mjs`, `prepare-profile-document-attachment.mjs`, `profile-document-attachments-handler.mjs`, `profile-document-attachments-reader.mjs`), tre suite (`profile-document-attachments.test.mjs`, `profile-document-attachments-handler.test.mjs`, `profile-document-attachments-reader.test.mjs`) e il documento tecnico `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md`. Modificati: `package.json` (registrazione delle suite), `docs/FILE_INVENTORY.md` (rigenerato, 692 file censiti), `docs/PIANO_MATURITA_PROFESSIONALE.md`, `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md`, `Frontend/GUIDA_AGGIORNAMENTI.md` (stato candidato non montato, rischi, prove).
+- **Test eseguiti e risultati:** test mirati **35/35**; `npm run test:vault-shell` **599/599** (564 + 35); `npm test` completo **superato** (exit 0, nessun fallimento nel log); `git diff --check` **pulito**. Nessun emulatore e nessuna verifica browser, coerenti con l'incarico: in questo incremento non esiste interfaccia.
+- **Scostamenti dall'incarico:** (1) oltre al commit di lavoro ci sono due commit che toccano **solo** questo file di coordinamento (`a7db2ae6` presa in carico, l'ultimo per rapporto e `DA_VERIFICARE`), come già in DS-001: il commit dedicato al lavoro resta uno. (2) Ai metadati candidati ho aggiunto `ownerId` e `status` rispetto all'elenco dell'incarico: servono al controllo di proprietà e alla macchina a stati richiesta, e sono dichiarati nel documento tecnico. (3) `FILE_INVENTORY.md` è stato rigenerato perché l'elenco dei file censiti è cambiato, come previsto dall'incarico; di conseguenza la riga di inventario di questo stesso file di coordinamento risulta di qualche riga datata dopo la scrittura del rapporto.
+- **Rischi residui:** il contratto è più restrittivo delle Rules attuali e l'irrigidimento vive nel client finché non è autorizzato — `firestore.rules:106-118` ammette ancora la scrittura diretta del proprietario su `profileDocumentAttachments`, `storage.rules:12-20` consente 25 MiB e formati non immagine e richiede il marcatore `encrypted='v1'` per `application/octet-stream` (decisione rinviata); la cifratura binaria reale non è implementata, il sigillo è iniettato e i test usano un'implementazione sintetica; `recover()` dipende da ricevute complete (incluso `operationId`) e da un trasporto che sappia elencare `mutationResults/{uid}/operations`; nessuna prova su emulatori, dispositivi o byte reali; il percorso Storage non è vincolato dalle Rules, il confinamento è nel contratto; restano aperte le decisioni su cestino/retention (M7), backup/ripristino (M8), revoca degli Object URL e gate §16.
+- **Note per Codex:** i test hanno scoperto due difetti reali, corretti prima del commit: il servizio scriveva `readyAt` nei metadati (fuori dall'allowlist, rendendoli non verificabili per la cancellazione e per la proiezione) e la ricevuta non conservava il proprio `operationId`, quindi `recover()` non riusciva a ricostruirne il percorso. Ora la macchina a stati vive solo nella ricevuta e i metadati restano esattamente nell'allowlist del contratto. Il modello **non** riusa gli allegati Account (AAD costante `CodiciPassword-Attachment-v1`, `url` persistente): `attachment-security.js` è stato letto solo come fotografia dei limiti legacy. Base, ramo e working tree verificati prima di iniziare (dopo `58aaa625` solo questo file modificato); `master` `4efda528`, versione `1.2.127`, nessun deploy e nessun dato reale. **DS-002B non è stato avviato**: resta in coda non eseguibile finché non lo dettagli.
 
 ## Coda approvata dal proprietario
 
