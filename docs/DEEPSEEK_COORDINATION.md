@@ -7,7 +7,7 @@
 ## Protocollo
 
 1. DeepSeek controlla questo file e lavora soltanto quando `Stato incarico` è `PRONTO`.
-2. Prima di iniziare verifica ramo, commit di partenza e working tree pulita. Se non coincidono, scrive `BLOCCATO` nel rapporto e non modifica il repository.
+2. Prima di iniziare verifica ramo, base di codice e working tree pulita. Sono ammessi dopo la base soltanto commit che modificano questo file di coordinamento; qualsiasi altro scostamento porta a `BLOCCATO`.
 3. Quando prende l'incarico imposta `Stato incarico: IN_LAVORAZIONE`, aggiunge data/ora e commit osservato, quindi salva il file.
 4. Legge nell'ordine `docs/GUIDA_PROGETTO.md`, `docs/ARCHITETTURA_SICUREZZA_V1.md`, `docs/PIANO_MATURITA_PROFESSIONALE.md`, il contratto specialistico indicato e `Frontend/GUIDA_AGGIORNAMENTI.md`.
 5. Non amplia il perimetro. Dubbi, conflitti con gli MD, dati reali, migrazioni, Rules/Functions produttive, bump, merge o deploy portano a `BLOCCATO`, lasciando intatto ciò che non è autorizzato.
@@ -20,7 +20,7 @@
 
 - **ID:** DS-001
 - **Stato incarico:** PRONTO
-- **Commit di partenza obbligatorio:** `0e7e062cc41aea48c9055eae17bc090f4a279f3d`
+- **Base di codice obbligatoria:** `0e7e062cc41aea48c9055eae17bc090f4a279f3d` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** laboratorio della shell persistente, editor contatti privati A1
 
