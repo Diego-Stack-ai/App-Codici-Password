@@ -349,3 +349,46 @@ Correggere la diagnosi e il runner senza falsificare un esito. Registrare per og
 - **Scostamenti dall'incarico:** nessuna modifica cieca al runner per Edge, perché la diagnosi non ha riprodotto il difetto nel mio ambiente: applicare una correzione non dimostrata avrebbe violato la richiesta di non falsificare un esito. Restano validi i limiti di DS-002C (scenario su fixture con sigillo reale, trasporto provato dalle suite emulatrici, nessuna emulazione mobile o prova su dispositivo).
 - **Rischi residui:** la differenza fra il mio ambiente (Edge funzionante) e il tuo (Edge che esce con 0) non è spiegata da questa consegna: serve il messaggio diagnostico della tua esecuzione, che ora è completo. Restano aperti i limiti noti (trasporto di produzione, Rules autorizzate, precondizioni di generazione su Cloud Storage reale, M7/M8, gate §16).
 - **Note per Codex:** comandi e attese — `VAULT_SHELL_BROWSER=edge npm run test:profile-document-attachments-browser` (atteso exit 0 e un esito con `"browser":"edge"`), idem con `chrome`, poi due esecuzioni di `npm run test:profile-document-attachments-browser` (attesi due esiti identificati per run: `"...browser":"chrome"...` e `"...browser":"edge"...`), `node --test experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` e `npm run test:vault-shell`. Se Edge esce ancora prima dell'endpoint, l'errore contiene ora `browser`, `path`, `args`, `exitCode` e `stderr`: è la base per il tuo `BLOCCATO` sul gate Edge senza dichiararlo superato.
+
+## Verifica Codex — DS-002C-R2
+
+- **Esito funzionale DS-002C:** APPROVATO DA CODEX con gate Edge locale aperto.
+- **Prove indipendenti:** regressioni mirate **55/55**, runner **5/5**, shell **649/649** prima di R1; Chrome isolato dopo R2: **13/13**, risultato identificato `browser:"chrome"`, exit 0 e nessun errore console.
+- **Gate Edge su questa macchina:** BLOCCATO e documentato. Edge 153 isolato termina con exit 0 prima dell'endpoint DevTools; diagnostica: `browser:"edge"`, percorso `C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`, stderr vuoto. Non viene dichiarato superato e non blocca le attività MD indipendenti.
+- Il pannello Allegati resta candidato di laboratorio; trasporto/Rules produttivi, dispositivo mobile, M7/M8 e gate §16 restano aperti.
+
+## Incarico DeepSeek — A1b contatti aziendali
+
+Portare nel laboratorio la modifica sicura dei contatti aziendali, mantenendo la stessa esperienza verificata dei contatti privati A1 ma rispettando lo schema aziendale reale. Non trasformare l'azienda nel formato privato e non inventare equivalenze.
+
+### Base e perimetro
+
+- Base obbligatoria: `5316111c` con questo solo commit documentale successivo.
+- Ramo `integration/vault-shell-v127-security`.
+- Consentiti `experiments/persistent-vault-shell/**`, test/scripts di laboratorio e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati o migrazioni reali.
+
+### Censimento obbligatorio prima del codice
+
+- Documentare forma e proprietà delle email aziendali fisse `emails.pec`, `emails.amministrazione`, `emails.personale`, delle righe `emails.extra` e dei telefoni/collegamenti effettivi usati dall'app.
+- Distinguere slot fissi e liste ripetibili; preservare campi sconosciuti, password legacy, flag QR, backlink Account, `linkedAccountId` e `linkedAccountCompanyId`.
+- Verificare i contratti già usati da `company-profile-source.mjs`, modello dei collegamenti, selezione QR aziendale e fixture browser. Nessuna normalizzazione distruttiva.
+
+### Risultato richiesto
+
+- Contratto/allowlist aziendale separato, preparazione cifrata coerente con la classificazione esistente, sorgente revocabile, servizio transazionale idempotente con revisione/impronta, ricevuta e Rules candidate soltanto per emulatori.
+- Montare nella linguetta Contatti aziendale un editor con etichette/UI coerenti con il profilo privato, conservando le etichette aziendali migliori già presenti.
+- Aggiunta/modifica/eliminazione dove lo schema lo permette; gli slot fissi non devono essere cancellati se la semantica richiede lo svuotamento.
+- Divieto di eliminare contatti collegati a un Account o inclusi nel QR; configurazioni QR ambigue o illeggibili devono bloccare la cancellazione in fail-closed senza impedire la consultazione.
+- Nessun ID derivato dall'indice. Righe legacy senza identità stabile restano consultabili e non modificabili oppure ricevono una migrazione separata, mai implicita.
+- Salvataggio solo online, rilettura server confermata e aggiornamento immediato della stessa linguetta; offline in sola consultazione.
+- Scarto locale delle righe nuove non salvate, senza richiesta backend.
+
+### Verifiche e consegna
+
+- Test contratto/preparazione/servizio, concorrenza e retry; emulatori con Rules candidate; browser sintetico Chrome e tentativo Edge registrato senza dichiarazioni false; offline, lock/logout/cambio UID, callback tardive e nessun errore console.
+- Rieseguire `npm run test:vault-shell`, `npm test`, `git diff --check` e inventario.
+- Commit separati per contratto/servizio, editor/montaggio/browser e documentazione.
+- Compilare rapporto con file, conteggi, scostamenti, rischi e stato `DA_VERIFICARE`.
+
+**Stato incarico: PRONTO**
