@@ -664,7 +664,7 @@ Riprendi dalla punta `c25a2ac2` e completa ora l'intero residuo già definito, s
 
 Non chiudere nuovamente l'incarico dopo un singolo sottoblocco: completa i punti sopra oppure registra un errore concreto come `BLOCCATO`. Vincoli invariati: nessuno schema aziendale inventato, niente produzione, versione, `master`, deploy, dati reali o file produttivi.
 
-**Stato incarico: BLOCCATO** — blocco dichiarato dall'agente 2026-09-18 00:46 (DeepSeek), **non un errore tecnico**: vedi il rapporto qui sotto. Base `c25a2ac2` intatta, nessun file di codice modificato in questo giro, albero pulito.
+**Stato incarico: DA_VERIFICARE** — completamento A3-R2 consegnato da Codex sulla base `c25a2ac2`; commit di lavoro `9d420c4b`. Il precedente blocco era limitato alla sessione DeepSeek e non è più attivo.
 
 ## Rapporto DeepSeek — A3-R2
 
@@ -675,3 +675,15 @@ Non chiudere nuovamente l'incarico dopo un singolo sottoblocco: completa i punti
 - **Stato del lavoro A3 a oggi (per il coordinatore):** approvati come base il censimento `docs/A3_CENSIMENTO_UTENZE.md`, il contratto, la preparazione e il servizio con **6 prove unitarie**, più la correzione semantica della guardia QR (`0eeb8fd2`, `9319e8c8`); `npm run test:vault-shell` **712/712**, `npm test` **exit 0**, `git diff --check` pulito, inventario **745 file**. **Mancano i sei punti elencati da A3-R2.**
 - **Che cosa serve per riprendere, senza lavoro preparatorio:** una sessione con budget pieno. Il punto di ripresa è `c25a2ac2`; l'elenco dei sei punti è nell'incarico A3-R2; il runner ha già i profili `desktop`/`mobile` e il pattern dell'editor è quello approvato di A2/A2-R1 (`addresses-editor-view.mjs`, provider e sorgenti separate, `emulator-addresses-check.mjs`). Non ci sono decisioni pendenti né dubbi aperti: il lavoro è definito, manca solo l'esecuzione.
 - **Rischi:** nessuno per il repository, che resta alla base pulita e approvata. Il rischio è di **tempo**: l'incarico resta aperto e il residuo non si riduce da solo. Se il coordinatore preferisce, i sei punti possono essere riassegnati a un altro agente o spezzati in due incarichi più piccoli — segnalo che l'editor montato sotto l'indirizzo padre e lo scenario browser sono le due parti più costose, mentre endpoint, Rules candidate e suite emulatrici sono le più contenute e si prestano a un incarico separato.
+
+## Rapporto Codex — A3-R2 completato
+
+- **Stato:** COMPLETATO — `DA_VERIFICARE`.
+- **Commit di lavoro:** `9d420c4b` (`feat(shell): complete nested utility editor`), costruito sulla punta documentale `0df5e7b1` e sulla base di codice approvata `c25a2ac2`.
+- **Consegnato:** sorgente revocabile, vista e provider delle utenze private montati sotto ogni indirizzo A2 con identità persistita; create/update/delete, cifratura del solo `value`, doppia conferma, scarto locale e rilettura confermata. Indirizzo padre, altre utenze, password legacy, campi sconosciuti e collegamenti sono preservati. Le azioni Collega/Cambia/Scollega inoltrano l'origine composta `{collection:'utilities', id, parentAddressId}` al servizio collegamenti esistente. Nessuno schema aziendale è stato introdotto.
+- **Guardie:** eliminazione bloccata per Account collegato e identità mancante/derivata; nessuna lettura della selezione QR nel servizio utenze e prova esplicita che l'indirizzo padre incluso nella tessera non blocca la singola utenza.
+- **Trasporto candidato:** endpoint loopback `applyPrivateUtilitiesMutation`, overlay Rules di laboratorio e suite Firestore Emulator `--profile-utilities`. Nessuna modifica a Rules/Functions produttive.
+- **Prove:** test mirati core+editor/Rules **11/11**; `npm run test:vault-shell` **712/712**; Firestore Emulator A3 **1/1**; `npm test` completo **exit 0**; inventario rigenerato **751 file**; `git diff --check` pulito. Scenario browser A2+A3: Chrome desktop **31/31** e Chrome mobile **31/31**, inclusi montaggio sotto il padre, create/update/delete, guardia Account, assenza falso blocco QR, rilettura, lifecycle A2, layout e zero errori console. Edge è stato tentato ma il processo termina con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0` prima di aprire DevTools: gate ambientale, non fallimento dello scenario Chrome.
+- **Perimetro:** invariati `Frontend/public/**`, `firestore.rules`, `storage.rules`, `functions/**`, `master` (`445b338d`) e versione applicativa (`1.2.127`); nessun deploy e nessun dato reale.
+- **Rischi residui:** trasporto e Rules produttivi non autorizzati; prova su dispositivo fisico aperta; Edge non verificabile su questa macchina; le righe senza identità persistita restano consultabili ma non modificabili e richiedono migrazione separata.
+- **Pubblicazione:** il push del commit di lavoro è stato richiesto ma respinto dal controllo automatico dell'ambiente perché il remoto GitHub è stato classificato come destinazione non verificata. Il commit resta locale sul ramo condiviso fino all'autorizzazione esplicita dell'utente.
