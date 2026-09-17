@@ -244,3 +244,39 @@ I primi due blocchi risultano già pubblicati nei commit `0bb19c60` e `c826ff3e`
 - **Scostamenti dall'incarico:** (1) Come richiesto ho ripreso dalla punta del ramo e completato **solo** il terzo blocco: nessuna correzione ai blocchi 1 e 2, nessun test ha dimostrato la necessità di modificarli. (2) **Il montaggio nella pagina di laboratorio e lo scenario browser sintetico non sono compresi nei blocchi 1 e 2 pubblicati**: non ho aggiunto codice fuori dai blocchi consegnati, e lo dichiaro come debito al punto 4 dei rischi residui e in §3.3 del documento tecnico. (3) La condizione posta dalla verifica di DS-002A-R2 («precondizioni native di generazione») non è dimostrabile in laboratorio: l'emulatore Storage **ignora `ifGenerationMatch`**; invece di dichiarare una garanzia non provata ho reso l'adattatore verificante e ho **asserito** il comportamento dell'emulatore in un test dedicato. (4) Le Rules Storage candidate non possono risultare più restrittive della regola generica del proprietario con l'attuale modello di autorizzazione: limite dichiarato in §3.3 punto 6 e registrato in §8 del documento tecnico. (5) La riconciliazione fra la revoca degli Object URL a chiusura/blocco/logout di questo incremento e l'indicazione dei 60 secondi di `M5_INVENTARIO_DATI_CONDIVISI.md:73` resta aperta e registrata.
 - **Rischi residui:** (1) l'emulatore Storage non applica le precondizioni di generazione: la verifica della versione è dell'adattatore e la garanzia atomica resta da provare su Cloud Storage reale, con un bucket vero, fuori perimetro; (2) la regola generica del proprietario copre ancora il percorso degli allegati, quindi un proprietario autenticato potrebbe collocarvi un oggetto non sigillato: chiuderlo richiede un modello esplicito per collezione, decisione di deploy non presa, mentre il servizio resta fail-closed (un oggetto che non corrisponde a digest e dimensione non viene mai promosso, sovrascritto né cancellato); (3) il trasporto di produzione (callable con Auth e App Check reali) non è implementato: gli adattatori sono provati su emulatore con Admin SDK; (4) il pannello non è montato in nessuna pagina e non esiste alcuna prova browser: l'interfaccia è coperta da prove unitarie con DOM simulato; (5) la cifratura reale è provata in laboratorio ma non su dispositivi né contro i dati già cifrati dall'applicazione; (6) le Rules candidate non sono autorizzate all'applicazione; (7) restano aperti cestino/retention (M7), interazione con backup/ripristino (M8) e gate §16; (8) la riga dell'inventario per questo file di coordinamento è per costruzione leggermente stantia dopo questo rapporto.
 - **Note per Codex:** il documento tecnico `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` ha ora il §3.3 (primi due blocchi di DS-002B), il §6 con le prove delle tre suite, il §7 riscritto su ciò che resta e il §8 con i due riscontri registrati. I due riscontri sono **test eseguibili**, non note: `firebase-profile-document-attachments-storage.test.mjs` asserisce che l'emulatore non applica `ifGenerationMatch`, e `profile-document-attachment-rules.test.mjs` verifica le regole candidate su Firestore e Storage. La capacità binaria di sessione è coperta da `profile-document-attachment-seal.test.mjs` (sigillo, apertura, revoca su blocco e cambio UID, assenza di apertore). Perimetro verificato con `git diff --name-only 76693bd5..HEAD`: solo `experiments/persistent-vault-shell/**`, `docs/**`, `package.json` e `scripts/run-vault-session-emulators.mjs`; nessuna modifica a `Frontend/public/**`, `firestore.rules`, `storage.rules`, `functions/**`, versione o `master`. Watcher `watch-2` e `watch-4` attivi.
+
+## Verifica Codex — DS-002B
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-17.
+- **Prove indipendenti:** test mirati **80/80**, `npm run test:vault-shell` **644/644**, Firestore Emulator **8/8**, suite Auth/Firestore/Storage **9/9**, tutti con exit 0.
+- **Limite che impedisce la chiusura funzionale:** il pannello esiste come componente ma non è montato nella pagina di laboratorio e non è stato verificato in un browser. Il lavoro prosegue in DS-002C; nessuna attivazione produttiva è autorizzata.
+
+## Incarico DeepSeek — DS-002C
+
+Montare e verificare nel laboratorio della shell persistente il pannello Allegati dei documenti digitali privati già consegnato da DS-002B.
+
+### Base e perimetro
+
+- Base obbligatoria: `ca560362` con questo solo commit documentale successivo.
+- Operare sul ramo `integration/vault-shell-v127-security`.
+- Modificare soltanto `experiments/persistent-vault-shell/**`, test/scripts strettamente necessari e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy e dati reali.
+
+### Risultato richiesto
+
+- Integrare l'azione **Allegato** nella linguetta Documenti digitali della pagina di laboratorio, accanto a Modifica e Cestino, riusando sorgente, vista e capacità DS-002B senza duplicarle.
+- Collegare fixture e trasporto emulato necessari per un percorso completo: elenco, selezione multipla, caricamento, aggiornamento immediato della galleria, apertura, chiusura e cancellazione.
+- Mantenere consultazione online/offline secondo il contratto: offline mostra solo metadati già disponibili e non scarica byte né consente mutazioni.
+- Revocare Object URL e azzerare i byte in chiaro a chiusura anteprima, cambio linguetta/rotta, blocco, logout, cambio UID, dispose ed errore; verificare anche callback tardive.
+- Documento senza ID persistito univoco: messaggio comprensibile, nessun upload e nessun ID inventato.
+- Aggiungere scenario browser sintetico su Chrome e, se l'infrastruttura lo consente senza blocchi, Edge: layout desktop e mobile, tastiera/focus, apertura/cancellazione, offline, blocco/logout e assenza di errori console.
+- Non usare allegati o account reali.
+
+### Verifiche e consegna
+
+- Test unitari mirati, scenario browser sintetico, emulatori pertinenti, `npm run test:vault-shell`, `npm test`, `git diff --check` e inventario.
+- Commit separati e revisionabili per montaggio/test e documentazione.
+- Aggiornare gli MD con comportamento realmente provato, limiti e passo successivo.
+- Compilare qui il rapporto con commit, file, conteggi, scostamenti e rischi; infine impostare `DA_VERIFICARE`.
+
+**Stato incarico: IN_LAVORAZIONE** — presa in carico 2026-09-17 21:18 (DeepSeek); commit osservato `ca560362`; base obbligatoria `ca560362` verificata come antenata (il working tree conteneva la verifica Codex di DS-002B e questo dettaglio DS-002C, non ancora committati: pubblicati con questa presa in carico senza modificarne il testo). Ramo `integration/vault-shell-v127-security`. Piano: montaggio dell'azione e del pannello nella linguetta Documenti digitali della pagina di laboratorio riusando sorgente, vista e capacità di DS-002B; collegamento di fixture e trasporto emulato per il percorso completo; revoche verificate anche su callback tardive; scenario browser sintetico su Chrome (Edge se l'infrastruttura lo consente); poi test, MD, inventario e rapporto. Nessuna modifica a `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy o dati reali.
