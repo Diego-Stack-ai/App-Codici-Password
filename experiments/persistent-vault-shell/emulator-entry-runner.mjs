@@ -3,7 +3,7 @@ import {existsSync} from 'node:fs';
 import {mkdtemp, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {dirname, resolve} from 'node:path';
-import {attachEntryNetworkControl} from './emulator-network-control.mjs';
+import {assertEveryBrowserReported, attachEntryNetworkControl} from './emulator-network-control.mjs';
 
 export async function runEntryBrowsers(nextReport, {restart = false, forced = false} = {}) {
     if (forced && !restart) throw new Error('FORCED_RESTART_REQUIRED');
@@ -13,6 +13,9 @@ export async function runEntryBrowsers(nextReport, {restart = false, forced = fa
         process.env.EDGE_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'] :
         [process.env.CHROME_PATH || '/usr/bin/google-chrome', process.env.EDGE_PATH || '/usr/bin/microsoft-edge'];
     const browsers = browserSelection === 'all' ? available : [available[browserSelection === 'chrome' ? 0 : 1]];
+    // Every browser of the matrix must be awaited, reported and counted: a missing
+    // outcome is a failure, never a silent matrix reduction.
+    const completed = new Set();
     for (const browser of browsers) {
         if (!existsSync(browser)) throw new Error('ENTRY_BROWSER_MISSING');
         const temp = resolve(tmpdir()), profile = await mkdtemp(`${temp}/codex-entry-browser-`);
@@ -61,9 +64,18 @@ export async function runEntryBrowsers(nextReport, {restart = false, forced = fa
           }
         } finally {
             clearTimeout(timer); closeNetwork?.(); child?.kill();
+            // The browser is allowed to finish exiting before the next one of the
+            // matrix starts: a closing process must not disturb the next DevTools
+            // endpoint and must not be read as an early exit.
+            if (child && child.exitCode === null) {
+                await Promise.race([new Promise(resolve => child.once('exit', resolve)),
+                    new Promise(resolve => setTimeout(resolve, 2000))]);
+            }
             if (dirname(profile) === temp && profile.startsWith(`${temp}`) && profile.includes('codex-entry-browser-')) {
                 await rm(profile, {recursive: true, force: true, maxRetries: 10, retryDelay: 100}).catch(() => {});
             }
         }
+        completed.add(browser);
     }
+    assertEveryBrowserReported({browsers, results: [...completed]});
 }

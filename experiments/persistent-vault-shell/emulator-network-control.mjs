@@ -1,16 +1,42 @@
 // Test runner only. DevTools affects this disposable browser target, never the
 // host connection. The control channel remains available while HTTP is offline.
-export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport} = {}) {
-    if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
-    const endpoint = await new Promise((resolve, reject) => {
-        let output = '';
-        const finish = (error, value) => { clearTimeout(timer); child.stderr.off('data', read); child.off('error', fail); child.off('exit', exited); error ? reject(error) : resolve(value); };
+// Waiting for the endpoint is exported on its own, and it settles exactly once:
+// the listeners are detached the moment the endpoint arrives, so a browser that
+// closes normally afterwards is never reported as an early exit.
+export function awaitDevToolsEndpoint(child, {timeoutMs = 10000} = {}) {
+    return new Promise((resolve, reject) => {
+        let output = '', settled = false;
+        const detach = () => {clearTimeout(timer); child.stderr?.off?.('data', read); child.off('error', fail); child.off('exit', exited);};
+        const finish = (error, value) => {
+            if (settled) return;
+            settled = true;
+            detach();
+            error ? reject(error) : resolve(value);
+        };
         const fail = error => finish(error);
         const exited = code => finish(new Error(`DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:${code}`));
-        const read = chunk => { output = (output + chunk).slice(-16384); const match = output.match(/DevTools listening on (ws:\/\/[^\s]+)/); if (match) finish(null, match[1]); };
-        const timer = setTimeout(() => finish(new Error('DEVTOOLS_ENDPOINT_TIMEOUT')), 10000);
-        child.stderr.on('data', read); child.on('error', fail); child.on('exit', exited);
+        const read = chunk => {
+            output = (output + chunk).slice(-16384);
+            const match = output.match(/DevTools listening on (ws:\/\/[^\s]+)/);
+            if (match) finish(null, match[1]);
+        };
+        const timer = setTimeout(() => finish(new Error('DEVTOOLS_ENDPOINT_TIMEOUT')), timeoutMs);
+        child.stderr?.on?.('data', read);
+        child.on('error', fail);
+        child.on('exit', exited);
     });
+}
+// Every browser of the matrix must produce a result: a missing one is a failure,
+// never a silent reduction of the matrix to a single browser.
+export function assertEveryBrowserReported({browsers, results}) {
+    if (!Array.isArray(results) || results.length !== browsers.length) {
+        throw new Error(`ENTRY_BROWSER_RESULTS_MISSING:${results?.length ?? 0}/${browsers.length}`);
+    }
+    return results;
+}
+export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport} = {}) {
+    if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
+    const endpoint = await awaitDevToolsEndpoint(child);
     const address = new URL(endpoint);
     if (address.hostname !== '127.0.0.1') throw new Error('DEVTOOLS_NONLOCAL');
     const host = address.host;
