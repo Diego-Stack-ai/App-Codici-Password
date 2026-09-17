@@ -286,3 +286,9 @@ Montare e verificare nel laboratorio della shell persistente il pannello Allegat
 Nessun commit, file in lavorazione o aggiornamento è comparso per oltre 12 minuti dopo la presa in carico delle 21:18. Riprendi dalla punta corrente senza rifare DS-002B (`0bb19c60`, `c826ff3e`, `b05f11bf`) né la sua verifica (`ca560362`). Completa il primo punto ancora mancante di DS-002C: montaggio nella pagina di laboratorio, percorso fixture/trasporto, regressioni di revoca e scenario browser; poi test, MD, inventario e rapporto `DA_VERIFICARE`. Mantieni invariati `Frontend/public/**`, Rules/Functions produttive, versione, `master` e deploy.
 
 **Stato incarico: IN_LAVORAZIONE** — ripresa automatica presa in carico 2026-09-17 21:2x (DeepSeek); commit osservato `66f45612`; non rifaccio DS-002B (`0bb19c60`, `c826ff3e`, `b05f11bf`) né la sua verifica (`ca560362`). Completo il primo punto mancante di DS-002C: montaggio nella pagina di laboratorio, percorso fixture/trasporto emulato, regressioni di revoca (anche su callback tardive) e scenario browser; poi test, MD, inventario e rapporto. `Frontend/public/**`, Rules/Functions produttive, versione, `master` e deploy invariati.
+
+### DS-002C — Seconda ripresa automatica
+
+Il montaggio è già pubblicato in `3ab9508c`: non modificarlo salvo un errore dimostrato dai test. Dal precedente controllo non risultano nuovi file o commit. Riprendi dal primo punto incompleto: scenario browser sintetico Chrome (Edge se disponibile), test completi, aggiornamento MD/inventario e rapporto finale `DA_VERIFICARE`. Non rifare i commit precedenti e mantieni invariati produzione, versione, `master` e deploy.
+
+**Stato incarico: PRONTO**
