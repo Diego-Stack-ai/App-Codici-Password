@@ -161,7 +161,7 @@ Test indipendenti superati: mirati **42/42**, Firestore Emulator **6/6**, shell 
 ## Incarico attivo
 
 - **ID:** DS-002A-R2
-- **Stato incarico:** PRONTO
+- **Stato incarico:** IN_LAVORAZIONE — presa in carico 2026-09-17 20:11 (DeepSeek); commit osservato `e819a5d9`, base obbligatoria `dbb7bdb3` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Nota watcher: `watch-2` (tail) non ha consegnato il segnale `PRONTO` perché il file viene sostituito dalle operazioni git; affiancato `watch-3`, polling a 20 s con confronto SHA-256, che consegna solo al cambio di contenuto con `PRONTO` presente.
 - **Base di codice obbligatoria:** `dbb7bdb38a394f8d9cb4e4ddbdfd850108f88e1e`
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** sola chiusura delle finestre TOCTOU e validazione canonica di record/ricevute; nessuna interfaccia o produzione
