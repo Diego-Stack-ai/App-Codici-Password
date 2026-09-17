@@ -122,7 +122,7 @@ Test rieseguiti indipendentemente: mirati **35/35**, shell **599/599**. Il perim
 ## Incarico attivo
 
 - **ID:** DS-002A-R1
-- **Stato incarico:** DA_VERIFICARE
+- **Stato incarico:** DA_CORREGGERE — revisione Codex 17/09/2026 20:22
 - **Presa in carico:** 2026-09-17 19:28 (DeepSeek); commit osservato `a8e2fbd8`, base obbligatoria `62fb8d69` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Nota watcher: `watch-1` era attivo ma non ha consegnato il segnale `PRONTO` (il file era stato sostituito dalle operazioni git successive all'armamento); ri-ancorato come `watch-2` con gli stessi parametri (file, pattern `Stato incarico:\s*PRONTO`, label `codici-password-orders`, `max_events: 0`).
 - **Base di codice obbligatoria:** `62fb8d6928ceef921ffa178b45ea6cf6428efba8`
 - **Ramo:** `integration/vault-shell-v127-security`
@@ -153,6 +153,43 @@ Test rieseguiti indipendentemente: mirati **35/35**, shell **599/599**. Il perim
 - **Scostamenti dall'incarico:** (1) il commit di lavoro resta uno solo; i commit che toccano esclusivamente questo file di coordinamento sono separati (`3cb940df` presa in carico, l'ultimo per rapporto e stato), come in DS-001/DS-002A. (2) Il limite atomico è realizzato con una **lettura transazionale limitata** e conteggio canonico dei record legati a proprietario e documento, non con un contatore: l'incarico chiedeva di documentare "l'indice/contatore scelto e la relativa compensazione", e la scelta qui è di non avere alcuno stato aggiuntivo da compensare, perché il numero è derivato dai record autorevoli a ogni prenotazione. (3) La nuova suite emulatore è stata aggiunta alla catena `npm test`, quindi la verifica completa ora include anche questo trasporto.
 - **Rischi residui:** `recover()` dipende da ricevute complete (`operationId`, `objectDigest`) e da un trasporto che sappia elencare `mutationResults/{uid}/operations`: se il trasporto non li espone, le operazioni restano `incomplete` e nessun oggetto viene cancellato (fail-closed). Il conteggio canonico ignora i record malformati: non consumano budget ma restano segnalati come non verificabili dalla proiezione. Lo Storage della suite emulatore è un doppio in memoria: creazione condizionata, coerenza e digest reali di Firebase Storage restano da provare in DS-002B, che deve implementare il contratto `probe/putIfAbsent/remove`. `firestore.rules:106-118` continua ad ammettere la scrittura diretta del proprietario su `profileDocumentAttachments` e `storage.rules:12-20` richiede il marcatore `encrypted='v1'` con 25 MiB e formati non immagine: nessuna modifica autorizzata in questo incremento. La cifratura binaria reale non è implementata (sigillo iniettato), non esistono prove su dispositivi e il candidato resta **non montato**.
 - **Note per Codex:** le sei correzioni sono tracciate punto per punto in `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` §3.1. Difetto scoperto durante il lavoro: la ricevuta salvava un solo digest e `recover()` confrontava il digest di operazione con quello dell'oggetto; ora la ricevuta porta `digest` (operazione) e `objectDigest` (oggetto) e la promozione richiede la corrispondenza dei byte. L'ordine letture/scritture è verificato due volte: dal fake unitario (che rifiuta read-after-write in tutte le suite) e da Firestore Emulator nella nuova suite, dove l'ordine è imposto dal server. Base, ramo e working tree verificati prima di iniziare; `master` `4efda528`, versione `1.2.127`, nessun deploy e nessun dato reale. **DS-002B non è stato avviato**; watcher `watch-2` attivo sul file di coordinamento.
+
+### Revisione Codex — DS-002A-R1
+
+Test indipendenti superati: mirati **42/42**, Firestore Emulator **6/6**, shell **606/606**. La struttura generale è corretta, ma la consegna non è ancora approvabile perché restano finestre TOCTOU nelle finalizzazioni e nel recupero.
+
+## Incarico attivo
+
+- **ID:** DS-002A-R2
+- **Stato incarico:** PRONTO
+- **Base di codice obbligatoria:** `dbb7bdb38a394f8d9cb4e4ddbdfd850108f88e1e`
+- **Ramo:** `integration/vault-shell-v127-security`
+- **Perimetro:** sola chiusura delle finestre TOCTOU e validazione canonica di record/ricevute; nessuna interfaccia o produzione
+
+### Correzioni richieste
+
+- Introdurre validatori canonici per le ricevute upload/delete: campi esatti, kind, owner, operationId, documento, allegato, percorso, digest operazione, digest oggetto/atteso e stato. Una ricevuta malformata deve restare bloccata senza toccare record o Storage.
+- Nella finalizzazione upload, rileggere **nella stessa transazione** record e ricevuta e ricontrollarne l'intera coerenza con il comando prima di impostare `ready`. Se uno dei due è cambiato dopo la prenotazione, non promuovere nulla.
+- Nella finalizzazione delete, rileggere **nella stessa transazione** record e ricevuta; cancellare il record o chiudere la ricevuta soltanto se sono ancora canonici e coerenti con l'operazione. Non cancellare un record sostituito dopo la verifica iniziale.
+- In `recover()`, eliminare la separazione fra verifica fuori transazione e scrittura: prima di promuovere, cancellare o compensare, rileggere record e ricevuta nella transazione finale e ripetere la validazione canonica. Un cambio concorrente deve produrre `incomplete`, senza scritture distruttive.
+- Verificare anche `probe.size` quando disponibile e coerente con la dimensione cifrata registrata; documentare esplicitamente il comportamento del trasporto se la dimensione non è disponibile. Digest e dimensione discordanti non devono permettere promozione, sovrascrittura o cancellazione.
+- Aggiungere regressioni che mutano record o ricevuta fra probe e finalizzazione per upload, delete e recover; includere ricevute con digest operazione invalido, campi estranei, stato incoerente e dimensione oggetto diversa.
+- Rieseguire test mirati, emulatore, `npm run test:vault-shell`, `npm test` e `git diff --check`. Aggiornare rapporto e MD senza avviare DS-002B.
+
+### Divieti
+
+- Nessuna modifica a `Frontend/public/**`, Rules/Functions produttive, `master`, versione o deploy.
+- Nessun dato reale, migrazione o interfaccia Allegato.
+
+## Rapporto DeepSeek — DS-002A-R2
+
+- **Stato:** IN ATTESA
+- **Commit finale:**
+- **File modificati:**
+- **Test eseguiti e risultati:**
+- **Scostamenti dall'incarico:**
+- **Rischi residui:**
+- **Note per Codex:**
 
 ## Coda approvata dal proprietario
 
