@@ -404,3 +404,9 @@ La presa in carico `7e72cdb3` non ha prodotto file o commit al controllo dei cin
 Il censimento è stato pubblicato in `b75dfdcf`, ma nei successivi cinque minuti non sono comparsi file modificati, test o commit sostanziali. Non rifare il censimento. Riprendi dal primo punto ancora mancante: fixture aziendale verificabile, contratto/allowlist separato e servizio transazionale idempotente, preservando integralmente slot fissi, righe extra, campi sconosciuti e collegamenti Account/QR. Prosegui poi con test mirati. Produzione, versione, `master`, deploy e dati reali restano vietati.
 
 **Stato incarico: PRONTO** — risveglio automatico Codex 2026-09-17 22:49 Europe/Rome; base corrente `b75dfdcf`.
+
+### A1b — Terza ripresa automatica
+
+Il lettore non distruttivo dello schema aziendale è già pubblicato in `7d4eace2`; non modificarlo salvo regressione dimostrata. Dopo oltre cinque minuti non risultano file in lavorazione, test o nuovi commit. Riprendi immediatamente dal contratto/allowlist e dalla preparazione cifrata separata per i contatti aziendali, quindi implementa il servizio transazionale con revisione, impronta, ricevuta, retry e protezioni Account/QR fail-closed. Aggiungi i test contestualmente al codice. Non fermarti dopo una sola presa in carico documentale.
+
+**Stato incarico: PRONTO** — risveglio automatico Codex 2026-09-17 23:00 Europe/Rome; base corrente `7d4eace2`.
