@@ -134,3 +134,36 @@ test('a Vault without a binary cipher refuses to seal instead of degrading to pl
     await assert.rejects(context.openImage({payload: plaintext(), envelope: {}, aad}), /SEAL_UNAVAILABLE/);
     f.session.dispose();
 });
+test('the binary capability opens what it sealed and is revoked like the session', async () => {
+    const f = sessionFixture();
+    await f.session.unlock();
+    await f.session.navigate('private');
+    const context = f.contexts.at(-1);
+    const capability = createProfileDocumentAttachmentCapability({context, getUser: () => ({uid}),
+        seal: ({bytes, aad}) => context.sealImage({bytes, aad}),
+        open: ({payload, envelope, aad}) => context.openImage({payload, envelope, aad})});
+    const planned = await capability.sealImage({bytes: plaintext(), documentId, attachmentId});
+    const opened = await capability.openImage({payload: planned.payload, envelope: planned.envelope, documentId, attachmentId});
+    assert.deepEqual([...opened], [...plaintext()]);
+    // A payload that does not belong to this identity is refused, not repaired.
+    await assert.rejects(capability.openImage({payload: planned.payload, envelope: planned.envelope,
+        documentId, attachmentId: 'attachment-other'}), /DOCUMENT_ATTACHMENT_OPEN_FAILED/);
+    f.session.lock('manual');
+    await assert.rejects(capability.openImage({payload: planned.payload, envelope: planned.envelope, documentId, attachmentId}),
+        /VIEW_DISPOSED|VAULT_LOCKED/);
+    capability.dispose();
+    f.session.dispose();
+});
+test('a capability without an opener refuses to open instead of returning bytes', async () => {
+    const f = sessionFixture();
+    await f.session.unlock();
+    await f.session.navigate('private');
+    const context = f.contexts.at(-1);
+    const capability = createProfileDocumentAttachmentCapability({context, getUser: () => ({uid}),
+        seal: ({bytes, aad}) => context.sealImage({bytes, aad})});
+    const planned = await capability.sealImage({bytes: plaintext(), documentId, attachmentId});
+    await assert.rejects(capability.openImage({payload: planned.payload, envelope: planned.envelope, documentId, attachmentId}),
+        /DOCUMENT_ATTACHMENT_CAPABILITY_UNAVAILABLE/);
+    capability.dispose();
+    f.session.dispose();
+});

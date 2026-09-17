@@ -2,21 +2,15 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **702**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **705**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/persistent-vault-shell/firebase-document-attachment-transport.mjs` | MJS | 5296 | 108 | File di progetto: firebase-document-attachment-transport. |
-| `experiments/persistent-vault-shell/firebase-document-attachment-transport.test.mjs` | MJS | 6462 | 112 | File di progetto: firebase-document-attachment-transport.test. |
-| `experiments/persistent-vault-shell/firebase-profile-document-attachments-storage.test.mjs` | MJS | 13888 | 175 | File di progetto: firebase-profile-document-attachments-storage.test. |
-| `experiments/persistent-vault-shell/firebase.emulators-storage.json` | JSON | 456 | 14 | File di progetto: firebase.emulators-storage. |
-| `experiments/persistent-vault-shell/profile-document-attachment-candidate-rules.mjs` | MJS | 2240 | 36 | File di progetto: profile-document-attachment-candidate-rules. |
-| `experiments/persistent-vault-shell/profile-document-attachment-rules.test.mjs` | MJS | 5530 | 71 | File di progetto: profile-document-attachment-rules.test. |
-| `experiments/persistent-vault-shell/profile-document-attachment-seal.mjs` | MJS | 5499 | 101 | File di progetto: profile-document-attachment-seal. |
-| `experiments/persistent-vault-shell/profile-document-attachment-seal.test.mjs` | MJS | 8894 | 137 | File di progetto: profile-document-attachment-seal.test. |
-| `experiments/persistent-vault-shell/profile-document-attachment-storage-rules.mjs` | MJS | 3448 | 48 | File di progetto: profile-document-attachment-storage-rules. |
+| `experiments/persistent-vault-shell/profile-document-attachments-editor.test.mjs` | MJS | 16165 | 267 | File di progetto: profile-document-attachments-editor.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-source.mjs` | MJS | 7733 | 138 | File di progetto: profile-document-attachments-source. |
+| `experiments/persistent-vault-shell/profile-document-attachments-view.mjs` | MJS | 7265 | 151 | File di progetto: profile-document-attachments-view. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -136,15 +130,19 @@ File censiti: **702**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
 | `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12936 | 175 | File di progetto: firebase-backup.test. |
 | `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10293 | 159 | File di progetto: firebase-deadline.test. |
+| `experiments/persistent-vault-shell/firebase-document-attachment-transport.mjs` | MJS | 5296 | 108 | File di progetto: firebase-document-attachment-transport. |
+| `experiments/persistent-vault-shell/firebase-document-attachment-transport.test.mjs` | MJS | 6462 | 112 | File di progetto: firebase-document-attachment-transport.test. |
 | `experiments/persistent-vault-shell/firebase-mutation.test.mjs` | MJS | 35343 | 480 | File di progetto: firebase-mutation.test. |
 | `experiments/persistent-vault-shell/firebase-private-note-source.mjs` | MJS | 852 | 13 | File di progetto: firebase-private-note-source. |
 | `experiments/persistent-vault-shell/firebase-profile-contacts.test.mjs` | MJS | 13594 | 174 | File di progetto: firebase-profile-contacts.test. |
+| `experiments/persistent-vault-shell/firebase-profile-document-attachments-storage.test.mjs` | MJS | 13888 | 175 | File di progetto: firebase-profile-document-attachments-storage.test. |
 | `experiments/persistent-vault-shell/firebase-profile-document-attachments.test.mjs` | MJS | 17121 | 219 | File di progetto: firebase-profile-document-attachments.test. |
 | `experiments/persistent-vault-shell/firebase-profile-link.test.mjs` | MJS | 6545 | 77 | File di progetto: firebase-profile-link.test. |
 | `experiments/persistent-vault-shell/firebase-profile-text.test.mjs` | MJS | 5016 | 63 | File di progetto: firebase-profile-text.test. |
 | `experiments/persistent-vault-shell/firebase-qr-selection.test.mjs` | MJS | 10982 | 132 | File di progetto: firebase-qr-selection.test. |
 | `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3751 | 62 | File di progetto: firebase-session. |
 | `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 13223 | 176 | File di progetto: firebase-session.test. |
+| `experiments/persistent-vault-shell/firebase.emulators-storage.json` | JSON | 456 | 14 | File di progetto: firebase.emulators-storage. |
 | `experiments/persistent-vault-shell/firebase.emulators.json` | JSON | 359 | 12 | File di progetto: firebase.emulators. |
 | `experiments/persistent-vault-shell/firebase.preview.json` | JSON | 626 | 15 | File di progetto: firebase.preview. |
 | `experiments/persistent-vault-shell/fixture-repository.mjs` | MJS | 1036 | 21 | File di progetto: fixture-repository. |
@@ -186,7 +184,12 @@ File censiti: **702**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-contacts-editor.test.mjs` | MJS | 21259 | 331 | File di progetto: profile-contacts-editor.test. |
 | `experiments/persistent-vault-shell/profile-contacts-handler.mjs` | MJS | 8057 | 122 | File di progetto: profile-contacts-handler. |
 | `experiments/persistent-vault-shell/profile-contacts.test.mjs` | MJS | 20766 | 305 | File di progetto: profile-contacts.test. |
-| `experiments/persistent-vault-shell/profile-document-attachment-capability.mjs` | MJS | 2852 | 51 | File di progetto: profile-document-attachment-capability. |
+| `experiments/persistent-vault-shell/profile-document-attachment-candidate-rules.mjs` | MJS | 2240 | 36 | File di progetto: profile-document-attachment-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-document-attachment-capability.mjs` | MJS | 4004 | 67 | File di progetto: profile-document-attachment-capability. |
+| `experiments/persistent-vault-shell/profile-document-attachment-rules.test.mjs` | MJS | 5530 | 71 | File di progetto: profile-document-attachment-rules.test. |
+| `experiments/persistent-vault-shell/profile-document-attachment-seal.mjs` | MJS | 5499 | 101 | File di progetto: profile-document-attachment-seal. |
+| `experiments/persistent-vault-shell/profile-document-attachment-seal.test.mjs` | MJS | 10932 | 170 | File di progetto: profile-document-attachment-seal.test. |
+| `experiments/persistent-vault-shell/profile-document-attachment-storage-rules.mjs` | MJS | 3448 | 48 | File di progetto: profile-document-attachment-storage-rules. |
 | `experiments/persistent-vault-shell/profile-document-attachments-contract.mjs` | MJS | 18911 | 255 | File di progetto: profile-document-attachments-contract. |
 | `experiments/persistent-vault-shell/profile-document-attachments-handler.mjs` | MJS | 32023 | 464 | File di progetto: profile-document-attachments-handler. |
 | `experiments/persistent-vault-shell/profile-document-attachments-handler.test.mjs` | MJS | 35867 | 543 | File di progetto: profile-document-attachments-handler.test. |
@@ -657,7 +660,7 @@ File censiti: **702**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 14134 | 96 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 14214 | 96 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

@@ -11,7 +11,7 @@ const SHA256 = async value => {
 // envelope and the digest of the stored bytes. The Vault Key is never requested,
 // never received and never returned here, and the plaintext buffer is cleared on
 // every path, including the failing one.
-export function createProfileDocumentAttachmentCapability({context, getUser, seal}) {
+export function createProfileDocumentAttachmentCapability({context, getUser, seal, open}) {
     if (typeof seal !== 'function') throw Error('DOCUMENT_ATTACHMENT_CAPABILITY_UNAVAILABLE');
     const uid = context.user?.uid;
     let disposed = false;
@@ -45,6 +45,22 @@ export function createProfileDocumentAttachmentCapability({context, getUser, sea
             if (!documentAttachmentDigest(digest)) throw Error('DOCUMENT_ATTACHMENT_SEAL_FAILED');
             const payload = sealed.payload;
             return Object.freeze({payload, envelope, digest, size, storagePath, aad});
+        },
+        // Opening is the mirror image: the capability receives the stored payload
+        // and the record envelope, derives the same AAD from the identity and
+        // returns the plaintext bytes to its caller, which is then responsible for
+        // consuming them immediately (Object URL) and clearing them afterwards.
+        async openImage({payload, envelope, documentId, attachmentId}) {
+            if (typeof open !== 'function') throw Error('DOCUMENT_ATTACHMENT_CAPABILITY_UNAVAILABLE');
+            check();
+            if (!documentAttachmentBytes(payload) || !payload.byteLength) throw Error('DOCUMENT_IMAGE_NOT_ALLOWED');
+            const storagePath = documentImageStoragePath({uid, documentId, attachmentId});
+            const aad = documentAttachmentAad({uid, documentId, attachmentId, storagePath});
+            check();
+            const plaintext = await open({payload, envelope, aad, uid, documentId, attachmentId, storagePath});
+            check();
+            if (!documentAttachmentBytes(plaintext) || !plaintext.byteLength) throw Error('DOCUMENT_ATTACHMENT_OPEN_FAILED');
+            return plaintext;
         }});
 }
 export {documentAttachmentInvalid};
