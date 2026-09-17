@@ -122,7 +122,7 @@ Test rieseguiti indipendentemente: mirati **35/35**, shell **599/599**. Il perim
 ## Incarico attivo
 
 - **ID:** DS-002A-R1
-- **Stato incarico:** PRONTO
+- **Stato incarico:** PRONTO — segnale watcher riemesso 17/09/2026 19:23
 - **Base di codice obbligatoria:** `62fb8d6928ceef921ffa178b45ea6cf6428efba8`
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** sola correzione del candidato DS-002A; nessuna interfaccia o produzione
