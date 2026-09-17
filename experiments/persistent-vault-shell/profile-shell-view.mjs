@@ -97,7 +97,8 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                 context.assertUnlocked(); clear(); sectionControls = new AbortController();
                 const mounted = await mountAddressesEditor(panel, {signal: sectionControls.signal,
                     onSaved: () => current(ticket) ? select('addresses', true) : undefined,
-                    onCancel: () => current(ticket) ? select('addresses') : undefined});
+                    onCancel: () => current(ticket) ? select('addresses') : undefined,
+                    onLink: ({source, mode}) => current(ticket) ? select('addresses', false, {linkOrigin: source, mode}) : undefined});
                 if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
                 return;
             }

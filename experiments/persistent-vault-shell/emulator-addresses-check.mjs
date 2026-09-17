@@ -6,6 +6,7 @@
 import {mountPrivateAddressesEditorProvider} from '/modules/private-addresses-editor-provider.mjs';
 import {mountCompanyAddressesEditorProvider} from '/modules/company-addresses-editor-provider.mjs';
 import {createPrivateAddressesHandler} from '/modules/private-addresses-handler.mjs';
+import {createPrivateUtilitiesHandler} from '/modules/private-utilities-handler.mjs';
 import {createCompanyAddressesHandler} from '/modules/company-addresses-handler.mjs';
 
 const checks = [];
@@ -56,6 +57,9 @@ const fieldOf = (root, id, key) => {const row = rowOf(root, id); return row && r
 const actionOf = (root, name, id) => {const scope = id ? rowOf(root, id) : root; return scope && scope.querySelector(`[data-address-action="${name}"]`);};
 const messageOf = (root, id) => rowOf(root, id)?.querySelector('[data-address-message]')?.textContent ?? '';
 const statusOf = root => root.querySelector('[data-address-status]')?.textContent ?? '';
+const utilityRow = (root, id) => queries(root, '[data-utility-row]').find(row => row.dataset.utilityId === id);
+const utilityField = (root, id, key) => utilityRow(root, id)?.querySelector(`[data-utility-field="${key}"]`);
+const utilityAction = (root, name, id) => (id ? utilityRow(root, id) : root)?.querySelector(`[data-utility-action="${name}"]`);
 const click = async node => {node.dispatchEvent(new Event('click')); await tick();};
 // Private environment: the real handler over an isolated store, mounted through the
 // real provider. Only the id generator is synthetic.
@@ -65,26 +69,32 @@ function privateEnvironment({online = true, selection = {nome: true, emails: [],
         userAddresses: [
             {id: 'address-home', type: 'Residenza', address: 'Via fittizia 1', civic: '1', cap: '00100', city: 'Roma',
                 province: 'RM', isPrimary: true, campoIgnoto: 'da conservare',
-                utilities: [{id: 'utility-gas', type: 'Contatore Metano', value: 'cipher:POD'}]},
+                utilities: [{id: 'utility-gas', type: 'Contatore Metano', value: 'cipher:POD'},
+                    {id: 'utility-linked', type: 'Fibra', value: 'cipher:LINEA', linkedAccountId: 'account'}]},
             {id: 'address-office', type: 'Ufficio', address: 'Via ufficio 2', isPrimary: false},
             {id: 'address-free', type: 'Altro', address: 'Via libera 5', isPrimary: false},
             {id: 'address-legacy-1a2b', type: 'Altro', address: 'Via legacy 3', isPrimary: false}]},
         ...(selection === null ? {} : {[selectionPath]: selection})});
-    const state = {online, submits: 0, saved: 0, locked: false, uid, hold: false, release: null};
+    const state = {online, submits: 0, utilitySubmits: 0, saved: 0, locked: false, uid, hold: false, release: null, links: []};
     const abort = new AbortController();
     const handler = createPrivateAddressesHandler({db: store, hash, timestamp: () => 123});
-    const context = {user: {uid}, signal: abort.signal, assertUnlocked() {if (state.locked) throw Error('LOCKED');}};
+    const utilitiesHandler = createPrivateUtilitiesHandler({db: store, hash, timestamp: () => 123});
+    const context = {user: {uid}, signal: abort.signal, assertUnlocked() {if (state.locked) throw Error('LOCKED');},
+        read: async ({ciphertext}) => atob(ciphertext).slice(48), encrypt: async value => btoa('x'.repeat(48) + value)};
     let counter = 0, cleanup = null;
     const host = container();
     const mount = async () => {cleanup = await mountPrivateAddressesEditorProvider(host, context, {
         getUser: () => ({uid: state.uid}), hash, isOnline: () => state.online,
+        isEncryptedValue: value => typeof value === 'string' && value.length >= 64 && /^[A-Za-z0-9+/]+={0,2}$/.test(value),
         repository: {getUserProfile: async () => store.get(path), getUserProfileConfirmed: async () => store.get(path),
             getUserSetting: async (requested, key) => store.get(`${path}/settings/${key}`) ?? null},
-        createId: prefix => `${prefix}-c0ffee${++counter}`, onCancel: () => {},
+        createId: prefix => `${prefix}-c0ffee${++counter}`, onCancel: () => {}, onUtilityLink: value => state.links.push(value),
         onSaved: async () => {state.saved += 1; cleanup?.(); cleanup = null; await mount(); await tick();},
         submit: async request => {state.submits += 1;
             if (state.hold) await new Promise(resolve => {state.release = resolve;});
-            return handler(request, {auth: {uid}, app: {appId: 'synthetic-not-http-attestation'}});}});};
+            return handler(request, {auth: {uid}, app: {appId: 'synthetic-not-http-attestation'}});},
+        submitUtilities: async request => {state.utilitySubmits += 1; return utilitiesHandler(request,
+            {auth: {uid}, app: {appId: 'synthetic-not-http-attestation'}});}});};
     return {host, store, state, abort, path, mount, cleanup: () => {cleanup?.(); cleanup = null;}};
 }
 // Company environment: same shape, with the legal seat and `altreSedi`.
@@ -120,10 +130,22 @@ try {
     // ── Private addresses ────────────────────────────────────────────────────
     const priv = privateEnvironment();
     await priv.mount();
+    await tick(60);
     record('privato: quattro indirizzi con le etichette reali del profilo',
         rowsOf(priv.host).length === 4 && rowOf(priv.host, 'address-home').textContent.includes('Residenza')
         && rowOf(priv.host, 'address-office').textContent.includes('Ufficio'),
         rowsOf(priv.host).map(row => row.dataset.addressId).join(','));
+    record('A3: utenze renderizzate sotto il relativo indirizzo padre',
+        Boolean(rowOf(priv.host, 'address-home').querySelector('[data-utilities-editor]'))
+        && utilityField(priv.host, 'utility-gas', 'type').value === 'Contatore Metano'
+        && !rowOf(priv.host, 'address-office').querySelector('[data-utility-row]'));
+    record('A3: guardia Account e azioni Collega/Cambia/Scollega restano operative',
+        utilityAction(priv.host, 'delete', 'utility-linked').disabled
+        && utilityRow(priv.host, 'utility-linked').querySelector('[data-utility-link="change"]')
+        && utilityRow(priv.host, 'utility-linked').querySelector('[data-utility-link="unlink"]'));
+    await click(utilityRow(priv.host, 'utility-linked').querySelector('[data-utility-link="change"]'));
+    record('A3: azione Account conserva origine composta indirizzo/utenza',
+        priv.state.links[0]?.source?.parentAddressId === 'address-home' && priv.state.links[0]?.source?.id === 'utility-linked');
     record('privato: la riga con identità derivata è consultabile ma non modificabile',
         fieldOf(priv.host, 'address-legacy-1a2b', 'address').readOnly && actionOf(priv.host, 'delete', 'address-legacy-1a2b').disabled
         && /non persistita/.test(messageOf(priv.host, 'address-legacy-1a2b')), messageOf(priv.host, 'address-legacy-1a2b'));
@@ -167,6 +189,24 @@ try {
     record('privato: doppia conferma prima dell’eliminazione di un indirizzo persistito',
         confirmed && !priv.store.get(priv.path).userAddresses.some(item => item.id === 'address-free'));
     priv.cleanup();
+    const utilities = privateEnvironment({selection: {nome: true, emails: [], phones: [], addresses: ['address-home']}});
+    await utilities.mount();
+    await tick(60);
+    utilityField(utilities.host, 'utility-gas', 'value').value = 'POD-AGGIORNATO';
+    await click(utilityAction(utilities.host, 'add'));
+    const freshUtility = queries(utilities.host, '[data-utility-new]').at(-1), freshId = freshUtility.dataset.utilityId;
+    freshUtility.querySelector('[data-utility-field="type"]').value = 'Acqua'; freshUtility.querySelector('[data-utility-field="value"]').value = 'MATRICOLA';
+    await click(utilityAction(utilities.host, 'save'));
+    record('A3: modifica e creazione cifrano solo value, rileggono e preservano indirizzo/campi legacy',
+        utilities.state.utilitySubmits === 1 && utilityField(utilities.host, 'utility-gas', 'value').value === 'POD-AGGIORNATO'
+        && utilityField(utilities.host, freshId, 'value').value === 'MATRICOLA'
+        && utilities.store.get(utilities.path).userAddresses[0].address === 'Via fittizia 1'
+        && utilities.store.get(utilities.path).userAddresses[0].campoIgnoto === 'da conservare');
+    const utilityDelete = utilityAction(utilities.host, 'delete', 'utility-gas'); await click(utilityDelete);
+    const utilityConfirmed = utilityDelete.textContent === 'Conferma eliminazione'; await click(utilityDelete); await click(utilityAction(utilities.host, 'save'));
+    record('A3: doppia conferma e nessun falso blocco QR quando il padre è nella tessera',
+        utilityConfirmed && !utilities.store.get(utilities.path).userAddresses[0].utilities.some(item => item.id === 'utility-gas'));
+    utilities.cleanup();
     const offline = privateEnvironment({online: false});
     await offline.mount();
     record('privato offline: sola consultazione, nessun salvataggio',

@@ -8,14 +8,14 @@ const BLOCKED = Object.freeze({
     ADDRESS_ID_DERIVED: 'Identità ricavata dalla posizione e non persistita: la riga è visibile ma non modificabile.',
     COMPANY_ADDRESS_ID_MISSING: 'Sede senza ID persistito: è visibile ma non modificabile. L’assegnazione dell’ID richiede una migrazione separata.',
     COMPANY_ADDRESS_ID_DERIVED: 'Identità della sede ricavata dalla posizione e non persistita: la riga è visibile ma non modificabile.',
-    PROFILE_ADDRESS_UTILITIES_PRESENT: 'Contiene utenze: l’eliminazione è vietata. Le utenze si gestiscono dal percorso dedicato, non ancora disponibile in questa vista.',
+    PROFILE_ADDRESS_UTILITIES_PRESENT: 'Contiene utenze: l’eliminazione è vietata. Gestisci prima le utenze mostrate sotto questo indirizzo.',
     PROFILE_ADDRESS_LINKED: 'Collegato a un Account: scollega prima dal percorso dei collegamenti.',
     PROFILE_ADDRESS_QR_SELECTED: 'Incluso nella tessera digitale: escludilo prima dalla tessera.',
     COMPANY_ADDRESS_QR_SELECTED: 'Sede inclusa nella tessera digitale: escludila prima dalla tessera.',
     PROFILE_ADDRESSES_QR_UNVERIFIABLE: 'Selezione della tessera digitale non verificabile: l’eliminazione è disabilitata finché la configurazione salvata non è leggibile e coerente.',
     COMPANY_ADDRESSES_QR_UNVERIFIABLE: 'Selezione della tessera digitale non verificabile: l’eliminazione è disabilitata finché la configurazione salvata non è leggibile e coerente.'
 });
-export async function mountAddressesEditor(root, context, {load, createController, createId, onSaved, onCancel, labels = {}}) {
+export async function mountAddressesEditor(root, context, {load, createController, createId, onSaved, onCancel, mountUtilities, labels = {}}) {
     const text = {save: 'Salva indirizzi', saved: 'Indirizzi salvati.', delete: 'Elimina', confirm: 'Conferma eliminazione',
         removed: 'Riga rimossa: salva per confermare.', refresh: 'Indirizzi salvati, ma la vista non si è aggiornata. Riapri la linguetta.',
         invalid: 'Dati cambiati o salvataggio non disponibile. Riapri la linguetta.',
@@ -122,6 +122,12 @@ export async function mountAddressesEditor(root, context, {load, createControlle
         }, {signal: controls.signal});
         set.append(message, remove); retained.push(set, legend, message, remove, ...entries.map(entry => entry.input));
         rowsHost.append(set); rows.push(row);
+        if (!created && editable && typeof mountUtilities === 'function') {
+            const utilities = document.createElement('div'); utilities.dataset.addressUtilities = id; set.append(utilities); retained.push(utilities);
+            const mounted = mountUtilities(utilities, id);
+            Promise.resolve(mounted).then(cleanup => {if (typeof cleanup === 'function') controls.signal.addEventListener('abort', cleanup, {once: true});})
+                .catch(() => {if (!disposed) message.textContent = text.unavailable;});
+        }
         return row;
     };
     const valueOf = entry => entry.input.type === 'checkbox' ? entry.input.checked : entry.input.value;

@@ -2,7 +2,299 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **751**. Duplicati byte-per-byte: **1 gruppi**.
+
+## experiments
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `experiments/persistent-vault-shell/firebase-utilities.test.mjs` | MJS | 4237 | 15 | File di progetto: firebase-utilities.test. |
+| `experiments/persistent-vault-shell/private-utilities-candidate-rules.mjs` | MJS | 740 | 7 | File di progetto: private-utilities-candidate-rules. |
+| `experiments/persistent-vault-shell/private-utilities-editor-provider.mjs` | MJS | 1019 | 11 | File di progetto: private-utilities-editor-provider. |
+| `experiments/persistent-vault-shell/private-utilities-editor-source.mjs` | MJS | 4895 | 69 | File di progetto: private-utilities-editor-source. |
+| `experiments/persistent-vault-shell/private-utilities-editor-view.mjs` | MJS | 5639 | 38 | File di progetto: private-utilities-editor-view. |
+| `experiments/persistent-vault-shell/private-utilities-editor.test.mjs` | MJS | 4621 | 41 | File di progetto: private-utilities-editor.test. |
+| `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
+| `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
+| `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
+| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2746 | 49 | Documentazione: REAL IMAGE AUDIT. |
+| `experiments/card-importer/card-parser.mjs` | MJS | 3041 | 81 | File di progetto: card-parser. |
+| `experiments/card-importer/card-parser.test.mjs` | MJS | 1480 | 33 | File di progetto: card-parser.test. |
+| `experiments/card-importer/prototype.css` | CSS | 1529 | 18 | File di progetto: prototype. |
+| `experiments/card-importer/prototype.html` | HTML | 2168 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
+| `experiments/card-importer/prototype.mjs` | MJS | 13822 | 312 | File di progetto: prototype. |
+| `experiments/credential-health/credential-health.mjs` | MJS | 1968 | 46 | File di progetto: credential-health. |
+| `experiments/credential-health/credential-health.test.mjs` | MJS | 1701 | 36 | File di progetto: credential-health.test. |
+| `experiments/history-recovery/firestore.candidate.rules` | RULES | 644 | 20 | File di progetto: firestore.candidate. |
+| `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
+| `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
+| `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 26806 | 320 | File di progetto: browser-backend-sync. |
+| `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1294 | 23 | File di progetto: browser-coordination-worker. |
+| `experiments/offline-sync/browser-coordination.mjs` | MJS | 17832 | 239 | File di progetto: browser-coordination. |
+| `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
+| `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3194 | 54 | File di progetto: conflict-note-proposal. |
+| `experiments/offline-sync/conflict-note-proposal.test.mjs` | MJS | 4444 | 62 | File di progetto: conflict-note-proposal.test. |
+| `experiments/offline-sync/conflict-note-review.mjs` | MJS | 1970 | 28 | File di progetto: conflict-note-review. |
+| `experiments/offline-sync/conflict-note-review.test.mjs` | MJS | 2668 | 40 | File di progetto: conflict-note-review.test. |
+| `experiments/offline-sync/emulated-backend-bridge.mjs` | MJS | 6282 | 90 | File di progetto: emulated-backend-bridge. |
+| `experiments/offline-sync/fenced-queue-client.mjs` | MJS | 5833 | 99 | File di progetto: fenced-queue-client. |
+| `experiments/offline-sync/fenced-queue-writer.mjs` | MJS | 8158 | 124 | File di progetto: fenced-queue-writer. |
+| `experiments/offline-sync/firebase-fenced-queue-client.mjs` | MJS | 3008 | 55 | File di progetto: firebase-fenced-queue-client. |
+| `experiments/offline-sync/firebase-fenced-queue-client.test.mjs` | MJS | 5745 | 82 | File di progetto: firebase-fenced-queue-client.test. |
+| `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
+| `experiments/offline-sync/hybrid-queue-coordinator.mjs` | MJS | 4154 | 79 | File di progetto: hybrid-queue-coordinator. |
+| `experiments/offline-sync/hybrid-queue-coordinator.test.mjs` | MJS | 9046 | 148 | File di progetto: hybrid-queue-coordinator.test. |
+| `experiments/offline-sync/indexeddb-queue-lease.mjs` | MJS | 5522 | 99 | File di progetto: indexeddb-queue-lease. |
+| `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8650 | 139 | File di progetto: indexeddb-queue-lease.test. |
+| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
+| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
+| `experiments/offline-sync/offline-save-panel.mjs` | MJS | 17064 | 235 | File di progetto: offline-save-panel. |
+| `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 6988 | 93 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1196 | 21 | File di progetto: run-emulated-browsers. |
+| `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2584 | 47 | File di progetto: account-detail-reader. |
+| `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7387 | 121 | File di progetto: account-detail-reader.test. |
+| `experiments/persistent-vault-shell/account-note-candidate-rules.mjs` | MJS | 728 | 12 | File di progetto: account-note-candidate-rules. |
+| `experiments/persistent-vault-shell/account-note-contract.mjs` | MJS | 2959 | 42 | File di progetto: account-note-contract. |
+| `experiments/persistent-vault-shell/account-note-editor-provider.mjs` | MJS | 2989 | 43 | File di progetto: account-note-editor-provider. |
+| `experiments/persistent-vault-shell/account-note-editor-source.mjs` | MJS | 3779 | 54 | File di progetto: account-note-editor-source. |
+| `experiments/persistent-vault-shell/account-note-editor.test.mjs` | MJS | 8949 | 101 | File di progetto: account-note-editor.test. |
+| `experiments/persistent-vault-shell/account-note-handler.mjs` | MJS | 2846 | 39 | File di progetto: account-note-handler. |
+| `experiments/persistent-vault-shell/account-note-panel-router.mjs` | MJS | 3627 | 58 | File di progetto: account-note-panel-router. |
+| `experiments/persistent-vault-shell/account-note-panel-router.test.mjs` | MJS | 4732 | 56 | File di progetto: account-note-panel-router.test. |
+| `experiments/persistent-vault-shell/account-note-queue-access.mjs` | MJS | 2088 | 37 | File di progetto: account-note-queue-access. |
+| `experiments/persistent-vault-shell/account-note-queue-access.test.mjs` | MJS | 4124 | 49 | File di progetto: account-note-queue-access.test. |
+| `experiments/persistent-vault-shell/account-note.test.mjs` | MJS | 7167 | 85 | File di progetto: account-note.test. |
+| `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
+| `experiments/persistent-vault-shell/account-route.test.mjs` | MJS | 4424 | 80 | File di progetto: account-route.test. |
+| `experiments/persistent-vault-shell/account-widget-reader.mjs` | MJS | 6297 | 107 | File di progetto: account-widget-reader. |
+| `experiments/persistent-vault-shell/account-widget-reader.test.mjs` | MJS | 8841 | 144 | File di progetto: account-widget-reader.test. |
+| `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5488 | 88 | File di progetto: account-widget-view. |
+| `experiments/persistent-vault-shell/account-widget-view.test.mjs` | MJS | 4309 | 60 | File di progetto: account-widget-view.test. |
+| `experiments/persistent-vault-shell/addresses-editor-view.mjs` | MJS | 15134 | 241 | File di progetto: addresses-editor-view. |
+| `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
+| `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4410 | 102 | File di progetto: LICENSE LIBERATION. |
+| `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Bold.ttf` | TTF | 137052 | 1082 | File di progetto: LiberationSans-Bold. |
+| `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Regular.ttf` | TTF | 139512 | 906 | File di progetto: LiberationSans-Regular. |
+| `experiments/persistent-vault-shell/banking-reader.mjs` | MJS | 5045 | 80 | File di progetto: banking-reader. |
+| `experiments/persistent-vault-shell/banking-reader.test.mjs` | MJS | 5963 | 78 | File di progetto: banking-reader.test. |
+| `experiments/persistent-vault-shell/banking-view.mjs` | MJS | 3424 | 51 | File di progetto: banking-view. |
+| `experiments/persistent-vault-shell/banking-view.test.mjs` | MJS | 3714 | 52 | File di progetto: banking-view.test. |
+| `experiments/persistent-vault-shell/browser-session-boundary.mjs` | MJS | 998 | 21 | File di progetto: browser-session-boundary. |
+| `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
+| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 4534 | 49 | File di progetto: build-emulator. |
+| `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
+| `experiments/persistent-vault-shell/company-addresses-candidate-rules.mjs` | MJS | 1578 | 23 | File di progetto: company-addresses-candidate-rules. |
+| `experiments/persistent-vault-shell/company-addresses-contract.mjs` | MJS | 11115 | 208 | File di progetto: company-addresses-contract. |
+| `experiments/persistent-vault-shell/company-addresses-editor-provider.mjs` | MJS | 1358 | 21 | File di progetto: company-addresses-editor-provider. |
+| `experiments/persistent-vault-shell/company-addresses-editor-source.mjs` | MJS | 6700 | 101 | File di progetto: company-addresses-editor-source. |
+| `experiments/persistent-vault-shell/company-addresses-handler.mjs` | MJS | 5672 | 92 | File di progetto: company-addresses-handler. |
+| `experiments/persistent-vault-shell/company-addresses.test.mjs` | MJS | 13824 | 202 | File di progetto: company-addresses.test. |
+| `experiments/persistent-vault-shell/company-contacts-candidate-rules.mjs` | MJS | 1872 | 27 | File di progetto: company-contacts-candidate-rules. |
+| `experiments/persistent-vault-shell/company-contacts-contract.mjs` | MJS | 21667 | 351 | File di progetto: company-contacts-contract. |
+| `experiments/persistent-vault-shell/company-contacts-contract.test.mjs` | MJS | 17159 | 234 | File di progetto: company-contacts-contract.test. |
+| `experiments/persistent-vault-shell/company-contacts-editor-provider.mjs` | MJS | 1373 | 21 | File di progetto: company-contacts-editor-provider. |
+| `experiments/persistent-vault-shell/company-contacts-editor-source.mjs` | MJS | 10959 | 164 | File di progetto: company-contacts-editor-source. |
+| `experiments/persistent-vault-shell/company-contacts-editor-view.mjs` | MJS | 15651 | 250 | File di progetto: company-contacts-editor-view. |
+| `experiments/persistent-vault-shell/company-contacts-editor.test.mjs` | MJS | 15141 | 231 | File di progetto: company-contacts-editor.test. |
+| `experiments/persistent-vault-shell/company-contacts-handler.mjs` | MJS | 8003 | 123 | File di progetto: company-contacts-handler. |
+| `experiments/persistent-vault-shell/company-contacts.test.mjs` | MJS | 30122 | 437 | File di progetto: company-contacts.test. |
+| `experiments/persistent-vault-shell/company-digital-card-reader.mjs` | MJS | 4087 | 64 | File di progetto: company-digital-card-reader. |
+| `experiments/persistent-vault-shell/company-digital-card-reader.test.mjs` | MJS | 3598 | 48 | File di progetto: company-digital-card-reader.test. |
+| `experiments/persistent-vault-shell/company-directory.mjs` | MJS | 5102 | 82 | File di progetto: company-directory. |
+| `experiments/persistent-vault-shell/company-directory.test.mjs` | MJS | 5415 | 61 | File di progetto: company-directory.test. |
+| `experiments/persistent-vault-shell/company-profile-source.mjs` | MJS | 2096 | 31 | File di progetto: company-profile-source. |
+| `experiments/persistent-vault-shell/company-profile-source.test.mjs` | MJS | 5210 | 60 | File di progetto: company-profile-source.test. |
+| `experiments/persistent-vault-shell/company-qr-editor-provider.mjs` | MJS | 1777 | 25 | File di progetto: company-qr-editor-provider. |
+| `experiments/persistent-vault-shell/company-qr-editor-source.mjs` | MJS | 2506 | 42 | File di progetto: company-qr-editor-source. |
+| `experiments/persistent-vault-shell/company-qr-editor-source.test.mjs` | MJS | 4571 | 60 | File di progetto: company-qr-editor-source.test. |
+| `experiments/persistent-vault-shell/company-qr-selection-candidate-rules.mjs` | MJS | 1028 | 17 | File di progetto: company-qr-selection-candidate-rules. |
+| `experiments/persistent-vault-shell/company-qr-selection-contract.mjs` | MJS | 2614 | 48 | File di progetto: company-qr-selection-contract. |
+| `experiments/persistent-vault-shell/company-qr-selection-contract.test.mjs` | MJS | 2798 | 39 | File di progetto: company-qr-selection-contract.test. |
+| `experiments/persistent-vault-shell/company-qr-selection-handler.mjs` | MJS | 3304 | 47 | File di progetto: company-qr-selection-handler. |
+| `experiments/persistent-vault-shell/company-qr-selection-handler.test.mjs` | MJS | 5009 | 68 | File di progetto: company-qr-selection-handler.test. |
+| `experiments/persistent-vault-shell/company-summary-browser.mjs` | MJS | 2732 | 39 | File di progetto: company-summary-browser. |
+| `experiments/persistent-vault-shell/company-summary-browser.test.mjs` | MJS | 2121 | 28 | File di progetto: company-summary-browser.test. |
+| `experiments/persistent-vault-shell/company-summary-pdf.mjs` | MJS | 5829 | 95 | File di progetto: company-summary-pdf. |
+| `experiments/persistent-vault-shell/company-summary-pdf.test.mjs` | MJS | 2199 | 32 | File di progetto: company-summary-pdf.test. |
+| `experiments/persistent-vault-shell/company-summary-reader.mjs` | MJS | 5040 | 66 | File di progetto: company-summary-reader. |
+| `experiments/persistent-vault-shell/company-summary-reader.test.mjs` | MJS | 2890 | 35 | File di progetto: company-summary-reader.test. |
+| `experiments/persistent-vault-shell/company-summary-view.mjs` | MJS | 5600 | 58 | File di progetto: company-summary-view. |
+| `experiments/persistent-vault-shell/company-summary-view.test.mjs` | MJS | 2453 | 34 | File di progetto: company-summary-view.test. |
+| `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
+| `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
+| `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
+| `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
+| `experiments/persistent-vault-shell/emulator-addresses-check.mjs` | MJS | 25653 | 329 | File di progetto: emulator-addresses-check. |
+| `experiments/persistent-vault-shell/emulator-attachments-check.mjs` | MJS | 8327 | 126 | File di progetto: emulator-attachments-check. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 15148 | 168 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
+| `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
+| `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
+| `experiments/persistent-vault-shell/emulator-company-contacts-check.mjs` | MJS | 18052 | 274 | File di progetto: emulator-company-contacts-check. |
+| `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6440 | 125 | File di progetto: emulator-detail-view. |
+| `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15289 | 260 | File di progetto: emulator-detail-view.test. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 37026 | 442 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 7420 | 101 | File di progetto: emulator-entry-runner. |
+| `experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` | MJS | 6132 | 93 | File di progetto: emulator-entry-runner.test. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 26165 | 311 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
+| `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
+| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 8754 | 125 | File di progetto: emulator-network-control. |
+| `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
+| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 5250 | 69 | File di progetto: emulator-qr-bridge. |
+| `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
+| `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 3845 | 54 | File di progetto: emulator-queue.test. |
+| `experiments/persistent-vault-shell/emulator.css` | CSS | 3719 | 39 | File di progetto: emulator. |
+| `experiments/persistent-vault-shell/emulator.html` | HTML | 1961 | 11 | Struttura della pagina emulator; comportamento demandato ai moduli. |
+| `experiments/persistent-vault-shell/excel-export-projection.mjs` | MJS | 6288 | 96 | File di progetto: excel-export-projection. |
+| `experiments/persistent-vault-shell/excel-export-projection.test.mjs` | MJS | 6413 | 105 | File di progetto: excel-export-projection.test. |
+| `experiments/persistent-vault-shell/firebase-account-note.test.mjs` | MJS | 4890 | 57 | File di progetto: firebase-account-note.test. |
+| `experiments/persistent-vault-shell/firebase-addresses.test.mjs` | MJS | 13835 | 170 | File di progetto: firebase-addresses.test. |
+| `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
+| `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12936 | 175 | File di progetto: firebase-backup.test. |
+| `experiments/persistent-vault-shell/firebase-company-contacts.test.mjs` | MJS | 16674 | 212 | File di progetto: firebase-company-contacts.test. |
+| `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10293 | 159 | File di progetto: firebase-deadline.test. |
+| `experiments/persistent-vault-shell/firebase-document-attachment-transport.mjs` | MJS | 5296 | 108 | File di progetto: firebase-document-attachment-transport. |
+| `experiments/persistent-vault-shell/firebase-document-attachment-transport.test.mjs` | MJS | 6462 | 112 | File di progetto: firebase-document-attachment-transport.test. |
+| `experiments/persistent-vault-shell/firebase-mutation.test.mjs` | MJS | 35343 | 480 | File di progetto: firebase-mutation.test. |
+| `experiments/persistent-vault-shell/firebase-private-note-source.mjs` | MJS | 852 | 13 | File di progetto: firebase-private-note-source. |
+| `experiments/persistent-vault-shell/firebase-profile-contacts.test.mjs` | MJS | 13594 | 174 | File di progetto: firebase-profile-contacts.test. |
+| `experiments/persistent-vault-shell/firebase-profile-document-attachments-storage.test.mjs` | MJS | 13888 | 175 | File di progetto: firebase-profile-document-attachments-storage.test. |
+| `experiments/persistent-vault-shell/firebase-profile-document-attachments.test.mjs` | MJS | 17121 | 219 | File di progetto: firebase-profile-document-attachments.test. |
+| `experiments/persistent-vault-shell/firebase-profile-link.test.mjs` | MJS | 6545 | 77 | File di progetto: firebase-profile-link.test. |
+| `experiments/persistent-vault-shell/firebase-profile-text.test.mjs` | MJS | 5016 | 63 | File di progetto: firebase-profile-text.test. |
+| `experiments/persistent-vault-shell/firebase-qr-selection.test.mjs` | MJS | 10982 | 132 | File di progetto: firebase-qr-selection.test. |
+| `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3751 | 62 | File di progetto: firebase-session. |
+| `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 13223 | 176 | File di progetto: firebase-session.test. |
+| `experiments/persistent-vault-shell/firebase.emulators-storage.json` | JSON | 456 | 14 | File di progetto: firebase.emulators-storage. |
+| `experiments/persistent-vault-shell/firebase.emulators.json` | JSON | 359 | 12 | File di progetto: firebase.emulators. |
+| `experiments/persistent-vault-shell/firebase.preview.json` | JSON | 626 | 15 | File di progetto: firebase.preview. |
+| `experiments/persistent-vault-shell/fixture-repository.mjs` | MJS | 1036 | 21 | File di progetto: fixture-repository. |
+| `experiments/persistent-vault-shell/fixture.mjs` | MJS | 2025 | 32 | File di progetto: fixture. |
+| `experiments/persistent-vault-shell/index.html` | HTML | 1748 | 27 | Struttura della pagina index; comportamento demandato ai moduli. |
+| `experiments/persistent-vault-shell/legacy-adapter.mjs` | MJS | 3664 | 83 | File di progetto: legacy-adapter. |
+| `experiments/persistent-vault-shell/legacy-adapter.test.mjs` | MJS | 11224 | 220 | File di progetto: legacy-adapter.test. |
+| `experiments/persistent-vault-shell/master-prompt.mjs` | MJS | 1415 | 29 | File di progetto: master-prompt. |
+| `experiments/persistent-vault-shell/master-prompt.test.mjs` | MJS | 3590 | 64 | File di progetto: master-prompt.test. |
+| `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 6403 | 120 | File di progetto: memory-vault. |
+| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 3700 | 48 | File di progetto: offline-consultation-probe. |
+| `experiments/persistent-vault-shell/owned-queue.test.mjs` | MJS | 5666 | 82 | File di progetto: owned-queue.test. |
+| `experiments/persistent-vault-shell/prepare-company-addresses.mjs` | MJS | 5773 | 93 | File di progetto: prepare-company-addresses. |
+| `experiments/persistent-vault-shell/prepare-company-contacts.mjs` | MJS | 8229 | 132 | File di progetto: prepare-company-contacts. |
+| `experiments/persistent-vault-shell/prepare-preview.mjs` | MJS | 2144 | 32 | File di progetto: prepare-preview. |
+| `experiments/persistent-vault-shell/prepare-private-account-mutation.mjs` | MJS | 6732 | 105 | File di progetto: prepare-private-account-mutation. |
+| `experiments/persistent-vault-shell/prepare-private-account-mutation.test.mjs` | MJS | 8547 | 128 | File di progetto: prepare-private-account-mutation.test. |
+| `experiments/persistent-vault-shell/prepare-private-account-patch.mjs` | MJS | 4145 | 63 | File di progetto: prepare-private-account-patch. |
+| `experiments/persistent-vault-shell/prepare-private-account-patch.test.mjs` | MJS | 6482 | 103 | File di progetto: prepare-private-account-patch.test. |
+| `experiments/persistent-vault-shell/prepare-private-addresses.mjs` | MJS | 4589 | 76 | File di progetto: prepare-private-addresses. |
+| `experiments/persistent-vault-shell/prepare-private-utilities.mjs` | MJS | 4758 | 81 | File di progetto: prepare-private-utilities. |
+| `experiments/persistent-vault-shell/prepare-profile-contacts.mjs` | MJS | 4555 | 83 | File di progetto: prepare-profile-contacts. |
+| `experiments/persistent-vault-shell/prepare-profile-document-attachment.mjs` | MJS | 10002 | 121 | File di progetto: prepare-profile-document-attachment. |
+| `experiments/persistent-vault-shell/prepare-profile-text.mjs` | MJS | 2086 | 32 | File di progetto: prepare-profile-text. |
+| `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4504 | 74 | File di progetto: preview.test. |
+| `experiments/persistent-vault-shell/private-account-save-controller.mjs` | MJS | 7242 | 135 | File di progetto: private-account-save-controller. |
+| `experiments/persistent-vault-shell/private-account-save-controller.test.mjs` | MJS | 12949 | 189 | File di progetto: private-account-save-controller.test. |
+| `experiments/persistent-vault-shell/private-addresses-candidate-rules.mjs` | MJS | 1483 | 21 | File di progetto: private-addresses-candidate-rules. |
+| `experiments/persistent-vault-shell/private-addresses-contract.mjs` | MJS | 9048 | 161 | File di progetto: private-addresses-contract. |
+| `experiments/persistent-vault-shell/private-addresses-editor-provider.mjs` | MJS | 1938 | 28 | File di progetto: private-addresses-editor-provider. |
+| `experiments/persistent-vault-shell/private-addresses-editor-source.mjs` | MJS | 7700 | 118 | File di progetto: private-addresses-editor-source. |
+| `experiments/persistent-vault-shell/private-addresses-handler.mjs` | MJS | 7629 | 114 | File di progetto: private-addresses-handler. |
+| `experiments/persistent-vault-shell/private-addresses.test.mjs` | MJS | 15665 | 221 | File di progetto: private-addresses.test. |
+| `experiments/persistent-vault-shell/private-digital-card-reader.mjs` | MJS | 6184 | 100 | File di progetto: private-digital-card-reader. |
+| `experiments/persistent-vault-shell/private-digital-card-reader.test.mjs` | MJS | 4731 | 56 | File di progetto: private-digital-card-reader.test. |
+| `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 8117 | 107 | File di progetto: private-note-panel-provider. |
+| `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 10005 | 144 | File di progetto: private-note-panel-provider.test. |
+| `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
+| `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
+| `experiments/persistent-vault-shell/private-qr-editor-provider.mjs` | MJS | 1098 | 17 | File di progetto: private-qr-editor-provider. |
+| `experiments/persistent-vault-shell/private-utilities-contract.mjs` | MJS | 9645 | 162 | File di progetto: private-utilities-contract. |
+| `experiments/persistent-vault-shell/private-utilities-handler.mjs` | MJS | 4486 | 72 | File di progetto: private-utilities-handler. |
+| `experiments/persistent-vault-shell/private-utilities.test.mjs` | MJS | 15746 | 217 | File di progetto: private-utilities.test. |
+| `experiments/persistent-vault-shell/profile-account-picker-reader.mjs` | MJS | 4123 | 66 | File di progetto: profile-account-picker-reader. |
+| `experiments/persistent-vault-shell/profile-account-picker-view.mjs` | MJS | 4923 | 62 | File di progetto: profile-account-picker-view. |
+| `experiments/persistent-vault-shell/profile-account-picker.test.mjs` | MJS | 8818 | 106 | File di progetto: profile-account-picker.test. |
+| `experiments/persistent-vault-shell/profile-contacts-candidate-rules.mjs` | MJS | 1267 | 18 | File di progetto: profile-contacts-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-contacts-contract.mjs` | MJS | 8458 | 139 | File di progetto: profile-contacts-contract. |
+| `experiments/persistent-vault-shell/profile-contacts-editor-provider.mjs` | MJS | 1325 | 20 | File di progetto: profile-contacts-editor-provider. |
+| `experiments/persistent-vault-shell/profile-contacts-editor-source.mjs` | MJS | 8479 | 126 | File di progetto: profile-contacts-editor-source. |
+| `experiments/persistent-vault-shell/profile-contacts-editor-view.mjs` | MJS | 11572 | 183 | File di progetto: profile-contacts-editor-view. |
+| `experiments/persistent-vault-shell/profile-contacts-editor.test.mjs` | MJS | 21259 | 331 | File di progetto: profile-contacts-editor.test. |
+| `experiments/persistent-vault-shell/profile-contacts-handler.mjs` | MJS | 8057 | 122 | File di progetto: profile-contacts-handler. |
+| `experiments/persistent-vault-shell/profile-contacts.test.mjs` | MJS | 20766 | 305 | File di progetto: profile-contacts.test. |
+| `experiments/persistent-vault-shell/profile-document-attachment-candidate-rules.mjs` | MJS | 2240 | 36 | File di progetto: profile-document-attachment-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-document-attachment-capability.mjs` | MJS | 4004 | 67 | File di progetto: profile-document-attachment-capability. |
+| `experiments/persistent-vault-shell/profile-document-attachment-rules.test.mjs` | MJS | 5530 | 71 | File di progetto: profile-document-attachment-rules.test. |
+| `experiments/persistent-vault-shell/profile-document-attachment-seal.mjs` | MJS | 5499 | 101 | File di progetto: profile-document-attachment-seal. |
+| `experiments/persistent-vault-shell/profile-document-attachment-seal.test.mjs` | MJS | 10932 | 170 | File di progetto: profile-document-attachment-seal.test. |
+| `experiments/persistent-vault-shell/profile-document-attachment-storage-rules.mjs` | MJS | 3448 | 48 | File di progetto: profile-document-attachment-storage-rules. |
+| `experiments/persistent-vault-shell/profile-document-attachments-contract.mjs` | MJS | 18911 | 255 | File di progetto: profile-document-attachments-contract. |
+| `experiments/persistent-vault-shell/profile-document-attachments-editor.test.mjs` | MJS | 16307 | 269 | File di progetto: profile-document-attachments-editor.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-handler.mjs` | MJS | 32023 | 464 | File di progetto: profile-document-attachments-handler. |
+| `experiments/persistent-vault-shell/profile-document-attachments-handler.test.mjs` | MJS | 35867 | 543 | File di progetto: profile-document-attachments-handler.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-provider.mjs` | MJS | 3950 | 57 | File di progetto: profile-document-attachments-provider. |
+| `experiments/persistent-vault-shell/profile-document-attachments-provider.test.mjs` | MJS | 12525 | 179 | File di progetto: profile-document-attachments-provider.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-reader.mjs` | MJS | 3087 | 54 | File di progetto: profile-document-attachments-reader. |
+| `experiments/persistent-vault-shell/profile-document-attachments-reader.test.mjs` | MJS | 7593 | 110 | File di progetto: profile-document-attachments-reader.test. |
+| `experiments/persistent-vault-shell/profile-document-attachments-source.mjs` | MJS | 8169 | 144 | File di progetto: profile-document-attachments-source. |
+| `experiments/persistent-vault-shell/profile-document-attachments-view.mjs` | MJS | 7265 | 151 | File di progetto: profile-document-attachments-view. |
+| `experiments/persistent-vault-shell/profile-document-attachments.test.mjs` | MJS | 22388 | 299 | File di progetto: profile-document-attachments.test. |
+| `experiments/persistent-vault-shell/profile-link-candidate-rules.mjs` | MJS | 2638 | 31 | File di progetto: profile-link-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-link-contract.mjs` | MJS | 5889 | 79 | File di progetto: profile-link-contract. |
+| `experiments/persistent-vault-shell/profile-link-editor-provider.mjs` | MJS | 6307 | 85 | File di progetto: profile-link-editor-provider. |
+| `experiments/persistent-vault-shell/profile-link-editor-source.mjs` | MJS | 3461 | 49 | File di progetto: profile-link-editor-source. |
+| `experiments/persistent-vault-shell/profile-link-editor-source.test.mjs` | MJS | 8743 | 123 | File di progetto: profile-link-editor-source.test. |
+| `experiments/persistent-vault-shell/profile-link-handler.mjs` | MJS | 5095 | 63 | File di progetto: profile-link-handler. |
+| `experiments/persistent-vault-shell/profile-link-origin.mjs` | MJS | 1376 | 22 | File di progetto: profile-link-origin. |
+| `experiments/persistent-vault-shell/profile-link-plan.mjs` | MJS | 6061 | 80 | File di progetto: profile-link-plan. |
+| `experiments/persistent-vault-shell/profile-link.test.mjs` | MJS | 12281 | 147 | File di progetto: profile-link.test. |
+| `experiments/persistent-vault-shell/profile-linked-account.mjs` | MJS | 4382 | 67 | File di progetto: profile-linked-account. |
+| `experiments/persistent-vault-shell/profile-linked-account.test.mjs` | MJS | 6660 | 85 | File di progetto: profile-linked-account.test. |
+| `experiments/persistent-vault-shell/profile-overview-reader.mjs` | MJS | 4584 | 66 | File di progetto: profile-overview-reader. |
+| `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
+| `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 5155 | 73 | File di progetto: profile-section-reader. |
+| `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 13800 | 190 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 12980 | 159 | File di progetto: profile-shell-view.test. |
+| `experiments/persistent-vault-shell/profile-text-candidate-rules.mjs` | MJS | 1766 | 24 | File di progetto: profile-text-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-text-contract.mjs` | MJS | 4197 | 61 | File di progetto: profile-text-contract. |
+| `experiments/persistent-vault-shell/profile-text-editor-provider.mjs` | MJS | 1294 | 20 | File di progetto: profile-text-editor-provider. |
+| `experiments/persistent-vault-shell/profile-text-editor-source.mjs` | MJS | 3794 | 52 | File di progetto: profile-text-editor-source. |
+| `experiments/persistent-vault-shell/profile-text-editor-view.mjs` | MJS | 5069 | 61 | File di progetto: profile-text-editor-view. |
+| `experiments/persistent-vault-shell/profile-text-editor.test.mjs` | MJS | 6562 | 83 | File di progetto: profile-text-editor.test. |
+| `experiments/persistent-vault-shell/profile-text-handler.mjs` | MJS | 2515 | 38 | File di progetto: profile-text-handler. |
+| `experiments/persistent-vault-shell/profile-text.test.mjs` | MJS | 8087 | 99 | File di progetto: profile-text.test. |
+| `experiments/persistent-vault-shell/profile-widget-reader.mjs` | MJS | 4427 | 70 | File di progetto: profile-widget-reader. |
+| `experiments/persistent-vault-shell/profile-widget-reader.test.mjs` | MJS | 4399 | 50 | File di progetto: profile-widget-reader.test. |
+| `experiments/persistent-vault-shell/profile-widget-view.mjs` | MJS | 3430 | 50 | File di progetto: profile-widget-view. |
+| `experiments/persistent-vault-shell/profile-widget-view.test.mjs` | MJS | 2894 | 38 | File di progetto: profile-widget-view.test. |
+| `experiments/persistent-vault-shell/protected-session.mjs` | MJS | 7145 | 141 | File di progetto: protected-session. |
+| `experiments/persistent-vault-shell/protected-session.test.mjs` | MJS | 8780 | 164 | File di progetto: protected-session.test. |
+| `experiments/persistent-vault-shell/prototype.test.mjs` | MJS | 10094 | 222 | File di progetto: prototype.test. |
+| `experiments/persistent-vault-shell/qr-selection-candidate-rules.mjs` | MJS | 749 | 12 | File di progetto: qr-selection-candidate-rules. |
+| `experiments/persistent-vault-shell/qr-selection-contract.mjs` | MJS | 1966 | 33 | File di progetto: qr-selection-contract. |
+| `experiments/persistent-vault-shell/qr-selection-contract.test.mjs` | MJS | 1972 | 30 | File di progetto: qr-selection-contract.test. |
+| `experiments/persistent-vault-shell/qr-selection-editor-source.mjs` | MJS | 5029 | 66 | File di progetto: qr-selection-editor-source. |
+| `experiments/persistent-vault-shell/qr-selection-editor-source.test.mjs` | MJS | 3340 | 46 | File di progetto: qr-selection-editor-source.test. |
+| `experiments/persistent-vault-shell/qr-selection-editor-view.mjs` | MJS | 4776 | 63 | File di progetto: qr-selection-editor-view. |
+| `experiments/persistent-vault-shell/qr-selection-editor-view.test.mjs` | MJS | 4595 | 58 | File di progetto: qr-selection-editor-view.test. |
+| `experiments/persistent-vault-shell/qr-selection-handler.mjs` | MJS | 4310 | 60 | File di progetto: qr-selection-handler. |
+| `experiments/persistent-vault-shell/qr-selection-handler.test.mjs` | MJS | 3374 | 48 | File di progetto: qr-selection-handler.test. |
+| `experiments/persistent-vault-shell/qr-selection-save-controller.mjs` | MJS | 3788 | 66 | File di progetto: qr-selection-save-controller. |
+| `experiments/persistent-vault-shell/qr-selection-save-controller.test.mjs` | MJS | 2915 | 41 | File di progetto: qr-selection-save-controller.test. |
+| `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2355 | 40 | File di progetto: real-lists-entry. |
+| `experiments/persistent-vault-shell/render-company-summary-fixture.mjs` | MJS | 1708 | 19 | File di progetto: render-company-summary-fixture. |
+| `experiments/persistent-vault-shell/router.mjs` | MJS | 1210 | 33 | File di progetto: router. |
+| `experiments/persistent-vault-shell/serve.mjs` | MJS | 1577 | 21 | File di progetto: serve. |
+| `experiments/persistent-vault-shell/shell-offline-preparation.mjs` | MJS | 1891 | 31 | File di progetto: shell-offline-preparation. |
+| `experiments/persistent-vault-shell/shell-offline-preparation.test.mjs` | MJS | 2935 | 36 | File di progetto: shell-offline-preparation.test. |
+| `experiments/persistent-vault-shell/style.css` | CSS | 2766 | 36 | File di progetto: style. |
+| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2077 | 50 | File di progetto: firestore.candidate. |
+| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2662 | 81 | File di progetto: migration-simulator. |
+| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2416 | 54 | File di progetto: migration-simulator.test. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5927 | 139 | File di progetto: record-sharing-crypto. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
+| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
 
 ## .firebaserc
 
@@ -35,7 +327,7 @@ File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 142122 | 1012 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 141563 | 1012 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -311,7 +603,7 @@ File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 137392 | 636 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 148428 | 677 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -331,299 +623,13 @@ File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 104866 | 688 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 125979 | 719 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 105393 | 688 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 125736 | 719 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
 | `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
-
-## experiments
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
-| `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
-| `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
-| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2746 | 49 | Documentazione: REAL IMAGE AUDIT. |
-| `experiments/card-importer/card-parser.mjs` | MJS | 3041 | 81 | File di progetto: card-parser. |
-| `experiments/card-importer/card-parser.test.mjs` | MJS | 1480 | 33 | File di progetto: card-parser.test. |
-| `experiments/card-importer/prototype.css` | CSS | 1529 | 18 | File di progetto: prototype. |
-| `experiments/card-importer/prototype.html` | HTML | 2168 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
-| `experiments/card-importer/prototype.mjs` | MJS | 13822 | 312 | File di progetto: prototype. |
-| `experiments/credential-health/credential-health.mjs` | MJS | 1968 | 46 | File di progetto: credential-health. |
-| `experiments/credential-health/credential-health.test.mjs` | MJS | 1701 | 36 | File di progetto: credential-health.test. |
-| `experiments/history-recovery/firestore.candidate.rules` | RULES | 644 | 20 | File di progetto: firestore.candidate. |
-| `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
-| `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
-| `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 26806 | 320 | File di progetto: browser-backend-sync. |
-| `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1294 | 23 | File di progetto: browser-coordination-worker. |
-| `experiments/offline-sync/browser-coordination.mjs` | MJS | 17832 | 239 | File di progetto: browser-coordination. |
-| `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
-| `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3194 | 54 | File di progetto: conflict-note-proposal. |
-| `experiments/offline-sync/conflict-note-proposal.test.mjs` | MJS | 4444 | 62 | File di progetto: conflict-note-proposal.test. |
-| `experiments/offline-sync/conflict-note-review.mjs` | MJS | 1970 | 28 | File di progetto: conflict-note-review. |
-| `experiments/offline-sync/conflict-note-review.test.mjs` | MJS | 2668 | 40 | File di progetto: conflict-note-review.test. |
-| `experiments/offline-sync/emulated-backend-bridge.mjs` | MJS | 6282 | 90 | File di progetto: emulated-backend-bridge. |
-| `experiments/offline-sync/fenced-queue-client.mjs` | MJS | 5833 | 99 | File di progetto: fenced-queue-client. |
-| `experiments/offline-sync/fenced-queue-writer.mjs` | MJS | 8158 | 124 | File di progetto: fenced-queue-writer. |
-| `experiments/offline-sync/firebase-fenced-queue-client.mjs` | MJS | 3008 | 55 | File di progetto: firebase-fenced-queue-client. |
-| `experiments/offline-sync/firebase-fenced-queue-client.test.mjs` | MJS | 5745 | 82 | File di progetto: firebase-fenced-queue-client.test. |
-| `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
-| `experiments/offline-sync/hybrid-queue-coordinator.mjs` | MJS | 4154 | 79 | File di progetto: hybrid-queue-coordinator. |
-| `experiments/offline-sync/hybrid-queue-coordinator.test.mjs` | MJS | 9046 | 148 | File di progetto: hybrid-queue-coordinator.test. |
-| `experiments/offline-sync/indexeddb-queue-lease.mjs` | MJS | 5522 | 99 | File di progetto: indexeddb-queue-lease. |
-| `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8650 | 139 | File di progetto: indexeddb-queue-lease.test. |
-| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
-| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/offline-sync/offline-save-panel.mjs` | MJS | 17064 | 235 | File di progetto: offline-save-panel. |
-| `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 6988 | 93 | File di progetto: run-browser-tests. |
-| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1196 | 21 | File di progetto: run-emulated-browsers. |
-| `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2584 | 47 | File di progetto: account-detail-reader. |
-| `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7387 | 121 | File di progetto: account-detail-reader.test. |
-| `experiments/persistent-vault-shell/account-note-candidate-rules.mjs` | MJS | 728 | 12 | File di progetto: account-note-candidate-rules. |
-| `experiments/persistent-vault-shell/account-note-contract.mjs` | MJS | 2959 | 42 | File di progetto: account-note-contract. |
-| `experiments/persistent-vault-shell/account-note-editor-provider.mjs` | MJS | 2989 | 43 | File di progetto: account-note-editor-provider. |
-| `experiments/persistent-vault-shell/account-note-editor-source.mjs` | MJS | 3779 | 54 | File di progetto: account-note-editor-source. |
-| `experiments/persistent-vault-shell/account-note-editor.test.mjs` | MJS | 8949 | 101 | File di progetto: account-note-editor.test. |
-| `experiments/persistent-vault-shell/account-note-handler.mjs` | MJS | 2846 | 39 | File di progetto: account-note-handler. |
-| `experiments/persistent-vault-shell/account-note-panel-router.mjs` | MJS | 3627 | 58 | File di progetto: account-note-panel-router. |
-| `experiments/persistent-vault-shell/account-note-panel-router.test.mjs` | MJS | 4732 | 56 | File di progetto: account-note-panel-router.test. |
-| `experiments/persistent-vault-shell/account-note-queue-access.mjs` | MJS | 2088 | 37 | File di progetto: account-note-queue-access. |
-| `experiments/persistent-vault-shell/account-note-queue-access.test.mjs` | MJS | 4124 | 49 | File di progetto: account-note-queue-access.test. |
-| `experiments/persistent-vault-shell/account-note.test.mjs` | MJS | 7167 | 85 | File di progetto: account-note.test. |
-| `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
-| `experiments/persistent-vault-shell/account-route.test.mjs` | MJS | 4424 | 80 | File di progetto: account-route.test. |
-| `experiments/persistent-vault-shell/account-widget-reader.mjs` | MJS | 6297 | 107 | File di progetto: account-widget-reader. |
-| `experiments/persistent-vault-shell/account-widget-reader.test.mjs` | MJS | 8841 | 144 | File di progetto: account-widget-reader.test. |
-| `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5488 | 88 | File di progetto: account-widget-view. |
-| `experiments/persistent-vault-shell/account-widget-view.test.mjs` | MJS | 4309 | 60 | File di progetto: account-widget-view.test. |
-| `experiments/persistent-vault-shell/addresses-editor-view.mjs` | MJS | 14606 | 235 | File di progetto: addresses-editor-view. |
-| `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
-| `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4410 | 102 | File di progetto: LICENSE LIBERATION. |
-| `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Bold.ttf` | TTF | 137052 | 1082 | File di progetto: LiberationSans-Bold. |
-| `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Regular.ttf` | TTF | 139512 | 906 | File di progetto: LiberationSans-Regular. |
-| `experiments/persistent-vault-shell/banking-reader.mjs` | MJS | 5045 | 80 | File di progetto: banking-reader. |
-| `experiments/persistent-vault-shell/banking-reader.test.mjs` | MJS | 5963 | 78 | File di progetto: banking-reader.test. |
-| `experiments/persistent-vault-shell/banking-view.mjs` | MJS | 3424 | 51 | File di progetto: banking-view. |
-| `experiments/persistent-vault-shell/banking-view.test.mjs` | MJS | 3714 | 52 | File di progetto: banking-view.test. |
-| `experiments/persistent-vault-shell/browser-session-boundary.mjs` | MJS | 998 | 21 | File di progetto: browser-session-boundary. |
-| `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
-| `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 4534 | 49 | File di progetto: build-emulator. |
-| `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
-| `experiments/persistent-vault-shell/company-addresses-candidate-rules.mjs` | MJS | 1578 | 23 | File di progetto: company-addresses-candidate-rules. |
-| `experiments/persistent-vault-shell/company-addresses-contract.mjs` | MJS | 11115 | 208 | File di progetto: company-addresses-contract. |
-| `experiments/persistent-vault-shell/company-addresses-editor-provider.mjs` | MJS | 1358 | 21 | File di progetto: company-addresses-editor-provider. |
-| `experiments/persistent-vault-shell/company-addresses-editor-source.mjs` | MJS | 6700 | 101 | File di progetto: company-addresses-editor-source. |
-| `experiments/persistent-vault-shell/company-addresses-handler.mjs` | MJS | 5672 | 92 | File di progetto: company-addresses-handler. |
-| `experiments/persistent-vault-shell/company-addresses.test.mjs` | MJS | 13824 | 202 | File di progetto: company-addresses.test. |
-| `experiments/persistent-vault-shell/company-contacts-candidate-rules.mjs` | MJS | 1872 | 27 | File di progetto: company-contacts-candidate-rules. |
-| `experiments/persistent-vault-shell/company-contacts-contract.mjs` | MJS | 21667 | 351 | File di progetto: company-contacts-contract. |
-| `experiments/persistent-vault-shell/company-contacts-contract.test.mjs` | MJS | 17159 | 234 | File di progetto: company-contacts-contract.test. |
-| `experiments/persistent-vault-shell/company-contacts-editor-provider.mjs` | MJS | 1373 | 21 | File di progetto: company-contacts-editor-provider. |
-| `experiments/persistent-vault-shell/company-contacts-editor-source.mjs` | MJS | 10959 | 164 | File di progetto: company-contacts-editor-source. |
-| `experiments/persistent-vault-shell/company-contacts-editor-view.mjs` | MJS | 15651 | 250 | File di progetto: company-contacts-editor-view. |
-| `experiments/persistent-vault-shell/company-contacts-editor.test.mjs` | MJS | 15141 | 231 | File di progetto: company-contacts-editor.test. |
-| `experiments/persistent-vault-shell/company-contacts-handler.mjs` | MJS | 8003 | 123 | File di progetto: company-contacts-handler. |
-| `experiments/persistent-vault-shell/company-contacts.test.mjs` | MJS | 30122 | 437 | File di progetto: company-contacts.test. |
-| `experiments/persistent-vault-shell/company-digital-card-reader.mjs` | MJS | 4087 | 64 | File di progetto: company-digital-card-reader. |
-| `experiments/persistent-vault-shell/company-digital-card-reader.test.mjs` | MJS | 3598 | 48 | File di progetto: company-digital-card-reader.test. |
-| `experiments/persistent-vault-shell/company-directory.mjs` | MJS | 5102 | 82 | File di progetto: company-directory. |
-| `experiments/persistent-vault-shell/company-directory.test.mjs` | MJS | 5415 | 61 | File di progetto: company-directory.test. |
-| `experiments/persistent-vault-shell/company-profile-source.mjs` | MJS | 2096 | 31 | File di progetto: company-profile-source. |
-| `experiments/persistent-vault-shell/company-profile-source.test.mjs` | MJS | 5210 | 60 | File di progetto: company-profile-source.test. |
-| `experiments/persistent-vault-shell/company-qr-editor-provider.mjs` | MJS | 1777 | 25 | File di progetto: company-qr-editor-provider. |
-| `experiments/persistent-vault-shell/company-qr-editor-source.mjs` | MJS | 2506 | 42 | File di progetto: company-qr-editor-source. |
-| `experiments/persistent-vault-shell/company-qr-editor-source.test.mjs` | MJS | 4571 | 60 | File di progetto: company-qr-editor-source.test. |
-| `experiments/persistent-vault-shell/company-qr-selection-candidate-rules.mjs` | MJS | 1028 | 17 | File di progetto: company-qr-selection-candidate-rules. |
-| `experiments/persistent-vault-shell/company-qr-selection-contract.mjs` | MJS | 2614 | 48 | File di progetto: company-qr-selection-contract. |
-| `experiments/persistent-vault-shell/company-qr-selection-contract.test.mjs` | MJS | 2798 | 39 | File di progetto: company-qr-selection-contract.test. |
-| `experiments/persistent-vault-shell/company-qr-selection-handler.mjs` | MJS | 3304 | 47 | File di progetto: company-qr-selection-handler. |
-| `experiments/persistent-vault-shell/company-qr-selection-handler.test.mjs` | MJS | 5009 | 68 | File di progetto: company-qr-selection-handler.test. |
-| `experiments/persistent-vault-shell/company-summary-browser.mjs` | MJS | 2732 | 39 | File di progetto: company-summary-browser. |
-| `experiments/persistent-vault-shell/company-summary-browser.test.mjs` | MJS | 2121 | 28 | File di progetto: company-summary-browser.test. |
-| `experiments/persistent-vault-shell/company-summary-pdf.mjs` | MJS | 5829 | 95 | File di progetto: company-summary-pdf. |
-| `experiments/persistent-vault-shell/company-summary-pdf.test.mjs` | MJS | 2199 | 32 | File di progetto: company-summary-pdf.test. |
-| `experiments/persistent-vault-shell/company-summary-reader.mjs` | MJS | 5040 | 66 | File di progetto: company-summary-reader. |
-| `experiments/persistent-vault-shell/company-summary-reader.test.mjs` | MJS | 2890 | 35 | File di progetto: company-summary-reader.test. |
-| `experiments/persistent-vault-shell/company-summary-view.mjs` | MJS | 5600 | 58 | File di progetto: company-summary-view. |
-| `experiments/persistent-vault-shell/company-summary-view.test.mjs` | MJS | 2453 | 34 | File di progetto: company-summary-view.test. |
-| `experiments/persistent-vault-shell/detail-extra-fields.mjs` | MJS | 2838 | 62 | File di progetto: detail-extra-fields. |
-| `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
-| `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
-| `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
-| `experiments/persistent-vault-shell/emulator-addresses-check.mjs` | MJS | 21812 | 289 | File di progetto: emulator-addresses-check. |
-| `experiments/persistent-vault-shell/emulator-attachments-check.mjs` | MJS | 8327 | 126 | File di progetto: emulator-attachments-check. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 15148 | 168 | File di progetto: emulator-browser. |
-| `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
-| `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
-| `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
-| `experiments/persistent-vault-shell/emulator-company-contacts-check.mjs` | MJS | 18052 | 274 | File di progetto: emulator-company-contacts-check. |
-| `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6440 | 125 | File di progetto: emulator-detail-view. |
-| `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15289 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 37026 | 442 | File di progetto: emulator-entry-check. |
-| `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 7420 | 101 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` | MJS | 6132 | 93 | File di progetto: emulator-entry-runner.test. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 25578 | 305 | File di progetto: emulator-entry. |
-| `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
-| `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
-| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 8754 | 125 | File di progetto: emulator-network-control. |
-| `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
-| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 5052 | 67 | File di progetto: emulator-qr-bridge. |
-| `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
-| `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 3845 | 54 | File di progetto: emulator-queue.test. |
-| `experiments/persistent-vault-shell/emulator.css` | CSS | 3719 | 39 | File di progetto: emulator. |
-| `experiments/persistent-vault-shell/emulator.html` | HTML | 1961 | 11 | Struttura della pagina emulator; comportamento demandato ai moduli. |
-| `experiments/persistent-vault-shell/excel-export-projection.mjs` | MJS | 6288 | 96 | File di progetto: excel-export-projection. |
-| `experiments/persistent-vault-shell/excel-export-projection.test.mjs` | MJS | 6413 | 105 | File di progetto: excel-export-projection.test. |
-| `experiments/persistent-vault-shell/firebase-account-note.test.mjs` | MJS | 4890 | 57 | File di progetto: firebase-account-note.test. |
-| `experiments/persistent-vault-shell/firebase-addresses.test.mjs` | MJS | 13835 | 170 | File di progetto: firebase-addresses.test. |
-| `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
-| `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12936 | 175 | File di progetto: firebase-backup.test. |
-| `experiments/persistent-vault-shell/firebase-company-contacts.test.mjs` | MJS | 16674 | 212 | File di progetto: firebase-company-contacts.test. |
-| `experiments/persistent-vault-shell/firebase-deadline.test.mjs` | MJS | 10293 | 159 | File di progetto: firebase-deadline.test. |
-| `experiments/persistent-vault-shell/firebase-document-attachment-transport.mjs` | MJS | 5296 | 108 | File di progetto: firebase-document-attachment-transport. |
-| `experiments/persistent-vault-shell/firebase-document-attachment-transport.test.mjs` | MJS | 6462 | 112 | File di progetto: firebase-document-attachment-transport.test. |
-| `experiments/persistent-vault-shell/firebase-mutation.test.mjs` | MJS | 35343 | 480 | File di progetto: firebase-mutation.test. |
-| `experiments/persistent-vault-shell/firebase-private-note-source.mjs` | MJS | 852 | 13 | File di progetto: firebase-private-note-source. |
-| `experiments/persistent-vault-shell/firebase-profile-contacts.test.mjs` | MJS | 13594 | 174 | File di progetto: firebase-profile-contacts.test. |
-| `experiments/persistent-vault-shell/firebase-profile-document-attachments-storage.test.mjs` | MJS | 13888 | 175 | File di progetto: firebase-profile-document-attachments-storage.test. |
-| `experiments/persistent-vault-shell/firebase-profile-document-attachments.test.mjs` | MJS | 17121 | 219 | File di progetto: firebase-profile-document-attachments.test. |
-| `experiments/persistent-vault-shell/firebase-profile-link.test.mjs` | MJS | 6545 | 77 | File di progetto: firebase-profile-link.test. |
-| `experiments/persistent-vault-shell/firebase-profile-text.test.mjs` | MJS | 5016 | 63 | File di progetto: firebase-profile-text.test. |
-| `experiments/persistent-vault-shell/firebase-qr-selection.test.mjs` | MJS | 10982 | 132 | File di progetto: firebase-qr-selection.test. |
-| `experiments/persistent-vault-shell/firebase-session.mjs` | MJS | 3751 | 62 | File di progetto: firebase-session. |
-| `experiments/persistent-vault-shell/firebase-session.test.mjs` | MJS | 13223 | 176 | File di progetto: firebase-session.test. |
-| `experiments/persistent-vault-shell/firebase.emulators-storage.json` | JSON | 456 | 14 | File di progetto: firebase.emulators-storage. |
-| `experiments/persistent-vault-shell/firebase.emulators.json` | JSON | 359 | 12 | File di progetto: firebase.emulators. |
-| `experiments/persistent-vault-shell/firebase.preview.json` | JSON | 626 | 15 | File di progetto: firebase.preview. |
-| `experiments/persistent-vault-shell/fixture-repository.mjs` | MJS | 1036 | 21 | File di progetto: fixture-repository. |
-| `experiments/persistent-vault-shell/fixture.mjs` | MJS | 2025 | 32 | File di progetto: fixture. |
-| `experiments/persistent-vault-shell/index.html` | HTML | 1748 | 27 | Struttura della pagina index; comportamento demandato ai moduli. |
-| `experiments/persistent-vault-shell/legacy-adapter.mjs` | MJS | 3664 | 83 | File di progetto: legacy-adapter. |
-| `experiments/persistent-vault-shell/legacy-adapter.test.mjs` | MJS | 11224 | 220 | File di progetto: legacy-adapter.test. |
-| `experiments/persistent-vault-shell/master-prompt.mjs` | MJS | 1415 | 29 | File di progetto: master-prompt. |
-| `experiments/persistent-vault-shell/master-prompt.test.mjs` | MJS | 3590 | 64 | File di progetto: master-prompt.test. |
-| `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 6403 | 120 | File di progetto: memory-vault. |
-| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 3700 | 48 | File di progetto: offline-consultation-probe. |
-| `experiments/persistent-vault-shell/owned-queue.test.mjs` | MJS | 5666 | 82 | File di progetto: owned-queue.test. |
-| `experiments/persistent-vault-shell/prepare-company-addresses.mjs` | MJS | 5773 | 93 | File di progetto: prepare-company-addresses. |
-| `experiments/persistent-vault-shell/prepare-company-contacts.mjs` | MJS | 8229 | 132 | File di progetto: prepare-company-contacts. |
-| `experiments/persistent-vault-shell/prepare-preview.mjs` | MJS | 2144 | 32 | File di progetto: prepare-preview. |
-| `experiments/persistent-vault-shell/prepare-private-account-mutation.mjs` | MJS | 6732 | 105 | File di progetto: prepare-private-account-mutation. |
-| `experiments/persistent-vault-shell/prepare-private-account-mutation.test.mjs` | MJS | 8547 | 128 | File di progetto: prepare-private-account-mutation.test. |
-| `experiments/persistent-vault-shell/prepare-private-account-patch.mjs` | MJS | 4145 | 63 | File di progetto: prepare-private-account-patch. |
-| `experiments/persistent-vault-shell/prepare-private-account-patch.test.mjs` | MJS | 6482 | 103 | File di progetto: prepare-private-account-patch.test. |
-| `experiments/persistent-vault-shell/prepare-private-addresses.mjs` | MJS | 4589 | 76 | File di progetto: prepare-private-addresses. |
-| `experiments/persistent-vault-shell/prepare-private-utilities.mjs` | MJS | 4758 | 81 | File di progetto: prepare-private-utilities. |
-| `experiments/persistent-vault-shell/prepare-profile-contacts.mjs` | MJS | 4555 | 83 | File di progetto: prepare-profile-contacts. |
-| `experiments/persistent-vault-shell/prepare-profile-document-attachment.mjs` | MJS | 10002 | 121 | File di progetto: prepare-profile-document-attachment. |
-| `experiments/persistent-vault-shell/prepare-profile-text.mjs` | MJS | 2086 | 32 | File di progetto: prepare-profile-text. |
-| `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4504 | 74 | File di progetto: preview.test. |
-| `experiments/persistent-vault-shell/private-account-save-controller.mjs` | MJS | 7242 | 135 | File di progetto: private-account-save-controller. |
-| `experiments/persistent-vault-shell/private-account-save-controller.test.mjs` | MJS | 12949 | 189 | File di progetto: private-account-save-controller.test. |
-| `experiments/persistent-vault-shell/private-addresses-candidate-rules.mjs` | MJS | 1483 | 21 | File di progetto: private-addresses-candidate-rules. |
-| `experiments/persistent-vault-shell/private-addresses-contract.mjs` | MJS | 9048 | 161 | File di progetto: private-addresses-contract. |
-| `experiments/persistent-vault-shell/private-addresses-editor-provider.mjs` | MJS | 1292 | 20 | File di progetto: private-addresses-editor-provider. |
-| `experiments/persistent-vault-shell/private-addresses-editor-source.mjs` | MJS | 7700 | 118 | File di progetto: private-addresses-editor-source. |
-| `experiments/persistent-vault-shell/private-addresses-handler.mjs` | MJS | 7629 | 114 | File di progetto: private-addresses-handler. |
-| `experiments/persistent-vault-shell/private-addresses.test.mjs` | MJS | 15665 | 221 | File di progetto: private-addresses.test. |
-| `experiments/persistent-vault-shell/private-digital-card-reader.mjs` | MJS | 6184 | 100 | File di progetto: private-digital-card-reader. |
-| `experiments/persistent-vault-shell/private-digital-card-reader.test.mjs` | MJS | 4731 | 56 | File di progetto: private-digital-card-reader.test. |
-| `experiments/persistent-vault-shell/private-note-panel-provider.mjs` | MJS | 8117 | 107 | File di progetto: private-note-panel-provider. |
-| `experiments/persistent-vault-shell/private-note-panel-provider.test.mjs` | MJS | 10005 | 144 | File di progetto: private-note-panel-provider.test. |
-| `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
-| `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
-| `experiments/persistent-vault-shell/private-qr-editor-provider.mjs` | MJS | 1098 | 17 | File di progetto: private-qr-editor-provider. |
-| `experiments/persistent-vault-shell/private-utilities-contract.mjs` | MJS | 9645 | 162 | File di progetto: private-utilities-contract. |
-| `experiments/persistent-vault-shell/private-utilities-handler.mjs` | MJS | 4486 | 72 | File di progetto: private-utilities-handler. |
-| `experiments/persistent-vault-shell/private-utilities.test.mjs` | MJS | 15746 | 217 | File di progetto: private-utilities.test. |
-| `experiments/persistent-vault-shell/profile-account-picker-reader.mjs` | MJS | 4123 | 66 | File di progetto: profile-account-picker-reader. |
-| `experiments/persistent-vault-shell/profile-account-picker-view.mjs` | MJS | 4923 | 62 | File di progetto: profile-account-picker-view. |
-| `experiments/persistent-vault-shell/profile-account-picker.test.mjs` | MJS | 8818 | 106 | File di progetto: profile-account-picker.test. |
-| `experiments/persistent-vault-shell/profile-contacts-candidate-rules.mjs` | MJS | 1267 | 18 | File di progetto: profile-contacts-candidate-rules. |
-| `experiments/persistent-vault-shell/profile-contacts-contract.mjs` | MJS | 8458 | 139 | File di progetto: profile-contacts-contract. |
-| `experiments/persistent-vault-shell/profile-contacts-editor-provider.mjs` | MJS | 1325 | 20 | File di progetto: profile-contacts-editor-provider. |
-| `experiments/persistent-vault-shell/profile-contacts-editor-source.mjs` | MJS | 8479 | 126 | File di progetto: profile-contacts-editor-source. |
-| `experiments/persistent-vault-shell/profile-contacts-editor-view.mjs` | MJS | 11572 | 183 | File di progetto: profile-contacts-editor-view. |
-| `experiments/persistent-vault-shell/profile-contacts-editor.test.mjs` | MJS | 21259 | 331 | File di progetto: profile-contacts-editor.test. |
-| `experiments/persistent-vault-shell/profile-contacts-handler.mjs` | MJS | 8057 | 122 | File di progetto: profile-contacts-handler. |
-| `experiments/persistent-vault-shell/profile-contacts.test.mjs` | MJS | 20766 | 305 | File di progetto: profile-contacts.test. |
-| `experiments/persistent-vault-shell/profile-document-attachment-candidate-rules.mjs` | MJS | 2240 | 36 | File di progetto: profile-document-attachment-candidate-rules. |
-| `experiments/persistent-vault-shell/profile-document-attachment-capability.mjs` | MJS | 4004 | 67 | File di progetto: profile-document-attachment-capability. |
-| `experiments/persistent-vault-shell/profile-document-attachment-rules.test.mjs` | MJS | 5530 | 71 | File di progetto: profile-document-attachment-rules.test. |
-| `experiments/persistent-vault-shell/profile-document-attachment-seal.mjs` | MJS | 5499 | 101 | File di progetto: profile-document-attachment-seal. |
-| `experiments/persistent-vault-shell/profile-document-attachment-seal.test.mjs` | MJS | 10932 | 170 | File di progetto: profile-document-attachment-seal.test. |
-| `experiments/persistent-vault-shell/profile-document-attachment-storage-rules.mjs` | MJS | 3448 | 48 | File di progetto: profile-document-attachment-storage-rules. |
-| `experiments/persistent-vault-shell/profile-document-attachments-contract.mjs` | MJS | 18911 | 255 | File di progetto: profile-document-attachments-contract. |
-| `experiments/persistent-vault-shell/profile-document-attachments-editor.test.mjs` | MJS | 16307 | 269 | File di progetto: profile-document-attachments-editor.test. |
-| `experiments/persistent-vault-shell/profile-document-attachments-handler.mjs` | MJS | 32023 | 464 | File di progetto: profile-document-attachments-handler. |
-| `experiments/persistent-vault-shell/profile-document-attachments-handler.test.mjs` | MJS | 35867 | 543 | File di progetto: profile-document-attachments-handler.test. |
-| `experiments/persistent-vault-shell/profile-document-attachments-provider.mjs` | MJS | 3950 | 57 | File di progetto: profile-document-attachments-provider. |
-| `experiments/persistent-vault-shell/profile-document-attachments-provider.test.mjs` | MJS | 12525 | 179 | File di progetto: profile-document-attachments-provider.test. |
-| `experiments/persistent-vault-shell/profile-document-attachments-reader.mjs` | MJS | 3087 | 54 | File di progetto: profile-document-attachments-reader. |
-| `experiments/persistent-vault-shell/profile-document-attachments-reader.test.mjs` | MJS | 7593 | 110 | File di progetto: profile-document-attachments-reader.test. |
-| `experiments/persistent-vault-shell/profile-document-attachments-source.mjs` | MJS | 8169 | 144 | File di progetto: profile-document-attachments-source. |
-| `experiments/persistent-vault-shell/profile-document-attachments-view.mjs` | MJS | 7265 | 151 | File di progetto: profile-document-attachments-view. |
-| `experiments/persistent-vault-shell/profile-document-attachments.test.mjs` | MJS | 22388 | 299 | File di progetto: profile-document-attachments.test. |
-| `experiments/persistent-vault-shell/profile-link-candidate-rules.mjs` | MJS | 2638 | 31 | File di progetto: profile-link-candidate-rules. |
-| `experiments/persistent-vault-shell/profile-link-contract.mjs` | MJS | 5889 | 79 | File di progetto: profile-link-contract. |
-| `experiments/persistent-vault-shell/profile-link-editor-provider.mjs` | MJS | 6307 | 85 | File di progetto: profile-link-editor-provider. |
-| `experiments/persistent-vault-shell/profile-link-editor-source.mjs` | MJS | 3461 | 49 | File di progetto: profile-link-editor-source. |
-| `experiments/persistent-vault-shell/profile-link-editor-source.test.mjs` | MJS | 8743 | 123 | File di progetto: profile-link-editor-source.test. |
-| `experiments/persistent-vault-shell/profile-link-handler.mjs` | MJS | 5095 | 63 | File di progetto: profile-link-handler. |
-| `experiments/persistent-vault-shell/profile-link-origin.mjs` | MJS | 1376 | 22 | File di progetto: profile-link-origin. |
-| `experiments/persistent-vault-shell/profile-link-plan.mjs` | MJS | 6061 | 80 | File di progetto: profile-link-plan. |
-| `experiments/persistent-vault-shell/profile-link.test.mjs` | MJS | 12281 | 147 | File di progetto: profile-link.test. |
-| `experiments/persistent-vault-shell/profile-linked-account.mjs` | MJS | 4382 | 67 | File di progetto: profile-linked-account. |
-| `experiments/persistent-vault-shell/profile-linked-account.test.mjs` | MJS | 6660 | 85 | File di progetto: profile-linked-account.test. |
-| `experiments/persistent-vault-shell/profile-overview-reader.mjs` | MJS | 4584 | 66 | File di progetto: profile-overview-reader. |
-| `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
-| `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 5155 | 73 | File di progetto: profile-section-reader. |
-| `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 13666 | 189 | File di progetto: profile-shell-view. |
-| `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 12980 | 159 | File di progetto: profile-shell-view.test. |
-| `experiments/persistent-vault-shell/profile-text-candidate-rules.mjs` | MJS | 1766 | 24 | File di progetto: profile-text-candidate-rules. |
-| `experiments/persistent-vault-shell/profile-text-contract.mjs` | MJS | 4197 | 61 | File di progetto: profile-text-contract. |
-| `experiments/persistent-vault-shell/profile-text-editor-provider.mjs` | MJS | 1294 | 20 | File di progetto: profile-text-editor-provider. |
-| `experiments/persistent-vault-shell/profile-text-editor-source.mjs` | MJS | 3794 | 52 | File di progetto: profile-text-editor-source. |
-| `experiments/persistent-vault-shell/profile-text-editor-view.mjs` | MJS | 5069 | 61 | File di progetto: profile-text-editor-view. |
-| `experiments/persistent-vault-shell/profile-text-editor.test.mjs` | MJS | 6562 | 83 | File di progetto: profile-text-editor.test. |
-| `experiments/persistent-vault-shell/profile-text-handler.mjs` | MJS | 2515 | 38 | File di progetto: profile-text-handler. |
-| `experiments/persistent-vault-shell/profile-text.test.mjs` | MJS | 8087 | 99 | File di progetto: profile-text.test. |
-| `experiments/persistent-vault-shell/profile-widget-reader.mjs` | MJS | 4427 | 70 | File di progetto: profile-widget-reader. |
-| `experiments/persistent-vault-shell/profile-widget-reader.test.mjs` | MJS | 4399 | 50 | File di progetto: profile-widget-reader.test. |
-| `experiments/persistent-vault-shell/profile-widget-view.mjs` | MJS | 3430 | 50 | File di progetto: profile-widget-view. |
-| `experiments/persistent-vault-shell/profile-widget-view.test.mjs` | MJS | 2894 | 38 | File di progetto: profile-widget-view.test. |
-| `experiments/persistent-vault-shell/protected-session.mjs` | MJS | 7145 | 141 | File di progetto: protected-session. |
-| `experiments/persistent-vault-shell/protected-session.test.mjs` | MJS | 8780 | 164 | File di progetto: protected-session.test. |
-| `experiments/persistent-vault-shell/prototype.test.mjs` | MJS | 10094 | 222 | File di progetto: prototype.test. |
-| `experiments/persistent-vault-shell/qr-selection-candidate-rules.mjs` | MJS | 749 | 12 | File di progetto: qr-selection-candidate-rules. |
-| `experiments/persistent-vault-shell/qr-selection-contract.mjs` | MJS | 1966 | 33 | File di progetto: qr-selection-contract. |
-| `experiments/persistent-vault-shell/qr-selection-contract.test.mjs` | MJS | 1972 | 30 | File di progetto: qr-selection-contract.test. |
-| `experiments/persistent-vault-shell/qr-selection-editor-source.mjs` | MJS | 5029 | 66 | File di progetto: qr-selection-editor-source. |
-| `experiments/persistent-vault-shell/qr-selection-editor-source.test.mjs` | MJS | 3340 | 46 | File di progetto: qr-selection-editor-source.test. |
-| `experiments/persistent-vault-shell/qr-selection-editor-view.mjs` | MJS | 4776 | 63 | File di progetto: qr-selection-editor-view. |
-| `experiments/persistent-vault-shell/qr-selection-editor-view.test.mjs` | MJS | 4595 | 58 | File di progetto: qr-selection-editor-view.test. |
-| `experiments/persistent-vault-shell/qr-selection-handler.mjs` | MJS | 4310 | 60 | File di progetto: qr-selection-handler. |
-| `experiments/persistent-vault-shell/qr-selection-handler.test.mjs` | MJS | 3374 | 48 | File di progetto: qr-selection-handler.test. |
-| `experiments/persistent-vault-shell/qr-selection-save-controller.mjs` | MJS | 3788 | 66 | File di progetto: qr-selection-save-controller. |
-| `experiments/persistent-vault-shell/qr-selection-save-controller.test.mjs` | MJS | 2915 | 41 | File di progetto: qr-selection-save-controller.test. |
-| `experiments/persistent-vault-shell/real-lists-entry.mjs` | MJS | 2355 | 40 | File di progetto: real-lists-entry. |
-| `experiments/persistent-vault-shell/render-company-summary-fixture.mjs` | MJS | 1708 | 19 | File di progetto: render-company-summary-fixture. |
-| `experiments/persistent-vault-shell/router.mjs` | MJS | 1210 | 33 | File di progetto: router. |
-| `experiments/persistent-vault-shell/serve.mjs` | MJS | 1577 | 21 | File di progetto: serve. |
-| `experiments/persistent-vault-shell/shell-offline-preparation.mjs` | MJS | 1891 | 31 | File di progetto: shell-offline-preparation. |
-| `experiments/persistent-vault-shell/shell-offline-preparation.test.mjs` | MJS | 2935 | 36 | File di progetto: shell-offline-preparation.test. |
-| `experiments/persistent-vault-shell/style.css` | CSS | 2766 | 36 | File di progetto: style. |
-| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2077 | 50 | File di progetto: firestore.candidate. |
-| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2662 | 81 | File di progetto: migration-simulator. |
-| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2416 | 54 | File di progetto: migration-simulator.test. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5927 | 139 | File di progetto: record-sharing-crypto. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
-| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
 
 ## firebase.json
 
@@ -700,7 +706,7 @@ File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 15450 | 101 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 15764 | 103 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -731,7 +737,7 @@ File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 4684 | 39 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 4839 | 40 | Strumento manutenzione/test: run-vault-session-emulators. |
 | `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
 | `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
 | `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |

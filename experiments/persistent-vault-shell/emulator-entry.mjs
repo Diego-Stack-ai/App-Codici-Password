@@ -192,9 +192,9 @@ const mountProfile = context => {
                     repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
                     createId: prefix => privateProfileModel.createProfileItemId(prefix)});
         },
-        mountAddressesEditor: (root, {signal, onSaved, onCancel}) => {
+        mountAddressesEditor: (root, {signal, onSaved, onCancel, onLink}) => {
             const scoped = {...context, signal}, getUser = () => auth.currentUser;
-            const common = {getUser, onSaved, onCancel,
+            const common = {getUser, onSaved, onCancel, isEncryptedValue: cryptoApi.isEncryptedValue,
                 hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
                 submit: async request => {
                     if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
@@ -208,6 +208,12 @@ const mountProfile = context => {
                 createId: prefix => privateProfileModel.createProfileItemId(prefix)})
                 : mountPrivateAddressesEditorProvider(root, scoped, {...common,
                     repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
+                    submitUtilities: async request => {
+                        if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                        scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                        return (await httpsCallable(functions, 'applyPrivateUtilitiesMutation')(request)).data;
+                    },
+                    onUtilityLink: onLink,
                     createId: prefix => privateProfileModel.createProfileItemId(prefix)});
         },
         readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,
