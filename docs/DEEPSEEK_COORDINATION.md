@@ -687,3 +687,39 @@ Non chiudere nuovamente l'incarico dopo un singolo sottoblocco: completa i punti
 - **Perimetro:** invariati `Frontend/public/**`, `firestore.rules`, `storage.rules`, `functions/**`, `master` (`445b338d`) e versione applicativa (`1.2.127`); nessun deploy e nessun dato reale.
 - **Rischi residui:** trasporto e Rules produttivi non autorizzati; prova su dispositivo fisico aperta; Edge non verificabile su questa macchina; le righe senza identità persistita restano consultabili ma non modificabili e richiedono migrazione separata.
 - **Pubblicazione:** il push del commit di lavoro è stato richiesto ma respinto dal controllo automatico dell'ambiente perché il remoto GitHub è stato classificato come destinazione non verificata. Il commit resta locale sul ramo condiviso fino all'autorizzazione esplicita dell'utente.
+
+## Verifica Codex — A3-R2
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-18.
+- **Prove indipendenti:** core+editor/Rules **11/11**; scenario Chrome desktop **31/31** e mobile **31/31**, metriche DevTools identificate, exit 0 e zero errori console; `git diff --check` pulito.
+- **Gate Edge:** aperto sulla macchina Codex (`DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`), senza invalidare Chrome o gli emulatori.
+- **Pubblicazione:** commit locali `9d420c4b` e `8b9b2ab3`; push in attesa dell'autorizzazione esplicita richiesta dal controllo automatico.
+
+## Incarico Codex — A4 editor documenti
+
+Realizzare nel laboratorio l'editor sicuro dei documenti del profilo, integrandolo con collegamenti Account e allegati immagini già candidati. Censire prima separatamente schema privato e aziendale; se non esiste una collezione aziendale equivalente, documentarne l'assenza e non inventarla.
+
+### Base e perimetro
+
+- Base obbligatoria locale: `8b9b2ab3` con questo solo commit documentale successivo.
+- Ramo `integration/vault-shell-v127-security`.
+- Consentiti `experiments/persistent-vault-shell/**`, test/scripts di laboratorio e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati o migrazioni reali.
+
+### Risultato richiesto
+
+- Censimento verificato di `documenti[]`: identità persistita, campi, cifratura, scadenze, QR, link Account, allegati e campi sconosciuti; schema aziendale verificato separatamente.
+- Contratto/allowlist, preparazione, sorgente revocabile e servizio transazionale idempotente con revisione, impronta, ricevuta e retry.
+- Create/update/delete preservando collegamenti, allegati e campi estranei. Eliminazione bloccata per Account collegato, inclusione QR o allegati esistenti; stato ambiguo fail-closed. Righe senza ID stabile consultabili e non modificabili.
+- Editor nella linguetta Documenti, accanto alle azioni Allegato/Collega-Cambia-Scollega già candidate, senza duplicare i relativi servizi. Rilettura confermata e aggiornamento immediato; doppia conferma; scarto locale; offline consultativo.
+- Revoca e pulizia su cambio sezione, lock, logout, cambio UID e callback tardive.
+- Endpoint e Rules candidate soltanto laboratorio.
+
+### Verifiche
+
+- Unitari, emulatori Firestore/Rules e browser Chrome/Edge tentato con profili desktop/mobile: rendering, create/update/delete, allegati preservati, guardie Account/QR/allegati, azioni esistenti, rilettura, offline, lifecycle, layout e zero errori console.
+- Suite complete, scenario entry, inventario e MD; rapporto `DA_VERIFICARE` con scostamenti e rischi.
+
+Non riaprire A1-A3 o DS-002 salvo regressione dimostrata. Nessuna creazione Account in questa fetta.
+
+**Stato incarico: PRONTO** — approvazione A3 e avvio A4 Codex 2026-09-18 01:23 Europe/Rome; base locale `8b9b2ab3`.
