@@ -61,7 +61,8 @@ Diff conforme: due soli file di laboratorio, nessun writer o confine produttivo.
 ## Incarico attivo
 
 - **ID:** DS-002A
-- **Stato incarico:** PRONTO
+- **Stato incarico:** IN_LAVORAZIONE
+- **Presa in carico:** 2026-09-17 10:42 (DeepSeek); commit osservato `a3c7e54e`, base obbligatoria `58aaa625` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Rapporto DS-001 lasciato intatto.
 - **Base di codice obbligatoria:** `58aaa625c264ca23db4998eb2f26561707e58dbe` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** laboratorio della shell persistente; contratto e modello candidato per le immagini dei documenti digitali privati
