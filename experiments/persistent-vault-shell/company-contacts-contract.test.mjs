@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {COMPANY_CONTACT_REFUSALS, companyContactId, companyContactRemovable, companyContactsView,
-    emptyCompanyContactSlot} from './company-contacts-contract.mjs';
+import {COMPANY_CONTACT_MUTATION_REFUSALS, COMPANY_CONTACT_REFUSALS, companyContactBasis, companyContactEmptyRefusal,
+    companyContactExtraDeleteRefusal, companyContactId, companyContactQrState, companyContactRemovable, companyContactsRevision,
+    companyContactsView, emptyCompanyContactSlot, validateCompanyContactsRequest} from './company-contacts-contract.mjs';
 
 // Fixture of the real company schema: fixed slots (one empty), repeatable extra
 // rows (one with a stable id, one without), phones, an Account link, a QR flag,
@@ -99,4 +100,134 @@ test('the company schema refuses a foreign shape instead of normalizing it', () 
     assert.equal(companyContactId('extra-2'), null);
     assert.equal(companyContactId('con:duepunti'), null);
     assert.equal(companyContactId(''), null);
+});
+
+// ─── A1b mutation contract ────────────────────────────────────────────────────
+// Regressione dimostrata: lo schema aziendale reale memorizza i telefoni come
+// stringhe (`ma_save.js`), quindi diffondere il valore avrebbe trasformato
+// "0110000000" in {0:'0',1:'1',…} distruggendo il record.
+const stringPhones = () => ({
+    ragioneSociale: 'Azienda fittizia',
+    emails: {pec: {email: 'pec@example.invalid', tipo: 'PEC'}},
+    telefonoAzienda: '0110000000',
+    faxAzienda: '0110000001',
+    referenteCellulare: '3330000000',
+    campoIgnotoTop: 'da conservare'
+});
+test('a telephone slot stored as a string is emptied as a string, not spread into an object', () => {
+    const record = stringPhones();
+    const emptied = emptyCompanyContactSlot(record, {kind: 'phone-slot', id: 'telefonoAzienda'});
+    assert.equal(emptied.telefonoAzienda, '', 'the phone slot stays a string');
+    assert.equal(Object.keys(emptied).some(key => /^\d+$/.test(key)), false, 'no positional key is invented');
+    assert.equal(emptied.faxAzienda, '0110000001');
+    assert.equal(emptied.referenteCellulare, '3330000000');
+    assert.equal(emptied.emails.pec.email, 'pec@example.invalid');
+    assert.equal(emptied.campoIgnotoTop, 'da conservare');
+    assert.equal(record.telefonoAzienda, '0110000000', 'the source record is never mutated');
+    const objectSlot = emptyCompanyContactSlot({referenteCellulare: {label: 'Referente', number: '333'}},
+        {kind: 'phone-slot', id: 'referenteCellulare'});
+    assert.deepEqual(objectSlot.referenteCellulare, {label: 'Referente', number: ''},
+        'a legacy object-shaped slot keeps its label');
+});
+test('the company revision is separate from the private one and refuses a foreign schema', () => {
+    assert.equal(companyContactsRevision({_companyContactsSchemaVersion: 1}), 0);
+    assert.equal(companyContactsRevision({_companyContactsRevision: 4, _profileContactsRevision: 9}), 4);
+    for (const record of [{_companyContactsSchemaVersion: 2}, {_companyContactsRevision: -1}, {isArchived: true}, null]) {
+        assert.throws(() => companyContactsRevision(record), /COMPANY_CONTACTS_SHAPE_INVALID/);
+    }
+    const basis = companyContactBasis({a: 1, b: null, c: [1, 'x'], d: {z: true}});
+    assert.equal(basis, companyContactBasis({d: {z: true}, c: [1, 'x'], b: null, a: 1}), 'key order is irrelevant');
+    assert.throws(() => companyContactBasis(undefined), /COMPANY_CONTACTS_INVALID/);
+});
+test('the QR state reproduces the digital-card defaults and fails closed when it cannot be read', () => {
+    const absent = companyContactQrState({emails: {}});
+    assert.equal(absent.state, 'absent');
+    assert.equal(absent.slots.pec, true, 'the card publishes the PEC unless it is switched off');
+    assert.equal(absent.slots.referenteCellulare, true);
+    assert.equal(absent.slots.amministrazione, false, 'new fields need an explicit opt-in');
+    assert.equal(absent.slots.personale, false);
+    assert.equal(absent.slots.telefonoAzienda, false);
+    assert.equal(absent.slots.faxAzienda, false, 'the fax has no card flag');
+    const configured = companyContactQrState({qrConfig: {aziendaEmail: false, persEmail: true, _qrRevision: 2, _qrSchemaVersion: 1}});
+    assert.equal(configured.state, 'verified');
+    assert.equal(configured.slots.pec, false);
+    assert.equal(configured.slots.personale, true);
+    assert.equal(configured.slots.referenteCellulare, true, 'a key missing from a saved configuration keeps the card default');
+    const extras = companyContactQrState({emails: {extra: [{id: 'a'}, {id: 'b', qr: false}, {id: 'c', qr: true}]}});
+    assert.deepEqual(extras.extras, [true, false, true], 'a row is published unless its flag is explicitly false');
+    for (const record of [{qrConfig: 'not-an-object'}, {qrConfig: {sconosciuto: true}}, {qrConfig: {_qrSchemaVersion: 2}},
+        {qrConfig: {telefonoAzienda: 'si'}}, {emails: {extra: [{qr: 'si'}]}}, null]) {
+        assert.equal(companyContactQrState(record).state, 'unverified', JSON.stringify(record));
+        assert.equal(companyContactQrState(record).slots, null);
+    }
+});
+test('empty and delete guards refuse a linked, published or legacy row and nothing else', () => {
+    const record = {emails: {pec: {tipo: 'PEC'}, personale: {email: 'p@example.invalid'},
+        extra: [{id: 'company-email-1', email: 'a@example.invalid'}]},
+        telefonoAzienda: '0110', referenteCellulare: '333', aziendaEmail: 'vecchia@example.invalid',
+        phoneAccountLinks: {telefonoAzienda: {linkedAccountId: 'account'}}};
+    assert.equal(companyContactEmptyRefusal(record, {kind: 'phone-slot', id: 'telefonoAzienda'}), 'COMPANY_CONTACTS_LINKED');
+    assert.equal(companyContactEmptyRefusal(record, {kind: 'email-slot', id: 'personale', qrIncluded: true}),
+        'COMPANY_CONTACTS_QR_SELECTED');
+    assert.equal(companyContactEmptyRefusal(record, {kind: 'phone-slot', id: 'referenteCellulare', qrIncluded: true}),
+        'COMPANY_CONTACTS_QR_SELECTED');
+    assert.equal(companyContactEmptyRefusal(record, {kind: 'email-slot', id: 'pec'}), 'COMPANY_CONTACTS_LEGACY_FALLBACK',
+        'the legacy aziendaEmail fallback would simply reappear');
+    assert.equal(companyContactEmptyRefusal({...record, aziendaEmail: ''}, {kind: 'email-slot', id: 'pec'}), null);
+    assert.equal(companyContactEmptyRefusal({emails: {pec: {email: 'x'}}, aziendaEmail: 'vecchia@example.invalid'},
+        {kind: 'email-slot', id: 'pec'}), null, 'a stored slot value shadows the fallback');
+    assert.equal(companyContactEmptyRefusal(record, {kind: 'email-extra', id: 'company-email-1'}),
+        COMPANY_CONTACT_MUTATION_REFUSALS.INVALID, 'a repeatable row is deleted, not emptied');
+    assert.equal(companyContactExtraDeleteRefusal(record.emails.extra[0], {qrIncluded: false}), null);
+    assert.equal(companyContactExtraDeleteRefusal(record.emails.extra[0], {qrIncluded: true}), 'COMPANY_CONTACTS_QR_SELECTED');
+    assert.equal(companyContactExtraDeleteRefusal({email: 'x'}, {qrIncluded: false}), COMPANY_CONTACT_REFUSALS.ID_MISSING);
+    assert.equal(companyContactExtraDeleteRefusal({id: 'extra-3'}, {qrIncluded: false}), COMPANY_CONTACT_REFUSALS.ID_DERIVED);
+    assert.equal(companyContactExtraDeleteRefusal({id: 'company-email-1', linkedAccountId: 'account'}, {qrIncluded: false}),
+        'COMPANY_CONTACTS_LINKED');
+    assert.equal(companyContactExtraDeleteRefusal({id: 'company-email-1', linkedAccountCompanyId: 'other'}, {qrIncluded: false}),
+        'COMPANY_CONTACTS_LINKED', 'a company-only link still protects the row');
+    assert.equal(companyContactExtraDeleteRefusal({id: 'extra-3', qr: false}, {qrIncluded: true}),
+        COMPANY_CONTACT_REFUSALS.ID_DERIVED, 'identity is decided before the card selection');
+});
+test('the company request allowlist keeps the company schema apart from the private one', () => {
+    const request = {target: {domain: 'company', companyId: 'company'}, expectedRevision: 1, operationId: 'operation',
+        operations: [{kind: 'email-slot', id: 'pec', basis: 'a'.repeat(64), fields: {email: 'nuova@example.invalid'}},
+            {kind: 'phone-slot', id: 'telefonoAzienda', basis: 'b'.repeat(64), value: '0110000000'},
+            {kind: 'email-extra-create', id: 'company-email-1', fields: {email: 'x@example.invalid', qr: true}},
+            {kind: 'email-extra-update', id: 'email-extra-9', basis: 'c'.repeat(64), fields: {tipo: 'Ufficio'}},
+            {kind: 'email-extra-delete', id: 'email-extra-8', basis: 'd'.repeat(64)}]};
+    const validated = validateCompanyContactsRequest(request);
+    assert.ok(Object.isFrozen(validated) && Object.isFrozen(validated.operations));
+    assert.deepEqual(validated.operations.map(operation => operation.kind),
+        ['email-slot', 'phone-slot', 'email-extra-create', 'email-extra-update', 'email-extra-delete']);
+    assert.deepEqual(validated.target, {domain: 'company', companyId: 'company'});
+    const patch = change => ({...request, operations: [change]});
+    for (const operations of [
+        [{kind: 'create', collection: 'contactEmails', id: 'email-1', fields: {address: 'x'}}],
+        [{kind: 'email-slot', id: 'mobile', basis: 'a'.repeat(64), fields: {email: 'x'}}],
+        [{kind: 'email-slot', id: 'pec', basis: 'a'.repeat(64), fields: {address: 'x'}}],
+        [{kind: 'email-slot', id: 'pec', basis: 'a'.repeat(64), fields: {nome: 'x'}}],
+        [{kind: 'email-slot', id: 'pec', basis: 'short', fields: {email: 'x'}}],
+        [{kind: 'email-slot', id: 'pec', fields: {email: 'x'}}],
+        [{kind: 'phone-slot', id: 'faxAzienda', basis: 'a'.repeat(64), value: 'x'.repeat(121)}],
+        [{kind: 'phone-slot', id: 'faxAzienda', basis: 'a'.repeat(64), fields: {number: 'x'}}],
+        [{kind: 'email-extra-create', id: 'extra-0', fields: {email: 'x'}}],
+        [{kind: 'email-extra-create', id: 'email-1', fields: {email: 'x'}}],
+        [{kind: 'email-extra-create', id: 'company-email-1', fields: {qr: 'si'}}],
+        [{kind: 'email-extra-create', id: 'company-email-1', fields: {}}],
+        [{kind: 'email-extra-delete', id: 'extra-3', basis: 'a'.repeat(64)}],
+        [{kind: 'email-extra-update', id: 'company-email-1', basis: 'a'.repeat(64), fields: {tipo: 'x'.repeat(121)}}],
+        [{kind: 'email-extra-delete', id: 'company-email-1', basis: 'a'.repeat(64)},
+            {kind: 'email-extra-update', id: 'company-email-1', basis: 'b'.repeat(64), fields: {tipo: 'x'}}],
+        []
+    ]) {
+        assert.throws(() => validateCompanyContactsRequest(patch(operations)), /COMPANY_CONTACTS_INVALID/, JSON.stringify(operations));
+    }
+    for (const value of [{...request, target: {domain: 'private'}}, {...request, target: {domain: 'company', companyId: '../x'}},
+        {...request, target: {domain: 'company', companyId: 'company', extra: 1}}, {...request, expectedRevision: -1},
+        {...request, operationId: 'x/y'}, {...request, operations: 'x'}, {...request, extra: true}]) {
+        assert.throws(() => validateCompanyContactsRequest(value), /COMPANY_CONTACTS_INVALID/);
+    }
+    const many = Array.from({length: 51}, (_, index) => ({kind: 'email-extra-delete', id: `email-${index}`, basis: 'a'.repeat(64)}));
+    assert.throws(() => validateCompanyContactsRequest({...request, operations: many}), /COMPANY_CONTACTS_INVALID/);
 });
