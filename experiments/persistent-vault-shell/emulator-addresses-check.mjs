@@ -8,6 +8,8 @@ import {mountCompanyAddressesEditorProvider} from '/modules/company-addresses-ed
 import {createPrivateAddressesHandler} from '/modules/private-addresses-handler.mjs';
 import {createPrivateUtilitiesHandler} from '/modules/private-utilities-handler.mjs';
 import {createCompanyAddressesHandler} from '/modules/company-addresses-handler.mjs';
+import {mountPrivateDocumentsEditorProvider} from '/modules/private-documents-editor-provider.mjs';
+import {createPrivateDocumentsHandler} from '/modules/private-documents-handler.mjs';
 
 const checks = [];
 const errors = [];
@@ -30,6 +32,7 @@ function createStore(seed) {
     let chain = Promise.resolve();
     return {get: path => structuredClone(data.get(path)),
         doc: value => value,
+        collection: path => ({where: (_field, _operator, documentId) => ({query: true, path, documentId})}),
         runTransaction(run) {
             const next = chain.then(async () => {
                 const staged = new Map();
@@ -37,6 +40,7 @@ function createStore(seed) {
                 const result = await run({
                     async get(ref) {
                         assert(!written, 'READ_AFTER_WRITE');
+                        if (ref?.query) return {size: [...data.entries()].filter(([path, value]) => path.startsWith(`${ref.path}/`) && value?.documentId === ref.documentId).length};
                         return {exists: data.has(ref), data: () => structuredClone(data.get(ref))};
                     },
                     update(ref, patch) {written = true; staged.set(ref, {...structuredClone(data.get(ref)), ...structuredClone(patch)});},
@@ -48,6 +52,17 @@ function createStore(seed) {
             chain = next.then(() => {}, () => {});
             return next;
         }};
+}
+function documentsEnvironment({online = true, selection = {cf: false}} = {}) {
+    const uid='documents-owner',path=`users/${uid}`,selectionPath=`${path}/settings/qrCodeInclusions`;
+    const store=createStore({[path]:{ownerId:uid,_profileDocumentsRevision:1,documenti:[
+        {id:'document-linked',type:'Carta identità',num_serie:btoa('x'.repeat(48)+'AA1'),linkedAccountId:'account',unknown:'keep'},
+        {id:'document-free',type:'Passaporto',note:btoa('x'.repeat(48)+'nota')},
+        {id:'document-legacy-x',type:'Legacy'}]},[selectionPath]:selection});
+    const state={online,uid,submits:0,saved:0,links:[]},abort=new AbortController(),context={user:{uid},signal:abort.signal,assertUnlocked(){},read:async({ciphertext})=>atob(ciphertext).slice(48),encrypt:async value=>btoa('x'.repeat(48)+value)};
+    const handler=createPrivateDocumentsHandler({db:store,hash,timestamp:()=>123}),host=container();let counter=0,cleanup=null;
+    const mount=async()=>{cleanup=await mountPrivateDocumentsEditorProvider(host,context,{getUser:()=>({uid:state.uid}),repository:{getUserProfile:async()=>store.get(path),getUserProfileConfirmed:async()=>store.get(path)},isOnline:()=>state.online,isEncryptedValue:value=>typeof value==='string'&&value.length>=64,hash,createId:()=>`document-new-${++counter}`,onLink:value=>state.links.push(value),onSaved:async()=>{state.saved++;cleanup?.();await mount()},submit:async request=>{state.submits++;return handler(request,{auth:{uid},app:{appId:'synthetic'}})}})};
+    return{host,store,state,abort,path,mount,cleanup:()=>cleanup?.()};
 }
 const container = () => {const node = document.createElement('div'); document.body.append(node); return node;};
 const queries = (root, selector) => [...root.querySelectorAll(selector)];
@@ -123,7 +138,7 @@ function companyEnvironment({qrConfig = {qrLegale: true, aziendaEmail: true, adm
     return {host, store, state, abort, path, mount, cleanup: () => {cleanup?.(); cleanup = null;}};
 }
 try {
-    for (const endpoint of ['applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
+    for (const endpoint of ['applyPrivateAddressesMutation', 'applyCompanyAddressesMutation', 'applyPrivateDocumentsMutation']) {
         const denied = await fetch(`/demo-vault-shell/europe-west1/${endpoint}`, {method: 'POST', body: '{}'});
         record(`endpoint A2 ${endpoint}: richiesta anonima respinta dal bridge reale`, denied.status === 401, `status=${denied.status}`);
     }
@@ -220,6 +235,16 @@ try {
         actionOf(unverifiable.host, 'delete', 'address-free').disabled
         && /non verificabile/.test(messageOf(unverifiable.host, 'address-free')), messageOf(unverifiable.host, 'address-free'));
     unverifiable.cleanup();
+    // ── A4 private documents ────────────────────────────────────────────────
+    const documents=documentsEnvironment();await documents.mount();await tick(40);
+    const documentRows=()=>queries(documents.host,'[data-document-row]'),documentRow=id=>documentRows().find(row=>row.dataset.documentId===id),documentField=(id,key)=>documentRow(id)?.querySelector(`[data-document-field="${key}"]`),documentAction=(name,id)=>(id?documentRow(id):documents.host)?.querySelector(`[data-document-action="${name}"]`);
+    record('A4: documenti renderizzati, segreti decifrati e legacy in sola consultazione',documentRows().length===3&&documentField('document-linked','num_serie').value==='AA1'&&documentField('document-legacy-x','type').readOnly);
+    record('A4: guardia Account e azioni esistenti preservate',documentAction('delete','document-linked').disabled&&documentRow('document-linked').querySelector('[data-document-link="change"]')&&documentRow('document-linked').querySelector('[data-document-link="unlink"]'));
+    await click(documentAction('add'));const newDocument=documentRows().at(-1),newDocumentId=newDocument.dataset.documentId;newDocument.querySelector('[data-document-field="type"]').value='Patente';newDocument.querySelector('[data-document-field="num_serie"]').value='NEW';await click(documentAction('save'));
+    record('A4: creazione cifrata e rilettura confermata',documents.state.submits===1&&documents.store.get(documents.path).documenti.find(item=>item.id===newDocumentId)?.num_serie!== 'NEW'&&documentField(newDocumentId,'num_serie').value==='NEW');
+    documentField('document-free','note').value='nota aggiornata';await click(documentAction('save'));record('A4: modifica preserva campi e collegamenti estranei',documents.store.get(documents.path).documenti.find(item=>item.id==='document-linked').unknown==='keep'&&documentField('document-free','note').value==='nota aggiornata');
+    const deleteDocument=documentAction('delete','document-free');await click(deleteDocument);const documentConfirmed=deleteDocument.textContent==='Conferma eliminazione';await click(deleteDocument);await click(documentAction('save'));record('A4: doppia conferma ed eliminazione senza dipendenze',documentConfirmed&&!documents.store.get(documents.path).documenti.some(item=>item.id==='document-free'));
+    documents.cleanup();const documentsOffline=documentsEnvironment({online:false});await documentsOffline.mount();record('A4: offline consultativo e nessuna mutazione',documentsOffline.host.querySelector('[data-document-action="save"]').disabled&&documentsOffline.state.submits===0);documentsOffline.abort.abort();documentsOffline.cleanup();
     // ── Company addresses ───────────────────────────────────────────────────
     const comp = companyEnvironment();
     await comp.mount();

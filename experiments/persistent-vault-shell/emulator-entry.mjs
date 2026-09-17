@@ -7,6 +7,7 @@ import {mountProfileContactsEditorProvider} from './profile-contacts-editor-prov
 import {mountCompanyContactsEditorProvider} from './company-contacts-editor-provider.mjs';
 import {mountPrivateAddressesEditorProvider} from './private-addresses-editor-provider.mjs';
 import {mountCompanyAddressesEditorProvider} from './company-addresses-editor-provider.mjs';
+import {mountPrivateDocumentsEditorProvider} from './private-documents-editor-provider.mjs';
 import {createCompanySummaryReader} from './company-summary-reader.mjs';
 import {mountCompanySummaryView} from './company-summary-view.mjs';
 import {createCompanyPdfActions} from './company-summary-browser.mjs';
@@ -215,6 +216,18 @@ const mountProfile = context => {
                     },
                     onUtilityLink: onLink,
                     createId: prefix => privateProfileModel.createProfileItemId(prefix)});
+        },
+        mountDocumentsEditor: company ? undefined : (root, {signal, onSaved, onCancel, onLink}) => {
+            const scoped = {...context, signal}, getUser = () => auth.currentUser;
+            return mountPrivateDocumentsEditorProvider(root, scoped, {getUser, onSaved, onCancel, onLink,
+                repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue,
+                createId: prefix => privateProfileModel.createProfileItemId(prefix),
+                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                submit: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, 'applyPrivateDocumentsMutation')(request)).data;
+                }});
         },
         readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,
             repository: {getUserProfile, getUserProfileConfirmed}, isEncryptedValue: cryptoApi.isEncryptedValue, buildProfileOverview, resolvePrimary}),

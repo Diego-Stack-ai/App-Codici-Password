@@ -11,6 +11,7 @@ import {createCompanyContactsHandler} from './company-contacts-handler.mjs';
 import {createPrivateAddressesHandler} from './private-addresses-handler.mjs';
 import {createPrivateUtilitiesHandler} from './private-utilities-handler.mjs';
 import {createCompanyAddressesHandler} from './company-addresses-handler.mjs';
+import {createPrivateDocumentsHandler} from './private-documents-handler.mjs';
 import {readFile} from 'node:fs/promises';
 
 export async function createEmulatorQrBridge(uids) {
@@ -40,6 +41,7 @@ export async function createEmulatorQrBridge(uids) {
         ['/demo-vault-shell/europe-west1/applyPrivateAddressesMutation', createPrivateAddressesHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyPrivateUtilitiesMutation', createPrivateUtilitiesHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyCompanyAddressesMutation', createCompanyAddressesHandler(dependencies)]
+        ,['/demo-vault-shell/europe-west1/applyPrivateDocumentsMutation', createPrivateDocumentsHandler(dependencies)]
     ]);
     return async (request, response) => {
         const run = handlers.get(request.url); if (!run) return false;

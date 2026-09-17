@@ -2,7 +2,7 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Optional editors are supplied by bootstrap; there is no fallback writer.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountContactsEditor, mountAddressesEditor, mountLinkEditor, mountDocumentAttachments, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountContactsEditor, mountAddressesEditor, mountDocumentsEditor, mountLinkEditor, mountDocumentAttachments, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
@@ -102,6 +102,15 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                 if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
                 return;
             }
+            if (editing === true && section === 'documents' && mountDocumentsEditor) {
+                context.assertUnlocked(); clear(); sectionControls = new AbortController();
+                const mounted = await mountDocumentsEditor(panel, {signal: sectionControls.signal,
+                    onSaved: () => current(ticket) ? select('documents', true) : undefined,
+                    onCancel: () => current(ticket) ? select('documents') : undefined,
+                    onLink: ({source, mode}) => current(ticket) ? select('documents', false, {linkOrigin: source, mode}) : undefined});
+                if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
+                return;
+            }
             if ((section === 'digital-card' && mountDigitalCard) || (section === 'pdf-summary' && mountCompanySummary)) {
                 context.assertUnlocked(); clear(); sectionControls = new AbortController();
                 const mounted = await (section === 'digital-card' ? mountDigitalCard : mountCompanySummary)(panel, {signal: sectionControls.signal});
@@ -153,6 +162,11 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                 const editAddresses = document.createElement('button'); editAddresses.type = 'button'; editAddresses.textContent = 'Modifica indirizzi';
                 editAddresses.addEventListener('click', () => {if (current(ticket)) void select('addresses', false, true);}, {signal: sectionControls.signal});
                 panel.append(editAddresses);
+            }
+            if (section === 'documents' && mountDocumentsEditor) {
+                const editDocuments = document.createElement('button'); editDocuments.type = 'button'; editDocuments.textContent = 'Modifica documenti';
+                editDocuments.addEventListener('click', () => {if (current(ticket)) void select('documents', false, true);}, {signal: sectionControls.signal});
+                panel.append(editDocuments);
             }
             if (mountWidgets && Object.hasOwn(PROFILE_SECTIONS, section)) {
                 const mounted = await mountWidgets(panel, {section, signal: sectionControls.signal});
