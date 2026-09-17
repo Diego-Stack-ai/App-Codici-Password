@@ -92,7 +92,7 @@ test('nested utilities are created, updated and deleted through one frozen reque
     assert.equal(saved._profileUtilitiesUpdatedAt, 123);
     assert.ok(f.stored.has('mutationResults/owner/operations/profile-utilities-operation'));
 });
-test('a linked utility, a derived identity and a QR-included parent are never deleted', async () => {
+test('a linked utility and a derived identity are never deleted, and the card never blocks the row', async () => {
     const f = fixture();
     await assert.rejects(() => f.prepare({deletes: [{id: 'utility-linked'}]}), /PROFILE_UTILITY_LINKED/);
     await assert.rejects(() => f.prepare({deletes: [{id: 'utility-address-home-legacy-1a2b'}]}), /UTILITY_ID_DERIVED/);
@@ -108,15 +108,17 @@ test('a linked utility, a derived identity and a QR-included parent are never de
     assert.throws(() => validatePrivateUtilitiesRequest({target: {domain: 'private'}, parentAddressId: 'address-legacy-9',
         expectedRevision: 1, operationId: 'operation', operations: [{kind: 'delete', id: 'utility-free', basis: 'a'.repeat(64)}]}),
         /PROFILE_UTILITIES_INVALID/, 'a legacy parent address is not an addressable parent');
-    // The parent address decides: if the card publishes it, its utilities go with it.
+    // The digital card publishes only the `ADR` line of a selected address
+    // (`qr_code_utils-v2.js`) and never serializes `utilities[]`: including the
+    // parent address in the card does not block the deletion of one utility, and the
+    // selection itself is never touched.
     const published = fixture();
     published.stored.set(published.selectionPath, {nome: true, emails: [], phones: [], addresses: ['address-home']});
-    const request = await published.prepare({deletes: [{id: 'utility-free'}]});
-    await assert.rejects(published.handler(request, published.trusted), /PROFILE_UTILITY_QR_SELECTED/);
-    assert.equal(published.utilities().length, 4);
-    // A non-destructive edit stays available on the same row.
-    const edited = await published.prepare({updates: [{id: 'utility-free', fields: {type: 'Altro'}}]});
-    assert.deepEqual(edited.operations[0].fields, {type: 'Altro'});
+    assert.deepEqual(await published.handler(await published.prepare({deletes: [{id: 'utility-free'}]}), published.trusted),
+        {status: 'confirmed', revision: 2});
+    assert.equal(published.utilities().length, 3);
+    assert.deepEqual(published.stored.get(published.selectionPath),
+        {nome: true, emails: [], phones: [], addresses: ['address-home']}, 'the selection is never rewritten');
 });
 test('revision, fingerprint, parent and row conflicts are refused without a receipt', async () => {
     const update = {updates: [{id: 'utility-free', fields: {type: 'Altro'}}]};
@@ -164,25 +166,28 @@ test('the same operation retries idempotently and concurrent requests cannot bot
     assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
     assert.equal(g.stored.get(g.path)._profileUtilitiesRevision, 2);
 });
-test('the QR configuration decides the deletion and is never rewritten', async () => {
-    for (const selection of [{addresses: 'address-home'}, {addresses: ['address-missing']}, {addresses: [3]},
-        {addresses: ['address-home', 'address-home']}, 'non-un-oggetto']) {
+// Regressione della correzione A3-R1: la tessera non serializza le utenze, quindi
+// nessuno stato della selezione QR dell'indirizzo può bloccare la modifica o
+// l'eliminazione di una singola utenza.
+test('nessuna guardia QR sulla singola utenza: la selezione dell’indirizzo non blocca la riga', async () => {
+    const selections = [null, {nome: true, emails: [], phones: [], addresses: []},
+        {nome: true, emails: [], phones: [], addresses: ['address-home']},
+        {nome: true, emails: [], phones: [], addresses: ['address-office']},
+        {addresses: 'address-home'}, {addresses: ['address-missing']}, 'non-un-oggetto'];
+    for (const selection of selections) {
         const f = fixture();
-        f.stored.set(f.selectionPath, selection);
-        const before = structuredClone([...f.stored]);
-        await assert.rejects(f.handler(await f.prepare({deletes: [{id: 'utility-free'}]}), f.trusted), /UTILITIES_QR_UNVERIFIABLE/,
-            JSON.stringify(selection));
-        assert.deepEqual([...f.stored], before);
+        if (selection !== null) f.stored.set(f.selectionPath, selection);
+        const before = structuredClone(f.stored.get(f.selectionPath));
+        assert.deepEqual(await f.handler(await f.prepare({deletes: [{id: 'utility-free'}]}), f.trusted),
+            {status: 'confirmed', revision: 2}, JSON.stringify(selection));
+        assert.equal(f.utilities().length, 3, JSON.stringify(selection));
+        assert.deepEqual(f.stored.get(f.selectionPath), before, 'the selection is never rewritten');
     }
-    const absent = fixture();
-    assert.deepEqual(await absent.handler(await absent.prepare({deletes: [{id: 'utility-free'}]}), absent.trusted),
+    // An unreadable selection never turns into a refusal either.
+    const unreadable = fixture();
+    unreadable.stored.set(unreadable.selectionPath, {addresses: [3]});
+    assert.deepEqual(await unreadable.handler(await unreadable.prepare({deletes: [{id: 'utility-free'}]}), unreadable.trusted),
         {status: 'confirmed', revision: 2});
-    assert.equal(absent.stored.has(absent.selectionPath), false, 'a deletion never recreates the selection');
-    const other = fixture();
-    other.stored.set(other.selectionPath, {nome: true, emails: [], phones: [], addresses: ['address-office']});
-    assert.deepEqual(await other.handler(await other.prepare({deletes: [{id: 'utility-free'}]}), other.trusted),
-        {status: 'confirmed', revision: 2});
-    assert.deepEqual(other.stored.get(other.selectionPath), {nome: true, emails: [], phones: [], addresses: ['address-office']});
 });
 test('untrusted context, archived profiles and a revoked view never write', async () => {
     for (const trusted of [{}, {auth: {uid: 'owner'}}, {auth: {uid: '../owner'}, app: {appId: 'x'}}]) {

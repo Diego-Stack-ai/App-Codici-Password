@@ -104,9 +104,11 @@ export function privateUtilityParent(record, parentAddressId) {
     }
     return {parent, utilities};
 }
-// A utility linked to an Account, or published with a parent address that the
-// digital card includes, is never deleted.
-export function privateUtilityDeleteRefusal(item, {qrIncluded = false} = {}) {
+// A utility linked to an Account is never deleted. The digital card does **not**
+// publish the utilities: `qr_code_utils-v2.js` emits only the `ADR` line of a
+// selected address (address, civic, city, cap), so including the parent address in
+// the card is not a reason to block the deletion of one of its utilities.
+export function privateUtilityDeleteRefusal(item) {
     if (!object(item)) return PRIVATE_UTILITY_REFUSALS.ID_MISSING;
     const id = privateUtilityId(item.id);
     if (id === null || privateUtilityLegacyId(item.id)) {
@@ -115,7 +117,7 @@ export function privateUtilityDeleteRefusal(item, {qrIncluded = false} = {}) {
     for (const field of ['linkedAccountId', 'linkedAccountCompanyId']) {
         if (typeof item[field] === 'string' && item[field]) return 'PROFILE_UTILITY_LINKED';
     }
-    return qrIncluded === true ? 'PROFILE_UTILITY_QR_SELECTED' : null;
+    return null;
 }
 export const PRIVATE_UTILITY_OPERATION_KEYS = Object.freeze({
     create: Object.freeze(['kind', 'id', 'fields']),

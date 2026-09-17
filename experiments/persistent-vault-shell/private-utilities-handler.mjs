@@ -1,6 +1,5 @@
 import {privateUtilityBasis, privateUtilityDeleteRefusal, privateUtilityParent, privateUtilitiesRevision,
     privateUtilityUid, validatePrivateUtilitiesRequest} from './private-utilities-contract.mjs';
-import {preparePrivateQrSelection} from './qr-selection-contract.mjs';
 
 // Candidate backend only; the future callable must supply verified Auth and App
 // Check context. Never exported by production Functions in this increment.
@@ -9,24 +8,6 @@ import {preparePrivateQrSelection} from './qr-selection-contract.mjs';
 // byte as they were.
 export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
     const fail = code => {throw Error(code);};
-    // The canonical private selection contract is the only authority on the QR
-    // configuration: a value that cannot be resolved never degrades to "nothing
-    // selected" and blocks every deletion (fail-closed).
-    const qrSelection = (data, projection) => {
-        if (!data || typeof data !== 'object' || Array.isArray(data)) fail('UTILITIES_QR_UNVERIFIABLE');
-        const config = {...data};
-        if (config.id !== undefined && config.id !== 'qrCodeInclusions') fail('UTILITIES_QR_UNVERIFIABLE');
-        delete config.id;
-        const revision = Object.hasOwn(config, '_qrRevision') ? config._qrRevision : 0;
-        if (!Number.isSafeInteger(revision) || revision < 0 ||
-            (Object.hasOwn(config, '_qrSchemaVersion') && config._qrSchemaVersion !== 1)) fail('UTILITIES_QR_UNVERIFIABLE');
-        delete config._qrRevision; delete config._qrSchemaVersion;
-        try {
-            return {config, selection: preparePrivateQrSelection(config, projection)};
-        } catch {
-            return fail('UTILITIES_QR_UNVERIFIABLE');
-        }
-    };
     return async (data, trusted) => {
         const uid = trusted?.auth?.uid;
         if (!privateUtilityUid(uid)) fail('UNAUTHENTICATED');
@@ -36,8 +17,6 @@ export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
         const digest = await hash(JSON.stringify({uid, ...request}));
         const recordRef = db.doc(`users/${uid}`);
         const receiptRef = db.doc(`mutationResults/${uid}/operations/profile-utilities-${operationId}`);
-        const needsSelection = operations.some(operation => operation.kind === 'delete');
-        const selectionRef = needsSelection ? db.doc(`users/${uid}/settings/qrCodeInclusions`) : null;
         return db.runTransaction(async transaction => {
             const receipt = await transaction.get(receiptRef);
             if (receipt.exists) {
@@ -52,7 +31,6 @@ export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
             if (record.isArchived || (record.ownerId !== undefined && record.ownerId !== uid)) fail('PROFILE_UNAVAILABLE');
             const revision = privateUtilitiesRevision(record);
             if (revision !== expectedRevision) fail('REVISION_CONFLICT');
-            const selectionSnapshot = selectionRef ? await transaction.get(selectionRef) : null;
             // All reads happen before the first write, as Firestore requires.
             let parent, stored;
             try {
@@ -61,13 +39,6 @@ export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
                 return fail(error.message);
             }
             const utilities = [...stored];
-            const qr = needsSelection && selectionSnapshot?.exists ? qrSelection(selectionSnapshot.data(), {
-                contactEmails: (Array.isArray(record.contactEmails) ? record.contactEmails : []).map(item => ({id: item?.id})),
-                contactPhones: (Array.isArray(record.contactPhones) ? record.contactPhones : []).map(item => ({id: item?.id})),
-                userAddresses: (Array.isArray(record.userAddresses) ? record.userAddresses : []).map(item => ({id: item?.id}))}) : null;
-            // The parent address itself decides whether its utilities are published:
-            // the digital card includes an address, and its utilities with it.
-            const qrIncluded = qr ? qr.selection.addresses.includes(parentAddressId) : false;
             for (const operation of operations) {
                 if (operation.kind === 'create') {
                     if (utilities.some(item => item.id === operation.id)) fail('UTILITIES_EXISTS');
@@ -85,7 +56,7 @@ export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
                     utilities[index] = {...matches[0], ...operation.fields};
                     continue;
                 }
-                const refusal = privateUtilityDeleteRefusal(original, {qrIncluded});
+                const refusal = privateUtilityDeleteRefusal(original);
                 if (refusal) fail(refusal);
                 utilities.splice(index, 1);
             }
