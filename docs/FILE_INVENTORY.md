@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 139569 | 1009 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 140298 | 1009 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -310,7 +310,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 96906 | 488 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 106285 | 518 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -330,8 +330,8 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 101565 | 682 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 123431 | 716 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 102299 | 682 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 124155 | 716 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -399,6 +399,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-widget-reader.test.mjs` | MJS | 8841 | 144 | File di progetto: account-widget-reader.test. |
 | `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5488 | 88 | File di progetto: account-widget-view. |
 | `experiments/persistent-vault-shell/account-widget-view.test.mjs` | MJS | 4309 | 60 | File di progetto: account-widget-view.test. |
+| `experiments/persistent-vault-shell/addresses-editor-view.mjs` | MJS | 14606 | 235 | File di progetto: addresses-editor-view. |
 | `experiments/persistent-vault-shell/app.mjs` | MJS | 5001 | 94 | File di progetto: app. |
 | `experiments/persistent-vault-shell/assets/pdf/LICENSE_LIBERATION` | CONFIG | 4410 | 102 | File di progetto: LICENSE LIBERATION. |
 | `experiments/persistent-vault-shell/assets/pdf/LiberationSans-Bold.ttf` | TTF | 137052 | 1082 | File di progetto: LiberationSans-Bold. |
@@ -411,7 +412,10 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/browser-session-boundary.test.mjs` | MJS | 2904 | 46 | File di progetto: browser-session-boundary.test. |
 | `experiments/persistent-vault-shell/build-emulator.mjs` | MJS | 4534 | 49 | File di progetto: build-emulator. |
 | `experiments/persistent-vault-shell/build.mjs` | MJS | 2525 | 32 | File di progetto: build. |
+| `experiments/persistent-vault-shell/company-addresses-candidate-rules.mjs` | MJS | 1578 | 23 | File di progetto: company-addresses-candidate-rules. |
 | `experiments/persistent-vault-shell/company-addresses-contract.mjs` | MJS | 11115 | 208 | File di progetto: company-addresses-contract. |
+| `experiments/persistent-vault-shell/company-addresses-editor-provider.mjs` | MJS | 1358 | 21 | File di progetto: company-addresses-editor-provider. |
+| `experiments/persistent-vault-shell/company-addresses-editor-source.mjs` | MJS | 6700 | 101 | File di progetto: company-addresses-editor-source. |
 | `experiments/persistent-vault-shell/company-addresses-handler.mjs` | MJS | 5672 | 92 | File di progetto: company-addresses-handler. |
 | `experiments/persistent-vault-shell/company-addresses.test.mjs` | MJS | 13824 | 202 | File di progetto: company-addresses.test. |
 | `experiments/persistent-vault-shell/company-contacts-candidate-rules.mjs` | MJS | 1872 | 27 | File di progetto: company-contacts-candidate-rules. |
@@ -449,23 +453,24 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
 | `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
 | `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
+| `experiments/persistent-vault-shell/emulator-addresses-check.mjs` | MJS | 16998 | 228 | File di progetto: emulator-addresses-check. |
 | `experiments/persistent-vault-shell/emulator-attachments-check.mjs` | MJS | 8327 | 126 | File di progetto: emulator-attachments-check. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 14523 | 160 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 14683 | 161 | File di progetto: emulator-browser. |
 | `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
 | `experiments/persistent-vault-shell/emulator-company-contacts-check.mjs` | MJS | 18052 | 274 | File di progetto: emulator-company-contacts-check. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6440 | 125 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15289 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 36960 | 442 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 37026 | 442 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 6663 | 92 | File di progetto: emulator-entry-runner. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` | MJS | 4223 | 73 | File di progetto: emulator-entry-runner.test. |
-| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 23806 | 285 | File di progetto: emulator-entry. |
+| `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 25578 | 305 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
 | `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 7333 | 109 | File di progetto: emulator-network-control. |
 | `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
-| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 4656 | 63 | File di progetto: emulator-qr-bridge. |
+| `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 5052 | 67 | File di progetto: emulator-qr-bridge. |
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
 | `experiments/persistent-vault-shell/emulator-queue.test.mjs` | MJS | 3845 | 54 | File di progetto: emulator-queue.test. |
 | `experiments/persistent-vault-shell/emulator.css` | CSS | 3719 | 39 | File di progetto: emulator. |
@@ -473,6 +478,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/excel-export-projection.mjs` | MJS | 6288 | 96 | File di progetto: excel-export-projection. |
 | `experiments/persistent-vault-shell/excel-export-projection.test.mjs` | MJS | 6413 | 105 | File di progetto: excel-export-projection.test. |
 | `experiments/persistent-vault-shell/firebase-account-note.test.mjs` | MJS | 4890 | 57 | File di progetto: firebase-account-note.test. |
+| `experiments/persistent-vault-shell/firebase-addresses.test.mjs` | MJS | 13835 | 170 | File di progetto: firebase-addresses.test. |
 | `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
 | `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12936 | 175 | File di progetto: firebase-backup.test. |
 | `experiments/persistent-vault-shell/firebase-company-contacts.test.mjs` | MJS | 16674 | 212 | File di progetto: firebase-company-contacts.test. |
@@ -516,7 +522,10 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/preview.test.mjs` | MJS | 4504 | 74 | File di progetto: preview.test. |
 | `experiments/persistent-vault-shell/private-account-save-controller.mjs` | MJS | 7242 | 135 | File di progetto: private-account-save-controller. |
 | `experiments/persistent-vault-shell/private-account-save-controller.test.mjs` | MJS | 12949 | 189 | File di progetto: private-account-save-controller.test. |
+| `experiments/persistent-vault-shell/private-addresses-candidate-rules.mjs` | MJS | 1483 | 21 | File di progetto: private-addresses-candidate-rules. |
 | `experiments/persistent-vault-shell/private-addresses-contract.mjs` | MJS | 9048 | 161 | File di progetto: private-addresses-contract. |
+| `experiments/persistent-vault-shell/private-addresses-editor-provider.mjs` | MJS | 1292 | 20 | File di progetto: private-addresses-editor-provider. |
+| `experiments/persistent-vault-shell/private-addresses-editor-source.mjs` | MJS | 7700 | 118 | File di progetto: private-addresses-editor-source. |
 | `experiments/persistent-vault-shell/private-addresses-handler.mjs` | MJS | 7629 | 114 | File di progetto: private-addresses-handler. |
 | `experiments/persistent-vault-shell/private-addresses.test.mjs` | MJS | 15665 | 221 | File di progetto: private-addresses.test. |
 | `experiments/persistent-vault-shell/private-digital-card-reader.mjs` | MJS | 6184 | 100 | File di progetto: private-digital-card-reader. |
@@ -529,7 +538,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-account-picker-reader.mjs` | MJS | 4123 | 66 | File di progetto: profile-account-picker-reader. |
 | `experiments/persistent-vault-shell/profile-account-picker-view.mjs` | MJS | 4923 | 62 | File di progetto: profile-account-picker-view. |
 | `experiments/persistent-vault-shell/profile-account-picker.test.mjs` | MJS | 8818 | 106 | File di progetto: profile-account-picker.test. |
-| `experiments/persistent-vault-shell/profile-contacts-candidate-rules.mjs` | MJS | 1049 | 15 | File di progetto: profile-contacts-candidate-rules. |
+| `experiments/persistent-vault-shell/profile-contacts-candidate-rules.mjs` | MJS | 1267 | 18 | File di progetto: profile-contacts-candidate-rules. |
 | `experiments/persistent-vault-shell/profile-contacts-contract.mjs` | MJS | 8458 | 139 | File di progetto: profile-contacts-contract. |
 | `experiments/persistent-vault-shell/profile-contacts-editor-provider.mjs` | MJS | 1325 | 20 | File di progetto: profile-contacts-editor-provider. |
 | `experiments/persistent-vault-shell/profile-contacts-editor-source.mjs` | MJS | 8479 | 126 | File di progetto: profile-contacts-editor-source. |
@@ -569,7 +578,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/profile-overview-reader.test.mjs` | MJS | 4259 | 44 | File di progetto: profile-overview-reader.test. |
 | `experiments/persistent-vault-shell/profile-section-reader.mjs` | MJS | 5155 | 73 | File di progetto: profile-section-reader. |
 | `experiments/persistent-vault-shell/profile-section-reader.test.mjs` | MJS | 6018 | 77 | File di progetto: profile-section-reader.test. |
-| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 12564 | 174 | File di progetto: profile-shell-view. |
+| `experiments/persistent-vault-shell/profile-shell-view.mjs` | MJS | 13666 | 189 | File di progetto: profile-shell-view. |
 | `experiments/persistent-vault-shell/profile-shell-view.test.mjs` | MJS | 12980 | 159 | File di progetto: profile-shell-view.test. |
 | `experiments/persistent-vault-shell/profile-text-candidate-rules.mjs` | MJS | 1766 | 24 | File di progetto: profile-text-candidate-rules. |
 | `experiments/persistent-vault-shell/profile-text-contract.mjs` | MJS | 4197 | 61 | File di progetto: profile-text-contract. |
@@ -686,7 +695,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 15122 | 99 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 15388 | 101 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -717,7 +726,7 @@ File censiti: **731**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1161 | 27 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 4350 | 37 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 4684 | 39 | Strumento manutenzione/test: run-vault-session-emulators. |
 | `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
 | `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
 | `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |
