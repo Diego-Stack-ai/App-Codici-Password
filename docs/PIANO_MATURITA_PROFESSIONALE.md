@@ -2,7 +2,7 @@
 
 > **Stato:** programma in corso; avanzamento riconciliato, gate aperti conservati.
 > **Autorità:** piano subordinato alla baseline e ai contratti specialistici; prevale la baseline sicurezza.
-> **Revisione:** 16/09/2026; consegna e cartelle locali riconciliate; riconciliazione PDF 1.2.128 chiusa in laboratorio. Produzione 1.2.128 (PR #68); candidata applicativa ebf1b1fa nella PR #67 ancora separata.
+> **Revisione:** 17/09/2026; editor dei contatti privati (A1) aggiunto in laboratorio, contatti aziendali esclusi. Produzione 1.2.128 (PR #68); candidata applicativa nella PR #67 ancora separata.
 > **Area:** maturità M0–M10 e post-M10.
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
@@ -16,9 +16,23 @@ Riferimento operativo: [relazione di consegna](./PASSAGGIO_CONSEGNE_2026-09-16.m
 - **Produzione 1.2.128:** PDF aziendale pubblicato separatamente, commit `9d0f7065`, merge `4efda528`, PR #68. Suite completa, 23 test PDF e verifiche browser/asset online superati; CI 35071328912. Nessuna nuova Rules/Function o migrazione.
 - **Candidata `ebf1b1fa`:** Collega/Cambia/Scollega montati; note e coda già integrate. Suite completa, 513 test shell e 109 verifiche Chrome; CI 35070097640 superata. Tutto committato e inviato prima di questa relazione, non pubblicato come shell completa.
 - **Riconciliazione PDF:** completata il 16/09/2026 con confronto selettivo e senza merge. La candidata mancava solo del rilascio `9d0f7065`; generatore e lettore erano già byte-identici, riallineate la vista e il CSS `.company-pdf-*`. Dettagli nella sezione di laboratorio sotto.
-- **Prossimo:** creazione Account/editor contatti-indirizzi-documenti, editor completi Account/Widget/banca e altri percorsi. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
+- **Prossimo:** contatti aziendali (A1b), poi editor indirizzi/utenze/documenti e creazione Account dal collegamento; quindi editor completi Account/Widget/banca e altri percorsi. L'editor dei contatti privati (A1) è in laboratorio e non pubblicato. Excel originale resta isolato a `40052515`; M5–M10 e collaudi reali ancora aperti. Non ricominciare i blocchi già conclusi nelle note storiche.
 - **Motivo:** parità incompleta, trasporti/Rules di laboratorio, transizione writer e migrazione/rollback non chiusi. VS-P0-01 resta aperto in produzione. Il deploy PDF non autorizza il deploy dell'intera PR #67.
 - **Cartella principale unica:** `C:/Users/Diego/Documents/Progetti/App-Codici-Password`. Le vecchie copie e i worktree temporanei sono stati archiviati e rimossi; l'Excel resta disponibile sul ramo remoto `origin/codex/real-excel-export-preview` al commit `40052515`. Ripresa automatica in pausa per il passaggio a un altro agente.
+
+### Editor contatti privati (A1) — laboratorio 17/09/2026
+
+Fetta verticale dei **soli contatti privati**, non pubblicata: contratto e allowlist dei campi, preparazione con cifratura dei soli campi già cifrati, sorgente revocabile, servizio transazionale candidato con ricevuta idempotente, editor e provider, bridge loopback, overlay Rules di laboratorio e montaggio nella linguetta Contatti. I **contatti aziendali sono esclusi** e restano ad A1b.
+
+Perimetro di scrittura: `contactEmails` e `contactPhones` del documento `users/{uid}`. Campi modificabili: email `label`, `address`, `note`, `password`; telefono `label`, `number`. **Nessuna ricifratura**: `note` e `password` restano cifrate, i campi non cifrati conservano il formato già memorizzato e un valore invariato non viene mai riscritto; lo svuotamento esplicito scrive stringa vuota e non cancella il campo. Solo online per le scritture: la coda M6 non è stata modificata e la consultazione offline resta invariata.
+
+Identità: nessun ID derivato dalla posizione o dall'indice; le nuove righe ricevono `email-<uuid>`/`phone-<uuid>` da `createProfileItemId`. Le righe **senza ID persistito** restano visibili e non modificabili con messaggio esplicito, in attesa di una migrazione separata. Campi sconosciuti, legacy, `isPrimary` e i riferimenti `linkedAccountId`/`linkedAccountCompanyId` sono preservati. Revisione o impronta divergenti rifiutano l'intera transazione senza scritture parziali; la ripetizione della stessa operazione è idempotente tramite ricevuta e il riuso della ricevuta per un'altra richiesta è respinto.
+
+Guardie di eliminazione: una riga collegata a un Account, inclusa nella selezione QR o raggiunta da un riferimento posizionale legacy non viene eliminata. `qrCodeInclusions` non viene mai modificata.
+
+Prove: 34 nuove prove unitarie (contratto/preparazione/servizio e sorgente/editor), una suite emulatore con Rules candidate, ricevuta, conflitti, duplicati, guardie e corsa concorrente, e il nuovo flusso browser nella linguetta Contatti (aggiunta con ID generato, refresh confermato, eliminazione consentita, rifiuto della riga collegata, sola consultazione offline) superato su Chrome 152 e Edge 153. `npm run test:vault-shell` 547 test, 0 fallimenti (513 di base più 34).
+
+Restano aperti: contatti aziendali (A1b); editor indirizzi/utenze/documenti e creazione Account dal collegamento; migrazione degli ID mancanti; classificazione di telefoni e indirizzi con eventuale migrazione verso maggiore cifratura (gate separato prima del rilascio produttivo); trasporto callable/App Check produttivi e transizione dei writer legacy. Limite osservato: l'editor della selezione QR (`qr-selection-editor-source.mjs`) valida ogni ID selezionabile e non tollera una riga di contatto priva di ID, quindi la fixture browser conserva ID validi e il caso senza ID resta coperto dalle prove unitarie. Nessun deploy, nessun bump, nessuna modifica a master, Rules o Functions produttive.
 
 ## 1. Obiettivo
 

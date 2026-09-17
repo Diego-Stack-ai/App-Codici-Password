@@ -3,6 +3,7 @@ import {httpsCallable} from 'firebase/functions';
 import {mountPrivateQrEditor} from './private-qr-editor-provider.mjs';
 import {mountCompanyQrEditor} from './company-qr-editor-provider.mjs';
 import {mountProfileTextEditorProvider} from './profile-text-editor-provider.mjs';
+import {mountProfileContactsEditorProvider} from './profile-contacts-editor-provider.mjs';
 import {createCompanySummaryReader} from './company-summary-reader.mjs';
 import {mountCompanySummaryView} from './company-summary-view.mjs';
 import {createCompanyPdfActions} from './company-summary-browser.mjs';
@@ -168,6 +169,19 @@ const mountProfile = context => {
                     if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
                     scoped.assertUnlocked(); if (scoped.signal.aborted || auth.currentUser?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
                     return (await httpsCallable(functions, 'applyProfileTextMutation')(request)).data;
+                }});
+        },
+        mountContactsEditor: company ? undefined : (root, {signal, onSaved, onCancel}) => {
+            const scoped = {...context, signal};
+            return mountProfileContactsEditorProvider(root, scoped, {getUser: () => auth.currentUser,
+                repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
+                isEncryptedValue: cryptoApi.isEncryptedValue, createId: prefix => privateProfileModel.createProfileItemId(prefix),
+                onSaved, onCancel,
+                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                submit: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (scoped.signal.aborted || auth.currentUser?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, 'applyProfileContactsMutation')(request)).data;
                 }});
         },
         readOverview: createProfileOverviewReader({context, source, getUser: () => auth.currentUser,

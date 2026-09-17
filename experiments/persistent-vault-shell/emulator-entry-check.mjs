@@ -89,6 +89,53 @@ async function checkAnagraphic(mode, company) {
     }
     profileChecks.push(`${company ? 'company' : 'private'} anagraphic editor ${mode}: values, refresh and revocation`);
 }
+async function checkContactsEditor(mode) {
+    const button = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
+    const rows = () => [...document.querySelectorAll('[data-contact-row]')];
+    const inputs = () => [...document.querySelectorAll('[data-contact-field]')];
+    byId('profile').click();
+    await wait(() => byId('content').textContent.includes('Nome fittizio'), 'CONTACTS_PROFILE');
+    document.querySelector('[data-profile-section="contacts"]').click();
+    let openContacts;
+    await wait(() => (openContacts = button('Modifica contatti')) !== undefined, 'CONTACTS_TAB');
+    openContacts.click();
+    await wait(() => document.querySelector('[data-profile-contacts-editor]'), 'CONTACTS_EDITOR');
+    assert(rows().length === 3, 'CONTACTS_ROWS');
+    const linked = rows().find(row => row.dataset.contactId === 'email');
+    assert(linked.querySelector('[data-contact-action="delete"]').disabled, 'CONTACTS_LINKED_DELETE');
+    if (mode === 'online') {
+        const original = inputs();
+        await wait(() => document.querySelector('[data-contact-add="contactEmails"]'), 'CONTACTS_ADD');
+        document.querySelector('[data-contact-add="contactEmails"]').click();
+        const created = rows().find(row => row.dataset.contactNew === 'true');
+        assert(created && created.dataset.contactId.startsWith('email-'), 'CONTACTS_NEW_ID');
+        created.querySelector('[data-contact-field="address"]').value = 'laboratorio-contatti@example.invalid';
+        button('Salva contatti').click();
+        await wait(() => !document.querySelector('[data-profile-contacts-editor]') && button('Modifica contatti') && byId('content').textContent.includes('laboratorio-contatti@example.invalid'), 'CONTACTS_REFRESH');
+        assert(original.every(node => node.value === ''), 'CONTACTS_SAVE_CLEAR');
+        button('Modifica contatti').click();
+        await wait(() => document.querySelector('[data-profile-contacts-editor]'), 'CONTACTS_REOPEN');
+        const fresh = rows().find(row => [...row.querySelectorAll('[data-contact-field="address"]')].some(node => node.value === 'laboratorio-contatti@example.invalid'));
+        assert(fresh, 'CONTACTS_SAVED_VALUE');
+        const remove = fresh.querySelector('[data-contact-action="delete"]');
+        assert(!remove.disabled, 'CONTACTS_DELETE_ALLOWED');
+        remove.click(); remove.click();
+        button('Salva contatti').click();
+        await wait(() => !document.querySelector('[data-profile-contacts-editor]') && button('Modifica contatti') && !byId('content').textContent.includes('laboratorio-contatti@example.invalid'), 'CONTACTS_DELETED');
+        button('Modifica contatti').click();
+        await wait(() => document.querySelector('[data-profile-contacts-editor]'), 'CONTACTS_REOPEN_DELETE');
+        assert(rows().length === 3, 'CONTACTS_ROWS_RESTORED');
+    } else {
+        assert(inputs().every(node => node.readOnly), 'CONTACTS_OFFLINE_READONLY');
+        assert(button('Salva contatti').disabled, 'CONTACTS_OFFLINE_DISABLED');
+        assert(byId('content').textContent.includes('sola consultazione'), 'CONTACTS_OFFLINE_NOTICE');
+    }
+    button('Annulla').click();
+    await wait(() => !document.querySelector('[data-profile-contacts-editor]') && button('Modifica contatti'), 'CONTACTS_CANCEL');
+    assert(inputs().length === 0, 'CONTACTS_CLEARED');
+    profileChecks.push('private contacts editor ' + mode + ': id guard, add, refresh, delete and cleanup');
+}
+
 async function checkBanking(mode) {
     for (const scope of ['private', 'company']) {
         if (scope === 'private') byId('private').click();
@@ -303,7 +350,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation', 'applyProfileContactsMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }
@@ -317,6 +364,7 @@ try {
     byId('master-dialog').querySelector('form').requestSubmit();
     await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'LIST');
     await checkProfile('online');
+    await checkContactsEditor('online');
     await checkCompanyProfile('online');
     await checkBanking('online');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
@@ -355,6 +403,7 @@ try {
     const cachedDomains = await runOfflineConsultationProbe();
     assert(JSON.stringify(cachedDomains) === JSON.stringify(loadedDomains), 'OFFLINE_DOMAIN_MATRIX');
     await checkProfile('offline');
+    await checkContactsEditor('offline');
     await checkCompanyProfile('offline');
     await checkBanking('offline');
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();

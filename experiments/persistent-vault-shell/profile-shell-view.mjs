@@ -2,12 +2,14 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Optional editors are supplied by bootstrap; there is no fallback writer.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountLinkEditor, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountContactsEditor, mountLinkEditor, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
     const title = document.createElement('h2'); title.textContent = profileTitle;
-    const notice = document.createElement('p'); notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. ' + (mountAnagraphicEditor ? 'Puoi modificare l’anagrafica, comprese le note.' : 'Modifiche ai dati e ai collegamenti non sono ancora integrate in questa vista di prova.') + (mountDigitalCard ? '' : ' Tessera digitale non ancora integrata.');
+    const notice = document.createElement('p');
+    const noticeEditable = [mountAnagraphicEditor ? 'l’anagrafica, comprese le note' : null, mountContactsEditor ? 'i contatti, comprese email e telefoni' : null].filter(Boolean);
+    notice.textContent = 'Consultazione del profilo e degli Account collegati, incluse le utenze degli indirizzi personali. ' + (noticeEditable.length ? `Puoi modificare ${noticeEditable.join(' e ')}.` : 'Modifiche ai dati e ai collegamenti non sono ancora integrate in questa vista di prova.') + (mountDigitalCard ? '' : ' Tessera digitale non ancora integrata.');
     const navigation = document.createElement('nav'); navigation.setAttribute('aria-label', 'Sezioni del profilo');
     const panel = document.createElement('div'); panel.setAttribute('aria-live', 'polite');
     const controls = new AbortController(), buttons = [];
@@ -81,6 +83,14 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                 if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
                 return;
             }
+            if (editing === true && section === 'contacts' && mountContactsEditor) {
+                context.assertUnlocked(); clear(); sectionControls = new AbortController();
+                const mounted = await mountContactsEditor(panel, {signal: sectionControls.signal,
+                    onSaved: () => current(ticket) ? select('contacts', true) : undefined,
+                    onCancel: () => current(ticket) ? select('contacts') : undefined});
+                if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
+                return;
+            }
             if ((section === 'digital-card' && mountDigitalCard) || (section === 'pdf-summary' && mountCompanySummary)) {
                 context.assertUnlocked(); clear(); sectionControls = new AbortController();
                 const mounted = await (section === 'digital-card' ? mountDigitalCard : mountCompanySummary)(panel, {signal: sectionControls.signal});
@@ -122,6 +132,11 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
                 const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Modifica anagrafica';
                 edit.addEventListener('click', () => {if (current(ticket)) void select('personal', false, true);}, {signal: sectionControls.signal});
                 panel.append(edit);
+            }
+            if (section === 'contacts' && mountContactsEditor) {
+                const editContacts = document.createElement('button'); editContacts.type = 'button'; editContacts.textContent = 'Modifica contatti';
+                editContacts.addEventListener('click', () => {if (current(ticket)) void select('contacts', false, true);}, {signal: sectionControls.signal});
+                panel.append(editContacts);
             }
             if (mountWidgets && Object.hasOwn(PROFILE_SECTIONS, section)) {
                 const mounted = await mountWidgets(panel, {section, signal: sectionControls.signal});
