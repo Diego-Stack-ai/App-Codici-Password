@@ -19,8 +19,8 @@
 ## Incarico attivo
 
 - **ID:** DS-001
-- **Stato incarico:** IN_LAVORAZIONE
-- **Presa in carico:** 2026-09-17 10:20 (DeepSeek); commit osservato `777a9a96`, base obbligatoria `0e7e062c` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento.
+- **Stato incarico:** DA_VERIFICARE
+- **Presa in carico:** 2026-09-17 10:20 (DeepSeek); commit osservato `777a9a96`, base obbligatoria `0e7e062c` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Consegna: 2026-09-17 10:30.
 - **Base di codice obbligatoria:** `0e7e062cc41aea48c9055eae17bc090f4a279f3d` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** laboratorio della shell persistente, editor contatti privati A1
@@ -46,13 +46,13 @@ Correggere la rimozione di una riga appena creata e non ancora salvata. Attualme
 
 ## Rapporto DeepSeek — DS-001
 
-- **Stato:** IN ATTESA
-- **Commit finale:**
-- **File modificati:**
-- **Test eseguiti e risultati:**
-- **Scostamenti dall'incarico:**
-- **Rischi residui:**
-- **Note per Codex:**
+- **Stato:** COMPLETATO — in attesa di verifica Codex
+- **Commit finale:** `6992cb5f41dafe2cfbdc5427665e815ed69fc57b` (`fix(shell): discard unsaved contact rows locally`); presa in carico pubblicata con `683af74f`; base obbligatoria `0e7e062c` intatta.
+- **File modificati:** `experiments/persistent-vault-shell/profile-contacts-editor-view.mjs` e `experiments/persistent-vault-shell/profile-contacts-editor.test.mjs` (+72 / −2). Nessun altro file di codice; questo file di coordinamento aggiornato solo per stato e rapporto.
+- **Test eseguiti e risultati:** test mirati dei contatti **51/51** (31 contratto/preparazione/servizio + 20 sorgente/editor, con 3 nuove regressioni); `npm run test:vault-shell` **564/564**; emulatori contatti (`--profile-contacts`) **2/2**; `npm test` completo **superato** (exit 0, 25 suite, 0 fallimenti nel log); `git diff --check` **pulito**. Verifica aggiuntiva non richiesta ma pertinente: controllo browser entry su Chrome 152 ed Edge 153, online e offline, **superato**.
+- **Scostamenti dall'incarico:** (1) il protocollo chiede un solo commit dedicato: ne risultano tre, di cui **uno solo** contiene codice e test (`6992cb5f`); gli altri due toccano esclusivamente questo file — `683af74f` per rendere visibile la presa in carico sul remoto (passo 3) e l'ultimo per pubblicare rapporto e stato `DA_VERIFICARE` (passo 7), dato che il rapporto deve contenere lo SHA del commit di lavoro. (2) Nessun aggiornamento degli MD e nessuna rigenerazione di `FILE_INVENTORY.md`, come richiesto: conseguenza dichiarata, le righe di inventario dei due file di laboratorio modificati restano leggermente datate (byte/righe). (3) Aggiunta una guardia difensiva in `draft()` — una riga rimossa e mai salvata non produce mai una cancellazione — oltre alla correzione nel punto di scarto: non amplia il perimetro, rende esplicito l'invariante.
+- **Rischi residui:** lo scarto è solo locale e senza conferma per le righe nuove (comportamento richiesto), senza annullamento; le righe persistite mantengono doppia conferma e guardie Account/QR invariate (`profile-contacts-handler.mjs` non toccato in questo incarico); la correzione è client-side, quindi una richiesta di cancellazione con ID inesistente resta rifiutata dal servizio con `CONTACTS_MISSING` (già coperto da test); il flusso browser del laboratorio non è stato esteso con un caso "riga nuova scartata", coperto dalle prove unitarie del view; restano aperti i limiti già noti di A1 (A1b, migrazione degli ID, classificazione telefoni/indirizzi, trasporto produttivo, collaudi fisici, VS-P0-01).
+- **Note per Codex:** il difetto era nel view: il click su "Elimina" di una riga nuova cadeva nel ramo della doppia conferma e la marcava `removed`, quindi `draft()` la inseriva in `deletes` e il servizio la rifiutava con `CONTACTS_MISSING` perché l'ID non esiste ancora. Ora una riga `created` viene scartata al primo click (valori e testo azzerati, blocco staccato dalla bozza, riga rimossa da `rows`) e non produce alcuna operazione. Durante il lavoro un mio errore è stato intercettato dal `try/catch` del view (i nodi `set`/`message`/`remove` non erano memorizzati nella riga): corretto memorizzandoli. Base, ramo e working tree verificati prima di iniziare (dopo `0e7e062c` solo questo file modificato); `master` `4efda528`, versione `1.2.127`, nessun deploy, nessun dato reale. Pronto per `DA_CORREGGERE` o per il prossimo incarico; DS-002 resta `DA_PROGETTARE`.
 
 ## Coda approvata dal proprietario
 
