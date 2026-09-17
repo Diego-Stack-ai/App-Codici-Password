@@ -17,7 +17,8 @@ const base = import.meta.dirname;
 const forced = process.argv.includes('--test-crash');
 const restart = process.argv.includes('--test-restart') || forced;
 const cold = process.argv.includes('--test-cold') || restart;
-const automated = process.argv.includes('--test') || cold;
+const attachmentsBrowser = process.argv.includes('--test-attachments');
+const automated = process.argv.includes('--test') || cold || attachmentsBrowser;
 let reportResult;
 await buildEmulator({persistent: cold});
 const source = await readFile(`${base}/../../Frontend/public/assets/js/modules/core/crypto-utils.js`, 'utf8');
@@ -115,7 +116,20 @@ const server = createServer(async (request, response) => {
         reportResult?.(JSON.parse(body)); response.end('{}'); return;
     }
     if (automated && request.url === '/entry-check.mjs') {
-        response.setHeader('Content-Type', 'text/javascript'); response.end(await readFile(`${base}/${cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs'}`)); return;
+        const scenario = attachmentsBrowser ? 'emulator-attachments-check.mjs' : cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs';
+        response.setHeader('Content-Type', 'text/javascript'); response.end(await readFile(`${base}/${scenario}`)); return;
+    }
+    // DS-002C scenario: the modules of the candidate boundary are served to the
+    // page so the synthetic check mounts the real provider, source, view and
+    // capability, with fixtures and a real WebCrypto seal.
+    if (attachmentsBrowser && request.method === 'GET' && request.url.startsWith('/modules/')) {
+        const name = request.url.slice('/modules/'.length);
+        if (!/^[a-z0-9-]+\.mjs$/.test(name)) { response.writeHead(404).end(); return; }
+        response.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+        response.setHeader('Cache-Control', 'no-store');
+        try { response.writeHead(200).end(await readFile(`${base}/${name}`)); }
+        catch { response.writeHead(404).end(); }
+        return;
     }
     if (cold && request.method === 'GET' && request.url === '/emulator-cold-sw.js') {
         response.setHeader('Content-Type', 'text/javascript'); response.setHeader('Cache-Control', 'no-store');
