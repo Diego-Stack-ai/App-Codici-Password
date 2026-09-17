@@ -8,6 +8,8 @@ import {createAccountNoteHandler} from './account-note-handler.mjs';
 import {createProfileLinkHandler} from './profile-link-handler.mjs';
 import {createProfileContactsHandler} from './profile-contacts-handler.mjs';
 import {createCompanyContactsHandler} from './company-contacts-handler.mjs';
+import {createPrivateAddressesHandler} from './private-addresses-handler.mjs';
+import {createCompanyAddressesHandler} from './company-addresses-handler.mjs';
 import {readFile} from 'node:fs/promises';
 
 export async function createEmulatorQrBridge(uids) {
@@ -33,7 +35,9 @@ export async function createEmulatorQrBridge(uids) {
         ['/demo-vault-shell/europe-west1/applyAccountNoteMutation', createAccountNoteHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyProfileLinkMutation', createProfileLinkHandler({...dependencies, models, deleteField: () => FieldValue.delete()})],
         ['/demo-vault-shell/europe-west1/applyProfileContactsMutation', createProfileContactsHandler(dependencies)],
-        ['/demo-vault-shell/europe-west1/applyCompanyContactsMutation', createCompanyContactsHandler(dependencies)]
+        ['/demo-vault-shell/europe-west1/applyCompanyContactsMutation', createCompanyContactsHandler(dependencies)],
+        ['/demo-vault-shell/europe-west1/applyPrivateAddressesMutation', createPrivateAddressesHandler(dependencies)],
+        ['/demo-vault-shell/europe-west1/applyCompanyAddressesMutation', createCompanyAddressesHandler(dependencies)]
     ]);
     return async (request, response) => {
         const run = handlers.get(request.url); if (!run) return false;

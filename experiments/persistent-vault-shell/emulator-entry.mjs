@@ -5,6 +5,8 @@ import {mountCompanyQrEditor} from './company-qr-editor-provider.mjs';
 import {mountProfileTextEditorProvider} from './profile-text-editor-provider.mjs';
 import {mountProfileContactsEditorProvider} from './profile-contacts-editor-provider.mjs';
 import {mountCompanyContactsEditorProvider} from './company-contacts-editor-provider.mjs';
+import {mountPrivateAddressesEditorProvider} from './private-addresses-editor-provider.mjs';
+import {mountCompanyAddressesEditorProvider} from './company-addresses-editor-provider.mjs';
 import {createCompanySummaryReader} from './company-summary-reader.mjs';
 import {mountCompanySummaryView} from './company-summary-view.mjs';
 import {createCompanyPdfActions} from './company-summary-browser.mjs';
@@ -187,6 +189,24 @@ const mountProfile = context => {
             return company ? mountCompanyContactsEditorProvider(root, scoped, {...common, source,
                 createId: prefix => privateProfileModel.createProfileItemId(prefix)})
                 : mountProfileContactsEditorProvider(root, scoped, {...common,
+                    repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
+                    createId: prefix => privateProfileModel.createProfileItemId(prefix)});
+        },
+        mountAddressesEditor: (root, {signal, onSaved, onCancel}) => {
+            const scoped = {...context, signal}, getUser = () => auth.currentUser;
+            const common = {getUser, onSaved, onCancel,
+                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                submit: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, company ? 'applyCompanyAddressesMutation' : 'applyPrivateAddressesMutation')(request)).data;
+                }};
+            // The company addresses editor writes the legal seat and `altreSedi`
+            // only; the private one writes `userAddresses` and leaves the nested
+            // utilities untouched.
+            return company ? mountCompanyAddressesEditorProvider(root, scoped, {...common, source,
+                createId: prefix => privateProfileModel.createProfileItemId(prefix)})
+                : mountPrivateAddressesEditorProvider(root, scoped, {...common,
                     repository: {getUserProfile, getUserProfileConfirmed, getUserSetting, getUserSettingConfirmed},
                     createId: prefix => privateProfileModel.createProfileItemId(prefix)});
         },

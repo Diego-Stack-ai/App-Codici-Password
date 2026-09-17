@@ -19,7 +19,8 @@ const restart = process.argv.includes('--test-restart') || forced;
 const cold = process.argv.includes('--test-cold') || restart;
 const attachmentsBrowser = process.argv.includes('--test-attachments');
 const companyContactsBrowser = process.argv.includes('--test-company-contacts');
-const automated = process.argv.includes('--test') || cold || attachmentsBrowser || companyContactsBrowser;
+const addressesBrowser = process.argv.includes('--test-addresses');
+const automated = process.argv.includes('--test') || cold || attachmentsBrowser || companyContactsBrowser || addressesBrowser;
 let reportResult;
 await buildEmulator({persistent: cold});
 const source = await readFile(`${base}/../../Frontend/public/assets/js/modules/core/crypto-utils.js`, 'utf8');
@@ -117,13 +118,13 @@ const server = createServer(async (request, response) => {
         reportResult?.(JSON.parse(body)); response.end('{}'); return;
     }
     if (automated && request.url === '/entry-check.mjs') {
-        const scenario = companyContactsBrowser ? 'emulator-company-contacts-check.mjs' : attachmentsBrowser ? 'emulator-attachments-check.mjs' : cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs';
+        const scenario = addressesBrowser ? 'emulator-addresses-check.mjs' : companyContactsBrowser ? 'emulator-company-contacts-check.mjs' : attachmentsBrowser ? 'emulator-attachments-check.mjs' : cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs';
         response.setHeader('Content-Type', 'text/javascript'); response.end(await readFile(`${base}/${scenario}`)); return;
     }
     // DS-002C / A1b-R1 scenarios: the modules of the candidate boundary are served
     // to the page so the synthetic check mounts the real provider, source, view,
     // controller and service, with isolated synthetic fixtures.
-    if ((attachmentsBrowser || companyContactsBrowser) && request.method === 'GET' && request.url.startsWith('/modules/')) {
+    if ((attachmentsBrowser || companyContactsBrowser || addressesBrowser) && request.method === 'GET' && request.url.startsWith('/modules/')) {
         const name = request.url.slice('/modules/'.length);
         if (!/^[a-z0-9-]+\.mjs$/.test(name)) { response.writeHead(404).end(); return; }
         response.setHeader('Content-Type', 'text/javascript; charset=utf-8');

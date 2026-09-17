@@ -350,7 +350,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation', 'applyProfileContactsMutation', 'applyCompanyContactsMutation']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation', 'applyProfileContactsMutation', 'applyCompanyContactsMutation', 'applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }
