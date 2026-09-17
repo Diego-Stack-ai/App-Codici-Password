@@ -19,7 +19,8 @@
 ## Incarico attivo
 
 - **ID:** DS-001
-- **Stato incarico:** PRONTO
+- **Stato incarico:** IN_LAVORAZIONE
+- **Presa in carico:** 2026-09-17 10:20 (DeepSeek); commit osservato `777a9a96`, base obbligatoria `0e7e062c` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento.
 - **Base di codice obbligatoria:** `0e7e062cc41aea48c9055eae17bc090f4a279f3d` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** laboratorio della shell persistente, editor contatti privati A1
