@@ -411,6 +411,20 @@ test('the editor refuses to save offline or after a concurrent change, and revok
         item.dispose();
     }
 });
+test('the editor shows the legacy aziendaEmail fallback in place of a missing PEC address', async () => {
+    const record = {...records(), emails: {pec: {tipo: 'PEC'}, amministrazione: {}, personale: {}, extra: []}};
+    const f = fixture(record);
+    f.stored.get(f.path).qrConfig = {aziendaEmail: false};
+    const editor = f.editor();
+    const model = await editor.load();
+    const pec = model.rows.find(row => row.id === 'pec');
+    assert.equal(pec.fields.find(field => field.key === 'email').value, 'legacy@example.invalid',
+        'reading only the slot would show an empty field where the profile shows an address');
+    assert.equal(pec.fields.find(field => field.key === 'email').form, undefined);
+    assert.equal(pec.emptyRefusal, 'COMPANY_CONTACTS_LEGACY_FALLBACK');
+    assert.equal(pec.fields.find(field => field.key === 'password').value, '', 'the legacy top-level password is not this slot’s password');
+    editor.dispose();
+});
 test('the editor refuses a company source whose schema changed the case, and consultable rows stay visible', async () => {
     const f = fixture(), editor = f.editor();
     await editor.load();

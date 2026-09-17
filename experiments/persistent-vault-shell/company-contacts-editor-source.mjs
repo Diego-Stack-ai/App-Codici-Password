@@ -99,7 +99,13 @@ export function createCompanyContactsEditorSource({context, getUser, source, isE
                 const label = row.label && row.label !== row.id ? row.label : (SLOT_LABELS[row.id] ?? row.label);
                 const slotQr = qrUnverified ? null : qr.slots?.[row.id] === true;
                 if (row.kind === 'email-slot') {
-                    const {fields, forms, originals} = await emailFields(initial.emails?.[row.id], 'email-slot');
+                    // The legacy `aziendaEmail` fallback stands in for a missing PEC
+                    // address: reading only the slot would show an empty field where
+                    // the rest of the profile shows an address. The fallback is never
+                    // rewritten, and emptying it is refused by `emptyRefusal`.
+                    const stored = initial.emails?.[row.id] ?? {};
+                    const {fields, forms, originals} = await emailFields(row.legacyFallback ? {...stored, email: row.value} : stored,
+                        'email-slot');
                     snapshot.set(`email-slot:${row.id}`, {fields: originals, forms});
                     rows.push(Object.freeze({kind: row.kind, id: row.id, label, fields: Object.freeze(fields), editable: true,
                         removable: false, blocked: null, link: row.link, qr: slotQr, deleteRefusal: null,
