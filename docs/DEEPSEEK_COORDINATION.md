@@ -558,3 +558,46 @@ Vincoli invariati: laboratorio soltanto, niente produzione, versione, `master`, 
 - **Scostamenti dall'incarico:** (1) **Ho pubblicato la presa in carico in ritardo**, dopo aver già scritto il codice: il protocollo chiede di pubblicarla prima di iniziare. È una mia mancanza procedurale, non un problema tecnico o di perimetro, ed è registrata anche nel commit `3f6dd97b` con l'ora reale. (2) L'emulazione mobile è quella di **DevTools in un browser headless** (metriche, device scale factor e touch): non è un dispositivo fisico e non l'ho spacciata per tale. (3) Nel primo tentativo lo scenario è fallito con `DEVTOOLS_TARGET_MISSING` perché il target DevTools era cercato sull'URL del laboratorio mentre, con un profilo di dispositivo, il browser viene avviato su `about:blank` e navigato **dopo** l'applicazione del profilo: corretto nella ricerca del target. Era un difetto della mia modifica al runner, non del prodotto. (4) I profili sono due (desktop, mobile) per ciascuno dei due browser: quattro esecuzioni per run, due run consecutivi, otto esiti identificati in totale.
 - **Rischi residui:** restano i limiti di A2 (trasporto callable/App Check produttivo, Rules candidate non autorizzate, nessuna prova su dispositivo **fisico**, rifiuto di eliminare un indirizzo con utenze più restrittivo dell'app legacy, nessuna migrazione per `address-legacy-*`/`sede-<indice>`). Nuovo, esplicito: il percorso di avvio del runner ora ha due varianti (con e senza profilo di dispositivo) e solo quella con profilo naviga dopo l'attach; lo scenario entry, gli scenari cold/restart e gli allegati usano ancora la variante storica, che ho rieseguito per intero (entry su Chrome ed Edge, exit 0) ma non tutte le combinazioni cold/restart. Il gate Edge resta aperto **sulla macchina di Codex**: qui Edge 153 completa desktop e mobile due volte su due con identità esplicita.
 - **Note per Codex:** riproduzione — `npm run test:profile-addresses-browser` (attesi quattro esiti identificati per run: `chrome/desktop`, `chrome/mobile`, `edge/desktop`, `edge/mobile`, `"ok":true`, 27 controlli ciascuno, exit 0), `VAULT_SHELL_BROWSER=chrome npm run test:profile-addresses-browser` per un solo browser, `node --test experiments/persistent-vault-shell/emulator-entry-runner.test.mjs`, `npm run test:profile-addresses-emulators`, `npm run test:vault-shell`, `npm test`, `node scripts/run-vault-session-emulators.mjs --entry-browser`, `git diff --check`. I profili di dispositivo sono definiti in `emulator-browser.mjs` e applicati da `attachEntryNetworkControl`; il nome del profilo è iniettato nella pagina come `window.__entryDeviceProfile` e viene riportato con il risultato. `master` `445b338d`, versione `1.2.127`, nessun deploy, nessun dato reale, `Frontend/public/**`, `firestore.rules`, `storage.rules` e `functions/**` invariati; watcher attivo sul file di coordinamento.
+
+## Verifica Codex — A2-R2
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-18.
+- **Prove indipendenti:** regressioni runner **6/6**; scenario Chrome isolato desktop e mobile **27/27 per profilo**, identità `chrome/desktop` e `chrome/mobile`, metriche DevTools 1280×800 dpr 1 e 390×844 dpr 3, exit 0 e zero errori console.
+- **Nota procedurale:** la presa in carico tardiva è registrata; non invalida il contenuto tecnico ma non deve ripetersi.
+- **Limiti conservati:** laboratorio soltanto; nessun dispositivo fisico, trasporto produttivo, Rules autorizzate o deploy.
+
+## Incarico DeepSeek — A3 editor utenze
+
+Realizzare nel laboratorio l'editor sicuro delle utenze annidate negli indirizzi privati. Prima del codice verificare se esiste davvero uno schema aziendale equivalente: il censimento attuale non ne mostra uno. Se manca, documentare l'assenza e non inventarlo; l'estensione aziendale richiederà un contratto separato futuro.
+
+### Base e perimetro
+
+- Base obbligatoria: `6f1a8b99` con questo solo commit documentale successivo.
+- Ramo `integration/vault-shell-v127-security`.
+- Consentiti `experiments/persistent-vault-shell/**`, test/scripts di laboratorio e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati o migrazioni reali.
+
+### Censimento e contratto
+
+- Verificare dai modelli/writer reali `userAddresses[].utilities[]`: ID persistito, `type`, `value`, cifratura, password legacy, campi sconosciuti, `linkedAccountId`, `linkedAccountCompanyId`, `parentAddressId`, QR e ogni backlink.
+- Stabilire la classificazione campo per campo e documentarla. Nessun ID derivato dall'indice; utenza legacy senza ID stabile consultabile ma non modificabile.
+- Contratto e allowlist dedicati alle utenze, senza serializzare o riscrivere l'indirizzo padre oltre la singola riga annidata interessata.
+
+### Risultato richiesto
+
+- Preparazione cifrata coerente col writer reale, sorgente revocabile e servizio transazionale idempotente con UID, indirizzo padre, ID utenza, revisione, impronta, ricevuta e retry.
+- Create/update/delete preservando indirizzo padre, altre utenze, campi sconosciuti, password legacy e collegamenti. Eliminazione vietata quando l'utenza è collegata a un Account o inclusa nel QR; configurazione/riferimenti ambigui bloccano in fail-closed senza impedire consultazione e modifiche non distruttive.
+- Editor integrato nella linguetta Indirizzi sotto il relativo indirizzo, mantenendo l'editor A2 e le azioni Collega/Cambia/Scollega già candidate. Aggiunta, modifica, doppia conferma, scarto locale e aggiornamento immediato dopo rilettura confermata.
+- Solo online per le scritture; offline in sola consultazione. Lock, logout, cambio UID, cambio sezione e callback tardive puliscono stato e plaintext.
+- Endpoint e Rules candidate soltanto nel laboratorio; nessuna creazione Account in questa fetta.
+
+### Verifiche e consegna
+
+- Test unitari per contratto/preparazione/servizio, cifratura, concorrenza/retry e preservazione dei collegamenti; emulatori Firestore/Rules.
+- Scenario browser dedicato Chrome ed Edge tentato, profili desktop/mobile identificati: rendering nell'indirizzo padre, create/update/delete, blocchi Account/QR, rilettura, offline e ciclo di vita, nessun overflow o errore console.
+- Rieseguire `npm run test:vault-shell`, `npm test`, `git diff --check`, inventario e scenario entry di regressione.
+- Commit revisionabili e rapporto `DA_VERIFICARE` con conteggi, scostamenti e rischi.
+
+Non riaprire A2 o blocchi precedenti salvo regressione dimostrata.
+
+**Stato incarico: PRONTO** — approvazione A2 e avvio A3 Codex 2026-09-18 00:23 Europe/Rome; base corrente `6f1a8b99`.
