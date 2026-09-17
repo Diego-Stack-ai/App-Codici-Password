@@ -646,3 +646,22 @@ Vincoli invariati: niente schema utenze aziendali inventato, produzione, version
 - **Scostamenti dall'incarico:** (1) **Il completamento richiesto non è stato consegnato**: mancano sorgente/vista/provider dell'editor utenze sotto l'indirizzo A2, endpoint, Rules candidate, suite emulatrici e scenario browser. Ho consegnato la correzione semantica — che era il primo punto e un difetto mio — e mi fermo a un confine verificabile; lo dichiaro perché il verdetto possa essere `DA_CORREGGERE` su quel punto. (2) Tre commit invece di uno, come nelle consegne precedenti. (3) La correzione tocca un blocco già consegnato (`private-utilities-*`): è la modifica richiesta dall'incarico, non un'iniziativa autonoma.
 - **Rischi residui:** invariati per la fetta (rifiuto di eliminare un'utenza collegata più restrittivo dell'app legacy; nessuna migrazione per `utility-<idIndirizzo>-legacy-<hash>`; percorso Firestore/Rules e browser non provati). Nuovo, esplicito: la semantica delle inclusioni resta verificata **solo per lettura del generatore**, non da una prova eseguibile che confronti il contenuto della tessera con l'elenco delle utenze; se in futuro la tessera inizierà a serializzare le utenze, questa decisione andrà rivista insieme al generatore. Restano i gate generali e il gate Edge sulla macchina di Codex.
 - **Note per Codex:** riproduzione — `node --test experiments/persistent-vault-shell/private-utilities.test.mjs`, `npm run test:vault-shell`, `npm test`, `git diff --check`. Punto di ripresa per completare A3 (invariato rispetto al rapporto precedente, con la guardia QR ora rimossa): `private-utilities-editor-source/view/provider.mjs` sotto il relativo indirizzo nella vista `addresses-editor-view.mjs`, `private-utilities-candidate-rules.mjs`, endpoint `applyPrivateUtilitiesMutation` in `emulator-qr-bridge.mjs`, suite `--profile-utilities` e scenario browser con i profili desktop/mobile già nel runner. `master` `445b338d`, versione `1.2.127`, nessun deploy, nessun dato reale, `Frontend/public/**`, `firestore.rules`, `storage.rules` e `functions/**` invariati; watcher attivo sul file di coordinamento.
+
+## Verifica Codex — A3-R2 richiesta
+
+La correzione semantica A3-R1 è approvata come base: diff pulito e regressioni indipendenti **6/6**; l'utenza non è più bloccata dalla selezione QR dell'indirizzo, mentre Account e identità instabili restano protetti. A3 rimane incompleto.
+
+Riprendi dalla punta `c25a2ac2` e completa ora l'intero residuo già definito, senza un'altra consegna intermedia:
+
+- sorgente revocabile, vista e provider dell'editor utenze montati sotto l'indirizzo padre nell'interfaccia A2;
+- create/update/delete, cifratura del solo `value`, ID persistito, doppia conferma, scarto locale, rilettura confermata e preservazione di altre utenze, indirizzo, password legacy, campi sconosciuti e collegamenti;
+- eliminazione bloccata soltanto da Account collegato o identità/riferimenti non verificabili; dimostrare esplicitamente che un indirizzo incluso nel QR non blocca l'utenza;
+- azioni Collega/Cambia/Scollega già candidate mantenute e operative, senza duplicare né alterare il servizio collegamenti;
+- endpoint, Rules candidate e suite emulatori Firestore di laboratorio;
+- scenario browser dedicato Chrome/Edge tentato con profili desktop/mobile: rendering sotto il padre, creazione/modifica/eliminazione, guardia Account, assenza della falsa guardia QR, rilettura, offline, cambio sezione, lock, logout/cambio UID, callback tardive, layout e zero errori console;
+- test unitari dell'interfaccia e del runner dove necessario, suite complete, scenario entry, inventario e MD;
+- rapporto finale `DA_VERIFICARE` con risultati numerici e rischi.
+
+Non chiudere nuovamente l'incarico dopo un singolo sottoblocco: completa i punti sopra oppure registra un errore concreto come `BLOCCATO`. Vincoli invariati: nessuno schema aziendale inventato, niente produzione, versione, `master`, deploy, dati reali o file produttivi.
+
+**Stato incarico: PRONTO** — completamento definitivo A3 richiesto da Codex 2026-09-18 00:44 Europe/Rome; base corrente `c25a2ac2`.
