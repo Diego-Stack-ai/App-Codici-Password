@@ -292,3 +292,9 @@ Nessun commit, file in lavorazione o aggiornamento è comparso per oltre 12 minu
 Il montaggio è già pubblicato in `3ab9508c`: non modificarlo salvo un errore dimostrato dai test. Dal precedente controllo non risultano nuovi file o commit. Riprendi dal primo punto incompleto: scenario browser sintetico Chrome (Edge se disponibile), test completi, aggiornamento MD/inventario e rapporto finale `DA_VERIFICARE`. Non rifare i commit precedenti e mantieni invariati produzione, versione, `master` e deploy.
 
 **Stato incarico: IN_LAVORAZIONE** — seconda ripresa presa in carico 2026-09-17 21:4x (DeepSeek); commit osservato `3ab9508c`; il montaggio pubblicato non viene modificato salvo errore dimostrato dai test. Punto in lavorazione: scenario browser sintetico su Chrome (Edge se disponibile) con cablaggio di fixture e trasporto emulato nella pagina di laboratorio; poi test completi, MD, inventario e rapporto. Produzione, versione, `master` e deploy invariati.
+
+### DS-002C — Ripresa scenario browser
+
+La presa in carico `27ed31f2` non ha prodotto nuovi file o commit nei due controlli successivi. Riprendi senza modificare il montaggio `3ab9508c`: realizza ed esegui ora lo scenario browser sintetico richiesto; se l'infrastruttura browser è realmente indisponibile, documenta comando ed errore e prosegui comunque con test completi, MD, inventario e rapporto `DA_VERIFICARE`. Non lasciare lo stato in lavorazione senza un esito verificabile.
+
+**Stato incarico: PRONTO**
