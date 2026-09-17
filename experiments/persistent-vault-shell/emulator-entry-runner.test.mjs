@@ -33,11 +33,22 @@ test('a close after the endpoint is not an early exit and never rejects the wait
     assert.equal(child.listenerCount('exit'), 0);
     assert.equal(child.stderr.listenerCount('data'), 0);
 });
-test('a browser that exits before the endpoint is a real error, not a silent pass', async () => {
+test('a browser that exits before the endpoint reports the browser identity and the sanitized stderr', async () => {
     const child = fakeBrowser();
-    const pending = awaitDevToolsEndpoint(child, {timeoutMs: 200});
+    const pending = awaitDevToolsEndpoint(child, {timeoutMs: 200,
+        describe: () => ({browser: 'edge', path: 'C:/Edge/msedge.exe', args: ['--headless=new'], exitCode: child.exitCode})});
+    child.stderr.emit('data', Buffer.from('profile C:/Temp/codex-entry-browser-Ab12Cd is corrupt\n'));
     child.exit(0);
-    await assert.rejects(pending, /DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0/);
+    await assert.rejects(pending, error => {
+        assert.match(error.message, /DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0/);
+        const detail = JSON.parse(error.message.slice(error.message.indexOf('{')));
+        assert.equal(detail.browser, 'edge');
+        assert.equal(detail.path, 'C:/Edge/msedge.exe');
+        assert.equal(detail.exitCode, 0);
+        assert.match(detail.stderr, /codex-entry-browser-<profile>/, 'the disposable profile token is redacted');
+        assert.doesNotMatch(detail.stderr, /Ab12Cd/);
+        return true;
+    });
     assert.equal(child.listenerCount('exit'), 0, 'the failing wait detaches its listeners too');
 });
 test('a browser that never reports the endpoint times out', async () => {
@@ -45,9 +56,17 @@ test('a browser that never reports the endpoint times out', async () => {
     await assert.rejects(awaitDevToolsEndpoint(child, {timeoutMs: 20}), /DEVTOOLS_ENDPOINT_TIMEOUT/);
     assert.equal(child.listenerCount('exit'), 0);
 });
-test('the matrix fails when one browser of the two never reported', () => {
-    const browsers = ['chrome', 'edge'];
-    assert.deepEqual(assertEveryBrowserReported({browsers, results: ['chrome', 'edge']}), ['chrome', 'edge']);
-    assert.throws(() => assertEveryBrowserReported({browsers, results: ['chrome']}), /ENTRY_BROWSER_RESULTS_MISSING:1\/2/);
+test('the matrix needs one identified result per browser and never counts one twice', () => {
+    const browsers = [{name: 'chrome', path: 'chrome.exe'}, {name: 'edge', path: 'msedge.exe'}];
+    const results = [{browser: 'chrome'}, {browser: 'edge'}];
+    assert.deepEqual(assertEveryBrowserReported({browsers, results}), results);
+    assert.throws(() => assertEveryBrowserReported({browsers, results: [{browser: 'chrome'}]}),
+        /ENTRY_BROWSER_RESULTS_MISSING:1\/2/);
     assert.throws(() => assertEveryBrowserReported({browsers, results: []}), /ENTRY_BROWSER_RESULTS_MISSING:0\/2/);
+    assert.throws(() => assertEveryBrowserReported({browsers, results: [{browser: 'chrome'}, {browser: 'chrome'}]}),
+        /ENTRY_BROWSER_RESULT_DUPLICATED/);
+    assert.throws(() => assertEveryBrowserReported({browsers, results: [undefined, {browser: 'edge'}]}),
+        /ENTRY_BROWSER_RESULT_UNIDENTIFIED/);
+    assert.throws(() => assertEveryBrowserReported({browsers, results: [{browser: 'firefox'}, {browser: 'edge'}]}),
+        /ENTRY_BROWSER_RESULT_UNIDENTIFIED/);
 });

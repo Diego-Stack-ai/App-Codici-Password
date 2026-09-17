@@ -3,9 +3,19 @@
 // Waiting for the endpoint is exported on its own, and it settles exactly once:
 // the listeners are detached the moment the endpoint arrives, so a browser that
 // closes normally afterwards is never reported as an early exit.
-export function awaitDevToolsEndpoint(child, {timeoutMs = 10000} = {}) {
+// The stderr of a browser is kept for diagnosis, with the disposable profile
+// token removed: an endpoint that never arrives must say which browser it was.
+export const sanitizeBrowserOutput = value => String(value ?? '')
+    .replaceAll(/codex-entry-browser-[A-Za-z0-9]+/g, 'codex-entry-browser-<profile>')
+    .replaceAll(/\\+/g, '/').slice(-600);
+export function awaitDevToolsEndpoint(child, {timeoutMs = 10000, describe} = {}) {
     return new Promise((resolve, reject) => {
         let output = '', settled = false;
+        const context = () => {
+            let detail = {};
+            try {detail = describe?.() ?? {};} catch {detail = {describe: 'unavailable'};}
+            return JSON.stringify({...detail, stderr: sanitizeBrowserOutput(output)});
+        };
         const detach = () => {clearTimeout(timer); child.stderr?.off?.('data', read); child.off('error', fail); child.off('exit', exited);};
         const finish = (error, value) => {
             if (settled) return;
@@ -14,29 +24,38 @@ export function awaitDevToolsEndpoint(child, {timeoutMs = 10000} = {}) {
             error ? reject(error) : resolve(value);
         };
         const fail = error => finish(error);
-        const exited = code => finish(new Error(`DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:${code}`));
+        const exited = code => finish(new Error(`DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:${code} ${context()}`));
         const read = chunk => {
             output = (output + chunk).slice(-16384);
             const match = output.match(/DevTools listening on (ws:\/\/[^\s]+)/);
             if (match) finish(null, match[1]);
         };
-        const timer = setTimeout(() => finish(new Error('DEVTOOLS_ENDPOINT_TIMEOUT')), timeoutMs);
+        const timer = setTimeout(() => finish(new Error(`DEVTOOLS_ENDPOINT_TIMEOUT ${context()}`)), timeoutMs);
         child.stderr?.on?.('data', read);
         child.on('error', fail);
         child.on('exit', exited);
     });
 }
-// Every browser of the matrix must produce a result: a missing one is a failure,
-// never a silent reduction of the matrix to a single browser.
+// Every browser of the matrix must produce one identified result: a missing one,
+// an unnamed one or the same browser counted twice is a failure, never a silent
+// reduction of the matrix.
 export function assertEveryBrowserReported({browsers, results}) {
-    if (!Array.isArray(results) || results.length !== browsers.length) {
-        throw new Error(`ENTRY_BROWSER_RESULTS_MISSING:${results?.length ?? 0}/${browsers.length}`);
+    const expected = browsers.map(entry => typeof entry === 'string' ? entry : entry.name);
+    if (!Array.isArray(results) || results.length !== expected.length) {
+        throw new Error(`ENTRY_BROWSER_RESULTS_MISSING:${results?.length ?? 0}/${expected.length}`);
+    }
+    const names = results.map(entry => entry?.browser);
+    if (names.some(name => typeof name !== 'string' || !expected.includes(name))) {
+        throw new Error(`ENTRY_BROWSER_RESULT_UNIDENTIFIED:${JSON.stringify(names)}`);
+    }
+    if (new Set(names).size !== names.length) {
+        throw new Error(`ENTRY_BROWSER_RESULT_DUPLICATED:${JSON.stringify(names)}`);
     }
     return results;
 }
-export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport} = {}) {
+export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport, describe} = {}) {
     if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
-    const endpoint = await awaitDevToolsEndpoint(child);
+    const endpoint = await awaitDevToolsEndpoint(child, {describe});
     const address = new URL(endpoint);
     if (address.hostname !== '127.0.0.1') throw new Error('DEVTOOLS_NONLOCAL');
     const host = address.host;
