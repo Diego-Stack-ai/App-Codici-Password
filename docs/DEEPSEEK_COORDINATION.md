@@ -732,3 +732,40 @@ Non riaprire A1-A3 o DS-002 salvo regressione dimostrata. Nessuna creazione Acco
 - **Consegnato:** contratto/allowlist, preparazione cifrata, sorgente revocabile, vista e provider, servizio transazionale con revisione/impronta/ricevuta/retry, endpoint e Rules candidate di laboratorio. Create/update/delete preservano campi estranei, scadenze, collegamenti e allegati; delete è bloccata da Account, QR fiscale, allegati o stato ambiguo. L'editor è montato soltanto nella linguetta Documenti privata e riusa le azioni Account esistenti.
 - **Prove:** unitari core+editor/Rules **9/9**; Firestore Emulator **1/1**; `npm run test:vault-shell` **712/712**; `npm test` completo **exit 0**; scenario Chrome desktop e mobile **38/38** per profilo, viewport DevTools 1280×800 dpr 1 e 390×844 dpr 3, zero errori console. Lo scenario copre rendering, cifratura, create/update/delete, rilettura, doppia conferma, guardia Account, offline e identità legacy; le prove unitarie/emulatore coprono QR e allegati. Inventario rigenerato (**762 file**) e `git diff --check` pulito.
 - **Scostamenti e rischi:** Edge desktop è stato tentato e termina prima dell'endpoint DevTools con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`; mobile Edge non può quindi partire. Non è stata aggiunta una seconda superficie allegati: viene conservato il provider DS-002 già esistente. Il trasporto e le Rules produttivi, il dispositivo fisico, la migrazione degli ID legacy e il deploy restano gate aperti. Nessun file `Frontend/public/**`, Rule/Function produttiva, versione, `master`, dato reale o migrazione è stato modificato.
+
+## Verifica Codex — A4
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-18.
+- **Prove indipendenti:** core/editor/Rules **9/9**; scenario Chrome desktop **38/38** e mobile **38/38**, metriche identificate, exit 0 e zero errori console; diff pulito.
+- **Gate Edge:** aperto (`DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`). Schema aziendale distinto `allegati[]` correttamente non convertito.
+- **Pubblicazione:** commit locali `c252d3ae` e `f772845b`; push ancora sospeso in attesa dell'autorizzazione esplicita richiesta dal controllo automatico.
+
+## Incarico Codex — A5 creazione Account dal collegamento
+
+Completare nel laboratorio il percorso “Collega o crea Account”: da email, telefono, utenza o documento con identità persistita, l'utente può scegliere un Account esistente oppure crearne uno nuovo e collegarlo atomicamente all'origine.
+
+### Base e perimetro
+
+- Base obbligatoria locale: `f772845b` con questo solo commit documentale successivo.
+- Ramo `integration/vault-shell-v127-security`.
+- Consentiti `experiments/persistent-vault-shell/**`, test/scripts di laboratorio e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati o migrazioni reali.
+
+### Contratto richiesto
+
+- Censire e riusare i modelli canonici Account personali/aziendali, il selettore esistente e il servizio Collega/Cambia/Scollega. Non duplicare writer o inventare campi.
+- La creazione deve scegliere esplicitamente ambito personale o azienda, validare proprietà e azienda, generare un ID persistito lato servizio e creare soltanto i campi minimi ammessi. Nome/username possono essere proposti dall'origine ma restano modificabili.
+- Una password legacy dell'origine può essere trasferita solo su scelta esplicita, cifrata con la Vault Key, e rimossa dall'origine nella stessa transazione riuscita; nessuna copia in chiaro, nessuna cancellazione prima della conferma. Se il trasferimento non è verificabile, conservare il campo legacy e mostrare il motivo.
+- Transazione atomica o compensazione fail-closed fra creazione Account, riferimento sull'origine e backlink Account; revisione, impronte, ricevuta idempotente e retry. Nessun Account orfano e nessun collegamento parziale.
+- Conservare il percorso di selezione Account esistente, ricerca personale/azienda, Account condivisi e Cambia/Scollega.
+- Offline consultativo; revoca su cambio sezione, lock, logout, cambio UID e callback tardive.
+
+### UI e verifiche
+
+- Nel selettore aggiungere “Crea un nuovo Account” con form coerente, campo ricerca visibile e contesto dell'origine; dopo conferma rileggere la stessa linguetta e mostrare Apri/Cambia/Scollega sulla stessa riga.
+- Unitari, emulatori transazionali/Rules e browser Chrome/Edge tentato desktop/mobile per ogni origine supportata, personale e aziendale, retry/concorrenza, trasferimento password scelto/non scelto, errore con conservazione legacy, offline, lifecycle e zero errori.
+- Suite complete, scenario entry, inventario e MD; rapporto `DA_VERIFICARE`.
+
+Non estendere origini senza schema persistito né riaprire A1-A4 salvo regressione dimostrata.
+
+**Stato incarico: PRONTO** — approvazione A4 e avvio A5 Codex 2026-09-18 01:42 Europe/Rome; base locale `f772845b`.
