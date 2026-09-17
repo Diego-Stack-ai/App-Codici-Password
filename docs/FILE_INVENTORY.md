@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **745**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -35,7 +35,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 140441 | 1009 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 142108 | 1012 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -301,6 +301,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
 | `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
+| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 4837 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
 | `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
 | `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
 | `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
@@ -310,7 +311,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 115911 | 551 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 127657 | 604 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -330,8 +331,8 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 102620 | 682 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 124298 | 716 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 104910 | 688 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 125965 | 719 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -516,6 +517,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/prepare-private-account-patch.mjs` | MJS | 4145 | 63 | File di progetto: prepare-private-account-patch. |
 | `experiments/persistent-vault-shell/prepare-private-account-patch.test.mjs` | MJS | 6482 | 103 | File di progetto: prepare-private-account-patch.test. |
 | `experiments/persistent-vault-shell/prepare-private-addresses.mjs` | MJS | 4589 | 76 | File di progetto: prepare-private-addresses. |
+| `experiments/persistent-vault-shell/prepare-private-utilities.mjs` | MJS | 4758 | 81 | File di progetto: prepare-private-utilities. |
 | `experiments/persistent-vault-shell/prepare-profile-contacts.mjs` | MJS | 4555 | 83 | File di progetto: prepare-profile-contacts. |
 | `experiments/persistent-vault-shell/prepare-profile-document-attachment.mjs` | MJS | 10002 | 121 | File di progetto: prepare-profile-document-attachment. |
 | `experiments/persistent-vault-shell/prepare-profile-text.mjs` | MJS | 2086 | 32 | File di progetto: prepare-profile-text. |
@@ -535,6 +537,9 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/private-note-source.mjs` | MJS | 2151 | 31 | File di progetto: private-note-source. |
 | `experiments/persistent-vault-shell/private-note-source.test.mjs` | MJS | 2825 | 40 | File di progetto: private-note-source.test. |
 | `experiments/persistent-vault-shell/private-qr-editor-provider.mjs` | MJS | 1098 | 17 | File di progetto: private-qr-editor-provider. |
+| `experiments/persistent-vault-shell/private-utilities-contract.mjs` | MJS | 9529 | 160 | File di progetto: private-utilities-contract. |
+| `experiments/persistent-vault-shell/private-utilities-handler.mjs` | MJS | 6696 | 101 | File di progetto: private-utilities-handler. |
+| `experiments/persistent-vault-shell/private-utilities.test.mjs` | MJS | 15406 | 212 | File di progetto: private-utilities.test. |
 | `experiments/persistent-vault-shell/profile-account-picker-reader.mjs` | MJS | 4123 | 66 | File di progetto: profile-account-picker-reader. |
 | `experiments/persistent-vault-shell/profile-account-picker-view.mjs` | MJS | 4923 | 62 | File di progetto: profile-account-picker-view. |
 | `experiments/persistent-vault-shell/profile-account-picker.test.mjs` | MJS | 8818 | 106 | File di progetto: profile-account-picker.test. |
@@ -695,7 +700,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 15388 | 101 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 15450 | 101 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
