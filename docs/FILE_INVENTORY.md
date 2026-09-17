@@ -35,7 +35,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 140298 | 1009 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 140441 | 1009 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3920 | 83 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 20708 | 350 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -310,7 +310,7 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 106285 | 518 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 115911 | 551 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -330,8 +330,8 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 102299 | 682 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 124155 | 716 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 102620 | 682 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 124298 | 716 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
 | `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
@@ -453,9 +453,9 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/detail-extra-fields.test.mjs` | MJS | 5898 | 96 | File di progetto: detail-extra-fields.test. |
 | `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
 | `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
-| `experiments/persistent-vault-shell/emulator-addresses-check.mjs` | MJS | 16998 | 228 | File di progetto: emulator-addresses-check. |
+| `experiments/persistent-vault-shell/emulator-addresses-check.mjs` | MJS | 21812 | 289 | File di progetto: emulator-addresses-check. |
 | `experiments/persistent-vault-shell/emulator-attachments-check.mjs` | MJS | 8327 | 126 | File di progetto: emulator-attachments-check. |
-| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 14683 | 161 | File di progetto: emulator-browser. |
+| `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 15148 | 168 | File di progetto: emulator-browser. |
 | `experiments/persistent-vault-shell/emulator-cold-check.mjs` | MJS | 19971 | 234 | File di progetto: emulator-cold-check. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.js` | JS | 1175 | 17 | File di progetto: emulator-cold-sw. |
 | `experiments/persistent-vault-shell/emulator-cold-sw.test.mjs` | MJS | 2314 | 35 | File di progetto: emulator-cold-sw.test. |
@@ -463,12 +463,12 @@ File censiti: **740**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 6440 | 125 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15289 | 260 | File di progetto: emulator-detail-view.test. |
 | `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 37026 | 442 | File di progetto: emulator-entry-check. |
-| `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 6663 | 92 | File di progetto: emulator-entry-runner. |
-| `experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` | MJS | 4223 | 73 | File di progetto: emulator-entry-runner.test. |
+| `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 7420 | 101 | File di progetto: emulator-entry-runner. |
+| `experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` | MJS | 6132 | 93 | File di progetto: emulator-entry-runner.test. |
 | `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 25578 | 305 | File di progetto: emulator-entry. |
 | `experiments/persistent-vault-shell/emulator-firebase.mjs` | MJS | 1485 | 19 | File di progetto: emulator-firebase. |
 | `experiments/persistent-vault-shell/emulator-list-view.mjs` | MJS | 3503 | 54 | File di progetto: emulator-list-view. |
-| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 7333 | 109 | File di progetto: emulator-network-control. |
+| `experiments/persistent-vault-shell/emulator-network-control.mjs` | MJS | 8754 | 125 | File di progetto: emulator-network-control. |
 | `experiments/persistent-vault-shell/emulator-note-bridge.mjs` | MJS | 2475 | 44 | File di progetto: emulator-note-bridge. |
 | `experiments/persistent-vault-shell/emulator-qr-bridge.mjs` | MJS | 5052 | 67 | File di progetto: emulator-qr-bridge. |
 | `experiments/persistent-vault-shell/emulator-queue.mjs` | MJS | 3353 | 52 | File di progetto: emulator-queue. |
