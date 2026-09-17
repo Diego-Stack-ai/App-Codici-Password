@@ -25,6 +25,10 @@ export const DOCUMENT_ATTACHMENT_REFUSALS = Object.freeze({
     ATTACHMENT_ID_INVALID: 'ATTACHMENT_ID_INVALID',
     ATTACHMENT_EXISTS: 'ATTACHMENT_EXISTS',
     ATTACHMENT_LIMIT_REACHED: 'ATTACHMENT_LIMIT_REACHED',
+    ATTACHMENT_PAYLOAD_MISMATCH: 'ATTACHMENT_PAYLOAD_MISMATCH',
+    ATTACHMENT_OBJECT_CONFLICT: 'ATTACHMENT_OBJECT_CONFLICT',
+    DOCUMENT_COUNT_UNAVAILABLE: 'DOCUMENT_COUNT_UNAVAILABLE',
+    DOCUMENT_NOT_PERSISTED: 'DOCUMENT_NOT_PERSISTED',
     MIME_NOT_ALLOWED: 'MIME_NOT_ALLOWED',
     SIZE_NOT_ALLOWED: 'SIZE_NOT_ALLOWED',
     METADATA_INVALID: 'METADATA_INVALID',
@@ -47,6 +51,17 @@ export const documentAttachmentMime = value => typeof value === 'string' && DOCU
 export const documentAttachmentSize = value => Number.isSafeInteger(value) && value > 0 && value <= DOCUMENT_IMAGE_MAX_BYTES;
 export const documentAttachmentDigest = value => typeof value === 'string' && DIGEST_PATTERN.test(value);
 export const documentAttachmentBytes = value => Object.prototype.toString.call(value) === '[object Uint8Array]';
+// Trusted binary copy: the boundary decides what is written, so whatever the
+// caller does with its own buffer afterwards cannot change the stored object.
+export const documentAttachmentPayloadCopy = value => {
+    if (!documentAttachmentBytes(value) || !documentAttachmentSize(value.byteLength)) documentAttachmentInvalid();
+    return Uint8Array.from(value);
+};
+export const documentAttachmentSha256 = async value => {
+    if (!documentAttachmentBytes(value)) documentAttachmentInvalid();
+    const digest = await crypto.subtle.digest('SHA-256', value);
+    return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+};
 export const documentAttachmentBase64 = (value, minimum, maximum = 4096) => typeof value === 'string' &&
     value.length >= minimum && value.length <= maximum && value.length % 4 === 0 && BASE64_PATTERN.test(value);
 export const documentAttachmentStatus = value => typeof value === 'string' && DOCUMENT_ATTACHMENT_STATUSES.includes(value);
