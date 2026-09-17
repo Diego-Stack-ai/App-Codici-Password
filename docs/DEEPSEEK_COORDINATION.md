@@ -297,4 +297,4 @@ Il montaggio è già pubblicato in `3ab9508c`: non modificarlo salvo un errore d
 
 La presa in carico `27ed31f2` non ha prodotto nuovi file o commit nei due controlli successivi. Riprendi senza modificare il montaggio `3ab9508c`: realizza ed esegui ora lo scenario browser sintetico richiesto; se l'infrastruttura browser è realmente indisponibile, documenta comando ed errore e prosegui comunque con test completi, MD, inventario e rapporto `DA_VERIFICARE`. Non lasciare lo stato in lavorazione senza un esito verificabile.
 
-**Stato incarico: PRONTO**
+**Stato incarico: IN_LAVORAZIONE** — terza ripresa presa in carico 2026-09-17 22:03 (DeepSeek); commit osservato `27ed31f2`; montaggio `3ab9508c` non modificato. Realizzo ed eseguo ora lo scenario browser sintetico: check in pagina servito dal banco di laboratorio, con fixture e sigillo reale nel browser su Chrome, poi test completi, MD, inventario e rapporto. Se il browser risultasse indisponibile registrerò comando ed errore esatti.
