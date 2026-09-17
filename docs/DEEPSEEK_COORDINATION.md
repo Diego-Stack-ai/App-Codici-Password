@@ -122,7 +122,8 @@ Test rieseguiti indipendentemente: mirati **35/35**, shell **599/599**. Il perim
 ## Incarico attivo
 
 - **ID:** DS-002A-R1
-- **Stato incarico:** PRONTO — segnale watcher riemesso 17/09/2026 19:23
+- **Stato incarico:** IN_LAVORAZIONE
+- **Presa in carico:** 2026-09-17 19:28 (DeepSeek); commit osservato `a8e2fbd8`, base obbligatoria `62fb8d69` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Nota watcher: `watch-1` era attivo ma non ha consegnato il segnale `PRONTO` (il file era stato sostituito dalle operazioni git successive all'armamento); ri-ancorato come `watch-2` con gli stessi parametri (file, pattern `Stato incarico:\s*PRONTO`, label `codici-password-orders`, `max_events: 0`).
 - **Base di codice obbligatoria:** `62fb8d6928ceef921ffa178b45ea6cf6428efba8`
 - **Ramo:** `integration/vault-shell-v127-security`
 - **Perimetro:** sola correzione del candidato DS-002A; nessuna interfaccia o produzione
