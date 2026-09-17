@@ -1,8 +1,10 @@
-import {contactBasis, contactRevision, profileContactsUid, validateProfileContactsRequest} from './profile-contacts-contract.mjs';
+import {contactBasis, contactRevision, profileContactsObject, profileContactsUid, validateProfileContactsRequest} from './profile-contacts-contract.mjs';
+import {preparePrivateQrSelection} from './qr-selection-contract.mjs';
 
 // Candidate backend only; the future callable must supply verified Auth and App
 // Check context. Never exported by production Functions in this increment.
 const QR_KEYS = Object.freeze({contactEmails: 'emails', contactPhones: 'phones'});
+const QR_SCHEMA_VERSION = 1;
 export function createProfileContactsHandler({db, hash, timestamp}) {
     const fail = code => {throw Error(code);};
     const rows = (record, collection) => {
@@ -10,6 +12,25 @@ export function createProfileContactsHandler({db, hash, timestamp}) {
         if (!Array.isArray(items) || items.length > 10000 ||
             items.some(item => !item || typeof item !== 'object' || Array.isArray(item))) fail('PROFILE_CONTACTS_UNAVAILABLE');
         return [...items];
+    };
+    // The canonical selection contract is the only authority on the QR
+    // configuration: a value that cannot be resolved never degrades to "nothing
+    // selected". Transport metadata attached by the repository is validated and
+    // never ignored, and so are the schema and revision markers.
+    const qrSelection = (data, projection) => {
+        if (!profileContactsObject(data)) fail('CONTACTS_QR_UNVERIFIABLE');
+        const config = {...data};
+        if (config.id !== undefined && config.id !== 'qrCodeInclusions') fail('CONTACTS_QR_UNVERIFIABLE');
+        delete config.id;
+        const revision = Object.hasOwn(config, '_qrRevision') ? config._qrRevision : 0;
+        if (!Number.isSafeInteger(revision) || revision < 0 ||
+            (Object.hasOwn(config, '_qrSchemaVersion') && config._qrSchemaVersion !== QR_SCHEMA_VERSION)) fail('CONTACTS_QR_UNVERIFIABLE');
+        delete config._qrRevision; delete config._qrSchemaVersion;
+        try {
+            return {config, selection: preparePrivateQrSelection(config, projection)};
+        } catch {
+            return fail('CONTACTS_QR_UNVERIFIABLE');
+        }
     };
     return async (data, trusted) => {
         const uid = trusted?.auth?.uid;
@@ -35,13 +56,21 @@ export function createProfileContactsHandler({db, hash, timestamp}) {
             if (record.ownerId !== undefined && record.ownerId !== uid) fail('PROFILE_UNAVAILABLE');
             if (revision !== expectedRevision) fail('REVISION_CONFLICT');
             const selectionSnapshot = selectionRef ? await transaction.get(selectionRef) : null;
-            const selection = selectionSnapshot?.exists ? selectionSnapshot.data() : null;
-            const references = collection => {
-                if (!selection) return [];
-                const value = selection[QR_KEYS[collection]];
-                return Array.isArray(value) ? value : [];
-            };
-            const arrays = {contactEmails: rows(record, 'contactEmails'), contactPhones: rows(record, 'contactPhones')};
+            // `stored` keeps the committed arrays for position arithmetic: the
+            // working copies shift as soon as one deletion is applied.
+            const stored = {contactEmails: rows(record, 'contactEmails'), contactPhones: rows(record, 'contactPhones')};
+            const arrays = {contactEmails: [...stored.contactEmails], contactPhones: [...stored.contactPhones]};
+            const addressRows = record.userAddresses === undefined ? [] : record.userAddresses;
+            if (needsSelection && !Array.isArray(addressRows)) fail('CONTACTS_QR_UNVERIFIABLE');
+            // An absent document is a verified empty selection; a present one
+            // must resolve canonically before any deletion is considered. Only
+            // referenced sections matter, so unrelated damage cannot widen this
+            // guard: it simply leaves those references unresolved.
+            const qr = needsSelection && selectionSnapshot?.exists ? qrSelection(selectionSnapshot.data(), {
+                contactEmails: stored.contactEmails.map(item => ({id: item.id})),
+                contactPhones: stored.contactPhones.map(item => ({id: item.id})),
+                userAddresses: addressRows.map(item => ({id: item?.id}))
+            }) : null;
             const touched = new Set();
             for (const operation of operations) {
                 const items = arrays[operation.collection];
@@ -61,14 +90,19 @@ export function createProfileContactsHandler({db, hash, timestamp}) {
                     touched.add(operation.collection);
                     continue;
                 }
-                // Deletion requires an unlinked row and no QR reference: a linked
-                // contact is unlinked first, and a positional reference cannot be
-                // re-resolved after a shift, so it blocks the deletion as well.
+                // Deletion requires an unlinked row and a verified QR selection:
+                // a linked contact is unlinked first, a selected one is excluded
+                // from the card first, and a legacy position that the deletion
+                // would shift blocks the operation instead of changing meaning.
                 if ((typeof matches[0].linkedAccountId === 'string' && matches[0].linkedAccountId) ||
                     (typeof matches[0].linkedAccountCompanyId === 'string' && matches[0].linkedAccountCompanyId)) fail('CONTACTS_LINKED');
-                const refs = references(operation.collection);
-                if (refs.some(reference => typeof reference === 'string' && reference === operation.id)) fail('CONTACTS_QR_SELECTED');
-                if (refs.some(reference => Number.isSafeInteger(reference))) fail('CONTACTS_QR_INDEXED');
+                if (qr) {
+                    if (qr.selection[QR_KEYS[operation.collection]].includes(operation.id)) fail('CONTACTS_QR_SELECTED');
+                    const references = qr.config[QR_KEYS[operation.collection]];
+                    const position = stored[operation.collection].indexOf(matches[0]);
+                    if (Array.isArray(references) &&
+                        references.some(reference => Number.isSafeInteger(reference) && reference > position)) fail('CONTACTS_QR_INDEXED');
+                }
                 items.splice(index, 1);
                 touched.add(operation.collection);
             }

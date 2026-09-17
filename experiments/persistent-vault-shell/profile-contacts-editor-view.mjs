@@ -11,7 +11,8 @@ export async function mountProfileContactsEditor(root, context, {load, createCon
         offline: 'Contatti disponibili offline in sola consultazione.',
         empty: 'Nessuna modifica da salvare.', incomplete: 'Compila almeno un campo della nuova riga.',
         linked: 'Collegato a un Account: scollega prima dal percorso dei collegamenti.',
-        qr: 'Incluso nella selezione QR: escludilo prima dalla tessera digitale.', ...labels};
+        qr: 'Incluso nella selezione QR: escludilo prima dalla tessera digitale.',
+        qrUnverified: 'Selezione QR non verificabile: l’eliminazione è disabilitata finché la configurazione salvata non è leggibile e coerente.', ...labels};
     const host = document.createElement('section'), rowsHost = document.createElement('div'), actions = document.createElement('div');
     const status = document.createElement('p'), controls = new AbortController(), rows = [], retained = [];
     host.dataset.profileContactsEditor = 'true'; status.dataset.contactStatus = 'true'; status.setAttribute('role', 'status');
@@ -37,9 +38,11 @@ export async function mountProfileContactsEditor(root, context, {load, createCon
     };
     context.signal.addEventListener('abort', dispose, {once: true});
     if (context.signal.aborted) {dispose(); return dispose;}
-    // A row without a persisted ID is shown, never repaired here and never targeted.
+    // A row without a persisted ID is shown, never repaired here and never
+    // targeted. An unverifiable QR protection blocks deletion for every row.
     const blockReason = row => !row.editable && !row.created ? BLOCKED[row.blocked] || 'Riga non modificabile.'
-        : row.linked ? text.linked : row.qr === true ? text.qr : null;
+        : row.qr === 'unverified' ? text.qrUnverified
+            : row.linked ? text.linked : row.qr === true ? text.qr : null;
     const addRow = ({collection, id, fields, created = false, editable = true, linked = false, qr = null, blocked: blockedCode = null}) => {
         const row = {collection, id, created, editable, linked, qr, blocked: blockedCode, removed: false, entries: []};
         const set = document.createElement('fieldset');

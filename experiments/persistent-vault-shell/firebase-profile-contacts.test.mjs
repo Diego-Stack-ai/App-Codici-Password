@@ -103,3 +103,71 @@ test('private contacts candidate writes, guards and receipts on synthetic emulat
     assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
     assert.equal((await db.doc(path).get()).data()._profileContactsRevision, 3);
 });
+test('unverifiable QR configurations refuse every deletion without touching profile, selection or receipts', async t => {
+    const rules = withProfileContactsCandidateRules(await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8'));
+    const env = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085, rules}});
+    const app = initializeApp({projectId: 'demo-vault-shell'}, 'profile-contacts-qr-test'), db = getFirestore(app);
+    t.after(async () => {await db.terminate(); await deleteApp(app); await env.cleanup();});
+    const uid = 'contacts-qr-owner', path = `users/${uid}`, selectionPath = `users/${uid}/settings/qrCodeInclusions`;
+    const run = createProfileContactsHandler({db, hash, timestamp: () => FieldValue.serverTimestamp()});
+    const trusted = {auth: {uid}, app: {appId: 'synthetic-not-http-attestation'}};
+    const context = {user: {uid}, signal: new AbortController().signal, assertUnlocked() {},
+        async encrypt(value) {return cipher(value);}, async read({ciphertext}) {return ciphertext;}};
+    const snapshots = record => {
+        const map = new Map();
+        for (const [collection, items] of [['contactEmails', record.contactEmails ?? []], ['contactPhones', record.contactPhones ?? []]]) {
+            for (const item of items) {
+                const fields = {}, forms = {};
+                for (const [key, value] of Object.entries(item)) {
+                    if (typeof value !== 'string' || key === 'id') continue;
+                    forms[key] = 'plain';
+                    fields[key] = value;
+                }
+                map.set(`${collection}:${item.id}`, {fields, forms});
+            }
+        }
+        return map;
+    };
+    const remove = async (id, operationId) => {
+        const record = (await db.doc(path).get()).data();
+        const request = await prepareProfileContacts({context, getUser: () => ({uid}), record, snapshot: snapshots(record),
+            draft: {deletes: [{collection: 'contactPhones', id}]}, operationId, hash});
+        return run(request, trusted);
+    };
+    await db.doc(path).set({ownerId: uid, _profileContactsRevision: 1,
+        contactEmails: [{id: 'email-home', address: 'home@example.invalid'}],
+        contactPhones: [{id: 'phone-mobile', label: 'Cellulare', number: '3330000000'},
+            {id: 'phone-other', label: 'Altro', number: '3331111111'}]});
+    const cases = [
+        ['emails with the wrong type', {emails: 'email-home', phones: [], addresses: []}],
+        ['phones with the wrong type', {emails: [], phones: {}, addresses: []}],
+        ['a reference to a non-existent id', {emails: [], phones: ['phone-missing'], addresses: []}],
+        ['duplicate references', {emails: [], phones: ['phone-other', 'phone-other'], addresses: []}],
+        ['an unresolvable legacy index', {emails: [], phones: [9], addresses: []}],
+        ['a negative legacy index', {emails: [], phones: [-1], addresses: []}],
+        ['a reference into a missing section', {emails: [], phones: [], addresses: ['address-missing']}],
+        ['a scalar with the wrong type', {emails: [], phones: [], addresses: [], nome: 'si'}],
+        ['an unsupported schema version', {emails: [], phones: [], addresses: [], _qrSchemaVersion: 2}],
+        ['a foreign transport id', {emails: [], phones: [], addresses: [], id: 'otherSetting'}]
+    ];
+    for (const [index, [name, selection]] of cases.entries()) {
+        await db.doc(selectionPath).set(selection);
+        const beforeProfile = (await db.doc(path).get()).data(), beforeSelection = (await db.doc(selectionPath).get()).data();
+        const operationId = `qr-${index}`;
+        await assert.rejects(remove('phone-mobile', operationId), /CONTACTS_QR_UNVERIFIABLE/, name);
+        assert.deepEqual((await db.doc(path).get()).data(), beforeProfile, name);
+        assert.deepEqual((await db.doc(selectionPath).get()).data(), beforeSelection, name);
+        assert.equal((await db.doc(`mutationResults/${uid}/operations/profile-contacts-${operationId}`).get()).exists, false, name);
+    }
+    // A verified selection allows an unselected contact and refuses a selected one.
+    await db.doc(selectionPath).set({nome: true, emails: ['email-home'], phones: ['phone-other'], addresses: []});
+    assert.deepEqual(await remove('phone-mobile', 'qr-unselected'), {status: 'confirmed', revision: 2});
+    assert.deepEqual((await db.doc(selectionPath).get()).data(),
+        {nome: true, emails: ['email-home'], phones: ['phone-other'], addresses: []}, 'a confirmed deletion never rewrites the selection');
+    await assert.rejects(remove('phone-other', 'qr-selected'), /CONTACTS_QR_SELECTED/);
+    assert.equal((await db.doc(`mutationResults/${uid}/operations/profile-contacts-qr-selected`).get()).exists, false);
+    // A genuinely absent document is a verified empty selection.
+    await db.doc(selectionPath).delete();
+    assert.deepEqual(await remove('phone-other', 'qr-absent'), {status: 'confirmed', revision: 3});
+    assert.equal((await db.doc(selectionPath).get()).exists, false, 'the deletion never recreates the selection');
+});

@@ -1,8 +1,11 @@
 import {CONTACT_COLLECTIONS, CONTACT_FIELDS, contactBasis, contactRevision, profileContactsObject} from './profile-contacts-contract.mjs';
 import {prepareProfileContacts} from './prepare-profile-contacts.mjs';
+import {preparePrivateQrSelection} from './qr-selection-contract.mjs';
 
 const labels = Object.freeze({label: 'Etichetta', address: 'Indirizzo email', note: 'Note', password: 'Password', number: 'Numero'});
 const settings = Object.freeze({contactEmails: 'emails', contactPhones: 'phones'});
+// Deletion is refused for every row while the QR protection cannot be verified.
+const QR_UNVERIFIED = 'unverified';
 // Private contacts only. No company source is accepted: company contacts are a
 // separate slice and the projection used here would not be safe to write back.
 export function createProfileContactsEditorSource({context, getUser, repository, isEncryptedValue, hash, createId,
@@ -25,11 +28,28 @@ export function createProfileContactsEditorSource({context, getUser, repository,
     // Any change to either array or to the revision invalidates the opened editor.
     const signature = record => contactBasis({contactEmails: record.contactEmails ?? [], contactPhones: record.contactPhones ?? [],
         _profileContactsRevision: record._profileContactsRevision ?? 0});
-    const selections = async () => {
+    // Three outcomes only. A missing document is a verified empty selection; a
+    // read failure, foreign transport metadata or any configuration that does
+    // not resolve canonically is "unverified" and blocks every deletion. It is
+    // never silently reported as "nothing selected", and consultation and
+    // editing stay available because only deletion depends on this protection.
+    const selections = async projection => {
+        let setting;
         try {
-            const setting = await repository.getUserSetting(uid, 'qrCodeInclusions');
-            return profileContactsObject(setting) ? setting : null;
-        } catch {return null;}
+            setting = await repository.getUserSetting(uid, 'qrCodeInclusions');
+        } catch {return {state: 'unverified'};}
+        if (setting === null || setting === undefined) return {state: 'absent'};
+        if (!profileContactsObject(setting)) return {state: 'unverified'};
+        const config = {...setting};
+        if (config.id !== undefined && config.id !== 'qrCodeInclusions') return {state: 'unverified'};
+        delete config.id;
+        const revision = Object.hasOwn(config, '_qrRevision') ? config._qrRevision : 0;
+        if (!Number.isSafeInteger(revision) || revision < 0 ||
+            (Object.hasOwn(config, '_qrSchemaVersion') && config._qrSchemaVersion !== 1)) return {state: 'unverified'};
+        delete config._qrRevision; delete config._qrSchemaVersion;
+        try {
+            return {state: 'verified', selection: preparePrivateQrSelection(config, projection)};
+        } catch {return {state: 'unverified'};}
     };
     return Object.freeze({dispose,
         createId(collection) {
@@ -42,12 +62,17 @@ export function createProfileContactsEditorSource({context, getUser, repository,
             loaded = null;
             const initial = await read(isOnline()); check();
             const revision = contactRevision(initial), current = signature(initial);
-            const setting = await selections(); check();
+            // The canonical contract validates the whole saved selection against
+            // the profile rows: identifiers are resolved, never guessed.
+            const idRows = value => Array.isArray(value)
+                ? value.map(item => profileContactsObject(item) ? {id: item.id} : item) : value;
+            const qr = await selections({contactEmails: idRows(initial.contactEmails ?? []),
+                contactPhones: idRows(initial.contactPhones ?? []), userAddresses: idRows(initial.userAddresses ?? [])});
+            check();
             const rows = [], snapshot = new Map();
             for (const collection of Object.keys(settings)) {
                 const items = initial[collection] === undefined ? [] : initial[collection];
                 if (!Array.isArray(items) || items.length > 10000) throw Error('PROFILE_SHAPE_INVALID');
-                const references = setting && Array.isArray(setting[settings[collection]]) ? setting[settings[collection]] : null;
                 for (const item of items) {
                     if (!profileContactsObject(item)) throw Error('PROFILE_SHAPE_INVALID');
                     const id = typeof item.id === 'string' && item.id ? item.id : null;
@@ -66,10 +91,10 @@ export function createProfileContactsEditorSource({context, getUser, repository,
                         forms[spec.key] = encrypted ? 'cipher' : 'plain';
                         originals[spec.key] = value;
                     }
-                    // A row included in the QR selection (or any legacy positional
-                    // reference) cannot be deleted from this editor.
-                    const selected = references === null ? null : references.includes(id) ||
-                        references.some(reference => Number.isSafeInteger(reference));
+                    // Only a canonically verified selection can allow a deletion:
+                    // an unverifiable protection disables it for every row.
+                    const selected = qr.state === 'unverified' ? QR_UNVERIFIED
+                        : qr.state === 'verified' && qr.selection[settings[collection]].includes(id);
                     rows.push(Object.freeze({collection, id, editable: id !== null,
                         blocked: id === null ? 'CONTACT_ID_MISSING' : null,
                         linked: Boolean(item.linkedAccountId || item.linkedAccountCompanyId), qr: selected,

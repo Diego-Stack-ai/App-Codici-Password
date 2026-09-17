@@ -14,7 +14,7 @@ const record = () => ({ownerId: 'owner', _profileContactsRevision: 3,
     contactPhones: [
         {id: 'phone-mobile', label: 'Cellulare', number: 'ENC:3330000000', linkedAccountId: 'account'},
         {id: 'phone-other', label: '', number: 'ENC:3331111111'}]});
-function fixture({selection = {emails: ['email-home'], phones: [0]}} = {}) {
+function fixture({selection = {emails: ['email-home'], phones: [0]}, failSelection = false} = {}) {
     const abort = new AbortController(), state = {uid: 'owner', online: true, locked: false, reads: [], decoded: [], record: record()};
     const context = {user: {uid: 'owner'}, signal: abort.signal,
         assertUnlocked() {if (state.locked) throw Error('LOCKED');},
@@ -24,7 +24,7 @@ function fixture({selection = {emails: ['email-home'], phones: [0]}} = {}) {
     const options = {context, getUser: () => ({uid: state.uid}), isEncryptedValue: value => value.startsWith('ENC:'), hash,
         createId: prefix => `${prefix}-generato`, isOnline: () => state.online,
         repository: {getUserProfile: uid => read(uid, false), getUserProfileConfirmed: uid => read(uid, true),
-            getUserSetting: async () => selection}};
+            getUserSetting: async () => {if (failSelection) throw Error('SETTING_UNAVAILABLE'); return selection;}}};
     return {state, abort, context, options, source: createProfileContactsEditorSource(options)};
 }
 test('the source projects labels, id presence, links and the QR selection', async () => {
@@ -36,7 +36,8 @@ test('the source projects labels, id presence, links and the QR selection', asyn
     assert.equal(home.fields.find(field => field.key === 'address').value, 'a@example.invalid');
     assert.equal(home.fields.find(field => field.key === 'password').secret, true);
     assert.equal(without.editable, false); assert.equal(without.blocked, 'CONTACT_ID_MISSING'); assert.equal(without.id, null);
-    assert.equal(mobile.linked, true); assert.equal(mobile.qr, true); assert.equal(other.qr, true);
+    assert.equal(mobile.linked, true); assert.equal(mobile.qr, true);
+    assert.equal(other.qr, false, 'a legacy position resolves to its own row, not to every row');
     assert.equal(home.qr, true);
     assert.equal(model.templates.contactPhones.length, 2);
     assert.ok(!f.state.decoded.includes('nota'), 'secrets are never read raw');
@@ -45,10 +46,29 @@ test('the source projects labels, id presence, links and the QR selection', asyn
     assert.throws(() => f.source.createId('userAddresses'), /PROFILE_CONTACTS_INVALID/);
     f.source.dispose();
 });
-test('an unknown QR selection never blocks a row by itself', async () => {
-    const f = fixture({selection: null}), model = await f.source.load();
-    assert.ok(model.rows.every(row => row.qr === null));
-    f.source.dispose();
+test('an absent QR document allows deletion while an unverifiable protection never does', async () => {
+    const absent = fixture({selection: null}), absentModel = await absent.source.load();
+    assert.ok(absentModel.rows.every(row => row.qr === false));
+    absent.source.dispose();
+    for (const [name, selection] of [
+        ['emails with the wrong type', {emails: 'email-home', phones: []}],
+        ['phones with the wrong type', {emails: [], phones: {}}],
+        ['a reference to a non-existent id', {emails: ['email-missing'], phones: []}],
+        ['duplicate references', {emails: ['email-home', 'email-home'], phones: []}],
+        ['an unresolvable legacy index', {emails: [], phones: [7]}],
+        ['a negative legacy index', {emails: [], phones: [-1]}],
+        ['an unsupported schema version', {emails: [], phones: [], _qrSchemaVersion: 2}],
+        ['a foreign transport id', {emails: [], phones: [], id: 'otherSetting'}],
+        ['a configuration that is not an object', 'not-an-object']]) {
+        const f = fixture({selection}), model = await f.source.load();
+        assert.ok(model.rows.every(row => row.qr === 'unverified'), name);
+        assert.equal(model.canSave, true, `${name}: consultation and editing stay available`);
+        f.source.dispose();
+    }
+    const failing = fixture({failSelection: true}), failingModel = await failing.source.load();
+    assert.ok(failingModel.rows.every(row => row.qr === 'unverified'), 'a read failure never allows deletion');
+    assert.equal(failingModel.canSave, true);
+    failing.source.dispose();
 });
 test('offline contacts stay readable but cannot be prepared', async () => {
     const f = fixture(); f.state.online = false;
@@ -136,9 +156,31 @@ const model = canSave => ({canSave, rows: [
         {key: 'password', label: 'Password', maxLength: 1000, secret: true}],
     contactPhones: [{key: 'label', label: 'Etichetta', maxLength: 120}, {key: 'number', label: 'Numero', maxLength: 120}]}});
 const mount = (root, options = {}) => mountProfileContactsEditor(root, {signal: options.signal ?? new AbortController().signal, assertUnlocked() {}}, {
-    load: options.load ?? (async () => model(options.canSave ?? true)), createId: () => 'email-fixed',
+    load: options.load ?? (async () => options.model ?? model(options.canSave ?? true)), createId: () => 'email-fixed',
     onSaved: options.onSaved ?? (() => {}), onCancel: options.onCancel ?? (() => {}),
     createController: options.createController ?? (() => ({dispose() {}, save: async draft => {options.sent = draft; return {status: 'saved'};}}))});
+test('an unverifiable QR protection disables every deletion but keeps the fields editable', async () => {
+    const unverified = model(true);
+    unverified.rows = unverified.rows.map(row => ({...row, qr: 'unverified'}));
+    const root = new Node('root'), options = {model: unverified};
+    await mount(root, options);
+    const removeButtons = byAction(root, 'delete');
+    assert.equal(removeButtons.length, 3);
+    assert.ok(removeButtons.every(node => node.disabled), 'no deletion survives an unverifiable protection');
+    for (const row of rows(root)) {
+        const message = row.children.find(node => node.dataset.contactMessage === 'true');
+        assert.ok(message.textContent.length > 0, 'every row explains its blocked deletion');
+        if (row.dataset.contactId !== '') assert.match(message.textContent, /Selezione QR non verificabile/);
+        else assert.match(message.textContent, /senza ID persistito/);
+    }
+    assert.equal(byField(rows(root)[0], 'address').readOnly, false, 'editing stays available');
+    assert.equal(byAction(root, 'save')[0].disabled, false);
+    byAdd(root, 'contactPhones').dispatchEvent(new Event('click'));
+    const created = rows(root).at(-1);
+    assert.equal(created.children.find(node => node.dataset.contactAction === 'delete').disabled, false,
+        'a new row can still be removed before it is saved');
+    assert.equal(byField(created, 'number').readOnly, false);
+});
 test('the editor shows every row, blocks the ones it cannot write and sends only the changes', async () => {
     const root = new Node('root'), options = {};
     const cleanup = await mount(root, options);

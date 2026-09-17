@@ -190,21 +190,66 @@ test('a linked row cannot be deleted and keeps its link when edited', async () =
     const row = f.stored.get(f.path).contactEmails[0];
     assert.equal(row.address, 'nuova@example.invalid'); assert.equal(row.linkedAccountId, 'account');
 });
-test('a row referenced by the QR selection or by a legacy position cannot be deleted', async () => {
-    const path = 'users/owner/settings/qrCodeInclusions';
-    for (const selection of [{emails: ['email-work'], phones: []}, {emails: [], phones: [0]}, {emails: [], phones: ['phone-mobile']}]) {
+const qrPath = 'users/owner/settings/qrCodeInclusions';
+const remove = async (f, target) => f.handler(await f.prepare({deletes: [target]}), f.trusted);
+test('a selected row is refused, by stored id or by a resolvable legacy position', async () => {
+    for (const [selection, target] of [
+        [{emails: ['email-work'], phones: []}, {collection: 'contactEmails', id: 'email-work'}],
+        [{emails: [], phones: [0]}, {collection: 'contactPhones', id: 'phone-mobile'}],
+        [{emails: [], phones: ['phone-mobile']}, {collection: 'contactPhones', id: 'phone-mobile'}]]) {
         const f = fixture();
-        f.stored.set(path, selection);
-        const target = selection.emails.length ? {collection: 'contactEmails', id: 'email-work'} : {collection: 'contactPhones', id: 'phone-mobile'};
+        f.stored.set(qrPath, selection);
         const before = structuredClone([...f.stored]);
-        await assert.rejects(f.prepare({deletes: [target]}).then(request => f.handler(request, f.trusted)), /CONTACTS_QR_/);
+        await assert.rejects(remove(f, target), /CONTACTS_QR_SELECTED/);
         assert.deepEqual([...f.stored], before);
     }
-    const f = fixture();
-    f.stored.set(path, {emails: [], phones: []});
-    await f.prepare({deletes: [{collection: 'contactPhones', id: 'phone-mobile'}]}).then(request => f.handler(request, f.trusted));
-    assert.equal(f.stored.get(f.path).contactPhones.length, 0);
-    assert.equal(f.stored.get(f.path).contactEmails.length, 2, 'an unrelated collection is untouched');
+});
+test('a legacy positional reference that the deletion would shift blocks the operation', async () => {
+    const record = {ownerId: 'owner', contactEmails: [{id: 'email-a', address: 'a@example.invalid'},
+        {id: 'email-b', address: 'b@example.invalid'}], contactPhones: [], _profileContactsRevision: 1};
+    const f = fixture(record);
+    f.stored.set(qrPath, {emails: [1], phones: []});
+    const before = structuredClone([...f.stored]);
+    await assert.rejects(remove(f, {collection: 'contactEmails', id: 'email-a'}), /CONTACTS_QR_INDEXED/);
+    assert.deepEqual([...f.stored], before);
+    await assert.rejects(remove(f, {collection: 'contactEmails', id: 'email-b'}), /CONTACTS_QR_SELECTED/);
+    assert.deepEqual([...f.stored], before);
+});
+for (const [name, selection] of [
+    ['emails with the wrong type', {emails: 'email-work', phones: []}],
+    ['phones with the wrong type', {emails: [], phones: {}}],
+    ['a reference to a non-existent id', {emails: ['email-missing'], phones: []}],
+    ['duplicate references', {emails: ['email-home', 'email-home'], phones: []}],
+    ['an unresolvable legacy index', {emails: [], phones: [7]}],
+    ['a negative legacy index', {emails: [], phones: [-1]}],
+    ['a reference into a missing section', {emails: [], phones: [], addresses: ['address-missing']}],
+    ['a scalar with the wrong type', {emails: [], phones: [], nome: 'si'}],
+    ['an unsupported schema version', {emails: [], phones: [], _qrSchemaVersion: 2}],
+    ['a foreign transport id', {emails: [], phones: [], id: 'otherSetting'}],
+    ['a configuration that is not an object', 'not-an-object']]) {
+    test(`an unverifiable QR configuration refuses the deletion: ${name}`, async () => {
+        const f = fixture();
+        f.stored.set(qrPath, selection);
+        const before = structuredClone([...f.stored]);
+        // The unrelated target proves that the whole configuration is validated.
+        await assert.rejects(remove(f, {collection: 'contactPhones', id: 'phone-mobile'}), /CONTACTS_QR_UNVERIFIABLE/);
+        assert.deepEqual([...f.stored], before);
+        assert.equal(f.stored.has('mutationResults/owner/operations/profile-contacts-operation'), false);
+    });
+}
+test('a missing document and a verified unselected contact still allow the deletion', async () => {
+    const absent = fixture();
+    await remove(absent, {collection: 'contactPhones', id: 'phone-mobile'});
+    assert.equal(absent.stored.get(absent.path).contactPhones.length, 0);
+    assert.equal(absent.stored.has(qrPath), false);
+    for (const selection of [{emails: [], phones: []}, {nome: true, emails: ['email-work'], phones: [], addresses: []}]) {
+        const f = fixture();
+        f.stored.set(qrPath, selection);
+        await remove(f, {collection: 'contactPhones', id: 'phone-mobile'});
+        assert.equal(f.stored.get(f.path).contactPhones.length, 0);
+        assert.equal(f.stored.get(f.path).contactEmails.length, 2, 'an unrelated collection is untouched');
+        assert.deepEqual(f.stored.get(qrPath), selection, 'the selection is never modified');
+    }
 });
 test('the same operation retries idempotently and cannot be reused for another request', async () => {
     const f = fixture(), request = await f.prepare({deletes: [{collection: 'contactEmails', id: 'email-work'}]});
