@@ -280,3 +280,9 @@ Montare e verificare nel laboratorio della shell persistente il pannello Allegat
 - Compilare qui il rapporto con commit, file, conteggi, scostamenti e rischi; infine impostare `DA_VERIFICARE`.
 
 **Stato incarico: IN_LAVORAZIONE** — presa in carico 2026-09-17 21:18 (DeepSeek); commit osservato `ca560362`; base obbligatoria `ca560362` verificata come antenata (il working tree conteneva la verifica Codex di DS-002B e questo dettaglio DS-002C, non ancora committati: pubblicati con questa presa in carico senza modificarne il testo). Ramo `integration/vault-shell-v127-security`. Piano: montaggio dell'azione e del pannello nella linguetta Documenti digitali della pagina di laboratorio riusando sorgente, vista e capacità di DS-002B; collegamento di fixture e trasporto emulato per il percorso completo; revoche verificate anche su callback tardive; scenario browser sintetico su Chrome (Edge se l'infrastruttura lo consente); poi test, MD, inventario e rapporto. Nessuna modifica a `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy o dati reali.
+
+### DS-002C — Ripresa automatica dopo inattività
+
+Nessun commit, file in lavorazione o aggiornamento è comparso per oltre 12 minuti dopo la presa in carico delle 21:18. Riprendi dalla punta corrente senza rifare DS-002B (`0bb19c60`, `c826ff3e`, `b05f11bf`) né la sua verifica (`ca560362`). Completa il primo punto ancora mancante di DS-002C: montaggio nella pagina di laboratorio, percorso fixture/trasporto, regressioni di revoca e scenario browser; poi test, MD, inventario e rapporto `DA_VERIFICARE`. Mantieni invariati `Frontend/public/**`, Rules/Functions produttive, versione, `master` e deploy.
+
+**Stato incarico: PRONTO**
