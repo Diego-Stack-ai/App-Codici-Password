@@ -1,5 +1,5 @@
 // Prototype only: no persistence and no Firebase identity provider.
-export function createMemoryVault({unlockKey, decryptRecord, encryptValue, openQueueWithKey, now = Date.now, timeoutMs = 60_000, onLock = () => {}}) {
+export function createMemoryVault({unlockKey, decryptRecord, encryptValue, sealBytes, openBytes, openQueueWithKey, now = Date.now, timeoutMs = 60_000, onLock = () => {}}) {
     let key = null, uid = null, generation = 0, expiresAt = 0, unlocking = null;
     const queues = new Set();
     const disposeQueue = queue => { try { Promise.resolve(queue?.close?.()).catch(() => {}); } catch {} };
@@ -90,6 +90,27 @@ export function createMemoryVault({unlockKey, decryptRecord, encryptValue, openQ
             assertCurrent(owner, epoch);
             if (typeof ciphertext !== 'string' || !ciphertext) throw new Error('CIPHERTEXT_REQUIRED');
             return ciphertext;
+        },
+        // Binary sealing stays inside the Vault boundary exactly as the textual
+        // methods do: the key material is handed to the injected cipher and never
+        // returned, and the operation is abandoned if the session changed meanwhile.
+        async sealImage(owner, {bytes, aad} = {}) {
+            const epoch = generation;
+            assertCurrent(owner, epoch);
+            if (typeof sealBytes !== 'function') throw new Error('SEAL_UNAVAILABLE');
+            const sealed = await sealBytes(key, {bytes, aad});
+            assertCurrent(owner, epoch);
+            if (!sealed?.payload || !sealed?.envelope) throw new Error('SEAL_FAILED');
+            return sealed;
+        },
+        async openImage(owner, {payload, envelope, aad} = {}) {
+            const epoch = generation;
+            assertCurrent(owner, epoch);
+            if (typeof openBytes !== 'function') throw new Error('SEAL_UNAVAILABLE');
+            const plaintext = await openBytes(key, {payload, envelope, aad});
+            assertCurrent(owner, epoch);
+            if (!plaintext?.byteLength) throw new Error('OPEN_FAILED');
+            return plaintext;
         },
         touch() {
             if (isUnlocked()) expiresAt = now() + timeoutMs;

@@ -21,6 +21,10 @@ export const DOCUMENT_ATTACHMENT_KINDS = Object.freeze(['profile-document-attach
 // Transport wiring is DS-002B; a different marker would need an authorized Rules
 // change, which this increment does not perform.
 export const DOCUMENT_ATTACHMENT_STORAGE_METADATA = Object.freeze({encrypted: 'v1'});
+// The transport must fail a conditional removal when the stored object is no
+// longer the one that was verified: `storage.remove(path, {generation})` applies
+// a native generation precondition and reports this code when it does not hold.
+export const DOCUMENT_ATTACHMENT_STORAGE_CHANGED = 'OBJECT_CHANGED';
 export const DOCUMENT_ATTACHMENT_CIPHER = 'AES-GCM-256';
 export const DOCUMENT_ATTACHMENT_KEY_WRAP = 'HKDF-SHA256+A256GCM';
 export const DOCUMENT_ATTACHMENT_REFUSALS = Object.freeze({

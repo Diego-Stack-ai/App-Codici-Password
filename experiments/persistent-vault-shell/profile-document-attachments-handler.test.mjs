@@ -44,7 +44,7 @@ function fixture({documents = [documentId], seeded = []} = {}) {
     // record, a receipt or the stored object exactly between the proof and the
     // transaction that would write: the window DS-002A-R2 must close.
     const hooks = {onProbe: null};
-    let transactions = 0, chain = Promise.resolve();
+    let transactions = 0, generations = 0, chain = Promise.resolve();
     records.set(`users/${uid}`, {ownerId: uid, documenti: documents.map(id => ({id, type: 'Patente'}))});
     for (const attachment of seeded) records.set(documentAttachmentRecordPath({uid, attachmentId: attachment}), boundRecord(attachment));
     const snapshot = ref => ({exists: records.has(ref), data: () => structuredClone(records.get(ref))});
@@ -114,7 +114,8 @@ function fixture({documents = [documentId], seeded = []} = {}) {
             calls.probe++;
             if (failures.probe) throw Error('PROBE_FAILED');
             const object = objects.get(path);
-            const descriptor = object ? {exists: true, digest: object.digest, size: object.size ?? object.bytes.byteLength} : {exists: false};
+            const descriptor = object ? {exists: true, digest: object.digest, size: object.size ?? object.bytes.byteLength,
+                generation: object.generation} : {exists: false};
             if (hooks.onProbe) hooks.onProbe(calls.probe);
             return descriptor;
         },
@@ -123,12 +124,21 @@ function fixture({documents = [documentId], seeded = []} = {}) {
             if (failures.write) throw Error('WRITE_FAILED');
             if (objects.has(path)) return 'exists';
             const copy = Uint8Array.from(bytes);
-            objects.set(path, {bytes: copy, digest: hash(Buffer.from(copy)), metadata: options?.metadata});
+            objects.set(path, {bytes: copy, digest: hash(Buffer.from(copy)), metadata: options?.metadata,
+                generation: ++generations});
             return 'created';
         },
-        async remove(path) {
+        // Mirrors a native generation precondition: an object whose version is no
+        // longer the one that was verified is not deleted.
+        async remove(path, options = {}) {
             calls.remove++;
             if (failures.remove) throw Error('REMOVE_FAILED');
+            const object = objects.get(path);
+            if (object && options.generation !== undefined && object.generation !== options.generation) {
+                const error = Error('OBJECT_CHANGED');
+                error.code = 'OBJECT_CHANGED';
+                throw error;
+            }
             objects.delete(path);
         }
     };
@@ -136,7 +146,7 @@ function fixture({documents = [documentId], seeded = []} = {}) {
         failAt: offset => {failures.throwOn = [transactions + offset];},
         seedObject: (path, bytes, overrides = {}) => {
             const copy = Uint8Array.from(bytes);
-            objects.set(path, {bytes: copy, digest: hash(Buffer.from(copy)), ...overrides});
+            objects.set(path, {bytes: copy, digest: hash(Buffer.from(copy)), generation: ++generations, ...overrides});
         },
         handler: createProfileDocumentAttachmentHandler({db, storage, hash, timestamp: () => 123})};
 }
@@ -490,4 +500,43 @@ test('recover blocks every receipt that is not canonical without touching storag
         assert.equal(f.calls.probe + f.calls.remove, 0, label);
         assert.equal(f.records.has(receiptPath('blocked')), true, label);
     }
+});
+test('a deletion never removes an object whose version changed after the proof', async () => {
+    const f = fixture();
+    await f.handler.upload(await uploadInput(), trusted);
+    const input = await deleteInput({...f.records.get(recordPath), id: attachmentId});
+    const bytes = Uint8Array.from(f.objects.get(storagePath).bytes);
+    const base = f.calls.probe;
+    // Same bytes, same digest, new native version: only the precondition can stop
+    // the removal, and it must.
+    f.hooks.onProbe = count => {if (count === base + 2) f.seedObject(storagePath, bytes);};
+    assert.deepEqual(await f.handler.remove(input, trusted), {status: 'incomplete', code: 'OBJECT_CHANGED', attachmentId});
+    assert.equal(f.objects.size, 1, 'the replaced object is not deleted');
+    assert.equal(f.records.get(recordPath).status, 'deleting');
+    assert.equal(f.records.get(receiptPath('delete-1')).status, 'deleting');
+});
+test('recover does not remove an object replaced after its proof', async () => {
+    const f = fixture();
+    await f.handler.upload(await uploadInput(), trusted);
+    const input = await deleteInput({...f.records.get(recordPath), id: attachmentId});
+    f.failures.remove = true;
+    await f.handler.remove(input, trusted);
+    f.failures.remove = false;
+    const bytes = Uint8Array.from(f.objects.get(storagePath).bytes);
+    f.hooks.onProbe = () => {f.seedObject(storagePath, bytes);};
+    assert.deepEqual(await f.handler.recover(trusted), {status: 'recovered', confirmed: 0, compensated: 0, incomplete: 1});
+    assert.equal(f.objects.size, 1, 'the replaced object survives the recovery');
+    assert.equal(f.records.get(recordPath).status, 'deleting');
+    assert.equal(f.records.get(receiptPath('delete-1')).status, 'deleting');
+});
+test('the compensation of an orphan object is conditional on its version', async () => {
+    const f = fixture(), input = await uploadInput();
+    f.failAt(2);
+    await f.handler.upload(input, trusted);
+    f.records.delete(recordPath);
+    const bytes = Uint8Array.from(f.objects.get(storagePath).bytes);
+    f.hooks.onProbe = () => {f.seedObject(storagePath, bytes);};
+    assert.deepEqual(await f.handler.upload(input, trusted), {status: 'incomplete', code: 'OBJECT_CHANGED', attachmentId});
+    assert.equal(f.objects.size, 1, 'a replaced object survives the compensation');
+    assert.equal(f.records.has(receiptPath('upload-1')), true, 'the receipt stays for recover');
 });

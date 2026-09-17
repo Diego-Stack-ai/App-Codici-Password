@@ -1,6 +1,6 @@
-import {DOCUMENT_ATTACHMENT_SCHEMA_VERSION, DOCUMENT_ATTACHMENT_REFUSALS, DOCUMENT_IMAGE_MAX_PER_DOCUMENT,
-    documentAttachmentDeleteReceipt, documentAttachmentEnvelopeEquals, documentAttachmentMetadata,
-    documentAttachmentObject, documentAttachmentObjectSize, documentAttachmentOperationDigest,
+import {DOCUMENT_ATTACHMENT_SCHEMA_VERSION, DOCUMENT_ATTACHMENT_REFUSALS, DOCUMENT_ATTACHMENT_STORAGE_CHANGED,
+    DOCUMENT_IMAGE_MAX_PER_DOCUMENT, documentAttachmentDeleteReceipt, documentAttachmentEnvelopeEquals,
+    documentAttachmentMetadata, documentAttachmentObject, documentAttachmentObjectSize, documentAttachmentOperationDigest,
     documentAttachmentPayloadCopy, documentAttachmentReceiptCollection, documentAttachmentReceiptPath,
     documentAttachmentRecordPath, documentAttachmentSha256, documentAttachmentUploadReceipt}
     from './profile-document-attachments-contract.mjs';
@@ -17,7 +17,12 @@ const DELETE_KIND = 'profile-document-attachment-delete';
 // from DS-002B:
 //   db:      {doc(path), get(ref), list(collectionPath), attachmentsFor({uid, documentId}), runTransaction(run)}
 //   tx:      {get(ref), listAttachments(query), create, update, delete}   // read-only before any write
-//   storage: {probe(path) -> {exists, digest, size}, putIfAbsent(path, bytes, options) -> 'created'|'exists', remove(path)}
+//   storage: {probe(path) -> {exists, digest, size, generation},
+//             putIfAbsent(path, bytes, options) -> 'created'|'exists',   // native ifGenerationMatch: 0
+//             remove(path, {generation}) -> void}                        // native ifGenerationMatch: <generation>
+// `generation` is the native version of the stored object: when the transport
+// reports it, the removal is conditional on the version that was just verified and
+// a changed object must be reported as DOCUMENT_ATTACHMENT_STORAGE_CHANGED.
 //
 // Firestore and Storage are never atomic together: each step is recorded in the
 // receipt and every partial outcome is either resumable or compensable. Outcomes
@@ -71,6 +76,20 @@ export function createProfileDocumentAttachmentHandler({db, storage, hash, times
         if (size === 'invalid') return false;
         if (size === null || objectSize === null || objectSize === undefined) return true;
         return size === objectSize;
+    };
+    // Conditional removal: the transport receives the native version observed
+    // immediately before, so an object replaced in that window is never deleted. A
+    // transport that has no generations simply receives `undefined`.
+    const removeObject = async (descriptor, path, {code}) => {
+        try {
+            await storage.remove(path, {generation: descriptor?.generation});
+            return null;
+        } catch (error) {
+            if (error?.code === DOCUMENT_ATTACHMENT_STORAGE_CHANGED || error?.message === DOCUMENT_ATTACHMENT_STORAGE_CHANGED) {
+                return DOCUMENT_ATTACHMENT_STORAGE_CHANGED;
+            }
+            return code;
+        }
     };
     // Whole-record coherence with a command: owner, document, derived attachment,
     // path, digest, status and — for an upload — the exact metadata the command
@@ -261,11 +280,8 @@ export function createProfileDocumentAttachmentHandler({db, storage, hash, times
                 let current;
                 try {current = await storage.probe(command.storagePath);} catch {return incomplete('OBJECT_UNVERIFIABLE', command.attachmentId);}
                 if (!objectProof(current, proof)) return incomplete('OBJECT_CONFLICT', command.attachmentId);
-                try {
-                    await storage.remove(command.storagePath);
-                } catch {
-                    return incomplete('COMPENSATION_FAILED', command.attachmentId);
-                }
+                const removal = await removeObject(current, command.storagePath, {code: 'COMPENSATION_FAILED'});
+                if (removal) return incomplete(removal, command.attachmentId);
                 const cleared = await withdrawReservation({recordRef, receiptRef, uid, expectation, objectDigest: command.digest});
                 if (cleared === 'cleared') return compensated('METADATA_MISSING', command.attachmentId);
                 return incomplete(cleared === 'failed' ? 'COMPENSATION_FAILED' : 'COMPENSATION_CONFLICT', command.attachmentId);
@@ -326,11 +342,8 @@ export function createProfileDocumentAttachmentHandler({db, storage, hash, times
                 if (!objectProof(probe, proof)) {
                     return incomplete('OBJECT_CONFLICT', command.attachmentId);
                 }
-                try {
-                    await storage.remove(command.storagePath);
-                } catch {
-                    return incomplete('OBJECT_REMOVE_FAILED', command.attachmentId);
-                }
+                const removal = await removeObject(probe, command.storagePath, {code: 'OBJECT_REMOVE_FAILED'});
+                if (removal) return incomplete(removal, command.attachmentId);
             }
             // Finalization: receipt and record are re-read and re-proved in the same
             // transaction. A record replaced after the reservation is not deleted.
@@ -422,7 +435,8 @@ export function createProfileDocumentAttachmentHandler({db, storage, hash, times
                     try {probe = await storage.probe(receipt.storagePath);} catch {incompleteCount++; continue;}
                     if (probe?.exists) {
                         if (!objectProof(probe, {objectDigest, objectSize})) {incompleteCount++; continue;}
-                        try {await storage.remove(receipt.storagePath);} catch {incompleteCount++; continue;}
+                        const removal = await removeObject(probe, receipt.storagePath, {code: 'OBJECT_REMOVE_FAILED'});
+                        if (removal) {incompleteCount++; continue;}
                     }
                     const closed = await db.runTransaction(async transaction => {
                         const currentReceipt = await transaction.get(receiptRef);
