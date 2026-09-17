@@ -685,3 +685,6 @@ Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima 
 ### Candidata Auth prima del rendering — 15/09/2026
 
 Su master 1.2.126 riprodotta la Home generica visibile prima del redirect anonimo. Correzione isolata delle 22 pagine private, attesa Auth con errore/timeout chiusi e cleanup centralizzato logout. Il requisito era già previsto dal bootstrap protetto e dal contratto di pulizia; mancava il collaudo del primo frame produttivo. Dettagli, test e limiti nell'ultima sezione di AUDIT_VAULT_SESSION_P0.md. Nessun deploy, dato reale o certificazione complessiva della baseline. La shell persistente resta la direzione già scelta nel ramo sperimentale.
+# Incremento A4 — editor documenti candidato (18/09/2026)
+
+Nel laboratorio della shell persistente è disponibile l'editor transazionale dei documenti privati. Identità legacy, collegamenti Account, selezione del codice fiscale nel QR e allegati immagine sono trattati in fail-closed; campi estranei, scadenze e riferimenti restano invariati. Lo schema aziendale è stato censito separatamente e non contiene una collezione equivalente. Rules ed endpoint restano candidati di laboratorio, senza deploy. Dettagli in `A4_CENSIMENTO_DOCUMENTI.md`.

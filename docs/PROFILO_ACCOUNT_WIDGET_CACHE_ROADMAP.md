@@ -716,3 +716,6 @@ Corretto il pulsante introdotto nella UI 1.2.118: la creazione dal conto ora sel
 ## Prerequisito conto salvato — candidata 1.2.120, 13/09/2026
 
 Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consentiva di inviare il Widget prima che il conto fosse salvato. Il backend respingeva correttamente la richiesta con HTTP 400/failed-precondition. Ora i due form distinguono gli ID caricati da quelli appena generati; creazione e spostamento chiedono prima il salvataggio Account, senza inviare il comando fallito e conservando eventuali campi nel modale. Gestito anche il testo italiano del rifiuto server. Nessuna modifica backend, Rules, dati reali o ramo Vault.
+# Integrazione A4 documenti e Account — 18/09/2026
+
+L'editor candidato dei documenti riusa le origini `documenti` del servizio collegamenti Account e conserva i backlink senza riscriverli. Le azioni Collega/Cambia/Scollega restano nello stesso flusso già provato; un documento collegato non è eliminabile. Gli allegati DS-002 restano una capability distinta e la loro presenza blocca l'eliminazione della riga padre. Nessuna equivalenza è stata inventata per gli allegati aziendali.

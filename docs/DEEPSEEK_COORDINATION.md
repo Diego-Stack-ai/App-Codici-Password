@@ -722,4 +722,13 @@ Realizzare nel laboratorio l'editor sicuro dei documenti del profilo, integrando
 
 Non riaprire A1-A3 o DS-002 salvo regressione dimostrata. Nessuna creazione Account in questa fetta.
 
-**Stato incarico: PRONTO** — approvazione A3 e avvio A4 Codex 2026-09-18 01:23 Europe/Rome; base locale `8b9b2ab3`.
+**Stato incarico: DA_VERIFICARE** — A4 completato localmente da Codex sulla base `8b9b2ab3`; commit di lavoro `c252d3ae`; rapporto in fondo al file. Nessun push tentato.
+
+## Rapporto Codex — A4 editor documenti
+
+- **Stato:** COMPLETATO — `DA_VERIFICARE`.
+- **Commit di lavoro:** `c252d3ae` (`feat(shell): add secure private document editor`).
+- **Censimento:** `users/{uid}.documenti[]` usa ID persistiti `document-<uuid>`; gli ID `document-legacy-*` sintetizzati dal modello sono instabili e restano in sola consultazione. Il writer cifra quattordici campi sensibili e lascia in chiaro tipo, nome, date e flag principale. Collegamenti Account ed `expiryReference` vivono nella riga; gli allegati DS-002 vivono nella sottocollezione `profileDocumentAttachments`. Il QR usa soltanto il documento fiscale per `cf`. Nel dominio aziendale non esiste `documenti[]`: esiste il distinto `allegati[]`, che A4 non converte né estende.
+- **Consegnato:** contratto/allowlist, preparazione cifrata, sorgente revocabile, vista e provider, servizio transazionale con revisione/impronta/ricevuta/retry, endpoint e Rules candidate di laboratorio. Create/update/delete preservano campi estranei, scadenze, collegamenti e allegati; delete è bloccata da Account, QR fiscale, allegati o stato ambiguo. L'editor è montato soltanto nella linguetta Documenti privata e riusa le azioni Account esistenti.
+- **Prove:** unitari core+editor/Rules **9/9**; Firestore Emulator **1/1**; `npm run test:vault-shell` **712/712**; `npm test` completo **exit 0**; scenario Chrome desktop e mobile **38/38** per profilo, viewport DevTools 1280×800 dpr 1 e 390×844 dpr 3, zero errori console. Lo scenario copre rendering, cifratura, create/update/delete, rilettura, doppia conferma, guardia Account, offline e identità legacy; le prove unitarie/emulatore coprono QR e allegati. Inventario rigenerato (**762 file**) e `git diff --check` pulito.
+- **Scostamenti e rischi:** Edge desktop è stato tentato e termina prima dell'endpoint DevTools con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`; mobile Edge non può quindi partire. Non è stata aggiunta una seconda superficie allegati: viene conservato il provider DS-002 già esistente. Il trasporto e le Rules produttivi, il dispositivo fisico, la migrazione degli ID legacy e il deploy restano gate aperti. Nessun file `Frontend/public/**`, Rule/Function produttiva, versione, `master`, dato reale o migrazione è stato modificato.
