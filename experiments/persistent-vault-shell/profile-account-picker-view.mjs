@@ -2,14 +2,14 @@ import {profileLinkAccount} from './profile-link-contract.mjs';
 
 // Standalone picker: selection does not write or create an Account. The caller
 // must use the guarded relationship source and transactional service to save.
-export async function mountProfileAccountPicker(root, context, {load, filterAccounts, onSelect, onCancel}) {
+export async function mountProfileAccountPicker(root, context, {load, filterAccounts, onSelect, onCancel, onCreate}) {
     const host = document.createElement('section'), search = document.createElement('input'), scope = document.createElement('select');
-    const list = document.createElement('div'), status = document.createElement('p'), more = document.createElement('button'), cancel = document.createElement('button');
+    const list = document.createElement('div'), status = document.createElement('p'), more = document.createElement('button'), create = document.createElement('button'), cancel = document.createElement('button');
     const controls = new AbortController(); let renderControls, rows = [], disposed = false, maximum = 50;
     host.dataset.profileAccountPicker = 'true'; search.type = 'search'; search.autocomplete = 'off'; search.maxLength = 1000;
     search.placeholder = 'Cerca Account o azienda'; search.setAttribute('aria-label', 'Cerca Account o azienda');
     scope.setAttribute('aria-label', 'Ambito degli Account'); status.setAttribute('role', 'status');
-    more.type = cancel.type = 'button'; more.textContent = 'Mostra altri'; cancel.textContent = 'Annulla'; more.hidden = true;
+    more.type = create.type = cancel.type = 'button'; more.textContent = 'Mostra altri'; create.textContent = 'Crea un nuovo Account'; cancel.textContent = 'Annulla'; more.hidden = true;
     const check = () => {if (disposed || context.signal.aborted) throw Error('VIEW_DISPOSED'); context.assertUnlocked();};
     const clear = () => {renderControls?.abort(); for (const node of list.querySelectorAll('button')) node.textContent = ''; list.replaceChildren();};
     const dispose = () => {
@@ -34,7 +34,7 @@ export async function mountProfileAccountPicker(root, context, {load, filterAcco
     };
     context.signal.addEventListener('abort', dispose, {once: true});
     try {
-        check(); status.textContent = 'Caricamento Account…'; host.append(search, scope, status, list, more, cancel); root.append(host);
+        check(); status.textContent = 'Caricamento Account…'; host.append(search, scope, status, list, more, create, cancel); root.append(host);
         cancel.addEventListener('click', () => {dispose(); onCancel();}, {signal: controls.signal});
         const loaded = await load(); check();
         if (!Array.isArray(loaded) || loaded.length > 10000) throw Error('PROFILE_PICKER_INVALID');
@@ -55,6 +55,8 @@ export async function mountProfileAccountPicker(root, context, {load, filterAcco
         scope.value = 'all';
         for (const [node, event] of [[search, 'input'], [scope, 'change']]) node.addEventListener(event, () => {try {maximum = 50; render();} catch {dispose();}}, {signal: controls.signal});
         more.addEventListener('click', () => {try {maximum += 50; render();} catch {dispose();}}, {signal: controls.signal});
+        create.hidden = typeof onCreate !== 'function';
+        create.addEventListener('click', () => {try {check(); const choices = [...companies].map(([companyId, companyName]) => ({companyId, companyName})); dispose(); onCreate(choices);} catch {dispose();}}, {signal: controls.signal});
         render();
     } catch (error) {dispose(); throw error;}
     return dispose;

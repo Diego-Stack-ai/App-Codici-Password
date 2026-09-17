@@ -2,6 +2,7 @@ import {createProfileLinkEditorSource} from './profile-link-editor-source.mjs';
 import {validateProfileLinkRequest} from './profile-link-contract.mjs';
 import {createQrSelectionSaveController} from './qr-selection-save-controller.mjs';
 import {mountProfileAccountPicker} from './profile-account-picker-view.mjs';
+import {mountProfileAccountCreate} from './profile-account-create-view.mjs';
 
 export async function mountProfileLinkEditor(root, context, options) {
     if (!['change', 'unlink'].includes(options.mode) || typeof options.submit !== 'function' ||
@@ -26,7 +27,7 @@ export async function mountProfileLinkEditor(root, context, options) {
         if (disposed || context.signal.aborted || options.getUser()?.uid !== uid) throw Error('VIEW_DISPOSED');
         context.assertUnlocked();
     };
-    const report = () => {try {check(); status.textContent = 'Collegamento non disponibile o dati cambiati. Riapri il profilo.';} catch {dispose();}};
+    const report = error => {try {check(); status.textContent = `Collegamento non disponibile (${error?.message || 'dati cambiati'}). Riapri il profilo.`;} catch {dispose();}};
     const act = async operation => {
         try {check(); const result = await operation(); check(); if (result?.status === 'saved') {dispose(); await options.onSaved();}}
         catch {report();}
@@ -42,7 +43,13 @@ export async function mountProfileLinkEditor(root, context, options) {
                     const unchanged = JSON.stringify(selected) === JSON.stringify(model.account);
                     save.disabled = unchanged || !model.canSave; status.textContent = unchanged ? 'Questo Account è già collegato al dato.' : '';
                 } catch {dispose();}
-            }, onCancel: () => {dispose(); options.onCancel();}});
+            }, onCreate: typeof options.submitCreate === 'function' ? companies => {
+                try {
+                    check(); pickerCleanup?.(); pickerHost.replaceChildren();
+                    void (options.mountCreate || mountProfileAccountCreate)(pickerHost, context, {...options, companies,
+                        onSaved: options.onSaved, onCancel: () => { void openPicker().catch(report); }}).then(cleanup => { pickerCleanup = cleanup; }).catch(report);
+                } catch { dispose(); }
+            } : undefined, onCancel: () => {dispose(); options.onCancel();}});
         if (disposed || context.signal.aborted) mounted?.(); else pickerCleanup = mounted;
     };
     context.signal.addEventListener('abort', dispose, {once: true});

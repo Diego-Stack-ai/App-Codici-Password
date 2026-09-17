@@ -152,6 +152,7 @@ const mountProfile = context => {
         mountLinkEditor: (root, {signal, source: origin, mode, onSaved, onCancel}) => {
             const scoped = {...context, signal}, getUser = () => auth.currentUser;
             return mountProfileLinkEditor(root, scoped, {source: origin, models, mode, getUser, onSaved, onCancel,
+                isEncryptedValue: cryptoApi.isEncryptedValue,
                 readProfile: ({uid, confirmed}) => source ? source.read(uid, confirmed) : (confirmed ? getUserProfileConfirmed(uid) : getUserProfile(uid)),
                 readAccounts: createProfileAccountPickerReader({context: scoped, getUser, isEncryptedValue: cryptoApi.isEncryptedValue,
                     repository: {listPrivateAccounts, listPrivateAccountsConfirmed, listCompanies, listCompaniesConfirmed, listCompanyAccounts, listCompanyAccountsConfirmed}}),
@@ -162,6 +163,10 @@ const mountProfile = context => {
                     if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
                     scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
                     return (await httpsCallable(functions, 'applyProfileLinkMutation')(request)).data;
+                }, submitCreate: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, 'applyProfileAccountCreate')(request)).data;
                 }});
         },
         mountAnagraphicEditor: (root, {signal, onSaved, onCancel}) => {

@@ -94,6 +94,14 @@ test('picker paginates locally without excluding later matches', async () => {
     const search = root.querySelectorAll('input')[0]; search.value = '74'; search.dispatchEvent(new Event('input'));
     assert.equal(buttons(root).length, 1); cleanup();
 });
+test('picker exposes new Account creation with canonical company choices', async () => {
+    const f = fixture(), root = new Node('root'); let choices;
+    await mountProfileAccountPicker(root, f.context, {load: f.read, filterAccounts: filterProfileAccounts,
+        onSelect() {}, onCancel() {}, onCreate: value => { choices = value; }});
+    const create = root.querySelectorAll('button').find(node => node.textContent === 'Crea un nuovo Account');
+    assert.equal(create.hidden, false); create.dispatchEvent(new Event('click'));
+    assert.deepEqual(choices, [{companyId: 'firm', companyName: 'Società'}]); assert.equal(root.children.length, 0);
+});
 test('late picker load after cancel/abort never renders or replaces the next view', async () => {
     for (const abort of [true, false]) {
         const f = fixture(), root = new Node('root'); let release;

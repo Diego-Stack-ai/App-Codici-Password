@@ -688,3 +688,7 @@ Su master 1.2.126 riprodotta la Home generica visibile prima del redirect anonim
 # Incremento A4 — editor documenti candidato (18/09/2026)
 
 Nel laboratorio della shell persistente è disponibile l'editor transazionale dei documenti privati. Identità legacy, collegamenti Account, selezione del codice fiscale nel QR e allegati immagine sono trattati in fail-closed; campi estranei, scadenze e riferimenti restano invariati. Lo schema aziendale è stato censito separatamente e non contiene una collezione equivalente. Rules ed endpoint restano candidati di laboratorio, senza deploy. Dettagli in `A4_CENSIMENTO_DOCUMENTI.md`.
+
+### Incremento A5 — crea e collega Account candidato (18/09/2026)
+
+Il selettore Account del laboratorio offre ora la creazione personale o aziendale dalle sole origini persistite già ammesse. Il servizio genera l'ID e commette atomicamente Account minimo, riferimento sull'origine, backlink e ricevuta idempotente. Il trasferimento della password legacy è esplicito: conserva il ciphertext quando non scelto e lo elimina dall'origine soltanto nella transazione riuscita. Unitari **8/8**, picker/link **22/22**, emulatore **2/2**, shell preesistente **712/712**. Il primo scenario Chrome aggiornato si è fermato al picker (`TIMEOUT_ACCOUNT_CREATE`): A5 resta candidato da verificare nel browser, senza deploy o modifiche produttive.

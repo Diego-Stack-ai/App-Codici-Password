@@ -30,6 +30,15 @@ async function checkProfileLink(mode, id, target) {
         assert(byId('content').querySelectorAll('[data-profile-link-action="unlink"]').length === originalCount - 1, 'LINK_OTHER_CONTACTS_PRESERVED');
         action('change').click();
         await wait(() => document.querySelector('[data-profile-account-picker] input'), 'LINK_PICKER');
+        button('Crea un nuovo Account').click();
+        await wait(() => document.querySelector('[data-profile-account-create]'), 'ACCOUNT_CREATE');
+        const createHost = document.querySelector('[data-profile-account-create]'), fields = createHost.querySelectorAll('input');
+        fields[0].value = `Creato da ${id}`; fields[1].value = `${id}@example.invalid`;
+        button('Crea e collega').click();
+        await wait(() => action('unlink'), 'ACCOUNT_CREATED_' + id);
+        action('unlink').click(); await wait(() => button('Conferma scollegamento'), 'ACCOUNT_CREATED_UNLINK_' + id);
+        button('Conferma scollegamento').click(); await wait(() => action('change'), 'ACCOUNT_CREATED_DETACHED_' + id);
+        action('change').click(); await wait(() => document.querySelector('[data-profile-account-picker] input'), 'LINK_PICKER_REOPEN');
         const search = document.querySelector('[data-profile-account-picker] input');
         search.value = target; search.dispatchEvent(new Event('input'));
         await wait(() => [...document.querySelectorAll('[data-profile-account-picker] button')].some(node => node.textContent.startsWith(target + ' — ')), 'LINK_TARGET');
@@ -350,7 +359,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation', 'applyProfileContactsMutation', 'applyCompanyContactsMutation', 'applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation', 'applyProfileAccountCreate', 'applyProfileContactsMutation', 'applyCompanyContactsMutation', 'applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }

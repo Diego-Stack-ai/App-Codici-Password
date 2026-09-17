@@ -9,6 +9,7 @@ import {withQrSelectionCandidateRules} from './qr-selection-candidate-rules.mjs'
 import {withProfileLinkCandidateRules} from './profile-link-candidate-rules.mjs';
 import {readProfileLinkContact} from './profile-link-plan.mjs';
 import {createProfileLinkHandler} from './profile-link-handler.mjs';
+import {createProfileAccountCreateHandler} from './profile-account-create-handler.mjs';
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
 assert.equal(process.env.GCLOUD_PROJECT, 'demo-vault-shell');
@@ -73,4 +74,24 @@ test('profile links and inverse references commit atomically in the demo emulato
     await db.doc(company).update({telefonoAzienda: 'enc:CHANGED'});
     await assert.rejects(run(stale, trusted), /LINK_CONFLICT/);
     assert.equal((await db.doc(`mutationResults/${uid}/operations/profile-link-legacy-change`).get()).exists, false);
+});
+
+test('Account creation, source link, backlink and explicit legacy transfer commit together', async t => {
+    const originalRules = await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8');
+    const env = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085,
+        rules: withProfileLinkCandidateRules(withQrSelectionCandidateRules(originalRules))}});
+    const app = initializeApp({projectId: 'demo-vault-shell'}, 'profile-account-create-test'), db = getFirestore(app);
+    t.after(async () => {await db.terminate(); await deleteApp(app); await env.cleanup();});
+    const uid = 'create-owner', root = `users/${uid}`, source = {domain: 'private', type: 'email', id: 'email'};
+    await db.doc(root).set({ownerId: uid, contactEmails: [{id: 'email', address: 'enc:mail', password: 'enc:legacy'}]});
+    const profile = (await db.doc(root).get()).data(), current = readProfileLinkContact(profile, source, models);
+    const request = {source, scope: {domain: 'private'}, name: 'ZW5jcnlwdGVkLW5hbWUtZml4dHVyZS0wMDA=', username: '', password: '',
+        transferLegacyPassword: false, expectedLegacyPassword: '', expectedFingerprint: hash(current.fingerprintInput), expectedRevision: 0,
+        operationId: 'create-private', expectedOwnerUid: uid};
+    const run = createProfileAccountCreateHandler({db, models, hash, timestamp: () => FieldValue.serverTimestamp(), deleteField: () => FieldValue.delete()});
+    const result = await run(request, {auth: {uid}, app: {appId: 'synthetic'}}), saved = (await db.doc(root).get()).data();
+    const accountPath = `${root}/accounts/${result.account.id}`;
+    assert.equal(saved.contactEmails[0].linkedAccountId, result.account.id); assert.equal(saved.contactEmails[0].password, 'enc:legacy');
+    assert.equal((await db.doc(accountPath).get()).data().linkedProfileFields[0].id, 'email');
+    await run(request, {auth: {uid}, app: {appId: 'synthetic'}}); assert.equal((await db.doc(accountPath).get()).data()._profileLinkRevision, 1);
 });

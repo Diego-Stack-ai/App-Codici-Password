@@ -1,0 +1,11 @@
+# A5 — Creazione Account dal collegamento
+
+Il candidato estende il selettore Account già montato senza sostituire il percorso per Account esistenti. Le sole origini ammesse sono quelle con identità canonica persistita: email, telefono, documento e utenza privata (con indirizzo padre), più gli slot aziendali già accettati dal contratto dei collegamenti. Righe legacy, alias, extra aziendali e schemi non censiti restano consultabili senza azione di creazione.
+
+L'utente sceglie esplicitamente Personale o una delle aziende proprietarie lette dal selettore. Il servizio genera un ID deterministico dal proprietario e dall'operationId, verifica nuovamente origine, revisione, impronta e azienda, quindi crea il record Account minimo canonico insieme al riferimento sull'origine, al backlink e alla ricevuta. Tutte le letture precedono le scritture nella stessa transazione Admin. Retry identico restituisce la ricevuta; payload diverso, concorrenza o azienda non valida non scrivono nulla.
+
+Il nome e lo username sono cifrati dalla capacità della vista. La password legacy non viene letta in chiaro: il ciphertext già protetto può essere trasferito solo con scelta esplicita e uguaglianza verificata sul record autorevole. La stessa transazione lo scrive nell'Account e lo elimina dall'origine; se il controllo fallisce, il campo resta nell'origine e nessun Account viene creato. Se il trasferimento non è scelto, la password legacy resta intatta.
+
+La UI aggiunge “Crea un nuovo Account” al picker ricercabile e conserva ricerca, selezione personale/azienda e Collega/Cambia/Scollega. Il form mostra origine e ambito, consente di modificare nome e username, offre il trasferimento soltanto quando il campo legacy esiste, ed è revocato con la vista. Offline il sorgente rifiuta la preparazione.
+
+Il confine resta di laboratorio: endpoint loopback `applyProfileAccountCreate`, Rules candidate preesistenti che vietano al client di creare backlink protetti, nessuna Function o Rule produttiva. Restano aperti trasporto/App Check produttivi, migrazione delle identità legacy, dispositivo fisico e verifica browser A5 completa (il primo tentativo Chrome ha raggiunto il picker ma non ha montato il form entro il timeout, da diagnosticare).

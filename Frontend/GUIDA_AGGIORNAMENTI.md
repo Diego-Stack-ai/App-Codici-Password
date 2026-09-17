@@ -1012,3 +1012,7 @@ Produzione resta 1.2.128, master `4efda528`, PDF aziendale pubblicato tramite PR
 # Candidata A4 documenti profilo — 18/09/2026
 
 Il laboratorio integra aggiunta, modifica ed eliminazione controllata dei documenti privati nella linguetta Documenti, accanto ai collegamenti Account e agli allegati candidati. Le scritture richiedono rete e rilettura confermata; le righe legacy restano consultabili. Nessuna modifica è stata applicata alla UI pubblica o ai servizi produttivi.
+
+# Candidata A5 crea Account dal collegamento — 18/09/2026
+
+Nel solo laboratorio, il selettore dei collegamenti espone “Crea un nuovo Account” con ambito personale/azienda, nome e username modificabili. La creazione e il collegamento sono una singola operazione idempotente; non possono lasciare Account senza origine o backlink parziali. Una password legacy resta intatta salvo consenso esplicito al trasferimento cifrato. La UI pubblica, le Rules e le Functions produttive non sono state modificate. La prova browser A5 resta da chiudere dopo un timeout di montaggio del form osservato nel primo scenario Chrome.

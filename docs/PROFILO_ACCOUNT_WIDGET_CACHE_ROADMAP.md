@@ -719,3 +719,7 @@ Corretto il flusso della 1.2.119: il form generava bankId localmente, ma consent
 # Integrazione A4 documenti e Account — 18/09/2026
 
 L'editor candidato dei documenti riusa le origini `documenti` del servizio collegamenti Account e conserva i backlink senza riscriverli. Le azioni Collega/Cambia/Scollega restano nello stesso flusso già provato; un documento collegato non è eliminabile. Gli allegati DS-002 restano una capability distinta e la loro presenza blocca l'eliminazione della riga padre. Nessuna equivalenza è stata inventata per gli allegati aziendali.
+
+## A5 — creazione Account dal collegamento (18/09/2026)
+
+Il picker esistente mantiene ricerca, scelta di Account esistenti e Cambia/Scollega, aggiungendo un form di creazione personale o per una delle aziende proprietarie. Email, telefono, documento e utenza privata, oltre agli slot aziendali canonici, sono le sole origini ammesse. ID Account generato nel servizio, revisione, impronta e ricevuta rendono retry e concorrenza fail-closed; origine e backlink sono aggiornati nella stessa transazione. Nome e username sono cifrati localmente. La password legacy si trasferisce solo su consenso esplicito, senza plaintext sul filo, e viene rimossa dall'origine soltanto insieme alla creazione riuscita. Dettagli e limiti in `experiments/persistent-vault-shell/docs/A5_CREAZIONE_ACCOUNT_DAL_COLLEGAMENTO.md`.

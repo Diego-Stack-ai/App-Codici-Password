@@ -31,7 +31,7 @@
     "test:offline": "node scripts/audit-offline-shell.mjs && node --test tests/offline-profile-readiness.test.mjs tests/offline-account-widgets.test.mjs",
     "test:security": "node scripts/audit-security-flows.mjs && node --test tests/input-autofill.test.mjs tests/private-bootstrap-offline.test.mjs tests/private-auth-gate.test.mjs",
     "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs tests/vault-logout.test.mjs tests/vault-session-races.test.mjs && npm run test:vault-shell",
-    "test:profile-utilities-editor": "node --test experiments/persistent-vault-shell/private-utilities-editor.test.mjs",
+    "test:profile-utilities-editor": "node --test experiments/persistent-vault-shell/private-utilities-editor.test.mjs experiments/persistent-vault-shell/profile-account-create.test.mjs",
     "test:profile-documents-editor": "node --test experiments/persistent-vault-shell/private-documents.test.mjs experiments/persistent-vault-shell/private-documents-editor.test.mjs",
     "test:account-note-emulators": "node scripts/run-vault-session-emulators.mjs --account-note",
     "test:profile-link-emulators": "node scripts/run-vault-session-emulators.mjs --profile-link",
