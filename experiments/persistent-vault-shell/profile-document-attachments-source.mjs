@@ -1,4 +1,4 @@
-import {DOCUMENT_IMAGE_MAX_PER_DOCUMENT, documentAttachmentObject}
+import {DOCUMENT_IMAGE_MAX_PER_DOCUMENT, documentAttachmentMetadata}
     from './profile-document-attachments-contract.mjs';
 
 // Revocable gallery source for the images of one private digital document
@@ -33,13 +33,19 @@ export function createProfileDocumentAttachmentsSource({context, getUser, reader
         if (disposed || context.signal.aborted || !uid || getUser()?.uid !== uid) {dispose(); fail('VIEW_DISPOSED');}
         context.assertUnlocked();
     };
+    // The record is validated with the canonical contract before it is used: the
+    // identity of the attachment is derived from the path, never read from a field
+    // the contract does not allow, and a malformed record is refused here. The raw
+    // value is kept for the planner, which re-validates it as a record.
     const record = async attachmentId => {
         check();
         if (!documentId) fail('DOCUMENT_NOT_LOADED');
-        const current = await repository.read(uid, attachmentId);
+        const value = await repository.read(uid, attachmentId);
         check();
-        if (!documentAttachmentObject(current) || current.documentId !== documentId) fail('ATTACHMENT_MISSING');
-        return current;
+        let metadata;
+        try {metadata = documentAttachmentMetadata(value, {uid});} catch {return fail('ATTACHMENT_INVALID');}
+        if (metadata.documentId !== documentId) fail('ATTACHMENT_MISSING');
+        return {value, metadata};
     };
     return Object.freeze({
         dispose,
@@ -98,19 +104,19 @@ export function createProfileDocumentAttachmentsSource({context, getUser, reader
         // one exists, so the view never shows a revoked URL, and the plaintext buffer
         // that carried it is cleared by `revoke()`.
         async open(attachmentId) {
-            const current = await record(attachmentId);
-            if (current.status !== 'ready') fail('ATTACHMENT_NOT_READY');
+            const {metadata} = await record(attachmentId);
+            if (metadata.status !== 'ready') fail('ATTACHMENT_NOT_READY');
             if (!isOnline()) fail('OFFLINE_NOT_ALLOWED');
             check();
-            const payload = await repository.download(uid, {storagePath: current.storagePath});
+            const payload = await repository.download(uid, {storagePath: metadata.storagePath});
             check();
-            const plaintext = await capability.openImage({payload, envelope: current.envelope,
-                documentId: current.documentId, attachmentId: current.attachmentId});
+            const plaintext = await capability.openImage({payload, envelope: metadata.envelope,
+                documentId: metadata.documentId, attachmentId: metadata.attachmentId});
             check();
-            const url = objectUrl.create(plaintext, current.mimeType);
+            const url = objectUrl.create(plaintext, metadata.mimeType);
             revoke();
-            preview = {attachmentId: current.attachmentId, url, plaintext};
-            return Object.freeze({attachmentId: current.attachmentId, url, mimeType: current.mimeType});
+            preview = {attachmentId: metadata.attachmentId, url, plaintext};
+            return Object.freeze({attachmentId: metadata.attachmentId, url, mimeType: metadata.mimeType});
         },
         close() {
             if (disposed) return false;
@@ -121,8 +127,8 @@ export function createProfileDocumentAttachmentsSource({context, getUser, reader
         async remove(attachmentId) {
             check();
             if (!isOnline()) fail('OFFLINE_NOT_ALLOWED');
-            const current = await record(attachmentId);
-            const plan = await planner.remove({context, getUser, documentId: current.documentId, attachment: current,
+            const {value} = await record(attachmentId);
+            const plan = await planner.remove({context, getUser, documentId: value.documentId, attachment: value,
                 operationId: createOperationId()});
             if (plan?.status === 'refused') return Object.freeze({status: 'refused', code: plan.code});
             const outcome = await service.remove({command: plan.command, digest: plan.digest}, trusted);

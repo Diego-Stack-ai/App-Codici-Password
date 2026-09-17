@@ -2,7 +2,7 @@ import {PROFILE_SECTIONS} from './profile-section-reader.mjs';
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 
 // Optional editors are supplied by bootstrap; there is no fallback writer.
-export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountContactsEditor, mountLinkEditor, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
+export async function mountProfileShell(root, context, {readSection, readOverview, mountWidgets, mountDigitalCard, mountCompanySummary, mountAnagraphicEditor, mountContactsEditor, mountLinkEditor, mountDocumentAttachments, linkedAccounts, onOpenAccount, profileTitle = 'Profilo utente'}) {
     if (!context.unlocked || context.signal.aborted) return () => {};
     let disposed = false, revision = 0, sectionControls, widgetCleanup;
     const host = document.createElement('div'); host.dataset.profileShell = 'true';
@@ -141,6 +141,16 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
             if (mountWidgets && Object.hasOwn(PROFILE_SECTIONS, section)) {
                 const mounted = await mountWidgets(panel, {section, signal: sectionControls.signal});
                 if (!current(ticket)) mounted?.(); else widgetCleanup = mounted;
+            }
+            // DS-002C: the Allegato surface lives inside the documents section, next
+            // to the rows it belongs to, and is disposed with everything else.
+            if (section === 'documents' && mountDocumentAttachments) {
+                const mounted = await mountDocumentAttachments(panel, {signal: sectionControls.signal});
+                if (!current(ticket)) mounted?.();
+                else {
+                    const widgets = widgetCleanup;
+                    widgetCleanup = widgets ? () => {try {mounted?.();} finally {widgets();}} : mounted;
+                }
             }
         } catch (error) {
             if (current(ticket)) {

@@ -21,8 +21,10 @@ function sourceFixture({online = true, locked = false, attachmentStatus = 'ready
             attachments: [{attachmentId, mimeType: 'image/jpeg', size: 4, digest: 'a'.repeat(64), status: attachmentStatus,
                 schemaVersion: 1, available}], invalid: []};}},
         repository: {
+            // The record keeps only the contract allowlist: the identity of the
+            // attachment is derived from the path by the canonical validator.
             async read(owner, id) {assert.equal(owner, uid); assert.equal(id, attachmentId);
-                return {ownerId: uid, documentId, attachmentId: id, storagePath: `users/${uid}/profile-documents/${documentId}/attachments/${id}`,
+                return {ownerId: uid, documentId, storagePath: `users/${uid}/profile-documents/${documentId}/attachments/${id}`,
                     mimeType: 'image/jpeg', size: 4, digest: 'a'.repeat(64), envelope, status: attachmentStatus,
                     schemaVersion: 1};},
             async download() {state.downloads++; return Uint8Array.from([9, 9, 9]);}},
