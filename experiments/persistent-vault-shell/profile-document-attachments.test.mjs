@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {DOCUMENT_IMAGE_MAX_BYTES, DOCUMENT_IMAGE_MAX_PER_DOCUMENT, DOCUMENT_ATTACHMENT_REFUSALS, DOCUMENT_ATTACHMENT_STORAGE_METADATA,
-    documentAttachmentAad, documentAttachmentEnvelope, documentAttachmentIdFromPath, documentAttachmentIdentity,
-    documentAttachmentMetadata, documentAttachmentSize, documentImageStoragePath}
+import {DOCUMENT_IMAGE_MAX_BYTES, DOCUMENT_IMAGE_MAX_PER_DOCUMENT, DOCUMENT_IMAGE_MAX_STORED_BYTES, DOCUMENT_ATTACHMENT_REFUSALS,
+    DOCUMENT_ATTACHMENT_STORAGE_METADATA, documentAttachmentAad, documentAttachmentDeleteReceipt,
+    documentAttachmentEnvelope, documentAttachmentEnvelopeEquals, documentAttachmentIdFromPath, documentAttachmentIdentity,
+    documentAttachmentMetadata, documentAttachmentObjectSize, documentAttachmentReceiptName, documentAttachmentSize,
+    documentAttachmentUploadReceipt, documentImageStoragePath}
     from './profile-document-attachments-contract.mjs';
 import {createProfileDocumentAttachmentCapability} from './profile-document-attachment-capability.mjs';
 import {createDocumentAttachmentId, documentAttachmentCommandDigestInput, planProfileDocumentAttachmentDelete,
@@ -230,4 +232,67 @@ test('commands are re-validated where they are consumed', async () => {
     }
     f.capability.dispose();
     assert.equal(documentAttachmentEnvelope(envelope()).version, 1);
+});
+test('the receipt validators accept only the canonical upload and delete receipts', () => {
+    const operationId = 'operation-1';
+    const upload = overrides => ({kind: 'profile-document-attachment', ownerId: uid, operationId, documentId, attachmentId,
+        storagePath, digest: hash('command'), objectDigest: hash('payload'), objectSize: 2048, status: 'reserved',
+        createdAt: 1, ...overrides});
+    const remove = overrides => ({kind: 'profile-document-attachment-delete', ownerId: uid, operationId, documentId, attachmentId,
+        storagePath, digest: hash('delete-command'), expectedDigest: hash('payload'), objectSize: 2048, status: 'deleting',
+        createdAt: 1, ...overrides});
+    const canonical = documentAttachmentUploadReceipt(upload(), {uid});
+    assert.equal(canonical.attachmentId, attachmentId);
+    assert.equal(canonical.objectDigest, hash('payload'));
+    assert.equal(canonical.objectSize, 2048);
+    assert.equal(canonical.readyAt, undefined);
+    // The state timestamp exists exactly in the state that owns it.
+    assert.equal(documentAttachmentUploadReceipt(upload({status: 'ready', readyAt: 2}), {uid}).readyAt, 2);
+    assert.throws(() => documentAttachmentUploadReceipt(upload({status: 'ready'}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.throws(() => documentAttachmentUploadReceipt(upload({readyAt: 2}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    // `objectSize` is null only when the transport cannot report it.
+    assert.equal(documentAttachmentUploadReceipt(upload({objectSize: null}), {uid}).objectSize, null);
+    // The transport id is tolerated, but only when it is the derived document name.
+    assert.equal(documentAttachmentUploadReceipt(upload({id: documentAttachmentReceiptName(operationId)}), {uid}).operationId, operationId);
+    assert.throws(() => documentAttachmentUploadReceipt(upload({id: 'other'}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    for (const bad of [{kind: 'profile-document-attachment-delete'}, {extra: 1}, {expectedDigest: hash('payload')},
+        {removedAt: 3}, {digest: 'not-a-digest'}, {objectDigest: 'not-a-digest'}, {objectSize: 0}, {objectSize: 1.5},
+        {status: 'removed'}, {status: 'deleting'}, {storagePath: 'users/owner/elsewhere'}, {ownerId: 'other'},
+        {attachmentId: '../escape'}, {documentId: ''}, {operationId: '../escape'}, {createdAt: null}]) {
+        assert.throws(() => documentAttachmentUploadReceipt(upload(bad), {uid}), /DOCUMENT_ATTACHMENT_INVALID/, JSON.stringify(bad));
+    }
+    // Expectations are checked, not assumed.
+    for (const wrong of [{operationId: 'other'}, {documentId: 'document-2'}, {attachmentId: 'attachment-2'},
+        {storagePath: 'users/owner/elsewhere'}, {digest: hash('other')}, {objectDigest: hash('other')},
+        {objectSize: 4}, {statuses: ['ready']}]) {
+        assert.throws(() => documentAttachmentUploadReceipt(upload(), {uid, ...wrong}), /DOCUMENT_ATTACHMENT_INVALID/);
+    }
+    // The two kinds never accept each other's receipts.
+    assert.throws(() => documentAttachmentUploadReceipt(remove(), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.throws(() => documentAttachmentDeleteReceipt(upload(), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.equal(documentAttachmentDeleteReceipt(remove(), {uid}).status, 'deleting');
+    assert.equal(documentAttachmentDeleteReceipt(remove({status: 'removed', removedAt: 2}), {uid}).removedAt, 2);
+    assert.throws(() => documentAttachmentDeleteReceipt(remove({status: 'removed'}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.throws(() => documentAttachmentDeleteReceipt(remove({objectDigest: hash('payload')}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.throws(() => documentAttachmentDeleteReceipt(remove({readyAt: 2}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.throws(() => documentAttachmentDeleteReceipt(remove({status: 'ready'}), {uid}), /DOCUMENT_ATTACHMENT_INVALID/);
+    assert.throws(() => documentAttachmentDeleteReceipt(remove({objectSize: 4}), {uid, objectSize: 2048}),
+        /DOCUMENT_ATTACHMENT_INVALID/);
+});
+test('the stored size, the envelope equality and the receipt name are canonical', () => {
+    assert.equal(documentAttachmentObjectSize(1), true);
+    assert.equal(documentAttachmentObjectSize(DOCUMENT_IMAGE_MAX_STORED_BYTES), true);
+    assert.equal(documentAttachmentObjectSize(DOCUMENT_IMAGE_MAX_STORED_BYTES + 1), false);
+    assert.equal(documentAttachmentObjectSize(DOCUMENT_IMAGE_MAX_BYTES), true);
+    for (const bad of [0, -1, 1.5, null, undefined, '2048', Number.MAX_SAFE_INTEGER + 1]) {
+        assert.equal(documentAttachmentObjectSize(bad), false, String(bad));
+    }
+    assert.equal(documentAttachmentReceiptName('operation-1'), 'profile-document-attachment-operation-1');
+    assert.throws(() => documentAttachmentReceiptName('../escape'), /DOCUMENT_ATTACHMENT_INVALID/);
+    const left = documentAttachmentEnvelope(envelope());
+    assert.equal(documentAttachmentEnvelopeEquals(left, documentAttachmentEnvelope(envelope())), true);
+    assert.equal(documentAttachmentEnvelopeEquals(left, documentAttachmentEnvelope(envelope({wrapIv: b64(12, 12)}))), false);
+    assert.equal(documentAttachmentEnvelopeEquals(left, documentAttachmentEnvelope(envelope({wrappedFileKey: b64(44, 13)}))), false);
+    assert.equal(documentAttachmentEnvelopeEquals(left, null), false);
+    assert.equal(documentAttachmentEnvelopeEquals(null, left), false);
 });

@@ -152,10 +152,10 @@ test('document attachments: real transactions, atomic limit and coordinated dele
         const bytes = Uint8Array.from([1, 2, 3]), digest = hash(Buffer.from(bytes));
         const attachment = 'pending-1', storagePath = documentImageStoragePath({uid, documentId, attachmentId: attachment});
         await db.doc(documentAttachmentRecordPath({uid, attachmentId: attachment})).set({...boundRecord(attachment),
-            status: 'reserved', digest});
+            status: 'reserved', digest, size: bytes.byteLength});
         await db.doc(documentAttachmentReceiptPath({uid, operationId: 'pending-1'})).set({kind: 'profile-document-attachment',
             ownerId: uid, operationId: 'pending-1', documentId, attachmentId: attachment, storagePath,
-            digest: hash('operation-pending-1'), objectDigest: digest, status: 'reserved', createdAt: 1});
+            digest: hash('operation-pending-1'), objectDigest: digest, objectSize: bytes.byteLength, status: 'reserved', createdAt: 1});
         objects.set(storagePath, {bytes, digest});
         const promoted = await handler.recover(trusted);
         assert.ok(promoted.confirmed >= 1);
@@ -163,14 +163,56 @@ test('document attachments: real transactions, atomic limit and coordinated dele
 
         const foreign = 'pending-2', foreignPath = documentImageStoragePath({uid, documentId, attachmentId: foreign});
         const expected = hash('payload-other');
-        await db.doc(documentAttachmentRecordPath({uid, attachmentId: foreign})).set({...boundRecord(foreign), status: 'reserved', digest: expected});
+        await db.doc(documentAttachmentRecordPath({uid, attachmentId: foreign})).set({...boundRecord(foreign), size: 1,
+            status: 'reserved', digest: expected});
         await db.doc(documentAttachmentReceiptPath({uid, operationId: 'pending-2'})).set({kind: 'profile-document-attachment',
             ownerId: uid, operationId: 'pending-2', documentId, attachmentId: foreign, storagePath: foreignPath,
-            digest: hash('operation-pending-2'), objectDigest: expected, status: 'reserved', createdAt: 1});
+            digest: hash('operation-pending-2'), objectDigest: expected, objectSize: 1, status: 'reserved', createdAt: 1});
         objects.set(foreignPath, {bytes: Uint8Array.from([9]), digest: hash('payload-different')});
         const blocked = await handler.recover(trusted);
         assert.ok(blocked.incomplete >= 1);
         assert.equal((await db.doc(documentAttachmentRecordPath({uid, attachmentId: foreign})).get()).data().status, 'reserved');
         assert.equal(objects.has(foreignPath), true, 'an unproven object is never deleted or promoted');
+    });
+    await t.test('a stored size that is not the recorded one blocks promotion without touching the object', async () => {
+        const bytes = Uint8Array.from([1, 2, 3]), digest = hash(Buffer.from(bytes));
+        const attachment = 'size-mismatch', storagePath = documentImageStoragePath({uid, documentId, attachmentId: attachment});
+        await db.doc(documentAttachmentRecordPath({uid, attachmentId: attachment})).set({...boundRecord(attachment),
+            status: 'reserved', digest, size: bytes.byteLength});
+        await db.doc(documentAttachmentReceiptPath({uid, operationId: 'size-mismatch'})).set({kind: 'profile-document-attachment',
+            ownerId: uid, operationId: 'size-mismatch', documentId, attachmentId: attachment, storagePath,
+            digest: hash('operation-size-mismatch'), objectDigest: digest, objectSize: bytes.byteLength, status: 'reserved', createdAt: 1});
+        // Same digest, one byte more: the object is not the one the receipt recorded.
+        objects.set(storagePath, {bytes: Uint8Array.from([1, 2, 3, 4]), digest});
+        const recovered = await handler.recover(trusted);
+        assert.ok(recovered.incomplete >= 1);
+        assert.equal((await db.doc(documentAttachmentRecordPath({uid, attachmentId: attachment})).get()).data().status, 'reserved',
+            'a resized object is never promoted');
+        assert.equal(objects.has(storagePath), true, 'a resized object is never deleted');
+    });
+    await t.test('a receipt that is not canonical blocks the operation on real transactions', async () => {
+        const bytes = Uint8Array.from([7, 7, 7]), digest = hash(Buffer.from(bytes));
+        const foreignField = 'receipt-foreign-field', foreignPath = documentImageStoragePath({uid, documentId, attachmentId: foreignField});
+        await db.doc(documentAttachmentRecordPath({uid, attachmentId: foreignField})).set({...boundRecord(foreignField),
+            status: 'reserved', digest, size: bytes.byteLength});
+        await db.doc(documentAttachmentReceiptPath({uid, operationId: foreignField})).set({kind: 'profile-document-attachment',
+            ownerId: uid, operationId: foreignField, documentId, attachmentId: foreignField, storagePath: foreignPath,
+            digest: hash('operation-foreign-field'), objectDigest: digest, objectSize: bytes.byteLength, status: 'reserved',
+            createdAt: 1, note: 'campo estraneo'});
+        objects.set(foreignPath, {bytes, digest});
+        const invalidDigest = 'receipt-invalid-digest', invalidPath = documentImageStoragePath({uid, documentId, attachmentId: invalidDigest});
+        await db.doc(documentAttachmentRecordPath({uid, attachmentId: invalidDigest})).set({...boundRecord(invalidDigest),
+            status: 'reserved', digest, size: bytes.byteLength});
+        await db.doc(documentAttachmentReceiptPath({uid, operationId: invalidDigest})).set({kind: 'profile-document-attachment',
+            ownerId: uid, operationId: invalidDigest, documentId, attachmentId: invalidDigest, storagePath: invalidPath,
+            digest: 'not-a-digest', objectDigest: digest, objectSize: bytes.byteLength, status: 'reserved', createdAt: 1});
+        objects.set(invalidPath, {bytes, digest});
+        const recovered = await handler.recover(trusted);
+        assert.ok(recovered.incomplete >= 2);
+        assert.equal((await db.doc(documentAttachmentRecordPath({uid, attachmentId: foreignField})).get()).data().status, 'reserved');
+        assert.equal((await db.doc(documentAttachmentRecordPath({uid, attachmentId: invalidDigest})).get()).data().status, 'reserved');
+        assert.equal(objects.has(foreignPath), true, 'a malformed receipt never touches Storage');
+        assert.equal(objects.has(invalidPath), true, 'a malformed receipt never touches Storage');
+        assert.equal((await db.doc(documentAttachmentReceiptPath({uid, operationId: foreignField})).get()).exists, true);
     });
 });

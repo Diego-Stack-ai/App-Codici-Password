@@ -40,6 +40,10 @@ function fixture({documents = [documentId], seeded = []} = {}) {
     const records = new Map(), objects = new Map();
     const calls = {write: 0, remove: 0, probe: 0};
     const failures = {write: false, remove: false, probe: false, throwOn: []};
+    // `onProbe` runs after each probe has been observed, so a test can change a
+    // record, a receipt or the stored object exactly between the proof and the
+    // transaction that would write: the window DS-002A-R2 must close.
+    const hooks = {onProbe: null};
     let transactions = 0, chain = Promise.resolve();
     records.set(`users/${uid}`, {ownerId: uid, documenti: documents.map(id => ({id, type: 'Patente'}))});
     for (const attachment of seeded) records.set(documentAttachmentRecordPath({uid, attachmentId: attachment}), boundRecord(attachment));
@@ -110,7 +114,9 @@ function fixture({documents = [documentId], seeded = []} = {}) {
             calls.probe++;
             if (failures.probe) throw Error('PROBE_FAILED');
             const object = objects.get(path);
-            return object ? {exists: true, digest: object.digest, size: object.bytes.byteLength} : {exists: false};
+            const descriptor = object ? {exists: true, digest: object.digest, size: object.size ?? object.bytes.byteLength} : {exists: false};
+            if (hooks.onProbe) hooks.onProbe(calls.probe);
+            return descriptor;
         },
         async putIfAbsent(path, bytes, options) {
             calls.write++;
@@ -126,9 +132,12 @@ function fixture({documents = [documentId], seeded = []} = {}) {
             objects.delete(path);
         }
     };
-    return {records, objects, calls, failures, transactions: () => transactions,
+    return {records, objects, calls, failures, hooks, transactions: () => transactions,
         failAt: offset => {failures.throwOn = [transactions + offset];},
-        seedObject: (path, bytes) => {const copy = Uint8Array.from(bytes); objects.set(path, {bytes: copy, digest: hash(Buffer.from(copy))});},
+        seedObject: (path, bytes, overrides = {}) => {
+            const copy = Uint8Array.from(bytes);
+            objects.set(path, {bytes: copy, digest: hash(Buffer.from(copy)), ...overrides});
+        },
         handler: createProfileDocumentAttachmentHandler({db, storage, hash, timestamp: () => 123})};
 }
 test('the transactional fake itself refuses read-after-write, so the ordering guarantee is real', async () => {
@@ -371,4 +380,114 @@ test('a deferred deletion finalize is reported as incomplete and completed by re
     assert.equal(f.objects.size, 0);
     assert.deepEqual(await f.handler.recover(trusted), {status: 'recovered', confirmed: 1, compensated: 0, incomplete: 0});
     assert.equal(f.records.has(recordPath), false);
+});
+test('an upload whose record changes between probe and finalization promotes nothing', async () => {
+    const f = fixture(), input = await uploadInput();
+    f.hooks.onProbe = () => {f.records.get(recordPath).digest = hash('replaced');};
+    assert.deepEqual(await f.handler.upload(input, trusted), {status: 'incomplete', code: 'FINALIZE_CONFLICT', attachmentId});
+    assert.equal(f.records.get(recordPath).status, 'reserved', 'a changed record is never promoted');
+    assert.equal(f.records.get(receiptPath('upload-1')).status, 'reserved');
+    assert.equal(f.objects.size, 1, 'the proven object stays for recover');
+});
+test('an upload whose receipt changes between probe and finalization promotes nothing', async () => {
+    const f = fixture(), input = await uploadInput();
+    f.hooks.onProbe = () => {f.records.get(receiptPath('upload-1')).objectSize = 999;};
+    assert.deepEqual(await f.handler.upload(input, trusted), {status: 'incomplete', code: 'FINALIZE_CONFLICT', attachmentId});
+    assert.equal(f.records.get(recordPath).status, 'reserved', 'a changed receipt never promotes the record');
+    assert.equal(f.records.get(receiptPath('upload-1')).status, 'reserved');
+});
+test('an upload never reuses an object whose size is not the recorded one', async () => {
+    const f = fixture(), input = await uploadInput();
+    f.seedObject(storagePath, input.payload, {size: input.payload.byteLength + 1});
+    assert.deepEqual(await f.handler.upload(input, trusted), {status: 'incomplete', code: 'OBJECT_CONFLICT', attachmentId});
+    assert.equal(f.calls.write, 0, 'a resized object is never overwritten');
+    assert.equal(f.objects.size, 1);
+    assert.equal(f.records.get(recordPath).status, 'reserved');
+});
+test('a deletion whose record changes between probe and finalization deletes no metadata', async () => {
+    const f = fixture();
+    await f.handler.upload(await uploadInput(), trusted);
+    const input = await deleteInput({...f.records.get(recordPath), id: attachmentId});
+    const base = f.calls.probe;
+    f.hooks.onProbe = count => {if (count === base + 2) f.records.get(recordPath).digest = hash('replaced');};
+    assert.deepEqual(await f.handler.remove(input, trusted), {status: 'incomplete', code: 'FINALIZE_CONFLICT', attachmentId});
+    assert.equal(f.records.has(recordPath), true, 'a replaced record is never deleted');
+    assert.equal(f.records.get(recordPath).status, 'deleting');
+    assert.equal(f.records.get(receiptPath('delete-1')).status, 'deleting');
+});
+test('a deletion whose receipt changes between probe and finalization deletes no metadata', async () => {
+    const f = fixture();
+    await f.handler.upload(await uploadInput(), trusted);
+    const input = await deleteInput({...f.records.get(recordPath), id: attachmentId});
+    const base = f.calls.probe;
+    f.hooks.onProbe = count => {if (count === base + 2) f.records.get(receiptPath('delete-1')).expectedDigest = hash('other');};
+    assert.deepEqual(await f.handler.remove(input, trusted), {status: 'incomplete', code: 'FINALIZE_CONFLICT', attachmentId});
+    assert.equal(f.records.has(recordPath), true, 'the record survives a changed receipt');
+    assert.equal(f.records.get(receiptPath('delete-1')).status, 'deleting');
+});
+test('a deletion never removes an object whose recorded size changed', async () => {
+    const f = fixture();
+    await f.handler.upload(await uploadInput(), trusted);
+    const input = await deleteInput({...f.records.get(recordPath), id: attachmentId});
+    f.failures.remove = true;
+    assert.deepEqual(await f.handler.remove(input, trusted), {status: 'incomplete', code: 'OBJECT_REMOVE_FAILED', attachmentId});
+    f.failures.remove = false;
+    const bytes = Uint8Array.from(f.objects.get(storagePath).bytes);
+    f.seedObject(storagePath, bytes, {size: bytes.byteLength + 1});
+    assert.deepEqual(await f.handler.remove(input, trusted), {status: 'incomplete', code: 'OBJECT_CONFLICT', attachmentId});
+    assert.equal(f.objects.size, 1, 'the object is not the one this operation recorded');
+    assert.equal(f.records.get(recordPath).status, 'deleting');
+});
+test('recover promotes nothing and deletes nothing when the record changes under it', async () => {
+    const upload = fixture(), input = await uploadInput();
+    upload.failAt(2);
+    await upload.handler.upload(input, trusted);
+    upload.hooks.onProbe = () => {upload.records.get(recordPath).digest = hash('replaced');};
+    assert.deepEqual(await upload.handler.recover(trusted), {status: 'recovered', confirmed: 0, compensated: 0, incomplete: 1});
+    assert.equal(upload.records.get(recordPath).status, 'reserved', 'no promotion on a changed record');
+    assert.equal(upload.records.get(receiptPath('upload-1')).status, 'reserved');
+    assert.equal(upload.objects.size, 1);
+
+    const pending = fixture();
+    await pending.handler.upload(await uploadInput(), trusted);
+    const pendingInput = await deleteInput({...pending.records.get(recordPath), id: attachmentId});
+    pending.failures.remove = true;
+    await pending.handler.remove(pendingInput, trusted);
+    pending.failures.remove = false;
+    pending.hooks.onProbe = () => {pending.records.get(recordPath).digest = hash('replaced');};
+    assert.deepEqual(await pending.handler.recover(trusted), {status: 'recovered', confirmed: 0, compensated: 0, incomplete: 1});
+    assert.equal(pending.records.has(recordPath), true, 'a changed record is never deleted by recover');
+    assert.equal(pending.records.get(recordPath).status, 'deleting');
+    assert.equal(pending.records.get(receiptPath('delete-1')).status, 'deleting');
+});
+test('recover does not promote an object whose size is not the recorded one', async () => {
+    const f = fixture(), input = await uploadInput();
+    f.failAt(2);
+    await f.handler.upload(input, trusted);
+    const bytes = Uint8Array.from(f.objects.get(storagePath).bytes);
+    f.seedObject(storagePath, bytes, {size: bytes.byteLength + 1});
+    assert.deepEqual(await f.handler.recover(trusted), {status: 'recovered', confirmed: 0, compensated: 0, incomplete: 1});
+    assert.equal(f.records.get(recordPath).status, 'reserved');
+    assert.equal(f.calls.remove, 0, 'a resized object is never deleted');
+});
+test('recover blocks every receipt that is not canonical without touching storage', async () => {
+    const canonical = overrides => ({kind: 'profile-document-attachment', ownerId: uid, operationId: 'blocked',
+        documentId, attachmentId, storagePath, digest: hash('operation-blocked'), objectDigest: hash('payload-blocked'),
+        objectSize: 4, status: 'reserved', createdAt: 1, ...overrides});
+    for (const [label, overrides] of [
+        ['invalid operation digest', {digest: 'not-a-digest'}],
+        ['invalid object digest', {objectDigest: null}],
+        ['foreign field', {note: 'estraneo'}],
+        ['incoherent status', {status: 'ready'}],
+        ['timestamp of another state', {readyAt: 1}],
+        ['non canonical stored size', {objectSize: 0}],
+        ['foreign path', {storagePath: 'users/owner/elsewhere'}],
+        ['delete field on an upload receipt', {expectedDigest: hash('payload-blocked')}]]) {
+        const f = fixture();
+        f.records.set(receiptPath('blocked'), canonical(overrides));
+        assert.deepEqual(await f.handler.recover(trusted),
+            {status: 'recovered', confirmed: 0, compensated: 0, incomplete: 1}, label);
+        assert.equal(f.calls.probe + f.calls.remove, 0, label);
+        assert.equal(f.records.has(receiptPath('blocked')), true, label);
+    }
 });
