@@ -16,7 +16,7 @@
 | collegamenti Account | `linkedAccountId` / `linkedAccountCompanyId` scritti **nell'utenza**; i riferimenti inversi vivono sull'Account (`linkedProfileFields`) con `{type:'utility', id, parentAddressId}` | `profile-model.js:218-220`, `profile-link-contract.mjs:21` |
 | identità composta | un'utenza è identificata da `(type:'utility', id, parentAddressId)`: due indirizzi possono avere un'utenza con lo stesso `id` | `profile-model.js:209-211` |
 | patch canonica | il modello sostituisce **la sola riga** dentro l'indirizzo padre (`{...address, utilities: address.utilities.map(...)}`) | `profile-model.js:213` |
-| QR | `qrCodeInclusions.addresses` include l'**indirizzo**, non la singola utenza: l'utenza è pubblicata insieme al padre | `qr_code_utils.js:56-58`, `profile-model.js:195` |
+| QR | `qrCodeInclusions.addresses` seleziona l'indirizzo, ma il generatore pubblica **solo** la riga `ADR` (indirizzo, civico, città, CAP) e **non serializza** `utilities[]`: l'utenza non entra nella tessera | `qr_code_utils-v2.js:70-73` |
 | eliminazione legacy | `deleteUtility` rimuove la riga e poi «rinfresca» i riferimenti Account dell'utenza rimossa | `profilo_privato.js:437-448` |
 
 ## 2. Schema aziendale equivalente: **non esiste**
@@ -29,6 +29,6 @@ Nei moduli aziendali (`modules/azienda/**`) la parola «utility» compare **solo
 2. **Allowlist dedicata**: `type` (in chiaro) e `value` (cifrato, forma memorizzata preservata). Nessun altro campo entra in un comando, quindi **campi sconosciuti e password legacy sopravvivono per costruzione**.
 3. **Identità**: nuova `utility-<uuid>`; un id che contiene `-legacy-` è **derivato** e la riga resta consultabile e **non modificabile**, in nessun percorso, nemmeno in una richiesta costruita a mano.
 4. **Identità composta**: la richiesta porta `parentAddressId`; il servizio verifica che esista **esattamente un** indirizzo con quell'id e che l'utenza sia trovata **dentro quell'indirizzo**.
-5. **Eliminazione vietata** se l'utenza ha un riferimento Account; se l'indirizzo padre è incluso nella selezione QR (una configurazione non risolvibile canonicamente blocca in fail-closed); consultazione e modifiche non distruttive restano sempre possibili.
+5. **Eliminazione vietata** solo se l'utenza ha un riferimento Account. La selezione QR dell'indirizzo **non** blocca la singola utenza: la tessera pubblica solo la riga `ADR` e non le utenze (correzione A3-R1, dopo che il primo blocco aveva introdotto una guardia non verificata). Consultazione e modifiche non distruttive restano sempre possibili; identità derivate e riferimenti ambigui restano fail-closed.
 6. **Revisione separata** (`_profileUtilitiesRevision`/`_profileUtilitiesSchemaVersion`/`_profileUtilitiesUpdatedAt`), impronta dell'intera riga, ricevuta idempotente in `mutationResults/{uid}/operations/profile-utilities-{operationId}`, letture prima delle scritture e nessuna scrittura parziale.
 7. Solo online, rilettura confermata, scarto locale della riga nuova non salvata, doppia conferma per l'eliminazione persistita.
