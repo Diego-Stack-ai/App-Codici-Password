@@ -230,6 +230,58 @@ test('deletion needs a second confirmation and disappears from the visible rows'
     assert.deepEqual(options.sent.deletes, [{collection: 'contactEmails', id: 'email-home'}]);
     assert.deepEqual(options.sent.updates, []);
 });
+test('a row created in this session is discarded locally and never becomes a delete', async () => {
+    for (const [collection, field, label] of [['contactEmails', 'address', 'nuova email'], ['contactPhones', 'number', 'nuovo telefono']]) {
+        const root = new Node('root'), options = {};
+        await mount(root, options);
+        const before = rows(root).length;
+        byAdd(root, collection).dispatchEvent(new Event('click'));
+        const created = rows(root).at(-1);
+        assert.equal(created.dataset.contactNew, 'true', label);
+        const input = byField(created, field);
+        input.value = 'valore non salvato';
+        const remove = created.children.find(node => node.dataset.contactAction === 'delete');
+        assert.equal(remove.disabled, false, `${label}: una riga non salvata è sempre scartabile`);
+        remove.dispatchEvent(new Event('click'));
+        assert.equal(rows(root).length, before, `${label}: la riga esce dalla bozza con una sola azione`);
+        assert.equal(rows(root).includes(created), false);
+        assert.equal(input.value, '', `${label}: il valore digitato viene azzerato`);
+        assert.equal(input.defaultValue, '');
+        byAction(root, 'save')[0].dispatchEvent(new Event('click'));
+        await tick();
+        assert.equal(options.sent, undefined, `${label}: nessuna richiesta parte`);
+        assert.match(status(root).textContent, /Nessuna modifica da salvare/);
+    }
+});
+test('a discarded new row does not hide an edit of a persisted row', async () => {
+    const root = new Node('root'), options = {};
+    await mount(root, options);
+    byAdd(root, 'contactEmails').dispatchEvent(new Event('click'));
+    const created = rows(root).at(-1);
+    byField(created, 'address').value = 'da scartare@example.invalid';
+    created.children.find(node => node.dataset.contactAction === 'delete').dispatchEvent(new Event('click'));
+    assert.equal(rows(root).includes(created), false);
+    byField(rows(root)[0], 'address').value = 'nuova@example.invalid';
+    byAction(root, 'save')[0].dispatchEvent(new Event('click'));
+    await tick();
+    assert.deepEqual(options.sent, {creates: [], deletes: [],
+        updates: [{collection: 'contactEmails', id: 'email-home', fields: {address: 'nuova@example.invalid'}}]});
+});
+test('a draft that only held discarded rows stays empty and sends nothing', async () => {
+    const root = new Node('root'), options = {};
+    await mount(root, options);
+    for (const [collection, field] of [['contactEmails', 'address'], ['contactPhones', 'number']]) {
+        byAdd(root, collection).dispatchEvent(new Event('click'));
+        const created = rows(root).at(-1);
+        byField(created, field).value = 'temporaneo';
+        created.children.find(node => node.dataset.contactAction === 'delete').dispatchEvent(new Event('click'));
+    }
+    assert.equal(rows(root).length, 3, 'restano soltanto le righe persistite');
+    byAction(root, 'save')[0].dispatchEvent(new Event('click'));
+    await tick();
+    assert.equal(options.sent, undefined);
+    assert.match(status(root).textContent, /Nessuna modifica da salvare/);
+});
 test('offline contacts are readable but nothing is sent and the status explains why', async () => {
     const root = new Node('root'), options = {canSave: false};
     await mount(root, options);

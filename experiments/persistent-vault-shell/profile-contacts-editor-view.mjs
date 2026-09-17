@@ -43,6 +43,21 @@ export async function mountProfileContactsEditor(root, context, {load, createCon
     const blockReason = row => !row.editable && !row.created ? BLOCKED[row.blocked] || 'Riga non modificabile.'
         : row.qr === 'unverified' ? text.qrUnverified
             : row.linked ? text.linked : row.qr === true ? text.qr : null;
+    // A row that was never saved leaves the draft only: it produces no delete
+    // operation, no backend request, and no typed value is left behind.
+    const discard = row => {
+        for (const entry of row.entries) {
+            entry.input.value = ''; entry.input.defaultValue = ''; entry.caption.textContent = '';
+        }
+        row.message.textContent = ''; row.remove.textContent = '';
+        row.set.remove();
+        const index = rows.indexOf(row);
+        if (index !== -1) rows.splice(index, 1);
+        for (const node of [row.set, row.message, row.remove, ...row.entries.map(entry => entry.input)]) {
+            const at = retained.indexOf(node);
+            if (at !== -1) retained.splice(at, 1);
+        }
+    };
     const addRow = ({collection, id, fields, created = false, editable = true, linked = false, qr = null, blocked: blockedCode = null}) => {
         const row = {collection, id, created, editable, linked, qr, blocked: blockedCode, removed: false, entries: []};
         const set = document.createElement('fieldset');
@@ -61,11 +76,12 @@ export async function mountProfileContactsEditor(root, context, {load, createCon
             input.setAttribute('autocomplete', 'off'); input.setAttribute('data-lpignore', 'true'); input.setAttribute('data-1p-ignore', 'true');
             label.append(caption, input); set.append(label);
             retained.push(input, caption, label);
-            row.entries.push({key: field.key, input, original: input.value});
+            row.entries.push({key: field.key, input, caption, original: input.value});
         }
         const message = document.createElement('p'), remove = document.createElement('button');
         message.dataset.contactMessage = 'true'; remove.type = 'button'; remove.dataset.contactAction = 'delete';
         remove.textContent = text.delete; retained.push(message, remove);
+        row.set = set; row.message = message; row.remove = remove;
         const blocked = blockReason(row);
         if (blocked) message.textContent = blocked;
         remove.disabled = !canSave || Boolean(blocked);
@@ -73,6 +89,8 @@ export async function mountProfileContactsEditor(root, context, {load, createCon
             try {
                 check();
                 if (remove.disabled) return;
+                // An unsaved row is discarded locally and never reaches the service.
+                if (row.created) {discard(row); return;}
                 if (remove.dataset.contactConfirm !== 'true') {
                     remove.dataset.contactConfirm = 'true'; remove.textContent = text.confirm;
                     return;
@@ -95,7 +113,7 @@ export async function mountProfileContactsEditor(root, context, {load, createCon
     const draft = () => {
         const creates = [], updates = [], deletes = [];
         for (const row of rows) {
-            if (row.removed) {deletes.push({collection: row.collection, id: row.id}); continue;}
+            if (row.removed) {if (!row.created) deletes.push({collection: row.collection, id: row.id}); continue;}
             if (row.created) {creates.push({collection: row.collection, id: row.id, fields: values(row, false)}); continue;}
             const fields = values(row, true);
             if (Object.keys(fields).length) updates.push({collection: row.collection, id: row.id, fields});
