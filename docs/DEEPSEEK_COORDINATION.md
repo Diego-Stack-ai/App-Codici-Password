@@ -769,3 +769,15 @@ Completare nel laboratorio il percorso “Collega o crea Account”: da email, t
 Non estendere origini senza schema persistito né riaprire A1-A4 salvo regressione dimostrata.
 
 **Stato incarico: PRONTO** — approvazione A4 e avvio A5 Codex 2026-09-18 01:42 Europe/Rome; base locale `f772845b`.
+
+## Rapporto Codex — A5 creazione Account dal collegamento
+
+- **Stato:** COMPLETATO CON GATE BROWSER — `DA_VERIFICARE`.
+- **Commit di lavoro:** `d486dc79` (`feat(shell): create and link accounts atomically`), costruito sulla punta locale `2e44a912` e sulla base A5 `f772845b`. Nessun push tentato.
+- **Consegnato:** contratto e preparazione revocabile; form “Crea un nuovo Account” dentro il picker esistente; scelta esplicita personale/azienda; ID persistito generato nel servizio; Account minimo canonico con nome/username cifrati; transazione unica per Account, origine, backlink e ricevuta; retry idempotente e concorrenza fail-closed. Collega/Cambia/Scollega, ricerca e Account esistenti restano nello stesso flusso.
+- **Password legacy:** trasferimento soltanto con scelta esplicita. Il ciphertext autorevole viene verificato, scritto nell'Account e rimosso dall'origine nella medesima transazione. Se non scelto resta invariato; conflitto o esito non verificabile non crea Account e non cancella il campo. Nessun plaintext entra nel comando persistibile.
+- **Origini e perimetro:** email, telefono, documento e utenza privata con identità persistita; slot aziendali già canonici. Nessuna origine legacy o schema aggiuntivo. Endpoint loopback `applyProfileAccountCreate`; nessuna Rule/Function produttiva modificata.
+- **Prove:** unitari A5 **8/8**; picker/link mirati **31/31**; Firestore Emulator collegamenti+creazione **2/2**; `npm run test:vault-shell` preesistente **712/712**; `npm test` completo **exit 0**, incluso A5 registrato nella catena; inventario **768 file**; `git diff --check` pulito.
+- **Gate browser concreto:** lo scenario Chrome è stato esteso per provare creazione e ripristino da email, telefono, utenza e documento. Due esecuzioni raggiungono il picker aggiornato ma terminano con `TIMEOUT_ACCOUNT_CREATE` prima che il form venga osservato. La prova unitaria del picker dimostra che il callback “Crea un nuovo Account” riceve correttamente gli ambiti aziendali, ma il montaggio nel bundle browser resta da diagnosticare. Edge e profili desktop/mobile A5 non sono quindi dichiarati superati.
+- **Rischi residui:** trasporto/App Check e Rules produttivi, dispositivo fisico, migrazione identità legacy e gate browser A5. Il record minimo usa il contratto Account isolato già vigente; non importa writer produttivi né dati reali.
+- **Perimetro rispettato:** invariati `Frontend/public/**`, `firestore.rules`, `storage.rules`, `functions/**`, `master` e versione `1.2.127`; nessun deploy, dato o migrazione reale.
