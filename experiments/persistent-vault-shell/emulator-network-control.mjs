@@ -37,31 +37,35 @@ export function awaitDevToolsEndpoint(child, {timeoutMs = 10000, describe} = {})
     });
 }
 // Every browser of the matrix must produce one identified result: a missing one,
-// an unnamed one or the same browser counted twice is a failure, never a silent
-// reduction of the matrix.
+// an unnamed one, an unexpected device profile or the same (browser, profile) pair
+// counted twice is a failure, never a silent reduction of the matrix.
 export function assertEveryBrowserReported({browsers, results}) {
-    const expected = browsers.map(entry => typeof entry === 'string' ? entry : entry.name);
+    const keyOf = entry => `${typeof entry === 'string' ? entry : entry.name}::${(typeof entry === 'string' ? null : entry.profile)?.name ?? 'single'}`;
+    const expected = browsers.map(keyOf);
     if (!Array.isArray(results) || results.length !== expected.length) {
         throw new Error(`ENTRY_BROWSER_RESULTS_MISSING:${results?.length ?? 0}/${expected.length}`);
     }
-    const names = results.map(entry => entry?.browser);
-    if (names.some(name => typeof name !== 'string' || !expected.includes(name))) {
-        throw new Error(`ENTRY_BROWSER_RESULT_UNIDENTIFIED:${JSON.stringify(names)}`);
+    const actual = results.map(entry => `${entry?.browser}::${entry?.profile ?? 'single'}`);
+    if (actual.some(value => !expected.includes(value))) {
+        throw new Error(`ENTRY_BROWSER_RESULT_UNIDENTIFIED:${JSON.stringify(actual)}`);
     }
-    if (new Set(names).size !== names.length) {
-        throw new Error(`ENTRY_BROWSER_RESULT_DUPLICATED:${JSON.stringify(names)}`);
+    if (new Set(actual).size !== actual.length) {
+        throw new Error(`ENTRY_BROWSER_RESULT_DUPLICATED:${JSON.stringify(actual)}`);
     }
     return results;
 }
-export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport, describe} = {}) {
+export async function attachEntryNetworkControl(child, {restartPhase, forced = false, onReport, describe, deviceProfile = null} = {}) {
     if (restartPhase !== undefined && !['prepare', 'resume'].includes(restartPhase)) throw new Error('INVALID_RESTART_PHASE');
+    if (deviceProfile && (!Number.isSafeInteger(deviceProfile.width) || !Number.isSafeInteger(deviceProfile.height) ||
+        typeof deviceProfile.name !== 'string' || !deviceProfile.name)) throw new Error('INVALID_DEVICE_PROFILE');
     const endpoint = await awaitDevToolsEndpoint(child, {describe});
     const address = new URL(endpoint);
     if (address.hostname !== '127.0.0.1') throw new Error('DEVTOOLS_NONLOCAL');
     const host = address.host;
     let target;
     for (let i = 0; i < 100 && !target; i++) {
-        target = (await (await fetch(`http://${host}/json/list`)).json()).find(item => item.type === 'page' && item.url === (restartPhase ? 'about:blank' : 'http://127.0.0.1:4188/'));
+        target = (await (await fetch(`http://${host}/json/list`)).json()).find(item => item.type === 'page' &&
+            item.url === (restartPhase || deviceProfile ? 'about:blank' : 'http://127.0.0.1:4188/'));
         if (!target) await new Promise(done => setTimeout(done, 50));
     }
     if (!target) throw new Error('DEVTOOLS_TARGET_MISSING');
@@ -95,13 +99,25 @@ export async function attachEntryNetworkControl(child, {restartPhase, forced = f
     await send('Network.enable'); await send('Runtime.enable');
     await send('Runtime.addBinding', {name: '__entryNetworkControl'});
     if (forced) await send('Runtime.addBinding', {name: '__entryResult'});
+    // A device profile is applied through DevTools before the page loads, so the
+    // first paint already has the emulated viewport: the dimensions, the device
+    // scale factor and the touch capability are reported with the result.
+    if (deviceProfile) {
+        await send('Page.enable');
+        await send('Emulation.setDeviceMetricsOverride', {width: deviceProfile.width, height: deviceProfile.height,
+            deviceScaleFactor: deviceProfile.deviceScaleFactor ?? 1, mobile: deviceProfile.mobile !== false});
+        if (deviceProfile.mobile !== false) await send('Emulation.setTouchEmulationEnabled', {enabled: true, maxTouchPoints: 5});
+        await send('Page.addScriptToEvaluateOnNewDocument',
+            {source: `window.__entryDeviceProfile = ${JSON.stringify(deviceProfile.name)};`});
+    }
     if (restartPhase) {
         await send('Page.enable');
         await send('Page.addScriptToEvaluateOnNewDocument', {source: `window.__entryRestartPhase = ${JSON.stringify(restartPhase)}; window.__entryForced = ${JSON.stringify(forced)};`});
         if (restartPhase === 'resume') await send('Network.emulateNetworkConditions', {offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1});
         await send('Page.navigate', {url: 'http://127.0.0.1:4188/'});
-    }
+    } else if (deviceProfile) await send('Page.navigate', {url: 'http://127.0.0.1:4188/'});
     const close = () => socket.close();
+    close.deviceProfile = deviceProfile ? {...deviceProfile} : null;
     close.quitBrowser = () => send('Browser.close');
     close.inspect = async () => ({state: (await send('Runtime.evaluate', {expression: `JSON.stringify({ready:document.readyState, online:navigator.onLine, controlled:Boolean(navigator.serviceWorker?.controller), status:document.getElementById('status')?.textContent, message:document.getElementById('message')?.textContent, phase:sessionStorage.getItem('synthetic-cold-phase'), failure:window.__coldFailure})`, returnByValue: true})).result?.value, exceptions});
     return close;

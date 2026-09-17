@@ -70,3 +70,23 @@ test('the matrix needs one identified result per browser and never counts one tw
     assert.throws(() => assertEveryBrowserReported({browsers, results: [{browser: 'firefox'}, {browser: 'edge'}]}),
         /ENTRY_BROWSER_RESULT_UNIDENTIFIED/);
 });
+// A2-R2: the identity of a result is the (browser, device profile) pair. The same
+// pair must never be counted twice, and a result that does not say which device
+// profile it came from is not accepted while profiles are in play.
+test('the matrix counts each (browser, device profile) pair once', () => {
+    const desktop = {name: 'desktop'}, mobile = {name: 'mobile'};
+    const browsers = [{name: 'chrome', path: 'chrome.exe', profile: desktop}, {name: 'chrome', path: 'chrome.exe', profile: mobile},
+        {name: 'edge', path: 'msedge.exe', profile: desktop}, {name: 'edge', path: 'msedge.exe', profile: mobile}];
+    const results = [{browser: 'chrome', profile: 'desktop'}, {browser: 'chrome', profile: 'mobile'},
+        {browser: 'edge', profile: 'desktop'}, {browser: 'edge', profile: 'mobile'}];
+    assert.deepEqual(assertEveryBrowserReported({browsers, results}), results);
+    assert.throws(() => assertEveryBrowserReported({browsers, results: results.slice(1)}), /ENTRY_BROWSER_RESULTS_MISSING:3\/4/);
+    assert.equal(assertEveryBrowserReported({browsers: [{name: 'chrome', profile: desktop}], results: [{browser: 'chrome', profile: 'desktop'}]}).length, 1);
+    assert.throws(() => assertEveryBrowserReported({browsers, results: [results[0], results[1], results[2], results[0]]}),
+        /ENTRY_BROWSER_RESULT_DUPLICATED/, 'the same browser with the same profile is never counted twice');
+    assert.throws(() => assertEveryBrowserReported({browsers,
+        results: [{browser: 'chrome', profile: 'tablet'}, results[1], results[2], results[3]]}),
+        /ENTRY_BROWSER_RESULT_UNIDENTIFIED/, 'an unexpected device profile is not accepted');
+    assert.throws(() => assertEveryBrowserReported({browsers, results: [{browser: 'chrome'}, results[1], results[2], results[3]]}),
+        /ENTRY_BROWSER_RESULT_UNIDENTIFIED/, 'a result without the device profile identity is not accepted');
+});
