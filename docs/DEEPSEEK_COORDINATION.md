@@ -16,10 +16,10 @@
 8. Codex controlla diff, test e MD. Solo Codex imposta `APPROVATO`, `DA_CORREGGERE` oppure prepara l'incarico successivo.
 9. DeepSeek non avvia un secondo incarico e non interpreta modifiche al solo rapporto come un nuovo comando. Ogni incarico ha un ID diverso.
 
-## Incarico attivo
+## Incarico completato — DS-001
 
 - **ID:** DS-001
-- **Stato incarico:** DA_VERIFICARE
+- **Stato incarico:** APPROVATO DA CODEX — 17/09/2026 10:34
 - **Presa in carico:** 2026-09-17 10:20 (DeepSeek); commit osservato `777a9a96`, base obbligatoria `0e7e062c` verificata come antenata; dopo la base risulta modificato solo questo file di coordinamento. Consegna: 2026-09-17 10:30.
 - **Base di codice obbligatoria:** `0e7e062cc41aea48c9055eae17bc090f4a279f3d` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
 - **Ramo:** `integration/vault-shell-v127-security`
@@ -54,13 +54,67 @@ Correggere la rimozione di una riga appena creata e non ancora salvata. Attualme
 - **Rischi residui:** lo scarto è solo locale e senza conferma per le righe nuove (comportamento richiesto), senza annullamento; le righe persistite mantengono doppia conferma e guardie Account/QR invariate (`profile-contacts-handler.mjs` non toccato in questo incarico); la correzione è client-side, quindi una richiesta di cancellazione con ID inesistente resta rifiutata dal servizio con `CONTACTS_MISSING` (già coperto da test); il flusso browser del laboratorio non è stato esteso con un caso "riga nuova scartata", coperto dalle prove unitarie del view; restano aperti i limiti già noti di A1 (A1b, migrazione degli ID, classificazione telefoni/indirizzi, trasporto produttivo, collaudi fisici, VS-P0-01).
 - **Note per Codex:** il difetto era nel view: il click su "Elimina" di una riga nuova cadeva nel ramo della doppia conferma e la marcava `removed`, quindi `draft()` la inseriva in `deletes` e il servizio la rifiutava con `CONTACTS_MISSING` perché l'ID non esiste ancora. Ora una riga `created` viene scartata al primo click (valori e testo azzerati, blocco staccato dalla bozza, riga rimossa da `rows`) e non produce alcuna operazione. Durante il lavoro un mio errore è stato intercettato dal `try/catch` del view (i nodi `set`/`message`/`remove` non erano memorizzati nella riga): corretto memorizzandoli. Base, ramo e working tree verificati prima di iniziare (dopo `0e7e062c` solo questo file modificato); `master` `4efda528`, versione `1.2.127`, nessun deploy, nessun dato reale. Pronto per `DA_CORREGGERE` o per il prossimo incarico; DS-002 resta `DA_PROGETTARE`.
 
+### Verifica Codex
+
+Diff conforme: due soli file di laboratorio, nessun writer o confine produttivo. Rieseguiti indipendentemente i test mirati **51/51** e `npm run test:vault-shell` **564/564**. Commit e rapporto pubblicati, ramo sincronizzato, `master` invariato. DS-001 chiuso.
+
+## Incarico attivo
+
+- **ID:** DS-002A
+- **Stato incarico:** PRONTO
+- **Base di codice obbligatoria:** `58aaa625c264ca23db4998eb2f26561707e58dbe` (i commit successivi possono riguardare esclusivamente questo file di coordinamento)
+- **Ramo:** `integration/vault-shell-v127-security`
+- **Perimetro:** laboratorio della shell persistente; contratto e modello candidato per le immagini dei documenti digitali privati
+
+### Obiettivo
+
+Preparare il confine sicuro e testabile che consentirà a ogni elemento persistito di `users/{uid}.documenti[]` di possedere zero o più immagini cifrate. Questo incremento non monta ancora il pulsante nell'interfaccia e non esegue upload reali: definisce identità, metadati, cifratura contestuale, percorsi, limiti, cancellazione e test necessari prima dell'integrazione browser.
+
+### Decisioni vincolanti
+
+- Sono supportate soltanto immagini JPEG, PNG, WebP, HEIC e HEIF; massimo **10 MiB per immagine** e **10 immagini per documento**.
+- Un documento deve avere un ID persistito, univoco e non derivato dall'indice. Le righe senza ID o con ID duplicato restano consultabili ma non possono ricevere allegati; nessuna migrazione implicita.
+- Metadati candidati in documenti distinti sotto `users/{uid}/profileDocumentAttachments/{attachmentId}`, con `documentId`, `storagePath`, tipo/dimensione originali, digest, envelope di cifratura, schema e timestamp backend. Nessun nome originale, URL di download o byte in Firestore.
+- Percorso Storage candidato confinato a `users/{uid}/profile-documents/{documentId}/attachments/{attachmentId}`. UID, ID documento, ID allegato e percorso devono essere derivati dal contesto autenticato, non accettati liberamente dal client.
+- La cifratura deve avvenire localmente con chiave-file casuale. Il nuovo AAD deve legare almeno versione, UID proprietario, ID documento, ID allegato e percorso Storage. Non riusare il formato allegati Account v1 con AAD costante.
+- I byte non entrano nella cache offline; offline si può mostrare soltanto metadato già sincronizzato e stato non disponibile.
+- Preparare una macchina a stati per upload e cancellazione con esito idempotente, compensazione degli oggetti orfani e nessuna dichiarazione di atomicità inesistente fra Firestore e Storage.
+- La shell non riceve né esporta la Vault Key: il progetto deve prevedere una capacità binaria revocabile e confinata alla vista, distinta dai metodi testuali.
+
+### Consegna richiesta
+
+- Contratto puro e validatori candidati nel laboratorio, senza import Firebase produttivi.
+- Modello di comando immutabile per preparazione upload/cancellazione e ricevuta idempotente; nessun byte, plaintext, chiave o nome originale nel comando persistibile.
+- Proiezione di sola lettura degli allegati associati a un documento, con controlli proprietario/documento/percorso e revoca dopo ogni attesa.
+- Test unitari per limiti, MIME, ID mancanti/duplicati, path injection, metadati sconosciuti, AAD diverso fra proprietari/documenti/allegati, revoca, conflitti, retry e compensazione descritta.
+- Documento tecnico sintetico che spieghi schema, flusso, rollback e cosa resta per DS-002B (trasporto emulatori, upload, pulsante Allegato, galleria/apertura/eliminazione).
+- Aggiornamento puntuale degli MD autorevoli con stato **candidato non montato**, rischi e prove reali; nessun inventario rigenerato se non cambia l'elenco dei file censiti.
+- Eseguire test mirati, `npm run test:vault-shell`, `npm test` e `git diff --check`.
+
+### Divieti
+
+- Nessuna modifica a `Frontend/public/**`, Rules/Functions produttive, `master`, versione o deploy.
+- Nessun caricamento, lettura o cancellazione di dati reali e nessun accesso al progetto Firebase reale.
+- Nessun riuso diretto di `attachment-security.js` o dei moduli allegati Account; possono essere letti soltanto come fotografia dei limiti legacy.
+- Nessun pulsante o promessa di funzionalità disponibile all'utente in questo incremento.
+
+## Rapporto DeepSeek — DS-002A
+
+- **Stato:** IN ATTESA
+- **Commit finale:**
+- **File modificati:**
+- **Test eseguiti e risultati:**
+- **Scostamenti dall'incarico:**
+- **Rischi residui:**
+- **Note per Codex:**
+
 ## Coda approvata dal proprietario
 
-### DS-002 — Allegati dei documenti digitali privati
+### DS-002B — Allegati dei documenti digitali privati nell'interfaccia
 
 Nella linguetta **Documenti digitali** del Profilo utente, accanto alle azioni Modifica e Cestino, aggiungere **Allegato**. Ogni documento deve poter avere una o più immagini del documento stesso.
 
-Questo incarico sarà dettagliato da Codex dopo DS-001 e dopo la verifica del modello dati. Dovrà rispettare almeno questi vincoli già decisi negli MD:
+Questo incarico sarà dettagliato da Codex dopo l'approvazione di DS-002A. Dovrà rispettare almeno questi vincoli già decisi negli MD:
 
 - cifratura locale prima dell'upload;
 - allegati disponibili online e non inclusi automaticamente nella cache offline;
@@ -72,4 +126,4 @@ Questo incarico sarà dettagliato da Codex dopo DS-001 e dopo la verifica del mo
 - nessun dato reale nei test;
 - nessun riuso automatico del modello allegati Account finché compatibilità, AAD e proprietà non sono dimostrate.
 
-**Stato coda:** DA_PROGETTARE, non ancora eseguibile.
+**Stato coda:** IN ATTESA DI DS-002A, non ancora eseguibile.
