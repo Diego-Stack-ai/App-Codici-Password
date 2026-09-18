@@ -2,22 +2,59 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **780**. Duplicati byte-per-byte: **1 gruppi**.
+
+## docs
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
+| `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
+| `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
+| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
+| `docs/A4_CENSIMENTO_DOCUMENTI.md` | MD | 2143 | 12 | Documentazione: A4 CENSIMENTO DOCUMENTI. |
+| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
+| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 32060 | 488 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 177961 | 914 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
+| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
+| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
+| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 108699 | 707 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 130176 | 742 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/persistent-vault-shell/account-standard-candidate-rules.mjs` | MJS | 1040 | 19 | File di progetto: account-standard-candidate-rules. |
-| `experiments/persistent-vault-shell/account-standard-contract.mjs` | MJS | 4657 | 51 | File di progetto: account-standard-contract. |
-| `experiments/persistent-vault-shell/account-standard-editor-provider.mjs` | MJS | 1706 | 20 | File di progetto: account-standard-editor-provider. |
-| `experiments/persistent-vault-shell/account-standard-editor-source.mjs` | MJS | 3446 | 41 | File di progetto: account-standard-editor-source. |
-| `experiments/persistent-vault-shell/account-standard-editor-view.mjs` | MJS | 2759 | 35 | File di progetto: account-standard-editor-view. |
-| `experiments/persistent-vault-shell/account-standard-editor.test.mjs` | MJS | 4501 | 39 | File di progetto: account-standard-editor.test. |
-| `experiments/persistent-vault-shell/account-standard-handler.mjs` | MJS | 2811 | 39 | File di progetto: account-standard-handler. |
-| `experiments/persistent-vault-shell/account-standard.test.mjs` | MJS | 5440 | 54 | File di progetto: account-standard.test. |
-| `experiments/persistent-vault-shell/docs/A6_EDITOR_CREDENZIALI_STANDARD.md` | MD | 2612 | 24 | Documentazione: A6 EDITOR CREDENZIALI STANDARD. |
-| `experiments/persistent-vault-shell/firebase-account-standard.test.mjs` | MJS | 4845 | 60 | File di progetto: firebase-account-standard.test. |
+| `experiments/offline-sync/browser-no-locks.mjs` | MJS | 12715 | 195 | File di progetto: browser-no-locks. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -33,7 +70,7 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
 | `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 26806 | 320 | File di progetto: browser-backend-sync. |
-| `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1294 | 23 | File di progetto: browser-coordination-worker. |
+| `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1828 | 30 | File di progetto: browser-coordination-worker. |
 | `experiments/offline-sync/browser-coordination.mjs` | MJS | 17832 | 239 | File di progetto: browser-coordination. |
 | `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
 | `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3194 | 54 | File di progetto: conflict-note-proposal. |
@@ -46,16 +83,16 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/firebase-fenced-queue-client.mjs` | MJS | 3008 | 55 | File di progetto: firebase-fenced-queue-client. |
 | `experiments/offline-sync/firebase-fenced-queue-client.test.mjs` | MJS | 5745 | 82 | File di progetto: firebase-fenced-queue-client.test. |
 | `experiments/offline-sync/firestore.candidate.rules` | RULES | 711 | 22 | File di progetto: firestore.candidate. |
-| `experiments/offline-sync/hybrid-queue-coordinator.mjs` | MJS | 4154 | 79 | File di progetto: hybrid-queue-coordinator. |
-| `experiments/offline-sync/hybrid-queue-coordinator.test.mjs` | MJS | 9046 | 148 | File di progetto: hybrid-queue-coordinator.test. |
+| `experiments/offline-sync/hybrid-queue-coordinator.mjs` | MJS | 5635 | 102 | File di progetto: hybrid-queue-coordinator. |
+| `experiments/offline-sync/hybrid-queue-coordinator.test.mjs` | MJS | 16281 | 265 | File di progetto: hybrid-queue-coordinator.test. |
 | `experiments/offline-sync/indexeddb-queue-lease.mjs` | MJS | 5522 | 99 | File di progetto: indexeddb-queue-lease. |
 | `experiments/offline-sync/indexeddb-queue-lease.test.mjs` | MJS | 8650 | 139 | File di progetto: indexeddb-queue-lease.test. |
 | `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4660 | 68 | File di progetto: offline-mutation-model. |
 | `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3958 | 58 | File di progetto: offline-mutation-model.test. |
 | `experiments/offline-sync/offline-save-panel.mjs` | MJS | 17064 | 235 | File di progetto: offline-save-panel. |
 | `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 6988 | 93 | File di progetto: run-browser-tests. |
-| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1196 | 21 | File di progetto: run-emulated-browsers. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 7137 | 95 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1273 | 22 | File di progetto: run-emulated-browsers. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2762 | 51 | File di progetto: account-detail-reader. |
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7479 | 121 | File di progetto: account-detail-reader.test. |
 | `experiments/persistent-vault-shell/account-note-candidate-rules.mjs` | MJS | 728 | 12 | File di progetto: account-note-candidate-rules. |
@@ -71,6 +108,14 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/account-note.test.mjs` | MJS | 7167 | 85 | File di progetto: account-note.test. |
 | `experiments/persistent-vault-shell/account-route.mjs` | MJS | 2067 | 38 | File di progetto: account-route. |
 | `experiments/persistent-vault-shell/account-route.test.mjs` | MJS | 4424 | 80 | File di progetto: account-route.test. |
+| `experiments/persistent-vault-shell/account-standard-candidate-rules.mjs` | MJS | 1040 | 19 | File di progetto: account-standard-candidate-rules. |
+| `experiments/persistent-vault-shell/account-standard-contract.mjs` | MJS | 4657 | 51 | File di progetto: account-standard-contract. |
+| `experiments/persistent-vault-shell/account-standard-editor-provider.mjs` | MJS | 1706 | 20 | File di progetto: account-standard-editor-provider. |
+| `experiments/persistent-vault-shell/account-standard-editor-source.mjs` | MJS | 3446 | 41 | File di progetto: account-standard-editor-source. |
+| `experiments/persistent-vault-shell/account-standard-editor-view.mjs` | MJS | 2759 | 35 | File di progetto: account-standard-editor-view. |
+| `experiments/persistent-vault-shell/account-standard-editor.test.mjs` | MJS | 4501 | 39 | File di progetto: account-standard-editor.test. |
+| `experiments/persistent-vault-shell/account-standard-handler.mjs` | MJS | 2811 | 39 | File di progetto: account-standard-handler. |
+| `experiments/persistent-vault-shell/account-standard.test.mjs` | MJS | 5440 | 54 | File di progetto: account-standard.test. |
 | `experiments/persistent-vault-shell/account-widget-reader.mjs` | MJS | 6297 | 107 | File di progetto: account-widget-reader. |
 | `experiments/persistent-vault-shell/account-widget-reader.test.mjs` | MJS | 8841 | 144 | File di progetto: account-widget-reader.test. |
 | `experiments/persistent-vault-shell/account-widget-view.mjs` | MJS | 5488 | 88 | File di progetto: account-widget-view. |
@@ -130,6 +175,7 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/digital-card-view.mjs` | MJS | 3719 | 50 | File di progetto: digital-card-view. |
 | `experiments/persistent-vault-shell/digital-card-view.test.mjs` | MJS | 3405 | 46 | File di progetto: digital-card-view.test. |
 | `experiments/persistent-vault-shell/docs/A5_CREAZIONE_ACCOUNT_DAL_COLLEGAMENTO.md` | MD | 2654 | 14 | Documentazione: A5 CREAZIONE ACCOUNT DAL COLLEGAMENTO. |
+| `experiments/persistent-vault-shell/docs/A6_EDITOR_CREDENZIALI_STANDARD.md` | MD | 2612 | 24 | Documentazione: A6 EDITOR CREDENZIALI STANDARD. |
 | `experiments/persistent-vault-shell/emulator-addresses-check.mjs` | MJS | 30485 | 354 | File di progetto: emulator-addresses-check. |
 | `experiments/persistent-vault-shell/emulator-attachments-check.mjs` | MJS | 8327 | 126 | File di progetto: emulator-attachments-check. |
 | `experiments/persistent-vault-shell/emulator-browser.mjs` | MJS | 15225 | 169 | File di progetto: emulator-browser. |
@@ -139,7 +185,7 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/emulator-company-contacts-check.mjs` | MJS | 18052 | 274 | File di progetto: emulator-company-contacts-check. |
 | `experiments/persistent-vault-shell/emulator-detail-view.mjs` | MJS | 7319 | 134 | File di progetto: emulator-detail-view. |
 | `experiments/persistent-vault-shell/emulator-detail-view.test.mjs` | MJS | 15289 | 260 | File di progetto: emulator-detail-view.test. |
-| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 41274 | 483 | File di progetto: emulator-entry-check. |
+| `experiments/persistent-vault-shell/emulator-entry-check.mjs` | MJS | 42739 | 508 | File di progetto: emulator-entry-check. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.mjs` | MJS | 7420 | 101 | File di progetto: emulator-entry-runner. |
 | `experiments/persistent-vault-shell/emulator-entry-runner.test.mjs` | MJS | 6132 | 93 | File di progetto: emulator-entry-runner.test. |
 | `experiments/persistent-vault-shell/emulator-entry.mjs` | MJS | 29422 | 344 | File di progetto: emulator-entry. |
@@ -155,6 +201,7 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/excel-export-projection.mjs` | MJS | 6288 | 96 | File di progetto: excel-export-projection. |
 | `experiments/persistent-vault-shell/excel-export-projection.test.mjs` | MJS | 6413 | 105 | File di progetto: excel-export-projection.test. |
 | `experiments/persistent-vault-shell/firebase-account-note.test.mjs` | MJS | 4890 | 57 | File di progetto: firebase-account-note.test. |
+| `experiments/persistent-vault-shell/firebase-account-standard.test.mjs` | MJS | 4845 | 60 | File di progetto: firebase-account-standard.test. |
 | `experiments/persistent-vault-shell/firebase-addresses.test.mjs` | MJS | 13835 | 170 | File di progetto: firebase-addresses.test. |
 | `experiments/persistent-vault-shell/firebase-archive.test.mjs` | MJS | 5099 | 67 | File di progetto: firebase-archive.test. |
 | `experiments/persistent-vault-shell/firebase-backup.test.mjs` | MJS | 12936 | 175 | File di progetto: firebase-backup.test. |
@@ -185,7 +232,7 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/persistent-vault-shell/master-prompt.mjs` | MJS | 1415 | 29 | File di progetto: master-prompt. |
 | `experiments/persistent-vault-shell/master-prompt.test.mjs` | MJS | 3590 | 64 | File di progetto: master-prompt.test. |
 | `experiments/persistent-vault-shell/memory-vault.mjs` | MJS | 6403 | 120 | File di progetto: memory-vault. |
-| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 3700 | 48 | File di progetto: offline-consultation-probe. |
+| `experiments/persistent-vault-shell/offline-consultation-probe.mjs` | MJS | 4903 | 62 | File di progetto: offline-consultation-probe. |
 | `experiments/persistent-vault-shell/owned-queue.test.mjs` | MJS | 5666 | 82 | File di progetto: owned-queue.test. |
 | `experiments/persistent-vault-shell/prepare-company-addresses.mjs` | MJS | 5773 | 93 | File di progetto: prepare-company-addresses. |
 | `experiments/persistent-vault-shell/prepare-company-contacts.mjs` | MJS | 8229 | 132 | File di progetto: prepare-company-contacts. |
@@ -613,51 +660,6 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 | `archive/home-experiments/home_confronto_legacy.css` | CSS | 2717 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_nebbia.html` | HTML | 605 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 
-## docs
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
-| `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
-| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
-| `docs/A4_CENSIMENTO_DOCUMENTI.md` | MD | 2143 | 12 | Documentazione: A4 CENSIMENTO DOCUMENTI. |
-| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
-| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 31302 | 486 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 170245 | 849 | Documentazione: DEEPSEEK COORDINATION. |
-| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
-| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
-| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
-| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 68786 | 415 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12401 | 110 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
-| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3258 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
-| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 107835 | 699 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 128734 | 732 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
-| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
-
 ## firebase.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -733,7 +735,7 @@ File censiti: **778**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 16395 | 105 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 16496 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

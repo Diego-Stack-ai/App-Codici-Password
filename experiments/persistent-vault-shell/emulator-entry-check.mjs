@@ -175,8 +175,8 @@ async function checkContactsEditor(mode) {
     profileChecks.push('private contacts editor ' + mode + ': id guard, add, refresh, delete and cleanup');
 }
 
-async function checkBanking(mode) {
-    for (const scope of ['private', 'company']) {
+async function checkBanking(mode, {reopen = false} = {}) {
+    const openScope = async scope => {
         if (scope === 'private') byId('private').click();
         else {
             byId('companies').click(); await wait(() => document.querySelector('[data-company-accounts="company"]'), 'BANK_COMPANY_DIRECTORY');
@@ -185,20 +185,45 @@ async function checkBanking(mode) {
         await wait(() => document.querySelector('[data-action="navigate"][data-id="banca"]'), 'BANK_ACCOUNT');
         document.querySelector('[data-action="navigate"][data-id="banca"]').click();
         await wait(() => document.querySelector('[data-bank-id="fixture-two"] [data-bank-part="cards"] button'), 'BANK_MOUNT');
-        for (const [id, iban, pin] of [['fixture', 'IBAN-FITTIZIO', '1234'], ['fixture-two', 'IBAN-SECONDO', '5678']]) {
+    };
+    const fieldsText = () => [...byId('content').querySelectorAll('[data-bank-part="fields"]')].map(node => node.textContent);
+    const reveal = async scope => {
+        const pins = [], ccvs = [];
+        for (const [id, iban, pin, ccv] of [['fixture', 'IBAN-FITTIZIO', '1234', '000'], ['fixture-two', 'IBAN-SECONDO', '5678', '111']]) {
             const bank = document.querySelector(`[data-bank-id="${id}"]`);
             assert(bank.children[0].dataset.bankPart === 'fields' && bank.children[1].dataset.bankPart === 'widgets' && bank.children[2].dataset.bankPart === 'cards', 'BANK_ORDER');
             assert(bank.children[0].textContent.includes(iban), 'BANK_IBAN');
             const widget = bank.querySelector(`[data-widget-id="bank-${scope}-${id}"]`);
             assert(widget, 'BANK_WIDGET_PARENT'); widget.querySelector('button').click();
             await wait(() => widget.textContent.includes(`BANK-WIDGET-${scope}-${id}-A`), 'BANK_WIDGET_VALUE');
-            [...bank.children[2].querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN').click();
-            await wait(() => [...bank.children[2].querySelectorAll('.shared-account-value')].some(node => node.textContent === pin), 'BANK_PIN');
+            const card = bank.children[2];
+            const revealButton = label => [...card.querySelectorAll('button')].find(node => node.textContent === label);
+            assert(revealButton('Mostra PIN') && revealButton('Mostra CCV'), 'BANK_CARD_ACTIONS');
+            revealButton('Mostra PIN').click();
+            await wait(() => [...card.querySelectorAll('.shared-account-value')].some(node => node.textContent === pin), 'BANK_PIN');
+            revealButton('Mostra CCV').click();
+            await wait(() => [...card.querySelectorAll('.shared-account-value')].some(node => node.textContent === ccv), 'BANK_CCV');
+            pins.push(pin); ccvs.push(ccv);
+        }
+        return {pins, ccvs};
+    };
+    for (const scope of ['private', 'company']) {
+        await openScope(scope);
+        const first = await reveal(scope);
+        if (reopen) {
+            // Leave the detail and re-enter it without reloading: the same two
+            // banks, Widgets and card secrets must come back deterministically.
+            const before = fieldsText();
+            await openScope(scope);
+            assert(JSON.stringify(fieldsText()) === JSON.stringify(before), 'BANK_REOPEN_FIELDS');
+            const second = await reveal(scope);
+            assert(JSON.stringify(second) === JSON.stringify(first), 'BANK_REOPEN_SECRETS');
+            profileChecks.push(`reopened ${scope} banking detail keeps two banks, Widgets, PIN and CCV ${mode}`);
         }
         const values = [...byId('content').querySelectorAll('.shared-account-value')];
         byId('private').click(); await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'BANK_BACK');
         assert(values.every(node => node.textContent === ''), 'BANK_CLEAR');
-        profileChecks.push(`two ${scope} banks keep Widgets above cards and clear secrets ${mode}`);
+        profileChecks.push(`two ${scope} banks keep Widgets above cards, reveal PIN and CCV and clear secrets ${mode}`);
     }
 }
 async function checkWidgets(scope, mode) {
@@ -446,7 +471,7 @@ try {
     await checkProfile('offline');
     await checkContactsEditor('offline');
     await checkCompanyProfile('offline');
-    await checkBanking('offline');
+    await checkBanking('offline', {reopen: true});
     document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
     await wait(() => content.textContent.includes('già conservata sul dispositivo'), 'OFFLINE_RECOVERY');
     const recoveredInput = content.querySelector('textarea');

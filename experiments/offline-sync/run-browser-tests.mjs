@@ -8,7 +8,8 @@ import {build} from 'esbuild';
 // Synthetic data and disposable browser profile. Optional backend is emulator-only.
 const browserPath = process.argv[2];
 const backendMode = ['--backend', '--private-backend'].includes(process.argv[3]);
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && backendMode))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend]');
+const noLocks = process.argv[3] === '--no-locks';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
@@ -23,7 +24,8 @@ const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true,
         export {createFirebasePrivateNoteSource} from './experiments/persistent-vault-shell/firebase-private-note-source.mjs';
         export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
-    ['/suite.mjs', backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],
+    ['/suite.mjs', noLocks ? 'experiments/offline-sync/browser-no-locks.mjs'
+        : backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
     ['/fenced-queue-writer.mjs', 'experiments/offline-sync/fenced-queue-writer.mjs'],
     ['/fenced-queue-client.mjs', 'experiments/offline-sync/fenced-queue-client.mjs'],

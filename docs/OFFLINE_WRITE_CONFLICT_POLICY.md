@@ -17,7 +17,7 @@ Contratto introdotto in M2 e applicato progressivamente da M6. Alla v1.2.110 il 
 4. L'aggiornamento può essere applicato automaticamente soltanto se la revisione remota coincide con la revisione di partenza della mutazione.
 5. Se entrambe le copie hanno cambiato lo stesso record, l'app non usa silenziosamente “ultimo salvataggio vince”. Registra un conflitto e chiede una scelta comprensibile all'utente.
 6. Le cancellazioni sono tombstone revisionate finché termina il periodo di recupero; non sono rimozioni locali immediate non tracciate.
-7. Due schede dello stesso dispositivo coordinano una sola coda tramite lock e messaggi tra contesti.
+7. Due schede dello stesso dispositivo coordinano una sola coda tramite lock e messaggi tra contesti. Quando Web Locks non è disponibile, l'esclusione reciproca è garantita dal lease IndexedDB con scadenza e fencing: l'acquisizione è limitata nel tempo e allo scadere il comando non viene eseguito, mentre un lease concesso in ritardo viene rilasciato senza eseguire la mutazione.
 8. Logout, cambio utente e revoca dispositivo eliminano chiavi e coda decifrabile appartenenti all'utente precedente.
 9. Email, Push e altre azioni esterne partono dal backend una sola volta dopo l'accettazione della mutazione, mai direttamente dalla coda locale.
 10. Allegati richiedono un protocollo separato con hash, caricamento riprendibile e commit del metadato soltanto dopo verifica.

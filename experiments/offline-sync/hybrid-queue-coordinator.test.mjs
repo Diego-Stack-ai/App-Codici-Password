@@ -31,7 +31,7 @@ function fixture() {
         })));
         return tx;
     }};
-    const client = holderId => createIndexedDbQueueLease({database, uid: 'owner', holderId, now: () => clock, ttlMs: 100});
+    const client = (holderId, uid = 'owner') => createIndexedDbQueueLease({database, uid, holderId, now: () => clock, ttlMs: 100});
     const guard = (lease, callback) => new Promise((resolve, reject) => {
         const tx = database.transaction(['queueLeases', 'operations'], 'readwrite');
         let reason;
@@ -40,6 +40,40 @@ function fixture() {
     });
     return {data, database, client, guard, set failWrite(value) { failWrite = value; },
         get clock() { return clock; }, set clock(value) { clock = value; }, set beforeTransaction(hook) { beforeTransaction = hook; }};
+}
+
+// A database whose transactions stay open until `release()`: without Web Locks
+// nothing can cancel a blocked/suspended transaction, so the coordinator itself
+// must bound acquisition and refuse the late lease.
+function stallingFixture() {
+    const data = new Map([['queueLeases', new Map()], ['operations', new Map()]]);
+    let tail = Promise.resolve(), clock = 1000, open, completions = 0;
+    const gate = new Promise(resolve => { open = resolve; });
+    const database = {transaction(names, mode) {
+        names = Array.isArray(names) ? names : [names];
+        const requests = [];
+        const tx = {db: database, mode, aborted: false, abort() { this.aborted = true; }, objectStore(name) {
+            if (!names.includes(name)) throw new Error('STORE_NOT_IN_TRANSACTION');
+            const enqueue = (action, key, value) => { const request = {}; requests.push({name, action, key, value, request}); return request; };
+            return {get: key => enqueue('get', key), put: value => enqueue('put', value.id, value)};
+        }};
+        tail = tail.then(() => gate).then(() => new Promise(resolve => setImmediate(() => {
+            const drafts = new Map(names.map(name => [name, structuredClone(data.get(name))]));
+            while (requests.length && !tx.aborted) {
+                const {name, action, key, value, request} = requests.shift();
+                if (action === 'get') request.result = structuredClone(drafts.get(name).get(key));
+                else drafts.get(name).set(key, structuredClone(value));
+                try { request.onsuccess?.(); } catch (error) { tx.error = error; tx.abort(); }
+            }
+            if (!tx.aborted && mode === 'readwrite') for (const [name, draft] of drafts) data.set(name, draft);
+            completions++;
+            if (tx.aborted) tx.onabort?.(); else tx.oncomplete?.();
+            resolve();
+        })));
+        return tx;
+    }};
+    return {data, database, release: () => open(), get completions() { return completions; },
+        now: () => clock};
 }
 
 const gate = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return {promise, resolve}; };
@@ -52,8 +86,8 @@ function webLocks() {
         try { return await callback({name: 'synthetic'}); } finally { held = false; }
     }};
 }
-const coordinator = (f, holderId, locks = null) => createHybridQueueCoordinator({database: f.database,
-    uid: 'owner', holderId, now: () => f.clock, ttlMs: 100, locks});
+const coordinator = (f, holderId, locks = null, uid = 'owner') => createHybridQueueCoordinator({database: f.database,
+    uid, holderId, now: () => f.clock, ttlMs: 100, locks});
 
 test('Web Lock holder excludes fallback and fallback holder excludes Web Lock path through shared IDB', async () => {
     for (const firstUsesLocks of [true, false]) {
@@ -142,6 +176,89 @@ test('successful task closes context permanently and session change after await 
     let active = true;
     await assert.rejects(coordinator(f, 'B').run(async () => { await Promise.resolve(); active = false; return 'stale'; },
         {isActive: () => active}), /SESSION_INACTIVE/);
+    assert.equal(f.data.get('operations').size, 0);
+});
+
+// --- Fallback without Web Locks: bounded acquisition, late callbacks, UID scope.
+
+test('absent Web Locks API still coordinates through the IndexedDB lease alone', async () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+    const f = fixture();
+    Object.defineProperty(globalThis, 'navigator', {value: {}, configurable: true});
+    try {
+        // No `locks` key: the default parameter must resolve to the missing API.
+        const withoutLocks = () => createHybridQueueCoordinator({database: f.database, uid: 'owner',
+            holderId: 'A', now: () => f.clock, ttlMs: 100});
+        let calls = 0;
+        assert.deepEqual(await withoutLocks().run(() => { calls++; return 'fallback'; }), {acquired: true, value: 'fallback'});
+        const entered = gate(), leave = gate();
+        const pending = withoutLocks().run(async () => { entered.resolve(); await leave.promise; });
+        await entered.promise;
+        assert.deepEqual(await createHybridQueueCoordinator({database: f.database, uid: 'owner', holderId: 'B',
+            now: () => f.clock, ttlMs: 100}).run(() => { calls++; }), {acquired: false});
+        leave.resolve(); await pending;
+        assert.equal(calls, 1);
+        // A malformed locks object must never silently degrade to the fallback.
+        assert.throws(() => createHybridQueueCoordinator({database: f.database, uid: 'owner', holderId: 'A',
+            now: () => f.clock, ttlMs: 100, locks: {}}), /HYBRID_LOCKS_INVALID/);
+        assert.throws(() => createHybridQueueCoordinator({database: f.database, uid: 'owner', holderId: 'A',
+            now: () => f.clock, ttlMs: 100, locks: null, acquireTimeoutMs: 0}), /HYBRID_TIMEOUT_INVALID/);
+    } finally {
+        if (descriptor) Object.defineProperty(globalThis, 'navigator', descriptor);
+        else delete globalThis.navigator;
+    }
+});
+
+test('blocked acquisition expires without running the task and refuses the late lease', async () => {
+    const f = stallingFixture(); let calls = 0, retained;
+    const run = createHybridQueueCoordinator({database: f.database, uid: 'owner', holderId: 'A',
+        now: f.now, ttlMs: 100, acquireTimeoutMs: 20}).run(context => { calls++; retained = context; });
+    await assert.rejects(run, /HYBRID_ACQUIRE_TIMEOUT/);
+    assert.equal(calls, 0);
+    f.release();
+    for (let i = 0; i < 6; i++) await new Promise(resolve => setImmediate(resolve));
+    // The late transaction may still have persisted a lease, but it is released
+    // and no owner is handed out: a delayed callback cannot run the task.
+    assert.equal(calls, 0); assert.equal(retained, undefined);
+    assert.equal(f.data.get('queueLeases').get('owner')?.holderId ?? null, null);
+    const stored = f.data.get('operations');
+    assert.equal(stored.size, 0);
+});
+
+test('a never-settling Web Lock request also expires fail-closed', async () => {
+    const f = stallingFixture(); let calls = 0;
+    const locks = {request: () => new Promise(() => {})};
+    await assert.rejects(createHybridQueueCoordinator({database: f.database, uid: 'owner', holderId: 'A',
+        now: f.now, ttlMs: 100, locks, acquireTimeoutMs: 20}).run(() => { calls++; }), /HYBRID_ACQUIRE_TIMEOUT/);
+    assert.equal(calls, 0);
+    assert.equal(f.data.get('queueLeases').size, 0, 'no lease may be created by a lock that never resolves');
+});
+
+test('distinct UIDs never exclude each other and a malformed UID fails closed', async () => {
+    const f = fixture(), entered = gate(), leave = gate();
+    const pending = coordinator(f, 'A', null, 'owner-a').run(async () => { entered.resolve(); await leave.promise; return 'a'; });
+    await entered.promise;
+    assert.deepEqual(await coordinator(f, 'B', null, 'owner-b').run(() => 'b'), {acquired: true, value: 'b'},
+        'another UID owns another lease record and must not be blocked');
+    assert.deepEqual(await coordinator(f, 'C', null, 'owner-a').run(() => 'c'), {acquired: false});
+    leave.resolve(); assert.deepEqual(await pending, {acquired: true, value: 'a'});
+    assert.equal(f.data.get('queueLeases').get('owner-a').holderId, null);
+    assert.equal(f.data.get('queueLeases').get('owner-b').holderId, null);
+    assert.throws(() => createHybridQueueCoordinator({database: f.database, uid: '', holderId: 'A', ttlMs: 100}),
+        /LEASE_CONFIG_INVALID/);
+});
+
+test('crash-resume: an abandoned holder is fenced after expiry in the fallback path', async () => {
+    const f = fixture();
+    // Simulated crash: the lease is taken and never released, without Web Locks.
+    const crashed = await f.client('crashed').acquire();
+    assert.equal(crashed.token, 1);
+    assert.deepEqual(await coordinator(f, 'B').run(() => 'blocked'), {acquired: false});
+    f.clock = 1200;
+    let retained;
+    await coordinator(f, 'B').run(context => { retained = context; });
+    await assert.rejects(f.guard(crashed, store => store.put({id: 'op', value: 'stale'})), /LEASE_LOST/);
+    await assert.rejects(retained.checkCurrent(), /CONTEXT_CLOSED/);
     assert.equal(f.data.get('operations').size, 0);
 });
 

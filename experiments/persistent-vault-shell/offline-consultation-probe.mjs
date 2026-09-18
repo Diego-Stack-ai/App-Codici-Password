@@ -29,7 +29,12 @@ export async function probeOfflineConsultation({context, getUser, includeAttachm
         ['bank IBAN', privateAccounts.find(record => record.id === 'banca').banking[0].iban, 'IBAN-FITTIZIO'],
         ['card PIN', privateAccounts.find(record => record.id === 'banca').banking[0].cards[0].pin, '1234'],
         ['card CCV', privateAccounts.find(record => record.id === 'banca').banking[0].cards[0].ccv, '000'],
+        ['second bank IBAN', privateAccounts.find(record => record.id === 'banca').banking[1].iban, 'IBAN-SECONDO'],
+        ['second card PIN', privateAccounts.find(record => record.id === 'banca').banking[1].cards[0].pin, '5678'],
+        ['second card CCV', privateAccounts.find(record => record.id === 'banca').banking[1].cards[0].ccv, '111'],
         ['company bank IBAN', companyAccounts.find(record => record.id === 'banca').banking[0].iban, 'IBAN-FITTIZIO'],
+        ['company second bank IBAN', companyAccounts.find(record => record.id === 'banca').banking[1].iban, 'IBAN-SECONDO'],
+        ['company second card PIN', companyAccounts.find(record => record.id === 'banca').banking[1].cards[0].pin, '5678'],
         ['widget data', widgets.find(record => record.id === 'fixture').fields[0].valueEnc, 'WIDGET-FITTIZIO'],
         ['deadline data', deadlines.find(record => record.id === 'fixture').note, 'SCADENZA-FITTIZIA'],
         ...(includeAttachmentMetadata ? [['attachment metadata', attachments.find(record => record.id === 'fixture').name, 'ALLEGATO-FITTIZIO']] : [])
@@ -42,6 +47,15 @@ export async function probeOfflineConsultation({context, getUser, includeAttachm
         let missing = false;
         try { await repository.getRecordByPath(`users/${uid}/contacts/never-cached`); } catch { missing = true; }
         if (!missing) throw new Error('PROBE_MISSING_CACHE_NOT_REPORTED');
+        // A banking document that was never loaded must be refused, never shown
+        // as an empty or valid bank/card record. Byte availability on Storage is
+        // out of scope here.
+        for (const [scope, path] of [['private', `users/${uid}/accounts/banca-mai-preparata`],
+            ['company', `users/${uid}/aziende/company/accounts/banca-mai-preparata`]]) {
+            let refused = false;
+            try { refused = (await repository.getRecordByPath(path)) == null; } catch { refused = true; }
+            if (!refused) throw new Error(`PROBE_UNPREPARED_BANKING_${scope}`);
+        }
     }
     return samples.map(([label]) => label);
 }
