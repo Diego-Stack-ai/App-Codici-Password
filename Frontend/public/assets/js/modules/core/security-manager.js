@@ -6,7 +6,7 @@
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.124';
+import { db, auth } from '../../firebase-config.js?v=1.2.127';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
@@ -586,6 +586,8 @@ export async function changeMasterPassword() {
     showToast('Master Password modificata. Riattiva la biometria su questo dispositivo.', 'success');
     return true;
 }
+
+window.addEventListener('private-auth-blocked', () => clearSession());
 
 export function clearSession() {
     invalidatePendingUnlock();

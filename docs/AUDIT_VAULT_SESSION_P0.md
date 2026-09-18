@@ -1,10 +1,12 @@
 # Audit P0 — Sessione Vault
 
-> **Stato:** audit statico completato; correzione architetturale da approvare
+> **Stato:** audit iniziale completato; shell persistente approvata e parzialmente integrata. VS-P0-01 ancora aperto in produzione.
 > **Autorità:** evidenza subordinata a [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e [Contratto Vault Key](./VAULT_KEY_CONTRACT.md)
 > **Data:** 11 settembre 2026
 > **Commit esaminato:** `2b00336dfcf2a2c90e244263bca33fbf3db2d922`
 > **Codice esaminato:** `security-manager.js`, `vault-session.js`, `webauthn-manager.js`, `inactivity-timer.js`, chiamate di logout e test Vault
+
+> **Ultima verifica dello stato:** 15/09/2026, incremento `054b045d`, PR #67; produzione 1.2.127. Le sezioni iniziali descrivono l'audit storico del commit sopra indicato; per stato corrente e chiusure vedere il [riepilogo del programma](./PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). La scelta architetturale non è più in attesa di approvazione.
 
 ## 1. Esito
 
@@ -870,3 +872,74 @@ Riscontro: i componenti di consultazione già leggono accountWidgets e sharedVau
 Validazione: test:data-access, test:offline, test:js-syntax e controllo whitespace superati. Sette nuove regressioni: tre sulla preparazione (inclusione senza visita, fallimento di ciascuna raccolta) e quattro sulla UI reale eseguita in ambiente simulato, con letture server vietate offline, per Widget/credenziali e Account personali/aziendali. Verificati rendering, rivelazione del valore e rimozione al blocco; zero scritture. Crittografia nei test UI simulata: non attribuire una nuova prova fisica iPhone o end-to-end a questi risultati. La suite completa era passata su 9f769aab; questo incremento ha eseguito i controlli mirati indicati.
 
 Nessun deploy, bump, modifica a master, scrittura dati o estensione delle modifiche offline. Produzione resta 1.2.125; il candidato sperimentale richiede il riallineamento già previsto prima del rilascio.
+
+## Verifica della visibilità prima di Auth — candidata del 15/09/2026
+
+**Base pubblicata esaminata:** 1.2.126, master a14d0198. **Stato:** correzione candidata separata; nessun deploy e nessuna modifica ai dati utente.
+
+### Esito e requisito già previsto
+
+Riprodotta con Chrome headless in un profilo temporaneo nuovo, senza credenziali: la struttura della Home è visibile prima della conferma Auth e poi avviene il redirect a /login-v115.html. La verifica registra soltanto visibilità e pathname. Non è una dimostrazione di accesso a dati personali: la struttura statica è pubblica su Hosting e i controlli dei dati rimangono Firebase Rules e cifratura. La segnalazione è fondata sul rendering preventivo; in questa prova la Home non rimane accessibile dopo il controllo della sessione assente.
+
+Il Piano prevede già un bootstrap protetto unico; Architettura Sicurezza V1 §10 e Contratto Vault Key §3 richiedono pulizia del materiale sbloccato al logout/cambio identità. Mancava la regressione sul primo frame della pagina pubblicata. Le correzioni storiche nel ramo sperimentale non certificano la conformità di master: questa candidata parte dalla produzione e non importa la shell.
+
+### Correzione
+
+- Tutte le 22 pagine private nascono hidden e inert, con CSS che impedisce override del display; bootstrap sincrono nel head. Le nove eccezioni pubbliche (accesso/recupero, informazioni, contatto condiviso e laboratorio viewport) sono censite dal test.
+- private-auth-gate.js coordina attesa, identità verificata, timeout di 15 secondi, rifiuto delle risposte tardive e blocco al cambio UID. main-v129.js conferma la visibilità soltanto dopo onAuthStateChanged e il controllo esistente dell'email, prima delle letture dati. Offline resta valida l'identità Firebase restaurata e verificata senza reload di rete.
+- Errore/timeout vanno al login senza rivelare il contenuto. Un callback nullo reindirizza al percorso assoluto. pagehide nasconde la pagina e pageshow da BFCache ricontrolla tramite reload.
+- logout-session.js chiude il gate, notifica la pulizia RAM e rimuove i contenitori locali della sessione Vault prima di signOut; redirect anche su errore/timeout. Il marker non segreto della scheda impedisce auto-rientro dopo logout fallito e viene rimosso soltanto da un nuovo login esplicito riuscito. Header, logout comune, Impostazioni e cambio password usano la pulizia condivisa, conservando i redirect di riautenticazione.
+
+### Validazione e limiti
+
+Quattordici nuove regressioni Auth/logout e sette regressioni del precedente bootstrap offline superate. Dieci scenari browser locali, cinque ciascuno in Chrome ed Edge: anonimo, identità valida, errore, timeout reale e logout. Il browser usa l'HTML/CSS e la validazione Auth reali con identità sintetica; non legge Firestore. Test live separato in sola lettura sulla Home pubblicata. npm test completo comprende il nuovo gate.
+
+Il controllo sincrono aggiunge un modulo iniziale: tetti statici aggiornati esplicitamente da 42 a 43 moduli e da 336 a 337 KB gzip, con massimo misurato 336.8 KB; invariati limite CSS e altri criteri. Questo costo di difesa non è una riduzione di sicurezza per migliorare prestazioni.
+
+Restano il collaudo fisico iPhone/PWA dopo eventuale rilascio, la gestione della revoca remota in assenza rete e l'audit generale Vault. Il contenitore legacy di session wrapping della base produttiva NON viene dichiarato conforme né riprogettato qui: la shell persistente è già la direzione scelta sul ramo sperimentale. Il gate DOM non sostituisce Rules, cifratura o protezione XSS. Nessuna lettura/scrittura/cancellazione di dati reali; nessuna migrazione, bump, modifica Functions/Rules o deploy.
+
+Rollback: revert della candidata come insieme (HTML nascosto, bootstrap, CSS e cablaggio); non distribuire solo una parte, altrimenti la pagina potrebbe restare intenzionalmente bloccata.
+
+## Riallineamento sicurezza 1.2.127 e ingresso nella shell — 15/09/2026
+
+Ramo integration/vault-shell-v127-security, base sperimentale 04d297c9. Merge locale di master 0ba2332b registrato in 1089cde8: risolti i conflitti mantenendo il ciclo di vita/invalidazione dei componenti sperimentali e il nuovo logout fail-closed. Riferimenti asset riallineati alla versione già pubblicata 1.2.127, senza nuovo bump. Suite completa sul merge superata. Il ramo è una candidata di integrazione, non una release: nessuna modifica a master o deploy.
+
+Verifica read-only delle Rules effettivamente distribuite tramite API Firebase Rules, senza leggere Firestore o Storage degli utenti: corrispondenza esatta con i file produttivi dopo sola normalizzazione CRLF/LF. Firestore ruleset 73bf1d91-5f5e-4779-976e-f31b27060ec2, SHA256 90cb830421c1cc94de97eb29ff68d3058cf6c9096ad05ed2b700723b4c6d63a4; Storage ruleset 205f26e1-37a7-4883-8e6d-94c39ef5f50e, SHA256 4929d9034cbda16c8a56013273c92bf84dcf99cd35b0466e555ee7aefe2715c7. Sono configurazioni, non prove di assenza di vulnerabilità. L'audit di isolamento separato è nel commit 27099764.
+
+La shell usa già createMemoryVault e createLegacyAdapter per decifrare envelope originali in RAM. Mancava la cancellazione dei residui della sessione multipagina all'ingresso: ora createFirebaseSession elimina esclusivamente quattro chiavi legacy, senza leggerne il contenuto e prima di costruire la nuova sessione. Storage presente ma inaccessibile interrompe l'ingresso. Nessuna cancellazione di identità Firebase, ciphertext, coda IndexedDB, preferenze o marker di logout.
+
+Aggiunto confine browser: pagehide, freeze e ripristino BFCache bloccano la Vault, interrompendo anche risultati di decifratura tardivi; private-auth-blocked dispone definitivamente la sessione e impedisce nuovo unlock sullo stesso oggetto. La normale navigazione interna non scatena pagehide. La disposizione rimuove i listener. Sette nuove prove con sessione RAM reale e verifica aggiuntiva dell'ingresso Firebase con storage fittizio. Test shell: 201 superati. I test logout verificano ora lo stato RAM/storage catturato prima di signOut fuori dal callback che può essere intercettato, evitando falsi positivi.
+
+Stato cutover: non completato. Il laboratorio monta liste personali/aziendali, dettaglio e nota privata compatibile; la matrice offline legge altri domini ma non sostituisce tutte le relative UI. Occorre integrare le pagine canoniche ancora multipagina (profili/editor, scadenze, impostazioni e relativi flussi) nel bootstrap unico, collaudare la compatibilità e poi rimuovere dal runtime produttivo saveVaultSession/restoreVaultSession e la persistenza legacy. Non distribuire questo ramo come sostituzione completa e non dichiarare risolto VS-P0-01 in produzione. La scelta shell persistente è già autorizzata; non richiederla nuovamente. Foto e byte allegati restano esclusi dal requisito offline.
+
+Validazione finale dell'incremento: npm test completo superato sulla nuova boundary, inclusi 201 test shell e SDK Firebase/emulatori; successiva verifica mirata dei tre test logout superata dopo spostamento delle asserzioni fuori dal callback. Chrome/Edge: 56 verifiche entry online/offline e 50 arresto forzato/riapertura con nuova Master Password, 106 complessive. Il crash riguarda esclusivamente processi temporanei creati dal runner. Nessuna prova fisica iPhone del nuovo ramo e nessuna garanzia contro eviction/corruzione del disco. Inventario rigenerato dopo la risoluzione del merge: 568 file (il conteggio intermedio durante il merge includeva le voci non risolte dell'indice).
+
+Regressione browser Auth del ramo integrato: dieci scenari Chrome/Edge superati (anonimo, valido, errore, timeout reale e logout). Le verifiche browser complessive di questo incremento sono 116, sempre con dati sintetici.
+
+## Consultazione profilo nella shell — 15/09/2026
+
+Base 0fc581a0, stessa candidata integration/vault-shell-v127-security e PR #67. Aggiunta la route profilo al laboratorio Firebase: Anagrafica, Contatti, Indirizzi e Documenti in sola consultazione, selezione interna senza reload. Si tratta di una migrazione parziale, non della pagina produttiva completa: panoramica, editor, utenze, collegamenti Account, password collegate, foto, Widget e tessera digitale non vengono dichiarati integrati da questo incremento. La vista esplicita il proprio perimetro.
+
+Il nuovo lettore usa getUserProfile del repository canonico e una proiezione fissa dei soli campi previsti; le decifrature passano dalla capability della route, senza ricevere o esporre chiavi. Aggiunta assertUnlocked al contesto protetto per verificare la Vault viva anche sui campi legacy in chiaro: scadenza, UID diverso e vista annullata impediscono la lettura. Compatibilità plaintext ammessa soltanto per i campi espliciti del profilo dopo autorizzazione; nessun fallback da decifratura fallita, nessuna scrittura o migrazione. Password/PIN/PUK, file, foto e proprietà estranee non vengono proiettati o decifrati nella nuova vista.
+
+La UI usa textContent; cambio linguetta annulla la pubblicazione di risultati precedenti. Uscita/lock cancella il testo dai nodi dei valori anche se trattenuti da riferimenti del vecchio DOM, rimuove listener e contenitore senza toccare la vista successiva. Errori offline riusano read-error-message.js della produzione; permessi e decifratura non vengono riclassificati come cache assente.
+
+Corrette le fixture e la matrice offline: telefono number (prima value), indirizzo address (prima street), documento num_serie (prima numero). I test precedenti dimostravano decifratura dei campioni, non corrispondenza di quei tre nomi con il profilo reale. Le nuove prove del rendering usano lo schema canonico effettivo. Nessun dato reale modificato.
+
+Validazione: npm test completo superato sulla nuova route (214 test shell); dopo l'ultimo riuso del messaggio offline, suite shell mirata superata con 215 test, inclusa la distinzione errori. Chrome/Edge: 64 verifiche entry online/offline (quattro sezioni profilo, ritorno alla lista senza reload, pulizia testi inclusi) e 52 arresto/riapertura (profilo e contatti consultati per la prima volta dopo riavvio offline e nuovo sblocco), 116 esecuzioni. Il controllo browser entry viene ripetuto sulla versione finale del messaggio condiviso. Nessuna nuova prova fisica iPhone, eviction o cache non preparata; foto e file restano esclusi dall'offline.
+
+Produzione invariata alla 1.2.127, nessun deploy o bump. VS-P0-01 resta aperto finché il percorso produttivo multipagina non viene sostituito: la nuova vista non autorizza la rimozione isolata del vecchio gestore di sessione. Prossime parti: parità del profilo (azioni e collegamenti) e profilo aziendale, poi i restanti percorsi canonici.
+
+Conferma finale: entry Chrome/Edge ripetuta dopo il riuso del messaggio offline, 64 verifiche superate. Workflow di validazione esteso alle PR con base experiment/**; il deploy rimane esclusivamente workflow_dispatch. Il risultato GitHub del nuovo commit va verificato separatamente dai test locali.
+
+## Account collegati al profilo nella shell — 15/09/2026
+
+Base 3fff87bc, stessa PR #67. Contatti email/telefono e documenti con collegamento canonico possono aprire l'Account nella shell e tornare al profilo, mostrare/nascondere e copiare la password. Nessun reload o passaggio della chiave ai componenti. Lo stesso Account rimane consultabile da più contatti; sono ammessi Account personali e aziendali. Non vengono implementate in questo incremento creazione, modifica o dissociazione dei collegamenti.
+
+Il lettore convalida ID e provenienza del collegamento sul profilo dell'UID corrente, esige un solo elemento sorgente e verifica il collegamento nuovamente dopo le attese. Online usa letture confermate dal server; offline usa il repository/cache canonico. Account assente, archiviato, proprietario diverso, collegamento cambiato, blocco o cambio UID impediscono la restituzione. La password viene letta solo su azione esplicita e solo dall'Account collegato; nessun fallback alla vecchia password del contatto. Cambio tab e uscita cancellano i valori e impediscono copie o navigazioni tardive. Una copia già consegnata al sistema operativo non è revocabile dalla vista.
+
+Validazione: npm test completo superato (231 test shell); aggiunta finale di una regressione sulla proiezione dei collegamenti, suite shell mirata 232/232. Chrome/Edge: 72 verifiche entry online/offline e 54 arresto/riapertura offline con nuova Master, tutte superate, esclusivamente su fixture. Mostra/nascondi, Account condiviso tra email e telefono, Account aziendale e ritorno al profilo verificati nel browser; copia e operazioni tardive verificate con clipboard fittizia. Nessun dato reale letto o modificato.
+
+Il primo test browser ha rilevato una preparazione incompleta della matrice: una precedente lettura del dettaglio aziendale aveva popolato la cache di un solo Account. Il probe ora carica online le tre liste mediante letture confermate prima della simulazione offline. Questa correzione del laboratorio non dimostra che l'apertura generica dell'app prepari automaticamente tutti i domini; la completezza del pre-caricamento produttivo rimane da verificare nel cutover. Cache non preparata, eviction e iPhone fisico non sono coperti da queste nuove prove; foto e byte allegati restano esclusi.
+
+Produzione invariata alla 1.2.127, nessun bump, merge in master o deploy. Restano parità dei profili/editor, azioni sui collegamenti, utenze, Widget, tessera digitale e gli altri percorsi canonici. VS-P0-01 resta aperto sul runtime produttivo legacy: questo incremento non completa la sostituzione della sessione multipagina.

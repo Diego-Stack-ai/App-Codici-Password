@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.124';
+import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -54,7 +54,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.124');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.127');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -168,7 +168,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.124');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.127');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -300,7 +300,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.124');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.127');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -921,7 +921,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.124');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.127');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
@@ -951,7 +951,8 @@ async function requireSecurityReauthentication(message) {
     sessionStorage.setItem('codex_security_notice', message);
     clearSession();
     try {
-        await signOut(auth);
+        window.privateAuthGate?.block();
+        await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
     } finally {
         window.location.replace('login-v115.html?reauth=security-settings');
     }
@@ -1177,7 +1178,8 @@ function initSettingsEvents() {
         const ok = await showConfirmModal(t('section_security') || 'Sicurezza', "Vuoi davvero uscire dall'account?", "Esci", "Annulla");
         if (ok) {
             clearSession(); // 🔐 Pulisce vaultKeyMaterial e sessionStorage
-            await signOut(auth);
+            window.privateAuthGate?.block();
+        await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
             window.location.href = 'login-v115.html';
         }
     });
@@ -1214,7 +1216,8 @@ function initSettingsEvents() {
         try {
             await revokeAllSessions();
             clearSession();
-            await signOut(auth);
+            window.privateAuthGate?.block();
+        await (await import('../../logout-session.js')).logoutWithCleanup(async () => await signOut(auth), null);
             window.location.replace('login-v115.html?reauth=sessions-revoked');
         } catch (error) {
             showToast(error.message || 'Revoca delle sessioni non riuscita.', 'error');

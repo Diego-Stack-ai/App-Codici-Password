@@ -6,6 +6,8 @@
 > **Data:** 11 settembre 2026  
 > **Vincolo:** l’audit è inizialmente read-only. Non autorizza migrazioni, deploy, cancellazioni o modifiche ai dati reali.
 
+> **Aggiornamento di stato:** 15/09/2026, incremento `054b045d`, PR #67. Chiusura delle sole attività verificate e gate rimanenti nel [riepilogo corrente](./PIANO_MATURITA_PROFESSIONALE.md#chiusura-documentale-dellincremento-054b045d--15092026). La shell è già approvata; l'audit complessivo e la correzione produttiva VS-P0-01 non sono chiusi. La data sopra identifica l'origine di questo piano.
+
 ## 1. Obiettivo
 
 Ricontrollare l’intero progetto e determinare, con prove:

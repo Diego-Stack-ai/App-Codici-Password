@@ -192,7 +192,7 @@ Le correzioni dovranno essere approvate e realizzate per blocchi separati, con t
 
 | ID | Gravità | Stato | Finding |
 |---|---|---|---|
-| F2-P1-07 | Media | Verificato nel codice | `withOfflineQueueLease` genera errore se Web Locks non è disponibile; non esiste il fallback dichiarato dal contratto |
+| F2-P1-07 | Media | Verificato nel codice; candidato di laboratorio verificato in browser — adozione runtime aperta | `withOfflineQueueLease` genera errore se Web Locks non è disponibile; non esiste il fallback dichiarato dal contratto |
 | F2-P1-08 | Media | Verificato nel codice | L'handoff dopo salvataggio conserva in `sessionStorage` l'intero record, inclusi metadati non cifrati, con TTL controllato solo alla lettura |
 | F2-P1-09 | Media | Verificato nel codice e da prova dichiarata | Offline, una query cache vuota viene restituita direttamente e non distingue raccolta vuota da cache mai preparata |
 | F2-P1-10 | Media | Verificato nel codice | Il flag globale delle mutazioni è disattivato, ma l'adattatore Account lo forza a `enabled: true`; il nome “pilot” non riflette più chiaramente il cutover dichiarato |
@@ -205,6 +205,8 @@ Le correzioni dovranno essere approvate e realizzate per blocchi separati, con t
 
 La coda è separata per UID tramite il nome del database e i contenitori restano cifrati. Non è emersa una cancellazione fisica automatica del database IndexedDB al logout. La coda non dovrebbe essere decifrabile senza il materiale Vault, ma cancellazione, revoca dispositivo e recupero della coda residua richiedono una prova specifica.
 
+`withOfflineQueueLease` continua a rifiutare un browser privo di Web Locks. Il candidato di laboratorio `hybrid-queue-coordinator.mjs` realizza il fallback dichiarato dal contratto con il solo lease IndexedDB, ora con acquisizione limitata nel tempo e rifiuto del lease tardivo; la prova in Chrome 152 ed Edge 153 con `navigator.locks` realmente assente è registrata in `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` (M6-CLOSE, 18/09/2026). Il finding resta aperto finché il runtime non adotta il candidato.
+
 `private-account-offline-pilot.js` salva per 60 secondi un handoff della UI in `sessionStorage`. Il controllo del TTL avviene quando il dato viene consumato; se la pagina successiva non lo legge, il contenitore può restare oltre il TTL. Il record include ciphertext per le credenziali ma anche i metadati che il normale schema conserva in chiaro.
 
 Il worker Firebase Messaging è separato dal worker della shell. Gestisce correttamente i deep link per Scadenze proprie e ricevute; per `share_invite` usa invece il fallback Home.
@@ -212,7 +214,7 @@ Il worker Firebase Messaging è separato dal worker della shell. Gestisce corret
 ### Gate ancora aperti
 
 - apertura offline deterministica delle liste su iPhone;
-- prova su browser privo di Web Locks;
+- adozione nel runtime del fallback senza Web Locks: il candidato di laboratorio è completo e verificato in un browser con l'API realmente assente, mentre `withOfflineQueueLease` continua a rifiutare l'API mancante;
 - logout, cambio UID e revoca con coda pendente;
 - chiusura forzata prima del consumo dell'handoff;
 - aggiornamento della shell quando una risorsa del manifest non è disponibile;

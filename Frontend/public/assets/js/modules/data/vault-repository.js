@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.124';
+import {db} from '../../firebase-config.js?v=1.2.127';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -63,6 +63,8 @@ export const getCompanyAccount = (uid, companyId, accountId) =>
 export const getCompanyAccountConfirmed = (uid, companyId, accountId) => readConfirmedRecord(
     doc(db, 'users', uid, 'aziende', companyId, 'accounts', accountId));
 export const getUserSetting = (uid, settingId) => getRecordByPath(`users/${uid}/settings/${settingId}`);
+export const getUserSettingConfirmed = (uid, settingId) => readConfirmedRecord(
+    doc(db, 'users', uid, 'settings', settingId));
 
 export const listCompanies = uid => readRecords(`companies:${uid}`,
     collection(db, 'users', uid, 'aziende'));
@@ -118,6 +120,8 @@ export const listContacts = uid => readRecords(`contacts:${uid}`,
 
 export const listProfileWidgets = uid => readRecords(`profile-widgets:${uid}`,
     collection(db, 'users', uid, 'profileWidgets'));
+export const listProfileWidgetsConfirmed = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'profileWidgets'));
 export const listSharedVaultData = uid => readRecords(`shared-vault-data:${uid}`,
     collection(db, 'users', uid, 'sharedVaultData'));
 export const listSharedVaultDataConfirmed = uid => readConfirmedRecords(
@@ -143,6 +147,7 @@ export const listEmbeddedAccountWidgetsConfirmed = async (uid, account) =>
         .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
 
 export const getUserProfile = uid => readRecord(`profile:${uid}`, doc(db, 'users', uid));
+export const getUserProfileConfirmed = uid => readConfirmedRecord(doc(db, 'users', uid));
 
 // M8: fotografia server-confermata dei soli domini proprietari ammessi dal
 // contratto backup. Non usa cache perché un file incompleto sembrerebbe valido.

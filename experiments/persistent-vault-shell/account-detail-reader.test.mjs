@@ -61,15 +61,15 @@ test('optional absent fields are empty, unsupported and plaintext fields fail cl
     await assert.rejects(detail.read('password'), /CIPHERTEXT_REQUIRED/);
 });
 
-test('notes and website use the same protected reader and reject plaintext', async () => {
-    const env = setup({note: {encrypted: 'Nota fittizia\nseconda riga'}, url: {encrypted: 'https://example.invalid'}});
+test('notes remain protected while the canonical website is plaintext', async () => {
+    const env = setup({note: {encrypted: 'Nota fittizia\nseconda riga'}, url: 'https://example.invalid'});
     const detail = await env.open(privateSelection);
     assert.equal(await detail.read('note'), 'Nota fittizia\nseconda riga');
     assert.equal(await detail.read('url'), 'https://example.invalid');
-    for (const field of ['note', 'url']) {
-        const plain = await setup({[field]: 'plaintext'}).open(privateSelection);
-        await assert.rejects(plain.read(field), /CIPHERTEXT_REQUIRED/);
-    }
+    const plain = await setup({note: 'plaintext'}).open(privateSelection);
+    await assert.rejects(plain.read('note'), /CIPHERTEXT_REQUIRED/);
+    const encryptedUrl = await setup({url: {encrypted: 'https://example.invalid'}}).open(privateSelection);
+    await assert.rejects(encryptedUrl.read('url'), /URL_INVALID/);
 });
 
 test('snapshot isolates ciphertext from repository and decryptor mutation, ignores stored id', async () => {

@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.124';
+import { auth } from './firebase-config.js?v=1.2.127';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -207,10 +207,10 @@ export async function initComponents() {
                             onclick: async () => {
                                 const confirmed = await showLogoutModal();
                                 if (confirmed) {
-                                    const { clearSession } = await import('./modules/core/security-manager.js');
-                                    clearSession();
-                                    await signOut(auth);
-                                    window.location.href = 'login-v115.html';
+                                    window.privateAuthGate?.block();
+                                    try { sessionStorage.setItem('codex_explicit_logout', '1'); } catch { /* Remain locked if storage is unavailable. */ }
+                                    const { logoutWithCleanup } = await import('./logout-session.js');
+                                    await logoutWithCleanup(() => signOut(auth));
                                 }
                             }
                         }, [

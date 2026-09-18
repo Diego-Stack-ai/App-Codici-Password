@@ -1,0 +1,56 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
+import {doc, getDoc, updateDoc, setDoc, deleteDoc} from 'firebase/firestore';
+import {withQrSelectionCandidateRules} from './qr-selection-candidate-rules.mjs';
+import {withAccountNoteCandidateRules} from './account-note-candidate-rules.mjs';
+import {accountNoteBasis} from './account-note-contract.mjs';
+import {createAccountNoteHandler} from './account-note-handler.mjs';
+assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
+assert.equal(process.env.GCLOUD_PROJECT, 'demo-vault-shell');
+assert.equal(process.env.GOOGLE_CLOUD_PROJECT, 'demo-vault-shell');
+assert.equal(process.env.METADATA_SERVER_DETECTION, 'none');
+const require = createRequire(new URL('../../functions/package.json', import.meta.url));
+const {initializeApp, deleteApp} = require('firebase-admin/app');
+const {getFirestore, FieldValue} = require('firebase-admin/firestore');
+const hash = value => createHash('sha256').update(value).digest('hex'), cipher = Buffer.alloc(48, 42).toString('base64');
+test('note-only transactions preserve links and reject direct writes in the demo emulator', async t => {
+    const original = await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8');
+    const rules = withAccountNoteCandidateRules(withQrSelectionCandidateRules(original));
+    const env = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085, rules}});
+    const app = initializeApp({projectId: 'demo-vault-shell'}, 'account-note-test'), db = getFirestore(app);
+    t.after(async () => {await db.terminate(); await deleteApp(app); await env.cleanup();});
+    const uid = 'note-owner', root = `users/${uid}`, parent = `${root}/aziende/firm`;
+    await db.doc(parent).set({ownerId: uid});
+    const run = createAccountNoteHandler({db, hash, timestamp: () => FieldValue.serverTimestamp()});
+    const trusted = {auth: {uid}, app: {appId: 'synthetic-not-http-attestation'}};
+    const owner = env.authenticatedContext(uid).firestore(), other = env.authenticatedContext('other').firestore();
+    for (const domain of ['private', 'company']) {
+        const account = domain === 'private' ? {domain, id: 'account'} : {domain, companyId: 'firm', id: 'account'};
+        const path = `${domain === 'private' ? root : parent}/accounts/account`, ref = db.doc(path);
+        const original = {ownerId: uid, note: 'old', password: 'unchanged', linkedProfileFields: [{id: 'mobile', type: 'phone'}],
+            _profileLinkRevision: 2, _profileLinkSchemaVersion: 1, _profileLinkUpdatedAt: FieldValue.serverTimestamp()};
+        await ref.set(original);
+        await assertSucceeds(getDoc(doc(owner, path))); await assertFails(getDoc(doc(other, path)));
+        for (const patch of [{note: ''}, {revision: 100}, {schemaVersion: 2}, {updatedAt: 12}, {linkedProfileFields: []}]) await assertFails(updateDoc(doc(owner, path), patch));
+        await assertFails(deleteDoc(doc(owner, path)));
+        const before = (await ref.get()).data(), basis = accountNoteBasis(before, uid, account);
+        const request = {account, note: cipher, expectedFingerprint: hash(basis.value), expectedRevision: basis.revision, operationId: domain, expectedOwnerUid: uid};
+        const race = await Promise.allSettled([run(request, trusted), run({...request, note: '', operationId: domain + '-race'}, trusted)]);
+        assert.equal(race.filter(value => value.status === 'fulfilled').length, 1);
+        const saved = (await ref.get()).data(); assert.equal(saved.revision, 1);
+        assert.deepEqual(saved.linkedProfileFields, before.linkedProfileFields); assert.equal(saved.password, before.password);
+        assert.equal(saved._profileLinkUpdatedAt.toMillis(), before._profileLinkUpdatedAt.toMillis());
+        assert.equal(saved._profileLinkRevision, 2); assert.ok(saved.updatedAt.toMillis() > 0);
+        const winner = race[0].status === 'fulfilled' ? request : {...request, note: '', operationId: domain + '-race'};
+        await run(winner, trusted); assert.equal((await ref.get()).data().revision, 1);
+        await assertFails(setDoc(doc(owner, `mutationResults/${uid}/operations/account-note-${winner.operationId}`), {revision: 2}));
+        const stale = {...request, expectedRevision: 1, expectedFingerprint: hash(accountNoteBasis(saved, uid, account).value), operationId: domain + '-legacy'};
+        await ref.update({note: 'legacy concurrent'});
+        await assert.rejects(run(stale, trusted), /NOTE_CONFLICT/);
+        assert.equal((await db.doc(`mutationResults/${uid}/operations/account-note-${stale.operationId}`).get()).exists, false);
+    }
+});

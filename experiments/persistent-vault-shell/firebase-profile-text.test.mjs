@@ -1,0 +1,62 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
+import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
+import {doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField} from 'firebase/firestore';
+import {withQrSelectionCandidateRules} from './qr-selection-candidate-rules.mjs';
+import {withProfileTextCandidateRules} from './profile-text-candidate-rules.mjs';
+import {prepareProfileText} from './prepare-profile-text.mjs';
+import {createProfileTextHandler} from './profile-text-handler.mjs';
+
+assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
+assert.equal(process.env.GCLOUD_PROJECT, 'demo-vault-shell');
+assert.equal(process.env.GOOGLE_CLOUD_PROJECT, 'demo-vault-shell');
+assert.equal(process.env.METADATA_SERVER_DETECTION, 'none');
+const require = createRequire(new URL('../../functions/package.json', import.meta.url));
+const {initializeApp, deleteApp} = require('firebase-admin/app');
+const {getFirestore, FieldValue} = require('firebase-admin/firestore');
+const hash = value => createHash('sha256').update(value).digest('hex');
+test('private/company profile text candidate on synthetic emulator records', async t => {
+    const rules = withProfileTextCandidateRules(withQrSelectionCandidateRules(await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8')));
+    const env = await initializeTestEnvironment({projectId: 'demo-vault-shell', firestore: {host: '127.0.0.1', port: 8085, rules}});
+    const app = initializeApp({projectId: 'demo-vault-shell'}, 'profile-text-test'), db = getFirestore(app);
+    t.after(async () => {await db.terminate(); await deleteApp(app); await env.cleanup();});
+    const uid = 'profile-owner', owner = env.authenticatedContext(uid).firestore(), other = env.authenticatedContext('other').firestore();
+    const run = createProfileTextHandler({db, hash, timestamp: () => FieldValue.serverTimestamp()});
+    const trusted = {auth: {uid}, app: {appId: 'synthetic-not-http-attestation'}};
+    const context = {user: {uid}, signal: new AbortController().signal, assertUnlocked() {},
+        encrypt: async () => Buffer.alloc(48, 42).toString('base64')};
+    for (const domain of ['private', 'company']) await t.test(domain, async () => {
+        const target = domain === 'private' ? {domain} : {domain, companyId: 'company'};
+        const path = domain === 'private' ? `users/${uid}` : `users/${uid}/aziende/company`;
+        const original = {ownerId: uid, note: 'legacy synthetic note', unrelated: 'keep', contactEmails: [{linkedAccountId: 'synthetic'}]};
+        await db.doc(path).set(original);
+        await assertSucceeds(getDoc(doc(owner, path))); await assertFails(getDoc(doc(other, path)));
+        await assertFails(updateDoc(doc(owner, path), {note: 'plaintext'}));
+        await assertFails(updateDoc(doc(owner, path), {note: deleteField()}));
+        await assertFails(updateDoc(doc(owner, path), {_profileTextRevision: 99}));
+        await assertFails(setDoc(doc(owner, path), {ownerId: uid}));
+        await assertFails(deleteDoc(doc(owner, path)));
+        await assertSucceeds(updateDoc(doc(owner, path), {unrelated: 'changed'}));
+        const prepare = async (operationId, changes = {note: 'new synthetic note'}) => prepareProfileText({context,
+            getUser: () => ({uid}), source: (await db.doc(path).get()).data(), target, changes, operationId, hash});
+        const request = await prepare(`${domain}-first`);
+        assert.deepEqual(await run(request, trusted), {status: 'confirmed', revision: 1});
+        assert.deepEqual(await run(request, trusted), {status: 'confirmed', revision: 1});
+        const saved = (await db.doc(path).get()).data();
+        assert.equal(saved.note, request.changes.note); assert.equal(saved.unrelated, 'changed');
+        assert.deepEqual(saved.contactEmails, original.contactEmails); assert.ok(saved._profileTextUpdatedAt.toMillis() > 0);
+        await assertFails(setDoc(doc(owner, `mutationResults/${uid}/operations/profile-text-${domain}-first`), {revision: 100}));
+        const requests = await Promise.all([prepare(`${domain}-race-a`), prepare(`${domain}-race-b`)]);
+        const results = await Promise.allSettled(requests.map(value => run(value, trusted)));
+        assert.equal(results.filter(value => value.status === 'fulfilled').length, 1);
+        assert.equal((await db.doc(path).get()).data()._profileTextRevision, 2);
+        const stale = await prepare(`${domain}-stale`); await db.doc(path).update({note: 'changed by legacy'});
+        await assert.rejects(run(stale, trusted), /FIELD_CONFLICT/);
+        assert.equal((await db.doc(`mutationResults/${uid}/operations/profile-text-${domain}-stale`).get()).exists, false);
+        await run(await prepare(`${domain}-clear`, {note: ''}), trusted);
+        assert.equal((await db.doc(path).get()).data().note, '');
+    });
+});

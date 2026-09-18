@@ -17,7 +17,7 @@ function fixture({online = false, verified = true, refresh, page = 'account_priv
         if (!online) throw new Error('auth/network-request-failed');
     }};
     const auth = {currentUser: user};
-    const context = vm.createContext({user, auth, navigator: {onLine: online}, currentPage: page, state,
+    const context = vm.createContext({gate: {block() {}, acceptIdentity: () => true}, authAttempt: 1, user, auth, navigator: {onLine: online}, currentPage: page, state,
         window: {location: {replace: url => redirects.push(url)}}});
     const run = vm.runInContext(`(async () => { ${source.slice(start, end)} state.initialized++; })`, context);
     return {run, state, redirects, auth};

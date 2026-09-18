@@ -38,6 +38,10 @@ export function createAccountDetailReader({context, getUser, repository}) {
         };
         return Object.freeze({has, async read(field) {
             if (!has(field)) return '';
+            if (field === 'url') {
+                if (typeof ciphertext[field] !== 'string') throw new Error('URL_INVALID');
+                return ciphertext[field];
+            }
             const value = await context.read({ownerId: uid, ciphertext: structuredClone(ciphertext[field])});
             assertActive();
             return value;

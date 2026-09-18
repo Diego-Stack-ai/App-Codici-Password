@@ -22,7 +22,8 @@ const unlock = async () => {
 const pendingNote = 'Nota sintetica conservata prima di arresto forzato';
 const button = label => [...byId('content').querySelectorAll('button')].find(item => item.textContent === label);
 try {
-    const {runOfflineConsultationProbe} = await import('/emulator.js');
+    const {runOfflineConsultationProbe: probe} = await import('/emulator.js');
+    const runOfflineConsultationProbe = () => probe({includeAttachmentMetadata: false});
     // Only a phase marker survives reload; no Vault key or decrypted data.
     const restartPhase = window.__entryRestartPhase;
     const resumed = restartPhase === 'resume' || sessionStorage.getItem('synthetic-cold-phase') === 'reload';
@@ -31,7 +32,8 @@ try {
         byId('login').click();
         await wait(() => byId('status').textContent.includes('bloccato') && !byId('unlock').disabled, 'AUTH');
         await unlock();
-        await runOfflineConsultationProbe();
+        // No probe or page visits prime the cache: exercise normal shell startup.
+        await wait(() => byId('offline-status').dataset.state === 'ready', 'AUTOMATIC_OFFLINE_PREPARATION');
         await navigator.serviceWorker.register('/emulator-cold-sw.js');
         await navigator.serviceWorker.ready;
         await wait(() => navigator.serviceWorker.controller, 'SW_CONTROLLER');
@@ -68,6 +70,129 @@ try {
         assert(blocked, 'NETWORK_NOT_BLOCKED');
         await unlock();
         const domains = await runOfflineConsultationProbe();
+        const originalDocument = document;
+        byId('profile').click();
+        await wait(() => byId('content').textContent.includes('Nome fittizio'), 'COLD_PROFILE');
+        assert(document.querySelector('[data-profile-section="overview"][aria-pressed="true"]'), 'COLD_OVERVIEW_DEFAULT');
+        assert(byId('content').textContent.includes('fixture@example.invalid'), 'COLD_OVERVIEW_CONTACT');
+        document.querySelector('[data-profile-section="personal"]').click();
+        await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'COLD_PERSONAL');
+        button('Modifica anagrafica').click();
+        await wait(() => document.querySelector('[data-profile-field="note"]'), 'COLD_ANAGRAPHIC_EDITOR');
+        const privateInputs = [...document.querySelectorAll('[data-profile-field]')];
+        assert(document.querySelector('[data-profile-field="note"]').value === 'Nota anagrafica fittizia' && button('Salva anagrafica').disabled, 'COLD_ANAGRAPHIC_VALUES');
+        button('Annulla').click();
+        await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'COLD_ANAGRAPHIC_CANCEL');
+        assert(privateInputs.every(node => node.value === ''), 'COLD_ANAGRAPHIC_CLEAR');
+        assert(byId('content').textContent.includes('Nota anagrafica fittizia'), 'COLD_PROFILE_NOTE');
+        const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
+        await wait(() => document.querySelector('[data-profile-widget="fixture"] > button'), 'COLD_PROFILE_WIDGET');
+        document.querySelector('[data-profile-widget="fixture"] > button').click();
+        await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Mostra PIN profilo'), 'COLD_WIDGET_EXPAND');
+        assert(!byId('content').textContent.includes('ANTEPRIMA-FITTIZIA'), 'COLD_WIDGET_PREVIEW');
+        [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN profilo').click();
+        await wait(() => byId('content').textContent.includes('WIDGET-FITTIZIO'), 'COLD_WIDGET_VALUE');
+        const profileWidgetValues = [...byId('content').querySelectorAll('.shared-account-value')];
+        document.querySelector('[data-profile-section="digital-card"]').click();
+        await wait(() => document.querySelector('[data-digital-card-preview]'), 'COLD_DIGITAL_TAB');
+        [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Genera QR dalla selezione salvata').click();
+        await wait(() => byId('content').textContent.includes('QR pronto.'), 'COLD_DIGITAL_GENERATED');
+        const qrPreview = document.querySelector('[data-digital-card-preview]'), qrCanvas = qrPreview.querySelector('canvas');
+        assert(qrPreview.title.includes('EMAIL:fixture@example.invalid'), 'COLD_DIGITAL_PROJECTION');
+        button('Modifica selezione').click();
+        await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Salva selezione'), 'COLD_QR_EDITOR');
+        const qrEditorLabels = [...byId('content').querySelectorAll('label span')];
+        assert(qrEditorLabels.some(node => node.textContent === 'fixture@example.invalid'), 'COLD_QR_EDITOR_DATA');
+        document.querySelector('[data-profile-section="contacts"]').click();
+        await wait(() => byId('content').textContent.includes('fixture@example.invalid') && byId('content').textContent.includes('000000000'), 'COLD_PROFILE_CONTACTS');
+        assert(profileNote.textContent === '', 'COLD_PROFILE_NOTE_CLEAR');
+        assert(profileWidgetValues.every(node => node.textContent === ''), 'COLD_WIDGET_CLEAR');
+        assert(qrCanvas.width === 0 && !qrPreview.title, 'COLD_DIGITAL_CLEAR');
+        assert(qrEditorLabels.every(node => node.textContent === ''), 'COLD_QR_EDITOR_CLEAR');
+        assert(document === originalDocument, 'COLD_PROFILE_RELOAD');
+        const linkedButtons = [...byId('content').querySelectorAll('button')].filter(node => node.textContent === 'Mostra password');
+        assert(linkedButtons.length === 3, 'COLD_PROFILE_LINKS');
+        for (const node of linkedButtons) {
+            node.click();
+            await wait(() => node.textContent === 'Nascondi password' && !node.disabled, 'COLD_PROFILE_PASSWORD');
+        }
+        const linkedValues = [...byId('content').querySelectorAll('dd')];
+        assert(linkedValues.filter(node => node.textContent === 'SEGRETO-FITTIZIO-private-Zeta-A').length === 2, 'COLD_SHARED_PASSWORD');
+        assert(linkedValues.some(node => node.textContent === 'SEGRETO-FITTIZIO-company-Zeta-A'), 'COLD_COMPANY_PASSWORD');
+        byId('private').click();
+        await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_PROFILE_RETURN');
+        assert(linkedValues.every(node => node.textContent === ''), 'COLD_PROFILE_PASSWORD_CLEARED');
+        byId('profile').click();await wait(()=>byId('content').textContent.includes('Nome fittizio'),'COLD_UTILITY_PROFILE');
+        document.querySelector('[data-profile-section="addresses"]').click();
+        await wait(()=>byId('content').textContent.includes('POD-FITTIZIO'),'COLD_UTILITY');
+        button('Mostra password').click();
+        await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_UTILITY_PASSWORD');
+        byId('companies').click();
+        await wait(()=>document.querySelector('[data-company-accounts="second-company"]'),'COLD_COMPANY_DIRECTORY');
+        document.querySelector('[data-company-accounts="second-company"]').click();
+        await wait(()=>byId('content').textContent.includes('Zeta seconda A'),'COLD_SECOND_COMPANY_ACCOUNTS');
+        document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
+        await wait(() => document.querySelector('[data-widget-id="widget-second-company"] button'), 'COLD_WIDGET');
+        const widget = document.querySelector('[data-widget-id="widget-second-company"]');
+        [...widget.querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN Widget').click();
+        await wait(() => widget.textContent.includes('WIDGET-second-company-A'), 'COLD_WIDGET_VALUE');
+        const sharedWidget = document.querySelector('[data-widget-id="link-second-company"]');
+        await wait(() => sharedWidget?.querySelector('button'), 'COLD_COMMON');
+        sharedWidget.querySelector('button').click();
+        await wait(() => sharedWidget.textContent.includes('COMMON-A'), 'COLD_COMMON_VALUE');
+        const widgetValues = [...byId('content').querySelectorAll('.shared-account-value')];
+        byId('companies').click();await wait(()=>document.querySelector('[data-company-profile="company"]'),'COLD_COMPANY_DIRECTORY_BACK');
+        assert(widgetValues.every(node => node.textContent === ''), 'COLD_WIDGET_CLEARED');
+        document.querySelector('[data-company-profile="company"]').click();
+        await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COLD_COMPANY_PROFILE');
+        document.querySelector('[data-profile-section="personal"]').click();
+        await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Modifica anagrafica'), 'COLD_COMPANY_ANAGRAPHIC_TAB');
+        button('Modifica anagrafica').click();
+        await wait(() => document.querySelector('[data-profile-field="ragioneSociale"]'), 'COLD_COMPANY_ANAGRAPHIC_EDITOR');
+        const companyInputs = [...document.querySelectorAll('[data-profile-field]')];
+        assert(document.querySelector('[data-profile-field="ragioneSociale"]').value === 'Azienda fittizia' && button('Salva anagrafica').disabled, 'COLD_COMPANY_ANAGRAPHIC_VALUES');
+        button('Annulla').click();
+        await wait(() => !document.querySelector('[data-profile-text-editor]'), 'COLD_COMPANY_ANAGRAPHIC_CANCEL');
+        assert(companyInputs.every(node => node.value === ''), 'COLD_COMPANY_ANAGRAPHIC_CLEAR');
+        document.querySelector('[data-profile-section="digital-card"]').click();
+        await wait(()=>document.querySelector('[data-digital-card-preview]'),'COLD_COMPANY_DIGITAL_TAB');
+        button('Modifica selezione').click();
+        await wait(()=>[...byId('content').querySelectorAll('button')].some(node=>node.textContent==='Salva selezione'), 'COLD_COMPANY_QR_EDITOR');
+        assert(byId('content').querySelectorAll('input[type="checkbox"]').length === 14, 'COLD_COMPANY_QR_CHOICES');
+        const companyEditorLabels = [...byId('content').querySelectorAll('label span')];
+        button('Genera QR dalla selezione salvata').click();
+        await wait(()=>byId('content').textContent.includes('QR pronto.'),'COLD_COMPANY_DIGITAL_READY');
+        const companyQr = document.querySelector('[data-digital-card-preview]'), companyCanvas = companyQr.querySelector('canvas');
+        assert(companyQr.title.includes('FN:Azienda fittizia') && companyQr.title.includes('pec@example.invalid'), 'COLD_COMPANY_DIGITAL_DATA');
+        assert(!/SEGRETO|personale@example.invalid|Visura/.test(companyQr.title), 'COLD_COMPANY_DIGITAL_EXCLUSION');
+        document.querySelector('[data-profile-section="pdf-summary"]').click();
+        await wait(() => [...byId('content').querySelectorAll('button')].some(node => node.textContent === 'Prepara PDF'), 'COLD_COMPANY_PDF_TAB');
+        button('Prepara PDF').click();
+        await wait(() => byId('content').textContent.includes('PDF pronto.'), 'COLD_COMPANY_PDF_READY');
+        const companyPdfValues = [...document.querySelectorAll('[data-company-pdf-preview] dd')];
+        assert(companyPdfValues.some(node => node.textContent === 'Azienda fittizia') && !companyPdfValues.some(node => /SEGRETO|Visura/.test(node.textContent)), 'COLD_COMPANY_PDF_DATA');
+        document.querySelector('[data-profile-section="contacts"]').click();
+        await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COLD_COMPANY_CONTACTS');
+        assert(companyCanvas.width === 0 && !companyQr.title, 'COLD_COMPANY_DIGITAL_CLEAR');
+        assert(companyEditorLabels.every(node => node.textContent === ''), 'COLD_COMPANY_QR_EDITOR_CLEAR');
+        assert(companyPdfValues.every(node => node.textContent === ''), 'COLD_COMPANY_PDF_CLEAR');
+        button('Mostra password').click();
+        await wait(()=>byId('content').textContent.includes('SEGRETO-FITTIZIO-company-Zeta-A'),'COLD_COMPANY_PASSWORD');
+        const companyValues=[...byId('content').querySelectorAll('dd')];
+        byId('private').click();
+        await wait(()=>document.querySelector('[data-action="navigate"][data-id="alfa"]'),'COLD_COMPANY_RETURN');
+        assert(companyValues.every(node=>node.textContent===''),'COLD_COMPANY_CLEARED');
+        document.querySelector('[data-action="navigate"][data-id="banca"]').click();
+        await wait(() => document.querySelector('[data-bank-id="fixture-two"] [data-bank-part="cards"] button'), 'COLD_BANKS');
+        const bank = document.querySelector('[data-bank-id="fixture-two"]');
+        assert(bank.children[0].textContent.includes('IBAN-SECONDO') && bank.children[1].dataset.bankPart === 'widgets' && bank.children[2].dataset.bankPart === 'cards', 'COLD_BANK_ORDER');
+        bank.children[1].querySelector('button').click();
+        await wait(() => bank.textContent.includes('BANK-WIDGET-private-fixture-two-A'), 'COLD_BANK_WIDGET');
+        [...bank.children[2].querySelectorAll('button')].find(node => node.textContent === 'Mostra PIN').click();
+        await wait(() => [...bank.children[2].querySelectorAll('.shared-account-value')].some(node => node.textContent === '5678'), 'COLD_BANK_PIN');
+        const bankValues = [...bank.querySelectorAll('.shared-account-value')];
+        byId('private').click(); await wait(() => document.querySelector('[data-action="navigate"][data-id="alfa"]'), 'COLD_BANK_BACK');
+        assert(bankValues.every(node => node.textContent === ''), 'COLD_BANK_CLEAR');
         if (window.__entryForced) {
             document.querySelector('[data-action="navigate"][data-id="alfa"]').click();
             await wait(() => byId('content').textContent.includes('già conservata sul dispositivo'), 'CRASH_QUEUE_RECOVERY');
@@ -88,8 +213,15 @@ try {
         sessionStorage.removeItem('synthetic-cold-phase');
         await fetch('/entry-result', {method: 'POST', body: JSON.stringify({ok: true, browser: navigator.userAgent,
             passed: [restartPhase ? 'static laboratory shell starts offline in a new browser process' : 'static laboratory shell reloads without network', 'Firebase identity restored from persistent storage',
-                'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required',
-                ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
+                'reloaded Vault remains locked and denies consultation', 'uncached HTTP remains blocked', 'new Master Password prompt required', 'profile identity and contacts render offline after restart without a prior profile visit',
+                  'linked shared private and company credentials readable after offline restart and cleared on exit',
+                  'company profile and linked credential readable on first offline visit after restart',
+                  'normal shell startup prepared textual domains without a probe or prior page visits',
+                  'address utility and its linked credential readable offline after restart',
+                  'company directory and second-company accounts available after automatic offline preparation',
+                  'nonempty Account Widget and common credential render after cold offline restart and clear on exit',
+                  'two banks and their Widget/card composition readable on first visit after offline restart',
+                  ...domains.map(domain => `persistent cached decryption after reload: ${domain}`),
                 ...(window.__entryForced ? ['offline pending note recovered after forced termination', 'recovered note synchronized explicitly after reconnect'] : []),
                 'domain matrix readable after reconnect', 'logout denies persistent cache consultation']})});
     }

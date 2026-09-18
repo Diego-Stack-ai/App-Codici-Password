@@ -7,11 +7,19 @@
 > **Dipendenze:** [Guida progetto](./GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
 
-Le tappe di adozione e le checkbox registrano la sequenza storica; lo stato corrente è il perimetro del primo cutover descritto in fondo. La flag disattivata del client generico non disattiva l'adattatore privato, che passa esplicitamente `enabled: true`. Il codice della coda richiede Web Locks: se l'API manca restituisce `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`; il fallback previsto dal contratto resta da realizzare e collaudare. Queste precisazioni non estendono i domini abilitati e non chiudono il gate bancario.
+Le tappe di adozione e le checkbox registrano la sequenza storica; lo stato corrente è il perimetro del primo cutover descritto in fondo. La flag disattivata del client generico non disattiva l'adattatore privato, che passa esplicitamente `enabled: true`. Il codice della coda nel runtime distribuito richiede Web Locks: se l'API manca restituisce `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`. Il candidato di laboratorio del fallback è ora completo e verificato in browser con l'API realmente assente (sezione M6-CLOSE del 18/09/2026); l'adozione nel runtime resta aperta. Queste precisazioni non estendono i domini abilitati e non chiudono il gate bancario.
 
 > **Esito vincolante:** il test iPhone del 10/09/2026 con Account bancario non ha superato la consultazione offline. Nessun altro esito “verde” può essere interpretato come certificazione dell’offline completo finché quel flusso e la matrice prevista non sono superati.
 
 ## Stato iniziale
+
+### Preparazione automatica nella shell — candidata 15/09/2026
+
+Base `2686b48e`, stessa PR #67. Lo sblocco avvia in background `prepareOfflineData` canonico; non dipende dal montaggio delle pagine. La shell mostra preparazione, esito incompleto e modalità offline; ritorno online ritenta senza decifrare contenuti. Blocco/cambio UID/perdita rete invalidano i risultati tardivi della UI. Richieste SDK già inviate possono terminare nella cache cifrata del rispettivo UID. Il deduplicatore canonico è ora separato per UID: una preparazione precedente non può diventare la Promise dell'utente successivo.
+
+Suite completa superata, inclusi 248 test shell e dieci test della preparazione del profilo. Browser Chrome/Edge: 80 verifiche entry e 56 arresto/riapertura superate. Il test di riapertura non invoca più il probe né visita profili prima di andare offline: attende il normale stato pronto, termina il browser e verifica dopo nuovo sblocco profilo personale/aziendale, credenziali, dati bancari, Widget del profilo e scadenze fittizi. Gli allegati in sottocollezioni non vengono precaricati da questo test; foto e byte file restano esclusi. La preparazione di accountWidgets/sharedVaultData è verificata nei test del servizio, non va confusa con una nuova prova browser di record non vuoti in quelle raccolte.
+
+Questa prova chiude la dipendenza dal preload manuale del laboratorio per i domini testati. Non certifica eviction, quota disco, ogni pagina produttiva o iPhone fisico. Nessuna modifica a formati/Rules/Functions o nuove scritture offline, nessun deploy. La shell è ancora incompleta e VS-P0-01 resta aperto in produzione.
 
 L'app usa la cache persistente multi-tab di Firestore e preriscalda le raccolte principali. Le letture offline sono quindi parzialmente operative, ma la coda implicita dell'SDK non offre all'interfaccia un contratto esplicito per revisione, idempotenza, conflitto o recupero dopo chiusura forzata.
 
@@ -314,7 +322,7 @@ Il laboratorio carica esplicitamente una matrice sintetica, poi disabilita la re
 |---|---|---|
 | Account personali e aziendali | Presenza nelle liste e password cifrate già caricate | Non tutte le schermate/categorie o installazioni reali |
 | Profili, email, telefoni, indirizzi e documenti | Lettura e decifratura dei campi sintetici del profilo | Non certifica foto, tessera QR e contenuto dei documenti |
-| Banca e carte | IBAN personale/aziendale, PIN e CCV già presenti nel documento | Gate iPhone e rendering bancario completo restano aperti |
+| Banca e carte | IBAN personale/aziendale, PIN e CCV già presenti nel documento; dal 18/09/2026 anche seconda banca e seconda carta, Widget bancari, cache mancante e riapertura (matrice M6-CLOSE) | Gate iPhone e byte Storage restano aperti |
 | Widget del profilo e scadenze | Dati sintetici letti dal repository/cache | Widget Account, credenziali condivise e altre varianti non inclusi |
 | Allegati | Nome e metadati Firestore già caricati | I byte su Storage usano getBytes e non hanno cache offline esplicita |
 | Avvio da app chiusa | Non coperto | Autenticazione, asset e cache persistente devono essere collaudati insieme |
@@ -404,3 +412,43 @@ PR #66 unita in master 0ba2332b298d155f0afb1a4eb50c9659115fe321; release 94792d8
 npm test completo e dieci scenari browser Chrome/Edge superati; GitHub Actions 34939530695 riuscita. Dopo il deploy, 31 file pubblicati corrispondono via SHA256 alla release. Prova Chrome con profilo isolato senza credenziali: nessuna struttura privata visibile e arrivo a /login-v115.html senza parametro di errore/timeout. Collaudo fisico iPhone ancora da eseguire, inclusa riapertura offline con sessione mantenuta e sblocco Vault.
 
 Produzione ora 1.2.127. PR #63 resta sperimentale: riallineare con master prima di integrare, evitando duplicazioni dei backport offline e logout. La direzione shell persistente resta confermata; questo rilascio non chiude il P0 legacy del wrapping in sessionStorage né l'intero audit sicurezza. Dettagli implementativi e regressioni sono in docs/AUDIT_VAULT_SESSION_P0.md del ramo produttivo e nella PR #66.
+
+## M6-CLOSE — 18/09/2026
+
+Incarico di chiusura delle attività autonome di M6, con ramo `integration/vault-shell-v127-security` e base `482e88f5`. Soltanto laboratorio, test e MD: nessuna modifica a `Frontend/public/**`, Rules o Functions produttive, `master`, versione, deploy o dati reali. Il gate fisico iPhone resta aperto e non blocca questa consegna. A1–A6 non sono stati rifatti; M7–M10 restano sospesi.
+
+### Fallback senza Web Locks verificato in browser
+
+Il contratto dichiara da tempo un fallback per i browser privi di Web Locks. Il laboratorio coordinava già entrambi i percorsi sullo stesso lease IndexedDB, ma due lacune impedivano di considerarlo completo: l'acquisizione non aveva un limite di tempo e non esisteva alcuna prova in un browser con l'API realmente assente.
+
+`experiments/offline-sync/hybrid-queue-coordinator.mjs` accetta ora `acquireTimeoutMs` (predefinito 10 s) e limita soltanto l'acquisizione. Se il lease IndexedDB o la richiesta di Web Lock non si concludono entro la scadenza, il comando non viene eseguito e viene restituito `HYBRID_ACQUIRE_TIMEOUT`: senza la piattaforma nulla può annullare una transazione bloccata o sospesa, quindi il fallback deve fallire chiuso invece di attendere indefinitamente. Un lease concesso in ritardo viene rilasciato senza eseguire il task, così una callback tardiva non può mutare la coda né dichiarare un salvataggio. Dopo l'acquisizione il timer viene annullato: il rinnovo periodico continua a coprire gli invii lunghi. Un oggetto Web Locks malformato fallisce con `HYBRID_LOCKS_INVALID` senza degradare al fallback; un lock occupato o rifiutato non aggira il blocco.
+
+Nuova suite dedicata `node experiments/offline-sync/run-browser-tests.mjs <browser> --no-locks`, riproducibile con `npm run test:offline-no-locks` su Chrome ed Edge. Pagina e Worker eliminano davvero `navigator.locks` prima di creare il coordinatore, che usa la risoluzione predefinita senza parametri iniettati; il report espone `webLocks: "undefined"`. Nove scenari superati in Chrome headless 152 ed Edge headless 153 su Windows, con profilo usa e getta, solo loopback e dati sintetici: coda cifrata mutata sotto il solo lease; esclusione reciproca pagina/Worker in entrambe le direzioni; subentro dopo scadenza reale con fencing del titolare ripreso; ripresa di un lease abbandonato con generazione monotona; scadenza dell'acquisizione bloccata senza eseguire il task e senza effetti da callback tardiva; richiesta di Web Lock che non si conclude mai; isolamento fra UID distinti; invalidazione di sessione con ciphertext intatto; riapertura della connessione con ciphertext e generazione conservati.
+
+I test unitari del coordinatore passano da sette a dodici e coprono gli stessi casi senza browser, inclusa la risoluzione predefinita con `navigator` privo di `locks`. Le 24 verifiche della suite browser di coordinamento esistente restano superate in Chrome 152: nessuna regressione.
+
+Limiti dichiarati: il percorso resta di laboratorio e non è importato dal runtime. `withOfflineQueueLease` in `Frontend/public/**` continua a restituire `OFFLINE_QUEUE_LOCKS_UNAVAILABLE` quando l'API manca, quindi l'adozione nel runtime, la distribuzione preparatoria delle copie PWA e i collaudi fisici restano aperti. Il fencing protegge le scritture IndexedDB, non ritira una richiesta di rete già inviata: le ricevute idempotenti del backend restano necessarie.
+
+### Matrice offline bancaria e delle UI previste
+
+Il collaudo `--entry-browser` e la matrice del laboratorio coprono ora esplicitamente le dimensioni del gate bancario. La rete viene disabilitata dal protocollo DevTools e un `fetch` di controllo deve fallire; le fixture sono sintetiche e nessun byte Storage viene incluso o dichiarato disponibile.
+
+| Dimensione richiesta | Evidenza nel laboratorio | Limite aperto |
+|---|---|---|
+| Account personali e aziendali | Lista e dettaglio aperti offline dopo lock/sblocco; decifratura dei campi sintetici nella matrice del probe | Installazioni reali e tutte le categorie di pagina |
+| Più banche e carte | Per ciascuno scope `fixture` (`IBAN-FITTIZIO`, PIN `1234`, CCV `000`) e `fixture-two` (`IBAN-SECONDO`, PIN `5678`, CCV `111`), con PIN e CCV rivelati nella UI | Nessun byte Storage; carte reali non provate |
+| Widget bancari | Widget bancari di entrambe le banche montati sopra le carte e rivelati offline | Nessuna nuova prova fisica |
+| Cache preparata | Matrice del probe online, poi riletta e decifrata offline dopo nuovo sblocco, anche per la seconda banca e la seconda carta | Eviction e quota disco non coperte |
+| Cache mancante | Offline il probe rifiuta i bancari mai preparati (`users/{uid}/accounts/banca-mai-preparata` e il percorso aziendale) invece di mostrare un record vuoto | Non distingue un documento esistente ma espulso dalla cache |
+| Rete assente | DevTools offline con HTTP bloccato e `navigator.onLine` falso; nessuna richiesta server durante la lettura | — |
+| Riapertura | Dettaglio bancario lasciato e riaperto nella stessa sessione con valori identici; dopo riavvio del processo browser con cache persistente la seconda banca e la seconda carta restano leggibili | PWA fisica e riavvio dispositivo |
+| Lock/sblocco | Blocco del Vault con accesso negato ai dati in cache, nuovo sblocco offline e rilettura della matrice | — |
+| Cambio sezione e pulizia dei valori | Uscita dal dettaglio bancario con azzeramento di tutti i valori rivelati, in ogni scope e in entrambe le modalità | — |
+
+Esecuzioni reali: `--entry-browser` superato in quattro esecuzioni (Chrome 152 ed Edge 153, profili desktop e mobile) con la matrice bancaria estesa e le nuove etichette di riapertura; `--restart-browser` superato in Chrome 152 ed Edge 153, 35 verifiche ciascuno, con la seconda banca e la seconda carta decifrate dopo il riavvio del processo e la cache persistente. I 723 test di `npm run test:vault-shell` restano superati, così come i 12 test unitari del coordinatore e le 71 prove offline del laboratorio.
+
+La matrice certifica disponibilità e decifratura dei dati sintetici già caricati e il comportamento delle UI di laboratorio, non l'avvio a freddo, ogni pagina di produzione, i file Storage, la PWA fisica o l'assenza di espulsione della cache sul telefono.
+
+### Gate residui di M6-CLOSE
+
+Aperti e non chiusi da questa consegna: test fisico iPhone/PWA riservato a Diego (checklist dedicata in [M6_CHECKLIST_IPHONE.md](./M6_CHECKLIST_IPHONE.md)); adozione del fallback senza Web Locks e del lease nel runtime distribuito; distribuzione preparatoria e compatibilità delle copie PWA con lo schema IndexedDB; trasporto autenticato e App Check reali; concorrenza reale fra schede e dispositivi sul runtime distribuito; cache espulsa e avvio da processo terminato sul dispositivo fisico.

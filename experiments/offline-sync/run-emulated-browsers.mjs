@@ -9,9 +9,10 @@ const candidates = process.platform === 'win32' ? [
     [process.env.EDGE_PATH, '/usr/bin/microsoft-edge', '/usr/bin/microsoft-edge-stable']
 ];
 const paths = candidates.map(group => group.find(path => path && existsSync(path)));
+const modes = process.argv.includes('--no-locks') ? ['--no-locks'] : ['--backend', '--private-backend'];
 for (const browser of paths) {
     if (!browser) throw new Error('Chrome/Edge unavailable; set CHROME_PATH and EDGE_PATH to executable paths');
-    for (const mode of ['--backend', '--private-backend']) {
+    for (const mode of modes) {
         const result = spawnSync(process.execPath, [fileURLToPath(new URL('./run-browser-tests.mjs', import.meta.url)), browser, mode],
             {env: process.env, stdio: 'inherit', windowsHide: true});
         if (result.error) throw result.error;

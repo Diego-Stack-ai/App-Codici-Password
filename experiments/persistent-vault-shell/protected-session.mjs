@@ -28,6 +28,11 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
         const unlocked = Boolean(uid && vault.isUnlocked());
         if (context.signal.aborted) return;
         return mount({...context, user: uid ? Object.freeze({uid}) : null, unlocked,
+            assertUnlocked() {
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                assertOwner(uid, epoch);
+                if (!vault.isUnlocked()) throw new Error('VAULT_LOCKED');
+            },
             async read(record) {
                 if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
                 assertOwner(uid, epoch);
@@ -43,6 +48,25 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
                 assertOwner(uid, epoch);
                 if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
                 return ciphertext;
+            },
+            // Binary capability of the session: a route can seal and open the
+            // document images of this owner only, and loses both on lock, logout or
+            // UID change, because the Vault is re-checked before and after each use.
+            async sealImage({bytes, aad}) {
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                assertOwner(uid, epoch);
+                const sealed = await vault.sealImage(uid, {bytes, aad});
+                assertOwner(uid, epoch);
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                return sealed;
+            },
+            async openImage({payload, envelope, aad}) {
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                assertOwner(uid, epoch);
+                const plaintext = await vault.openImage(uid, {payload, envelope, aad});
+                assertOwner(uid, epoch);
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                return plaintext;
             }
         });
     }]));
