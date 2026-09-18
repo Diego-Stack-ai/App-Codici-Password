@@ -729,3 +729,13 @@ A5-R1 chiude il gate browser Chrome. La causa era la readiness del picker: il pu
 ## A6 — editor credenziali standard Account (18/09/2026)
 
 Il dettaglio personale e aziendale della shell monta ora un editor candidato per `nomeAccount`, `username`, `account`, `password` e `url`. La transazione verifica identità composta, proprietà, revisione, impronta e backlink, preservando note, allegati, condivisioni, banking, referente, Widget, credenziali comuni e campi estranei. Offline è consultativo e il plaintext viene pulito su uscita e revoca. Il formato legacy lascia nome e URL in chiaro; A6 cifra anche il nome per il nuovo confine e conserva l'URL canonico HTTP(S) in chiaro, senza migrazione implicita. Dettagli in `experiments/persistent-vault-shell/docs/A6_EDITOR_CREDENZIALI_STANDARD.md`. Rules/Functions produttive e gli editor Widget/banking restano fuori perimetro.
+
+**A6 APPROVATO DA CODEX — 18/09/2026.** Revisione indipendente: diff e perimetro puliti, unitari A6 **9/9**. Restano separati il gate Edge, la migrazione legacy e ogni attivazione produttiva.
+
+## M6-CLOSE — incarico autonomo limitato a M6
+
+Stato: **PRONTO**. Censire i soli gate M6 ancora aperti alla luce delle prove recenti, senza riaprire A1–A6 né anticipare altri livelli. Completare nel laboratorio il fallback di esclusione reciproca quando Web Locks non è disponibile e renderlo verificabile per concorrenza, chiusura, crash/ripresa e cambio UID. Completare una matrice offline bancaria/UI verificabile che distingua dati preparati, cache mancante, riapertura, lock/sblocco, cambio sezione, Widget bancari, carte e pulizia del plaintext, senza dichiarare coperti byte Storage o dati mai preparati.
+
+Predisporre una checklist operativa per preview e PWA iPhone: versione/build osservata, preparazione online, mantenimento sessione, modalità aereo, chiusura/riapertura, nuovo sblocco, schermate da consultare, eviction/cache miss, evidenze e criteri di arresto. La checklist non vale come esecuzione: nessuna prova fisica, preview remota, rollout o gate produttivo può essere dichiarato superato senza evidenza reale.
+
+**M7, M8, M9 e M10: SOSPESI PER DECISIONE UTENTE FINO AL 21/09/2026.** Non modificarli, avviarli o usare M6-CLOSE per anticiparne retention, backup/ripristino, accessibilità fisica, monitoraggio o rollout.

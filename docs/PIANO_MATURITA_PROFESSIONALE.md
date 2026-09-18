@@ -696,3 +696,11 @@ Il selettore Account del laboratorio offre ora la creazione personale o aziendal
 ### Incremento A6 — editor standard Account candidato (18/09/2026)
 
 La shell modifica soltanto nome, username, account/codice, password e URL su Account personali e aziendali. Il servizio candidato accetta i backlink canonici invece di escludere gli Account collegati, li verifica nella transazione e preserva byte per byte ogni campo estraneo; Widget e credenziali comuni restano documenti esterni intatti. Richiesta, revisione, impronta e ricevuta rendono retry e conflitti fail-closed. Offline resta consultativo; capability e input vengono revocati o puliti su lifecycle. L'overlay Rules è soltanto di laboratorio e chiude i writer diretti A6. Nessun editor Widget, banking o migrazione legacy è incluso.
+
+**A6 APPROVATO DA CODEX — 18/09/2026.** Diff/perimetro revisionati indipendentemente e unitari A6 **9/9**. L'approvazione riguarda il candidato di laboratorio e non chiude Edge, migrazione legacy, Rules/Functions o rollout produttivi.
+
+### Incarico M6-CLOSE — PRONTO
+
+Perimetro esclusivo M6: ricostruire dai risultati già registrati l'elenco dei gate ancora aperti; completare e provare il fallback senza Web Locks; completare nel laboratorio la matrice offline bancaria/UI con stati di cache, riapertura, lock/sblocco, cambio sezione e pulizia. Preparare inoltre una checklist preview/PWA iPhone ripetibile, senza attribuirle l'esito di prove fisiche non eseguite. Nessun deploy, dato reale, modifica produttiva, master o versione.
+
+**M7–M10 sono SOSPESI PER DECISIONE UTENTE FINO AL 21/09/2026.** Durante M6-CLOSE non devono essere modificati o avviati.

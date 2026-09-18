@@ -858,3 +858,33 @@ Non implementare ancora editor Widget, riordino, template, modifica banking/cart
 - **Prove:** unitari A6 **9/9**; `npm run test:vault-shell` **723/723**; `npm test` completo **exit 0**; inventario rigenerato a **778 file**; `git diff --check` pulito.
 - **Browser:** Chrome 152 desktop 1280×800 dpr 1 e mobile 390×844 dpr 3 superano l'intero scenario, incluse modifica/ripristino dei cinque campi personale e aziendale, stesso ID in aziende diverse, Account con più origini, note, banking, Widget, Credenziale comune, offline, rilettura e pulizia. Edge desktop è stato tentato e termina prima dell'endpoint con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`; mobile Edge non è quindi dichiarato provato.
 - **Scostamenti e rischi:** il collaudo ha richiesto di correggere il lettore dettaglio e le fixture affinché l'URL segua davvero la forma canonica in chiaro. Le Rules/Functions produttive, la migrazione dei nomi legacy, gli editor Widget/banking, il dispositivo fisico e il gate Edge restano aperti. Invariati `Frontend/public/**`, Rules/Functions produttive, `master` e versione `1.2.127`; nessun deploy, dato o migrazione reale.
+
+## Verifica Codex — A6
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-18.
+- **Commit verificati:** `3b399f9c` (lavoro A6) e `482e88f5` (rapporto).
+- **Prove indipendenti:** diff/perimetro puliti; unitari A6 **9/9**.
+- **Gate residui:** Edge, migrazione dei nomi legacy, Rules/Functions e rollout produttivi restano separati.
+
+## Incarico Codex — M6-CLOSE
+
+Chiudere il lavoro autonomo ancora verificabile di M6 senza estendere il perimetro ad altri livelli.
+
+### Perimetro e obiettivi
+
+- Censire i gate M6 ancora aperti rispetto alle evidenze recenti, distinguendo ciò che è già provato nel laboratorio da preview, PWA/dispositivo fisico e rollout produttivo.
+- Completare il fallback di esclusione reciproca quando Web Locks non è disponibile. Coprire contesa fra contesti, proprietà/lease, timeout, chiusura, crash/ripresa, cambio UID e callback tardive con comportamento fail-closed.
+- Completare una matrice offline bancaria/UI verificabile nel laboratorio: Account personali e aziendali, più banche e carte, Widget bancari, cache preparata o mancante, rete assente, riapertura, lock/sblocco, cambio sezione e pulizia dei valori. Non includere byte Storage né dichiarare leggibili dati mai preparati.
+- Predisporre una checklist preview/PWA iPhone eseguibile dall'utente con prerequisiti, build/versione, preparazione online, sessione mantenuta, modalità aereo, chiusura/riapertura, nuovo sblocco, schermate, eviction/cache miss, evidenze attese e criteri di stop. La sola checklist non supera alcun gate fisico.
+
+### Verifiche e consegna
+
+- Unitari mirati, emulatori pertinenti e browser Chrome/Edge desktop/mobile quando applicabile; riferire esiti reali e separare limiti ambientali.
+- `npm run test:vault-shell`, `npm test`, inventario, `git diff --check` e rapporto finale `DA_VERIFICARE`.
+- Solo laboratorio, test/script e MD autorevoli. Nessun `Frontend/public/**`, Rules/Functions produttive, master, versione, deploy, dato o migrazione reale; commit locali e nessun push.
+
+### Sospensione vincolante
+
+**M7, M8, M9 e M10: SOSPESI PER DECISIONE UTENTE FINO AL 21/09/2026.** Non modificarli, avviarli o anticiparne attività durante M6-CLOSE.
+
+**Stato incarico: PRONTO** — M6-CLOSE disposto da Codex il 2026-09-18; base locale `482e88f5` con questo solo commit documentale successivo.
