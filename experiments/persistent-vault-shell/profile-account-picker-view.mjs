@@ -10,6 +10,10 @@ export async function mountProfileAccountPicker(root, context, {load, filterAcco
     search.placeholder = 'Cerca Account o azienda'; search.setAttribute('aria-label', 'Cerca Account o azienda');
     scope.setAttribute('aria-label', 'Ambito degli Account'); status.setAttribute('role', 'status');
     more.type = create.type = cancel.type = 'button'; more.textContent = 'Mostra altri'; create.textContent = 'Crea un nuovo Account'; cancel.textContent = 'Annulla'; more.hidden = true;
+    // The shell is allowed to expose the picker frame while its confirmed read is
+    // still pending. Keep creation inert until the canonical company scopes and
+    // its click handler are ready; otherwise an early user click is silently lost.
+    create.disabled = true;
     const check = () => {if (disposed || context.signal.aborted) throw Error('VIEW_DISPOSED'); context.assertUnlocked();};
     const clear = () => {renderControls?.abort(); for (const node of list.querySelectorAll('button')) node.textContent = ''; list.replaceChildren();};
     const dispose = () => {
@@ -57,6 +61,7 @@ export async function mountProfileAccountPicker(root, context, {load, filterAcco
         more.addEventListener('click', () => {try {maximum += 50; render();} catch {dispose();}}, {signal: controls.signal});
         create.hidden = typeof onCreate !== 'function';
         create.addEventListener('click', () => {try {check(); const choices = [...companies].map(([companyId, companyName]) => ({companyId, companyName})); dispose(); onCreate(choices);} catch {dispose();}}, {signal: controls.signal});
+        create.disabled = false;
         render();
     } catch (error) {dispose(); throw error;}
     return dispose;

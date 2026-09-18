@@ -30,6 +30,7 @@ async function checkProfileLink(mode, id, target) {
         assert(byId('content').querySelectorAll('[data-profile-link-action="unlink"]').length === originalCount - 1, 'LINK_OTHER_CONTACTS_PRESERVED');
         action('change').click();
         await wait(() => document.querySelector('[data-profile-account-picker] input'), 'LINK_PICKER');
+        await wait(() => button('Crea un nuovo Account') && !button('Crea un nuovo Account').disabled, 'ACCOUNT_CREATE_READY');
         button('Crea un nuovo Account').click();
         await wait(() => document.querySelector('[data-profile-account-create]'), 'ACCOUNT_CREATE');
         const createHost = document.querySelector('[data-profile-account-create]'), fields = createHost.querySelectorAll('input');

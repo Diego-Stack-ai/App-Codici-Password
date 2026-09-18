@@ -102,6 +102,20 @@ test('picker exposes new Account creation with canonical company choices', async
     assert.equal(create.hidden, false); create.dispatchEvent(new Event('click'));
     assert.deepEqual(choices, [{companyId: 'firm', companyName: 'Società'}]); assert.equal(root.children.length, 0);
 });
+test('picker enables creation only after its confirmed read and deterministically mounts the creation form', async () => {
+    const f = fixture(), root = new Node('root'); let release, mounted;
+    const pending = mountProfileAccountPicker(root, f.context, {load: () => new Promise(resolve => {release = resolve;}),
+        filterAccounts: filterProfileAccounts, onSelect() {}, onCancel() {}, onCreate: companies => {
+            const form = new Node('section'); form.dataset.profileAccountCreate = 'true'; form.companies = companies; root.append(form); mounted = form;
+        }});
+    const create = root.querySelectorAll('button').find(node => node.textContent === 'Crea un nuovo Account');
+    assert.equal(create.disabled, true); create.dispatchEvent(new Event('click')); assert.equal(mounted, undefined);
+    release(await f.read()); await pending;
+    assert.equal(create.disabled, false); create.dispatchEvent(new Event('click'));
+    assert.equal(mounted?.dataset.profileAccountCreate, 'true');
+    assert.deepEqual(mounted?.companies, [{companyId: 'firm', companyName: 'Società'}]);
+    assert.deepEqual(root.children, [mounted]);
+});
 test('late picker load after cancel/abort never renders or replaces the next view', async () => {
     for (const abort of [true, false]) {
         const f = fixture(), root = new Node('root'); let release;

@@ -64,9 +64,15 @@ test('legacy transfer is explicit, preserves it when declined and removes only a
     const moved = fixture(); const b = await moved.run(moved.request({transfer: true}), moved.trusted);
     assert.equal(Object.hasOwn(moved.records.get(moved.sourcePath).contactEmails[0], 'password'), false);
     assert.equal(moved.records.get(`users/owner/accounts/${b.account.id}`).password, cipher('legacy'));
+    const receipt = [...moved.records.entries()].find(([path]) => path.startsWith('mutationResults/'))?.[1];
+    assert.ok(receipt); assert.ok(!JSON.stringify(receipt).includes(cipher('legacy')));
+    assert.equal(Object.hasOwn(receipt, 'password'), false); assert.equal(Object.hasOwn(receipt, 'expectedLegacyPassword'), false);
     const conflict = fixture(); const request = conflict.request({transfer: true}); conflict.records.get(conflict.sourcePath).contactEmails[0].password = cipher('changed');
     await assert.rejects(conflict.run(request, conflict.trusted), /LINK_CONFLICT|LEGACY_PASSWORD_CHANGED/);
     assert.equal([...conflict.records.keys()].some(path => path.includes('/accounts/')), false);
+    const plaintext = fixture(); const invalid = plaintext.request({transfer: true}); invalid.password = invalid.expectedLegacyPassword = 'legacy-plaintext';
+    await assert.rejects(plaintext.run(invalid, plaintext.trusted), /PROFILE_ACCOUNT_CREATE_INVALID/);
+    assert.equal([...plaintext.records.keys()].some(path => path.includes('/accounts/')), false);
 });
 
 test('concurrency, foreign company and receipt reuse fail closed without orphan Accounts', async () => {

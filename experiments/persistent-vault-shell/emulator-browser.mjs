@@ -20,13 +20,14 @@ const cold = process.argv.includes('--test-cold') || restart;
 const attachmentsBrowser = process.argv.includes('--test-attachments');
 const companyContactsBrowser = process.argv.includes('--test-company-contacts');
 const addressesBrowser = process.argv.includes('--test-addresses');
+const entryBrowser = process.argv.includes('--test');
 // The A2 scenario runs once per device profile: the profile is applied through
 // DevTools before the page loads and is part of the identity of each result.
 const DEVICE_PROFILES = Object.freeze([
     Object.freeze({name: 'desktop', width: 1280, height: 800, deviceScaleFactor: 1, mobile: false}),
     Object.freeze({name: 'mobile', width: 390, height: 844, deviceScaleFactor: 3, mobile: true})
 ]);
-const automated = process.argv.includes('--test') || cold || attachmentsBrowser || companyContactsBrowser || addressesBrowser;
+const automated = entryBrowser || cold || attachmentsBrowser || companyContactsBrowser || addressesBrowser;
 let reportResult;
 await buildEmulator({persistent: cold});
 const source = await readFile(`${base}/../../Frontend/public/assets/js/modules/core/crypto-utils.js`, 'utf8');
@@ -161,7 +162,7 @@ await new Promise(done => server.listen(4188, '127.0.0.1', done));
 console.log('Laboratorio pronto: http://127.0.0.1:4188 — solo fixture locali');
 if (automated) {
     try { await (await import('./emulator-entry-runner.mjs')).runEntryBrowsers(() => new Promise(resolve => { reportResult = resolve; }), {restart, forced,
-        deviceProfiles: addressesBrowser ? DEVICE_PROFILES : []}); }
+        deviceProfiles: addressesBrowser || entryBrowser ? DEVICE_PROFILES : []}); }
     finally { server.closeAllConnections(); await new Promise(done => server.close(done)); }
     process.exit(0);
 }
