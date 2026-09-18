@@ -845,4 +845,16 @@ Realizzare la prima fetta verticale verificabile degli editor completi Account: 
 
 Non implementare ancora editor Widget, riordino, template, modifica banking/carte o migrazioni legacy: questa fetta deve soltanto preservarne i dati e dimostrare che l'editor standard non li danneggia.
 
-**Stato incarico: PRONTO** — A6 disposto da Codex il 2026-09-18; base locale `035a8a07` con questo solo commit documentale successivo.
+**Stato incarico: DA_VERIFICARE** — A6 completato localmente da Codex il 2026-09-18; commit di lavoro `3b399f9c`; nessun push.
+
+## Rapporto Codex — A6 editor credenziali standard Account
+
+- **Stato:** COMPLETATO — `DA_VERIFICARE`.
+- **Commit di lavoro:** `3b399f9c` (`feat(shell): edit standard account credentials`), costruito sulla punta locale `652524fa`; nessun push tentato.
+- **Censimento e formato:** i writer legacy personali/aziendali lasciano `nomeAccount` e `url` in chiaro e cifrano username, account/codice, password e nota. Il confine A6 richiesto cifra i primi quattro campi standard, incluso il nome, e conserva l'URL canonico HTTP(S) in chiaro. Non viene inventata una migrazione: i nomi legacy in chiaro restano incompatibili con questo editor candidato.
+- **Consegnato:** contratto/allowlist, preparazione revocabile, sorgente, vista/provider, servizio transazionale e ricevuta idempotente. “Modifica Account” è montato nei dettagli personali e aziendali del laboratorio; la rilettura confermata aggiorna il dettaglio senza reload. Account collegati sono ammessi dopo verifica dei backlink; note, allegati, proprietà/condivisioni, archivio, banking, referente, Widget, credenziali comuni e campi estranei restano invariati.
+- **Sicurezza e lifecycle:** richiesta immutabile con UID, identità composta, revisione e impronta; retry identico restituisce lo stesso esito, conflitti o relazioni malformate non scrivono. Offline è consultativo. Lock, logout, cambio UID, navigazione e callback tardive revocano la capability; salvataggio e annullamento puliscono gli input. Solo la password Account usa semantica credenziale.
+- **Rules/emulatore:** l'overlay candidato compone i confini collegamenti e note e vieta modifiche client dirette dei cinque campi. La prima prova, eseguita erroneamente sulle Rules produttive permissive, ha rilevato il problema; la prova finale usa l'overlay e una transazione Admin reale. Firestore Emulator **1/1**, con Account personale/aziendale dallo stesso ID, retry, Rules e preservazione dei documenti esterni.
+- **Prove:** unitari A6 **9/9**; `npm run test:vault-shell` **723/723**; `npm test` completo **exit 0**; inventario rigenerato a **778 file**; `git diff --check` pulito.
+- **Browser:** Chrome 152 desktop 1280×800 dpr 1 e mobile 390×844 dpr 3 superano l'intero scenario, incluse modifica/ripristino dei cinque campi personale e aziendale, stesso ID in aziende diverse, Account con più origini, note, banking, Widget, Credenziale comune, offline, rilettura e pulizia. Edge desktop è stato tentato e termina prima dell'endpoint con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`; mobile Edge non è quindi dichiarato provato.
+- **Scostamenti e rischi:** il collaudo ha richiesto di correggere il lettore dettaglio e le fixture affinché l'URL segua davvero la forma canonica in chiaro. Le Rules/Functions produttive, la migrazione dei nomi legacy, gli editor Widget/banking, il dispositivo fisico e il gate Edge restano aperti. Invariati `Frontend/public/**`, Rules/Functions produttive, `master` e versione `1.2.127`; nessun deploy, dato o migrazione reale.
