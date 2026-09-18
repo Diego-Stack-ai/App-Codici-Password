@@ -941,11 +941,12 @@ DeepSeek deve ora completare tutte le attività autonome di M6-CLOSE: verificare
 
 ### Scostamenti dall'incarico
 
-- Il protocollo prevede un solo commit dedicato: risultano tre commit complessivi, di cui **uno solo** con codice e test (`dcccdc0b`); `7f53da42` è la presa in carico richiesta dal passo 3 e l'ultimo pubblica questo rapporto, come già accettato per DS-001. Coerente con la richiesta di Diego di commit separati per lavoro e rapporto.
+- Il protocollo prevede un solo commit dedicato: risultano quattro commit locali, di cui **uno solo** con codice e test (`dcccdc0b`); `7f53da42` è la presa in carico richiesta dal passo 3, la prima revisione di questo rapporto è `59f35246` e l'ultimo è la sua messa a punto finale. Coerente con la richiesta di Diego di commit separati per lavoro e rapporto.
+- **Pubblicazione non richiesta da DeepSeek:** durante il lavoro un processo esterno di supervisione ha pubblicato su `origin/integration/vault-shell-v127-security` i commit `7f53da42`, `dcccdc0b` e la prima revisione del rapporto `59f35246` (reflog «update by push»), senza alcun `git push` eseguito da DeepSeek. Il commit locale di messa a punto del rapporto è un fast-forward di `59f35246` e non è stato pubblicato: non serve alcun force-push. Nessun altro push è stato effettuato.
 - Aggiunta al candidato di laboratorio la scadenza `acquireTimeoutMs` (predefinita 10 s): è l'unico modo per coprire la voce «timeout ... fail-closed» dell'incarico, perché senza Web Locks nulla può annullare una transazione bloccata e il chiamante restava in attesa indefinita. L'opzione è retrocompatibile e non modifica il comportamento dei chiamanti esistenti.
 - `package.json` riceve il solo script `test:offline-no-locks` per rendere riproducibile la prova in browser; nessuna dipendenza o versione modificata.
-- Il Worker del laboratorio accetta tre opzioni sintetiche (`stripLocks`, `holdMs`, `ttlMs`); i chiamanti esistenti non passano alcuna di esse e restano invariati.
-- `FILE_INVENTORY.md` è rigenerato nel commit di lavoro; il rapporto modifica questo file, quindi la sua riga di inventario viene riallineata nel commit del rapporto.
+- Il Worker del laboratorio accetta quattro opzioni sintetiche opzionali (`stripLocks`, `holdMs`, `ttlMs`, `acquireTimeoutMs`); i chiamanti esistenti non ne passano alcuna e restano invariati.
+- `FILE_INVENTORY.md` è rigenerato nel commit di lavoro mentre i due file nuovi erano ancora non tracciati; il generatore elenca prima i file tracciati e poi gli altri, quindi il loro inserimento nell'indice ha riordinato le righe e il commit del rapporto contiene la rigenerazione definitiva, insieme alla riga aggiornata di questo file. Verificato che il generatore è deterministico: una seconda esecuzione a albero pulito non produce alcuna differenza.
 
 ### Rischi residui e gate
 

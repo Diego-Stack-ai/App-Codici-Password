@@ -312,7 +312,7 @@ File censiti: **780**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 185996 | 965 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 186831 | 966 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -360,7 +360,7 @@ File censiti: **780**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
 | `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 26806 | 320 | File di progetto: browser-backend-sync. |
-| `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1828 | 30 | File di progetto: browser-coordination-worker. |
+| `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1857 | 30 | File di progetto: browser-coordination-worker. |
 | `experiments/offline-sync/browser-coordination.mjs` | MJS | 17832 | 239 | File di progetto: browser-coordination. |
 | `experiments/offline-sync/browser-no-locks.mjs` | MJS | 12715 | 195 | File di progetto: browser-no-locks. |
 | `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
