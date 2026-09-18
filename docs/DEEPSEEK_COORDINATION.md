@@ -911,3 +911,54 @@ DeepSeek deve ora completare tutte le attività autonome di M6-CLOSE: verificare
 - **Gate dichiarati aperti e non bloccanti:** test fisico iPhone/PWA (riservato a Diego); adozione nel runtime distribuito del fallback senza Web Locks; roll-out dello schema IndexedDB e copie PWA; trasporto autenticato/App Check reale; concorrenza reale fra dispositivi.
 
 **Stato incarico: IN_LAVORAZIONE** — M6-CLOSE preso in carico da DeepSeek il 2026-09-18 alle 09:23; il gate iPhone resta aperto e non blocca la consegna delle attività autonome.
+
+## Rapporto DeepSeek — M6-CLOSE
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** presa in carico `7f53da42`, lavoro `dcccdc0b` (`feat(offline): complete Web Locks fallback and banking offline matrix`); base obbligatoria `482e88f5` intatta; nessun push eseguito.
+- **File modificati:** 14 file nel commit di lavoro (618 aggiunte / 90 rimozioni). Codice e test: `experiments/offline-sync/hybrid-queue-coordinator.mjs` (+30/−7), `hybrid-queue-coordinator.test.mjs` (+120/−3), `browser-no-locks.mjs` (nuovo, +194), `browser-coordination-worker.mjs` (+8/−1), `run-browser-tests.mjs` (+4/−2), `run-emulated-browsers.mjs` (+2/−1), `experiments/persistent-vault-shell/offline-consultation-probe.mjs` (+14), `emulator-entry-check.mjs` (+32/−7), `package.json` (+1). MD: `M6_SINCRONIZZAZIONE_OFFLINE.md` (+42/−2), `M6_CHECKLIST_IPHONE.md` (nuovo, +100), `AUDIT_PROGETTO_FASE2_STATICO.md` (+4/−2), `OFFLINE_WRITE_CONFLICT_POLICY.md` (+1/−1), `FILE_INVENTORY.md` rigenerato (66/64). Questo file di coordinamento è toccato solo da presa in carico e rapporto.
+
+### Attività completate
+
+1. **Fallback senza Web Locks.** `hybrid-queue-coordinator.mjs` accetta `acquireTimeoutMs` (predefinito 10 s) e limita la sola acquisizione: lease IndexedDB o richiesta di Web Lock che non si concludono entro la scadenza producono `HYBRID_ACQUIRE_TIMEOUT` senza eseguire il comando; un lease concesso in ritardo viene rilasciato e la callback tardiva non può mutare la coda né dichiarare un salvataggio. Dopo l'acquisizione il timer è annullato e il rinnovo periodico resta valido. Web Locks malformato resta `HYBRID_LOCKS_INVALID` senza degradare al fallback. Nuova suite `run-browser-tests.mjs <browser> --no-locks` (script `test:offline-no-locks`) in cui pagina e Worker eliminano davvero `navigator.locks` e usano la risoluzione predefinita: contesa fra contesti, proprietà/lease, timeout, chiusura/invalidazione sessione, crash/ripresa con generazione monotona, cambio UID e callback tardive, tutti fail-closed.
+2. **Matrice offline bancaria e delle UI.** Il probe di consultazione decifra ora anche la seconda banca e la seconda carta di entrambi gli scope (aziendale e personale) e, offline, rifiuta i bancari mai preparati invece di mostrare un record vuoto. Il collaudo dell'entry rivela PIN **e** CCV di ogni carta, verifica Widget bancari sopra le carte e aggiunge una riapertura esplicita del dettaglio (`reopened <scope> banking detail keeps two banks, Widgets, PIN and CCV`) con pulizia dei valori all'uscita. Matrice completa con limiti e evidenze in `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` § M6-CLOSE.
+3. **Test mirati indispensabili.** Elencati sotto; nessun test ridondante rieseguito oltre a quelli richiesti dall'incarico.
+4. **MD autorevoli.** `M6_SINCRONIZZAZIONE_OFFLINE.md` (stato del fallback nella premessa, tabella della matrice, sezione M6-CLOSE, gate residui), `OFFLINE_WRITE_CONFLICT_POLICY.md` (regola 7: lease IndexedDB e scadenza dell'acquisizione), `AUDIT_PROGETTO_FASE2_STATICO.md` (F2-P1-07 e gate aperti), `FILE_INVENTORY.md` rigenerato.
+5. **Checklist iPhone.** `docs/M6_CHECKLIST_IPHONE.md`, eseguibile da Diego: prerequisiti, versione attesa `v1.2.127` letta nel piè di pagina, preparazione online, mantenimento sessione, modalità aereo, chiusura/riapertura e riavvio, 13 verifiche offline con esito per riga, cache mancante ed espulsione, evidenze attese, criteri di stop ed esito.
+
+### Verifiche eseguite ed esiti reali
+
+- `node --test experiments/offline-sync/hybrid-queue-coordinator.test.mjs` → **12/12** (erano 7; cinque nuove regressioni).
+- `npm run test:offline-write-prototype` → **121/121**.
+- `npm run test:vault-shell` → **723/723**.
+- `npm run test:offline-no-locks` → Chrome headless **152** ed Edge headless **153**, **9 scenari ciascuno**, report con `webLocks: "undefined"`.
+- Suite browser di coordinamento esistente (`run-browser-tests.mjs <chrome>` senza flag) → **24/24** in Chrome 152: nessuna regressione dal limite di acquisizione.
+- `node scripts/run-vault-session-emulators.mjs --entry-browser` → **quattro esecuzioni superate** (Chrome 152 ed Edge 153, profili desktop e mobile), con la matrice bancaria estesa e la riapertura del dettaglio offline.
+- `node scripts/run-vault-session-emulators.mjs --restart-browser` → Chrome 152 ed Edge 153, **35 verifiche ciascuno**, con seconda banca e seconda carta decifrate dopo riavvio del processo e cache persistente.
+- `npm test` completo → **exit 0**.
+- `git diff --check` → **pulito**; `npm run audit:inventory` → 780 file.
+- `master` locale osservato `445b338d`, non modificato; versione `1.2.127` invariata; nessun deploy, dato reale, Rules o Function produttiva toccati; `Frontend/public/**` invariato (verificato dopo `build:offline-runtime`, che resta un no-op).
+
+### Scostamenti dall'incarico
+
+- Il protocollo prevede un solo commit dedicato: risultano tre commit complessivi, di cui **uno solo** con codice e test (`dcccdc0b`); `7f53da42` è la presa in carico richiesta dal passo 3 e l'ultimo pubblica questo rapporto, come già accettato per DS-001. Coerente con la richiesta di Diego di commit separati per lavoro e rapporto.
+- Aggiunta al candidato di laboratorio la scadenza `acquireTimeoutMs` (predefinita 10 s): è l'unico modo per coprire la voce «timeout ... fail-closed» dell'incarico, perché senza Web Locks nulla può annullare una transazione bloccata e il chiamante restava in attesa indefinita. L'opzione è retrocompatibile e non modifica il comportamento dei chiamanti esistenti.
+- `package.json` riceve il solo script `test:offline-no-locks` per rendere riproducibile la prova in browser; nessuna dipendenza o versione modificata.
+- Il Worker del laboratorio accetta tre opzioni sintetiche (`stripLocks`, `holdMs`, `ttlMs`); i chiamanti esistenti non passano alcuna di esse e restano invariati.
+- `FILE_INVENTORY.md` è rigenerato nel commit di lavoro; il rapporto modifica questo file, quindi la sua riga di inventario viene riallineata nel commit del rapporto.
+
+### Rischi residui e gate
+
+- Il fallback resta di laboratorio: `withOfflineQueueLease` in `Frontend/public/**` continua a restituire `OFFLINE_QUEUE_LOCKS_UNAVAILABLE` con l'API assente. Adozione nel runtime, distribuzione preparatoria delle copie PWA, upgrade dello schema IndexedDB e rollback compatibile restano aperti.
+- La voce «cache mancante» dimostra il rifiuto di un bancario mai preparato o inesistente; **non** distingue un documento esistente ma espulso dalla cache. Il limite è dichiarato nella matrice.
+- Il fencing protegge le scritture IndexedDB e non ritira una richiesta di rete già inviata: le ricevute idempotenti del backend restano necessarie.
+- Trasporto autenticato, App Check reale e concorrenza reale fra schede e dispositivi sul runtime distribuito restano fuori dal lavoro autonomo completato.
+- **Unico gate fisico non superato:** il test iPhone/PWA di `docs/M6_CHECKLIST_IPHONE.md`, dichiarato APERTO e non bloccante; richiede Diego e un dispositivo reale, e M6-CLOSE non ha eseguito alcun rilascio o preview.
+
+### Note per Codex
+
+- Il punto da controllare nel diff è `hybrid-queue-coordinator.mjs`: la scadenza copre solo l'acquisizione, il timer è annullato dopo il lease e un lease tardivo viene rilasciato senza eseguire il task. Le cinque nuove regressioni unitarie e i nove scenari browser con `navigator.locks` assente sono la prova diretta.
+- Per rieseguire: `node --test experiments/offline-sync/hybrid-queue-coordinator.test.mjs`, `npm run test:offline-no-locks`, `npm run test:vault-shell`, `npm run test:offline-write-prototype`, `npm test`. I collaudi `--entry-browser` e `--restart-browser` richiedono gli emulatori e la cache Java/Firestore locale.
+- La checklist iPhone non è stata eseguita e non viene dichiarata superata: la consegna riguarda soltanto le attività autonome.
+
+**Stato incarico: DA_VERIFICARE** — M6-CLOSE consegnato da DeepSeek il 2026-09-18; lavoro autonomo completo, gate fisico iPhone separato e ancora APERTO.
