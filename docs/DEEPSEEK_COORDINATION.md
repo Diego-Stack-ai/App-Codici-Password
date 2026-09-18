@@ -781,3 +781,29 @@ Non estendere origini senza schema persistito né riaprire A1-A4 salvo regressio
 - **Gate browser concreto:** lo scenario Chrome è stato esteso per provare creazione e ripristino da email, telefono, utenza e documento. Due esecuzioni raggiungono il picker aggiornato ma terminano con `TIMEOUT_ACCOUNT_CREATE` prima che il form venga osservato. La prova unitaria del picker dimostra che il callback “Crea un nuovo Account” riceve correttamente gli ambiti aziendali, ma il montaggio nel bundle browser resta da diagnosticare. Edge e profili desktop/mobile A5 non sono quindi dichiarati superati.
 - **Rischi residui:** trasporto/App Check e Rules produttivi, dispositivo fisico, migrazione identità legacy e gate browser A5. Il record minimo usa il contratto Account isolato già vigente; non importa writer produttivi né dati reali.
 - **Perimetro rispettato:** invariati `Frontend/public/**`, `firestore.rules`, `storage.rules`, `functions/**`, `master` e versione `1.2.127`; nessun deploy, dato o migrazione reale.
+
+## Verifica Codex — A5 e incarico A5-R1
+
+- **Esito A5:** NON APPROVATO — il nucleo unitario ed emulatore resta valido, ma il flusso browser non monta il form dopo `Crea un nuovo Account` e termina con `TIMEOUT_ACCOUNT_CREATE`.
+- **Commit da conservare e non rifare:** `d486dc79` (codice A5) e `f0ac9de8` (rapporto A5).
+- **Correzione richiesta:** riprodurre e correggere il passaggio picker → callback → form; aggiungere una regressione deterministica; provare personale/azienda e origini email, telefono, utenza e documento; verificare trasferimento legacy scelto/non scelto e conservazione su errore; dopo conferma rileggere la linguetta e mostrare Apri/Cambia/Scollega; coprire offline e revoche lifecycle.
+- **Sicurezza:** nessun plaintext in comando, ricevuta, log o metadati; rimozione legacy soltanto nella stessa transazione riuscita; nessun Account orfano o collegamento parziale; retry e concorrenza fail-closed.
+- **Verifiche:** unitari, emulatori, Chrome desktop/mobile, Edge tentato con esito identificato, `npm run test:vault-shell`, `npm test`, inventario e `git diff --check`.
+- **Perimetro:** solo laboratorio, test/script e MD; vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati e migrazioni reali.
+- **Pubblicazione:** commit locali soltanto; nessun push senza autorizzazione esplicita di Diego.
+
+**Stato incarico: PRONTO** — A5-R1 disposto da Codex il 2026-09-18; base obbligatoria locale `f0ac9de8` con questo solo commit documentale successivo.
+
+## Rapporto Codex — A5-R1 disponibilità picker e montaggio creazione
+
+- **Stato:** COMPLETATO — `DA_VERIFICARE`.
+- **Commit di lavoro:** `e1499e55` (`fix(shell): mount account creation after picker readiness`), successivo a `f0ac9de8`; nessun push tentato.
+- **Causa e correzione:** il telaio del picker, compreso il pulsante di creazione, era visibile prima del completamento della lettura confermata; lo scenario poteva quindi cliccare prima che l'handler fosse installato e il click veniva perso. Il comando resta ora disabilitato fino alla disponibilità degli ambiti canonici e dell'handler. Lo scenario attende questa disponibilità esplicita prima di esercitare callback e form.
+- **Regressione:** aggiunta prova deterministica `picker → callback → form`, inclusa la verifica che un click durante la lettura pendente sia inerte e che, dopo la conferma, monti una sola superficie di creazione con gli ambiti aziendali canonici.
+- **Sicurezza:** il comando rifiuta password plaintext; nome e username vengono cifrati dalla capacità revocabile. Il trasferimento legacy usa soltanto il ciphertext verificato e lo elimina nella stessa transazione che crea Account, collegamento, backlink e ricevuta. La ricevuta è stata verificata priva di password e ciphertext legacy; conflitto e payload non valido non producono Account orfani.
+- **Prove mirate:** create/picker/link **35/35**; Firestore Emulator collegamenti+creazione **2/2**; `npm run test:vault-shell` **714/714**; `npm test` completo **exit 0**.
+- **Browser:** Chrome 152 desktop 1280×800 e mobile 390×844 completano entrambi l'intero scenario, comprese origini email, telefono, utenza, documento e PEC aziendale, creazione, rilettura, Apri/Cambia/Scollega, ripristino Account esistente, offline e revoche. Edge desktop è stato tentato e termina prima dell'endpoint con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`; la matrice si arresta prima del profilo mobile, che non è dichiarato superato.
+- **Inventario e perimetro:** inventario rigenerato a **768 file**; `git diff --check` pulito. Invariati `Frontend/public/**`, Rules/Functions produttive, `master` e versione `1.2.127`; nessun deploy, dato o migrazione reale.
+- **Rischi residui:** trasporto/App Check e Rules produttivi, migrazione delle identità legacy, dispositivo fisico e gate Edge. Il candidato resta confinato al laboratorio.
+
+**Stato incarico: DA_VERIFICARE** — A5-R1 consegnato localmente da Codex il 2026-09-18; commit di lavoro `e1499e55`; rapporto non ancora committato; nessun push.
