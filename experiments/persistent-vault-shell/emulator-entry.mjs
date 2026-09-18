@@ -20,6 +20,7 @@ import {createProfileLinkOriginResolver} from './profile-link-origin.mjs';
 import {mountProfileLinkEditor} from './profile-link-editor-provider.mjs';
 import {createProfileAccountPickerReader} from './profile-account-picker-reader.mjs';
 import {createAccountNoteQueueAccess} from './account-note-queue-access.mjs';
+import {mountAccountStandardEditorProvider} from './account-standard-editor-provider.mjs';
 import * as privateProfileModel from '../../Frontend/public/assets/js/modules/privato/profile-model.js';
 import * as companyProfileModel from '../../Frontend/public/assets/js/modules/azienda/company-profile-model.js';
 import {listPrivateAccounts, listPrivateAccountsConfirmed, listCompanyAccounts, listCompanyAccountsConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
@@ -129,6 +130,20 @@ const mountDetail = context => {
         repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed,
             listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed}});
     return mountEmulatorDetail(content, context, {selection, openAccount, mountNotePanel,
+        mountAccountEditor: (root, {signal, onSaved, onCancel}) => {
+            const scoped = {...context, signal}, getUser = () => auth.currentUser;
+            return mountAccountStandardEditorProvider(root, scoped, {account: selection, getUser, onSaved, onCancel,
+                repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed, getCompany, getCompanyConfirmed},
+                isEncryptedValue: cryptoApi.isEncryptedValue,
+                assertNoPendingMutation: async queueScope => (await createAccountNoteQueueAccess({context: scoped, getUser, account: queueScope.account,
+                    openQueue: options => session.openMutationQueue(options)}).inspect()).status === 'clear',
+                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                submit: async request => {
+                    if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                    scoped.assertUnlocked(); if (signal.aborted || getUser()?.uid !== scoped.user.uid) throw Error('VIEW_DISPOSED');
+                    return (await httpsCallable(functions, 'applyAccountStandardMutation')(request)).data;
+                }});
+        },
         mountWidgets: async root => {
             const generic = await mountAccountWidgetView(root, context, {reader: {
                 list: async () => (await widgetReader.list()).filter(widget => !widget.bankId), read: (...args) => widgetReader.read(...args)}});

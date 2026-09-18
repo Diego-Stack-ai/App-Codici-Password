@@ -75,7 +75,7 @@ for (const suffix of ['A', 'B']) {
                 {bankId: 'fixture', iban: await encrypted('IBAN-FITTIZIO'), cards: [{pin: await encrypted('1234'), ccv: await encrypted('000')}]},
                 {bankId: 'fixture-two', iban: await encrypted('IBAN-SECONDO'), cards: [{pin: await encrypted('5678'), ccv: await encrypted('111')}]}]});
             if (domain === 'private' && title === 'Alfa') Object.assign(record, {schemaVersion: 1, revision: 0, type: 'account', visibility: 'private'});
-            for (const [field, value] of Object.entries(fields)) record[field] = await cryptoApi.encrypt(value, key);
+            for (const [field, value] of Object.entries(fields)) record[field] = field === 'url' ? value : await cryptoApi.encrypt(value, key);
             const path = ['users', user.uid];
             if (domain === 'company') path.push('aziende', 'company');
             path.push('accounts', title.toLowerCase());

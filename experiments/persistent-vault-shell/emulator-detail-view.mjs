@@ -3,7 +3,7 @@ import {mountDetailExtraFields} from './detail-extra-fields.mjs';
 
 // Basic experimental detail: reuse the canonical card without activating the
 // legacy detail orchestrators, their writes, or their security manager.
-export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, mountNotePanel, mountWidgets, backLabel = 'Torna alla lista'}) {
+export async function mountEmulatorDetail(root, context, {selection, openAccount, onBack, mountSavePanel, mountNotePanel, mountAccountEditor, mountWidgets, backLabel = 'Torna alla lista'}) {
     if (context.signal.aborted) return () => {};
     if (!context.unlocked) throw new Error('VAULT_LOCKED');
     const lifecycle = new AbortController();
@@ -12,7 +12,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
     const back = document.createElement('button'); back.type = 'button'; back.textContent = backLabel;
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, back, container);
-    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, widgetCleanup = null, refreshPending;
+    let disposed = false, view = null, account = null, extraCleanup = null, saveCleanup = null, editorCleanup = null, widgetCleanup = null, refreshPending;
     let revision = 0;
     const assertActive = () => {
         if (disposed || context.signal.aborted) throw new DOMException('View disposed', 'AbortError');
@@ -58,7 +58,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         lifecycle.abort();
         account = null;
         try { saveCleanup?.(); } finally {
-            try { widgetCleanup?.(); } finally { try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } } }
+            try { editorCleanup?.(); } finally { try { widgetCleanup?.(); } finally { try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } } } }
         }
     };
     context.signal.addEventListener('abort', cleanup, {once: true});
@@ -115,6 +115,15 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
             }
             if (disposed) saveCleanup?.();
             assertActive();
+        }
+        if (mountAccountEditor) {
+            const action = document.createElement('button'), host = document.createElement('div');
+            action.type = 'button'; action.textContent = 'Modifica Account'; action.dataset.accountStandardAction = 'true'; wrapper.append(action, host);
+            action.addEventListener('click', async () => {
+                if (editorCleanup || disposed) return; action.disabled = true;
+                try { editorCleanup = await mountAccountEditor(host, {signal: lifecycle.signal, selection, onSaved: async () => {editorCleanup = null; action.disabled = false; await refreshDetail();}, onCancel: () => {editorCleanup = null; action.disabled = false;}}); }
+                catch {action.disabled = false;}
+            }, {signal: lifecycle.signal});
         }
         return cleanup;
     } catch (error) {

@@ -75,6 +75,35 @@ async function checkAccountNote(mode, scope) {
     }
     profileChecks.push(`${scope} Account note ${mode}: scoped editor, refresh and cleanup`);
 }
+async function checkAccountStandard(mode, scope) {
+    const content = byId('content'), action = () => content.querySelector('[data-account-standard-action]');
+    const button = label => [...content.querySelectorAll('button')].find(node => node.textContent === label);
+    await wait(() => action(), 'ACCOUNT_STANDARD_ACTION_' + scope); action().click();
+    await wait(() => content.querySelector('[data-account-standard-editor]'), 'ACCOUNT_STANDARD_EDITOR_' + scope);
+    const inputs = Object.fromEntries([...content.querySelectorAll('[data-account-standard-editor] input')].map(node => [node.dataset.field, node]));
+    assert(inputs.password.type === 'password' && inputs.username.type !== 'password' && inputs.account.type !== 'password', 'ACCOUNT_STANDARD_PASSWORD_SEMANTICS');
+    const original = Object.fromEntries(Object.entries(inputs).map(([field, node]) => [field, node.value]));
+    if (mode === 'online') {
+        inputs.nomeAccount.value = `Account A6 ${scope}`; inputs.username.value = `a6-${scope}@example.invalid`;
+        inputs.account.value = `CODICE-A6-${scope}`; inputs.password.value = `SEGRETO-A6-${scope}`; inputs.url.value = `https://example.invalid/a6/${scope}`;
+        button('Salva Account').click();
+        await wait(() => !content.querySelector('[data-account-standard-editor]') && action() && content.textContent.includes(`Account A6 ${scope}`), 'ACCOUNT_STANDARD_REFRESH_' + scope);
+        assert(Object.values(inputs).every(node => node.value === '' && node.defaultValue === ''), 'ACCOUNT_STANDARD_SAVE_CLEAR');
+        action().click(); await wait(() => content.querySelector('[data-account-standard-editor]'), 'ACCOUNT_STANDARD_REOPEN_' + scope);
+        const restored = Object.fromEntries([...content.querySelectorAll('[data-account-standard-editor] input')].map(node => [node.dataset.field, node]));
+        assert(restored.username.value === `a6-${scope}@example.invalid` && restored.account.value === `CODICE-A6-${scope}`, 'ACCOUNT_STANDARD_SAVED_VALUES');
+        for (const [field, value] of Object.entries(original)) restored[field].value = value;
+        button('Salva Account').click();
+        await wait(() => !content.querySelector('[data-account-standard-editor]') && action() && content.textContent.includes(original.nomeAccount), 'ACCOUNT_STANDARD_RESTORE_' + scope);
+        assert(Object.values(restored).every(node => node.value === '' && node.defaultValue === ''), 'ACCOUNT_STANDARD_RESTORE_CLEAR');
+    } else {
+        assert(Object.values(inputs).every(node => node.readOnly), 'ACCOUNT_STANDARD_OFFLINE_READONLY');
+        assert(button('Salva Account').disabled, 'ACCOUNT_STANDARD_OFFLINE_DISABLED');
+        button('Annulla').click(); await wait(() => !content.querySelector('[data-account-standard-editor]') && action(), 'ACCOUNT_STANDARD_CANCEL_' + scope);
+        assert(Object.values(inputs).every(node => node.value === '' && node.defaultValue === ''), 'ACCOUNT_STANDARD_CANCEL_CLEAR');
+    }
+    profileChecks.push(`${scope} Account standard editor ${mode}: five fields, refresh, password semantics and cleanup`);
+}
 async function checkAnagraphic(mode, company) {
     const button = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
     document.querySelector('[data-profile-section="personal"]').click();
@@ -205,6 +234,7 @@ async function checkCompanyProfile(mode) {
     document.querySelector('[data-action="navigate"][data-id="zeta"]').click();
     await wait(()=>byId('content').textContent.includes('Dettaglio Account')&&byId('content').textContent.includes('Zeta seconda A'),'SECOND_DETAIL');
     await checkAccountNote(mode, 'second-company');
+    await checkAccountStandard(mode, 'second-company');
     const widgetValues = await checkWidgets('second-company', mode);
     [...byId('content').querySelectorAll('button')].find(node=>node.textContent==='Torna alla lista').click();
     await wait(()=>document.querySelector('[data-action="navigate"][data-id="zeta"]'),'SECOND_DETAIL_BACK');
@@ -226,6 +256,7 @@ async function checkCompanyProfile(mode) {
     buttons('Apri Account collegato')[1].click();
     await wait(()=>byId('content').textContent.includes('Zeta privato A')&&buttons('Torna al profilo').length,'COMPANY_OPEN');
     await checkAccountNote(mode, 'private-linked');
+    await checkAccountStandard(mode, 'private-linked');
     assert(values.every(node=>node.textContent===''),'COMPANY_CLEAR');
     buttons('Torna al profilo')[0].click();await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_BACK');
     for(const [section,value] of [['addresses','Filiale fittizia'],['documents','Visura fittizia']]) {
@@ -360,7 +391,7 @@ try {
     const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
-        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyProfileLinkMutation', 'applyProfileAccountCreate', 'applyProfileContactsMutation', 'applyCompanyContactsMutation', 'applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
+        for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyAccountStandardMutation', 'applyProfileLinkMutation', 'applyProfileAccountCreate', 'applyProfileContactsMutation', 'applyCompanyContactsMutation', 'applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
             const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }

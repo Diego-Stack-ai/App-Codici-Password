@@ -1016,3 +1016,7 @@ Il laboratorio integra aggiunta, modifica ed eliminazione controllata dei docume
 # Candidata A5 crea Account dal collegamento — 18/09/2026
 
 Nel solo laboratorio, il selettore dei collegamenti espone “Crea un nuovo Account” con ambito personale/azienda, nome e username modificabili. La creazione e il collegamento sono una singola operazione idempotente; non possono lasciare Account senza origine o backlink parziali. Una password legacy resta intatta salvo consenso esplicito al trasferimento cifrato. La UI pubblica, le Rules e le Functions produttive non sono state modificate. La prova browser A5 resta da chiudere dopo un timeout di montaggio del form osservato nel primo scenario Chrome.
+
+## Candidato A6 editor standard Account — 18/09/2026
+
+La shell di laboratorio monta “Modifica Account” nei dettagli personali e aziendali per i soli cinque campi standard. Il salvataggio è transazionale, idempotente e compatibile con backlink profilo, note, allegati, condivisioni, banking, referente, Widget e credenziali comuni. Offline è di sola lettura e i valori in chiaro vengono eliminati alla chiusura o alla revoca. L'overlay Rules e l'endpoint restano candidati locali; nessuna UI, Rule o Function produttiva è cambiata.

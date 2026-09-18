@@ -5,6 +5,7 @@ import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
 import {createCompanyQrSelectionHandler} from './company-qr-selection-handler.mjs';
 import {createProfileTextHandler} from './profile-text-handler.mjs';
 import {createAccountNoteHandler} from './account-note-handler.mjs';
+import {createAccountStandardHandler} from './account-standard-handler.mjs';
 import {createProfileLinkHandler} from './profile-link-handler.mjs';
 import {createProfileAccountCreateHandler} from './profile-account-create-handler.mjs';
 import {createProfileContactsHandler} from './profile-contacts-handler.mjs';
@@ -36,6 +37,7 @@ export async function createEmulatorQrBridge(uids) {
         ['/demo-vault-shell/europe-west1/applyCompanyQrSelection', createCompanyQrSelectionHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyProfileTextMutation', createProfileTextHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyAccountNoteMutation', createAccountNoteHandler(dependencies)],
+        ['/demo-vault-shell/europe-west1/applyAccountStandardMutation', createAccountStandardHandler(dependencies)],
         ['/demo-vault-shell/europe-west1/applyProfileLinkMutation', createProfileLinkHandler({...dependencies, models, deleteField: () => FieldValue.delete()})],
         ['/demo-vault-shell/europe-west1/applyProfileAccountCreate', createProfileAccountCreateHandler({...dependencies, models, deleteField: () => FieldValue.delete()})],
         ['/demo-vault-shell/europe-west1/applyProfileContactsMutation', createProfileContactsHandler(dependencies)],
