@@ -807,3 +807,42 @@ Non estendere origini senza schema persistito né riaprire A1-A4 salvo regressio
 - **Rischi residui:** trasporto/App Check e Rules produttivi, migrazione delle identità legacy, dispositivo fisico e gate Edge. Il candidato resta confinato al laboratorio.
 
 **Stato incarico: DA_VERIFICARE** — A5-R1 consegnato localmente da Codex il 2026-09-18; commit di lavoro `e1499e55`; rapporto non ancora committato; nessun push.
+
+## Verifica Codex — A5-R1
+
+- **Esito:** APPROVATO DA CODEX — 2026-09-18.
+- **Commit verificati:** `e1499e55` (correzione e regressioni) e `035a8a07` (rapporto e inventario).
+- **Prove indipendenti:** create/picker/link **35/35**; Firestore Emulator **2/2**; shell **714/714**; `npm test` completo exit 0; Chrome 152 desktop e mobile completano il percorso integrato.
+- **Sicurezza:** nessun plaintext ammesso nel comando; la ricevuta non contiene password o ciphertext legacy; rimozione legacy, creazione Account, origine e backlink restano nella stessa transazione. Conflitti e payload invalidi non creano Account orfani.
+- **Gate residuo:** Edge desktop termina prima dell'endpoint DevTools con `DEVTOOLS_BROWSER_EXITED_BEFORE_ENDPOINT:0`; mobile Edge non è dichiarato provato. Gate produttivi e dispositivo fisico restano separati.
+
+## Incarico Codex — A6 editor credenziali standard Account
+
+Realizzare la prima fetta verticale verificabile degli editor completi Account: modifica dei soli campi credenziali standard per Account personali e aziendali, preservando integralmente collegamenti, note, allegati, condivisioni, banking e Widget.
+
+### Base e perimetro
+
+- Base obbligatoria locale: `035a8a07` con questo solo commit documentale successivo.
+- Ramo `integration/vault-shell-v127-security`.
+- Consentiti `experiments/persistent-vault-shell/**`, test/script del laboratorio e MD autorevoli.
+- Vietati `Frontend/public/**`, Rules/Functions produttive, versione, `master`, deploy, dati e migrazioni reali.
+
+### Contratto richiesto
+
+- Censire prima i writer e gli schemi canonici personali/aziendali per `nomeAccount`, `username`, `account`/codice, `password` e `url`; documentare differenze e campi legacy senza inventare equivalenze.
+- Evolvere il candidato esistente senza aggirare i controlli che oggi escludono Account collegati: il servizio deve accettare e preservare metadati e backlink canonici, verificandoli nella transazione invece di filtrarli.
+- Modificare soltanto i cinque campi standard consentiti. Nome, username, account/codice e password devono essere cifrati con la capability della vista; l'URL segue la forma canonica censita. Campi non modificati e campi sconosciuti restano byte-per-byte invariati.
+- Preservare note e relativo editor smart, allegati, proprietà/condivisione, archivio, banking, referente, `linkedProfileFields`/`linkedCompanyProfileFields`, revisioni di collegamento e documenti esterni `accountWidgets`, `sharedVaultData` e `sharedVaultLinks`.
+- Richiesta immutabile con UID atteso, dominio/azienda, ID persistito, revisione e impronta; transazione idempotente con ricevuta. Retry identico restituisce lo stesso esito; conflitto, ambito cambiato o relazione malformata falliscono senza scritture parziali.
+- Offline in sola consultazione; pulizia del plaintext e revoca su lock, logout, cambio UID, navigazione, cambio Account e callback tardive. Nessun campo dinamico deve essere riconosciuto dal browser come password; soltanto la password Account usa la semantica credenziale.
+
+### UI e verifiche
+
+- Montare “Modifica Account” nel dettaglio laboratorio personale e aziendale riusando la vista e la rilettura confermata; dopo il salvataggio il dettaglio deve aggiornarsi senza reload.
+- Provare modifica e svuotamento consentito dei cinque campi, Account collegato a più origini, stesso ID in aziende diverse, presenza simultanea di nota, allegato, banking, referente, Widget incorporato e Credenziale comune, preservazione dei campi estranei e conflitti concorrenti.
+- Unitari di contratto/preparazione/servizio/editor; Firestore Emulator con isolamento personale/aziendale e Rules candidate; browser Chrome desktop/mobile online/offline e lifecycle. Edge va tentato e riferito con esito reale.
+- Eseguire `npm run test:vault-shell`, `npm test`, inventario e `git diff --check`; rapporto finale `DA_VERIFICARE` con scostamenti e rischi.
+
+Non implementare ancora editor Widget, riordino, template, modifica banking/carte o migrazioni legacy: questa fetta deve soltanto preservarne i dati e dimostrare che l'editor standard non li danneggia.
+
+**Stato incarico: PRONTO** — A6 disposto da Codex il 2026-09-18; base locale `035a8a07` con questo solo commit documentale successivo.
