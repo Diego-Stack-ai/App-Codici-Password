@@ -888,3 +888,26 @@ Chiudere il lavoro autonomo ancora verificabile di M6 senza estendere il perimet
 **M7, M8, M9 e M10: SOSPESI PER DECISIONE UTENTE FINO AL 21/09/2026.** Non modificarli, avviarli o anticiparne attività durante M6-CLOSE.
 
 **Stato incarico: PRONTO** — M6-CLOSE disposto da Codex il 2026-09-18; base locale `482e88f5` con questo solo commit documentale successivo.
+
+## Risveglio DeepSeek — M6-CLOSE
+
+Ripresa richiesta esplicitamente da Diego. Leggere integralmente l’incarico M6-CLOSE già definito e proseguire dal primo punto mancante, senza rifare A1–A6. Consumo contenuto: riusare le prove esistenti, eseguire soltanto test mirati necessari, nessuna preview o release. M7 non va avviato da questo incarico; M8–M10 restano sospesi.
+
+**Stato incarico: PRONTO** — risveglio Codex 2026-09-18; verificare HEAD e working tree prima della presa in carico.
+
+## Correzione supervisore — il gate iPhone non blocca M6-CLOSE
+
+La checklist iPhone è un gate fisico riservato a Diego e deve restare dichiarata APERTA. Non costituisce motivo per fermare l’incarico.
+
+DeepSeek deve ora completare tutte le attività autonome di M6-CLOSE: verificare e, se necessario, correggere il fallback senza Web Locks; completare la matrice offline bancaria/UI nel laboratorio; eseguire soltanto i test mirati indispensabili; aggiornare gli MD e preparare la checklist iPhone. Al termine deve consegnare `DA_VERIFICARE`, indicando separatamente il solo gate fisico non superato. Non eseguire M7–M10 e non attendere il test iPhone prima di consegnare il lavoro autonomo.
+
+**Stato incarico: PRONTO** — ripresa obbligatoria DeepSeek dal primo punto autonomo mancante; il gate iPhone resta aperto ma non bloccante.
+
+## Presa in carico DeepSeek — M6-CLOSE
+
+- **Presa in carico:** 2026-09-18 09:23 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `0b0d88e6` con la sola correzione supervisore non ancora committata su questo file.
+- **Base di codice obbligatoria:** `482e88f5`; dopo la base risultano commit e modifiche che riguardano esclusivamente questo file di coordinamento.
+- **Perimetro ripreso:** solo attività autonome di M6-CLOSE. A1–A6 non vengono rifatti; M7–M10 non vengono avviati; `master`, versione, deploy, dati reali, `Frontend/public/**`, Rules e Functions produttive restano invariati.
+- **Gate dichiarati aperti e non bloccanti:** test fisico iPhone/PWA (riservato a Diego); adozione nel runtime distribuito del fallback senza Web Locks; roll-out dello schema IndexedDB e copie PWA; trasporto autenticato/App Check reale; concorrenza reale fra dispositivi.
+
+**Stato incarico: IN_LAVORAZIONE** — M6-CLOSE preso in carico da DeepSeek il 2026-09-18 alle 09:23; il gate iPhone resta aperto e non blocca la consegna delle attività autonome.
