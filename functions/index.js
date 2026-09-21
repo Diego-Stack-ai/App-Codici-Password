@@ -1389,7 +1389,7 @@ exports.onInviteCreated = onDocumentCreated(
         }
         const results = await Promise.allSettled(tasks);
         results.filter((result) => result.status === "rejected")
-            .forEach((result) => console.error(`[INVITE NOTIFICATION FAILED] ${event.params.inviteId}:`, result.reason?.message || result.reason));
+            .forEach(() => console.error("[INVITE NOTIFICATION FAILED] DELIVERY_FAILED"));
     }
 );
 
