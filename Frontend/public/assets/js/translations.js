@@ -80,6 +80,7 @@ const _it = {
         confirm_archive_recipients_caveat: "Elenco ricavato dai dati caricati ora: eventuali modifiche fatte altrove possono non comparire.",
         success_restored_sharing_revoked: "Account ripristinato: le condivisioni precedenti sono state revocate. Invia un nuovo invito per riattivare un accesso.",
         account_suspended_label: "Account sospeso",
+        guest_authorization_unverified: "Impossibile verificare l'accesso a questo Account: controlla la connessione e riprova.",
         success_moved_to_archive: "Account spostato nell'Archivio",
         success_already_archived: "Account già presente nell'Archivio",
         archive_conflict_refresh: "L'Account è cambiato nel frattempo: aggiorna la lista e riprova.",

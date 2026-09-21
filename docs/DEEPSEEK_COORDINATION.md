@@ -2815,3 +2815,58 @@ Casi coperti: **online** con cache che dice «attivo» e server che dice «sospe
 3. Restano invariati: inviti orfani, trigger di audit non implementato, R7C-5 (reinvito) e la chiusura complessiva prima della distribuibilità, nessun collaudo su browser o dispositivo reale.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R7C-4 consegnata da DeepSeek il 2026-09-21; sospensione verificata prima di leggere/renderizzare sul percorso ospite privato e aziendale, conferma server quando online e copia locale offline, limite del dispositivo offline dichiarato, prove con Account in cache e casi online/offline, controllo negativo 17/20 → 20/20, nessun push eseguito.
+
+## Verifica Codex — M7-R7C-4: revoca online e Account in cache
+
+**Esito: DA_CORREGGERE.** Commit `76fcf2fa` sposta correttamente la verifica dell'invito sospeso **prima** della lettura e usa il server quando online. Rimane però un secondo percorso: se l'invito è stato **revocato/eliminato** oppure non è più `accepted`, `findSuspendedGuestInvite` restituisce `null` (filtra solo `status == accepted`). Il dettaglio ospite continua allora con `getPrivateAccount`/`getCompanyAccount`, che passano da `getDocSmart` e possono restituire **l'Account già in cache** senza attendere il server. Risultato: online, un ospite ormai non autorizzato può ancora vedere la vecchia copia pur senza invito sospeso. Il pre-check dei soli «sospesi» non è una prova di autorizzazione attiva.
+
+**Correzione richiesta a DeepSeek:** online, sul percorso ospite, autorizzare il rendering solo con una lettura **server-confirmed dell'Account** (o equivalente che confermi grant attuale): se negata/assente, non usare fallback cache né legacy che aggiri il diniego; la query inviti può servire per distinguere «sospeso» da «non trovato/revocato», non per concedere accesso. Offline, mantenere la consultazione concordata e bloccare quando la sospensione è nota in cache, dichiarando il limite inevitabile di copie/inviti non aggiornati. Test con invito revocato/eliminato + Account cached, invito non accepted + cache, sospeso noto, attivo confermato, errore di rete online; privato e aziendale; zero rendering/decrittazione nei dinieghi. Un commit locale mirato, nessun push/deploy; consegna `DA_VERIFICARE`. Non avviare altre fette in parallelo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R7C-4, revoca online e Account in cache
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `76fcf2fa`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** percorso ospite dei due dettagli (autorizzazione online, diniego, errore di rete) + testi. **Nessun** push, deploy o dato reale; **nessuna altra fetta avviata**.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R7C-4 (revoca online e cache) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R7C-4, revoca online e Account in cache
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `76fcf2fa`; **nessun push o deploy**.
+
+### Il rilievo è fondato
+
+Con l'invito **revocato o eliminato** (o non più `accepted`) `findSuspendedGuestInvite` restituisce `null` — filtra `status == accepted` — e il dettaglio proseguiva con la lettura ordinaria, che passa da `getDocSmart`: online un ospite **non più autorizzato** poteva quindi vedere la copia in cache. Il pre-check dei soli «sospesi» non è una prova di autorizzazione attiva.
+
+### Correzione
+
+1. **Online, sul percorso ospite, l'autorizzazione si stabilisce con una lettura confermata dal server** (`privato/dettaglio_account_privato.js:196-221`, `azienda/dettaglio_account_azienda.js:142-176`): si usa `getPrivateAccountConfirmed`/`getCompanyAccountConfirmed`; se il server **nega o non trova** il documento si esce con `account_not_found` **senza** alcun fallback sulla cache e **senza** il percorso legacy (`legacyLookupAllowed`, `:221`). Il percorso legacy resta per il proprietario e per l'ospite **offline**.
+2. **Errore di rete online ⇒ fail-closed** (`:206-211` e `:159-166`): nessun render e messaggio dedicato `guest_authorization_unverified` («Impossibile verificare l'accesso…»), con l'errore registrato in `logError`.
+3. **Offline**: consultazione concordata invariata (cache e, se serve, risoluzione legacy), con il **blocco** quando la sospensione è nota nella copia locale; il limite di una copia o di un invito non aggiornati resta dichiarato e **non** viene presentato come protezione del server.
+4. La **query inviti** resta solo un discriminante: serve a distinguere «sospeso» da «non trovato/revocato», non a concedere accesso.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/private-detail-legacy-id.test.mjs` (3 casi nuovi/aggiornati) | **17/17** |
+| `node --test tests/company-detail-readonly.test.mjs` (2 casi nuovi) | **8/8** |
+| `npm run test:navigation` | **146/146** |
+| `npm run test:history-prototype` / `test:sharing-prototype` / `test:data-access` / `test:functions-security` | 98/98 · 24/24 · 95/95 · 142/142 |
+| `test:js-syntax` · `test:html-purity` · `test:static-references` · budget pagine | 161 moduli · HTML puro · 235 file · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **794 file** |
+
+Casi coperti, **privato e aziendale**: invito **revocato/assente** (diniego del server) con Account in cache ⇒ nessuna lettura locale, nessun modulo, nessuna scrittura di vista, nessuna decrittazione e `account_not_found`; **errore di rete online** ⇒ nessun render e `guest_authorization_unverified`; **sospensione nota** ⇒ bloccata prima di qualunque lettura (casi già presenti); **attivo confermato** ⇒ il dettaglio si apre normalmente (ora via lettura confermata sul percorso ospite online); **ospite offline** ⇒ consultazione concordata e risoluzione legacy conservate; proprietario invariato.
+
+**Controllo negativo eseguito:** con la sola versione già committata (`76fcf2fa`, lettura smart per l'ospite online) i cinque casi che dipendono dalla conferma server falliscono (**20/25**); con la correzione **25/25**.
+
+### Limiti dichiarati
+
+1. **Dispositivo offline con copia o invito non aggiornati**: limite inevitabile, dichiarato; il server non protegge offline.
+2. **Costo**: una lettura confermata dal server (non cache) per ogni apertura del dettaglio come ospite online, come richiesto da Codex.
+3. **Conseguenza voluta**: su rete instabile l'ospite online non vede contenuti e riceve l'invito a riprovare; è la scelta fail-closed richiesta, non un difetto.
+4. Restano invariati: inviti orfani, trigger di audit non implementato, R7C-5 (reinvito) e la chiusura complessiva prima della distribuibilità, nessun collaudo su browser o dispositivo reale.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R7C-4 consegnata da DeepSeek il 2026-09-21; online l'ospite viene autorizzato solo da una lettura confermata dal server (diniego o assenza ⇒ nessun fallback locale o legacy), errore di rete fail-closed con messaggio dedicato, offline conservata la consultazione concordata con blocco sulla sospensione nota, prove su privato e aziendale, controllo negativo 20/25 → 25/25, nessun push eseguito.

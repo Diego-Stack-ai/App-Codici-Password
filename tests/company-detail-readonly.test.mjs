@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
-function fixture({suspended = false} = {}) {
+function fixture({suspended = false, denied = false, networkError = false} = {}) {
     const writes = [], reads = [], errors = [], modules = [], classes = new Set(), suspendedReads = [];
     const footer = {children: [], classList: {
         add: value => classes.add(value),
@@ -26,7 +26,11 @@ function fixture({suspended = false} = {}) {
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),
         updateDoc: async (path, change) => writes.push({path, change}),
         getCompanyAccount: async (...args) => { reads.push(args); return read(); },
-        getCompanyAccountConfirmed: async (...args) => { reads.push(args); return read(); },
+        getCompanyAccountConfirmed: async (...args) => {
+            reads.push(args);
+            if (networkError) throw new Error('NETWORK_ERROR');
+            return denied ? null : read();
+        },
         // M7-R7C-4: per un ospite la sospensione nota viene verificata prima della lettura.
         findSuspendedGuestInvite: async (ownerId, accountId, email, companyId) => {
             suspendedReads.push([ownerId, accountId, email, companyId]);
@@ -71,6 +75,30 @@ test('guest deep link to a suspended company account renders nothing even with a
     assert.equal(f.reads.length, 0, 'nessuna lettura dell\'Account');
     assert.equal(f.modules.length, 0, 'nessun modulo di contenuto inizializzato');
     assert.equal(f.button(), undefined);
+    assert.equal(f.writes.length, 0);
+});
+
+// M7-R7C-4: online l'ospite viene autorizzato solo da una lettura confermata dal
+// server; un diniego o un errore di rete non ammettono fallback sulla cache.
+test('guest deep link to a revoked company account does not render from the cache', async () => {
+    const f = fixture({denied: true});
+    f.window.location.search += '&ownerId=owner';
+    f.read(async () => ({nomeAccount: 'Cached synthetic account', username: 'cached-user'}));
+    await f.init('guest');
+    assert.equal(f.reads.length, 1, 'solo il tentativo confermato, nessun fallback locale');
+    assert.equal(f.modules.length, 0, 'nessun contenuto inizializzato');
+    assert.equal(f.button(), undefined);
+    assert.equal(f.writes.length, 0);
+    assert.equal(f.errors.length, 0);
+});
+
+test('guest online with a network error renders nothing and reports the unverified state', async () => {
+    const f = fixture({networkError: true});
+    f.window.location.search += '&ownerId=owner';
+    f.read(async () => ({nomeAccount: 'Cached synthetic account'}));
+    await f.init('guest');
+    assert.equal(f.reads.length, 1);
+    assert.equal(f.modules.length, 0);
     assert.equal(f.writes.length, 0);
 });
 

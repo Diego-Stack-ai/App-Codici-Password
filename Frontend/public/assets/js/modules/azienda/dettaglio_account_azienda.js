@@ -139,10 +139,13 @@ async function loadAccount(mount = mounted) {
     const active = () => mount.active() && version === mount.version && !signal.aborted;
     setupActions(() => active() && mount.loaded, mount.fileInputs);
     const {uid: loadViewerId, owner: loadOwnerId, company: companyId, id: accountId} = mount.scope;
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     try {
-        // M7-R7C-4 correzione: per un ospite la sospensione NOTA va verificata PRIMA
-        // di leggere o renderizzare: la lettura passa dalla cache persistente e
-        // potrebbe restituire una copia che il server non autorizza più.
+        // M7-R7C-4: per un ospite l'autorizzazione va stabilita PRIMA di leggere o
+        // renderizzare. Online serve una lettura CONFERMATA DAL SERVER: la copia in
+        // cache non prova un grant attuale, quindi un diniego non ammette fallback
+        // locale. Offline resta la consultazione concordata.
+        let account = null;
         if (loadOwnerId !== loadViewerId) {
             const suspended = await findSuspendedGuestInvite(loadOwnerId, accountId, auth.currentUser?.email, companyId);
             if (!active()) return;
@@ -151,9 +154,26 @@ async function loadAccount(mount = mounted) {
                 setTimeout(() => { if (active()) history.back(); }, 1000);
                 return;
             }
+            if (!offline) {
+                try {
+                    account = await getCompanyAccountConfirmed(loadOwnerId, companyId, accountId);
+                } catch (error) {
+                    if (!active()) return;
+                    logError('GuestAuthorization', error);
+                    showToast(t('guest_authorization_unverified'), "error");
+                    setTimeout(() => { if (active()) history.back(); }, 1000);
+                    return;
+                }
+                if (!active()) return;
+                if (!account) {
+                    showToast(t('account_not_found'), "error");
+                    setTimeout(() => { if (active()) history.back(); }, 1000);
+                    return;
+                }
+            }
         }
         const docRef = doc(db, "users", loadOwnerId, "aziende", companyId, "accounts", accountId);
-        const account = await (requireServerRefresh
+        if (!account) account = await (requireServerRefresh
             ? getCompanyAccountConfirmed(loadOwnerId, companyId, accountId)
             : getCompanyAccount(loadOwnerId, companyId, accountId));
 

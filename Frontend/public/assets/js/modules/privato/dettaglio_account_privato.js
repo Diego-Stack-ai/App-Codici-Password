@@ -187,21 +187,38 @@ async function loadAccount(mount = mounted) {
         return clear;
     };
     setupActions(actionActive);
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     try {
-        // M7-R7C-4 correzione: per un ospite la sospensione NOTA va verificata
-        // PRIMA di leggere o renderizzare. La lettura dell'Account passa dalla cache
-        // persistente (`getPrivateAccount` → `getDocSmart`) e potrebbe restituire
-        // subito una copia che il server non autorizza più.
+        // M7-R7C-4: per un ospite l'autorizzazione va stabilita PRIMA di leggere o
+        // renderizzare. Online serve una lettura CONFERMATA DAL SERVER: la copia in
+        // cache non prova un grant attuale, quindi non si usa alcun fallback locale
+        // né il percorso legacy quando il server nega o non risponde. Offline resta
+        // la consultazione concordata, con il blocco se la sospensione è nota.
+        let loaded = null;
+        let legacyLookupAllowed = true;
         if (lookupOwner !== lookupUid) {
             const suspended = await findSuspendedGuestInvite(lookupOwner, lookupId, auth.currentUser?.email, '');
             if (!active()) return;
             if (suspended) { showToast(t('account_suspended_label'), "warning"); return; }
+            if (!offline) {
+                try {
+                    loaded = await getPrivateAccountConfirmed(lookupOwner, lookupId);
+                } catch (error) {
+                    if (!active()) return;
+                    logError('GuestAuthorization', error);
+                    showToast(t('guest_authorization_unverified'), "error");
+                    return;
+                }
+                if (!active()) return;
+                if (!loaded) { showToast(t('account_not_found'), "error"); return; }
+                legacyLookupAllowed = false;
+            }
         }
-        let loaded = await (requireServerRefresh
+        if (!loaded) loaded = await (requireServerRefresh
             ? getPrivateAccountConfirmed(lookupOwner, lookupId)
             : getPrivateAccount(lookupOwner, lookupId));
         if (!active()) return;
-        if (!loaded) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
+        if (!loaded && legacyLookupAllowed) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
         if (!active()) return;
         if (!loaded) { showToast(t('account_not_found'), "error"); return; }
         loaded = {...loaded};
