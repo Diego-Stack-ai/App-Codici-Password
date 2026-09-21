@@ -1408,3 +1408,62 @@ Nessun test copre le Rules produttive per l'ospite accettato o per `invites`; il
 - La tabella delle opzioni è pronta per essere presentata a Diego; le voci `non verificate` indicano cosa servirebbe per trasformare una deduzione in prova (emulatori con condivisione reale, test sulle Rules produttive).
 
 **Stato incarico: DA_VERIFICARE** — M7-R4 consegnato da DeepSeek il 2026-09-21; mappa in sola lettura completa, nessuna decisione presa, nessuna modifica produttiva e nessun push eseguito.
+
+## Verifica Codex — M7-R4
+
+**Esito: DA_CORREGGERE, documentazione e prova sintetica mirata.** Il commit `405cf927` resta nel perimetro documentale e `git diff --check` è pulito. La distinzione proprietario/ospite e il contrasto `deleteDoc` dalla lista vs `purgeArchivedAccount` sono fondati sui sorgenti campionati.
+
+1. In `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` §1 la frase «nessuna copia nella memoria dell'ospite» è falsa: `account_privati.js:205-255` legge il record nella memoria JavaScript e lo inserisce in `allAccounts`. Intendevi «nessun documento Account separato nella raccolta Firestore dell'ospite». Correggi con precisione e distingui memoria/cache locale dalla persistenza Firestore.
+2. In §2.2 si afferma come certo che la copia di un record cifrato restituisca ciphertext, mentre §5 e §9 dichiarano il comportamento di decifratura non verificato. Allinea tabella e testo allo stesso livello di evidenza; mantieni distinta la prova statica di `SHARED_RECORD_READER_ENABLED = false` dall'effettivo comportamento UI del destinatario. Non dichiarare testata una proprietà non provata.
+3. La sezione 7.1.1 descrive un possibile blocco reale della revoca dopo accettazione: transazione proprietario che scrive anche `users/{guestUid}/notifications`, mentre le Rules richiedono `isOwner(guestUid)`. Prepara un **test mirato con Rules/emulatore e dati fittizi** che dimostri successo o rifiuto dell'intera transazione. Se l'ambiente emulatore non è disponibile, registra la deduzione come non confermata e fornisci il test riproducibile senza eseguirlo. Non modificare la revoca produttiva in questa fetta.
+
+Consegna un commit locale mirato di correzione e rapporto `DA_VERIFICARE`, senza push. Non iniziare implementazioni o decisioni su cosa eliminare; Codex presenterà poi a Diego le opzioni per i quattro casi.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — M7-R4 correzione
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); base osservata `405cf927`; la revisione Codex era nel working tree non committata ed è **conservata** in questo commit.
+- **Perimetro:** documentazione, un test mirato con Rules produttive ed emulatore, e la registrazione del test nel runner. Nessuna modifica alla revoca produttiva, a Rules o Functions; nessuna decisione su cosa eliminare.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R4 presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R4 correzione
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** **un commit locale mirato di correzione e rapporto**; base `405cf927`; **nessun push eseguito**.
+- **File:** `tests/sharing-revocation.rules.test.mjs` (nuovo), `scripts/run-firestore-rules-tests.mjs` (registrazione del nuovo file nella suite Rules), `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md`, `docs/FILE_INVENTORY.md`. **Nessuna modifica alla revoca produttiva.**
+
+### Le tre correzioni richieste
+
+1. **§1 — «nessuna copia nella memoria dell'ospite» era falso.** Riscritto: il caso 3 non crea **nessun documento Account separato** nella raccolta Firestore dell'ospite, ma la lista ne conserva una copia **in memoria JavaScript** inserendola in `allAccounts` (`account_privati.js:205-216,226,255`), con possibile permanenza nella cache locale di Firestore. Memoria/cache locale e persistenza Firestore sono ora distinte.
+2. **§2.2 — livello di evidenza allineato.** Separato ciò che è **verificato nel codice** (chiave Vault per-UID in `security-manager.js:399-404`; lettore dei record condivisi disattivato, `SHARED_RECORD_READER_ENABLED = false`) da ciò che resta **non verificato** (che cosa la schermata mostri all'ospite e se il valore copiato sia ciphertext). Il documento non dichiara più provato il comportamento dell'interfaccia.
+3. **§7.1.1 — prova sintetica eseguita.** Nuovo test con le Rules **produttive** e l'emulatore, dati fittizi, che riproduce i passi reali della transazione (aggiornamento dell'Account, cancellazione dell'invito, notifica al proprietario, notifica all'ospite).
+
+### Esito della prova (il blocco della revoca è confermato)
+
+| Prova | Esito |
+|---|---|
+| Il proprietario scrive nella **propria** raccolta di notifiche ma **non** in quella dell'ospite | confermato |
+| Transazione di revoca **senza** notifica all'ospite (controllo) | riesce e rimuove l'accesso |
+| Transazione **reale**, con notifica all'ospite | **rifiutata interamente**: l'Account resta invariato (`sharedWithUids` ancora con l'ospite, `visibility` ancora `shared`, `acceptedCount` ancora 1, invito ancora presente) |
+| Cancellazione del solo invito da parte del proprietario | consentita |
+| Suite Rules completa | **25/25** |
+
+La deduzione della prima consegna è quindi **confermata con prova riproducibile**: la revoca di un ospite che ha accettato non va a termine con le Rules attuali. **Nessuna correzione è stata applicata al codice produttivo**, come richiesto.
+
+### Difetti del mio test, trovati e corretti prima della consegna
+
+Nel primo tentativo il test falliva per due errori **miei**, non del prodotto: (a) un helper `admin()` che restituiva `undefined`, perché `withSecurityRulesDisabled` non propaga il valore di ritorno del callback; (b) l'import mancante di `assert`. Corretti entrambi; il secondo tentativo è verde. È utile registrarlo perché un test che fallisce per un difetto dello strumento non è una prova del prodotto.
+
+### Verifiche eseguite
+
+- `npm run test:firestore-rules` → **25/25** (erano 21; il nuovo file ne aggiunge 4).
+- Controlli statici sulla mappa: citazioni verificate, tabelle coerenti, `git diff --check` **pulito**, inventario rigenerato.
+- Nessuna modifica a runtime, Rules, Functions, dati reali, versione (`1.2.127`) o `master` (`445b338d`). Nessuna decisione su cosa eliminare.
+
+### Limiti
+
+Il test prova **Rules e transazione** con dati sintetici su emulatore; **non** esegue l'app in un browser né contro un ambiente distribuito, quindi il sintomo visibile all'utente (messaggio di errore, stato dell'interfaccia) resta non verificato. Le sezioni 1 e 2 sono state allineate al livello di evidenza effettivo.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R4 consegnata da DeepSeek il 2026-09-21; blocco della revoca provato con test sulle Rules produttive, nessuna modifica produttiva e nessun push eseguito.
