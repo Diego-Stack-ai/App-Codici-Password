@@ -60,7 +60,9 @@ Sul commit applicativo indicato, `executeBackupRestore` applica transazioni sepa
 - [ ] **NON CHIUSA (21/09/2026)** dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva: su emulatori reali, con dati sintetici e il percorso reale `executeBackupRestore`, un **upload fallito dopo l'applicazione dei record** lascia il metadato dell'allegato in Firestore (che cita il percorso) **senza** i byte in Storage — riferimento orfano **osservato**, non dedotto. Dettagli e controllo positivo nella sezione qui sotto; gate lasciato **aperto**.
 - [ ] misurare memoria e dimensioni su iPhone e Windows.
 
-L’### Riferimenti orfani dopo un ripristino interrotto (verifica 21/09/2026)
+L’export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.
+
+## Riferimenti orfani dopo un ripristino interrotto (verifica 21/09/2026)
 
 Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, **codice di produzione** del client (`prepareBackupRestore` + `executeBackupRestore`) e **callable reale** `restoreBackupChunk`: `tests/interrupted-restore-orphan-refs.emulator.test.mjs` (2 casi), runner `scripts/run-interrupted-restore-emulators.mjs`.
 
@@ -74,8 +76,6 @@ Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, 
 **Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le collisioni o le modifiche intercorse dopo l'anteprima, né la ripetizione con `retry` dal piano bloccato (il codice la rifiuta con `BACKUP_STORAGE_RETRY_BLOCKED` finché `storageStarted` è vero: asserzione di codice, non provata qui).
 
 **Nessuna correzione introdotta.** Come richiesto non ho introdotto staging, compensazione, retry automatici o nuove politiche: il difetto è registrato e il gate resta **aperto** in attesa di una decisione (domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md`, commit separato).
-export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.
-
 
 ## Protezioni candidate della sessione di ripristino — 13/09/2026
 

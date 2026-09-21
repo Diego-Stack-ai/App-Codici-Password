@@ -149,8 +149,6 @@ test('M8 su emulatore: upload fallito dopo i record lascia il riferimento senza 
     assert.equal((await data(`users/${OWNER}/accounts/account-1/attachments/att-1`)).storagePath, OBJECT_PATH);
     // …ma l'oggetto Storage **non esiste**: riferimento senza byte.
     assert.equal(f.uploads.length, 1, 'il caricamento è stato tentato una volta');
-    const [present] = await f.storage.app ? [null] : [null];
-    void present;
     let missing = null;
     try { await getBytes(storageRef(f.storage, OBJECT_PATH)); } catch (error) { missing = error; }
     assert.equal(missing?.code, 'storage/object-not-found',
