@@ -12,9 +12,11 @@
 La revisione **locale** di M10-1 è conclusa: 15 controlli automatici rieseguiti (comprese Rules 65/65 e
 Storage 12/12 e `npm audit --omit=dev` a **0 vulnerabilità note**), matrice di autorizzazione dei 24
 ingressi esportati letta dal codice, 11 aree esaminate, **nessuna vulnerabilità dimostrata**. Restano
-quattro voci da assegnare — igiene dei log in `security-manager.js`/`vault-session.js`, bundle di terze
-parti `qrcode.min.js` con `innerHTML`, parametro PBKDF2 storico a 100 000 iterazioni, P0 **già noto**
-della chiave di wrapping in `sessionStorage` — e i gate esterni di M10. **Nessuna correzione** è stata
+quattro voci da assegnare — igiene dei log in `security-manager.js`/`vault-session.js` (9 chiamate che
+registrano l'oggetto errore), bundle di terze parti `qrcode.min.js` con `innerHTML`, **PBKDF2 dei campi a
+100 000 iterazioni attivo in scrittura** (`crypto-utils.js:11`, raggiunto da `encrypt` a `:212` e da
+`decrypt` a `:275`, con ripiego sulla **Master Password** nel percorso legacy), P0 **già noto** della
+chiave di wrapping in `sessionStorage` — e i gate esterni di M10. **Nessuna correzione** è stata
 introdotta e **M10-1 resta aperto**.
 
 ## Domande
@@ -24,8 +26,10 @@ introdotta e **M10-1 resta aperto**.
    La proposta di questa revisione: (a) crittografia e gestione delle chiavi a partire dallo stato
    documentato (incluso il P0 della chiave di wrapping in `sessionStorage`); (b) isolamento fra
    proprietari e condivisione/revoca; (c) bundle di terze parti (`qrcode`) e superficie `innerHTML`;
-   (d) chiarimento del parametro PBKDF2 storico. Serve indicare anche **commit o versione** da
-   certificare: l'audit su una candidata diversa dalla produzione ha valore diverso.
+   (d) **PBKDF2 dei campi a 100 000 iterazioni**, attivo in scrittura e con ripiego sulla Master Password
+   nel percorso legacy: parametro, formato senza marcatore KDF e migrazione necessaria. Serve indicare
+   anche **commit o versione** da certificare: l'audit su una candidata diversa dalla produzione ha
+   valore diverso.
 
 2. **Q2 — Criterio di chiusura di M10-1.**
    Il gate si chiude con il **rapporto dell'audit** più la revisione OWASP finale firmata, oppure

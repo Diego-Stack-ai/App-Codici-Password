@@ -69,10 +69,27 @@ positivi** (per esempio su `trashSyncRecord`).
    **Nessun** uso di `Math.random` per chiavi, IV, token o identificatori di idempotenza: i 5 usi
    rimasti sono id di riga nel DOM (`ma_cards.js:123,231,303`, `area_privata.js:208`) e un indice di
    colore (`ma_save.js:136`) — nessun valore di sicurezza.
-2. **Derivazione delle chiavi.** Verificatore e KEK a **600 000** iterazioni PBKDF2-SHA256
-   (`crypto-utils.js:14-15`, `backup-crypto.js:5`); un parametro **100 000** resta in
-   `crypto-utils.js:11` per il percorso storico: **da chiarire con l'audit indipendente** se sia ancora
-   usato in scrittura o solo in lettura retrocompatibile.
+2. **Derivazione delle chiavi (corretto il 22/09 dopo la revisione Codex).** Due parametri **distinti**:
+   - **Vault:** verificatore e KEK a **600 000** iterazioni PBKDF2-SHA256 (`crypto-utils.js:14-15`,
+     `VERIFIER_ITERATIONS`/`KEK_ITERATIONS`; `deriveKek` nell'involucro della chiave).
+   - **Cifratura dei campi:** `ITERATIONS = 100000` (`crypto-utils.js:11`) è **attivo anche in
+     scrittura**: `encrypt()` → `deriveKey()` (`:212` → `:176-187`) e `decrypt()` → `deriveKey()`
+     (`:275`). **Non** è un residuo di sola lettura storica.
+   Formato del valore cifrato: `salt(16) + iv(12) + ciphertext`, **senza** conteggio di iterazioni né
+   marcatore KDF (`:209-225`, `:249-257`); `decrypt` usa il parametro fisso e prova i candidati del
+   keyring (`encryptionKeyCandidates`, `:273`). **Conseguenza:** alzare il parametro **non** è una
+   modifica di una riga — richiede ri-cifratura/migrazione di tutti i campi oppure un meccanismo di
+   iterazioni candidate, quindi una decisione da prendere con l'audit.
+   **Che cosa passa da `encrypt`** (33 call site nei moduli): `form-azienda-save.js` (10) e
+   `form-privato-save.js` (8) — campi di Account aziendali e privati, comprese le credenziali bancarie;
+   `ma_save.js` (5) e `profilo-sync.js` (5) — dati aziendali e Profilo; `attachment-security.js` (2);
+   poi `dati_azienda.js`, `sharing-identity.js`, `vault-session.js`, `webauthn-manager.js`,
+   `account-widget-client.js`, `offline-mutation-queue.js`, `shared-vault-data-client.js`.
+   **Quale segreto entra:** `generateVaultKey()` produce 32 byte casuali; il keyring `CPVK2:` porta
+   `primaryKey` (casuale) e `legacyKey` — e nei due call site di `security-manager.js:265,573` il
+   `legacyKey` è la **Master Password**. Per i record cifrati con la chiave casuale le iterazioni contano
+   poco (spazio delle chiavi già impraticabile); per il **percorso legacy** che ripiega sulla Master
+   Password le 100 000 iterazioni sono l'unico fattore di lavoro.
 3. **IV.** AES-GCM con IV a **12 byte** generati casualmente (`backup-crypto.js:76`); i valori a 24/32
    byte sono salt/chiavi. Nessun IV riusato in modo visibile nei percorsi esaminati.
 4. **Segreti nel repository.** Nessuna chiave privata, nessun `.env` e nessun file di service account
@@ -80,9 +97,13 @@ positivi** (per esempio su `trashSyncRecord`).
    La **Firebase Web API key** compare in `push-messaging-client.js:12`, `firebase-messaging-sw.js:5` e
    `functions/index.js:664`: **non è un segreto** per progetto (identifica il progetto; i presidi sono
    App Check e Rules), ma va trattata come identificatore da limitare in caso di abuso.
-5. **Dati sensibili nei log.** **107** chiamate `console.*` nei moduli di produzione: il campione
-   esaminato registra identificatori, codici e messaggi d'errore, mai password, chiavi o plaintext.
-   Due punti di igiene da migliorare sono in §5.1.
+5. **Dati sensibili nei log (limite del campione, corretto il 22/09).** Nei moduli di produzione ci sono
+   **107** chiamate `console.*`; il **campione effettivamente esaminato** (moduli
+   `crypto|backup|vault|session|security|offline-mutation|archive`) non registra password, chiavi o
+   plaintext **per quanto visto**. Il campione **non** è esaustivo: `security-manager.js` registra un
+   **oggetto errore** in **7** chiamate (righe 66, 112, 131, 185, 429, 488, 539), non solo nelle due
+   citate in §5.1. Nessuna delle due affermazioni è una prova di sfruttabilità: sono igiene da
+   completare.
 6. **DOM e iniezione.** Nessun `innerHTML`, `insertAdjacentHTML`, `document.write`, `eval` o
    `new Function` nel codice applicativo: i DOM sono costruiti con `createElement`/`textContent`. I soli
    riscontri sono nei **bundle di terze parti** (`qrcode.min.js` costruisce una tabella via `innerHTML`;
@@ -111,20 +132,25 @@ Le voci seguenti **non** sono difetti dimostrati: sono igiene, ambito da chiarir
 Per un eventuale difetto l'incarico prevede prova e proposta di correzione, **senza** modificare il
 codice qui.
 
-1. **Igiene dei log (proposta di correzione, basso rischio).** `security-manager.js:66,112` e
-   `vault-session.js:40,70` registrano l'**oggetto errore** (`console.error(..., e)`), mentre il resto
-   del codice usa la sola `e.name`/messaggio (per esempio `crypto-utils.js:227`). *Perché conta:* un
-   errore dell'SDK può contenere percorso o dettagli della richiesta. *Proposta:* registrare solo
-   `e?.name || 'Error'` in quelle quattro chiamate, come già fatto in `crypto-utils.js`. *Verifica
-   proposta:* grep di controllo che nei moduli di sicurezza nessuna `console.*` riceva un oggetto
-   errore; `npm test` verde. **Non applicata**: serve un incarico esecutivo.
+1. **Igiene dei log (proposta di correzione, basso rischio).** Nei moduli di sicurezza **9** chiamate
+   registrano l'**oggetto errore**: `security-manager.js:66,112,131,185,429,488,539` e
+   `vault-session.js:40,70`; il resto del codice usa la sola `e.name`/messaggio (per esempio
+   `crypto-utils.js:227`). *Perché conta:* un errore dell'SDK può contenere percorso o dettagli della
+   richiesta. *Proposta:* registrare solo `e?.name || 'Error'` in quelle nove chiamate.
+   *Verifica proposta:* grep di controllo che nei moduli di sicurezza nessuna `console.*` riceva un
+   oggetto errore; `npm test` verde. **Non applicata**: serve un incarico esecutivo.
 2. **Bundle di terze parti con sink HTML.** `qrcode.min.js` usa `innerHTML` per la tabella di fallback;
    il contenuto deriva da dati QR generati dall'app (non HTML) e il contenitore è creato dalla libreria.
    *Proposta:* includerlo nell'ambito dell'audit indipendente e, se si vuole, sostituire la libreria con
    una versione che non usi `innerHTML`. Nessuna prova di sfruttabilità in questo laboratorio.
-3. **Parametro PBKDF2 storico (100 000).** Da chiarire se `crypto-utils.js:11` è ancora usato in
-   **scrittura** o solo per leggere dati preesistenti; se è in scrittura, valutare l'allineamento a
-   600 000. Non è una vulnerabilità dimostrata (dipende dall'entropia della Master Password).
+3. **PBKDF2 dei campi a 100 000 iterazioni, attivo in scrittura (esposizione dimostrata dal codice; impatto non dimostrato).**
+   *Esposizione:* `ITERATIONS = 100000` (`crypto-utils.js:11`) è passato a PBKDF2 da `deriveKey` (`:176-187`)
+   e raggiunto sia da `encrypt` (`:212`) sia da `decrypt` (`:275`): vale quindi **anche per i dati nuovi**.
+   *Impatto:* dipende dall'entropia del segreto effettivo — per i record cifrati con la chiave casuale
+   del keyring le iterazioni aggiungono poco, mentre nel **percorso legacy con la Master Password** sono
+   l'unico fattore di lavoro; non è una vulnerabilità dimostrata in questo laboratorio. *Che cosa serve:*
+   **audit indipendente** e una decisione su migrazione/ri-cifratura, perché il formato non memorizza il
+   parametro. **Nessuna modifica applicata.**
 4. **P0 noto, non chiuso da questa revisione.** La chiave di wrapping della sessione Vault vive in
    `sessionStorage` (`vault-session.js:3,17`): è il P0 legacy già dichiarato in
    `AUDIT_VAULT_SESSION_P0.md` e richiamato dal piano (`PIANO:683`). Bonifica della shell persistente,
