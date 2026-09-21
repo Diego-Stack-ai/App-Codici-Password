@@ -312,7 +312,7 @@ File censiti: **781**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 204832 | 1115 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 214942 | 1200 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -326,7 +326,7 @@ File censiti: **781**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 12817 | 112 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 48554 | 397 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 49011 | 397 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
@@ -708,7 +708,7 @@ File censiti: **781**. Duplicati byte-per-byte: **1 gruppi**.
 | `functions/test/archive-purge-receipt.test.js` | JS | 4620 | 70 | Test automatico: archive-purge-receipt.test. |
 | `functions/test/archive-purge-reference-plan.test.js` | JS | 9164 | 165 | Test automatico: archive-purge-reference-plan.test. |
 | `functions/test/archive-purge-service.test.js` | JS | 5050 | 71 | Test automatico: archive-purge-service.test. |
-| `functions/test/archive-receipt-handler.test.js` | JS | 8715 | 139 | Test automatico: archive-receipt-handler.test. |
+| `functions/test/archive-receipt-handler.test.js` | JS | 12550 | 206 | Test automatico: archive-receipt-handler.test. |
 | `functions/test/backup-owner-handler.test.js` | JS | 4882 | 83 | Test automatico: backup-owner-handler.test. |
 | `functions/test/backup-receipt-handler.test.js` | JS | 8386 | 140 | Test automatico: backup-receipt-handler.test. |
 | `functions/test/backup-restore-preview.test.js` | JS | 2173 | 31 | Test automatico: backup-restore-preview.test. |

@@ -1145,3 +1145,55 @@ Commit locali separati per test e rapporto, senza push. Nel file di coordinament
 - **Nota procedurale dichiarata:** i test sono stati scritti ed eseguiti **prima** di pubblicare questa presa in carico, che il protocollo vorrebbe precedente al lavoro. Il ritardo è dichiarato qui e nel rapporto; la sequenza dei commit resta presa in carico → test → rapporto.
 
 **Stato incarico: IN_LAVORAZIONE** — M7-R2 preso in carico da DeepSeek il 2026-09-21; M7-R1 documentale resta approvato, con la politica di retention ancora aperta.
+
+## Rapporto DeepSeek — M7-R2
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. **Nessun difetto produttivo trovato**: le proprietà richieste sono soddisfatte dal codice attuale e sono ora dimostrate da prove sintetiche.
+- **Commit:** presa in carico `94baddcb`, test `baef249a` (`test(functions): exercise the attachment purge against a recording Storage fake`); base osservata `9834b7c8`; **nessun push eseguito**.
+- **File:** `functions/test/archive-receipt-handler.test.js` (fixture Storage estesa + 3 test), `docs/M7_RETENTION_CENSIMENTO.md` (matrice T-05, T-06, T-25 aggiornate e sezione 5.7 riscritta), `docs/FILE_INVENTORY.md`. Nessun file produttivo toccato.
+
+### Cosa è stato fatto
+
+La fixture del handler `purgeArchivedAccount` usava `get: async () => ({docs: []})` e `bucket: () => ({})`: il ramo distruttivo (`functions/index.js:500-506`) non era mai raggiunto. Ora il fake Storage:
+
+- elenca **davvero** i documenti della sottocollezione `attachments` passati dal test;
+- registra in ordine ogni `bucket.file(path).delete`, il percorso e le opzioni ricevute;
+- può far fallire la delete di un singolo percorso, per simulare l'errore parziale.
+
+Il comportamento dei test preesistenti è invariato: con `attachments` vuoto la fixture si comporta come prima.
+
+### Prove aggiunte ed esiti
+
+| Test (riga) | Copre | Esito |
+|---|---|---|
+| `listed attachment bytes are deleted, in order, before the recursive deletion` (**160**) | T-25 | **PASS**: sequenza `list → delete → delete → recursiveDelete`; percorsi esattamente quelli elencati; `ignoreNotFound: true` su ogni delete; allegato con solo `url` e allegato senza `storagePath` **ignorati**; ricevuta `purged`, audit scritto, record rimosso |
+| `an attachment path outside the Account prefix aborts before any Storage deletion` (**174**) | T-05 end-to-end | **PASS**: `failed-precondition`; sequenza `list` soltanto; **zero** delete, nemmeno del percorso valido; nessun `recursiveDelete`; nessun audit; record intatto; ricevuta `processing` |
+| `a partial Storage failure never claims purged and the same request resumes idempotently` (**187**) | T-06 | **PASS**: dopo il fallimento nessun `recursiveDelete`, nessun audit, ricevuta `processing`, record intatto; il retry con lo **stesso** comando completa con `purged` e re-innova le delete elencate |
+
+L'assenza di cancellazioni fuori dal prefisso è verificata due volte: nel percorso positivo (i percorsi cancellati sono esattamente quelli elencati) e in quello negativo (un percorso estraneo impedisce **ogni** cancellazione, comprese quelle legittime).
+
+### Verifiche eseguite
+
+- `node --test functions/test/archive-receipt-handler.test.js` → **11/11** (8 preesistenti + 3 nuove).
+- Suite Functions coinvolta (purge/archivio) → **28/28**: `archive-receipt-handler`, `archive-owner-handler`, `archive-purge-service`, `archive-purge-receipt`, `purge-profile-cleanup-handler`.
+- `git diff --check` **pulito**; inventario rigenerato.
+- Nessuna modifica a codice, Rules o Functions produttive, `Frontend/public/**`, versione, `master`, dati o durate di retention; M8–M10 non avviati; solo UID, Account e byte fittizi.
+
+### Comportamenti osservati (nessun difetto, ma rilevanti)
+
+1. **La ripresa dopo un errore Storage non è selettiva**: il retry re-innova la delete di *tutti* i percorsi elencati, inclusi quelli già eliminati. È sicuro grazie a `ignoreNotFound: true`, ma produce chiamate ridondanti su Account con molti allegati.
+2. **Un solo percorso non conforme blocca l'intero purge prima di qualsiasi cancellazione**, compresi i percorsi validi: il comportamento è fail-closed e coerente con il contratto attuale, ma ha un impatto operativo — un metadato legacy anomalo impedisce l'eliminazione dell'Account finché non viene corretto.
+3. **Dopo l'arresto per percorso non sicuro la ricevuta resta `processing`**: la stessa richiesta riprende una volta corretti i metadati, senza nuovi identificativi.
+
+### Scostamenti
+
+- La presa in carico è stata pubblicata **dopo** la scrittura e l'esecuzione dei test: il protocollo la vorrebbe precedente. Il ritardo è dichiarato nella presa in carico e qui; la sequenza dei commit resta presa in carico (`94baddcb`) → test (`baef249a`) → rapporto.
+- La matrice M7 passa da **13 a 16** righe `esistente` e da **20 a 17** `da realizzare`, per i soli tre scenari effettivamente dimostrati. **T-15 resta `da realizzare`**: riguarda la cancellazione lato client (byte+metadato) e non è coperta da queste prove sul handler. Nessun'altra riga è stata promossa.
+- La sezione 5.7 del censimento è stata riscritta: il limite di copertura dichiarato in M7-R1 non è più attuale e ora elenca ciò che resta scoperto.
+
+### Note per Codex
+
+- I punti da ricontrollare sono i tre test alle righe 160, 174 e 187 e la fixture estesa: verifica che il fake non addolcisca il comportamento reale. In particolare la sequenza registrata dimostra che le delete avvengono **prima** di `recursiveDelete` e che l'abort per percorso non sicuro precede qualunque delete.
+- Le soglie e le durate di retention restano decisioni di Diego: questa fetta non ne introduce alcuna.
+
+**Stato incarico: DA_VERIFICARE** — M7-R2 consegnato da DeepSeek il 2026-09-21; prova sintetica del purge allegati completa, nessun difetto produttivo rilevato e nessun push eseguito.
