@@ -80,7 +80,7 @@
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",
     "test:audit-retention-emulators": "node scripts/run-audit-retention-emulators.mjs",
     "test:assistant": "node scripts/test-vault-assistant.mjs && node --test experiments/card-importer/card-parser.test.mjs",
-    "test:profile": "node --test tests/avatar-change-residues.test.mjs tests/profile-model.test.mjs tests/profile-lazy-editor.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs tests/profile-contact-link.test.mjs tests/company-profile.test.mjs tests/company-form-freshness.test.mjs tests/company-detail-freshness.test.mjs tests/profile-account-management.test.mjs tests/contact-card-photo.test.mjs",
+    "test:profile": "node --test tests/avatar-change-residues.test.mjs tests/consultation-copies.test.mjs tests/profile-model.test.mjs tests/profile-lazy-editor.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs tests/profile-contact-link.test.mjs tests/company-profile.test.mjs tests/company-form-freshness.test.mjs tests/company-detail-freshness.test.mjs tests/profile-account-management.test.mjs tests/contact-card-photo.test.mjs",
     "test:maturity-fixture": "node --test tests/maturity-dataset.test.mjs",
     "test:css": "node node_modules/stylelint/bin/stylelint.mjs \"Frontend/public/assets/css/**/*.css\"",
     "test:dependencies": "node node_modules/madge/bin/cli.js Frontend/public/assets/js --extensions js --circular",
