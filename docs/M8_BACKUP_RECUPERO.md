@@ -56,7 +56,7 @@ Il collaudo del 09/09/2026 attesta il percorso riuscito descritto sopra. La rele
 Sul commit applicativo indicato, `executeBackupRestore` applica transazioni separate fino a 400 record e carica gli allegati dopo i record. Due prove isolate del client, con servizi Firebase simulati e dati fittizi, confermano che un errore al secondo blocco lascia il primo già accettato e che un errore Storage arriva dopo l’applicazione del record allegato. Il backend conferma nel codice l’atomicità per singolo blocco; non è una transazione globale.
 
 - [ ] progettare e collaudare staging, ripresa o compensazione fra blocchi e allegati;
-- [ ] verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima;
+- [ ] **PARZIALE (21/09/2026)** verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima: su emulatori reali e dati sintetici, una **nuova** sessione di ripristino dello stesso file classifica i record già applicati — compreso il **metadato dell'allegato i cui byte mancano** — come «invariato» e **non riprova nulla** (`BACKUP_RESTORE_NOTHING_SELECTED`, zero caricamenti): il riferimento resta senza byte anche quando un'altra parte del ripristino riesce. Osservati anche il blocco nella stessa sessione (`BACKUP_STORAGE_RETRY_BLOCKED`) e il fatto che la ricevuta precedente **non** impedisce una nuova esecuzione. **Non** esercitati: collisioni e modifiche intervenute **dopo** l'anteprima, backup di grandi dimensioni, iPhone/Windows. Dettagli nella sezione «Nuovo tentativo dopo un ripristino interrotto»; gate lasciato **aperto**.
 - [ ] **NON CHIUSA (21/09/2026)** dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva: su emulatori reali, con dati sintetici e il percorso reale `executeBackupRestore`, un **upload fallito dopo l'applicazione dei record** lascia il metadato dell'allegato in Firestore (che cita il percorso) **senza** i byte in Storage — riferimento orfano **osservato**, non dedotto. Dettagli e controllo positivo nella sezione qui sotto; gate lasciato **aperto**.
 - [ ] misurare memoria e dimensioni su iPhone e Windows.
 
@@ -73,9 +73,30 @@ Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, 
 
 **Perché accade (dal codice).** `executeBackupRestore` applica **prima** tutti i blocchi di record (fase `firestore`) e solo **dopo** carica gli allegati (fase `storage`, `storageStarted = true`); un errore in fase `storage` blocca il piano (`BACKUP_STORAGE_RETRY_BLOCKED`) e **non** esiste compensazione, staging o retry automatico. Il caso osservato è **complementare** a quello già dichiarato in questo documento («senza creare oggetti orfani non referenziati», riga 120): là i **byte senza riferimento**, qui il **riferimento senza byte**.
 
-**Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le collisioni o le modifiche intercorse dopo l'anteprima, né la ripetizione con `retry` dal piano bloccato (il codice la rifiuta con `BACKUP_STORAGE_RETRY_BLOCKED` finché `storageStarted` è vero: asserzione di codice, non provata qui).
+**Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le collisioni o le modifiche intercorse dopo l'anteprima, né la ripetizione con `retry` dal piano bloccato (all'epoca asserzione di codice; la sezione «Nuovo tentativo dopo un ripristino interrotto» la osserva poi sul percorso reale con `BACKUP_STORAGE_RETRY_BLOCKED`).
 
 **Nessuna correzione introdotta.** Come richiesto non ho introdotto staging, compensazione, retry automatici o nuove politiche: il difetto è registrato e il gate resta **aperto** in attesa di una decisione (domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md`, commit separato).
+
+## Nuovo tentativo dopo un ripristino interrotto (verifica 21/09/2026)
+
+Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, **codice di produzione** del client (`prepareBackupRestore` + `executeBackupRestore`) e **callable reale** `restoreBackupChunk`: `tests/restore-retry-new-session.emulator.test.mjs` (3 casi), runner `scripts/run-restore-retry-emulators.mjs`. Punto di partenza: il caso della sezione precedente (record applicati, primo `uploadBytes` fallito, piano bloccato), riaperto in una **nuova** sessione di ripristino con lo **stesso** file.
+
+| Domanda | Esito osservato |
+|---|---|
+| Che cosa viene **classificato** | i tre record già scritti — **compreso il metadato dell'allegato i cui byte non esistono** — risultano «invariato» (`missing 0, unchanged 3, changed 0`, `collisionCount` 3): la classificazione confronta **solo** il documento Firestore, non i byte in Storage |
+| Che cosa può essere **selezionato o confermato** | nulla: sia l'esecuzione senza selezione sia quella con la selezione degli indici «invariato» sono rifiutate con `BACKUP_RESTORE_NOTHING_SELECTED`; **zero** caricamenti tentati (nell'interfaccia le caselle «Invariato» sono disabilitate, `impostazioni.js:620`) |
+| Ripetizione **impedita o permessa** | nella **stessa** sessione il piano bloccato resta non riprovabile (`BACKUP_STORAGE_RETRY_BLOCKED`, anche con `retry`); la **ricevuta** dell'applicazione interrotta **non** blocca una nuova sessione (ogni esecuzione ha un proprio `operationId`/`executionId`), ma la nuova sessione non arriva a eseguire perché non resta nulla da applicare, e l'anteprima non scrive ricevute |
+| **Stato finale** di riferimento e byte | il metadato continua a citare il percorso e i byte restano assenti (`storage/object-not-found`): il difetto **persiste** e non nasce alcuna nuova ricevuta |
+| **Controllo positivo** (metadato mancante) | cancellando il **solo metadato** dell'allegato, la nuova sessione lo classifica «mancante», lo applica e **carica i byte**: riferimento e byte tornano coerenti, con **due** ricevute di applicazione distinte |
+| **Controllo positivo** (record modificato) | modificando l'Account, la nuova sessione lo classifica «modificato» e lo applica con esito riuscito (1 record, 0 allegati) **senza** ricaricare i byte: l'allegato resta orfano anche dopo un ripristino riuscito |
+
+**Perché accade (dal codice).** `prepareRestoreExecution` esclude i record «invariato» (`entry.status !== 'unchanged'`) e rifiuta l'esecuzione se non ne resta nessuno; i percorsi Storage da caricare sono quelli dei **soli record applicati** (`collectStoragePaths(records, uid)`), quindi l'allegato di un record escluso non viene mai ricaricato. La ricevuta è legata all'`operationId` dell'esecuzione (`restore:{backupId}:{executionId}:{index}`), mentre l'anteprima usa `restore:{backupId}:{index}` e non persiste nulla.
+
+**Controllo per mutazione.** Rendendo sempre vero il filtro sugli «invariato» (`entry.status !== 'unchanged'` → `entry.status === entry.status`), il primo caso diventa **rosso** (`BACKUP_COLLISIONS` invece di `BACKUP_RESTORE_NOTHING_SELECTED`) e gli altri due restano verdi; il file di produzione è poi stato ripristinato con hash identico a `HEAD` (`git hash-object` = `1591885ed5a52ba3eb966b80217a8d5a9a55f339`).
+
+**Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le **collisioni** e le **modifiche intervenute dopo l'anteprima** (`stale-preview`), i ripristini con più allegati, né l'interfaccia grafica (le caselle disabilitate sono lette dal codice, non da un browser).
+
+**Nessuna correzione introdotta.** Come richiesto non ho introdotto retry automatici, staging, compensazione, migrazione o nuove politiche: il difetto è registrato e il gate resta **aperto** (nuove domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_NUOVA_SESSIONE.md`, commit separato).
 
 ## Protezioni candidate della sessione di ripristino — 13/09/2026
 
