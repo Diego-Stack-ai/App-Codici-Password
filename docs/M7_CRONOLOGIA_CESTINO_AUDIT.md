@@ -115,15 +115,28 @@ Il CAS non chiude la race purge/ripristino: la preparazione purge non marca anco
 
 **Decisione del proprietario.** Gli eventi tecnici di `users/{uid}/auditEvents` sono conservati per **24 mesi** dal timestamp autorevole e poi cancellati automaticamente da un processo **controllato dal backend**; l'app client non può creare, modificare o cancellare singoli eventi di audit. Diego ha indicato 12 mesi e poi corretto a **24 mesi** il 21/09/2026: prevale la seconda indicazione. La durata è una decisione di prodotto per questo registro e **non** un termine legale generale: eventuali obblighi specifici di conservazione restano da verificare. La decisione **non** si estende alle ricevute di idempotenza (`mutationResults`, `operationResults`, `archiveOperations`, `backupRestoreOperations`), ai backup, ai log di piattaforma o agli Account archiviati, che restano senza scadenza automatica.
 
-**Stato: candidato di laboratorio, NON attivo in produzione.** Non esistono job schedulati di potatura, le Rules produttive non sono cambiate e nessun dato reale è stato cancellato o letto. `functions/index.js`, `firestore.rules`, `storage.rules` e `Frontend/public/**` restano invariati.
+**Stato: implementato nel ramo locale, NON distribuito.** Il candidato di laboratorio è stato montato in Functions e le Rules del ramo escludono la scrittura client sul registro: nel ramo esistono gli eventi di risposta agli inviti (M7-AUDIT-4), i trigger degli inviti (M7-AUDIT-5I) e degli Account (M7-AUDIT-5A), i marcatori opachi nei tre scrittori client (M7-AUDIT-5C) e il job pianificato di retention (M7-AUDIT-6). **Nessun deploy è avvenuto e nessun dato reale è stato letto o cancellato**: in produzione non esiste ancora alcun job attivo e le Rules distribuite restano quelle precedenti. `experiments/history-recovery/audit-retention.mjs` resta il **riferimento di laboratorio**; il runtime ha il proprio modulo `functions/audit-retention-service.js`.
+
+### Contratto implementato nel ramo (riferimento per i documenti successivi)
+
+- **Registro best-effort.** `users/{uid}/auditEvents` traccia transizioni Firestore: non è prova forense dell'intenzione dell'utente e **non** è input di alcuna decisione di accesso.
+- **Contatori Account delle voci di condivisione.** I campi sono `suspendedSharingEntries` e `neutralizedSharingEntries` e contano le **voci di `sharedWith`** che passano da `pending`/`accepted` a `suspended` nella scrittura osservata — **non** i documenti invito toccati dal client, che il trigger non può conoscere. I vecchi nomi `suspendedInvites`/`neutralizedInvites` sono storici e superati.
+- **Limiti di D-8.** Il reinvito resta un `update` sullo stesso documento, quindi il proprietario può cambiare `auditRef` e rimuovere `responseAuditRef`: l'effetto massimo è una riga del **proprio** registro.
+- **Retention di 24 mesi di calendario**, dal timestamp efficace, con giorno limitato nei mesi corti.
+- **Date ammesse.** `at` è la data ordinaria; `createdAt` (Timestamp del server) è ammessa **solo** per le due famiglie che non scrivono `at` (`shared-vault-*`, `account-widget-*`) e **solo** quando `at` è assente. Un `at` presente ma malformato non viene aggirato da alcun ripiego.
+- **Eventi non databili conservati.** Un evento senza data valida è `unverifiable` e **non** entra in alcun lotto.
+- **Cursori di servizio.** La scansione avanza fra i run con un cursore per campo nel documento `auditRetentionState/scan`; a fine giro i cursori tornano `null` e la scansione riparte dall'inizio.
+- **Fuori dalla retention:** ricevute di idempotenza (`mutationResults`, `operationResults`, `archiveOperations`, `backupRestoreOperations`, `syncRecords`), `trash`, `recordHistory` (non esiste in produzione), backup, log di piattaforma e Account archiviati.
+- **Nessun deploy**: le voci sopra valgono **solo nel ramo**.
+
 
 ### Perimetro del registro
 
-Entrano in `auditEvents` i cinque percorsi già censiti in [M7_RETENTION_CENSIMENTO.md](./M7_RETENTION_CENSIMENTO.md) §4.1: `trashed`/`restored` (`trashSyncRecord`/`restoreSyncRecord`), `account-purged` (`purgeArchivedAccount`), `shared-vault-<azione>`, `account-widget-<azione>` e `backup-restore-chunk`. Nessun altro scrittore è previsto; un nuovo scrittore dovrà rispettare il timestamp autorevole descritto sotto.
+Entrano in `auditEvents` i cinque percorsi censiti in [M7_RETENTION_CENSIMENTO.md](./M7_RETENTION_CENSIMENTO.md) §4.1 — `trashed`/`restored` (`trashSyncRecord`/`restoreSyncRecord`), `account-purged` (`purgeArchivedAccount`), `shared-vault-<azione>`, `account-widget-<azione>` e `backup-restore-chunk` — **più tre famiglie introdotte dalle fette M7-AUDIT**: la risposta all'invito (`invite-accepted`/`invite-rejected`, dentro la transazione della callable), i trigger degli inviti (`invite-created`, `invite-removed`) e i trigger degli Account (`account-archived`, `account-restored`). I nuovi produttori scrivono `at` con `FieldValue.serverTimestamp()`; le due famiglie `shared-vault-*` e `account-widget-*` scrivono `createdAt` con `FieldValue.serverTimestamp()` e **non** scrivono `at`.
 
 ### Timestamp autorevole
 
-Il timestamp è `at`, impostato dal backend con `serverTimestamp` in tutti e cinque i percorsi. Il candidato accetta le forme con cui Firestore restituisce un Timestamp (istanza SDK, `{seconds, nanoseconds}`, `Date` nei test) e considera **inverificabile** qualunque altro valore. La validazione è stretta: i nanosecondi devono essere interi nell'intervallo **0…999999999** e i secondi devono produrre un istante intero, sicuro e rappresentabile da una data JavaScript. Un valore fuori intervallo — nanosecondi negativi o oltre il miliardo, secondi oltre l'intervallo di `Date`, tipi non interi — è **malformato** e resta `unverifiable`; se la scadenza calcolata non è finita, l'evento è ugualmente `unverifiable`. Questa severità è stata introdotta dalla revisione Codex del 21/09/2026, che ha rilevato l'accettazione di `nanoseconds` fuori intervallo nella prima stesura.
+Il timestamp è `at`, impostato dal backend con `serverTimestamp`: nei cinque percorsi storici e nelle tre famiglie nuove (risposta all'invito, trigger inviti, trigger Account). Le due famiglie `shared-vault-*` e `account-widget-*` scrivono invece `createdAt` con `FieldValue.serverTimestamp()` e **non** scrivono `at`; per quelle, e solo quando `at` è assente e `createdAt` è un Timestamp valido, la data efficace è `createdAt` (M7-AUDIT-6P-R1 e rettifica approvata). Il validatore accetta le forme con cui Firestore restituisce un Timestamp (istanza SDK, `{seconds, nanoseconds}`, `Date` nei test) e considera **inverificabile** qualunque altro valore. La validazione è stretta: i nanosecondi devono essere interi nell'intervallo **0…999999999** e i secondi devono produrre un istante intero, sicuro e rappresentabile da una data JavaScript. Un valore fuori intervallo — nanosecondi negativi o oltre il miliardo, secondi oltre l'intervallo di `Date`, tipi non interi — è **malformato** e resta `unverifiable`; se la scadenza calcolata non è finita, l'evento è ugualmente `unverifiable`. Questa severità è stata introdotta dalla revisione Codex del 21/09/2026, che ha rilevato l'accettazione di `nanoseconds` fuori intervallo nella prima stesura.
 
 ### Record legacy o malformati
 
@@ -131,11 +144,13 @@ Un evento privo di data valida non viene mai cancellato: è classificato `unveri
 
 ### Cancellazione a lotti
 
-Il piano è deterministico: solo eventi scaduti e databili, ordinati dal più vecchio con spareggio sull'id, divisi in lotti entro il limite di **500 operazioni per batch** di Firestore (dimensione predefinita 200) e con un tetto di **10.000 eventi per esecuzione**. L'ordine stabile rende il piano riproducibile.
+Il piano è deterministico: solo eventi scaduti e databili, ordinati dal più vecchio con spareggio sull'id, divisi in lotti entro il limite di **500 operazioni per batch** di Firestore (dimensione predefinita 200). Nel job montato nel ramo i tetti sono: **20.000 letture per run**, **50 lotti per run** e **10 lotti per proprietario**, così un singolo proprietario con uno storico enorme non consuma il budget degli altri; la finestra della query è di 700 giorni (24 mesi di calendario sono almeno 730) e il classificatore resta l'unica autorità sulla cancellazione. L'ordine stabile rende il piano riproducibile.
 
 ### Idempotenza, errori e ripresa
 
 La cancellazione di un documento già assente è un no-op; il piano si ricalcola dagli eventi ancora presenti, quindi ripetere l'esecuzione non duplica effetti e un lotto già cancellato non riappare. Un errore di lotto interrompe l'esecuzione e riporta `partial` con il lotto fallito, **senza mai dichiarare completato** ciò che non lo è; una sessione chiusa interrompe senza cancellare oltre. La ripresa riparte dagli eventi residui.
+
+**Dettagli del job montato nel ramo (M7-AUDIT-6).** La cancellazione di ogni lotto è confermata sulla **versione letta**: via rapida con precondizione `lastUpdateTime` e, se la versione è cambiata, transazione di ripiego che rilegge, riclassifica e cancella solo ciò che è **ancora** scaduto. Il conteggio dei cancellati viene dal solo tentativo che ha committato. La scansione avanza fra i run con un **cursore per campo** (`auditRetentionState/scan`), che si azzera a fine giro; i cursori avanzano solo se la finestra letta è stata gestita per intero, così un lotto fallito o un piano saltato non fanno perdere eventi. Un errore di pianificazione produce `partial` e non avanza i cursori. Lo stato `completed` significa «nessun lavoro noto», non «tutto il registro è stato esaminato».
 
 ### Esclusione delle ricevute e isolamento fra UID
 
@@ -143,18 +158,20 @@ Ogni percorso pianificato deve iniziare con `users/{uid}/auditEvents/`: id non c
 
 ### Visibilità all'utente
 
-Non esiste un'interfaccia che mostri la cronologia: nessun modulo di `Frontend/public/assets/js` legge `auditEvents`. Il candidato mantiene la **lettura** del proprietario e nega ogni scrittura client; l'eventuale futura visibilità all'utente richiederebbe una decisione di prodotto separata.
+Non esiste un'interfaccia che mostri la cronologia: **censimento in sola lettura di M7-AUDIT-7, confermato** — nessun file di `Frontend/public/assets/js` nomina `auditEvents`, e nessun modulo lo legge. Le Rules del ramo mantengono la **lettura** del proprietario e negano ogni scrittura client. L'eventuale visibilità all'utente richiederebbe una decisione di prodotto separata: la proposta minima, **non implementata**, è una pagina in sola lettura che elenca gli eventi del proprietario ordinati per `at`, con finestra di 24 mesi, nessun dato del Vault e nessuna azione di modifica (i dettagli in `docs/DEEPSEEK_COORDINATION.md`, sezione di riconciliazione M7-AUDIT-7).
 
 ### Dipendenze e decisioni ancora aperte
 
-- **Convenzione della finestra**: il candidato usa mesi di calendario (con giorno limitato nei mesi corti); l'alternativa è un multiplo fisso di giorni. Da confermare.
-- **Record storici senza `at`**: conservazione permanente o bonifica manuale documentata.
+- **Convenzione della finestra**: **decisa e implementata**: mesi di calendario con giorno limitato nei mesi corti.
+- **Record storici senza `at` valido**: conservati come `unverifiable` e mai cancellati; una bonifica manuale resta una decisione aperta.
+- **Record storici delle due famiglie `createdAt`**: databili e quindi potabili dopo 24 mesi, perché `createdAt` è un Timestamp del server (deciso in M7-AUDIT-6P-R1 e nella rettifica approvata).
 - **Obblighi legali specifici**: dipendenza dichiarata, nessuna deroga inventata.
-- **Job reale**: cadenza, ambiente di collaudo, monitoraggio, allarme e rollback non sono progettati da questa fetta.
-- **Rules produttive e distribuzione**: la rimozione della scrittura client sull'audit richiede la modifica delle Rules effettive e un rilascio coordinato, autorizzati separatamente.
+- **Rilascio del job**: cadenza, ambiente di collaudo, monitoraggio, allarme e rollback sono **progettati solo come proposta** (giornaliero alle 03:00 Europe/Rome, 50 lotti per run, 10 per proprietario, 3 ritentativi); nessun deploy è autorizzato.
+- **Rules produttive e distribuzione**: le Rules del **ramo** escludono la scrittura client sul registro; la distribuzione coordinata resta autorizzata separatamente.
+- **Vista utente del registro**: non esiste (censimento in sola lettura in M7-AUDIT-7); una vista in sola lettura resta una decisione di prodotto separata e non è implementata.
 
-### Prove di laboratorio disponibili
+### Prove disponibili
 
-- `experiments/history-recovery/audit-retention.mjs` — pianificatore ed esecutore puri, non importati dall'app né da Functions.
-- `experiments/history-recovery/audit-retention.test.mjs` — **15 prove sintetiche**: forme del timestamp e intervalli validi, finestra di 24 mesi con limite di calendario, conservazione/scadenza al confine, dati non interpretabili mai cancellati, ordinamento e lotti, esclusione delle ricevute, isolamento UID, input fuori misura, completamento, errore parziale con ripresa idempotente, interruzione, rifiuto dei piani arbitrari prima di qualunque cancellazione.
+- **Laboratorio**: `experiments/history-recovery/audit-retention.mjs` — pianificatore ed esecutore puri, riferimento di laboratorio, **non importati** da Functions; `experiments/history-recovery/audit-retention.test.mjs` — **15 prove sintetiche** (forme del timestamp, finestra di calendario, dati non interpretabili mai cancellati, ordinamento e lotti, esclusione delle ricevute, isolamento UID, input fuori misura, completamento, errore parziale con ripresa idempotente, interruzione, rifiuto dei piani arbitrari).
+- **Runtime (ramo)**: `functions/audit-retention-service.js` (policy: data efficace, `createdAt` solo per le due famiglie, finestra di calendario, confinamento, piano, esecutore) con 13 casi in `functions/test/audit-retention-service.test.js`; il job in `functions/index.js` con 6 casi in `functions/test/audit-retention-job.test.js` (conteggio dal solo tentativo che committa, via rapida con precondizione, ripiego transazionale, errore non inghiottito, errore di piano ⇒ `partial`, scrittura dei cursori) e **14 casi Emulator** in `tests/audit-retention.emulator.test.mjs` (semantica dei due filtri, idempotenza, sottocollezione orfana, percorso estraneo respinto, cursore e duplicati fra proprietari, aggiornamento concorrente, scansione troncata, prefisso non cancellabile più lungo del tetto su più run, budget di letture, configurazione indici).
 - `tests/history-recovery.rules.test.mjs` — Rules **candidate** (`experiments/history-recovery/firestore.candidate.rules`): lettura riservata al proprietario e **create, update e delete negati** al client su `auditEvents`, `trash` e `recordHistory`.
