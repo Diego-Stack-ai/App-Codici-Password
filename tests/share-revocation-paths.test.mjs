@@ -67,6 +67,18 @@ for (const file of writers) {
   });
 }
 
+// M7-R7C-4 — la vista ospite riconosce la sospensione dall'invito, non
+// dall'Account (che le Rules negano) e solo per inviti già accettati.
+test('inviti: la scoperta dell\'ospite resta limitata agli inviti accettati', () => {
+  const repository = readFileSync(new URL('../Frontend/public/assets/js/modules/data/vault-repository.js', import.meta.url), 'utf8');
+  assert.match(repository, /where\('status', '==', 'accepted'\)/, 'un invito pendente non è un accesso');
+  assert.match(repository, /sharingState === 'suspended'/, 'lo stato sospeso viene letto dall\'invito');
+  for (const file of ['privato/account_privati.js', 'privato/dettaglio_account_privato.js', 'azienda/dettaglio_account_azienda.js']) {
+    assert.match(readFileSync(new URL(`../Frontend/public/assets/js/modules/${file}`, import.meta.url), 'utf8'),
+      /findSuspendedGuestInvite|_suspended/, `${file}: deve riconoscere l'accesso sospeso`);
+  }
+});
+
 test('utils: il ciclo legacy è 0 e i valori malformati sono invalidi', async () => {
   const source = await readFile(new URL('../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8');
   const helpers = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));

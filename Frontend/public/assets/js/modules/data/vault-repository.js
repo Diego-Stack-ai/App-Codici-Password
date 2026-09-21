@@ -113,6 +113,16 @@ export const listPrivateAccountAttachments = (uid, accountId) =>
     ));
 
 export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
+// M7-R7C-4: quando l'Account è sospeso il get è negato dalle Rules; l'invito del
+// destinatario è l'unica fonte lecita per riconoscere lo stato senza aprire
+// contenuti. Riusa la query già autorizzata per il destinatario.
+export const findSuspendedGuestInvite = async (ownerId, accountId, email, companyId = '') => {
+    const invites = await listAcceptedInvites(email);
+    return invites.find(invite => invite.accountId === accountId
+        && (invite.ownerId || invite.senderId) === ownerId
+        && String(invite.aziendaId || '') === String(companyId || '')
+        && invite.sharingState === 'suspended') || null;
+};
 export const getPushDevice = (uid, deviceId) => getRecordByPath(`users/${uid}/pushDevices/${deviceId}`);
 
 export const listContacts = uid => readRecords(`contacts:${uid}`,

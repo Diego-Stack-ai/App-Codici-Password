@@ -81,6 +81,7 @@ export function mountAccountPrivati(user, options = {}) {
         getSubtitle: account => account.username || account.email || 'Utente Nascosto',
         onNavigate(account) {
             if (signal.aborted) return;
+            if (account._suspended) return; // M7-R7C-4: nessuna apertura per un accesso sospeso
             if (account._aziendaId) {
                 navigate(`dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`);
             } else {
@@ -202,6 +203,23 @@ export function mountAccountPrivati(user, options = {}) {
                         return null;
                     }
 
+                    // M7-R7C-4: un invito sospeso (Account nell'Archivio) non concede
+                    // lettura e non si tenta il get sull'Account, negato dalle Rules:
+                    // la card si costruisce dal solo invito, con il nome che già
+                    // contiene e nessun altro dato.
+                    if (inv.sharingState === 'suspended') {
+                        return {
+                            id: inv.accountId,
+                            nomeAccount: inv.accountName || '',
+                            isOwner: false,
+                            ownerId: senderId,
+                            _isGuest: true,
+                            _suspended: true,
+                            _aziendaId: inv.aziendaId || '',
+                            cycle: inv.cycle
+                        };
+                    }
+
                     let accPath = `users/${senderId}/accounts/${inv.accountId}`;
                     // Consider empty string or null as no azienda
                     if (inv.aziendaId && inv.aziendaId.trim() !== "") {
@@ -223,7 +241,19 @@ export function mountAccountPrivati(user, options = {}) {
                 }
                 return null;
             });
-            sharedWithMe = (await waitFor(Promise.all(invitePromises))).filter(Boolean);
+            // Più inviti dello stesso Account (cicli diversi) non devono produrre
+            // due card: vince l'accesso attivo, altrimenti il ciclo più recente.
+            const byAccount = new Map();
+            for (const record of (await waitFor(Promise.all(invitePromises))).filter(Boolean)) {
+                const key = [record.ownerId, record._aziendaId || '', record.id].join('|');
+                const current = byAccount.get(key);
+                if (!current) { byAccount.set(key, record); continue; }
+                const better = (current._suspended && !record._suspended)
+                    || (Boolean(current._suspended) === Boolean(record._suspended)
+                        && (record.cycle ?? 0) > (current.cycle ?? 0));
+                if (better) byAccount.set(key, record);
+            }
+            sharedWithMe = [...byAccount.values()];
             LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
 
             // 2. Own Accounts

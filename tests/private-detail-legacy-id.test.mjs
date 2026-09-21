@@ -10,7 +10,7 @@ const source = await readFile(new URL('../Frontend/public/assets/js/modules/priv
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function deferred() { let resolve; const promise = new Promise(done => { resolve = done; }); return {promise, resolve}; }
 
-function fixture({missing = false, pending = null, directPending = null, search = '?id=legacy-alias'} = {}) {
+function fixture({missing = false, pending = null, directPending = null, search = '?id=legacy-alias', suspended = false} = {}) {
     const calls = [], footer = {children: []};
     let failNextRead = false;
     const attachmentClasses = new Set();
@@ -34,6 +34,12 @@ function fixture({missing = false, pending = null, directPending = null, search 
         },
         getPrivateAccountConfirmed: async (uid, id) => { calls.push(['confirmed', uid, id]); return null; },
         findPrivateAccountByLegacyId: async (uid, id) => { calls.push(['legacy', uid, id]); return pending ? pending.promise : missing ? null : physical(); },
+        // M7-R7C-4: per un Account sospeso la lettura dell'Account è negata dalle
+        // Rules; il riconoscimento passa dall'invito del destinatario.
+        findSuspendedGuestInvite: async (ownerId, accountId, email, companyId) => {
+            calls.push(['suspended-invite', ownerId, accountId, email, companyId]);
+            return suspended ? {accountId, ownerId, aziendaId: companyId, sharingState: 'suspended', accountName: 'Account sintetico'} : null;
+        },
         initPrivateAttachmentModule: data => calls.push(['attachments-init', data]),
         loadPrivateAttachments: async () => calls.push(['attachments-load']),
         openSourceSelector: () => calls.push(['attachment-open']),
@@ -92,6 +98,15 @@ test('a missing account leaves record actions unavailable', async () => {
     assert.equal(f.findEdit(), undefined);
     assert.equal(f.calls.some(([type]) => ['update', 'attachments-init', 'attachments-load', 'sharing-init', 'sharing-render', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false);
     assert.equal(f.calls.find(([type]) => type === 'toast')[1], 'account_not_found');
+    assert.ok(f.calls.some(([type]) => type === 'suspended-invite'), 'lo stato viene verificato sull\'invito prima dell\'errore generico');
+});
+
+test('deep link a un Account sospeso: stato dedicato, nessuna azione e nessun contenuto', async () => {
+    const f = fixture({missing: true, suspended: true}); await f.init(); await tick();
+    assert.equal(f.findEdit(), undefined, 'nessuna azione di modifica');
+    assert.equal(f.calls.some(([type]) => ['update', 'attachments-init', 'attachments-load', 'sharing-init', 'sharing-render', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false,
+        'nessun modulo di contenuto inizializzato');
+    assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['account_suspended_label', 'warning']);
 });
 
 test('reload after legacy resolution reads the physical document directly', async () => {

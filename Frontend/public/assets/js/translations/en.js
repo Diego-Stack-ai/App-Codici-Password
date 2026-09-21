@@ -50,6 +50,7 @@ export default {
     "confirm_archive_suspend_msg": "They will lose access to the Account while it stays in the Archive.",
     "confirm_archive_recipients_caveat": "List taken from the data loaded now: changes made elsewhere may not appear.",
     "success_restored_sharing_revoked": "Account restored: previous sharing was revoked. Send a new invitation to grant access again.",
+    "account_suspended_label": "Suspended account",
     "success_moved_to_archive": "Account moved to the Archive",
     "success_already_archived": "Account already in the Archive",
     "archive_conflict_refresh": "The Account changed in the meantime: refresh the list and try again.",

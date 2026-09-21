@@ -256,6 +256,72 @@ test('private: own-account rejection is handled even while accepted invites are 
     invites.resolve([]); mounted.destroy();
 });
 
+// M7-R7C-4 — vista ospite: l'accesso sospeso resta riconoscibile senza aprire
+// l'Account, che le Rules negano; più inviti dello stesso Account non Duplicano.
+const guestInvite = (overrides = {}) => ({id: 'invite-1', accountId: 'shared-account', accountName: 'Banca Sintetica',
+    ownerId: 'other-owner', senderId: 'other-owner', recipientEmail: 'fixture@example.invalid',
+    status: 'accepted', ...overrides});
+
+test('private: un invito sospeso produce una card senza leggere l\'Account', async () => {
+    const reads = [];
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite({sharingState: 'suspended', cycle: 1})],
+        getRecordByPath: async path => { reads.push(path); return null; }
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const rows = f.views[0].renders.at(-1).filter(row => row._isGuest === true);
+    assert.equal(rows.length, 1, 'la card dell\'accesso sospeso resta visibile');
+    assert.equal(rows[0]._suspended, true);
+    assert.equal(rows[0].nomeAccount, 'Banca Sintetica', 'solo il nome contenuto nell\'invito');
+    assert.equal(rows[0].ownerId, 'other-owner');
+    assert.equal(rows[0].isOwner, false);
+    assert.equal(rows[0].username, undefined, 'nessun contenuto dell\'Account');
+    assert.equal(rows[0].password, undefined);
+    assert.deepEqual(reads, [], 'nessuna lettura dell\'Account negato dalle Rules');
+    mounted.destroy();
+});
+
+test('private: un invito attivo continua a leggere l\'Account e a produrre la card normale', async () => {
+    const reads = [];
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite()],
+        getRecordByPath: async path => { reads.push(path); return {id: 'shared-account', nomeAccount: 'Banca Sintetica', username: 'utente'}; }
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const guest = f.views[0].renders.at(-1).find(row => row._isGuest === true);
+    assert.deepEqual(reads, ['users/other-owner/accounts/shared-account']);
+    assert.equal(guest._suspended, undefined);
+    assert.equal(guest.username, 'utente');
+    mounted.destroy();
+});
+
+test('private: due inviti dello stesso Account danno una sola card e vince l\'accesso attivo', async () => {
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite({sharingState: 'suspended', cycle: 4}), guestInvite()],
+        getRecordByPath: async () => ({id: 'shared-account', nomeAccount: 'Banca Sintetica', username: 'utente'})
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const guests = f.views[0].renders.at(-1).filter(row => row._isGuest === true);
+    assert.equal(guests.length, 1, 'nessun duplicato');
+    assert.equal(guests[0]._suspended, undefined, 'vince l\'accesso attivo');
+    assert.equal(guests[0].username, 'utente');
+    mounted.destroy();
+});
+
+test('private: fra due inviti sospesi resta il ciclo più recente', async () => {
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite({id: 'old', sharingState: 'suspended', cycle: 1}),
+            guestInvite({id: 'new', sharingState: 'suspended', cycle: 3})],
+        getRecordByPath: async () => { throw new Error('nessuna lettura attesa'); }
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const guests = f.views[0].renders.at(-1).filter(row => row._isGuest === true);
+    assert.equal(guests.length, 1);
+    assert.equal(guests[0].cycle, 3);
+    assert.equal(guests[0]._suspended, true);
+    mounted.destroy();
+});
+
 for (const company of [false, true]) {
     test(`${company ? 'company' : 'private'}: active archive and delete retain their write destinations`, async () => {
         const f = await fixture(company); const mounted = f.mount(); await mounted.ready;

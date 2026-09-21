@@ -18,6 +18,7 @@ import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
 import {
     findPrivateAccountByLegacyId,
+    findSuspendedGuestInvite,
     getPrivateAccount,
     getPrivateAccountConfirmed
 } from '../data/vault-repository.js';
@@ -193,7 +194,15 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         if (!loaded) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
         if (!active()) return;
-        if (!loaded) { showToast(t('account_not_found'), "error"); return; }
+        if (!loaded) {
+            // M7-R7C-4: un deep link a un Account sospeso non deve mostrare un
+            // errore generico né contenuti: si riconosce lo stato dall'invito del
+            // destinatario, l'unica lettura consentita in questo caso.
+            const suspended = await findSuspendedGuestInvite(lookupOwner, lookupId, auth.currentUser?.email, '');
+            if (!active()) return;
+            showToast(suspended ? t('account_suspended_label') : t('account_not_found'), suspended ? "warning" : "error");
+            return;
+        }
         loaded = {...loaded};
         const storedNote = loaded.note;
         const resolvedId = loaded.id;

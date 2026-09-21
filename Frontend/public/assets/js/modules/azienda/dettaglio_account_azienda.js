@@ -23,7 +23,7 @@ import {
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
-import {getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
+import {findSuspendedGuestInvite, getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -147,7 +147,11 @@ async function loadAccount(mount = mounted) {
 
         if (!active()) return;
         if (!account) {
-            showToast(t('account_not_found'), "error");
+            // M7-R7C-4: deep link a un Account sospeso: si riconosce lo stato
+            // dall'invito del destinatario e non si mostra alcun contenuto.
+            const suspended = await findSuspendedGuestInvite(loadOwnerId, accountId, auth.currentUser?.email, companyId);
+            if (!active()) return;
+            showToast(suspended ? t('account_suspended_label') : t('account_not_found'), suspended ? "warning" : "error");
             setTimeout(() => { if (active()) history.back(); }, 1000);
             return;
         }

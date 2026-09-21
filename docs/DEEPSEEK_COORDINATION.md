@@ -2703,3 +2703,60 @@ Scenari coperti dall'invariante: `sharedWithUids` malformato (stringa e mappa), 
 4. **Cache offline** non revocabile; **candidato non distribuibile** finché R7C-4/R7C-5 non sono chiuse; nessun collaudo su dispositivo reale.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R7C-2 consegnata da DeepSeek il 2026-09-21; invariante completo del ripristino (tipo canonico dei grant, nessuna voce attiva/pendente, contatore azzerato, ciclo valido), neutralizzazione con avanzamento del ciclo e fallimento chiuso `ARCHIVE_RESTORE_INCOHERENT` per gli stati non neutralizzabili, prove sul percorso reale di scrittura con controprova, controllo negativo 43/45 → 45/45, nessun push eseguito e vista ospite non avviata.
+
+## Verifica Codex — correzione M7-R7C-2 invariante ripristino
+
+**Esito: APPROVATO come candidato locale.** Commit `81fedb73`: un ripristino semplice è ammesso solo con ciclo valido, grant canonici vuoti, nessuna voce `pending`/`accepted` e contatore coerente; gli stati recuperabili sono neutralizzati nella transazione, quelli non interpretabili falliscono chiusi. `node --test tests/archive-session.test.mjs tests/shared-regrant-after-restore.test.mjs` passa **48/48**; la prova del salvataggio reale mostra che una voce sospesa non rigenera grant e la controprova mostra perché la guardia è necessaria. Nessun push/deploy. Rimane da rendere visibile all'ospite lo stato sospeso senza aprire il documento Account.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7C-4: card ospite «Account sospeso»
+
+**Stato incarico: PRONTO.** DeepSeek implementi la vista ospite decisa da Diego: per inviti già accettati ma marcati `sharingState: 'suspended'`, mostrare nella lista una card «Account sospeso» o «archiviato», con solo nome già presente nell'invito e nessun contenuto/credenziale/allegato dell'Account; non tentare un get sull'Account negato dalle Rules e non rendere la card apribile. Per inviti attivi, comportamento normale; con più inviti dello stesso Account e cicli diversi, deduplicare preferendo quello corrente attivo, senza far riapparire vecchi accessi; inviti pendenti non rappresentano accessi sospesi. Difendere anche URL diretti e stato offline/cache: se il client conosce la sospensione deve bloccare dettaglio e azioni; dichiarare esplicitamente il limite di una copia offline non aggiornata, senza promettere revoca retroattiva. Test mirati sui percorsi privato/aziendale, due cicli, remount, clic/card e deep link con dati sintetici; nessun dato reale. Un solo commit locale mirato, nessun push/merge/deploy; consegna `DA_VERIFICARE`. Non avviare audit o migrazioni in parallelo.
+
+## Presa in carico DeepSeek — M7-R7C-4 card ospite «Account sospeso»
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `81fedb73`; l'incarico era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** vista ospite (lista + deep link) e testi. **Nessun** push, deploy o dato reale; **nessun audit o migrazione avviati**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7C-4 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7C-4 card ospite «Account sospeso»
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `81fedb73`; **nessun push o deploy**.
+
+### Implementazione
+
+1. **Card non apribile** (`shared/account-list-view.js:88,91-93,124`): con `account._suspended === true` la card riceve `dataset.action: 'suspended'`, il clic **non** naviga, il sottotitolo diventa `account_suspended_label` («Account sospeso») e il pulsante di pin non viene creato. L'area dei dati resta vuota **per costruzione**, perché la card non porta alcun campo oltre al nome.
+2. **Lista ospite senza lettura dell'Account** (`privato/account_privati.js:205-224`): un invito con `sharingState === 'suspended'` produce la card **dal solo invito** (`accountId`, `accountName`, `ownerId`, `aziendaId`, `cycle`), **senza** `getRecordByPath`: la lettura sarebbe negata dalle Rules e non serve. `onNavigate` (`:84`) rifiuta comunque i sospesi, come seconda difesa.
+3. **Deduplica per Account** (`:249-256`): più inviti dello stesso Account (cicli diversi) producono **una** card; vince l'accesso **attivo**, altrimenti il **ciclo più recente**. Gli inviti pendenti non entrano mai: `listAcceptedInvites` filtra `status == 'accepted'` (`data/vault-repository.js:38-45`).
+4. **Deep link** (`data/vault-repository.js:119-125` + `privato/dettaglio_account_privato.js:197-204` + `azienda/dettaglio_account_azienda.js:149-157`): quando l'Account non è leggibile e chi guarda è un ospite, lo stato si riconosce dall'**invito del destinatario** (query già autorizzata dalle Rules) e si mostra «Account sospeso»; **nessun modulo di contenuto viene inizializzato** (niente allegati, condivisione, banking, widget, credenziali, nota) e nel caso aziendale si torna indietro. Il percorso privato copre anche gli Account **aziendali** condivisi, che nell'app compaiono nella lista privata con `inv.aziendaId`.
+5. **Testi**: `account_suspended_label` in `translations.js` e `translations/en.js`.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/account-page-lifecycle.test.mjs` (4 casi nuovi) | **41/41** |
+| `node --test tests/private-detail-legacy-id.test.mjs` (1 caso nuovo) | **13/13** |
+| `node --test tests/share-revocation-paths.test.mjs` (guardia nuova) | **21/21** |
+| `npm run test:navigation` | **139/139** |
+| `npm run test:history-prototype` / `test:sharing-prototype` / `test:data-access` / `test:functions-security` | 98/98 · 19/19 · 95/95 · 142/142 |
+| `test:js-syntax` · `test:html-purity` · `test:static-references` · budget pagine | 161 moduli · HTML puro · 235 file · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **793 file** |
+
+Casi coperti: invito sospeso ⇒ card dal solo invito, **zero letture** dell'Account, nessun `username`/`password`, `_suspended` vero; invito attivo ⇒ comportamento invariato (l'Account viene letto, card normale); due inviti dello stesso Account ⇒ **una** card e vince l'attivo; due sospesi ⇒ resta il **ciclo più recente**; deep link privato a un Account sospeso ⇒ «Account sospeso» con **nessun** modulo di contenuto e nessuna azione di modifica; deep link a un Account assente non sospeso ⇒ errore generico invariato. La guardia statica verifica che la scoperta resti limitata agli inviti **accettati** e che lista e dettagli consultino l'invito per lo stato sospeso.
+
+**Controllo negativo eseguito:** senza il ramo sospeso nella lista (`81fedb73`) i tre casi che dipendono dalla card falliscono (**38/41**); con la correzione **41/41**.
+
+### Limiti dichiarati
+
+1. **Copia offline non aggiornata**: se il dispositivo ha in cache un invito precedente senza `sharingState: 'suspended'`, la card può apparire attiva; l'apertura però non mostra contenuti perché la lettura dell'Account è negata dal server e il dettaglio ricade sullo stato sospeso o sull'errore di account assente. **Nessuna revoca retroattiva** è promessa: il limite è dichiarato.
+2. **Inviti pendenti**: non rappresentano accessi sospesi e restano fuori dalla query per costruzione (verificato dalla guardia).
+3. **Swipe sulla card sospesa**: resta la guardia di proprietà (`dataset.owner`), quindi l'azione viene rifiutata con il messaggio esistente; non è un'apertura e non modifica dati.
+4. **La lista aziendale** (`azienda/account_azienda.js`) elenca solo gli Account propri: gli Account aziendali condivisi passano dalla lista privata, quindi il percorso aziendale è coperto dal caso `inv.aziendaId`.
+5. **Il candidato non è ancora distribuibile**: R7C-5 (interfaccia di reinvito) e la chiusura complessiva restano aperte.
+6. Nessun collaudo su browser o dispositivo reale: prove sintetiche su banchi e Rules Emulator delle fette precedenti.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7C-4 consegnato da DeepSeek il 2026-09-21; card «Account sospeso» costruita dal solo invito e non apribile, nessuna lettura dell'Account negato, deduplica per Account con preferenza per l'accesso attivo e per il ciclo più recente, deep link privato e aziendale difesi senza inizializzare contenuti, limite della copia offline dichiarato, controllo negativo 38/41 → 41/41, nessun push eseguito.
