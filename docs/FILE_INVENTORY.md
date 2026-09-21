@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **825**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -186,7 +186,7 @@ File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/scadenze/deadline-recipient-controller.js` | JS | 6176 | 105 | Flusso scadenze/configurazione: deadline-recipient-controller. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js` | JS | 2875 | 66 | Flusso scadenze/configurazione: deadline-recipient-model. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-save-service.js` | JS | 6847 | 180 | Flusso scadenze/configurazione: deadline-save-service. |
-| `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 24045 | 506 | Flusso scadenze/configurazione: dettaglio scadenza. |
+| `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 24550 | 506 | Flusso scadenze/configurazione: dettaglio scadenza. |
 | `Frontend/public/assets/js/modules/scadenze/scadenze.js` | JS | 15003 | 399 | Flusso scadenze/configurazione: scadenze. |
 | `Frontend/public/assets/js/modules/settings/account-field-usage-model.js` | JS | 6787 | 110 | Impostazioni applicative: account-field-usage-model. |
 | `Frontend/public/assets/js/modules/settings/account-field-usage-service.js` | JS | 8154 | 181 | Impostazioni applicative: account-field-usage-service. |
@@ -312,7 +312,7 @@ File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 855699 | 5843 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 866372 | 5912 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -329,7 +329,7 @@ File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md` | MD | 4177 | 70 | Documentazione: M7 DOMANDE T23 CACHE DISPOSITIVO. |
 | `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
 | `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 74765 | 490 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 78792 | 511 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
@@ -750,7 +750,7 @@ File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 17604 | 110 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 17787 | 111 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -780,6 +780,7 @@ File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-account-attachment-delete-emulators.mjs` | MJS | 1445 | 37 | Strumento manutenzione/test: run-account-attachment-delete-emulators. |
+| `scripts/run-attachment-removal-emulators.mjs` | MJS | 1288 | 35 | Strumento manutenzione/test: run-attachment-removal-emulators. |
 | `scripts/run-audit-retention-emulators.mjs` | MJS | 1152 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
 | `scripts/run-avatar-residues-emulators.mjs` | MJS | 1340 | 36 | Strumento manutenzione/test: run-avatar-residues-emulators. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1443 | 31 | Strumento manutenzione/test: run-firestore-rules-tests. |
@@ -832,6 +833,8 @@ File censiti: **822**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/archive-list-filter.test.mjs` | MJS | 12088 | 204 | Test automatico: archive-list-filter.test. |
 | `tests/archive-recipients.test.mjs` | MJS | 5567 | 101 | Test automatico: archive-recipients.test. |
 | `tests/archive-session.test.mjs` | MJS | 45922 | 700 | Test automatico: archive-session.test. |
+| `tests/attachment-removal-residues.emulator.test.mjs` | MJS | 8540 | 142 | Test automatico: attachment-removal-residues.emulator.test. |
+| `tests/attachment-removal-residues.test.mjs` | MJS | 11571 | 181 | Test automatico: attachment-removal-residues.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
 | `tests/audit-events.rules.test.mjs` | MJS | 5113 | 96 | Test automatico: audit-events.rules.test. |
 | `tests/audit-retention.emulator.test.mjs` | MJS | 19544 | 331 | Test automatico: audit-retention.emulator.test. |
