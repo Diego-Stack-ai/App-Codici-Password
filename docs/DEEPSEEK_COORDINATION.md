@@ -963,3 +963,42 @@ DeepSeek deve ora completare tutte le attività autonome di M6-CLOSE: verificare
 - La checklist iPhone non è stata eseguita e non viene dichiarata superata: la consegna riguarda soltanto le attività autonome.
 
 **Stato incarico: DA_VERIFICARE** — M6-CLOSE consegnato da DeepSeek il 2026-09-18; lavoro autonomo completo, gate fisico iPhone separato e ancora APERTO.
+
+## Verifica Codex — M6-CLOSE
+
+- **Esito:** APPROVATO DA CODEX per il lavoro autonomo di laboratorio.
+- **Commit verificati:** `dcccdc0b` (fallback Web Locks e matrice bancaria), `59f35246`/`7ce5a989` (rapporto allineato).
+- **Verifica indipendente mirata:** diff e perimetro conformi; `git diff --check` pulito; `hybrid-queue-coordinator.test.mjs` **12/12**. La scadenza copre soltanto l’acquisizione, annulla il timer dopo il lease e rilascia un lease tardivo senza eseguire il task.
+- **Perimetro:** nessun file produttivo, Rule/Function produttiva, master, versione, deploy o dato reale modificato.
+- **Stato M6:** attività autonome M6-CLOSE completate; il gate fisico iPhone/PWA resta APERTO e impedisce la chiusura definitiva di M6 sul dispositivo.
+- **Prosecuzione:** M7 non viene avviato finché il gate iPhone M6 non è eseguito o Diego non dispone diversamente; M8–M10 restano sospesi.
+
+**Stato incarico: APPROVATO** — M6-CLOSE autonomo verificato da Codex il 2026-09-18; attesa checklist fisica iPhone.
+
+## Incarico DeepSeek — M7-R1 censimento retention
+
+Diego autorizza la ripresa del programma MD dal 21/09/2026. Codex resta supervisore e revisore; DeepSeek è l'unico esecutore. Prima di iniziare, verifica ramo, HEAD, remote e working tree. Conserva la modifica locale precedente a questo file (approvazione Codex M6-CLOSE) e non aprire una seconda sessione esecutrice.
+
+### Base e perimetro
+
+- Ramo `integration/vault-shell-v127-security`; base osservata `7ce5a989` e approvazione M6 non ancora committata nel file di coordinamento. Verifica nuovamente prima di agire.
+- Leggi `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md`, il piano M0-M10, i contratti M8/backup e la baseline sicurezza.
+- In questa fetta esegui soltanto analisi in lettura e documentazione del comportamento attuale di retention per Account archiviati, cronologia/audit, allegati e backup. Cita per ogni flusso codice/Rules/Functions effettivi, eventuale scadenza, cancellazione, ripristino, copie residue e test esistenti. Se una proprietà non è dimostrabile, segna `non verificata`.
+- Prepara una proposta confrontabile di politica di retention e una matrice di test sintetici per la futura verifica, distinguendo vincoli tecnici da scelte del proprietario. Non impostare durate, eccezioni legali o cancellazioni definitive senza decisione esplicita di Diego.
+- Nessuna modifica a runtime, dati, `Frontend/public/**`, Rules/Functions produttive, versione, `master` o deploy. Nessuna lettura/scrittura di dati reali. Non avviare M8-M10 né l'audit Alibaba/OpenCodeReview in questa fetta.
+- Esegui solo controlli statici mirati e `git diff --check`; evita suite costose che non verificano una modifica di codice.
+
+### Consegna
+
+Produci un MD M7 di censimento/proposta con riferimenti verificabili; aggiorna il coordinamento con file modificati, limiti e domande decisionali per Diego. Commit locale separato di documentazione, nessun push senza autorizzazione esplicita. Consegna `DA_VERIFICARE`; Codex valuterà prima di assegnare altro.
+
+**Stato incarico: PRONTO** — M7-R1 disposto da Codex su richiesta di Diego il 21/09/2026; M6 laboratorio approvato, gate fisico del candidato ancora distinto.
+
+## Presa in carico DeepSeek — M7-R1
+
+- **Presa in carico:** 2026-09-21 09:33 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `7ce5a989`, allineato a `origin/integration/vault-shell-v127-security`.
+- **Working tree alla presa in carico:** modificato soltanto questo file di coordinamento, con l'approvazione Codex di M6-CLOSE e l'incarico M7-R1 non ancora committati. La modifica è **conservata** e pubblicata con questa presa in carico senza alterarne il testo, come richiesto.
+- **Perimetro della fetta:** sola analisi in lettura e documentazione della retention attuale per Account archiviati, cronologia/audit, allegati e backup; proposta di politica confrontabile e matrice di test sintetici. Nessuna modifica a runtime, dati, `Frontend/public/**`, Rules/Functions produttive, versione, `master` o deploy; nessun dato reale; M8–M10 e l'audit Alibaba/OpenCodeReview non vengono avviati.
+- **Consegna prevista:** MD M7 di censimento/proposta, aggiornamento di questo file con file modificati, limiti e domande decisionali per Diego; commit locali separati (documentazione); nessun push senza autorizzazione; stato finale `DA_VERIFICARE`.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R1 preso in carico da DeepSeek il 2026-09-21 alle 09:33; M6-CLOSE resta approvato per il laboratorio con il solo gate fisico iPhone aperto.
