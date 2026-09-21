@@ -24,6 +24,25 @@ const GUEST_EMAIL = 'guest@example.invalid';
 const ACCOUNT_PATH = 'users/owner/accounts/account-1';
 const COMPANY_PATH = 'users/owner/aziende/company-1/accounts/account-1';
 
+// M7-AUDIT-5C — ogni creazione/reinvito dichiara una base opaca dell'istanza di
+// invito. Il banco inietta `crypto` (come già fa per gli altri globali del
+// browser) e produce UUID validi e distinti a ogni chiamata, così la freschezza
+// del marcatore è verificabile.
+const AUDIT_REF = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// Le sole chiavi ammesse dalla creazione degli inviti nelle Rules di produzione
+// (`firestore.rules`, `match /invites/{inviteId}`): il payload dei writer deve
+// restare dentro questo insieme, altrimenti la creazione verrebbe negata.
+const RULES_INVITE_CREATE_KEYS = ['inviteId', 'recipientEmail', 'accountId', 'accountName', 'ownerId',
+    'senderId', 'senderEmail', 'aziendaId', 'type', 'status', 'createdAt', 'notifyPush', 'notifyEmail',
+    'cycle', 'auditRef'];
+let markerCount = 0;
+const newMarker = () => `00000000-0000-4000-8000-${String(++markerCount).padStart(12, '0')}`;
+const assertInvitePayload = payload => {
+    assert.match(payload.auditRef, AUDIT_REF, 'l\'invito dichiara una base opaca valida');
+    assert.deepEqual(Object.keys(payload).filter(key => !RULES_INVITE_CREATE_KEYS.includes(key)), [],
+        'nessuna chiave fuori dall\'allowlist di creazione delle Rules');
+};
+
 // Stato dopo il ripristino fail-closed: ciclo avanzato, nessun grant, voci sospese.
 const restoredAccount = () => ({revision: 2, updatedAt: '2026-01-01T00:00:00.000Z', visibility: 'shared',
     sharingCycle: 1, sharedWithUids: [], acceptedCount: 0, nomeAccount: 'Account sintetico', type: 'account',
@@ -39,6 +58,7 @@ async function fixture(accountState = restoredAccount(), company = false) {
     const context = vm.createContext({
         auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}}, db: {},
         inviteIdForGuest, sanitizeEmail, sharingCycleOf, structuredClone,
+        crypto: {randomUUID: newMarker},
         doc: (_db, ...path) => ({path: path.join('/'), id: path.at(-1)}),
         collection: (_db, ...path) => ({path: path.join('/'), id: path.at(-1)}),
         deleteField: () => ({__delete: true}), increment: value => ({__increment: value}),
@@ -103,6 +123,8 @@ test('salvataggio con l\'ospite riselezionato: nuovo invito del ciclo corrente e
     assert.equal(invite[0], 'invites/account-1_guest_example_invalid_c1', 'ID del ciclo corrente');
     assert.equal(invite[1].cycle, 1);
     assert.equal(invite[1].status, 'pending');
+    // M7-AUDIT-5C: base opaca presente e payload dentro l'allowlist delle Rules.
+    assertInvitePayload(invite[1]);
     const account = f.writes.find(write => write[0] === ACCOUNT_PATH);
     assert.equal(account[1].sharedWithUids.length, 0, 'l\'accesso non torna prima dell\'accettazione');
     assert.equal(account[1].sharedWith[GUEST_KEY].status, 'pending');
@@ -141,6 +163,8 @@ test('azienda: l\'ospite sospeso riselezionato riceve un invito del ciclo corren
     assert.equal(invite[1].cycle, 1);
     assert.equal(invite[1].aziendaId, 'company-1');
     assert.equal(invite[1].status, 'pending');
+    // M7-AUDIT-5C: base opaca presente anche nel writer aziendale.
+    assertInvitePayload(invite[1]);
     const account = f.writes.find(write => write[0] === COMPANY_PATH);
     assert.equal(account[1].sharedWithUids.length, 0, 'l\'accesso non torna prima dell\'accettazione');
     assert.equal(account[1].sharedWith[GUEST_KEY].status, 'pending');

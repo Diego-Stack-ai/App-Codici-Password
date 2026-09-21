@@ -163,7 +163,13 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                         if (!sharedWith[key] || sharedWith[key].status === 'rejected' || sharedWith[key].status === 'suspended') {
                             sharedWith[key] = { email, status: 'pending', uid: null };
                             const invite = {
-                                inviteId: inviteIdForGuest(accountId, key, cycle), accountId, ownerId, senderId: ownerId,
+                                inviteId: inviteIdForGuest(accountId, key, cycle),
+                                // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
+                                // ogni creazione e a ogni reinvito. L'id dell'evento di
+                                // registro si deriva solo da qui, mai dall'email, dalla
+                                // sua chiave sanificata o dall'id del documento.
+                                auditRef: crypto.randomUUID(),
+                                accountId, ownerId, senderId: ownerId,
                                 senderEmail: auth.currentUser?.email || '', recipientEmail: email,
                                 accountName: stored.nomeAccount || '', type: isMemo ? 'memo' : 'account',
                                 notifyPush: document.getElementById('account-mode-notify-push')?.checked === true,

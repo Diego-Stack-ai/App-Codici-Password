@@ -20,6 +20,17 @@ const EMAIL = 'guest@example.invalid';
 const KEY = 'guest_example_invalid';
 const ACCOUNT_ID = 'account-1';
 
+// M7-AUDIT-5C — il writer dichiara una base opaca per ogni istanza di invito.
+// Il banco inietta `crypto` e produce UUID validi e distinti a ogni chiamata.
+const AUDIT_REF = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// Le sole chiavi ammesse dalla creazione degli inviti nelle Rules di produzione
+// (`firestore.rules`, `match /invites/{inviteId}`).
+const RULES_INVITE_CREATE_KEYS = ['inviteId', 'recipientEmail', 'accountId', 'accountName', 'ownerId',
+    'senderId', 'senderEmail', 'aziendaId', 'type', 'status', 'createdAt', 'notifyPush', 'notifyEmail',
+    'cycle', 'auditRef'];
+let markerCount = 0;
+const newMarker = () => `00000000-0000-4000-8000-${String(++markerCount).padStart(12, '0')}`;
+
 class Node {
     constructor(tag, props = {}, children = []) {
         this.tag = tag; this.children = []; this.dataset = {}; this.listeners = new Map();
@@ -45,6 +56,7 @@ function fixture({sharingCycle = 1, status = 'suspended'} = {}) {
         sharedWith: {[KEY]: {email: EMAIL, status, uid: null}}};
     const context = vm.createContext({
         inviteIdForGuest, sanitizeEmail, sharingCycleOf, structuredClone, console: {warn: () => {}, error: () => {}},
+        crypto: {randomUUID: newMarker},
         db: {}, auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}},
         doc: (_db, ...path) => ({path: path.join('/')}),
         collection: (_db, ...path) => ({path: path.join('/')}),
@@ -102,6 +114,11 @@ test('editor dettaglio: la selezione espressa crea l\'invito del ciclo corrente 
     assert.deepEqual(created.map(write => write[0]), ['invites/account-1_guest_example_invalid_c1']);
     assert.equal(created[0][1].cycle, 1, 'l\'invito dichiara il ciclo corrente');
     assert.equal(created[0][1].status, 'pending');
+    // M7-AUDIT-5C: base opaca dell'istanza e payload dentro l'allowlist delle
+    // Rules di creazione (altrimenti la creazione verrebbe negata).
+    assert.match(created[0][1].auditRef, AUDIT_REF, 'l\'invito dichiara una base opaca valida');
+    assert.deepEqual(Object.keys(created[0][1]).filter(key => !RULES_INVITE_CREATE_KEYS.includes(key)), [],
+        'nessuna chiave fuori dall\'allowlist di creazione delle Rules');
     assert.equal(f.writes.some(write => write[0] === 'invites/account-1_guest_example_invalid'), false,
         'l\'invito storico (ciclo 0) non viene toccato');
     const account = f.writes.find(write => write[0] === 'users/owner/accounts/account-1');
@@ -129,4 +146,27 @@ test('editor dettaglio: una voce pendente già selezionata non richiede un nuovo
     await f.save();
     assert.equal(f.writes.some(write => write[0].startsWith('invites/') && write[2] === 'set'), false,
         'nessun nuovo invito per una voce già pendente');
+});
+
+test('editor dettaglio: il marcatore è nuovo a ogni reinvito della stessa istanza', async () => {
+    const f = fixture({sharingCycle: 1, status: 'suspended'});
+    await f.init();
+    const checkbox = f.checkbox();
+    checkbox.checked = true;
+    checkbox.dispatch('change');
+    await f.save();
+    // Un rifiuto riporta la voce allo stato che richiede un nuovo invito: il
+    // secondo salvataggio è un reinvito sullo **stesso** documento (il ciclo non
+    // cambia), quindi la base opaca deve essere nuova.
+    f.account.sharedWith[KEY] = {email: EMAIL, status: 'rejected', uid: null};
+    await f.save();
+    const created = f.writes.filter(write => write[0].startsWith('invites/') && write[2] === 'set');
+    assert.equal(created.length, 2, 'due salvataggi, due inviti');
+    assert.deepEqual(created.map(write => write[0]),
+        ['invites/account-1_guest_example_invalid_c1', 'invites/account-1_guest_example_invalid_c1'],
+        'il reinvito riusa l\'istanza di documento del ciclo corrente');
+    const markers = created.map(write => write[1].auditRef);
+    assert.match(markers[0], AUDIT_REF);
+    assert.match(markers[1], AUDIT_REF);
+    assert.notEqual(markers[0], markers[1], 'ogni creazione/reinvito riceve una base nuova');
 });

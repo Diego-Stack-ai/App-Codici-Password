@@ -64,6 +64,12 @@ for (const file of writers) {
     // Nessun ID costruito a mano: il formato vive in un solo posto.
     assert.equal(/invites['"],\s*`\$\{[^}]+\}_\$\{[^}]+\}`/.test(source), false, 'nessun ID invito costruito a mano');
     assert.match(source, /status === 'suspended'/, 'una voce sospesa richiede un nuovo invito');
+    // M7-AUDIT-5C: ogni creazione/reinvito dichiara una base opaca **nuova** per
+    // l'istanza di invito, generata con `crypto.randomUUID()`: l'espressione è
+    // vincolata per costruzione, quindi non può derivare dall'email, dalla sua
+    // chiave sanificata o dall'id del documento.
+    assert.match(source, /auditRef:\s*crypto\.randomUUID\(\)/,
+      'l\'invito dichiara la base opaca dell\'istanza con crypto.randomUUID()');
   });
 }
 

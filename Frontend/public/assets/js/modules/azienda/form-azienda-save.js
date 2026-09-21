@@ -247,6 +247,11 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                         // Crea Invito
                         transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
                             inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
+                            // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
+                            // ogni creazione e a ogni reinvito. L'id dell'evento di
+                            // registro si deriva solo da qui, mai dall'email, dalla
+                            // sua chiave sanificata o dall'id del documento.
+                            auditRef: crypto.randomUUID(),
                             accountId: targetId,
                             aziendaId: currentAziendaId,
                             ownerId: currentUid,
