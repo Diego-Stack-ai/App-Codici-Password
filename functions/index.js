@@ -13,7 +13,7 @@ const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https")
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
+const { FieldPath, FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { getStorage } = require("firebase-admin/storage");
 const nodemailer = require("nodemailer");
@@ -54,6 +54,10 @@ const {
     accountEventId, accountTransition, auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition,
     invitedEventId, removedEventId, responseEventId
 } = require("./audit-event-service");
+const {
+    DEFAULT_BATCH_SIZE, MAX_EVENTS_PER_RUN, auditEventPath, classifyAuditEvent, planAuditRetention,
+    runAuditRetention
+} = require("./audit-retention-service");
 
 initializeApp();
 
@@ -1999,4 +2003,175 @@ exports.onScadenzaDeleted = onDocumentDeleted(
             console.error(`[RECEIVED DEADLINE CLEANUP FAILED] ${event.params.scadenzaId}:`, error.message);
         }
     }
+);
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-6 — Retention del registro tecnico (24 mesi di calendario)
+// ─────────────────────────────────────────────────────────────
+// Job pianificato che cancella **solo** gli eventi scaduti e databili di
+// `users/{uid}/auditEvents`. La logica pura (finestra, data efficace,
+// classificazione, piano, esecuzione) sta in `./audit-retention-service`; qui
+// vivono la scoperta e la cancellazione confermata.
+//
+// Difese sul confinamento: la scoperta usa una query di **gruppo di collezioni**
+// (così trova anche le sottocollezioni il cui documento padre `users/{uid}` non
+// esiste), ma ogni risultato viene ricondotto al percorso atteso da
+// `auditEventPath(uid, id)` e **respinto** se non coincide: un `auditEvents`
+// annidato altrove non viene mai cancellato.
+//
+// Conferma atomica: la via rapida usa una precondizione di versione
+// (`delete(ref, {lastUpdateTime})`), quindi cancella solo la versione che il
+// classificatore ha dichiarato scaduta; se il documento è cambiato o sparito la
+// transazione di ripiego rilegge la **versione corrente**, la riclassifica e
+// cancella solo ciò che è ancora scaduto.
+const AUDIT_RETENTION_PAGE_SIZE = 200;
+const AUDIT_RETENTION_MAX_BATCHES_PER_RUN = 50;
+// Finestra grossolana della query: 24 mesi di calendario sono sempre almeno 730
+// giorni, quindi 700 giorni è un sovrainsieme sicuro di ciò che può essere
+// scaduto. Il classificatore resta l'unica autorità sulla cancellazione.
+const AUDIT_RETENTION_COARSE_CUTOFF_MS = 700 * 24 * 60 * 60 * 1000;
+// Campi su cui il job cerca la data efficace: `at` per tutte le famiglie,
+// `createdAt` per le due che non scrivono `at` (la politica la applica il
+// classificatore, non la query).
+const AUDIT_RETENTION_DATE_FIELDS = Object.freeze(["at", "createdAt"]);
+const FIREBASE_FAILED_PRECONDITION = 9;
+
+function isPreconditionFailure(error) {
+    const code = error?.code;
+    return code === FIREBASE_FAILED_PRECONDITION || code === "failed-precondition" ||
+        /FAILED_PRECONDITION|PRECONDITION/i.test(String(error?.message || ""));
+}
+
+// Scoperta: due query di gruppo (una per campo, perché un filtro di intervallo
+// non ne copre due), paginazione con cursore sull'**istantanea completa** —
+// stabile anche quando più proprietari hanno lo stesso id — e deduplica per
+// percorso completo.
+async function collectExpiredAuditEvents(db, cutoff, {
+    pageSize = AUDIT_RETENTION_PAGE_SIZE, maxEvents = MAX_EVENTS_PER_RUN
+} = {}) {
+    const collected = new Map();
+    const rejected = [];
+    for (const field of AUDIT_RETENTION_DATE_FIELDS) {
+        let cursor = null;
+        for (;;) {
+            if (collected.size >= maxEvents) break;
+            let query = db.collectionGroup("auditEvents")
+                .where(field, "<=", cutoff)
+                .orderBy(field)
+                .orderBy(FieldPath.documentId())
+                .limit(pageSize);
+            if (cursor) query = query.startAfter(cursor);
+            const page = await query.get();
+            if (page.empty) break;
+            for (const snapshot of page.docs) {
+                const owner = snapshot.ref.parent ? snapshot.ref.parent.parent : null;
+                const uid = owner ? owner.id : null;
+                let expected = null;
+                try { expected = auditEventPath(uid, snapshot.ref.id); } catch { expected = null; }
+                if (expected !== snapshot.ref.path) {
+                    rejected.push({path: snapshot.ref.path, code: "AUDIT_RETENTION_PATH_FORBIDDEN"});
+                    continue;
+                }
+                if (!collected.has(snapshot.ref.path)) {
+                    collected.set(snapshot.ref.path, {
+                        uid, id: snapshot.ref.id, path: snapshot.ref.path,
+                        data: snapshot.data(), updateTime: snapshot.updateTime
+                    });
+                }
+            }
+            cursor = page.docs[page.docs.length - 1];
+            if (page.size < pageSize) break;
+        }
+    }
+    return {entries: [...collected.values()], rejected};
+}
+
+// Cancellazione di un lotto con conferma della versione. Ritorna il numero di
+// documenti effettivamente cancellati (un documento sparito o non più scaduto
+// non è una cancellazione).
+async function deleteAuditBatchWithConfirmation(db, batch, now, updateTimes) {
+    const references = batch.paths.map(path => db.doc(path));
+    const versions = batch.paths.map(path => updateTimes.get(path));
+    if (versions.every(version => version !== undefined)) {
+        const writer = db.batch();
+        references.forEach((reference, index) => writer.delete(reference, {lastUpdateTime: versions[index]}));
+        try {
+            await writer.commit();
+            return batch.paths.length;
+        } catch (error) {
+            if (!isPreconditionFailure(error)) throw error;
+            // Versione cambiata o documento sparito: si passa alla conferma
+            // atomica, senza dichiarare cancellato ciò che non lo è.
+        }
+    }
+    let deleted = 0;
+    await db.runTransaction(async (transaction) => {
+        const snapshots = await transaction.getAll(...references);
+        for (const snapshot of snapshots) {
+            if (!snapshot.exists) continue;
+            if (classifyAuditEvent(snapshot.data(), now) !== "expired") continue;
+            transaction.delete(snapshot.ref);
+            deleted++;
+        }
+    });
+    return deleted;
+}
+
+async function runAuditRetentionJob(db, {
+    now = Date.now(),
+    pageSize = AUDIT_RETENTION_PAGE_SIZE,
+    maxEvents = MAX_EVENTS_PER_RUN,
+    batchSize = DEFAULT_BATCH_SIZE,
+    maxBatches = AUDIT_RETENTION_MAX_BATCHES_PER_RUN
+} = {}) {
+    const cutoff = Timestamp.fromMillis(now - AUDIT_RETENTION_COARSE_CUTOFF_MS);
+    const {entries, rejected} = await collectExpiredAuditEvents(db, cutoff, {pageSize, maxEvents});
+    const updateTimes = new Map(entries.map(entry => [entry.path, entry.updateTime]));
+    const byOwner = new Map();
+    for (const entry of entries) {
+        if (!byOwner.has(entry.uid)) byOwner.set(entry.uid, []);
+        byOwner.get(entry.uid).push({id: entry.id, ...entry.data});
+    }
+    const counters = {scanned: entries.length, planned: 0, deleted: 0, retained: 0, unverifiable: 0, batches: 0};
+    let status = "completed";
+    for (const [uid, events] of byOwner) {
+        if (counters.batches >= maxBatches) { status = "interrupted"; break; }
+        let plan;
+        try {
+            plan = planAuditRetention({uid, events, now, batchSize});
+        } catch (error) {
+            console.warn("[AUDIT] retention: piano saltato", {
+                code: String(error?.code || "AUDIT_RETENTION_INPUT_INVALID")
+            });
+            continue;
+        }
+        counters.retained += plan.retained.length;
+        counters.unverifiable += plan.unverifiable.length;
+        const allowed = plan.batches.slice(0, Math.max(0, maxBatches - counters.batches));
+        if (allowed.length < plan.batches.length) status = "interrupted";
+        counters.planned += allowed.reduce((total, batch) => total + batch.ids.length, 0);
+        const report = await runAuditRetention({
+            plan: {...plan, batches: allowed},
+            deleteBatch: async (batch) => {
+                counters.deleted += await deleteAuditBatchWithConfirmation(db, batch, now, updateTimes);
+            }
+        });
+        counters.batches += report.completed;
+        if (report.status !== "completed") { status = report.status; break; }
+    }
+    // Log di soli conteggi e codici: nessun uid, nessun id, nessun contenuto.
+    console.log("[AUDIT] retention registro", {status, ...counters, rejectedPaths: rejected.length});
+    return Object.freeze({...counters, status, rejectedPaths: rejected.length});
+}
+
+exports.purgeExpiredAuditEvents = onSchedule(
+    {
+        schedule: "0 3 * * *",
+        timeZone: "Europe/Rome",
+        region: "europe-west1",
+        memory: "512MiB",
+        timeoutSeconds: 540,
+        retryCount: 3,
+    },
+    () => runAuditRetentionJob(firestore())
 );
