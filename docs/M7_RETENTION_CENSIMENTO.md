@@ -330,8 +330,8 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-08 | Copie residue | dopo il purge restano `accountWidgets`/`sharedVaultLinks`/inviti | documentare l'esito atteso secondo la politica scelta | **da realizzare** |
 | T-09 | Copie residue | allegato su Storage non elencato nei metadati | resta dopo il purge: verificare la scelta D4 | **da realizzare** |
 | T-10 | Cronologia | un evento di audit non contiene segreti | il segreto fittizio non compare nel documento | esistente (`functions/test/history-recovery-service.test.js:15`; `functions/test/backup-restore-service.test.js:68`) |
-| T-11 | Cronologia | limite/scadenza della cronologia nel runtime | secondo la politica scelta | **da realizzare** (oggi il limite esiste solo nel laboratorio) |
-| T-12 | Cronologia | il client tenta di cancellare un evento di audit | rifiuto secondo la politica scelta | **da realizzare** (oggi le Rules lo consentono) |
+| T-11 | Cronologia | limite/scadenza della cronologia nel runtime | cancellazione automatica degli eventi oltre la finestra decisa | **da realizzare** in produzione: la finestra di **24 mesi** è decisa e il candidato di laboratorio è provato (T-34…T-38), ma nessun job esiste ancora nel runtime |
+| T-12 | Cronologia | il client tenta di creare, modificare o cancellare un evento di audit | rifiuto secondo la politica decisa | **da realizzare** in produzione: provato solo sulle Rules candidate (`tests/history-recovery.rules.test.mjs`); le Rules produttive consentono ancora le scritture proprietario |
 | T-13 | Cronologia | effetto del purge su `trash`/`auditEvents`/ricevute legacy | definito e verificato | **da realizzare** |
 | T-14 | Allegati | upload senza marcatore `encrypted` per `application/octet-stream` | rifiuto delle Rules | esistente (`tests/storage.rules.test.mjs:69`; `storage.rules:9-21`) |
 | T-15 | Allegati | cancellazione di un allegato da parte dell'utente: percorso completo con esito positivo | oggetto rimosso **e** metadato rimosso, senza residui | **da realizzare**: i test citati in T-32 dimostrano solo l'arresto dopo il cambio di Account, non il percorso completo |
@@ -353,6 +353,11 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-31 | Cestino Account | ripristino riuscito | identità privato/azienda conservata, solo stato di archiviazione e revisione aggiornati | esistente (`tests/archive-session.test.mjs:147`) |
 | T-32 | Allegati | cancellazione di un allegato interrotta dal cambio di Account | nessuna scrittura di metadati sotto il nuovo Account; se la conferma arriva dopo il cambio, nessuna operazione | esistente (`tests/private-account-detail-lifecycle.test.mjs:166,172`) |
 | T-33 | Purge | predicato di percorso sicuro su un `storagePath` di un altro proprietario o fuori dal prefisso dell'Account | percorso rifiutato come non sicuro | esistente (`functions/test/archive-purge-service.test.js:19`) |
+| T-34 | Cronologia | evento dentro, al confine e oltre la finestra di 24 mesi | conservato dentro, cancellabile al confine e oltre | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:26,35`) |
+| T-35 | Cronologia | record senza data valida o con data malformata | mai cancellato, elencato come `unverifiable` | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:19,35`) |
+| T-36 | Cronologia | cancellazione a lotti con errore parziale e ripresa | nessun falso completamento; ripresa idempotente dagli eventi residui | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:46,120`) |
+| T-37 | Cronologia | isolamento UID e percorsi fuori dal registro | piano interrotto; nessuna ricevuta pianificata o toccata | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:65,81`) |
+| T-38 | Cronologia | il client tenta create, update e delete su un evento di audit | tutte e tre negate; lettura del proprietario conservata | esistente in laboratorio (`tests/history-recovery.rules.test.mjs:17`, Rules candidate) |
 
 ## 10. Domande decisionali per Diego
 

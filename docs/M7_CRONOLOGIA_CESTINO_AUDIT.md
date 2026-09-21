@@ -109,3 +109,52 @@ Base `4fba54e7`, ramo `experiment/m7-archive-restore-cas`: il ripristino rilegge
 25 test del servizio/UI superati. Il runner mutazioni include inoltre il servizio canonico con Auth/Firestore demo: successo, revisione obsoleta/stato già ripristinato, retry SDK dopo aggiornamento concorrente e invalidazione sessione dopo lettura. I casi negativi conservano contenuto e updateTime; i test usano esclusivamente dati sintetici. Il ripristino non retrocede più la revisione usando soltanto la snapshot UI.
 
 Il CAS non chiude la race purge/ripristino: la preparazione purge non marca ancora il documento e recursiveDelete resta fuori dalla transazione. Il futuro protocollo comune deve essere rispettato da tutti i writer, Rules, Widget/link, inviti e backup prima di attivare il planner residui. Nessuna modifica a retention, backend o dati reali in questo blocco.
+
+
+## Retention del registro tecnico — decisione 21/09/2026 e progetto candidato
+
+**Decisione del proprietario.** Gli eventi tecnici di `users/{uid}/auditEvents` sono conservati per **24 mesi** dal timestamp autorevole e poi cancellati automaticamente da un processo **controllato dal backend**; l'app client non può creare, modificare o cancellare singoli eventi di audit. Diego ha indicato 12 mesi e poi corretto a **24 mesi** il 21/09/2026: prevale la seconda indicazione. La durata è una decisione di prodotto per questo registro e **non** un termine legale generale: eventuali obblighi specifici di conservazione restano da verificare. La decisione **non** si estende alle ricevute di idempotenza (`mutationResults`, `operationResults`, `archiveOperations`, `backupRestoreOperations`), ai backup, ai log di piattaforma o agli Account archiviati, che restano senza scadenza automatica.
+
+**Stato: candidato di laboratorio, NON attivo in produzione.** Non esistono job schedulati di potatura, le Rules produttive non sono cambiate e nessun dato reale è stato cancellato o letto. `functions/index.js`, `firestore.rules`, `storage.rules` e `Frontend/public/**` restano invariati.
+
+### Perimetro del registro
+
+Entrano in `auditEvents` i cinque percorsi già censiti in [M7_RETENTION_CENSIMENTO.md](./M7_RETENTION_CENSIMENTO.md) §4.1: `trashed`/`restored` (`trashSyncRecord`/`restoreSyncRecord`), `account-purged` (`purgeArchivedAccount`), `shared-vault-<azione>`, `account-widget-<azione>` e `backup-restore-chunk`. Nessun altro scrittore è previsto; un nuovo scrittore dovrà rispettare il timestamp autorevole descritto sotto.
+
+### Timestamp autorevole
+
+Il timestamp è `at`, impostato dal backend con `serverTimestamp` in tutti e cinque i percorsi. Il candidato accetta le forme con cui Firestore restituisce un Timestamp (istanza SDK, `{seconds, nanoseconds}`, `Date` nei test) e considera **inverificabile** qualunque altro valore.
+
+### Record legacy o malformati
+
+Un evento privo di data valida non viene mai cancellato: è classificato `unverifiable`, resta nel registro e viene elencato dall'esecuzione. La scelta è deliberata — non si inventa una data per eliminare un record che non si sa datare — ed è il motivo per cui una futura bonifica dei record storici senza `at` resta una decisione aperta.
+
+### Cancellazione a lotti
+
+Il piano è deterministico: solo eventi scaduti e databili, ordinati dal più vecchio con spareggio sull'id, divisi in lotti entro il limite di **500 operazioni per batch** di Firestore (dimensione predefinita 200) e con un tetto di **10.000 eventi per esecuzione**. L'ordine stabile rende il piano riproducibile.
+
+### Idempotenza, errori e ripresa
+
+La cancellazione di un documento già assente è un no-op; il piano si ricalcola dagli eventi ancora presenti, quindi ripetere l'esecuzione non duplica effetti e un lotto già cancellato non riappare. Un errore di lotto interrompe l'esecuzione e riporta `partial` con il lotto fallito, **senza mai dichiarare completato** ciò che non lo è; una sessione chiusa interrompe senza cancellare oltre. La ripresa riparte dagli eventi residui.
+
+### Esclusione delle ricevute e isolamento fra UID
+
+Ogni percorso pianificato deve iniziare con `users/{uid}/auditEvents/`: id non conformi sono rifiutati e un evento attribuito a un altro UID interrompe il piano. Le ricevute di idempotenza non sono mai toccate, né pianificate.
+
+### Visibilità all'utente
+
+Non esiste un'interfaccia che mostri la cronologia: nessun modulo di `Frontend/public/assets/js` legge `auditEvents`. Il candidato mantiene la **lettura** del proprietario e nega ogni scrittura client; l'eventuale futura visibilità all'utente richiederebbe una decisione di prodotto separata.
+
+### Dipendenze e decisioni ancora aperte
+
+- **Convenzione della finestra**: il candidato usa mesi di calendario (con giorno limitato nei mesi corti); l'alternativa è un multiplo fisso di giorni. Da confermare.
+- **Record storici senza `at`**: conservazione permanente o bonifica manuale documentata.
+- **Obblighi legali specifici**: dipendenza dichiarata, nessuna deroga inventata.
+- **Job reale**: cadenza, ambiente di collaudo, monitoraggio, allarme e rollback non sono progettati da questa fetta.
+- **Rules produttive e distribuzione**: la rimozione della scrittura client sull'audit richiede la modifica delle Rules effettive e un rilascio coordinato, autorizzati separatamente.
+
+### Prove di laboratorio disponibili
+
+- `experiments/history-recovery/audit-retention.mjs` — pianificatore ed esecutore puri, non importati dall'app né da Functions.
+- `experiments/history-recovery/audit-retention.test.mjs` — **12 prove sintetiche**: forme del timestamp, finestra di 24 mesi con limite di calendario, conservazione/scadenza al confine, dati non interpretabili mai cancellati, ordinamento e lotti, esclusione delle ricevute, isolamento UID, input fuori misura, completamento, errore parziale con ripresa idempotente, interruzione.
+- `tests/history-recovery.rules.test.mjs` — Rules **candidate** (`experiments/history-recovery/firestore.candidate.rules`): lettura riservata al proprietario e **create, update e delete negati** al client su `auditEvents`, `trash` e `recordHistory`.

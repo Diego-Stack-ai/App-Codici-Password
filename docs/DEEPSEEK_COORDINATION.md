@@ -1197,3 +1197,92 @@ L'assenza di cancellazioni fuori dal prefisso è verificata due volte: nel perco
 - Le soglie e le durate di retention restano decisioni di Diego: questa fetta non ne introduce alcuna.
 
 **Stato incarico: DA_VERIFICARE** — M7-R2 consegnato da DeepSeek il 2026-09-21; prova sintetica del purge allegati completa, nessun difetto produttivo rilevato e nessun push eseguito.
+
+## Verifica Codex — M7-R2
+
+- **Esito: APPROVATO** per le prove sintetiche T-05, T-06 e T-25. Ho verificato il diff `9834b7c8..3a1c96ff`, i tre test e il fake Storage: la lista degli allegati passa al handler reale, le chiamate `bucket.file(path).delete` sono registrate, il percorso non sicuro ferma ogni delete, il fallimento parziale conserva la ricevuta `processing`, e il retry conclude `purged`. Il test mirato `node --test functions/test/archive-receipt-handler.test.js` passa **11/11**; `git diff --check` è pulito.
+- **Limite:** la prova usa Storage fittizio e dati sintetici; non certifica il bucket reale né la politica complessiva di retention. Nessun codice produttivo è stato modificato.
+- **Semplificazione operativa:** i nove commit locali M7 derivano da tre tranche con commit separati di presa in carico, lavoro e rapporto. Per i prossimi incarichi, usa **un solo commit locale per tranche** che comprenda lavoro e rapporto nel file di coordinamento; registra `IN_LAVORAZIONE` nel file durante il lavoro senza creare un commit solo amministrativo. Crea un secondo commit soltanto se serve per una correzione reale o per separare codice e documentazione per revisione. Non riscrivere i nove commit esistenti e non fare push senza incarico.
+- **Prossimo passo:** nessun nuovo incarico esecutivo fino alla scelta di Diego sulla politica di retention. DeepSeek resta in attesa; il censimento e i test M7 già completati rimangono validi.
+
+**Stato incarico: APPROVATO** — M7-R2 verificato da Codex il 21/09/2026; decisioni di retention aperte.
+
+## Decisione Diego — M7 retention Account archiviati
+
+Il 21/09/2026 Diego ha approvato la proposta Codex: **gli Account archiviati sono conservati senza scadenza automatica, finché l'utente non sceglie di eliminarli; la cancellazione definitiva manuale resta disponibile con conferma esplicita**. Questa decisione risponde a D1 (opzione D1-a) e conferma il comportamento ordinario di D2 per gli Account, senza introdurre eccezioni, obblighi legali o una nuova durata. Non autorizza a cancellare dati reali, eseguire deploy o cambiare altre politiche M7. Le restanti decisioni D3-D9 sono aperte. DeepSeek non deve dedurre approvazioni ulteriori da questa voce.
+
+## Decisione Diego — M7 registro tecnico delle operazioni
+
+Il 21/09/2026 Diego ha scelto **12 mesi** per la conservazione degli eventi tecnici in `users/{uid}/auditEvents`, seguiti da cancellazione automatica controllata dal backend. L'app client non deve poter creare, modificare o cancellare singoli eventi di audit. La durata è una decisione di prodotto per questo registro, non un termine legale generale; eventuali obblighi specifici restano da verificare. La decisione **non** si estende alle ricevute di idempotenza (`mutationResults`, `operationResults`, `archiveOperations`, `backupRestoreOperations`), ai backup, ai log di piattaforma o agli Account archiviati. Nessuna cancellazione di dati reali è autorizzata da questa voce.
+
+## Incarico DeepSeek — M7-R3 progetto e prove di retention audit
+
+Codex coordina e revisiona; DeepSeek è l'unico esecutore. Verifica ramo `integration/vault-shell-v127-security`, HEAD, remote e working tree; conserva le modifiche preesistenti del file di coordinamento. Base osservata `3a1c96ff`, nove commit locali avanti a origin. Non avviare una seconda sessione esecutrice.
+
+- Traduci la decisione dei 12 mesi in un progetto verificabile: quali eventi entrano in `auditEvents`, timestamp autorevole, trattamento dei record legacy senza timestamp valido, cancellazione a lotti, idempotenza, errori/riprova, esclusione delle ricevute e visibilità all'utente. Se emerge una dipendenza da un obbligo di conservazione specifico, segnala la decisione aperta senza inventare una deroga.
+- Prepara **solo candidato di laboratorio e test sintetici** per: divieto di scrittura/cancellazione client sull'audit, evento entro/fuori finestra, record legacy/malformato, errore parziale e retry del job, isolamento UID, nessuna modifica alle ricevute. Le Rules e Functions produttive restano intatte; non eseguire job sul progetto reale.
+- Non toccare `Frontend/public/**`, `firestore.rules` o `storage.rules` produttive, `functions/index.js` o altre Functions produttive, versione, master o dati reali. Non fare deploy, push o merge. M8–M10 e l'audit Alibaba/OpenCodeReview restano fuori da questa fetta.
+- Aggiorna il censimento/contratto M7 solo con ciò che è deciso e realmente provato; lascia esplicito che la politica non è attiva in produzione. Esegui test mirati, controlli statici e `git diff --check`; evita suite non pertinenti.
+- Usa normalmente **un solo commit locale** per lavoro e rapporto, come disposto nella verifica M7-R2; un secondo commit solo per correzione reale o separazione necessaria alla revisione. Registra nel file di coordinamento esiti, file, limiti, eventuali decisioni ancora necessarie. Consegna `DA_VERIFICARE`.
+
+**Stato incarico: PRONTO** — M7-R3 disposto da Codex il 21/09/2026, secondo le scelte esplicite di Diego.
+
+## Correzione decisione Diego — M7-R3 audit: 24 mesi
+
+Diego ha precisato il 21/09/2026: **teniamo 24 mesi**. Questa scelta **sostituisce** la precedente indicazione di 12 mesi per i soli eventi tecnici `users/{uid}/auditEvents`. DeepSeek deve adattare il candidato M7-R3 e i test alla finestra di **24 mesi** prima della consegna; non deve assumere che il lavoro su 12 mesi sia ancora approvabile. Se è già in esecuzione, rilegga questa correzione prima del commit. Le ricevute di idempotenza, i backup, i log di piattaforma e gli Account archiviati restano fuori dalla decisione. Nessuna cancellazione reale, modifica produttiva o deploy è autorizzata.
+
+**Stato incarico: CORREZIONE IN CORSO** — prevale questa decisione sui 12 mesi; M7-R3 resta affidato a DeepSeek.
+
+## Presa in carico DeepSeek — M7-R3
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base osservata `3a1c96ff`, nove commit locali avanti a origin. Le modifiche preesistenti di questo file (approvazione M7-R2, decisioni di Diego, incarico M7-R3 e correzione a 24 mesi) sono **conservate** e incluse nell'unico commit di tranche.
+- **Correzione recepita prima del commit:** la finestra è di **24 mesi**, non 12; candidato e test sono stati adeguati e nessuna asserzione presume più i 12 mesi.
+- **Perimetro:** solo candidato di laboratorio e test sintetici. Nessuna modifica a codice, Rules o Functions produttive, `Frontend/public/**`, versione, `master` o dati; nessun job sul progetto reale; nessun deploy, push o merge; M8–M10 non avviati.
+- **Commit:** uno solo per la tranche (lavoro e rapporto insieme), come disposto nella verifica M7-R2; nessun commit amministrativo separato.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R3 preso in carico da DeepSeek il 2026-09-21 con la finestra corretta a 24 mesi.
+
+## Rapporto DeepSeek — M7-R3
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** **un solo commit locale di tranche** (candidato, test, documenti e questo rapporto), come disposto dalla verifica M7-R2; base `3a1c96ff`; **nessun push eseguito**.
+- **File:** `experiments/history-recovery/audit-retention.mjs` (nuovo, candidato), `experiments/history-recovery/audit-retention.test.mjs` (nuovo, 12 prove), `tests/history-recovery.rules.test.mjs` (esteso a update e delete), `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` (nuova sezione di progetto), `docs/M7_RETENTION_CENSIMENTO.md` (righe T-11/T-12 e nuove T-34…T-38), `docs/FILE_INVENTORY.md`. Nessun file produttivo toccato.
+
+### Decisione tradotta in progetto
+
+La sezione «Retention del registro tecnico» del contratto M7 documenta: perimetro (i cinque scrittori già censiti), timestamp autorevole (`at` con `serverTimestamp`), trattamento dei record legacy/malformati, cancellazione a lotti, idempotenza ed errori, esclusione delle ricevute, isolamento UID e visibilità all'utente. **La finestra è di 24 mesi**, come corretto da Diego; la precedente indicazione di 12 mesi è superata e non è più richiamata da codice, test o documenti.
+
+### Candidato di laboratorio
+
+`experiments/history-recovery/audit-retention.mjs` — pianificatore ed esecutore **puri**, non importati dall'app né da Functions:
+
+- classifica ogni evento in `expired` / `retained` / `unverifiable`; un evento senza data interpretabile **non viene mai cancellato**;
+- finestra a mesi di calendario, con giorno limitato nei mesi corti;
+- piano deterministico (dal più vecchio, spareggio sull'id) in lotti entro il limite di **500 operazioni per batch** Firestore e con tetto di 10.000 eventi per esecuzione;
+- ogni percorso pianificato deve stare in `users/{uid}/auditEvents/`: id non conformi rifiutati, evento di un altro UID rifiutato, ricevute di idempotenza mai pianificate;
+- esecutore con esito `completed` / `partial` (lotto fallito, nessun falso completamento) / `interrupted`, con difesa in profondità sul percorso dei lotti.
+
+### Esiti reali
+
+- `node --test experiments/history-recovery/audit-retention.test.mjs` → **12/12**.
+- `npm run test:firestore-rules` → **21/21**; il file `tests/history-recovery.rules.test.mjs` ora prova che il client non può **creare, modificare né cancellare** gli archivi di recupero (prima solo la create) e che l'evento resta leggibile dal proprietario.
+- `git diff --check` **pulito**; inventario rigenerato.
+- Nessuna modifica a codice, Rules o Functions produttive, `Frontend/public/**`, versione (`1.2.127`), `master` (`445b338d`), dati reali o durate di altre politiche.
+- **Nota meccanica sull'inventario:** il generatore elenca prima i file tracciati e poi gli altri, quindi l'inventario è stato rigenerato **dopo** aver messo in stage i due file nuovi; senza quel passaggio le loro righe cambiano posizione alla rigenerazione successiva (comportamento già osservato in M6-CLOSE). Il commit di tranche resta uno solo, con l'inventario stabile.
+
+### Comportamenti e limiti dichiarati
+
+1. **La politica non è attiva in produzione.** Nessun job schedulato e nessuna modifica alle Rules produttive: il divieto di scrittura client è provato **solo** sulle Rules candidate, mentre le Rules effettive continuano a consentire le scritture del proprietario.
+2. **La convenzione della finestra resta un dettaglio da confermare**: il candidato usa mesi di calendario; l'alternativa è un multiplo fisso di giorni. Con 24 mesi la differenza è di pochi giorni l'anno.
+3. **I record senza data valida restano per sempre**, per scelta: richiedono una bonifica manuale documentata, altrimenti il registro non si alleggerisce di quegli elementi.
+4. **Il job reale non è progettato**: cadenza, ambiente di collaudo, monitoraggio, allarme e rollback restano fuori da questa fetta.
+5. La cancellazione a lotti presuppone un esecutore backend con permessi amministrativi; il candidato non contiene credenziali, SDK o trasporto.
+
+### Decisioni ancora necessarie
+
+- confermare mesi di calendario **oppure** giorni fissi per la finestra;
+- decidere il destino dei record storici senza `at`;
+- verificare se esistono obblighi legali specifici che prevalgono sui 24 mesi (dipendenza dichiarata, nessuna deroga inventata);
+- approvare il progetto del job reale e la modifica delle Rules produttive con rilascio coordinato.
+
+**Stato incarico: DA_VERIFICARE** — M7-R3 consegnato da DeepSeek il 2026-09-21; progetto e prove sintetiche pronti, politica di retention **non attiva in produzione** e nessun push eseguito.
