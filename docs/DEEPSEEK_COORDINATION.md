@@ -3141,3 +3141,51 @@ I casi di **caricamenti sovrapposti** restano verdi: `tests/company-form-archive
 **B-1 è chiuso.** **B-2 resta aperto e non è stato toccato** (come disposto): `npm run test:profile` è ancora rosso per gli helper di ciclo assenti nel banco `tests/profile-contact-link.test.mjs`. Di conseguenza **`npm test` non può ancora essere verde** e M7 non è completo: serve la fetta B-2 prima della chiusura.
 
 **Stato incarico: DA_VERIFICARE** — M7-FIX-1A consegnato da DeepSeek il 2026-09-21; contratto di fondazione UI ripristinato con la modifica minima al runtime (epoch catturata alla chiamata), protezione dal montaggio superato provata dai casi di sovrapposizione, `test:ui-foundations` verde, mirati 23/23 e navigation 146/146, B-2 dichiarato ancora aperto, nessun push eseguito.
+
+## Verifica Codex — M7-FIX-1A caricamento parallelo
+
+**Esito: APPROVATO.** Commit `dc707d32`: `loadRubrica()` e `loadData()` catturano sincronicamente l'epoch del montaggio prima della prima attesa; il `Promise.all` resta parallelo e il controllo sul montaggio superato continua dopo le attese. Ho rieseguito `npm run test:ui-foundations`: verde. DeepSeek riferisce test mirati di sovrapposizione 23/23 e navigation 146/146. Nessun push/deploy.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-FIX-1B: banco collegamenti Profilo
+
+**Stato incarico: PRONTO.** DeepSeek corregga solo B-2: `tests/profile-contact-link.test.mjs` rimuove gli import dal modulo reale, ma ora il runtime usa `sharingCycleOf`/`inviteIdForGuest` e il banco non li fornisce. Iniettare gli helper reali nel contesto del test, senza alterare il comportamento dell'app o nascondere gli errori. Verificare i casi privato/aziendale e l'intera suite `npm run test:profile`; se i test rivelano un difetto runtime, fermarsi e descriverlo prima di ampliare il perimetro. Un commit locale mirato, nessun push/deploy né dati reali; consegna `DA_VERIFICARE`. Dopo la correzione, l'intera `npm test` dovrà essere rieseguita come gate distinto.
+
+## Presa in carico DeepSeek — M7-FIX-1B banco collegamenti Profilo
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `dc707d32`; la revisione Codex e l'incarico erano nel working tree non committati e sono **conservati** senza alterarne il testo.
+- **Perimetro:** solo B-2, poi il gate `npm test`. **Nessun** push, deploy o dato reale; **nessun altro gate avviato**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-FIX-1B preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-FIX-1B banco collegamenti Profilo
+
+- **Stato:** COMPLETATO (B-2) — in attesa di verifica Codex. Il gate `npm test` ha rivelato un **terzo difetto bloccante (B-3)**, descritto sotto e **non** toccato in questa fetta.
+- **Commit:** un solo commit locale mirato; base `dc707d32`; **nessun push o deploy**.
+
+### B-2: corretto con gli helper reali
+
+In `tests/profile-contact-link.test.mjs` il caricatore rimuove gli `import` dal modulo reale, quindi `sanitizeEmail`, `sharingCycleOf` e `inviteIdForGuest` risultavano non definiti. Ho iniettato gli helper **reali** (nessuno stub, nessun comportamento alterato): `const utils = await sourceModule('../utils.js');` e `...utils` in testa all'oggetto delle dipendenze di `saveFixture`, che alimenta sia lo scrittore privato sia quello aziendale. **Nessun difetto di runtime è emerso**: i test dello scrittore passano con gli helper veri, inclusi invito con ID/ciclo corrente e casi aziendali.
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/profile-contact-link.test.mjs` | **65/65** |
+| `npm run test:profile` (intera suite) | **142/142** |
+
+### Il gate `npm test` e il difetto B-3 (BLOCCANTE, fuori perimetro)
+
+Eseguito come richiesto: **`npm test` esce 1** e si arresta su **`test:vault-mutation`** (`node scripts/run-vault-session-emulators.mjs --mutation`).
+
+- **File:** `experiments/persistent-vault-shell/firebase-archive.test.mjs:19` costruisce `restoreArchivedAccount` con `new Function(...)` sul sorgente reale di `settings/archive-account-service.js`, ripulito con `.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '')`.
+- **Causa:** quella pulizia non gestisce le **ri-esportazioni**; la riga `export { archiveRecipients, archiveConfirmMessage } from './archive-account-model.js';` che ho aggiunto in `1162aac1` (M7-R7C-1, per non far crescere il budget statico della pagina aziendale) diventa `{ … } from '…';` e `new Function` fallisce con **`SyntaxError: Unexpected string`** — riprodotto in isolamento.
+- **Secondo effetto, già visibile dopo la prima correzione:** il `new Function` (`:19`) elenca solo `auth, db, doc, runTransaction, deleteField, onAuthStateChanged`, mentre `restoreArchivedAccount` usa anche `sharingCycleOf`/`nextSharingCycle`/`inviteIdForGuest` (R7C-2): senza di essi il banco fallirebbe con `ReferenceError`.
+- **Correzione minima proposta (fetta successiva, non eseguita qui):** nel file di test, rimuovere anche le ri-esportazioni (`.replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/gm, '')`) **e** aggiungere i tre helper di `utils.js` all'elenco dei parametri di `new Function`, passandoli reali (sorgente letto e valutato come già fa il file). **Non** togliere la ri-esportazione dal servizio: serve al budget statico di `form_account_azienda.html`.
+- **Perché non l'ho corretto qui:** l'incarico autorizzava solo B-2 e vieta di ampliare il perimetro; lo consegno come difetto bloccante dimostrato con causa e correzione minima, come già fatto per B-1/B-2 in M7-CLOSE.
+- **Conseguenza dichiarata:** **`npm test` non è ancora verde**; dopo B-3 va rieseguito per intero come gate distinto. Le suite verificate prima dell'arresto (comprese `test:firestore-rules` 45/45, `test:storage-rules`, `test:vault-emulators`) risultano verdi.
+
+### Nota di metodo (terza occorrenza)
+
+B-1, B-2 e B-3 sono tutti nati da tranche mie e sono emersi **solo** con l'esecuzione completa di `npm test`, mai con la batteria per tranche. Confermo la regola già dichiarata in M7-CLOSE: **nessuna consegna senza `npm test` completo verde** (ora bloccato da B-3).
+
+**Stato incarico: DA_VERIFICARE** — M7-FIX-1B consegnato da DeepSeek il 2026-09-21; helper reali iniettati nel banco dei collegamenti Profilo (65/65, `test:profile` 142/142), nessun difetto di runtime emerso, gate `npm test` rieseguito e rosso su **B-3** (`test:vault-mutation`, `SyntaxError` per la ri-esportazione non filtrata nel banco emulatore) con causa riprodotta e correzione minima proposta, B-3 **non** toccato e nessun push eseguito.

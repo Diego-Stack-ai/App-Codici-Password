@@ -11,6 +11,10 @@ const model = await sourceModule('privato/profile-model.js');
 const companyModel = await sourceModule('azienda/company-profile-model.js');
 const modes = await sourceModule('shared/account-mode-model.js');
 const crypto = await sourceModule('core/crypto-utils.js');
+// M7-FIX-1B: gli scrittori reali usano `sanitizeEmail`, `sharingCycleOf` e
+// `inviteIdForGuest` da `utils.js`; il banco inietta gli helper REALI (nessuno
+// stub) perché gli import vengono rimossi dal caricatore.
+const utils = await sourceModule('../utils.js');
 
 // Esegue il codice applicativo reale sostituendo solo i confini browser/Firebase.
 async function loadController(path, dependencies, exports) {
@@ -132,7 +136,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         return { path, id: path.split('/').at(-1) };
     }
     const dependencies = {
-        ...model, ...modes,
+        ...utils, ...model, ...modes,
         auth: { currentUser: { uid: 'owner', email: 'owner@example.test' } }, db: {}, LOG: () => {},
         doc: (...parts) => parts.length === 1 ? ref(parts[0], 'new-account') : ref(...parts), collection: ref,
         increment: amount => amount, deleteField: () => 'DELETE',
