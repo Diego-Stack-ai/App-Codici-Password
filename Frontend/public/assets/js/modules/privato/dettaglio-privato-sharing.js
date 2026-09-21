@@ -4,13 +4,11 @@
  */
 
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
-import { LOG } from '../../logger.js';
-import { doc, collection, runTransaction, setDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
-import {attemptShareRevocationNotice, shareRevocationNotice} from '../shared/share-revocation-notice.js';
 
 let mounted = null;
 
@@ -103,7 +101,6 @@ async function revokeRecipient(email, mount = mounted) {
     if (!mount.active() || !confirmed) return;
 
     try {
-        const revokedGuests = [];
         await runTransaction(db, async transaction => {
             if (!mount.active()) return;
             const accountRef = doc(db, 'users', ownerId, 'accounts', accountId);
@@ -116,7 +113,6 @@ async function revokeRecipient(email, mount = mounted) {
             const sharedWith = { ...(data.sharedWith || {}) };
             const revokedInvitation = sharedWith[normalizedEmail];
             const wasAccepted = revokedInvitation?.status === 'accepted';
-            const guestUid = wasAccepted ? revokedInvitation?.uid : null;
             delete sharedWith[normalizedEmail];
 
             const hasActiveGuests = Object.values(sharedWith)
@@ -149,12 +145,9 @@ async function revokeRecipient(email, mount = mounted) {
                 read: false
             });
 
-            if (guestUid) {
-                revokedGuests.push({ uid: guestUid, email, accountName: data.nomeAccount || 'Account' });
-            }
+            // Notifica all'ospite: richiede un backend dedicato, non implementata.
         });
         if (!mount.active()) return;
-        await Promise.allSettled(revokedGuests.map(({uid, email, accountName}) => attemptShareRevocationNotice(() => setDoc(doc(collection(db, 'users', uid, 'notifications')), shareRevocationNotice({accountName, ownerEmail, guestEmail: email})), {log: LOG})));
         showToast('Accesso revocato con successo');
         if (onReload) await onReload();
     } catch (error) {

@@ -1526,3 +1526,68 @@ Prove Rules nuove: l'ospite accettato **legge prima** della revoca e **non legge
 6. Restano fuori da questa fetta: la rinuncia dell'ospite, gli inviti orfani, la pulizia di widget e credenziali comuni al purge, la prova in un browser reale e la modifica delle Rules produttive.
 
 **Stato incarico: DA_VERIFICARE** — M7-R5 consegnato da DeepSeek il 2026-09-21; revoca degli ospiti accettati corretta e provata con test sulle Rules produttive, Rules non ampliate e nessun push eseguito.
+
+## Decisione Diego — M7 pulsante Elimina e Archivio
+
+Il 21/09/2026 Diego ha confermato: **il pulsante «Elimina» per un Account di sua proprietà deve spostare l'Account nell'Archivio; soltanto dall'Archivio è possibile avviare la cancellazione definitiva con conferma esplicita**. Vale per Account propri privati e aziendali, inclusi quelli che il proprietario ha condiviso. Questa decisione sostituisce il vecchio `deleteDoc` diretto dalla lista e si coordina con la politica già scelta: Archivio senza scadenza automatica. Non autorizza la cancellazione di dati reali, un deploy, né decide da sola la sorte di inviti, widget o credenziali comuni. Per gli Account ricevuti da un altro proprietario l'ospite non ottiene alcun diritto di cancellare l'originale; l'eventuale rinuncia dell'ospite resta una decisione separata.
+
+**Stato decisione: APPROVATA DA DIEGO** — da tradurre in incarico esecutivo dopo la verifica M7-R5; non avviare due incarichi in parallelo.
+
+## Verifica Codex — M7-R5: correzione prima dell'approvazione
+
+**Esito: DA_CORREGGERE.** Il commit `4b78eb43` toglie correttamente la scrittura nell'ospite dalla transazione; `git diff --check` pulito e `node --test tests/share-revocation-notice.test.mjs tests/share-revocation-paths.test.mjs` passa **11/11**. Le Rules del ramo continuano a negare al client del proprietario la scrittura in `users/{guestUid}/notifications`.
+
+**Difetto residuo concreto:** i cinque percorsi client fanno `await Promise.allSettled(revokedGuests.map(... setDoc(users/{guestUid}/notifications) ...))` prima di mostrare il successo/ricaricare. Il tentativo è sempre non autorizzato dalle Rules quando online; se la rete si interrompe dopo il commit della revoca, la Promise `setDoc` può restare pendente e bloccare feedback/UI pur avendo rimosso l'accesso. `allSettled` non è un timeout. Inoltre `revokedGuests.push` dentro un callback `runTransaction` ritentabile può accumulare duplicati. Non chiamare questo comportamento «non bloccante».
+
+**Correzione richiesta a DeepSeek:** non tentare dal client una scrittura che le Rules vietano. Per questa tranche, elimina il tentativo all'ospite dai percorsi client e mostra/ricarica subito dopo il commit confermato; conserva le notifiche al proprietario autorizzate. Documenta esplicitamente che la notifica all'ospite richiede un backend dedicato non ancora implementato, senza annunciare una consegna. Se proponi un backend, fallo in un incarico separato dopo revisione; non ampliare le Rules. Aggiungi test di lifecycle o sorgente che dimostrino nessuna attesa dopo il commit e nessuna scrittura client cross-UID nei cinque percorsi. Verifica retry transazionale, pending/accepted e messaggio di successo solo dopo commit. Un commit locale mirato, nessun push/deploy, consegna `DA_VERIFICARE`.
+
+La decisione di Diego sul pulsante «Elimina» → Archivio è registrata subito sopra ma **non avviare quel lavoro** finché M7-R5 non è approvato.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — M7-R5 correzione
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); base osservata `4b78eb43`; la revisione Codex era nel working tree non committata ed è **conservata** in questo commit.
+- **Perimetro:** rimozione completa del tentativo client vietato dalle Rules nei cinque file, guardia di regressione, documentazione. Nessuna modifica alle Rules, nessuna Function nuova, nessun push.
+- **Nota di coordinamento:** non ho avviato il lavoro sul pulsante «Elimina» → Archivio, come richiesto.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R5 presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R5 correzione
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un commit locale mirato di correzione e rapporto; base `4b78eb43`; **nessun push eseguito**.
+- **File:** i cinque moduli client già citati; **eliminati** `Frontend/public/assets/js/modules/shared/share-revocation-notice.js` e `tests/share-revocation-notice.test.mjs` (codice morto); riscritta `tests/share-revocation-paths.test.mjs`; aggiornati `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` e `docs/FILE_INVENTORY.md`. **`firestore.rules` non toccato.**
+
+### Il rilievo era fondato, su due punti distinti
+
+1. **`allSettled` non è un timeout.** Il tentativo verso `users/{guestUid}/notifications` è sempre negato dalle Rules quando online; con la rete caduta dopo il commit, la Promise del `setDoc` poteva restare pendente e **ritardare messaggio e ricaricamento** dopo una revoca già avvenuta. Non era quindi un comportamento «non bloccante».
+2. **Accumulo ritentabile.** `revokedGuests.push(...)` dentro un callback `runTransaction` ritentabile poteva raccogliere **duplicati**.
+
+### Correzione applicata
+
+Il tentativo all'ospite è stato **eliminato del tutto** dal client, non spostato: nei cinque file non restano `setDoc` verso un altro UID, né `Promise.allSettled`, né l'array accumulato. Dopo il commit confermato seguono soltanto il messaggio di esito, la guardia di vista e il ricaricamento già esistenti. Le notifiche al **proprietario** restano dentro la transazione e i controlli di proprietario/UID, la revisione e la transazione sono invariati. Ho anche rimosso tre import diventati morti per effetto della rimozione (`LOG` in due file, `collection` in uno).
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/share-revocation-paths.test.mjs` | **16/16** |
+| `npm run test:firestore-rules` | **29/29** |
+| `npm run test:js-syntax` | **161 moduli OK** (162 meno l'helper eliminato) |
+| `git diff --check` | pulito |
+
+Conteggi per file dopo la correzione: `setDoc` **0**, `revokedGuests` **0**, `attemptShareRevocationNotice` **0**; percorsi `notifications` **1, 1, 0, 1, 1**: solo la notifica al proprietario (il terzo file non ne aveva). La guardia verifica inoltre che nessun percorso notifiche usi una variabile diversa dal proprietario, che non ci siano attese aggiunte dopo il commit e che la revoca resti transazionale con un messaggio di esito.
+
+### Correzione della mia stessa guardia (dichiarata)
+
+La prima versione della guardia confrontava la posizione di `showToast(` con quella di `runTransaction(`: asserzione **ingenua**, perché tre file hanno messaggi di validazione *prima* della transazione. L'ho sostituita con asserzioni non fragili (nessun percorso notifiche non proprietario, nessuna attesa aggiunta, transazione e messaggio di esito presenti). Il rilievo era corretto: era un difetto del mio test, non del prodotto.
+
+### Limiti e scelte dichiarate
+
+- **La notifica all'ospite non viene recapitata** e il codice non annuncia alcuna consegna. Per recapitarla serve un **percorso backend dedicato** (callable con Admin SDK), **non implementato**: la proposta resta da valutare in un incarico separato e non autorizza un ampliamento delle Rules.
+- Nei due percorsi «diventa privato» il testo della notifica precedente (comunque non consegnabile) è stato sostituito da un commento veritiero: nessun messaggio utente nuovo.
+- Il numero di moduli verificati scende a 161 per l'eliminazione dell'helper: non è una regressione di sintassi.
+- Resta non verificato il comportamento in un browser reale e restano fuori fette separate la rinuncia dell'ospite, gli inviti orfani, la pulizia di widget e credenziali comuni al purge.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R5 consegnata da DeepSeek il 2026-09-21; nessuna scrittura client cross-UID, nessuna attesa dopo il commit, Rules intatte e nessun push eseguito.

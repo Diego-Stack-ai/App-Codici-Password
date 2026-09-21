@@ -1,11 +1,10 @@
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
-import { collection, doc, increment, runTransaction, setDoc } from '/assets/js/vendor/firebase-runtime.js';
+import { doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { sanitizeEmail } from '../../utils.js';
 import { listContacts } from '../data/vault-repository.js';
 import { accountModeFromRecord, hasAccountCredentials, validateAccountMode } from './account-mode-model.js';
-import {attemptShareRevocationNotice, shareRevocationNotice} from './share-revocation-notice.js';
 
 const fullName = contact => [contact?.nome, contact?.cognome].filter(Boolean).join(' ').trim() || contact?.email || '';
 const normalizeEmail = email => String(email || '').trim().toLowerCase();
@@ -134,7 +133,6 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 : ['users', ownerId, 'accounts', accountId];
             const accountRef = doc(db, ...path);
             if (!active()) return;
-            const revokedGuests = [];
             await runTransaction(db, async transaction => {
                 if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
                 const snap = await transaction.get(accountRef);
@@ -146,12 +144,9 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
 
                 for (const key of Object.keys(sharedWith)) {
                     if (!isShared || !requestedKeys.has(key)) {
-                        const guest = sharedWith[key];
                         delete sharedWith[key];
                         transaction.delete(doc(db, 'invites', `${accountId}_${key}`));
-                        if (guest?.status === 'accepted' && guest.uid) {
-                            revokedGuests.push({ uid: guest.uid, email: guest.email || key, accountName: stored.nomeAccount || 'Account' });
-                        }
+                        // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
                 }
 
@@ -184,7 +179,6 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 });
             });
             if (!active()) return;
-            await Promise.allSettled(revokedGuests.map(({uid, email, accountName}) => attemptShareRevocationNotice(() => setDoc(doc(collection(db, 'users', uid, 'notifications')), shareRevocationNotice({accountName, ownerEmail: auth.currentUser?.email || 'Proprietario', guestEmail: email})))));
             showToast('Tipologia e condivisione aggiornate.');
             await onReload?.();
         } catch (error) {

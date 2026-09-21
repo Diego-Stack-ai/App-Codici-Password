@@ -171,7 +171,7 @@ Il purge di un Account elimina gli oggetti Storage **solo** per i percorsi letti
 | Rimozione di una riga dall'array `allegati` (anagrafica azienda) | solo la voce dell'array (`.../azienda/ma_attachments.js:65-68`) | l'oggetto su Storage |
 | Rimozione di una riga dall'array `attachments` di una Scadenza | solo la voce dell'array (`.../scadenze/deadline-attachment-controller.js:41-43`) | l'oggetto su Storage e l'eventuale cartella `new_<ts>` di una scadenza mai salvata |
 | Cancellazione di una Scadenza | il documento; il trigger rimuove solo le copie ricevute (`functions/index.js:1689-1704`) | tutti i byte sotto `users/{uid}/scadenze/{id}/**` |
-| Hard-delete di un Account aziendale | il solo documento (`.../azienda/account_azienda.js:271`; `.../azienda/form-azienda-save.js:337`) | metadati della sottocollezione `attachments` e relativi oggetti Storage |
+| Hard-delete di un Account aziendale | il solo documento (`.../azienda/account_azienda.js:271`; `.../azienda/form-azienda-save.js:326`) | metadati della sottocollezione `attachments` e relativi oggetti Storage |
 | Hard-delete di un'Azienda | il solo documento (`.../azienda/ma_save.js:204`) | sottocollezioni `accounts/*/attachments` e oggetti `aziende_allegati/**` |
 | Cambio avatar | **nessuna** cancellazione dell'avatar precedente | un oggetto orfano per ogni sostituzione |
 

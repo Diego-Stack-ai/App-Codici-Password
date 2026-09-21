@@ -2,7 +2,7 @@ import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferenc
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
-import { collection, deleteField, doc, increment, runTransaction, setDoc } from '/assets/js/vendor/firebase-runtime.js';
+import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
@@ -12,7 +12,6 @@ import { classifyPrivateAccountOfflineWrite } from './private-account-offline-po
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
-import {attemptShareRevocationNotice, shareRevocationNotice} from '../shared/share-revocation-notice.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -245,7 +244,6 @@ export async function savePrivateAccount({
 
         // --- ATOMIC TRANSACTION V3.1 ---
         let retainedProfilePassword = false;
-        const revokedGuests = [];
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
             savedAccountId = accRef.id;
@@ -293,13 +291,9 @@ export async function savePrivateAccount({
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    const guest = currentSharedWith[sKey];
                     transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
 
-                    // [NEW] Notifica Guest (se aveva accettato) — consegna dopo la transazione
-                    if (guest && guest.status === 'accepted' && guest.uid) {
-                        revokedGuests.push({ uid: guest.uid, email: guest.email || sKey, accountName: data.nomeAccount || 'Account' });
-                    }
+                    // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
                 finalData.sharedWith = {};
                 finalData.sharedWithUids = [];
@@ -314,14 +308,10 @@ export async function savePrivateAccount({
                 // Rimuovi quelli sbiancati dalla UI
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
-                        const guest = currentSharedWith[oldKey];
                         delete finalData.sharedWith[oldKey];
                         transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
 
-                        // [NEW] Notifica Guest (se aveva accettato) — consegna dopo la transazione
-                        if (guest && guest.status === 'accepted' && guest.uid) {
-                            revokedGuests.push({ uid: guest.uid, email: guest.email || oldKey, accountName: data.nomeAccount || 'Account' });
-                        }
+                        // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
                 }
 
@@ -403,8 +393,6 @@ export async function savePrivateAccount({
         });
 
         if (profileContactLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
-
-        await Promise.allSettled(revokedGuests.map(({uid, email, accountName}) => attemptShareRevocationNotice(() => setDoc(doc(collection(db, 'users', uid, 'notifications')), shareRevocationNotice({accountName, ownerEmail: auth.currentUser?.email || 'Proprietario', guestEmail: email})), {log: LOG})));
 
         showToast(retainedProfilePassword
             ? 'Account collegato. La password diversa è stata conservata nel Profilo.'
