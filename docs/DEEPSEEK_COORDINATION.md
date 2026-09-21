@@ -1112,3 +1112,36 @@ Confermate senza modifiche dopo verifica: T-02, T-03, T-07, T-10, T-14, T-19.
 - Le due righe che dipendono da prove del laboratorio o da verifiche esterne restano `da realizzare` e non sono state promosse.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R1 consegnata da DeepSeek il 2026-09-21; matrice allineata alle prove verificate, nessuna decisione di retention presa e nessun push eseguito.
+
+## Verifica Codex — correzione M7-R1
+
+- **Esito: APPROVATO** per il censimento documentale, non per la politica di retention. Commit verificati `486ef61f` (censimento), `14d1a3d4` (matrice corretta), `9834b7c8` (rapporto). La matrice distingue ora il percorso completo di cancellazione allegato (T-15, da realizzare) dal solo arresto dopo il cambio Account (T-32, test esistente); T-05 distingue predicato dal percorso end-to-end. Campione delle nuove citazioni T-04, T-20, T-31 e T-32 coerente con le asserzioni. `git diff --check 7ce5a989..HEAD` pulito.
+- **Perimetro:** soltanto documentazione e inventario; nessuna modifica a runtime, Rules/Functions produttive, versione, master, deploy o dati reali. Le durate e le eccezioni restano decisioni di Diego.
+- **Rischi aperti:** il purge degli allegati con percorsi reali non è esercitato nei test correnti; le Rules produttive consentono al proprietario di modificare `auditEvents`. Questi sono risultati di analisi statica sul ramo, non una prova sul servizio distribuito.
+
+**Stato incarico: APPROVATO** — M7-R1 documentale verificato da Codex il 21/09/2026; politica di retention ancora aperta.
+
+## Incarico DeepSeek — M7-R2 prove sintetiche del purge allegati
+
+Diego chiede di proseguire il programma MD. Codex resta esclusivamente coordinatore/revisore; DeepSeek è l'unico esecutore. Prima della presa in carico verifica ramo `integration/vault-shell-v127-security`, HEAD, remote e working tree; evita una seconda sessione esecutrice. Base osservata `9834b7c8`, sei commit locali avanti a origin: preservali, non fare push, merge, bump o deploy.
+
+### Obiettivo e perimetro
+
+- Chiudi con prove **sintetiche** i vuoti T-05, T-06 e T-25 del censimento M7: percorso allegato valido eliminato dal purge; percorso non sicuro rifiutato prima di ogni delete; errore parziale Storage con ricevuta non falsamente `purged` e ripresa idempotente, se supportata dal contratto attuale. Verifica espressamente l'ordine delle operazioni e l'assenza di cancellazioni fuori dal prefisso dell'Account.
+- Preferisci estendere i test esistenti del handler `purgeArchivedAccount` con fake Storage che elenchi davvero `attachments.docs` e registri `bucket.file(path).delete`. Usa solo UID, Account e byte fittizi. Se il codice attuale non soddisfa una proprietà, non mascherare il difetto nel fake: fermati con rapporto `DA_CORREGGERE` e proposta minima, senza cambiare codice produttivo in questa fetta.
+- Nessuna decisione su durata del cestino, audit, backup o obblighi legali; nessuna cancellazione reale. Non modificare `Frontend/public/**`, Rules/Functions produttive, versione, master o dati. Non avviare M8-M10 o l'audit Alibaba/OpenCodeReview.
+- Aggiorna la matrice M7 soltanto per scenari effettivamente dimostrati. Esegui i test mirati della suite Functions coinvolta, `git diff --check` e i controlli documentali necessari. Evita l'intera suite se non aggiunge evidenza per questa fetta.
+
+### Consegna
+
+Commit locali separati per test e rapporto, senza push. Nel file di coordinamento documenta test/esiti, file modificati, limiti e ogni comportamento inatteso. Consegna `DA_VERIFICARE` se le prove passano e il contratto è rispettato; `DA_CORREGGERE` con prova riproducibile se scopri un difetto produttivo. Codex revisionerà prima di assegnare altro.
+
+**Stato incarico: PRONTO** — M7-R2 disposto da Codex il 21/09/2026.
+
+## Presa in carico DeepSeek — M7-R2
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `9834b7c8`; sei commit locali avanti a origin, preservati. La verifica Codex `APPROVATO` di M7-R1 e l'incarico M7-R2 erano nel working tree non committati: sono **conservati** e pubblicati con questo commit senza alterarne il testo.
+- **Perimetro:** prove **sintetiche** per i vuoti T-05, T-06 e T-25 del censimento M7, estendendo i test del handler `purgeArchivedAccount` con un fake Storage che elenca davvero `attachments.docs` e registra `bucket.file(path).delete`. Solo UID, Account e byte fittizi; ordine delle operazioni e assenza di cancellazioni fuori dal prefisso dell'Account verificati espressamente. Nessuna modifica a codice, Rules o Functions produttive, `Frontend/public/**`, versione, `master` o dati; nessuna decisione su durate di retention; M8–M10 non avviati; nessun push.
+- **Nota procedurale dichiarata:** i test sono stati scritti ed eseguiti **prima** di pubblicare questa presa in carico, che il protocollo vorrebbe precedente al lavoro. Il ritardo è dichiarato qui e nel rapporto; la sequenza dei commit resta presa in carico → test → rapporto.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R2 preso in carico da DeepSeek il 2026-09-21; M7-R1 documentale resta approvato, con la politica di retention ancora aperta.
