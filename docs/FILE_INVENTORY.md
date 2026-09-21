@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **812**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -312,7 +312,7 @@ File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 772748 | 5306 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 798799 | 5467 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -327,7 +327,7 @@ File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 52223 | 402 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 52870 | 402 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
@@ -748,7 +748,7 @@ File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 16954 | 107 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 17191 | 108 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -777,6 +777,7 @@ File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
 | `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
 | `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
+| `scripts/run-account-attachment-delete-emulators.mjs` | MJS | 1445 | 37 | Strumento manutenzione/test: run-account-attachment-delete-emulators. |
 | `scripts/run-audit-retention-emulators.mjs` | MJS | 1152 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1443 | 31 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
@@ -812,6 +813,8 @@ File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `tests/account-archive-paths.test.mjs` | MJS | 6158 | 91 | Test automatico: account-archive-paths.test. |
+| `tests/account-attachment-delete.emulator.test.mjs` | MJS | 8784 | 154 | Test automatico: account-attachment-delete.emulator.test. |
+| `tests/account-attachment-delete.test.mjs` | MJS | 11031 | 179 | Test automatico: account-attachment-delete.test. |
 | `tests/account-detail-compact.test.mjs` | MJS | 7958 | 113 | Test automatico: account-detail-compact.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
@@ -822,6 +825,7 @@ File censiti: **808**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
 | `tests/archive-guest-suspension.rules.test.mjs` | MJS | 13533 | 233 | Test automatico: archive-guest-suspension.rules.test. |
+| `tests/archive-list-filter.test.mjs` | MJS | 12088 | 204 | Test automatico: archive-list-filter.test. |
 | `tests/archive-recipients.test.mjs` | MJS | 5567 | 101 | Test automatico: archive-recipients.test. |
 | `tests/archive-session.test.mjs` | MJS | 45922 | 700 | Test automatico: archive-session.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
