@@ -125,6 +125,26 @@ Atomicità: i passi 5 e 6 **non** sono dentro una transazione. Un'interruzione f
 
 **Limiti dichiarati.** Non sono esercitati l'interfaccia (conferma, redirect, lista aziende) né la visibilità degli Account orfani nella UI: la diagnosi è sui dati. Il percorso A è provato con la funzione reale della lista (`deleteCompany`); la form esegue lo stesso `deleteDoc` e la differenza è asserita sul sorgente. Restano fuori perimetro i residui del purge privato (T-13) e la pulizia degli orfani (D4), non decisa.
 
+### 3.6 Copie condivise e inviti dopo il purge (verificato M7-T08)
+
+Misura dell'effetto del purge su un Account con widget, dati condivisi, collegamento e invito collegato, più una Scadenza condivisa come percorso di confronto. Il purge viene eseguito **reale** (Admin SDK, come in produzione) e la leggibilità è verificata con le **Rules di produzione** su contesti client di proprietario, destinatario ed estraneo.
+
+| Elemento | Dopo il purge | Leggibile dal **destinatario**? |
+|---|---|---|
+| `users/{uid}/accountWidgets/{id}` | **resta, invariato** (confronto byte per byte prima/dopo) | **no**: sola lettura del proprietario, scrittura negata |
+| `users/{uid}/sharedVaultData/{id}` | **resta, invariato** | **no**: idem |
+| `users/{uid}/sharedVaultLinks/{id}` | **resta, invariato** | **no**: idem |
+| `invites/{inviteId}` | **resta, invariato**: `sharingState: 'suspended'` e `suspendedAt` sono quelli scritti dall'**archiviazione** (`archive-account-service.js:254,352`), non dal purge; `status` non viene riscritto | **sì**, per email: il destinatario legge ancora `accountName`, `accountId`, `status` e `sharingState` dell'Account purgato |
+| Account e allegati | **rimossi** (ricorsivo) più i byte elencati | no: il documento non esiste più |
+| `users/{destinatario}/receivedDeadlines/{id}` (Scadenze) | **resta, invariato**: percorso separato | **sì**: è la copia del destinatario |
+| `deadlineShares/{id}` (indice backend delle Scadenze) | resta; nessun client lo legge | **no**: `allow read, write: if false` |
+
+**Decisioni già prese, misurate e non cambiate.** Il purge **non** riscrive lo stato sospeso (lo fa l'archiviazione), **non** crea un nuovo invito (la riattivazione resta un gesto del proprietario, con il rinvio attuale mantenuto) e **non** tocca la copia della Scadenza nel profilo del destinatario. Nessun job o percorso pulisce queste collezioni: nel backend esistono solo due schedulazioni (scadenze e retention del registro, che scansiona il solo `collectionGroup("auditEvents")`).
+
+**Prove.** `tests/shared-copies-purge.emulator.test.mjs` (2 casi, emulatori Firestore + Storage reali, purge reale e Rules reali) e `tests/shared-copies-purge.test.mjs` (5 casi di sorgente e Rules). **Controllo per mutazione**: purge che elimina una copia condivisa e l'invito → rosso; Rules che ignorano `isArchived` per gli ospiti → rosso (discriminato da un Account archiviato che conserva il destinatario fra gli UID ammessi, forma legacy).
+
+**Limiti dichiarati.** Emulator e Rules sono esercitati; **l'interfaccia no** (nessuna prova browser: che cosa il destinatario *veda* nella sua schermata non è misurato). Il purge è invocato con l'Admin SDK, che ignora le Rules come in produzione. Le funzioni backend della condivisione Scadenze (`syncReceivedDeadlines`/`removeReceivedDeadlines`) **non** sono eseguite: la loro separazione è misurata come invarianza e asserita sul sorgente. Restano fuori perimetro la pulizia degli orfani (D4) e la scelta su che cosa fare di inviti e copie dopo il purge.
+
 ## 4. Cronologia e audit: comportamento attuale
 ### 4.1 Dove sono gli eventi
 
@@ -454,7 +474,7 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-05 | Purge | un `storagePath` fuori dal prefisso dell'Account presente nei metadati | purge interrotto **prima** di ogni cancellazione, ricevuta in `processing` | esistente (`functions/test/archive-receipt-handler.test.js:174`); il predicato isolato è T-33 |
 | T-06 | Purge | errore parziale sulle delete Storage | ricevuta resta `processing`, nessun falso `purged`, ripresa idempotente con lo stesso comando | esistente (`functions/test/archive-receipt-handler.test.js:187`) |
 | T-07 | Purge | piano di pulizia riferimenti oltre 450 modifiche | transazione finale annullata, nessuna pulizia parziale | esistente (`functions/test/purge-profile-cleanup-handler.test.js:63`) |
-| T-08 | Copie residue | dopo il purge restano `accountWidgets`/`sharedVaultLinks`/inviti | documentare l'esito atteso secondo la politica scelta | **da realizzare** |
+| T-08 | Copie residue | dopo il purge restano `accountWidgets`/`sharedVaultLinks`/inviti | documentare l'esito atteso secondo la politica scelta | **dichiarato e verificato per il comportamento attuale** (M7-T08, §3.6): `accountWidgets`, `sharedVaultData` e `sharedVaultLinks` **restano invariati** e leggibili **solo dal proprietario**; l'**invito resta invariato** e il **destinatario lo legge ancora** (nome e id dell'Account purgato), con lo stato `suspended` scritto dall'**archiviazione**, non dal purge; la **Scadenza condivisa** segue un altro percorso e la copia del destinatario resta leggibile; nessun job pulisce queste collezioni. Prove: `tests/shared-copies-purge.emulator.test.mjs` (2 casi) e `tests/shared-copies-purge.test.mjs` (5 casi); mutazioni rosse. Nessuna modifica a produzione, Rules o decisioni: le domande residue sono in un commit separato |
 | T-09 | Copie residue | allegato su Storage non elencato nei metadati | resta dopo il purge: verificare la scelta D4 | **da realizzare** |
 | T-10 | Cronologia | un evento di audit non contiene segreti | il segreto fittizio non compare nel documento | esistente (`functions/test/history-recovery-service.test.js:15`; `functions/test/backup-restore-service.test.js:68`) |
 | T-11 | Cronologia | limite/scadenza della cronologia nel runtime | cancellazione automatica degli eventi oltre la finestra decisa | **realizzato nel ramo, non distribuito** (M7-AUDIT-6): job pianificato con finestra di 24 mesi di calendario, date `at`/`createdAt`, cursori di servizio, `functions/test/audit-retention-service.test.js` (13 casi), `functions/test/audit-retention-job.test.js` (6) e `tests/audit-retention.emulator.test.mjs` (14); in produzione il job non esiste ancora |

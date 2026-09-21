@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **830**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **833**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -312,7 +312,7 @@ File censiti: **830**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 884020 | 6040 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 890074 | 6085 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -331,7 +331,7 @@ File censiti: **830**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
 | `docs/M7_DOMANDE_T27_HARD_DELETE.md` | MD | 4089 | 68 | Documentazione: M7 DOMANDE T27 HARD DELETE. |
 | `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 83950 | 533 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 87689 | 553 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
@@ -752,7 +752,7 @@ File censiti: **830**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 17974 | 112 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 18152 | 113 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -788,6 +788,7 @@ File censiti: **830**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/run-company-hard-delete-emulators.mjs` | MJS | 1287 | 35 | Strumento manutenzione/test: run-company-hard-delete-emulators. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1443 | 31 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-purge-retention-emulators.mjs` | MJS | 1411 | 37 | Strumento manutenzione/test: run-purge-retention-emulators. |
+| `scripts/run-shared-copies-purge-emulators.mjs` | MJS | 1270 | 35 | Strumento manutenzione/test: run-shared-copies-purge-emulators. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
 | `scripts/run-vault-session-emulators.mjs` | MJS | 5000 | 41 | Strumento manutenzione/test: run-vault-session-emulators. |
 | `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
@@ -911,6 +912,8 @@ File censiti: **830**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
 | `tests/setup-linux-cloud.test.mjs` | MJS | 5095 | 92 | Test automatico: setup-linux-cloud.test. |
 | `tests/share-revocation-paths.test.mjs` | MJS | 6539 | 102 | Test automatico: share-revocation-paths.test. |
+| `tests/shared-copies-purge.emulator.test.mjs` | MJS | 10937 | 174 | Test automatico: shared-copies-purge.emulator.test. |
+| `tests/shared-copies-purge.test.mjs` | MJS | 4859 | 75 | Test automatico: shared-copies-purge.test. |
 | `tests/shared-credential-editor.test.mjs` | MJS | 3612 | 21 | Test automatico: shared-credential-editor.test. |
 | `tests/shared-credential-update-session.test.mjs` | MJS | 4043 | 79 | Test automatico: shared-credential-update-session.test. |
 | `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
