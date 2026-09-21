@@ -51,7 +51,8 @@ const {
     accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData
 } = require("./account-widget-service");
 const {
-    auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition, invitedEventId, removedEventId, responseEventId
+    accountEventId, accountTransition, auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition,
+    invitedEventId, removedEventId, responseEventId
 } = require("./audit-event-service");
 
 initializeApp();
@@ -1547,6 +1548,107 @@ exports.onInviteWritten = onDocumentWritten(
             }
         });
     }
+);
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-5A — Registro tecnico di archiviazione e ripristino degli Account
+// ─────────────────────────────────────────────────────────────
+// Due trigger `onDocumentUpdated`, uno per percorso: l'identità dell'Account
+// viene dal **percorso autorevole** (`event.params`) e il tipo è un parametro
+// esplicito — mai dedotto dal valore di `context` — così un'azienda il cui id è
+// `privato` non collide con il profilo privato (M7-AUDIT-3-R2). Si scrive una
+// sola riga nel registro del proprietario, con id opaco `${chiaveAccount}:${revision}`
+// e create-if-absent, quindi una riconsegna — o un secondo ciclo
+// archivia→ripristina→archivia — non sovrascrive nulla.
+//
+// **Contatori**: il documento Account **non** contiene `suspendedInvites` /
+// `neutralizedInvites`: le transazioni client li calcolano in memoria e li
+// restituiscono senza scriverli (`settings/archive-account-service.js:185-259` e
+// `:290-356`). Il payload porta quindi il numero di **voci di condivisione**
+// marcate `suspended` nel documento scritto — una quantità derivata dal
+// documento, mai un valore inventato — mentre il numero esatto di **documenti
+// invito** toccati dal client non è ricostruibile dal trigger. `neutralized` è
+// derivato dal fatto che la transazione di ripristino fa avanzare
+// `sharingCycle` esattamente quando neutralizza (`:235-248`).
+async function recordAccountTransitionAudit(type, event) {
+    const before = event.data?.before?.data() ?? null;
+    const after = event.data?.after?.data() ?? null;
+    const transition = accountTransition(before, after);
+    if (transition.kind === "none") return;
+    const archived = transition.kind === "account-archived";
+    const params = event.params || {};
+    let effect;
+    try {
+        const descriptor = type === "privato"
+            ? {type: "privato", accountId: params.accountId}
+            : {type: "azienda", companyId: params.aziendaId, accountId: params.accountId};
+        const sharing = after.sharedWith;
+        if (sharing !== undefined && (typeof sharing !== "object" || sharing === null || Array.isArray(sharing))) {
+            const invalid = new Error("AUDIT_FIELD_INVALID");
+            invalid.code = "AUDIT_FIELD_INVALID";
+            throw invalid;
+        }
+        const suspended = Object.values(sharing || {}).filter(entry => entry?.status === "suspended").length;
+        const sharingCycle = after.sharingCycle === undefined ? 0 : after.sharingCycle;
+        const previousCycle = before.sharingCycle === undefined ? 0 : before.sharingCycle;
+        const fields = {
+            actorUid: params.uid,
+            accountId: params.accountId,
+            context: type === "privato" ? "privato" : params.aziendaId,
+            cycle: sharingCycle,
+            revision: after.revision,
+            sharingCycle
+        };
+        if (archived) {
+            fields.suspendedInvites = suspended;
+        } else {
+            fields.neutralized = sharingCycle !== previousCycle;
+            fields.neutralizedInvites = suspended;
+        }
+        effect = {
+            id: accountEventId(descriptor, after.revision),
+            payload: buildAuditEvent(transition.kind, fields)
+        };
+    } catch (error) {
+        // Classe controllabile: dati del documento non validi. Nessun evento e
+        // una sola riga con codice stabile, senza dati dell'Account; la
+        // scrittura di archiviazione o ripristino è già committata e non viene
+        // toccata.
+        console.warn("[AUDIT] evento Account saltato", {
+            code: String((error && error.code) || "AUDIT_EVENT_INVALID"), action: transition.kind
+        });
+        return;
+    }
+    const eventDocument = firestore().doc(`users/${params.uid}/auditEvents/${effect.id}`);
+    await firestore().runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(eventDocument);
+        const decision = auditWriteDecision(snapshot.exists === true, effect);
+        if (decision.write) {
+            transaction.set(eventDocument, {...decision.payload, at: FieldValue.serverTimestamp()});
+        }
+    });
+}
+
+exports.onPrivateAccountWritten = onDocumentUpdated(
+    {
+        document: "users/{uid}/accounts/{accountId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+        retry: true,
+    },
+    (event) => recordAccountTransitionAudit("privato", event)
+);
+
+exports.onCompanyAccountWritten = onDocumentUpdated(
+    {
+        document: "users/{uid}/aziende/{aziendaId}/accounts/{accountId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+        retry: true,
+    },
+    (event) => recordAccountTransitionAudit("azienda", event)
 );
 
 // ─────────────────────────────────────────────────────────────

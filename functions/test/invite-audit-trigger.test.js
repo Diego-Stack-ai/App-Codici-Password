@@ -15,7 +15,9 @@ const {
 // dati personali ed errori controllabili che non producono falsi eventi.
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const start = source.indexOf('exports.onInviteWritten');
-const end = source.indexOf('// UTILITY — Componi e invia una email per una scadenza', start);
+// Il gestore finisce dove comincia la sezione Account (M7-AUDIT-5A): il confine
+// è un altro export, non un commento, come nel banco di `respondToInvitation`.
+const end = source.indexOf('exports.onPrivateAccountWritten', start);
 const handler = source.slice(start, end);
 
 const OWNER = 'owner';
