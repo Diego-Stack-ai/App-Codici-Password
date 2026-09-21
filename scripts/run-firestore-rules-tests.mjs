@@ -10,7 +10,8 @@ const testFiles = [
   resolve(projectRoot, 'tests', 'sharing-prototype.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'offline-sync.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'history-recovery.rules.test.mjs'),
-  resolve(projectRoot, 'tests', 'sharing-revocation.rules.test.mjs')
+  resolve(projectRoot, 'tests', 'sharing-revocation.rules.test.mjs'),
+  resolve(projectRoot, 'tests', 'archive-guest-suspension.rules.test.mjs')
 ];
 mkdirSync(configRoot, {recursive: true});
 

@@ -2105,3 +2105,73 @@ Effetti: l'accettazione **e** il rifiuto di un invito pendente su un Account arc
 - Invariati: `firestore.rules`, `storage.rules`, condivisioni, purge, versione e `master`.
 
 **Stato incarico: DA_VERIFICARE** — M7-R7B3 consegnato da DeepSeek il 2026-09-21; invito pendente non accettabile né rifiutabile su Account archiviato, errore chiaro `ACCOUNT_ARCHIVED`, zero scritture su invito e condivisione, comportamento invariato per Account attivo, race coperta dal ritentativo, controllo negativo 2/5 → 5/5, nessun push eseguito.
+
+## Verifica Codex — M7-R7B3 inviti su Account archiviato
+
+**Esito: APPROVATO come candidato locale.** Commit `374b03d6`; guardia `account.isArchived === true` nel gestore reale, dopo lettura transazionale e prima delle scritture. `node --test functions/test/respond-invitation-archived.test.js` **5/5**, inclusi Account privato/aziendale, nessuna scrittura e ritentativo simulato in caso di archiviazione concorrente; `git diff --check 3723b2ad..HEAD` pulito. Limite dichiarato: non è una prova su Emulator reale; il blocco lettura ospite non esiste ancora. Nessun push/deploy.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7B1a: blocco autorevole nelle Rules
+
+**Stato incarico: PRONTO.** DeepSeek implementi nel ramo candidato, senza deploy, la condizione autorevole che impedisce all'ospite di leggere/listare Account del proprietario mentre `isArchived === true`, per i tre match delle Rules privato, aziendale e ricorsivo. Il proprietario deve mantenere accesso all'Archivio; gli inviti e i campi `sharedWith` non vanno cancellati o riscritti. Aggiungere prove su Firestore Rules Emulator: ospite accettato legge Account attivo; ospite accettato è negato su Account archiviato in tutti i percorsi; pendente negato; proprietario conserva l'accesso; le Rules non concedono nuovi percorsi ad allegati, widget o profilo. Evitare di promettere revoca retroattiva della cache offline. Una sola fetta locale e un solo commit; nessun push, merge, deploy o dato reale. Non modificare il flusso di ripristino, la lista ospite o l'invito: queste parti attendono la scelta di Diego e una fetta successiva. Consegna `DA_VERIFICARE` con esito Emulator e limiti.
+
+## Presa in carico DeepSeek — M7-R7B1a blocco autorevole nelle Rules
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `374b03d6`; l'incarico M7-R7B1a era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** tre match ospite delle Rules; **nessuna** modifica al flusso di ripristino, alla lista ospite, agli inviti, alle Functions o a dati reali. Un solo commit locale, nessun push e **nessun deploy**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7B1a preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7B1a blocco autorevole nelle Rules
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `374b03d6`; **nessun push, merge o deploy**, nessun dato reale. Le Rules restano nel **ramo candidato**.
+
+### Implementazione
+
+`firestore.rules`: nuova funzione e tre match aggiornati.
+
+```js
+function isGuestReadableAccount() {
+  return isAcceptedGuest() && resource.data.get('isArchived', false) == false;
+}
+```
+
+- Usata nei tre match ospite: privato (`users/{userId}/accounts/{accountId}`), aziendale (`users/{userId}/aziende/{aziendaId}/accounts/{accountId}`) e ricorsivo (`{path=**}/accounts/{accountId}`).
+- **Il proprietario non passa da queste regole**: continua a valere il match generico proprietario, quindi lettura, elenco dell'Archivio e scrittura restano intatti (provato).
+- **Scelta dichiarata:** confronto esplicito `== false` invece di `!= true`, così un valore malformato (`isArchived: 'true'`, numeri, stringhe) **chiude** la lettura invece di aprirla. Un documento senza il campo resta leggibile all'ospite accettato (default `false`).
+- **Inviti e condivisione non vengono toccati**: la condizione è di sola lettura; `sharedWith`, `sharedWithUids` e gli inviti restano come sono (provato leggendo il documento come admin).
+
+### Prove su Firestore Rules Emulator
+
+Nuovo file `tests/archive-guest-suspension.rules.test.mjs` (8 casi), registrato in `scripts/run-firestore-rules-tests.mjs` ed eseguito con le Rules **di produzione del ramo candidato** e dati sintetici.
+
+| Caso | Esito |
+|---|---|
+| Ospite accettato legge l'Account **attivo** (privato e aziendale) | consentito |
+| Ospite accettato sull'Account **archiviato** (privato, aziendale, elenco della raccolta) | **negato** |
+| Invito **pendente** su Account attivo e archiviato | negato |
+| Estraneo | negato |
+| `isArchived` **malformato** (`'true'`) | negato (chiusura esplicita) |
+| **Proprietario**: lettura dell'archiviato, elenco `isArchived == true`, scrittura | consentito |
+| Sospensione non cancella né riscrive inviti e condivisione | `sharedWith`/`sharedWithUids` intatti; la scrittura dell'ospite è negata |
+| Nessun nuovo percorso: allegati, widget, credenziali comuni, contatti, profilo | negati |
+
+| Verifica | Risultato |
+|---|---|
+| `npm run test:firestore-rules` (suite completa: 29 casi precedenti + 8 nuovi) | **37/37** |
+| `git diff --check` | pulito |
+| `npm run audit:inventory` | **792 file** |
+
+**Controllo negativo eseguito attraverso l'Emulator:** con le Rules di `374b03d6` (senza il blocco) lo stesso file passa **6/8** e falliscono **esattamente i due casi decisivi** — lettura dell'Account archiviato e `isArchived` malformato. Gli altri sei sono invarianti di regressione e passano in entrambe le versioni: è la conferma che i nuovi test misurano il blocco e non rumore.
+
+### Limiti dichiarati
+
+1. **La cache offline non viene revocata**: le Rules valgono per le letture di rete. Una copia già presente sul dispositivo resta leggibile finché non viene sfrattata o aggiornata. **Non prometto alcuna revoca retroattiva.**
+2. **La lista ospite non è stata toccata** (come richiesto): l'ospite può ancora vedere la card dell'Account archiviato nella lista, ma la **lettura del documento è negata dal server**. L'adeguamento dell'interfaccia e la scelta della lista attendono Diego e una fetta successiva.
+3. **Il flusso di ripristino non è stato toccato**: al ripristino il blocco cade da solo perché la condizione dipende solo da `isArchived`; se Diego vorrà una riconferma, è la fetta B5.
+4. **Nessun deploy**: le Rules sono nel ramo candidato e non sono attive in produzione. Il collaudo su browser/dispositivo reale resta non eseguito.
+5. Effetto collaterale noto e già censito in M7-R7A (P2): con il blocco attivo una lettura ospite negata arriva al client come `permission-denied`, indistinguibile da una revoca. Nessuna UI è stata modificata qui.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7B1a consegnato da DeepSeek il 2026-09-21; blocco autorevole nei tre match ospite con chiusura esplicita su `isArchived`, proprietario intatto, inviti e condivisione non toccati, suite Rules **37/37** su Emulator, controllo negativo 6/8 con i due casi decisivi in errore, nessun deploy e nessun push.

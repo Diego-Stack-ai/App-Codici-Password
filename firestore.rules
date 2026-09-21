@@ -10,6 +10,14 @@ service cloud.firestore {
     function isAcceptedGuest() {
       return isAuth() && request.auth.uid in resource.data.get('sharedWithUids', []);
     }
+    // M7-R7B1a: un Account nell'Archivio è sospeso per gli ospiti, in lettura e
+    // in elenco. Il confronto è esplicito (`== false`) perché un valore
+    // malformato non apra la lettura. Il proprietario non passa da queste regole
+    // (match generico proprietario) e conserva l'accesso all'Archivio; inviti e
+    // campi `sharedWith`/`sharedWithUids` non vengono toccati da questa condizione.
+    function isGuestReadableAccount() {
+      return isAcceptedGuest() && resource.data.get('isArchived', false) == false;
+    }
 
     // Solo Cloud Functions (Admin SDK) può leggere o scrivere i codici di recupero.
     match /mfaRecovery/{userId} {
@@ -162,13 +170,13 @@ service cloud.firestore {
     }
 
     match /users/{userId}/accounts/{accountId} {
-      allow get, list: if isAcceptedGuest();
+      allow get, list: if isGuestReadableAccount();
     }
     match /users/{userId}/aziende/{aziendaId}/accounts/{accountId} {
-      allow get, list: if isAcceptedGuest();
+      allow get, list: if isGuestReadableAccount();
     }
     match /{path=**}/accounts/{accountId} {
-      allow get, list: if isAcceptedGuest();
+      allow get, list: if isGuestReadableAccount();
     }
 
     match /invites/{inviteId} {
