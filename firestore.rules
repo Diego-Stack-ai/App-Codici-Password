@@ -200,13 +200,43 @@ service cloud.firestore {
       function isRecipient() {
         return isAuth() && resource.data.get('recipientEmail', '').lower() == myEmail();
       }
+      // M7-AUDIT-5R — forma del marcatore opaco dell'istanza di invito
+      // (M7-AUDIT-3P-R1): UUID canonico, come lo genera `crypto.randomUUID()`.
+      // Maiuscole ammesse, coerentemente con il validatore degli helper
+      // (`functions/audit-event-service.js:34`, regex case-insensitive).
+      function isOpaqueInviteRef(value) {
+        return value is string &&
+          value.matches('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+      }
+      // `responseAuditRef` lo scrive **solo** la callable Admin, che ignora le
+      // Rules. Un client non può inserirlo né modificarlo (compreso inserirlo
+      // nullo, che il trigger leggerebbe come assente), ma può **conservarlo
+      // invariato**: gli aggiornamenti di merge (`updateDoc`, `transaction.update`)
+      // non lo toccano e il campo resta nel documento risultante — è il caso di
+      // «rifiutato → Archivia» e dell'archiviazione/ripristino dell'Account.
+      // Può anche **rimuoverlo**, perché la `set` senza merge del reinvito
+      // sostituisce il documento e scrive un `auditRef` nuovo: la base vecchia
+      // appartiene a un'istanza morta. Limite dichiarato (D-8, decisione di Diego
+      // del 21/09/2026): la rimozione isolata resta possibile e tocca solo il
+      // registro best-effort di chi la esegue.
+      function keepsResponseAuditRef() {
+        return !request.resource.data.keys().hasAny(['responseAuditRef']) ||
+          (resource.data.keys().hasAny(['responseAuditRef']) &&
+            request.resource.data.get('responseAuditRef', null) == resource.data.get('responseAuditRef', null));
+      }
 
       allow get, list: if isInviteOwner() || isRecipient();
       allow create: if isAuth() &&
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
-          'status', 'createdAt', 'notifyPush', 'notifyEmail', 'cycle'
+          'status', 'createdAt', 'notifyPush', 'notifyEmail', 'cycle',
+          // M7-AUDIT-5R: marcatore opaco dell'istanza, scritto dai client di
+          // M7-AUDIT-5C. **Facoltativo**: un client in cache che non lo invia
+          // continua a creare inviti (finestra legacy dichiarata); se presente
+          // deve avere forma valida, altrimenti l'id del registro non sarebbe
+          // derivabile in modo univoco.
+          'auditRef'
         ]) &&
         request.resource.data.get('ownerId', '') == request.auth.uid &&
         request.resource.data.get('senderId', '') == request.auth.uid &&
@@ -220,9 +250,32 @@ service cloud.firestore {
         // sicuro non negativo. L'assenza resta valida (creazioni legacy = ciclo 0).
         request.resource.data.get('cycle', 0) is int &&
         request.resource.data.get('cycle', 0) >= 0 &&
-        request.resource.data.get('cycle', 0) <= 9007199254740991;
+        request.resource.data.get('cycle', 0) <= 9007199254740991 &&
+        (!request.resource.data.keys().hasAny(['auditRef']) ||
+          isOpaqueInviteRef(request.resource.data.get('auditRef', '')));
 
-      allow update, delete: if isInviteOwner();
+      // M7-AUDIT-5R — campi aggiornabili ristretti (decisione D-6 di Codex del
+      // 21/09/2026, allowlist verificata in M7-AUDIT-5P-R1 §3). `affectedKeys()`
+      // comprende le chiavi **rimosse**, quindi l'elenco contiene anche i campi
+      // che il reinvito full-replace fa sparire (`guestUid`, `respondedAt`,
+      // `responseAuditRef`, `sharingState`, `suspendedAt`, `senderNotified`) e
+      // `cycle`, che il primo update di un invito legacy senza ciclo aggiunge con
+      // valore 0. Restano fuori `ownerId`, `senderId`, `senderEmail`,
+      // `recipientEmail`, `inviteId`, `accountId`, `aziendaId`: invariati in tutti
+      // i flussi censiti, quindi una loro modifica è negata.
+      allow update: if isInviteOwner() &&
+        keepsResponseAuditRef() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'auditRef', 'status', 'cycle', 'createdAt', 'accountName', 'type',
+          'notifyPush', 'notifyEmail', 'senderNotified', 'sharingState',
+          'suspendedAt', 'guestUid', 'respondedAt', 'responseAuditRef'
+        ]) &&
+        (!request.resource.data.keys().hasAny(['auditRef']) ||
+          isOpaqueInviteRef(request.resource.data.get('auditRef', '')));
+
+      // La revoca resta al proprietario, senza vincoli di campo: `delete` non
+      // scrive nulla e non ha campi da limitare.
+      allow delete: if isInviteOwner();
     }
   }
 }
