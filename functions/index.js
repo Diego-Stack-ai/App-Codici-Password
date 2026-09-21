@@ -1217,6 +1217,17 @@ exports.respondToInvitation = onCall(
             if (!accountSnap.exists) throw new HttpsError("not-found", "Account condiviso non trovato.");
 
             const account = accountSnap.data();
+            // M7-R7B3: un Account nell'Archivio è sospeso. La risposta a un invito
+            // pendente non deve riattivare la condivisione né modificare l'invito:
+            // si fallisce con un errore chiaro e senza alcuna scrittura. La lettura
+            // dell'Account avviene dentro la transazione, quindi un'archiviazione
+            // concorrente fra lettura e scrittura provoca il ritentativo e questo
+            // controllo viene rieseguito sullo stato aggiornato.
+            if (account.isArchived === true) {
+                throw new HttpsError("failed-precondition",
+                    "Account nell'Archivio: l'invito resta in attesa finché l'Account è sospeso.",
+                    {reason: "ACCOUNT_ARCHIVED"});
+            }
             const sharedWith = { ...(account.sharedWith || {}) };
             const guestKey = sanitizeEmail(email);
             const guest = sharedWith[guestKey];

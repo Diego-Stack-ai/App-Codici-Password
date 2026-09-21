@@ -2033,3 +2033,75 @@ Frontend: `settings/archive-account-model.js`, `settings/archive-account-service
 4. Invariati e fuori perimetro: `firestore.rules`, `functions/index.js`, condivisioni, purge, versione, `master`, deploy e dati reali.
 
 **Stato incarico: DA_VERIFICARE** — M7-R7B4 consegnato da DeepSeek il 2026-09-21; avviso destinatari nei tre punti d'ingresso del proprietario e nel gesto «Archivio» condiviso, nessun segreto nel testo, nota di incompletezza presente, guardie di concorrenza e conferma/annulla conservate, regressione di `test:navigation` trovata e chiusa, nessun push eseguito.
+
+## Verifica Codex — M7-R7B4 avviso destinatari
+
+**Esito: APPROVATO come candidato locale.** Commit `3723b2ad`; `node --test tests/archive-recipients.test.mjs` **8/8** e test mirati elenco/form **51/51**. Il popup usa soltanto email deduplicate, esclude i rifiutati, esplicita che l'elenco deriva dai dati caricati e preserva annullamento e controllo di conflitto. Nei gesti Archivio senza destinatari resta l'azione immediata preesistente; con destinatari chiede conferma. È corretta la dichiarazione che questo commit NON sospende ancora alcun accesso: il testo del popup non deve essere distribuito da solo prima di B1/B3. Nessun deploy o push verificato.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7B3: inviti su Account archiviato
+
+**Stato incarico: PRONTO.** DeepSeek implementi soltanto il blocco server di `respondToInvitation` quando l'Account proprietario è archiviato: un invito pendente non deve poter essere accettato né rifiutato aggiornando l'Account sospeso senza una decisione esplicita di prodotto; preferire un errore chiaro, senza cambiare invito o condivisione. Mantenere invariato il comportamento per Account non archiviato. Aggiungere test mirati con Firebase Functions/Firestore Emulator o test equivalente che eserciti la transazione reale, inclusi assenza di scritture nel caso archiviato e race fra lettura e archiviazione. Un solo commit locale mirato, nessun push/merge/deploy, nessun dato reale. Consegna `DA_VERIFICARE`. Non implementare ancora la riattivazione degli ospiti al ripristino né il blocco Rules in parallelo.
+
+## Presa in carico DeepSeek — M7-R7B3 inviti su Account archiviato
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `3723b2ad`; l'incarico M7-R7B3 era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** solo il blocco server in `respondToInvitation`; **nessuna** modifica a Rules, a condivisioni, alla riattivazione al ripristino o a dati reali. Un solo commit locale, nessun push.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7B3 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7B3 inviti su Account archiviato
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `3723b2ad`; **nessun push, merge o deploy**, nessun dato reale.
+- **Perimetro rispettato:** solo il blocco server. **Nessuna** modifica a Rules, condivisioni, riattivazione al ripristino o purge.
+
+### Implementazione
+
+In `respondToInvitation`, dentro la transazione e **dopo la lettura dell'Account, prima di qualunque scrittura** (`functions/index.js:1220-1230`):
+
+```js
+if (account.isArchived === true) {
+    throw new HttpsError("failed-precondition",
+        "Account nell'Archivio: l'invito resta in attesa finché l'Account è sospeso.",
+        {reason: "ACCOUNT_ARCHIVED"});
+}
+```
+
+Effetti: l'accettazione **e** il rifiuto di un invito pendente su un Account archiviato falliscono con un errore chiaro e riconoscibile (`failed-precondition` + `ACCOUNT_ARCHIVED`); **l'invito resta `pending`** e **la condivisione non viene toccata** (nessuna scrittura su `sharedWith`, `sharedWithUids`, `acceptedCount`, `visibility`). Per un Account non archiviato il comportamento è invariato, ramo aziendale compreso.
+
+**Perché regge la race:** la lettura dell'Account è già dentro `runTransaction`. Firestore ritenta la transazione quando un documento letto cambia prima del commit, quindi un'archiviazione concorrente fra lettura e scrittura non può «sfuggire»: al ritentativo il controllo viene rieseguito sullo stato aggiornato e l'operazione fallisce. Il test lo dimostra con una transazione che applica quella semantica.
+
+### Test
+
+`functions/test/respond-invitation-archived.test.js` (nuovo, 5 casi), eseguito da `npm run test:functions-security`. Il banco estrae il **gestore reale** e i suoi helper da `functions/index.js` (stessa tecnica di `functions/test/archive-owner-handler.test.js`) e fornisce una transazione con la semantica di Firestore: le letture fissano una versione, se un documento letto cambia prima del commit la transazione viene **ritentata**.
+
+| Caso | Esito provato |
+|---|---|
+| Account archiviato, accettazione e rifiuto | errore `ACCOUNT_ARCHIVED`, **zero scritture**, invito ancora `pending`, condivisione identica, un solo tentativo |
+| Account attivo | accettazione e rifiuto invariati: percorsi `users/A/accounts/account` + `invites/...`, `sharedWithUids`, `acceptedCount`, `visibility`, `guestUid` |
+| **Race: archiviazione dopo la lettura** | la transazione ritenta (**2 tentativi**), poi errore `ACCOUNT_ARCHIVED` e zero scritture |
+| Race: invito elaborato altrove | ritenta (2 tentativi) e rifiuta con «Invito già elaborato», zero scritture |
+| Contesto aziendale | il percorso letto è `users/A/aziende/company-1/accounts/account` e il blocco vale anche lì |
+
+**Controllo negativo eseguito:** con la sola versione già committata (`3723b2ad`, senza la guardia) lo stesso file passa **2/5** e falliscono esattamente i tre casi che dipendono dal blocco; con la guardia passa **5/5**.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test functions/test/respond-invitation-archived.test.js` | **5/5** |
+| `npm run test:functions-security` (`node --check` + ESLint + tutte le suite Functions) | **136/136** |
+| `git diff --check` | pulito |
+| `npm run audit:inventory` | `docs/FILE_INVENTORY.md` — **791 file** |
+
+### Cosa non è stato usato, dichiarato
+
+- **Nessun emulatore Functions/Firestore** è stato avviato in questa fetta: l'incarico ammetteva «o test equivalente che eserciti la transazione reale» e il banco esegue il **gestore reale** con una transazione che **riproduce la semantica di ritentativo**. Non dichiaro quindi una prova sull'emulatore che non ho fatto; se Codex la ritiene necessaria, è una fetta aggiuntiva.
+- **La sospensione effettiva verso gli ospiti non è implementata** (M7-R7B1, Rules): qui si impedisce soltanto che la risposta a un invito **modifichi** un Account archiviato. Le letture dell'ospite restano quelle censite in M7-R7A.
+- **La riattivazione al ripristino resta non implementata**, come richiesto: nessuna scelta implicita su cosa succede agli inviti pendenti quando l'Account torna attivo (l'invito resta `pending` e potrà essere risposto allora).
+- Nessuna UI è stata toccata: l'errore è server-side e il client attuale lo mostra come errore generico. Un messaggio dedicato è una fetta di interfaccia separata, non richiesta qui.
+- Invariati: `firestore.rules`, `storage.rules`, condivisioni, purge, versione e `master`.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7B3 consegnato da DeepSeek il 2026-09-21; invito pendente non accettabile né rifiutabile su Account archiviato, errore chiaro `ACCOUNT_ARCHIVED`, zero scritture su invito e condivisione, comportamento invariato per Account attivo, race coperta dal ritentativo, controllo negativo 2/5 → 5/5, nessun push eseguito.
