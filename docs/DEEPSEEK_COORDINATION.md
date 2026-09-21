@@ -1591,3 +1591,79 @@ La prima versione della guardia confrontava la posizione di `showToast(` con que
 - Resta non verificato il comportamento in un browser reale e restano fuori fette separate la rinuncia dell'ospite, gli inviti orfani, la pulizia di widget e credenziali comuni al purge.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R5 consegnata da DeepSeek il 2026-09-21; nessuna scrittura client cross-UID, nessuna attesa dopo il commit, Rules intatte e nessun push eseguito.
+
+## Verifica Codex — correzione M7-R5
+
+- **Esito: APPROVATO** per la revoca. Il commit `3f581685` rimuove da cinque percorsi client ogni tentativo di scrittura cross-UID dopo la transazione, senza ampliare le Rules. Il successo resta dopo il commit della revoca; nessuna attesa su `setDoc` vietato può bloccare il feedback. `git diff --check 4b78eb43..HEAD` pulito; `node --test tests/share-revocation-paths.test.mjs` **16/16**. Le prove Rules/emulatore riportate da DeepSeek restano distinte dal collaudo browser non eseguito.
+- **Limite residuo:** la notifica all'ospite dopo la revoca non è implementata. Richiede un percorso backend dedicato, da progettare e testare separatamente; nessuna UI deve dichiararla consegnata. Nessun deploy o modifica di dati reali.
+
+**Stato incarico: APPROVATO** — M7-R5 verificato da Codex il 21/09/2026.
+
+## Incarico DeepSeek — M7-R6 Elimina sposta nell'Archivio
+
+Diego ha deciso esplicitamente (voce «Decisione Diego — M7 pulsante Elimina e Archivio»): per gli Account **di sua proprietà**, «Elimina» sposta nell'Archivio; solo dall'Archivio parte la cancellazione definitiva con conferma. Codex coordina/revisiona, DeepSeek è l'unico esecutore. Verifica ramo `integration/vault-shell-v127-security`, HEAD, remote e working tree; base osservata `3f581685`, 15 commit locali avanti a origin. Preserva i commit e il file di coordinamento. Un incarico alla volta.
+
+- Censisci tutti i punti d'ingresso che eliminano direttamente un **Account privato o aziendale** (liste, form e dettagli): il censimento M7-R4 nomina `account_privati.js`, `account_azienda.js`, `form-azienda-save.js`; verifica eventuali altri. Sostituisci la cancellazione diretta con l'archiviazione canonica (`createArchiveMetadata`/servizio appropriato) e aggiorna la UI dopo conferma. Non lasciare un percorso `deleteDoc` Account diretto ancora raggiungibile.
+- Il testo di conferma deve dire chiaramente «Sposta nell'Archivio» e spiegare che la cancellazione definitiva avviene soltanto dall'Archivio. Mantieni il blocco per gli Account ricevuti come ospite; nessun diritto di cancellare il record del proprietario. Non cambiare la durata dell'Archivio (nessuna scadenza automatica) o la callable `purgeArchivedAccount`.
+- Gestisci revisioni e conflitti con il contratto corrente: se lo stato o la revisione sono cambiati, non sovrascrivere e chiedi di aggiornare. Account già archiviato: niente doppio incremento, mostra stato coerente. Verifica Account privato/aziendale, condiviso con ospiti, collegato a credenziali comuni e offline; nessuna cancellazione di allegati, inviti, widget o credenziali in questa fetta. Gli ospiti di un Account archiviato possono ancora leggerlo secondo le Rules attuali: dichiaralo come limite, non fingere revoca automatica.
+- Aggiungi test significativi per ogni punto d'ingresso: nessuna `deleteDoc`/`batch.delete` del documento Account, archiviazione con `isArchived`/data/revisione, UI aggiornata, owner guard, conflitto, offline e nessun effetto su dati condivisi o allegati. Test mirati + `git diff --check`; se il contratto richiede una scelta non già fatta da Diego, fermati con proposta concreta.
+- Niente dati reali, master, bump, push, deploy, merge o M8–M10. Un commit locale per lavoro e rapporto; consegna `DA_VERIFICARE` con file, test, limiti e differenze rispetto alla decisione di Diego.
+
+**Stato incarico: PRONTO** — M7-R6 disposto da Codex il 21/09/2026 secondo decisione esplicita di Diego.
+
+## Presa in carico DeepSeek — M7-R6
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); base osservata `3f581685`, 15 commit locali avanti a origin; nessun'altra modifica preesistente oltre a questo file.
+- **Perimetro:** attuazione della decisione di Diego — «Elimina» sposta nell'Archivio per gli Account propri; nessuna modifica a Rules, Functions produttive, durata dell'Archivio o `purgeArchivedAccount`; nessun push.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R6 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R6
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale di lavoro e rapporto; base `3f581685`; **nessun push eseguito**.
+
+### Censimento dei punti d'ingresso
+
+Eliminavano direttamente un **Account**: `.../privato/account_privati.js:395` (`batch.delete`), `.../azienda/account_azienda.js:271` (`deleteDoc`), `.../azienda/form-azienda-save.js:326` (`deleteDoc`). Nessun altro: le altre `deleteDoc` del frontend riguardano inviti, allegati, dispositivi, scadenze, widget o **Aziende** (non Account). Tutti e tre sono stati convertiti; **nessun percorso di cancellazione diretta di un Account resta raggiungibile**.
+
+### Modifiche
+
+- **`archive-account-service.js`**: nuova `archiveAccount(uid, {id, context, revision})`, transazionale, che riusa `createArchiveMetadata` e il controllo di sessione esistente. Esiti: `archived`; `already-archived` **senza seconda scrittura né doppio incremento**; `ARCHIVE_CONFLICT` se la revisione è cambiata (non sovrascrive e la UI chiede di aggiornare); `ARCHIVE_ACCOUNT_MISSING`; `ARCHIVE_REVISION_INVALID`; `ARCHIVE_SESSION_INVALIDATED`.
+- **Tre punti d'ingresso**: liste privata e aziendale (sia il gesto Archivio sia il pulsante Elimina) e `deleteAccount` del form aziendale ora chiamano `archiveAccount`. La conferma dice **«Sposta nell'Archivio»** ed è stata aggiunta la spiegazione che la cancellazione definitiva avviene soltanto da lì. Nel form la revisione viene letta prima dell'operazione.
+- **Guardia ospite mantenuta** in entrambe le liste (`dataset.owner !== 'true'`); nel form aziendale non è applicabile perché opera già sul percorso del proprietario autenticato.
+- **Non si sganciano più** le email del Profilo all'eliminazione: l'Account resta in Archivio, quindi il riferimento non va rimosso.
+- **Testi**: sei chiavi nuove in `translations.js` e in `translations/en.js` (`confirm_archive_*`, `success_moved_to_archive`, `success_already_archived`, `archive_*_refresh`).
+- **Test**: `tests/archive-session.test.mjs` esteso con cinque prove di `archiveAccount`; nuova guardia `tests/account-archive-paths.test.mjs`, registrata in `test:history-prototype`. Documentazione M7 aggiornata.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/archive-session.test.mjs tests/account-archive-paths.test.mjs` | **41/41** |
+| `npm run test:firestore-rules` | **29/29** |
+| `npm run test:js-syntax` | **161 moduli OK** |
+| `git diff --check` | pulito |
+
+La guardia dimostra per ciascuno dei tre moduli: nessuna `deleteDoc`/`batch.delete`/`writeBatch` di un documento Account, uso di `archiveAccount`, conferma dedicata, nessuna cancellazione definitiva diretta. I test del servizio dimostrano: metadati canonici con revisione incrementata per contesto privato **e** aziendale, `already-archived` senza seconde scritture, conflitto di revisione senza sovrascrittura, documento assente e revisione non valida, blocco del Vault e cambio utente con zero scritture.
+
+### Limiti e differenze rispetto alla decisione di Diego
+
+1. **Gli ospiti di un Account archiviato continuano a leggerlo**: le Rules non guardano `isArchived`. **Nessuna revoca automatica** viene simulata: è un limite dichiarato, non un effetto voluto.
+2. **Le eliminazioni dirette di un'Azienda** (`company-list-service.js:9`, `ma_save.js:204`) restano fuori: non sono Account, e le sottocollezioni dei loro Account restano come prima. Segnalato come fetta separata.
+3. **Nessuna cancellazione di allegati, inviti, widget o credenziali**: l'archiviazione non tocca nulla e il purge resta l'unico percorso definitivo, invariato.
+4. **Offline**: l'operazione è transazionale e richiede la rete; se non è disponibile fallisce senza modificare nulla e la UI invita a riprovare. Non è stata introdotta una coda offline per l'archiviazione, che non era richiesta.
+5. **Consolidamento dichiarato**: anche il gesto «Archivio» esistente ora usa `archiveAccount`, così l'archiviazione è una sola e gode del controllo di revisione (prima era un `updateDoc` senza CAS).
+
+### Due regressioni trovate e chiuse prima della consegna
+
+1. **Budget dei moduli statici (introdotta da questa fetta).** L'import statico del servizio di Archivio in `form-azienda-save.js` portava `form_account_azienda.html` a **45 moduli** contro un tetto di **43**: la pagina era già esattamente al limite. Risolto con **import differito** dentro `deleteAccount` (il servizio viene caricato solo alla conferma), pattern già usato nel progetto per il modulo bancario; `node scripts/audit-page-performance.mjs --check` torna a dichiarare «Budget statico rispettato da 30 pagine». La guardia accetta ora sia l'import statico sia quello differito.
+2. **Audit di navigazione (ereditata da M7-R5).** `scripts/audit-navigation-flows.mjs` cercava ancora `const guestUid = wasAccepted` in `dettaglio-privato-sharing.js`, rimosso dalla correzione M7-R5 approvata. Non era una scelta di prodotto ma un **controllo statico obsoleto**: l'ho aggiornato all'invariante corrente (la revoca rimuove l'ospite e ricalcola `sharedWithUids`). L'audit torna verde e la suite `test:navigation` non è più rossa.
+
+### Altre scelte tecniche dichiarate
+
+- **`getDocFromServer`** invece di `getDoc`: il bundle vendored non esporta `getDoc`, e `offline-firestore.js` è vietato ai moduli da `audit-data-access.mjs`. La lettura è server-confermata, coerente con l'audit; offline l'operazione fallisce senza modifiche.
+- **`showConfirmModal` mancava dall'import di `form-azienda-save.js`**: difetto preesistente per cui `deleteAccount` sarebbe fallita con un `ReferenceError` prima di qualunque logica. Aggiunto all'import esistente (una riga).
+- Nelle due liste la revisione usata dal controllo di concorrenza proviene dal record in memoria: con una cache obsoleta l'esito è `ARCHIVE_CONFLICT` — nessuna scrittura e invito ad aggiornare — coerente con il requisito di non sovrascrivere.
+
+**Stato incarico: DA_VERIFICARE** — M7-R6 consegnato da DeepSeek il 2026-09-21; «Elimina» sposta nell'Archivio per gli Account propri, nessuna cancellazione diretta residua, budget di pagina e audit ripristinati, Rules e purge invariati e nessun push eseguito.

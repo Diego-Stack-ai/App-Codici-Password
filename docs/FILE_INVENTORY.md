@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **787**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -113,7 +113,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/auth/login.js` | JS | 14122 | 340 | Flusso autenticazione: login. |
 | `Frontend/public/assets/js/modules/auth/registrati.js` | JS | 7113 | 202 | Flusso autenticazione: registrati. |
 | `Frontend/public/assets/js/modules/auth/reset_password.js` | JS | 4396 | 134 | Flusso autenticazione: reset password. |
-| `Frontend/public/assets/js/modules/azienda/account_azienda.js` | JS | 11866 | 287 | Flusso aziende/account aziendali: account azienda. |
+| `Frontend/public/assets/js/modules/azienda/account_azienda.js` | JS | 12894 | 300 | Flusso aziende/account aziendali: account azienda. |
 | `Frontend/public/assets/js/modules/azienda/company-list-service.js` | JS | 423 | 11 | Flusso aziende/account aziendali: company-list-service. |
 | `Frontend/public/assets/js/modules/azienda/company-profile-link.js` | JS | 2761 | 25 | Flusso aziende/account aziendali: company-profile-link. |
 | `Frontend/public/assets/js/modules/azienda/company-profile-model.js` | JS | 2642 | 37 | Flusso aziende/account aziendali: company-profile-model. |
@@ -124,7 +124,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 10243 | 255 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 12826 | 278 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 23325 | 507 | Flusso aziende/account aziendali: dettaglio account azienda. |
-| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 18709 | 331 | Flusso aziende/account aziendali: form-azienda-save. |
+| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 19916 | 348 | Flusso aziende/account aziendali: form-azienda-save. |
 | `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 28044 | 615 | Flusso aziende/account aziendali: form account azienda. |
 | `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 10138 | 266 | Flusso aziende/account aziendali: lista aziende. |
 | `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2731 | 70 | Flusso aziende/account aziendali: ma attachments. |
@@ -155,7 +155,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3459 | 71 | Supporto frontend: home-deadline-inbox. |
 | `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3669 | 88 | Supporto frontend: home-presentation. |
 | `Frontend/public/assets/js/modules/home/home.js` | JS | 14430 | 355 | Supporto frontend: home. |
-| `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 18297 | 419 | Flusso profilo/account personali: account privati. |
+| `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 18447 | 416 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 21560 | 514 | Flusso profilo/account personali: area privata. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 11901 | 282 | Flusso profilo/account personali: dettaglio-privato-attachments. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 7637 | 159 | Flusso profilo/account personali: dettaglio-privato-sharing. |
@@ -191,7 +191,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/settings/account-field-usage-model.js` | JS | 6787 | 110 | Impostazioni applicative: account-field-usage-model. |
 | `Frontend/public/assets/js/modules/settings/account-field-usage-service.js` | JS | 8154 | 181 | Impostazioni applicative: account-field-usage-service. |
 | `Frontend/public/assets/js/modules/settings/archive-account-model.js` | JS | 283 | 9 | Impostazioni applicative: archive-account-model. |
-| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 11901 | 285 | Impostazioni applicative: archive-account-service. |
+| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 14320 | 334 | Impostazioni applicative: archive-account-service. |
 | `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 20883 | 471 | Impostazioni applicative: archivio account. |
 | `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 5314 | 125 | Impostazioni applicative: backup-crypto. |
 | `Frontend/public/assets/js/modules/settings/backup-export-buffer.js` | JS | 2570 | 50 | Impostazioni applicative: backup-export-buffer. |
@@ -236,9 +236,9 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/push-messaging-client.js` | JS | 1160 | 35 | Supporto frontend: push-messaging-client. |
 | `Frontend/public/assets/js/swipe-list-v6.js` | JS | 8791 | 251 | Supporto frontend: swipe-list-v6. |
 | `Frontend/public/assets/js/theme-init.js` | JS | 2176 | 54 | Applica il tema prima del rendering per evitare lampeggiamenti. |
-| `Frontend/public/assets/js/translations.js` | JS | 23703 | 440 | Dizionario italiano e caricamento differito delle altre lingue. |
+| `Frontend/public/assets/js/translations.js` | JS | 24243 | 446 | Dizionario italiano e caricamento differito delle altre lingue. |
 | `Frontend/public/assets/js/translations/de.js` | JS | 5975 | 123 | Dizionario differito per la lingua de. |
-| `Frontend/public/assets/js/translations/en.js` | JS | 15882 | 301 | Dizionario differito per la lingua en. |
+| `Frontend/public/assets/js/translations/en.js` | JS | 16391 | 307 | Dizionario differito per la lingua en. |
 | `Frontend/public/assets/js/translations/es.js` | JS | 6970 | 141 | Dizionario differito per la lingua es. |
 | `Frontend/public/assets/js/translations/fr.js` | JS | 6132 | 123 | Dizionario differito per la lingua fr. |
 | `Frontend/public/assets/js/translations/hi.js` | JS | 8868 | 122 | Dizionario differito per la lingua hi. |
@@ -312,7 +312,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 263675 | 1594 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 273871 | 1670 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -326,12 +326,12 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 19045 | 161 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 27585 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
+| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28312 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
 | `docs/M7_RETENTION_CENSIMENTO.md` | MD | 50550 | 402 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5588 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
 | `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
 | `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
@@ -739,7 +739,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 16496 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 16533 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -751,7 +751,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
 | `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
 | `scripts/audit-lightweight-features.mjs` | MJS | 2698 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 10564 | 132 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 10558 | 132 | Strumento manutenzione/test: audit-navigation-flows. |
 | `scripts/audit-offline-shell.mjs` | MJS | 3627 | 70 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 8131 | 146 | Strumento manutenzione/test: audit-page-performance. |
 | `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
@@ -801,6 +801,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
+| `tests/account-archive-paths.test.mjs` | MJS | 2999 | 55 | Test automatico: account-archive-paths.test. |
 | `tests/account-detail-compact.test.mjs` | MJS | 7958 | 113 | Test automatico: account-detail-compact.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
@@ -810,7 +811,7 @@ File censiti: **786**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
-| `tests/archive-session.test.mjs` | MJS | 26655 | 408 | Test automatico: archive-session.test. |
+| `tests/archive-session.test.mjs` | MJS | 30033 | 465 | Test automatico: archive-session.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
 | `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
 | `tests/backup-export-model.test.mjs` | MJS | 2662 | 49 | Test automatico: backup-export-model.test. |

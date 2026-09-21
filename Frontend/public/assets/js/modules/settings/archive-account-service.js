@@ -1,6 +1,7 @@
 import { auth, db, functions } from '../../firebase-config.js?v=1.2.127';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { createArchiveMetadata } from './archive-account-model.js';
 import {
     getCompany,
     listArchivedPrivateAccounts,
@@ -190,6 +191,54 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
                 revision: currentRevision + 1
             });
         });
+    });
+}
+
+// Archiviazione canonica (decisione di Diego del 21/09/2026): il pulsante
+// «Elimina» di un Account proprio sposta nell'Archivio, non cancella. Usa la
+// stessa forma di metadati del gesto di Archivio (`createArchiveMetadata`) con
+// controllo di concorrenza sulla revisione: lo stato o la revisione cambiati
+// fermano la scrittura, un Account già archiviato non viene incrementato due
+// volte e viene restituito come stato coerente.
+export async function archiveAccount(uid, account, options = {}) {
+    const target = accountIdentity(account);
+    return withArchiveSession(uid, options, async check => {
+        check();
+        const invalid = code => Object.assign(new Error(code), {code});
+        const revisionOf = value => {
+            if (value === undefined) return 0;
+            if (!Number.isSafeInteger(value) || value < 0 || value === Number.MAX_SAFE_INTEGER) {
+                throw invalid('ARCHIVE_REVISION_INVALID');
+            }
+            return value;
+        };
+        const expectedRevision = revisionOf(target.revision);
+        const reference = accountReference(uid, target);
+        const metadata = createArchiveMetadata({revision: expectedRevision});
+        let status = 'archived', revision = expectedRevision + 1;
+        await runTransaction(db, async transaction => {
+            check();
+            const snapshot = await transaction.get(reference);
+            check();
+            if (!snapshot.exists()) throw invalid('ARCHIVE_ACCOUNT_MISSING');
+            const current = snapshot.data();
+            const currentRevision = revisionOf(current.revision);
+            if (current.isArchived === true) {
+                // Già in Archivio: nessuna seconda scrittura e nessun doppio incremento.
+                status = 'already-archived';
+                revision = currentRevision;
+                return;
+            }
+            if (currentRevision !== expectedRevision) throw invalid('ARCHIVE_CONFLICT');
+            transaction.update(reference, {
+                isArchived: true,
+                archiveSchemaVersion: metadata.archiveSchemaVersion,
+                archivedAt: metadata.archivedAt,
+                revision: currentRevision + 1
+            });
+        });
+        check();
+        return Object.freeze({status, id: target.id, context: target.context, revision});
     });
 }
 

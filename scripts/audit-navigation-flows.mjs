@@ -43,8 +43,8 @@ if (/\bauth\.currentUser\b/.test(privateSharing)) {
     assert.match(privateSharing, /import \{[^}]*\bauth\b[^}]*\} from ['"]\.\.\/\.\.\/firebase-config\.js/,
         'La condivisione privata usa auth senza importarlo');
 }
-assert.match(privateSharing, /const guestUid = wasAccepted[\s\S]+delete sharedWith\[normalizedEmail\]/,
-    'La revoca privata perde l’UID ospite prima di creare la notifica');
+assert.match(privateSharing, /delete sharedWith\[normalizedEmail\][\s\S]+sharedWithUids/,
+    'La revoca privata non rimuove l’ospite o non ricalcola gli UID accettati');
 assert.match(homeDeadlineInbox, /unread\.slice\(0, 10\)/,
     'La Home non limita il lavoro dell’inbox Scadenze');
 assert.match(homeDeadlineInbox, /dettaglio_scadenza\.html\?id=\$\{encodeURIComponent\(notification\.deadlineId\)\}&notification=\$\{encodeURIComponent\(notification\.id\)\}/,

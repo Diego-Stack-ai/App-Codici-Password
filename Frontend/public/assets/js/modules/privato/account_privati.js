@@ -6,7 +6,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
 
 import { db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
-import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -14,14 +14,13 @@ import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
     getRecordByPath,
-    getUserProfile,
     listAcceptedInvites,
     listPrivateAccounts,
     listPrivateAccountsConfirmed
 } from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
-import {createArchiveMetadata} from '../settings/archive-account-model.js';
+import { archiveAccount } from '../settings/archive-account-service.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -362,20 +361,29 @@ export function mountAccountPrivati(user, options = {}) {
         }
     }
 
+    // Esiti concorrenti dell'archiviazione canonica: chiedono un aggiornamento
+    // esplicito della lista invece di dichiarare un fallimento generico.
+    function archiveErrorMessage(error) {
+        if (error?.code === 'ARCHIVE_CONFLICT') return t('archive_conflict_refresh');
+        if (error?.code === 'ARCHIVE_ACCOUNT_MISSING') return t('archive_missing_refresh');
+        return readErrorMessage(error, t('error_generic'));
+    }
+
     async function handleArchive(item) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
         try {
             const account = allAccounts.find(candidate => candidate.id === id);
-            await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), createArchiveMetadata(account));
+            const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision});
             if (signal.aborted) return;
-            showToast(t('success_archived'));
+            showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_archived'));
             allAccounts = allAccounts.filter(a => a.id !== id);
             filterAndRender();
         } catch (e) {
             if (signal.aborted) return;
             logError("Archive", e);
+            showToast(archiveErrorMessage(e), "error");
         }
     }
 
@@ -383,31 +391,20 @@ export function mountAccountPrivati(user, options = {}) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
-        const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'));
+        const confirmed = await showConfirmModal(t('confirm_archive_title'), t('confirm_archive_msg'));
         if (signal.aborted) return;
         if (!confirmed) { filterAndRender(); return; }
         try {
-            const userRef = doc(db, 'users', currentUser.uid);
-            const userProfile = await waitFor(getUserProfile(currentUser.uid));
-            const emails = userProfile?.contactEmails || [];
-            const hasProfileLink = emails.some(email => email.linkedAccountId === id);
-            const batch = writeBatch(db);
-            batch.delete(doc(db, "users", currentUser.uid, "accounts", id));
-            if (hasProfileLink) {
-                batch.update(userRef, {
-                    contactEmails: emails.map(email => email.linkedAccountId === id
-                        ? { ...email, linkedAccountId: null }
-                        : email)
-                });
-            }
-            await batch.commit();
+            const account = allAccounts.find(candidate => candidate.id === id);
+            const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision});
             if (signal.aborted) return;
-            showToast(t('success_deleted'));
+            showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'));
             allAccounts = allAccounts.filter(a => a.id !== id);
             filterAndRender();
         } catch (e) {
             if (signal.aborted) return;
             logError("Delete", e);
+            showToast(archiveErrorMessage(e), "error");
         }
     }
 

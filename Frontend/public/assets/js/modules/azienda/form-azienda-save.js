@@ -10,9 +10,9 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
 import {
-    doc, collection, runTransaction, deleteDoc, deleteField
+    doc, collection, runTransaction, deleteField, getDocFromServer
 } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from '../../ui-core-v129.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -317,14 +317,31 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 }
 
 /**
- * Cancella un account aziendale da Firestore.
+ * Sposta nell'Archivio un account aziendale: la cancellazione definitiva resta
+ * possibile soltanto dall'Archivio, con una conferma esplicita.
  * @param {Object} ctx - Contesto con ID dell'account
  */
 export async function deleteAccount({ currentUid, currentAziendaId, currentDocId }) {
-    if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) return;
+    if (!await showConfirmModal(t('confirm_archive_title'), t('confirm_archive_msg'))) return;
     try {
-        await deleteDoc(doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentDocId));
-        showToast(t('success_deleted'), "success");
+        // Import differito: il servizio di Archivio non entra nella closure
+        // iniziale della pagina (budget dei moduli statici) e viene caricato
+        // soltanto quando l'utente conferma di spostare un Account.
+        const { archiveAccount } = await import('../settings/archive-account-service.js');
+        // La revisione corrente è il termine di paragone del controllo di
+        // concorrenza di archiveAccount: se cambia, l'operazione si ferma.
+        const snapshot = await getDocFromServer(doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentDocId));
+        if (!snapshot.exists()) {
+            showToast(t('archive_missing_refresh'), "error");
+            return;
+        }
+        const result = await archiveAccount(currentUid, {id: currentDocId, context: currentAziendaId, revision: snapshot.data()?.revision});
+        showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'), "success");
         setTimeout(() => window.location.href = `account_azienda.html?id=${currentAziendaId}`, 1000);
-    } catch (e) { logError("Delete", e); showToast(t('error_generic'), "error"); }
+    } catch (e) {
+        logError("Archive", e);
+        if (e?.code === 'ARCHIVE_CONFLICT') showToast(t('archive_conflict_refresh'), "error");
+        else if (e?.code === 'ARCHIVE_ACCOUNT_MISSING') showToast(t('archive_missing_refresh'), "error");
+        else showToast(t('error_generic'), "error");
+    }
 }

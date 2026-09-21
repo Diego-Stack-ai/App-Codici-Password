@@ -6,6 +6,7 @@ import {readFile} from 'node:fs/promises';
 const base = new URL('../Frontend/public/assets/js/modules/settings/', import.meta.url);
 const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const service = strip(await readFile(new URL('archive-account-service.js', base), 'utf8'));
+const archiveModel = strip(await readFile(new URL('archive-account-model.js', base), 'utf8'));
 const ui = strip(await readFile(new URL('archivio_account.js', base), 'utf8'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 const tick = () => new Promise(setImmediate);
@@ -39,7 +40,7 @@ function fixture(withUi = false) {
         .map(id => [id, new Element('div', {id})]));
     const search = new Element('input'), body = new Element('body'), document = new EventTarget();
     Object.assign(document, {body, activeElement: search, getElementById: id => nodes[id], querySelector: () => search});
-    let operationCount = 0;
+    let operationCount = 0, stored = {isArchived: true, revision: 1};
     const context = vm.createContext({
         auth, db: {}, functions: {}, AbortController, crypto: {randomUUID: () => `operation-${++operationCount}`}, console: {warn() {}},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
@@ -48,7 +49,7 @@ function fixture(withUi = false) {
         updateDoc: async (...args) => writes.push(args),
         runTransaction: async (_db, callback) => {
             const staged = [];
-            await callback({get: async () => ({exists: () => true, data: () => ({isArchived: true, revision: 1})}),
+            await callback({get: async () => ({exists: () => stored !== null, data: () => stored}),
                 update: (...args) => staged.push(args)});
             writes.push(...staged);
         },
@@ -65,9 +66,11 @@ function fixture(withUi = false) {
         SwipeList: class { constructor(selector, options) { this.options = options; swipes.push(this); } destroy() { this.destroyed = true; } },
         setTimeout: callback => { const id = timers.size + 1; timers.set(id, callback); return id; }, clearTimeout: id => timers.delete(id)
     });
+    vm.runInContext(archiveModel, context);
     vm.runInContext(service, context);
     if (withUi) vm.runInContext(ui, context);
     return {context, calls, writes, nodes, search, body, swipes, toasts, observers, timers,
+        set stored(value) { stored = value; },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
         pagehide: () => events.dispatchEvent(new Event('pagehide')),
         changeUid: uid => { auth.currentUser = uid ? {uid} : null; for (const callback of [...observers]) callback(auth.currentUser); },
@@ -404,4 +407,58 @@ test('empty UI removes confirmed targets after interrupted second account withou
     f.body.querySelectorAll('button').find(button => button.textContent === 'Interrompi').onclick(); await pending;
     assert.deepEqual(f.nodes['accounts-container'].children.map(row => row.dataset.key), ['["privato","two"]']);
     assert.equal(f.toasts.at(-1)[1], 'warning');
+});
+
+// M7-R6 — archiviazione canonica: il pulsante «Elimina» sposta nell'Archivio.
+// Questi test coprono il percorso condiviso da liste e form.
+
+test('archiviazione: scrive i metadati canonici con revisione incrementata', async () => {
+    for (const [context, prefix] of [['privato', 'users/A/accounts/x'], ['company-1', 'users/A/aziende/company-1/accounts/x']]) {
+        const f = fixture(); f.stored = {isArchived: false, revision: 4};
+        const result = await f.context.archiveAccount('A', {id: 'x', context, revision: 4});
+        assert.deepEqual({...result}, {status: 'archived', id: 'x', context, revision: 5});
+        assert.equal(f.writes.length, 1);
+        const [path, patch] = f.writes[0];
+        assert.equal(path, prefix);
+        assert.equal(patch.isArchived, true);
+        assert.equal(patch.revision, 5);
+        assert.equal(patch.archiveSchemaVersion, 2);
+        assert.equal(typeof patch.archivedAt, 'string');
+    }
+});
+
+test('archiviazione: un Account già in Archivio non viene incrementato due volte', async () => {
+    const f = fixture(); f.stored = {isArchived: true, revision: 7};
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 7});
+    assert.deepEqual({...result}, {status: 'already-archived', id: 'x', context: 'privato', revision: 7});
+    assert.equal(f.writes.length, 0, 'nessuna seconda scrittura');
+});
+
+test('archiviazione: revisione cambiata non sovrascrive e chiede di aggiornare', async () => {
+    const f = fixture(); f.stored = {isArchived: false, revision: 9};
+    await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 4}), /ARCHIVE_CONFLICT/);
+    assert.equal(f.writes.length, 0);
+});
+
+test('archiviazione: documento assente, revisione non valida e identità incompleta falliscono senza scritture', async () => {
+    const f = fixture(); f.stored = null;
+    await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 1}), /ARCHIVE_ACCOUNT_MISSING/);
+    f.stored = {isArchived: false, revision: 1};
+    for (const revision of [-1, 1.5, '1', Number.MAX_SAFE_INTEGER]) {
+        await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', revision}), /ARCHIVE_REVISION_INVALID/);
+    }
+    await assert.rejects(f.context.archiveAccount('A', {id: '', context: 'privato', revision: 0}), /Account archiviato non valido/);
+    assert.equal(f.writes.length, 0);
+});
+
+test('archiviazione: blocco del Vault e cambio utente impediscono la scrittura', async () => {
+    const f = fixture(); f.stored = {isArchived: false, revision: 2};
+    const controller = new AbortController();
+    const aborted = f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 2}, {signal: controller.signal});
+    controller.abort();
+    await assert.rejects(aborted, /ARCHIVE_SESSION_INVALIDATED/);
+    const changed = f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 2});
+    f.changeUid('B');
+    await assert.rejects(changed, /ARCHIVE_SESSION_INVALIDATED/);
+    assert.equal(f.writes.length, 0);
 });
