@@ -68,4 +68,10 @@ test('il form aziendale usa la revisione osservata all\'apertura, senza rilegger
   const page = readFileSync(new URL('../Frontend/public/assets/js/modules/azienda/form_account_azienda.js', import.meta.url), 'utf8');
   assert.match(page, /observedRevision/, 'la pagina deve conservare la revisione letta all\'apertura');
   assert.match(page, /window\.deleteAccount[\s\S]*observedRevision/, 'la pagina deve passarla all\'archiviazione');
+  // Correzione M7-R6 (secondo rilievo Codex): lo stato di modulo non deve
+  // sopravvivere a un rimontaggio, e l'azione resta chiusa finché il
+  // caricamento del montaggio corrente non ha confermato il documento.
+  assert.match(page, /observedRevision = undefined;/, 'il marker osservato va azzerato a ogni montaggio');
+  assert.match(page, /markerConfirmed = false;/, 'la conferma del montaggio corrente va azzerata a ogni montaggio');
+  assert.match(page, /if \(!markerConfirmed\)/, 'l\'archiviazione deve essere bloccata senza conferma');
 });

@@ -1738,3 +1738,77 @@ Nel banco la **sola riga di caricamento differito** è sostituita dal namespace 
 5. Non verificato il comportamento su browser o dispositivo reale: le prove di questa correzione restano sintetiche (vm ed emulatore).
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R6 consegnata da DeepSeek il 2026-09-21; il form aziendale usa i marker osservati all'apertura e non rilegge, il conflitto produce zero scritture con invito ad aggiornare, la politica sugli ospiti è invariata e nessun push è stato eseguito.
+
+## Decisione Diego — M7 Account archiviato: sospensione degli accessi
+
+Il 21/09/2026 Diego ha stabilito: **un Account spostato nell'Archivio non è più operativo**. Finché è archiviato, deve essere bloccato l'accesso e ogni attività sull'Account, inclusa la lettura da parte di ospiti ai dati dell'Account condiviso e agli eventuali allegati/dati condivisi associati. L'archiviazione è una **sospensione**, non una cancellazione di Account, allegati o metadati: la conservazione in Archivio resta senza scadenza automatica e il purge manuale rimane l'unica cancellazione definitiva. Prima di archiviare un Account con condivisioni, mostrare un avviso che identifichi i destinatari interessati (nome/email disponibili) e spieghi che perderanno accesso finché l'Account è archiviato; evitare di mostrare dati sensibili non necessari nel popup.
+
+**Perimetro da progettare e testare:** oggi `firestore.rules` concede lettura all'ospite accettato senza controllare `isArchived`, quindi la sola UI non basta. DeepSeek deve progettare un blocco effettivo dei percorsi di lettura/azione, includendo future superfici di condivisione, e provarlo con dati sintetici; non applicare in silenzio una revoca definitiva o un'eliminazione degli inviti. La scelta se il ripristino riattivi automaticamente le condivisioni precedenti oppure richieda una nuova conferma di Diego è **aperta** e va chiesta prima dell'implementazione di quella parte. Non modificare Rules produttive o dati reali mentre è ancora aperta M7-R6: un incarico alla volta.
+
+**Stato decisione: APPROVATA DA DIEGO** — blocco degli accessi durante l'archiviazione e avviso ai destinatari; comportamento al ripristino ancora da definire.
+
+## Verifica Codex — correzione M7-R6: reset del marker fra montaggi
+
+**Esito: DA_CORREGGERE prima dell'approvazione.** Il commit `6ba1f39c` corregge la rilettura tardiva del form; `node --test tests/company-archive-conflict.test.mjs tests/archive-session.test.mjs tests/account-archive-paths.test.mjs` passa **50/50** e `git diff --check` è pulito. La prova form-level copre conflitti di revisione e `updatedAt`.
+
+**Rischio residuo:** `form_account_azienda.js` dichiara `let observedRevision;` a livello modulo, la valorizza in `loadData()`, ma `initFormAccountAzienda()` azzera `baseUpdatedAt` e altri stati **senza azzerare `observedRevision`**. Al rimontaggio della stessa pagina/modulo su un Account diverso, o se `loadData()` fallisce, la callback globale `window.deleteAccount` può passare la revisione del precedente Account. Il controllo `ARCHIVE_MARKER_MISSING` non scatta; se la revisione coincide accidentalmente, l'Account nuovo può essere archiviato pur non essendo stato caricato correttamente.
+
+**Correzione richiesta a DeepSeek:** azzera il marker osservato all'inizio di ogni `initFormAccountAzienda`, insieme a `baseUpdatedAt`; impedisci l'azione finché il nuovo `loadData()` non ha confermato identità e marker del documento visualizzato. Aggiungi test di rimontaggio/cambio Account e caricamento fallito: zero scritture e messaggio di aggiornamento; verifica il percorso felice invariato. Un commit locale mirato, nessun push/deploy; consegna `DA_VERIFICARE`.
+
+La nuova scelta di Diego sulla sospensione dell'accesso degli ospiti in Archivio è registrata, ma resta separata da questa correzione. Non avviare due lavori in parallelo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R6, reset del marker fra montaggi
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `6ba1f39c`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** azzeramento e conferma del marker osservato in `form_account_azienda.js`, prove di rimontaggio e di caricamento fallito, guardia e documentazione. **Nessun push.** La decisione di Diego sulla sospensione degli accessi in Archivio **non viene avviata**: resta separata, come richiesto.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R6 (secondo rilievo) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R6, reset del marker fra montaggi
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato di correzione e rapporto; base `6ba1f39c`; **nessun push eseguito**.
+
+### Il rilievo era fondato
+
+`observedRevision` era **stato di modulo** valorizzato in `loadData()`, mentre `initFormAccountAzienda()` azzerava `baseUpdatedAt` ma **non** `observedRevision`. Al rimontaggio dello stesso modulo su un altro Account, o con `loadData()` fallito, la callback globale `window.deleteAccount` poteva passare la revisione del documento precedente: `ARCHIVE_MARKER_MISSING` non scattava e, se la revisione coincideva, l'Account mostrato veniva archiviato pur non essendo stato caricato.
+
+### Correzione applicata
+
+1. **Azzeramento a ogni montaggio** (`form_account_azienda.js:72-73`): `observedRevision = undefined` e `markerConfirmed = false` accanto al reset già esistente di `baseUpdatedAt`.
+2. **Conferma del montaggio corrente** (`:46`, `:339`): `markerConfirmed` diventa vero soltanto **all'ultima istruzione del percorso felice** di `loadData()`; documento assente, errore di lettura o uscita anticipata (chiave del Vault mancante) non lo attivano.
+3. **Azione bloccata senza conferma** (`:104-105`): `window.deleteAccount` invita ad aggiornare (`archive_conflict_refresh`) e **non chiama il servizio** finché il montaggio corrente non ha confermato identità e marker del documento visualizzato.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/company-form-archive-mount.test.mjs` (nuovo) | **4/4** |
+| `npm run test:history-prototype` | **73/73** |
+| `npm run test:firestore-rules` | **29/29** |
+| `npm run test:js-syntax` | **161 moduli OK** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato da 30 pagine» |
+| `node scripts/audit-navigation-flows.mjs` | verde |
+| `git diff --check` | pulito |
+| `npm run audit:inventory` | `docs/FILE_INVENTORY.md` — **789 file** |
+
+`tests/company-form-archive-mount.test.mjs` monta la **pagina reale** con il salvataggio e il servizio reali: percorso felice (una sola scrittura, messaggio di successo); rimontaggio su un altro Account il cui **caricamento fallisce** mentre il documento esiste e ha la stessa revisione e lo stesso `updatedAt` del precedente → **zero transazioni e zero scritture**, invito ad aggiornare; documento modificato **dopo** il caricamento del secondo montaggio → zero scritture e invito; rimontaggio con stato coerente → archivia il nuovo Account.
+
+**Controllo negativo eseguito:** con la sola versione già committata (`6ba1f39c`, senza azzeramento né guardia) lo stesso file di test **fallisce** sul caso «caricamento fallito non riusa il marker dell'Account precedente» (**3/4**); con la correzione passa **4/4**. La prova rileva quindi davvero il difetto e non è una guardia vuota.
+
+Nel banco ogni modulo reale è eseguito nella propria funzione e pubblica solo i simboli necessari (pagina e modulo di salvataggio dichiarano entrambi una `const get` di modulo, che in un unico contesto colliderebbe); resta sostituita la sola riga di caricamento differito del servizio. È dichiarato nel commento del test.
+
+### Guardia aggiornata
+
+`tests/account-archive-paths.test.mjs:72-76` — oltre ai marker osservati, verifica che la pagina **azzeri** `observedRevision` e `markerConfirmed` a ogni montaggio e che l'archiviazione sia **bloccata** senza conferma.
+
+### Limiti e scelte dichiarate
+
+1. Nel form di **creazione** `markerConfirmed` resta falso e l'archiviazione non è raggiungibile: non esiste un Account da archiviare, quindi non è una regressione.
+2. La decisione di Diego del 21/09/2026 sulla **sospensione degli accessi** degli ospiti resta **non avviata**: richiede Rules e progetto, e non va in parallelo a questa correzione.
+3. Invariati e fuori perimetro: `firestore.rules`, `functions/index.js`, budget dei moduli, cancellazione definitiva solo dall'Archivio, versione, `master`, deploy e dati reali.
+4. Resta non verificato il comportamento su browser o dispositivo reale: le prove sono sintetiche (vm ed emulatore).
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R6 (secondo rilievo) consegnata da DeepSeek il 2026-09-21; il marker osservato non sopravvive al rimontaggio, l'archiviazione è bloccata finché il caricamento non conferma il documento, il controllo negativo dimostra che la prova rileva il difetto e nessun push è stato eseguito.

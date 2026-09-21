@@ -2,14 +2,14 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **788**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **789**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## tests
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/company-archive-conflict.test.mjs` | MJS | 5448 | 106 | Test automatico: company-archive-conflict.test. |
-| `tests/account-archive-paths.test.mjs` | MJS | 4514 | 72 | Test automatico: account-archive-paths.test. |
+| `tests/company-form-archive-mount.test.mjs` | MJS | 7813 | 130 | Test automatico: company-form-archive-mount.test. |
+| `tests/account-archive-paths.test.mjs` | MJS | 5061 | 78 | Test automatico: account-archive-paths.test. |
 | `tests/account-detail-compact.test.mjs` | MJS | 7958 | 113 | Test automatico: account-detail-compact.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
@@ -32,6 +32,7 @@ File censiti: **788**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/banking-widget-hosts.test.mjs` | MJS | 6923 | 105 | Test automatico: banking-widget-hosts.test. |
 | `tests/banking-widget-placement.test.mjs` | MJS | 7853 | 95 | Test automatico: banking-widget-placement.test. |
 | `tests/company-account-detail-lifecycle.test.mjs` | MJS | 12407 | 112 | Test automatico: company-account-detail-lifecycle.test. |
+| `tests/company-archive-conflict.test.mjs` | MJS | 5448 | 106 | Test automatico: company-archive-conflict.test. |
 | `tests/company-detail-freshness.test.mjs` | MJS | 7145 | 105 | Test automatico: company-detail-freshness.test. |
 | `tests/company-detail-readonly.test.mjs` | MJS | 6276 | 94 | Test automatico: company-detail-readonly.test. |
 | `tests/company-form-freshness.test.mjs` | MJS | 5063 | 69 | Test automatico: company-form-freshness.test. |
@@ -215,7 +216,7 @@ File censiti: **788**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 12826 | 278 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 23325 | 507 | Flusso aziende/account aziendali: dettaglio account azienda. |
 | `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 20082 | 350 | Flusso aziende/account aziendali: form-azienda-save. |
-| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 28363 | 619 | Flusso aziende/account aziendali: form account azienda. |
+| `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 29233 | 635 | Flusso aziende/account aziendali: form account azienda. |
 | `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 10138 | 266 | Flusso aziende/account aziendali: lista aziende. |
 | `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2731 | 70 | Flusso aziende/account aziendali: ma attachments. |
 | `Frontend/public/assets/js/modules/azienda/ma_cards.js` | JS | 16116 | 330 | Flusso aziende/account aziendali: ma cards. |
@@ -402,7 +403,7 @@ File censiti: **788**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 275967 | 1682 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 286074 | 1761 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -829,7 +830,7 @@ File censiti: **788**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 16573 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 16615 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

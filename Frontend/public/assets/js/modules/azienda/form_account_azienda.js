@@ -40,6 +40,10 @@ let baseUpdatedAt = '';
 // Marker osservato all'apertura del modulo: è il termine di paragone
 // dell'archiviazione, così una modifica concorrente non viene sovrascritta.
 let observedRevision;
+// Falso finché il `loadData()` del montaggio corrente non ha confermato il
+// documento mostrato: un rimontaggio su un altro Account, o un caricamento
+// fallito, non possono riusare il marker del montaggio precedente.
+let markerConfirmed = false;
 
 // Funzione di re-render locale per banking-renderer
 const rerender = () => renderBankAccounts(bankAccounts, rerender, {
@@ -65,6 +69,8 @@ export async function initFormAccountAzienda(user) {
     currentAziendaId = urlParams.get('aziendaId');
     profileContactLinkDraft = null;
     baseUpdatedAt = '';
+    observedRevision = undefined;
+    markerConfirmed = false;
     try {
         const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
         if (draft?.profileContactId === urlParams.get('profileContactId') && draft.ownerUid === user.uid &&
@@ -91,8 +97,14 @@ export async function initFormAccountAzienda(user) {
     bankAccounts = [];
     myContacts = [];
 
-    // Esponi deleteAccount su window per eventuali onclick HTML
-    window.deleteAccount = () => deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt: baseUpdatedAt });
+    // Esponi deleteAccount su window per eventuali onclick HTML.
+    // L'archiviazione resta bloccata finché questo montaggio non ha confermato
+    // identità e marker del documento visualizzato: senza la conferma si invita
+    // ad aggiornare invece di usare lo stato di un montaggio precedente.
+    window.deleteAccount = () => {
+        if (!markerConfirmed) { showToast(t('archive_conflict_refresh'), "error"); return; }
+        return deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt: baseUpdatedAt });
+    };
 
     initBaseUI();
     setupUI();
@@ -321,6 +333,10 @@ async function loadData() {
             document.getElementById('logo-placeholder').classList.add('hidden');
             document.getElementById('btn-remove-logo')?.classList.remove('hidden');
         }
+
+        // Ultima istruzione del percorso felice: da qui il documento mostrato ha
+        // identità e marker confermati e l'archiviazione è ammessa.
+        markerConfirmed = true;
 
     } catch (e) { logError("LoadData", e); if (profileContactLinkDraft) throw e; }
     finally { toggleLoading(false); }
