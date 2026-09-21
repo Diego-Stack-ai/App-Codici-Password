@@ -10,14 +10,17 @@
 ## Che cosa è stato misurato (per contesto)
 
 Esportando un backup mentre un Account è **archiviato** e poi **purgandolo**, il ripristino
-dello stesso file **ricrea** l'Account con i valori del backup (`isArchived: true`, revisione e
-campi cifrati com'erano), ricrea il metadato dell'allegato, **ricarica i byte** dell'allegato al
-percorso finale e riporta i **riferimenti** in Profilo e Azienda al valore del backup — cioè
+dello stesso file **ricrea** l'Account con i valori memorizzati identici (`isArchived: true` e
+revisione inclusi; il banco usa marcatori sintetici, non ciphertext reali), ricrea il metadato
+dell'allegato, **ricarica i byte** dell'allegato al
+ percorso finale e riporta i **riferimenti** in Profilo e Azienda al valore del backup — cioè
 **annulla la pulizia dei riferimenti** fatta dal purge. La ricevuta di purge resta `purged`: una
 ripetizione del purge con lo **stesso** `operationId` risponde `duplicate` e l'Account ricreato
-resta, mentre con un `operationId` **nuovo** il purge funziona di nuovo. Un backup **non** si
-applica sotto un proprietario diverso (`BACKUP_OWNER_MISMATCH`) e i percorsi dei record sono
-derivati dall'UID autenticato.
+resta, mentre con un `operationId` **nuovo** il purge funziona di nuovo. Il **file prodotto**
+non si apre sotto un proprietario diverso — il primo passo del flusso di import valida
+`ownerUid` nell'intestazione — e la callable **rifiuta** una richiesta con proprietario atteso
+diverso (`BACKUP_OWNER_MISMATCH`); con l'utente coerente i percorsi dei record sono derivati
+dall'UID autenticato.
 
 ## Domande
 
