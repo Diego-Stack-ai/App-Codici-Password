@@ -3189,3 +3189,51 @@ Eseguito come richiesto: **`npm test` esce 1** e si arresta su **`test:vault-mut
 B-1, B-2 e B-3 sono tutti nati da tranche mie e sono emersi **solo** con l'esecuzione completa di `npm test`, mai con la batteria per tranche. Confermo la regola già dichiarata in M7-CLOSE: **nessuna consegna senza `npm test` completo verde** (ora bloccato da B-3).
 
 **Stato incarico: DA_VERIFICARE** — M7-FIX-1B consegnato da DeepSeek il 2026-09-21; helper reali iniettati nel banco dei collegamenti Profilo (65/65, `test:profile` 142/142), nessun difetto di runtime emerso, gate `npm test` rieseguito e rosso su **B-3** (`test:vault-mutation`, `SyntaxError` per la ri-esportazione non filtrata nel banco emulatore) con causa riprodotta e correzione minima proposta, B-3 **non** toccato e nessun push eseguito.
+
+## Verifica Codex — M7-FIX-1B banco Profilo
+
+**Esito: APPROVATO per B-2; M7 ancora aperto.** Commit `db580a5f` inietta gli helper reali `utils.js` nel banco che elimina gli import; `node --test tests/profile-contact-link.test.mjs` passa **65/65**, e DeepSeek riferisce `npm run test:profile` **142/142**. Ho verificato la nuova causa B-3: `firebase-archive.test.mjs` passa il sorgente del servizio a `new Function`, ma il filtro attuale non rimuove la ri-esportazione `export { ... } from ...` e non passa i nuovi helper di ciclo. Nessun difetto runtime dimostrato da B-3; è un banco emulatore da aggiornare senza stub. Nessun push/deploy.
+
+**Stato verifica: APPROVATO (B-2)** — 21/09/2026.
+
+## Incarico Codex — M7-FIX-1C: banco Vault Mutation
+
+**Stato incarico: PRONTO.** DeepSeek corregga solo B-3 in `experiments/persistent-vault-shell/firebase-archive.test.mjs`: il caricatore del sorgente reale deve gestire le ri-esportazioni ESM e fornire al `new Function` gli helper reali `sharingCycleOf`, `nextSharingCycle`, `inviteIdForGuest` senza stubbing della logica applicativa. Conservare le prove esistenti di archivio/ripristino e aggiungere solo quanto necessario per il nuovo protocollo; verificare `npm run test:vault-mutation`, poi `npm test` completo una sola volta. Se emerge un ulteriore errore, registrarlo con causa e non ampliare il perimetro di propria iniziativa. Un commit locale mirato, nessun push/merge/deploy, nessun dato reale; consegna `DA_VERIFICARE`. Non avviare altri gate in parallelo.
+
+## Presa in carico DeepSeek — M7-FIX-1C banco Vault Mutation
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `db580a5f`; la revisione Codex e l'incarico erano nel working tree non committati e sono **conservati** senza alterarne il testo.
+- **Perimetro:** solo B-3 nel banco emulatore, poi il gate `npm test`. **Nessun** push, deploy o dato reale; **nessun altro gate avviato**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-FIX-1C preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-FIX-1C banco Vault Mutation
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. **`npm test` completo è verde** (exit 0).
+- **Commit:** un solo commit locale mirato; base `db580a5f`; **nessun push o deploy**.
+
+### B-3: corretto nel banco, nessuna modifica al runtime
+
+`experiments/persistent-vault-shell/firebase-archive.test.mjs:17-27`:
+
+1. un unico `stripModule` rimuove **anche le ri-esportazioni ESM** (`^export {…} from '…';`) oltre a import ed `export`, quindi il sorgente reale del servizio non produce più `SyntaxError: Unexpected string`;
+2. `utils.js` viene letto con lo stesso filtro e valutato una volta per ottenere gli helper **reali** `sharingCycleOf`, `nextSharingCycle`, `inviteIdForGuest`;
+3. il `new Function` (`:27`) li riceve come parametri e il punto di chiamata (`:44-48`) li passa: **nessuno stub della logica applicativa**.
+
+Prove esistenti conservate (ripristino con incremento di revisione e cifratura intatta, revisione stantia/già ripristinato invariati byte per byte, modifica concorrente con ritentativo, perdita di sessione) e aggiunte **solo** le asserzioni del nuovo protocollo sul ripristino legacy: `sharingCycle` portato a **1**, `sharedWithUids` vuoto, `acceptedCount` 0 — cioè il ripristino non riapre accessi.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `npm run test:vault-mutation` | **41/41** (4 suite emulatrici, incluse le 4 sotto-prove del ripristino su SDK reali) |
+| **`npm test` completo (una sola esecuzione)** | **exit 0** — 44 script eseguiti (`pretest`, `build:offline-runtime` e tutti i 42 gruppi), **nessun fallimento**, nessun `✖` nel log (2908 righe) |
+| `git diff --check` | pulito |
+
+Riepilogo dei gruppi attraversati nella singola esecuzione: offline, security, vault-contract, **vault-shell**, profile-utilities-editor, data-access, navigation, page-shells, **ui-foundations**, html-purity, static-references, lightweight, performance-budget, js-syntax, css, dependencies, assistant, **profile**, maturity-fixture, crypto, attachments, **sharing-prototype**, offline-write-prototype, **history-prototype**, backup-prototype, credential-health-prototype, release-hardening, **functions-security**, **firestore-rules**, **storage-rules**, **vault-emulators**, **vault-mutation**, qr-selection-emulators, profile-text/contacts/company-contacts/addresses/utilities/document-attachments/document-attachments-storage/link-emulators, account-note-emulators, account-standard-emulators.
+
+### Stato del blocco
+
+**B-1, B-2 e B-3 sono chiusi** e il gate di suite è **verde** per la prima volta dall'inizio di M7-R6. **M7 resta però aperto** per i gate di prodotto/backend già elencati in M7-CLOSE, che questa fetta non tocca: trigger di audit, inviti orfani, decisione sullo storico delle cancellazioni, dati legacy reali, job di retention, Rules produttive dell'audit, concorrenza purge/ripristino, 15 righe di censimento M7-R1, aggiornamento degli MD autorevoli (M7-CLOSE-2) e collaudo su browser/dispositivo (gate fisico iPhone).
+
+**Stato incarico: DA_VERIFICARE** — M7-FIX-1C consegnato da DeepSeek il 2026-09-21; ri-esportazioni ESM e helper reali gestiti dal banco Vault Mutation senza stub, `test:vault-mutation` **41/41**, **`npm test` completo verde (exit 0)** come gate distinto, nessuna modifica al runtime, nessun push eseguito e M7 dichiarato ancora aperto per i gate residui.

@@ -14,9 +14,18 @@ assert.equal(process.env.METADATA_SERVER_DETECTION, 'none');
 const requireFunctions = createRequire(new URL('../../functions/package.json', import.meta.url));
 const {initializeApp: initializeAdminApp, deleteApp: deleteAdminApp} = requireFunctions('firebase-admin/app');
 const {getFirestore: getAdminFirestore} = requireFunctions('firebase-admin/firestore');
-const source = (await readFile(new URL('../../Frontend/public/assets/js/modules/settings/archive-account-service.js', import.meta.url), 'utf8'))
+// M7-FIX-1C: il servizio usa le ri-esportazioni ESM (per il budget statico della
+// pagina aziendale) e gli helper di ciclo/invito di `utils.js`; il caricatore del
+// banco deve gestirli senza sostituire la logica applicativa con stub.
+const stripModule = text => text
+    .replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/gm, '')
     .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-const createRestore = new Function('auth', 'db', 'doc', 'runTransaction', 'deleteField', 'onAuthStateChanged', `${source}\nreturn restoreArchivedAccount;`);
+const source = stripModule(await readFile(new URL('../../Frontend/public/assets/js/modules/settings/archive-account-service.js', import.meta.url), 'utf8'));
+const utilsSource = stripModule(await readFile(new URL('../../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8'));
+const {sharingCycleOf, nextSharingCycle, inviteIdForGuest} = new Function(
+    `${utilsSource}\nreturn {sharingCycleOf, nextSharingCycle, inviteIdForGuest};`)();
+const createRestore = new Function('auth', 'db', 'doc', 'runTransaction', 'deleteField', 'onAuthStateChanged',
+    'sharingCycleOf', 'nextSharingCycle', 'inviteIdForGuest', `${source}\nreturn restoreArchivedAccount;`);
 
 test('canonical archive restore compares current state in real SDK transactions', {timeout: 120000}, async t => {
     const adminApp = initializeAdminApp({projectId: 'demo-vault-shell'}, `archive-${crypto.randomUUID()}`);
@@ -37,11 +46,16 @@ test('canonical archive restore compares current state in real SDK transactions'
     const operation = hook => createRestore(auth, db, doc, (database, callback) => runTransaction(database, async tx => callback({
         get: async ref => { const snapshot = await tx.get(ref); await hook?.(snapshot); return snapshot; },
         update: (ref, value) => tx.update(ref, value)
-    })), deleteField, onAuthStateChanged);
+    })), deleteField, onAuthStateChanged, sharingCycleOf, nextSharingCycle, inviteIdForGuest);
     await t.test('successful restore increments revision while preserving unrelated ciphertext', async () => {
         await reference.set(initial); await operation()(uid, identity);
         const after = (await reference.get()).data();
         assert.equal(after.revision, 4); assert.equal(after.isArchived, false); assert.equal(after.password, initial.password);
+        // Protocollo M7: un Account archiviato senza ciclo viene neutralizzato e il
+        // ciclo avanza, così il ripristino non riapre alcun accesso.
+        assert.equal(after.sharingCycle, 1, 'il ciclo viene portato a 1');
+        assert.equal(after.sharedWithUids.length, 0, 'nessun grant residuo');
+        assert.equal(after.acceptedCount, 0);
     });
     await t.test('stale revision and already restored state remain byte and timestamp unchanged', async () => {
         for (const state of [{...initial, revision: 4}, {...initial, isArchived: false}]) {
