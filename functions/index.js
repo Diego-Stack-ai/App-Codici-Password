@@ -2026,6 +2026,15 @@ exports.onScadenzaDeleted = onDocumentDeleted(
 // cancella solo ciò che è ancora scaduto.
 const AUDIT_RETENTION_PAGE_SIZE = 200;
 const AUDIT_RETENTION_MAX_BATCHES_PER_RUN = 50;
+// Tetto **per proprietario**: senza di esso un singolo proprietario con uno
+// storico enorme consumerebbe l'intero budget del run e gli altri non
+// progredirebbero (rilievo della revisione M7-AUDIT-6).
+const AUDIT_RETENTION_MAX_BATCHES_PER_OWNER = 10;
+// Tetto di **scansione**: conta i documenti esaminati, non quelli cancellabili.
+// È deliberatamente molto più alto del budget di cancellazione, perché i
+// documenti vecchi ma non cancellabili (azioni estranee, `at` incoerente) non
+// devono mai impedire di raggiungere gli eventi scaduti che vengono dopo.
+const AUDIT_RETENTION_MAX_SCAN = 20_000;
 // Finestra grossolana della query: 24 mesi di calendario sono sempre almeno 730
 // giorni, quindi 700 giorni è un sovrainsieme sicuro di ciò che può essere
 // scaduto. Il classificatore resta l'unica autorità sulla cancellazione.
@@ -2046,15 +2055,19 @@ function isPreconditionFailure(error) {
 // non ne copre due), paginazione con cursore sull'**istantanea completa** —
 // stabile anche quando più proprietari hanno lo stesso id — e deduplica per
 // percorso completo.
+//
+// `truncated` dice se il tetto di scansione è stato raggiunto **con altre pagine
+// da leggere**: in quel caso il job non può dichiarare il completamento.
 async function collectExpiredAuditEvents(db, cutoff, {
-    pageSize = AUDIT_RETENTION_PAGE_SIZE, maxEvents = MAX_EVENTS_PER_RUN
+    pageSize = AUDIT_RETENTION_PAGE_SIZE, maxScan = AUDIT_RETENTION_MAX_SCAN
 } = {}) {
     const collected = new Map();
     const rejected = [];
+    let scanned = 0, truncated = false;
     for (const field of AUDIT_RETENTION_DATE_FIELDS) {
         let cursor = null;
         for (;;) {
-            if (collected.size >= maxEvents) break;
+            if (collected.size >= maxScan) { truncated = true; break; }
             let query = db.collectionGroup("auditEvents")
                 .where(field, "<=", cutoff)
                 .orderBy(field)
@@ -2064,6 +2077,7 @@ async function collectExpiredAuditEvents(db, cutoff, {
             const page = await query.get();
             if (page.empty) break;
             for (const snapshot of page.docs) {
+                scanned++;
                 const owner = snapshot.ref.parent ? snapshot.ref.parent.parent : null;
                 const uid = owner ? owner.id : null;
                 let expected = null;
@@ -2083,12 +2097,17 @@ async function collectExpiredAuditEvents(db, cutoff, {
             if (page.size < pageSize) break;
         }
     }
-    return {entries: [...collected.values()], rejected};
+    return {entries: [...collected.values()], rejected, truncated, scanned};
 }
 
 // Cancellazione di un lotto con conferma della versione. Ritorna il numero di
 // documenti effettivamente cancellati (un documento sparito o non più scaduto
 // non è una cancellazione).
+//
+// Il conteggio **non** vive dentro il callback ritentabile: `runTransaction` può
+// rieseguirlo più volte su conflitto, e un contatore esterno sommerebbe
+// cancellazioni solo tentate. Il callback **restituisce** i percorsi cancellati
+// e `runTransaction` risolve con il valore del tentativo che ha committato.
 async function deleteAuditBatchWithConfirmation(db, batch, now, updateTimes) {
     const references = batch.paths.map(path => db.doc(path));
     const versions = batch.paths.map(path => updateTimes.get(path));
@@ -2104,64 +2123,75 @@ async function deleteAuditBatchWithConfirmation(db, batch, now, updateTimes) {
             // atomica, senza dichiarare cancellato ciò che non lo è.
         }
     }
-    let deleted = 0;
-    await db.runTransaction(async (transaction) => {
+    const committed = await db.runTransaction(async (transaction) => {
         const snapshots = await transaction.getAll(...references);
+        const deleted = [];
         for (const snapshot of snapshots) {
             if (!snapshot.exists) continue;
             if (classifyAuditEvent(snapshot.data(), now) !== "expired") continue;
             transaction.delete(snapshot.ref);
-            deleted++;
+            deleted.push(snapshot.ref.path);
         }
+        return deleted;
     });
-    return deleted;
+    return Array.isArray(committed) ? committed.length : 0;
 }
 
 async function runAuditRetentionJob(db, {
     now = Date.now(),
     pageSize = AUDIT_RETENTION_PAGE_SIZE,
-    maxEvents = MAX_EVENTS_PER_RUN,
+    maxScan = AUDIT_RETENTION_MAX_SCAN,
     batchSize = DEFAULT_BATCH_SIZE,
-    maxBatches = AUDIT_RETENTION_MAX_BATCHES_PER_RUN
+    maxBatches = AUDIT_RETENTION_MAX_BATCHES_PER_RUN,
+    maxBatchesPerOwner = AUDIT_RETENTION_MAX_BATCHES_PER_OWNER
 } = {}) {
     const cutoff = Timestamp.fromMillis(now - AUDIT_RETENTION_COARSE_CUTOFF_MS);
-    const {entries, rejected} = await collectExpiredAuditEvents(db, cutoff, {pageSize, maxEvents});
+    const {entries, rejected, truncated, scanned} = await collectExpiredAuditEvents(db, cutoff, {pageSize, maxScan});
     const updateTimes = new Map(entries.map(entry => [entry.path, entry.updateTime]));
     const byOwner = new Map();
     for (const entry of entries) {
         if (!byOwner.has(entry.uid)) byOwner.set(entry.uid, []);
         byOwner.get(entry.uid).push({id: entry.id, ...entry.data});
     }
-    const counters = {scanned: entries.length, planned: 0, deleted: 0, retained: 0, unverifiable: 0, batches: 0};
-    let status = "completed";
+    const counters = {scanned, planned: 0, deleted: 0, retained: 0, unverifiable: 0, batches: 0};
+    // Una scansione troncata significa «potrebbero restare eventi scaduti»:
+    // il run non può dichiararsi completato.
+    let status = truncated ? "interrupted" : "completed";
     for (const [uid, events] of byOwner) {
         if (counters.batches >= maxBatches) { status = "interrupted"; break; }
-        let plan;
-        try {
-            plan = planAuditRetention({uid, events, now, batchSize});
-        } catch (error) {
-            console.warn("[AUDIT] retention: piano saltato", {
-                code: String(error?.code || "AUDIT_RETENTION_INPUT_INVALID")
-            });
-            continue;
-        }
-        counters.retained += plan.retained.length;
-        counters.unverifiable += plan.unverifiable.length;
-        const allowed = plan.batches.slice(0, Math.max(0, maxBatches - counters.batches));
-        if (allowed.length < plan.batches.length) status = "interrupted";
-        counters.planned += allowed.reduce((total, batch) => total + batch.ids.length, 0);
-        const report = await runAuditRetention({
-            plan: {...plan, batches: allowed},
-            deleteBatch: async (batch) => {
-                counters.deleted += await deleteAuditBatchWithConfirmation(db, batch, now, updateTimes);
+        let ownerBatches = 0;
+        for (let offset = 0; offset < events.length; offset += MAX_EVENTS_PER_RUN) {
+            const ownerBudget = Math.min(maxBatchesPerOwner - ownerBatches, maxBatches - counters.batches);
+            if (ownerBudget <= 0) { status = "interrupted"; break; }
+            let plan;
+            try {
+                plan = planAuditRetention({uid, events: events.slice(offset, offset + MAX_EVENTS_PER_RUN), now, batchSize});
+            } catch (error) {
+                console.warn("[AUDIT] retention: piano saltato", {
+                    code: String(error?.code || "AUDIT_RETENTION_INPUT_INVALID")
+                });
+                continue;
             }
-        });
-        counters.batches += report.completed;
-        if (report.status !== "completed") { status = report.status; break; }
+            counters.retained += plan.retained.length;
+            counters.unverifiable += plan.unverifiable.length;
+            const allowed = plan.batches.slice(0, ownerBudget);
+            if (allowed.length < plan.batches.length) status = "interrupted";
+            counters.planned += allowed.reduce((total, batch) => total + batch.ids.length, 0);
+            const report = await runAuditRetention({
+                plan: {...plan, batches: allowed},
+                deleteBatch: async (batch) => {
+                    counters.deleted += await deleteAuditBatchWithConfirmation(db, batch, now, updateTimes);
+                }
+            });
+            counters.batches += report.completed;
+            ownerBatches += report.completed;
+            if (report.status !== "completed") { status = report.status; break; }
+        }
+        if (counters.batches >= maxBatches) status = "interrupted";
     }
     // Log di soli conteggi e codici: nessun uid, nessun id, nessun contenuto.
-    console.log("[AUDIT] retention registro", {status, ...counters, rejectedPaths: rejected.length});
-    return Object.freeze({...counters, status, rejectedPaths: rejected.length});
+    console.log("[AUDIT] retention registro", {status, truncated, ...counters, rejectedPaths: rejected.length});
+    return Object.freeze({...counters, status, truncated, rejectedPaths: rejected.length});
 }
 
 exports.purgeExpiredAuditEvents = onSchedule(

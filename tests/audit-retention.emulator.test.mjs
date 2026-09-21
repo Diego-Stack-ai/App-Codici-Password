@@ -223,3 +223,53 @@ test('configurazione indici: gli override COLLECTION_GROUP per at e createdAt so
     // Limite dichiarato: l’Emulator non applica gli indici, quindi questa prova
     // verifica la configurazione, non il comportamento di un progetto reale.
 });
+
+test('progresso con un prefisso non cancellabile: gli eventi scaduti successivi vengono raggiunti', async () => {
+    // Cinque documenti scoperti ma **non** cancellabili (azioni estranee con
+    // `createdAt` vecchio) che la scansione deve attraversare senza fermarsi.
+    const uid = 'owner-l';
+    for (let index = 0; index < 5; index++) {
+        await seed(eventPath(uid, `estraneo-${index}`), {action: 'backup-restore-chunk', createdAt: OLD});
+    }
+    await seed(eventPath(uid, 'legacy-1'), {action: 'shared-vault-create', createdAt: OLD});
+    await seed(eventPath(uid, 'legacy-2'), {action: 'shared-vault-create', createdAt: OLD});
+
+    const first = await job.runAuditRetentionJob(db, {now: NOW, batchSize: 1, maxBatches: 1, maxBatchesPerOwner: 1});
+    assert.equal(first.deleted, 1, 'il prefisso non cancellabile non blocca la cancellazione');
+    assert.equal(first.status, 'interrupted', 'con altro lavoro noto il run non è completo');
+    const second = await job.runAuditRetentionJob(db, {now: NOW, batchSize: 1, maxBatches: 1, maxBatchesPerOwner: 1});
+    assert.equal(second.deleted, 1);
+    const third = await job.runAuditRetentionJob(db, {now: NOW});
+    assert.equal(third.deleted, 0, 'nessun lavoro residuo: i run convergono');
+    assert.equal(third.status, 'completed');
+    // I non cancellabili restano, e sono ancora scoperti: non sono «lavoro».
+    for (let index = 0; index < 5; index++) {
+        assert.equal(await exists(eventPath(uid, `estraneo-${index}`)), true);
+    }
+});
+
+test('budget per proprietario: con il tetto per proprietario più proprietari progrediscono', async () => {
+    for (const uid of ['owner-m', 'owner-n']) {
+        await seed(eventPath(uid, 'op-1'), {action: 'account-purged', at: OLD});
+        await seed(eventPath(uid, 'op-2'), {action: 'account-purged', at: OLD});
+    }
+    const report = await job.runAuditRetentionJob(db, {now: NOW, batchSize: 1, maxBatches: 10, maxBatchesPerOwner: 1});
+    assert.equal(report.deleted, 2, 'un lotto per proprietario: nessuno resta indietro');
+    assert.equal(report.status, 'interrupted', 'resta un secondo lotto per ciascuno');
+    assert.equal(await exists(eventPath('owner-m', 'op-1')), false);
+    assert.equal(await exists(eventPath('owner-n', 'op-1')), false);
+    assert.equal(await exists(eventPath('owner-m', 'op-2')), true);
+});
+
+test('scansione troncata: il run non si dichiara completato', async () => {
+    const uid = 'owner-o';
+    for (let index = 0; index < 4; index++) {
+        await seed(eventPath(uid, `op-${index}`), {action: 'account-purged', at: OLD});
+    }
+    const report = await job.runAuditRetentionJob(db, {now: NOW, pageSize: 1, maxScan: 2});
+    assert.equal(report.truncated, true, 'restano pagine da leggere');
+    assert.equal(report.status, 'interrupted', '`completed` significa «nessun lavoro noto»');
+    const completed = await job.runAuditRetentionJob(db, {now: NOW});
+    assert.equal(completed.status, 'completed');
+    assert.equal(completed.deleted, 2, 'la ripresa completa il lavoro rimasto');
+});
