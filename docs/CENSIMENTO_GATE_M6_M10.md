@@ -19,7 +19,7 @@ su iPhone/Windows reali · **Laboratorio** = lavoro autonomo possibile su dati s
 | # | Gate e fonte | Evidenza già presente | Che cosa manca | Dipendenza |
 |---|---|---|---|---|
 | M6-1 | Consultazione bancaria offline iPhone e matrice completa — `PIANO:387` | Matrice di laboratorio con due banche/carte sintetiche, cache preparata e mancante, lock/sblocco, cambio sezione e pulizia, riapertura con cache persistente; 4 esecuzioni `--entry-browser` e 2 `--restart-browser` su Chrome 152/Edge 153 desktop+mobile (`M6:432-450`) | PWA fisica su iPhone, cache espulsa, avvio a freddo, tutte le categorie di pagina di produzione, file Storage | **Dispositivo** (Diego) + **Laboratorio** per le parti non fisiche |
-| M6-2 | Fallback senza Web Locks e collaudi dei dispositivi — `PIANO:388`; finding `F2-P1-07` in `AUDIT_PROGETTO_FASE2_STATICO.md:195-217` | Fallback di laboratorio completo: `acquireTimeoutMs`, rifiuto del lease tardivo, 9 scenari in Chrome 152/Edge 153 con `navigator.locks` realmente assente, 12 test unitari, 24 verifiche di coordinamento senza regressioni (`M6:420-430`) | **Adozione nel runtime**: `withOfflineQueueLease` (`Frontend/public/assets/js/modules/data/offline-mutation-queue.js:259-260`) continua a rifiutare con `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`; distribuzione preparatoria delle copie PWA; trasporto autenticato/App Check reali; concorrenza reale fra schede e dispositivi | **Laboratorio** (progetto e prova) + **Diego/Codex** per l'attivazione nel runtime |
+| M6-2 | Fallback senza Web Locks e collaudi dei dispositivi — `PIANO:388`; finding `F2-P1-07` in `AUDIT_PROGETTO_FASE2_STATICO.md:195-217` | Fallback di laboratorio completo: `acquireTimeoutMs`, rifiuto del lease tardivo, 9 scenari in Chrome 152/Edge 153 con `navigator.locks` realmente assente, 12 test unitari, 24 verifiche di coordinamento senza regressioni (`M6:420-430`); **M6-2 del 21/09** (`M6_SINCRONIZZAZIONE_OFFLINE.md`): il candidato iniettato **nell'interfaccia reale** (`withOfflineQueueLease` / `withLease`) è verde in Chrome 153 ed Edge 153 su 8 scenari (esecuzione, esclusione reciproca, timeout/lease tardivo, rilascio dopo errore, coda reale con `OFFLINE_QUEUE_BUSY`), con due controlli di discriminazione | **Adozione nel runtime**: `withOfflineQueueLease` (`offline-mutation-queue.js:259-260`) continua a rifiutare con `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`; lo store `queueLeases` **non esiste** nello schema distribuito (versione 1, solo `encryptedOperations`) → serve una decisione su schema/aggiornamento delle copie PWA installate; distribuzione preparatoria; trasporto autenticato/App Check reali; concorrenza reale fra schede e dispositivi; collaudi fisici | **Diego** (decisione su schema e adozione) + **Laboratorio** completato per la parte di evidenza + **Dispositivo** per i collaudi |
 | M6-3 | Lettore compatibile, upgrade store, lease in tutte le scritture, copie PWA precedenti — `PIANO:537`, `M6:143-148`, `PIANO:551` | Lettore schemi 1 e 2 disponibile in laboratorio senza upgrade né scritture; 11 scenari browser in Chrome/Edge; prova reale che il lettore v1 rifiuta lo schema 2 | Integrazione delle **mutazioni** sotto il nuovo schema, upgrade dello store, gestione delle copie PWA precedenti e del rollback | **Laboratorio** + **Diego** per la distribuzione |
 | M7-1 | Politica di retention complessiva approvata e verificata su dati, allegati e backup — `PIANO:396` | Censimento con matrice T-01…T-38 e decisioni D1–D16 proposte; comportamenti attuali verificati (T-08, T-09, T-16, T-21, T-23, T-24, T-26, T-27, T-28); **decisioni già registrate:** retention **24 mesi** del registro tecnico (D3, decisa il 21/09 e implementata **solo nel ramo**: job, trigger, marcatori; nessun deploy) `M7_CRONOLOGIA:114-171`; **rinvio dichiarato di D8** (obblighi legali come dipendenza, nessuna deroga inventata) | Approvazione delle decisioni **ancora aperte**: D1, D2, D4, D5, D6, D7, D9, D10–D16 e le parti residue di D3 (permanenza delle altre famiglie, rimozione della scrittura client); bonifica dei record storici senza `at`; vista utente del registro; rilascio del job (cadenza, ambiente, monitoraggio, rollback); distribuzione delle Rules del ramo | **Diego** (decisione) + **Laboratorio** |
 | M7-2 | Verifica esterna di TTL e lifecycle sul progetto — `PIANO:396`, `M7_RETENTION:635-660` | Sonda documentata con esito **`non verificato`**: `gcloud` assente, nessuna ADC, Firebase CLI non autenticato; i due comandi di completamento sono scritti nel censimento | Esecuzione di `gcloud firestore fields ttls list` e `gcloud storage buckets describe` con registrazione di fonte, data e output | **Esterno** (credenziali) |
@@ -34,30 +34,39 @@ su iPhone/Windows reali · **Laboratorio** = lavoro autonomo possibile su dati s
 | M10-3 | Matrice end-to-end su iPhone, Windows e browser supportati, incluse rete lenta, offline, riapertura e overscroll — `PIANO:423`, `M10:20` | Smoke test del proprietario dell'8/09 sulla v1.2.64, dichiarato **non** sostitutivo della matrice (`M10:27-29`); 29 pagine canoniche e shell verificate a livello automatico | Matrice fisica firmata per dispositivo, sistema, browser, tema e condizioni di rete | **Dispositivo** (Diego) |
 | M10-4 | Guida utente, revisione privacy finali e informazioni organizzative della risposta agli incidenti — `PIANO:425`, `M10:41-50`, `RISPOSTA_INCIDENTI_E_RECUPERO.md:48` | Procedura di risposta agli incidenti presente nel repository; checklist operativa di rilascio in 8 punti | Guida utente, revisione privacy finale, completamento delle informazioni organizzative; rollback identificato prima di un deploy | **Laboratorio** (bozza) + **Diego** |
 
-## 2. Un solo prossimo passo autonomo consigliato
+## 2. Prossimo passo autonomo consigliato — M6-2 (eseguito il 21/09/2026)
 
 **M6-2 — provare in laboratorio l'adozione del coordinatore ibrido (lease + fallback senza Web Locks)
 dietro l'interfaccia del runtime, senza modificare `Frontend/public/**`.**
 
-- **Che cosa farebbe.** `withOfflineQueueLease(uid, task, locks)` accetta già un `locks` iniettabile
+- **Che cosa ha fatto.** `withOfflineQueueLease(uid, task, locks)` accetta già un `locks` iniettabile
   (`offline-mutation-queue.js:259-260`) e `offline-mutation-client.js:16` lo collega come `withLease`.
-  Il passo è un banco di laboratorio che esercita **la funzione del runtime** con il coordinatore
-  ibrido iniettato nei due rami (Web Locks presente e assente), riusando i 9 scenari `--no-locks` e le
-  24 verifiche di coordinamento già registrate, e una nota di adozione/rollback che elenca le copie
-  PWA precedenti da aggiornare. **Non** attiva nulla e **non** tocca file distribuiti.
-- **Perché è autonomo.** Nessuna decisione di prodotto pendente, nessun accesso esterno, nessun
-  dispositivo fisico: usa solo laboratorio, browser headless e dati sintetici. **Fa avanzare
+  Il banco di laboratorio esercita **la funzione del runtime** con il coordinatore ibrido iniettato
+  nei due rami (Web Locks presente e assente), riusando i 9 scenari `--no-locks`, le 23 verifiche di
+  coordinamento e i 12 + 20 test unitari già registrati, e aggiunge solo il vuoto di copertura.
+  **Non** attiva nulla e **non** tocca file distribuiti.
+- **Esito (21/09/2026).** `npm run test:offline-runtime-lease` **verde in Chrome 153 ed Edge 153** con
+  `navigator.locks` realmente assente (`webLocks: "undefined"`): **8 scenari** — esecuzione e rilascio,
+  esclusione reciproca fra titolari distinti, errore del task con rilascio del lease, acquisizione
+  bloccata (`HYBRID_ACQUIRE_TIMEOUT`) con task mai eseguito e lease tardivo rilasciato senza effetti,
+  coda reale con `withLease` iniettato (`OFFLINE_QUEUE_BUSY`), schema della coda distribuita.
+  Due **controlli di discriminazione** (rifiuto del runtime rimosso; esclusione del lease rimossa)
+  hanno reso il banco **rosso** e i file sono stati ripristinati con hash identico a `HEAD`.
+  Dettagli, prove riusate e limiti in `M6_SINCRONIZZAZIONE_OFFLINE.md` (sezione M6-2).
+- **Perché era autonomo.** Nessuna decisione di prodotto pendente, nessun accesso esterno, nessun
+  dispositivo fisico: solo laboratorio, browser headless e dati sintetici. Ha **fatto avanzare
   l'evidenza di laboratorio sul finding `F2-P1-07`** portando la prova dal candidato isolato
-  all'interfaccia reale del runtime, **senza chiuderlo**: l'adozione nel runtime, la distribuzione
-  preparatoria delle copie PWA e i collaudi fisici restano aperti, come dichiarato nella riga M6-2.
-- **Criterio di uscita verificabile.** (a) banco nuovo verde nei due rami, accanto a
-  `npm run test:offline-no-locks` e alla suite browser di coordinamento; (b)
-  `git diff --name-only -- Frontend functions firestore.rules storage.rules` **vuoto**; (c)
-  documento di adozione/rollback con l'elenco esplicito di ciò che resta a Diego (distribuzione
-  preparatoria, collaudo fisico); (d) `npm test` completo verde.
-
-*Questo censimento non autorizza il passo: lo valuta e lo assegna Codex. Gli altri gate restano come
-in tabella.*
+  all'interfaccia reale del runtime, **senza chiuderlo**.
+- **Che cosa resta aperto (criterio di uscita non ancora soddisfatto).** Il runtime **non** usa il
+  fallback: `withOfflineQueueLease` continua a rifiutare con `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`, e la
+  coda distribuita è in **versione 1 con il solo store `encryptedOperations`**, quindi manca lo store
+  `queueLeases` su cui il fallback si appoggia. Servono: **decisione** su schema/aggiornamento delle
+  copie PWA installate (domande in `M6_DOMANDE_FALLBACK_WEB_LOCKS.md`), adozione nel runtime,
+  distribuzione preparatoria, trasporto autenticato/App Check reali, concorrenza reale fra schede e
+  dispositivi, collaudi fisici.
+- Altri criteri già soddisfatti dalla consegna: `git diff --name-only -- Frontend functions
+  firestore.rules storage.rules` **vuoto**; nota di adozione/rollback presente nel contratto M6;
+  `npm test` completo verde.
 
 ## 3. Che cosa questo censimento **non** fa
 

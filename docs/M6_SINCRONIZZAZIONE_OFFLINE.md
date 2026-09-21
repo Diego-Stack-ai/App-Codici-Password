@@ -452,3 +452,50 @@ La matrice certifica disponibilità e decifratura dei dati sintetici già carica
 ### Gate residui di M6-CLOSE
 
 Aperti e non chiusi da questa consegna: test fisico iPhone/PWA riservato a Diego (checklist dedicata in [M6_CHECKLIST_IPHONE.md](./M6_CHECKLIST_IPHONE.md)); adozione del fallback senza Web Locks e del lease nel runtime distribuito; distribuzione preparatoria e compatibilità delle copie PWA con lo schema IndexedDB; trasporto autenticato e App Check reali; concorrenza reale fra schede e dispositivi sul runtime distribuito; cache espulsa e avvio da processo terminato sul dispositivo fisico.
+
+## M6-2 — Coordinatore ibrido dietro l'interfaccia della coda, 21/09/2026
+
+Laboratorio, dati sintetici, profilo browser usa e getta, solo loopback. **`Frontend/public/**`, Functions e Rules restano invariati**: il banco inietta il candidato dall'esterno e non attiva nulla. Comando nuovo `npm run test:offline-runtime-lease` (Chrome ed Edge headless, 153.0.0.0), pagina `experiments/offline-sync/browser-runtime-lease.mjs` servita dal runner di laboratorio.
+
+### Che cosa è stato verificato
+
+Il candidato di laboratorio è iniettato **nell'interfaccia reale** della coda: come terzo argomento `locks` di `withOfflineQueueLease(uid, task, locks)` e come `withLease` passato a `createOfflineMutationClientCore`, che è il punto in cui `offline-mutation-client.js:16` collega la stessa funzione. L'adattatore traduce l'esito del coordinatore nel contratto della piattaforma: lease ottenuto → il task gira sotto il lease IndexedDB; lease non ottenuto → l'interfaccia riceve `no lock`, esattamente come con Web Locks occupato (`ifAvailable: true`).
+
+| Scenario | Esito osservato (Chrome 153 ed Edge 153) |
+|---|---|
+| **Web Locks disponibile** (comportamento attuale, invariato) | il task gira sotto il lock di piattaforma; un secondo ingresso concorrente ottiene `{acquired: false}` senza attendere |
+| **`navigator.locks` realmente assente** | il runtime distribuito **rifiuta** con `OFFLINE_QUEUE_LOCKS_UNAVAILABLE` e non esegue nulla: il fallback **non** è nel runtime, coerentemente con il finding aperto |
+| **Assenza + coordinatore iniettato** — esecuzione e rilascio | `{acquired: true, value}`; l'ingresso successivo riesce, quindi il lease è stato rilasciato dopo il successo |
+| **Assenza + coordinatore iniettato** — esclusione reciproca | due richieste concorrenti da **titolari distinti**, una sola esegue (`heldRuns === 1`), l'altra riceve `{acquired: false}` senza attendere |
+| **Assenza + coordinatore iniettato** — errore del task | l'errore attraversa l'interfaccia (`SYNTHETIC_TASK_FAILURE`) e il lease viene **rilasciato**: l'ingresso successivo riesce |
+| **Assenza + coordinatore iniettato** — acquisizione bloccata | `HYBRID_ACQUIRE_TIMEOUT` attraverso l'interfaccia, task **mai** eseguito, nessun effetto; il **lease tardivo** viene rilasciato senza eseguire il task |
+| **Coda reale + `withLease` iniettato** (`discard` con `createOfflineMutationClientCore`) | con il lease occupato da un altro titolare la coda reale segnala `OFFLINE_QUEUE_BUSY`; ottenutolo, l'operazione viene rimossa (coda vuota) |
+| **Schema della coda distribuita** | il database `codex-offline-queue-{uid}` è in **versione 1** con il solo store `encryptedOperations`: **non esiste** uno store `queueLeases` |
+
+### Prove già presenti, riusate e non sostituite
+
+12 test unitari del coordinatore ibrido, 9 scenari browser `--no-locks` (Chrome 152/Edge 153), 23 scenari browser di coordinamento e 20 test unitari della coda (`tests/offline-mutation-queue.test.mjs`, che copre anche `withOfflineQueueLease` con `locks` iniettato a livello unitario). Il banco nuovo **non li duplica**: aggiunge il solo vuoto di copertura — l'interfaccia **reale** della coda esercitata con il candidato iniettato, nei due rami, più i tre casi richiesti (esclusione reciproca, timeout/lease tardivo, rilascio dopo errore). `npm run test:offline-no-locks` resta verde su entrambi i browser dopo questa consegna.
+
+### Controlli di discriminazione (mutazioni temporanee, poi ripristinate)
+
+| Mutazione | Esito atteso | Esito ottenuto |
+|---|---|---|
+| `withOfflineQueueLease`: rimosso il rifiuto quando `locks` manca | banco rosso sul ramo «API assente» | **rosso** (`RUNTIME_FALLBACK_CLAIMED`), 1/8 scenari |
+| `indexeddb-queue-lease`: concesso il lease anche se un altro titolare lo detiene | banco rosso sull'esclusione reciproca | **rosso** (`HYBRID_EXCLUSION`), 3/8 scenari |
+
+Entrambi i file sono stati ripristinati con hash **identico a `HEAD`** (`git hash-object`: `1eb704a1dadb22d4aca8060df17dbc82546145fe` per `offline-mutation-queue.js`, `7d0c3535e83133de6bedf5577d5e8870747af498` per `indexeddb-queue-lease.mjs`); `git diff --name-only -- Frontend functions firestore.rules storage.rules` è **vuoto**.
+
+### Nota di adozione e rollback (copie PWA precedenti)
+
+L'adozione nel runtime **non è stata fatta** e richiede una decisione, perché il fallback ha bisogno di uno store `queueLeases` che la coda distribuita non ha (versione 1, solo `encryptedOperations`). Un rilascio coordinato dovrebbe quindi: (a) decidere l'aggiornamento di schema e la sua compatibilità con le **copie PWA già installate** — il lettore v1 del laboratorio rifiuta lo schema 2, quindi l'ordine di aggiornamento conta; (b) mantenere il rifiuto fail-closed attuale finché l'aggiornamento non è distribuito; (c) prevedere un rollback che non reintroduca un percorso di scrittura senza lease. Le domande per il proprietario sono in [M6_DOMANDE_FALLBACK_WEB_LOCKS.md](./M6_DOMANDE_FALLBACK_WEB_LOCKS.md) (commit separato dalle prove).
+
+### Criterio ancora aperto per `F2-P1-07`
+
+Il finding **resta aperto**: questo banco **fa avanzare l'evidenza** (l'interfaccia reale accetta il candidato e si comporta come previsto nei tre casi critici), ma **non** chiude l'adozione nel runtime, l'aggiornamento dello schema IndexedDB, la distribuzione preparatoria delle copie PWA, la concorrenza reale fra schede e dispositivi sul runtime distribuito, né i collaudi fisici.
+
+### Limiti dichiarati
+
+- Banco **di laboratorio**: browser headless, dati sintetici, nessun dispositivo fisico, nessuna app distribuita, nessun deploy.
+- Nel banco il database del lease è **separato** da quello della coda reale (nel caso `createOfflineMutationClientCore` il lease vive in un database di laboratorio dedicato) proprio perché la coda distribuita non ha lo store del lease: un'adozione reale dovrà riconciliare i due schemi.
+- L'esclusione reciproca è provata fra **titolari in pagina**; il caso pagina/Worker e la concorrenza fra schede e dispositivi restano coperti dalle suite di coordinamento esistenti, non da questo banco.
+- Non sono esercitati UI, migrazione IndexedDB, aggiornamento delle copie PWA installate, né il comportamento con Storage/cache espulsi.

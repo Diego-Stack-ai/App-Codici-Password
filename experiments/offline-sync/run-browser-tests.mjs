@@ -9,7 +9,8 @@ import {build} from 'esbuild';
 const browserPath = process.argv[2];
 const backendMode = ['--backend', '--private-backend'].includes(process.argv[3]);
 const noLocks = process.argv[3] === '--no-locks';
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks]');
+const runtimeLease = process.argv[3] === '--runtime-lease';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
@@ -24,7 +25,8 @@ const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true,
         export {createFirebasePrivateNoteSource} from './experiments/persistent-vault-shell/firebase-private-note-source.mjs';
         export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
-    ['/suite.mjs', noLocks ? 'experiments/offline-sync/browser-no-locks.mjs'
+    ['/suite.mjs', runtimeLease ? 'experiments/offline-sync/browser-runtime-lease.mjs'
+        : noLocks ? 'experiments/offline-sync/browser-no-locks.mjs'
         : backendMode ? 'experiments/offline-sync/browser-backend-sync.mjs' : 'experiments/offline-sync/browser-coordination.mjs'],
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
     ['/fenced-queue-writer.mjs', 'experiments/offline-sync/fenced-queue-writer.mjs'],
@@ -36,6 +38,7 @@ const paths = new Map([
     ['/persistent-vault-shell/prepare-private-account-patch.mjs', 'experiments/persistent-vault-shell/prepare-private-account-patch.mjs'],
     ['/Frontend/public/assets/js/modules/data/offline-mutation-sync.js', 'Frontend/public/assets/js/modules/data/offline-mutation-sync.js'],
     ['/Frontend/public/assets/js/modules/data/offline-mutation-queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
+    ['/Frontend/public/assets/js/modules/data/offline-mutation-client-core.js', 'Frontend/public/assets/js/modules/data/offline-mutation-client-core.js'],
     ['/worker.mjs', 'experiments/offline-sync/browser-coordination-worker.mjs'],
     ['/hybrid-queue-coordinator.mjs', 'experiments/offline-sync/hybrid-queue-coordinator.mjs'],
     ['/indexeddb-queue-lease.mjs', 'experiments/offline-sync/indexeddb-queue-lease.mjs'],
