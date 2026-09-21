@@ -50,6 +50,9 @@ const {
 const {
     accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData
 } = require("./account-widget-service");
+const {
+    auditWriteDecision, buildAuditEvent, inviteRefOf, responseEventId
+} = require("./audit-event-service");
 
 initializeApp();
 
@@ -1200,6 +1203,11 @@ exports.respondToInvitation = onCall(
 
         const firestore = admin.firestore();
         const inviteRef = firestore.collection("invites").doc(inviteId);
+        // M7-AUDIT-4: base opaca generata una sola volta per invocazione, quindi
+        // stabile anche se la transazione viene ritentata. È usata solo quando
+        // l'invito non ha un `auditRef` valido (invito legacy o marcatore corrotto).
+        const responseRef = crypto.randomUUID();
+        let auditSkipCode = null;
         await firestore.runTransaction(async (transaction) => {
             const inviteSnap = await transaction.get(inviteRef);
             if (!inviteSnap.exists) throw new HttpsError("not-found", "Invito non trovato.");
@@ -1254,6 +1262,55 @@ exports.respondToInvitation = onCall(
             const sharedWithUids = [...new Set(acceptedGuests.map((item) => item.uid))];
             const hasActive = Object.values(sharedWith).some((item) => ["pending", "accepted"].includes(item?.status));
 
+            // M7-AUDIT-4 (opzione A, decisione D-7) — evento del registro tecnico
+            // scritto nella stessa transazione della risposta: un errore Firestore
+            // ferma insieme risposta ed evento, quindi il registro non contiene mai
+            // una riga per un'azione non avvenuta. Un payload non valido è la sola
+            // classe controllabile e non blocca la risposta: si annota un codice
+            // stabile e si prosegue senza evento.
+            let auditBase = null;
+            // Marcatore assente o corrotto: non è un errore fatale, si ripiega sulla
+            // base casuale senza toccare `auditRef`.
+            try { auditBase = inviteRefOf(invite); } catch { auditBase = null; }
+            // Invito legacy (o marcatore corrotto): la scrittura originaria è questa
+            // callable, quindi la base opaca diventa `responseRef`, persistito
+            // sull'invito come `responseAuditRef` per la futura rimozione (M7-AUDIT-3P-R1).
+            const auditLegacy = auditBase === null;
+            if (auditLegacy) auditBase = responseRef;
+            let auditPlan = null;
+            try {
+                const auditFields = {
+                    actorUid: invite.ownerId,
+                    accountId: invite.accountId,
+                    context: invite.aziendaId || "privato",
+                    cycle: inviteCycle,
+                    guestKnown: status === "accepted"
+                };
+                if (status === "accepted") auditFields.guestUid = uid;
+                const auditId = responseEventId(auditBase, status);
+                auditPlan = {
+                    id: auditId,
+                    path: `users/${invite.ownerId}/auditEvents/${auditId}`,
+                    payload: buildAuditEvent(`invite-${status}`, auditFields)
+                };
+            } catch (error) {
+                auditPlan = null;
+                auditSkipCode = String((error && error.code) || "AUDIT_EVENT_INVALID");
+            }
+            // Letture prima delle scritture: il documento evento si legge nella fase
+            // di lettura della transazione, prima della prima `update` (vincolo reale
+            // di Firestore, non stilistico).
+            let auditWrite = false;
+            if (auditPlan) {
+                const auditSnapshot = await transaction.get(firestore.doc(auditPlan.path));
+                try {
+                    auditWrite = auditWriteDecision(auditSnapshot.exists === true, auditPlan).write;
+                } catch (error) {
+                    auditWrite = false;
+                    auditSkipCode = String((error && error.code) || "AUDIT_DECISION_INVALID");
+                }
+            }
+
             transaction.update(accountRef, {
                 sharedWith,
                 sharedWithUids,
@@ -1261,12 +1318,29 @@ exports.respondToInvitation = onCall(
                 visibility: hasActive ? "shared" : "private",
                 updatedAt: new Date().toISOString()
             });
-            transaction.update(inviteRef, {
+            const invitePatch = {
                 status,
                 guestUid: status === "accepted" ? uid : null,
                 respondedAt: new Date().toISOString()
-            });
+            };
+            if (auditLegacy) invitePatch.responseAuditRef = responseRef;
+            transaction.update(inviteRef, invitePatch);
+            // Create-if-absent: un evento già presente non viene riscritto, quindi
+            // `at` resta quello della prima scrittura.
+            if (auditPlan && auditWrite) {
+                transaction.set(firestore.doc(auditPlan.path), {
+                    ...auditPlan.payload, at: FieldValue.serverTimestamp()
+                });
+            }
         });
+        if (auditSkipCode) {
+            // Nessun dato dell'invito nei log: solo un codice stabile, l'azione e un
+            // correlatore casuale. Email, chiave sanificata e id del documento invito
+            // non devono mai finire nei log.
+            console.warn("[AUDIT] evento saltato", {
+                code: auditSkipCode, action: `invite-${status}`, correlationId: responseRef
+            });
+        }
         return { ok: true, status };
     }
 );

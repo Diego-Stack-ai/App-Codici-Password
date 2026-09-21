@@ -2,13 +2,21 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
+const {randomUUID} = require('node:crypto');
 const {HttpsError} = require('firebase-functions/v2/https');
+const {inviteRefOf, responseEventId, buildAuditEvent, auditWriteDecision} = require('../audit-event-service');
 
 // M7-R7B3 — risposta a un invito quando l'Account del proprietario è
-// nell'Archivio. Il banco esegue il gestore REALE (`respondToInvitation`)
-// estratto da `functions/index.js` e una transazione con la stessa semantica di
-// Firestore: le letture fissano una versione, se un documento letto cambia prima
-// del commit la transazione viene ritentata e il controllo viene rieseguito.
+// nell'Archivio.
+// M7-AUDIT-4 — evento `invite-accepted`/`invite-rejected` scritto nella stessa
+// transazione della risposta (opzione A, decisione D-7 di Diego).
+// Il banco esegue il gestore REALE (`respondToInvitation`) estratto da
+// `functions/index.js` e una transazione con la stessa semantica di Firestore:
+// le letture fissano una versione, se un documento letto cambia prima del commit
+// la transazione viene ritentata e il controllo viene rieseguito. Il giornale
+// `journal` registra l'ordine delle chiamate, così la regola «prima le letture,
+// poi le scritture» diventa verificabile: nel banco una `get` dopo una `set`
+// funzionerebbe, in produzione no.
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const emailGuard = source.slice(source.indexOf('function sanitizeEmail('), source.indexOf('function normalizeEmail('));
 const handler = source.slice(source.indexOf('exports.respondToInvitation'), source.indexOf('exports.deleteContactIfUnused'));
@@ -17,21 +25,46 @@ const EMAIL = 'guest@example.invalid';
 // `sanitizeEmail` sostituisce ogni carattere non alfanumerico con `_`.
 const KEY = 'guest_example_invalid';
 const UID = 'guest-uid';
-const INVITE_PATH = `invites/account_${KEY}`;
+const INVITE_ID = `account_${KEY}`;
+const INVITE_PATH = `invites/${INVITE_ID}`;
 const ACCOUNT_PATH = 'users/A/accounts/account';
+const AUDIT_REF = '11111111-1111-4111-8111-111111111111';
+const CORRUPT_REF = 'non-uuid';
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// Sostituto del `FieldValue.serverTimestamp()` reale: distinguibile da un `at`
+// seminato, così la prova «l'evento presente non viene riscritto» è visibile.
+const SERVER_TIMESTAMP = {__serverTimestamp: true};
+const eventPath = id => `users/A/auditEvents/${id}`;
+const EVENT_PATH = eventPath(`${AUDIT_REF}__accepted`);
+const REJECTED_PATH = eventPath(`${AUDIT_REF}__rejected`);
 
-function fixture({archived = false, status = 'accepted', hook = null, accountCycle, inviteCycle} = {}) {
+// La regola di Firestore è «prima tutte le letture, poi le scritture»: una `get`
+// dopo la prima scrittura accantonata non è valida in produzione. Questa guardia
+// rende il difetto visibile nel banco (e la prova della prova lo dimostra).
+function readFollowsWrite(journal) {
+    const firstWrite = journal.findIndex(entry => entry[0] === 'write');
+    if (firstWrite === -1) return false;
+    return journal.map(entry => entry[0]).lastIndexOf('read') > firstWrite;
+}
+
+function assertReadsBeforeWrites(f) {
+    assert.equal(readFollowsWrite(f.journal), false, 'nessuna lettura dopo la prima scrittura');
+}
+
+function fixture({archived = false, status = 'accepted', hook = null, accountCycle, inviteCycle,
+    auditRef = AUDIT_REF, commitHook = null} = {}) {
     const account = {isArchived: archived, sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}};
     if (accountCycle !== undefined) account.sharingCycle = accountCycle;
-    const invite = {inviteId: `account_${KEY}`, ownerId: 'A', senderId: 'A', accountId: 'account',
+    const invite = {inviteId: INVITE_ID, ownerId: 'A', senderId: 'A', accountId: 'account',
         recipientEmail: EMAIL, status: 'pending'};
     if (inviteCycle !== undefined) invite.cycle = inviteCycle;
+    if (auditRef !== null) invite.auditRef = auditRef;
     const documents = new Map([
         [ACCOUNT_PATH, account],
         [INVITE_PATH, invite]
     ]);
     const versions = new Map();
-    const reads = [], writes = [];
+    const reads = [], writes = [], journal = [], auditLogs = [];
     let attempts = 0;
     const reference = path => ({path});
     const store = {
@@ -45,18 +78,22 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
                 const transaction = {
                     get: async target => {
                         reads.push(target.path);
+                        journal.push(['read', target.path]);
                         const data = documents.get(target.path);
                         readVersions.set(target.path, versions.get(target.path) || 0);
                         const snapshot = {exists: data !== undefined, data: () => (data ? structuredClone(data) : undefined)};
                         hook?.({path: target.path, attempt, documents, versions});
                         return snapshot;
                     },
-                    update: (target, patch) => staged.push([target.path, patch]),
-                    set: (target, patch) => staged.push([target.path, patch])
+                    update: (target, patch) => { staged.push([target.path, patch]); journal.push(['write', target.path]); },
+                    set: (target, patch) => { staged.push([target.path, patch]); journal.push(['write', target.path]); }
                 };
                 const result = await callback(transaction);
                 const superseded = [...readVersions].some(([path, version]) => (versions.get(path) || 0) !== version);
                 if (superseded) continue;
+                // M7-AUDIT-4 — errore Firestore al commit: nessuna scrittura viene
+                // applicata, come in una transazione che fallisce.
+                commitHook?.({attempt, staged, documents, versions});
                 for (const [path, patch] of staged) {
                     documents.set(path, {...documents.get(path), ...patch});
                     versions.set(path, (versions.get(path) || 0) + 1);
@@ -68,16 +105,19 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
         }
     };
     const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, run) => run,
-        admin: {firestore: () => store}, structuredClone});
+        admin: {firestore: () => store}, structuredClone, crypto: {randomUUID},
+        FieldValue: {serverTimestamp: () => SERVER_TIMESTAMP},
+        console: {warn: (...args) => auditLogs.push(args)},
+        inviteRefOf, responseEventId, buildAuditEvent, auditWriteDecision});
     vm.runInContext(emailGuard + handler, context);
-    return {documents, writes, reads, get attempts() { return attempts; },
+    return {documents, writes, reads, journal, auditLogs, get attempts() { return attempts; },
         archive: () => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), isArchived: true});
             versions.set(ACCOUNT_PATH, (versions.get(ACCOUNT_PATH) || 0) + 1); },
         bumpCycle: value => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), sharingCycle: value});
             versions.set(ACCOUNT_PATH, (versions.get(ACCOUNT_PATH) || 0) + 1); },
         respond: (requested = status) => context.exports.respondToInvitation({
             auth: {uid: UID, token: {email: EMAIL}},
-            data: {inviteId: `account_${KEY}`, status: requested}
+            data: {inviteId: INVITE_ID, status: requested}
         })};
 }
 
@@ -97,7 +137,7 @@ test('invito su Account archiviato: errore chiaro, nessuna scrittura, invito e c
 test('invito su Account attivo: comportamento invariato per accettazione e rifiuto', async () => {
     const accepted = fixture();
     assert.deepEqual({...await accepted.respond('accepted')}, {ok: true, status: 'accepted'});
-    assert.deepEqual(accepted.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH]);
+    assert.deepEqual(accepted.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH, EVENT_PATH]);
     const account = accepted.documents.get(ACCOUNT_PATH);
     assert.deepEqual([...account.sharedWithUids], [UID]);
     assert.equal(account.sharedWith[KEY].status, 'accepted');
@@ -210,4 +250,141 @@ test('archiviazione concorrente durante la risposta: il ciclo aggiornato nega l\
     await assert.rejects(f.respond('accepted'), error => error.details?.reason === 'INVITE_CYCLE_STALE');
     assert.equal(f.attempts, 2, 'la transazione viene ritentata sul ciclo aggiornato');
     assert.equal(f.writes.length, 0);
+});
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-4 — evento di risposta nella stessa transazione (opzione A, D-7)
+// ─────────────────────────────────────────────────────────────
+
+test('risposta accettata con `auditRef`: evento nella stessa transazione, id opaco', async () => {
+    const f = fixture();
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.deepEqual(f.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH, EVENT_PATH]);
+    assert.deepEqual({...f.documents.get(EVENT_PATH)}, {schemaVersion: 1, action: 'invite-accepted',
+        actorUid: 'A', accountId: 'account', context: 'privato', cycle: 0, guestKnown: true,
+        guestUid: UID, at: SERVER_TIMESTAMP});
+    assert.equal('responseAuditRef' in f.documents.get(INVITE_PATH), false,
+        'invito con `auditRef` valido: nessun ripiego persistito');
+    assert.ok(f.reads.includes(EVENT_PATH), 'il documento evento viene letto nella fase di lettura');
+    assertReadsBeforeWrites(f);
+});
+
+test('risposta rifiutata: id distinto e nessun `guestUid` nel registro', async () => {
+    const f = fixture({status: 'rejected'});
+    assert.deepEqual({...await f.respond('rejected')}, {ok: true, status: 'rejected'});
+    assert.deepEqual(f.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH, REJECTED_PATH]);
+    const event = f.documents.get(REJECTED_PATH);
+    assert.equal(event.action, 'invite-rejected');
+    assert.equal(event.guestKnown, false);
+    assert.equal('guestUid' in event, false, 'risposta rifiutata: indicatore anonimo, nessun uid');
+    assert.equal(f.documents.get(INVITE_PATH).guestUid, null);
+});
+
+test('invito legacy: base casuale persistita e un solo evento con quella base', async () => {
+    const f = fixture({auditRef: null});
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    const invite = f.documents.get(INVITE_PATH);
+    assert.equal('auditRef' in invite, false);
+    assert.match(invite.responseAuditRef, UUID);
+    const legacyPath = eventPath(`${invite.responseAuditRef}__accepted`);
+    assert.deepEqual(f.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH, legacyPath]);
+    assert.equal(f.documents.get(legacyPath).action, 'invite-accepted');
+    assert.equal(f.documents.get(legacyPath).guestUid, UID);
+});
+
+test('marcatore corrotto: nessun abort, ripiego sulla base casuale, `auditRef` invariato', async () => {
+    const f = fixture({auditRef: CORRUPT_REF});
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    const invite = f.documents.get(INVITE_PATH);
+    assert.equal(invite.auditRef, CORRUPT_REF, 'il marcatore corrotto non viene toccato');
+    assert.match(invite.responseAuditRef, UUID);
+    const fallbackPath = eventPath(`${invite.responseAuditRef}__accepted`);
+    assert.equal(f.documents.get(fallbackPath).action, 'invite-accepted');
+    assert.equal(f.auditLogs.length, 0, 'un marcatore corrotto non è un payload saltato');
+});
+
+test('payload audit non valido: la risposta riesce, nessun evento, una riga di log senza segreti', async () => {
+    const f = fixture();
+    f.documents.set(INVITE_PATH, {...f.documents.get(INVITE_PATH), aziendaId: 'A@B'});
+    const companyPath = 'users/A/aziende/A@B/accounts/account';
+    f.documents.set(companyPath, {isArchived: false,
+        sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}});
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.deepEqual(f.writes.map(write => write[0]), [companyPath, INVITE_PATH]);
+    assert.equal([...f.documents.keys()].some(path => path.startsWith('users/A/auditEvents/')), false,
+        'nessun evento quando il payload è rifiutato');
+    assert.equal(f.auditLogs.length, 1, 'una sola riga di log');
+    const [message, detail] = f.auditLogs[0];
+    assert.equal(message, '[AUDIT] evento saltato');
+    assert.equal(detail.code, 'AUDIT_FIELD_INVALID', 'codice tecnico stabile');
+    assert.equal(detail.action, 'invite-accepted');
+    assert.match(detail.correlationId, UUID);
+    const logged = JSON.stringify(f.auditLogs);
+    for (const secret of [EMAIL, KEY, INVITE_ID]) {
+        assert.equal(logged.includes(secret), false, `il log non deve contenere ${secret}`);
+    }
+});
+
+test('evento già presente: nessuna riscrittura, `at` e payload seminati intatti', async () => {
+    const f = fixture();
+    const seeded = {schemaVersion: 1, action: 'invite-accepted', actorUid: 'seeded', accountId: 'seeded',
+        context: 'privato', cycle: 0, guestKnown: false, at: 'SEEDED'};
+    f.documents.set(EVENT_PATH, seeded);
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.deepEqual(f.documents.get(EVENT_PATH), seeded, 'create-if-absent non riscrive l\'evento');
+    assert.deepEqual(f.writes.map(write => write[0]), [ACCOUNT_PATH, INVITE_PATH]);
+    assert.ok(f.reads.includes(EVENT_PATH), 'l\'esistenza dell\'evento viene letta nella transazione');
+});
+
+test('fallimento transazionale: nessuna risposta e nessun evento (atomicità)', async () => {
+    const f = fixture({commitHook: () => { throw new Error('FIRESTORE_UNAVAILABLE'); }});
+    await assert.rejects(f.respond('accepted'), /FIRESTORE_UNAVAILABLE/);
+    assert.equal(f.writes.length, 0, 'nessuna scrittura applicata');
+    assert.equal(f.documents.get(INVITE_PATH).status, 'pending');
+    assert.equal(f.documents.get(EVENT_PATH), undefined, 'nessuna riga per un\'azione non avvenuta');
+    assert.deepEqual(f.documents.get(ACCOUNT_PATH).sharedWithUids, undefined, 'nessun grant senza risposta');
+});
+
+test('seconda invocazione dopo il commit: nessuna seconda risposta e nessun secondo evento', async () => {
+    const f = fixture();
+    await f.respond('accepted');
+    const writes = f.writes.length;
+    const reads = f.reads.length;
+    await assert.rejects(f.respond('accepted'), error => error.code === 'failed-precondition'
+        && /già elaborato/.test(error.message));
+    assert.equal(f.writes.length, writes, 'la risposta già elaborata non scrive');
+    assert.deepEqual(f.reads.slice(reads), [INVITE_PATH], 'la seconda invocazione si ferma alla prima lettura');
+    assert.equal(f.auditLogs.length, 0);
+});
+
+test('registro senza segreti: nessuna email, chiave sanificata o id invito in id e payload', async () => {
+    for (const requested of ['accepted', 'rejected']) {
+        const f = fixture({status: requested});
+        await f.respond(requested);
+        const [path, patch] = f.writes.at(-1);
+        const serialized = JSON.stringify(patch);
+        assert.equal(/@/.test(serialized), false, 'nessuna email nel payload');
+        for (const secret of [EMAIL, KEY, INVITE_ID]) {
+            assert.equal(serialized.includes(secret), false, `nessun ${secret} nel payload`);
+            assert.equal(path.includes(secret), false, `nessun ${secret} nell'id dell'evento`);
+        }
+        const expected = ['accountId', 'action', 'actorUid', 'at', 'context', 'cycle', 'guestKnown', 'schemaVersion'];
+        if (requested === 'accepted') expected.push('guestUid');
+        assert.deepEqual(Object.keys(patch).sort(), expected.sort(), `chiavi esatte per ${requested}`);
+    }
+});
+
+test('ordine letture/scritture: invito, Account ed evento si leggono prima di ogni scrittura', async () => {
+    const f = fixture();
+    await f.respond('accepted');
+    assert.deepEqual(f.journal.filter(entry => entry[0] === 'read').map(entry => entry[1]),
+        [INVITE_PATH, ACCOUNT_PATH, EVENT_PATH]);
+    assertReadsBeforeWrites(f);
+});
+
+test('la guardia dell\'ordine riconosce una lettura dopo la prima scrittura (prova della prova)', () => {
+    assert.equal(readFollowsWrite([['read', 'a'], ['read', 'b'], ['write', 'c']]), false);
+    assert.equal(readFollowsWrite([['read', 'a'], ['write', 'b'], ['read', 'c']]), true);
+    assert.equal(readFollowsWrite([['write', 'a']]), false);
+    assert.equal(readFollowsWrite([]), false);
 });
