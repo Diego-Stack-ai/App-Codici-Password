@@ -142,6 +142,8 @@ test('late company list cannot fan out reads after an owner change and restore c
 
 function restoreFixture(record = {isArchived: true, revision: 1, password: 'synthetic-cipher'}) {
     const f = fixture(), reads = [];
+    // M7-R7C-2: il ripristino legge anche gli inviti quando deve neutralizzare.
+    const invites = new Map();
     let server = record, afterRead = async () => {}, retry = false;
     f.context.runTransaction = async (_db, callback) => {
         for (;;) {
@@ -149,24 +151,28 @@ function restoreFixture(record = {isArchived: true, revision: 1, password: 'synt
             await callback({
                 get: async reference => {
                     reads.push(reference);
-                    const snapshot = structuredClone(server);
+                    const isInvite = String(reference).startsWith('invites/');
+                    const snapshot = isInvite ? (invites.has(reference) ? structuredClone(invites.get(reference)) : null) : structuredClone(server);
                     await afterRead();
                     return {exists: () => snapshot !== null, data: () => snapshot};
                 },
-                update: (reference, patch) => staged.push([reference, patch])
+                update: (reference, patch) => staged.push([reference, patch]),
+                delete: () => { throw new Error('M7R7C2_NO_DELETE'); }
             });
             if (retry) { retry = false; continue; }
             f.writes.push(...staged);
             return;
         }
     };
-    return {...f, reads, set server(value) { server = value; }, set afterRead(callback) { afterRead = callback; },
+    return {...f, reads, invites, set server(value) { server = value; }, set afterRead(callback) { afterRead = callback; },
         set retry(value) { retry = value; }};
 }
 
 test('archive restore CAS preserves private/company identity and updates only archive state and revision', async () => {
     for (const context of ['privato', 'company']) {
-        const f = restoreFixture(), selected = account('same', context);
+        // Account archiviato DAL PROTOCOLLO: grant vuoti e ciclo ≥ 1.
+        const f = restoreFixture({isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: []});
+        const selected = account('same', context);
         const pending = f.context.restoreArchivedAccount('A', selected);
         selected.id = 'changed'; selected.context = 'other'; selected.revision = 99;
         await pending;
@@ -222,6 +228,73 @@ test('archive restore lock or identity change during transaction read prevents a
         await assert.rejects(f.context.restoreArchivedAccount('A', account()), /ARCHIVE_SESSION_INVALIDATED/);
         assert.equal(f.writes.length, 0); assert.equal(f.observers.size, 0);
     }
+});
+
+// M7-R7C-2 — il ripristino non riapre alcun accesso.
+
+test('ripristino: Account archiviato dal protocollo non tocca condivisione né inviti', async () => {
+    const f = restoreFixture({isArchived: true, revision: 4, sharingCycle: 2, sharedWithUids: [],
+        sharedWith: {k: {email: 'g@example.invalid', status: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'}}});
+    const result = await f.context.restoreArchivedAccount('A', {...account(), revision: 4});
+    assert.equal(result.status, 'restored');
+    assert.equal(result.neutralized, false);
+    assert.equal(result.sharingCycle, 2);
+    assert.equal(result.neutralizedInvites, 0);
+    assert.equal(f.writes.length, 1);
+    const patch = f.writes[0][1];
+    assert.equal(patch.isArchived, false);
+    assert.equal(Object.hasOwn(patch, 'sharedWithUids'), false, 'nessun grant toccato');
+    assert.equal(Object.hasOwn(patch, 'sharingCycle'), false, 'il ciclo resta quello del protocollo');
+    assert.equal(f.reads.length, 1, 'nessuna lettura di inviti quando lo stato è coerente');
+});
+
+test('ripristino: Account legacy viene neutralizzato nella stessa transazione e il ciclo avanza', async () => {
+    const f = restoreFixture({isArchived: true, revision: 3, sharedWithUids: ['guest-1', 'guest-2'],
+        sharedWith: {
+            accepted_key: {email: 'accepted@example.invalid', status: 'accepted', uid: 'guest-1'},
+            pending_key: {email: 'pending@example.invalid', status: 'pending', uid: null},
+            rejected_key: {email: 'rejected@example.invalid', status: 'rejected', uid: null}
+        }});
+    f.invites.set('invites/same_accepted_key', {status: 'accepted'});
+    f.invites.set('invites/same_pending_key', {status: 'pending'});
+    const result = await f.context.restoreArchivedAccount('A', {...account(), revision: 3});
+    assert.equal(result.neutralized, true, 'grant residui ⇒ neutralizzazione');
+    assert.equal(result.sharingCycle, 1, 'il ciclo parte da zero e avanza');
+    assert.equal(result.neutralizedInvites, 2);
+    const patch = f.writes.find(write => write[0] === 'users/A/accounts/same')[1];
+    assert.equal(patch.isArchived, false);
+    assert.equal(patch.sharedWithUids.length, 0, 'nessun accesso riaperto');
+    assert.equal(patch.acceptedCount, 0);
+    assert.equal(patch.sharingCycle, 1);
+    assert.equal(patch.sharedWith.accepted_key.status, 'suspended');
+    assert.equal(patch.sharedWith.pending_key.status, 'suspended');
+    assert.equal(patch.sharedWith.rejected_key.status, 'rejected');
+    const inviteWrites = f.writes.filter(write => String(write[0]).startsWith('invites/'));
+    assert.deepEqual(inviteWrites.map(write => write[0]).sort(), ['invites/same_accepted_key', 'invites/same_pending_key']);
+    assert.ok(inviteWrites.every(write => write[1].sharingState === 'suspended'));
+});
+
+test('ripristino: Account legacy senza ospiti avanza comunque il ciclo', async () => {
+    const f = restoreFixture({isArchived: true, revision: 1, sharedWith: {}});
+    const result = await f.context.restoreArchivedAccount('A', account());
+    assert.equal(result.neutralized, true, 'ciclo assente ⇒ protocollo non applicato');
+    assert.equal(result.sharingCycle, 1);
+    assert.equal(result.neutralizedInvites, 0);
+    assert.equal(f.writes.length, 1);
+    assert.equal(f.writes[0][1].sharedWithUids.length, 0);
+});
+
+test('ripristino: ciclo malformato o oltre il tetto fallisce senza scritture', async () => {
+    for (const sharingCycle of [-1, '1', 1.5, Number.MAX_SAFE_INTEGER + 2, Number.MAX_SAFE_INTEGER]) {
+        const f = restoreFixture({isArchived: true, revision: 1, sharingCycle, sharedWithUids: []});
+        await assert.rejects(f.context.restoreArchivedAccount('A', account()), /ARCHIVE_RESTORE_CYCLE_INVALID/);
+        assert.equal(f.writes.length, 0, `nessuna scrittura con sharingCycle ${sharingCycle}`);
+    }
+    const sharedWith = {};
+    for (let index = 0; index <= 100; index++) sharedWith[`guest_${index}`] = {email: `g${index}@example.invalid`, status: 'accepted', uid: `u${index}`};
+    const over = restoreFixture({isArchived: true, revision: 1, sharedWithUids: ['u0'], sharedWith});
+    await assert.rejects(over.context.restoreArchivedAccount('A', account()), /ARCHIVE_RECIPIENTS_LIMIT/);
+    assert.equal(over.writes.length, 0);
 });
 
 test('late archive read from previous mount cannot replace the next owner list', async () => {

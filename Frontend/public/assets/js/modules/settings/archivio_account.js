@@ -388,9 +388,12 @@ async function handleRestore(key) {
 
     mutationPending = true;
     try {
-        await restoreArchivedAccount(uid, {...item}, serviceOptions);
+        const restored = await restoreArchivedAccount(uid, {...item}, serviceOptions);
         if (!active()) return;
-        showToast(t('success_restored') || "Ripristinato", "success");
+        // M7-R7C-2: se il ripristino ha dovuto neutralizzare una condivisione
+        // precedente (Account archiviato prima del protocollo), il proprietario
+        // deve sapere che serve un nuovo invito.
+        showToast(restored?.neutralized ? t('success_restored_sharing_revoked') : (t('success_restored') || "Ripristinato"), "success");
         allArchived = allArchived.filter(account => identity(account) !== key);
         const el = [...container.children].find(row => row.dataset.key === key);
         if (el) {

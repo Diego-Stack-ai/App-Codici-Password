@@ -2582,3 +2582,63 @@ Casi nuovi in `tests/archive-guest-suspension.rules.test.mjs`:
 4. Invariati: Functions, scrittori, versione, `master`, deploy e dati reali.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R7C-1 consegnata da DeepSeek il 2026-09-21; `cycle` ammesso e validato nell'allowlist di creazione con compatibilità legacy, quattro prove Emulator aggiunte (creazione consentita, malformati negati, estraneo negato, letture invariate), suite Rules **43/43**, controllo negativo 13/14 → 14/14, nessun push eseguito e R7C-2 non avviata.
+
+## Verifica Codex — correzione M7-R7C-1 allowlist inviti
+
+**Esito: APPROVATO come candidato locale.** Commit `054315a2`: `cycle` è ammesso nell'allowlist `invites` solo in creazione, con valore intero non negativo entro il massimo sicuro; assenza compatibile col ciclo legacy 0. I test Rules Emulator riportati passano **43/43**, il controllo negativo fallisce precisamente sulla creazione con `cycle`, e il diff è pulito. L'handler Functions resta l'autorità per la risposta e rifiuta cicli non corrispondenti. M7-R7C-1 si chiude per questa fetta; il ramo non è distribuibile finché ripristino e vista ospite non sono completati.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7C-2: ripristino senza riattivare ospiti
+
+**Stato incarico: PRONTO.** DeepSeek implementi il ripristino fail-closed nel servizio Archivio, mantenendo il CAS sulla revisione selezionata. Per Account già archiviati con il nuovo protocollo, verificare che grant e ciclo siano coerenti prima di impostare `isArchived: false`; per Account legacy archiviati prima del protocollo, neutralizzare `sharedWithUids`, marcare sospese le voci attive e gli inviti identificabili, incrementare `sharingCycle` da 0 nella stessa transazione di ripristino. Ogni lettura transazionale preceda ogni scrittura; valori di ciclo/revisione malformati, oltre limite, condivisione incoerente o invito non aggiornabile devono fallire senza riaprire accessi. Non aggiungere una rilettura che assorba modifiche esterne al CAS. Test mirati su privato/azienda, legacy con inviti pendenti e accettati, ciclo nuovo, nessun ospite, race, fallimento atomico e assenza di accesso dopo il ripristino su Emulator. Audit trigger eventualmente in una fetta successiva se serve per tenere il cambiamento verificabile e piccolo; dichiarare il limite. Un solo commit locale mirato, nessun push/merge/deploy né dati reali; consegna `DA_VERIFICARE`. Non avviare la vista ospite in parallelo.
+
+## Presa in carico DeepSeek — M7-R7C-2 ripristino senza riattivare ospiti
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `054315a2`; l'incarico era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** servizio Archivio + messaggio di esito; **nessun** push, merge, deploy o dato reale; **vista ospite non avviata**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7C-2 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7C-2 ripristino senza riattivare ospiti
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `054315a2`; **nessun push, merge o deploy**.
+
+### Implementazione
+
+`settings/archive-account-service.js:169-247` — il ripristino resta una sola transazione con **CAS sulla revisione selezionata** (nessuna rilettura aggiuntiva: il documento è letto una volta e il conflitto è valutato su quella lettura).
+
+- **Coerenza del protocollo:** `cycle = sharingCycleOf(current)` e `nextCycle = nextSharingCycle(current)`; un ciclo **malformato, negativo o al massimo** ⇒ `ARCHIVE_RESTORE_CYCLE_INVALID` e **nessuna scrittura**.
+- **Account archiviato dal protocollo** (`sharingCycle ≥ 1` **e** `sharedWithUids` vuoto): si scrivono solo `isArchived: false` e la rimozione dei metadati d'archivio, più la revisione. Nessuna scrittura su condivisione, nessuna lettura di inviti, ciclo invariato (`:229-245`).
+- **Account legacy o incoerente** (`sharingCycle` assente/0 **oppure** `sharedWithUids` non vuoto) — `:205`: nella **stessa** transazione si azzera `sharedWithUids`, si marca `suspended`+`suspendedAt` ogni voce `pending`/`accepted` (chi ha rifiutato conserva lo stato), si sospendono gli inviti **identificabili** del ciclo corrente (`sharingState: 'suspended'`, mai cancellati) e si porta `sharingCycle` da 0 a 1. **Tutte le letture (Account + inviti) precedono ogni scrittura.**
+- **Fallimenti chiusi:** revisione stantia ⇒ `ARCHIVE_RESTORE_CONFLICT`; ciclo invalido ⇒ `ARCHIVE_RESTORE_CYCLE_INVALID`; oltre **100** destinatari ⇒ `ARCHIVE_RECIPIENTS_LIMIT`; un `update` di un invito che non riesce fa fallire l'intera transazione. In tutti i casi **nulla cambia** e nessun accesso si riapre.
+- **Esito** (`:246`): `{status: 'restored', sharingCycle, neutralizedInvites, neutralized}`.
+- **Interfaccia** (`settings/archivio_account.js:396`): se il ripristino ha neutralizzato una condivisione precedente, il messaggio è dedicato — «Account ripristinato: le condivisioni precedenti sono state revocate. Invia un nuovo invito…» (nuova chiave in `translations.js` e `translations/en.js`) — così il proprietario sa che serve una nuova volontà di condividere, come richiesto dalla decisione di Diego.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/archive-session.test.mjs` (4 casi nuovi) | **43/43** |
+| `npm run test:firestore-rules` (Emulator; 1 caso nuovo) | **44/44** |
+| `npm run test:history-prototype` | **96/96** |
+| `npm run test:functions-security` / `test:navigation` / `test:data-access` | 142/142 · 134/134 · 95/95 |
+| `npm run test:js-syntax` · `audit-page-performance --check` | 161 moduli · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **792 file** |
+
+Casi coperti: **protocollo** (nessuna scrittura su condivisione, ciclo invariato, nessuna lettura di inviti); **legacy con inviti pendenti e accettati** (grant azzerati, voci sospese, inviti marcati, ciclo 0 → 1, una sola transazione, nessuna cancellazione); **legacy senza ospiti** (ciclo che avanza comunque); **ciclo malformato o oltre il tetto** (nessuna scrittura); conflitto di revisione, record assente, revisione malformata e lock/cambio utente già coperti dalle prove esistenti; **Emulator**: dopo la transazione di ripristino del proprietario su un Account legacy l'ospite **non rilegge** l'Account, il proprietario sì, `sharedWithUids` è vuoto, il ciclo è 1 e l'invito risulta `suspended`.
+Privato e aziendale: il percorso è lo stesso codice con il riferimento costruito dal contesto, già coperto dai test di archivio per entrambi i contesti.
+
+**Controllo negativo eseguito:** con la sola versione già committata (`054315a2`, ripristino che non neutralizza) i 4 casi nuovi falliscono (**39/43**); con la correzione **43/43**.
+
+### Limiti dichiarati
+
+1. **Trigger di audit non implementato**: archiviazione e ripristino non scrivono un evento di audit lato backend (il client non può, decisione M7-R3). Codex lo ammette in una fetta successiva: qui il cambiamento resta piccolo e verificabile.
+2. **Inviti orfani**: la sospensione al ripristino enumera solo gli inviti derivabili dalle chiavi di `sharedWith`; gli orfani restano inerti e non ricensiti (R7C-6).
+3. **Vista ospite non adeguata** (R7C-4, non avviata come disposto): dopo il ripristino l'ospite non rilegge, ma non vede ancora la card «Account sospeso».
+4. **Cache offline** non revocabile: limite invariato da M7-R7A.
+5. **Il candidato resta non distribuibile**: mancano R7C-4 e R7C-5.
+6. Nessun collaudo su browser o dispositivo reale.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7C-2 consegnato da DeepSeek il 2026-09-21; ripristino fail-closed in una sola transazione con CAS intatto, neutralizzazione dei legacy (grant azzerati, voci sospese, inviti marcati, ciclo 0 → 1) e nessuna scrittura su condivisione per gli Account del protocollo, esito distinto per il proprietario, suite 43/43 · 44/44 su Emulator · 96/96, controllo negativo 39/43 → 43/43, nessun push eseguito e vista ospite non avviata.

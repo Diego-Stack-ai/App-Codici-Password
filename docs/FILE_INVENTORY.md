@@ -191,8 +191,8 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/settings/account-field-usage-model.js` | JS | 6787 | 110 | Impostazioni applicative: account-field-usage-model. |
 | `Frontend/public/assets/js/modules/settings/account-field-usage-service.js` | JS | 8154 | 181 | Impostazioni applicative: account-field-usage-service. |
 | `Frontend/public/assets/js/modules/settings/archive-account-model.js` | JS | 2602 | 55 | Impostazioni applicative: archive-account-model. |
-| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 18286 | 392 | Impostazioni applicative: archive-account-service. |
-| `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 20883 | 471 | Impostazioni applicative: archivio account. |
+| `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 21274 | 436 | Impostazioni applicative: archive-account-service. |
+| `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 21179 | 474 | Impostazioni applicative: archivio account. |
 | `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 5314 | 125 | Impostazioni applicative: backup-crypto. |
 | `Frontend/public/assets/js/modules/settings/backup-export-buffer.js` | JS | 2570 | 50 | Impostazioni applicative: backup-export-buffer. |
 | `Frontend/public/assets/js/modules/settings/backup-export-model.js` | JS | 4479 | 93 | Impostazioni applicative: backup-export-model. |
@@ -236,9 +236,9 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/push-messaging-client.js` | JS | 1160 | 35 | Supporto frontend: push-messaging-client. |
 | `Frontend/public/assets/js/swipe-list-v6.js` | JS | 8791 | 251 | Supporto frontend: swipe-list-v6. |
 | `Frontend/public/assets/js/theme-init.js` | JS | 2176 | 54 | Applica il tema prima del rendering per evitare lampeggiamenti. |
-| `Frontend/public/assets/js/translations.js` | JS | 24566 | 449 | Dizionario italiano e caricamento differito delle altre lingue. |
+| `Frontend/public/assets/js/translations.js` | JS | 24731 | 450 | Dizionario italiano e caricamento differito delle altre lingue. |
 | `Frontend/public/assets/js/translations/de.js` | JS | 5975 | 123 | Dizionario differito per la lingua de. |
-| `Frontend/public/assets/js/translations/en.js` | JS | 16698 | 310 | Dizionario differito per la lingua en. |
+| `Frontend/public/assets/js/translations/en.js` | JS | 16835 | 311 | Dizionario differito per la lingua en. |
 | `Frontend/public/assets/js/translations/es.js` | JS | 6970 | 141 | Dizionario differito per la lingua es. |
 | `Frontend/public/assets/js/translations/fr.js` | JS | 6132 | 123 | Dizionario differito per la lingua fr. |
 | `Frontend/public/assets/js/translations/hi.js` | JS | 8868 | 122 | Dizionario differito per la lingua hi. |
@@ -312,7 +312,7 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 388832 | 2585 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 390795 | 2595 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -812,9 +812,9 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
-| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 10341 | 180 | Test automatico: archive-guest-suspension.rules.test. |
+| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 12928 | 223 | Test automatico: archive-guest-suspension.rules.test. |
 | `tests/archive-recipients.test.mjs` | MJS | 5567 | 101 | Test automatico: archive-recipients.test. |
-| `tests/archive-session.test.mjs` | MJS | 38761 | 595 | Test automatico: archive-session.test. |
+| `tests/archive-session.test.mjs` | MJS | 43639 | 668 | Test automatico: archive-session.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
 | `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
 | `tests/backup-export-model.test.mjs` | MJS | 2662 | 49 | Test automatico: backup-export-model.test. |

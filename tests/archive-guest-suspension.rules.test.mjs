@@ -2,7 +2,7 @@ import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from 'firebase/firestore';
+import {collection, doc, getDoc, getDocs, query, runTransaction, setDoc, updateDoc, where} from 'firebase/firestore';
 
 // M7-R7B1a — blocco autorevole della lettura ospite quando l'Account del
 // proprietario è nell'Archivio (firestore.rules:164-176). Prove su Firestore
@@ -16,6 +16,8 @@ const EMAIL_KEY = 'guest_example_invalid';
 const activePath = ['users', OWNER, 'accounts', ACCOUNT];
 const archivedPath = ['users', OWNER, 'accounts', ARCHIVED];
 const restoredPath = ['users', OWNER, 'accounts', 'restored-1'];
+const legacyPath = ['users', OWNER, 'accounts', 'legacy-1'];
+const legacyInvitePath = ['invites', `legacy-1_${EMAIL_KEY}`];
 const guestInvitePath = ['invites', `${ACCOUNT}_${EMAIL_KEY}`];
 const activeCompanyPath = ['users', OWNER, 'aziende', COMPANY, 'accounts', ACCOUNT];
 const archivedCompanyPath = ['users', OWNER, 'aziende', COMPANY, 'accounts', ARCHIVED];
@@ -48,6 +50,12 @@ beforeEach(async () => {
         await setDoc(doc(db, ...guestInvitePath), {inviteId: `${ACCOUNT}_${EMAIL_KEY}`, ownerId: OWNER, senderId: OWNER,
             accountId: ACCOUNT, recipientEmail: 'guest@example.invalid', status: 'accepted',
             sharingState: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'});
+        // M7-R7C-2: Account archiviato PRIMA del protocollo, con grant ancora attivi.
+        await setDoc(doc(db, ...legacyPath), {nomeAccount: 'Account legacy', type: 'account', revision: 1,
+            isArchived: true, acceptedCount: 1, sharedWithUids: [GUEST],
+            sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'accepted', uid: GUEST}}});
+        await setDoc(doc(db, ...legacyInvitePath), {inviteId: `legacy-1_${EMAIL_KEY}`, ownerId: OWNER, senderId: OWNER,
+            accountId: 'legacy-1', recipientEmail: 'guest@example.invalid', status: 'accepted'});
         await setDoc(doc(db, ...activeCompanyPath), account(false));
         await setDoc(doc(db, ...archivedCompanyPath), account(true));
         await setDoc(doc(db, ...archivedPath, 'attachments', 'attachment-1'), {name: 'allegato sintetico'});
@@ -176,4 +184,39 @@ test('inviti del ciclo corrente e del ciclo precedente restano leggibili dal des
     });
     await assertSucceeds(getDoc(doc(asGuest(), 'invites', 'invito-ciclo-1')));
     await assertSucceeds(getDoc(doc(asGuest(), ...guestInvitePath)));
+});
+
+// M7-R7C-2 — il ripristino di un Account legacy neutralizza la condivisione nella
+// stessa transazione: dopo il ripristino l'ospite precedente NON rilegge.
+test('ripristino legacy: la transazione del proprietario revoca i grant e l\'ospite non rilegge', async () => {
+    const db = asOwnerWithEmail();
+    await assertSucceeds(runTransaction(db, async transaction => {
+        const accountRef = doc(db, ...legacyPath);
+        const snapshot = await transaction.get(accountRef);
+        const current = snapshot.data();
+        const inviteRef = doc(db, ...legacyInvitePath);
+        const inviteSnapshot = await transaction.get(inviteRef);
+        const sharedWith = {...current.sharedWith};
+        sharedWith[EMAIL_KEY] = {...sharedWith[EMAIL_KEY], status: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'};
+        transaction.update(accountRef, {
+            isArchived: false,
+            sharedWith,
+            sharedWithUids: [],
+            acceptedCount: 0,
+            sharingCycle: 1,
+            revision: 2
+        });
+        if (inviteSnapshot.exists()) {
+            transaction.update(inviteRef, {sharingState: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'});
+        }
+    }));
+    const stored = await readAsAdmin(...legacyPath);
+    assert.equal(stored.data().isArchived, false);
+    assert.deepEqual([...stored.data().sharedWithUids], []);
+    assert.equal(stored.data().sharingCycle, 1);
+    assert.equal(stored.data().sharedWith[EMAIL_KEY].status, 'suspended');
+    const invite = await readAsAdmin(...legacyInvitePath);
+    assert.equal(invite.data().sharingState, 'suspended');
+    await assertSucceeds(getDoc(doc(asOwner(), ...legacyPath)), 'il proprietario rilegge il proprio Account');
+    await assertFails(getDoc(doc(asGuest(), ...legacyPath)), 'l\'ospite precedente non rilegge dopo il ripristino');
 });

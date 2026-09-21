@@ -182,6 +182,7 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
         };
         const expectedRevision = revisionOf(target.revision);
         const reference = accountReference(uid, target);
+        let sharingCycle = 0, neutralizedInvites = 0, neutralized = false;
         // CAS protects the selected archived version. It does not coordinate the
         // separate purge preparation/recursiveDelete protocol.
         await runTransaction(db, async transaction => {
@@ -192,14 +193,57 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
             const current = snapshot.data();
             const currentRevision = revisionOf(current.revision);
             if (current.isArchived !== true || currentRevision !== expectedRevision) throw invalid('ARCHIVE_RESTORE_CONFLICT');
-            transaction.update(reference, {
+            // M7-R7C-2: il ripristino non deve riaprire alcun accesso. Un Account
+            // archiviato dal protocollo ha la lista dei grant vuota e un ciclo ≥ 1;
+            // grant residui o ciclo legacy vengono neutralizzati QUI, nella stessa
+            // transazione e prima di `isArchived: false`.
+            const cycle = sharingCycleOf(current);
+            const nextCycle = nextSharingCycle(current);
+            if (cycle === null || nextCycle === null) throw invalid('ARCHIVE_RESTORE_CYCLE_INVALID');
+            const sharedWith = {...(current.sharedWith || {})};
+            const grantUids = Array.isArray(current.sharedWithUids) ? current.sharedWithUids : [];
+            neutralized = cycle < 1 || grantUids.length > 0;
+            const guestKeys = Object.keys(sharedWith);
+            if (guestKeys.length > ARCHIVE_RECIPIENTS_LIMIT) throw invalid('ARCHIVE_RECIPIENTS_LIMIT');
+            const inviteRefs = neutralized
+                ? guestKeys.map(key => doc(db, 'invites', inviteIdForGuest(target.id, key, cycle)))
+                : [];
+            // Tutte le letture prima di ogni scrittura (vincolo di Firestore).
+            const inviteSnapshots = await Promise.all(inviteRefs.map(inviteRef => transaction.get(inviteRef)));
+            check();
+            const now = new Date().toISOString();
+            const patch = {
                 isArchived: false,
                 archiveSchemaVersion: deleteField(),
                 archivedAt: deleteField(),
                 purgeAfter: deleteField(),
                 revision: currentRevision + 1
+            };
+            if (neutralized) {
+                for (const key of guestKeys) {
+                    const guest = sharedWith[key];
+                    if (guest && typeof guest === 'object' && ['pending', 'accepted'].includes(guest.status)) {
+                        sharedWith[key] = {...guest, status: 'suspended', suspendedAt: now};
+                    }
+                }
+                patch.sharedWith = sharedWith;
+                patch.sharedWithUids = [];
+                patch.acceptedCount = 0;
+                patch.sharingCycle = nextCycle;
+                sharingCycle = nextCycle;
+            } else {
+                sharingCycle = cycle;
+            }
+            transaction.update(reference, patch);
+            inviteSnapshots.forEach((inviteSnapshot, index) => {
+                if (!inviteSnapshot.exists()) return;
+                neutralizedInvites++;
+                transaction.update(inviteRefs[index], {sharingState: 'suspended', suspendedAt: now});
             });
         });
+        check();
+        return Object.freeze({status: 'restored', id: target.id, context: target.context,
+            sharingCycle, neutralizedInvites, neutralized});
     });
 }
 
