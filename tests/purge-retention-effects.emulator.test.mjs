@@ -124,11 +124,18 @@ async function seedAll() {
         uid: OWNER, command: policy.validatePurgeCommand(COMMAND)}), status: 'processing'});
 }
 
+// Oggetti usati dal controllo mirato di T-09 (nessuno è elencato nei metadati).
+const UNLISTED_OBJECTS = [
+    `${ACCOUNT_PATH}/scansioni/mai-elencato.pdf`,
+    `${ACCOUNT_PATH}/attachments/secondo-mai-elencato.bin`,
+    `users/${OWNER}/accounts/acc-1-bis/attachments/allegato.pdf`
+];
+
 async function clear() {
     await db.recursiveDelete(db.collection('users'));
     await db.recursiveDelete(db.collection('mutationResults'));
     await db.recursiveDelete(db.collection('auditRetentionState'));
-    for (const path of [LISTED_OBJECT, ORPHAN_OBJECT]) {
+    for (const path of [LISTED_OBJECT, ORPHAN_OBJECT, ...UNLISTED_OBJECTS]) {
         await bucket.file(path).delete({ignoreNotFound: true});
     }
 }
@@ -238,4 +245,44 @@ test('T-13: la retention dei 24 mesi tocca il solo registro, anche per l’event
         assert.equal(await exists(path), true, `${path} non è di competenza della retention del registro`);
     }
     assert.equal(await exists(receiptPath), true, 'la ricevuta di idempotenza resta senza scadenza automatica');
+});
+
+// M7-T09 — Controllo mirato sul confine del prefisso. Le asserzioni «elencato
+// eliminato / non elencato sopravvissuto» erano già provate (T-13 caso 1 e
+// `tests/company-hard-delete-residues.emulator.test.mjs` caso 2); questo caso
+// aggiunge i confini non coperti: oggetti non elencati in una **sottocartella
+// diversa** da `attachments/`, un secondo non elencato nella stessa cartella e un
+// Account **vicino di nome** (`acc-1-bis`), più il conteggio che dimostra che il
+// purge **non scansiona** il prefisso.
+test('T-09: sotto il prefisso dell’Account sopravvivono solo gli oggetti non elencati', async () => {
+    const bytesFor = index => Uint8Array.from([10 + index, 20, 30]);
+    for (const [index, path] of UNLISTED_OBJECTS.entries()) {
+        await bucket.file(path).save(Buffer.from(bytesFor(index)), {resumable: false,
+            metadata: {contentType: 'application/pdf'}});
+    }
+    await db.doc(`users/${OWNER}/accounts/acc-1-bis`).set({nomeAccount: 'Account vicino', isArchived: true, revision: 1});
+    await db.doc(`users/${OWNER}/accounts/acc-1-bis/attachments/att-bis`)
+        .set({storagePath: UNLISTED_OBJECTS[2], name: 'allegato.pdf'});
+
+    assert.equal((await purge({auth: {uid: OWNER}, data: COMMAND})).status, 'purged');
+
+    // L'unico elencato nei metadati dell'Account è sparito…
+    assert.equal((await bucket.file(LISTED_OBJECT).exists())[0], false, 'i byte elencati sono spariti');
+    // …e ogni oggetto **non** elencato è ancora lì, con i propri byte.
+    for (const [index, path] of UNLISTED_OBJECTS.entries()) {
+        assert.equal((await bucket.file(path).exists())[0], true, `${path} doveva restare`);
+        const [downloaded] = await bucket.file(path).download();
+        assert.deepEqual([...new Uint8Array(downloaded)], [...bytesFor(index)],
+            `${path} conserva i propri byte, non quelli di un altro oggetto`);
+    }
+    // Il purge non scansiona il prefisso: sotto l'Account restano **solo** gli
+    // oggetti non elencati (l'elencato è stato rimosso, nessun altro è stato toccato).
+    const [files] = await bucket.getFiles({prefix: `${ACCOUNT_PATH}/`});
+    assert.deepEqual(files.map(file => file.name).sort(),
+        [ORPHAN_OBJECT, UNLISTED_OBJECTS[0], UNLISTED_OBJECTS[1]].sort(),
+        'nessun inventario del prefisso: sopravvivono solo gli oggetti non elencati');
+    // L'Account vicino di nome non è toccato: né documento né allegato.
+    assert.equal(await exists(`users/${OWNER}/accounts/acc-1-bis`), true,
+        'un Account con id che condivide il prefisso non viene eliminato');
+    assert.equal(await exists(`users/${OWNER}/accounts/acc-1-bis/attachments/att-bis`), true);
 });
