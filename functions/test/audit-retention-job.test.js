@@ -1,10 +1,11 @@
 "use strict";
 
-// M7-AUDIT-6 — Prove del job di retention sui punti che la revisione ha
-// contestato: il conteggio delle cancellazioni non deve dipendere dai
-// rieseguimenti della transazione, e la conferma atomica deve restare corretta.
-// Il banco esegue il **codice reale** di `functions/index.js` con un Firestore
-// finto, quindi non tocca né dati reali né l'emulatore.
+// M7-AUDIT-6 — Prove del job di retention sui punti contestati dalla revisione:
+// il conteggio non deve dipendere dai rieseguimenti della transazione, la
+// conferma atomica deve restare corretta, un errore di pianificazione non può
+// chiudere il run come «completed». Il banco esegue il **codice reale** di
+// `functions/index.js` con un Firestore finto: nessun dato reale, nessun
+// emulatore.
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -15,24 +16,64 @@ const source = readFileSync(require.resolve("../index"), "utf8");
 const start = source.indexOf("const AUDIT_RETENTION_PAGE_SIZE");
 const end = source.indexOf("exports.purgeExpiredAuditEvents = onSchedule(");
 assert.ok(start > 0 && end > start, "la sezione del job deve essere estraibile da index.js");
-
-// Stesso realm del modulo di servizio: nessun problema di Promise fra realm.
-const silentConsole = {log() {}, warn() {}, error() {}};
-const jobFactory = new Function("Timestamp", "FieldPath", "console", "auditEventPath", "classifyAuditEvent",
-    "planAuditRetention", "runAuditRetention", "DEFAULT_BATCH_SIZE", "MAX_EVENTS_PER_RUN",
-    `${source.slice(start, end)}\nreturn {collectExpiredAuditEvents, deleteAuditBatchWithConfirmation, runAuditRetentionJob};`);
-const job = jobFactory(
-    {fromMillis: ms => ({seconds: Math.floor(ms / 1000), nanoseconds: 0})},
-    {documentId: () => "__name__"},
-    silentConsole,
-    service.auditEventPath, service.classifyAuditEvent, service.planAuditRetention, service.runAuditRetention,
-    service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN
-);
+const jobSource = source.slice(start, end);
 
 const OLD = Date.parse("2023-01-01T00:00:00.000Z");
 const RECENT = Date.parse("2026-06-01T00:00:00.000Z");
 const NOW = Date.parse("2026-09-21T00:00:00.000Z");
 const seconds = ms => ({seconds: Math.floor(ms / 1000), nanoseconds: 0});
+const silentConsole = {log() {}, warn() {}, error() {}};
+
+// Stesso realm del modulo di servizio: nessun problema di Promise fra realm.
+function makeJob(overrides = {}) {
+    const injected = {
+        auditEventPath: service.auditEventPath,
+        classifyAuditEvent: service.classifyAuditEvent,
+        planAuditRetention: service.planAuditRetention,
+        runAuditRetention: service.runAuditRetention,
+        ...overrides
+    };
+    const factory = new Function("Timestamp", "FieldPath", "FieldValue", "console", "auditEventPath",
+        "classifyAuditEvent", "planAuditRetention", "runAuditRetention", "DEFAULT_BATCH_SIZE", "MAX_EVENTS_PER_RUN",
+        `${jobSource}\nreturn {collectExpiredAuditEvents, deleteAuditBatchWithConfirmation, runAuditRetentionJob};`);
+    return factory(
+        {fromMillis: ms => ({seconds: Math.floor(ms / 1000), nanoseconds: 0})},
+        {documentId: () => "__name__"},
+        {serverTimestamp: () => ({__serverTimestamp: true})},
+        silentConsole,
+        injected.auditEventPath, injected.classifyAuditEvent, injected.planAuditRetention,
+        injected.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN
+    );
+}
+
+const job = makeJob();
+
+// Firestore finto con una sola pagina per campo: serve a esercitare la
+// pianificazione e il salvataggio dei cursori senza un database reale.
+function queryDb(entries, state = {}) {
+    const snapshots = entries.map(entry => ({
+        ref: {path: entry.path, id: entry.path.split("/").at(-1),
+            parent: {parent: {id: entry.path.split("/")[1]}}},
+        data: () => entry.data,
+        updateTime: {seconds: 1, nanoseconds: 0}
+    }));
+    const query = {
+        where: () => query, orderBy: () => query, limit: () => query, startAfter: () => query,
+        get: async () => ({empty: snapshots.length === 0, size: snapshots.length, docs: snapshots})
+    };
+    return {
+        collectionGroup: () => query,
+        doc: path => ({
+            path,
+            get: async () => ({exists: false}),
+            set: async patch => { state.saved = patch; }
+        }),
+        // Via rapida della cancellazione: il batch finto committa sempre.
+        batch: () => ({delete() {}, commit: async () => {}}),
+        runTransaction: async () => { throw new Error("non deve essere raggiunta"); },
+        state
+    };
+}
 
 function snapshot(ref, data) {
     return {exists: true, ref, data: () => data};
@@ -124,4 +165,32 @@ test("errore non di precondizione: non viene inghiottito e non diventa un falso 
     await assert.rejects(job.deleteAuditBatchWithConfirmation(db,
         {index: 0, ids: ["a"], paths}, NOW, new Map([[paths[0], {seconds: 1, nanoseconds: 0}]])),
     /UNAVAILABLE/);
+});
+
+test("errore di pianificazione: il run è parziale e i cursori non avanzano", async () => {
+    const path = "users/owner/auditEvents/op-1";
+    const db = queryDb([{path, data: {action: "account-purged", at: seconds(OLD)}}]);
+    const failing = makeJob({planAuditRetention: () => {
+        const error = new Error("AUDIT_RETENTION_INPUT_INVALID");
+        error.code = "AUDIT_RETENTION_INPUT_INVALID";
+        throw error;
+    }});
+    const report = await failing.runAuditRetentionJob(db, {now: NOW});
+    assert.equal(report.planErrors, 1);
+    assert.equal(report.status, "partial", "documenti letti ma non valutati: mai «completed»");
+    assert.equal(report.cursorsSaved, false, "una finestra non gestita non fa avanzare i cursori");
+    assert.equal(db.state.saved, undefined, "nessuna scrittura di stato");
+});
+
+test("finestra gestita: i cursori vengono salvati e il run è completo", async () => {
+    const path = "users/owner/auditEvents/op-1";
+    const db = queryDb([{path, data: {action: "account-purged", at: seconds(OLD)}}]);
+    const report = await job.runAuditRetentionJob(db, {now: NOW});
+    assert.equal(report.status, "completed");
+    assert.equal(report.cursorsSaved, true);
+    assert.deepEqual(Object.keys(db.state.saved.cursors).sort(), ["at", "createdAt"]);
+    // La query è esaurita: i cursori tornano null e il giro successivo riparte
+    // dall'inizio, così nessun evento può restare fuori per sempre.
+    assert.equal(db.state.saved.cursors.at, null);
+    assert.equal(db.state.saved.cursors.createdAt, null);
 });

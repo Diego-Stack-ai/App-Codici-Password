@@ -20,7 +20,7 @@ assert.match(String(process.env.FIRESTORE_EMULATOR_HOST || ''), /^127\.0\.0\.1:\
 
 const requireFunctions = createRequire(new URL('../functions/package.json', import.meta.url));
 const {initializeApp, deleteApp} = requireFunctions('firebase-admin/app');
-const {getFirestore, Timestamp, FieldPath} = requireFunctions('firebase-admin/firestore');
+const {getFirestore, Timestamp, FieldPath, FieldValue} = requireFunctions('firebase-admin/firestore');
 const service = requireFunctions('./audit-retention-service.js');
 
 const source = readFileSync(new URL('../functions/index.js', import.meta.url), 'utf8');
@@ -33,10 +33,10 @@ const jobSource = source.slice(start, end);
 // dell'Admin SDK: una transazione creata in un realm `vm` diverso non
 // restituirebbe un `Promise` riconosciuto da `runTransaction`.
 const silentConsole = {log() {}, warn() {}, error() {}};
-const jobFactory = new Function('Timestamp', 'FieldPath', 'console', 'auditEventPath', 'classifyAuditEvent',
+const jobFactory = new Function('Timestamp', 'FieldPath', 'FieldValue', 'console', 'auditEventPath', 'classifyAuditEvent',
     'planAuditRetention', 'runAuditRetention', 'DEFAULT_BATCH_SIZE', 'MAX_EVENTS_PER_RUN',
     `${jobSource}\nreturn {collectExpiredAuditEvents, deleteAuditBatchWithConfirmation, runAuditRetentionJob};`);
-const job = jobFactory(Timestamp, FieldPath, silentConsole, service.auditEventPath, service.classifyAuditEvent,
+const job = jobFactory(Timestamp, FieldPath, FieldValue, silentConsole, service.auditEventPath, service.classifyAuditEvent,
     service.planAuditRetention, service.runAuditRetention, service.DEFAULT_BATCH_SIZE, service.MAX_EVENTS_PER_RUN);
 
 const app = initializeApp({projectId: PROJECT_ID}, `audit-retention-${process.pid}`);
@@ -59,6 +59,8 @@ async function exists(path) {
 async function clear() {
     await db.recursiveDelete(db.collection('users'));
     await db.recursiveDelete(db.collection('mutationResults'));
+    // Anche lo stato del job: i cursori non devono sopravvivere fra i test.
+    await db.recursiveDelete(db.collection('auditRetentionState'));
 }
 
 test.beforeEach(clear);
@@ -272,4 +274,57 @@ test('scansione troncata: il run non si dichiara completato', async () => {
     const completed = await job.runAuditRetentionJob(db, {now: NOW});
     assert.equal(completed.status, 'completed');
     assert.equal(completed.deleted, 2, 'la ripresa completa il lavoro rimasto');
+});
+
+test('prefisso non cancellabile più lungo del tetto: i run avanzano e raggiungono gli scaduti', async () => {
+    // Sei documenti scoperti ma non cancellabili **prima** dei due scaduti: con
+    // un tetto di scansione piccolo il primo run non può vederli tutti, e senza
+    // cursore persistente i run successivi rileggerebbero sempre lo stesso
+    // prefisso senza mai raggiungere gli eventi da cancellare.
+    const uid = 'owner-p';
+    for (let index = 0; index < 6; index++) {
+        await seed(eventPath(uid, `estraneo-${index}`), {action: 'backup-restore-chunk', createdAt: OLD});
+    }
+    await seed(eventPath(uid, 'legacy-1'), {action: 'shared-vault-create', createdAt: OLD});
+    await seed(eventPath(uid, 'legacy-2'), {action: 'shared-vault-create', createdAt: OLD});
+
+    const first = await job.runAuditRetentionJob(db, {now: NOW, pageSize: 2, maxScan: 4});
+    assert.equal(first.scanned, 4, 'il primo run legge solo il prefisso');
+    assert.equal(first.deleted, 0, 'nel prefisso non c’è nulla da cancellare');
+    assert.equal(first.status, 'interrupted');
+    assert.equal(first.cursorsSaved, true, 'il cursore avanza oltre il prefisso letto');
+    const state = await db.doc('auditRetentionState/scan').get();
+    assert.equal(state.exists, true);
+    assert.ok(state.data().cursors.createdAt, 'il cursore del campo è persistito');
+
+    const second = await job.runAuditRetentionJob(db, {now: NOW, pageSize: 2, maxScan: 20});
+    assert.equal(second.deleted, 2, 'il secondo run riprende dal cursore e raggiunge i due scaduti');
+    assert.equal(second.status, 'completed');
+    assert.equal(await exists(eventPath(uid, 'legacy-1')), false);
+    assert.equal(await exists(eventPath(uid, 'legacy-2')), false);
+    for (let index = 0; index < 6; index++) {
+        assert.equal(await exists(eventPath(uid, `estraneo-${index}`)), true, 'i non cancellabili restano');
+    }
+
+    // Giro completo esaurito: i cursori tornano null e la scansione riparte
+    // dall'inizio, quindi nessun evento può restare fuori per sempre.
+    const third = await job.runAuditRetentionJob(db, {now: NOW, pageSize: 50, maxScan: 50});
+    assert.equal(third.status, 'completed');
+    assert.equal(third.deleted, 0);
+    const reset = await db.doc('auditRetentionState/scan').get();
+    assert.equal(reset.data().cursors.createdAt, null);
+    assert.equal(reset.data().cursors.at, null);
+});
+
+test('il tetto di scansione conta le letture, non i documenti raccolti', async () => {
+    // Un percorso respinto consuma il budget: con `maxScan: 1` il run legge solo
+    // quel documento e si dichiara troncato, anche se non ha raccolto nulla.
+    const uid = 'owner-q';
+    await seed(`users/${uid}/accounts/acc-1/auditEvents/estraneo`, {action: 'account-purged', at: OLD});
+    await seed(eventPath(uid, 'scaduto'), {action: 'account-purged', at: OLD});
+    const report = await job.runAuditRetentionJob(db, {now: NOW, pageSize: 1, maxScan: 1});
+    assert.equal(report.scanned, 1, 'una sola lettura consentita');
+    assert.equal(report.truncated, true);
+    assert.equal(report.rejectedPaths + report.planned, 1, 'la lettura è stata spesa su un solo documento');
+    assert.equal(report.status, 'interrupted');
 });

@@ -2030,11 +2030,17 @@ const AUDIT_RETENTION_MAX_BATCHES_PER_RUN = 50;
 // storico enorme consumerebbe l'intero budget del run e gli altri non
 // progredirebbero (rilievo della revisione M7-AUDIT-6).
 const AUDIT_RETENTION_MAX_BATCHES_PER_OWNER = 10;
-// Tetto di **scansione**: conta i documenti esaminati, non quelli cancellabili.
-// È deliberatamente molto più alto del budget di cancellazione, perché i
-// documenti vecchi ma non cancellabili (azioni estranee, `at` incoerente) non
-// devono mai impedire di raggiungere gli eventi scaduti che vengono dopo.
+// Tetto di **scansione**: conta le **letture** effettive (percorsi respinti e
+// duplicati compresi), non i documenti raccolti, ed è separato dal budget di
+// cancellazione: i documenti vecchi ma non cancellabili non devono impedire di
+// raggiungere gli eventi scaduti che vengono dopo.
 const AUDIT_RETENTION_MAX_SCAN = 20_000;
+// Stato del job: un cursore per campo, così la scansione **avanza fra i run**
+// anche quando il prefisso non cancellabile è più lungo del tetto di scansione.
+// È un documento di servizio, fuori dal registro e fuori dai dati utente: il job
+// non lo cancella mai e il client non può leggerlo né scriverlo (nessuna regola
+// lo copre, quindi vale il diniego predefinito di Firestore).
+const AUDIT_RETENTION_STATE_PATH = "auditRetentionState/scan";
 // Finestra grossolana della query: 24 mesi di calendario sono sempre almeno 730
 // giorni, quindi 700 giorni è un sovrainsieme sicuro di ciò che può essere
 // scaduto. Il classificatore resta l'unica autorità sulla cancellazione.
@@ -2051,33 +2057,72 @@ function isPreconditionFailure(error) {
         /FAILED_PRECONDITION|PRECONDITION/i.test(String(error?.message || ""));
 }
 
+function usableCursor(cursor) {
+    return Boolean(cursor) && typeof cursor.path === "string" && cursor.path.length > 0 &&
+        cursor.value !== undefined && cursor.value !== null;
+}
+
+// I cursori sono dati di servizio: un contenuto malformato non deve fermare la
+// retention, si riparte semplicemente dall'inizio di quel campo.
+async function readAuditRetentionCursors(db) {
+    const snapshot = await db.doc(AUDIT_RETENTION_STATE_PATH).get();
+    const stored = snapshot.exists ? snapshot.data() : null;
+    const cursors = {};
+    for (const field of AUDIT_RETENTION_DATE_FIELDS) {
+        const candidate = stored?.cursors?.[field];
+        cursors[field] = usableCursor(candidate) ? {value: candidate.value, path: candidate.path} : null;
+    }
+    return cursors;
+}
+
+async function saveAuditRetentionCursors(db, cursors) {
+    const stored = {};
+    for (const field of AUDIT_RETENTION_DATE_FIELDS) {
+        const cursor = cursors[field];
+        stored[field] = usableCursor(cursor) ? {value: cursor.value, path: cursor.path} : null;
+    }
+    await db.doc(AUDIT_RETENTION_STATE_PATH).set(
+        {cursors: stored, updatedAt: FieldValue.serverTimestamp()}, {merge: false});
+}
+
 // Scoperta: due query di gruppo (una per campo, perché un filtro di intervallo
 // non ne copre due), paginazione con cursore sull'**istantanea completa** —
 // stabile anche quando più proprietari hanno lo stesso id — e deduplica per
 // percorso completo.
 //
-// `truncated` dice se il tetto di scansione è stato raggiunto **con altre pagine
-// da leggere**: in quel caso il job non può dichiarare il completamento.
+// `cursors` sono i cursori di partenza (uno per campo, `null` = dall'inizio) e
+// `cursors` nel risultato sono quelli aggiornati: avanzano quando la scansione
+// del campo è stata interrotta dal tetto di letture, tornano `null` quando la
+// query è esaurita (il giro successivo riparte dall'inizio, così nessun evento
+// resta fuori per sempre). `truncated` dice se il tetto di **letture** è stato
+// raggiunto con altre pagine da leggere: in quel caso il job non può dichiarare
+// il completamento.
 async function collectExpiredAuditEvents(db, cutoff, {
-    pageSize = AUDIT_RETENTION_PAGE_SIZE, maxScan = AUDIT_RETENTION_MAX_SCAN
+    pageSize = AUDIT_RETENTION_PAGE_SIZE, maxScan = AUDIT_RETENTION_MAX_SCAN, cursors = {}
 } = {}) {
     const collected = new Map();
     const rejected = [];
+    const nextCursors = {};
     let scanned = 0, truncated = false;
     for (const field of AUDIT_RETENTION_DATE_FIELDS) {
-        let cursor = null;
+        const start = usableCursor(cursors[field]) ? cursors[field] : null;
+        let cursor = start, exhausted = false, advanced = false;
         for (;;) {
-            if (collected.size >= maxScan) { truncated = true; break; }
+            // Il budget conta le **letture**: un percorso respinto o un duplicato
+            // consuma il tetto come qualunque altro documento letto.
+            if (scanned >= maxScan) { truncated = true; break; }
             let query = db.collectionGroup("auditEvents")
                 .where(field, "<=", cutoff)
                 .orderBy(field)
                 .orderBy(FieldPath.documentId())
                 .limit(pageSize);
-            if (cursor) query = query.startAfter(cursor);
+            if (cursor) query = query.startAfter(cursor.value, cursor.path);
             const page = await query.get();
-            if (page.empty) break;
+            if (page.empty) { exhausted = true; break; }
             for (const snapshot of page.docs) {
                 scanned++;
+                advanced = true;
+                cursor = {value: snapshot.data()[field], path: snapshot.ref.path};
                 const owner = snapshot.ref.parent ? snapshot.ref.parent.parent : null;
                 const uid = owner ? owner.id : null;
                 let expected = null;
@@ -2093,11 +2138,13 @@ async function collectExpiredAuditEvents(db, cutoff, {
                     });
                 }
             }
-            cursor = page.docs[page.docs.length - 1];
-            if (page.size < pageSize) break;
+            if (page.size < pageSize) { exhausted = true; break; }
         }
+        // Esaurita: si riparte dall'inizio al giro successivo. Interrotta dal
+        // tetto: si riprende da dove si era arrivati. Non toccata: resta com'era.
+        nextCursors[field] = exhausted ? null : (advanced ? cursor : start);
     }
-    return {entries: [...collected.values()], rejected, truncated, scanned};
+    return {entries: [...collected.values()], rejected, truncated, scanned, cursors: nextCursors};
 }
 
 // Cancellazione di un lotto con conferma della versione. Ritorna il numero di
@@ -2146,27 +2193,39 @@ async function runAuditRetentionJob(db, {
     maxBatchesPerOwner = AUDIT_RETENTION_MAX_BATCHES_PER_OWNER
 } = {}) {
     const cutoff = Timestamp.fromMillis(now - AUDIT_RETENTION_COARSE_CUTOFF_MS);
-    const {entries, rejected, truncated, scanned} = await collectExpiredAuditEvents(db, cutoff, {pageSize, maxScan});
+    const previousCursors = await readAuditRetentionCursors(db);
+    const {entries, rejected, truncated, scanned, cursors} =
+        await collectExpiredAuditEvents(db, cutoff, {pageSize, maxScan, cursors: previousCursors});
     const updateTimes = new Map(entries.map(entry => [entry.path, entry.updateTime]));
     const byOwner = new Map();
     for (const entry of entries) {
         if (!byOwner.has(entry.uid)) byOwner.set(entry.uid, []);
         byOwner.get(entry.uid).push({id: entry.id, ...entry.data});
     }
-    const counters = {scanned, planned: 0, deleted: 0, retained: 0, unverifiable: 0, batches: 0};
+    const counters = {scanned, planned: 0, deleted: 0, retained: 0, unverifiable: 0, batches: 0, planErrors: 0};
     // Una scansione troncata significa «potrebbero restare eventi scaduti»:
     // il run non può dichiararsi completato.
     let status = truncated ? "interrupted" : "completed";
+    // La finestra è «pulita» solo se tutto ciò che è stato letto è stato gestito:
+    // un errore di piano, un lotto saltato per budget o un lotto fallito la
+    // lasciano sporca e i cursori **non** avanzano, così il run successivo
+    // rilegge la stessa finestra e nessun evento viene perso.
+    let windowClean = true;
     for (const [uid, events] of byOwner) {
-        if (counters.batches >= maxBatches) { status = "interrupted"; break; }
+        if (counters.batches >= maxBatches) { status = "interrupted"; windowClean = false; break; }
         let ownerBatches = 0;
         for (let offset = 0; offset < events.length; offset += MAX_EVENTS_PER_RUN) {
             const ownerBudget = Math.min(maxBatchesPerOwner - ownerBatches, maxBatches - counters.batches);
-            if (ownerBudget <= 0) { status = "interrupted"; break; }
+            if (ownerBudget <= 0) { status = "interrupted"; windowClean = false; break; }
             let plan;
             try {
                 plan = planAuditRetention({uid, events: events.slice(offset, offset + MAX_EVENTS_PER_RUN), now, batchSize});
             } catch (error) {
+                // Documenti letti ma non valutati: il run **non** è completo e lo
+                // stato lo dichiara, invece di proseguire come se nulla fosse.
+                counters.planErrors++;
+                status = "partial";
+                windowClean = false;
                 console.warn("[AUDIT] retention: piano saltato", {
                     code: String(error?.code || "AUDIT_RETENTION_INPUT_INVALID")
                 });
@@ -2175,7 +2234,7 @@ async function runAuditRetentionJob(db, {
             counters.retained += plan.retained.length;
             counters.unverifiable += plan.unverifiable.length;
             const allowed = plan.batches.slice(0, ownerBudget);
-            if (allowed.length < plan.batches.length) status = "interrupted";
+            if (allowed.length < plan.batches.length) { status = "interrupted"; windowClean = false; }
             counters.planned += allowed.reduce((total, batch) => total + batch.ids.length, 0);
             const report = await runAuditRetention({
                 plan: {...plan, batches: allowed},
@@ -2185,13 +2244,15 @@ async function runAuditRetentionJob(db, {
             });
             counters.batches += report.completed;
             ownerBatches += report.completed;
-            if (report.status !== "completed") { status = report.status; break; }
+            if (report.status !== "completed") { status = report.status; windowClean = false; break; }
         }
-        if (counters.batches >= maxBatches) status = "interrupted";
+        if (counters.batches >= maxBatches) { status = "interrupted"; windowClean = false; }
     }
+    if (windowClean) await saveAuditRetentionCursors(db, cursors);
     // Log di soli conteggi e codici: nessun uid, nessun id, nessun contenuto.
-    console.log("[AUDIT] retention registro", {status, truncated, ...counters, rejectedPaths: rejected.length});
-    return Object.freeze({...counters, status, truncated, rejectedPaths: rejected.length});
+    console.log("[AUDIT] retention registro",
+        {status, truncated, cursorsSaved: windowClean, ...counters, rejectedPaths: rejected.length});
+    return Object.freeze({...counters, status, truncated, cursorsSaved: windowClean, rejectedPaths: rejected.length});
 }
 
 exports.purgeExpiredAuditEvents = onSchedule(
