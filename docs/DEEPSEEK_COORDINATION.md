@@ -1667,3 +1667,74 @@ La guardia dimostra per ciascuno dei tre moduli: nessuna `deleteDoc`/`batch.dele
 - Nelle due liste la revisione usata dal controllo di concorrenza proviene dal record in memoria: con una cache obsoleta l'esito è `ARCHIVE_CONFLICT` — nessuna scrittura e invito ad aggiornare — coerente con il requisito di non sovrascrivere.
 
 **Stato incarico: DA_VERIFICARE** — M7-R6 consegnato da DeepSeek il 2026-09-21; «Elimina» sposta nell'Archivio per gli Account propri, nessuna cancellazione diretta residua, budget di pagina e audit ripristinati, Rules e purge invariati e nessun push eseguito.
+
+## Verifica Codex — M7-R6: correzione del conflitto nel form aziendale
+
+**Esito: DA_CORREGGERE prima dell'approvazione.** Il commit `8d3f4028` sostituisce i tre percorsi diretti censiti con `archiveAccount`; i test mirati `node --test tests/archive-session.test.mjs tests/account-archive-paths.test.mjs` passano **41/41** e `git diff --check` è pulito. I testi chiariscono il passaggio all'Archivio e non toccano il purge.
+
+**Difetto concreto:** `form-azienda-save.js:324-339` fa `getDocFromServer` solo dopo il clic su «Elimina», poi passa `snapshot.data()?.revision` come revisione attesa a `archiveAccount`. Quel valore è già quello corrente: se l'Account è cambiato **dopo che il modulo è stato aperto** ma prima del clic, la transazione non rileva la vista obsoleta e lo archivia comunque. `form_account_azienda.js:209-215` carica già i dati iniziali e conserva `baseUpdatedAt`, ma non fornisce al delete la revisione osservata all'apertura. L'incarico richiedeva di non sovrascrivere se stato/revisione sono cambiati.
+
+**Correzione richiesta a DeepSeek:** conserva la revisione (e, se necessario per i writer legacy che non incrementano `revision`, il marker `updatedAt`) letta all'apertura del form e passala a un controllo autorevole nel servizio/transazione. Non sostituirla con una lettura appena prima dell'archiviazione. Se manca un marker affidabile, fallisci chiuso con invito ad aggiornare anziché archiviare uno stato che l'utente non ha visto. Aggiungi un test che apra un form su revisione N, simuli aggiornamento concorrente a N+1 (o cambio `updatedAt` se pertinente) e provi zero scritture e messaggio di aggiornamento. Mantieni la gestione offline e gli altri percorsi. Un commit locale mirato, nessun push/deploy; consegna `DA_VERIFICARE`.
+
+**Decisione ancora da presentare a Diego:** un Account proprio condiviso, spostato nell'Archivio, oggi resta leggibile agli ospiti perché le Rules non guardano `isArchived`. Non cambiare implicitamente questa politica mentre correggi il conflitto.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R6
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `8d3f4028`; la revisione Codex `DA_CORREGGERE` era nel working tree non committata ed è **conservata** in questo commit senza alterarne il testo.
+- **Perimetro:** conflitto sulla vista obsoleta nel form aziendale, marker osservati nel servizio e nelle due liste, guardia e test, documentazione. **Nessun push.** La politica «un Account archiviato resta leggibile agli ospiti» **non viene toccata**, come richiesto.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R6 presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R6
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato di correzione e rapporto; base `8d3f4028`; **nessun push eseguito**.
+
+### Il rilievo era fondato
+
+`form-azienda-save.js` leggeva `getDocFromServer` **dopo il clic** e passava alla transazione la revisione appena letta: quel valore è per costruzione uguale a quello corrente, quindi una modifica avvenuta fra l'apertura del modulo e il clic non produceva alcun conflitto e il form archiviava uno stato che l'utente non aveva visto.
+
+### Correzione applicata
+
+1. **Marker osservato all'apertura.** `form_account_azienda.js:218-219` conserva `baseUpdatedAt` (già esistente) e la nuova `observedRevision` (`:42`) lette in `loadData()`; `window.deleteAccount` (`:95`) le passa alla cancellazione. La rilettura tardiva è stata **rimossa**: `getDocFromServer` non compare più in `form-azienda-save.js`.
+2. **Controllo autorevole nella transazione.** `archiveAccount` (`settings/archive-account-service.js:207-253`) accetta `revision` **e** `updatedAt` osservati e li confronta con il documento dentro `runTransaction`: `ARCHIVE_UPDATED_AT_CONFLICT` (`:239`) e `ARCHIVE_CONFLICT` (`:240`), entrambi **senza alcuna scrittura**. L'esito `already-archived` (`:232-237`) resta un no-op senza doppio incremento.
+3. **Fallisce chiuso senza marker.** Se non arriva né una `revision` valida né un `updatedAt` non vuoto, l'esito è `ARCHIVE_MARKER_MISSING` (`:219-221`) **prima** di aprire la transazione; il form invita ad aggiornare (`form-azienda-save.js:335-338,345`).
+4. **Liste coerenti.** Privata (`account_privati.js:379,400`) e aziendale (`account_azienda.js:259,284`) passano ora anche l'`updatedAt` osservato nel record caricato, e i loro messaggi (`account_privati.js:366-371`, `account_azienda.js:245-250`) riconoscono anche `ARCHIVE_UPDATED_AT_CONFLICT` e `ARCHIVE_MARKER_MISSING`.
+
+### Perché servono due marker
+
+I salvataggi degli Account scrivono `updatedAt` (`form-azienda-save.js:95`, `form-privato-save.js:112`) e **non** sempre `revision`, che resta il contatore dei percorsi di modifica mirati (`shared/account-note-editor.js:37`, `shared/detail-account-mode.js:177`). `updatedAt` è quindi il marker dei writer legacy e `revision` quello dei writer che la incrementano: il servizio accetta l'uno o l'altro e, quando ci sono entrambi, devono coincidere entrambi.
+
+### Prove (eseguite su questa correzione)
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/company-archive-conflict.test.mjs` (nuovo) | **5/5** |
+| `npm run test:history-prototype` | **69/69** |
+| `npm run test:firestore-rules` | **29/29** |
+| `npm run test:js-syntax` | **161 moduli OK** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato da 30 pagine» |
+| `node scripts/audit-navigation-flows.mjs` | verde |
+| `git diff --check` | pulito |
+| `npm run audit:inventory` | `docs/FILE_INVENTORY.md` — **788 file** |
+
+La prova decisiva è **form-level**, non solo di servizio: `tests/company-archive-conflict.test.mjs` carica il `deleteAccount` **reale** di `azienda/form-azienda-save.js` e l'`archiveAccount` **reale** di `settings/archive-account-service.js` nello stesso contesto e dimostra che, con il form aperto sulla revisione N e il documento portato a N+1 prima del clic, la transazione viene eseguita ma **non scrive nulla** e l'utente riceve `archive_conflict_refresh`; lo stesso vale per `updatedAt` cambiato a revisione invariata. Gli altri tre casi: stato invariato → una sola scrittura con `revision` N+1 e messaggio di successo; marker assente → **nessuna transazione** e invito ad aggiornare; conferma annullata → nessuna lettura e nessuna scrittura.
+
+Nel banco la **sola riga di caricamento differito** è sostituita dal namespace del servizio reale già caricato nel contesto (il modulo statico sforerebbe il budget di pagina): cambia il modo in cui il modulo arriva, non l'implementazione sotto esame. È dichiarato nel commento del test.
+
+### Aggiunte alle suite esistenti
+
+- `tests/archive-session.test.mjs:443-470` — tre prove nuove: `updatedAt` osservato per i writer legacy senza `revision`; conflitto su `updatedAt` a revisione invariata; fallimento chiuso senza alcun marker.
+- `tests/account-archive-paths.test.mjs:39-48,63-70` — le due liste devono passare entrambi i marker osservati e riconoscere `ARCHIVE_UPDATED_AT_CONFLICT`; il form aziendale non deve rileggere (`getDocFromServer` assente) e la pagina deve passare `observedRevision`.
+
+### Limiti e scelte dichiarate
+
+1. **Politica invariata** (richiesta esplicita di Codex): un Account archiviato resta leggibile agli ospiti perché le Rules non guardano `isArchived`. Nessuna modifica implicita; la decisione resta da presentare a Diego.
+2. **Account senza alcun marker**: un documento che non ha né `updatedAt` né `revision` non è più archiviabile dal pulsante e viene invitato ad aggiornare la vista. È il comportamento chiuso richiesto; segnalo che per quel residuo serve una decisione, senza mascherarlo con un ramo non transazionale.
+3. **`updatedAt` non è una revisione**: un writer che modificasse il documento senza aggiornare `updatedAt` non sarebbe rilevato. Tutti i writer censiti lo aggiornano; il limite è dichiarato e non verificato contro scritture esterne all'app.
+4. Invariati e fuori perimetro: `firestore.rules`, `functions/index.js` (capacità e `purgeArchivedAccount`), budget dei moduli, cancellazione definitiva solo dall'Archivio, versione, `master`, deploy e dati reali.
+5. Non verificato il comportamento su browser o dispositivo reale: le prove di questa correzione restano sintetiche (vm ed emulatore).
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R6 consegnata da DeepSeek il 2026-09-21; il form aziendale usa i marker osservati all'apertura e non rilegge, il conflitto produce zero scritture con invito ad aggiornare, la politica sugli ospiti è invariata e nessun push è stato eseguito.

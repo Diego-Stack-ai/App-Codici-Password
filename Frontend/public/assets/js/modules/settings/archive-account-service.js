@@ -52,7 +52,7 @@ function accountIdentity(account) {
     if (!account || typeof account.id !== 'string' || !account.id || typeof account.context !== 'string' || !account.context) {
         throw new Error('Account archiviato non valido.');
     }
-    return {id: account.id, context: account.context, revision: account.revision};
+    return {id: account.id, context: account.context, revision: account.revision, updatedAt: account.updatedAt};
 }
 
 function accountReference(uid, account) {
@@ -197,9 +197,13 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
 // Archiviazione canonica (decisione di Diego del 21/09/2026): il pulsante
 // «Elimina» di un Account proprio sposta nell'Archivio, non cancella. Usa la
 // stessa forma di metadati del gesto di Archivio (`createArchiveMetadata`) con
-// controllo di concorrenza sulla revisione: lo stato o la revisione cambiati
-// fermano la scrittura, un Account già archiviato non viene incrementato due
-// volte e viene restituito come stato coerente.
+// controllo di concorrenza sui marker che il chiamante ha OSSERVATO quando ha
+// aperto la vista: revisione e, per i writer legacy che non la incrementano,
+// `updatedAt`. Il confronto avviene nella transazione: se lo stato osservato
+// non coincide più, non si sovrascrive e si chiede di aggiornare. Un Account
+// già archiviato non viene incrementato due volte. Se il chiamante non fornisce
+// alcun marker affidabile l'operazione fallisce chiusa (`ARCHIVE_MARKER_MISSING`)
+// invece di archiviare uno stato che l'utente non ha visto.
 export async function archiveAccount(uid, account, options = {}) {
     const target = accountIdentity(account);
     return withArchiveSession(uid, options, async check => {
@@ -212,9 +216,11 @@ export async function archiveAccount(uid, account, options = {}) {
             }
             return value;
         };
+        const hasRevision = target.revision !== undefined;
+        const hasUpdatedAt = typeof target.updatedAt === 'string' && target.updatedAt !== '';
+        if (!hasRevision && !hasUpdatedAt) throw invalid('ARCHIVE_MARKER_MISSING');
         const expectedRevision = revisionOf(target.revision);
         const reference = accountReference(uid, target);
-        const metadata = createArchiveMetadata({revision: expectedRevision});
         let status = 'archived', revision = expectedRevision + 1;
         await runTransaction(db, async transaction => {
             check();
@@ -229,7 +235,11 @@ export async function archiveAccount(uid, account, options = {}) {
                 revision = currentRevision;
                 return;
             }
-            if (currentRevision !== expectedRevision) throw invalid('ARCHIVE_CONFLICT');
+            // Entrambi i marker osservati devono coincidere con lo stato attuale.
+            if (hasUpdatedAt && current.updatedAt !== target.updatedAt) throw invalid('ARCHIVE_UPDATED_AT_CONFLICT');
+            if (hasRevision && currentRevision !== expectedRevision) throw invalid('ARCHIVE_CONFLICT');
+            const metadata = createArchiveMetadata({revision: currentRevision});
+            revision = metadata.revision;
             transaction.update(reference, {
                 isArchived: true,
                 archiveSchemaVersion: metadata.archiveSchemaVersion,

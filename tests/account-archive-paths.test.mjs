@@ -40,6 +40,10 @@ test('le liste mantengono il blocco per gli Account ricevuti come ospite', () =>
   for (const module of ['privato/account_privati.js', 'azienda/account_azienda.js']) {
     const source = readFileSync(new URL(`../Frontend/public/assets/js/modules/${module}`, import.meta.url), 'utf8');
     assert.match(source, /dataset\.owner !== 'true'/, `${module}: la guardia di proprietà deve restare`);
+    // Correzione M7-R6: il confronto usa i marker osservati nel record caricato.
+    assert.match(source, /revision: account\?\.revision, updatedAt: account\?\.updatedAt/,
+      `${module}: la revisione osservata e il marker updatedAt devono essere passati al servizio`);
+    assert.match(source, /ARCHIVE_UPDATED_AT_CONFLICT/, `${module}: anche il conflitto su updatedAt invita ad aggiornare`);
   }
 });
 
@@ -51,4 +55,17 @@ test('la cancellazione definitiva resta soltanto dall\'Archivio', () => {
     assert.equal(source.includes('purgeArchivedAccount'), false, `${module}: nessuna cancellazione definitiva diretta`);
     assert.equal(source.includes('DELETE_FOREVER'), false, `${module}: nessuna conferma di cancellazione definitiva`);
   }
+});
+
+// M7-R6 correzione (revisione Codex 21/09/2026): il form aziendale deve usare il
+// marker osservato ALL'APERTURA, non una rilettura appena prima di archiviare,
+// altrimenti una modifica concorrente dopo l'apertura passerebbe inosservata.
+test('il form aziendale usa la revisione osservata all\'apertura, senza rileggere prima di archiviare', () => {
+  const form = readFileSync(new URL('../Frontend/public/assets/js/modules/azienda/form-azienda-save.js', import.meta.url), 'utf8');
+  assert.match(form, /observedRevision/, 'deve ricevere la revisione osservata');
+  assert.match(form, /observedUpdatedAt/, 'deve ricevere il marker updatedAt osservato');
+  assert.equal(form.includes('getDocFromServer'), false, 'nessuna rilettura tardiva del documento');
+  const page = readFileSync(new URL('../Frontend/public/assets/js/modules/azienda/form_account_azienda.js', import.meta.url), 'utf8');
+  assert.match(page, /observedRevision/, 'la pagina deve conservare la revisione letta all\'apertura');
+  assert.match(page, /window\.deleteAccount[\s\S]*observedRevision/, 'la pagina deve passarla all\'archiviazione');
 });

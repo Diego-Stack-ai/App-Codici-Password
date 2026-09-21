@@ -37,6 +37,9 @@ let invitedEmails = [];
 let accountWidgetController = null;
 let profileContactLinkDraft = null;
 let baseUpdatedAt = '';
+// Marker osservato all'apertura del modulo: è il termine di paragone
+// dell'archiviazione, così una modifica concorrente non viene sovrascritta.
+let observedRevision;
 
 // Funzione di re-render locale per banking-renderer
 const rerender = () => renderBankAccounts(bankAccounts, rerender, {
@@ -89,7 +92,7 @@ export async function initFormAccountAzienda(user) {
     myContacts = [];
 
     // Esponi deleteAccount su window per eventuali onclick HTML
-    window.deleteAccount = () => deleteAccount({ currentUid, currentAziendaId, currentDocId });
+    window.deleteAccount = () => deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt: baseUpdatedAt });
 
     initBaseUI();
     setupUI();
@@ -213,6 +216,7 @@ async function loadData() {
             return;
         }
         baseUpdatedAt = data.updatedAt || '';
+        observedRevision = Number.isSafeInteger(data.revision) ? data.revision : undefined;
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)

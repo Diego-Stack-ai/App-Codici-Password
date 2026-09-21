@@ -440,6 +440,35 @@ test('archiviazione: revisione cambiata non sovrascrive e chiede di aggiornare',
     assert.equal(f.writes.length, 0);
 });
 
+// Correzione M7-R6 (revisione Codex del 21/09/2026): il marker osservato deve
+// essere quello letto all'apertura della vista. Prima di questa correzione il
+// form aziendale rileggeva il documento al momento del clic, quindi una modifica
+// concorrente fra apertura e clic spariva senza conflitto. Ora valgono due
+// marker osservati: `revision` e, per i writer legacy che non la incrementano,
+// `updatedAt`. Se non arriva nessuno dei due si fallisce chiusi.
+test('archiviazione: updatedAt osservato consente di archiviare i writer legacy senza revisione', async () => {
+    const f = fixture(); f.stored = {isArchived: false, revision: 3, updatedAt: '2026-01-01T00:00:00.000Z'};
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', updatedAt: '2026-01-01T00:00:00.000Z'});
+    assert.deepEqual({...result}, {status: 'archived', id: 'x', context: 'privato', revision: 4});
+    assert.equal(f.writes.length, 1);
+    assert.equal(f.writes[0][1].isArchived, true);
+    assert.equal(f.writes[0][1].revision, 4);
+});
+
+test('archiviazione: updatedAt cambiato con la stessa revisione non sovrascrive', async () => {
+    const f = fixture(); f.stored = {isArchived: false, revision: 3, updatedAt: '2026-02-02T00:00:00.000Z'};
+    await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato',
+        revision: 3, updatedAt: '2026-01-01T00:00:00.000Z'}), /ARCHIVE_UPDATED_AT_CONFLICT/);
+    assert.equal(f.writes.length, 0, 'nessuna scrittura quando il documento è cambiato dopo l\'apertura');
+});
+
+test('archiviazione: senza alcun marker osservato si fallisce chiusi', async () => {
+    const f = fixture(); f.stored = {isArchived: false, revision: 2, updatedAt: '2026-01-01T00:00:00.000Z'};
+    await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato'}), /ARCHIVE_MARKER_MISSING/);
+    await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', updatedAt: ''}), /ARCHIVE_MARKER_MISSING/);
+    assert.equal(f.writes.length, 0, 'non si archivia uno stato che l\'utente non ha visto');
+});
+
 test('archiviazione: documento assente, revisione non valida e identità incompleta falliscono senza scritture', async () => {
     const f = fixture(); f.stored = null;
     await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 1}), /ARCHIVE_ACCOUNT_MISSING/);

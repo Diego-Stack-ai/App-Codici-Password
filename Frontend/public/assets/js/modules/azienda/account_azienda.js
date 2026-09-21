@@ -243,7 +243,8 @@ export function mountAccountAziendaList(user, options = {}) {
     // Esiti concorrenti dell'archiviazione canonica: chiedono un aggiornamento
     // esplicito della lista invece di dichiarare un fallimento generico.
     function archiveErrorMessage(error) {
-        if (error?.code === 'ARCHIVE_CONFLICT') return t('archive_conflict_refresh');
+        if (error?.code === 'ARCHIVE_CONFLICT' || error?.code === 'ARCHIVE_UPDATED_AT_CONFLICT'
+            || error?.code === 'ARCHIVE_MARKER_MISSING') return t('archive_conflict_refresh');
         if (error?.code === 'ARCHIVE_ACCOUNT_MISSING') return t('archive_missing_refresh');
         return readErrorMessage(error, t('error_generic'));
     }
@@ -255,7 +256,7 @@ export function mountAccountAziendaList(user, options = {}) {
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
         try {
             const account = allAccounts.find(candidate => candidate.id === id);
-            const result = await archiveAccount(currentUser.uid, {id, context: currentAziendaId, revision: account?.revision});
+            const result = await archiveAccount(currentUser.uid, {id, context: currentAziendaId, revision: account?.revision, updatedAt: account?.updatedAt});
             if (signal.aborted) return;
             showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_archived'));
             allAccounts = allAccounts.filter(a => a.id !== id);
@@ -280,7 +281,7 @@ export function mountAccountAziendaList(user, options = {}) {
         }
         try {
             const account = allAccounts.find(candidate => candidate.id === id);
-            const result = await archiveAccount(currentUser.uid, {id, context: currentAziendaId, revision: account?.revision});
+            const result = await archiveAccount(currentUser.uid, {id, context: currentAziendaId, revision: account?.revision, updatedAt: account?.updatedAt});
             if (signal.aborted) return;
             showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'));
             allAccounts = allAccounts.filter(a => a.id !== id);

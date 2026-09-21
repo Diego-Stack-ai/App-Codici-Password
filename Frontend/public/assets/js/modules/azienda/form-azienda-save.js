@@ -10,7 +10,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
 import {
-    doc, collection, runTransaction, deleteField, getDocFromServer
+    doc, collection, runTransaction, deleteField
 } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -321,26 +321,28 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
  * possibile soltanto dall'Archivio, con una conferma esplicita.
  * @param {Object} ctx - Contesto con ID dell'account
  */
-export async function deleteAccount({ currentUid, currentAziendaId, currentDocId }) {
+export async function deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt }) {
     if (!await showConfirmModal(t('confirm_archive_title'), t('confirm_archive_msg'))) return;
     try {
         // Import differito: il servizio di Archivio non entra nella closure
         // iniziale della pagina (budget dei moduli statici) e viene caricato
         // soltanto quando l'utente conferma di spostare un Account.
         const { archiveAccount } = await import('../settings/archive-account-service.js');
-        // La revisione corrente è il termine di paragone del controllo di
-        // concorrenza di archiveAccount: se cambia, l'operazione si ferma.
-        const snapshot = await getDocFromServer(doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentDocId));
-        if (!snapshot.exists()) {
-            showToast(t('archive_missing_refresh'), "error");
+        // Si usa il marker OSSERVATO all'apertura del modulo: una rilettura
+        // appena prima dell'archiviazione renderebbe invisibile una modifica
+        // concorrente avvenuta dopo l'apertura. Se manca un marker affidabile
+        // l'operazione fallisce chiusa e invita ad aggiornare.
+        if (observedRevision === undefined && !observedUpdatedAt) {
+            showToast(t('archive_conflict_refresh'), "error");
             return;
         }
-        const result = await archiveAccount(currentUid, {id: currentDocId, context: currentAziendaId, revision: snapshot.data()?.revision});
+        const result = await archiveAccount(currentUid, {id: currentDocId, context: currentAziendaId,
+            revision: observedRevision, updatedAt: observedUpdatedAt});
         showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'), "success");
         setTimeout(() => window.location.href = `account_azienda.html?id=${currentAziendaId}`, 1000);
     } catch (e) {
         logError("Archive", e);
-        if (e?.code === 'ARCHIVE_CONFLICT') showToast(t('archive_conflict_refresh'), "error");
+        if (['ARCHIVE_CONFLICT', 'ARCHIVE_UPDATED_AT_CONFLICT', 'ARCHIVE_MARKER_MISSING'].includes(e?.code)) showToast(t('archive_conflict_refresh'), "error");
         else if (e?.code === 'ARCHIVE_ACCOUNT_MISSING') showToast(t('archive_missing_refresh'), "error");
         else showToast(t('error_generic'), "error");
     }
