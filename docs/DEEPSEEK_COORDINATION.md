@@ -2993,3 +2993,151 @@ L'incarico chiedeva la verifica dei **tre** editor: i due form avevano banchi co
 3. Restano aperti e non avviati: audit/migrazioni (R7C-6), inviti orfani, collaudo su dispositivo; candidato **non distribuibile**.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R7C-5 consegnata da DeepSeek il 2026-09-21; banco comportamentale sul terzo editor reale (non preselezione, zero scritture senza selezione, invito del ciclo corrente con storico intatto, ciclo malformato senza scritture, pendente invariata), nessun difetto di runtime trovato, sharing 37/37 e suite principali verdi, nessun push eseguito.
+
+## Verifica Codex — M7-R7C-5 terzo editor
+
+**Esito: APPROVATO come candidato locale.** Commit `c21d7bc9` aggiunge una prova comportamentale sul modulo reale `shared/detail-account-mode.js`; `node --test tests/detail-account-mode-reinvite.test.mjs` passa **5/5**. Verificati: sospeso non preselezionato, nessuna scrittura senza selezione, nuovo invito del ciclo corrente con storico intatto dopo selezione esplicita, ciclo malformato senza scritture e pendente invariato. Il test non richiede modifiche runtime. I tre editor di condivisione ora hanno prove mirate; nessun push/deploy.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-CLOSE: audit integrato del blocco Archivio/condivisione
+
+**Stato incarico: PRONTO.** DeepSeek esegua una verifica finale del blocco M7 appena implementato, senza modificare runtime in questa fetta: leggere gli MD autorevoli di sicurezza, programma e maturità e confrontare i requisiti M7 con i commit locali da M7-R1 a R7C-5; eseguire la suite pertinente completa una sola volta e i test Emulator Rules/Functions necessari; controllare percorso archivio → sospensione guest → ripristino → reinvito → accettazione → revoca, includendo Account privato/aziendale, cache offline e limiti dichiarati. Identificare ogni gate ancora aperto (audit trigger, inviti orfani, dati legacy reali, prova browser/iPhone, storico cancellazioni, eventuali Rules/indici, MD da aggiornare) e distinguere difetti bloccanti da lavoro futuro. Verificare stato Git, numero commit ahead, working tree e assenza di push/merge/deploy; non toccare dati reali. Consegnare rapporto e proposta di fette residue nel solo `docs/DEEPSEEK_COORDINATION.md`, con `DA_VERIFICARE`; non dichiarare M7 completo se ci sono gate aperti. Nessun codice, test nuovo, commit, push o deploy in questa ricognizione. Un incarico alla volta.
+
+## Presa in carico DeepSeek — M7-CLOSE audit integrato del blocco Archivio/condivisione
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `c21d7bc9`; l'incarico era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** ricognizione. **Nessun codice, nessun test nuovo, nessun commit, push o deploy**; nessun dato reale toccato.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-CLOSE preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-CLOSE audit integrato del blocco Archivio/condivisione
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Ricognizione, **nessun commit**: il working tree contiene solo questo file di coordinamento.
+- **M7 NON è completo**: due difetti bloccanti trovati (sotto) e gate di prodotto/backend ancora aperti.
+
+### 1. Difetti BLOCCANTI (introdotti dalle mie tranche e non intercettati prima)
+
+| # | Suite | Evidenza | Commit che l'ha introdotto | Correzione minima proposta |
+|---|---|---|---|---|
+| B-1 | `npm run test:ui-foundations` | `Fondazione mancante: caricamento account e rubrica parallelo` — l'audit (`scripts/audit-ui-foundations.mjs:107`) pretende `await Promise.all([… loadRubrica() … loadData(` e la pagina aziendale ora chiama `loadRubrica(mount)` | **`ae315ffd`** (M7-R6, epoch di montaggio) | catturare l'epoch **dentro** `loadRubrica` (`const mount = mountEpoch;` come prima istruzione, sincrona alla chiamata) e tornare a `loadRubrica()` senza parametro: semantica identica, fondazione ripristinata, nessuna modifica all'audit |
+| B-2 | `npm run test:profile` | 12 test rossi in `tests/profile-contact-link.test.mjs`, causa `sharingCycleOf`/`inviteIdForGuest` non definiti nel contesto del banco (gli `import` sono rimossi) | **`1162aac1`** (M7-R7C-1: i writer usano gli helper di ciclo) | iniettare i tre helper di `utils.js` nel contesto del banco, come già fatto per i banchi aziendali in R7C-5 |
+
+**Come sono sfuggiti:** la mia batteria per tranche non comprendeva `test:ui-foundations` né `test:profile`; `npm test` (che le include) non era mai stato eseguito per intero. È lo stesso tipo di lacuna già dichiarata per `test:navigation` in M7-R7B4: **la batteria per tranche va estesa all'intera `npm test`** (o almeno a queste due suite) prima di consegnare.
+
+### 2. Esecuzione della suite (una sola esecuzione completa + completamento mirato)
+
+`npm test` eseguito **una volta**: si arresta al primo fallimento (`&&`), cioè a `test:ui-foundations`, dopo che erano passati `test:offline`, `test:security`, `test:vault-contract`, `test:profile-utilities-editor`, `test:data-access` (95/95) e `test:navigation` (146/146). Per avere il quadro completo ho poi eseguito **individualmente** le suite successive:
+
+| Suite | Esito |
+|---|---|
+| `test:ui-foundations` | **1 (rosso)** — B-1 |
+| `test:profile` | **1 (rosso)** — B-2 |
+| `test:lightweight` · `test:performance-budget` · `test:css` · `test:dependencies` · `test:assistant` · `test:maturity-fixture` · `test:crypto` · `test:attachments` | 0 (verdi) |
+| `test:sharing-prototype` · `test:offline-write-prototype` · `test:history-prototype` · `test:backup-prototype` · `test:credential-health-prototype` · `test:release-hardening` | 0 (verdi) |
+| `test:functions-security` · `test:firestore-rules` · `test:storage-rules` | 0 (verdi; Functions **142/142**, Rules **45/45**) |
+| `test:page-shells` · `test:html-purity` · `test:static-references` · `test:js-syntax` · budget pagine | verdi (161 moduli, 235 file, 30 pagine) |
+
+Nessuna delle suite **emulatrici non-M7** (`vault-emulators`, `qr-selection`, `profile-*-emulators`, `account-standard-emulators`) è stata eseguita: non riguardano il blocco Archivio/condivisione e la ricognizione non doveva ampliarsi. **Non è quindi una esecuzione verde di `npm test`**: con B-1 e B-2 aperte, la suite completa non può passare.
+
+### 3. Percorso verificato (archivio → sospensione → ripristino → reinvito → accettazione → revoca)
+
+| Passo | Privato | Aziendale | Evidenza |
+|---|---|---|---|
+| Archiviazione atomica con CAS, revoca grant, ciclo | ✅ | ✅ | `tests/archive-session.test.mjs` 45/45 (una sola transazione, `sharingCycle` +1, inviti marcati senza cancellazioni) |
+| Ospite sospeso: lettura negata dalle Rules | ✅ | ✅ | `tests/archive-guest-suspension.rules.test.mjs` (Emulator, 45/45 con la suite) |
+| Card «Account sospeso» senza aprire l'Account | ✅ | ✅ (via lista privata con `aziendaId`) | `tests/account-page-lifecycle.test.mjs` 41/41 |
+| Deep link difeso, anche con Account in cache | ✅ | ✅ | `tests/private-detail-legacy-id.test.mjs` 17/17, `tests/company-detail-readonly.test.mjs` 8/8 |
+| Online: autorizzazione con lettura confermata dal server | ✅ | ✅ | `tests/guest-invite-suspension.test.mjs` 5/5 + i due banchi dettaglio |
+| Ripristino fail-closed (nessuna riattivazione) | ✅ | ✅ | `tests/archive-session.test.mjs` (invariante completo, `ARCHIVE_RESTORE_INCOHERENT`) |
+| Reinvito intenzionale nei **tre** editor | ✅ | ✅ | `tests/shared-regrant-after-restore.test.mjs` 5/5, `tests/detail-account-mode-reinvite.test.mjs` 5/5 |
+| Vecchio invito non accettabile | ✅ | ✅ | `functions/test/respond-invitation-archived.test.js` 11/11 (`INVITE_CYCLE_STALE`) |
+| Accettazione del nuovo invito → accesso | ✅ | ✅ | `tests/archive-guest-suspension.rules.test.mjs` (grant accettato ⇒ lettura consentita) |
+| Revoca esplicita | ✅ | ✅ | `tests/detail-sharing-revocation-cycle.test.mjs` 6/6 (`_c{n}`, storico intatto) |
+| Cache offline: limiti dichiarati | ✅ | ✅ | copia non revocabile retroattivamente; offline con invito vecchio non protegge (dichiarato, non mascherato) |
+
+### 4. Gate ancora aperti (distinti dai difetti bloccanti)
+
+**Backend / prodotto (fette future, non difetti):**
+1. **Trigger di audit** dell'archiviazione/sospensione/reinvito: non implementato (il client non può scrivere `auditEvents`, decisione M7-R3).
+2. **Inviti orfani**: non enumerabili dalle chiavi di `sharedWith`; inerti ma non ricensiti.
+3. **Storico delle cancellazioni**: la revoca esplicita **cancella** l'invito; se lo storico deve essere completo serve una decisione di Diego (marcare `revoked` invece di cancellare).
+4. **Dati legacy reali**: normalizzazione di `cycle`/`sharingCycle`/ID invito e censimento degli Account già archiviati: richiede autorizzazione esplicita (dati reali).
+5. **Retention M7**: la finestra di **24 mesi** è decisa e il candidato di laboratorio è provato, ma **nessun job esiste nel runtime** (censimento T-11) e la suite completa di retention **non è approvata** (`PIANO_MATURITA_PROFESSIONALE.md:469`).
+6. **Rules produttive per l'audit** (T-12): il divieto di scrittura client sugli eventi è provato solo su Rules candidate; le Rules produttive consentono ancora le scritture del proprietario.
+7. **Concorrenza globale purge/ripristino** e **planner dei riferimenti residui non collegato al runtime** (`PIANO_MATURITA_PROFESSIONALE.md:510`).
+8. **Righe del censimento M7-R1 ancora «da realizzare»**: T-08, T-09, T-13, T-15, T-16, T-17, T-21, T-22, T-23, T-24, T-26, T-27, T-28, T-29, T-30 (allegati, backup, cestino, trasversali) — 15 righe su 38, oltre alle due già chiuse in T-11/T-12 solo come candidato.
+9. **Nessuna nuova Rule o indice è richiesto** dalle fette R7C: le query degli inviti restano su filtri di sola uguaglianza e il campo `cycle` è già ammesso nell'allowlist di creazione.
+10. **MD autorevoli da aggiornare** dopo la chiusura: sezione M7 di `PIANO_MATURITA_PROFESSIONALE.md` (stato, retention, protocollo condiviso), `M7_RETENTION_CENSIMENTO.md` (righe chiuse), `M7_CRONOLOGIA_CESTINO_AUDIT.md` (sospensione/ripristino), `ARCHITETTURA_SICUREZZA_V1.md` (modello di sospensione dell'accesso condiviso).
+
+**Non bloccanti ma dichiarati:** nessun collaudo su browser/dispositivo reale (gate fisico **iPhone** ancora aperto da M6), candidato **non distribuibile**, `master` e versione invariati.
+
+### 5. Stato Git verificato
+
+- Ramo `integration/vault-shell-v127-security`; **HEAD `c21d7bc9`**; **32 commit locali** avanti rispetto a `origin/integration/vault-shell-v127-security`; `origin/master` **`4efda528`**; versione **`1.2.127`**.
+- Working tree: **solo `docs/DEEPSEEK_COORDINATION.md` modificato** (questo rapporto); nessun altro file, nessun commit nuovo.
+- **Nessun push, merge o deploy** eseguito; nessun dato reale toccato; Rules/Functions produttive invariate.
+
+### 6. Proposta di fette residue
+
+1. **M7-FIX-1 (bloccante, prioritario):** ripristinare B-1 e B-2 senza cambiare comportamento — `loadRubrica()` con epoch catturata internamente e helper iniettati nel banco `profile-contact-link`; poi **`npm test` completo verde** come prova di chiusura, e da lì in avanti la batteria per tranche comprende l'intera `npm test`.
+2. **M7-R7C-6 (backend):** trigger di audit per archiviazione, sospensione, reinvito e revoca, idempotente sull'`event.id`.
+3. **M7-R7C-7 (pulizia e storico):** censimento/pulizia degli inviti orfani e decisione di Diego sulla marcatura `revoked` al posto della cancellazione.
+4. **M7-R7C-8 (dati reali, solo con autorizzazione):** normalizzazione di cicli e ID invito sugli Account esistenti.
+5. **M7-CLOSE-2:** aggiornamento degli MD autorevoli e dichiarazione dello stato M7 (la distribuzione resta una decisione di Diego, non mia).
+6. Le righe residue del censimento M7-R1 vanno raggruppate per area (allegati, backup, cestino, trasversali) e assegnate una per volta.
+
+**Stato incarico: DA_VERIFICARE** — M7-CLOSE consegnato da DeepSeek il 2026-09-21; **M7 non completo**: due difetti bloccanti (`test:ui-foundations` da `ae315ffd`, `test:profile` da `1162aac1`) con causa e correzione minima indicate, percorso archivio→sospensione→ripristino→reinvito→accettazione→revoca verificato su privato e aziendale con cache offline e limiti dichiarati, gate backend/prodotto e 15 righe di censimento ancora aperte, stato Git verificato (32 commit avanti, working tree pulito, nessun push) e nessun codice, test o commit prodotto in questa ricognizione.
+
+## Verifica Codex — M7-CLOSE audit integrato
+
+**Esito: APPROVATO come diagnosi, M7 ancora aperto.** Ho riprodotto i due difetti segnalati: `npm run test:ui-foundations` si ferma su «Fondazione mancante: caricamento account e rubrica parallelo»; `node --test tests/profile-contact-link.test.mjs` ha più regressioni con `error_generic`, coerenti con helper del ciclo assenti nel banco. Il rapporto distingue correttamente questo blocco dai gate di audit, retention, dati reali e collaudo dispositivo. Stato Git: ramo `integration/vault-shell-v127-security`, 32 commit locali avanti, solo file di coordinamento modificato, nessun push/deploy verificato. Non dichiarare M7 completo.
+
+**Stato verifica: APPROVATO (audit, non release)** — 21/09/2026.
+
+## Incarico Codex — M7-FIX-1A: fondazione UI del caricamento parallelo
+
+**Stato incarico: PRONTO.** DeepSeek corregga solo B-1: ripristinare il contratto `test:ui-foundations` del caricamento parallelo di Account e rubrica nel form aziendale senza perdere la protezione dall'epoch contro un montaggio superato. Preferire una modifica minima del runtime con `loadRubrica()` che cattura sincronicamente l'epoch corrente, oppure proporre una modifica dell'audit solo se il suo requisito non descrive più un'invariante reale; motivare la scelta. Eseguire `npm run test:ui-foundations`, i test mirati del form e la verifica di navigazione; un commit locale mirato, nessun push/deploy, nessun dato reale. Consegnare `DA_VERIFICARE`. Non avviare B-2 o altri gate in parallelo.
+
+## Presa in carico DeepSeek — M7-FIX-1A fondazione UI del caricamento parallelo
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `c21d7bc9`; la revisione Codex e l'incarico erano nel working tree non committati e sono **conservati** senza alterarne il testo.
+- **Perimetro:** solo B-1. **Nessun** push, deploy o dato reale; **B-2 e gli altri gate non avviati**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-FIX-1A preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-FIX-1A fondazione UI del caricamento parallelo
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `c21d7bc9`; **nessun push o deploy**.
+
+### Scelta: modifica minima del runtime, audit intatto (motivazione)
+
+Il requisito dell'audit — **caricamento parallelo di Account e rubrica** nello stesso `Promise.all` — descrive un'invarianza **ancora reale**: non era obsoleto, era cambiata solo la **firma** delle funzioni (l'epoch passata come parametro in M7-R6). Ho quindi lasciato `scripts/audit-ui-foundations.mjs:107` **inalterato** e ho riportato il runtime al contratto:
+
+- `azienda/form_account_azienda.js:124-125` → `loadRubrica()` e `loadData()` senza argomenti;
+- `loadRubrica()` (`:376-388`) e `loadData()` (`:238-244`) catturano l'epoch **sincronicamente alla chiamata** (`const mount = mountEpoch;` come prima istruzione): la chiamata avviene dentro lo stesso `Promise.all` dello stesso `init`, quindi il valore è quello del montaggio corrente e i controlli `mount !== mountEpoch` / `stale()` restano **identici**.
+
+Le due funzioni non sono invocate da nessun altro punto della pagina (verificato: unica chiamata in `initFormAccountAzienda`), quindi la cattura interna è equivalente per costruzione e non introduce percorsi alternativi.
+
+### Prova che la protezione dall'epoch non è stata persa
+
+I casi di **caricamenti sovrapposti** restano verdi: `tests/company-form-archive-mount.test.mjs` (9/9, inclusi «il completamento tardivo di A non conferma il marker per B» e «A in ritardo non sostituisce i marker del montaggio B»). La guardia `tests/account-archive-paths.test.mjs:79-88` è stata aggiornata al contratto equivalente: pretende ancora l'epoch di montaggio, la sua crescita in `init`, l'uscita `if (stale()) return;` e ora la **cattura sincrona** dentro `loadData`/`loadRubrica` invece del parametro.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `npm run test:ui-foundations` | **verde** — «Nessuna nuova discrepanza rispetto alla baseline; fondazioni presenti» |
+| Test mirati del form (`company-form-archive-mount` + `company-archive-conflict` + `banking-form-roundtrip` + `company-form-freshness`) | **23/23** |
+| `npm run test:navigation` | **146/146** |
+| `npm run test:history-prototype` (guardia inclusa) | **98/98** |
+| `test:data-access` / `test:sharing-prototype` / `test:functions-security` | 95/95 · 37/37 · 142/142 |
+| `test:js-syntax` · `test:page-shells` · `test:html-purity` · `test:static-references` · budget pagine | 161 moduli · 24+5 pagine conformi · HTML puro · 235 file · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **796 file** |
+
+### Stato del blocco dopo questa fetta
+
+**B-1 è chiuso.** **B-2 resta aperto e non è stato toccato** (come disposto): `npm run test:profile` è ancora rosso per gli helper di ciclo assenti nel banco `tests/profile-contact-link.test.mjs`. Di conseguenza **`npm test` non può ancora essere verde** e M7 non è completo: serve la fetta B-2 prima della chiusura.
+
+**Stato incarico: DA_VERIFICARE** — M7-FIX-1A consegnato da DeepSeek il 2026-09-21; contratto di fondazione UI ripristinato con la modifica minima al runtime (epoch catturata alla chiamata), protezione dal montaggio superato provata dai casi di sovrapposizione, `test:ui-foundations` verde, mirati 23/23 e navigation 146/146, B-2 dichiarato ancora aperto, nessun push eseguito.

@@ -121,8 +121,8 @@ export async function initFormAccountAzienda(user) {
     setupUI();
     setupImageUploader();
     await Promise.all([
-        loadRubrica(mount),
-        isEditing ? loadData(mount) : Promise.resolve()
+        loadRubrica(),
+        isEditing ? loadData() : Promise.resolve()
     ]);
     // Un montaggio superato non deve proseguire: lo stato di modulo (compresi
     // gli identificativi) appartiene ormai al montaggio corrente.
@@ -233,7 +233,12 @@ function initBaseUI() {
     }
 }
 
-async function loadData(mount) {
+async function loadData() {
+    // Come `loadRubrica`, l'epoch è catturata SINCROMENTE alla chiamata (dentro il
+    // `Promise.all` dello stesso `init`): il contratto di fondazione UI
+    // `loadRubrica()` + `loadData()` resta intatto e la protezione dal montaggio
+    // superato è identica.
+    const mount = mountEpoch;
     const stale = () => mount !== mountEpoch;
     try {
         const data = await getCompanyAccount(currentUid, currentAziendaId, currentDocId);
@@ -371,7 +376,13 @@ async function loadData(mount) {
     finally { if (!stale()) toggleLoading(false); }
 }
 
-async function loadRubrica(mount) {
+async function loadRubrica() {
+    // L'epoch viene catturata SINCROMENTE alla chiamata, che avviene dentro il
+    // `Promise.all` dello stesso `init`: è quindi quella del montaggio corrente
+    // senza bisogno di un parametro, e la protezione contro un montaggio superato
+    // resta identica (`loadRubrica()` mantiene il contratto di fondazione UI del
+    // caricamento parallelo di Account e rubrica).
+    const mount = mountEpoch;
     try {
         const contacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
         if (mount !== mountEpoch) return;

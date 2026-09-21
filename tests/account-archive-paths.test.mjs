@@ -77,9 +77,14 @@ test('il form aziendale usa la revisione osservata all\'apertura, senza rilegger
   assert.match(page, /markerConfirmed = false;/, 'la conferma del montaggio corrente va azzerata a ogni montaggio');
   assert.match(page, /if \(!markerConfirmed\)/, 'l\'archiviazione deve essere bloccata senza conferma');
   // Correzione M7-R6 (terzo rilievo Codex): i caricamenti possono sovrapporsi,
-  // quindi il risultato va legato a un'epoch immutabile del montaggio.
+  // quindi il risultato va legato a un'epoch immutabile del montaggio. M7-FIX-1A:
+  // l'epoch è catturata DENTRO `loadData`/`loadRubrica` alla chiamata sincrona,
+  // così il contratto di fondazione UI (`loadRubrica()` + `loadData()`) resta
+  // intatto senza perdere la protezione.
   assert.match(page, /let mountEpoch = 0;/, 'serve un\'epoch di montaggio');
   assert.match(page, /const mount = \+\+mountEpoch;/, 'ogni init deve aprire una nuova epoch');
-  assert.match(page, /async function loadData\(mount\)/, 'il caricamento deve ricevere l\'epoch del montaggio');
+  assert.match(page, /async function loadData\(\)/, 'il caricamento non deve dipendere da un parametro esterno');
+  assert.match(page, /const mount = mountEpoch;/, 'l\'epoch va catturata alla chiamata');
+  assert.match(page, /async function loadRubrica\(\)/, 'la rubrica mantiene il contratto di fondazione UI');
   assert.match(page, /if \(stale\(\)\) return;/, 'un caricamento superato deve uscire dopo le attese');
 });
