@@ -57,10 +57,24 @@ Sul commit applicativo indicato, `executeBackupRestore` applica transazioni sepa
 
 - [ ] progettare e collaudare staging, ripresa o compensazione fra blocchi e allegati;
 - [ ] verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima;
-- [ ] dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva;
+- [ ] **NON CHIUSA (21/09/2026)** dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva: su emulatori reali, con dati sintetici e il percorso reale `executeBackupRestore`, un **upload fallito dopo l'applicazione dei record** lascia il metadato dell'allegato in Firestore (che cita il percorso) **senza** i byte in Storage — riferimento orfano **osservato**, non dedotto. Dettagli e controllo positivo nella sezione qui sotto; gate lasciato **aperto**.
 - [ ] misurare memoria e dimensioni su iPhone e Windows.
 
-L’export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.
+L’### Riferimenti orfani dopo un ripristino interrotto (verifica 21/09/2026)
+
+Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, **codice di produzione** del client (`prepareBackupRestore` + `executeBackupRestore`) e **callable reale** `restoreBackupChunk`: `tests/interrupted-restore-orphan-refs.emulator.test.mjs` (2 casi), runner `scripts/run-interrupted-restore-emulators.mjs`.
+
+| Scenario | Esito osservato |
+|---|---|
+| **Interruzione mirata** fra scrittura del riferimento e upload (primo `uploadBytes` che fallisce) | i record sono applicati (Profilo, Account e **metadato dell'allegato**, che cita il percorso dell'oggetto); l'upload viene tentato una volta e fallisce; la lettura dei byte fallisce con `storage/object-not-found` → **riferimento senza byte** |
+| **Controllo positivo** (upload riuscito) | riferimento e byte **coincidono**: l'oggetto esiste e il contenuto è quello del backup |
+
+**Perché accade (dal codice).** `executeBackupRestore` applica **prima** tutti i blocchi di record (fase `firestore`) e solo **dopo** carica gli allegati (fase `storage`, `storageStarted = true`); un errore in fase `storage` blocca il piano (`BACKUP_STORAGE_RETRY_BLOCKED`) e **non** esiste compensazione, staging o retry automatico. Il caso osservato è **complementare** a quello già dichiarato in questo documento («senza creare oggetti orfani non referenziati», riga 120): là i **byte senza riferimento**, qui il **riferimento senza byte**.
+
+**Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le collisioni o le modifiche intercorse dopo l'anteprima, né la ripetizione con `retry` dal piano bloccato (il codice la rifiuta con `BACKUP_STORAGE_RETRY_BLOCKED` finché `storageStarted` è vero: asserzione di codice, non provata qui).
+
+**Nessuna correzione introdotta.** Come richiesto non ho introdotto staging, compensazione, retry automatici o nuove politiche: il difetto è registrato e il gate resta **aperto** in attesa di una decisione.
+export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.
 
 
 ## Protezioni candidate della sessione di ripristino — 13/09/2026
