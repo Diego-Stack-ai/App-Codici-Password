@@ -626,6 +626,12 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 6. retention dei log delle Cloud Functions, che possono contenere il payload dei comandi di ripristino;
 7. eventuali procedure operative esterne al repository che eliminino o conservino dati;
 
+8. comportamento in caso di fallimento parziale delle cancellazioni Storage (deducibile, non testato);
+9. configurazione reale di App Check, backup gestiti/PITR e quote del progetto;
+10. copie residue lato browser: `persistentLocalCache` conserva metadati in IndexedDB, `localStorage['codex_profile_avatar_{uid}']` conserva l'URL dell'avatar e nel codice non esiste una rimozione al logout (l'assenza di altre copie nel browser non è dimostrabile staticamente);
+11. validità della `downloadURL` ripristinata dal backup mentre l'oggetto viene riscritto (comportamento backend del token di download, non deducibile dal codice);
+12. cifratura at-rest gestita da Google e concorrenza reale fra purge e upload nella finestra fra la lettura di `attachments` (`functions/index.js:500`) e `recursiveDelete` (`:507`): il codice non serializza le due operazioni.
+
 ### 11.1 Verifica esterna di TTL e lifecycle (M7-T22, 21/09/2026)
 
 **Che cosa dichiarano i file locali (letti, non modificati).**
@@ -658,11 +664,6 @@ gcloud storage buckets describe gs://appcodici-password.firebasestorage.app --fo
 Da registrare quando eseguiti: **fonte** (account e strumento usati), **data**, **progetto/bucket** e **output** (elenco delle policy TTL attive; eventuale blocco `lifecycle`), senza elencare documenti, oggetti o nomi di file.
 
 **Limiti.** Nessuna lista di documenti, oggetti o nomi reali è stata prodotta; nessuna modifica a TTL, lifecycle, Rules o IAM; nessun test di codice è stato aggiunto (la verifica è di configurazione). Nessuna nuova domanda di prodotto: la voce resta un **handoff operativo** verso chi possiede le credenziali.
-8. comportamento in caso di fallimento parziale delle cancellazioni Storage (deducibile, non testato);
-9. configurazione reale di App Check, backup gestiti/PITR e quote del progetto;
-10. copie residue lato browser: `persistentLocalCache` conserva metadati in IndexedDB, `localStorage['codex_profile_avatar_{uid}']` conserva l'URL dell'avatar e nel codice non esiste una rimozione al logout (l'assenza di altre copie nel browser non è dimostrabile staticamente);
-11. validità della `downloadURL` ripristinata dal backup mentre l'oggetto viene riscritto (comportamento backend del token di download, non deducibile dal codice);
-12. cifratura at-rest gestita da Google e concorrenza reale fra purge e upload nella finestra fra la lettura di `attachments` (`functions/index.js:500`) e `recursiveDelete` (`:507`): il codice non serializza le due operazioni.
 
 **Limiti di metodo.** Il censimento è statico: legge codice, Rules e configurazione versionata; non esegue test, non interroga il progetto, non legge dati reali. Le proprietà elencate come «esistenti» derivano da codice e test citati, non da un collaudo end-to-end. Nessuna durata, eccezione legale o cancellazione definitiva è stata decisa o implementata da questo documento.
 
