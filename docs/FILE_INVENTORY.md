@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **855**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **856**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## docs
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `docs/M6_DOMANDE_CACHE_ESPULSA.md` | MD | 3273 | 49 | Documentazione: M6 DOMANDE CACHE ESPULSA. |
+| `docs/M10_REVISIONE_LOCALE.md` | MD | 11833 | 147 | Documentazione: M10 REVISIONE LOCALE. |
 | `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
 | `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
 | `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
@@ -21,9 +21,9 @@ File censiti: **855**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 32060 | 488 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 13878 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
+| `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14470 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1038396 | 7028 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1052500 | 7091 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -35,6 +35,7 @@ File censiti: **855**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
 | `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
+| `docs/M6_DOMANDE_CACHE_ESPULSA.md` | MD | 3273 | 49 | Documentazione: M6 DOMANDE CACHE ESPULSA. |
 | `docs/M6_DOMANDE_FALLBACK_WEB_LOCKS.md` | MD | 3267 | 48 | Documentazione: M6 DOMANDE FALLBACK WEB LOCKS. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 87601 | 535 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
