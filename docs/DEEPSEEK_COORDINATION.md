@@ -1340,3 +1340,71 @@ Il rilievo era fondato e aveva una seconda conseguenza che ho verificato: `audit
 - Ho preso atto del prossimo lavoro concordato con Diego (mappatura in sola lettura dei percorsi di archiviazione/cancellazione di Account propri, propri condivisi, ricevuti come ospite e credenziali comuni collegate): **non è stato avviato**, in attesa della chiusura di M7-R3.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R3 consegnata da DeepSeek il 2026-09-21; difetto chiuso con prova sintetica, 24 mesi invariati e nessun push eseguito.
+
+## Verifica Codex — correzione M7-R3
+
+- **Esito: APPROVATO come candidato di laboratorio.** Diff `8600f332..b5df2f2b` nel perimetro concordato; `git diff --check` pulito. La validazione respinge nanosecondi fuori da 0…999999999, secondi/date non rappresentabili e piani con UID o percorsi non coerenti. I record malformati restano `unverifiable`, fuori dai lotti. Test mirato `node --test experiments/history-recovery/audit-retention.test.mjs`: **15/15**.
+- **Limiti:** la finestra di 24 mesi non è attiva in produzione; Rules produttive e job reale non sono modificati. Il candidato usa mesi di calendario e conserva i record senza data valida in attesa di una decisione. La funzione esecutrice deve ricevere soltanto un piano ricavato dal pianificatore fidato; il montaggio produttivo dovrà mantenere questo vincolo.
+
+**Stato incarico: APPROVATO** — M7-R3 di laboratorio verificato da Codex il 21/09/2026.
+
+## Incarico DeepSeek — M7-R4 mappa eliminazione e condivisione
+
+Codex coordina/revisiona; DeepSeek esegue. Verifica ramo `integration/vault-shell-v127-security`, HEAD, remote e working tree. Preserva tutte le modifiche preesistenti. Base osservata `b5df2f2b` (11 commit locali avanti a origin). Nessun push, merge, deploy o secondo esecutore.
+
+### Lavoro richiesto: sola lettura e documentazione
+
+- Mappa separatamente **quattro casi**: (1) Account proprio privato o aziendale non condiviso; (2) Account proprio condiviso a uno o più ospiti; (3) Account di altro proprietario ricevuto tramite invito accettato; (4) Account proprio collegato a `sharedVaultData`/`sharedVaultLinks` o ad altri Account tramite credenziali comuni. Per ogni caso individua chi può archiviare, ripristinare, cancellare dalla lista, fare purge da Archivio, revocare l'accesso o rinunciare alla condivisione. Distingui i diritti dell'ospite da quelli del proprietario e segnala le azioni non implementate.
+- Traccia i percorsi reali UI → codice → Firestore/Functions/Rules e gli effetti su record, allegati/metadati, inviti, widget, credenziali comuni, riferimenti nei Profili/Aziende, audit, backup e cache. Distingui ciò che è dimostrato dal codice da ciò che è solo desiderabile. In particolare verifica il vecchio `deleteDoc` dalla lista rispetto a `purgeArchivedAccount` e il comportamento dell'ospite dopo accettazione dell'invito.
+- Produci una tabella breve di **opzioni decisionali per Diego** in linguaggio semplice: cosa significa 'Elimina' nei quattro casi e quali elementi devono restare. Non decidere al suo posto la pulizia di dati condivisi o la rinuncia dell'ospite. Nessuna modifica al runtime, Rules, Functions, dati reali, versione o master; nessun test distruttivo. Non iniziare M8–M10.
+- Solo controlli statici mirati e `git diff --check`; un unico commit locale di documentazione/rapporto, senza push. Consegna `DA_VERIFICARE` nel file di coordinamento, con riferimenti verificabili e limiti. Codex revisionerà e presenterà a Diego le scelte prima di autorizzare implementazione.
+
+**Stato incarico: PRONTO** — M7-R4 disposto da Codex il 21/09/2026 su richiesta di Diego.
+
+## Presa in carico DeepSeek — M7-R4
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base osservata `b5df2f2b`, 11 commit locali avanti a origin. Le modifiche preesistenti di questo file (approvazione M7-R3 e incarico M7-R4) sono **conservate** nell'unico commit di tranche.
+- **Perimetro:** sola lettura e documentazione. Mappa dei quattro casi (Account proprio non condiviso, proprio condiviso, ricevuto come ospite, collegato a credenziali comuni) con diritti per ruolo, percorsi UI → codice → Firestore/Functions/Rules ed effetti; tabella di opzioni decisionali per Diego. Nessuna modifica a runtime, Rules, Functions, dati reali, versione o `master`; nessun test distruttivo; M8–M10 non avviati; nessun push.
+- **Commit:** uno solo di documentazione e rapporto, come richiesto.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R4 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R4
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** **un solo commit locale** di documentazione e rapporto, come richiesto; base `b5df2f2b`; **nessun push eseguito**.
+- **File:** `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` (nuovo), `docs/DEEPSEEK_COORDINATION.md`, `docs/FILE_INVENTORY.md`. Nessun file di codice, Rules o Functions toccato.
+
+### Consegna
+
+Il nuovo MD mappa i **quattro casi** richiesti (Account proprio non condiviso, proprio condiviso, ricevuto come ospite, collegato a credenziali comuni) con: azioni per ruolo, tracciamento UI → codice → Firestore/Functions/Rules, tabella di sopravvivenza degli elementi per caso, confronto `deleteDoc` contro `purgeArchivedAccount`, comportamento dell'ospite dopo l'accettazione, **7 trabocchetti verificati**, **8 azioni non implementate**, tabella di **opzioni decisionali per Diego** in linguaggio semplice e **9 voci `non verificate`**.
+
+### Reperti principali (verificati di persona su codice e Rules)
+
+1. **La revoca di un ospite che ha già accettato può fallire per intero.** Le vie di revoca scrivono una notifica in `users/{guestUid}/notifications` dentro la stessa transazione (`.../privato/dettaglio-privato-sharing.js:150-161`), ma `notifications` non ha regole dedicate e ricade nella wildcard del proprietario (`firestore.rules:106-118`): la scrittura è negata e, essendo in transazione, annulla anche la rimozione dell'ospite. Ramo attivo solo con `guestUid` valorizzato, cioè proprio quando l'ospite ha accettato. **Nessun test lo copre.**
+2. **`respondToInvitation` non incrementa `revision`** (`functions/index.js:1231-1237`) mentre il resto dell'app lo fa: dopo un'accettazione la revisione non descrive più il documento e il purge, che richiede uguaglianza esatta (`functions/archive-purge-service.js:47-48`), lavora su un valore incoerente.
+3. **Una credenziale comune collegata a un Account archiviato non è più scollegabile né eliminabile**: il selettore elenca solo Account non archiviati (`.../settings/shared-credentials-controller.js:84,88`) e la callable rifiuta l'eliminazione finché esistono collegamenti (`functions/index.js:294-299`).
+4. **Archiviare un Account condiviso non avvisa gli ospiti** (le Rules non guardano `isArchived`, l'ospite continua a leggerlo) **e rende la revoca irraggiungibile** finché non lo si ripristina, perché dall'Archivio non si raggiunge il dettaglio.
+5. **`deleteDoc` dalla lista e purge non sono equivalenti**: il primo lascia metadati allegati, oggetti Storage, widget, credenziali comuni e inviti, e non scrive ricevute né audit; dopo di esso il purge risponde `not-found` e quei residui non hanno più un percorso applicativo.
+6. **`auditEvents` resta cancellabile dal proprietario** nelle Rules produttive; la protezione esiste solo nel candidato di laboratorio M7-R3.
+
+### Opzioni per Diego (sezione 8 del MD, non decise qui)
+
+Tabella per i quattro casi con: cosa significa oggi «Elimina», cosa resta, e le opzioni (lasciare com'è / far passare l'eliminazione dal cestino / pulire i collegamenti a widget e credenziali comuni / dare all'ospite un'azione di rinuncia / pulire gli inviti orfani / avvisare gli ospiti). **Non ho deciso** né la pulizia dei dati condivisi né la rinuncia dell'ospite.
+
+### Verifiche eseguite
+
+- Controlli statici sul nuovo MD: 6 tabelle con **0 incoerenze**, **41 citazioni distinte, 0 non valide** (file esistente e riga presente).
+- `git diff --check` **pulito**; `npm run audit:inventory` eseguito; nessun test eseguito (l'incarico chiede solo controlli statici mirati).
+- Nessuna modifica a runtime, Rules, Functions, dati reali, versione (`1.2.127`) o `master` (`445b338d`).
+
+### Limiti e voci non verificate
+
+Nessun test copre le Rules produttive per l'ospite accettato o per `invites`; il fallimento della revoca è dedotto da codice e Rules, **non riprodotto**; la decifratura lato ospite **non è implementata** (prototipo di laboratorio); nessun test verifica la sopravvivenza di widget, collegamenti e inviti dopo un purge; lo stato reale del database e delle Rules distribuite non è ispezionato; l'ampiezza della regola `/{path=**}/accounts/{accountId}` non è verificata nei suoi effetti pratici.
+
+### Note per Codex
+
+- I due trabocchetti 1 e 3 sono difetti funzionali, non scelte di retention: li ho documentati come tali e **non** ho proposto correzioni, che richiederebbero un incarico separato.
+- La tabella delle opzioni è pronta per essere presentata a Diego; le voci `non verificate` indicano cosa servirebbe per trasformare una deduzione in prova (emulatori con condivisione reale, test sulle Rules produttive).
+
+**Stato incarico: DA_VERIFICARE** — M7-R4 consegnato da DeepSeek il 2026-09-21; mappa in sola lettura completa, nessuna decisione presa, nessuna modifica produttiva e nessun push eseguito.
