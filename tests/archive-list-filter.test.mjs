@@ -59,9 +59,15 @@ test('T-30: la query dell\'Archivio privato filtra i soli archiviati', async () 
 
 // ── 2. Filtro aziendale, identità di contesto e cambi di sessione ───────────
 
-function fixture({privateAccounts = [], companies = [], companyAccounts = {}, holdPrivate = null} = {}) {
+// Le sorgenti sono **sensibili al proprietario**: ogni lettura riceve l'uid e
+// restituisce solo i documenti di quell'uid, e l'uid ricevuto viene registrato
+// in `reads`. È il punto che rende la prova del cambio di sessione significativa:
+// con sorgenti che restituiscono gli stessi documenti a chiunque, un servizio
+// che continuasse a leggere i dati del vecchio proprietario passerebbe il banco.
+function fixture({privateAccounts = {}, companies = {}, companyAccounts = {}, holdPrivate = null} = {}) {
     const observers = new Set();
     const listeners = new Map();
+    const reads = [];
     const auth = {currentUser: {uid: 'A'}};
     const context = vm.createContext({
         auth, db: {}, functions: {}, deleteField: () => ({delete: true}),
@@ -73,25 +79,37 @@ function fixture({privateAccounts = [], companies = [], companyAccounts = {}, ho
         runTransaction: async () => { throw new Error('non usata dalla lista'); },
         decrypt: async value => value, ensureVaultKeyMaterial: async () => 'key',
         console: {warn() {}},
-        listArchivedPrivateAccounts: async () => {
+        listArchivedPrivateAccounts: async uid => {
+            reads.push(['listArchivedPrivateAccounts', uid]);
             if (holdPrivate) await holdPrivate;
-            return privateAccounts;
+            // La sorgente privata consegna già i soli archiviati: il filtro lì è
+            // nella query del repository (provato al caso 1 su `vault-repository.js`).
+            // Le sorgenti aziendali invece consegnano tutto, perché lì il filtro è
+            // client-side dentro il servizio: la differenza è voluta.
+            return (privateAccounts[uid] || []).filter(entry => entry.isArchived === true);
         },
-        listCompanies: async () => companies,
-        listCompanyAccounts: async (_uid, companyId) => companyAccounts[companyId] || [],
-        getCompany: async (_uid, companyId) => companies.find(company => company.id === companyId) || null
+        listCompanies: async uid => {
+            reads.push(['listCompanies', uid]);
+            return companies[uid] || [];
+        },
+        listCompanyAccounts: async (uid, companyId) => {
+            reads.push(['listCompanyAccounts', uid, companyId]);
+            return companyAccounts[`${uid}/${companyId}`] || [];
+        },
+        getCompany: async (uid, companyId) =>
+            (companies[uid] || []).find(company => company.id === companyId) || null
     });
     vm.runInContext(archiveModel, context);
     vm.runInContext(service, context);
-    return {context, auth,
+    return {context, auth, reads,
         changeUid: uid => { auth.currentUser = uid ? {uid} : null; for (const callback of [...observers]) callback(auth.currentUser); },
         lock: () => listeners.get('vault-session-locked')?.()};
 }
 
 const allFixture = () => fixture({
-    privateAccounts: [account('p1', 'privato')],
-    companies: [{id: 'company-1', ragioneSociale: 'Azienda Sintetica'}],
-    companyAccounts: {'company-1': [account('c1', 'company-1'), account('c2', 'company-1', false)]}
+    privateAccounts: {A: [account('p1', 'privato')]},
+    companies: {A: [{id: 'company-1', ragioneSociale: 'Azienda Sintetica'}]},
+    companyAccounts: {'A/company-1': [account('c1', 'company-1'), account('c2', 'company-1', false)]}
 });
 
 test('T-30: nella lista compaiono solo gli archiviati, con il contesto corretto', async () => {
@@ -121,7 +139,7 @@ test('T-30: le letture per contesto non mescolano privato e aziende', async () =
 
 test('T-30: cambio di utente durante la lettura, nessuna lista dalla sessione precedente', async () => {
     const gate = deferred();
-    const f = fixture({privateAccounts: [account('p1', 'privato')], holdPrivate: gate.promise});
+    const f = fixture({privateAccounts: {A: [account('p1', 'privato')]}, holdPrivate: gate.promise});
     const pending = f.context.loadArchivedAccounts('A', 'privato');
     f.changeUid('B');
     gate.resolve();
@@ -131,7 +149,7 @@ test('T-30: cambio di utente durante la lettura, nessuna lista dalla sessione pr
 
 test('T-30: blocco del Vault durante la lettura, nessuna lista consegnata', async () => {
     const gate = deferred();
-    const f = fixture({privateAccounts: [account('p1', 'privato')], holdPrivate: gate.promise});
+    const f = fixture({privateAccounts: {A: [account('p1', 'privato')]}, holdPrivate: gate.promise});
     const pending = f.context.loadArchivedAccounts('A', 'privato');
     f.lock();
     gate.resolve();
@@ -139,12 +157,47 @@ test('T-30: blocco del Vault durante la lettura, nessuna lista consegnata', asyn
 });
 
 test('T-30: dopo il cambio di sessione la nuova lista ha l\'identità del nuovo proprietario', async () => {
-    const f = allFixture();
+    const f = fixture({
+        privateAccounts: {
+            A: [account('p1', 'privato')],
+            B: [account('pb', 'privato'), account('pb-attivo', 'privato', false)]
+        },
+        companies: {
+            A: [{id: 'company-1', ragioneSociale: 'Azienda Sintetica'}],
+            B: [{id: 'company-b', ragioneSociale: 'Azienda Nuova'}]
+        },
+        companyAccounts: {
+            'A/company-1': [account('c1', 'company-1')],
+            'B/company-b': [account('cb', 'company-b'), account('cb-attivo', 'company-b', false)]
+        }
+    });
+    // Controllo della fixture stessa: la sessione A vede i documenti di A. Se le
+    // sorgenti fossero insensibili all'uid, questo confronto non discriminerebbe
+    // nulla e il banco successivo non proverebbe il cambio di proprietario.
+    assert.deepEqual([...await f.context.loadArchivedAccounts('A', 'all')].map(entry => `${entry.context}:${entry.id}`).sort(),
+        ['company-1:c1', 'privato:p1'], 'la fixture risponde per proprietario');
     f.changeUid('B');
+    const firstReadOfB = f.reads.length;
     const listed = await f.context.loadArchivedAccounts('B', 'all');
     assert.deepEqual([...listed].map(entry => `${entry.context}:${entry.id}`).sort(),
-        ['company-1:c1', 'privato:p1'],
-        'le voci restano quelle del proprietario corrente, con lo stesso contesto');
-    const privato = listed.find(entry => entry.id === 'p1');
+        ['company-b:cb', 'privato:pb'],
+        'la nuova lista contiene solo i documenti del nuovo proprietario');
+    assert.equal(listed.some(entry => ['p1', 'c1'].includes(entry.id)), false,
+        'nessuna voce della sessione precedente sopravvive al cambio di utente');
+    // Le letture della nuova sessione devono essere state fatte *per* B: un
+    // servizio che riusasse l\'uid di A verrebbe smascherato qui.
+    assert.deepEqual([...new Set(f.reads.slice(firstReadOfB).map(read => read[1]))], ['B'],
+        'ogni lettura della nuova sessione è stata richiesta per il nuovo proprietario');
+    assert.deepEqual(f.reads.slice(firstReadOfB).filter(read => read[0] === 'listCompanyAccounts').map(read => read.slice(1)),
+        [['B', 'company-b']], 'la sottocollezione letta è quella del proprietario corrente');
+    const privato = listed.find(entry => entry.id === 'pb');
     assert.equal(privato.context, 'privato', 'il contesto non eredita lo stato della sessione precedente');
+    assert.equal('businessName' in privato, false, 'il profilo privato del nuovo proprietario resta senza ragione sociale');
+    const aziendale = listed.find(entry => entry.id === 'cb');
+    assert.equal(aziendale.context, 'company-b');
+    assert.equal(aziendale.businessName, 'Azienda Nuova');
+    // Anche le letture per contesto della nuova sessione restano quelle di B.
+    assert.deepEqual([...await f.context.loadArchivedAccounts('B', 'company-b')].map(entry => `${entry.context}:${entry.id}`),
+        ['company-b:cb'], 'la lettura per azienda non pesca dati della sessione precedente');
+    assert.deepEqual([...await f.context.listArchiveContexts('B')].map(company => company.id), ['company-b']);
 });
