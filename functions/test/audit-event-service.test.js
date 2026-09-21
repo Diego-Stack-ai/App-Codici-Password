@@ -7,7 +7,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
-  AUDIT_EVENT_ACTIONS, AUDIT_PAYLOAD_KEYS, MAX_EVENT_ID_LENGTH, SCHEMA_VERSION,
+  ACCOUNT_TYPES, AUDIT_EVENT_ACTIONS, AUDIT_PAYLOAD_KEYS, MAX_EVENT_ID_LENGTH, SCHEMA_VERSION,
   accountEventId, accountEventKey, accountTransition, auditWriteDecision,
   buildAuditEvent, inviteRefOf, inviteTransition, invitedEventId, isAuditEventId,
   removalRefOf, removedEventId, responseEventId
@@ -148,24 +148,59 @@ test("gli id degli eventi derivano dalla base opaca e non dall'id invito", () =>
   assert.equal(codeOf(() => removedEventId("")), "AUDIT_REF_INVALID");
 });
 
-test("la chiave dell'Account è iniettiva: prefisso di tipo e separatore non ambiguo", () => {
-  // M7-AUDIT-3-R1 — le due collisioni segnalate da Codex.
-  assert.notEqual(accountEventKey("a_b", "c"), accountEventKey("a", "b_c"));
-  assert.notEqual(accountEventId("a_b", "c", 7), accountEventId("a", "b_c", 7));
-  // Un Account privato non collide con un'azienda il cui id è 'privato'.
-  assert.notEqual(accountEventId("privato", "privato_x", 1), accountEventId("privato", "x", 1));
-  assert.notEqual(accountEventId("privato", "x", 1), accountEventId("privato", "x__1", 1));
-  // La tupla si ricostruisce dall'id: nessuna informazione è ambigua.
-  assert.equal(accountEventKey("privato", "account-1"), "privato:account-1");
-  assert.equal(accountEventKey("company-1", "account-1"), "azienda:company-1:account-1");
-  assert.equal(accountEventId("privato", "account-1", 4), "privato:account-1:4");
-  assert.equal(accountEventId("company-1", "account-1", 0), "azienda:company-1:account-1:0");
-  const pairs = [["privato", "a"], ["privato", "a_b"], ["a_b", "c"], ["a", "b_c"],
-    ["company-1", "account-1"], ["privato", "privato_x"], ["privato", "x"], ["privato", "x__1"]];
-  const ids = pairs.map(([context, accountId]) => accountEventId(context, accountId, 3));
+test("il tipo dell'Account è esplicito: un'azienda chiamata 'privato' non è il profilo privato", () => {
+  // M7-AUDIT-3-R2 — il caso decisivo: stesso accountId, stessa revisione, tipo
+  // diverso. Con il tipo dedotto da `context === 'privato'` questi due id
+  // coincidevano, e create-if-absent avrebbe perso un evento.
+  const privato = {type: "privato", accountId: "x"};
+  const azienda = {type: "azienda", companyId: "privato", accountId: "x"};
+  assert.equal(accountEventKey(privato), "privato:x");
+  assert.equal(accountEventKey(azienda), "azienda:privato:x");
+  assert.notEqual(accountEventKey(privato), accountEventKey(azienda));
+  assert.notEqual(accountEventId(privato, 1), accountEventId(azienda, 1));
+  // Il caso di Codex in M7-AUDIT-3-R1, ora non più ambiguo.
+  assert.notEqual(accountEventKey({type: "azienda", companyId: "a_b", accountId: "c"}),
+    accountEventKey({type: "azienda", companyId: "a", accountId: "b_c"}));
+  assert.notEqual(accountEventId({type: "azienda", companyId: "a_b", accountId: "c"}, 7),
+    accountEventId({type: "azienda", companyId: "a", accountId: "b_c"}, 7));
+});
+
+test("il descrittore dell'Account è validato: tipo, companyId e campi non pertinenti", () => {
+  assert.deepEqual([...ACCOUNT_TYPES], ["privato", "azienda"]);
+  const invalids = [
+    () => accountEventKey(null),
+    () => accountEventKey("privato"),
+    () => accountEventKey({accountId: "x"}),
+    () => accountEventKey({type: "company", accountId: "x"}),
+    () => accountEventKey({type: "privato"}),
+    () => accountEventKey({type: "privato", accountId: EMAIL}),
+    // companyId presente sul profilo privato: errore, non campo ignorato.
+    () => accountEventKey({type: "privato", accountId: "x", companyId: "company-1"}),
+    () => accountEventKey({type: "azienda", accountId: "x"}),
+    () => accountEventKey({type: "azienda", companyId: EMAIL, accountId: "x"}),
+    () => accountEventKey({type: "azienda", companyId: "company-1", accountId: EMAIL})
+  ];
+  for (const attempt of invalids) assert.equal(codeOf(attempt), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventId({type: "privato", accountId: "x"}, -1)), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventId({type: "azienda", companyId: "c", accountId: "x"}, 1.5)),
+    "AUDIT_FIELD_INVALID");
+});
+
+test("la chiave dell'Account è iniettiva su un insieme di descrittori", () => {
+  const companyIds = ["a", "b", "a_b", "a-b", "a__b", "privato", "privato_x", "x", "x__1", "account-1"];
+  const accountIds = ["a", "b", "a_b", "a-b", "a__b", "privato", "privato_x", "x", "x__1", "account-1"];
+  const descriptors = [
+    ...accountIds.map(accountId => ({type: "privato", accountId})),
+    ...companyIds.flatMap(companyId => accountIds.map(accountId => ({type: "azienda", companyId, accountId})))
+  ];
+  const keys = descriptors.map(accountEventKey);
+  const ids = descriptors.map(descriptor => accountEventId(descriptor, 3));
+  assert.equal(new Set(keys).size, keys.length);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(new Set(pairs.map(([context, accountId]) => accountEventKey(context, accountId))).size, pairs.length);
-  assert.equal(codeOf(() => accountEventKey("a:b", "c")), "AUDIT_FIELD_INVALID");
+  for (const id of ids) assert.equal(isAuditEventId(id), true, id);
+  // Il ':' resta vietato dentro i componenti: è ciò che rende univoco lo split.
+  assert.equal(codeOf(() => accountEventKey({type: "azienda", companyId: "a:b", accountId: "c"})),
+    "AUDIT_FIELD_INVALID");
 });
 
 test("ogni id rispetta charset e limite dei validatori del progetto", () => {
@@ -174,8 +209,9 @@ test("ogni id rispetta charset e limite dei validatori del progetto", () => {
   // Firestore e senza '/'.
   const strictest = /^[A-Za-z0-9:_-]{1,160}$/;
   const ids = [invitedEventId(REF_A), responseEventId(REF_A, "accepted"), responseEventId(REF_A, "rejected"),
-    removedEventId(REF_A), accountEventId("privato", "account-1", 4),
-    accountEventId("company-1", "account-1", 0), accountEventId("a_b", "c", 1)];
+    removedEventId(REF_A), accountEventId({type: "privato", accountId: "account-1"}, 4),
+    accountEventId({type: "azienda", companyId: "company-1", accountId: "account-1"}, 0),
+    accountEventId({type: "azienda", companyId: "a_b", accountId: "c"}, 1)];
   for (const id of ids) {
     assert.equal(strictest.test(id), true, id);
     assert.equal(isAuditEventId(id), true, id);
@@ -187,37 +223,50 @@ test("ogni id rispetta charset e limite dei validatori del progetto", () => {
   assert.equal(isAuditEventId("id con spazio"), false);
 });
 
-test("oltre il limite si fallisce chiusi, senza troncare", () => {
+test("oltre il limite si fallisce chiusi, senza troncare: entrambi i rami", () => {
   const max = "a".repeat(120); // massimo ammesso dall'identificatore
-  const privato = accountEventId("privato", max, 1);
-  assert.equal(privato.length <= MAX_EVENT_ID_LENGTH, true);
-  assert.equal(isAuditEventId(privato), true);
-  // Un accountId al massimo con un'azienda breve entra ancora nel limite.
-  const conAziendaBreve = accountEventId("company-1", max, 1);
-  assert.equal(conAziendaBreve.length <= MAX_EVENT_ID_LENGTH, true);
-  assert.equal(isAuditEventId(conAziendaBreve), true);
-  // Due componenti al massimo non entrano nel limite: nessun troncamento, errore.
-  assert.equal(codeOf(() => accountEventKey("company-1", max + max)), "AUDIT_FIELD_INVALID");
-  assert.equal(codeOf(() => accountEventKey("privato", "a".repeat(151))), "AUDIT_FIELD_INVALID");
-  // Il confine esatto: con contesto di 29 caratteri e accountId di 120 l'id
-  // arriva a 160; un carattere in più sullo stesso prefisso lo supera.
-  const exact = accountEventId("c".repeat(29), max, 1);
-  assert.equal(exact.length, MAX_EVENT_ID_LENGTH);
-  assert.equal(isAuditEventId(exact), true);
-  assert.equal(codeOf(() => accountEventId("c".repeat(30), max, 1)), "AUDIT_ID_TOO_LONG");
-  // La revisione massima resta dentro il limite su componenti brevi.
-  assert.equal(isAuditEventId(accountEventId("privato", "account-1", Number.MAX_SAFE_INTEGER)), true);
+  // Ramo privato: 'privato:' (8) + accountId (max 120) + ':' + revisione (max 16)
+  // = 145, quindi il limite di 160 non è raggiungibile e non serve un rifiuto.
+  const privatoMax = accountEventId({type: "privato", accountId: max}, Number.MAX_SAFE_INTEGER);
+  assert.equal(privatoMax.length, 145);
+  assert.equal(isAuditEventId(privatoMax), true);
+  assert.equal(accountEventId({type: "privato", accountId: max}, 1).length, 130);
+  // Oltre il massimo dell'identificatore non si arriva nemmeno al controllo di
+  // lunghezza: il valore è già invalido.
+  assert.equal(codeOf(() => accountEventKey({type: "privato", accountId: "a".repeat(121)})),
+    "AUDIT_FIELD_INVALID");
+  // Ramo aziendale: 'azienda:' (8) + companyId + ':' + accountId + ':' + revisione.
+  const aziendaBreve = accountEventId({type: "azienda", companyId: "company-1", accountId: max}, 1);
+  assert.equal(aziendaBreve.length <= MAX_EVENT_ID_LENGTH, true);
+  assert.equal(isAuditEventId(aziendaBreve), true);
+  // Il confine esatto cade qui: companyId di 29 caratteri, accountId di 120 e
+  // revisione di 1 cifra danno esattamente 160.
+  const aziendaConfine = accountEventId({type: "azienda", companyId: "c".repeat(29), accountId: max}, 1);
+  assert.equal(aziendaConfine.length, MAX_EVENT_ID_LENGTH);
+  assert.equal(isAuditEventId(aziendaConfine), true);
+  assert.equal(codeOf(() => accountEventId({type: "azienda", companyId: "c".repeat(30), accountId: max}, 1)),
+    "AUDIT_ID_TOO_LONG");
+  // Due componenti al massimo (120+120) darebbero 251: errore, mai troncamento.
+  assert.equal(codeOf(() => accountEventId({type: "azienda", companyId: max, accountId: max}, 1)),
+    "AUDIT_ID_TOO_LONG");
+  assert.equal(codeOf(() => accountEventKey({type: "azienda", companyId: max, accountId: max})),
+    "AUDIT_ID_TOO_LONG");
+  assert.equal(codeOf(() => accountEventKey({type: "azienda", companyId: max, accountId: max + max})),
+    "AUDIT_FIELD_INVALID");
 });
 
 test("il contratto delle revisioni resta: interi non negativi, id distinti", () => {
-  assert.equal(accountEventId("privato", "account-1", 0), "privato:account-1:0");
-  assert.notEqual(accountEventId("privato", "account-1", 4), accountEventId("privato", "account-1", 5));
-  assert.notEqual(accountEventId("privato", "account-1", 4), accountEventId("company-1", "account-1", 4));
-  assert.equal(codeOf(() => accountEventId("privato", "account-1", -1)), "AUDIT_FIELD_INVALID");
-  assert.equal(codeOf(() => accountEventId("privato", "account-1", 1.5)), "AUDIT_FIELD_INVALID");
-  assert.equal(codeOf(() => accountEventId("privato", "account-1", "4")), "AUDIT_FIELD_INVALID");
-  assert.equal(codeOf(() => accountEventKey("privato", EMAIL)), "AUDIT_FIELD_INVALID");
-  const max = accountEventId("privato", "account-1", Number.MAX_SAFE_INTEGER);
+  const privato = {type: "privato", accountId: "account-1"};
+  const azienda = {type: "azienda", companyId: "company-1", accountId: "account-1"};
+  assert.equal(accountEventId(privato, 0), "privato:account-1:0");
+  assert.equal(accountEventId(azienda, 0), "azienda:company-1:account-1:0");
+  assert.notEqual(accountEventId(privato, 4), accountEventId(privato, 5));
+  assert.notEqual(accountEventId(privato, 4), accountEventId(azienda, 4));
+  assert.equal(codeOf(() => accountEventId(privato, -1)), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventId(privato, 1.5)), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventId(privato, "4")), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventKey({type: "privato", accountId: EMAIL})), "AUDIT_FIELD_INVALID");
+  const max = accountEventId(privato, Number.MAX_SAFE_INTEGER);
   assert.equal(max, "privato:account-1:9007199254740991");
   assert.equal(isAuditEventId(max), true);
 });

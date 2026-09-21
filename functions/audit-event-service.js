@@ -42,6 +42,8 @@ const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 // fino a 1500 byte senza '/': 160 caratteri ASCII restano dentro il limite.
 const EVENT_ID = /^[A-Za-z0-9:_-]{1,160}$/;
 const MAX_EVENT_ID_LENGTH = 160;
+// Tipo dell'Account: parametro esplicito, mai dedotto dal valore di `context`.
+const ACCOUNT_TYPES = Object.freeze(['privato', 'azienda']);
 
 const AUDIT_EVENT_ACTIONS = Object.freeze([
     'invite-created',
@@ -187,26 +189,41 @@ function removedEventId(ref) {
     return ensureEventId(`${auditRef(ref)}__removed`);
 }
 
-// Chiave dell'Account, **iniettiva** sulla coppia (context, accountId): un
-// prefisso di tipo esplicito e il separatore ':' che nessun identificatore può
-// contenere (IDENTIFIER). Senza queste due proprietà `(context='a_b',
-// accountId='c')` e `(context='a', accountId='b_c')` produrrebbero la stessa
-// stringa, e con la stessa revisione uno dei due eventi andrebbe perso nel
-// create-if-absent. Per i privati `context` è 'privato'; per le aziende `context`
-// È l'aziendaId (`Frontend/public/assets/js/modules/settings/archive-account-service.js:68-69`),
-// quindi la chiave lo include. Nessun troncamento: oltre il limite si fallisce
-// chiusi, perché un id troncato tornerebbe a collidere.
-function accountEventKey(context, accountId) {
-    const owner = identifier(accountId);
-    if (context === 'privato') return ensureEventId(`privato:${owner}`);
-    return ensureEventId(`azienda:${identifier(context)}:${owner}`);
+// Chiave dell'Account, **iniettiva**. Il tipo è un parametro esplicito e non si
+// deduce dal valore di `context`: per i privati `context` è la stringa 'privato',
+// per le aziende è l'aziendaId (`Frontend/public/assets/js/modules/settings/archive-account-service.js:68-69`),
+// quindi un'azienda il cui id fosse esattamente 'privato' sarebbe indistinguibile
+// dal profilo privato — M7-AUDIT-3-R2. Il descrittore è
+// `{type: 'privato', accountId}` oppure `{type: 'azienda', companyId, accountId}`;
+// il separatore ':' non è contenuto in alcun identificatore (IDENTIFIER), quindi
+// lo split è univoco e coppie diverse non possono produrre lo stesso id. Nessun
+// troncamento: oltre il limite si fallisce chiusi, perché un id troncato
+// tornerebbe a collidere.
+function accountIdentityOf(descriptor) {
+    if (!descriptor || typeof descriptor !== 'object') throw fail('AUDIT_FIELD_INVALID');
+    if (!ACCOUNT_TYPES.includes(descriptor.type)) throw fail('AUDIT_FIELD_INVALID');
+    const accountId = identifier(descriptor.accountId);
+    if (descriptor.type === 'privato') {
+        // Un `companyId` sul profilo privato è un errore, non un dettaglio da ignorare.
+        if (descriptor.companyId !== undefined && descriptor.companyId !== null) {
+            throw fail('AUDIT_FIELD_INVALID');
+        }
+        return {type: 'privato', accountId};
+    }
+    return {type: 'azienda', companyId: identifier(descriptor.companyId), accountId};
+}
+
+function accountEventKey(descriptor) {
+    const identity = accountIdentityOf(descriptor);
+    if (identity.type === 'privato') return ensureEventId(`privato:${identity.accountId}`);
+    return ensureEventId(`azienda:${identity.companyId}:${identity.accountId}`);
 }
 
 // `revision` è scritta dalla stessa transazione della transizione e resta
 // l'ultimo campo della tupla: la revisione è decimale canonica, quindi lo split
 // sul separatore è univoco.
-function accountEventId(context, accountId, revision) {
-    return ensureEventId(`${accountEventKey(context, accountId)}:${count(revision)}`);
+function accountEventId(descriptor, revision) {
+    return ensureEventId(`${accountEventKey(descriptor)}:${count(revision)}`);
 }
 
 // Classificatore puro della scrittura su `invites/{inviteId}` (onDocumentWritten,
@@ -266,6 +283,7 @@ function auditWriteDecision(exists, effect) {
 }
 
 module.exports = {
+    ACCOUNT_TYPES,
     AUDIT_EVENT_ACTIONS,
     AUDIT_PAYLOAD_KEYS,
     MAX_EVENT_ID_LENGTH,

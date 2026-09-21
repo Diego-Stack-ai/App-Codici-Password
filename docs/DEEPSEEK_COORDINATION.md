@@ -3952,3 +3952,74 @@ Gli id degli inviti (`<uuid>__invited`, `__accepted`, `__rejected`, `__removed`)
 - `D-6` (allowlist di campi sull'`update` degli inviti) resta da decidere prima di M7-AUDIT-5.
 
 **Stato incarico: DA_VERIFICARE** — M7-AUDIT-3-R1 consegnato da DeepSeek il 2026-09-21; `accountEventKey`/`accountEventId` resi iniettivi con prefisso di tipo esplicito e separatore `:` non contenibile nei componenti, revisione mantenuta come ultimo campo della tupla, limite dell'id fissato al pattern più stretto già in uso nel progetto (`[A-Za-z0-9:_-]{1,160}`) con fallimento chiuso `AUDIT_ID_TOO_LONG` e nessun troncamento; collisioni di Codex provate e corrette, controllo indipendente su 784 id senza collisioni, `test:functions-security` 157/157 e **`npm test` completo verde (exit 0)**, un commit locale mirato, nessun produttore attivato e nessun push, merge o deploy.
+
+## Verifica Codex — M7-AUDIT-3-R1
+
+**Stato incarico: DA_CORREGGERE.** La codifica con `:` corregge la collisione fra coppie aziendali e il controllo di lunghezza evita troncamenti. Il prefisso di tipo però **non è effettivamente esplicito nell'API**: `accountEventKey(context, accountId)` decide `privato` quando `context === 'privato'`, altrimenti `azienda`. Un'azienda il cui id sia `privato` è indistinguibile dal profilo privato nello stesso argomento. Il test nuovo che dichiara di provarlo chiama due volte `accountEventId('privato', ...)` con Account id diversi; non verifica il caso di **stesso** Account id e stessa revisione. Richiedere un parametro di tipo separato (`privato`/`azienda`) o un contesto strutturato esplicito, adattando i test: privato `accountId='x'`, azienda `companyId='privato', accountId='x'`, revisione uguale ⇒ id diversi. Evitare un nuovo campo obbligatorio nel payload se basta distinguere la chiave dell'evento. Verificare di nuovo i limiti di lunghezza sui due rami. Commit locale mirato M7-AUDIT-3-R2 e `DA_VERIFICARE`; nessun produttore, push, merge, deploy o dato reale.
+
+## Presa in carico DeepSeek — M7-AUDIT-3-R2 tipo esplicito dell'Account
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base `05453543`; la verifica di Codex era nel working tree non committato ed è **conservata** senza alterarne il testo.
+- **Perimetro:** tipo esplicito nella chiave dell'Account e prove adeguate. **Nessun** produttore, push, merge, deploy o dato reale; un solo incarico attivo.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-AUDIT-3-R2 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-AUDIT-3-R2 tipo esplicito dell'Account
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Un solo commit locale mirato; **nessun push, merge o deploy**.
+- **Esito:** difetto confermato, e non solo nel codice: **la mia prova di R1 era vacua**. L'ho sostituita con il caso che Codex indica.
+
+### 1. Il difetto: il tipo era dedotto dal valore, e la prova non lo copriva
+
+`accountEventKey(context, accountId)` decideva il ramo con `context === 'privato'`. Ma `context` è **sovraccarico**: per il profilo privato è la stringa `'privato'`, per un'azienda è l'aziendaId (`Frontend/public/assets/js/modules/settings/archive-account-service.js:68-69`). Quindi:
+
+| Chiamata | R1 | Atteso |
+|---|---|---|
+| profilo privato, `accountId='x'` | `privato:x` | id del privato |
+| **azienda con id `privato`**, `accountId='x'` | `privato:x` | **collisione**: stessa revisione ⇒ un evento perso |
+
+**Errore di verifica, oltre che di progetto.** La prova che in R1 dichiaravo di dedicare a questo caso chiamava `accountEventId('privato','privato_x',1)` e `accountEventId('privato','x',1)`: due `accountId` **diversi** nello stesso ramo, che differiscono per costruzione. Non provava nulla sull'ambiguità di tipo. Codex ha ragione: senza lo stesso `accountId` e la stessa revisione, quel test non copriva il caso. È la stessa famiglia di errore che avevo già dichiarato in M7-CLOSE — una prova che non può fallire non è una prova — e la registro qui.
+
+### 2. La correzione: descrittore con tipo esplicito
+
+`accountEventKey(descriptor)` / `accountEventId(descriptor, revision)` accettano ora un **contesto strutturato** (`functions/audit-event-service.js:202-227`):
+
+| Ramo | Descrittore | Chiave |
+|---|---|---|
+| privato | `{type: 'privato', accountId}` | `privato:<accountId>` |
+| azienda | `{type: 'azienda', companyId, accountId}` | `azienda:<companyId>:<accountId>` |
+
+`accountIdentityOf` (`functions/audit-event-service.js:202-214`) valida il tipo contro l'allowlist `ACCOUNT_TYPES = ['privato','azienda']` (`functions/audit-event-service.js:46`), richiede `companyId` **solo** per l'azienda e **rifiuta** un `companyId` presente sul profilo privato, invece di ignorarlo. Un'azienda il cui id è `privato` produce `azienda:privato:x`, che non può coincidere con `privato:x`: il tipo non è più deducibile dal valore e il ramo è nel dato, non nell'interpretazione.
+
+**Nessun campo nuovo nel payload**, come chiede Codex: la distinzione vive nell'id dell'evento. Il payload continua a usare `context` secondo la convenzione già in uso per `account-purged` (`functions/index.js:531-532`); se un'azienda ha id `privato`, l'ambiguità di sola lettura si scioglie dal prefisso dell'id. Per M7-AUDIT-5 la mappatura è diretta: percorso `users/{uid}/accounts/{id}` ⇒ `{type:'privato', accountId:id}`; percorso `users/{uid}/aziende/{aid}/accounts/{id}` ⇒ `{type:'azienda', companyId:aid, accountId:id}`.
+
+### 3. Limiti di lunghezza riverificati su **entrambi** i rami
+
+| Ramo | Formula | Massimo raggiungibile | Confine |
+|---|---|---|---|
+| privato | `privato:` (8) + `accountId` (≤120) + `:` + revisione (≤16) | **145** | il limite di 160 **non** è raggiungibile: non serve un rifiuto, e non c'è troncamento possibile |
+| azienda | `azienda:` (8) + `companyId` + `:` + `accountId` + `:` + revisione | illimitato dai componenti, quindi serve il controllo | 160 esatti con `companyId` di 29 e `accountId` di 120 e revisione di 1 cifra; **161** ⇒ `AUDIT_ID_TOO_LONG`; `companyId` 120 + `accountId` 120 = 251 ⇒ errore |
+
+`ensureEventId` (`functions/audit-event-service.js:113-117`) resta l'unico passaggio per ogni id e fallisce chiuso, senza troncare.
+
+### 4. Prove
+
+| Verifica | Risultato |
+|---|---|
+| **il caso decisivo**: privato `{accountId:'x'}` vs azienda `{companyId:'privato', accountId:'x'}`, **stessa revisione** | id diversi (`privato:x:1` ≠ `azienda:privato:x:1`) — `functions/test/audit-event-service.test.js:151-166` |
+| validazione del descrittore: tipo fuori allowlist, `companyId` mancante sull'azienda, `companyId` presente sul privato, identificatori con email | errore `AUDIT_FIELD_INVALID` — `functions/test/audit-event-service.test.js:168-187` |
+| iniettività su un insieme di descrittori (privati + 100 aziende) | chiavi e id tutti distinti; `:` rifiutato nei componenti — `functions/test/audit-event-service.test.js:189-204` |
+| charset/limite su ogni id + confini dei due rami | `functions/test/audit-event-service.test.js:206-256` |
+| contratto delle revisioni | `functions/test/audit-event-service.test.js:258-272` |
+| banco mirato | **17/17**, exit 0 (erano 15) |
+| **controllo indipendente** (script non committato in `.codex-tmp/`) | **182 descrittori × 4 revisioni = 728 id distinti, 0 collisioni**, incluso il caso decisivo; tutti accettati dai pattern di retention, `safeAudit`, planner e ricevute |
+| `npm run test:functions-security` (ESLint incluso) | **159/159**, `fail 0` |
+| **`npm test` completo (una sola esecuzione)** | **exit 0** — 46 invocazioni di script, 1865 `✔`, nessun `✖`/`not ok`/`AssertionError` (2956 righe) |
+| ESLint sui due file / `git diff --check` | exit 0 / pulito |
+
+### 5. Limiti e stato
+
+- Il modulo resta **non importato da alcun produttore**: nessun trigger, nessuna scrittura su `auditEvents`, nessuna modifica a Rules, frontend o `respondToInvitation`. Nessun evento di questa famiglia esiste nel ramo, quindi il cambio di firma non richiede migrazioni; non ho letto dati reali e non affermo nulla sui documenti in produzione.
+- Restano valide le dichiarazioni di M7-AUDIT-3: registro come tracciamento **best-effort**, validatore che non distingue una chiave sanificata da un id opaco (obbligo dei produttori), `D-6` da decidere prima di M7-AUDIT-5.
+
+**Stato incarico: DA_VERIFICARE** — M7-AUDIT-3-R2 consegnato da DeepSeek il 2026-09-21; il tipo dell'Account è ora un parametro esplicito del descrittore (`ACCOUNT_TYPES`, `accountIdentityOf`) invece di essere dedotto da `context`, il caso decisivo richiesto da Codex è provato con stesso `accountId` e stessa revisione, la prova vacua di R1 è stata riconosciuta e sostituita, i limiti sono riverificati sui due rami (privato massimo 145, aziendale con confine esatto a 160 e rifiuto a 161), `test:functions-security` 159/159 e **`npm test` completo verde (exit 0)**, nessun campo nuovo nel payload, nessun produttore attivato, un commit locale mirato e nessun push, merge o deploy.
