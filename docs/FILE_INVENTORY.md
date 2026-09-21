@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **856**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **857**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## docs
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `docs/M10_REVISIONE_LOCALE.md` | MD | 11833 | 147 | Documentazione: M10 REVISIONE LOCALE. |
+| `docs/M10_DOMANDE_AUDIT_INDIPENDENTE.md` | MD | 2626 | 41 | Documentazione: M10 DOMANDE AUDIT INDIPENDENTE. |
 | `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
 | `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
 | `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
@@ -29,6 +29,7 @@ File censiti: **856**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
 | `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M10_REVISIONE_LOCALE.md` | MD | 11833 | 147 | Documentazione: M10 REVISIONE LOCALE. |
 | `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
