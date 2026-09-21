@@ -56,7 +56,7 @@ Il collaudo del 09/09/2026 attesta il percorso riuscito descritto sopra. La rele
 Sul commit applicativo indicato, `executeBackupRestore` applica transazioni separate fino a 400 record e carica gli allegati dopo i record. Due prove isolate del client, con servizi Firebase simulati e dati fittizi, confermano che un errore al secondo blocco lascia il primo già accettato e che un errore Storage arriva dopo l’applicazione del record allegato. Il backend conferma nel codice l’atomicità per singolo blocco; non è una transazione globale.
 
 - [ ] progettare e collaudare staging, ripresa o compensazione fra blocchi e allegati;
-- [ ] **PARZIALE (21/09/2026)** verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima: **retry** — su emulatori reali e dati sintetici una nuova sessione dello stesso file classifica i record già applicati, compreso il metadato dell'allegato i cui byte mancano, come «invariato» e non riprova nulla (`BACKUP_RESTORE_NOTHING_SELECTED`, zero caricamenti), mentre la ricevuta precedente non impedisce una nuova esecuzione se resta un record selezionabile (sezione «Nuovo tentativo dopo un ripristino interrotto»); **modifiche dopo l'anteprima** — il controllo di versione sul percorso reale rifiuta il blocco con `stale-preview` senza scrivere dati, ricevute o audit e senza caricamenti, con **una parzialità dichiarata** nel flusso a più blocchi, dove il rifiuto lascia applicati i blocchi precedenti (sezione «Modifica intervenuta dopo l'anteprima»). **Non** esercitati: iPhone/Windows, backup di grandi dimensioni, sostituzione confermata su collisioni multiple. Gate complessivo lasciato **aperto**.
+- [ ] **PARZIALE (21/09/2026)** verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima: **retry** — su emulatori reali e dati sintetici una nuova sessione dello stesso file classifica i record già applicati, compreso il metadato dell'allegato i cui byte mancano, come «invariato» e non riprova nulla (`BACKUP_RESTORE_NOTHING_SELECTED`, zero caricamenti), mentre la ricevuta precedente non impedisce una nuova esecuzione se resta un record selezionabile (sezione «Nuovo tentativo dopo un ripristino interrotto»); **modifiche dopo l'anteprima** — il controllo di versione sul percorso reale rifiuta il blocco con `stale-preview` senza scrivere dati, ricevute o audit e senza caricamenti, con **una parzialità dichiarata** nel flusso a più blocchi, dove il rifiuto lascia applicati i blocchi precedenti (sezione «Modifica intervenuta dopo l'anteprima»); **collisioni multiple** — con due destinazioni modificate e una invariata, l'esecuzione senza selezione è rifiutata con `BACKUP_COLLISIONS` e la selezione di **un solo** modificato applica quello lasciando intatti l'altro modificato e l'invariato, con ricevute, audit e allegati coerenti con la selezione (sezione «Collisioni multiple con selezione e conferma»). **Non** esercitati: iPhone/Windows, backup di grandi dimensioni, più allegati per record, collaudi fisici. Gate complessivo lasciato **aperto** (restano staging, riferimenti orfani e collaudi fisici).
 - [ ] **NON CHIUSA (21/09/2026)** dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva: su emulatori reali, con dati sintetici e il percorso reale `executeBackupRestore`, un **upload fallito dopo l'applicazione dei record** lascia il metadato dell'allegato in Firestore (che cita il percorso) **senza** i byte in Storage — riferimento orfano **osservato**, non dedotto. Dettagli e controllo positivo nella sezione qui sotto; gate lasciato **aperto**.
 - [ ] misurare memoria e dimensioni su iPhone e Windows.
 
@@ -135,6 +135,48 @@ iPhone/Windows, backup di grandi dimensioni, blocchi contenenti **più** allegat
 ### Nessuna correzione introdotta
 
 Come richiesto non ho introdotto politiche, compensazioni, staging o retry: comportamento attuale descritto e parzialità dichiarata. Il gate M8 resta **aperto** e **non** è concluso da questo caso (nuove domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_CAS_PARZIALE.md`, commit separato).
+
+## Collisioni multiple con selezione e conferma (verifica 21/09/2026)
+
+Controllo osservato sul percorso **reale end-to-end** — client di produzione (`prepareBackupRestore` + `executeBackupRestore`) e callable reale `restoreBackupChunk` — su **emulatori reali** (Firestore + Storage) con dati sintetici: `tests/restore-multiple-collisions.emulator.test.mjs` (4 casi), runner `scripts/run-restore-collisions-emulators.mjs`. Stato di partenza: due destinazioni **modificate** rispetto al backup, una **invariata**, profilo e metadato dell'allegato **mancanti** (anteprima reale: `missing 2, unchanged 1, changed 2`, `collisionCount` 3, un solo blocco da 5 record).
+
+### Prove già presenti (censimento, riusate e non modificate)
+
+| Dove | Che cosa prova già |
+|---|---|
+| `tests/backup-restore-session.test.mjs:191-265,341-364` | client con callable **simulata**: un record esistente richiede selezione manuale e conferma `RESTORE_SELECTED_OVERWRITE`; un «invariato» non è selezionabile; selezione non contigua `[0, 2]`; selezione immutabile nel retry; `BACKUP_ATTACHMENT_MISSING` se si seleziona un record senza il suo allegato; selezione del solo allegato |
+| `functions/test/backup-restore-service.test.js:27-34,61-66` | validazione del chunk: `overwriteConfirmed` vero solo con `overwriteExisting` **e** `RESTORE_SELECTED_OVERWRITE`; `restoreChunkDecision` blocca le collisioni e le consente con overwrite |
+| `functions/test/backup-receipt-handler.test.js:105-120` | handler con store **in memoria**: il cambio del Profilo blocca il blocco; con overwrite confermato il blocco è applicato |
+| `experiments/persistent-vault-shell/firebase-backup.test.mjs:60-95` | **backend su emulatore**: applicazione di due record con le versioni dell'anteprima, ricevuta e audit |
+| `tests/backup-restore-ui.test.mjs:179-196` | ciclo di vita dell'anteprima selettiva (blocco che la chiude; `stale-preview` senza blocchi applicati), **non** la semantica di selezione |
+| `impostazioni.js:617-651` (letto, non esercitato) | caselle «Invariato» disabilitate e «Mancante» preselezionate: comportamento **letto dal codice**, non provato da un banco |
+
+**Mancava** la prova end-to-end con **più collisioni** e selezione parziale sul percorso reale (client + callable + emulatori): è quella aggiunta.
+
+### Esiti osservati
+
+| Caso | Esito |
+|---|---|
+| **Anteprima con più collisioni** (`missing 2, unchanged 1, changed 2`) | l'esecuzione **senza selezione** è rifiutata con `BACKUP_COLLISIONS`; nessun caricamento, **0** ricevute, **0** audit |
+| **Selezione di un solo modificato** (`account-1`) | applicato **1 record e 0 allegati**: il selezionato torna alla versione del backup; l'**altro modificato** e l'**invariato** restano intatti — e l'invariato conserva il proprio `updateTime` (prova che non è stato riscritto); il metadato dell'allegato non era selezionato e resta assente, **0** caricamenti; **1** ricevuta, **1** audit |
+| **Selezione del modificato con il suo allegato** | applicati **2 record e 1 allegato**: il metadato cita il percorso e i byte coincidono con il backup; l'altro modificato e l'invariato restano intatti (stesso `updateTime`); **nessun** byte per l'Account non selezionato; **1** caricamento, **1** ricevuta, **1** audit |
+| **Un selezionato cambia ancora prima dell'applicazione** | rifiuto `BACKUP_PREVIEW_STALE` (`confirmedChunks 0`, `mayHaveApplied false`, un solo blocco): il valore concorrente sopravvive, gli altri record restano intatti, **0** metadati, **0** caricamenti, **0** ricevute, **0** audit; il piano è invalidato (`BACKUP_PLAN_INVALID`) |
+
+**Dal codice:** `prepareRestoreExecution` filtra i record «invariato» e, se la selezione è esplicita, tiene **solo** gli indici scelti; `overwriteExisting` e la conferma `RESTORE_SELECTED_OVERWRITE` sono necessari per sostituire un record esistente; i percorsi Storage da caricare derivano **dai soli record applicati**.
+
+### Controllo per mutazione
+
+Resa sempre vera la condizione di selezione (`selected.has(entry.index)` → sempre vero), il **secondo** e il **terzo** caso diventano **rossi** (`recordCount 4` invece di 1 e 2: verrebbero applicati anche i record non selezionati) e il primo e il quarto restano verdi; `Frontend/public/assets/js/modules/settings/backup-import-service.js` è poi stato ripristinato con hash identico a `HEAD` (`git hash-object` = `1591885ed5a52ba3eb966b80217a8d5a9a55f339`).
+
+### Cosa resta dedotto o non dimostrato
+
+- **Nessuna atomicità globale** è dimostrata: in questi casi la selezione sta in **un solo blocco**; la garanzia è **per blocco**, come osservato nella sezione «Modifica intervenuta dopo l'anteprima».
+- Non esercitati: UI in un browser (la semantica di selezione è letta dal codice), iPhone/Windows, backup di grandi dimensioni, più allegati per record, selezioni che coprono **più** blocchi con collisioni miste, e la sostituzione confermata su molti record insieme.
+- Restano **aperti** staging fra blocchi e allegati, riferimenti orfani e collaudi fisici: **M8 non è concluso**.
+
+### Nessuna correzione e nessuna nuova domanda
+
+Comportamento attuale descritto, nessuna politica, compensazione, staging o retry introdotti. **Non** nascono nuove domande per Diego: le osservazioni rientrano in quelle già raccolte (`M8_DOMANDE_RIPRISTINO_INTERROTTO.md`, `M8_DOMANDE_RIPRISTINO_NUOVA_SESSIONE.md`, `M8_DOMANDE_RIPRISTINO_CAS_PARZIALE.md`), quindi qui non c'è un commit di domande.
 
 ## Protezioni candidate della sessione di ripristino — 13/09/2026
 
