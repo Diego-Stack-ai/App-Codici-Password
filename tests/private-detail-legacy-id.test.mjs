@@ -98,14 +98,25 @@ test('a missing account leaves record actions unavailable', async () => {
     assert.equal(f.findEdit(), undefined);
     assert.equal(f.calls.some(([type]) => ['update', 'attachments-init', 'attachments-load', 'sharing-init', 'sharing-render', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false);
     assert.equal(f.calls.find(([type]) => type === 'toast')[1], 'account_not_found');
-    assert.ok(f.calls.some(([type]) => type === 'suspended-invite'), 'lo stato viene verificato sull\'invito prima dell\'errore generico');
 });
 
 test('deep link a un Account sospeso: stato dedicato, nessuna azione e nessun contenuto', async () => {
-    const f = fixture({missing: true, suspended: true}); await f.init(); await tick();
+    const f = fixture({missing: true, suspended: true, search: '?id=legacy-alias&ownerId=other-owner'});
+    await f.init(); await tick();
     assert.equal(f.findEdit(), undefined, 'nessuna azione di modifica');
-    assert.equal(f.calls.some(([type]) => ['update', 'attachments-init', 'attachments-load', 'sharing-init', 'sharing-render', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false,
-        'nessun modulo di contenuto inizializzato');
+    assert.equal(f.calls.some(([type]) => ['get', 'update', 'attachments-init', 'attachments-load', 'sharing-init', 'sharing-render', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false,
+        'la sospensione viene verificata prima di leggere l\'Account e di inizializzare contenuti');
+    assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['account_suspended_label', 'warning']);
+});
+
+test('deep link sospeso con Account già in cache: nessuna lettura, nessun render', async () => {
+    // L'Account esiste e sarebbe leggibile dalla cache persistente: la sospensione
+    // nota deve fermare tutto PRIMA della lettura.
+    const f = fixture({suspended: true, search: '?id=legacy-alias&ownerId=other-owner'});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => type === 'get'), false, 'nessuna lettura dell\'Account, nemmeno dalla cache');
+    assert.equal(f.findEdit(), undefined);
+    assert.equal(f.calls.some(([type]) => ['update', 'attachments-init', 'sharing-init', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false);
     assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['account_suspended_label', 'warning']);
 });
 

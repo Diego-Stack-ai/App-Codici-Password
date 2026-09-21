@@ -188,21 +188,22 @@ async function loadAccount(mount = mounted) {
     };
     setupActions(actionActive);
     try {
+        // M7-R7C-4 correzione: per un ospite la sospensione NOTA va verificata
+        // PRIMA di leggere o renderizzare. La lettura dell'Account passa dalla cache
+        // persistente (`getPrivateAccount` → `getDocSmart`) e potrebbe restituire
+        // subito una copia che il server non autorizza più.
+        if (lookupOwner !== lookupUid) {
+            const suspended = await findSuspendedGuestInvite(lookupOwner, lookupId, auth.currentUser?.email, '');
+            if (!active()) return;
+            if (suspended) { showToast(t('account_suspended_label'), "warning"); return; }
+        }
         let loaded = await (requireServerRefresh
             ? getPrivateAccountConfirmed(lookupOwner, lookupId)
             : getPrivateAccount(lookupOwner, lookupId));
         if (!active()) return;
         if (!loaded) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
         if (!active()) return;
-        if (!loaded) {
-            // M7-R7C-4: un deep link a un Account sospeso non deve mostrare un
-            // errore generico né contenuti: si riconosce lo stato dall'invito del
-            // destinatario, l'unica lettura consentita in questo caso.
-            const suspended = await findSuspendedGuestInvite(lookupOwner, lookupId, auth.currentUser?.email, '');
-            if (!active()) return;
-            showToast(suspended ? t('account_suspended_label') : t('account_not_found'), suspended ? "warning" : "error");
-            return;
-        }
+        if (!loaded) { showToast(t('account_not_found'), "error"); return; }
         loaded = {...loaded};
         const storedNote = loaded.note;
         const resolvedId = loaded.id;

@@ -5,8 +5,8 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
-function fixture() {
-    const writes = [], reads = [], errors = [], modules = [], classes = new Set();
+function fixture({suspended = false} = {}) {
+    const writes = [], reads = [], errors = [], modules = [], classes = new Set(), suspendedReads = [];
     const footer = {children: [], classList: {
         add: value => classes.add(value),
         toggle(value, enabled) { if (enabled) classes.add(value); else classes.delete(value); }
@@ -27,6 +27,11 @@ function fixture() {
         updateDoc: async (path, change) => writes.push({path, change}),
         getCompanyAccount: async (...args) => { reads.push(args); return read(); },
         getCompanyAccountConfirmed: async (...args) => { reads.push(args); return read(); },
+        // M7-R7C-4: per un ospite la sospensione nota viene verificata prima della lettura.
+        findSuspendedGuestInvite: async (ownerId, accountId, email, companyId) => {
+            suspendedReads.push([ownerId, accountId, email, companyId]);
+            return suspended ? {accountId, ownerId, aziendaId: companyId, sharingState: 'suspended'} : null;
+        },
         createElement: (tag, props, children) => ({tag, props, children}),
         setChildren: (node, children) => { node.children = children; },
         clearElement: node => { node.children = []; }, createSafeAccountIcon: () => ({}),
@@ -39,7 +44,7 @@ function fixture() {
         setTimeout() {}, history: {back() {}}
     });
     vm.runInContext(source.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export async function', 'async function').replace(/\bimport\(/g, 'loadModule('), context);
-    return {writes, reads, errors, modules, footer, classes, window,
+    return {writes, reads, errors, modules, footer, classes, window, suspendedReads,
         button: () => find(footer.children, 'btn-edit-footer'),
         read: value => { read = value; }, init: uid => {context.auth.currentUser={uid};return context.initDettaglioAccountAzienda({uid})}};
 }
@@ -53,6 +58,20 @@ test('guest never gets an edit footer, including while fetch is pending, and sub
     assert.equal(f.writes.length, 0); assert.equal(f.button(), undefined); assert.equal(f.errors.length, 0);
     assert.deepEqual(f.reads[0], ['owner', 'company', 'account']);
     for (const [name, options] of f.modules) assert.equal(name === 'attachments' ? options.readOnly : options.isReadOnly ?? options.readOnly, true);
+});
+
+// M7-R7C-4 correzione: con Account già in cache e invito sospeso il dettaglio non
+// deve leggere né renderizzare nulla, perché la sospensione è già nota.
+test('guest deep link to a suspended company account renders nothing even with a cached record', async () => {
+    const f = fixture({suspended: true});
+    f.window.location.search += '&ownerId=owner';
+    f.read(async () => ({nomeAccount: 'Shared synthetic account', username: 'cached-user'}));
+    await f.init('guest');
+    assert.deepEqual(f.suspendedReads, [['owner', 'account', undefined, 'company']]);
+    assert.equal(f.reads.length, 0, 'nessuna lettura dell\'Account');
+    assert.equal(f.modules.length, 0, 'nessun modulo di contenuto inizializzato');
+    assert.equal(f.button(), undefined);
+    assert.equal(f.writes.length, 0);
 });
 
 test('owner retains exactly one views increment and a working edit footer', async () => {

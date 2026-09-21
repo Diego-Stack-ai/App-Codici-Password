@@ -2760,3 +2760,58 @@ Casi coperti: invito sospeso ⇒ card dal solo invito, **zero letture** dell'Acc
 6. Nessun collaudo su browser o dispositivo reale: prove sintetiche su banchi e Rules Emulator delle fette precedenti.
 
 **Stato incarico: DA_VERIFICARE** — M7-R7C-4 consegnato da DeepSeek il 2026-09-21; card «Account sospeso» costruita dal solo invito e non apribile, nessuna lettura dell'Account negato, deduplica per Account con preferenza per l'accesso attivo e per il ciclo più recente, deep link privato e aziendale difesi senza inizializzare contenuti, limite della copia offline dichiarato, controllo negativo 38/41 → 41/41, nessun push eseguito.
+
+## Verifica Codex — M7-R7C-4: deep link e copia cache
+
+**Esito: DA_CORREGGERE.** Commit `9612dd51`: la card da invito sospeso non è apribile e i test della lista sono utili. La protezione dei deep link arriva però **solo dopo** `getPrivateAccount`/`getCompanyAccount` e solo se la lettura ritorna `null` (`dettaglio_account_privato.js:190-204`, `dettaglio_account_azienda.js:143-157`). Il repository usa `getDocSmart` (`vault-repository.js:47-63`); `offline-firestore.js:32-42` può restituire subito una copia Firestore persistente dell'Account e avviare solo dopo una conferma server non bloccante. Quindi un ospite con Account già letto in cache può ottenere `loaded` anche se l'invito è noto come sospeso e il server ora nega: il ramo «sospeso» non scatta e il dettaglio può renderizzare contenuti. Il limite sulla cache offline è reale, ma non giustifica ignorare **una sospensione già conosciuta** dal client.
+
+**Correzione richiesta a DeepSeek:** sul percorso ospite (privato e aziendale) verificare lo stato dell'invito autorizzato **prima** di leggere/renderizzare il documento Account; se la sospensione è nota, fermare ogni contenuto e azione, anche con copia Account in cache. Per lettura online ospite attiva, valutare una conferma server bloccante dell'autorizzazione prima di decrittare/renderizzare, senza rompere la consultazione offline che è stata esplicitamente concordata; distinguere il limite inevitabile del dispositivo offline con invito ancora vecchio, dichiarandolo senza affermare che il server lo protegge offline. Aggiungere test con Account cached non-null + invito sospeso, deep link privato/aziendale, online e offline, nessuna inizializzazione/decrittazione/render; mantenere caso attivo. Un commit locale mirato, nessun push/deploy; consegna `DA_VERIFICARE`. Non avviare altre fette in parallelo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R7C-4, deep link e copia cache
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `9612dd51`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** percorso ospite dei due dettagli + lettura autorizzata. **Nessun** push, deploy o dato reale; **nessuna altra fetta avviata**.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R7C-4 (deep link e cache) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R7C-4, deep link e copia cache
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `9612dd51`; **nessun push o deploy**.
+
+### Il rilievo è fondato
+
+La verifica della sospensione stava **dopo** la lettura e solo nel ramo «documento assente». Poiché `getPrivateAccount`/`getCompanyAccount` passano da `getDocSmart` (`offline-firestore.js:32-42`), che può restituire subito la **copia persistente** dell'Account, un ospite con Account già in cache otteneva `loaded` anche con la sospensione nota: il ramo sospeso non scattava e il dettaglio poteva renderizzare contenuti.
+
+### Correzione
+
+1. **Verifica prima della lettura** (`privato/dettaglio_account_privato.js:191-196`, `azienda/dettaglio_account_azienda.js:142-150`): per il solo percorso **ospite** (`owner !== viewer`) lo stato dell'invito autorizzato è interrogato **prima** di leggere, decifrare o renderizzare; se la sospensione è nota si mostra «Account sospeso» e si esce **senza** inizializzare alcun modulo, senza decrittazione e senza scrittura di vista (`views`). Il ramo «documento assente» torna a essere il solo errore generico.
+2. **Conferma server quando si è online** (`data/vault-repository.js:38-51,127-133`): nuova `listAcceptedInvitesConfirmed` (stessa query via `getDocsServerConfirmed`) e `findSuspendedGuestInvite` che **online** usa l'elenco confermato dal server e **offline** la copia locale. Così una cache non può né **nascondere** una sospensione nota né **inventarla** se il server dice che l'accesso è attivo.
+3. **Limite dichiarato**: su un dispositivo **offline** con invito ancora vecchio il client non può sapere della sospensione; lì la consultazione resta quella concordata e **non** viene presentata come protetta dal server.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/guest-invite-suspension.test.mjs` (nuovo, 5 casi) | **5/5** |
+| `node --test tests/private-detail-legacy-id.test.mjs` (1 caso nuovo: Account in cache + sospeso) | **14/14** |
+| `node --test tests/company-detail-readonly.test.mjs` (1 caso nuovo) | **6/6** |
+| `npm run test:navigation` | **141/141** |
+| `npm run test:sharing-prototype` | **24/24** |
+| `npm run test:history-prototype` / `test:data-access` / `test:functions-security` | 98/98 · 95/95 · 142/142 |
+| `test:js-syntax` · `test:html-purity` · `test:static-references` · budget pagine | 161 moduli · HTML puro · 235 file · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **794 file** |
+
+Casi coperti: **online** con cache che dice «attivo» e server che dice «sospeso» ⇒ prevale il server e l'accesso è bloccato; **online** con cache che dice «sospeso» e server che dice «attivo» ⇒ nessuna sospensione inventata; **offline** ⇒ copia locale, sospensione in cache ⇒ bloccata; **offline con invito vecchio** ⇒ il limite è asserito apertamente (nessuna protezione affermata); corrispondenza per Account, proprietario, contesto aziendale e stato. Deep link privato **e** aziendale con Account leggibile in cache ⇒ **zero letture**, zero moduli, nessuna scrittura di vista e solo il messaggio «Account sospeso»; caso attivo invariato (l'Account viene letto e renderizzato).
+
+**Controllo negativo eseguito:** con la sola versione già committata (`9612dd51`, guardia dopo la lettura) i tre casi «Account in cache + sospeso» falliscono (**17/20**); con la correzione **20/20**.
+
+### Limiti dichiarati
+
+1. **Dispositivo offline con invito vecchio**: limite inevitabile, dichiarato e non mascherato; il server non protegge offline.
+2. **Costo**: una query in più per l'apertura del dettaglio come ospite quando online (conferma server bloccante richiesta da Codex).
+3. Restano invariati: inviti orfani, trigger di audit non implementato, R7C-5 (reinvito) e la chiusura complessiva prima della distribuibilità, nessun collaudo su browser o dispositivo reale.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R7C-4 consegnata da DeepSeek il 2026-09-21; sospensione verificata prima di leggere/renderizzare sul percorso ospite privato e aziendale, conferma server quando online e copia locale offline, limite del dispositivo offline dichiarato, prove con Account in cache e casi online/offline, controllo negativo 17/20 → 20/20, nessun push eseguito.

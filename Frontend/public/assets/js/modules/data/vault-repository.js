@@ -35,14 +35,20 @@ export const listTopPrivateAccounts = (uid, maximum = 10) => readRecords(`top-ac
         collection(db, 'users', uid, 'accounts'), orderBy('views', 'desc'), limit(maximum)
     ));
 
+const acceptedInvitesQuery = email => query(
+    collection(db, 'invites'),
+    where('recipientEmail', '==', String(email || '').trim().toLowerCase()),
+    where('status', '==', 'accepted')
+);
+
 export const listAcceptedInvites = email => {
     const normalizedEmail = String(email || '').trim().toLowerCase();
-    return readRecords(`accepted-invites:${normalizedEmail}`, query(
-        collection(db, 'invites'),
-        where('recipientEmail', '==', normalizedEmail),
-        where('status', '==', 'accepted')
-    ));
+    return readRecords(`accepted-invites:${normalizedEmail}`, acceptedInvitesQuery(normalizedEmail));
 };
+
+// M7-R7C-4: variante confermata dal server, usata quando il dispositivo è online
+// per non far nascondere a una copia in cache una sospensione già nota.
+export const listAcceptedInvitesConfirmed = email => readConfirmedRecords(acceptedInvitesQuery(email));
 
 export const getRecordByPath = recordPath => readRecord(`record:${recordPath}`, doc(db, recordPath));
 
@@ -115,9 +121,12 @@ export const listPrivateAccountAttachments = (uid, accountId) =>
 export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
 // M7-R7C-4: quando l'Account è sospeso il get è negato dalle Rules; l'invito del
 // destinatario è l'unica fonte lecita per riconoscere lo stato senza aprire
-// contenuti. Riusa la query già autorizzata per il destinatario.
+// contenuti. Online l'elenco è confermato dal server, così una copia in cache non
+// può nascondere una sospensione nota; offline resta la copia locale, e il limite
+// di un invito non aggiornato è dichiarato (il server non protegge offline).
 export const findSuspendedGuestInvite = async (ownerId, accountId, email, companyId = '') => {
-    const invites = await listAcceptedInvites(email);
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    const invites = offline ? await listAcceptedInvites(email) : await listAcceptedInvitesConfirmed(email);
     return invites.find(invite => invite.accountId === accountId
         && (invite.ownerId || invite.senderId) === ownerId
         && String(invite.aziendaId || '') === String(companyId || '')

@@ -140,6 +140,18 @@ async function loadAccount(mount = mounted) {
     setupActions(() => active() && mount.loaded, mount.fileInputs);
     const {uid: loadViewerId, owner: loadOwnerId, company: companyId, id: accountId} = mount.scope;
     try {
+        // M7-R7C-4 correzione: per un ospite la sospensione NOTA va verificata PRIMA
+        // di leggere o renderizzare: la lettura passa dalla cache persistente e
+        // potrebbe restituire una copia che il server non autorizza più.
+        if (loadOwnerId !== loadViewerId) {
+            const suspended = await findSuspendedGuestInvite(loadOwnerId, accountId, auth.currentUser?.email, companyId);
+            if (!active()) return;
+            if (suspended) {
+                showToast(t('account_suspended_label'), "warning");
+                setTimeout(() => { if (active()) history.back(); }, 1000);
+                return;
+            }
+        }
         const docRef = doc(db, "users", loadOwnerId, "aziende", companyId, "accounts", accountId);
         const account = await (requireServerRefresh
             ? getCompanyAccountConfirmed(loadOwnerId, companyId, accountId)
@@ -147,11 +159,7 @@ async function loadAccount(mount = mounted) {
 
         if (!active()) return;
         if (!account) {
-            // M7-R7C-4: deep link a un Account sospeso: si riconosce lo stato
-            // dall'invito del destinatario e non si mostra alcun contenuto.
-            const suspended = await findSuspendedGuestInvite(loadOwnerId, accountId, auth.currentUser?.email, companyId);
-            if (!active()) return;
-            showToast(suspended ? t('account_suspended_label') : t('account_not_found'), suspended ? "warning" : "error");
+            showToast(t('account_not_found'), "error");
             setTimeout(() => { if (active()) history.back(); }, 1000);
             return;
         }
