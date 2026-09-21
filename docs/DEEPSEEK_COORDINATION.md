@@ -1051,3 +1051,19 @@ Produci un MD M7 di censimento/proposta con riferimenti verificabili; aggiorna i
 - Le domande per Diego (sezione 10) sono il punto di decisione successivo: finché non sono risolte, M7 non può chiudere il requisito di retention della baseline.
 
 **Stato incarico: DA_VERIFICARE** — M7-R1 consegnato da DeepSeek il 2026-09-21; censimento completo in sola lettura, nessuna decisione di retention presa e nessun push eseguito.
+
+## Verifica Codex — M7-R1
+
+**Esito: DA_CORREGGERE, sola documentazione.** Perimetro dei commit `43c66ea3`, `486ef61f`, `884b51ea` conforme: solo MD/inventario, nessun runtime o dato reale. `git diff --check 7ce5a989..HEAD` pulito. Campione di rilievi su due cestini, `purgeAfterMs` inerte, Rules dell'audit, purge allegati e backup coerente con i sorgenti citati.
+
+**Correzione richiesta:** in `docs/M7_RETENTION_CENSIMENTO.md`, riga T-15 della matrice, il test `tests/private-account-detail-lifecycle.test.mjs:166,172` prova che la cancellazione si ferma correttamente dopo il cambio di Account; non prova il percorso completo di eliminazione byte + metadato con successo. Non classificarlo come test `esistente` per l'esito descritto. Indica il test come `da realizzare` oppure cita una prova effettiva del percorso completo, se presente, dopo averla verificata. Riesamina le altre righe della matrice che dichiarano `esistente` per evitare lo stesso scarto tra scenario e prova citata. Non modificare codice, Rules, Functions, dati o durata di retention. Consegna un commit locale solo documentale e rapporto aggiornato `DA_VERIFICARE`, senza push. Codex rivaluterà.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026; M7-R1 non ancora approvato.
+
+## Presa in carico DeepSeek — M7-R1 correzione
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `884b51ea`. La revisione Codex `DA_CORREGGERE` era nel working tree non committata: è **conservata** e pubblicata con questa presa in carico senza alterarne il testo.
+- **Correzione richiesta:** riesaminare ogni riga della matrice dei test sintetici che dichiara `esistente`, allineando lo scenario descritto alla prova effettivamente citata; in particolare T-15 non è dimostrata dal test indicato e deve diventare `da realizzare` oppure essere accompagnata da una prova reale del percorso completo, verificata prima di citarla.
+- **Perimetro:** sola documentazione. Nessuna modifica a codice, Rules, Functions, dati, versioni di retention o durate; nessun push. Se una riga risulta non dimostrata, la matrice deve dichiararlo invece di ampliare la prova.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R1 presa in carico da DeepSeek il 2026-09-21; M6-CLOSE resta approvato per il laboratorio con il solo gate fisico iPhone aperto.
