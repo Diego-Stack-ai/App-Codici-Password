@@ -21,6 +21,7 @@ import {
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
+import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -374,8 +375,15 @@ export function mountAccountPrivati(user, options = {}) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
+        const account = allAccounts.find(candidate => candidate.id === id);
+        // M7-R7B4: il gesto «Archivio» non ha conferma; se l'Account ha
+        // destinatari si mostra l'avviso, altrimenti resta l'azione immediata.
+        if (archiveRecipients(account).length) {
+            const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
+            if (signal.aborted) return;
+            if (!confirmed) { filterAndRender(); return; }
+        }
         try {
-            const account = allAccounts.find(candidate => candidate.id === id);
             const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision, updatedAt: account?.updatedAt});
             if (signal.aborted) return;
             showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_archived'));
@@ -392,11 +400,12 @@ export function mountAccountPrivati(user, options = {}) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
-        const confirmed = await showConfirmModal(t('confirm_archive_title'), t('confirm_archive_msg'));
+        const account = allAccounts.find(candidate => candidate.id === id);
+        // M7-R7B4: avviso informativo sui destinatari che perderanno l'accesso.
+        const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
         if (signal.aborted) return;
         if (!confirmed) { filterAndRender(); return; }
         try {
-            const account = allAccounts.find(candidate => candidate.id === id);
             const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision, updatedAt: account?.updatedAt});
             if (signal.aborted) return;
             showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'));

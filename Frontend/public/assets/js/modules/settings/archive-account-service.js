@@ -2,6 +2,10 @@ import { auth, db, functions } from '../../firebase-config.js?v=1.2.127';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';
+// Riusciti per i chiamanti che caricano questo servizio con import differito
+// (budget dei moduli statici di `form_account_azienda.html`): la pagina non deve
+// aggiungere un import statico per comporre l'avviso dei destinatari.
+export { archiveRecipients, archiveConfirmMessage } from './archive-account-model.js';
 import {
     getCompany,
     listArchivedPrivateAccounts,

@@ -11,12 +11,14 @@ import {readFile} from 'node:fs/promises';
 // rimonta su un altro Account e si prova che non si scrive nulla.
 
 const modules = new URL('../Frontend/public/assets/js/modules/', import.meta.url);
-const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+const strip = text => text.replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/gm, '')
+    .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const model = strip(await readFile(new URL('settings/archive-account-model.js', modules), 'utf8'));
 const service = strip(await readFile(new URL('settings/archive-account-service.js', modules), 'utf8'));
 // Unica riga sostituita: il caricamento differito del servizio (budget di pagina).
 const formSave = strip(await readFile(new URL('azienda/form-azienda-save.js', modules), 'utf8'))
-    .replace("await import('../settings/archive-account-service.js')", 'await Promise.resolve({archiveAccount: globalThis.archiveAccount})');
+    .replace("await import('../settings/archive-account-service.js')",
+        'await Promise.resolve({archiveAccount: globalThis.archiveAccount, archiveConfirmMessage: globalThis.archiveConfirmMessage})');
 const page = strip(await readFile(new URL('azienda/form_account_azienda.js', modules), 'utf8'));
 
 // La pagina e il modulo di salvataggio dichiarano entrambi una `const get` di
@@ -35,7 +37,7 @@ const documents = {
 
 function fixture() {
     const store = new Map(Object.entries(documents).map(([path, data]) => [path, {...data}]));
-    const hidden = new Set(), pending = new Map(), writes = [], toasts = [], errors = [], transactions = [];
+    const hidden = new Set(), pending = new Map(), writes = [], toasts = [], errors = [], transactions = [], confirmations = [];
     const windowState = {location: {href: '', pathname: '/form_account_azienda.html', search: '?id=acc-a&aziendaId=c1'}};
     const context = vm.createContext({
         auth: {currentUser: {uid: 'A'}}, db: {}, functions: {},
@@ -66,7 +68,7 @@ function fixture() {
         findProfileAccountItem: () => null, prepareProfileEmailAccountValues: () => ({}),
         accountModeFromRecord: () => 'standard', accountModeFromFlags: () => 'standard', validateAccountMode: () => ({}),
         initAccountEmbeddedWidgets: async () => null, initAccountSharedCredentials: async () => {}, initNewAccountSharedCredentials: () => {},
-        showConfirmModal: async () => true,
+        showConfirmModal: async (title, message) => { confirmations.push({title, message}); return true; },
         showToast: (...args) => toasts.push(args), t: value => value, logError: (...args) => errors.push(args),
         createElement: (tag, props, children) => ({tag, ...props, children}), setChildren: () => {}, clearElement: () => {},
         document: {getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener: () => {}},
@@ -74,12 +76,12 @@ function fixture() {
         URLSearchParams, console: {warn() {}, error() {}}, setTimeout: () => 0
     });
     for (const source of [
-        wrap(model, ['createArchiveMetadata']),
+        wrap(model, ['createArchiveMetadata', 'archiveRecipients', 'archiveConfirmMessage']),
         wrap(service, ['archiveAccount']),
         wrap(formSave, ['deleteAccount', 'saveAccount']),
         wrap(page, ['initFormAccountAzienda'])
     ]) vm.runInContext(source, context);
-    return {store, hidden, writes, toasts, errors, transactions, windowState,
+    return {store, hidden, writes, toasts, errors, transactions, confirmations, windowState,
         mount: search => { windowState.location.search = search; return context.initFormAccountAzienda({uid: 'A'}); },
         archive: async () => { await context.window.deleteAccount(); },
         // Tiene sospeso il caricamento di un Account finché il test non lo libera:
@@ -177,4 +179,60 @@ test('caricamenti sovrapposti: A in ritardo non sostituisce i marker del montagg
     assert.deepEqual(written.map(write => write[0]), ['users/A/aziende/c1/accounts/acc-b']);
     assert.equal(written[0][1].revision, 5, 'la revisione usata deve essere quella di B');
     assert.deepEqual(f.toasts.at(-1), ['success_moved_to_archive', 'success']);
+});
+
+// M7-R7B4 — avviso destinatari nel percorso del form aziendale.
+
+const shared = () => ({
+    password: 'SYNTH-PASSWORD', note: 'SYNTH-NOTE',
+    sharedWith: {
+        first: {email: 'one@example.invalid', status: 'accepted'},
+        second: {email: 'two@example.invalid', status: 'pending'},
+        third: {email: 'rejected@example.invalid', status: 'rejected'}
+    },
+    sharedWithEmails: ['legacy@example.invalid', 'one@example.invalid'],
+    recipientEmail: 'legacy@example.invalid'
+});
+
+test('popup aziendale: l\'avviso elenca i destinatari del documento caricato, senza segreti', async () => {
+    const f = fixture();
+    f.store.set('users/A/aziende/c1/accounts/acc-a',
+        {isArchived: false, revision: 4, updatedAt: MARKER, nomeAccount: 'Synthetic A', ...shared()});
+    await f.mount('?id=acc-a&aziendaId=c1');
+    await f.archive();
+    assert.equal(f.confirmations.length, 1);
+    assert.equal(f.confirmations[0].title, 'confirm_archive_title');
+    const message = f.confirmations[0].message;
+    assert.match(message, /one@example\.invalid/);
+    assert.match(message, /two@example\.invalid/);
+    assert.match(message, /legacy@example\.invalid/);
+    assert.equal(message.match(/one@example\.invalid/g).length, 1, 'le forme legacy non duplicano i destinatari');
+    assert.match(message, /confirm_archive_suspend_msg/);
+    assert.match(message, /confirm_archive_recipients_caveat/);
+    assert.equal(message.includes('rejected@example.invalid'), false, 'chi ha rifiutato non ha accesso');
+    assert.equal(message.includes('SYNTH-PASSWORD'), false);
+    assert.equal(message.includes('SYNTH-NOTE'), false);
+    assert.equal(f.writes.length, 1, 'la conferma produce una sola archiviazione');
+});
+
+test('popup aziendale: senza destinatari resta il testo base', async () => {
+    const f = fixture();
+    await f.mount('?id=acc-a&aziendaId=c1');
+    await f.archive();
+    assert.equal(f.confirmations[0].message, 'confirm_archive_msg');
+    assert.equal(f.writes.length, 1);
+});
+
+test('popup aziendale: il conflitto dopo l\'apertura conserva l\'avviso e non scrive', async () => {
+    const f = fixture();
+    f.store.set('users/A/aziende/c1/accounts/acc-a',
+        {isArchived: false, revision: 4, updatedAt: MARKER, nomeAccount: 'Synthetic A', ...shared()});
+    await f.mount('?id=acc-a&aziendaId=c1');
+    // Modifica concorrente dopo il caricamento del documento.
+    f.store.set('users/A/aziende/c1/accounts/acc-a',
+        {isArchived: false, revision: 5, updatedAt: '2026-05-05T00:00:00.000Z', nomeAccount: 'Synthetic A', ...shared()});
+    await f.archive();
+    assert.match(f.confirmations[0].message, /one@example\.invalid/, 'l\'avviso usa il documento mostrato all\'apertura');
+    assert.equal(f.writes.length, 0, 'il conflitto non sovrascrive');
+    assert.deepEqual(f.toasts.at(-1), ['archive_conflict_refresh', 'error']);
 });

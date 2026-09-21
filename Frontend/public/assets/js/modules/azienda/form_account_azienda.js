@@ -44,6 +44,9 @@ let observedRevision;
 // documento mostrato: un rimontaggio su un altro Account, o un caricamento
 // fallito, non possono riusare il marker del montaggio precedente.
 let markerConfirmed = false;
+// Campi di condivisione osservati all'apertura: servono solo a comporre
+// l'avviso dei destinatari prima di archiviare. Non contengono credenziali.
+let observedSharing = null;
 // Epoch del montaggio: ogni `initFormAccountAzienda` ne apre uno nuovo. Un
 // caricamento che termina dopo l'avvio di un altro montaggio appartiene a
 // un'epoch superata e va scartato: senza questo controllo il completamento
@@ -78,6 +81,7 @@ export async function initFormAccountAzienda(user) {
     baseUpdatedAt = '';
     observedRevision = undefined;
     markerConfirmed = false;
+    observedSharing = null;
     try {
         const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
         if (draft?.profileContactId === urlParams.get('profileContactId') && draft.ownerUid === user.uid &&
@@ -110,7 +114,7 @@ export async function initFormAccountAzienda(user) {
     // ad aggiornare invece di usare lo stato di un montaggio precedente.
     window.deleteAccount = () => {
         if (!markerConfirmed) { showToast(t('archive_conflict_refresh'), "error"); return; }
-        return deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt: baseUpdatedAt });
+        return deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt: baseUpdatedAt, observedSharing });
     };
 
     initBaseUI();
@@ -243,6 +247,12 @@ async function loadData(mount) {
         }
         baseUpdatedAt = data.updatedAt || '';
         observedRevision = Number.isSafeInteger(data.revision) ? data.revision : undefined;
+        // Solo i campi di condivisione: nessuna credenziale entra nell'avviso.
+        observedSharing = {
+            sharedWith: data.sharedWith,
+            sharedWithEmails: data.sharedWithEmails,
+            recipientEmail: data.recipientEmail
+        };
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)

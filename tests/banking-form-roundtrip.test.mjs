@@ -19,7 +19,7 @@ for (const area of ['privato', 'azienda']) {
             {banking: [{referenteNome: 'Solo referente banca'}]},
             {banking: {numeroVerde: '800 123 456'}}
         ]) {
-            const context = vm.createContext({...model, data: record, needsDecryption: false,
+            const context = vm.createContext({...model, data: record, needsDecryption: false, stale: () => false,
                 encrypt: async value => value ? `encrypted:${value}` : '', vaultKeyMaterial: 'synthetic-key'});
             const load = () => vm.runInContext(`(async()=>{${loader};return {loadedBanking,hasRealData};})()`, context);
             const first = await load();
@@ -36,7 +36,7 @@ for (const area of ['privato', 'azienda']) {
         }
     });
     test(`${area}: referente generale da solo non apre un conto bancario`, async () => {
-        const context = vm.createContext({...model, data: {referenteNome: 'Generale', referenteTelefono: '123'}, needsDecryption: false});
+        const context = vm.createContext({...model, data: {referenteNome: 'Generale', referenteTelefono: '123'}, needsDecryption: false, stale: () => false});
         const result = await vm.runInContext(`(async()=>{${loader};return {loadedBanking,hasRealData};})()`, context);
         assert.equal(result.hasRealData, false);
         assert.equal(result.loadedBanking.length, 0);

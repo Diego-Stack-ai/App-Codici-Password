@@ -1,4 +1,4 @@
-﻿import { LOG } from './logger.js';
+import { LOG } from './logger.js';
 
 /**
  * TRANSLATIONS LAZY LOADER (V2.0 — Auto-generato il 2026-06-06)
@@ -75,6 +75,9 @@ const _it = {
         confirm_delete_title: "Conferma eliminazione",
         confirm_archive_title: "Sposta nell'Archivio",
         confirm_archive_msg: "L'Account verrà spostato nell'Archivio e potrà essere eliminato definitivamente soltanto da lì, con una conferma esplicita.",
+        confirm_archive_recipients_label: "Destinatari attuali dell'Account:",
+        confirm_archive_suspend_msg: "Perderanno l'accesso all'Account finché resta nell'Archivio.",
+        confirm_archive_recipients_caveat: "Elenco ricavato dai dati caricati ora: eventuali modifiche fatte altrove possono non comparire.",
         success_moved_to_archive: "Account spostato nell'Archivio",
         success_already_archived: "Account già presente nell'Archivio",
         archive_conflict_refresh: "L'Account è cambiato nel frattempo: aggiorna la lista e riprova.",

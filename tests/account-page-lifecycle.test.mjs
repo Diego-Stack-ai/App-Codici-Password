@@ -5,19 +5,25 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
 const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+// M7-R7B4: le liste usano il modello reale dei destinatari; il banco lo inietta
+// nel contesto perché gli `import` vengono rimossi dai sorgenti sotto prova.
+const archiveModelSource = await readFile(new URL('../Frontend/public/assets/js/modules/settings/archive-account-model.js', import.meta.url), 'utf8');
+const {archiveRecipients, archiveConfirmMessage} = await import('data:text/javascript;base64,' + Buffer.from(archiveModelSource).toString('base64'));
 
 
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const user = {uid: 'fixture-user', email: 'fixture@example.invalid'};
-const records = () => [{id: 'b', nomeAccount: 'Beta'}, {id: 'a', nomeAccount: 'Alfa'}];
+const MARKER = '2026-01-01T00:00:00.000Z';
+const records = () => [{id: 'b', nomeAccount: 'Beta', revision: 1, updatedAt: MARKER},
+    {id: 'a', nomeAccount: 'Alfa', revision: 1, updatedAt: MARKER}];
 async function fixture(company, overrides = {}) {
     const elements = Object.fromEntries(['account-search', 'sort-btn', 'sort-label', 'accounts-container'].map(id => {
         const node = new EventTarget(); node.value = ''; return [id, node];
     }));
-    const views = [], writes = [], toasts = [], navigations = [];
+    const views = [], writes = [], toasts = [], navigations = [], confirmations = [];
     const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
-    const context = vm.createContext({readErrorMessage,
+    const context = vm.createContext({readErrorMessage, archiveRecipients, archiveConfirmMessage,
         window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError() {}, t: value => value,
         clearElement: node => { node.children = []; }, setChildren: (node, children) => { node.children = children; },
@@ -27,11 +33,26 @@ async function fixture(company, overrides = {}) {
             views.push(view); return view;
         },
         accountModeFromRecord: row => row.mode || 'account-private', createArchiveMetadata: () => ({isArchived: true}),
+        // M7-R6: le liste non scrivono più direttamente, delegano al servizio di
+        // Archivio. Qui se ne riproduce il contratto osservabile: percorso per
+        // contesto, metadati canonici e fallimento chiuso senza marker osservato.
+        auth: {currentUser: {uid: user.uid}},
+        archiveAccount: async (uid, account) => {
+            if (account.revision === undefined && !account.updatedAt) {
+                throw Object.assign(new Error('ARCHIVE_MARKER_MISSING'), {code: 'ARCHIVE_MARKER_MISSING'});
+            }
+            const path = account.context === 'privato'
+                ? `users/${uid}/accounts/${account.id}`
+                : `users/${uid}/aziende/${account.context}/accounts/${account.id}`;
+            writes.push([path, {isArchived: true, archiveSchemaVersion: 2, revision: (account.revision ?? 0) + 1}]);
+            return {status: 'archived', id: account.id, context: account.context};
+        },
         listPrivateAccounts: async () => records(), listPrivateAccountsConfirmed: async () => records(),
         listAcceptedInvites: async () => [], getRecordByPath: async () => null,
         listCompanyAccounts: async () => records(), ensureVaultKeyMaterial: async () => null,
         decrypt: async () => 'decrypted-fixture', getUserProfile: async () => ({contactEmails: []}),
-        showConfirmModal: async () => true, showToast: (...args) => toasts.push(args),
+        showConfirmModal: async (title, message) => { confirmations.push({title, message}); return true; },
+        showToast: (...args) => toasts.push(args),
         doc: (...parts) => parts.slice(1).join('/'),
         updateDoc: async (...args) => { writes.push(args); }, deleteDoc: async (...args) => { writes.push(args); },
         writeBatch: () => ({delete: (...args) => writes.push(args), update: (...args) => writes.push(args), commit: async () => {}}),
@@ -42,7 +63,7 @@ async function fixture(company, overrides = {}) {
     vm.runInContext(source.replace(/^import[\s\S]*?;\r?$/gm, '').replace(/^export /gm, ''), context);
     const mountName = company ? 'mountAccountAziendaList' : 'mountAccountPrivati';
     const initName = company ? 'initAccountAziendaList' : 'initAccountPrivati';
-    return {elements, views, writes, toasts, navigations,
+    return {elements, views, writes, toasts, navigations, confirmations,
         mount: options => context[mountName](user, {navigate: url => navigations.push(url), ...options}),
         init: () => context[initName](user),
     };
@@ -217,12 +238,12 @@ for (const company of [false, true]) {
     });
 }
 
-test('private: leaving during profile lookup prevents linked-profile delete batch creation', async () => {
+test('private: annullare la conferma non produce alcuna scrittura', async () => {
     const pending = deferred();
-    const f = await fixture(false, {getUserProfile: () => pending.promise});
+    const f = await fixture(false, {showConfirmModal: () => pending.promise});
     const mounted = f.mount(); await mounted.ready;
     const action = f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
-    await tick(); mounted.destroy(); pending.resolve({contactEmails: []}); await action;
+    await tick(); mounted.destroy(); pending.resolve(false); await action;
     assert.equal(f.writes.length, 0);
 });
 
@@ -249,15 +270,84 @@ for (const company of [false, true]) {
     });
 }
 
-test('private: confirmed deletion still dissociates only matching profile email links', async () => {
+// M7-R7B4 — avviso destinatari prima dell'archiviazione.
+const sharedRows = () => [
+    {id: 'a', nomeAccount: 'Alfa', revision: 1, updatedAt: MARKER, password: 'SYNTH-PASSWORD', note: 'SYNTH-NOTE', sharedWith: {
+        first: {email: 'one@example.invalid', status: 'accepted'},
+        second: {email: 'two@example.invalid', status: 'pending'},
+        third: {email: 'rejected@example.invalid', status: 'rejected'}
+    }},
+    {id: 'b', nomeAccount: 'Beta', revision: 1, updatedAt: MARKER,
+        sharedWithEmails: ['legacy@example.invalid', 'one@example.invalid'],
+        recipientEmail: 'legacy@example.invalid'}
+];
+const withRows = (company, rows) => company
+    ? {listCompanyAccounts: async () => rows}
+    : {listPrivateAccounts: async () => rows, listPrivateAccountsConfirmed: async () => rows};
+
+for (const company of [false, true]) {
+    const label = company ? 'company' : 'private';
+
+    test(`${label}: il popup dell'eliminazione elenca i destinatari e nessun segreto`, async () => {
+        const f = await fixture(company, withRows(company, sharedRows()));
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.confirmations.length, 1);
+        assert.equal(f.confirmations[0].title, 'confirm_archive_title');
+        const message = f.confirmations[0].message;
+        assert.match(message, /one@example\.invalid/);
+        assert.match(message, /two@example\.invalid/);
+        assert.match(message, /confirm_archive_suspend_msg/);
+        assert.match(message, /confirm_archive_recipients_caveat/);
+        assert.equal(message.includes('rejected@example.invalid'), false, 'un destinatario rifiutato non ha accesso');
+        assert.equal(message.includes('SYNTH-PASSWORD'), false);
+        assert.equal(message.includes('SYNTH-NOTE'), false);
+        assert.equal(f.writes.length, 1, 'la conferma porta a una sola scrittura');
+        mounted.destroy();
+    });
+
+    test(`${label}: il popup unisce e deduplica le forme legacy`, async () => {
+        const f = await fixture(company, withRows(company, sharedRows()));
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onDelete({dataset: {id: 'b', owner: 'true'}});
+        const message = f.confirmations[0].message;
+        assert.equal(message.match(/legacy@example\.invalid/g).length, 1);
+        assert.equal(message.match(/one@example\.invalid/g).length, 1);
+        mounted.destroy();
+    });
+
+    test(`${label}: il gesto Archivio chiede conferma solo agli Account con destinatari`, async () => {
+        const rows = sharedRows().concat([{id: 'c', nomeAccount: 'Gamma', revision: 1, updatedAt: MARKER}]);
+        const f = await fixture(company, withRows(company, rows));
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onArchive({dataset: {id: 'c', owner: 'true'}});
+        assert.equal(f.confirmations.length, 0, 'un Account senza condivisioni resta immediato');
+        assert.equal(f.writes.length, 1);
+        await f.views[0].options.onArchive({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.confirmations.length, 1, 'un Account condiviso chiede conferma');
+        assert.match(f.confirmations[0].message, /one@example\.invalid/);
+        assert.equal(f.writes.length, 2);
+        mounted.destroy();
+    });
+
+    test(`${label}: annullare l'avviso nel gesto Archivio non scrive`, async () => {
+        const f = await fixture(company, {showConfirmModal: async () => false, ...withRows(company, sharedRows())});
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onArchive({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.writes.length, 0);
+        mounted.destroy();
+    });
+}
+
+test('private: l\'archiviazione confermata non tocca più i collegamenti del Profilo (decisione M7-R6)', async () => {
     const f = await fixture(false, {getUserProfile: async () => ({contactEmails: [
         {email: 'fixture@example.invalid', linkedAccountId: 'a'}, {email: 'other@example.invalid', linkedAccountId: 'b'}
     ]})});
     const mounted = f.mount(); await mounted.ready;
     await f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
-    assert.equal(f.writes[1][0], 'users/fixture-user');
-    assert.equal(f.writes[1][1].contactEmails[0].linkedAccountId, null);
-    assert.equal(f.writes[1][1].contactEmails[1].linkedAccountId, 'b');
+    assert.equal(f.writes.length, 1, 'solo l\'archiviazione: nessuna scrittura sul documento del Profilo');
+    assert.equal(f.writes[0][0], 'users/fixture-user/accounts/a');
+    assert.equal(f.writes[0][1].isArchived, true);
     mounted.destroy();
 });
 

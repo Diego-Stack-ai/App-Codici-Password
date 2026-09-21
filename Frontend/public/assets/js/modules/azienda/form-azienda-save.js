@@ -321,13 +321,22 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
  * possibile soltanto dall'Archivio, con una conferma esplicita.
  * @param {Object} ctx - Contesto con ID dell'account
  */
-export async function deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt }) {
-    if (!await showConfirmModal(t('confirm_archive_title'), t('confirm_archive_msg'))) return;
+export async function deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt, observedSharing = null }) {
+    // Import differito: il servizio di Archivio (e con esso il modello dei
+    // destinatari) non entra nella closure iniziale della pagina (budget dei
+    // moduli statici) e viene caricato soltanto quando l'utente conferma.
+    let archiveAccount, archiveConfirmMessage;
     try {
-        // Import differito: il servizio di Archivio non entra nella closure
-        // iniziale della pagina (budget dei moduli statici) e viene caricato
-        // soltanto quando l'utente conferma di spostare un Account.
-        const { archiveAccount } = await import('../settings/archive-account-service.js');
+        ({ archiveAccount, archiveConfirmMessage } = await import('../settings/archive-account-service.js'));
+    } catch (e) {
+        logError("Archive", e);
+        showToast(t('error_generic'), "error");
+        return;
+    }
+    // M7-R7B4: avviso informativo sui destinatari, ricavato dal documento
+    // caricato all'apertura (nessuna lettura nuova, nessun segreto).
+    if (!await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(observedSharing, t))) return;
+    try {
         // Si usa il marker OSSERVATO all'apertura del modulo: una rilettura
         // appena prima dell'archiviazione renderebbe invisibile una modifica
         // concorrente avvenuta dopo l'apertura. Se manca un marker affidabile

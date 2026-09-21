@@ -4,7 +4,8 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const base = new URL('../Frontend/public/assets/js/modules/settings/', import.meta.url);
-const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+const strip = text => text.replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/gm, '')
+    .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const service = strip(await readFile(new URL('archive-account-service.js', base), 'utf8'));
 const archiveModel = strip(await readFile(new URL('archive-account-model.js', base), 'utf8'));
 const ui = strip(await readFile(new URL('archivio_account.js', base), 'utf8'));

@@ -1879,3 +1879,157 @@ I quattro casi precedenti (percorso felice, rimontaggio con caricamento fallito,
 4. Resta non verificato il comportamento su browser o dispositivo reale: le prove sono sintetiche (vm).
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R6 (terzo rilievo) consegnata da DeepSeek il 2026-09-21; il caricamento tardivo di un montaggio superato non conferma né sostituisce i marker del montaggio corrente, il controllo negativo dimostra che le due prove nuove rilevano il difetto e nessun push è stato eseguito.
+
+## Verifica Codex — M7-R6, caricamenti sovrapposti
+
+**Esito: APPROVATO.** Commit `ae315ffd`: l'epoch del montaggio viene incrementata all'inizializzazione; i risultati asincroni superati non confermano né sovrascrivono il marker, e la callback di archiviazione resta bloccata senza conferma del montaggio corrente. Revisione del diff mirato e `node --test tests/company-form-archive-mount.test.mjs`: **6/6**, comprese le due prove di sovrapposizione. Nessuna modifica di Rules, Functions, versione o produzione; nessun push/deploy. M7-R6 è chiuso come candidato locale. Resta distinto il lavoro sugli accessi condivisi in Archivio.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7A: mappa della sospensione Account condivisi
+
+**Stato incarico: PRONTO.** DeepSeek esegua ora un censimento in sola lettura, senza modificare codice, test, Rules o dati reali: individuare tutti i percorsi con cui un ospite può leggere o agire su Account di proprietà altrui, inclusi metadati, allegati, cache offline, link, anteprime e funzioni backend. Per ogni percorso indicare la condizione attuale di accesso, il punto in cui `isArchived` può essere imposto in modo autorevole e i test sintetici necessari. Individuare anche la fonte affidabile dei destinatari da mostrare nel popup prima di archiviare, senza includere segreti. Separare chiaramente sospensione durante archivio da politica di riattivazione al ripristino, che attende la scelta di Diego. Consegnare proposta M7-R7B nel solo `docs/DEEPSEEK_COORDINATION.md`, con riferimenti a file/riga e `DA_VERIFICARE`; un solo incarico alla volta. Nessun commit, push, merge o deploy richiesto per questa ricognizione.
+
+## Presa in carico DeepSeek — M7-R7A censimento sospensione Account condivisi
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `ae315ffd`; M7-R6 è **APPROVATO** da Codex e non viene riaperto.
+- **Perimetro:** ricognizione **in sola lettura**. Non modifico codice, test, Rules, Functions, versione o dati; nessun commit, push, merge o deploy. Un solo incarico alla volta: il lavoro sugli accessi condivisi in Archivio è questo censimento, non un'implementazione.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7A preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7A censimento sospensione Account condivisi
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Proposta M7-R7B in fondo.
+- **Perimetro rispettato:** sola lettura. **Nessuna modifica** a codice, test, Rules, Functions, versione o dati; **nessun commit, push, merge o deploy**. Le prove di questa fetta sono **statiche** (lettura delle fonti citate): nessun emulatore e nessun browser sono stati eseguiti.
+
+### 1. Chi è "ospite" e chi lo decide (autorità del server)
+
+- La condizione di ospite è **una sola**, nelle Rules: `isAcceptedGuest()` = `request.auth.uid in resource.data.get('sharedWithUids', [])` (`firestore.rules:10-12`).
+- `sharedWithUids` è materializzato in **due** modi: dal **backend** all'accettazione (`functions/index.js:1226-1233`) e dal **client del proprietario** quando salva la condivisione (`shared/detail-account-mode.js:175`, `privato/dettaglio-privato-sharing.js:127`, `azienda/dettaglio-azienda-sharing.js:243`, `privato/form-privato-save.js:365`, `azienda/form-azienda-save.js:273`).
+- La forma della voce condivisa è `{email, status, uid}` (`shared/detail-account-mode.js:157`), con `status` in `pending|accepted|rejected`.
+- Conseguenza: **solo Rules e backend sono autorevoli**; qualunque filtro nel client è UX e non impedisce la lettura di rete.
+
+### 2. Percorsi con cui un ospite legge o agisce su Account altrui
+
+| # | Percorso | Condizione attuale di accesso | `isArchived` oggi | Punto autorevole dove imporre la sospensione |
+|---|---|---|---|---|
+| P1 | Elenco Account condivisi (privato) | invito leggibile dal destinatario (`firestore.rules:181-185`) + **get** sull'Account del proprietario (`firestore.rules:165,168,171`) | **assente** | Rules P1 + filtro client |
+| P2 | Dettaglio Account privato condiviso | get sull'Account (`privato/dettaglio_account_privato.js:190-192,209`), vista in sola lettura (`:179`) | **assente** | Rules P1 + guardia del dettaglio |
+| P3 | Dettaglio Account aziendale condiviso | get sull'Account (`azienda/dettaglio_account_azienda.js:60,141-146`), `isReadOnly` (`:100`) | **assente** | Rules P1 + guardia del dettaglio |
+| P4 | Card in elenco: metadati, copia, anteprima | dati già nel documento letto in P1 (`shared/account-list-view.js:9-52,90,115`) | **assente** | cade con P1 (senza documento non c'è card) |
+| P5 | Allegati (Firestore + Storage) | **negati**: subcollezione non coperta dalle regole ospite; Storage solo proprietario (`storage.rules:33-36`) | non applicabile | nessuna azione: già chiuso |
+| P6 | Cache locale (IndexedDB) | `persistentLocalCache` (`firebase-config.js:56-57`); letture **prima dalla cache** (`offline-firestore.js:32-42`), offline **solo** cache (`:33,45`) | **le Rules non si applicano alla cache** | non imponibile lato server: limite dichiarato (sezione 6) |
+| P7 | Invito (`invites`) | destinatario legge `accountName`, `senderEmail`, `ownerId`, `accountId`, `aziendaId` (`firestore.rules:174-202`); elenco in `data/vault-repository.js:38-45` | **assente** | decisione di prodotto (sezione 5, opzione B2) |
+| P8 | Azioni dell'ospite (scritture) | **nessuna**: le regole ospite concedono solo `get, list` (`firestore.rules:164-172`); CTA disattivate (`privato/dettaglio_account_privato.js:257-260,273,289`, `azienda/dettaglio_account_azienda.js:112-127,220-222,251`); editor nota solo-proprietario (`shared/account-note-editor.js:18,53,66`) | non applicabile | già chiuso; l'archiviazione non deve riaprirle |
+| P9 | Accettazione invito (backend) | `respondToInvitation` rilegge l'Account e riscrive `sharedWith`/`sharedWithUids` **senza guardare `isArchived`** (`functions/index.js:1203-1243`) | **assente** | `functions/index.js:1219` (dopo la lettura, prima della scrittura) |
+| P10 | Backend che legge come admin | `manageReceivedDeadline` rilegge la fonte e **ricontrolla l'autorizzazione nella transazione** (`functions/index.js:1146-1148`): è il modello da riusare | non applicabile | modello di riferimento |
+| P11 | Elenco aziendale proprio | `azienda/account_azienda.js` legge solo `users/{currentUid}/aziende/...`: l'ospite non ha percorsi aziendali propri; gli Account aziendali condivisi passano da P1 (`privato/account_privati.js:206-207`) | **assente** ma non è percorso ospite | — |
+
+**Dettaglio P1 (la prova più critica):** `privato/account_privati.js:195-225` legge gli Account condivisi **per percorso** dopo averli scoperti dagli inviti accettati (`:204`, `:207`, `:211`) e li unisce agli altri (`:254`). Il filtro `isArchived` esiste **solo per gli Account propri** (`:252`) e **non** per i condivisi.
+
+**Verifiche negative (cosa l'ospite NON può fare oggi):** non legge il documento Azienda né i contatti del proprietario (nessuna regola ospite oltre agli Account: `firestore.rules:106-118,120-123`); non legge Widget, Credenziali comuni e collegamenti (`firestore.rules:149-162`); non legge né scarica allegati (`storage.rules:33-36,39-41`, subcollezione fuori dalle regole ospite); non scrive nulla (P8).
+
+### 3. Fonte affidabile dei destinatari per il popup prima dell'archiviazione
+
+- **Fonte:** il campo `sharedWith` del documento Account, già caricato dal proprietario nel form/dettaglio; forma `{email, status, uid}` (`shared/detail-account-mode.js:157`; stesso schema scritto dal backend in `functions/index.js:1220-1228`). **Nessuna lettura nuova e nessuna query aggiuntiva.**
+- **Da mostrare:** `Object.values(sharedWith).filter(g => ['pending','accepted'].includes(g.status))` → `email` + `status` (pendenti = perderanno l'accesso se accettano, accettati = lo perdono ora).
+- **Da non mostrare:** gli ospiti `rejected` (nessun accesso), e soprattutto **nessun segreto**: `username`, `account`, `password`, `note`, `banking`/`cards` sono classificati sensibili dal backend (`functions/private-account-write-scope.js:27-28`) e non servono al messaggio.
+- **Casi legacy da unire e deduplicare:** `sharedWithEmails` e `recipientEmail` sono percorsi storici ancora riconosciuti dal backend (`functions/index.js:1255-1258`) e non compaiono in `sharedWith`; il popup deve considerarli se presenti, mostrando solo l'email.
+- **Limite:** il popup è informativo e **locale**; non certifica che la sospensione sia già efficace (lo diventa con le Rules, sezione 5).
+
+### 4. Sospensione durante l'archivio ≠ politica di riattivazione
+
+- **Sospensione (oggetto di M7-R7A/M7-R7B):** mentre `isArchived == true`, l'ospite non legge e non agisce. Non rimuove `sharedWith`/`sharedWithUids`, **non cancella inviti** e non revoca definitivamente (vincolo esplicito di Diego e di Codex).
+- **Riattivazione (aperta, attende Diego):** oggi `restoreArchivedAccount` riporta `isArchived: false` **senza toccare la condivisione** (`settings/archive-account-service.js:180-194`), quindi con la sola condizione `isArchived` nelle Rules la riattivazione sarebbe **automatica**. Se Diego vuole una nuova conferma, serve una fetta dedicata con consenso/notifica ai destinatari: **non va implementata ora** e non va decisa in questo censimento.
+
+### 5. Proposta M7-R7B (fette separate, da autorizzare una per volta)
+
+- **B1 — Blocco autorevole (Rules + client), nessun backend nuovo.** Aggiungere la condizione di non-archiviato alle tre regole ospite (`firestore.rules:164-172`) e filtrare i condivisi archiviati nel client (`privato/account_privati.js:225`) con uno stato «sospeso» nel dettaglio (`privato/dettaglio_account_privato.js:190-196`, `azienda/dettaglio_account_azienda.js:144-153`). **Non** tocca `sharedWith`, inviti o purge.
+- **B2 — Inviti e anteprime.** Oggi il destinatario legge `accountName` dall'invito anche se l'Account è archiviato (P7). Due opzioni, da scegliere: **(B2a)** non cambiare nulla e dichiarare il limite (l'anteprima non è un dato operativo); **(B2b)** estendere l'invito con un campo di stato non segreto, aggiornato dal proprietario o dal backend, e nascondere l'anteprima ai destinatari quando l'Account è archiviato.
+- **B3 — Accettazione invito su Account archiviato.** In `respondToInvitation` (`functions/index.js:1219`) rifiutare o parcheggiare l'accettazione con un esito esplicito, così un invito pendente non **riattiva** la condivisione di un Account sospeso (P9).
+- **B4 — Popup destinatari.** Sola interfaccia, sulla fonte della sezione 3, prima della conferma di archiviazione (dai punti d'ingresso M7-R6).
+- **B5 — Riattivazione.** Solo dopo la decisione di Diego (sezione 4).
+
+**Difficoltà di UX da decidere in B1:** con le Rules corrette la lettura negata arriva al client come un errore **indistinguibile** da un invito revocato (`privato/account_privati.js:219-222` registra e scarta la card). Per mostrare «Account sospeso» invece di far sparire la card serve un'informazione leggibile dall'ospite — opzioni: **B2b** (campo di stato nell'invito) oppure accettare che la card scompaia senza spiegazione. È una scelta di prodotto, non tecnica.
+
+### 6. Test sintetici necessari (proposta, non implementati)
+
+- **Rules (emulatore), su `tests/sharing-revocation.rules.test.mjs` come base, registrati in `scripts/run-firestore-rules-tests.mjs:9-13`:** ospite accettato legge l'Account **non** archiviato (positivo, invariante da non rompere); ospite accettato **non** legge l'Account archiviato — get privato, get aziendale e percorso ricorsivo; proprietario continua a leggere e scrivere; ospite **pendente** resta negato in entrambi i casi; l'archiviazione **non** modifica `sharedWith`/`sharedWithUids` né cancella l'invito.
+- **Client:** `tests/account-page-lifecycle.test.mjs` (elenco ospite, già predisposto per `listAcceptedInvites`/`_isGuest`: `:31,80,231`) → un Account archiviato non compare né produce card; dettaglio in sola lettura che non renderizza un Account archiviato e mostra lo stato sospeso.
+- **Backend:** nuovo test in `functions/test/` per `respondToInvitation` con Account archiviato (esito di rifiuto) e non archiviato (comportamento invariato).
+- **Cache offline:** può essere coperta solo come caso client «record archiviato già in memoria non renderizzato»; l'eviction della cache **non** è verificabile in modo deterministico e va dichiarata come limite, non provata.
+
+### 7. Limiti dichiarati di questo censimento
+
+1. **Sola lettura statica**: nessuna prova su emulatore, browser o dispositivo. Le condizioni di accesso sono lette dalle Rules e dai percorsi client, non osservate.
+2. **Cache offline (P6):** con `persistentLocalCache` attiva una copia già letta resta disponibile sul dispositivo anche dopo l'archiviazione, finché la cache non viene sfrattata o aggiornata: le Rules non possono impedirlo. Va dichiarato come limite della sospensione, non nascosto.
+3. **Nessun dato reale consultato**: non so quanti Account archiviati abbiano oggi ospiti attivi; la misura non è stata fatta e non è richiesta.
+4. **Sottocollezioni**: oltre ad `attachments` non risultano altre sottocollezioni di Account con regole ospite; se in futuro se ne aggiungono, questo censimento va aggiornato.
+5. **Una fetta alla volta**: qui non ho implementato nulla e non ho avviato B1-B5.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7A consegnato da DeepSeek il 2026-09-21; censimento in sola lettura dei percorsi ospite (P1-P11), punto autorevole individuato nelle Rules `firestore.rules:164-172` e in `functions/index.js:1219`, fonte affidabile dei destinatari in `sharedWith`, sospensione e riattivazione tenute separate, nessuna modifica a codice/Rules/dati e nessun commit o push.
+
+## Verifica Codex — M7-R7A censimento sospensione
+
+**Esito: APPROVATO come mappa, non come protezione attiva.** I percorsi P1-P11 sono coerenti con `firestore.rules:164-202`, `storage.rules:33-41` e `functions/index.js:1203-1243`: la lettura dell'ospite sull'Account archiviato è oggi concessa; gli allegati sono già riservati al proprietario; inviti e accettazione richiedono trattamento separato. Corretta la dichiarazione del limite: una copia già presente nella cache offline non può essere revocata retroattivamente dalle Rules. Il rapporto separa correttamente sospensione e riattivazione. Precisione: l'accettazione di un invito durante l'archiviazione non supera di per sé una futura regola `isArchived`; crea però stato condiviso che potrebbe tornare operativo al ripristino, quindi B3 resta necessario. Nessun codice o dato modificato da questo censimento.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7B4: avviso prima dell'archiviazione condivisa
+
+**Stato incarico: PRONTO.** Implementare solo il popup informativo già deciso da Diego nei percorsi proprietario privato e aziendale di M7-R6: prima della conferma di spostamento nell'Archivio mostrare i destinatari attivi/pendenti ricavabili dal documento Account (deduplicando le forme legacy), e spiegare che l'accesso sarà sospeso. Non mostrare password, note, codici o allegati; evitare che la lista del popup diventi una promessa di completezza se il dato locale è vecchio. Conservare conferma/annulla e guardie di concorrenza esistenti; nessuna modifica a Rules, Functions, condivisioni o dati reali. Test sintetici per Account con zero/uno/più destinatari, forme legacy, annullamento e conflitto fra apertura e conferma. Un solo commit locale mirato, nessun push/merge/deploy; consegna `DA_VERIFICARE`. La sospensione effettiva degli accessi resta aperta e non va dichiarata realizzata da questo popup.
+
+## Presa in carico DeepSeek — M7-R7B4 avviso prima dell'archiviazione condivisa
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `ae315ffd`; l'incarico M7-R7B4 era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** solo popup informativo nei percorsi proprietario; **nessuna modifica** a Rules, Functions, condivisioni, dati reali, versione o `master`. Un solo commit locale, nessun push.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7B4 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7B4 avviso prima dell'archiviazione condivisa
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `ae315ffd`; **nessun push, merge o deploy**.
+- **La sospensione effettiva degli accessi resta NON implementata** (M7-R7B1 è una fetta separata): questo popup la **annuncia** e non la dichiara attiva.
+
+### Cosa è stato implementato
+
+1. **Modello puro** (`settings/archive-account-model.js`): `archiveRecipients(account)` restituisce `{email, status}` leggendo **solo** `sharedWith` (pendenti e accettati), `sharedWithEmails` e `recipientEmail` come forme legacy, unite e deduplicate; `rejected` è escluso perché non ha accesso; voci vuote o non riconoscibili come email sono ignorate. `archiveConfirmMessage(account, translate)` aggiunge l'avviso **solo** quando ci sono destinatari; il traduttore arriva dal chiamante, quindi il modulo resta senza dipendenze.
+2. **Servizio** (`settings/archive-account-service.js`): ri-esporta i due simboli, così il form aziendale li ottiene con l'import differito già esistente e **il budget statico di pagina non cambia** (nessun nuovo modulo nella closure).
+3. **Tre punti d'ingresso**, tutti con il testo informativo: lista privata (`privato/account_privati.js:405`) e lista aziendale (`azienda/account_azienda.js:286`) per «Elimina»; form aziendale (`azienda/form-azienda-save.js:338`).
+4. **Gesto «Archivio» delle due liste**: non aveva alcuna conferma; ora **chiede conferma solo se l'Account ha destinatari** (`privato/account_privati.js:381-385`, `azienda/account_azienda.js:261-265`). Un Account senza condivisioni resta l'azione immediata di prima. **Scelta dichiarata**, motivata dalla decisione di Diego («prima di archiviare un Account con condivisioni, mostrare un avviso»); se Codex preferisce non toccare quel gesto, è una rimozione di poche righe.
+5. **Form aziendale**: `form_account_azienda.js` osserva all'apertura i soli campi di condivisione (`observedSharing`, dichiarato a `:49`, valorizzato a `:251-255`), li azzera a ogni montaggio (`:84`) e li passa alla cancellazione (`:117`); nessuna lettura nuova, nessun segreto.
+6. **Testi**: tre chiavi nuove in `translations.js` e `translations/en.js` (`confirm_archive_recipients_label`, `confirm_archive_suspend_msg`, `confirm_archive_recipients_caveat`). La nota finale dichiara che l'elenco deriva dai dati caricati, per non promettere completezza.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/archive-recipients.test.mjs` (nuovo) | **8/8** |
+| `node --test tests/company-form-archive-mount.test.mjs` | **9/9** |
+| `npm run test:history-prototype` | **86/86** |
+| `npm run test:navigation` (suite completa) | **134/134** |
+| `npm run test:data-access` | **95/95** |
+| `npm run test:firestore-rules` | **29/29** |
+| `npm run test:js-syntax` / `test:static-references` / `test:html-purity` | 161 moduli · 235 file · HTML puro |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato da 30 pagine» |
+| `git diff --check` / `npm run audit:inventory` | pulito · **790 file** |
+
+Casi coperti: zero destinatari (testo base invariato), uno, più destinatari con ordine stabile, forme legacy unite e deduplicate, `rejected` escluso, voci non valide ignorate, nessun segreto nel messaggio, traduttore come unica fonte dei testi; sul percorso form-level: avviso dal documento caricato, testo base senza destinatari, **conflitto fra apertura e conferma** (avviso presente, zero scritture, invito ad aggiornare), caricamenti sovrapposti invariati. Sulle liste: popup con destinatari e senza segreti, deduplica delle forme legacy, gesto «Archivio» che chiede conferma solo se condiviso, **annullamento senza scritture** (sia «Elimina» sia «Archivio»).
+
+### Regressione trovata e chiusa (dichiarata)
+
+`tests/account-page-lifecycle.test.mjs` era **rosso già a `ae315ffd`** (6/29) per effetto di M7-R6: il banco non forniva `archiveAccount` (le liste non scrivono più direttamente) e due prove asserivano il comportamento **rimosso** dalla decisione di Diego (dissociazione delle email del Profilo all'eliminazione; attesa del profilo prima della scrittura). **Non era stato intercettato** perché nella tranche M7-R6 avevo eseguito `node scripts/audit-navigation-flows.mjs` invece della suite `npm run test:navigation`, che contiene anche quel file: la mia verifica era incompleta. Ho corretto il banco (contratto osservabile del servizio riprodotto, marker osservati nei record), riscritto la prova sui collegamenti del Profilo come invariante della decisione M7-R6 e sostituito la prova obsoleta sull'attesa del profilo con «annullare la conferma non produce alcuna scrittura». **`npm run test:navigation` entra da ora nella batteria di ogni tranche.** Sul banco estratto di `form_account_azienda.js` ho dovuto fornire la funzione `stale` (è una closure del montaggio): nessuna modifica alla logica sotto prova.
+
+### File toccati
+
+Frontend: `settings/archive-account-model.js`, `settings/archive-account-service.js`, `privato/account_privati.js`, `azienda/account_azienda.js`, `azienda/form_account_azienda.js`, `azienda/form-azienda-save.js`, `translations.js`, `translations/en.js`. Test: `tests/archive-recipients.test.mjs` (nuovo), `tests/account-page-lifecycle.test.mjs`, `tests/company-form-archive-mount.test.mjs`, `tests/company-archive-conflict.test.mjs`, `tests/archive-session.test.mjs`, `tests/account-archive-paths.test.mjs`, `tests/banking-form-roundtrip.test.mjs`. Altro: `package.json`, `docs/FILE_INVENTORY.md`, `docs/PAGE_PERFORMANCE_BASELINE.md` (rigenerata dall'audit).
+
+### Limiti dichiarati
+
+1. **La sospensione non esiste ancora**: il popup annuncia un effetto che sarà reale solo con B1 (Rules) e B3 (accettazione invito). Nessuna UI dichiara che l'accesso è già bloccato.
+2. L'elenco dei destinatari viene dal documento caricato nella vista: se un altro dispositivo ha modificato la condivisione, il popup può non essere completo — è dichiarato nel testo stesso.
+3. Resta non verificato il comportamento su browser o dispositivo reale: le prove sono sintetiche (vm).
+4. Invariati e fuori perimetro: `firestore.rules`, `functions/index.js`, condivisioni, purge, versione, `master`, deploy e dati reali.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7B4 consegnato da DeepSeek il 2026-09-21; avviso destinatari nei tre punti d'ingresso del proprietario e nel gesto «Archivio» condiviso, nessun segreto nel testo, nota di incompletezza presente, guardie di concorrenza e conferma/annulla conservate, regressione di `test:navigation` trovata e chiusa, nessun push eseguito.

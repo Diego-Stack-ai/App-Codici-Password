@@ -11,7 +11,8 @@ import {readFile} from 'node:fs/promises';
 // → **zero scritture** e messaggio di aggiornamento.
 
 const modules = new URL('../Frontend/public/assets/js/modules/', import.meta.url);
-const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+const strip = text => text.replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/gm, '')
+    .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const model = strip(await readFile(new URL('settings/archive-account-model.js', modules), 'utf8'));
 const service = strip(await readFile(new URL('settings/archive-account-service.js', modules), 'utf8'));
 // `deleteAccount` carica il servizio con import differito (il modulo statico
@@ -21,7 +22,8 @@ const service = strip(await readFile(new URL('settings/archive-account-service.j
 // `globalThis.archiveAccount` evita la zona morta della `const` dichiarata
 // dalla destrutturazione.
 const formSave = strip(await readFile(new URL('azienda/form-azienda-save.js', modules), 'utf8'))
-    .replace("await import('../settings/archive-account-service.js')", 'await Promise.resolve({archiveAccount: globalThis.archiveAccount})');
+    .replace("await import('../settings/archive-account-service.js')",
+        'await Promise.resolve({archiveAccount: globalThis.archiveAccount, archiveConfirmMessage: globalThis.archiveConfirmMessage})');
 
 function fixture({revision = 4, updatedAt = '2026-01-01T00:00:00.000Z', isArchived = false, confirm = true} = {}) {
     const writes = [], toasts = [], errors = [], transactions = [];

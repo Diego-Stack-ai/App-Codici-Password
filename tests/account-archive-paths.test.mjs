@@ -31,7 +31,9 @@ for (const module of modules) {
 
   test(`${label}: la conferma dice che l'Account va nell'Archivio`, () => {
     assert.match(source, /confirm_archive_title/, 'titolo di conferma dedicato');
-    assert.match(source, /confirm_archive_msg/, 'messaggio di conferma dedicato');
+    // M7-R7B4: il testo della conferma arriva dal modello dei destinatari, che
+    // aggiunge l'avviso quando l'Account è condiviso.
+    assert.match(source, /archiveConfirmMessage\(/, 'messaggio di conferma dedicato');
     assert.equal(source.includes('confirm_delete_title'), false, 'nessuna conferma di eliminazione diretta');
   });
 }
