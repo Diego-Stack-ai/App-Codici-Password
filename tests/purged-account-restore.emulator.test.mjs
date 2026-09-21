@@ -202,7 +202,9 @@ test('T-21 su emulatore: il ripristino ricrea l’Account purgato con allegati e
     assert.equal(results.every(result => result.status === 'applied'), true, 'tutti i chunk applicati');
     const restored = await data(`users/${OWNER}/accounts/account-1`);
     assert.equal(restored.nomeAccount, 'Account sintetico', 'l’Account è ricreato');
-    assert.equal(restored.password, MARKERS.password, 'il valore cifrato torna com’era nel backup');
+    assert.equal(restored.password, MARKERS.password,
+        'il valore memorizzato torna identico: il backup conserva la forma scritta dal client (qui un marcatore sintetico, non un ciphertext reale)');
+    assert.equal(restored.note, MARKERS.note, 'anche le note tornano identiche');
     assert.equal(restored.isArchived, true, 'torna **archiviato** come nel backup (quindi nel Cestino, non fra gli attivi)');
     assert.equal(restored.revision, 1);
     assert.equal(await exists(`users/${OWNER}/accounts/account-1/attachments/att-1`), true,
@@ -239,24 +241,34 @@ test('T-21 su emulatore: la ricevuta di purge sopravvive e blocca una ripetizion
     assert.equal(await exists(`users/${OWNER}/accounts/account-1`), false, 'con un id nuovo l’Account viene eliminato');
 });
 
-test('T-21 su emulatore: un backup non si applica sotto un proprietario diverso', async () => {
+test('T-21 su emulatore: il backup prodotto non è importabile sotto un proprietario diverso', async () => {
     await seed();
     const backup = buildBackup();
     const result = await backup.module.exportOwnerBackup(OWNER);
     backupText = backup.text();
     recoveryKey = result.recoveryKey;
 
-    // `expectedOwnerUid` diverso dall’utente autenticato: rifiuto prima di scrivere.
+    // (1) Il **file prodotto** non si apre nemmeno: il primo passo del flusso di
+    // import del client è la derivazione della chiave dall'intestazione, e
+    // l'intestazione è vincolata al proprietario.
+    const header = cryptoApi.parseBackupLine(backupText.trimEnd().split('\n')[0]);
+    await assert.rejects(cryptoApi.deriveBackupKey(header, recoveryKey, OTHER), /FORMAT/);
+    assert.equal(typeof await cryptoApi.deriveBackupKey(header, recoveryKey, OWNER), 'object',
+        'con il proprietario corretto la chiave si deriva');
+
+    // (2) Anche la callable rifiuta una richiesta con `expectedOwnerUid` diverso
+    // dall'utente autenticato, prima di qualunque scrittura.
     await assert.rejects(restoreChunk({auth: {uid: OTHER}, data: {expectedOwnerUid: OWNER,
-        operationId: 'restore:cross:0', backupId: 'cross', chunkIndex: 0, chunkCount: 1, mode: 'apply',
+        operationId: 'restore:cross:0', backupId: header.backupId, chunkIndex: 0, chunkCount: 1, mode: 'apply',
         confirmation: 'RESTORE_VALIDATED', records: [{scope: 'private-account', id: 'account-1',
             data: {nomeAccount: 'Intruso'}, expectedVersion: {exists: false}}]}}),
     error => error.details?.reason === 'BACKUP_OWNER_MISMATCH');
     assert.equal(await exists(`users/${OTHER}/accounts/account-1`), false, 'nessuna scrittura sotto l’altro proprietario');
 
-    // Anche con l'utente coerente, il percorso è **derivato** dall'UID autenticato.
+    // (3) Con l'utente coerente i percorsi sono **derivati** dall'UID autenticato:
+    // il contenuto di un backup finisce sempre sotto chi lo importa.
     const applied = await restoreChunk({auth: {uid: OTHER}, data: {expectedOwnerUid: OTHER,
-        operationId: 'restore:own:0', backupId: 'own', chunkIndex: 0, chunkCount: 1, mode: 'apply',
+        operationId: 'restore:own:0', backupId: header.backupId, chunkIndex: 0, chunkCount: 1, mode: 'apply',
         confirmation: 'RESTORE_VALIDATED', records: [{scope: 'private-account', id: 'account-1',
             data: {nomeAccount: 'Sintetico altrui'}, expectedVersion: {exists: false}}]}});
     assert.equal(applied.status, 'applied');
@@ -264,7 +276,7 @@ test('T-21 su emulatore: un backup non si applica sotto un proprietario diverso'
     assert.equal(await exists(`users/${OWNER}/accounts/account-1`), true, 'l’Account del proprietario originale non è toccato');
     // Un record con id non valido (tentativo di uscire dal prefisso) è rifiutato.
     await assert.rejects(restoreChunk({auth: {uid: OTHER}, data: {expectedOwnerUid: OTHER,
-        operationId: 'restore:escape:0', backupId: 'escape', chunkIndex: 0, chunkCount: 1, mode: 'apply',
+        operationId: 'restore:escape:0', backupId: header.backupId, chunkIndex: 0, chunkCount: 1, mode: 'apply',
         confirmation: 'RESTORE_VALIDATED', records: [{scope: 'private-account', id: '../owner-restore',
             data: {nomeAccount: 'Fuga'}, expectedVersion: {exists: false}}]}}));
 });
