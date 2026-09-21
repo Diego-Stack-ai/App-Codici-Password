@@ -1002,3 +1002,52 @@ Produci un MD M7 di censimento/proposta con riferimenti verificabili; aggiorna i
 - **Consegna prevista:** MD M7 di censimento/proposta, aggiornamento di questo file con file modificati, limiti e domande decisionali per Diego; commit locali separati (documentazione); nessun push senza autorizzazione; stato finale `DA_VERIFICARE`.
 
 **Stato incarico: IN_LAVORAZIONE** — M7-R1 preso in carico da DeepSeek il 2026-09-21 alle 09:33; M6-CLOSE resta approvato per il laboratorio con il solo gate fisico iPhone aperto.
+
+## Rapporto DeepSeek — M7-R1
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** presa in carico `43c66ea3`, lavoro `486ef61f` (`docs: census current retention for M7-R1`); base osservata `7ce5a989`, allineata a `origin/integration/vault-shell-v127-security`; **nessun push eseguito**.
+- **File:** `docs/M7_RETENTION_CENSIMENTO.md` (nuovo, 392 righe), `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` (+2 righe: rimando al censimento dal contratto d'area), `docs/FILE_INVENTORY.md` rigenerato. Questo file di coordinamento è toccato soltanto da presa in carico e rapporto.
+- **Perimetro rispettato:** sola analisi in lettura e documentazione. Nessuna modifica a runtime, dati, `Frontend/public/**`, Rules/Functions produttive, `master` (`445b338d`), versione (`1.2.127`), deploy o migrazioni; nessun dato reale letto; M8–M10 e l'audit Alibaba/OpenCodeReview non avviati; nessuna suite costosa eseguita, come prescritto.
+
+### Consegna
+
+`docs/M7_RETENTION_CENSIMENTO.md` contiene: requisito di partenza (baseline §13/§19, piano M7/M8); censimento per area con citazioni `percorso:riga`; sintesi «cosa esiste / cosa non esiste»; proposta di politica in nove dimensioni (D1–D9) **senza decidere durate**; matrice di **29 test sintetici** (T-01…T-29) con stato «esistente» o «da realizzare»; **9 domande decisionali** per Diego; **12 voci `non verificate`** con ciò che servirebbe per verificarle.
+
+### Esiti principali (fatti verificati nel codice)
+
+1. **Due cestini distinti.** L'Archivio Account usa un flag sul documento (`isArchived`, `archivedAt` dal clock del client, `revision+1`) **senza alcuna scadenza**; esiste poi un `users/{uid}/trash` legacy alimentato da `trashSyncRecord`/`restoreSyncRecord` che scrive `purgeAfterMs = +30 giorni` (`functions/index.js:429`, `RETENTION_MS` in `functions/history-recovery-service.js:2`) **mai letto da alcun processo** e senza alcun chiamante nel frontend distribuito. I rilievi F2-P1-03 e F2-P1-04 risultano così confermati e precisati.
+2. **Nessuna scadenza automatica in tutto il progetto.** L'unica schedulazione è `checkDeadlines` (`functions/index.js:1486`); `firebase.json` non ha lifecycle Storage e l'unico `ttl` versionato è `"ttl": false` (`firestore.indexes.json:7`).
+3. **Il purge è una saga non atomica** (preparazione → Storage → `recursiveDelete` → transazione finale con pulizia riferimenti e audit) e lascia copie residue: `auditEvents`, `mutationResults`/`operationResults`, ricevute legacy, `accountWidgets`, `sharedVaultData`/`sharedVaultLinks`, inviti e backup esportati.
+4. **`auditEvents` è illimitato, senza scadenza e cancellabile dal proprietario** per via della wildcard delle Rules (`firestore.rules:106-118`), che non esclude `auditEvents`, `trash`, `archiveOperations`: l'integrità dell'audit produttivo non è protetta dalle Rules attuali. L'allowlist senza segreti è applicata solo a due percorsi su cinque (`safeAudit`, `safeRestoreAudit`).
+5. **Allegati:** il purge copre solo `accounts/{id}/attachments`; cinque famiglie di percorsi su sei non sono toccate da alcun flusso backend (Scadenze, `aziende_allegati`, avatar, hard-delete di Azienda e di Account aziendale). Gli orfani sono strutturalmente possibili; l'avatar è caricato **non cifrato** con URL anche in `localStorage`; gli allegati legacy senza `encryption` vengono aperti via `url` **senza Vault Key**; il ripristino ricarica i byte con `customMetadata.encrypted = 'v1'` anche per quei legacy.
+6. **Backup:** il file `.cpbackup` è locale e **fuori dal controllo del servizio** (l'export include anche gli Account archiviati); ricevute e audit del ripristino sono permanenti; **non esiste staging né journal**; il ripristino è a blocchi (max 400 record) e non atomico.
+7. **Limite di copertura dei test:** i fake del purge usano `docs: []` e `bucket: () => ({})`, quindi il ramo che legge gli `storagePath` reali ed esegue `bucket.file(...).delete` (`functions/index.js:500-506`) **non è mai esercitato con percorsi allegato reali**.
+
+### Verifiche eseguite ed esiti reali
+
+- `git diff --check` → **pulito**.
+- `npm run audit:inventory` → **780 file** (conteggio invariato), inventario rigenerato.
+- Controllo statico delle citazioni del censimento (script temporaneo, non committato): **122 citazioni distinte, 0 non valide** (file esistente e riga presente).
+- Controllo delle tabelle markdown: **13 tabelle, 0 righe incoerenti**.
+- Nessuna suite di test eseguita: il censimento non modifica codice e l'incarico prescrive solo controlli statici mirati.
+
+### Scostamenti dall'incarico
+
+- Il censimento è stato prodotto con quattro analisi parallele in **sola lettura** (Account, cronologia/audit, allegati, backup) e con verifica diretta delle citazioni decisive da parte mia; nessuna analisi ha modificato file, eseguito commit o toccato dati.
+- Ho aggiunto **2 righe** al contratto d'area `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` per rendere il censimento raggiungibile dal documento autorevole; è l'unica modifica a un MD esistente oltre all'inventario.
+- `docs/FILE_INVENTORY.md` cambia per la rigenerazione e per l'inserimento del nuovo file.
+
+### Rischi e limiti dichiarati
+
+- Il censimento è **statico**: non interroga il progetto, non legge dati reali e non esegue collaudi. Le proprietà marcate «esistenti» derivano da codice, Rules e test citati.
+- Restano **12 voci `non verificate`** (policy TTL/lifecycle reali, allineamento col deploy, dati legacy reali, orfani effettivi nel bucket, validità della `downloadURL` ripristinata, retention dei log delle Functions, copie residue lato browser, concorrenza purge/upload, procedure esterne e altro).
+- **Nessuna durata, eccezione legale o cancellazione definitiva è stata decisa o implementata**: le scelte sono raccolte come domande nella sezione 10 del censimento.
+
+### Note per Codex
+
+- I punti su cui concentrare la revisione sono: la distinzione fra i due meccanismi di cestino (sezione 2); la dimostrazione dell'assenza di scadenza automatica (sezioni 2 e 7); l'integrità dell'audit rispetto alle Rules (sezione 4.4); il perimetro reale della cancellazione degli allegati (sezione 5); la mancanza di copertura dei test sul ramo distruttivo del purge (sezione 5.7).
+- Ogni affermazione del censimento porta un riferimento `percorso:riga`: la verifica può essere riga per riga; il controllo automatico delle 122 citazioni è ripetibile con un qualunque estrattore di `path:line`.
+- Le domande per Diego (sezione 10) sono il punto di decisione successivo: finché non sono risolte, M7 non può chiudere il requisito di retention della baseline.
+
+**Stato incarico: DA_VERIFICARE** — M7-R1 consegnato da DeepSeek il 2026-09-21; censimento completo in sola lettura, nessuna decisione di retention presa e nessun push eseguito.
