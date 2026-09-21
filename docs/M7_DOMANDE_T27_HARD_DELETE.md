@@ -33,9 +33,12 @@ Esistono **due percorsi diversi**:
    conferma esplicita. Quale?
 
 2. **Q2 — Ordine e atomicità se si sceglie la cascata.**
-   Cancellare prima i figli (se il padre non viene eliminato, restano Account senza Azienda) o
-   prima il padre (se i figli falliscono, restano orfani non più visibili)? Serve una
-   compensazione, un blocco dell'operazione, o si accetta un esito riprovabile?
+   **Figli prima, padre poi**: se i figli vengono eliminati e l'eliminazione del **padre**
+   fallisce, resta un'**Azienda senza quegli Account** (l'Azienda esiste ancora, ma è stata
+   svuotata). **Padre prima, figli poi**: se il padre viene eliminato e l'eliminazione dei
+   **figli** fallisce, restano **Account orfani senza Azienda visibile** (documenti, metadati e
+   byte non più raggiungibili dalla UI). Quale rischio si preferisce? Serve una compensazione,
+   un blocco dell'operazione, o si accetta un esito riprovabile?
 
 3. **Q3 — Riferimenti pendenti.**
    I contatti del Profilo che puntano a un Account di un'Azienda eliminata restano. Vanno
