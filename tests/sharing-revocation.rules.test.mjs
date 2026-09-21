@@ -2,7 +2,7 @@ import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {collection, deleteDoc, doc, getDoc, runTransaction, setDoc} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, runTransaction, setDoc, updateDoc} from 'firebase/firestore';
 
 // M7-R4 correzione (revisione Codex 21/09/2026): prova mirata sulla revoca di un
 // ospite che ha già accettato. La transazione reale del dettaglio privato
@@ -46,6 +46,8 @@ beforeEach(async () => {
 after(async () => testEnv?.cleanup());
 
 const asOwner = () => testEnv.authenticatedContext(OWNER).firestore();
+const asGuest = () => testEnv.authenticatedContext(GUEST).firestore();
+const asStranger = () => testEnv.authenticatedContext('stranger').firestore();
 // `withSecurityRulesDisabled` non restituisce il valore del callback: lo
 // catturiamo in una variabile locale.
 async function readAsAdmin(path) {
@@ -104,4 +106,48 @@ test('la transazione reale, che notifica anche l\'ospite, viene rifiutata intera
 test('cancellare l\'invito da solo resta consentito al proprietario', async () => {
   await assertSucceeds(deleteDoc(doc(asOwner(), ...invitePath)));
   assert.equal((await readAsAdmin(invitePath)).exists(), false);
+});
+
+// M7-R5: la revoca corretta non scrive nella raccolta dell'ospite e deve togliere
+// all'ospite la lettura del documento, senza toccare le credenziali comuni.
+
+test('l\'ospite accettato legge prima della revoca e non legge più dopo', async () => {
+  await assertSucceeds(getDoc(doc(asGuest(), ...accountPath)));
+  await assertSucceeds(revocationTransaction(asOwner(), {notifyGuest: false}));
+  await assertFails(getDoc(doc(asGuest(), ...accountPath)));
+});
+
+test('un utente non proprietario non modifica l\'Account né l\'invito', async () => {
+  await assertFails(updateDoc(doc(asStranger(), ...accountPath), {visibility: 'private'}));
+  await assertFails(deleteDoc(doc(asStranger(), ...invitePath)));
+  await assertFails(deleteDoc(doc(asGuest(), ...invitePath)));
+  await assertFails(setDoc(doc(asGuest(), 'users', OWNER, 'notifications', 'forzata'), {type: 'share_revoked'}));
+});
+
+test('un invito pendente non dà lettura e la sua revoca riesce senza notifiche', async () => {
+  await testEnv.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), ...accountPath), {
+      nomeAccount: 'Account sintetico', type: 'account', revision: 1, visibility: 'shared', acceptedCount: 0,
+      sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'pending', uid: null}}, sharedWithUids: []
+    });
+  });
+  await assertFails(getDoc(doc(asGuest(), ...accountPath)));
+  await assertSucceeds(revocationTransaction(asOwner(), {notifyGuest: false}));
+  const account = (await readAsAdmin(accountPath)).data();
+  assert.deepEqual(account.sharedWithUids, []);
+  assert.deepEqual(Object.keys(account.sharedWith), []);
+});
+
+test('la revoca non tocca credenziali comuni, collegamenti e widget del proprietario', async () => {
+  await testEnv.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'users', OWNER, 'sharedVaultData', 'common'), {ownerId: OWNER, title: 'sintetico'});
+    await setDoc(doc(db, 'users', OWNER, 'sharedVaultLinks', 'link'), {ownerId: OWNER, sharedDataId: 'common'});
+    await setDoc(doc(db, 'users', OWNER, 'accountWidgets', 'widget'), {ownerId: OWNER, accountId: ACCOUNT});
+  });
+  await assertSucceeds(revocationTransaction(asOwner(), {notifyGuest: false}));
+  const owner = asOwner();
+  await assertSucceeds(getDoc(doc(owner, 'users', OWNER, 'sharedVaultData', 'common')));
+  await assertSucceeds(getDoc(doc(owner, 'users', OWNER, 'sharedVaultLinks', 'link')));
+  await assertSucceeds(getDoc(doc(owner, 'users', OWNER, 'accountWidgets', 'widget')));
 });

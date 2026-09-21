@@ -1467,3 +1467,62 @@ Nel primo tentativo il test falliva per due errori **miei**, non del prodotto: (
 Il test prova **Rules e transazione** con dati sintetici su emulatore; **non** esegue l'app in un browser né contro un ambiente distribuito, quindi il sintomo visibile all'utente (messaggio di errore, stato dell'interfaccia) resta non verificato. Le sezioni 1 e 2 sono state allineate al livello di evidenza effettivo.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R4 consegnata da DeepSeek il 2026-09-21; blocco della revoca provato con test sulle Rules produttive, nessuna modifica produttiva e nessun push eseguito.
+
+## Verifica Codex — correzione M7-R4
+
+- **Esito: APPROVATO** per la mappa documentale e la riproduzione sintetica del blocco della revoca. Il commit `bb90cb1f` corregge la falsa frase sulla memoria dell'ospite e separa ciò che è provato nel codice da ciò che resta non verificato nella UI. Il test `tests/sharing-revocation.rules.test.mjs` usa le Rules produttive del ramo, controlla la scrittura vietata nel percorso dell'ospite e la transazione completa; il ramo senza notifica all'ospite fa da controllo positivo. `git diff --check` pulito.
+- **Limite della verifica indipendente:** la mia riesecuzione di `npm run test:firestore-rules` è stata impedita prima dei test prima dai permessi della configurazione temporanea Firebase (poi concessi), quindi dalla porta 8080 già occupata. Non ho terminato né alterato il processo che la occupa. DeepSeek riferisce 25/25; la mia approvazione si basa sul codice del test e sul suo rapporto, non su un secondo 25/25 locale. Il sintomo browser/progetto distribuito resta non verificato.
+- **Conclusione pratica:** nelle Rules del ramo la transazione che revoca un ospite già accettato e scrive `users/{guestUid}/notifications` è rifiutata; la revoca non può essere considerata affidabile finché il flusso non è corretto. Nessun dato reale è stato toccato.
+
+**Stato incarico: APPROVATO** — M7-R4 documentale verificato da Codex il 21/09/2026.
+
+## Incarico DeepSeek — M7-R5 correzione revoca ospite accettato
+
+Codex coordina/revisiona; DeepSeek è l'unico esecutore. Verifica ramo `integration/vault-shell-v127-security`, HEAD, remote e working tree. Base osservata `bb90cb1f`, 13 commit locali avanti a origin. Preserva il file di coordinamento e il lavoro altrui. Un solo incarico esecutivo.
+
+- Correggi il difetto confermato: il proprietario deve poter revocare un ospite che ha accettato, rimuovendo in modo coerente `sharedWith`, `sharedWithUids` e l'invito; l'ospite non deve più poter leggere il record secondo le Rules. **Non ampliare le Rules per permettere al client del proprietario di scrivere nella raccolta notifiche dell'ospite.** Progetta la notifica tramite un percorso backend autorizzato oppure rendila successiva/non bloccante, con esito esplicito; evita che un errore di notifica lasci accesso attivo pur mostrando successo.
+- Copri tutti i percorsi equivalenti (Account privato, aziendale, cambio modalità e salvataggi) senza duplicare una correzione incompleta. Mantieni i controlli di proprietario/UID, la transazione o un protocollo equivalente, revisione e aggiornamento UI. Distingui il caso invito pending dal caso accepted. Nessuna cancellazione di dati reali.
+- Aggiungi test sintetici significativi su Rules/emulatore e, dove possibile, sul codice UI/servizio: revoca accepted riuscita, accesso ospite negato dopo revoca, notifica fallita senza falsa conferma, utente non proprietario rifiutato, caso pending, nessuna regressione su credenziali comuni. Se l'emulatore è occupato usa una porta/configurazione temporanea isolata e riporta la prova; non interrompere processi altrui.
+- Modifica solo i file necessari su questo ramo sperimentale. Nessun master, bump, push, deploy o accesso a dati reali. Test mirati e `git diff --check`; se emerge una scelta di prodotto non determinabile (per esempio notifica obbligatoria), fermati con proposta concreta anziché decidere in silenzio. Un commit locale per lavoro e rapporto, salvo separazione tecnica necessaria; consegna `DA_VERIFICARE`.
+
+**Stato incarico: PRONTO** — M7-R5 disposto da Codex il 21/09/2026 per un difetto riprodotto con le Rules del ramo.
+
+## Presa in carico DeepSeek — M7-R5
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); base osservata `bb90cb1f`, 13 commit locali avanti a origin. Nessun'altra modifica preesistente nel working tree oltre a questo file.
+- **Perimetro:** correzione del difetto di revoca su questo ramo sperimentale (5 file client + 1 helper nuovo), test sintetici su Rules/emulatore e sul codice, documentazione. **Rules non ampliate**, nessuna Function nuova, nessun master, bump, push o deploy.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R5 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R5
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale di lavoro e rapporto; base `bb90cb1f`; **nessun push eseguito**.
+- **File:** nuovo `Frontend/public/assets/js/modules/shared/share-revocation-notice.js`; modificati `.../privato/dettaglio-privato-sharing.js`, `.../azienda/dettaglio-azienda-sharing.js`, `.../shared/detail-account-mode.js`, `.../privato/form-privato-save.js`, `.../azienda/form-azienda-save.js`; nuovi test `tests/share-revocation-notice.test.mjs` e `tests/share-revocation-paths.test.mjs`; esteso `tests/sharing-revocation.rules.test.mjs`; aggiornati `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` e `docs/FILE_INVENTORY.md`. **`firestore.rules` non toccato.**
+
+### Correzione applicata
+
+La notifica nella raccolta `notifications` dell'ospite è stata **rimossa dalla transazione di revoca** e trasformata in un tentativo **successivo e non bloccante** tramite `attemptShareRevocationNotice` (nuovo helper): non solleva mai, restituisce un esito esplicito (`delivered` / `not-delivered` con codice / `unavailable`) e un errore non può più annullare la revoca né farla apparire riuscita. Sono stati corretti **sette punti in cinque file** (dettaglio privato, dettaglio aziendale, cambio modalità, salvataggio privato con due punti, salvataggio aziendale con due punti); le notifiche al **proprietario** restano dentro la transazione, i controlli di proprietario, la revisione, la transazione e i messaggi di successo sono invariati. L'invito `pending` resta distinto dal caso `accepted`.
+
+### Esiti reali
+
+| Verifica | Risultato |
+|---|---|
+| `npm run test:firestore-rules` | **29/29** (erano 25) |
+| `tests/share-revocation-notice.test.mjs` + `tests/share-revocation-paths.test.mjs` | **11/11** |
+| `npm run test:js-syntax` | **162 moduli OK** |
+| Test di ciclo di vita privato/azienda e collegamenti | 22/22 e 18/18 |
+| `git diff --check` | pulito |
+
+Prove Rules nuove: l'ospite accettato **legge prima** della revoca e **non legge più dopo**; un utente estraneo non modifica l'Account né l'invito e non scrive nella raccolta notifiche del proprietario; un invito **pending** non dà lettura e la sua revoca riesce senza notifiche; la revoca **non tocca** credenziali comuni, collegamenti e widget. La guardia `tests/share-revocation-paths.test.mjs` verifica che nessuno dei cinque file replichi le forme esatte che causavano il difetto.
+
+### Scelte dichiarate e limiti
+
+1. **La notifica all'ospite non è consegnabile dal client** con le Rules attuali: dopo la correzione l'esito è esplicitamente `not-delivered`. Per recapitarla serve un **percorso backend dedicato** (callable con Admin SDK): è la proposta concreta che lascio a Codex e Diego, non una decisione presa in silenzio. Non ho ampliato le Rules né introdotto una Function nuova.
+2. Nei due percorsi «diventa privato» il testo della notifica (non consegnabile) diventa quello standard dell'helper invece del precedente «ha reso privato l'account… Il tuo accesso è terminato»: inevitabile usando il payload condiviso.
+3. Sui record legacy l'email dell'ospite ricade sulla chiave mappa se il campo `email` manca, per non perdere il riferimento.
+4. `await Promise.allSettled(...)` è atteso dopo il commit: la transazione è già chiusa e l'helper non rigetta, quindi la revoca non può fallire; un `setDoc` bloccato offline ritarderebbe solo il messaggio e il ricaricamento.
+5. Il controllo `node --check` non è applicabile ai moduli `.js` di questo repository (sono ESM del browser con `package.json` CommonJS): la sintassi è stata verificata con `scripts/audit-js-syntax.mjs`, che è il controllo di progetto.
+6. Restano fuori da questa fetta: la rinuncia dell'ospite, gli inviti orfani, la pulizia di widget e credenziali comuni al purge, la prova in un browser reale e la modifica delle Rules produttive.
+
+**Stato incarico: DA_VERIFICARE** — M7-R5 consegnato da DeepSeek il 2026-09-21; revoca degli ospiti accettati corretta e provata con test sulle Rules produttive, Rules non ampliate e nessun push eseguito.

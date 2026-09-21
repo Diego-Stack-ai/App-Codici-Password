@@ -10,7 +10,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
 import {
-    doc, collection, runTransaction, deleteDoc, deleteField
+    doc, collection, runTransaction, deleteDoc, deleteField, setDoc
 } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -20,6 +20,7 @@ import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode 
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
+import {attemptShareRevocationNotice, shareRevocationNotice} from '../shared/share-revocation-notice.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -154,6 +155,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         let retainedProfilePassword = false;
 
         // --- ATOMIC TRANSACTION V3.1 ---
+        const revokedGuests = [];
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
             savedAccountId = accRef.id;
@@ -203,18 +205,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                     const guest = currentSharedWith[sKey];
                     transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
 
-                    // Notifica Guest (se aveva accettato)
+                    // Notifica Guest (se aveva accettato) — consegna dopo la transazione
                     if (guest && guest.status === 'accepted' && guest.uid) {
-                        const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
-                        transaction.set(guestNotifRef, {
-                            title: "Accesso Revocato",
-                            message: `Il proprietario ha reso privato l'account aziendale: ${data.nomeAccount || 'condiviso'}. Il tuo accesso è terminato.`,
-                            accountName: data.nomeAccount || 'Account',
-                            type: "share_revoked",
-                            ownerEmail: auth.currentUser?.email || 'Proprietario',
-                            timestamp: new Date().toISOString(),
-                            read: false
-                        });
+                        revokedGuests.push({ uid: guest.uid, email: guest.email || sKey, accountName: data.nomeAccount || 'Account' });
                     }
                 }
                 finalData.sharedWith = {};
@@ -234,18 +227,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                         delete finalData.sharedWith[oldKey];
                         transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
 
-                        // Notifica Guest (se aveva accettato)
+                        // Notifica Guest (se aveva accettato) — consegna dopo la transazione
                         if (guest && guest.status === 'accepted' && guest.uid) {
-                            const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
-                            transaction.set(guestNotifRef, {
-                                title: "Accesso Revocato",
-                                message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account aziendale condiviso'}.`,
-                                accountName: data.nomeAccount || 'Account',
-                                type: "share_revoked",
-                                ownerEmail: auth.currentUser?.email || 'Proprietario',
-                                timestamp: new Date().toISOString(),
-                                read: false
-                            });
+                            revokedGuests.push({ uid: guest.uid, email: guest.email || oldKey, accountName: data.nomeAccount || 'Account' });
                         }
                     }
                 }
@@ -324,6 +308,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         });
 
         if (profileContactLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
+        await Promise.allSettled(revokedGuests.map(({uid, email, accountName}) => attemptShareRevocationNotice(() => setDoc(doc(collection(db, 'users', uid, 'notifications')), shareRevocationNotice({accountName, ownerEmail: auth.currentUser?.email || 'Proprietario', guestEmail: email})), {log: LOG})));
         showToast(retainedProfilePassword ? 'Account collegato. La password diversa è stata conservata nel Profilo.' : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
             const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'

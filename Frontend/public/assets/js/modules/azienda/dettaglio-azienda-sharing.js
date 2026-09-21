@@ -7,12 +7,13 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
-import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, runTransaction, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
 import { getInvite } from '../data/vault-repository.js';
+import {attemptShareRevocationNotice, shareRevocationNotice} from '../shared/share-revocation-notice.js';
 
 // --- STATE (inizializzato da initSharingModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -209,6 +210,7 @@ async function revokeRecipientV3(email) {
     if (!active() || !ok) return;
 
     try {
+        const revokedGuests = [];
         await runTransaction(db, async (transaction) => {
             if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
             const accRef = doc(db, "users", uid, "aziende", company, "accounts", account);
@@ -264,24 +266,15 @@ async function revokeRecipientV3(email) {
                 read: false
             });
 
-            // 4. Notifica all'ospite (se aveva accettato)
+            // 4. Notifica all'ospite (se aveva accettato) — consegna dopo la transazione
             const guestUid = wasAccepted ? data.sharedWith[targetSanitized]?.uid : null;
             if (guestUid) {
-                const guestNotifRef = doc(collection(db, "users", guestUid, "notifications"));
-                transaction.set(guestNotifRef, {
-                    title: "Accesso Revocato",
-                    message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
-                    accountName: data.nomeAccount || 'Account',
-                    type: "share_revoked",
-                    ownerEmail: auth.currentUser?.email || 'Proprietario',
-                    timestamp: new Date().toISOString(),
-                    read: false
-                });
-                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                revokedGuests.push({ uid: guestUid, email, accountName: data.nomeAccount || 'Account' });
             }
         });
 
         if (!active()) return;
+        await Promise.allSettled(revokedGuests.map(({uid, email, accountName}) => attemptShareRevocationNotice(() => setDoc(doc(collection(db, 'users', uid, 'notifications')), shareRevocationNotice({accountName, ownerEmail: auth.currentUser?.email || 'Proprietario', guestEmail: email})), {log: LOG})));
         showToast("Accesso revocato con successo");
         if (reload) await reload();
     } catch (e) {

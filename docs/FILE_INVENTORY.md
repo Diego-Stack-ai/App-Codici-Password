@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **788**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -122,9 +122,9 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js` | JS | 2522 | 51 | Flusso aziende/account aziendali: dati-azienda-attachments. |
 | `Frontend/public/assets/js/modules/azienda/dati_azienda.js` | JS | 15989 | 372 | Flusso aziende/account aziendali: dati azienda. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 10243 | 255 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
-| `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 13667 | 293 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
+| `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 13567 | 286 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 23325 | 507 | Flusso aziende/account aziendali: dettaglio account azienda. |
-| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 20449 | 357 | Flusso aziende/account aziendali: form-azienda-save. |
+| `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 19780 | 342 | Flusso aziende/account aziendali: form-azienda-save. |
 | `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 28044 | 615 | Flusso aziende/account aziendali: form account azienda. |
 | `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 10138 | 266 | Flusso aziende/account aziendali: lista aziende. |
 | `Frontend/public/assets/js/modules/azienda/ma_attachments.js` | JS | 2731 | 70 | Flusso aziende/account aziendali: ma attachments. |
@@ -158,9 +158,9 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 18297 | 419 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 21560 | 514 | Flusso profilo/account personali: area privata. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 11901 | 282 | Flusso profilo/account personali: dettaglio-privato-attachments. |
-| `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 8309 | 172 | Flusso profilo/account personali: dettaglio-privato-sharing. |
+| `Frontend/public/assets/js/modules/privato/dettaglio-privato-sharing.js` | JS | 8230 | 166 | Flusso profilo/account personali: dettaglio-privato-sharing. |
 | `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 23356 | 505 | Flusso profilo/account personali: dettaglio account privato. |
-| `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 25253 | 443 | Flusso profilo/account personali: form-privato-save. |
+| `Frontend/public/assets/js/modules/privato/form-privato-save.js` | JS | 24606 | 429 | Flusso profilo/account personali: form-privato-save. |
 | `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 38693 | 805 | Flusso profilo/account personali: form account privato. |
 | `Frontend/public/assets/js/modules/privato/private-account-offline-policy.js` | JS | 1719 | 31 | Flusso profilo/account personali: private-account-offline-policy. |
 | `Frontend/public/assets/js/modules/privato/profile-model.js` | JS | 10767 | 221 | Flusso profilo/account personali: profile-model. |
@@ -218,13 +218,14 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/shared/company-area-preference.js` | JS | 840 | 24 | Supporto frontend: company-area-preference. |
 | `Frontend/public/assets/js/modules/shared/contact-card-model.js` | JS | 4264 | 71 | Supporto frontend: contact-card-model. |
 | `Frontend/public/assets/js/modules/shared/contact-card-photo.js` | JS | 1669 | 34 | Supporto frontend: contact-card-photo. |
-| `Frontend/public/assets/js/modules/shared/detail-account-mode.js` | JS | 11477 | 202 | Supporto frontend: detail-account-mode. |
+| `Frontend/public/assets/js/modules/shared/detail-account-mode.js` | JS | 11552 | 202 | Supporto frontend: detail-account-mode. |
 | `Frontend/public/assets/js/modules/shared/gestione-destinatari.js` | JS | 7483 | 138 | Supporto frontend: gestione-destinatari. |
 | `Frontend/public/assets/js/modules/shared/profile-account-management.js` | JS | 7010 | 87 | Supporto frontend: profile-account-management. |
 | `Frontend/public/assets/js/modules/shared/push-manager.js` | JS | 12189 | 255 | Registrazione dispositivo FCM e preferenze push per ambito. |
 | `Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js` | JS | 7707 | 155 | Supporto frontend: qr code utils-v2. |
 | `Frontend/public/assets/js/modules/shared/qr_code_utils.js` | JS | 5450 | 124 | Caricamento QR e generazione vCard. |
 | `Frontend/public/assets/js/modules/shared/read-error-message.js` | JS | 518 | 9 | Supporto frontend: read-error-message. |
+| `Frontend/public/assets/js/modules/shared/share-revocation-notice.js` | JS | 1356 | 30 | Supporto frontend: share-revocation-notice. |
 | `Frontend/public/assets/js/modules/shared/ui-state-view.js` | JS | 1334 | 45 | Supporto frontend: ui-state-view. |
 | `Frontend/public/assets/js/offline-firestore.js` | JS | 2035 | 58 | Supporto frontend: offline-firestore. |
 | `Frontend/public/assets/js/offline-status.js` | JS | 813 | 23 | Supporto frontend: offline-status. |
@@ -312,7 +313,7 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 247862 | 1470 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 256120 | 1529 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -326,7 +327,7 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 19045 | 161 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 26798 | 183 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
+| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 27499 | 185 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
 | `docs/M7_RETENTION_CENSIMENTO.md` | MD | 50550 | 402 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
@@ -867,6 +868,8 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/repository-record-identity.test.mjs` | MJS | 5191 | 86 | Test automatico: repository-record-identity.test. |
 | `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
 | `tests/setup-linux-cloud.test.mjs` | MJS | 5095 | 92 | Test automatico: setup-linux-cloud.test. |
+| `tests/share-revocation-notice.test.mjs` | MJS | 3133 | 59 | Test automatico: share-revocation-notice.test. |
+| `tests/share-revocation-paths.test.mjs` | MJS | 2262 | 44 | Test automatico: share-revocation-paths.test. |
 | `tests/shared-credential-editor.test.mjs` | MJS | 3612 | 21 | Test automatico: shared-credential-editor.test. |
 | `tests/shared-credential-update-session.test.mjs` | MJS | 4043 | 79 | Test automatico: shared-credential-update-session.test. |
 | `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
@@ -874,7 +877,7 @@ File censiti: **785**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/sharing-identity.test.mjs` | MJS | 1748 | 24 | Test automatico: sharing-identity.test. |
 | `tests/sharing-prototype.rules.test.mjs` | MJS | 4519 | 94 | Test automatico: sharing-prototype.rules.test. |
 | `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4079 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
-| `tests/sharing-revocation.rules.test.mjs` | MJS | 5470 | 108 | Test automatico: sharing-revocation.rules.test. |
+| `tests/sharing-revocation.rules.test.mjs` | MJS | 8199 | 154 | Test automatico: sharing-revocation.rules.test. |
 | `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
 | `tests/storage-emulator-loopback-dispatcher.test.mjs` | MJS | 1648 | 45 | Test automatico: storage-emulator-loopback-dispatcher.test. |
 | `tests/storage.rules.test.mjs` | MJS | 4149 | 99 | Test automatico: storage.rules.test. |

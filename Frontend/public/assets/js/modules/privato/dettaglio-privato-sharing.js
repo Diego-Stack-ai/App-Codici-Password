@@ -5,11 +5,12 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
-import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, runTransaction, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
+import {attemptShareRevocationNotice, shareRevocationNotice} from '../shared/share-revocation-notice.js';
 
 let mounted = null;
 
@@ -102,6 +103,7 @@ async function revokeRecipient(email, mount = mounted) {
     if (!mount.active() || !confirmed) return;
 
     try {
+        const revokedGuests = [];
         await runTransaction(db, async transaction => {
             if (!mount.active()) return;
             const accountRef = doc(db, 'users', ownerId, 'accounts', accountId);
@@ -148,19 +150,11 @@ async function revokeRecipient(email, mount = mounted) {
             });
 
             if (guestUid) {
-                transaction.set(doc(collection(db, 'users', guestUid, 'notifications')), {
-                    title: 'Accesso Revocato',
-                    message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
-                    accountName: data.nomeAccount || 'Account',
-                    type: 'share_revoked',
-                    ownerEmail,
-                    timestamp: new Date().toISOString(),
-                    read: false
-                });
-                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                revokedGuests.push({ uid: guestUid, email, accountName: data.nomeAccount || 'Account' });
             }
         });
         if (!mount.active()) return;
+        await Promise.allSettled(revokedGuests.map(({uid, email, accountName}) => attemptShareRevocationNotice(() => setDoc(doc(collection(db, 'users', uid, 'notifications')), shareRevocationNotice({accountName, ownerEmail, guestEmail: email})), {log: LOG})));
         showToast('Accesso revocato con successo');
         if (onReload) await onReload();
     } catch (error) {
