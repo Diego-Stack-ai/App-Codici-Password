@@ -7,9 +7,9 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
-  AUDIT_EVENT_ACTIONS, AUDIT_PAYLOAD_KEYS, SCHEMA_VERSION,
+  AUDIT_EVENT_ACTIONS, AUDIT_PAYLOAD_KEYS, MAX_EVENT_ID_LENGTH, SCHEMA_VERSION,
   accountEventId, accountEventKey, accountTransition, auditWriteDecision,
-  buildAuditEvent, inviteRefOf, inviteTransition, invitedEventId,
+  buildAuditEvent, inviteRefOf, inviteTransition, invitedEventId, isAuditEventId,
   removalRefOf, removedEventId, responseEventId
 } = require("../audit-event-service");
 
@@ -148,16 +148,78 @@ test("gli id degli eventi derivano dalla base opaca e non dall'id invito", () =>
   assert.equal(codeOf(() => removedEventId("")), "AUDIT_REF_INVALID");
 });
 
-test("l'id dell'Account combina contesto e revisione", () => {
-  assert.equal(accountEventKey("privato", "account-1"), "account-1");
-  assert.equal(accountEventKey("company-1", "account-1"), "company-1_account-1");
-  assert.equal(accountEventId("privato", "account-1", 4), "account-1__4");
-  assert.equal(accountEventId("company-1", "account-1", 0), "company-1_account-1__0");
+test("la chiave dell'Account è iniettiva: prefisso di tipo e separatore non ambiguo", () => {
+  // M7-AUDIT-3-R1 — le due collisioni segnalate da Codex.
+  assert.notEqual(accountEventKey("a_b", "c"), accountEventKey("a", "b_c"));
+  assert.notEqual(accountEventId("a_b", "c", 7), accountEventId("a", "b_c", 7));
+  // Un Account privato non collide con un'azienda il cui id è 'privato'.
+  assert.notEqual(accountEventId("privato", "privato_x", 1), accountEventId("privato", "x", 1));
+  assert.notEqual(accountEventId("privato", "x", 1), accountEventId("privato", "x__1", 1));
+  // La tupla si ricostruisce dall'id: nessuna informazione è ambigua.
+  assert.equal(accountEventKey("privato", "account-1"), "privato:account-1");
+  assert.equal(accountEventKey("company-1", "account-1"), "azienda:company-1:account-1");
+  assert.equal(accountEventId("privato", "account-1", 4), "privato:account-1:4");
+  assert.equal(accountEventId("company-1", "account-1", 0), "azienda:company-1:account-1:0");
+  const pairs = [["privato", "a"], ["privato", "a_b"], ["a_b", "c"], ["a", "b_c"],
+    ["company-1", "account-1"], ["privato", "privato_x"], ["privato", "x"], ["privato", "x__1"]];
+  const ids = pairs.map(([context, accountId]) => accountEventId(context, accountId, 3));
+  assert.equal(new Set(ids).size, ids.length);
+  assert.equal(new Set(pairs.map(([context, accountId]) => accountEventKey(context, accountId))).size, pairs.length);
+  assert.equal(codeOf(() => accountEventKey("a:b", "c")), "AUDIT_FIELD_INVALID");
+});
+
+test("ogni id rispetta charset e limite dei validatori del progetto", () => {
+  // Lo stesso pattern più stretto già in uso in functions/ e nel candidato di
+  // retention: 160 caratteri di [A-Za-z0-9:_-], quindi dentro i 1500 byte di
+  // Firestore e senza '/'.
+  const strictest = /^[A-Za-z0-9:_-]{1,160}$/;
+  const ids = [invitedEventId(REF_A), responseEventId(REF_A, "accepted"), responseEventId(REF_A, "rejected"),
+    removedEventId(REF_A), accountEventId("privato", "account-1", 4),
+    accountEventId("company-1", "account-1", 0), accountEventId("a_b", "c", 1)];
+  for (const id of ids) {
+    assert.equal(strictest.test(id), true, id);
+    assert.equal(isAuditEventId(id), true, id);
+    assert.equal(id.includes("/"), false, id);
+    assert.equal(id.length <= 1500, true, id);
+  }
+  assert.equal(MAX_EVENT_ID_LENGTH, 160);
+  assert.equal(isAuditEventId("a".repeat(161)), false);
+  assert.equal(isAuditEventId("id con spazio"), false);
+});
+
+test("oltre il limite si fallisce chiusi, senza troncare", () => {
+  const max = "a".repeat(120); // massimo ammesso dall'identificatore
+  const privato = accountEventId("privato", max, 1);
+  assert.equal(privato.length <= MAX_EVENT_ID_LENGTH, true);
+  assert.equal(isAuditEventId(privato), true);
+  // Un accountId al massimo con un'azienda breve entra ancora nel limite.
+  const conAziendaBreve = accountEventId("company-1", max, 1);
+  assert.equal(conAziendaBreve.length <= MAX_EVENT_ID_LENGTH, true);
+  assert.equal(isAuditEventId(conAziendaBreve), true);
+  // Due componenti al massimo non entrano nel limite: nessun troncamento, errore.
+  assert.equal(codeOf(() => accountEventKey("company-1", max + max)), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventKey("privato", "a".repeat(151))), "AUDIT_FIELD_INVALID");
+  // Il confine esatto: con contesto di 29 caratteri e accountId di 120 l'id
+  // arriva a 160; un carattere in più sullo stesso prefisso lo supera.
+  const exact = accountEventId("c".repeat(29), max, 1);
+  assert.equal(exact.length, MAX_EVENT_ID_LENGTH);
+  assert.equal(isAuditEventId(exact), true);
+  assert.equal(codeOf(() => accountEventId("c".repeat(30), max, 1)), "AUDIT_ID_TOO_LONG");
+  // La revisione massima resta dentro il limite su componenti brevi.
+  assert.equal(isAuditEventId(accountEventId("privato", "account-1", Number.MAX_SAFE_INTEGER)), true);
+});
+
+test("il contratto delle revisioni resta: interi non negativi, id distinti", () => {
+  assert.equal(accountEventId("privato", "account-1", 0), "privato:account-1:0");
   assert.notEqual(accountEventId("privato", "account-1", 4), accountEventId("privato", "account-1", 5));
   assert.notEqual(accountEventId("privato", "account-1", 4), accountEventId("company-1", "account-1", 4));
   assert.equal(codeOf(() => accountEventId("privato", "account-1", -1)), "AUDIT_FIELD_INVALID");
   assert.equal(codeOf(() => accountEventId("privato", "account-1", 1.5)), "AUDIT_FIELD_INVALID");
+  assert.equal(codeOf(() => accountEventId("privato", "account-1", "4")), "AUDIT_FIELD_INVALID");
   assert.equal(codeOf(() => accountEventKey("privato", EMAIL)), "AUDIT_FIELD_INVALID");
+  const max = accountEventId("privato", "account-1", Number.MAX_SAFE_INTEGER);
+  assert.equal(max, "privato:account-1:9007199254740991");
+  assert.equal(isAuditEventId(max), true);
 });
 
 test("inviteTransition riconosce solo le nuove istanze", () => {

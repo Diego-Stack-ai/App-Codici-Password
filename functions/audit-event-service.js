@@ -12,6 +12,9 @@
 // - identificatori derivati solo da valori già presenti nella scrittura
 //   originaria (`auditRef`, `responseAuditRef`, `revision` dell'Account), mai
 //   dall'id del documento invito, che contiene la chiave sanificata dell'email;
+// - id **iniettivi**: la chiave dell'Account usa un prefisso di tipo e il
+//   separatore ':', che nessun identificatore può contenere, quindi coppie
+//   diverse non possono produrre lo stesso id (M7-AUDIT-3-R1);
 // - create-if-absent espresso come contratto: `auditWriteDecision` decide se
 //   scrivere, e per un evento già presente non restituisce alcun effetto, così
 //   un `at` esistente non viene mai sovrascritto.
@@ -25,12 +28,20 @@
 const SCHEMA_VERSION = 1;
 
 // Identificatori opachi: uid, accountId, aziendaId, 'privato'. Nessun '@',
-// nessuno spazio: un'email non è un identificatore valido.
+// nessuno spazio e nessun ':' (che è il separatore degli id: vedi sotto).
 const IDENTIFIER = /^[A-Za-z0-9_-]{1,120}$/;
 // `auditRef` e `responseAuditRef` sono UUID generati dai writer (crypto.randomUUID).
 const AUDIT_REF = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Timestamp tecnico nella stessa forma di `new Date().toISOString()`.
 const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+// Vincoli sull'id dell'evento: charset e lunghezza sono quelli del validatore
+// più stretto già in uso nel progetto, così l'id è accettato da tutti quelli
+// esistenti, retention compresa (`functions/archive-purge-receipt.js:2`,
+// `functions/archive-purge-reference-plan.js:3`, `functions/history-recovery-service.js:1`,
+// `experiments/history-recovery/audit-retention.mjs:27`). Firestore ammette id
+// fino a 1500 byte senza '/': 160 caratteri ASCII restano dentro il limite.
+const EVENT_ID = /^[A-Za-z0-9:_-]{1,160}$/;
+const MAX_EVENT_ID_LENGTH = 160;
 
 const AUDIT_EVENT_ACTIONS = Object.freeze([
     'invite-created',
@@ -95,6 +106,18 @@ function createdAt(value) {
     return value;
 }
 
+// Ogni id del registro passa di qui: oltre il limite si fallisce con un codice
+// distinto (mai un id troncato, mai un id fuori charset).
+function ensureEventId(value) {
+    if (typeof value !== 'string' || value.length > MAX_EVENT_ID_LENGTH) throw fail('AUDIT_ID_TOO_LONG');
+    if (!EVENT_ID.test(value)) throw fail('AUDIT_ID_INVALID');
+    return value;
+}
+
+function isAuditEventId(value) {
+    return typeof value === 'string' && EVENT_ID.test(value);
+}
+
 const FIELD_VALIDATORS = Object.freeze({
     actorUid: identifier,
     accountId: identifier,
@@ -153,29 +176,37 @@ function removalRefOf(invite) {
 }
 
 function invitedEventId(ref) {
-    return `${auditRef(ref)}__invited`;
+    return ensureEventId(`${auditRef(ref)}__invited`);
 }
 
 function responseEventId(ref, status) {
-    return `${auditRef(ref)}__${responseStatus(status)}`;
+    return ensureEventId(`${auditRef(ref)}__${responseStatus(status)}`);
 }
 
 function removedEventId(ref) {
-    return `${auditRef(ref)}__removed`;
+    return ensureEventId(`${auditRef(ref)}__removed`);
 }
 
-// Chiave dell'Account: per i privati `context` è 'privato' e la chiave è
-// l'accountId; per le aziende `context` È l'aziendaId (archive-account-service.js
-// usa `users/{uid}/aziende/{context}/accounts/{id}`), quindi la chiave la
-// include. `revision` è scritta dalla stessa transazione della transizione.
+// Chiave dell'Account, **iniettiva** sulla coppia (context, accountId): un
+// prefisso di tipo esplicito e il separatore ':' che nessun identificatore può
+// contenere (IDENTIFIER). Senza queste due proprietà `(context='a_b',
+// accountId='c')` e `(context='a', accountId='b_c')` produrrebbero la stessa
+// stringa, e con la stessa revisione uno dei due eventi andrebbe perso nel
+// create-if-absent. Per i privati `context` è 'privato'; per le aziende `context`
+// È l'aziendaId (`Frontend/public/assets/js/modules/settings/archive-account-service.js:68-69`),
+// quindi la chiave lo include. Nessun troncamento: oltre il limite si fallisce
+// chiusi, perché un id troncato tornerebbe a collidere.
 function accountEventKey(context, accountId) {
     const owner = identifier(accountId);
-    if (context === 'privato') return owner;
-    return `${identifier(context)}_${owner}`;
+    if (context === 'privato') return ensureEventId(`privato:${owner}`);
+    return ensureEventId(`azienda:${identifier(context)}:${owner}`);
 }
 
+// `revision` è scritta dalla stessa transazione della transizione e resta
+// l'ultimo campo della tupla: la revisione è decimale canonica, quindi lo split
+// sul separatore è univoco.
 function accountEventId(context, accountId, revision) {
-    return `${accountEventKey(context, accountId)}__${count(revision)}`;
+    return ensureEventId(`${accountEventKey(context, accountId)}:${count(revision)}`);
 }
 
 // Classificatore puro della scrittura su `invites/{inviteId}` (onDocumentWritten,
@@ -237,6 +268,7 @@ function auditWriteDecision(exists, effect) {
 module.exports = {
     AUDIT_EVENT_ACTIONS,
     AUDIT_PAYLOAD_KEYS,
+    MAX_EVENT_ID_LENGTH,
     SCHEMA_VERSION,
     accountEventId,
     accountEventKey,
@@ -246,6 +278,7 @@ module.exports = {
     inviteRefOf,
     inviteTransition,
     invitedEventId,
+    isAuditEventId,
     removalRefOf,
     removedEventId,
     responseEventId

@@ -3876,3 +3876,79 @@ Due tentativi di prova **non** potevano fallire come avevo previsto, e ho corret
 Nessun trigger, nessuna scrittura su `auditEvents`, nessuna modifica a `respondToInvitation`, al frontend o alle Rules; nessun produttore importa il modulo. Restano da fare, in ordine: **M7-AUDIT-4** (callable), **M7-AUDIT-5R** (Rules: `auditRef` nell'allowlist di creazione, `firestore.rules:205-223`), **M7-AUDIT-5C** (client, tre writer), **M7-AUDIT-5** (trigger `onDocumentWritten` e Account), **M7-AUDIT-6** (retention), **M7-AUDIT-7** (MD e vista). `D-6` va decisa prima di M7-AUDIT-5.
 
 **Stato incarico: DA_VERIFICARE** — M7-AUDIT-3 consegnato da DeepSeek il 2026-09-21; helper puri `functions/audit-event-service.js` (payload in allowlist, id opachi da `auditRef`/`responseAuditRef`/`revision`, classificatori di transizione, create-if-absent senza sovrascrittura di `at`) con dodici prove mirate `functions/test/audit-event-service.test.js`, `test:functions-security` 154/154 e **`npm test` completo verde (exit 0)**, riserva di Codex recepita con il registro ridefinito come tracciamento best-effort e un limite del validatore dichiarato e provato, nessun produttore attivato, nessuna modifica a Rules/frontend/callable, un commit locale mirato e nessun push, merge o deploy.
+
+## Verifica Codex — M7-AUDIT-3
+
+**Stato incarico: DA_CORREGGERE.** Il commit `ff41c9e3` contiene soltanto il modulo puro, i suoi test e il rapporto; non attiva produttori. I test dichiarati sono verdi. Un difetto di identità impedisce però di usare `accountEventId` nei trigger: `accountEventKey` concatena `context + '_' + accountId` senza delimitazione non ambigua. Per esempio l'Account aziendale `(context='a_b', accountId='c')` e `(context='a', accountId='b_c')` producono entrambi `a_b_c`; con la stessa revisione uno dei due eventi verrebbe perso da create-if-absent. Anche `context='privato'` non è un namespace strutturalmente separato da un'azienda con quell'id. Correggere con una codifica iniettiva e un prefisso esplicito di tipo, senza usare email o altri dati sensibili; aggiungere test di collisione e mantenere il contratto delle revisioni. Verificare anche il limite di lunghezza Firestore dell'id risultante sui valori massimi ammessi dal validatore. Consegnare un commit locale mirato M7-AUDIT-3-R1, test pertinenti e `DA_VERIFICARE`. Nessun produttore, push, merge, deploy o dato reale; un incarico attivo alla volta.
+
+## Presa in carico DeepSeek — M7-AUDIT-3-R1 identità iniettiva dell'Account
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base `ff41c9e3`; la verifica di Codex era nel working tree non committato ed è **conservata** senza alterarne il testo.
+- **Perimetro:** correzione dell'identità dell'Account e sue prove. **Nessun** produttore, push, merge, deploy o dato reale; un solo incarico attivo.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-AUDIT-3-R1 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-AUDIT-3-R1 identità iniettiva dell'Account
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Un solo commit locale mirato; **nessun push, merge o deploy**.
+- **Esito:** il difetto è reale e la correzione cambia il formato degli id dell'Account. Nessun produttore esiste ancora, quindi **nel ramo** non c'è alcun evento da migrare; non ho letto dati reali e non affermo nulla sui documenti in produzione.
+
+### 1. Il difetto, riprodotto
+
+La vecchia `accountEventKey` era `context + '_' + accountId` (o `accountId` per i privati): concatenazione **non iniettiva**, perché `_` è ammesso dentro i due componenti. Le due collisioni di Codex, più quella fra namespace privato e aziendale:
+
+| Insieme | Vecchio id (revisione 7) | Esito |
+|---|---|---|
+| `(context='a_b', accountId='c')` | `a_b_c__7` | **collisione** |
+| `(context='a', accountId='b_c')` | `a_b_c__7` | create-if-absent avrebbe perso il secondo evento |
+| `(context='privato', accountId='privato_x')` | `privato_x__1` | **collisione** con l'azienda `privato` |
+| `(context='privato' azienda, accountId='x')` | `privato_x__1` | idem |
+
+### 2. La correzione: prefisso di tipo e separatore non ambiguo
+
+`accountEventKey` ora produce `privato:<accountId>` per i privati e `azienda:<aziendaId>:<accountId>` per le aziende (`functions/audit-event-service.js:199-206`), e `accountEventId` appende la revisione come ultimo campo della tupla (`functions/audit-event-service.js:208-210`):
+
+- **prefisso di tipo esplicito**: `privato:` non può coincidere con `azienda:`;
+- **separatore `:` che nessun componente può contenere**: il charset `IDENTIFIER` è `[A-Za-z0-9_-]` (`functions/audit-event-service.js:32`) e **non** include `:`, quindi lo split sul separatore è univoco per costruzione — è questa proprietà, non un delimitatore «strano», a rendere la codifica iniettiva;
+- **revisione come ultimo campo**: intero non negativo in decimale canonico (`functions/audit-event-service.js:89-92`, `:208-210`), quindi il contratto delle revisioni resta quello di prima;
+- nessun dato sensibile: `context` e `accountId` sono identificatori opachi, `:` è un separatore, e un'email non attraversa `IDENTIFIER`.
+
+Esempi: `privato:account-1:12` e `azienda:company-1:account-1:12`.
+
+### 3. Limite di lunghezza, verificato e fatto fallire chiuso
+
+L'id dell'evento deve essere accettato **anche** dai validatori già in uso nel progetto, che sono più stretti di Firestore:
+
+| Validatore | Pattern | Massimo |
+|---|---|---|
+| `functions/archive-purge-receipt.js:2` e `functions/archive-purge-reference-plan.js:3` | `[A-Za-z0-9._:-]` | 160 |
+| `functions/history-recovery-service.js:1` (`safeAudit`) | `[A-Za-z0-9:_-]` | 180 |
+| `experiments/history-recovery/audit-retention.mjs:27` (retention futura) | `[A-Za-z0-9._:-]` | 200 |
+| Firestore | qualunque UTF-8 senza `/` | 1500 byte |
+
+Ho scelto il più stretto dei tre — `[A-Za-z0-9:_-]{1,160}` — come vincolo dell'id (`functions/audit-event-service.js:43-44`), e ogni costruttore di id passa da `ensureEventId` (`functions/audit-event-service.js:111-115`): oltre il limite si **fallisce chiusi** con `AUDIT_ID_TOO_LONG`, mai un troncamento (un id troncato tornerebbe a collidere). Due valori massimi per l'identificatore (120 caratteri ciascuno) in un id aziendale darebbero 251 caratteri: quel caso **non** produce un id, produce un errore. Il confine è provato: con contesto di 29 caratteri e `accountId` di 120 l'id arriva esattamente a 160; con 30 caratteri di contesto supera il limite e fallisce.
+
+### 4. Prove
+
+| Verifica | Risultato |
+|---|---|
+| banco mirato `node --test functions/test/audit-event-service.test.js` | **15/15**, exit 0 (erano 12: +3 di questa correzione) |
+| collisioni di Codex, esplicite | `functions/test/audit-event-service.test.js:151-169`: `('a_b','c')` ≠ `('a','b_c')`, privato `privato_x` ≠ azienda `privato`, `x` ≠ `x__1`; iniettività su un insieme di coppie; `:` rifiutato dentro un componente |
+| charset e limite su ogni id | `functions/test/audit-event-service.test.js:171-188`: tutti gli id rispettano `[A-Za-z0-9:_-]{1,160}`, nessun `/`, ≤1500 byte; `isAuditEventId` respinge 161 caratteri e gli spazi |
+| fallimento chiuso al confine | `functions/test/audit-event-service.test.js:190-210`: massimo privato ammesso, azienda breve ammessa, due componenti massimi rifiutati, 160 esatti ammessi, 161 rifiutati |
+| contratto delle revisioni | `functions/test/audit-event-service.test.js:212-223`: 0 e `Number.MAX_SAFE_INTEGER` validi, negativi/frazionari/stringa rifiutati, revisioni diverse ⇒ id diversi |
+| **controllo indipendente di iniettività** (script non committato in `.codex-tmp/`) | **784 id distinti** (14 contesti × 14 accountId × 4 revisioni, compresi `a_b`/`b_c`, `privato`/`privato_x`, `x__1`, 60 caratteri), **0 collisioni**, e ogni id accettato dai pattern di retention, `safeAudit`, planner e ricevute |
+| `npm run test:functions-security` (ESLint su `functions` incluso) | **157/157**, `fail 0` (erano 142 prima di M7-AUDIT-3) |
+| **`npm test` completo (una sola esecuzione)** | **exit 0** — 46 invocazioni di script, 1863 `✔`, nessun `✖`/`not ok`/`AssertionError` (2954 righe) |
+| ESLint sui due file / `git diff --check` | exit 0 / pulito |
+
+Gli id degli inviti (`<uuid>__invited`, `__accepted`, `__rejected`, `__removed`) **non cambiano** e sono già dentro lo stesso pattern e limite (36 + suffisso): la correzione riguarda solo la famiglia dell'Account.
+
+### 5. Limiti e stato
+
+- Resta vero quanto dichiarato in M7-AUDIT-3: il registro è **tracciamento best-effort** di transizioni Firestore, non prova forense; il validatore non distingue una chiave sanificata da un id opaco (prova in `functions/test/audit-event-service.test.js:89`), e tenerla fuori è obbligo dei produttori di M7-AUDIT-5.
+- Il modulo resta **non importato da alcun produttore**: nessun trigger, nessuna scrittura su `auditEvents`, nessuna modifica a Rules, frontend o `respondToInvitation`.
+- Se un giorno un `accountId` o un `aziendaId` reale superasse i limiti dell'identificatore (120) o facesse superare i 160 caratteri all'id, l'evento **non** verrebbe scritto e l'errore sarebbe visibile nei log di piattaforma: è la scelta dichiarata di fallire chiusi invece di troncare o collidere.
+- `D-6` (allowlist di campi sull'`update` degli inviti) resta da decidere prima di M7-AUDIT-5.
+
+**Stato incarico: DA_VERIFICARE** — M7-AUDIT-3-R1 consegnato da DeepSeek il 2026-09-21; `accountEventKey`/`accountEventId` resi iniettivi con prefisso di tipo esplicito e separatore `:` non contenibile nei componenti, revisione mantenuta come ultimo campo della tupla, limite dell'id fissato al pattern più stretto già in uso nel progetto (`[A-Za-z0-9:_-]{1,160}`) con fallimento chiuso `AUDIT_ID_TOO_LONG` e nessun troncamento; collisioni di Codex provate e corrette, controllo indipendente su 784 id senza collisioni, `test:functions-security` 157/157 e **`npm test` completo verde (exit 0)**, un commit locale mirato, nessun produttore attivato e nessun push, merge o deploy.
