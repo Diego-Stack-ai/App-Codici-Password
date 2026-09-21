@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **825**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -328,8 +328,9 @@ File censiti: **825**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
 | `docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md` | MD | 4177 | 70 | Documentazione: M7 DOMANDE T23 CACHE DISPOSITIVO. |
 | `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
+| `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
 | `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 78792 | 511 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 79349 | 512 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
