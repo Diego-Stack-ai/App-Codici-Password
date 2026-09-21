@@ -16,18 +16,28 @@ const legacyPath = 'users/owner/archiveOperations/operation';
 const auditPath = 'users/owner/auditEvents/operation';
 const bound = status => ({...receipts.createArchivePurgeBinding({uid: 'owner', command: policy.validatePurgeCommand(command)}), status});
 
-function fixture({missing = false, beforeFinal, failAfterDelete = false} = {}) {
+function fixture({missing = false, beforeFinal, failAfterDelete = false, attachments = [], storageFailure = null} = {}) {
   const states = new Map(), writes = [], reads = [];
   const counts = {storage: 0, recursiveDelete: 0, transactions: 0};
+  // Synthetic Storage recorder: the fixture lists real attachment metadata and
+  // logs every bucket.file(path).delete, so the destructive branch is exercised.
+  const storageDeletes = [], storageOrder = [];
   const link = {linkedAccountId: 'account', linkedAccountCompanyId: '', note: 'synthetic-note'};
   states.set('users/owner', {contactEmails: [link]});
   if (!missing) states.set(recordPath, {isArchived: true, revision: 1});
-  let failNextDelete = failAfterDelete;
+  let failNextDelete = failAfterDelete, failingStoragePath = storageFailure;
   const ref = path => ({path, collection: key => ref(`${path}/${key}`), doc: key => ref(`${path}/${key}`),
-    get: async () => { reads.push(path); return {docs: []}; }});
+    get: async () => {
+      reads.push(path);
+      if (path.endsWith('/attachments')) {
+        storageOrder.push('list');
+        return {docs: attachments.map(entry => ({data: () => entry}))};
+      }
+      return {docs: []};
+    }});
   const store = {collection: ref, doc: ref,
     recursiveDelete: async reference => {
-      counts.recursiveDelete++; states.delete(reference.path);
+      counts.recursiveDelete++; storageOrder.push('recursiveDelete'); states.delete(reference.path);
       if (failNextDelete) { failNextDelete = false; throw new Error('synthetic interruption after deletion'); }
       if (beforeFinal) beforeFinal(states);
     },
@@ -47,10 +57,18 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false} = {}) {
       return result;
     }};
   const context = vm.createContext({...policy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
-    getFirestore: () => store, getStorage: () => { counts.storage++; return {bucket: () => ({})}; },
+    getFirestore: () => store,
+    getStorage: () => { counts.storage++; return {bucket: () => ({file: path => ({
+      delete: async options => {
+        storageOrder.push('delete'); storageDeletes.push({path, options});
+        if (failingStoragePath === path) throw new Error('synthetic storage failure');
+        return [];
+      }})})}; },
     FieldValue: {serverTimestamp: () => 'synthetic-time'}});
   vm.runInContext(ownerGuard + handler, context);
-  return {states, counts, writes, reads, run: (data = command) => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data})};
+  return {states, counts, writes, reads, storageDeletes, storageOrder,
+    set storageFailure(value) { failingStoragePath = value; },
+    run: (data = command) => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data})};
 }
 
 test('forged legacy processing or purged receipt cannot authorize deletion or claim success', async () => {
@@ -135,4 +153,53 @@ test('missing deletion confirmation is rejected even for a previously completed 
   const f = fixture(); f.states.set(receiptPath, bound('purged'));
   await assert.rejects(f.run({...command, confirmation: undefined}), error => error.code === 'failed-precondition');
   assert.equal(f.counts.transactions, 0); assert.equal(f.counts.storage, 0); assert.equal(f.writes.length, 0);
+});
+
+// M7-R2: synthetic proofs for the destructive Storage branch (census T-05, T-06, T-25).
+
+test('listed attachment bytes are deleted, in order, before the recursive deletion', async () => {
+  const paths = ['users/owner/accounts/account/attachments/a.bin', 'users/owner/accounts/account/attachments/b.bin'];
+  const f = fixture({attachments: [{storagePath: paths[0]}, {url: 'https://example.invalid/legacy'},
+    {storagePath: paths[1]}, {name: 'synthetic-without-path'}]});
+  const result = await f.run();
+  assert.equal(result.status, 'purged');
+  assert.deepEqual(f.storageOrder, ['list', 'delete', 'delete', 'recursiveDelete']);
+  assert.deepEqual(f.storageDeletes.map(call => call.path), paths);
+  assert.equal(f.storageDeletes.every(call => call.options?.ignoreNotFound === true), true);
+  assert.equal(f.states.has(recordPath), false);
+  assert.equal(f.states.get(receiptPath).status, 'purged');
+  assert.equal(f.states.has(auditPath), true);
+});
+
+test('an attachment path outside the Account prefix aborts before any Storage deletion', async () => {
+  const f = fixture({attachments: [{storagePath: 'users/owner/accounts/account/attachments/ok.bin'},
+    {storagePath: 'users/owner/accounts/other/attachments/foreign.bin'},
+    {storagePath: 'users/another-owner/accounts/account/attachments/foreign.bin'}]});
+  await assert.rejects(f.run(), error => error.code === 'failed-precondition');
+  assert.deepEqual(f.storageOrder, ['list']);
+  assert.equal(f.storageDeletes.length, 0, 'not even the safe path may be deleted');
+  assert.equal(f.counts.recursiveDelete, 0);
+  assert.equal(f.states.has(recordPath), true);
+  assert.equal(f.states.get(receiptPath).status, 'processing');
+  assert.equal(f.states.has(auditPath), false);
+});
+
+test('a partial Storage failure never claims purged and the same request resumes idempotently', async () => {
+  const paths = ['users/owner/accounts/account/attachments/a.bin', 'users/owner/accounts/account/attachments/b.bin'];
+  const f = fixture({attachments: paths.map(storagePath => ({storagePath})), storageFailure: paths[1]});
+  await assert.rejects(f.run(), /synthetic storage failure/);
+  assert.deepEqual(f.storageOrder, ['list', 'delete', 'delete']);
+  assert.deepEqual(f.storageDeletes.map(call => call.path), paths);
+  assert.equal(f.counts.recursiveDelete, 0);
+  assert.equal(f.states.has(recordPath), true);
+  assert.equal(f.states.get(receiptPath).status, 'processing');
+  assert.equal(f.states.has(auditPath), false);
+  f.storageFailure = null;
+  const retry = await f.run();
+  assert.equal(retry.status, 'purged');
+  assert.deepEqual(f.storageOrder, ['list', 'delete', 'delete', 'list', 'delete', 'delete', 'recursiveDelete']);
+  assert.deepEqual(f.storageDeletes.map(call => call.path), [...paths, ...paths]);
+  assert.equal(f.states.get(receiptPath).status, 'purged');
+  assert.equal(f.states.has(auditPath), true);
+  assert.equal(f.states.has(recordPath), false);
 });
