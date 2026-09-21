@@ -57,16 +57,22 @@ const ACTION_SET = new Set(AUDIT_EVENT_ACTIONS);
 
 const INVITE_REQUIRED = ['actorUid', 'accountId', 'context', 'cycle'];
 const GUEST_REQUIRED = [...INVITE_REQUIRED, 'guestKnown'];
+// M7-AUDIT-5A (correzione): i campi degli eventi Account contano **voci di
+// condivisione** (`sharedWith`) portate da `pending`/`accepted` a `suspended`
+// dalla scrittura osservata — mai documenti invito. I nomi lo dicono: il
+// documento Account non contiene il numero di inviti che la transazione client
+// ha toccato, quindi un campo chiamato «Invites» prometterebbe una metrica che
+// il trigger non può conoscere.
 const ACTION_FIELDS = Object.freeze({
     'invite-created': Object.freeze({required: INVITE_REQUIRED, optional: ['inviteCreatedAt']}),
     'invite-accepted': Object.freeze({required: GUEST_REQUIRED, optional: ['guestUid']}),
     'invite-rejected': Object.freeze({required: GUEST_REQUIRED, optional: ['guestUid']}),
     'invite-removed': Object.freeze({required: GUEST_REQUIRED, optional: ['guestUid']}),
     'account-archived': Object.freeze({
-        required: [...INVITE_REQUIRED, 'revision', 'sharingCycle', 'suspendedInvites'], optional: []
+        required: [...INVITE_REQUIRED, 'revision', 'sharingCycle', 'suspendedSharingEntries'], optional: []
     }),
     'account-restored': Object.freeze({
-        required: [...INVITE_REQUIRED, 'revision', 'sharingCycle', 'neutralizedInvites', 'neutralized'],
+        required: [...INVITE_REQUIRED, 'revision', 'sharingCycle', 'neutralizedSharingEntries', 'neutralized'],
         optional: []
     })
 });
@@ -127,8 +133,8 @@ const FIELD_VALIDATORS = Object.freeze({
     cycle: count,
     revision: count,
     sharingCycle: count,
-    suspendedInvites: count,
-    neutralizedInvites: count,
+    suspendedSharingEntries: count,
+    neutralizedSharingEntries: count,
     neutralized: boolean,
     guestKnown: boolean,
     guestUid: identifier,

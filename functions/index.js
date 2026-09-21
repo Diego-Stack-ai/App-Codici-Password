@@ -1561,15 +1561,20 @@ exports.onInviteWritten = onDocumentWritten(
 // e create-if-absent, quindi una riconsegna — o un secondo ciclo
 // archivia→ripristina→archivia — non sovrascrive nulla.
 //
-// **Contatori**: il documento Account **non** contiene `suspendedInvites` /
-// `neutralizedInvites`: le transazioni client li calcolano in memoria e li
-// restituiscono senza scriverli (`settings/archive-account-service.js:185-259` e
-// `:290-356`). Il payload porta quindi il numero di **voci di condivisione**
-// marcate `suspended` nel documento scritto — una quantità derivata dal
-// documento, mai un valore inventato — mentre il numero esatto di **documenti
-// invito** toccati dal client non è ricostruibile dal trigger. `neutralized` è
-// derivato dal fatto che la transazione di ripristino fa avanzare
-// `sharingCycle` esattamente quando neutralizza (`:235-248`).
+// **Metrica dei contatori (correzione M7-AUDIT-5A).** Il documento Account non
+// contiene i contatori delle transazioni client e il trigger **non può** sapere
+// quanti **documenti invito** siano stati aggiornati: quei contatori vivono solo
+// in memoria nel client (`settings/archive-account-service.js:185-259` e
+// `:290-356`) e una voce di condivisione può non avere alcun invito. Il payload
+// usa quindi nomi espliciti — `suspendedSharingEntries` /
+// `neutralizedSharingEntries` — e conta le **voci di `sharedWith` che passano da
+// `pending`/`accepted` a `suspended`** confrontando `before` e `after`: una voce
+// già sospesa prima non viene ricontata e un ripristino **non** neutralizzato
+// vale **0**, anche se nel documento restano voci sospese. La metrica differisce
+// **deliberatamente** dall'esito del client (che conta documenti invito): sono
+// due quantità diverse e il registro non promette la seconda. `neutralized` e
+// `sharingCycle` restano separati e derivati dall'avanzamento del ciclo, che la
+// transazione di ripristino compie esattamente quando neutralizza (`:235-248`).
 async function recordAccountTransitionAudit(type, event) {
     const before = event.data?.before?.data() ?? null;
     const after = event.data?.after?.data() ?? null;
@@ -1582,13 +1587,21 @@ async function recordAccountTransitionAudit(type, event) {
         const descriptor = type === "privato"
             ? {type: "privato", accountId: params.accountId}
             : {type: "azienda", companyId: params.aziendaId, accountId: params.accountId};
-        const sharing = after.sharedWith;
-        if (sharing !== undefined && (typeof sharing !== "object" || sharing === null || Array.isArray(sharing))) {
-            const invalid = new Error("AUDIT_FIELD_INVALID");
-            invalid.code = "AUDIT_FIELD_INVALID";
-            throw invalid;
+        const beforeSharing = before ? before.sharedWith : undefined;
+        const afterSharing = after.sharedWith;
+        for (const sharing of [beforeSharing, afterSharing]) {
+            if (sharing !== undefined && (typeof sharing !== "object" || sharing === null || Array.isArray(sharing))) {
+                const invalid = new Error("AUDIT_FIELD_INVALID");
+                invalid.code = "AUDIT_FIELD_INVALID";
+                throw invalid;
+            }
         }
-        const suspended = Object.values(sharing || {}).filter(entry => entry?.status === "suspended").length;
+        // Voci portate in stato `suspended` da questa scrittura: non i documenti
+        // invito (che il trigger non può contare) e non le voci già sospese.
+        const wasActive = entry => entry?.status === "pending" || entry?.status === "accepted";
+        const suspended = Object.keys(afterSharing || {}).filter(key =>
+            wasActive(beforeSharing ? beforeSharing[key] : undefined)
+            && afterSharing[key]?.status === "suspended").length;
         const sharingCycle = after.sharingCycle === undefined ? 0 : after.sharingCycle;
         const previousCycle = before.sharingCycle === undefined ? 0 : before.sharingCycle;
         const fields = {
@@ -1600,10 +1613,10 @@ async function recordAccountTransitionAudit(type, event) {
             sharingCycle
         };
         if (archived) {
-            fields.suspendedInvites = suspended;
+            fields.suspendedSharingEntries = suspended;
         } else {
             fields.neutralized = sharingCycle !== previousCycle;
-            fields.neutralizedInvites = suspended;
+            fields.neutralizedSharingEntries = suspended;
         }
         effect = {
             id: accountEventId(descriptor, after.revision),

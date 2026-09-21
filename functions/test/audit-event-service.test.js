@@ -39,11 +39,11 @@ test("buildAuditEvent produce payload in allowlist per ogni azione", () => {
       ["accountId", "action", "actorUid", "context", "cycle", "guestKnown", "schemaVersion"]],
     ["invite-removed", {...INVITE, guestKnown: true, guestUid: "guest-1"},
       ["accountId", "action", "actorUid", "context", "cycle", "guestKnown", "guestUid", "schemaVersion"]],
-    ["account-archived", {...INVITE, revision: 4, sharingCycle: 1, suspendedInvites: 2},
+    ["account-archived", {...INVITE, revision: 4, sharingCycle: 1, suspendedSharingEntries: 2},
       ["accountId", "action", "actorUid", "context", "cycle", "revision", "schemaVersion", "sharingCycle",
-        "suspendedInvites"]],
-    ["account-restored", {...INVITE, revision: 5, sharingCycle: 2, neutralizedInvites: 3, neutralized: true},
-      ["accountId", "action", "actorUid", "context", "cycle", "neutralized", "neutralizedInvites", "revision",
+        "suspendedSharingEntries"]],
+    ["account-restored", {...INVITE, revision: 5, sharingCycle: 2, neutralizedSharingEntries: 3, neutralized: true},
+      ["accountId", "action", "actorUid", "context", "cycle", "neutralized", "neutralizedSharingEntries", "revision",
         "schemaVersion", "sharingCycle"]]
   ];
   for (const [action, fields, expected] of cases) {
@@ -108,7 +108,7 @@ test("buildAuditEvent rifiuta tipi e valori incoerenti", () => {
   assert.equal(codeOf(() => buildAuditEvent("invite-created", {...INVITE,
     inviteCreatedAt: "2026-09-21T10:00:00Z"})), "AUDIT_FIELD_INVALID");
   assert.equal(codeOf(() => buildAuditEvent("account-restored", {...INVITE, revision: 1, sharingCycle: 0,
-    neutralizedInvites: 0, neutralized: "true"})), "AUDIT_FIELD_INVALID");
+    neutralizedSharingEntries: 0, neutralized: "true"})), "AUDIT_FIELD_INVALID");
   assert.equal(codeOf(() => buildAuditEvent("invite-accepted", {...INVITE, guestKnown: true})),
     "AUDIT_FIELD_INVALID");
   assert.equal(codeOf(() => buildAuditEvent("invite-accepted", {...INVITE, guestKnown: false,
@@ -116,9 +116,11 @@ test("buildAuditEvent rifiuta tipi e valori incoerenti", () => {
 });
 
 test("AUDIT_PAYLOAD_KEYS è esattamente l'unione dei campi ammessi", () => {
+  // M7-AUDIT-5A correzione: i campi Account contano **voci** di condivisione
+  // portate in stato sospeso, non documenti invito: i nomi lo dichiarano.
   assert.deepEqual([...AUDIT_PAYLOAD_KEYS], ["accountId", "action", "actorUid", "context", "cycle", "guestKnown",
-    "guestUid", "inviteCreatedAt", "neutralized", "neutralizedInvites", "revision", "schemaVersion",
-    "sharingCycle", "suspendedInvites"]);
+    "guestUid", "inviteCreatedAt", "neutralized", "neutralizedSharingEntries", "revision", "schemaVersion",
+    "sharingCycle", "suspendedSharingEntries"]);
   assert.equal(AUDIT_EVENT_ACTIONS.length, 6);
 });
 
