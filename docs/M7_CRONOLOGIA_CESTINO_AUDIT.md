@@ -123,7 +123,7 @@ Entrano in `auditEvents` i cinque percorsi già censiti in [M7_RETENTION_CENSIME
 
 ### Timestamp autorevole
 
-Il timestamp è `at`, impostato dal backend con `serverTimestamp` in tutti e cinque i percorsi. Il candidato accetta le forme con cui Firestore restituisce un Timestamp (istanza SDK, `{seconds, nanoseconds}`, `Date` nei test) e considera **inverificabile** qualunque altro valore.
+Il timestamp è `at`, impostato dal backend con `serverTimestamp` in tutti e cinque i percorsi. Il candidato accetta le forme con cui Firestore restituisce un Timestamp (istanza SDK, `{seconds, nanoseconds}`, `Date` nei test) e considera **inverificabile** qualunque altro valore. La validazione è stretta: i nanosecondi devono essere interi nell'intervallo **0…999999999** e i secondi devono produrre un istante intero, sicuro e rappresentabile da una data JavaScript. Un valore fuori intervallo — nanosecondi negativi o oltre il miliardo, secondi oltre l'intervallo di `Date`, tipi non interi — è **malformato** e resta `unverifiable`; se la scadenza calcolata non è finita, l'evento è ugualmente `unverifiable`. Questa severità è stata introdotta dalla revisione Codex del 21/09/2026, che ha rilevato l'accettazione di `nanoseconds` fuori intervallo nella prima stesura.
 
 ### Record legacy o malformati
 
@@ -139,7 +139,7 @@ La cancellazione di un documento già assente è un no-op; il piano si ricalcola
 
 ### Esclusione delle ricevute e isolamento fra UID
 
-Ogni percorso pianificato deve iniziare con `users/{uid}/auditEvents/`: id non conformi sono rifiutati e un evento attribuito a un altro UID interrompe il piano. Le ricevute di idempotenza non sono mai toccate, né pianificate.
+Ogni percorso pianificato deve iniziare con `users/{uid}/auditEvents/`: id non conformi sono rifiutati e un evento attribuito a un altro UID interrompe il piano. Le ricevute di idempotenza non sono mai toccate, né pianificate. L'esecutore non si fida del piano ricevuto: prima di ogni cancellazione ri-deriva il percorso da UID e id, rifiuta un UID non valido, un id non conforme, una lunghezza incoerente o un percorso che non corrisponde all'id, **senza invocare alcuna cancellazione**.
 
 ### Visibilità all'utente
 
@@ -156,5 +156,5 @@ Non esiste un'interfaccia che mostri la cronologia: nessun modulo di `Frontend/p
 ### Prove di laboratorio disponibili
 
 - `experiments/history-recovery/audit-retention.mjs` — pianificatore ed esecutore puri, non importati dall'app né da Functions.
-- `experiments/history-recovery/audit-retention.test.mjs` — **12 prove sintetiche**: forme del timestamp, finestra di 24 mesi con limite di calendario, conservazione/scadenza al confine, dati non interpretabili mai cancellati, ordinamento e lotti, esclusione delle ricevute, isolamento UID, input fuori misura, completamento, errore parziale con ripresa idempotente, interruzione.
+- `experiments/history-recovery/audit-retention.test.mjs` — **15 prove sintetiche**: forme del timestamp e intervalli validi, finestra di 24 mesi con limite di calendario, conservazione/scadenza al confine, dati non interpretabili mai cancellati, ordinamento e lotti, esclusione delle ricevute, isolamento UID, input fuori misura, completamento, errore parziale con ripresa idempotente, interruzione, rifiuto dei piani arbitrari prima di qualunque cancellazione.
 - `tests/history-recovery.rules.test.mjs` — Rules **candidate** (`experiments/history-recovery/firestore.candidate.rules`): lettura riservata al proprietario e **create, update e delete negati** al client su `auditEvents`, `trash` e `recordHistory`.

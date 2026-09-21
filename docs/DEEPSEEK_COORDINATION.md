@@ -1286,3 +1286,57 @@ La sezione «Retention del registro tecnico» del contratto M7 documenta: perime
 - approvare il progetto del job reale e la modifica delle Rules produttive con rilascio coordinato.
 
 **Stato incarico: DA_VERIFICARE** — M7-R3 consegnato da DeepSeek il 2026-09-21; progetto e prove sintetiche pronti, politica di retention **non attiva in produzione** e nessun push eseguito.
+
+## Verifica Codex — M7-R3: correzione mirata
+
+**Esito: DA_CORREGGERE prima dell'approvazione.** Il perimetro di `8600f332` è conforme (solo candidato/test/MD); test mirati del candidato 12/12 e `git diff --check` puliti. La finestra di 24 mesi è stata recepita. Il candidato non è attivo in produzione.
+
+**Difetto concreto:** `auditTimestamp({seconds: 1735689600, nanoseconds: 1000000000})` viene accettato, benché i nanosecondi di un Timestamp siano validi soltanto da 0 a 999999999. Per una cancellazione futura non bisogna classificare come databile un record malformato. Correggi la validazione dell'intervallo dei nanosecondi e della data risultante, aggiungendo test per `-1`, `1_000_000_000`, secondi fuori dall'intervallo delle date JavaScript e qualunque caso che produca un tempo non sicuro/non finito. I record malformati devono restare `unverifiable` e non entrare in alcun batch. Verifica inoltre che l'esecutore non accetti un piano arbitrario con UID non valido prima di invocare `deleteBatch`. Non cambiare la scelta dei 24 mesi né il perimetro produttivo. Un commit locale di correzione + rapporto, senza push; consegna `DA_VERIFICARE`.
+
+**Prossimo lavoro già concordato con Diego:** dopo approvazione di M7-R3, mappare in sola lettura i percorsi di archiviazione/cancellazione degli Account propri, degli Account propri condivisi con altri, degli Account ricevuti come ospite e delle credenziali comuni collegate. Non iniziare questa mappatura prima di chiudere la correzione M7-R3, per evitare due incarichi esecutivi simultanei.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — M7-R3 correzione
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); base osservata `8600f332`; la revisione Codex era nel working tree non committata ed è **conservata** nell'unico commit di correzione.
+- **Difetto confermato:** la validazione del timestamp accettava nanosecondi fuori intervallo e non verificava la rappresentabilità della data; per una cancellazione futura un record malformato non deve risultare databile.
+- **Perimetro:** solo candidato, test e documentazione. Finestra di **24 mesi invariata**; nessuna modifica a codice, Rules o Functions produttive, `Frontend/public/**`, versione, `master` o dati; nessun push.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R3 presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R3 correzione
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** **un solo commit locale di correzione + rapporto**, come richiesto; base `8600f332`; **nessun push eseguito**.
+- **File:** `experiments/history-recovery/audit-retention.mjs`, `experiments/history-recovery/audit-retention.test.mjs`, `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md`, `docs/M7_RETENTION_CENSIMENTO.md`, `docs/FILE_INVENTORY.md`.
+
+### Difetto confermato e sua portata
+
+Il rilievo era fondato e aveva una seconda conseguenza che ho verificato: `auditTimestamp` accettava qualunque intero non negativo come `nanoseconds` (quindi anche `1_000_000_000`, oltre il massimo di 999999999) e non controllava che l'istante risultante fosse rappresentabile. Un valore estremo ma «sicuro» per il linguaggio produceva una `Date` non valida, e il confronto con `NaN` faceva classificare l'evento come **`retained`** invece che `unverifiable`: un record malformato sarebbe stato considerato databile — e quindi, in un futuro job, potenzialmente cancellabile con una data stimata.
+
+### Correzioni applicate
+
+1. **`auditTimestamp`** — i nanosecondi devono essere interi nell'intervallo **0…999999999**; un valore presente ma non intero (`null`, stringa, `NaN`, `Infinity`, frazionario) è malformato; i secondi devono essere interi sicuri e non negativi; l'istante calcolato deve essere intero, sicuro, entro ±8,64e15 ms e rappresentabile da `Date`, altrimenti è malformato.
+2. **`classifyAuditEvent`** — se la scadenza calcolata non è finita, l'evento è `unverifiable` e non entra in alcun lotto: nessuna data stimata autorizza una cancellazione.
+3. **`runAuditRetention`** — non si fida del piano ricevuto: valida l'UID, ri-deriva ogni percorso da UID e id e rifiuta UID non valido, id non conforme, lunghezze incoerenti o percorso non corrispondente **prima di invocare `deleteBatch`**.
+
+### Test aggiunti (15 totali, erano 12)
+
+- `nanosecondi fuori intervallo e secondi non rappresentabili sono malformati` — casi `-1`, `1_000_000_000`, frazionari, `null`, stringa, `NaN`, `Infinity`; secondi oltre l'intervallo di `Date`, `Number.MAX_SAFE_INTEGER`, negativi, non interi, stringa; `Date` e `toDate()` fuori intervallo.
+- `i record malformati restano inverificabili e non entrano in alcun lotto` — nessuno dei record malformati compare in `expired` o nei lotti; incluso il caso di data **valida** la cui scadenza a 24 mesi esce dall'intervallo di `Date`.
+- `l'esecutore rifiuta piani arbitrari prima di invocare deleteBatch` — UID vuoto, con separatori, con spazi, non stringa, `null`, `undefined`; percorso che non corrisponde all'id; lunghezze incoerenti; id con `/`; una spia conta **0** chiamate su ogni piano rifiutato e 1 sul piano legittimo.
+
+### Esiti reali
+
+- `node --test experiments/history-recovery/audit-retention.test.mjs` → **15/15**.
+- `npm run test:firestore-rules` → **21/21** (invariato).
+- `git diff --check` **pulito**; inventario rigenerato e stabile.
+- Finestra di **24 mesi invariata**; perimetro produttivo invariato; nessun dato reale.
+
+### Note per Codex
+
+- La severità è ora applicata a **entrambi** i punti di ingresso: il pianificatore classifica, l'esecutore ri-valida prima di qualunque cancellazione. Un record malformato non può più essere né classificato databile né entrare in un lotto.
+- Ho preso atto del prossimo lavoro concordato con Diego (mappatura in sola lettura dei percorsi di archiviazione/cancellazione di Account propri, propri condivisi, ricevuti come ospite e credenziali comuni collegate): **non è stato avviato**, in attesa della chiusura di M7-R3.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R3 consegnata da DeepSeek il 2026-09-21; difetto chiuso con prova sintetica, 24 mesi invariati e nessun push eseguito.

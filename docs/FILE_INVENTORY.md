@@ -312,7 +312,7 @@ File censiti: **783**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 226404 | 1289 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 232610 | 1343 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -325,8 +325,8 @@ File censiti: **783**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
 | `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 18096 | 161 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 50423 | 402 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 19045 | 161 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 50550 | 402 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
@@ -357,8 +357,8 @@ File censiti: **783**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/card-importer/prototype.mjs` | MJS | 13822 | 312 | File di progetto: prototype. |
 | `experiments/credential-health/credential-health.mjs` | MJS | 1968 | 46 | File di progetto: credential-health. |
 | `experiments/credential-health/credential-health.test.mjs` | MJS | 1701 | 36 | File di progetto: credential-health.test. |
-| `experiments/history-recovery/audit-retention.mjs` | MJS | 6792 | 128 | File di progetto: audit-retention. |
-| `experiments/history-recovery/audit-retention.test.mjs` | MJS | 9438 | 158 | File di progetto: audit-retention.test. |
+| `experiments/history-recovery/audit-retention.mjs` | MJS | 8563 | 157 | File di progetto: audit-retention. |
+| `experiments/history-recovery/audit-retention.test.mjs` | MJS | 13557 | 222 | File di progetto: audit-retention.test. |
 | `experiments/history-recovery/firestore.candidate.rules` | RULES | 644 | 20 | File di progetto: firestore.candidate. |
 | `experiments/history-recovery/history-model.mjs` | MJS | 1618 | 28 | File di progetto: history-model. |
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |

@@ -354,9 +354,9 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-32 | Allegati | cancellazione di un allegato interrotta dal cambio di Account | nessuna scrittura di metadati sotto il nuovo Account; se la conferma arriva dopo il cambio, nessuna operazione | esistente (`tests/private-account-detail-lifecycle.test.mjs:166,172`) |
 | T-33 | Purge | predicato di percorso sicuro su un `storagePath` di un altro proprietario o fuori dal prefisso dell'Account | percorso rifiutato come non sicuro | esistente (`functions/test/archive-purge-service.test.js:19`) |
 | T-34 | Cronologia | evento dentro, al confine e oltre la finestra di 24 mesi | conservato dentro, cancellabile al confine e oltre | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:26,35`) |
-| T-35 | Cronologia | record senza data valida o con data malformata | mai cancellato, elencato come `unverifiable` | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:19,35`) |
+| T-35 | Cronologia | record senza data valida, nanosecondi fuori intervallo o secondi non rappresentabili | mai cancellato, elencato come `unverifiable` e fuori da ogni lotto | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:19,35,162,177`) |
 | T-36 | Cronologia | cancellazione a lotti con errore parziale e ripresa | nessun falso completamento; ripresa idempotente dagli eventi residui | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:46,120`) |
-| T-37 | Cronologia | isolamento UID e percorsi fuori dal registro | piano interrotto; nessuna ricevuta pianificata o toccata | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:65,81`) |
+| T-37 | Cronologia | isolamento UID e percorsi fuori dal registro | piano interrotto; nessuna ricevuta pianificata o toccata; piani arbitrari rifiutati prima di ogni cancellazione | esistente in laboratorio (`experiments/history-recovery/audit-retention.test.mjs:65,81,204`) |
 | T-38 | Cronologia | il client tenta create, update e delete su un evento di audit | tutte e tre negate; lettura del proprietario conservata | esistente in laboratorio (`tests/history-recovery.rules.test.mjs:17`, Rules candidate) |
 
 ## 10. Domande decisionali per Diego

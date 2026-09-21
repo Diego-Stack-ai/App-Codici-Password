@@ -38,17 +38,33 @@ export function auditEventPath(uid, id) {
 // Accetta le forme con cui Firestore restituisce un Timestamp (istanza SDK,
 // oggetto {seconds,nanoseconds}, Date lato test). Qualunque altra cosa è
 // inverificabile: stringhe, numeri, null, oggetti vuoti, NaN.
+//
+// Difetto corretto dopo la revisione Codex del 21/09/2026: i nanosecondi di un
+// Timestamp Firestore sono validi solo da 0 a 999999999 e i secondi devono
+// cadere nell'intervallo rappresentabile da una data JavaScript. Un valore
+// fuori intervallo è malformato e deve restare `unverifiable`, non diventare
+// una data stimata.
+const MAX_NANOSECONDS = 999_999_999;
+const MAX_DATE_MS = 8.64e15; // intervallo massimo di Date in millisecondi
+
+function safeInstant(ms) {
+  return Number.isSafeInteger(ms) && Number.isFinite(ms) && Math.abs(ms) <= MAX_DATE_MS &&
+    Number.isFinite(new Date(ms).getTime()) ? ms : null;
+}
+
 export function auditTimestamp(value) {
-  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.getTime() : null;
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? safeInstant(value.getTime()) : null;
   if (typeof value?.toDate === 'function') {
     const date = value.toDate();
-    return date instanceof Date && Number.isFinite(date.getTime()) ? date.getTime() : null;
+    return date instanceof Date && Number.isFinite(date.getTime()) ? safeInstant(date.getTime()) : null;
   }
-  if (Number.isSafeInteger(value?.seconds) && value.seconds >= 0 &&
-      Number.isInteger(value?.nanoseconds ?? 0) && (value.nanoseconds ?? 0) >= 0) {
-    return value.seconds * 1000 + Math.floor((value.nanoseconds ?? 0) / 1e6);
-  }
-  return null;
+  const seconds = value?.seconds, rawNanoseconds = value?.nanoseconds;
+  // Un nanosecondo presente ma non intero (null, stringa, NaN, Infinity) è malformato.
+  if (rawNanoseconds !== undefined && !Number.isInteger(rawNanoseconds)) return null;
+  const nanoseconds = rawNanoseconds === undefined ? 0 : rawNanoseconds;
+  if (!Number.isSafeInteger(seconds) || seconds < 0) return null;
+  if (nanoseconds < 0 || nanoseconds > MAX_NANOSECONDS) return null;
+  return safeInstant(seconds * 1000 + Math.floor(nanoseconds / 1e6));
 }
 
 // Scadenza con mesi di calendario: il giorno viene limitato se il mese di
@@ -68,7 +84,11 @@ export function classifyAuditEvent(event, now, {months = RETENTION_MONTHS} = {})
   if (!Number.isFinite(now)) throw fail('AUDIT_RETENTION_CLOCK_INVALID');
   const at = auditTimestamp(event?.at);
   if (at === null) return 'unverifiable';
-  return auditExpiry(at, months) <= now ? 'expired' : 'retained';
+  const expiry = auditExpiry(at, months);
+  // Una scadenza non calcolabile non autorizza né la conservazione né la
+  // cancellazione: l'evento resta inverificabile e fuori da ogni lotto.
+  if (!Number.isFinite(expiry)) return 'unverifiable';
+  return expiry <= now ? 'expired' : 'retained';
 }
 
 // Piano deterministico: solo gli eventi scaduti e databili, dal più vecchio,
@@ -107,12 +127,21 @@ export function planAuditRetention({uid, events = [], now, batchSize = DEFAULT_B
 // Esecutore: cancella lotti nell'ordine del piano, si ferma al primo errore e
 // non dichiara mai completato ciò che non lo è. La ripetizione è idempotente
 // perché il piano si ricalcola dagli eventi ancora presenti.
+//
+// Ogni lotto viene ri-derivato da UID e id prima di qualunque chiamata: un
+// piano arbitrario con UID non valido o percorso non coerente viene rifiutato
+// senza invocare `deleteBatch` (revisione Codex del 21/09/2026).
 export async function runAuditRetention({plan, deleteBatch, isActive = () => true} = {}) {
   if (!plan?.batches || typeof deleteBatch !== 'function' || typeof isActive !== 'function') throw fail('AUDIT_RETENTION_RUN_INVALID');
+  if (typeof plan.uid !== 'string' || !IDENTIFIER.test(plan.uid)) throw fail('AUDIT_RETENTION_UID_INVALID');
   let completed = 0;
   for (const batch of plan.batches) {
-    for (const path of batch.paths) {
-      if (!path.startsWith(`users/${plan.uid}/auditEvents/`)) throw fail('AUDIT_RETENTION_PATH_FORBIDDEN');
+    if (!Array.isArray(batch.ids) || !Array.isArray(batch.paths) || batch.ids.length !== batch.paths.length) {
+      throw fail('AUDIT_RETENTION_PATH_FORBIDDEN');
+    }
+    for (let index = 0; index < batch.ids.length; index++) {
+      // auditEventPath valida UID e id e ricostruisce il percorso atteso.
+      if (auditEventPath(plan.uid, batch.ids[index]) !== batch.paths[index]) throw fail('AUDIT_RETENTION_PATH_FORBIDDEN');
     }
     if (!isActive()) return Object.freeze({status: 'interrupted', completed, total: plan.batches.length});
     try {

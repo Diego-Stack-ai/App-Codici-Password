@@ -155,3 +155,67 @@ test('interruzione per sessione chiusa e difesa sul percorso dei lotti', async (
         paths: ['mutationResults/owner/operations/op']}]}, deleteBatch: async () => {}}),
         /AUDIT_RETENTION_PATH_FORBIDDEN/);
 });
+
+// M7-R3 correzione (revisione Codex 21/09/2026): intervallo dei nanosecondi,
+// secondi non rappresentabili e rifiuto dei piani arbitrari.
+
+test('nanosecondi fuori intervallo e secondi non rappresentabili sono malformati', () => {
+    assert.equal(auditTimestamp({seconds: 1735689600, nanoseconds: 0}), 1735689600000);
+    assert.equal(auditTimestamp({seconds: 1735689600, nanoseconds: 999999999}), 1735689600000 + 999);
+    assert.equal(auditTimestamp({seconds: 1735689600}), 1735689600000);
+    for (const nanoseconds of [-1, 1_000_000_000, 1.5, null, '0', NaN, Infinity]) {
+        assert.equal(auditTimestamp({seconds: 1735689600, nanoseconds}), null, `nanosecondi ${String(nanoseconds)}`);
+    }
+    // secondi oltre l'intervallo rappresentabile da una data JavaScript
+    for (const seconds of [8.64e12 + 1, 9_000_000_000_000, 1e15, Number.MAX_SAFE_INTEGER, -1, 1.5, '1735689600']) {
+        assert.equal(auditTimestamp({seconds, nanoseconds: 0}), null, `secondi ${String(seconds)}`);
+    }
+    assert.equal(auditTimestamp(new Date(8.64e15 + 1)), null);
+    assert.equal(auditTimestamp({toDate: () => new Date(8.64e15 + 1)}), null);
+});
+
+test('i record malformati restano inverificabili e non entrano in alcun lotto', () => {
+    const now = at('2026-06-01T00:00:00Z');
+    const malformed = [
+        {id: 'nano-neg', at: {seconds: 1, nanoseconds: -1}},
+        {id: 'nano-oltre', at: {seconds: 1, nanoseconds: 1_000_000_000}},
+        {id: 'nano-null', at: {seconds: 1, nanoseconds: null}},
+        {id: 'secondi-oltre', at: {seconds: 9_000_000_000_000, nanoseconds: 0}},
+        {id: 'secondi-massimi', at: {seconds: Number.MAX_SAFE_INTEGER, nanoseconds: 0}},
+        {id: 'data-invalida', at: new Date('nope')},
+        {id: 'stringa', at: '2024-01-01'},
+        {id: 'assente'}
+    ];
+    const plan = planAuditRetention({uid: 'owner', now, batchSize: 10,
+        events: [...malformed, event('scaduto', '2024-01-01T00:00:00Z')]});
+    assert.deepEqual(plan.unverifiable, malformed.map(item => item.id));
+    assert.deepEqual(plan.expired, ['scaduto']);
+    assert.deepEqual(plan.batches.flatMap(batch => batch.ids), ['scaduto']);
+    for (const item of malformed) assert.equal(classifyAuditEvent(item, now), 'unverifiable', item.id);
+    // data valida ma scadenza non calcolabile: oltre l'intervallo di Date
+    const extreme = {id: 'estremo', at: new Date(8.64e15)};
+    assert.equal(Number.isFinite(auditTimestamp(extreme.at)), true);
+    assert.equal(classifyAuditEvent(extreme, now), 'unverifiable');
+    const extremePlan = planAuditRetention({uid: 'owner', now, batchSize: 10, events: [extreme]});
+    assert.deepEqual(extremePlan.batches, []);
+    assert.deepEqual(extremePlan.unverifiable, ['estremo']);
+});
+
+test('l\'esecutore rifiuta piani arbitrari prima di invocare deleteBatch', async () => {
+    const now = at('2026-06-01T00:00:00Z');
+    const plan = planAuditRetention({uid: 'owner', now, events: [event('a', '2024-01-01T00:00:00Z')]});
+    let calls = 0; const spy = async () => { calls++; };
+    for (const uid of ['', 'owner/../other', 'owner x', 42, null, undefined]) {
+        await assert.rejects(runAuditRetention({plan: {uid, batches: [{index: 0, ids: ['a'],
+            paths: ['users//auditEvents/a']}]}, deleteBatch: spy}), /AUDIT_RETENTION_UID_INVALID/, `uid ${String(uid)}`);
+    }
+    await assert.rejects(runAuditRetention({plan: {uid: 'owner', batches: [{index: 0, ids: ['a'],
+        paths: ['users/owner/auditEvents/b']}]}, deleteBatch: spy}), /AUDIT_RETENTION_PATH_FORBIDDEN/);
+    await assert.rejects(runAuditRetention({plan: {uid: 'owner', batches: [{index: 0, ids: ['a'],
+        paths: []}]}, deleteBatch: spy}), /AUDIT_RETENTION_PATH_FORBIDDEN/);
+    await assert.rejects(runAuditRetention({plan: {uid: 'owner', batches: [{index: 0, ids: ['a/b'],
+        paths: ['users/owner/auditEvents/a/b']}]}, deleteBatch: spy}), /AUDIT_RETENTION_ID_INVALID/);
+    assert.equal(calls, 0, 'deleteBatch non deve essere invocato su un piano rifiutato');
+    assert.equal((await runAuditRetention({plan, deleteBatch: spy})).status, 'completed');
+    assert.equal(calls, 1);
+});
