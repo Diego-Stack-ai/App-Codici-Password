@@ -14,7 +14,7 @@ import {
 } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { logError, sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, logError, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
@@ -184,6 +184,10 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 linkedContact.linkedAccountCompanyId = currentAziendaId;
             }
             let currentSharedWith = oldData?.sharedWith || {};
+            // M7-R7C-1: ciclo di condivisione dell'Account (0 = legacy). Un valore
+            // malformato chiude il salvataggio invece di scrivere su un ID incerto.
+            const sharingCycle = sharingCycleOf(oldData);
+            if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
 
             // 2. NOW EXECUTE ALL WRITES
             const finalData = { ...data };
@@ -200,7 +204,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
 
                     // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
@@ -218,7 +222,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
+                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, sharingCycle)));
 
                         // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
@@ -230,7 +234,10 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                     const existingGuest = finalData.sharedWith[sKey];
 
                     // FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito
-                    if (!existingGuest || existingGuest.status === 'rejected') {
+                    // M7-R7C-1: anche una voce `suspended` (Account archiviato e
+                    // ripristinato) richiede un NUOVO invito: è reinvitabile solo
+                    // perché l'utente l'ha riselezionata nel modulo.
+                    if (!existingGuest || existingGuest.status === 'rejected' || existingGuest.status === 'suspended') {
                         finalData.sharedWith[sKey] = {
                             email: email,
                             status: 'pending',
@@ -238,8 +245,8 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                         };
 
                         // Crea Invito
-                        transaction.set(doc(db, "invites", `${targetId}_${sKey}`), {
-                            inviteId: `${targetId}_${sKey}`,
+                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
+                            inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
                             accountId: targetId,
                             aziendaId: currentAziendaId,
                             ownerId: currentUid,
@@ -251,6 +258,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                             notifyPush: document.getElementById('invite-notify-push')?.checked === true,
                             notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
                             status: 'pending',
+                            cycle: sharingCycle,
                             createdAt: new Date().toISOString()
                         });
 

@@ -1228,6 +1228,21 @@ exports.respondToInvitation = onCall(
                     "Account nell'Archivio: l'invito resta in attesa finché l'Account è sospeso.",
                     {reason: "ACCOUNT_ARCHIVED"});
             }
+            // M7-R7C-1: il ciclo dell'invito deve coincidere con quello dell'Account.
+            // Assenza = ciclo legacy 0; valori non interi, negativi o non sicuri
+            // vengono rifiutati invece di essere interpretati. L'incremento del ciclo
+            // avviene nella stessa transazione dell'archiviazione, quindi una
+            // risposta tardiva a un invito del ciclo precedente è negata e non può
+            // ricreare `sharedWithUids` dopo il ripristino.
+            const cycleOf = value => value === undefined ? 0
+                : (Number.isSafeInteger(value) && value >= 0 ? value : null);
+            const inviteCycle = cycleOf(invite.cycle);
+            const accountCycle = cycleOf(account.sharingCycle);
+            if (inviteCycle === null || accountCycle === null || inviteCycle !== accountCycle) {
+                throw new HttpsError("failed-precondition",
+                    "Invito non più valido: l'Account è cambiato. Serve un nuovo invito.",
+                    {reason: "INVITE_CYCLE_STALE"});
+            }
             const sharedWith = { ...(account.sharedWith || {}) };
             const guestKey = sanitizeEmail(email);
             const guest = sharedWith[guestKey];

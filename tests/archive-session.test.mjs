@@ -9,6 +9,10 @@ const strip = text => text.replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/
 const service = strip(await readFile(new URL('archive-account-service.js', base), 'utf8'));
 const archiveModel = strip(await readFile(new URL('archive-account-model.js', base), 'utf8'));
 const ui = strip(await readFile(new URL('archivio_account.js', base), 'utf8'));
+// M7-R7C-1: il servizio usa gli helper di ciclo/invito da `utils.js`; il banco li
+// inietta nel contesto perché gli `import` vengono rimossi dai sorgenti.
+const utilsSource = await readFile(new URL('../../utils.js', base), 'utf8');
+const {inviteIdForGuest, nextSharingCycle, sharingCycleOf} = await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 const tick = () => new Promise(setImmediate);
 const account = (id = 'same', context = 'privato') => ({id, context, revision: 1, nomeAccount: 'Synthetic', isArchived: true});
@@ -42,16 +46,27 @@ function fixture(withUi = false) {
     const search = new Element('input'), body = new Element('body'), document = new EventTarget();
     Object.assign(document, {body, activeElement: search, getElementById: id => nodes[id], querySelector: () => search});
     let operationCount = 0, stored = {isArchived: true, revision: 1};
+    // M7-R7C-1: la transazione legge anche gli inviti identificabili del ciclo.
+    const invites = new Map();
+    let transactionRuns = 0;
     const context = vm.createContext({
         auth, db: {}, functions: {}, AbortController, crypto: {randomUUID: () => `operation-${++operationCount}`}, console: {warn() {}},
+        inviteIdForGuest, nextSharingCycle, sharingCycleOf,
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         doc: (_db, ...path) => path.join('/'), deleteField: () => ({delete: true}),
         updateDoc: async (...args) => writes.push(args),
         runTransaction: async (_db, callback) => {
+            transactionRuns++;
             const staged = [];
-            await callback({get: async () => ({exists: () => stored !== null, data: () => stored}),
-                update: (...args) => staged.push(args)});
+            await callback({get: async reference => {
+                    const path = typeof reference === 'string' ? reference : reference.path;
+                    const record = path.startsWith('invites/') ? (invites.has(path) ? invites.get(path) : null) : stored;
+                    return {exists: () => record !== null && record !== undefined, data: () => record};
+                },
+                update: (...args) => staged.push(args),
+                // M7-R7C-1: la sospensione non cancella mai inviti o dati.
+                delete: () => { throw new Error('M7R7C1_NO_DELETE'); }});
             writes.push(...staged);
         },
         respond: async () => ({data: {status: 'purged'}}),
@@ -70,7 +85,8 @@ function fixture(withUi = false) {
     vm.runInContext(archiveModel, context);
     vm.runInContext(service, context);
     if (withUi) vm.runInContext(ui, context);
-    return {context, calls, writes, nodes, search, body, swipes, toasts, observers, timers,
+    return {context, calls, writes, nodes, search, body, swipes, toasts, observers, timers, invites,
+        get transactionRuns() { return transactionRuns; },
         set stored(value) { stored = value; },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
         pagehide: () => events.dispatchEvent(new Event('pagehide')),
@@ -417,7 +433,7 @@ test('archiviazione: scrive i metadati canonici con revisione incrementata', asy
     for (const [context, prefix] of [['privato', 'users/A/accounts/x'], ['company-1', 'users/A/aziende/company-1/accounts/x']]) {
         const f = fixture(); f.stored = {isArchived: false, revision: 4};
         const result = await f.context.archiveAccount('A', {id: 'x', context, revision: 4});
-        assert.deepEqual({...result}, {status: 'archived', id: 'x', context, revision: 5});
+        assert.deepEqual({...result}, {status: 'archived', id: 'x', context, revision: 5, sharingCycle: 1, suspendedInvites: 0});
         assert.equal(f.writes.length, 1);
         const [path, patch] = f.writes[0];
         assert.equal(path, prefix);
@@ -431,7 +447,7 @@ test('archiviazione: scrive i metadati canonici con revisione incrementata', asy
 test('archiviazione: un Account già in Archivio non viene incrementato due volte', async () => {
     const f = fixture(); f.stored = {isArchived: true, revision: 7};
     const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 7});
-    assert.deepEqual({...result}, {status: 'already-archived', id: 'x', context: 'privato', revision: 7});
+    assert.deepEqual({...result}, {status: 'already-archived', id: 'x', context: 'privato', revision: 7, sharingCycle: 0, suspendedInvites: 0});
     assert.equal(f.writes.length, 0, 'nessuna seconda scrittura');
 });
 
@@ -450,7 +466,7 @@ test('archiviazione: revisione cambiata non sovrascrive e chiede di aggiornare',
 test('archiviazione: updatedAt osservato consente di archiviare i writer legacy senza revisione', async () => {
     const f = fixture(); f.stored = {isArchived: false, revision: 3, updatedAt: '2026-01-01T00:00:00.000Z'};
     const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', updatedAt: '2026-01-01T00:00:00.000Z'});
-    assert.deepEqual({...result}, {status: 'archived', id: 'x', context: 'privato', revision: 4});
+    assert.deepEqual({...result}, {status: 'archived', id: 'x', context: 'privato', revision: 4, sharingCycle: 1, suspendedInvites: 0});
     assert.equal(f.writes.length, 1);
     assert.equal(f.writes[0][1].isArchived, true);
     assert.equal(f.writes[0][1].revision, 4);
@@ -490,5 +506,89 @@ test('archiviazione: blocco del Vault e cambio utente impediscono la scrittura',
     const changed = f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 2});
     f.changeUid('B');
     await assert.rejects(changed, /ARCHIVE_SESSION_INVALIDATED/);
+    assert.equal(f.writes.length, 0);
+});
+
+// M7-R7C-1 — la revoca persistente dei grant e il ciclo sono atomici con
+// l'archiviazione, nella stessa transazione che verifica i marker osservati.
+
+const MARKER_7C = '2026-01-01T00:00:00.000Z';
+
+test('archiviazione: revoca persistente, stato sospeso e ciclo nella stessa transazione', async () => {
+    const f = fixture();
+    f.stored = {isArchived: false, revision: 4, updatedAt: MARKER_7C, sharedWith: {
+        accepted_key: {email: 'accepted@example.invalid', status: 'accepted', uid: 'guest-1'},
+        pending_key: {email: 'pending@example.invalid', status: 'pending', uid: null},
+        rejected_key: {email: 'rejected@example.invalid', status: 'rejected', uid: null}
+    }};
+    f.invites.set('invites/x_accepted_key', {status: 'accepted', guestUid: 'guest-1'});
+    f.invites.set('invites/x_pending_key', {status: 'pending'});
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 4, updatedAt: MARKER_7C});
+    assert.equal(f.transactionRuns, 1, 'archiviazione e revoca in una sola transazione');
+    assert.equal(result.status, 'archived');
+    assert.equal(result.sharingCycle, 1);
+    assert.equal(result.suspendedInvites, 2, 'solo gli inviti esistenti vengono marcati');
+    const accountWrite = f.writes.find(write => write[0] === 'users/A/accounts/x');
+    assert.equal(accountWrite[1].isArchived, true);
+    assert.equal(accountWrite[1].sharingCycle, 1);
+    assert.equal(accountWrite[1].sharedWithUids.length, 0, 'nessun grant residuo');
+    assert.equal(accountWrite[1].acceptedCount, 0);
+    assert.equal(accountWrite[1].sharedWith.accepted_key.status, 'suspended');
+    assert.equal(typeof accountWrite[1].sharedWith.accepted_key.suspendedAt, 'string');
+    assert.equal(accountWrite[1].sharedWith.pending_key.status, 'suspended');
+    assert.equal(accountWrite[1].sharedWith.rejected_key.status, 'rejected', 'chi ha rifiutato conserva lo stato');
+    const inviteWrites = f.writes.filter(write => write[0].startsWith('invites/'));
+    assert.deepEqual(inviteWrites.map(write => write[0]).sort(), ['invites/x_accepted_key', 'invites/x_pending_key']);
+    assert.ok(inviteWrites.every(write => write[1].sharingState === 'suspended' && typeof write[1].suspendedAt === 'string'));
+});
+
+test('archiviazione: senza ospiti il ciclo avanza comunque e non si scrivono inviti', async () => {
+    const f = fixture();
+    f.stored = {isArchived: false, revision: 2, updatedAt: MARKER_7C, sharedWith: {}};
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 2, updatedAt: MARKER_7C});
+    assert.equal(result.sharingCycle, 1);
+    assert.equal(result.suspendedInvites, 0);
+    assert.equal(f.writes.length, 1);
+});
+
+test('archiviazione: un ciclo già avanzato usa e marca l\'invito del ciclo corrente', async () => {
+    const f = fixture();
+    f.stored = {isArchived: false, revision: 1, updatedAt: MARKER_7C, sharingCycle: 2,
+        sharedWith: {k: {email: 'g@example.invalid', status: 'accepted', uid: 'u'}}};
+    f.invites.set('invites/x_k_c2', {status: 'accepted'});
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 1, updatedAt: MARKER_7C});
+    assert.equal(result.sharingCycle, 3);
+    assert.deepEqual(f.writes.filter(write => write[0].startsWith('invites/')).map(write => write[0]), ['invites/x_k_c2']);
+});
+
+test('archiviazione: ciclo malformato o al massimo chiude l\'operazione senza scritture', async () => {
+    for (const sharingCycle of [-1, 1.5, '1', Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 2]) {
+        const f = fixture();
+        f.stored = {isArchived: false, revision: 1, updatedAt: MARKER_7C, sharingCycle,
+            sharedWith: {k: {email: 'g@example.invalid', status: 'accepted', uid: 'u'}}};
+        await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 1, updatedAt: MARKER_7C}),
+            /ARCHIVE_CYCLE_INVALID/);
+        assert.equal(f.writes.length, 0, `nessuna scrittura con sharingCycle ${sharingCycle}`);
+    }
+});
+
+test('archiviazione: oltre il tetto di destinatari non si scrive nulla', async () => {
+    const f = fixture();
+    const sharedWith = {};
+    for (let index = 0; index <= 100; index++) sharedWith[`guest_${index}`] = {email: `g${index}@example.invalid`, status: 'accepted', uid: `u${index}`};
+    f.stored = {isArchived: false, revision: 1, updatedAt: MARKER_7C, sharedWith};
+    await assert.rejects(f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 1, updatedAt: MARKER_7C}),
+        /ARCHIVE_RECIPIENTS_LIMIT/);
+    assert.equal(f.writes.length, 0);
+    assert.equal(f.transactionRuns, 1);
+});
+
+test('archiviazione: già in Archivio riporta il ciclo senza scrivere', async () => {
+    const f = fixture();
+    f.stored = {isArchived: true, revision: 7, updatedAt: MARKER_7C, sharingCycle: 3,
+        sharedWith: {k: {email: 'g@example.invalid', status: 'suspended'}}};
+    const result = await f.context.archiveAccount('A', {id: 'x', context: 'privato', revision: 7, updatedAt: MARKER_7C});
+    assert.equal(result.status, 'already-archived');
+    assert.equal(result.sharingCycle, 3);
     assert.equal(f.writes.length, 0);
 });

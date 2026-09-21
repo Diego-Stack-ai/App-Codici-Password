@@ -344,7 +344,7 @@ async function loadData(mount) {
         if (isShared) {
             document.getElementById('shared-management')?.classList.remove('hidden');
             if (data.sharedWith) {
-                invitedEmails = Object.values(data.sharedWith).map(g => g.email);
+                invitedEmails = Object.values(data.sharedWith).filter(guest => guest?.status !== 'suspended').map(g => g.email);
             } else {
                 const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
                 invitedEmails = [...emails];

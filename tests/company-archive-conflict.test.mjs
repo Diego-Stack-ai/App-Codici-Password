@@ -24,12 +24,18 @@ const service = strip(await readFile(new URL('settings/archive-account-service.j
 const formSave = strip(await readFile(new URL('azienda/form-azienda-save.js', modules), 'utf8'))
     .replace("await import('../settings/archive-account-service.js')",
         'await Promise.resolve({archiveAccount: globalThis.archiveAccount, archiveConfirmMessage: globalThis.archiveConfirmMessage})');
+// M7-R7C-1: il servizio usa gli helper di ciclo/invito di `utils.js`; il banco li
+// inietta nel contesto perché gli `import` vengono rimossi dai sorgenti.
+const utilsSource = await readFile(new URL('../utils.js', modules), 'utf8');
+const {inviteIdForGuest, nextSharingCycle, sharingCycleOf} =
+    await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
 
 function fixture({revision = 4, updatedAt = '2026-01-01T00:00:00.000Z', isArchived = false, confirm = true} = {}) {
     const writes = [], toasts = [], errors = [], transactions = [];
     const stored = {isArchived, revision, updatedAt};
     const context = vm.createContext({
         auth: {currentUser: {uid: 'A'}}, db: {}, functions: {},
+        inviteIdForGuest, nextSharingCycle, sharingCycleOf,
         doc: (_db, ...path) => path.join('/'),
         deleteField: () => ({delete: true}),
         onAuthStateChanged: () => () => {},

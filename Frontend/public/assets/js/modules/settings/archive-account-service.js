@@ -2,6 +2,7 @@ import { auth, db, functions } from '../../firebase-config.js?v=1.2.127';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';
+import { inviteIdForGuest, nextSharingCycle, sharingCycleOf } from '../../utils.js';
 // Riusciti per i chiamanti che caricano questo servizio con import differito
 // (budget dei moduli statici di `form_account_azienda.html`): la pagina non deve
 // aggiungere un import statico per comporre l'avviso dei destinatari.
@@ -12,6 +13,10 @@ import {
     listCompanies,
     listCompanyAccounts
 } from '../data/vault-repository.js';
+
+// M7-R7C-1: tetto di destinatari per la transazione atomica di archiviazione.
+// Oltre il tetto si fallisce senza modifiche, invece di lasciare stati parziali.
+const ARCHIVE_RECIPIENTS_LIMIT = 100;
 
 function archiveSession(uid, {signal, isActive = () => true} = {}) {
     let invalid = false, unsubscribe = () => {};
@@ -225,7 +230,7 @@ export async function archiveAccount(uid, account, options = {}) {
         if (!hasRevision && !hasUpdatedAt) throw invalid('ARCHIVE_MARKER_MISSING');
         const expectedRevision = revisionOf(target.revision);
         const reference = accountReference(uid, target);
-        let status = 'archived', revision = expectedRevision + 1;
+        let status = 'archived', revision = expectedRevision + 1, sharingCycle = 0, suspendedInvites = 0;
         await runTransaction(db, async transaction => {
             check();
             const snapshot = await transaction.get(reference);
@@ -237,22 +242,61 @@ export async function archiveAccount(uid, account, options = {}) {
                 // Già in Archivio: nessuna seconda scrittura e nessun doppio incremento.
                 status = 'already-archived';
                 revision = currentRevision;
+                sharingCycle = sharingCycleOf(current) ?? 0;
                 return;
             }
-            // Entrambi i marker osservati devono coincidere con lo stato attuale.
+            // Entrambi i marker osservati devono coincidere con lo stato attuale,
+            // PRIMA di qualunque scrittura di questa stessa transazione: la revoca
+            // qui sotto non deve poter sembrare una modifica concorrente.
             if (hasUpdatedAt && current.updatedAt !== target.updatedAt) throw invalid('ARCHIVE_UPDATED_AT_CONFLICT');
             if (hasRevision && currentRevision !== expectedRevision) throw invalid('ARCHIVE_CONFLICT');
+            // M7-R7C-1: il ciclo legacy è 0 e l'incremento non supera mai il massimo
+            // intero sicuro; un valore malformato chiude l'operazione.
+            const cycle = sharingCycleOf(current);
+            const nextCycle = nextSharingCycle(current);
+            if (cycle === null || nextCycle === null) throw invalid('ARCHIVE_CYCLE_INVALID');
+            const sharedWith = {...(current.sharedWith || {})};
+            const guestKeys = Object.keys(sharedWith);
+            if (guestKeys.length > ARCHIVE_RECIPIENTS_LIMIT) throw invalid('ARCHIVE_RECIPIENTS_LIMIT');
+            const inviteRefs = guestKeys.map(key => doc(db, 'invites', inviteIdForGuest(target.id, key, cycle)));
+            // Tutte le letture prima di ogni scrittura (vincolo di Firestore).
+            const inviteSnapshots = await Promise.all(inviteRefs.map(inviteRef => transaction.get(inviteRef)));
+            check();
             const metadata = createArchiveMetadata({revision: currentRevision});
+            const suspendedAt = metadata.archivedAt;
+            for (const key of guestKeys) {
+                const guest = sharedWith[key];
+                // Solo chi aveva o poteva avere accesso viene sospeso: chi ha
+                // rifiutato conserva il suo stato.
+                if (guest && typeof guest === 'object' && ['pending', 'accepted'].includes(guest.status)) {
+                    sharedWith[key] = {...guest, status: 'suspended', suspendedAt};
+                }
+            }
             revision = metadata.revision;
+            sharingCycle = nextCycle;
+            // Una sola scrittura sul documento Account: archiviazione e revoca
+            // persistente dei grant sono atomiche, e il ciclo rende invalide le
+            // risposte tardive agli inviti precedenti.
             transaction.update(reference, {
                 isArchived: true,
                 archiveSchemaVersion: metadata.archiveSchemaVersion,
                 archivedAt: metadata.archivedAt,
-                revision: currentRevision + 1
+                revision: currentRevision + 1,
+                sharingCycle: nextCycle,
+                sharedWithUids: [],
+                acceptedCount: 0,
+                sharedWith
+            });
+            // Gli inviti identificabili del ciclo chiuso vengono marcati, mai
+            // cancellati; quelli assenti vengono saltati.
+            inviteSnapshots.forEach((inviteSnapshot, index) => {
+                if (!inviteSnapshot.exists()) return;
+                suspendedInvites++;
+                transaction.update(inviteRefs[index], {sharingState: 'suspended', suspendedAt});
             });
         });
         check();
-        return Object.freeze({status, id: target.id, context: target.context, revision});
+        return Object.freeze({status, id: target.id, context: target.context, revision, sharingCycle, suspendedInvites});
     });
 }
 

@@ -15,6 +15,8 @@ const ACCOUNT = 'account-1', ARCHIVED = 'archived-1', COMPANY = 'company-1';
 const EMAIL_KEY = 'guest_example_invalid';
 const activePath = ['users', OWNER, 'accounts', ACCOUNT];
 const archivedPath = ['users', OWNER, 'accounts', ARCHIVED];
+const restoredPath = ['users', OWNER, 'accounts', 'restored-1'];
+const guestInvitePath = ['invites', `${ACCOUNT}_${EMAIL_KEY}`];
 const activeCompanyPath = ['users', OWNER, 'aziende', COMPANY, 'accounts', ACCOUNT];
 const archivedCompanyPath = ['users', OWNER, 'aziende', COMPANY, 'accounts', ARCHIVED];
 let testEnv;
@@ -38,6 +40,14 @@ beforeEach(async () => {
         const db = context.firestore();
         await setDoc(doc(db, ...activePath), account(false));
         await setDoc(doc(db, ...archivedPath), account(true));
+        // M7-R7C-1: Account ripristinato dopo l'archiviazione: la revoca è
+        // persistente, quindi la lista dei grant è vuota e resterà vuota.
+        await setDoc(doc(db, ...restoredPath), {...account(false), sharingCycle: 1,
+            sharedWithUids: [], acceptedCount: 0,
+            sharedWith: {[EMAIL_KEY]: {email: 'guest@example.invalid', status: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'}}});
+        await setDoc(doc(db, ...guestInvitePath), {inviteId: `${ACCOUNT}_${EMAIL_KEY}`, ownerId: OWNER, senderId: OWNER,
+            accountId: ACCOUNT, recipientEmail: 'guest@example.invalid', status: 'accepted',
+            sharingState: 'suspended', suspendedAt: '2026-01-01T00:00:00.000Z'});
         await setDoc(doc(db, ...activeCompanyPath), account(false));
         await setDoc(doc(db, ...archivedCompanyPath), account(true));
         await setDoc(doc(db, ...archivedPath, 'attachments', 'attachment-1'), {name: 'allegato sintetico'});
@@ -48,7 +58,7 @@ beforeEach(async () => {
 });
 after(async () => testEnv?.cleanup());
 
-const asGuest = () => testEnv.authenticatedContext(GUEST).firestore();
+const asGuest = () => testEnv.authenticatedContext(GUEST, {email: 'guest@example.invalid'}).firestore();
 const asPending = () => testEnv.authenticatedContext(PENDING).firestore();
 const asStranger = () => testEnv.authenticatedContext(STRANGER).firestore();
 const asOwner = () => testEnv.authenticatedContext(OWNER).firestore();
@@ -73,6 +83,20 @@ test('ospite accettato: negato sull\'Account archiviato in tutti i percorsi', as
 test('invito pendente: resta negato su Account attivo e archiviato', async () => {
     await assertFails(getDoc(doc(asPending(), ...activePath)));
     await assertFails(getDoc(doc(asPending(), ...archivedPath)));
+});
+
+// M7-R7C-1 — la revoca è persistente: dopo il ripristino non basta `isArchived`
+// falso, perché la lista dei grant è vuota e resta vuota.
+test('Account ripristinato: l\'ospite precedente non rilegge', async () => {
+    await assertFails(getDoc(doc(asGuest(), ...restoredPath)));
+});
+
+test('invito del ciclo precedente: leggibile dal destinatario ma senza accesso all\'Account', async () => {
+    const snapshot = await assertSucceeds(getDoc(doc(asGuest(), ...guestInvitePath)));
+    assert.equal(snapshot.data().sharingState, 'suspended');
+    assert.equal(snapshot.data().accountName, undefined, 'l\'invito non contiene dati dell\'Account');
+    assert.equal(snapshot.data().password, undefined);
+    await assertFails(getDoc(doc(asGuest(), ...restoredPath)));
 });
 
 test('estraneo: nessun accesso agli Account del proprietario', async () => {

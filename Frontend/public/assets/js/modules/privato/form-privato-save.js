@@ -5,7 +5,7 @@ import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
@@ -272,6 +272,10 @@ export async function savePrivateAccount({
                     : { ...email, linkedAccountId: targetId };
             }
             let currentSharedWith = oldData?.sharedWith || {};
+            // M7-R7C-1: ciclo di condivisione dell'Account (0 = legacy). Un valore
+            // malformato chiude il salvataggio invece di scrivere su un ID incerto.
+            const sharingCycle = sharingCycleOf(oldData);
+            if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
 
             // 2. NOW EXECUTE ALL WRITES
             let finalData = { ...data };
@@ -291,7 +295,7 @@ export async function savePrivateAccount({
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
 
                     // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
@@ -309,7 +313,7 @@ export async function savePrivateAccount({
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
+                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, sharingCycle)));
 
                         // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
@@ -322,7 +326,10 @@ export async function savePrivateAccount({
                     const existingGuest = finalData.sharedWith[sKey];
 
                     // --- FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito ---
-                    if (!existingGuest || existingGuest.status === 'rejected') {
+                    // M7-R7C-1: anche una voce `suspended` (Account archiviato e
+                    // ripristinato) richiede un NUOVO invito: è reinvitabile solo
+                    // perché l'utente l'ha riselezionata nel modulo.
+                    if (!existingGuest || existingGuest.status === 'rejected' || existingGuest.status === 'suspended') {
                         // Nuovo Guest o Reset di un rifiutato
                         finalData.sharedWith[sKey] = {
                             email: email,
@@ -331,8 +338,8 @@ export async function savePrivateAccount({
                         };
 
                         // Crea Invito
-                        transaction.set(doc(db, "invites", `${targetId}_${sKey}`), {
-                            inviteId: `${targetId}_${sKey}`,
+                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
+                            inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
                             accountId: targetId,
                             ownerId: currentUid,
                             senderId: currentUid,
@@ -343,6 +350,7 @@ export async function savePrivateAccount({
                             notifyPush: document.getElementById('invite-notify-push')?.checked === true,
                             notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
                             status: 'pending',
+                            cycle: sharingCycle,
                             createdAt: new Date().toISOString()
                         });
 

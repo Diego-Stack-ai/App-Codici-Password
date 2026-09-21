@@ -2175,3 +2175,349 @@ Nuovo file `tests/archive-guest-suspension.rules.test.mjs` (8 casi), registrato 
 5. Effetto collaterale noto e già censito in M7-R7A (P2): con il blocco attivo una lettura ospite negata arriva al client come `permission-denied`, indistinguibile da una revoca. Nessuna UI è stata modificata qui.
 
 **Stato incarico: DA_VERIFICARE** — M7-R7B1a consegnato da DeepSeek il 2026-09-21; blocco autorevole nei tre match ospite con chiusura esplicita su `isArchived`, proprietario intatto, inviti e condivisione non toccati, suite Rules **37/37** su Emulator, controllo negativo 6/8 con i due casi decisivi in errore, nessun deploy e nessun push.
+
+## Verifica Codex — M7-R7B1a Rules sospensione ospiti
+
+**Esito: APPROVATO come candidato locale non distribuito.** Commit `b46b1f58`: la condizione `isAcceptedGuest() && resource.data.get('isArchived', false) == false` è applicata a tutti e tre i match ospite, mentre il match proprietario resta separato. La suite Emulator dichiarata da DeepSeek passa **37/37**, con controllo negativo dei due casi decisivi; revisione statica del diff conferma che `isArchived` malformato non apre la lettura e che non sono stati aggiunti permessi per allegati o profilo. Il campo assente mantiene il comportamento legacy (`false`). Limiti espliciti: cache già presente non revocabile retroattivamente; ripristino oggi riattiverebbe gli ospiti precedenti; UI non ancora adeguata. Non distribuire fino alla decisione di Diego sul ripristino e sulla lista ospite e alla chiusura della relativa implementazione.
+
+**Stato verifica: APPROVATO** — 21/09/2026. Nessun nuovo incarico esecutivo finché la decisione di prodotto ancora pendente non è registrata.
+
+## Decisione Diego — M7 ripristino e vista ospite (21/09/2026)
+
+1. **Ripristino di Account condiviso:** le autorizzazioni precedenti NON si riattivano automaticamente. Il proprietario deve esprimere una nuova volontà di condividere e inviare un **nuovo invito**. La sola modifica `isArchived: false` non deve mai rendere nuovamente leggibili i dati agli ospiti precedenti.
+2. **Vista dell'ospite durante l'archiviazione:** l'Account già condiviso rimane riconoscibile nella lista con stato **«Account sospeso» o «archiviato»**, senza esporre contenuti dell'Account, credenziali o allegati; l'apertura deve essere negata.
+
+Queste scelte superano ogni proposta precedente di riattivazione automatica o scomparsa silenziosa della card. Le Rules già preparate nel commit `b46b1f58` bloccano la lettura durante l'archivio, ma da sole NON implementano la prima decisione; il candidato non va distribuito finché il ciclo archivio-ripristino e la vista ospite non sono chiusi e testati.
+
+**Stato decisione: APPROVATA DA DIEGO.**
+
+## Incarico Codex — M7-R7C: progettare revoca persistente e stato sospeso
+
+**Stato incarico: PRONTO.** DeepSeek esegua una ricognizione/proposta in sola lettura prima di modificare il runtime. Disegnare un flusso fail-closed per archivio → stato sospeso visibile all'ospite → ripristino senza alcun accesso ospite → nuova condivisione tramite nuovo invito. Individuare esattamente quali campi e inviti oggi darebbero accesso automatico al ripristino (`sharedWithUids`, `sharedWith`, stato invito, eventuali copie locali) e come neutralizzarli in modo atomico o con una transizione verificabile, mantenendo storico/audit e senza cancellare dati o inviti per errore. Definire la minima informazione non segreta leggibile dall'ospite per la card «Account sospeso», autorevole anche quando le Rules negano il documento Account; impedire link profondi, dettagli e contenuti. Includere casi di concorrenza, offline/cache già esistente, Account privato/aziendale, inviti pendenti e utenti già accettati, test su Emulator e possibili migrazioni di dati preesistenti. Consegnare nel solo `docs/DEEPSEEK_COORDINATION.md` una sequenza di fette implementative e i rischi residui con riferimenti a file/riga; marcare `DA_VERIFICARE`. Nessun codice, commit, push, merge, deploy o dato reale in questa ricognizione. Un solo incarico attivo.
+
+## Presa in carico DeepSeek — M7-R7C progetto revoca persistente e stato sospeso
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `b46b1f58`; la decisione di Diego e l'incarico erano nel working tree non committati e sono **conservati** senza alterarne il testo.
+- **Perimetro:** ricognizione e proposta **in sola lettura**. **Nessun codice, commit, push, merge, deploy o dato reale**: non tocco runtime, Rules, Functions, test o versione. Un solo incarico attivo.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7C preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7C progetto revoca persistente e stato sospeso
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Proposta in sola lettura, nessun commit.
+- **Decisione recepita:** al ripristino **nessuna** riattivazione automatica degli ospiti precedenti; l'ospite vede la card con stato «Account sospeso» senza contenuti; nuove condivisioni solo con un **nuovo invito**.
+
+### 1. Che cosa oggi darebbe accesso automatico al ripristino
+
+| Fonte | Dove | Effetto al ripristino |
+|---|---|---|
+| `sharedWithUids` | sull'Account, `firestore.rules:10-12` è l'unica condizione d'accesso ospite | **resta popolato**: al solo `isArchived: false` l'ospite rilegge subito |
+| `sharedWith[key].status` | `shared/detail-account-mode.js:147-167`, `privato/form-privato-save.js:325,365`, `azienda/form-azienda-save.js:233,273` | alimenta il ricalcolo di `sharedWithUids` a ogni salvataggio della condivisione |
+| stato dell'invito | `functions/index.js:1203-1243`, `invites` leggibile dal destinatario (`firestore.rules:181-185`) | un invito ancora `pending` può essere accettato **dopo** il ripristino e ricreare `sharedWithUids` |
+| copia locale | cache persistente (`firebase-config.js:56-57`) | una copia già letta resta visibile offline: le Rules non la revocano |
+| ripristino | `settings/archive-account-service.js:180-194` | oggi **non tocca** la condivisione: è la causa diretta dell'accesso automatico |
+
+**Conclusione:** la condizione `isArchived` (`b46b1f58`) blocca *durante* l'archivio ma non *dopo* il ripristino. La neutralizzazione deve essere **persistente** e agire su `sharedWithUids`, perché è l'unico campo che le Rules leggono.
+
+### 2. Proposta: revoca persistente all'archiviazione (fail-closed)
+
+**Transizione «sospensione condivisione»**, da eseguire **prima** dell'archiviazione e con la stessa logica al ripristino se trova ancora ospiti attivi:
+
+- `sharedWithUids: []` → l'unico campo che concede lettura: da qui in poi nessun percorso ospite può corrispondere, **anche** con `isArchived: false`.
+- `acceptedCount: 0`.
+- ogni voce `sharedWith[key]` **conservata** e marcata `status: 'suspended'` + `suspendedAt` (storico, popup destinatari, possibilità di nuova condivisione).
+- ogni invito derivato **conservato** e marcato `sharingState: 'suspended'` + `suspendedAt` (nessuna cancellazione: Diego e l'incarico chiedono di non eliminare inviti per errore).
+- evento di audit lato backend (la scrittura di `auditEvents` non esiste nel frontend: `functions/index.js:530-533` è l'unico scrittore, coerente con la decisione M7-R3 sul registro tecnico).
+
+**Perché non cancellare gli inviti:** restano la storia della condivisione e la base della card «sospeso»; l'invito non concede lettura da solo (l'accesso dipende da `sharedWithUids`).
+
+**Perché uno stato separato (`sharingState`) invece di riusare `status`:** la scoperta della card da parte dell'ospite usa `where('recipientEmail','==',email).where('status','==','accepted')` (`data/vault-repository.js:38-45`). Cambiando `status` la card **sparirebbe** dalla lista, contro la decisione 2 di Diego; con un campo separato la query resta valida e lo stato è esplicito. Se si preferisse cambiare `status`, la query andrebbe estesa a `status in ['accepted','suspended']` (filtri di sola uguaglianza, serviti dagli indici automatici).
+
+**Atomicità e ordine (transizione verificabile):**
+1. la sospensione della condivisione è **una sola transazione** lato backend (Admin SDK) sul documento Account + gli inviti derivati dalle chiavi di `sharedWith` (`${accountId}_${sanitizeEmail(email)}`, come già fa il client in `shared/detail-account-mode.js:148`);
+2. **poi** l'archiviazione (transazione client con CAS già esistente, `settings/archive-account-service.js:207-253`);
+3. ordine scelto perché è **fail-closed**: se il passo 2 fallisce, l'Account resta attivo ma **non più condiviso** (recuperabile dal proprietario, nessun ospite in più); l'ordine inverso lascerebbe una finestra in cui l'Account è archiviato ma ancora leggibile da un ospite accettato;
+4. **la stessa neutralizzazione va eseguita anche dal percorso di ripristino** se `sharedWithUids` non è vuoto: copre i dati **preesistenti** archiviati prima di questa modifica, senza richiedere una migrazione per essere corretti;
+5. la transizione è **idempotente** (rieseguita su un Account già sospeso non cambia nulla e risponde `already-suspended`).
+
+**Concorrenza da coprire:** accettazione di un invito mentre si archivia (già coperta, `functions/index.js:1220-1230`); accettazione **dopo** il ripristino (oggi possibile: vedi punto 4 della sezione 4); due dispositivi del proprietario che archiviano/ripristinano insieme (CAS su `revision` già esistente); sospensione rientrante dopo un errore di rete (idempotenza).
+
+### 3. Minima informazione non segreta per la card «Account sospeso»
+
+- **Fonte autorevole:** il documento `invites/{inviteId}`, leggibile dal destinatario anche quando le Rules negano l'Account (`firestore.rules:181-185`). Contiene già solo campi non segreti (`accountName`, `ownerId`, `accountId`, `aziendaId`, `status`, `senderEmail`: allowlist di creazione in `firestore.rules:186-199`).
+- **Da mostrare:** nome Account (già visibile oggi all'ospite) + stato «Account sospeso»/«archiviato». La marca `sharingState: 'suspended'` è aggiunta dall'aggiornamento del proprietario, che sulle Rules è libero nei campi (`firestore.rules:201`).
+- **Da non mostrare:** nessun campo dell'Account, nessuna credenziale, nessun allegato, nessun dettaglio; **apertura negata** (il server già nega il documento; il client non deve navigare al dettaglio) e **link profondi** (`dettaglio_account_privato.html?id=…&ownerId=…`, `dettaglio_account_azienda.html?…`) devono rifiutare con lo stesso stato, senza mostrare contenuti.
+- **Pendenti:** un invito mai accettato non mostra «sospeso» (non c'era accesso); solo le voci già `accepted` sospese producono lo stato.
+
+### 4. Punti di rottura già individuati (da correggere nelle fette, non ora)
+
+1. **Nuova condivisione dopo il ripristino:** `shared/detail-account-mode.js:156`, `privato/form-privato-save.js:325`, `azienda/form-azienda-save.js:233` creano una nuova voce solo se `!sharedWith[key] || status === 'rejected'`: con `status: 'suspended'` **il nuovo invito non verrebbe creato**. Va trattato come reinvitabile.
+2. **Voce sospesa pre-selezionata:** `shared/detail-account-mode.js:34,108` filtra solo `status !== 'rejected'`: una voce `suspended` apparirebbe come ancora condivisa.
+3. **Accettazione dopo il ripristino:** `respondToInvitation` (`functions/index.js:1203-1243`) non controlla lo stato della voce e riscriverebbe `sharedWithUids` con `status: 'accepted'`; serve il rifiuto quando `sharingState === 'suspended'` o la voce non è pendente/accettata.
+4. **Lista ospite:** `privato/account_privati.js:195-225` carica ogni card con un `get` sull'Account: con la lettura negata la card **scompare silenziosamente** (il `catch` registra e scarta). Per la decisione 2 la card va costruita dall'invito, senza leggere l'Account.
+5. **Mutazione offline:** il percorso offline è chiuso sui campi di condivisione (`functions/private-account-write-scope.js:19-24`, `functions/private-account-mutation-service.js:8`): la sospensione **non** può passare dalla coda offline, quindi richiede rete — da dichiarare nella UI.
+6. **Inviti orfani:** inviti senza voce corrispondente non sono enumerabili dalle chiavi di `sharedWith`; restano inerti (non concedono lettura) ma vanno ricensiti in una fetta di pulizia.
+
+### 5. Sequenza di fette proposta (una per volta, da autorizzare)
+
+| Fetta | Contenuto | Test |
+|---|---|---|
+| **R7C-1** | Callable backend di sospensione condivisione (transazione admin: `sharedWithUids: []`, `acceptedCount: 0`, voci `suspended`+`suspendedAt`, inviti `sharingState: 'suspended'`, evento di audit), idempotente, con esito `already-suspended` | `functions/test/` con transazione reale simulata + assenza di scritture nel caso già sospeso |
+| **R7C-2** | Percorsi proprietario: archivio chiama **prima** la sospensione e poi archivia; il ripristino neutralizza se trova ospiti attivi (dati preesistenti) | Banchi esistenti (`company-form-archive-mount`, `account-page-lifecycle`, `archive-session`) estesi |
+| **R7C-3** | Vista ospite: card «Account sospeso» dall'invito, nessuna lettura dell'Account, dettaglio e link profondi rifiutati senza contenuti | Banchi lista/dettaglio + casi offline |
+| **R7C-4** | `respondToInvitation`: rifiuto difensivo per voce sospesa o invito non pendente | Estensione di `functions/test/respond-invitation-archived.test.js` |
+| **R7C-5** | Reinivito: `suspended` trattato come reinvitabile nei tre scrittori di condivisione (`:156`, `:325`, `:233`) e voce non pre-selezionata | Banchi dei moduli di condivisione |
+| **R7C-6** (opzionale, dati reali) | Ricognizione/migrazione degli Account **già** archiviati in produzione e degli inviti orfani; richiede autorizzazione esplicita di Diego | Solo dopo autorizzazione |
+
+### 6. Test su Emulator necessari (estensione di `tests/archive-guest-suspension.rules.test.mjs`)
+
+- ospite accettato **negato** su un Account **non archiviato** con `sharedWithUids: []` (il caso «ripristino»): è la prova che la revoca è persistente;
+- ospite accettato negato durante l'archivio (già presente);
+- invito leggibile dal destinatario con `sharingState: 'suspended'` e **nessun** campo dell'Account;
+- proprietario: lettura/scrittura dell'Account e nuovo invito dopo il ripristino;
+- pendente negato in entrambi gli stati; estraneo negato;
+- nessun nuovo permesso per allegati, widget, profilo.
+
+### 7. Rischi residui dichiarati
+
+1. **Cache offline**: una copia già presente non è revocabile dalle Rules e nemmeno dalla transazione; la card «sospeso» dipende da un invito che il dispositivo offline potrebbe avere ancora vecchio. Limite dichiarato, non promessa di revoca retroattiva.
+2. **Due fasi**: la sospensione e l'archiviazione non sono un'unica transazione (l'audit deve stare lato backend). L'ordine proposto è fail-closed e la transizione è idempotente, ma un'interruzione fra le due lascia l'Account attivo e non condiviso: va mostrato all'utente come stato recuperabile, non come successo.
+3. **Dati preesistenti**: gli Account già archiviati oggi hanno `sharedWithUids` popolato; senza la neutralizzazione al ripristino (punto 4 della sezione 2) tornerebbero leggibili. Con quella, non serve una migrazione per la correttezza.
+4. **Inviti orfani** non enumerabili per chiave: inerti ma non ricensiti.
+5. **UI non adeguata**: fino a R7C-3 l'ospite vede sparire la card (comportamento peggiore della decisione, ma sicuro).
+6. **Nessun collaudo su browser/dispositivo reale**: le prove restano su Emulator e banchi sintetici.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7C consegnato da DeepSeek il 2026-09-21; individuate le fonti di accesso automatico al ripristino (`sharedWithUids` in primis), proposta una revoca persistente fail-closed e idempotente con ordine verificabile, definita la card «sospeso» dall'invito senza contenuti, elencati i sei punti di rottura con riferimenti a file/riga, la sequenza in sei fette e i rischi residui; nessun codice, commit o push eseguito.
+
+## Verifica Codex — M7-R7C progetto revoca persistente
+
+**Esito: DA_CORREGGERE prima di avviare R7C-1.** Il censimento delle fonti d'accesso è utile e il limite della cache offline è dichiarato correttamente, ma la sequenza proposta presenta due incongruenze verificabili:
+
+1. **CAS dell'archiviazione:** R7C-1 aggiorna prima il documento Account (`sharedWithUids`, `sharedWith`, ecc.), poi R7C-2 chiama `archiveAccount` con i marker `revision`/`updatedAt` osservati prima del popup. Il controllo di concorrenza introdotto in M7-R6 rifiuterà quindi l'archiviazione come modifica concorrente causata dalla stessa sospensione. Non aggirare il CAS con una rilettura tardiva che assorbe anche vere modifiche esterne. Proporre un'unica transizione autorevole che renda atomici almeno `isArchived: true` e la revoca di `sharedWithUids`, con controllo della revisione osservata e preservazione del percorso utente; coordinare inviti/audit fuori o dentro la transazione con semantica esplicita di fallimento e recupero.
+2. **Nuovo invito vs ID deterministico:** gli scrittori privato/aziendale/dettaglio usano `inviteId = accountId + '_' + sanitizeEmail(email)` (`privato/form-privato-save.js:335`, `azienda/form-azienda-save.js:242`, `shared/detail-account-mode.js:159-167`). Reinvitare lo stesso ospite con `transaction.set` sullo stesso ID sovrascriverebbe l'invito storico accettato/sospeso. Questo contraddice «nuovo invito» e conservazione dello storico. Definire un ID nuovo per ciascun ciclo di condivisione, gli indici/query necessari e la difesa da una risposta tardiva a un invito precedente; mantenere la card sospesa senza esporre dati.
+
+**Correzione richiesta a DeepSeek:** revisionare soltanto il piano M7-R7C nel file di coordinamento, includendo flusso archivio-ripristino-reinvito, atomicità/CAS, cardinalità e autorizzazioni degli inviti, test Emulator e migrazione legacy. Nessun codice, test, commit, push o deploy in questa fase. Consegnare `DA_VERIFICARE` con prove/riferimenti; un solo incarico attivo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione piano M7-R7C
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `b46b1f58`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** revisione **del solo piano** nel file di coordinamento. **Nessun codice, test, commit, push, merge o deploy**; nessuna modifica al runtime.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione piano M7-R7C presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione piano M7-R7C
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Solo piano, nessun commit.
+- **Entrambi i rilievi sono fondati** e il piano precedente viene **sostituito** dalle sezioni seguenti (restano validi il censimento delle fonti d'accesso e la card «sospeso» della sezione 3 del rapporto precedente).
+
+### R1. Autoconflitto del CAS e transizione unica (sostituisce R7C-1 del piano precedente)
+
+**Perché il piano precedente non funzionava:** la sospensione scriveva sull'Account (`revision` +1, `updatedAt` nuovo) e subito dopo `archiveAccount` confrontava i marker **osservati prima del popup** (`settings/archive-account-service.js:239-240`) → conflitto generato da noi stessi (`ARCHIVE_UPDATED_AT_CONFLICT`/`ARCHIVE_CONFLICT`). Aggirarlo rileggendo il documento dopo il clic è escluso: assorbirebbe anche modifiche esterne e contraddirebbe M7-R6.
+
+**Transizione unica (una sola `runTransaction`, client, percorso utente invariato):**
+
+1. lettura del documento Account;
+2. `already-archived` resta un no-op senza seconda scrittura (`settings/archive-account-service.js:232-237`);
+3. **controllo dei marker osservati una sola volta**, contro lo stato letto all'inizio e **prima di qualunque nostra scrittura** (`:239-240`): nessun autoconflitto, e una modifica esterna continua a essere rilevata;
+4. **scrittura atomica**: `isArchived: true`, `archiveSchemaVersion`, `archivedAt`, `revision: currentRevision + 1`, **`sharedWithUids: []`**, **`acceptedCount: 0`**, mappa `sharedWith` con ogni voce `{...guest, status: 'suspended', suspendedAt}`;
+5. **nella stessa transazione**, sospensione degli inviti del ciclo corrente, enumerati dalle chiavi di `sharedWith` (ID attuale `${id}_${sanitizeEmail(email)}`, con suffisso di ciclo dopo R7C-3): **lettura** di ciascun invito (per non creare documenti inesistenti) e `update` con `sharingState: 'suspended'` e `suspendedAt`; gli inviti assenti vengono saltati;
+6. **fuori** dalla transazione, senza valore di correttezza: l'evento di **audit**, scritto da un **trigger backend** (`onDocumentUpdated` sui due percorsi Account) quando `isArchived` cambia, idempotente sull'`event.id`. Motivo: il client non può scrivere `auditEvents` (decisione M7-R3; unico scrittore `functions/index.js:530-533`).
+
+**Semantica di fallimento e recupero (esplicita):** se la transazione fallisce, **nulla** cambia — l'Account resta attivo e condiviso come prima e l'utente ritenta; se riesce, archiviazione e revoca sono **insieme**, quindi non esistono gli stati intermedi «archiviato ma leggibile» (piano precedente, passo 1 riuscito e passo 2 fallito) né «attivo ma non condiviso». L'audit può arrivare dopo: **non è una precondizione** e non va presentato come tale.
+
+**Cardinalità:** N destinatari ⇒ N letture + N scritture nella stessa transazione; il limite di 500 operazioni è ampiamente sufficiente, ma si dichiara un **tetto di 100 destinatari**, oltre il quale l'operazione fallisce con messaggio dedicato e senza modifiche (una fetta backend separata potrà gestire i casi estremi).
+
+**Alternativa valutata e non scelta come primaria:** spostare l'intera archiviazione in una **callable** con Admin SDK (audit e inviti orfani dentro la stessa transazione, enumerabili per query). È più coerente per l'audit atomico, ma **sostituisce** la transazione client approvata in M7-R6 e cambia il percorso utente appena verificato: la tengo disponibile se Codex preferisce l'audit nella stessa transazione.
+
+### R2. Ripristino (sostituisce R7C-2 del piano precedente)
+
+Una sola transazione con CAS sulla revisione osservata (`settings/archive-account-service.js:180-194`):
+
+- **caso normale** (Account archiviato da R7C-1): `sharedWithUids` è già vuoto → si scrive soltanto `isArchived: false` e si rimuovono i metadati d'archivio, come oggi;
+- **caso legacy/preesistente** (`sharedWithUids` non vuoto): **nella stessa transazione** si azzera la lista, si marcano le voci `suspended` e si sospendono gli inviti del ciclo corrente, **poi** si ripristina → nessuna riattivazione automatica, nemmeno per i dati archiviati prima di questa modifica;
+- il ripristino **non ricrea** condivisioni: serve un **nuovo ciclo** (R7C-3/R7C-5).
+
+### R3. Identità degli inviti per ciclo di condivisione (risolve il rilievo 2)
+
+**Stato attuale verificato:** l'ID è deterministico `${accountId}_${sanitizeEmail(email)}` in **tutti** gli scrittori — `privato/form-privato-save.js:334-335`, `azienda/form-azienda-save.js:241-242`, `shared/detail-account-mode.js:159-167` — con cancellazione sugli stessi ID (`privato/form-privato-save.js:294,312`, `azienda/form-azienda-save.js:203,221`, `shared/detail-account-mode.js:148`) e letture in `privato/dettaglio-privato-sharing.js:108`, `azienda/dettaglio-azienda-sharing.js:135-136,215-216`. Reinvitare la stessa email **sovrascrive** il documento storico e una risposta tardiva agirebbe sul nuovo invito.
+
+**Correzione di piano:**
+
+- **`sharingCycle`** intero sull'Account, incrementato dalla transizione di archiviazione (R7C-1);
+- `inviteId = ${accountId}_${sanitizeEmail(email)}_c${sharingCycle}` e campo **`cycle`** nell'invito;
+- **dentro lo stesso ciclo** il comportamento resta quello attuale (stesso ID: revoca e reinvito coerenti); un **nuovo ciclo** crea un documento nuovo e lascia intatto lo storico;
+- **difesa dalla risposta tardiva:** `respondToInvitation` (`functions/index.js:1202-1250`) deve verificare, dentro la transazione, che `invite.cycle` sia assente o uguale ad `account.sharingCycle` (`assente` = invito legacy dello stesso ciclo) e che l'Account non sia archiviato (già presente, `:1220-1230`); altrimenti `failed-precondition` con reason **`INVITE_CYCLE_STALE`** e **zero scritture**;
+- **query e indici:** la scoperta dell'ospite resta `recipientEmail == email` + `status == 'accepted'` (`data/vault-repository.js:38-45`): il nuovo ID non richiede indici nuovi; un'eventuale estensione a `status in ['accepted','suspended']` resta su filtri di sola uguaglianza;
+- **deduplica della card:** dopo un nuovo ciclo l'ospite può avere **due** documenti visibili per lo stesso Account (il vecchio sospeso e il nuovo attivo) → la lista deve deduplicare per `accountId`+`ownerId` e preferire l'invito attivo, mostrando «sospeso» solo se non esiste un invito attivo. **Punto che il piano precedente non copriva.**
+- **autorizzazioni inviti:** il destinatario legge per `recipientEmail` (`firestore.rules:181-185`), il proprietario crea con allowlist (`:186-199`) e aggiorna/cancella liberamente (`:201`). Cambiare l'ID **non** richiede regole nuove.
+- **storico a livello di voce:** la mappa `sharedWith` è per email, non per ciclo: la storia dei cicli vive nei **documenti invito**, la voce mantiene lo stato corrente (limite dichiarato).
+
+### R4. Sequenza di fette rivista
+
+| Fetta | Contenuto | Test |
+|---|---|---|
+| **R7C-1** | Archiviazione in **una sola transazione**: CAS sui marker osservati, `isArchived`, `sharedWithUids: []`, `acceptedCount: 0`, voci `suspended`, inviti del ciclo `sharingState: 'suspended'`; incremento di `sharingCycle`; tetto di 100 destinatari | Banchi client (`company-form-archive-mount`, `account-page-lifecycle`, `archive-session`) + Emulator per autorizzazioni; **prova che la transazione unica non genera autoconflitto** e che una revisione esterna stantia è ancora rifiutata |
+| **R7C-2** | Ripristino con neutralizzazione difensiva dei dati legacy nella stessa transazione + **trigger di audit** per archivio e ripristino | Banchi `archive-session` estesi + `functions/test/` per il trigger |
+| **R7C-3** | `sharingCycle` e ID invito per ciclo + `cycle` sull'invito + `INVITE_CYCLE_STALE` in `respondToInvitation`; deduplica per Account nella lista ospite | `functions/test/respond-invitation-archived.test.js` esteso + Emulator |
+| **R7C-4** | Vista ospite: card «Account sospeso» dall'invito senza leggere l'Account, dettaglio e link profondi rifiutati senza contenuti | Banchi lista/dettaglio + casi offline |
+| **R7C-5** | Reinvito: `suspended` reinvitabile e non pre-selezionato (`shared/detail-account-mode.js:34,108,156`, `privato/form-privato-save.js:325`, `azienda/form-azienda-save.js:233`) | Banchi dei moduli di condivisione |
+| **R7C-6** (opzionale, **dati reali**) | Normalizzazione degli ID legacy, inviti orfani, eventuale marcatura degli inviti degli Account già archiviati; richiede autorizzazione esplicita di Diego | Solo dopo autorizzazione |
+
+**Decisione aperta da porre a Diego (non implementare ora):** la revoca esplicita di un ospite oggi **cancella** l'invito (`shared/detail-account-mode.js:148`, `privato/form-privato-save.js:294,312`, `azienda/form-azienda-save.js:203,221`): se lo storico deve essere completo, va marcato (`revoked` + data) invece di cancellato. Tocca il comportamento approvato in M7-R4/R5 e per questo è una scelta, non un'implementazione automatica.
+
+### R5. Test su Emulator (elenco finale, estende `tests/archive-guest-suspension.rules.test.mjs`)
+
+1. ospite accettato **negato** su un Account **non archiviato** con `sharedWithUids: []` (caso «ripristino»): prova che la revoca è persistente;
+2. ospite accettato negato durante l'archivio (già presente nel commit `b46b1f58`);
+3. invito del **ciclo precedente** leggibile dal destinatario ma **senza** accesso all'Account;
+4. invito del ciclo corrente con `sharingState: 'suspended'` leggibile dal destinatario e privo di qualsiasi campo dell'Account;
+5. proprietario: lettura e scrittura dell'Account archiviato, elenco dell'Archivio, aggiornamento degli inviti del proprio Account (`firestore.rules:201`) e **nuovo invito** dopo il ripristino;
+6. pendente negato in entrambi gli stati; estraneo negato; `isArchived` malformato negato;
+7. nessun nuovo permesso per allegati, widget, credenziali comuni, contatti o profilo.
+
+### R6. Migrazione dei dati preesistenti
+
+Account archiviati prima di R7C-1 hanno `sharedWithUids` popolato e inviti senza suffisso di ciclo. **Nessuna migrazione è necessaria per la correttezza**: la neutralizzazione difensiva al ripristino (R7C-2) svuota la lista e la semantica «`cycle` assente = ciclo corrente» mantiene validi gli inviti pendenti legittimi. Una normalizzazione completa (ID con ciclo, inviti orfani, inviti di Account già archiviati) è la fetta R7C-6 e tocca **dati reali**: solo con autorizzazione esplicita.
+
+### R7. Rischi residui aggiornati
+
+1. **Cache offline**: una copia già presente non è revocabile dalle Rules né dalla transazione; resta il limite dichiarato.
+2. **Audit asincrono**: il trigger è eventualmente consistente (ritenta da solo); la sua assenza non deve bloccare l'archiviazione né essere presentata come prova che l'archiviazione non è avvenuta.
+3. **Tetto di 100 destinatari** per la transazione atomica: oltre il tetto l'operazione fallisce senza modifiche e serve una fetta backend.
+4. **Doppia card** dopo un nuovo ciclo se la deduplica per Account non viene implementata prima della vista ospite (R7C-4): è un requisito di quella fetta.
+5. **Storico degli inviti cancellati alla revoca esplicita**: decisione aperta (R4).
+6. **Inviti orfani**: non enumerabili dalle chiavi di `sharedWith`; inerti, da ricensire in R7C-6.
+7. **UI non adeguata** fino a R7C-4 e **nessun collaudo** su browser o dispositivo reale.
+
+**Stato incarico: DA_VERIFICARE** — correzione del piano M7-R7C consegnata da DeepSeek il 2026-09-21; transizione unica atomica con CAS che elimina l'autoconflitto e gli stati intermedi, inviti per ciclo con difesa dalla risposta tardiva e deduplica della card, ripristino con neutralizzazione legacy, sequenza in sei fette rivista, elenco Emulator e migrazione legacy dichiarata; nessun codice, test, commit o push eseguito.
+
+## Verifica Codex — correzione piano M7-R7C: ciclo degli inviti legacy
+
+**Esito: DA_CORREGGERE.** La transizione unica risolve l'autoconflitto del CAS e gli ID per ciclo evitano di sovrascrivere lo storico. Rimane però un percorso di riattivazione contrario alla decisione di Diego: R3 propone che `invite.cycle` **assente** sia trattato come «ciclo corrente». Gli inviti esistenti non hanno `cycle`; R7C-1 incrementerebbe `account.sharingCycle` all'archiviazione; dopo il ripristino un vecchio invito `pending` privo di `cycle` verrebbe considerato corrente e `respondToInvitation` potrebbe riportare l'ospite in `sharedWithUids` senza un nuovo invito. Lo stesso problema vale per inviti legacy già pendenti quando l'Account viene archiviato. La difesa `isArchived` non protegge più dopo il ripristino.
+
+**Correzione richiesta a DeepSeek:** attribuire agli inviti senza `cycle` un ciclo legacy fisso (ad es. 0), mai il ciclo corrente per definizione; dimostrare che dopo la prima archiviazione `sharingCycle` è maggiore del ciclo legacy e che ogni risposta tardiva è negata con zero scritture. Rivedere sequenza di rilascio, migrazione e test per Account/inviti legacy senza `sharingCycle`/`cycle`, inclusi pendenti e già accettati, archivio → ripristino → risposta tardiva → nuovo invito valido. Consegnare soltanto il piano corretto, senza codice, test, commit, push o deploy. Un solo incarico attivo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione piano M7-R7C, ciclo legacy
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `b46b1f58`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** correzione **del solo piano**. **Nessun codice, test, commit, push, merge o deploy.**
+
+**Stato incarico: IN_LAVORAZIONE** — correzione piano M7-R7C (ciclo legacy) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione piano M7-R7C, ciclo legacy
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Solo piano, nessun commit.
+- **Il rilievo è fondato** e la sezione R3 del piano precedente è **sostituita** dalle regole seguenti. Catena causale verificata: invito legacy `pending` **senza** `cycle` → R7C-1 incrementa `sharingCycle` a 1 → ripristino (`isArchived: false`) → la difesa `isArchived` non vale più → con «`cycle` assente = ciclo corrente» `respondToInvitation` riporterebbe l'ospite in `sharedWithUids` **senza un nuovo invito**. È esattamente ciò che la decisione 1 di Diego vieta.
+
+### C1. Ciclo legacy fisso, mai «corrente per definizione»
+
+- **Inviti senza `cycle` ⇒ ciclo 0**, sempre: `inviteCycle = Number.isSafeInteger(invite.cycle) ? invite.cycle : (invite.cycle === undefined ? 0 : INVALID)`.
+- **Account senza `sharingCycle` ⇒ ciclo 0**: `accountCycle = Number.isSafeInteger(account.sharingCycle) ? account.sharingCycle : (account.sharingCycle === undefined ? 0 : INVALID)`.
+- **Regola unica in `respondToInvitation`** (dentro la transazione, accanto alla guardia `isArchived` già presente in `functions/index.js:1220-1230`): la risposta è ammessa **solo se** `inviteCycle === accountCycle`; in ogni altro caso `failed-precondition` con reason **`INVITE_CYCLE_STALE`** e **zero scritture**.
+- **Valori malformati** (`cycle` stringa, negativo, `sharingCycle` non intero) ⇒ `INVALID` ⇒ rifiuto **fail-closed**, non interpretazione permissiva.
+
+### C2. Invariante «archiviato una volta ⇒ ciclo ≥ 1»
+
+- La transizione di archiviazione (R7C-1) scrive **sempre** `sharingCycle = (sharingCycle ?? 0) + 1`, anche senza ospiti: l'invariante non dipende dal contenuto della condivisione.
+- Di conseguenza, dopo la **prima** archiviazione: `accountCycle ≥ 1` mentre **ogni** invito legacy ha `cycle` 0 ⇒ `inviteCycle < accountCycle` ⇒ **ogni risposta tardiva è negata**, anche con Account **non** archiviato (ripristinato o mai archiviato dopo il ripristino), con **zero scritture**.
+- Il **percorso difensivo di ripristino** (R7C-2, Account archiviati prima di questa modifica, quindi senza `sharingCycle`) deve **incrementare anche lui** il ciclo nella stessa transazione in cui neutralizza la condivisione: senza questo, i loro inviti legacy `pending` (ciclo 0) resterebbero «correnti» dopo il ripristino. Requisito aggiunto rispetto al piano precedente.
+- **Nuovo invito valido:** dopo il ripristino gli scrittori (`privato/form-privato-save.js:334-335`, `azienda/form-azienda-save.js:241-242`, `shared/detail-account-mode.js:159-167`) leggono `sharingCycle` dall'Account e creano l'invito con `cycle` uguale e ID `…_c${sharingCycle}` ⇒ `inviteCycle === accountCycle` ⇒ rispondibile.
+- **Concorrenza:** l'invito e l'Account sono letti nella **stessa** transazione; se `sharingCycle` cambia prima del commit, Firestore ritenta e il confronto viene rieseguito sullo stato aggiornato (stessa semantica già provata per la guardia `isArchived` in `functions/index.js:1220-1230`).
+
+**Dimostrazione in tre passi** (quella richiesta): (1) Account legacy mai archiviato, invito legacy `pending`: 0 == 0 → accettazione **consentita** (comportamento attuale preservato); (2) prima archiviazione: `sharingCycle` 0→1, `sharedWithUids: []`; (3) dopo il ripristino, risposta all'invito legacy: 0 ≠ 1 → **negata, zero scritture**; risposta al nuovo invito `cycle: 1`: 1 == 1 → **consentita**.
+
+### C3. Sequenza di rilascio rivista (nessuno stato intermedio pericoloso)
+
+- **R7C-1 e R7C-3 del piano precedente vengono fusi in una sola fetta**: l'incremento del ciclo e il **controllo** della risposta entrano **insieme**. Motivo: R7C-1 da solo (incremento senza controllo) lascerebbe la finestra descritta da Codex; R7C-3 da solo è **inerte** (tutti i cicli sono 0) e quindi sicuro ma inutile. La fetta unica si chiama **R7C-1** e comprende: archiviazione atomica con CAS, `sharedWithUids: []`, voci `suspended`, inviti del ciclo sospesi, `sharingCycle` incrementato, `cycle`/ID per ciclo nei tre scrittori e controllo `INVITE_CYCLE_STALE`.
+- **R7C-2** (ripristino con neutralizzazione difensiva **e incremento del ciclo** per i legacy) segue nella stessa catena ma resta una fetta separata.
+- Il candidato **non va distribuito** finché R7C-1 e R7C-2 non sono entrambi chiusi e provati: fintanto che esistono Account archiviati prima di questa modifica, il percorso di ripristino è l'unica difesa per i loro inviti legacy.
+
+### C4. Migrazione e dati preesistenti
+
+- **Nessuna migrazione necessaria per la correttezza**: la semantica `?? 0` rende i dati legacy leggibili e coerenti senza toccarli, e il ripristino incrementa il ciclo.
+- **Effetto sui legacy voluto e dichiarato:** un invito legacy `pending` su un Account che viene archiviato **non è più rispondibile**, né durante l'archivio né dopo il ripristino. Il proprietario deve inviare un **nuovo invito**, come richiesto da Diego.
+- **Normalizzazione opzionale (R7C-6, dati reali, solo con autorizzazione):** scrivere esplicitamente `cycle: 0` sugli inviti legacy e `sharingCycle: 0` sugli Account che non lo hanno, per non dipendere dal default; ricensire gli inviti orfani.
+- **Inviti già `accepted`:** restano documenti storici; la loro risposta è comunque negata dal controllo `status === 'pending'` già presente (`functions/index.js:1207`) e, dopo un'archiviazione, anche dal ciclo.
+
+### C5. Test rivisti (sostituiscono l'elenco R5 del piano precedente per la parte legacy)
+
+1. **Legacy mai archiviato**: invito `pending` senza `cycle`, Account senza `sharingCycle` → accettazione **consentita** (nessuna regressione).
+2. **Dopo la prima archiviazione** (`sharingCycle: 1`, Account ripristinato, `isArchived: false`): risposta all'invito legacy `pending` → **`INVITE_CYCLE_STALE`, zero scritture**, `sharedWithUids` invariato.
+3. **Ciclo completo**: archivio → ripristino → risposta tardiva negata → **nuovo invito** (`cycle: 1`, ID `…_c1`) → accettazione consentita e `sharedWithUids` ricostruito.
+4. **Asserzione numerica dell'invariante**: dopo l'archiviazione `account.sharingCycle` > `invite.cycle` dell'invito precedente (prova esplicita richiesta da Codex).
+5. **Legacy già `accepted`**: risposta negata (invito non pendente) e nessuna scrittura.
+6. **Valori malformati**: `cycle: '1'`, `cycle: -1`, `sharingCycle: 1.5` → rifiuto fail-closed, zero scritture.
+7. **Concorrenza**: archiviazione durante un'accettazione → ritentativo → `INVITE_CYCLE_STALE` (o `ACCOUNT_ARCHIVED` se l'archivio è già committato), zero scritture.
+8. **Account archiviato prima della modifica** (senza `sharingCycle`): al ripristino la neutralizzazione **incrementa** il ciclo e l'invito legacy diventa non rispondibile.
+9. Restano validi i test Emulator R5 già elencati (lettura ospite negata su Account non archiviato con `sharedWithUids: []`, invito del ciclo precedente leggibile ma senza accesso, card senza contenuti, proprietario con accesso all'Archivio e nuovo invito, nessun nuovo permesso).
+
+### C6. Rischi residui aggiornati
+
+1. **Inviti legacy non rispondibili dopo un'archiviazione**: è l'effetto voluto della decisione di Diego; va comunicato nel messaggio all'ospite («invito non più valido: serve un nuovo invito») in R7C-4.
+2. **Dipendenze dal default `?? 0`**: fino all'eventuale normalizzazione R7C-6, la semantica poggia sull'assenza dei campi; i test C5.1/C5.6 la fissano esplicitamente.
+3. Restano: cache offline non revocabile, audit asincrono, tetto di 100 destinatari, deduplica della card, storico degli inviti cancellati alla revoca esplicita (decisione aperta), inviti orfani, UI non adeguata fino a R7C-4 e nessun collaudo su dispositivo reale.
+
+**Stato incarico: DA_VERIFICARE** — correzione del piano M7-R7C (ciclo legacy) consegnata da DeepSeek il 2026-09-21; ciclo legacy fisso a 0 mai «corrente», regola unica `inviteCycle === accountCycle` fail-closed sui valori malformati, invariante «archiviato ⇒ ciclo ≥ 1» con incremento anche nel ripristino difensivo, R7C-1 e R7C-3 fusi in una sola fetta per eliminare la finestra, migrazione non necessaria e test legacy esplicitati; nessun codice, test, commit o push eseguito.
+
+## Verifica Codex — piano M7-R7C con ciclo legacy fisso
+
+**Esito: APPROVATO per l'implementazione candidata.** Il ciclo legacy fisso 0 e l'incremento atomico all'archiviazione/ripristino difensivo chiudono il percorso di risposta tardiva. La fusione della revoca con la verifica del ciclo evita un rilascio intermedio pericoloso; ID per ciclo conserva gli inviti storici. Precisazione obbligatoria in codice e test: `Number.isSafeInteger(-1)` è vero, quindi la validazione deve imporre anche `>= 0` (e limitare overflow all'incremento). Nessun codice è stato ancora implementato per questa fetta; non distribuire il ramo finché archivio, ripristino, vista ospite e reinvito sono chiusi.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7C-1: transizione atomica e cicli invito
+
+**Stato incarico: PRONTO.** DeepSeek implementi la prima fetta del piano corretto sul solo ramo candidato: in una transazione con CAS osservato, archiviazione + revoca persistente dei grant + stato sospeso degli inviti identificabili + incremento del ciclo; nell'handler inviti confronto rigoroso fra ciclo invito e Account (assenza=0, valori non interi, negativi o overflow rifiutati), ID nuovo per ciclo nei tre scrittori, difesa da risposta tardiva. Preservare le forme legacy non ancora archiviate e i percorsi proprietario privato/aziendale già funzionanti. Non cancellare inviti o dati; non riattivare gli ospiti al ripristino. Test mirati su transazione unica, CAS stantio, archiviazione con/senza ospiti, inviti legacy pendenti/accettati, race archivio/risposta, nuovo ID e nessuna sovrascrittura storica; usare Emulator per le Rules e test dell'handler reale per Functions. Un solo commit locale mirato, nessun push/merge/deploy o dato reale. Registrare limiti e consegnare `DA_VERIFICARE`. La fetta R7C-2 ripristino legacy resterà separata e il candidato non sarà distribuibile fino alla sua chiusura.
+
+## Presa in carico DeepSeek — M7-R7C-1 transizione atomica e cicli invito
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `b46b1f58`; l'incarico era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** solo ramo candidato; **nessun** push, merge, deploy o dato reale; R7C-2 non avviata.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7C-1 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7C-1 transizione atomica e cicli invito
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `b46b1f58`; **nessun push, merge o deploy**; nessun dato reale.
+
+### Implementazione
+
+1. **Helper condivisi** in `Frontend/public/assets/js/utils.js:48-76`: `sharingCycleOf` (assenza = ciclo legacy **0**; non interi, negativi o non sicuri ⇒ `null`, quindi fail-closed), `nextSharingCycle` (nessun overflow oltre `Number.MAX_SAFE_INTEGER`) e `inviteIdForGuest` (ciclo 0 ⇒ ID storico `account_key`; dal primo ciclo successivo ⇒ `account_key_c{n}`). Collocati in `utils.js` **per non aggiungere moduli statici**: le due pagine form sono già al tetto di 43 e il budget è rimasto rispettato.
+2. **Archiviazione in una sola transazione** (`settings/archive-account-service.js:229-300`): CAS sui marker osservati **prima di qualunque scrittura di questa transazione** (nessun autoconflitto), `already-archived` resta un no-op, poi **una sola** `update` con `isArchived: true`, `sharedWithUids: []`, `acceptedCount: 0`, voci `pending`/`accepted` marcate `suspended`+`suspendedAt` (chi ha rifiutato conserva lo stato) e **`sharingCycle` incrementato**; nella stessa transazione gli inviti del ciclo chiuso (letture prima delle scritture) vengono marcati `sharingState: 'suspended'` e **mai cancellati**; tetto di **100 destinatari** (`:19`, `:260` → `ARCHIVE_RECIPIENTS_LIMIT`) oltre il quale non si scrive nulla; l'esito riporta `sharingCycle` e `suspendedInvites` (`:299`).
+3. **Handler inviti** (`functions/index.js:1231-1244`): confronto rigoroso `inviteCycle === accountCycle` (assenza = 0; non interi, negativi o non sicuri ⇒ rifiuto) con `INVITE_CYCLE_STALE` e **zero scritture**, subito dopo la guardia `ACCOUNT_ARCHIVED`.
+4. **Tre scrittori** con ID per ciclo e campo `cycle`: `shared/detail-account-mode.js:150-186`, `privato/form-privato-save.js:276-280` e `:294,314,338-352`, `azienda/form-azienda-save.js:186-190` e `:203,223,247-262`.
+5. **Reinvito**: una voce `suspended` è reinvitabile **solo perché l'utente l'ha riselezionata**, e gli ospiti sospesi **non** vengono preselezionati (`shared/detail-account-mode.js:34,108`, `privato/form_account_privato.js:510`, `azienda/form_account_azienda.js:347`). **Scostamento dichiarato:** queste due righe erano nel piano assegnate a R7C-5, ma senza di esse un salvataggio dopo il ripristino avrebbe reinvitato automaticamente tutti gli ospiti sospesi, contro la decisione 1 di Diego; le ho quindi incluse in R7C-1. Il resto di R7C-5 (interfaccia della lista ospite) resta alla fetta successiva.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/archive-session.test.mjs` (6 casi nuovi) | **39/39** |
+| `node --test functions/test/respond-invitation-archived.test.js` (6 casi nuovi) | **11/11** |
+| `node --test tests/share-revocation-paths.test.mjs` (guardia ID per ciclo) | **20/20** |
+| `npm run test:history-prototype` | **92/92** |
+| `npm run test:functions-security` (`node --check` + ESLint + tutte le suite Functions) | **142/142** |
+| `npm run test:firestore-rules` (Emulator, 2 casi nuovi) | **39/39** |
+| `npm run test:navigation` / `test:data-access` / `test:sharing-prototype` | 134/134 · 95/95 · 16/16 |
+| `npm run test:js-syntax` · `audit-page-performance --check` | 161 moduli · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **792 file** |
+
+Casi coperti: revoca persistente + stato sospeso + ciclo nella **stessa** transazione (una sola transazione, un solo write sull'Account, nessuna cancellazione); archiviazione **senza** ospiti (ciclo che avanza comunque); ciclo già avanzato (ID `_c{n}` del ciclo corrente); `sharingCycle` malformato/al massimo ⇒ `ARCHIVE_CYCLE_INVALID` senza scritture; oltre 100 destinatari ⇒ `ARCHIVE_RECIPIENTS_LIMIT` senza scritture; `already-archived` che riporta il ciclo senza scrivere; **ciclo legacy** (0/0) ancora rispondibile; invito del ciclo precedente negato **con zero scritture** dopo il ripristino; ciclo completo archivio → ripristino → risposta tardiva negata → nuovo invito valido; cicli malformati rifiutati; race archiviazione/risposta con ritentativo; su Emulator: ospite precedente **negato su Account ripristinato** con `sharedWithUids: []` e invito del ciclo precedente **leggibile** dal destinatario ma privo di dati dell'Account.
+
+**Controllo negativo eseguito:** con la sola versione già committata (`b46b1f58`, senza il confronto di ciclo) i test Functions passano **7/11** e falliscono esattamente i quattro casi dipendenti dal ciclo; con la correzione **11/11**.
+
+### Limiti dichiarati
+
+1. **R7C-2 resta separata e non è implementata**: il ripristino di un Account archiviato **prima** di questa modifica non neutralizza ancora la condivisione (lo farà R7C-2, che incrementerà anche il ciclo). **Il candidato non è distribuibile** finché R7C-2 non è chiusa, come disposto da Codex.
+2. **La vista ospite non è adeguata** (R7C-4): dopo la sospensione la card può ancora comparire e la lettura del documento è negata dal server, quindi l'ospite vede un errore invece di «Account sospeso».
+3. **Inviti orfani**: non enumerabili dalle chiavi di `sharedWith`; restano inerti ma non ricensiti (R7C-6).
+4. La **cancellazione dell'invito alla revoca esplicita** resta invariata (decisione aperta per Diego, non toccata qui).
+5. La **cache offline** non è revocabile: limite dichiarato da M7-R7A, non modificato da questa fetta.
+6. Nessun collaudo su browser o dispositivo reale: le prove sono su banchi sintetici ed Emulator.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7C-1 consegnato da DeepSeek il 2026-09-21; archiviazione e revoca persistente atomiche con CAS osservato, ciclo incrementato e inviti del ciclo marcati ma non cancellati, confronto rigoroso del ciclo nell'handler inviti con `INVITE_CYCLE_STALE`, ID per ciclo nei tre scrittori, forme legacy preservate, controllo negativo 7/11 → 11/11, suite 92/92 · 142/142 · 39/39 su Emulator, nessun push eseguito e R7C-2 non avviata.

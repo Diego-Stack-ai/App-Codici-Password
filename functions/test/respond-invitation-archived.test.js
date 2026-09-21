@@ -20,11 +20,15 @@ const UID = 'guest-uid';
 const INVITE_PATH = `invites/account_${KEY}`;
 const ACCOUNT_PATH = 'users/A/accounts/account';
 
-function fixture({archived = false, status = 'accepted', hook = null} = {}) {
+function fixture({archived = false, status = 'accepted', hook = null, accountCycle, inviteCycle} = {}) {
+    const account = {isArchived: archived, sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}};
+    if (accountCycle !== undefined) account.sharingCycle = accountCycle;
+    const invite = {inviteId: `account_${KEY}`, ownerId: 'A', senderId: 'A', accountId: 'account',
+        recipientEmail: EMAIL, status: 'pending'};
+    if (inviteCycle !== undefined) invite.cycle = inviteCycle;
     const documents = new Map([
-        [ACCOUNT_PATH, {isArchived: archived, sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}}],
-        [INVITE_PATH, {inviteId: `account_${KEY}`, ownerId: 'A', senderId: 'A', accountId: 'account',
-            recipientEmail: EMAIL, status: 'pending'}]
+        [ACCOUNT_PATH, account],
+        [INVITE_PATH, invite]
     ]);
     const versions = new Map();
     const reads = [], writes = [];
@@ -68,6 +72,8 @@ function fixture({archived = false, status = 'accepted', hook = null} = {}) {
     vm.runInContext(emailGuard + handler, context);
     return {documents, writes, reads, get attempts() { return attempts; },
         archive: () => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), isArchived: true});
+            versions.set(ACCOUNT_PATH, (versions.get(ACCOUNT_PATH) || 0) + 1); },
+        bumpCycle: value => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), sharingCycle: value});
             versions.set(ACCOUNT_PATH, (versions.get(ACCOUNT_PATH) || 0) + 1); },
         respond: (requested = status) => context.exports.respondToInvitation({
             auth: {uid: UID, token: {email: EMAIL}},
@@ -144,5 +150,64 @@ test('il percorso dell\'Account segue il contesto aziendale e resta confinato al
         sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}});
     await assert.rejects(f.respond('accepted'), error => error.details?.reason === 'ACCOUNT_ARCHIVED');
     assert.ok(f.reads.includes('users/A/aziende/company-1/accounts/account'));
+    assert.equal(f.writes.length, 0);
+});
+
+// M7-R7C-1 — ciclo dell'invito contro ciclo dell'Account: il ciclo legacy è 0 e
+// non è mai «corrente per definizione».
+
+test('ciclo legacy: invito senza `cycle` su Account senza `sharingCycle` resta rispondibile', async () => {
+    const f = fixture();
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.deepEqual([...f.documents.get(ACCOUNT_PATH).sharedWithUids], [UID]);
+});
+
+test('dopo l\'archiviazione l\'invito del ciclo precedente è negato con zero scritture', async () => {
+    const f = fixture({archived: false, accountCycle: 1});
+    await assert.rejects(f.respond('accepted'), error => error.code === 'failed-precondition'
+        && error.details?.reason === 'INVITE_CYCLE_STALE');
+    assert.equal(f.writes.length, 0);
+    assert.equal(f.documents.get(INVITE_PATH).status, 'pending');
+    assert.equal(f.documents.get(ACCOUNT_PATH).sharedWithUids, undefined, 'nessun grant ricreato');
+    assert.ok(f.documents.get(ACCOUNT_PATH).sharingCycle > (f.documents.get(INVITE_PATH).cycle ?? 0),
+        'il ciclo dell\'Account supera quello dell\'invito legacy');
+});
+
+test('ciclo completo: archivio, ripristino, risposta tardiva negata, nuovo invito valido', async () => {
+    const archived = fixture({archived: true, accountCycle: 1});
+    await assert.rejects(archived.respond('accepted'), error => error.details?.reason === 'ACCOUNT_ARCHIVED');
+    assert.equal(archived.writes.length, 0);
+    const restored = fixture({archived: false, accountCycle: 1});
+    await assert.rejects(restored.respond('accepted'), error => error.details?.reason === 'INVITE_CYCLE_STALE');
+    assert.equal(restored.writes.length, 0);
+    const fresh = fixture({archived: false, accountCycle: 1, inviteCycle: 1});
+    assert.deepEqual({...await fresh.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.deepEqual([...fresh.documents.get(ACCOUNT_PATH).sharedWithUids], [UID]);
+});
+
+test('cicli malformati vengono rifiutati senza scritture', async () => {
+    const cases = [[0, '1'], [0, -1], [0, 1.5], [1.5, 1], [-1, 1], [Number.MAX_SAFE_INTEGER + 2, 1]];
+    for (const [accountCycle, inviteCycle] of cases) {
+        const f = fixture({archived: false, accountCycle, inviteCycle});
+        await assert.rejects(f.respond('accepted'), error => error.details?.reason === 'INVITE_CYCLE_STALE',
+            `cicli Account/invito ${accountCycle}/${inviteCycle}`);
+        assert.equal(f.writes.length, 0, `nessuna scrittura con cicli ${accountCycle}/${inviteCycle}`);
+    }
+});
+
+test('un invito già elaborato resta rifiutato prima del confronto di ciclo', async () => {
+    const f = fixture({archived: false, accountCycle: 1});
+    f.documents.set(INVITE_PATH, {...f.documents.get(INVITE_PATH), status: 'accepted'});
+    await assert.rejects(f.respond('accepted'), error => /già elaborato/.test(error.message));
+    assert.equal(f.writes.length, 0);
+});
+
+test('archiviazione concorrente durante la risposta: il ciclo aggiornato nega l\'operazione', async () => {
+    let armed = true;
+    const f = fixture({hook: ({path}) => {
+        if (armed && path === ACCOUNT_PATH) { armed = false; f.bumpCycle(1); }
+    }});
+    await assert.rejects(f.respond('accepted'), error => error.details?.reason === 'INVITE_CYCLE_STALE');
+    assert.equal(f.attempts, 2, 'la transazione viene ritentata sul ciclo aggiornato');
     assert.equal(f.writes.length, 0);
 });

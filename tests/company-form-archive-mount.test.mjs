@@ -20,6 +20,9 @@ const formSave = strip(await readFile(new URL('azienda/form-azienda-save.js', mo
     .replace("await import('../settings/archive-account-service.js')",
         'await Promise.resolve({archiveAccount: globalThis.archiveAccount, archiveConfirmMessage: globalThis.archiveConfirmMessage})');
 const page = strip(await readFile(new URL('azienda/form_account_azienda.js', modules), 'utf8'));
+// M7-R7C-1: il servizio usa gli helper di ciclo/invito di `utils.js`, caricati nel
+// contesto come modulo reale (stessa tecnica degli altri moduli del banco).
+const utils = strip(await readFile(new URL('../utils.js', modules), 'utf8'));
 
 // La pagina e il modulo di salvataggio dichiarano entrambi una `const get` di
 // modulo: nello stesso contesto vm i `const` di primo livello collidono. Ogni
@@ -76,6 +79,7 @@ function fixture() {
         URLSearchParams, console: {warn() {}, error() {}}, setTimeout: () => 0
     });
     for (const source of [
+        wrap(utils, ['sharingCycleOf', 'nextSharingCycle', 'inviteIdForGuest']),
         wrap(model, ['createArchiveMetadata', 'archiveRecipients', 'archiveConfirmMessage']),
         wrap(service, ['archiveAccount']),
         wrap(formSave, ['deleteAccount', 'saveAccount']),

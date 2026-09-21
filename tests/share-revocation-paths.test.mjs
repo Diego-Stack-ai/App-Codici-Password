@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {readFile} from 'node:fs/promises';
 
 // M7-R5 correzione (revisione Codex 21/09/2026) — guardia di regressione.
 // Il client del proprietario non deve MAI tentare di scrivere nella raccolta
@@ -48,4 +49,35 @@ for (const [file, ownerVariables] of Object.entries(files)) {
 test('l\'helper rimosso non esiste più e nessun modulo lo importa', () => {
   assert.throws(() => readFileSync(new URL('../Frontend/public/assets/js/modules/shared/share-revocation-notice.js', import.meta.url), 'utf8'),
     /ENOENT/, 'il candidato di consegna non deve restare come codice morto');
+});
+
+// M7-R7C-1 — identità degli inviti per ciclo di condivisione: i tre scrittori
+// devono costruire l'ID con l'helper condiviso e dichiarare il ciclo, così un
+// reinvito dopo l'archiviazione non sovrascrive l'invito storico.
+const writers = ['shared/detail-account-mode.js', 'privato/form-privato-save.js', 'azienda/form-azienda-save.js'];
+for (const file of writers) {
+  test(`Frontend/public/assets/js/modules/${file}: gli inviti usano l'ID per ciclo`, () => {
+    const source = readFileSync(new URL(`../Frontend/public/assets/js/modules/${file}`, import.meta.url), 'utf8');
+    assert.match(source, /inviteIdForGuest\(/, 'l\'ID dell\'invito passa dall\'helper condiviso');
+    assert.match(source, /sharingCycleOf\(/, 'il ciclo viene letto e validato');
+    assert.match(source, /cycle: sharingCycle|cycle,/, 'l\'invito dichiara il proprio ciclo');
+    // Nessun ID costruito a mano: il formato vive in un solo posto.
+    assert.equal(/invites['"],\s*`\$\{[^}]+\}_\$\{[^}]+\}`/.test(source), false, 'nessun ID invito costruito a mano');
+    assert.match(source, /status === 'suspended'/, 'una voce sospesa richiede un nuovo invito');
+  });
+}
+
+test('utils: il ciclo legacy è 0 e i valori malformati sono invalidi', async () => {
+  const source = await readFile(new URL('../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8');
+  const helpers = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
+  assert.equal(helpers.sharingCycleOf({}), 0, 'assenza = ciclo legacy 0');
+  assert.equal(helpers.sharingCycleOf({sharingCycle: 2}), 2);
+  for (const invalid of [-1, 1.5, '1', null, Number.MAX_SAFE_INTEGER + 2]) {
+    assert.equal(helpers.sharingCycleOf({sharingCycle: invalid}), null, `ciclo invalido: ${invalid}`);
+  }
+  assert.equal(helpers.nextSharingCycle({}), 1);
+  assert.equal(helpers.nextSharingCycle({sharingCycle: Number.MAX_SAFE_INTEGER}), null, 'nessun overflow');
+  assert.equal(helpers.nextSharingCycle({sharingCycle: -1}), null);
+  assert.equal(helpers.inviteIdForGuest('account', 'guest_key', 0), 'account_guest_key', 'ciclo legacy: ID storico');
+  assert.equal(helpers.inviteIdForGuest('account', 'guest_key', 3), 'account_guest_key_c3');
 });
