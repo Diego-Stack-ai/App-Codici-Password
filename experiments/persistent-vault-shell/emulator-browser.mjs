@@ -15,7 +15,10 @@ assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099');
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085');
 const base = import.meta.dirname;
 const forced = process.argv.includes('--test-crash');
-const restart = process.argv.includes('--test-restart') || forced;
+const evictedBrowser = process.argv.includes('--test-evicted');
+// L'espulsione della cache applicativa richiede un processo browser nuovo con lo stesso
+// profilo: si riusa la macchina del banco a freddo (fase prepare → processo terminato → resume).
+const restart = process.argv.includes('--test-restart') || forced || evictedBrowser;
 const cold = process.argv.includes('--test-cold') || restart;
 const attachmentsBrowser = process.argv.includes('--test-attachments');
 const companyContactsBrowser = process.argv.includes('--test-company-contacts');
@@ -27,7 +30,7 @@ const DEVICE_PROFILES = Object.freeze([
     Object.freeze({name: 'desktop', width: 1280, height: 800, deviceScaleFactor: 1, mobile: false}),
     Object.freeze({name: 'mobile', width: 390, height: 844, deviceScaleFactor: 3, mobile: true})
 ]);
-const automated = entryBrowser || cold || attachmentsBrowser || companyContactsBrowser || addressesBrowser;
+const automated = entryBrowser || cold || evictedBrowser || attachmentsBrowser || companyContactsBrowser || addressesBrowser;
 let reportResult;
 await buildEmulator({persistent: cold});
 const source = await readFile(`${base}/../../Frontend/public/assets/js/modules/core/crypto-utils.js`, 'utf8');
@@ -125,7 +128,7 @@ const server = createServer(async (request, response) => {
         reportResult?.(JSON.parse(body)); response.end('{}'); return;
     }
     if (automated && request.url === '/entry-check.mjs') {
-        const scenario = addressesBrowser ? 'emulator-addresses-check.mjs' : companyContactsBrowser ? 'emulator-company-contacts-check.mjs' : attachmentsBrowser ? 'emulator-attachments-check.mjs' : cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs';
+        const scenario = addressesBrowser ? 'emulator-addresses-check.mjs' : companyContactsBrowser ? 'emulator-company-contacts-check.mjs' : attachmentsBrowser ? 'emulator-attachments-check.mjs' : evictedBrowser ? 'emulator-evicted-check.mjs' : cold ? 'emulator-cold-check.mjs' : 'emulator-entry-check.mjs';
         response.setHeader('Content-Type', 'text/javascript'); response.end(await readFile(`${base}/${scenario}`)); return;
     }
     // DS-002C / A1b-R1 scenarios: the modules of the candidate boundary are served

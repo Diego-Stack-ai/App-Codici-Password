@@ -8,12 +8,15 @@ export async function buildEmulator({persistent = false} = {}) {
     await mkdir(`${base}/dist/emulator-site/assets/pdf`, {recursive: true});
     const deny = 'const deny = () => {throw new Error("EMULATOR_READ_ONLY")};';
     const boundaries = {
-        'firebase-config.js': 'export {auth, db} from "./emulator-firebase.mjs";',
-        'firebase-runtime.js': `export {collection, doc, limit, orderBy, query, where, getDocFromCache, getDocFromServer, getDocsFromCache, getDocsFromServer} from 'firebase/firestore'; ${deny} export {deny as updateDoc, deny as deleteDoc, deny as writeBatch};`,
+        // A demo project cannot fall through to real resources: `functions` exists as an
+        // inert object because the bundled archive service imports it, while every callable
+        // entry point stays denied below.
+        'firebase-config.js': 'export {auth, db} from "./emulator-firebase.mjs"; export const functions = Object.freeze({});',
+        'firebase-runtime.js': `export {collection, doc, limit, orderBy, query, where, getDocFromCache, getDocFromServer, getDocsFromCache, getDocsFromServer} from 'firebase/firestore'; ${deny} export {deny as updateDoc, deny as deleteDoc, deny as writeBatch, deny as deleteField, deny as httpsCallable, deny as runTransaction}; export const onAuthStateChanged = () => () => {};`,
         'security-manager.js': `${deny} export {deny as ensureVaultKeyMaterial, deny as decrypt};`,
         'card-secret.js': `${deny} export function createCardSecretResolver(value, encrypted) { if (encrypted) return deny; return async () => value; }`,
         'logger.js': 'export const LOG = () => {};',
-        'utils.js': 'export const logError = () => {};',
+        'utils.js': `${deny} export const logError = () => {}; export {deny as inviteIdForGuest, deny as nextSharingCycle, deny as sharingCycleOf};`,
         'ui-core-v129.js': 'export const showToast = () => {}; export const showConfirmModal = async () => false;',
         'translations.js': `export const t = key => ({label_user:'Utente', label_account:'Codice', label_password:'Password', no_accounts_found:'Nessun account trovato'})[key] || key;`,
         'private-account-offline-pilot.js': `${deny} export {deny as consumePrivateAccountHandoff};`

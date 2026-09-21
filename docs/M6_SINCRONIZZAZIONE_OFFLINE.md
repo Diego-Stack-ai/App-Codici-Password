@@ -499,3 +499,36 @@ Il finding **resta aperto**: questo banco **fa avanzare l'evidenza** (l'interfac
 - Nel banco il database del lease è **separato** da quello della coda reale (nel caso `createOfflineMutationClientCore` il lease vive in un database di laboratorio dedicato) proprio perché la coda distribuita non ha lo store del lease: un'adozione reale dovrà riconciliare i due schemi.
 - L'esclusione reciproca è provata fra **titolari in pagina**; il caso pagina/Worker e la concorrenza fra schede e dispositivi restano coperti dalle suite di coordinamento esistenti, non da questo banco.
 - Non sono esercitati UI, migrazione IndexedDB, aggiornamento delle copie PWA installate, né il comportamento con Storage/cache espulsi.
+
+## M6-1-LAB — Avvio a freddo e cache espulsa, 22/09/2026
+
+Laboratorio, dati sintetici, profilo browser usa getta, solo loopback. **`Frontend/public/**`, Functions e Rules restano invariati.** Due risultati: una **riparazione del banco** senza la quale la matrice a freddo non era nemmeno costruibile, e un **banco nuovo** per la cache espulsa.
+
+### 1. Il banco a freddo non era eseguibile su questo ramo (difetto di laboratorio, corretto)
+
+`node scripts/run-vault-session-emulators.mjs --cold-browser` falliva **prima** di avviare il browser: il bundle di laboratorio (`buildEmulator`) non risolveva più otto export introdotti nel frattempo da `archive-account-service.js` — `functions` da `firebase-config.js`; `deleteField`, `httpsCallable`, `onAuthStateChanged`, `runTransaction` da `firebase-runtime.js`; `inviteIdForGuest`, `nextSharingCycle`, `sharingCycleOf` da `utils.js`. Gli stessi errori colpivano `--restart-browser`.
+
+Correzione **solo di laboratorio** in `experiments/persistent-vault-shell/build-emulator.mjs`: `functions` come oggetto inerte nel confine del progetto demo e `deny` (errore `EMULATOR_READ_ONLY`) per gli ingressi callable/mutazione, con `onAuthStateChanged` come sottoscrizione nulla. Nessuna scorciatoia permissiva: qualunque chiamata reale resta impossibile. Dopo la correzione il banco a freddo esistente **non è stato modificato** e torna eseguibile.
+
+### 2. Controllo positivo riusato (cache intatta): matrice bancaria a freddo
+
+`node scripts/run-vault-session-emulators.mjs --cold-browser`, **Chrome 153 ed Edge 153**: `ok: true` con **33 esiti**, fra cui «Firebase identity restored from persistent storage», «reloaded Vault remains locked and denies consultation», «uncached HTTP remains blocked», la matrice completa dei domini dopo riavvio offline e «two banks and their Widget/card composition readable on first visit after offline restart» (IBAN, PIN e CCV sintetici di due banche). È il riferimento con cui si confronta il caso con cache espulsa.
+
+### 3. Banco nuovo: cache applicativa espulsa (`npm run test:offline-evicted-browser`)
+
+Pagina `experiments/persistent-vault-shell/emulator-evicted-check.mjs`, nel flusso a due fasi del banco a freddo (**prepare → processo browser terminato → resume con lo stesso profilo**), Chrome 153 ed Edge 153, `ok: true`:
+
+| Fase | Che cosa fa e che cosa osserva |
+|---|---|
+| **prepare** (online) | accesso, sblocco del Vault, preparazione offline completata, service worker di laboratorio attivo; **enumerazione** di cache e database; quindi **espulsione della sola cache applicativa Firestore** (`indexedDB.deleteDatabase` sui database il cui nome contiene `firestore`) e terminazione del processo |
+| **resume** (processo nuovo, rete assente) | `cache del browser = ["synthetic-vault-cold-assets-v1"]` con la shell **presente nella cache**; `database IndexedDB = ["firebase-app-check-database","firebase-heartbeat-database","firebaseLocalStorageDb"]` → la cache Firestore **non c'è più**; **identità Firebase non ripristinata** e Vault chiuso; consultazione **rifiutata** con `PROBE_SESSION`; stato della preparazione offline `undefined` (mai `ready`); **nessun marcatore privato** nel documento; infine, espulsa anche la cache del browser, il documento **non è più disponibile dalla cache** e resta la garanzia di assenza di marcatori |
+
+**Distinzione richiesta fra le tre memorie.** *Cache del browser*: Cache Storage `synthetic-vault-cold-assets-v1`, che contiene la shell e resta intatta nell'espulsione applicativa. *Dati IndexedDB*: la cache Firestore viene espulsa, mentre restano i database di Auth, App Check e heartbeat. *File Storage*: in questo modo l'emulatore Storage **non è nemmeno avviato** (`--only auth,firestore`) e la sonda di consultazione esclude i metadati degli allegati: **nessun byte Storage** entra nella matrice.
+
+### 4. Limiti dichiarati (il gate M6-1 resta aperto)
+
+- **L'identità non si ripristina** dopo l'espulsione della cache applicativa: nel banco il ramo «sblocco riuscito con cache espulsa» **non è esercitato**, e la differenza rispetto al controllo positivo (stesso flusso, cache intatta, identità ripristinata) è l'unica variabile osservata. Serve una prova su dispositivo o una separazione diversa delle due cache per dire se è una proprietà del prodotto o un effetto del banco.
+- Una cancellazione di database può restare **`blocked`** finché l'SDK tiene aperte le connessioni: il banco **registra** ciò che resta invece di dichiarare un'espulsione completa.
+- Il controllo di rete della pagina **non governa le richieste del service worker** (verificato: con la cache vuota la richiesta riesce comunque): l'«indisponibilità offline assoluta» con cache espulsa **non è riproducibile** in modo affidabile qui. Il banco prova l'assenza dalla cache, non l'assenza di rete.
+- Restano fuori: iPhone/PWA fisica, **tutte** le categorie di pagina di produzione, i file Storage, l'espulsione reale per pressione di quota del browser, l'avvio a freddo dopo riavvio del dispositivo.
+- **Nessun gate è chiuso**: la dimensione «cache espulsa» della riga M6-1 è ora **documentata e parzialmente esercitata**, non verificata. Le domande per il proprietario sono in [M6_DOMANDE_CACHE_ESPULSA.md](./M6_DOMANDE_CACHE_ESPULSA.md) (commit separato).
