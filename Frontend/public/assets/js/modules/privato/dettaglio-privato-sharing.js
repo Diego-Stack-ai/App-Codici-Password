@@ -8,7 +8,7 @@ import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runt
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 
 let mounted = null;
 
@@ -105,11 +105,15 @@ async function revokeRecipient(email, mount = mounted) {
             if (!mount.active()) return;
             const accountRef = doc(db, 'users', ownerId, 'accounts', accountId);
             const normalizedEmail = sanitizeEmail(email);
-            const inviteRef = doc(db, 'invites', `${accountId}_${normalizedEmail}`);
             const snapshot = await transaction.get(accountRef);
             if (!mount.active() || !snapshot.exists()) return;
 
             const data = snapshot.data();
+            // M7-R7C-5: l'invito da revocare è quello del ciclo CORRENTE. Con un ID
+            // storico la cancellazione non colpirebbe nulla dopo un ripristino.
+            const cycle = sharingCycleOf(data);
+            if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
+            const inviteRef = doc(db, 'invites', inviteIdForGuest(accountId, normalizedEmail, cycle));
             const sharedWith = { ...(data.sharedWith || {}) };
             const revokedInvitation = sharedWith[normalizedEmail];
             const wasAccepted = revokedInvitation?.status === 'accepted';

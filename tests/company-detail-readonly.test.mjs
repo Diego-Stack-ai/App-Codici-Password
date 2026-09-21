@@ -4,6 +4,12 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
+// M7-R7C-5: la pagina usa gli helper di ciclo/invito di `utils.js` e il messaggio
+// di errore condiviso; il banco li inietta perché gli import vengono rimossi.
+const utilsSource = await readFile(new URL('../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8');
+const {inviteIdForGuest, sanitizeEmail, sharingCycleOf} = await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
+const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
 function fixture({suspended = false, denied = false, networkError = false} = {}) {
     const writes = [], reads = [], errors = [], modules = [], classes = new Set(), suspendedReads = [];
@@ -21,6 +27,7 @@ function fixture({suspended = false, denied = false, networkError = false} = {})
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
     const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: true}, console,
+        readErrorMessage, inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),

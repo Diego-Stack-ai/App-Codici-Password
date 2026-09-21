@@ -10,7 +10,7 @@ import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runt
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { getInvite } from '../data/vault-repository.js';
 
 // --- STATE (inizializzato da initSharingModule, immutabile per tutta la vita della pagina) ---
@@ -20,6 +20,7 @@ let _currentId = null;
 let _isReadOnly = false;
 let _active = () => true, _version = 0, _confirm = showConfirmModal;
 let _onReload = null; // callback per ricaricare i dati dal modulo principale
+let _sharingCycle = 0; // ciclo di condivisione dell'Account (0 = legacy)
 
 /**
  * Inizializza il modulo con il contesto dell'account corrente.
@@ -27,7 +28,8 @@ let _onReload = null; // callback per ricaricare i dati dal modulo principale
  * @param {Object} ctx
  * @param {Function} ctx.onReload - callback asincrono per ricaricare loadAccount()
  */
-export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal, sharingCycle = 0 }) {
+    _sharingCycle = Number.isSafeInteger(sharingCycle) && sharingCycle >= 0 ? sharingCycle : 0;
     _confirm = confirmAction;
     const version = ++_version;
     _active = () => version === _version && !signal?.aborted && isActive();
@@ -132,7 +134,7 @@ export async function renderGuests(guests) {
 
         if (isPending) {
             try {
-                const inviteId = `${_currentId}_${sanitizeEmail(displayEmail)}`;
+                const inviteId = inviteIdForGuest(_currentId, sanitizeEmail(displayEmail), _sharingCycle);
                 const invData = await getInvite(inviteId);
                 if (!active()) return;
 
@@ -212,14 +214,17 @@ async function revokeRecipientV3(email) {
             if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
             const accRef = doc(db, "users", uid, "aziende", company, "accounts", account);
             const targetSanitized = sanitizeEmail(email);
-            const inviteId = `${account}_${targetSanitized}`;
-            const invRef = doc(db, "invites", inviteId);
 
             const accSnap = await transaction.get(accRef);
             if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
             if (!accSnap.exists()) return;
 
             const data = accSnap.data();
+            // M7-R7C-5: l'invito da revocare è quello del ciclo CORRENTE: con un ID
+            // storico la cancellazione non colpirebbe nulla dopo un ripristino.
+            const cycle = sharingCycleOf(data);
+            if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
+            const invRef = doc(db, "invites", inviteIdForGuest(account, targetSanitized, cycle));
             const sharedWith = { ...data.sharedWith } || {};
             const wasAccepted = sharedWith[targetSanitized]?.status === 'accepted';
 

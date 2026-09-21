@@ -2870,3 +2870,69 @@ Casi coperti, **privato e aziendale**: invito **revocato/assente** (diniego del 
 4. Restano invariati: inviti orfani, trigger di audit non implementato, R7C-5 (reinvito) e la chiusura complessiva prima della distribuibilità, nessun collaudo su browser o dispositivo reale.
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R7C-4 consegnata da DeepSeek il 2026-09-21; online l'ospite viene autorizzato solo da una lettura confermata dal server (diniego o assenza ⇒ nessun fallback locale o legacy), errore di rete fail-closed con messaggio dedicato, offline conservata la consultazione concordata con blocco sulla sospensione nota, prove su privato e aziendale, controllo negativo 20/25 → 25/25, nessun push eseguito.
+
+## Verifica Codex — correzione M7-R7C-4 autorizzazione online ospite
+
+**Esito: APPROVATO come candidato locale.** Commit `f6eaecb8`: prima di renderizzare un Account altrui online, dettaglio privato e aziendale usano una lettura server-confirmed e non tornano alla cache/alias se il server nega o non risponde; l'invito serve solo per distinguere il messaggio «sospeso». Offline resta la consultazione concordata con blocco quando la sospensione è nota e il limite delle copie non aggiornate è dichiarato. `node --test tests/private-detail-legacy-id.test.mjs tests/company-detail-readonly.test.mjs` passa **25/25**; diff mirato coerente, working tree pulita. Nessun push/deploy.
+
+**Stato verifica: APPROVATO** — 21/09/2026.
+
+## Incarico Codex — M7-R7C-5: nuovo invito intenzionale e verifica end-to-end
+
+**Stato incarico: PRONTO.** DeepSeek completi e verifichi il percorso di reinvito dopo il ripristino in tutti e tre gli editor della condivisione, includendo UI e salvataggio: un ospite sospeso non deve essere preselezionato né riottenere accesso dal solo salvataggio; il proprietario deve selezionarlo espressamente; si crea un nuovo invito con ID/ciclo corrente senza sovrascrivere quello storico; il vecchio invito non può essere accettato; l'accesso torna solo dopo l'accettazione del nuovo invito. Verificare casi privato/azienda, rifiutato/pendente/sospeso, due cicli, revoca esplicita esistente e salvataggio senza cambiamenti, con test significativi su editor reale, handler Functions e Rules Emulator. Correggere solo lacune dimostrate; se il lavoro in R7C-1 copre già tutto, consegnare prove e un commit locale soltanto per eventuali correzioni. Nessun push/merge/deploy o dato reale; consegna `DA_VERIFICARE`. Non avviare audit/migrazioni in parallelo.
+
+## Presa in carico DeepSeek — M7-R7C-5 nuovo invito intenzionale e verifica end-to-end
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `f6eaecb8`; l'incarico era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** verifica dei tre editor della condivisione + correzione delle sole lacune dimostrate. **Nessun** push, deploy o dato reale; **nessun audit o migrazione avviati**.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-R7C-5 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-R7C-5 nuovo invito intenzionale e verifica end-to-end
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `f6eaecb8`; **nessun push o deploy**.
+
+### Lacuna dimostrata e corretta
+
+**I due pannelli di revoca nel dettaglio cancellavano l'invito con l'ID storico** (`dettaglio-privato-sharing.js:108`, `dettaglio-azienda-sharing.js:215` → `${accountId}_${key}`): dopo un'archiviazione e un ripristino (ciclo ≥ 1) la cancellazione non colpiva l'invito reale (`…_c{n}`) e l'invito del ciclo corrente **restava vivo**. Correzione: entrambi usano `inviteIdForGuest(accountId, key, cycle)` con il ciclo letto dall'Account nella stessa transazione (`privato:116`, `azienda:227`) e un ciclo malformato **non cancella nulla**. Il controllo di stato «in attesa» del pannello aziendale leggeva anch'esso l'ID storico (`:137`): ora usa il ciclo passato dal dettaglio (`dettaglio_account_azienda.js:253`, `sharingCycleOf(loaded)`).
+
+**Controllo negativo eseguito:** con la sola versione già committata (`f6eaecb8`) il banco nuovo passa **2/6** (falliscono i quattro casi dipendenti dal ciclo); con la correzione **6/6**.
+
+### Verifica: che cosa era già coperto da R7C-1/R7C-2
+
+| Requisito dell'incarico | Copertura e prova |
+|---|---|
+| L'ospite sospeso non è preselezionato | `shared/detail-account-mode.js:34,108` (filtro `!== 'suspended'`), `privato/form_account_privato.js:510`, `azienda/form_account_azienda.js:347`; guardia statica in `tests/share-revocation-paths.test.mjs` |
+| Un semplice salvataggio non ridà accesso | `tests/shared-regrant-after-restore.test.mjs` (privato **e** azienda): `sharedWithUids` resta vuoto |
+| Serve la selezione espressa del proprietario | condizione `status === 'suspended'` ⇒ nuovo invito solo se riselezionato (stessi test) |
+| Nuovo invito con ID/ciclo corrente, storico intatto | ID `…_c{n}` e campo `cycle` nei tre scrittori; `tests/shared-regrant-after-restore.test.mjs` (privato/azienda) e `tests/detail-sharing-revocation-cycle.test.mjs` |
+| Il vecchio invito non è più accettabile | `functions/index.js:1231-1244` (`INVITE_CYCLE_STALE`, zero scritture); `functions/test/respond-invitation-archived.test.js` **11/11** (ciclo legacy, ciclo completo, malformati, race) |
+| L'accesso torna **solo** dopo l'accettazione | `tests/archive-guest-suspension.rules.test.mjs`: negato con grant vuoti, consentito dopo che l'accettazione ricostruisce `sharedWithUids` |
+| Revoca esplicita esistente | il percorso di revoca resta invariato per ciclo 0 e ora colpisce il ciclo corrente (banco nuovo) |
+| Rifiutato / pendente / sospeso | il writer reinvita `rejected` e `suspended`, lascia `pending` intatto (condizioni nei tre scrittori, coperte dalla guardia e dai banchi) |
+| Due cicli | banco lista (`tests/account-page-lifecycle.test.mjs`: dedup e ciclo più recente) e banco revoca (ID `_c1`, `_c3`) |
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/detail-sharing-revocation-cycle.test.mjs` (nuovo, 6 casi) | **6/6** |
+| `node --test tests/shared-regrant-after-restore.test.mjs` (2 casi aziendali nuovi) | **5/5** |
+| `npm run test:sharing-prototype` | **32/32** |
+| `npm run test:firestore-rules` (Emulator, 1 caso nuovo) | **45/45** |
+| `npm run test:navigation` | **146/146** |
+| `npm run test:history-prototype` / `test:data-access` / `test:functions-security` | 98/98 · 95/95 · 142/142 |
+| `test:js-syntax` · `test:static-references` · `test:html-purity` · budget pagine | 161 moduli · 235 file · HTML puro · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **795 file** |
+
+Banchi adeguati al nuovo contratto (nessuna modifica di logica sotto prova): `tests/company-detail-readonly.test.mjs` e `tests/company-account-detail-lifecycle.test.mjs` ricevono gli helper `inviteIdForGuest`/`sharingCycleOf`/`sanitizeEmail` (e `readErrorMessage`) nei rispettivi contesti, perché gli `import` vengono rimossi dai banchi.
+
+### Limiti e dichiarazioni
+
+1. **Editor della modalità di condivisione** (`shared/detail-account-mode.js`): coperto da guardia statica e dal codice di R7C-1, **non** da un banco comportamentale dedicato in questa fetta; i due editor dei form hanno invece prove comportamentali complete (privato e azienda). Se Codex vuole la prova anche per quel modulo, è una fetta di test dedicata.
+2. **Nessuna modifica di logica** oltre alle due lacune dimostrate: revisione del ciclo e ID negli scrittori; tutto il resto era già coperto da R7C-1/R7C-2.
+3. Restano aperti: inviti orfani, trigger di audit, migrazioni (R7C-6, dati reali) e il collaudo su browser/dispositivo; il candidato **non è ancora distribuibile**.
+4. Nessun dato reale toccato; nessun push o deploy.
+
+**Stato incarico: DA_VERIFICARE** — M7-R7C-5 consegnato da DeepSeek il 2026-09-21; lacuna dimostrata e corretta nella revoca dei due pannelli (ID del ciclo corrente, nessuna cancellazione con ciclo malformato) e nella lettura di stato del pannello aziendale, percorso di reinvito verificato su editor dei form privato e azienda, handler Functions ed Emulator delle Rules, controllo negativo 2/6 → 6/6, nessun push eseguito.

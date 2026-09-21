@@ -101,6 +101,16 @@ test('Account ripristinato: l\'ospite precedente non rilegge', async () => {
     await assertFails(getDoc(doc(asGuest(), ...restoredPath)));
 });
 
+// M7-R7C-5: l'accesso torna solo dopo l'accettazione del NUOVO invito, cioè
+// quando l'handler ricostruisce i grant sul ciclo corrente.
+test('dopo l\'accettazione del nuovo invito l\'accesso torna', async () => {
+    await assertFails(getDoc(doc(asGuest(), ...restoredPath)), 'prima dell\'accettazione nessun accesso');
+    await testEnv.withSecurityRulesDisabled(async context => {
+        await updateDoc(doc(context.firestore(), ...restoredPath), {sharedWithUids: [GUEST]});
+    });
+    await assertSucceeds(getDoc(doc(asGuest(), ...restoredPath)), 'con il grant accettato l\'ospite rilegge');
+});
+
 test('invito del ciclo precedente: leggibile dal destinatario ma senza accesso all\'Account', async () => {
     const snapshot = await assertSucceeds(getDoc(doc(asGuest(), ...guestInvitePath)));
     assert.equal(snapshot.data().sharingState, 'suspended');

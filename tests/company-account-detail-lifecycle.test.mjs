@@ -7,6 +7,9 @@ const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.
 
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
+// M7-R7C-5: pagina e modulo di condivisione usano gli helper di ciclo/invito.
+const utilsSource = await readFile(new URL('../Frontend/public/assets/js/utils.js', import.meta.url), 'utf8');
+const {inviteIdForGuest, sanitizeEmail, sharingCycleOf} = await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
 function fixture() {
     const writes = [], reads = [], errors = [], modules = [], classes = new Set(), listeners = new Set();
@@ -25,6 +28,7 @@ function fixture() {
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
     const context = vm.createContext({readErrorMessage, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
+        inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : nodes[id] || find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),
@@ -87,7 +91,7 @@ test('real detail mode contact lookup respects parent teardown while default leg
 });
 test('real sharing revoke confirmation cannot submit after parent context changes',async()=>{
  const text=await moduleText('azienda/dettaglio-azienda-sharing.js');const gate=deferred();let active=true,writes=0;
- const realm=vm.createContext({showConfirmModal:()=>gate.promise,runTransaction:async()=>writes++,t:()=>'',document:{getElementById:()=>null}});vm.runInContext(text,realm);
+ const realm=vm.createContext({showConfirmModal:()=>gate.promise,runTransaction:async()=>writes++,t:()=>'',document:{getElementById:()=>null},inviteIdForGuest,sanitizeEmail,sharingCycleOf,db:{},doc:(_,...path)=>path.join('/')});vm.runInContext(text,realm);
  realm.initSharingModule({currentUid:'A',currentAziendaId:'company',currentId:'one',isReadOnly:false,isActive:()=>active});const pending=realm.revokeRecipientV3('synthetic@example.invalid');active=false;gate.resolve(true);await pending;assert.equal(writes,0);
 });
 

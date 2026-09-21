@@ -11,6 +11,7 @@ const modules = new URL('../Frontend/public/assets/js/modules/', import.meta.url
 const strip = text => text.replace(/^export \{[^}]*\} from ['"][^'"]*['"];\r?\n/gm, '')
     .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const source = strip(await readFile(new URL('privato/form-privato-save.js', modules), 'utf8'));
+const companySource = strip(await readFile(new URL('azienda/form-azienda-save.js', modules), 'utf8'));
 // M7-R7C-1: il writer usa gli helper di ciclo/invito di `utils.js`; il banco li
 // inietta nel contesto perché gli `import` vengono rimossi dai sorgenti.
 const utilsSource = await readFile(new URL('../utils.js', modules), 'utf8');
@@ -21,6 +22,7 @@ const GUEST_KEY = 'guest_example_invalid';
 const OTHER_KEY = 'other_example_invalid';
 const GUEST_EMAIL = 'guest@example.invalid';
 const ACCOUNT_PATH = 'users/owner/accounts/account-1';
+const COMPANY_PATH = 'users/owner/aziende/company-1/accounts/account-1';
 
 // Stato dopo il ripristino fail-closed: ciclo avanzato, nessun grant, voci sospese.
 const restoredAccount = () => ({revision: 2, updatedAt: '2026-01-01T00:00:00.000Z', visibility: 'shared',
@@ -30,9 +32,9 @@ const restoredAccount = () => ({revision: 2, updatedAt: '2026-01-01T00:00:00.000
         [OTHER_KEY]: {email: 'other@example.invalid', status: 'suspended', uid: null, suspendedAt: '2026-01-01T00:00:00.000Z'}
     }});
 
-async function fixture(accountState = restoredAccount()) {
+async function fixture(accountState = restoredAccount(), company = false) {
     const writes = [];
-    const fields = {'account-name': {value: 'Account sintetico'}, 'invite-email': {value: ''},
+    const accountPath = company ? COMPANY_PATH : ACCOUNT_PATH;    const fields = {'account-name': {value: 'Account sintetico'}, 'invite-email': {value: ''},
         'flag-shared': {checked: true}, 'flag-memo': {checked: false}, 'flag-memo-shared': {checked: false}};
     const context = vm.createContext({
         auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}}, db: {},
@@ -44,7 +46,7 @@ async function fixture(accountState = restoredAccount()) {
             const staged = [];
             await callback({
                 get: async reference => {
-                    const data = reference.path === ACCOUNT_PATH ? accountState : {contactEmails: []};
+                    const data = reference.path === accountPath ? accountState : {contactEmails: []};
                     return {exists: () => true, data: () => structuredClone(data)};
                 },
                 update: (reference, patch) => staged.push([reference.path, patch, 'update']),
@@ -65,10 +67,14 @@ async function fixture(accountState = restoredAccount()) {
         document: {getElementById: id => fields[id] || null, querySelector: () => null}, navigator: {onLine: true},
         sessionStorage: {removeItem: () => {}}, setTimeout: () => {}, console: {error: () => {}, warn: () => {}}
     });
-    vm.runInContext(source, context);
+    vm.runInContext(company ? companySource : source, context);
     return {writes,
         createdInvites: () => writes.filter(write => write[0].startsWith('invites/') && write[2] === 'set'),
-        save: invitedEmails => context.savePrivateAccount({
+        save: invitedEmails => company ? context.saveAccount({
+            bankAccounts: [], invitedEmails, isExplicitMemo: false, currentUid: 'owner',
+            currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: true,
+            profileContactLinkDraft: null, baseRevision: 2
+        }) : context.savePrivateAccount({
             bankAccounts: [], invitedEmails, isExplicitMemo: false, currentUid: 'owner',
             currentDocId: 'account-1', currentAziendaId: '', isEditing: true,
             profileContactLinkDraft: null, baseRevision: 2
@@ -103,7 +109,6 @@ test('salvataggio con l\'ospite riselezionato: nuovo invito del ciclo corrente e
 });
 
 test('controprova dell\'invariante: una voce ancora accettata ricrea il grant al salvataggio', async () => {
-    // Se il ripristino lasciasse una voce `accepted` (il caso segnalato da Codex),
     // questo stesso percorso ricalcolerebbe `sharedWithUids` e ridarebbe accesso
     // senza un nuovo invito: è il motivo per cui R7C-2 deve sospenderla.
     const stale = restoredAccount();
@@ -113,4 +118,30 @@ test('controprova dell\'invariante: una voce ancora accettata ricrea il grant al
     const account = f.writes.find(write => write[0] === ACCOUNT_PATH);
     assert.deepEqual([...account[1].sharedWithUids], ['guest-uid'], 'il writer ricostruisce i grant dalle voci accettate');
     assert.equal(f.createdInvites().length, 0, 'una voce accettata non richiede un nuovo invito');
+});
+
+// M7-R7C-5: stesso percorso nell'editor aziendale.
+
+test('azienda: un salvataggio dopo il ripristino non ricrea accessi', async () => {
+    const f = await fixture(restoredAccount(), true);
+    await f.save(['other@example.invalid']);
+    const account = f.writes.find(write => write[0] === COMPANY_PATH);
+    assert.ok(account, 'l\'Account aziendale viene salvato');
+    assert.equal(account[1].sharedWithUids.length, 0);
+    assert.equal(account[1].acceptedCount, 0);
+    assert.deepEqual(f.createdInvites().map(write => write[0]),
+        ['invites/account-1_other_example_invalid_c1'], 'solo per il contatto riselezionato');
+});
+
+test('azienda: l\'ospite sospeso riselezionato riceve un invito del ciclo corrente', async () => {
+    const f = await fixture(restoredAccount(), true);
+    await f.save([GUEST_EMAIL]);
+    const [invite] = f.createdInvites();
+    assert.equal(invite[0], 'invites/account-1_guest_example_invalid_c1');
+    assert.equal(invite[1].cycle, 1);
+    assert.equal(invite[1].aziendaId, 'company-1');
+    assert.equal(invite[1].status, 'pending');
+    const account = f.writes.find(write => write[0] === COMPANY_PATH);
+    assert.equal(account[1].sharedWithUids.length, 0, 'l\'accesso non torna prima dell\'accettazione');
+    assert.equal(account[1].sharedWith[GUEST_KEY].status, 'pending');
 });

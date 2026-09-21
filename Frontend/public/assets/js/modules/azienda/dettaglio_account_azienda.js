@@ -12,7 +12,7 @@ import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { logError } from '../../utils.js';
+import { logError, sharingCycleOf } from '../../utils.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
@@ -250,7 +250,7 @@ async function loadAccount(mount = mounted) {
         };
         const reload = () => mount.active() && loadAccount(mount);
         initAttachmentModule({ownerUid: loadOwnerId, currentAziendaId: companyId, currentId: accountId, readOnly: isReadOnly, isActive: actionActive, signal, confirm});
-        initSharingModule({currentUid: loadViewerId, currentAziendaId: companyId, currentId: accountId, isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        initSharingModule({currentUid: loadViewerId, currentAziendaId: companyId, currentId: accountId, isReadOnly, onReload: reload, isActive: actionActive, signal, confirm, sharingCycle: sharingCycleOf(loaded)});
         if (!isReadOnly && loadOwnerId === loadViewerId) {
             updateDoc(docRef, {views: increment(1)}).catch(e => { if (active()) logError('UpdateViews', e); });
         }
