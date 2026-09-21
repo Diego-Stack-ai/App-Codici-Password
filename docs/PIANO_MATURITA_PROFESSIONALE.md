@@ -426,6 +426,8 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 **Uscita:** release candidata documentata, misurata e ripristinabile.
 
+> **Censimento dei gate aperti M6–M10 (21/09/2026):** tabella con fonte, evidenza, ciò che manca, dipendenza e un solo passo autonomo consigliato in [CENSIMENTO_GATE_M6_M10.md](./CENSIMENTO_GATE_M6_M10.md). Il censimento è documentale e non chiude alcun gate.
+
 ### Attività conclusiva dopo M10 — Lingue, Impostazioni e campi protetti
 
 Questa attività è un promemoria vincolante, ma **non deve essere anticipata durante le fasi M0–M10**. Una volta completato l’intero programma di maturazione:
