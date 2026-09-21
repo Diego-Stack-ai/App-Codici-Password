@@ -1067,3 +1067,48 @@ Produci un MD M7 di censimento/proposta con riferimenti verificabili; aggiorna i
 - **Perimetro:** sola documentazione. Nessuna modifica a codice, Rules, Functions, dati, versioni di retention o durate; nessun push. Se una riga risulta non dimostrata, la matrice deve dichiararlo invece di ampliare la prova.
 
 **Stato incarico: IN_LAVORAZIONE** — correzione M7-R1 presa in carico da DeepSeek il 2026-09-21; M6-CLOSE resta approvato per il laboratorio con il solo gate fisico iPhone aperto.
+
+## Rapporto DeepSeek — M7-R1 correzione
+
+- **Stato:** COMPLETATO — in attesa di riverifica Codex.
+- **Commit:** presa in carico `033488b6`, correzione `14d1a3d4` (`docs: realign M7-R1 test matrix with verified evidence`); base osservata `884b51ea`; **nessun push eseguito**. Solo documentazione: `docs/M7_RETENTION_CENSIMENTO.md` e `docs/FILE_INVENTORY.md`.
+- **Correzione accolta:** T-15 non era dimostrata dal test citato. Il rilievo era fondato e riguardava anche altre righe.
+
+### Metodo del riesame
+
+Per ogni riga della matrice che dichiarava `esistente` ho estratto il titolo del test effettivamente associato alla riga citata e, dove il solo titolo non bastava, ho **letto il corpo del test** e le sue asserzioni. Lo scenario di ogni riga descrive ora la proprietà che il test citato dimostra davvero.
+
+### Esito: 33 righe (13 `esistente`, 20 `da realizzare`)
+
+| Riga | Prima | Dopo |
+|---|---|---|
+| T-01 | `archive-account-model.test.mjs:8` + `archive-session.test.mjs:147`, con scenario «archivio … rileggo la lista» | `tests/account-page-lifecycle.test.mjs:239` (privato **e** azienda: destinazione di scrittura corretta) + `tests/archive-account-model.test.mjs:8` (metadati, `revision+1`, `purgeAfter` assente). «Rileggo la lista» è stato **rimosso** dallo scenario: non era provato da alcun test citato |
+| T-04 | `archive-receipt-handler.test.js:112` (ripresa dopo errore) | `archive-receipt-handler.test.js:79` (`duplicate` senza Storage, `recursiveDelete` o scritture): è il test che dimostra l'esito descritto |
+| T-05 | `esistente` con il solo predicato di percorso | **`da realizzare`** per l'esito end-to-end (purge interrotto prima di ogni cancellazione); il predicato è diventato la riga T-33 |
+| T-15 | `esistente` | **`da realizzare`**: i test citati provano solo l'arresto dopo il cambio di Account, non il percorso completo byte+metadato (ora riga T-32) |
+| T-18 | `:110` | `:100,110`: errore al secondo blocco **e** errore sugli allegati |
+| T-20 | `backup-receipt-handler.test.js:36` (percorso felice) | `backup-receipt-handler.test.js:48` (`LEGACY_BACKUP_RESULT_UNVERIFIED`, nessuna scrittura) |
+
+Nuove righe, tutte con prova letta e verificata: **T-30** lettura filtrata della lista dell'Archivio (`da realizzare`); **T-31** ripristino riuscito (`esistente`, `archive-session.test.mjs:147`); **T-32** cancellazione di un allegato interrotta dal cambio di Account (`esistente`, `private-account-detail-lifecycle.test.mjs:166,172`); **T-33** predicato di percorso sicuro (`esistente`, `archive-purge-service.test.js:19`).
+
+Confermate senza modifiche dopo verifica: T-02, T-03, T-07, T-10, T-14, T-19.
+
+### Verifiche eseguite
+
+- Lettura diretta dei test citati per tutte le righe modificate, con controllo delle asserzioni (es. T-04: `{status:'purged', duplicate:true}`, `counts.storage === 0`, `counts.recursiveDelete === 0`, `writes.length === 0`; T-20: `LEGACY_BACKUP_RESULT_UNVERIFIED`, nessuna scrittura, nessun documento di esito).
+- Controllo automatico della matrice: ogni riga `esistente` allineata al titolo del test citato.
+- `git diff --check` **pulito**; `npm run audit:inventory` → **781 file**.
+- Controllo statico del censimento: 397 righe, 13 tabelle con 0 incoerenze, **125 citazioni distinte, 0 non valide**.
+- Nessuna modifica a codice, Rules, Functions, dati o durate di retention.
+
+### Scostamenti
+
+- La matrice passa da 29 a 33 righe: la parte già coperta di uno scenario non è più mescolata all'esito non coperto. Nessun'altra sezione del censimento è cambiata.
+- Tre commit locali per questo giro (presa in carico, correzione, rapporto), coerenti con la separazione fra lavoro e rapporto già in uso; la correzione è il solo commit che modifica il censimento.
+
+### Note per Codex
+
+- Il punto da ricontrollare è la tabella della sezione 9: ogni riga `esistente` cita ora il test che dimostra esattamente lo scenario descritto; le righe T-05 e T-15 dichiarano esplicitamente di non essere coperte.
+- Le due righe che dipendono da prove del laboratorio o da verifiche esterne restano `da realizzare` e non sono state promosse.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R1 consegnata da DeepSeek il 2026-09-21; matrice allineata alle prove verificate, nessuna decisione di retention presa e nessun push eseguito.
