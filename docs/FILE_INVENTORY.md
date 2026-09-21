@@ -2,172 +2,63 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **841**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **842**. Duplicati byte-per-byte: **1 gruppi**.
 
-## scripts
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `scripts/run-interrupted-restore-emulators.mjs` | MJS | 1285 | 35 | Strumento manutenzione/test: run-interrupted-restore-emulators. |
-| `scripts/audit-canonical-pages.mjs` | MJS | 1211 | 29 | Strumento manutenzione/test: audit-canonical-pages. |
-| `scripts/audit-data-access.mjs` | MJS | 6284 | 93 | Strumento manutenzione/test: audit-data-access. |
-| `scripts/audit-firestore-legacy-email-metadata.mjs` | MJS | 1947 | 44 | Strumento manutenzione/test: audit-firestore-legacy-email-metadata. |
-| `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
-| `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
-| `scripts/audit-lightweight-features.mjs` | MJS | 2698 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 10558 | 132 | Strumento manutenzione/test: audit-navigation-flows. |
-| `scripts/audit-offline-shell.mjs` | MJS | 3627 | 70 | Strumento manutenzione/test: audit-offline-shell. |
-| `scripts/audit-page-performance.mjs` | MJS | 8131 | 146 | Strumento manutenzione/test: audit-page-performance. |
-| `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
-| `scripts/audit-project-inventory.mjs` | MJS | 8433 | 127 | Strumento manutenzione/test: audit-project-inventory. |
-| `scripts/audit-release-hardening.mjs` | MJS | 2220 | 35 | Strumento manutenzione/test: audit-release-hardening. |
-| `scripts/audit-security-flows.mjs` | MJS | 34551 | 301 | Strumento manutenzione/test: audit-security-flows. |
-| `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |
-| `scripts/audit-ui-foundations.mjs` | MJS | 10399 | 139 | Strumento manutenzione/test: audit-ui-foundations. |
-| `scripts/audit-vault-key-terminology.mjs` | MJS | 2059 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
-| `scripts/build-card-importer-prototype.mjs` | MJS | 561 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
-| `scripts/build-offline-runtime.mjs` | MJS | 5011 | 125 | Strumento manutenzione/test: build-offline-runtime. |
-| `scripts/bump-version.mjs` | MJS | 5788 | 144 | Strumento manutenzione/test: bump-version. |
-| `scripts/lib/legacy-email-audit-model.mjs` | MJS | 3871 | 66 | Strumento manutenzione/test: legacy-email-audit-model. |
-| `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
-| `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
-| `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
-| `scripts/run-account-attachment-delete-emulators.mjs` | MJS | 1445 | 37 | Strumento manutenzione/test: run-account-attachment-delete-emulators. |
-| `scripts/run-attachment-removal-emulators.mjs` | MJS | 1288 | 35 | Strumento manutenzione/test: run-attachment-removal-emulators. |
-| `scripts/run-audit-retention-emulators.mjs` | MJS | 1152 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
-| `scripts/run-avatar-residues-emulators.mjs` | MJS | 1340 | 36 | Strumento manutenzione/test: run-avatar-residues-emulators. |
-| `scripts/run-company-hard-delete-emulators.mjs` | MJS | 1287 | 35 | Strumento manutenzione/test: run-company-hard-delete-emulators. |
-| `scripts/run-firestore-rules-tests.mjs` | MJS | 1443 | 31 | Strumento manutenzione/test: run-firestore-rules-tests. |
-| `scripts/run-purge-retention-emulators.mjs` | MJS | 1411 | 37 | Strumento manutenzione/test: run-purge-retention-emulators. |
-| `scripts/run-purged-account-restore-emulators.mjs` | MJS | 1288 | 35 | Strumento manutenzione/test: run-purged-account-restore-emulators. |
-| `scripts/run-shared-copies-purge-emulators.mjs` | MJS | 1270 | 35 | Strumento manutenzione/test: run-shared-copies-purge-emulators. |
-| `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
-| `scripts/run-vault-session-emulators.mjs` | MJS | 5000 | 41 | Strumento manutenzione/test: run-vault-session-emulators. |
-| `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
-| `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
-| `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |
-| `scripts/test-functions-emulator.mjs` | MJS | 2598 | 59 | Strumento manutenzione/test: test-functions-emulator. |
-| `scripts/test-private-auth-browser.mjs` | MJS | 9036 | 138 | Strumento manutenzione/test: test-private-auth-browser. |
-| `scripts/test-vault-assistant.mjs` | MJS | 1397 | 21 | Strumento manutenzione/test: test-vault-assistant. |
-| `scripts/ui-quality-baseline.json` | JSON | 128 | 7 | Strumento manutenzione/test: ui-quality-baseline. |
-
-## tests
+## docs
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/interrupted-restore-orphan-refs.emulator.test.mjs` | MJS | 11357 | 171 | Test automatico: interrupted-restore-orphan-refs.emulator.test. |
-| `tests/account-archive-paths.test.mjs` | MJS | 6158 | 91 | Test automatico: account-archive-paths.test. |
-| `tests/account-attachment-delete.emulator.test.mjs` | MJS | 8784 | 154 | Test automatico: account-attachment-delete.emulator.test. |
-| `tests/account-attachment-delete.test.mjs` | MJS | 11031 | 179 | Test automatico: account-attachment-delete.test. |
-| `tests/account-detail-compact.test.mjs` | MJS | 7958 | 113 | Test automatico: account-detail-compact.test. |
-| `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
-| `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
-| `tests/account-note-editor.test.mjs` | MJS | 10957 | 162 | Test automatico: account-note-editor.test. |
-| `tests/account-page-lifecycle.test.mjs` | MJS | 26419 | 434 | Test automatico: account-page-lifecycle.test. |
-| `tests/account-widget-lifecycle.test.mjs` | MJS | 15254 | 146 | Test automatico: account-widget-lifecycle.test. |
-| `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
-| `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
-| `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
-| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 13533 | 233 | Test automatico: archive-guest-suspension.rules.test. |
-| `tests/archive-list-filter.test.mjs` | MJS | 12088 | 204 | Test automatico: archive-list-filter.test. |
-| `tests/archive-recipients.test.mjs` | MJS | 5567 | 101 | Test automatico: archive-recipients.test. |
-| `tests/archive-session.test.mjs` | MJS | 45922 | 700 | Test automatico: archive-session.test. |
-| `tests/attachment-removal-residues.emulator.test.mjs` | MJS | 8540 | 142 | Test automatico: attachment-removal-residues.emulator.test. |
-| `tests/attachment-removal-residues.test.mjs` | MJS | 11571 | 181 | Test automatico: attachment-removal-residues.test. |
-| `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
-| `tests/audit-events.rules.test.mjs` | MJS | 5113 | 96 | Test automatico: audit-events.rules.test. |
-| `tests/audit-retention.emulator.test.mjs` | MJS | 19544 | 331 | Test automatico: audit-retention.emulator.test. |
-| `tests/avatar-change-residues.emulator.test.mjs` | MJS | 6599 | 116 | Test automatico: avatar-change-residues.emulator.test. |
-| `tests/avatar-change-residues.test.mjs` | MJS | 10806 | 197 | Test automatico: avatar-change-residues.test. |
-| `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
-| `tests/backup-export-model.test.mjs` | MJS | 2662 | 49 | Test automatico: backup-export-model.test. |
-| `tests/backup-export-session.test.mjs` | MJS | 8666 | 123 | Test automatico: backup-export-session.test. |
-| `tests/backup-header-cleartext.test.mjs` | MJS | 10050 | 161 | Test automatico: backup-header-cleartext.test. |
-| `tests/backup-import-model.test.mjs` | MJS | 5562 | 93 | Test automatico: backup-import-model.test. |
-| `tests/backup-restore-session.test.mjs` | MJS | 40167 | 598 | Test automatico: backup-restore-session.test. |
-| `tests/backup-restore-ui.test.mjs` | MJS | 20855 | 296 | Test automatico: backup-restore-ui.test. |
-| `tests/banking-form-roundtrip.test.mjs` | MJS | 3125 | 45 | Test automatico: banking-form-roundtrip.test. |
-| `tests/banking-model.test.mjs` | MJS | 2985 | 68 | Test automatico: banking-model.test. |
-| `tests/banking-widget-hosts.test.mjs` | MJS | 6923 | 105 | Test automatico: banking-widget-hosts.test. |
-| `tests/banking-widget-placement.test.mjs` | MJS | 7853 | 95 | Test automatico: banking-widget-placement.test. |
-| `tests/company-account-detail-lifecycle.test.mjs` | MJS | 12892 | 116 | Test automatico: company-account-detail-lifecycle.test. |
-| `tests/company-archive-conflict.test.mjs` | MJS | 6031 | 114 | Test automatico: company-archive-conflict.test. |
-| `tests/company-detail-freshness.test.mjs` | MJS | 7145 | 105 | Test automatico: company-detail-freshness.test. |
-| `tests/company-detail-readonly.test.mjs` | MJS | 9651 | 148 | Test automatico: company-detail-readonly.test. |
-| `tests/company-form-archive-mount.test.mjs` | MJS | 13965 | 243 | Test automatico: company-form-archive-mount.test. |
-| `tests/company-form-freshness.test.mjs` | MJS | 5063 | 69 | Test automatico: company-form-freshness.test. |
-| `tests/company-hard-delete-residues.emulator.test.mjs` | MJS | 10963 | 172 | Test automatico: company-hard-delete-residues.emulator.test. |
-| `tests/company-hard-delete-residues.test.mjs` | MJS | 6733 | 101 | Test automatico: company-hard-delete-residues.test. |
-| `tests/company-profile.test.mjs` | MJS | 7813 | 74 | Test automatico: company-profile.test. |
-| `tests/consultation-copies.test.mjs` | MJS | 13493 | 220 | Test automatico: consultation-copies.test. |
-| `tests/contact-card-photo.test.mjs` | MJS | 6076 | 85 | Test automatico: contact-card-photo.test. |
-| `tests/credential-health-runtime.test.mjs` | MJS | 3287 | 68 | Test automatico: credential-health-runtime.test. |
-| `tests/credential-health-session.test.mjs` | MJS | 3497 | 49 | Test automatico: credential-health-session.test. |
-| `tests/crypto-utils.test.mjs` | MJS | 1546 | 35 | Test automatico: crypto-utils.test. |
-| `tests/deadline-config-model.test.mjs` | MJS | 2122 | 45 | Test automatico: deadline-config-model.test. |
-| `tests/deadline-detail-lifecycle.test.mjs` | MJS | 22726 | 295 | Test automatico: deadline-detail-lifecycle.test. |
-| `tests/deadline-model.test.mjs` | MJS | 2208 | 44 | Test automatico: deadline-model.test. |
-| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
-| `tests/detail-account-mode-reinvite.test.mjs` | MJS | 9922 | 173 | Test automatico: detail-account-mode-reinvite.test. |
-| `tests/detail-sharing-revocation-cycle.test.mjs` | MJS | 5748 | 106 | Test automatico: detail-sharing-revocation-cycle.test. |
-| `tests/device-cache-residues.test.mjs` | MJS | 18651 | 317 | Test automatico: device-cache-residues.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 7500 | 154 | Test automatico: firestore.profile-widgets.rules.test. |
-| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
-| `tests/guest-invite-suspension.test.mjs` | MJS | 4890 | 82 | Test automatico: guest-invite-suspension.test. |
-| `tests/history-recovery.rules.test.mjs` | MJS | 2366 | 30 | Test automatico: history-recovery.rules.test. |
-| `tests/input-autofill.test.mjs` | MJS | 4322 | 69 | Test automatico: input-autofill.test. |
-| `tests/invite-audit-ref.rules.test.mjs` | MJS | 17460 | 298 | Test automatico: invite-audit-ref.rules.test. |
-| `tests/legacy-attachment-opening.test.mjs` | MJS | 16263 | 274 | Test automatico: legacy-attachment-opening.test. |
-| `tests/legacy-email-audit-model.test.mjs` | MJS | 1989 | 41 | Test automatico: legacy-email-audit-model.test. |
-| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
-| `tests/new-account-shared-link.test.mjs` | MJS | 2601 | 33 | Test automatico: new-account-shared-link.test. |
-| `tests/offline-account-widgets.test.mjs` | MJS | 6182 | 60 | Test automatico: offline-account-widgets.test. |
-| `tests/offline-mutation-client.test.mjs` | MJS | 5214 | 89 | Test automatico: offline-mutation-client.test. |
-| `tests/offline-mutation-queue.test.mjs` | MJS | 18379 | 301 | Test automatico: offline-mutation-queue.test. |
-| `tests/offline-mutation-sync.test.mjs` | MJS | 7093 | 112 | Test automatico: offline-mutation-sync.test. |
-| `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
-| `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |
-| `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18090 | 228 | Test automatico: private-account-detail-lifecycle.test. |
-| `tests/private-account-offline-pilot.test.mjs` | MJS | 2790 | 45 | Test automatico: private-account-offline-pilot.test. |
-| `tests/private-account-offline-policy.test.mjs` | MJS | 1352 | 23 | Test automatico: private-account-offline-policy.test. |
-| `tests/private-account-recovery.test.mjs` | MJS | 10689 | 112 | Test automatico: private-account-recovery.test. |
-| `tests/private-auth-gate.test.mjs` | MJS | 7879 | 128 | Test automatico: private-auth-gate.test. |
-| `tests/private-bootstrap-offline.test.mjs` | MJS | 3145 | 50 | Test automatico: private-bootstrap-offline.test. |
-| `tests/private-detail-legacy-id.test.mjs` | MJS | 18505 | 280 | Test automatico: private-detail-legacy-id.test. |
-| `tests/private-form-lazy-banking.test.mjs` | MJS | 2846 | 22 | Test automatico: private-form-lazy-banking.test. |
-| `tests/profile-account-management.test.mjs` | MJS | 5502 | 38 | Test automatico: profile-account-management.test. |
-| `tests/profile-contact-link.test.mjs` | MJS | 29029 | 378 | Test automatico: profile-contact-link.test. |
-| `tests/profile-deadline-link-model.test.mjs` | MJS | 2286 | 47 | Test automatico: profile-deadline-link-model.test. |
-| `tests/profile-label-management.test.mjs` | MJS | 1039 | 19 | Test automatico: profile-label-management.test. |
-| `tests/profile-lazy-editor.test.mjs` | MJS | 3248 | 73 | Test automatico: profile-lazy-editor.test. |
-| `tests/profile-legacy-email-recovery.test.mjs` | MJS | 1871 | 42 | Test automatico: profile-legacy-email-recovery.test. |
-| `tests/profile-model.test.mjs` | MJS | 5718 | 96 | Test automatico: profile-model.test. |
-| `tests/profile-widget-zone.test.mjs` | MJS | 769 | 17 | Test automatico: profile-widget-zone.test. |
-| `tests/purge-retention-effects.emulator.test.mjs` | MJS | 18370 | 289 | Test automatico: purge-retention-effects.emulator.test. |
-| `tests/purged-account-restore.emulator.test.mjs` | MJS | 19329 | 283 | Test automatico: purged-account-restore.emulator.test. |
-| `tests/repository-record-identity.test.mjs` | MJS | 5191 | 86 | Test automatico: repository-record-identity.test. |
-| `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
-| `tests/setup-linux-cloud.test.mjs` | MJS | 5095 | 92 | Test automatico: setup-linux-cloud.test. |
-| `tests/share-revocation-paths.test.mjs` | MJS | 6539 | 102 | Test automatico: share-revocation-paths.test. |
-| `tests/shared-copies-purge.emulator.test.mjs` | MJS | 10937 | 174 | Test automatico: shared-copies-purge.emulator.test. |
-| `tests/shared-copies-purge.test.mjs` | MJS | 4859 | 75 | Test automatico: shared-copies-purge.test. |
-| `tests/shared-credential-editor.test.mjs` | MJS | 3612 | 21 | Test automatico: shared-credential-editor.test. |
-| `tests/shared-credential-update-session.test.mjs` | MJS | 4043 | 79 | Test automatico: shared-credential-update-session.test. |
-| `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
-| `tests/shared-regrant-after-restore.test.mjs` | MJS | 10713 | 172 | Test automatico: shared-regrant-after-restore.test. |
-| `tests/shared-vault-data-model.test.mjs` | MJS | 4401 | 87 | Test automatico: shared-vault-data-model.test. |
-| `tests/sharing-identity.test.mjs` | MJS | 1748 | 24 | Test automatico: sharing-identity.test. |
-| `tests/sharing-prototype.rules.test.mjs` | MJS | 4519 | 94 | Test automatico: sharing-prototype.rules.test. |
-| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4079 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
-| `tests/sharing-revocation.rules.test.mjs` | MJS | 8199 | 154 | Test automatico: sharing-revocation.rules.test. |
-| `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
-| `tests/storage-emulator-loopback-dispatcher.test.mjs` | MJS | 1648 | 45 | Test automatico: storage-emulator-loopback-dispatcher.test. |
-| `tests/storage.rules.test.mjs` | MJS | 4149 | 99 | Test automatico: storage.rules.test. |
-| `tests/swipe-lifecycle.test.mjs` | MJS | 11318 | 211 | Test automatico: swipe-lifecycle.test. |
-| `tests/vault-logout.test.mjs` | MJS | 4848 | 95 | Test automatico: vault-logout.test. |
-| `tests/vault-session-races.test.mjs` | MJS | 10680 | 233 | Test automatico: vault-session-races.test. |
-| `tests/vault-session.test.mjs` | MJS | 1865 | 39 | Test automatico: vault-session.test. |
-| `tests/widget-common-picker.test.mjs` | MJS | 4738 | 40 | Test automatico: widget-common-picker.test. |
+| `docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md` | MD | 2889 | 51 | Documentazione: M8 DOMANDE RIPRISTINO INTERROTTO. |
+| `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
+| `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
+| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
+| `docs/A4_CENSIMENTO_DOCUMENTI.md` | MD | 2143 | 12 | Documentazione: A4 CENSIMENTO DOCUMENTI. |
+| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
+| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 32060 | 488 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 962661 | 6611 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
+| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
+| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
+| `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/M7_DOMANDE_T08_COPIE_CONDIVISE.md` | MD | 3447 | 63 | Documentazione: M7 DOMANDE T08 COPIE CONDIVISE. |
+| `docs/M7_DOMANDE_T17_INTESTAZIONE_BACKUP.md` | MD | 3295 | 56 | Documentazione: M7 DOMANDE T17 INTESTAZIONE BACKUP. |
+| `docs/M7_DOMANDE_T21_RIPRISTINO_DOPO_PURGE.md` | MD | 3401 | 59 | Documentazione: M7 DOMANDE T21 RIPRISTINO DOPO PURGE. |
+| `docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md` | MD | 4177 | 70 | Documentazione: M7 DOMANDE T23 CACHE DISPOSITIVO. |
+| `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
+| `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
+| `docs/M7_DOMANDE_T27_HARD_DELETE.md` | MD | 4089 | 68 | Documentazione: M7 DOMANDE T27 HARD DELETE. |
+| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 111806 | 679 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 27928 | 186 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
+| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 108699 | 707 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 130176 | 742 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
 
 ## .firebaserc
 
@@ -459,61 +350,6 @@ File censiti: **841**. Duplicati byte-per-byte: **1 gruppi**.
 | `archive/home-experiments/home_confronto.html` | HTML | 592 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_confronto_legacy.css` | CSS | 2717 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_nebbia.html` | HTML | 605 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-
-## docs
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
-| `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
-| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
-| `docs/A4_CENSIMENTO_DOCUMENTI.md` | MD | 2143 | 12 | Documentazione: A4 CENSIMENTO DOCUMENTI. |
-| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
-| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 32060 | 488 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 962661 | 6611 | Documentazione: DEEPSEEK COORDINATION. |
-| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
-| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
-| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
-| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 75981 | 455 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M7_DOMANDE_T08_COPIE_CONDIVISE.md` | MD | 3447 | 63 | Documentazione: M7 DOMANDE T08 COPIE CONDIVISE. |
-| `docs/M7_DOMANDE_T17_INTESTAZIONE_BACKUP.md` | MD | 3295 | 56 | Documentazione: M7 DOMANDE T17 INTESTAZIONE BACKUP. |
-| `docs/M7_DOMANDE_T21_RIPRISTINO_DOPO_PURGE.md` | MD | 3401 | 59 | Documentazione: M7 DOMANDE T21 RIPRISTINO DOPO PURGE. |
-| `docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md` | MD | 4177 | 70 | Documentazione: M7 DOMANDE T23 CACHE DISPOSITIVO. |
-| `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
-| `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
-| `docs/M7_DOMANDE_T27_HARD_DELETE.md` | MD | 4089 | 68 | Documentazione: M7 DOMANDE T27 HARD DELETE. |
-| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 111806 | 679 | Documentazione: M7 RETENTION CENSIMENTO. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 27845 | 186 | Documentazione: M8 BACKUP RECUPERO. |
-| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5505 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
-| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 108699 | 707 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 130176 | 742 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
-| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
 
 ## experiments
 
@@ -922,6 +758,53 @@ File censiti: **841**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `package.json` | JSON | 18486 | 115 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
+## scripts
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `scripts/audit-canonical-pages.mjs` | MJS | 1211 | 29 | Strumento manutenzione/test: audit-canonical-pages. |
+| `scripts/audit-data-access.mjs` | MJS | 6284 | 93 | Strumento manutenzione/test: audit-data-access. |
+| `scripts/audit-firestore-legacy-email-metadata.mjs` | MJS | 1947 | 44 | Strumento manutenzione/test: audit-firestore-legacy-email-metadata. |
+| `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
+| `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
+| `scripts/audit-lightweight-features.mjs` | MJS | 2698 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 10558 | 132 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-offline-shell.mjs` | MJS | 3627 | 70 | Strumento manutenzione/test: audit-offline-shell. |
+| `scripts/audit-page-performance.mjs` | MJS | 8131 | 146 | Strumento manutenzione/test: audit-page-performance. |
+| `scripts/audit-page-shells.mjs` | MJS | 8017 | 169 | Strumento manutenzione/test: audit-page-shells. |
+| `scripts/audit-project-inventory.mjs` | MJS | 8433 | 127 | Strumento manutenzione/test: audit-project-inventory. |
+| `scripts/audit-release-hardening.mjs` | MJS | 2220 | 35 | Strumento manutenzione/test: audit-release-hardening. |
+| `scripts/audit-security-flows.mjs` | MJS | 34551 | 301 | Strumento manutenzione/test: audit-security-flows. |
+| `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |
+| `scripts/audit-ui-foundations.mjs` | MJS | 10399 | 139 | Strumento manutenzione/test: audit-ui-foundations. |
+| `scripts/audit-vault-key-terminology.mjs` | MJS | 2059 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
+| `scripts/build-card-importer-prototype.mjs` | MJS | 561 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
+| `scripts/build-offline-runtime.mjs` | MJS | 5011 | 125 | Strumento manutenzione/test: build-offline-runtime. |
+| `scripts/bump-version.mjs` | MJS | 5788 | 144 | Strumento manutenzione/test: bump-version. |
+| `scripts/lib/legacy-email-audit-model.mjs` | MJS | 3871 | 66 | Strumento manutenzione/test: legacy-email-audit-model. |
+| `scripts/migrate-offline-firestore-reads.mjs` | MJS | 2005 | 47 | Strumento manutenzione/test: migrate-offline-firestore-reads. |
+| `scripts/normalize-responsive-foundations.mjs` | MJS | 1747 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
+| `scripts/page-performance-budget.json` | JSON | 718 | 22 | Strumento manutenzione/test: page-performance-budget. |
+| `scripts/run-account-attachment-delete-emulators.mjs` | MJS | 1445 | 37 | Strumento manutenzione/test: run-account-attachment-delete-emulators. |
+| `scripts/run-attachment-removal-emulators.mjs` | MJS | 1288 | 35 | Strumento manutenzione/test: run-attachment-removal-emulators. |
+| `scripts/run-audit-retention-emulators.mjs` | MJS | 1152 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
+| `scripts/run-avatar-residues-emulators.mjs` | MJS | 1340 | 36 | Strumento manutenzione/test: run-avatar-residues-emulators. |
+| `scripts/run-company-hard-delete-emulators.mjs` | MJS | 1287 | 35 | Strumento manutenzione/test: run-company-hard-delete-emulators. |
+| `scripts/run-firestore-rules-tests.mjs` | MJS | 1443 | 31 | Strumento manutenzione/test: run-firestore-rules-tests. |
+| `scripts/run-interrupted-restore-emulators.mjs` | MJS | 1285 | 35 | Strumento manutenzione/test: run-interrupted-restore-emulators. |
+| `scripts/run-purge-retention-emulators.mjs` | MJS | 1411 | 37 | Strumento manutenzione/test: run-purge-retention-emulators. |
+| `scripts/run-purged-account-restore-emulators.mjs` | MJS | 1288 | 35 | Strumento manutenzione/test: run-purged-account-restore-emulators. |
+| `scripts/run-shared-copies-purge-emulators.mjs` | MJS | 1270 | 35 | Strumento manutenzione/test: run-shared-copies-purge-emulators. |
+| `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
+| `scripts/run-vault-session-emulators.mjs` | MJS | 5000 | 41 | Strumento manutenzione/test: run-vault-session-emulators. |
+| `scripts/setup-linux-cloud.sh` | SH | 7927 | 156 | Strumento manutenzione/test: setup-linux-cloud. |
+| `scripts/split-translations.mjs` | MJS | 2976 | 85 | Strumento manutenzione/test: split-translations. |
+| `scripts/storage-emulator-loopback-dispatcher.cjs` | CJS | 1571 | 57 | Strumento manutenzione/test: storage-emulator-loopback-dispatcher. |
+| `scripts/test-functions-emulator.mjs` | MJS | 2598 | 59 | Strumento manutenzione/test: test-functions-emulator. |
+| `scripts/test-private-auth-browser.mjs` | MJS | 9036 | 138 | Strumento manutenzione/test: test-private-auth-browser. |
+| `scripts/test-vault-assistant.mjs` | MJS | 1397 | 21 | Strumento manutenzione/test: test-vault-assistant. |
+| `scripts/ui-quality-baseline.json` | JSON | 128 | 7 | Strumento manutenzione/test: ui-quality-baseline. |
+
 ## storage.cors.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -939,6 +822,124 @@ File censiti: **841**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `stylelint.config.mjs` | MJS | 510 | 17 | File di progetto: stylelint.config. |
+
+## tests
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `tests/account-archive-paths.test.mjs` | MJS | 6158 | 91 | Test automatico: account-archive-paths.test. |
+| `tests/account-attachment-delete.emulator.test.mjs` | MJS | 8784 | 154 | Test automatico: account-attachment-delete.emulator.test. |
+| `tests/account-attachment-delete.test.mjs` | MJS | 11031 | 179 | Test automatico: account-attachment-delete.test. |
+| `tests/account-detail-compact.test.mjs` | MJS | 7958 | 113 | Test automatico: account-detail-compact.test. |
+| `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
+| `tests/account-mode-model.test.mjs` | MJS | 1927 | 37 | Test automatico: account-mode-model.test. |
+| `tests/account-note-editor.test.mjs` | MJS | 10957 | 162 | Test automatico: account-note-editor.test. |
+| `tests/account-page-lifecycle.test.mjs` | MJS | 26419 | 434 | Test automatico: account-page-lifecycle.test. |
+| `tests/account-widget-lifecycle.test.mjs` | MJS | 15254 | 146 | Test automatico: account-widget-lifecycle.test. |
+| `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
+| `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
+| `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
+| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 13533 | 233 | Test automatico: archive-guest-suspension.rules.test. |
+| `tests/archive-list-filter.test.mjs` | MJS | 12088 | 204 | Test automatico: archive-list-filter.test. |
+| `tests/archive-recipients.test.mjs` | MJS | 5567 | 101 | Test automatico: archive-recipients.test. |
+| `tests/archive-session.test.mjs` | MJS | 45922 | 700 | Test automatico: archive-session.test. |
+| `tests/attachment-removal-residues.emulator.test.mjs` | MJS | 8540 | 142 | Test automatico: attachment-removal-residues.emulator.test. |
+| `tests/attachment-removal-residues.test.mjs` | MJS | 11571 | 181 | Test automatico: attachment-removal-residues.test. |
+| `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
+| `tests/audit-events.rules.test.mjs` | MJS | 5113 | 96 | Test automatico: audit-events.rules.test. |
+| `tests/audit-retention.emulator.test.mjs` | MJS | 19544 | 331 | Test automatico: audit-retention.emulator.test. |
+| `tests/avatar-change-residues.emulator.test.mjs` | MJS | 6599 | 116 | Test automatico: avatar-change-residues.emulator.test. |
+| `tests/avatar-change-residues.test.mjs` | MJS | 10806 | 197 | Test automatico: avatar-change-residues.test. |
+| `tests/backup-crypto-runtime.test.mjs` | MJS | 2716 | 43 | Test automatico: backup-crypto-runtime.test. |
+| `tests/backup-export-model.test.mjs` | MJS | 2662 | 49 | Test automatico: backup-export-model.test. |
+| `tests/backup-export-session.test.mjs` | MJS | 8666 | 123 | Test automatico: backup-export-session.test. |
+| `tests/backup-header-cleartext.test.mjs` | MJS | 10050 | 161 | Test automatico: backup-header-cleartext.test. |
+| `tests/backup-import-model.test.mjs` | MJS | 5562 | 93 | Test automatico: backup-import-model.test. |
+| `tests/backup-restore-session.test.mjs` | MJS | 40167 | 598 | Test automatico: backup-restore-session.test. |
+| `tests/backup-restore-ui.test.mjs` | MJS | 20855 | 296 | Test automatico: backup-restore-ui.test. |
+| `tests/banking-form-roundtrip.test.mjs` | MJS | 3125 | 45 | Test automatico: banking-form-roundtrip.test. |
+| `tests/banking-model.test.mjs` | MJS | 2985 | 68 | Test automatico: banking-model.test. |
+| `tests/banking-widget-hosts.test.mjs` | MJS | 6923 | 105 | Test automatico: banking-widget-hosts.test. |
+| `tests/banking-widget-placement.test.mjs` | MJS | 7853 | 95 | Test automatico: banking-widget-placement.test. |
+| `tests/company-account-detail-lifecycle.test.mjs` | MJS | 12892 | 116 | Test automatico: company-account-detail-lifecycle.test. |
+| `tests/company-archive-conflict.test.mjs` | MJS | 6031 | 114 | Test automatico: company-archive-conflict.test. |
+| `tests/company-detail-freshness.test.mjs` | MJS | 7145 | 105 | Test automatico: company-detail-freshness.test. |
+| `tests/company-detail-readonly.test.mjs` | MJS | 9651 | 148 | Test automatico: company-detail-readonly.test. |
+| `tests/company-form-archive-mount.test.mjs` | MJS | 13965 | 243 | Test automatico: company-form-archive-mount.test. |
+| `tests/company-form-freshness.test.mjs` | MJS | 5063 | 69 | Test automatico: company-form-freshness.test. |
+| `tests/company-hard-delete-residues.emulator.test.mjs` | MJS | 10963 | 172 | Test automatico: company-hard-delete-residues.emulator.test. |
+| `tests/company-hard-delete-residues.test.mjs` | MJS | 6733 | 101 | Test automatico: company-hard-delete-residues.test. |
+| `tests/company-profile.test.mjs` | MJS | 7813 | 74 | Test automatico: company-profile.test. |
+| `tests/consultation-copies.test.mjs` | MJS | 13493 | 220 | Test automatico: consultation-copies.test. |
+| `tests/contact-card-photo.test.mjs` | MJS | 6076 | 85 | Test automatico: contact-card-photo.test. |
+| `tests/credential-health-runtime.test.mjs` | MJS | 3287 | 68 | Test automatico: credential-health-runtime.test. |
+| `tests/credential-health-session.test.mjs` | MJS | 3497 | 49 | Test automatico: credential-health-session.test. |
+| `tests/crypto-utils.test.mjs` | MJS | 1546 | 35 | Test automatico: crypto-utils.test. |
+| `tests/deadline-config-model.test.mjs` | MJS | 2122 | 45 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-detail-lifecycle.test.mjs` | MJS | 22726 | 295 | Test automatico: deadline-detail-lifecycle.test. |
+| `tests/deadline-model.test.mjs` | MJS | 2208 | 44 | Test automatico: deadline-model.test. |
+| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
+| `tests/detail-account-mode-reinvite.test.mjs` | MJS | 9922 | 173 | Test automatico: detail-account-mode-reinvite.test. |
+| `tests/detail-sharing-revocation-cycle.test.mjs` | MJS | 5748 | 106 | Test automatico: detail-sharing-revocation-cycle.test. |
+| `tests/device-cache-residues.test.mjs` | MJS | 18651 | 317 | Test automatico: device-cache-residues.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 7500 | 154 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
+| `tests/guest-invite-suspension.test.mjs` | MJS | 4890 | 82 | Test automatico: guest-invite-suspension.test. |
+| `tests/history-recovery.rules.test.mjs` | MJS | 2366 | 30 | Test automatico: history-recovery.rules.test. |
+| `tests/input-autofill.test.mjs` | MJS | 4322 | 69 | Test automatico: input-autofill.test. |
+| `tests/interrupted-restore-orphan-refs.emulator.test.mjs` | MJS | 11357 | 171 | Test automatico: interrupted-restore-orphan-refs.emulator.test. |
+| `tests/invite-audit-ref.rules.test.mjs` | MJS | 17460 | 298 | Test automatico: invite-audit-ref.rules.test. |
+| `tests/legacy-attachment-opening.test.mjs` | MJS | 16263 | 274 | Test automatico: legacy-attachment-opening.test. |
+| `tests/legacy-email-audit-model.test.mjs` | MJS | 1989 | 41 | Test automatico: legacy-email-audit-model.test. |
+| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
+| `tests/new-account-shared-link.test.mjs` | MJS | 2601 | 33 | Test automatico: new-account-shared-link.test. |
+| `tests/offline-account-widgets.test.mjs` | MJS | 6182 | 60 | Test automatico: offline-account-widgets.test. |
+| `tests/offline-mutation-client.test.mjs` | MJS | 5214 | 89 | Test automatico: offline-mutation-client.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 18379 | 301 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-mutation-sync.test.mjs` | MJS | 7093 | 112 | Test automatico: offline-mutation-sync.test. |
+| `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
+| `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |
+| `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18090 | 228 | Test automatico: private-account-detail-lifecycle.test. |
+| `tests/private-account-offline-pilot.test.mjs` | MJS | 2790 | 45 | Test automatico: private-account-offline-pilot.test. |
+| `tests/private-account-offline-policy.test.mjs` | MJS | 1352 | 23 | Test automatico: private-account-offline-policy.test. |
+| `tests/private-account-recovery.test.mjs` | MJS | 10689 | 112 | Test automatico: private-account-recovery.test. |
+| `tests/private-auth-gate.test.mjs` | MJS | 7879 | 128 | Test automatico: private-auth-gate.test. |
+| `tests/private-bootstrap-offline.test.mjs` | MJS | 3145 | 50 | Test automatico: private-bootstrap-offline.test. |
+| `tests/private-detail-legacy-id.test.mjs` | MJS | 18505 | 280 | Test automatico: private-detail-legacy-id.test. |
+| `tests/private-form-lazy-banking.test.mjs` | MJS | 2846 | 22 | Test automatico: private-form-lazy-banking.test. |
+| `tests/profile-account-management.test.mjs` | MJS | 5502 | 38 | Test automatico: profile-account-management.test. |
+| `tests/profile-contact-link.test.mjs` | MJS | 29029 | 378 | Test automatico: profile-contact-link.test. |
+| `tests/profile-deadline-link-model.test.mjs` | MJS | 2286 | 47 | Test automatico: profile-deadline-link-model.test. |
+| `tests/profile-label-management.test.mjs` | MJS | 1039 | 19 | Test automatico: profile-label-management.test. |
+| `tests/profile-lazy-editor.test.mjs` | MJS | 3248 | 73 | Test automatico: profile-lazy-editor.test. |
+| `tests/profile-legacy-email-recovery.test.mjs` | MJS | 1871 | 42 | Test automatico: profile-legacy-email-recovery.test. |
+| `tests/profile-model.test.mjs` | MJS | 5718 | 96 | Test automatico: profile-model.test. |
+| `tests/profile-widget-zone.test.mjs` | MJS | 769 | 17 | Test automatico: profile-widget-zone.test. |
+| `tests/purge-retention-effects.emulator.test.mjs` | MJS | 18370 | 289 | Test automatico: purge-retention-effects.emulator.test. |
+| `tests/purged-account-restore.emulator.test.mjs` | MJS | 19329 | 283 | Test automatico: purged-account-restore.emulator.test. |
+| `tests/repository-record-identity.test.mjs` | MJS | 5191 | 86 | Test automatico: repository-record-identity.test. |
+| `tests/request-coordinator.test.mjs` | MJS | 1647 | 37 | Test automatico: request-coordinator.test. |
+| `tests/setup-linux-cloud.test.mjs` | MJS | 5095 | 92 | Test automatico: setup-linux-cloud.test. |
+| `tests/share-revocation-paths.test.mjs` | MJS | 6539 | 102 | Test automatico: share-revocation-paths.test. |
+| `tests/shared-copies-purge.emulator.test.mjs` | MJS | 10937 | 174 | Test automatico: shared-copies-purge.emulator.test. |
+| `tests/shared-copies-purge.test.mjs` | MJS | 4859 | 75 | Test automatico: shared-copies-purge.test. |
+| `tests/shared-credential-editor.test.mjs` | MJS | 3612 | 21 | Test automatico: shared-credential-editor.test. |
+| `tests/shared-credential-update-session.test.mjs` | MJS | 4043 | 79 | Test automatico: shared-credential-update-session.test. |
+| `tests/shared-record-reader.test.mjs` | MJS | 3452 | 77 | Test automatico: shared-record-reader.test. |
+| `tests/shared-regrant-after-restore.test.mjs` | MJS | 10713 | 172 | Test automatico: shared-regrant-after-restore.test. |
+| `tests/shared-vault-data-model.test.mjs` | MJS | 4401 | 87 | Test automatico: shared-vault-data-model.test. |
+| `tests/sharing-identity.test.mjs` | MJS | 1748 | 24 | Test automatico: sharing-identity.test. |
+| `tests/sharing-prototype.rules.test.mjs` | MJS | 4519 | 94 | Test automatico: sharing-prototype.rules.test. |
+| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 4079 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
+| `tests/sharing-revocation.rules.test.mjs` | MJS | 8199 | 154 | Test automatico: sharing-revocation.rules.test. |
+| `tests/sharing-two-device.test.mjs` | MJS | 4391 | 96 | Test automatico: sharing-two-device.test. |
+| `tests/storage-emulator-loopback-dispatcher.test.mjs` | MJS | 1648 | 45 | Test automatico: storage-emulator-loopback-dispatcher.test. |
+| `tests/storage.rules.test.mjs` | MJS | 4149 | 99 | Test automatico: storage.rules.test. |
+| `tests/swipe-lifecycle.test.mjs` | MJS | 11318 | 211 | Test automatico: swipe-lifecycle.test. |
+| `tests/vault-logout.test.mjs` | MJS | 4848 | 95 | Test automatico: vault-logout.test. |
+| `tests/vault-session-races.test.mjs` | MJS | 10680 | 233 | Test automatico: vault-session-races.test. |
+| `tests/vault-session.test.mjs` | MJS | 1865 | 39 | Test automatico: vault-session.test. |
+| `tests/widget-common-picker.test.mjs` | MJS | 4738 | 40 | Test automatico: widget-common-picker.test. |
 
 ## Duplicati esatti
 

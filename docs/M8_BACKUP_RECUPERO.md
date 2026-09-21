@@ -73,7 +73,7 @@ Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, 
 
 **Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le collisioni o le modifiche intercorse dopo l'anteprima, né la ripetizione con `retry` dal piano bloccato (il codice la rifiuta con `BACKUP_STORAGE_RETRY_BLOCKED` finché `storageStarted` è vero: asserzione di codice, non provata qui).
 
-**Nessuna correzione introdotta.** Come richiesto non ho introdotto staging, compensazione, retry automatici o nuove politiche: il difetto è registrato e il gate resta **aperto** in attesa di una decisione.
+**Nessuna correzione introdotta.** Come richiesto non ho introdotto staging, compensazione, retry automatici o nuove politiche: il difetto è registrato e il gate resta **aperto** in attesa di una decisione (domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md`, commit separato).
 export raccoglie i record in memoria e, senza File System Access, accumula il file in un Blob. Il formato incrementale non equivale quindi a memoria limitata al singolo record per l’intero runtime. Nessuna correzione del protocollo o migrazione è autorizzata da questo aggiornamento documentale.
 
 
