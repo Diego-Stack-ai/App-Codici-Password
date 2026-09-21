@@ -199,13 +199,33 @@ Il purge di un Account elimina gli oggetti Storage **solo** per i percorsi letti
 | metadato senza byte | `deleteObject` riuscito e `deleteDoc` fallito; oppure cancellazione manuale dell'oggetto dal client (consentita da `storage.rules:34`) | nessuna riparazione automatica |
 | byte senza metadato | `uploadBytes` riuscito e `addDoc` fallito, pagina abbandonata, form annullato dopo l'upload (`.../azienda/ma_save.js:147-161` carica prima della transazione) | nessun job li cerca: il purge legge solo i `storagePath` elencati (`functions/index.js:501`) |
 | byte di Scadenze e `aziende_allegati` | rimozione dall'array o cancellazione del documento (sezione 5.3) | nessuna gestione in alcun flusso backend |
-| byte dell'avatar | ogni cambio avatar | nessuna cancellazione; il purge non tocca `users/{uid}/avatar_*` |
+| byte dell'avatar | ogni cambio avatar | nessuna cancellazione; il purge non tocca `users/{uid}/avatar_*` — **provato** in M7-T28 (§5.8) |
 | metadati di sottocollezioni | hard-delete di Azienda o di Account aziendale | restano irraggiungibili dalla UI |
 | oggetti non elencati nei metadati | upload non registrato o percorso scritto direttamente dal client | il purge non scansiona il prefisso |
 | versioni precedenti dell'oggetto | dipende da object versioning del bucket: **non verificato** | — |
 | record `reserved` del candidato | interruzione fra prenotazione e scrittura dell'oggetto | chiusi solo con `recover()` invocato manualmente (`experiments/persistent-vault-shell/profile-document-attachments-handler.mjs:379-461`) |
 
 Verifica dell'esistenza effettiva di orfani nel progetto reale: **non verificata** (richiederebbe di listare il bucket; nessun dato reale è stato letto).
+
+### 5.8 Avatar del profilo: un percorso fuori dal protocollo degli allegati (verificato M7-T28)
+
+L'avatar è un oggetto Storage che **non** passa dal protocollo degli allegati: non ha metadati in una sottocollezione, non è cifrato e non è elencato in alcun documento tranne il riferimento `photoURL` del profilo.
+
+| Aspetto | Comportamento attuale (verificato) |
+|---|---|
+| Scrittore | unico: `setupAvatarEdit` in `Frontend/public/assets/js/modules/privato/profilo-ui.js:32-61` (`profilo_privato.js:159` lo monta) |
+| Validazione | `validateAttachmentFile(file, {imageOnly: true, maxBytes: MAX_AVATAR_BYTES})` (solo immagini, 5 MB) |
+| Percorso dell'oggetto | `users/{uid}/avatar_<timestamp>_<uuid>.<ext>` — **nome nuovo a ogni caricamento** (`createStorageObjectName`) |
+| Riferimento | `updateDoc(users/{uid}, {photoURL: url})` — **sovrascritto**, non conservato |
+| Cancellazione del precedente | **nessuna**: il modulo non importa né invoca primitive di cancellazione (nessun `deleteObject`), e nessun altro percorso del repository elimina `users/{uid}/avatar_*` |
+| Esito del cambio | il precedente oggetto **resta in Storage e non è più referenziato**: è un orfano, e se ne accumula uno a ogni cambio |
+| Errore su upload | nessun byte scritto, `photoURL` invariato, errore mostrato |
+| Errore su URL o su `updateDoc` | l'oggetto **nuovo** resta in Storage senza riferimento: un orfano in più, creato dall'errore parziale; `photoURL` resta quello vecchio |
+| Cambio di sessione durante il caricamento | l'uid viene letto **una sola volta** all'inizio (`_getState()`), quindi byte e riferimento finiscono sotto il proprietario iniziale; nessun controllo di sessione e nessuna scrittura sul proprietario nuovo |
+| Recupero | nessun job: la retention dei 24 mesi scansiona il solo `collectionGroup('auditEvents')` (§4), e il purge elimina solo gli oggetti elencati nei metadati `attachments` dell'Account, che per costruzione stanno sotto `.../accounts/{id}/attachments/` |
+| Backup | l'avatar **non** è incluso nei backup: `collectStoragePaths` raccoglie solo i campi `storagePath` (`.../settings/backup-export-model.js:67-84`), mentre `photoURL` è esportato come campo del profilo |
+
+**Decisione necessaria (non presa qui):** definire se e quando l'oggetto precedente va eliminato (alla sostituzione, con un job di pulizia per prefisso, o mai), con quale rapporto verso D4 sugli orfani e con quale gestione del caso «URL nel backup che punta a un oggetto rimosso». Il comportamento attuale è una **scelta non dichiarata**, non un difetto con una decisione già vigente: per questo T-28 è «dichiarato, non corretto» e non ho modificato la produzione.
 
 ### 5.7 Copertura di test e suoi limiti
 
@@ -347,7 +367,7 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-25 | Allegati | purge con `storagePath` reali: il ramo di cancellazione byte è esercitato | cancellazione effettiva, nell'ordine previsto e prima di `recursiveDelete`, con `ignoreNotFound` | esistente (`functions/test/archive-receipt-handler.test.js:160`) |
 | T-26 | Allegati | rimozione di una riga dagli array `allegati`/`attachments` e cancellazione di una Scadenza | byte non più referenziati: esito definito secondo D4 | **da realizzare** |
 | T-27 | Allegati | hard-delete di Azienda o di Account aziendale | metadati e byte residui: esito definito secondo D4 | **da realizzare** |
-| T-28 | Allegati | cambio avatar | il precedente oggetto non resta orfano, o è dichiarato | **da realizzare** |
+| T-28 | Allegati | cambio avatar | il precedente oggetto non resta orfano, o è dichiarato | **dichiarato, non corretto** (M7-T28): il percorso attuale **lascia il precedente oggetto in Storage** — nessuna cancellazione viene nemmeno tentata — e il residuo si accumula a ogni cambio, perché ogni upload usa un nome nuovo (`avatar_<timestamp>_<uuid>`) e `photoURL` viene sovrascritto. Provato con i moduli reali su modello (§5.8) e su emulatori reali Firestore + Storage con le Rules di produzione (`tests/avatar-change-residues.test.mjs`, 6 casi; `tests/avatar-change-residues.emulator.test.mjs`, 2 casi). La proprietà richiesta «non resta orfano» **non** è dimostrata: serve una decisione di pulizia (D4), non introdotta qui |
 | T-29 | Allegati | apertura di un allegato legacy senza `encryption` | comportamento di sicurezza dichiarato (oggi `openExternalUrl` senza Vault Key) | **da realizzare** |
 | T-17 | Backup | header in chiaro con `ownerUid`/`backupId`/`createdAt` | documentato come accettato o rimosso | **da realizzare** (decisione D5/D6) |
 | T-18 | Backup | errore al secondo blocco o durante il caricamento degli allegati | stato parziale dichiarato, nessun successo | esistente (`tests/backup-restore-session.test.mjs:100,110`) |
