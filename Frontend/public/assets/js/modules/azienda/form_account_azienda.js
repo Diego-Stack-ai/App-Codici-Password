@@ -44,6 +44,12 @@ let observedRevision;
 // documento mostrato: un rimontaggio su un altro Account, o un caricamento
 // fallito, non possono riusare il marker del montaggio precedente.
 let markerConfirmed = false;
+// Epoch del montaggio: ogni `initFormAccountAzienda` ne apre uno nuovo. Un
+// caricamento che termina dopo l'avvio di un altro montaggio appartiene a
+// un'epoch superata e va scartato: senza questo controllo il completamento
+// tardivo del montaggio A potrebbe confermare il marker di A nella callback
+// `window.deleteAccount` del montaggio B.
+let mountEpoch = 0;
 
 // Funzione di re-render locale per banking-renderer
 const rerender = () => renderBankAccounts(bankAccounts, rerender, {
@@ -62,6 +68,7 @@ export async function initFormAccountAzienda(user) {
     savedBankIds = new Set();
 
     if (!user) return;
+    const mount = ++mountEpoch;
     currentUid = user.uid;
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -110,9 +117,12 @@ export async function initFormAccountAzienda(user) {
     setupUI();
     setupImageUploader();
     await Promise.all([
-        loadRubrica(),
-        isEditing ? loadData() : Promise.resolve()
+        loadRubrica(mount),
+        isEditing ? loadData(mount) : Promise.resolve()
     ]);
+    // Un montaggio superato non deve proseguire: lo stato di modulo (compresi
+    // gli identificativi) appartiene ormai al montaggio corrente.
+    if (mount !== mountEpoch) return;
     if (profileContactLinkDraft) {
         try {
             const profile = profileContactLinkDraft.sourceCompanyId ? null : await getUserProfile(user.uid);
@@ -219,9 +229,13 @@ function initBaseUI() {
     }
 }
 
-async function loadData() {
+async function loadData(mount) {
+    const stale = () => mount !== mountEpoch;
     try {
         const data = await getCompanyAccount(currentUid, currentAziendaId, currentDocId);
+        // Il montaggio può essere stato superato durante l'attesa: da qui in poi
+        // nessuno stato di modulo viene toccato.
+        if (stale()) return;
         if (!data) {
             showToast(t('account_not_found'), "error");
             if (profileContactLinkDraft) throw new Error('Account non disponibile.');
@@ -243,6 +257,7 @@ async function loadData() {
                 history.back();
                 return;
             }
+            if (stale()) return;
         }
 
         const decryptIfPossible = async (val) => {
@@ -259,6 +274,7 @@ async function loadData() {
             decryptIfPossible(data.codiceSocieta),
             decryptIfPossible(data.note)
         ]);
+        if (stale()) return;
 
         setVal('account-name', data.nomeAccount);
         setVal('account-username', username);
@@ -289,6 +305,7 @@ async function loadData() {
                 })))
             })));
         }
+        if (stale()) return;
 
         const hasRealData = hasRealBankingData({banking: loadedBanking});
 
@@ -335,16 +352,20 @@ async function loadData() {
         }
 
         // Ultima istruzione del percorso felice: da qui il documento mostrato ha
-        // identità e marker confermati e l'archiviazione è ammessa.
+        // identità e marker confermati e l'archiviazione è ammessa. Solo il
+        // montaggio ancora corrente può arrivare qui.
+        if (stale()) return;
         markerConfirmed = true;
 
     } catch (e) { logError("LoadData", e); if (profileContactLinkDraft) throw e; }
-    finally { toggleLoading(false); }
+    finally { if (!stale()) toggleLoading(false); }
 }
 
-async function loadRubrica() {
+async function loadRubrica(mount) {
     try {
-        myContacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
+        const contacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
+        if (mount !== mountEpoch) return;
+        myContacts = contacts;
     } catch (e) { logError("LoadRubrica", e); }
 }
 

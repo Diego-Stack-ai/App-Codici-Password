@@ -1812,3 +1812,70 @@ Nel banco ogni modulo reale è eseguito nella propria funzione e pubblica solo i
 4. Resta non verificato il comportamento su browser o dispositivo reale: le prove sono sintetiche (vm ed emulatore).
 
 **Stato incarico: DA_VERIFICARE** — correzione M7-R6 (secondo rilievo) consegnata da DeepSeek il 2026-09-21; il marker osservato non sopravvive al rimontaggio, l'archiviazione è bloccata finché il caricamento non conferma il documento, il controllo negativo dimostra che la prova rileva il difetto e nessun push è stato eseguito.
+
+## Verifica Codex — M7-R6, caricamenti sovrapposti nella shell
+
+**Esito: DA_CORREGGERE.** Il commit `d4eca599` supera `node --test tests/company-form-archive-mount.test.mjs` (4/4) e risolve il rimontaggio sequenziale con caricamento fallito. La revisione statica trova però un caso non coperto: `initFormAccountAzienda()` richiama `loadData()` asincrono; `loadData()` usa i valori globali mutabili `currentUid/currentAziendaId/currentDocId`, sospende su `getCompanyAccount` e poi imposta `baseUpdatedAt`, `observedRevision` e infine `markerConfirmed=true` senza verificare che appartengano ancora al montaggio corrente. Se il montaggio A è ancora in attesa e parte il montaggio B, il completamento tardivo di A può confermare il marker di A nella callback `window.deleteAccount` di B. Il test aggiunto copre solo caricamenti sequenziali (`await mount(A); await mount(B)`).
+
+**Correzione richiesta a DeepSeek:** associa il risultato del caricamento a un'identità/epoch immutabile del montaggio; dopo ogni attesa asincrona rilevante, ignora il risultato di un montaggio superato e non attivare `markerConfirmed` per il nuovo Account. Aggiungi una prova form-level con `mount(A)` sospeso, avvio di `mount(B)`, completamento tardivo di A e clic Archivia: zero scritture sul documento B; conserva i quattro casi esistenti e il percorso felice. Un solo commit locale mirato, senza push/deploy e senza avviare il lavoro sugli accessi degli ospiti in parallelo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R6, caricamenti sovrapposti
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `d4eca599`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** epoch immutabile del montaggio in `form_account_azienda.js`, prove form-level con caricamenti sovrapposti, guardia e documentazione. **Nessun push.** Il lavoro sugli accessi degli ospiti in Archivio **non viene avviato**: resta separato, come richiesto.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R6 (terzo rilievo) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R6, caricamenti sovrapposti
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato di correzione e rapporto; base `d4eca599`; **nessun push eseguito**.
+
+### Il rilievo era fondato
+
+`loadData()` sospende su `getCompanyAccount` e poi scriveva stato di modulo (`baseUpdatedAt`, `observedRevision`, infine `markerConfirmed = true`) senza verificare di appartenere ancora al montaggio corrente. Con il montaggio A ancora in attesa e il montaggio B già avviato, il completamento tardivo di A confermava il marker di A per il montaggio B: l'archiviazione di B poteva partire con i marker di A, o fallire con un conflitto falso. La prova precedente copriva solo caricamenti **sequenziali** (`await mount(A); await mount(B)`).
+
+### Correzione applicata
+
+1. **Epoch immutabile del montaggio** (`form_account_azienda.js:52`, `:71`): `mountEpoch` cresce a ogni `initFormAccountAzienda` e il montaggio cattura il proprio valore in `const mount`.
+2. **Uscita dai caricamenti superati** (`:232-233`): `loadData(mount)` definisce `stale()` e **dopo ogni attesa rilevante** esce senza toccare lo stato — dopo la lettura del documento (`:238`), dopo la chiave del Vault (`:260`), dopo le decifrature dei campi (`:277`) e dopo la decifratura del banking (`:308`).
+3. **Conferma solo del montaggio corrente** (`:357-358`): `markerConfirmed = true` è preceduto da `if (stale()) return;`. Anche `finally` (`:361`) non spegne il caricamento se il montaggio è stato superato, per non nascondere l'overlay di quello corrente.
+4. **Init e rubrica** (`:125`, `:364-367`): dopo il `Promise.all` l'init esce se l'epoch non è più corrente (non inizializza credenziali comuni né widget per l'Account sbagliato) e `loadRubrica(mount)` non sovrascrive `myContacts` di un montaggio più recente.
+5. **Azione** (`:112`): resta il blocco senza `markerConfirmed`, che ora è per costruzione quello del montaggio corrente.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/company-form-archive-mount.test.mjs` | **6/6** |
+| `npm run test:history-prototype` | **75/75** |
+| `npm run test:firestore-rules` | **29/29** |
+| `npm run test:js-syntax` | **161 moduli OK** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato da 30 pagine» |
+| `node scripts/audit-navigation-flows.mjs` | verde |
+| `git diff --check` | pulito |
+| `npm run audit:inventory` | `docs/FILE_INVENTORY.md` — **789 file** |
+
+Due prove nuove in `tests/company-form-archive-mount.test.mjs`, con il caricamento di A **tenuto sospeso** e liberato dopo l'avvio di B (`hold`, `:87`):
+
+- `:149` **completamento tardivo di A con caricamento di B fallito** → **zero transazioni e zero scritture** sul documento di B, invito ad aggiornare. Senza epoch il marker di A confermava l'azione per B.
+- `:164` **A in ritardo con marker diversi** da quelli di B → l'archiviazione usa i marker di B e scrive sul documento di B con la revisione di B; il completamento di A non sostituisce lo stato del montaggio corrente.
+
+**Controllo negativo eseguito:** con la sola versione già committata (`d4eca599`, senza epoch) lo stesso file passa **4/6** e falliscono esattamente le due prove nuove; con la correzione passa **6/6**. Le prove rilevano quindi il difetto descritto, non una variante.
+
+I quattro casi precedenti (percorso felice, rimontaggio con caricamento fallito, documento cambiato dopo il caricamento, rimontaggio coerente) restano verdi e invariati.
+
+### Guardia aggiornata
+
+`tests/account-archive-paths.test.mjs:77-83` — verifica l'esistenza dell'epoch di montaggio, la sua crescita in `init`, la firma `loadData(mount)` e l'uscita `if (stale()) return;`.
+
+### Limiti e scelte dichiarate
+
+1. L'epoch protegge lo stato di **questo modulo**. Altri moduli con stato di modulo e più `await` non sono stati ricontrollati: se Codex lo ritiene opportuno, è una fetta separata.
+2. La decisione di Diego del 21/09/2026 sulla **sospensione degli accessi** degli ospiti resta **non avviata**.
+3. Invariati e fuori perimetro: `firestore.rules`, `functions/index.js`, budget dei moduli, cancellazione definitiva solo dall'Archivio, versione, `master`, deploy e dati reali.
+4. Resta non verificato il comportamento su browser o dispositivo reale: le prove sono sintetiche (vm).
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R6 (terzo rilievo) consegnata da DeepSeek il 2026-09-21; il caricamento tardivo di un montaggio superato non conferma né sostituisce i marker del montaggio corrente, il controllo negativo dimostra che le due prove nuove rilevano il difetto e nessun push è stato eseguito.

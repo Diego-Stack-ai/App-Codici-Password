@@ -35,7 +35,7 @@ const documents = {
 
 function fixture() {
     const store = new Map(Object.entries(documents).map(([path, data]) => [path, {...data}]));
-    const hidden = new Set(), writes = [], toasts = [], errors = [], transactions = [];
+    const hidden = new Set(), pending = new Map(), writes = [], toasts = [], errors = [], transactions = [];
     const windowState = {location: {href: '', pathname: '/form_account_azienda.html', search: '?id=acc-a&aziendaId=c1'}};
     const context = vm.createContext({
         auth: {currentUser: {uid: 'A'}}, db: {}, functions: {},
@@ -57,6 +57,7 @@ function fixture() {
         listCompanyAccounts: async () => [], getCompany: async () => null,
         getCompanyAccount: async (uid, companyId, accountId) => {
             if (hidden.has(accountId)) throw new Error('READ_FAILED');
+            if (pending.has(accountId)) return pending.get(accountId)();
             const data = store.get(`users/${uid}/aziende/${companyId}/accounts/${accountId}`);
             return data ? {...data} : null;
         },
@@ -80,7 +81,19 @@ function fixture() {
     ]) vm.runInContext(source, context);
     return {store, hidden, writes, toasts, errors, transactions, windowState,
         mount: search => { windowState.location.search = search; return context.initFormAccountAzienda({uid: 'A'}); },
-        archive: async () => { await context.window.deleteAccount(); }};
+        archive: async () => { await context.window.deleteAccount(); },
+        // Tiene sospeso il caricamento di un Account finché il test non lo libera:
+        // serve a far sovrapporre due montaggi.
+        hold: accountId => {
+            let open;
+            const gate = new Promise(resolve => { open = resolve; });
+            pending.set(accountId, async () => {
+                await gate;
+                const data = store.get(`users/A/aziende/c1/accounts/${accountId}`);
+                return data ? {...data} : null;
+            });
+            return () => { pending.delete(accountId); open(); };
+        }};
 }
 
 test('montaggio: il percorso felice archivia l\'Account mostrato', async () => {
@@ -125,5 +138,43 @@ test('rimontaggio: con marker coerenti archivia il nuovo Account', async () => {
     const writesBefore = f.writes.length;
     await f.archive();
     assert.deepEqual(f.writes.slice(writesBefore).map(write => write[0]), ['users/A/aziende/c1/accounts/acc-b']);
+    assert.deepEqual(f.toasts.at(-1), ['success_moved_to_archive', 'success']);
+});
+
+// Terzo rilievo Codex (21/09/2026): i caricamenti possono SOVRAPPORSI, non solo
+// susseguirsi. Con il montaggio A ancora in attesa e il montaggio B già avviato,
+// il completamento tardivo di A non deve confermare né sostituire il marker del
+// montaggio corrente.
+
+test('caricamenti sovrapposti: il completamento tardivo di A non conferma il marker per B', async () => {
+    const f = fixture();
+    const releaseA = f.hold('acc-a');
+    const mountA = f.mount('?id=acc-a&aziendaId=c1'); // sospeso su getCompanyAccount
+    f.hidden.add('acc-b');
+    await f.mount('?id=acc-b&aziendaId=c1'); // B parte e fallisce il caricamento
+    releaseA();                              // A completa in ritardo
+    await mountA;
+    const writesBefore = f.writes.length, transactionsBefore = f.transactions.length;
+    await f.archive();
+    assert.equal(f.writes.length, writesBefore, 'zero scritture sul documento di B');
+    assert.equal(f.transactions.length, transactionsBefore, 'nessuna transazione con il marker di A');
+    assert.deepEqual(f.toasts.at(-1), ['archive_conflict_refresh', 'error']);
+});
+
+test('caricamenti sovrapposti: A in ritardo non sostituisce i marker del montaggio B', async () => {
+    const f = fixture();
+    const releaseA = f.hold('acc-a');
+    const mountA = f.mount('?id=acc-a&aziendaId=c1');
+    await f.mount('?id=acc-b&aziendaId=c1'); // B carica correttamente
+    // A completa in ritardo con marker diversi da quelli di B.
+    f.store.set('users/A/aziende/c1/accounts/acc-a',
+        {isArchived: false, revision: 9, updatedAt: '2026-09-09T00:00:00.000Z', nomeAccount: 'Synthetic A'});
+    releaseA();
+    await mountA;
+    const writesBefore = f.writes.length;
+    await f.archive();
+    const written = f.writes.slice(writesBefore);
+    assert.deepEqual(written.map(write => write[0]), ['users/A/aziende/c1/accounts/acc-b']);
+    assert.equal(written[0][1].revision, 5, 'la revisione usata deve essere quella di B');
     assert.deepEqual(f.toasts.at(-1), ['success_moved_to_archive', 'success']);
 });
