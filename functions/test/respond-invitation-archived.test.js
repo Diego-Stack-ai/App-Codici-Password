@@ -388,3 +388,56 @@ test('la guardia dell\'ordine riconosce una lettura dopo la prima scrittura (pro
     assert.equal(readFollowsWrite([['write', 'a']]), false);
     assert.equal(readFollowsWrite([]), false);
 });
+
+// Correzione della revisione Codex — il log deve descrivere il tentativo che arriva
+// al commit: un codice di salto di un tentativo scartato non deve sopravvivere.
+
+test('conflitto dopo un salto: il tentativo finale scrive l\'evento e non logga il salto', async () => {
+    let armed = true;
+    const f = fixture({hook: ({path, documents, versions}) => {
+        if (armed && path === INVITE_PATH) {
+            armed = false;
+            documents.set(INVITE_PATH, {...documents.get(INVITE_PATH), aziendaId: 'company-1'});
+            versions.set(INVITE_PATH, (versions.get(INVITE_PATH) || 0) + 1);
+        }
+    }});
+    // Primo tentativo: contesto non opaco, quindi payload rifiutato e audit saltato.
+    f.documents.set(INVITE_PATH, {...f.documents.get(INVITE_PATH), aziendaId: 'A@B'});
+    const guest = () => ({isArchived: false,
+        sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}});
+    f.documents.set('users/A/aziende/A@B/accounts/account', guest());
+    f.documents.set('users/A/aziende/company-1/accounts/account', guest());
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.equal(f.attempts, 2, 'il primo tentativo viene scartato per conflitto');
+    assert.equal(f.auditLogs.length, 0, 'il tentativo finale scrive l\'evento: nessun log di salto');
+    assert.equal(f.documents.get(EVENT_PATH).context, 'company-1',
+        'il payload registrato è quello del tentativo finale');
+    assert.deepEqual(f.writes.map(write => write[0]),
+        ['users/A/aziende/company-1/accounts/account', INVITE_PATH, EVENT_PATH]);
+});
+
+test('sequenza inversa: audit valido poi saltato, risposta confermata e un solo log', async () => {
+    let armed = true;
+    const f = fixture({hook: ({path, documents, versions}) => {
+        if (armed && path === INVITE_PATH) {
+            armed = false;
+            documents.set(INVITE_PATH, {...documents.get(INVITE_PATH), aziendaId: 'A@B'});
+            versions.set(INVITE_PATH, (versions.get(INVITE_PATH) || 0) + 1);
+        }
+    }});
+    // Primo tentativo: contesto opaco, quindi payload valido ed evento pianificato.
+    f.documents.set(INVITE_PATH, {...f.documents.get(INVITE_PATH), aziendaId: 'company-1'});
+    const guest = () => ({isArchived: false,
+        sharedWith: {[KEY]: {email: EMAIL, status: 'pending', uid: null}}});
+    f.documents.set('users/A/aziende/A@B/accounts/account', guest());
+    f.documents.set('users/A/aziende/company-1/accounts/account', guest());
+    assert.deepEqual({...await f.respond('accepted')}, {ok: true, status: 'accepted'});
+    assert.equal(f.attempts, 2);
+    assert.equal([...f.documents.keys()].some(path => path.startsWith('users/A/auditEvents/')), false,
+        'la scrittura del primo tentativo non viene applicata');
+    assert.equal(f.auditLogs.length, 1, 'un solo log, dal tentativo finale');
+    assert.equal(f.auditLogs[0][1].code, 'AUDIT_FIELD_INVALID');
+    assert.deepEqual([...f.documents.get('users/A/aziende/A@B/accounts/account').sharedWithUids], [UID],
+        'la risposta è confermata anche senza evento');
+    assert.deepEqual(f.writes.map(write => write[0]), ['users/A/aziende/A@B/accounts/account', INVITE_PATH]);
+});

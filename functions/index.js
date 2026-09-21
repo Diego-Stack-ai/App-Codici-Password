@@ -1207,8 +1207,12 @@ exports.respondToInvitation = onCall(
         // stabile anche se la transazione viene ritentata. È usata solo quando
         // l'invito non ha un `auditRef` valido (invito legacy o marcatore corrotto).
         const responseRef = crypto.randomUUID();
-        let auditSkipCode = null;
-        await firestore.runTransaction(async (transaction) => {
+        const auditOutcome = await firestore.runTransaction(async (transaction) => {
+            // Esito dell'audit del tentativo **in corso**: Firestore può rieseguire
+            // questa callback, quindi vale solo il tentativo che arriva al commit. Il
+            // codice di salto è locale al tentativo: quello di un tentativo scartato
+            // non deve sopravvivere e far loggare un salto che non è avvenuto.
+            let auditSkipCode = null;
             const inviteSnap = await transaction.get(inviteRef);
             if (!inviteSnap.exists) throw new HttpsError("not-found", "Invito non trovato.");
             const invite = inviteSnap.data();
@@ -1332,13 +1336,14 @@ exports.respondToInvitation = onCall(
                     ...auditPlan.payload, at: FieldValue.serverTimestamp()
                 });
             }
+            return {auditSkipCode};
         });
-        if (auditSkipCode) {
+        if (auditOutcome.auditSkipCode) {
             // Nessun dato dell'invito nei log: solo un codice stabile, l'azione e un
             // correlatore casuale. Email, chiave sanificata e id del documento invito
             // non devono mai finire nei log.
             console.warn("[AUDIT] evento saltato", {
-                code: auditSkipCode, action: `invite-${status}`, correlationId: responseRef
+                code: auditOutcome.auditSkipCode, action: `invite-${status}`, correlationId: responseRef
             });
         }
         return { ok: true, status };
