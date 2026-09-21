@@ -62,6 +62,8 @@ const asGuest = () => testEnv.authenticatedContext(GUEST, {email: 'guest@example
 const asPending = () => testEnv.authenticatedContext(PENDING).firestore();
 const asStranger = () => testEnv.authenticatedContext(STRANGER).firestore();
 const asOwner = () => testEnv.authenticatedContext(OWNER).firestore();
+const asOwnerWithEmail = () => testEnv.authenticatedContext(OWNER, {email: 'owner@example.invalid'}).firestore();
+const asStrangerWithEmail = () => testEnv.authenticatedContext(STRANGER, {email: 'stranger@example.invalid'}).firestore();
 async function readAsAdmin(...path) {
     let snapshot;
     await testEnv.withSecurityRulesDisabled(async context => { snapshot = await getDoc(doc(context.firestore(), ...path)); });
@@ -137,4 +139,41 @@ test('nessun nuovo percorso concesso all\'ospite: allegati, widget, credenziali,
     await assertFails(getDoc(doc(db, 'users', OWNER, 'sharedVaultData', 'shared-1')));
     await assertFails(getDoc(doc(db, 'users', OWNER, 'contacts', 'contact-1')));
     await assertFails(getDoc(doc(db, 'users', OWNER)));
+});
+
+// M7-R7C-1 correzione (revisione Codex 21/09/2026): il campo `cycle` aggiunto dai
+// tre scrittori deve essere ammesso dall'allowlist di creazione degli inviti,
+// altrimenti Firebase rifiuterebbe OGNI nuovo invito, anche nel ciclo legacy.
+const invitePayload = (overrides = {}) => ({
+    inviteId: 'invito-sintetico', accountId: ACCOUNT, ownerId: OWNER, senderId: OWNER,
+    senderEmail: 'owner@example.invalid', recipientEmail: 'guest@example.invalid',
+    accountName: 'Account sintetico', type: 'account', status: 'pending',
+    createdAt: '2026-01-01T00:00:00.000Z', notifyPush: false, notifyEmail: false, ...overrides
+});
+
+test('creazione invito: ciclo legacy (assente o 0) e ciclo avanzato sono ammessi al proprietario', async () => {
+    const db = asOwnerWithEmail();
+    await assertSucceeds(setDoc(doc(db, 'invites', 'invito-senza-ciclo'), invitePayload()));
+    await assertSucceeds(setDoc(doc(db, 'invites', 'invito-ciclo-0'), invitePayload({inviteId: 'invito-ciclo-0', cycle: 0})));
+    await assertSucceeds(setDoc(doc(db, 'invites', 'invito-ciclo-3'), invitePayload({inviteId: 'invito-ciclo-3', cycle: 3})));
+});
+
+test('creazione invito: ciclo malformato o fuori intervallo viene negato', async () => {
+    const db = asOwnerWithEmail();
+    const invalid = [['stringa', '1'], ['negativo', -1], ['decimale', 1.5], ['oltre-il-massimo', 9007199254740992]];
+    for (const [nome, cycle] of invalid) {
+        await assertFails(setDoc(doc(db, 'invites', `invito-${nome}`), invitePayload({inviteId: `invito-${nome}`, cycle})));
+    }
+});
+
+test('creazione invito: un estraneo non può creare inviti per il proprietario', async () => {
+    await assertFails(setDoc(doc(asStrangerWithEmail(), 'invites', 'invito-estraneo'), invitePayload({inviteId: 'invito-estraneo'})));
+});
+
+test('inviti del ciclo corrente e del ciclo precedente restano leggibili dal destinatario', async () => {
+    await testEnv.withSecurityRulesDisabled(async context => {
+        await setDoc(doc(context.firestore(), 'invites', 'invito-ciclo-1'), invitePayload({inviteId: 'invito-ciclo-1', cycle: 1}));
+    });
+    await assertSucceeds(getDoc(doc(asGuest(), 'invites', 'invito-ciclo-1')));
+    await assertSucceeds(getDoc(doc(asGuest(), ...guestInvitePath)));
 });

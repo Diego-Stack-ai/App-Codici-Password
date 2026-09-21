@@ -195,7 +195,7 @@ service cloud.firestore {
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
-          'status', 'createdAt', 'notifyPush', 'notifyEmail'
+          'status', 'createdAt', 'notifyPush', 'notifyEmail', 'cycle'
         ]) &&
         request.resource.data.get('ownerId', '') == request.auth.uid &&
         request.resource.data.get('senderId', '') == request.auth.uid &&
@@ -204,7 +204,12 @@ service cloud.firestore {
         request.resource.data.get('recipientEmail', '').size() > 3 &&
         request.resource.data.get('notifyPush', false) is bool &&
         request.resource.data.get('notifyEmail', false) is bool &&
-        request.resource.data.get('status', '') == 'pending';
+        request.resource.data.get('status', '') == 'pending' &&
+        // M7-R7C-1: `cycle` è l'unico campo nuovo ammesso e deve essere un intero
+        // sicuro non negativo. L'assenza resta valida (creazioni legacy = ciclo 0).
+        request.resource.data.get('cycle', 0) is int &&
+        request.resource.data.get('cycle', 0) >= 0 &&
+        request.resource.data.get('cycle', 0) <= 9007199254740991;
 
       allow update, delete: if isInviteOwner();
     }

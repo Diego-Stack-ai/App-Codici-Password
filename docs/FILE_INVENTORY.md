@@ -312,7 +312,7 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 376578 | 2475 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 388832 | 2585 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -680,7 +680,7 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `firestore.rules` | RULES | 9299 | 213 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
+| `firestore.rules` | RULES | 9661 | 218 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
 ## functions
 
@@ -812,7 +812,7 @@ File censiti: **792**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/account-widget-session.test.mjs` | MJS | 2312 | 31 | Test automatico: account-widget-session.test. |
 | `tests/account-widget-ui.test.mjs` | MJS | 2442 | 48 | Test automatico: account-widget-ui.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 758 | 16 | Test automatico: archive-account-model.test. |
-| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 7856 | 141 | Test automatico: archive-guest-suspension.rules.test. |
+| `tests/archive-guest-suspension.rules.test.mjs` | MJS | 10341 | 180 | Test automatico: archive-guest-suspension.rules.test. |
 | `tests/archive-recipients.test.mjs` | MJS | 5567 | 101 | Test automatico: archive-recipients.test. |
 | `tests/archive-session.test.mjs` | MJS | 38761 | 595 | Test automatico: archive-session.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2699 | 55 | Test automatico: attachment-security.test. |
