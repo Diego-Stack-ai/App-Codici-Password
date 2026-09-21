@@ -8,7 +8,7 @@
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentDeleted, onDocumentUpdated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
@@ -51,7 +51,7 @@ const {
     accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData
 } = require("./account-widget-service");
 const {
-    auditWriteDecision, buildAuditEvent, inviteRefOf, responseEventId
+    auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition, invitedEventId, removedEventId, responseEventId
 } = require("./audit-event-service");
 
 initializeApp();
@@ -1469,6 +1469,83 @@ exports.onInviteCreated = onDocumentCreated(
         const results = await Promise.allSettled(tasks);
         results.filter((result) => result.status === "rejected")
             .forEach(() => console.error("[INVITE NOTIFICATION FAILED] DELIVERY_FAILED"));
+    }
+);
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-5I — Registro tecnico degli inviti
+// ─────────────────────────────────────────────────────────────
+// Trigger **separato** da `onInviteCreated`, che porta i segreti Gmail: qui non
+// si invia nulla, non si legge l'email del destinatario, la sua chiave
+// sanificata o l'id del documento invito (che la contiene), e non si tocca la
+// condivisione. Si scrive una sola riga nel registro del **proprietario**
+// dell'invito, con id opaco derivato dalla base dell'istanza (`auditRef`, o
+// `responseAuditRef` per un invito legacy già risposto) e create-if-absent, così
+// una riconsegna non duplica l'evento né riscrive `at`. Senza base opaca valida
+// non si inventa alcuna riga: la scelta D-5 registrata da Codex il 21/09/2026
+// preferisce una riga mancante a una riga sintetica indistinguibile.
+exports.onInviteWritten = onDocumentWritten(
+    {
+        document: "invites/{inviteId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+        // Gli eventi da trigger sono at-least-once: l'idempotenza dell'id è
+        // l'unica difesa contro i duplicati, e il ritentativo va dichiarato.
+        retry: true,
+    },
+    async (event) => {
+        const before = event.data?.before?.data() ?? null;
+        const after = event.data?.after?.data() ?? null;
+        const transition = inviteTransition(before, after);
+        if (transition.kind === "none") {
+            // Un marcatore presente ma malformato è un difetto di registrazione,
+            // non di sicurezza: si annota un codice stabile e non si scrive nulla.
+            if (transition.reason === "AUDIT_REF_INVALID") {
+                console.warn("[AUDIT] invito ignorato: base opaca non valida", {code: transition.reason});
+            }
+            return;
+        }
+        const removed = transition.kind === "invite-removed";
+        const source = removed ? before : after;
+        const action = removed ? "invite-removed" : "invite-created";
+        let effect;
+        try {
+            const fields = {
+                actorUid: source.ownerId,
+                accountId: source.accountId,
+                context: source.aziendaId || "privato",
+                cycle: source.cycle === undefined ? 0 : source.cycle
+            };
+            if (removed) {
+                // Il correlatore del destinatario solo se già noto: su un rifiuto
+                // la callable scrive `guestUid: null`, quindi resta anonimo.
+                const known = typeof source.guestUid === "string" && source.guestUid.length > 0;
+                fields.guestKnown = known;
+                if (known) fields.guestUid = source.guestUid;
+            } else if (typeof source.createdAt === "string") {
+                fields.inviteCreatedAt = source.createdAt;
+            }
+            effect = {
+                id: removed ? removedEventId(transition.ref) : invitedEventId(transition.ref),
+                payload: buildAuditEvent(action, fields)
+            };
+        } catch (error) {
+            // Classe controllabile: payload non valido. Nessun evento e una sola
+            // riga, senza dati dell'invito e senza messaggi grezzi.
+            console.warn("[AUDIT] evento invito saltato", {
+                code: String((error && error.code) || "AUDIT_EVENT_INVALID")
+            });
+            return;
+        }
+        const eventDocument = firestore().doc(`users/${source.ownerId}/auditEvents/${effect.id}`);
+        await firestore().runTransaction(async (transaction) => {
+            const snapshot = await transaction.get(eventDocument);
+            const decision = auditWriteDecision(snapshot.exists === true, effect);
+            if (decision.write) {
+                transaction.set(eventDocument, {...decision.payload, at: FieldValue.serverTimestamp()});
+            }
+        });
     }
 );
 

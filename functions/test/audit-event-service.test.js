@@ -299,7 +299,28 @@ test("inviteTransition riconosce solo le nuove istanze", () => {
   assert.deepEqual(inviteTransition({auditRef: REF_A, responseAuditRef: REF_B}, null),
     {kind: "invite-removed", ref: REF_A});
   assert.deepEqual(inviteTransition(null, null), {kind: "none", reason: "AUDIT_TRANSITION_INVALID"});
-  assert.equal(codeOf(() => inviteTransition({auditRef: INVITE_ID}, null)), "AUDIT_REF_INVALID");
+  // M7-AUDIT-5I: il classificatore non lancia più su un marcatore malformato — il
+  // trigger degli inviti deve poterlo ignorare senza far fallire la consegna — e
+  // in cancellazione ripiega su `responseAuditRef` quando quello è valido.
+  assert.deepEqual(inviteTransition({auditRef: INVITE_ID}, null),
+    {kind: "none", reason: "AUDIT_REF_INVALID"});
+  assert.deepEqual(inviteTransition(null, {auditRef: INVITE_ID}),
+    {kind: "none", reason: "AUDIT_REF_INVALID"});
+  assert.deepEqual(inviteTransition({auditRef: INVITE_ID}, {auditRef: INVITE_ID}),
+    {kind: "none", reason: "AUDIT_REF_INVALID"});
+  assert.deepEqual(inviteTransition({auditRef: INVITE_ID}, {auditRef: REF_A}),
+    {kind: "invite-reinvited", ref: REF_A});
+  assert.deepEqual(inviteTransition({auditRef: REF_A}, {auditRef: INVITE_ID}),
+    {kind: "none", reason: "AUDIT_REF_INVALID"});
+  assert.deepEqual(inviteTransition({auditRef: INVITE_ID, responseAuditRef: REF_B}, null),
+    {kind: "invite-removed", ref: REF_B});
+  assert.deepEqual(inviteTransition({auditRef: INVITE_ID, responseAuditRef: "x"}, null),
+    {kind: "none", reason: "AUDIT_REF_INVALID"});
+  assert.deepEqual(inviteTransition({responseAuditRef: REF_B}, null),
+    {kind: "invite-removed", ref: REF_B});
+  // Le letture severe restano severe per chi vuole distinguere i casi.
+  assert.equal(codeOf(() => inviteRefOf({auditRef: INVITE_ID})), "AUDIT_REF_INVALID");
+  assert.equal(codeOf(() => removalRefOf({auditRef: INVITE_ID})), "AUDIT_REF_INVALID");
 });
 
 test("accountTransition distingue archiviazione, ripristino e scritture invariate", () => {

@@ -226,28 +226,59 @@ function accountEventId(descriptor, revision) {
     return ensureEventId(`${accountEventKey(descriptor)}:${count(revision)}`);
 }
 
+// Base opaca dell'istanza letta **senza lanciare** (M7-AUDIT-5I). Per il trigger
+// degli inviti un marcatore assente o malformato è «nessuna istanza
+// riconoscibile», non un errore fatale: un documento legacy o corrotto non deve
+// far fallire la consegna dell'evento. `inviteRefOf`/`removalRefOf` restano
+// severe per i chiamanti che vogliono distinguere i due casi (la callable di
+// risposta, che su un marcatore corrotto ripiega e prosegue).
+function instanceRefOrNull(invite) {
+    if (!invite || typeof invite !== 'object') return null;
+    if (invite.auditRef === undefined || invite.auditRef === null) return null;
+    return AUDIT_REF.test(invite.auditRef) ? invite.auditRef : null;
+}
+
+function removalRefOrNull(invite) {
+    if (!invite || typeof invite !== 'object') return null;
+    const instance = instanceRefOrNull(invite);
+    if (instance) return instance;
+    if (invite.responseAuditRef === undefined || invite.responseAuditRef === null) return null;
+    return AUDIT_REF.test(invite.responseAuditRef) ? invite.responseAuditRef : null;
+}
+
+// Motivo distinto per un documento senza base utilizzabile: un campo **presente
+// ma malformato** non è un campo assente.
+function unusableRefReason(invite) {
+    return invite && typeof invite === 'object'
+        && invite.auditRef !== undefined && invite.auditRef !== null
+        ? 'AUDIT_REF_INVALID' : 'AUDIT_REF_MISSING';
+}
+
 // Classificatore puro della scrittura su `invites/{inviteId}` (onDocumentWritten,
 // M7-AUDIT-5). `before`/`after` sono i dati del documento, o null se assente.
 // Solo un cambio di `auditRef` è una nuova istanza: la risposta della callable
 // (che aggiunge `responseAuditRef` e cambia `status`) e gli aggiornamenti
-// accessori restano `none`.
+// accessori restano `none`. Non lancia mai: su un marcatore malformato risponde
+// `{kind: 'none', reason: 'AUDIT_REF_INVALID'}` e, in cancellazione, ripiega su
+// `responseAuditRef` quando quello è valido (M7-AUDIT-5I).
 function inviteTransition(before, after) {
     const had = before !== null && before !== undefined;
     const has = after !== null && after !== undefined;
     if (!had && has) {
-        const ref = inviteRefOf(after);
-        return ref ? {kind: 'invite-created', ref} : {kind: 'none', reason: 'AUDIT_REF_MISSING'};
+        const ref = instanceRefOrNull(after);
+        return ref ? {kind: 'invite-created', ref} : {kind: 'none', reason: unusableRefReason(after)};
     }
     if (had && has) {
-        const previous = inviteRefOf(before);
-        const next = inviteRefOf(after);
-        if (next === null) return {kind: 'none', reason: 'AUDIT_REF_MISSING'};
+        const previous = instanceRefOrNull(before);
+        const next = instanceRefOrNull(after);
+        if (next === null) return {kind: 'none', reason: unusableRefReason(after)};
         if (previous === next) return {kind: 'none', reason: 'AUDIT_REF_UNCHANGED'};
         return {kind: 'invite-reinvited', ref: next};
     }
     if (had && !has) {
-        const ref = removalRefOf(before);
-        return ref ? {kind: 'invite-removed', ref} : {kind: 'none', reason: 'AUDIT_REF_MISSING'};
+        const ref = removalRefOrNull(before);
+        if (ref) return {kind: 'invite-removed', ref};
+        return {kind: 'none', reason: unusableRefReason(before)};
     }
     return {kind: 'none', reason: 'AUDIT_TRANSITION_INVALID'};
 }
