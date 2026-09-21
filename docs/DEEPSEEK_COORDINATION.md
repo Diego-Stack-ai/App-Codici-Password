@@ -2642,3 +2642,64 @@ Privato e aziendale: il percorso è lo stesso codice con il riferimento costruit
 6. Nessun collaudo su browser o dispositivo reale.
 
 **Stato incarico: DA_VERIFICARE** — M7-R7C-2 consegnato da DeepSeek il 2026-09-21; ripristino fail-closed in una sola transazione con CAS intatto, neutralizzazione dei legacy (grant azzerati, voci sospese, inviti marcati, ciclo 0 → 1) e nessuna scrittura su condivisione per gli Account del protocollo, esito distinto per il proprietario, suite 43/43 · 44/44 su Emulator · 96/96, controllo negativo 39/43 → 43/43, nessun push eseguito e vista ospite non avviata.
+
+## Verifica Codex — M7-R7C-2: coerenza dei grant al ripristino
+
+**Esito: DA_CORREGGERE.** Commit `c9fd0ddb`: il CAS e la neutralizzazione legacy sono nella stessa transazione; `node --test tests/archive-session.test.mjs` passa **43/43**. La distinzione «protocollo coerente vs legacy/incoerente» però considera soltanto `sharingCycle >= 1` e `sharedWithUids` array vuoto. In `archive-account-service.js`, `const grantUids = Array.isArray(current.sharedWithUids) ? current.sharedWithUids : []` interpreta un campo malformato come vuoto; inoltre non controlla `sharedWith` con voci ancora `accepted` o `pending`. Un Account archiviato con ciclo 1, `sharedWithUids: []` e voce `accepted` verrebbe ripristinato senza sospenderla: il successivo salvataggio della condivisione può ricalcolare `sharedWithUids` da quella voce e ridare accesso senza un nuovo invito. Questo viola la decisione di Diego.
+
+**Correzione richiesta a DeepSeek:** definire l'invariante completo del protocollo per considerare sicuro un ripristino semplice: tipo canonico di `sharedWithUids`, assenza di grant e di voci attive/pendenti che possano rigenerarli, ciclo valido. Per uno stato incoerente, neutralizzare tutti i campi autorizzativi nella stessa transazione oppure fallire chiuso con errore dedicato; non convertire un tipo malformato in «vuoto sicuro». Preservare il ciclo corretto e impedire risposte a inviti vecchi. Aggiungere prove di `sharedWithUids` malformato, lista vuota con voce `accepted`, lista vuota con voce `pending`, e salvataggio successivo che non ricrea accessi; includere almeno un test sul percorso reale di scrittura che ricalcola i grant. Un solo commit locale mirato, senza push/deploy; consegna `DA_VERIFICARE`. Non avviare la vista ospite in parallelo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R7C-2, coerenza dei grant
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `c9fd0ddb`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** invariante di ripristino + prove. **Nessun** push, deploy o dato reale; **vista ospite non avviata**.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R7C-2 (coerenza dei grant) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R7C-2, coerenza dei grant
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `c9fd0ddb`; **nessun push o deploy**.
+
+### Il rilievo è fondato
+
+`Array.isArray(current.sharedWithUids) ? current.sharedWithUids : []` trattava un campo **malformato** come «vuoto sicuro», e l'invariante non guardava `sharedWith`: un Account con ciclo 1, lista vuota e una voce ancora `accepted` veniva ripristinato **senza sospenderla**, e il successivo salvataggio della condivisione (`privato/form-privato-save.js:365-367`, gli omologhi aziendale e di dettaglio) avrebbe **ricostruito `sharedWithUids`** da quella voce, ridando accesso senza un nuovo invito.
+
+### Correzione
+
+`settings/archive-account-service.js:196-218` — l'invariante completo per un ripristino **semplice** (nessuna scrittura autorizzativa) è ora:
+
+1. `sharedWith` **assente o mappa piana** — qualsiasi altro tipo (stringa, numero, array, `null`) ⇒ **`ARCHIVE_RESTORE_INCOHERENT`, nessuna scrittura**: non viene mai convertito in «vuoto sicuro» (`:210`);
+2. `sharedWithUids` **canonica** (assente o array) e **vuota**: un tipo malformato ⇒ neutralizzazione (`:212-214`);
+3. **nessuna voce `pending`/`accepted`** in `sharedWith` che possa rigenerare i grant (`:215-216`);
+4. nessun contatore residuo (`acceptedCount` assente o 0, `:217`);
+5. ciclo valido ≥ 1 (`:200-202`, altrimenti `ARCHIVE_RESTORE_CYCLE_INVALID`).
+
+Tutto ciò che non soddisfa l'invariante viene **neutralizzato nella stessa transazione**: grant azzerati, voci sospese, inviti identificabili marcati `sharingState: 'suspended'` (mai cancellati), `acceptedCount` azzerato e **ciclo che avanza da qualunque valore** (0→1, 3→4), così anche gli inviti del ciclo corrente diventano non rispondibili. Le letture restano tutte prima delle scritture e il CAS non è stato toccato.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/archive-session.test.mjs` (2 casi nuovi, 9 scenari) | **45/45** |
+| `node --test tests/shared-regrant-after-restore.test.mjs` (nuovo, percorso reale di scrittura) | **3/3** |
+| `npm run test:history-prototype` / `test:sharing-prototype` | **98/98** · **19/19** |
+| `npm run test:navigation` / `test:data-access` / `test:functions-security` | 134/134 · 95/95 · 142/142 |
+| `npm run test:js-syntax` · `audit-page-performance --check` | 161 moduli · «Budget statico rispettato da 30 pagine» |
+| `git diff --check` · `npm run audit:inventory` | pulito · **793 file** |
+
+Scenari coperti dall'invariante: `sharedWithUids` malformato (stringa e mappa), lista vuota con voce `accepted`, lista vuota con voce `pending`, contatore residuo ⇒ **neutralizzati** con il ciclo che avanza; `sharedWith` non neutralizzabile (stringa, numero, array, `null`) ⇒ **`ARCHIVE_RESTORE_INCOHERENT`** senza scritture.
+**Percorso reale di scrittura** (`tests/shared-regrant-after-restore.test.mjs`, che esegue `savePrivateAccount` vero): con le voci sospese non riselezionate i grant restano vuoti e l'invito della voce rimossa viene cancellato; con l'ospite **riselezionato** nasce un invito del **ciclo corrente** (`_c1`, `status: pending`) e l'accesso non torna prima dell'accettazione; la **controprova** mostra che una voce ancora `accepted` farebbe ricostruire `sharedWithUids` — è esattamente il caso che il ripristino ora impedisce.
+
+**Controllo negativo eseguito:** con la sola versione già committata (`c9fd0ddb`, invariante incompleto) i due casi nuovi falliscono (**43/45**); con la correzione **45/45**.
+
+### Limiti invariati
+
+1. **Trigger di audit** non implementato (fetta successiva, come ammesso da Codex).
+2. **Inviti orfani** non enumerabili dalle chiavi di `sharedWith`.
+3. **Vista ospite non avviata** (R7C-4): l'ospite non rilegge ma non vede ancora la card «sospeso».
+4. **Cache offline** non revocabile; **candidato non distribuibile** finché R7C-4/R7C-5 non sono chiuse; nessun collaudo su dispositivo reale.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R7C-2 consegnata da DeepSeek il 2026-09-21; invariante completo del ripristino (tipo canonico dei grant, nessuna voce attiva/pendente, contatore azzerato, ciclo valido), neutralizzazione con avanzamento del ciclo e fallimento chiuso `ARCHIVE_RESTORE_INCOHERENT` per gli stati non neutralizzabili, prove sul percorso reale di scrittura con controprova, controllo negativo 43/45 → 45/45, nessun push eseguito e vista ospite non avviata.

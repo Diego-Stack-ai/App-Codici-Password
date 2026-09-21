@@ -284,6 +284,38 @@ test('ripristino: Account legacy senza ospiti avanza comunque il ciclo', async (
     assert.equal(f.writes[0][1].sharedWithUids.length, 0);
 });
 
+test('ripristino: stato autorizzativo incoerente viene neutralizzato, mai interpretato come vuoto', async () => {
+    const cases = [
+        ['uids malformati (stringa)', {isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: 'guest-uid', sharedWith: {}}],
+        ['uids malformati (mappa)', {isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: {a: 'guest'}, sharedWith: {}}],
+        ['voce accettata con lista vuota', {isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: [], sharedWith: {k: {email: 'g@example.invalid', status: 'accepted', uid: 'guest-uid'}}}],
+        ['voce pendente con lista vuota', {isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: [], sharedWith: {k: {email: 'g@example.invalid', status: 'pending', uid: null}}}],
+        ['contatore residuo', {isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: [], acceptedCount: 1, sharedWith: {}}]
+    ];
+    for (const [name, record] of cases) {
+        const f = restoreFixture(record);
+        const result = await f.context.restoreArchivedAccount('A', account());
+        assert.equal(result.neutralized, true, name);
+        assert.equal(result.sharingCycle, 2, `${name}: il ciclo avanza`);
+        const patch = f.writes.find(write => write[0] === 'users/A/accounts/same')[1];
+        assert.equal(patch.isArchived, false, name);
+        assert.equal(patch.sharedWithUids.length, 0, `${name}: nessun grant`);
+        assert.equal(patch.acceptedCount, 0, name);
+        assert.equal(patch.sharingCycle, 2, name);
+        for (const guest of Object.values(patch.sharedWith || {})) {
+            assert.equal(['accepted', 'pending'].includes(guest.status), false, `${name}: nessuna voce attiva o pendente`);
+        }
+    }
+});
+
+test('ripristino: uno stato che non si può neutralizzare fallisce chiuso', async () => {
+    for (const sharedWith of ['stringa', 42, [], null]) {
+        const f = restoreFixture({isArchived: true, revision: 1, sharingCycle: 1, sharedWithUids: [], sharedWith});
+        await assert.rejects(f.context.restoreArchivedAccount('A', account()), /ARCHIVE_RESTORE_INCOHERENT/);
+        assert.equal(f.writes.length, 0, `nessuna scrittura con sharedWith ${JSON.stringify(sharedWith)}`);
+    }
+});
+
 test('ripristino: ciclo malformato o oltre il tetto fallisce senza scritture', async () => {
     for (const sharingCycle of [-1, '1', 1.5, Number.MAX_SAFE_INTEGER + 2, Number.MAX_SAFE_INTEGER]) {
         const f = restoreFixture({isArchived: true, revision: 1, sharingCycle, sharedWithUids: []});

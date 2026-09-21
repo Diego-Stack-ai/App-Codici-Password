@@ -194,15 +194,28 @@ export async function restoreArchivedAccount(uid, account, options = {}) {
             const currentRevision = revisionOf(current.revision);
             if (current.isArchived !== true || currentRevision !== expectedRevision) throw invalid('ARCHIVE_RESTORE_CONFLICT');
             // M7-R7C-2: il ripristino non deve riaprire alcun accesso. Un Account
-            // archiviato dal protocollo ha la lista dei grant vuota e un ciclo ≥ 1;
-            // grant residui o ciclo legacy vengono neutralizzati QUI, nella stessa
+            // archiviato dal protocollo è coerente solo se: ciclo valido ≥ 1, lista
+            // dei grant CANONICA e vuota, nessuna voce `pending`/`accepted` che possa
+            // rigenerarla al primo salvataggio della condivisione, nessun contatore
+            // residuo. Tutto il resto viene neutralizzato QUI, nella stessa
             // transazione e prima di `isArchived: false`.
             const cycle = sharingCycleOf(current);
             const nextCycle = nextSharingCycle(current);
             if (cycle === null || nextCycle === null) throw invalid('ARCHIVE_RESTORE_CYCLE_INVALID');
-            const sharedWith = {...(current.sharedWith || {})};
-            const grantUids = Array.isArray(current.sharedWithUids) ? current.sharedWithUids : [];
-            neutralized = cycle < 1 || grantUids.length > 0;
+            const rawSharing = current.sharedWith;
+            const isPlainSharing = rawSharing === undefined ||
+                (typeof rawSharing === 'object' && rawSharing !== null && !Array.isArray(rawSharing));
+            // Uno stato autorizzativo che non si può neutralizzare con certezza non
+            // viene MAI interpretato come «vuoto sicuro»: si fallisce chiusi.
+            if (!isPlainSharing) throw invalid('ARCHIVE_RESTORE_INCOHERENT');
+            const sharedWith = {...(rawSharing || {})};
+            const rawUids = current.sharedWithUids;
+            const canonicalUids = rawUids === undefined || Array.isArray(rawUids);
+            const grantUids = canonicalUids && rawUids ? rawUids : [];
+            const activeEntries = Object.values(sharedWith).some(guest => guest && typeof guest === 'object'
+                && ['pending', 'accepted'].includes(guest.status));
+            const staleAcceptedCount = current.acceptedCount !== undefined && current.acceptedCount !== 0;
+            neutralized = cycle < 1 || !canonicalUids || grantUids.length > 0 || activeEntries || staleAcceptedCount;
             const guestKeys = Object.keys(sharedWith);
             if (guestKeys.length > ARCHIVE_RECIPIENTS_LIMIT) throw invalid('ARCHIVE_RECIPIENTS_LIMIT');
             const inviteRefs = neutralized
