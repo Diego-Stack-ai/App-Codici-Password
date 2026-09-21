@@ -608,7 +608,7 @@ Non riaprire A2 o blocchi precedenti salvo regressione dimostrata.
 - **Commit:** presa in carico `761cfaa1`, pubblicata **prima** di iniziare i lavori come il protocollo richiede (il difetto procedurale di A2-R2 non si è ripetuto); censimento, contratto, preparazione, servizio e test `2b4f4cd7` (`feat(shell): prepare and transact the nested private utilities`); documentazione `89e79e79` (`docs: record the A3 utility census and core`). Base `6f1a8b99` intatta: dopo la base l'unico file modificato oltre a quelli dell'incarico è questo file di coordinamento. A2 e i blocchi precedenti **non riaperti**.
 - **File modificati:** 11 file, +651 / −7. **Nuovi (5):** `docs/A3_CENSIMENTO_UTENZE.md`, `private-utilities-contract.mjs`, `prepare-private-utilities.mjs`, `private-utilities-handler.mjs`, `private-utilities.test.mjs`. **Modificati:** `package.json` (registrazione della suite), i tre MD autorevoli e `docs/FILE_INVENTORY.md` (**745 file**). Più questo file.
 - **Test eseguiti e risultati:** **6 nuove prove unitarie** in `private-utilities.test.mjs`; `npm run test:vault-shell` **712/712** (706 prima di A3); `npm test` completo **exit 0**; `git diff --check` **pulito**; inventario rigenerato (**745 file**). **Nessun emulatore e nessuna prova browser per questa fetta**: l'interfaccia di A3 non esiste ancora e non ne dichiaro alcuna.
-- **Censimento (in `docs/A3_CENSIMENTO_UTENZE.md`, verificato sui writer reali):** `utilities[]` è annidata **dentro l'indirizzo padre**; il writer espone `type` e `value`, cifra **solo `value`** (`profilo-sync.js:72-80`); le righe nuove ricevono `utility-<uuid>`; l'identità legacy del modello di lettura è `utility-<idIndirizzo>-legacy-<hash>`, dipende dal contenuto **e dalla posizione** e contiene l'id dell'indirizzo; i collegamenti Account stanno nella riga e i riferimenti inversi sull'Account come `{type:'utility', id, parentAddressId}`; l'identità di un'utenza è composta con l'indirizzo padre (`profile-model.js:209-211`); il QR include l'**indirizzo**, non la singola utenza; l'eliminazione legacy rimuove la riga e poi ripara i riferimenti. **Verifica richiesta sullo schema aziendale: nessun equivalente esiste.** Nei moduli `azienda/**` «utility» compare solo come *tipo di collegamento* (`form_account_azienda.js:68,111,120`, `form-azienda-save.js:172`), mai come collezione; il documento aziendale non ha un campo `utilities`. L'assenza è documentata e **non ho inventato** alcuno schema aziendale.
+- **Censimento (in `docs/A3_CENSIMENTO_UTENZE.md`, verificato sui writer reali):** `utilities[]` è annidata **dentro l'indirizzo padre**; il writer espone `type` e `value`, cifra **solo `value`** (`profilo-sync.js:72-80`); le righe nuove ricevono `utility-<uuid>`; l'identità legacy del modello di lettura è `utility-<idIndirizzo>-legacy-<hash>`, dipende dal contenuto **e dalla posizione** e contiene l'id dell'indirizzo; i collegamenti Account stanno nella riga e i riferimenti inversi sull'Account come `{type:'utility', id, parentAddressId}`; l'identità di un'utenza è composta con l'indirizzo padre (`profile-model.js:209-211`); il QR include l'**indirizzo**, non la singola utenza; l'eliminazione legacy rimuove la riga e poi ripara i riferimenti. **Verifica richiesta sullo schema aziendale: nessun equivalente esiste.** Nei moduli `azienda/**` «utility» compare solo come *tipo di collegamento* (`form_account_azienda.js:68,111,120`, `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:172`), mai come collezione; il documento aziendale non ha un campo `utilities`. L'assenza è documentata e **non ho inventato** alcuno schema aziendale.
 - **Consegnato:** contratto e allowlist dedicati (`type` in chiaro, `value` cifrato con la forma memorizzata preservata); preparazione; servizio transazionale idempotente che porta nella richiesta **l'indirizzo padre** oltre a UID, ID utenza, revisione, operazione; revisione separata (`_profileUtilitiesRevision`/`_profileUtilitiesSchemaVersion`/`_profileUtilitiesUpdatedAt`); impronta dell'intera riga; ricevuta in `mutationResults/{uid}/operations/profile-utilities-{operationId}`; letture prima delle scritture e nessuna scrittura parziale. Il servizio sostituisce **solo** l'array `utilities` dell'indirizzo interessato — indirizzo padre, altre utenze, altri indirizzi, campi sconosciuti, password legacy e collegamenti restano byte per byte (provato). Guardie provate: un'utenza **collegata a un Account** non si elimina; un'**identità derivata** non è indirizzabile in nessun percorso, nemmeno in una richiesta costruita a mano, e nemmeno attraverso un indirizzo padre legacy; un'utenza di **un altro indirizzo** non è raggiungibile; una configurazione QR **non risolvibile** blocca l'eliminazione in fail-closed senza impedire consultazione e modifiche non distruttive. Un'utenza il cui **indirizzo padre è pubblicato sulla tessera** non si elimina.
 - **Scostamenti dall'incarico:** (1) **La consegna è parziale**: mancano l'editor integrato sotto l'indirizzo padre, gli endpoint e le Rules candidate, la suite emulatore e lo scenario browser dedicato, cioè la seconda metà di quanto richiesto. Ho consegnato il blocco censimento/contratto/preparazione/servizio completo e provato, fermandomi a un confine verificabile: lo dichiaro perché il verdetto possa essere `DA_CORREGGERE` sul punto giusto. (2) Tre commit (presa in carico, blocco, documentazione) invece di uno. (3) **Decisione mia, documentata e testata:** il QR è valutato sull'**indirizzo padre**, perché la tessera pubblica l'indirizzo e con esso le sue utenze; non esiste un flag QR per singola utenza nel writer reale. (4) La preparazione **non** applica il blocco Account/QR: come per gli indirizzi privati, la selezione QR vive in un documento separato e l'autorità resta il servizio; i rifiuti locali su identità e collegamenti sono comunque nella preparazione. (5) `value` è l'unico campo dell'allowlist oltre a `type`: ogni altro campo non entra mai in un comando, quindi campi sconosciuti e password legacy sopravvivono **per costruzione** e non per una gestione esplicita — è una scelta di progetto, non una dimenticanza.
 - **Rischi residui:** il rifiuto di eliminare un'utenza collegata è **più restrittivo** dell'applicazione legacy, che cancella e poi ripara i riferimenti Account; non esiste migrazione per le identità derivate `utility-<idIndirizzo>-legacy-<hash>`; il percorso Firestore/Rules e il comportamento in un browser reale di questo servizio **non sono ancora provati** (mancano emulatori e scenario); la fetta non monta alcuna interfaccia, quindi nessuna prova di ciclo di vita. Restano aperti i gate generali (trasporto produttivo, Rules autorizzate, dispositivi, M7/M8, gate §16) e il gate Edge sulla macchina di Codex.
@@ -1672,7 +1672,7 @@ La guardia dimostra per ciascuno dei tre moduli: nessuna `deleteDoc`/`batch.dele
 
 **Esito: DA_CORREGGERE prima dell'approvazione.** Il commit `8d3f4028` sostituisce i tre percorsi diretti censiti con `archiveAccount`; i test mirati `node --test tests/archive-session.test.mjs tests/account-archive-paths.test.mjs` passano **41/41** e `git diff --check` è pulito. I testi chiariscono il passaggio all'Archivio e non toccano il purge.
 
-**Difetto concreto:** `form-azienda-save.js:324-339` fa `getDocFromServer` solo dopo il clic su «Elimina», poi passa `snapshot.data()?.revision` come revisione attesa a `archiveAccount`. Quel valore è già quello corrente: se l'Account è cambiato **dopo che il modulo è stato aperto** ma prima del clic, la transazione non rileva la vista obsoleta e lo archivia comunque. `form_account_azienda.js:209-215` carica già i dati iniziali e conserva `baseUpdatedAt`, ma non fornisce al delete la revisione osservata all'apertura. L'incarico richiedeva di non sovrascrivere se stato/revisione sono cambiati.
+**Difetto concreto:** `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:324-339` fa `getDocFromServer` solo dopo il clic su «Elimina», poi passa `snapshot.data()?.revision` come revisione attesa a `archiveAccount`. Quel valore è già quello corrente: se l'Account è cambiato **dopo che il modulo è stato aperto** ma prima del clic, la transazione non rileva la vista obsoleta e lo archivia comunque. `form_account_azienda.js:209-215` carica già i dati iniziali e conserva `baseUpdatedAt`, ma non fornisce al delete la revisione osservata all'apertura. L'incarico richiedeva di non sovrascrivere se stato/revisione sono cambiati.
 
 **Correzione richiesta a DeepSeek:** conserva la revisione (e, se necessario per i writer legacy che non incrementano `revision`, il marker `updatedAt`) letta all'apertura del form e passala a un controllo autorevole nel servizio/transazione. Non sostituirla con una lettura appena prima dell'archiviazione. Se manca un marker affidabile, fallisci chiuso con invito ad aggiornare anziché archiviare uno stato che l'utente non ha visto. Aggiungi un test che apra un form su revisione N, simuli aggiornamento concorrente a N+1 (o cambio `updatedAt` se pertinente) e provi zero scritture e messaggio di aggiornamento. Mantieni la gestione offline e gli altri percorsi. Un commit locale mirato, nessun push/deploy; consegna `DA_VERIFICARE`.
 
@@ -1700,12 +1700,12 @@ La guardia dimostra per ciascuno dei tre moduli: nessuna `deleteDoc`/`batch.dele
 
 1. **Marker osservato all'apertura.** `form_account_azienda.js:218-219` conserva `baseUpdatedAt` (già esistente) e la nuova `observedRevision` (`:42`) lette in `loadData()`; `window.deleteAccount` (`:95`) le passa alla cancellazione. La rilettura tardiva è stata **rimossa**: `getDocFromServer` non compare più in `form-azienda-save.js`.
 2. **Controllo autorevole nella transazione.** `archiveAccount` (`settings/archive-account-service.js:207-253`) accetta `revision` **e** `updatedAt` osservati e li confronta con il documento dentro `runTransaction`: `ARCHIVE_UPDATED_AT_CONFLICT` (`:239`) e `ARCHIVE_CONFLICT` (`:240`), entrambi **senza alcuna scrittura**. L'esito `already-archived` (`:232-237`) resta un no-op senza doppio incremento.
-3. **Fallisce chiuso senza marker.** Se non arriva né una `revision` valida né un `updatedAt` non vuoto, l'esito è `ARCHIVE_MARKER_MISSING` (`:219-221`) **prima** di aprire la transazione; il form invita ad aggiornare (`form-azienda-save.js:335-338,345`).
+3. **Fallisce chiuso senza marker.** Se non arriva né una `revision` valida né un `updatedAt` non vuoto, l'esito è `ARCHIVE_MARKER_MISSING` (`:219-221`) **prima** di aprire la transazione; il form invita ad aggiornare (`Frontend/public/assets/js/modules/azienda/form-azienda-save.js:335-338,345`).
 4. **Liste coerenti.** Privata (`account_privati.js:379,400`) e aziendale (`account_azienda.js:259,284`) passano ora anche l'`updatedAt` osservato nel record caricato, e i loro messaggi (`account_privati.js:366-371`, `account_azienda.js:245-250`) riconoscono anche `ARCHIVE_UPDATED_AT_CONFLICT` e `ARCHIVE_MARKER_MISSING`.
 
 ### Perché servono due marker
 
-I salvataggi degli Account scrivono `updatedAt` (`form-azienda-save.js:95`, `form-privato-save.js:112`) e **non** sempre `revision`, che resta il contatore dei percorsi di modifica mirati (`shared/account-note-editor.js:37`, `shared/detail-account-mode.js:177`). `updatedAt` è quindi il marker dei writer legacy e `revision` quello dei writer che la incrementano: il servizio accetta l'uno o l'altro e, quando ci sono entrambi, devono coincidere entrambi.
+I salvataggi degli Account scrivono `updatedAt` (`Frontend/public/assets/js/modules/azienda/form-azienda-save.js:95`, `Frontend/public/assets/js/modules/privato/form-privato-save.js:112`) e **non** sempre `revision`, che resta il contatore dei percorsi di modifica mirati (`shared/account-note-editor.js:37`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:177`). `updatedAt` è quindi il marker dei writer legacy e `revision` quello dei writer che la incrementano: il servizio accetta l'uno o l'altro e, quando ci sono entrambi, devono coincidere entrambi.
 
 ### Prove (eseguite su questa correzione)
 
@@ -1905,8 +1905,8 @@ I quattro casi precedenti (percorso felice, rimontaggio con caricamento fallito,
 ### 1. Chi è "ospite" e chi lo decide (autorità del server)
 
 - La condizione di ospite è **una sola**, nelle Rules: `isAcceptedGuest()` = `request.auth.uid in resource.data.get('sharedWithUids', [])` (`firestore.rules:10-12`).
-- `sharedWithUids` è materializzato in **due** modi: dal **backend** all'accettazione (`functions/index.js:1226-1233`) e dal **client del proprietario** quando salva la condivisione (`shared/detail-account-mode.js:175`, `privato/dettaglio-privato-sharing.js:127`, `azienda/dettaglio-azienda-sharing.js:243`, `privato/form-privato-save.js:365`, `azienda/form-azienda-save.js:273`).
-- La forma della voce condivisa è `{email, status, uid}` (`shared/detail-account-mode.js:157`), con `status` in `pending|accepted|rejected`.
+- `sharedWithUids` è materializzato in **due** modi: dal **backend** all'accettazione (`functions/index.js:1226-1233`) e dal **client del proprietario** quando salva la condivisione (`Frontend/public/assets/js/modules/shared/detail-account-mode.js:175`, `privato/dettaglio-privato-sharing.js:127`, `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:243`, `privato/form-privato-save.js:365`, `azienda/form-azienda-save.js:273`).
+- La forma della voce condivisa è `{email, status, uid}` (`Frontend/public/assets/js/modules/shared/detail-account-mode.js:157`), con `status` in `pending|accepted|rejected`.
 - Conseguenza: **solo Rules e backend sono autorevoli**; qualunque filtro nel client è UX e non impedisce la lettura di rete.
 
 ### 2. Percorsi con cui un ospite legge o agisce su Account altrui
@@ -1931,7 +1931,7 @@ I quattro casi precedenti (percorso felice, rimontaggio con caricamento fallito,
 
 ### 3. Fonte affidabile dei destinatari per il popup prima dell'archiviazione
 
-- **Fonte:** il campo `sharedWith` del documento Account, già caricato dal proprietario nel form/dettaglio; forma `{email, status, uid}` (`shared/detail-account-mode.js:157`; stesso schema scritto dal backend in `functions/index.js:1220-1228`). **Nessuna lettura nuova e nessuna query aggiuntiva.**
+- **Fonte:** il campo `sharedWith` del documento Account, già caricato dal proprietario nel form/dettaglio; forma `{email, status, uid}` (`Frontend/public/assets/js/modules/shared/detail-account-mode.js:157`; stesso schema scritto dal backend in `functions/index.js:1220-1228`). **Nessuna lettura nuova e nessuna query aggiuntiva.**
 - **Da mostrare:** `Object.values(sharedWith).filter(g => ['pending','accepted'].includes(g.status))` → `email` + `status` (pendenti = perderanno l'accesso se accettano, accettati = lo perdono ora).
 - **Da non mostrare:** gli ospiti `rejected` (nessun accesso), e soprattutto **nessun segreto**: `username`, `account`, `password`, `note`, `banking`/`cards` sono classificati sensibili dal backend (`functions/private-account-write-scope.js:27-28`) e non servono al messaggio.
 - **Casi legacy da unire e deduplicare:** `sharedWithEmails` e `recipientEmail` sono percorsi storici ancora riconosciuti dal backend (`functions/index.js:1255-1258`) e non compaiono in `sharedWith`; il popup deve considerarli se presenti, mostrando solo l'email.
@@ -2212,7 +2212,7 @@ Queste scelte superano ogni proposta precedente di riattivazione automatica o sc
 | Fonte | Dove | Effetto al ripristino |
 |---|---|---|
 | `sharedWithUids` | sull'Account, `firestore.rules:10-12` è l'unica condizione d'accesso ospite | **resta popolato**: al solo `isArchived: false` l'ospite rilegge subito |
-| `sharedWith[key].status` | `shared/detail-account-mode.js:147-167`, `privato/form-privato-save.js:325,365`, `azienda/form-azienda-save.js:233,273` | alimenta il ricalcolo di `sharedWithUids` a ogni salvataggio della condivisione |
+| `sharedWith[key].status` | `Frontend/public/assets/js/modules/shared/detail-account-mode.js:147-167`, `privato/form-privato-save.js:325,365`, `azienda/form-azienda-save.js:233,273` | alimenta il ricalcolo di `sharedWithUids` a ogni salvataggio della condivisione |
 | stato dell'invito | `functions/index.js:1203-1243`, `invites` leggibile dal destinatario (`firestore.rules:181-185`) | un invito ancora `pending` può essere accettato **dopo** il ripristino e ricreare `sharedWithUids` |
 | copia locale | cache persistente (`firebase-config.js:56-57`) | una copia già letta resta visibile offline: le Rules non la revocano |
 | ripristino | `settings/archive-account-service.js:180-194` | oggi **non tocca** la condivisione: è la causa diretta dell'accesso automatico |
@@ -2234,7 +2234,7 @@ Queste scelte superano ogni proposta precedente di riattivazione automatica o sc
 **Perché uno stato separato (`sharingState`) invece di riusare `status`:** la scoperta della card da parte dell'ospite usa `where('recipientEmail','==',email).where('status','==','accepted')` (`data/vault-repository.js:38-45`). Cambiando `status` la card **sparirebbe** dalla lista, contro la decisione 2 di Diego; con un campo separato la query resta valida e lo stato è esplicito. Se si preferisse cambiare `status`, la query andrebbe estesa a `status in ['accepted','suspended']` (filtri di sola uguaglianza, serviti dagli indici automatici).
 
 **Atomicità e ordine (transizione verificabile):**
-1. la sospensione della condivisione è **una sola transazione** lato backend (Admin SDK) sul documento Account + gli inviti derivati dalle chiavi di `sharedWith` (`${accountId}_${sanitizeEmail(email)}`, come già fa il client in `shared/detail-account-mode.js:148`);
+1. la sospensione della condivisione è **una sola transazione** lato backend (Admin SDK) sul documento Account + gli inviti derivati dalle chiavi di `sharedWith` (`${accountId}_${sanitizeEmail(email)}`, come già fa il client in `Frontend/public/assets/js/modules/shared/detail-account-mode.js:148`);
 2. **poi** l'archiviazione (transazione client con CAS già esistente, `settings/archive-account-service.js:207-253`);
 3. ordine scelto perché è **fail-closed**: se il passo 2 fallisce, l'Account resta attivo ma **non più condiviso** (recuperabile dal proprietario, nessun ospite in più); l'ordine inverso lascerebbe una finestra in cui l'Account è archiviato ma ancora leggibile da un ospite accettato;
 4. **la stessa neutralizzazione va eseguita anche dal percorso di ripristino** se `sharedWithUids` non è vuoto: copre i dati **preesistenti** archiviati prima di questa modifica, senza richiedere una migrazione per essere corretti;
@@ -2251,8 +2251,8 @@ Queste scelte superano ogni proposta precedente di riattivazione automatica o sc
 
 ### 4. Punti di rottura già individuati (da correggere nelle fette, non ora)
 
-1. **Nuova condivisione dopo il ripristino:** `shared/detail-account-mode.js:156`, `privato/form-privato-save.js:325`, `azienda/form-azienda-save.js:233` creano una nuova voce solo se `!sharedWith[key] || status === 'rejected'`: con `status: 'suspended'` **il nuovo invito non verrebbe creato**. Va trattato come reinvitabile.
-2. **Voce sospesa pre-selezionata:** `shared/detail-account-mode.js:34,108` filtra solo `status !== 'rejected'`: una voce `suspended` apparirebbe come ancora condivisa.
+1. **Nuova condivisione dopo il ripristino:** `Frontend/public/assets/js/modules/shared/detail-account-mode.js:156`, `privato/form-privato-save.js:325`, `azienda/form-azienda-save.js:233` creano una nuova voce solo se `!sharedWith[key] || status === 'rejected'`: con `status: 'suspended'` **il nuovo invito non verrebbe creato**. Va trattato come reinvitabile.
+2. **Voce sospesa pre-selezionata:** `Frontend/public/assets/js/modules/shared/detail-account-mode.js:34,108` filtra solo `status !== 'rejected'`: una voce `suspended` apparirebbe come ancora condivisa.
 3. **Accettazione dopo il ripristino:** `respondToInvitation` (`functions/index.js:1203-1243`) non controlla lo stato della voce e riscriverebbe `sharedWithUids` con `status: 'accepted'`; serve il rifiuto quando `sharingState === 'suspended'` o la voce non è pendente/accettata.
 4. **Lista ospite:** `privato/account_privati.js:195-225` carica ogni card con un `get` sull'Account: con la lettura negata la card **scompare silenziosamente** (il `catch` registra e scarta). Per la decisione 2 la card va costruita dall'invito, senza leggere l'Account.
 5. **Mutazione offline:** il percorso offline è chiuso sui campi di condivisione (`functions/private-account-write-scope.js:19-24`, `functions/private-account-mutation-service.js:8`): la sospensione **non** può passare dalla coda offline, quindi richiede rete — da dichiarare nella UI.
@@ -2294,7 +2294,7 @@ Queste scelte superano ogni proposta precedente di riattivazione automatica o sc
 **Esito: DA_CORREGGERE prima di avviare R7C-1.** Il censimento delle fonti d'accesso è utile e il limite della cache offline è dichiarato correttamente, ma la sequenza proposta presenta due incongruenze verificabili:
 
 1. **CAS dell'archiviazione:** R7C-1 aggiorna prima il documento Account (`sharedWithUids`, `sharedWith`, ecc.), poi R7C-2 chiama `archiveAccount` con i marker `revision`/`updatedAt` osservati prima del popup. Il controllo di concorrenza introdotto in M7-R6 rifiuterà quindi l'archiviazione come modifica concorrente causata dalla stessa sospensione. Non aggirare il CAS con una rilettura tardiva che assorbe anche vere modifiche esterne. Proporre un'unica transizione autorevole che renda atomici almeno `isArchived: true` e la revoca di `sharedWithUids`, con controllo della revisione osservata e preservazione del percorso utente; coordinare inviti/audit fuori o dentro la transazione con semantica esplicita di fallimento e recupero.
-2. **Nuovo invito vs ID deterministico:** gli scrittori privato/aziendale/dettaglio usano `inviteId = accountId + '_' + sanitizeEmail(email)` (`privato/form-privato-save.js:335`, `azienda/form-azienda-save.js:242`, `shared/detail-account-mode.js:159-167`). Reinvitare lo stesso ospite con `transaction.set` sullo stesso ID sovrascriverebbe l'invito storico accettato/sospeso. Questo contraddice «nuovo invito» e conservazione dello storico. Definire un ID nuovo per ciascun ciclo di condivisione, gli indici/query necessari e la difesa da una risposta tardiva a un invito precedente; mantenere la card sospesa senza esporre dati.
+2. **Nuovo invito vs ID deterministico:** gli scrittori privato/aziendale/dettaglio usano `inviteId = accountId + '_' + sanitizeEmail(email)` (`privato/form-privato-save.js:335`, `azienda/form-azienda-save.js:242`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:159-167`). Reinvitare lo stesso ospite con `transaction.set` sullo stesso ID sovrascriverebbe l'invito storico accettato/sospeso. Questo contraddice «nuovo invito» e conservazione dello storico. Definire un ID nuovo per ciascun ciclo di condivisione, gli indici/query necessari e la difesa da una risposta tardiva a un invito precedente; mantenere la card sospesa senza esporre dati.
 
 **Correzione richiesta a DeepSeek:** revisionare soltanto il piano M7-R7C nel file di coordinamento, includendo flusso archivio-ripristino-reinvito, atomicità/CAS, cardinalità e autorizzazioni degli inviti, test Emulator e migrazione legacy. Nessun codice, test, commit, push o deploy in questa fase. Consegnare `DA_VERIFICARE` con prove/riferimenti; un solo incarico attivo.
 
@@ -2341,7 +2341,7 @@ Una sola transazione con CAS sulla revisione osservata (`settings/archive-accoun
 
 ### R3. Identità degli inviti per ciclo di condivisione (risolve il rilievo 2)
 
-**Stato attuale verificato:** l'ID è deterministico `${accountId}_${sanitizeEmail(email)}` in **tutti** gli scrittori — `privato/form-privato-save.js:334-335`, `azienda/form-azienda-save.js:241-242`, `shared/detail-account-mode.js:159-167` — con cancellazione sugli stessi ID (`privato/form-privato-save.js:294,312`, `azienda/form-azienda-save.js:203,221`, `shared/detail-account-mode.js:148`) e letture in `privato/dettaglio-privato-sharing.js:108`, `azienda/dettaglio-azienda-sharing.js:135-136,215-216`. Reinvitare la stessa email **sovrascrive** il documento storico e una risposta tardiva agirebbe sul nuovo invito.
+**Stato attuale verificato:** l'ID è deterministico `${accountId}_${sanitizeEmail(email)}` in **tutti** gli scrittori — `privato/form-privato-save.js:334-335`, `azienda/form-azienda-save.js:241-242`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:159-167` — con cancellazione sugli stessi ID (`privato/form-privato-save.js:294,312`, `azienda/form-azienda-save.js:203,221`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:148`) e letture in `privato/dettaglio-privato-sharing.js:108`, `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:135-136,215-216`. Reinvitare la stessa email **sovrascrive** il documento storico e una risposta tardiva agirebbe sul nuovo invito.
 
 **Correzione di piano:**
 
@@ -2362,10 +2362,10 @@ Una sola transazione con CAS sulla revisione osservata (`settings/archive-accoun
 | **R7C-2** | Ripristino con neutralizzazione difensiva dei dati legacy nella stessa transazione + **trigger di audit** per archivio e ripristino | Banchi `archive-session` estesi + `functions/test/` per il trigger |
 | **R7C-3** | `sharingCycle` e ID invito per ciclo + `cycle` sull'invito + `INVITE_CYCLE_STALE` in `respondToInvitation`; deduplica per Account nella lista ospite | `functions/test/respond-invitation-archived.test.js` esteso + Emulator |
 | **R7C-4** | Vista ospite: card «Account sospeso» dall'invito senza leggere l'Account, dettaglio e link profondi rifiutati senza contenuti | Banchi lista/dettaglio + casi offline |
-| **R7C-5** | Reinvito: `suspended` reinvitabile e non pre-selezionato (`shared/detail-account-mode.js:34,108,156`, `privato/form-privato-save.js:325`, `azienda/form-azienda-save.js:233`) | Banchi dei moduli di condivisione |
+| **R7C-5** | Reinvito: `suspended` reinvitabile e non pre-selezionato (`Frontend/public/assets/js/modules/shared/detail-account-mode.js:34,108,156`, `privato/form-privato-save.js:325`, `azienda/form-azienda-save.js:233`) | Banchi dei moduli di condivisione |
 | **R7C-6** (opzionale, **dati reali**) | Normalizzazione degli ID legacy, inviti orfani, eventuale marcatura degli inviti degli Account già archiviati; richiede autorizzazione esplicita di Diego | Solo dopo autorizzazione |
 
-**Decisione aperta da porre a Diego (non implementare ora):** la revoca esplicita di un ospite oggi **cancella** l'invito (`shared/detail-account-mode.js:148`, `privato/form-privato-save.js:294,312`, `azienda/form-azienda-save.js:203,221`): se lo storico deve essere completo, va marcato (`revoked` + data) invece di cancellato. Tocca il comportamento approvato in M7-R4/R5 e per questo è una scelta, non un'implementazione automatica.
+**Decisione aperta da porre a Diego (non implementare ora):** la revoca esplicita di un ospite oggi **cancella** l'invito (`Frontend/public/assets/js/modules/shared/detail-account-mode.js:148`, `privato/form-privato-save.js:294,312`, `azienda/form-azienda-save.js:203,221`): se lo storico deve essere completo, va marcato (`revoked` + data) invece di cancellato. Tocca il comportamento approvato in M7-R4/R5 e per questo è una scelta, non un'implementazione automatica.
 
 ### R5. Test su Emulator (elenco finale, estende `tests/archive-guest-suspension.rules.test.mjs`)
 
@@ -2425,7 +2425,7 @@ Account archiviati prima di R7C-1 hanno `sharedWithUids` popolato e inviti senza
 - La transizione di archiviazione (R7C-1) scrive **sempre** `sharingCycle = (sharingCycle ?? 0) + 1`, anche senza ospiti: l'invariante non dipende dal contenuto della condivisione.
 - Di conseguenza, dopo la **prima** archiviazione: `accountCycle ≥ 1` mentre **ogni** invito legacy ha `cycle` 0 ⇒ `inviteCycle < accountCycle` ⇒ **ogni risposta tardiva è negata**, anche con Account **non** archiviato (ripristinato o mai archiviato dopo il ripristino), con **zero scritture**.
 - Il **percorso difensivo di ripristino** (R7C-2, Account archiviati prima di questa modifica, quindi senza `sharingCycle`) deve **incrementare anche lui** il ciclo nella stessa transazione in cui neutralizza la condivisione: senza questo, i loro inviti legacy `pending` (ciclo 0) resterebbero «correnti» dopo il ripristino. Requisito aggiunto rispetto al piano precedente.
-- **Nuovo invito valido:** dopo il ripristino gli scrittori (`privato/form-privato-save.js:334-335`, `azienda/form-azienda-save.js:241-242`, `shared/detail-account-mode.js:159-167`) leggono `sharingCycle` dall'Account e creano l'invito con `cycle` uguale e ID `…_c${sharingCycle}` ⇒ `inviteCycle === accountCycle` ⇒ rispondibile.
+- **Nuovo invito valido:** dopo il ripristino gli scrittori (`privato/form-privato-save.js:334-335`, `azienda/form-azienda-save.js:241-242`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:159-167`) leggono `sharingCycle` dall'Account e creano l'invito con `cycle` uguale e ID `…_c${sharingCycle}` ⇒ `inviteCycle === accountCycle` ⇒ rispondibile.
 - **Concorrenza:** l'invito e l'Account sono letti nella **stessa** transazione; se `sharingCycle` cambia prima del commit, Firestore ritenta e il confronto viene rieseguito sullo stato aggiornato (stessa semantica già provata per la guardia `isArchived` in `functions/index.js:1220-1230`).
 
 **Dimostrazione in tre passi** (quella richiesta): (1) Account legacy mai archiviato, invito legacy `pending`: 0 == 0 → accettazione **consentita** (comportamento attuale preservato); (2) prima archiviazione: `sharingCycle` 0→1, `sharedWithUids: []`; (3) dopo il ripristino, risposta all'invito legacy: 0 ≠ 1 → **negata, zero scritture**; risposta al nuovo invito `cycle: 1`: 1 == 1 → **consentita**.
@@ -2490,8 +2490,8 @@ Account archiviati prima di R7C-1 hanno `sharedWithUids` popolato e inviti senza
 1. **Helper condivisi** in `Frontend/public/assets/js/utils.js:48-76`: `sharingCycleOf` (assenza = ciclo legacy **0**; non interi, negativi o non sicuri ⇒ `null`, quindi fail-closed), `nextSharingCycle` (nessun overflow oltre `Number.MAX_SAFE_INTEGER`) e `inviteIdForGuest` (ciclo 0 ⇒ ID storico `account_key`; dal primo ciclo successivo ⇒ `account_key_c{n}`). Collocati in `utils.js` **per non aggiungere moduli statici**: le due pagine form sono già al tetto di 43 e il budget è rimasto rispettato.
 2. **Archiviazione in una sola transazione** (`settings/archive-account-service.js:229-300`): CAS sui marker osservati **prima di qualunque scrittura di questa transazione** (nessun autoconflitto), `already-archived` resta un no-op, poi **una sola** `update` con `isArchived: true`, `sharedWithUids: []`, `acceptedCount: 0`, voci `pending`/`accepted` marcate `suspended`+`suspendedAt` (chi ha rifiutato conserva lo stato) e **`sharingCycle` incrementato**; nella stessa transazione gli inviti del ciclo chiuso (letture prima delle scritture) vengono marcati `sharingState: 'suspended'` e **mai cancellati**; tetto di **100 destinatari** (`:19`, `:260` → `ARCHIVE_RECIPIENTS_LIMIT`) oltre il quale non si scrive nulla; l'esito riporta `sharingCycle` e `suspendedInvites` (`:299`).
 3. **Handler inviti** (`functions/index.js:1231-1244`): confronto rigoroso `inviteCycle === accountCycle` (assenza = 0; non interi, negativi o non sicuri ⇒ rifiuto) con `INVITE_CYCLE_STALE` e **zero scritture**, subito dopo la guardia `ACCOUNT_ARCHIVED`.
-4. **Tre scrittori** con ID per ciclo e campo `cycle`: `shared/detail-account-mode.js:150-186`, `privato/form-privato-save.js:276-280` e `:294,314,338-352`, `azienda/form-azienda-save.js:186-190` e `:203,223,247-262`.
-5. **Reinvito**: una voce `suspended` è reinvitabile **solo perché l'utente l'ha riselezionata**, e gli ospiti sospesi **non** vengono preselezionati (`shared/detail-account-mode.js:34,108`, `privato/form_account_privato.js:510`, `azienda/form_account_azienda.js:347`). **Scostamento dichiarato:** queste due righe erano nel piano assegnate a R7C-5, ma senza di esse un salvataggio dopo il ripristino avrebbe reinvitato automaticamente tutti gli ospiti sospesi, contro la decisione 1 di Diego; le ho quindi incluse in R7C-1. Il resto di R7C-5 (interfaccia della lista ospite) resta alla fetta successiva.
+4. **Tre scrittori** con ID per ciclo e campo `cycle`: `Frontend/public/assets/js/modules/shared/detail-account-mode.js:150-186`, `privato/form-privato-save.js:276-280` e `:294,314,338-352`, `azienda/form-azienda-save.js:186-190` e `:203,223,247-262`.
+5. **Reinvito**: una voce `suspended` è reinvitabile **solo perché l'utente l'ha riselezionata**, e gli ospiti sospesi **non** vengono preselezionati (`Frontend/public/assets/js/modules/shared/detail-account-mode.js:34,108`, `privato/form_account_privato.js:510`, `azienda/form_account_azienda.js:347`). **Scostamento dichiarato:** queste due righe erano nel piano assegnate a R7C-5, ma senza di esse un salvataggio dopo il ripristino avrebbe reinvitato automaticamente tutti gli ospiti sospesi, contro la decisione 1 di Diego; le ho quindi incluse in R7C-1. Il resto di R7C-5 (interfaccia della lista ospite) resta alla fetta successiva.
 
 ### Prove
 
@@ -2895,7 +2895,7 @@ Casi coperti, **privato e aziendale**: invito **revocato/assente** (diniego del 
 
 ### Lacuna dimostrata e corretta
 
-**I due pannelli di revoca nel dettaglio cancellavano l'invito con l'ID storico** (`privato/dettaglio-privato-sharing.js:108`, `azienda/dettaglio-azienda-sharing.js:215` → `${accountId}_${key}`): dopo un'archiviazione e un ripristino (ciclo ≥ 1) la cancellazione non colpiva l'invito reale (`…_c{n}`) e l'invito del ciclo corrente **restava vivo**. Correzione: entrambi usano `inviteIdForGuest(accountId, key, cycle)` con il ciclo letto dall'Account nella stessa transazione (`privato/dettaglio-privato-sharing.js:116`, `azienda/dettaglio-azienda-sharing.js:227`) e un ciclo malformato **non cancella nulla**. Il controllo di stato «in attesa» del pannello aziendale leggeva anch'esso l'ID storico (`azienda/dettaglio-azienda-sharing.js:137`): ora usa il ciclo passato dal dettaglio (`azienda/dettaglio_account_azienda.js:253`, `sharingCycleOf(loaded)`).
+**I due pannelli di revoca nel dettaglio cancellavano l'invito con l'ID storico** (`privato/dettaglio-privato-sharing.js:108`, `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:215` → `${accountId}_${key}`): dopo un'archiviazione e un ripristino (ciclo ≥ 1) la cancellazione non colpiva l'invito reale (`…_c{n}`) e l'invito del ciclo corrente **restava vivo**. Correzione: entrambi usano `inviteIdForGuest(accountId, key, cycle)` con il ciclo letto dall'Account nella stessa transazione (`privato/dettaglio-privato-sharing.js:116`, `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:227`) e un ciclo malformato **non cancella nulla**. Il controllo di stato «in attesa» del pannello aziendale leggeva anch'esso l'ID storico (`Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:137`): ora usa il ciclo passato dal dettaglio (`azienda/dettaglio_account_azienda.js:253`, `sharingCycleOf(loaded)`).
 
 **Controllo negativo eseguito:** con la sola versione già committata (`f6eaecb8`) il banco nuovo passa **2/6** (falliscono i quattro casi dipendenti dal ciclo); con la correzione **6/6**.
 
@@ -2903,7 +2903,7 @@ Casi coperti, **privato e aziendale**: invito **revocato/assente** (diniego del 
 
 | Requisito dell'incarico | Copertura e prova |
 |---|---|
-| L'ospite sospeso non è preselezionato | `shared/detail-account-mode.js:34,108` (filtro `!== 'suspended'`), `privato/form_account_privato.js:510`, `azienda/form_account_azienda.js:347`; guardia statica in `tests/share-revocation-paths.test.mjs` |
+| L'ospite sospeso non è preselezionato | `Frontend/public/assets/js/modules/shared/detail-account-mode.js:34,108` (filtro `!== 'suspended'`), `privato/form_account_privato.js:510`, `azienda/form_account_azienda.js:347`; guardia statica in `tests/share-revocation-paths.test.mjs` |
 | Un semplice salvataggio non ridà accesso | `tests/shared-regrant-after-restore.test.mjs` (privato **e** azienda): `sharedWithUids` resta vuoto |
 | Serve la selezione espressa del proprietario | condizione `status === 'suspended'` ⇒ nuovo invito solo se riselezionato (stessi test) |
 | Nuovo invito con ID/ciclo corrente, storico intatto | ID `…_c{n}` e campo `cycle` nei tre scrittori; `tests/shared-regrant-after-restore.test.mjs` (privato/azienda) e `tests/detail-sharing-revocation-cycle.test.mjs` |
@@ -2967,7 +2967,7 @@ L'incarico chiedeva la verifica dei **tre** editor: i due form avevano banchi co
 
 | Caso | Esito |
 |---|---|
-| Voce `suspended` nell'elenco destinatari | **non preselezionata** (casella `checked === false`, `shared/detail-account-mode.js:34,108`) |
+| Voce `suspended` nell'elenco destinatari | **non preselezionata** (casella `checked === false`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:34,108`) |
 | Salvataggio **senza** selezione | **zero scritture** e avviso «Seleziona almeno un destinatario…» (`:118-127`) |
 | **Selezione espressa** | invito `invites/account-1_guest_example_invalid_c1` con `cycle: 1` e `status: 'pending'` (`:166`), voce `pending`, `sharedWithUids` **vuoto** e `acceptedCount` 0: l'accesso non torna prima dell'accettazione |
 | Invito **storico** del ciclo 0 | **non toccato**: nessuna scrittura su `invites/account-1_guest_example_invalid` |
@@ -3487,7 +3487,7 @@ Nessuna email, nessuna chiave sanificata, nessun hash e — per la stessa ragion
 
 **APPROVATO solo il perimetro M7-AUDIT-2 (Rules `auditEvents`).** La doppia modifica — esclusione dal catch-all e blocco dedicato — è coerente con il precedente `operationResults` in `firestore.rules:109-125`. La verifica su Rules produttive deve lasciare `trash` e `recordHistory` fuori perimetro.
 
-**DA_CORREGGERE prima di M7-AUDIT-3/4/5:** il nuovo `auditRef` nasce nel trigger *dopo* la scrittura dell'invito: risposta o cancellazione possono arrivare prima che il trigger lo depositi. Inoltre il reinvito riscrive un documento esistente con `set` senza merge (`form-privato-save.js:341`, `form-azienda-save.js:248`), quindi non attiva il trigger `onDocumentCreated` proposto e può perdere il marcatore. Progettare un'identità opaca per istanza assegnata nella stessa transazione che crea/reinvita l'invito, oppure un'altra soluzione che copra queste corse senza usare email o id derivati dall'email; considerare anche l'Account archiviato/ripristinato più volte. Serve una proposta rivista prima di incaricare il codice dei produttori. Nessuna modifica a quel runtime è autorizzata da questa approvazione.
+**DA_CORREGGERE prima di M7-AUDIT-3/4/5:** il nuovo `auditRef` nasce nel trigger *dopo* la scrittura dell'invito: risposta o cancellazione possono arrivare prima che il trigger lo depositi. Inoltre il reinvito riscrive un documento esistente con `set` senza merge (`Frontend/public/assets/js/modules/privato/form-privato-save.js:341`, `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:248`), quindi non attiva il trigger `onDocumentCreated` proposto e può perdere il marcatore. Progettare un'identità opaca per istanza assegnata nella stessa transazione che crea/reinvita l'invito, oppure un'altra soluzione che copra queste corse senza usare email o id derivati dall'email; considerare anche l'Account archiviato/ripristinato più volte. Serve una proposta rivista prima di incaricare il codice dei produttori. Nessuna modifica a quel runtime è autorizzata da questa approvazione.
 
 ## Incarico Codex — M7-AUDIT-2: protezione Rules del registro
 
@@ -3560,3 +3560,319 @@ Controllo di robustezza del banco: se si rimuovesse la sola esclusione di `fires
 8. **Inventario dei file non rigenerato, per scelta dichiarata.** `docs/FILE_INVENTORY.md` è generato da `npm run audit:inventory`, che **non** fa parte della catena di `npm test`: il nuovo banco quindi non vi compare. Rigenerarlo qui avrebbe prodotto **193 righe di puro riordino** della tabella `tests/` (il generatore elenca i file in un ordine non alfabetico e instabile, e il file nuovo finisce in testa), estranee a questa fetta: l'ho ripristinato e lo lascio a una fetta di manutenzione, insieme al difetto di ordinamento del generatore.
 
 **Stato incarico: DA_VERIFICARE** — M7-AUDIT-2 consegnato da DeepSeek il 2026-09-21; `auditEvents` escluso dal catch-all (`firestore.rules:126`) e protetto da match dedicato in sola lettura (`firestore.rules:114-122`), nuovo banco Emulator di produzione (`tests/audit-events.rules.test.mjs`, registrato in `scripts/run-firestore-rules-tests.mjs:13`) con i casi R1 compresi gli overlap, `test:firestore-rules` 48/48 e **`npm test` completo verde (exit 0)**, un commit locale mirato, nessun push/merge/deploy e protezione produttiva non ancora distribuita.
+
+## Verifica Codex — M7-AUDIT-2
+
+**APPROVATO.** Revisione del commit locale `74e18541`: `firestore.rules` aggiunge sia il match in sola lettura sia l'esclusione `auditEvents` dal catch-all; il nuovo banco carica le Rules produttive, prova owner/terzi/anonimo, get/list e create/update/delete, incluso il `set` con merge. `scripts/run-firestore-rules-tests.mjs` lo include nella suite. I file runtime diversi dalle Rules non sono toccati. DeepSeek riporta `test:firestore-rules` 48/48 e `npm test` completo verde; Codex ha revisionato il diff, senza ripetere l'intera suite. `trash` e `recordHistory` restano aperti. La modifica è solo sul ramo locale, senza push né deploy: non affermare che la protezione sia già pubblicata.
+
+## Incarico Codex — M7-AUDIT-3P: identità e produttori del registro
+
+**Stato incarico: PRONTO.** DeepSeek corregga **solo il progetto** dei produttori audit prima di M7-AUDIT-3/4/5. Analizzare i percorsi reali di creazione, reinvito, risposta, cancellazione, archiviazione e ripristino; proporre un id opaco per ogni transizione effettiva che esista già nella scrittura originaria, così risposta/cancellazione non possano anticipare un marcatore aggiunto in seguito da trigger. Coprire reinvito con `set` sullo stesso documento, doppia archiviazione/ripristino, inviti legacy, ritentativi e consegna fuori ordine. Non derivare id o payload dall'email. Precisare chi genera l'id, dove viene persistito, cosa fanno Rules e callable, e come evitare eventi duplicati o mancanti; distinguere le garanzie reali da quelle soltanto best-effort. Consegnare un piano minimo con casi Emulator e limiti nel solo file di coordinamento, `DA_VERIFICARE`. Nessun codice, test, commit, push, merge, deploy o dato reale; un incarico attivo alla volta.
+
+## Presa in carico DeepSeek — M7-AUDIT-3P identità e produttori del registro
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base `74e18541`; la verifica di Codex e l'incarico erano nel working tree non committato e sono **conservati** senza alterarne il testo.
+- **Perimetro:** correzione del **solo progetto**. **Nessun** codice, test, commit, push, merge, deploy o dato reale; nessun altro gate.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-AUDIT-3P preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-AUDIT-3P identità e produttori del registro
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. **Nessun commit**: l'incarico consegna solo il piano.
+- **Esito:** la correzione di Codex è accolta e il progetto è rifatto sul principio «l'id nasce nella scrittura originaria». Due scoperte cambiano il piano: sugli **Account** l'id non serve inventarlo (esiste già `revision`), e sui **client che creano inviti sono tre**, non due — ne avevo censiti due in R1.
+
+### 1. Perché un marcatore scritto dal trigger non regge
+
+Avevo proposto che il trigger di creazione depositasse `auditRef` sull'invito. Codex osserva che fra la scrittura dell'invito e quel deposito possono passare risposta o cancellazione (`docs/DEEPSEEK_COORDINATION.md:3490`): corretto, e la conseguenza è peggiore di un ritardo. L'ordine reale è: il client scrive l'invito → il guest può rispondere subito (`functions/index.js:1207` richiede solo che l'invito esista ed è `pending`) → il trigger di creazione può arrivare dopo. Un id che nasce **dopo** non è quindi un'identità dell'istanza, ma un ripiego: va sostituito, non spostato.
+
+### 2. Principio adottato
+
+**Ogni id del registro è un valore scritto dalla stessa transazione che produce la transizione** — o è derivato da un valore che quella transazione ha scritto. Nessun id dipende da una scrittura successiva di un trigger. Inoltre, per non derivare nulla dall'email: l'id dell'invito resta **fuori** dal registro (contiene la chiave sanificata, `Frontend/public/assets/js/utils.js:73-76`) e non si usa `event.id` sui documenti `invites`, il cui percorso contiene la stessa chiave.
+
+### 3. Mappa dei produttori e degli id (stato reale del codice)
+
+| Transizione | Scrittura originaria (censimento completo) | Id del registro | Chi lo genera | Dove è persistito | Come si evita il duplicato |
+|---|---|---|---|---|---|
+| `invite-created` e **reinvito** | `transaction.set` sul documento invito: `Frontend/public/assets/js/modules/privato/form-privato-save.js:341`, `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:248`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:174` | campo nuovo **`auditRef`** = `crypto.randomUUID()` | **il client che scrive l'invito**, nella stessa `set` | sull'invito, scritto insieme al resto | il trigger di creazione scrive l'evento a `${auditRef}__invited` con create-if-absent: una riconsegna trova lo stesso id e non riscrive |
+| `invite-accepted` / `invite-rejected` | callable `functions/index.js:1203-1269` | `${auditRef}__${status}`; se l'invito non ha `auditRef`, `${responseRef}` (UUID generato **una volta per invocazione**, fuori da `runTransaction`) | **backend** | `${responseRef}` viene anche scritto sull'invito come `responseAuditRef`, nella stessa transazione | `functions/index.js:1207` impedisce la seconda risposta sulla stessa istanza; create-if-absent non sovrascrive `at` |
+| `invite-removed` | `transaction.delete` dell'invito: `Frontend/public/assets/js/modules/privato/form-privato-save.js:298` e `:316`, `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:207` e `:225`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:153`, `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:256`, `Frontend/public/assets/js/main-v129.js:456` | `${auditRef}__removed`, letto da `event.data.before` | **backend** (trigger di cancellazione) | — | id deterministico da un valore che esisteva **prima** della cancellazione: la riconsegna ricalcola lo stesso id |
+| `account-archived` / `account-restored` | transazione client sull'Account: `Frontend/public/assets/js/modules/settings/archive-account-service.js:337-346` (archiviazione) e `:228-250` (ripristino) | `${chiaveAccount}__${revision}`, dove `chiaveAccount` = `aziendaId`+`accountId` per gli Account aziendali, altrimenti `accountId` | **backend** (trigger `onDocumentUpdated`), derivato dallo stato scritto | niente di nuovo: la `revision` è già scritta da quella transazione (`:341` archiviazione, `:233` ripristino) | la riconsegna porta lo stesso documento `after` ⇒ stesso id ⇒ create-if-absent |
+| purge, widget, shared vault, recovery, backup | callable esistenti (`functions/index.js:310`, `:388`, `:437`, `:530`, `:602`) | `command.operationId` | invariato | invariato | invariato |
+
+**Sui client che creano inviti: correzione al mio censimento R1.** I punti di creazione/reinvito sono **tre**, non due: oltre ai due form c'è `Frontend/public/assets/js/modules/shared/detail-account-mode.js:174` (modale di gestione condivisione nel dettaglio Account), che riscrive lo stesso documento invito con `set` senza merge (`:163-174`). Se si dimenticasse quel punto, gli inviti creati da lì non avrebbero `auditRef` e ricadrebbero nel caso legacy qui sotto. I punti di cancellazione sono **sette** (elencati sopra), di cui `Frontend/public/assets/js/main-v129.js:456` è l'azione «Elimina» del proprietario sul rifiuto ricevuto (`:433-458`) e non una pulizia automatica.
+
+### 4. Account: l'id esiste già, nessun campo nuovo
+
+`revision` è scritta dalla stessa transazione che produce la transizione e cresce in modo monotono, con controllo di concorrenza: l'archiviazione scrive `revision: currentRevision + 1` (`Frontend/public/assets/js/modules/settings/archive-account-service.js:341`) e il ripristino `revision: currentRevision + 1` (`:233`). L'id `${chiaveAccount}__${revision}` è quindi opaco (nessuna email), stabile sulla riconsegna e non richiede alcuna modifica al client. Due garanzie utili, verificate:
+
+- **doppia archiviazione**: un Account già archiviato **non viene riscritto** — `Frontend/public/assets/js/modules/settings/archive-account-service.js:298-303` esce con `already-archived` prima di qualunque scrittura ⇒ nessun aggiornamento del documento ⇒ **nessun evento**. Non serve deduplicare: non c'è transizione.
+- **doppio ripristino**: `Frontend/public/assets/js/modules/settings/archive-account-service.js:195` pretende `isArchived === true` **e** revisione attesa, altrimenti `ARCHIVE_RESTORE_CONFLICT` senza scrittura ⇒ **nessun evento**.
+- **archivia → ripristina → archivia**: ogni transizione scrive una revisione nuova ⇒ tre eventi distinti, come deve essere.
+
+### 5. Perché non si possono usare id compositi dai dati esistenti (e perché `auditRef` serve davvero)
+
+Sull'invito esistono già `accountId`, `cycle`, `createdAt`, `ownerId`, `senderId` (`Frontend/public/assets/js/modules/privato/form-privato-save.js:341-354`). Sarebbe comodo comporre l'id da quelli, ma non funziona: **una sola `set` di form crea più inviti nello stesso ciclo**, con `new Date().toISOString()` chiamato per ciascuno nella stessa transazione, quindi nello stesso millisecondo. Due ospiti diversi dello stesso Account finirebbero con lo **stesso** id composito e la seconda riga andrebbe persa (create-if-absent). Manca un discriminatore per ospite che non sia l'email o la sua chiave — vietati. `auditRef` è precisamente il discriminatore opaco che manca, ed è per questo che va scritto dal client nella scrittura originaria.
+
+### 6. Legacy, reinvito, ritentativi, consegna fuori ordine
+
+- **Reinvito con `set` sullo stesso documento**: la `set` senza merge **sostituisce** il documento, quindi `auditRef` va **rigenerato a ogni creazione/reinvito**. Così due istanze dello stesso id invito producono due eventi distinti (la seconda risposta non collide con la prima). Se il client riusasse lo stesso valore, i due eventi si sovrapporrebbero e il secondo andrebbe perso: comportamento **dichiarato**, mai silenzioso, e coperto da un caso di prova.
+- **Inviti legacy** (senza `auditRef`, creati prima della fetta): la **risposta** resta registrabile, perché la sua scrittura originaria è la callable stessa, che genera `responseRef` e lo persiste (`responseAuditRef`); la **creazione** e la **cancellazione** no: non esiste alcun valore opaco e stabile da cui derivare l'id, e `event.id` è vietato su `invites`. Propongo di **non registrare** quelle due transizioni sugli inviti legacy, senza inventare id (l'alternativa — id casuale per consegna — è descritta come **D-5** ed è best-effort con duplicati possibili). Un invito legacy **reinvitato** dopo la fetta riceve `auditRef` nella `set` del reinvito: da lì in poi è coperto.
+- **Ritentativi**: (a) della callable — la seconda esecuzione si ferma a `functions/index.js:1207` prima di scrivere, e comunque create-if-absent protegge `at`; (b) di un trigger — la consegna ripetuta ricalcola lo stesso id e non riscrive; (c) di `runTransaction` lato SDK — il corpo può rieseguire, ma nessun commit intermedio esiste, e `responseRef` è generato **fuori** dalla transazione, quindi resta lo stesso per tutta l'invocazione.
+- **Consegna fuori ordine**: gli id sono indipendenti, quindi nessuna scrittura può sovrascriverne un'altra; ma il registro **non ha un ordine totale** e `at` non è un ordinamento causale — l'evento di creazione porta l'ora del trigger, la risposta quella della transazione, e possono invertirsi. Per questo il payload include anche `inviteCreatedAt` (valore già presente nella scrittura originaria) come indizio causale; `at` resta il timestamp **autorevole per la retention** e per l'ordinamento di lettura, non una prova di causalità.
+- **Eventi mancanti**: per la callable è impossibile che l'azione sia committata senza il suo evento (stessa transazione); per i trigger l'azione è già committata quando il trigger parte, quindi un evento può mancare (`retry: true` nei log di piattaforma) e l'assenza **non** deve mai bloccare o autorizzare alcun accesso.
+
+### 7. Cosa fanno Rules e callable
+
+- **Rules**: le scritture client su `auditEvents` sono già negate (`firestore.rules:119-122` e l'esclusione a `firestore.rules:126`), quindi il registro resta scrivibile solo dall'Admin SDK — trigger e callable. Le Rules **non possono** garantire unicità né opacità di un id: non è una garanzia disponibile e va dichiarata come tale.
+- **Opzione da decidere (D-4)**: aggiungere al blocco `match /invites/{inviteId}` (`firestore.rules:193`) una validazione che pretenda `auditRef` di forma UUID sulle scritture di creazione. Trasformerebbe il best-effort in una garanzia **per i client aggiornati**, ma farebbe **fallire la creazione dell'invito** per un client vecchio o non conforme: l'audit diventerebbe una precondizione dell'azione dell'utente, contro il contratto («l'audit non è un controllo e non blocca mai»). La mia raccomandazione è **non** farlo e accettare il limite dichiarato; la decisione è di Diego/Codex.
+- **Callable**: `respondToInvitation` non cambia comportamento né errori; aggiunge solo la lettura di `auditRef`/`responseAuditRef` (già dentro la transazione, `functions/index.js:1204`) e la scrittura dell'evento nella stessa transazione, oltre a persistere `responseRef` sugli inviti legacy.
+
+### 8. Garanzie reali e garanzie best-effort
+
+| Transizione | Natura della garanzia |
+|---|---|
+| `invite-accepted` / `invite-rejected` | **reale**: evento e azione sono nella stessa transazione (mai mancante, mai duplicato) |
+| `account-archived` / `account-restored` | **reale** se la `revision` cambia, che è il caso delle due transazioni del servizio (`Frontend/public/assets/js/modules/settings/archive-account-service.js:341`, `:233`); **best-effort** se un writer non incrementa la revisione (ripiego su `event.id`) |
+| `invite-created` / reinvito | **best-effort**: dipende da un valore scritto dal client; un client ostile o vecchio può ometterlo (evento mancante) o riusarlo (evento perso). Conseguenze limitate e dichiarate: si perde una **riga**, mai un'autorizzazione — il client non può scrivere il registro né concedersi accesso |
+| `invite-removed` | **reale** per gli inviti con `auditRef`; **non registrato** per gli inviti legacy secondo la scelta raccomandata |
+| id e payload senza dati personali | **reale per costruzione**: `auditRef`/`responseRef` sono casuali, `revision` e gli id Account non derivano dall'email; il payload non contiene email, chiave sanificata né id invito |
+| unicità degli id | **non garantibile dalle Rules**: solo la disciplina dei writer; un id riusato fa perdere una riga, non ne crea una falsa |
+
+### 9. Casi Emulator proposti (per M7-AUDIT-4/5)
+
+1. invito creato con `auditRef` ⇒ **un** evento a `${auditRef}__invited`; riconsegna dello stesso evento di creazione ⇒ ancora **uno**.
+2. reinvito dello stesso documento con `auditRef` **nuovo** ⇒ **secondo** evento distinto; il primo resta invariato byte per byte.
+3. reinvito con `auditRef` **riusato** (client non conforme) ⇒ nessuna sovrascrittura: la seconda riga non compare; il comportamento è quello dichiarato.
+4. risposta su invito con `auditRef` ⇒ un evento `${auditRef}__accepted` (o `__rejected`) con `guestUid` solo se accettato; ritentativo dopo il commit ⇒ **nessun** secondo evento.
+5. risposta su invito **legacy** ⇒ un evento con `responseRef`, e `responseAuditRef` persistito sull'invito; la cancellazione successiva usa la stessa base ⇒ un solo evento di rimozione.
+6. cancellazione di invito con `auditRef` ⇒ un evento `${auditRef}__removed`; riconsegna ⇒ uno.
+7. cancellazione di invito **legacy senza alcuna base** ⇒ nessun evento e nessun errore (comportamento dichiarato), oppure l'esito di **D-5** se si sceglie il ripiego.
+8. archiviazione ⇒ un evento `account-archived` con `revision`, `sharingCycle`, `suspendedInvites`; **seconda** archiviazione (nessuna scrittura, `Frontend/public/assets/js/modules/settings/archive-account-service.js:298-303`) ⇒ **nessun** evento.
+9. ripristino ⇒ un evento `account-restored` con `neutralized`/`neutralizedInvites`; secondo ripristino (conflitto, `:195`) ⇒ **nessun** evento; archivia → ripristina → archivia ⇒ **tre** eventi con tre revisioni.
+10. consegna fuori ordine: applicare `__accepted` prima di `__invited` ⇒ entrambi presenti, id distinti, nessuna sovrascrittura; la lettura ordina per `at` e usa `inviteCreatedAt` come indizio causale.
+11. nessun dato personale: serializzare l'evento e verificare che non contenga email, chiave sanificata, id del documento invito né nome Account.
+12. i sette punti di cancellazione e i tre punti di creazione sono tutti coperti: un caso per ciascun percorso, perché ometterne uno reintroduce il caso legacy.
+
+### 10. Sequenza aggiornata e decisioni aperte
+
+| Fetta | Contenuto |
+|---|---|
+| **M7-AUDIT-3** | helper di payload in allowlist (forma `safeAudit`, `functions/history-recovery-service.js:29-34`) e helper di id (`auditRef`/`responseRef`/`revision`) con create-if-absent; nessun produttore attivo |
+| **M7-AUDIT-4** | `respondToInvitation`: evento nella transazione, `responseAuditRef` per gli inviti legacy |
+| **M7-AUDIT-5** | trigger Account (privato + aziendale) e trigger inviti (create/delete) |
+| **M7-AUDIT-5C** (frontend, nuova) | `auditRef` nella stessa `set` dei **tre** punti di creazione invito; verifica del budget di pagina con `npm run test:performance-budget` (che esegue `scripts/audit-page-performance.mjs --check`) e dei banchi che fissano il percorso delle scritture invito (`tests/archive-session.test.mjs:273` e `tests/archive-session.test.mjs:646` confrontano i **percorsi**, non il contenuto: il campo aggiunto non li cambia, da verificare) |
+| **M7-AUDIT-6** | retention pianificata (`experiments/history-recovery/audit-retention.mjs`) |
+| **M7-AUDIT-7** | MD autorevoli e vista in sola lettura se Diego la vuole |
+
+**Decisioni aperte**: **D-2** vista del registro; **D-3** nome di `invite-removed`; **D-4** forzare `auditRef` nelle Rules (raccomando di no); **D-5** inviti legacy: non registrare (raccomandato) o ripiego casuale con duplicati dichiarati.
+
+### 11. Limiti dichiarati
+
+- Il registro **non** è un controllo di sicurezza: nessuna di queste garanzie autorizza o revoca accessi, e l'assenza di un evento non cambia alcun esito.
+- La parte migliore-effort dipende da un valore scritto dal **client**: il backend non può inventarlo senza reintrodurre il marcatore posticipo che Codex ha respinto.
+- Nessun dato reale è stato letto o contato; nessun codice eseguito. La mappa dei writer è statica, verificata riga per riga sui file citati.
+- La correzione non tocca `trash`/`recordHistory` né i cinque produttori esistenti; i loro id restano `operationId`.
+
+**Stato incarico: DA_VERIFICARE** — M7-AUDIT-3P consegnato da DeepSeek il 2026-09-21; progetto rifatto sul principio dell'id nato nella scrittura originaria, con `auditRef` scritto dal client nella stessa `set` dei **tre** punti di creazione invito, `revision` già disponibile per gli Account (doppia archiviazione e doppio ripristino senza scrittura ⇒ senza evento), `responseRef` persistito dalla callable per gli inviti legacy, id vietati su tutto ciò che deriva dall'email, garanzie reali distinte da quelle best-effort, dodici casi Emulator e quattro decisioni aperte; nessun codice, test, commit, push, merge o deploy eseguito.
+
+## Verifica Codex — M7-AUDIT-3P
+
+**Stato incarico: DA_CORREGGERE.** Il principio dell'id opaco nella scrittura originaria è corretto; `revision` per le transizioni Account è un miglioramento. Restano due incoerenze che impediscono di autorizzare i produttori:
+
+1. Il piano continua a dire trigger `onDocumentCreated` per `invite-created` **e reinvito**, ma i tre writer citati fanno `set` sullo stesso documento: un reinvito è un **update**, non un create. Specificare un `onDocumentWritten`/`onDocumentUpdated` o altro percorso che confronti `before`/`after` e distingua la nuova istanza tramite `auditRef`; non registrare normali aggiornamenti, risposta o sospensione come nuovi inviti. Ordinare l'implementazione in modo che i client che scrivono `auditRef` precedano l'attivazione dei trigger, o dichiarare con precisione la finestra legacy.
+2. Per gli inviti legacy, §6 dice che la risposta salva `responseAuditRef` e che la cancellazione successiva userà la stessa base; §3 e il caso Emulator 7 dicono invece che la cancellazione senza `auditRef` non produce evento. Distinguere chiaramente legacy mai risposto (`auditRef` e `responseAuditRef` assenti) da legacy risposto (`responseAuditRef` presente) e definire id, trigger delete e casi di prova per entrambi. Verificare inoltre se `responseAuditRef` è ammesso dalle Rules dell'invito e non collide con risposte/reinviti successivi.
+
+Correggere il **solo progetto** M7-AUDIT-3P-R1 nel file di coordinamento, con tabella delle transizioni e sequenza di rilascio coerenti. Consegnare `DA_VERIFICARE`; nessun codice, test, commit, push, merge, deploy o dato reale. Non avviare M7-AUDIT-3/4/5 mentre questa revisione è aperta.
+
+## Presa in carico DeepSeek — M7-AUDIT-3P-R1 trigger, legacy e vincolo delle Rules
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base `74e18541`; la verifica di Codex era nel working tree non committato ed è **conservata** senza alterarne il testo.
+- **Perimetro:** correzione del **solo progetto**, con tabella delle transizioni e sequenza di rilascio coerenti. **Nessun** codice, test, commit, push, merge, deploy o dato reale; M7-AUDIT-3/4/5 non avviati.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-AUDIT-3P-R1 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-AUDIT-3P-R1 trigger, legacy e vincolo delle Rules
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. **Nessun commit** (l'incarico lo vieta).
+- **Esito:** le due incoerenze sono corrette; la seconda ha portato a scoprire un **vincolo bloccante** che avevo mancato: le Rules di produzione **non ammettono** un campo nuovo nella creazione di un invito (`firestore.rules:205-223`), quindi il piano dei client non è realizzabile senza una fetta Rules **prima** dei client.
+
+### 1. Correzione 1 recepita: il reinvito è un update, non una creazione
+
+Codex ha ragione: i tre writer fanno `transaction.set` sullo **stesso** documento (`inviteIdForGuest`), quindi la prima scrittura è un **create** e il reinvito è un **update** — `onDocumentCreated` non lo vedrebbe mai. Il trigger unico corretto è **`onDocumentWritten`** su `invites/{inviteId}`, che distingue la **nuova istanza** dal confronto `before`/`after`, non dal tipo di evento. Nota di implementazione: `onDocumentWritten` **non è oggi importato** (`functions/index.js:11` importa solo `onDocumentCreated`, `onDocumentDeleted`, `onDocumentUpdated`).
+
+Macchina a stati del trigger (un solo id per transizione effettiva):
+
+| `before` / `after` | Condizione | Azione |
+|---|---|---|
+| assente → presente | `after.auditRef` presente | evento `${after.auditRef}__invited` (create-if-absent) |
+| assente → presente | `auditRef` assente (client vecchio) | **niente** (finestra legacy dichiarata, §4) |
+| presente → presente | `before.auditRef !== after.auditRef` | evento `${after.auditRef}__invited`: **reinvito = nuova istanza** |
+| presente → presente | `before.auditRef === after.auditRef` | **niente**: è un aggiornamento della stessa istanza |
+| presente → assente | `before.auditRef` presente | evento `${before.auditRef}__removed` |
+| presente → assente | `before.auditRef` assente, `before.responseAuditRef` presente | evento `${before.responseAuditRef}__removed` (legacy risposto, §2) |
+| presente → assente | entrambi assenti | **niente** (legacy mai risposto: nessuna base opaca) |
+
+Gli aggiornamenti che **non** devono produrre un nuovo invito, tutti verificati nel codice:
+
+| Aggiornamento | Dove | Esito |
+|---|---|---|
+| `senderNotified: true` (azione «Archivia» del proprietario sul rifiuto) | `Frontend/public/assets/js/main-v129.js:448` | ignorato (`auditRef` invariato) |
+| `status`, `guestUid`, `respondedAt` scritti dalla callable di risposta | `functions/index.js:1264-1268` | ignorato: l'evento di risposta lo scrive la callable stessa |
+| `sharingState: 'suspended'`, `suspendedAt` (sospensione all'archiviazione e al ripristino neutralizzato) | `Frontend/public/assets/js/modules/settings/archive-account-service.js:352` e `:254` | ignorato: è un fatto dell'Account, riassunto in `account-archived`/`account-restored` con `suspendedInvites`/`neutralizedInvites` — altrimenti un'archiviazione con 100 destinatari (limite `Frontend/public/assets/js/modules/settings/archive-account-service.js:19`) produrrebbe 101 righe |
+| percorso del destinatario che accetta/rifiuta | `Frontend/public/assets/js/main-v129.js:540-561` | **sola lettura** lato client (la scrittura è la callable): nessun update client da ignorare |
+
+### 2. Correzione 2 recepita: tre stati legacy distinti, id coerente
+
+L'incoerenza era reale: §6 prometteva un evento di rimozione per gli inviti legacy, §3 e il caso 7 lo negavano. La regola unica che risolve: **la base opaca della rimozione è `auditRef ?? responseAuditRef`**; se nessuno dei due esiste, non c'è nulla da cui derivare un id e l'evento non si scrive.
+
+| Stato dell'invito | Creazione registrata? | Risposta registrata? (id) | Rimozione registrata? (id) |
+|---|---|---|---|
+| nuovo, con `auditRef` | **sì**, `${auditRef}__invited` | **sì**, `${auditRef}__${status}` | **sì**, `${auditRef}__removed` |
+| legacy **mai risposto** (`auditRef` e `responseAuditRef` assenti) | no | **sì**: la scrittura originaria è la callable, che genera `responseRef` e lo persiste come `responseAuditRef` nella stessa transazione | **sì**, `${responseAuditRef}__removed` |
+| legacy **risposto** (`responseAuditRef` presente) | no | già registrata al momento della risposta | **sì**, `${responseAuditRef}__removed` |
+| legacy mai risposto e poi **reinvitato** dopo la fetta | **sì** dalla `set` del reinvito (`auditRef` nuovo) | **sì**, `${auditRef}__${status}` | **sì**, `${auditRef}__removed` |
+| legacy mai risposto e poi **eliminato** senza risposta né reinvito | no | no | **no** — nessuna base opaca (unico buco residuo, dichiarato) |
+
+In tutti i casi la base è un UUID casuale, quindi nessun id e nessun payload derivano dall'email.
+
+**Rules dell'invito (`firestore.rules:193-226`), risposta alla domanda di Codex:**
+
+| Domanda | Esito verificato |
+|---|---|
+| `responseAuditRef` è ammesso dalle Rules? | **Non serve**: lo scrive la callable con l'Admin SDK, che ignora le Rules. Sul lato client il destinatario **non può aggiornare** l'invito: l'unico `allow update` è `isInviteOwner()` (`firestore.rules:225`) e `isRecipient()` compare solo nella lettura (`firestore.rules:204`) |
+| `auditRef` è ammesso dalle Rules? | **NO, ed è bloccante**: la creazione ha un'allowlist di campi — `request.resource.data.keys().hasOnly([...])` con tredici chiavi (`firestore.rules:205-223`) che **non** include `auditRef`. Un client che oggi scrivesse `auditRef` in creazione vedrebbe **rifiutata la creazione dell'invito** |
+| Il reinvito (update) è vincolato per campo? | **No**: `allow update, delete: if isInviteOwner()` (`firestore.rules:225`) non limita i campi. Il reinvito passa anche senza modifiche alle Rules, ma è **manomettibile** dal proprietario (che può riscrivere `auditRef`/`responseAuditRef`): conseguenza massima, una riga persa o duplicata nel **proprio** registro — mai un accesso |
+| Collisioni fra risposte e reinviti successivi? | No: il reinvito è una `set` **senza merge**, quindi sostituisce il documento e **cancella** `responseAuditRef`, scrivendo un `auditRef` nuovo; la rimozione della nuova istanza usa `${auditRef}__removed`, prefisso diverso da quello della risposta precedente. Le due basi restano distinte |
+
+**Conseguenza di piano nuova (fetta aggiuntiva):** serve **M7-AUDIT-5R**, una fetta Rules che aggiunga `'auditRef'` all'allowlist di creazione con validazione di forma (stringa non vuota, lunghezza fissa), mantenendo il `hasOnly` per tutto il resto, **prima** che i client lo scrivano. È l'unico modo per non far fallire la creazione di un invito.
+
+### 3. Tabella unica delle transizioni (aggiornata)
+
+| Transizione | Scrittura originaria | Id | Chi genera | Persistenza | Trigger o callable |
+|---|---|---|---|---|---|
+| `invite-created` e reinvito | `set` sul documento invito: i **tre** writer (`Frontend/public/assets/js/modules/privato/form-privato-save.js:341`, `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:248`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:174`) | `${auditRef}__invited` | **client** (valore casuale nella stessa `set`) | campo `auditRef` sull'invito | `onDocumentWritten`, ramo create/reinvito |
+| `invite-accepted` / `invite-rejected` | callable | `${auditRef}__${status}`, oppure `${responseRef}` per i legacy | **backend** | `responseAuditRef` sull'invito (solo legacy) | callable, **dentro** la transazione |
+| `invite-removed` | `delete` dell'invito: i **sette** writer (`Frontend/public/assets/js/modules/privato/form-privato-save.js:298` e `:316`, `Frontend/public/assets/js/modules/azienda/form-azienda-save.js:207` e `:225`, `Frontend/public/assets/js/modules/shared/detail-account-mode.js:153`, `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js:256`, `Frontend/public/assets/js/main-v129.js:456`) | `${auditRef ?? responseAuditRef}__removed` | backend | — | `onDocumentWritten`, ramo delete |
+| `account-archived` / `account-restored` | transazione client sull'Account (`Frontend/public/assets/js/modules/settings/archive-account-service.js:337-346` e `:228-250`) | `${chiaveAccount}__${revision}` | backend (derivato dall'`after`) | — (la `revision` è già scritta) | `onDocumentUpdated` |
+| purge, widget, shared vault, recovery, backup | callable esistenti | `command.operationId` | invariato | invariato | invariato |
+
+### 4. Sequenza di rilascio (ogni passo è un deploy separato, **nessuno autorizzato qui**)
+
+| Ordine | Fetta | Perché in questo ordine |
+|---|---|---|
+| 1 | **M7-AUDIT-3**: helper di payload e di id (nessun produttore attivo) | prepara il terreno senza effetti |
+| 2 | **M7-AUDIT-4**: `respondToInvitation` (evento atomico, `responseAuditRef` per i legacy) | non dipende da `auditRef` e copre già gli inviti legacy |
+| 3 | **M7-AUDIT-5R**: Rules — `'auditRef'` nell'allowlist di creazione, con validazione di forma | **prima dei client**: se i client scrivessero un campo non ammesso, la creazione dell'invito fallirebbe. Aggiungere un campo ammesso è invece innocuo anche se nessun client lo usa ancora |
+| 4 | **M7-AUDIT-5C**: client — `auditRef` nei tre writer di creazione/reinvito | dopo le Rules; il reinvito (update) non richiede modifiche alle Rules |
+| 5 | **M7-AUDIT-5**: trigger `onDocumentWritten` inviti + trigger Account | **dopo il rilascio dei client**: prima non troverebbe `auditRef` e registrerebbe solo la finestra legacy |
+| 6 | **M7-AUDIT-6** retention, **M7-AUDIT-7** MD e vista | invariati |
+
+**Finestra legacy, dichiarata con precisione.** Fra il rilascio dei client (passo 4) e l'attivazione dei trigger (passo 5) nessun invito produce eventi di creazione; dopo il passo 5 li producono solo gli inviti con `auditRef`. La finestra **non si chiude con il deploy dei client**: un client vecchio servito dalla cache dell'app può continuare a creare inviti senza `auditRef` (limite dell'app offline, non di questa fetta), e quei pochi inviti restano senza evento di creazione. Nessuna delle due condizioni è una garanzia: è il prezzo dichiarato di non bloccare mai l'azione dell'utente.
+
+### 5. Casi Emulator (aggiornati)
+
+1. **create** con `auditRef` ⇒ un evento `${auditRef}__invited`; riconsegna dello stesso evento ⇒ ancora uno.
+2. **reinvito** (`set` sullo stesso documento, `auditRef` nuovo) ⇒ evento distinto; il primo documento di registro resta invariato.
+3. **update con `auditRef` invariato** (`senderNotified`, `sharingState: 'suspended'`, `status`+`guestUid` della callable) ⇒ **nessun** evento di creazione, in tre prove separate.
+4. **create senza `auditRef`** (client vecchio) ⇒ nessun evento, nessun errore (finestra legacy).
+5. risposta con `auditRef` ⇒ un evento `${auditRef}__accepted` con `guestUid` solo se accettato; ritentativo dopo il commit ⇒ nessun secondo evento.
+6. risposta legacy ⇒ un evento con `responseRef` e `responseAuditRef` persistito; poi **rimozione** ⇒ un solo evento `${responseAuditRef}__removed`.
+7. legacy mai risposto e poi **rimosso** ⇒ **nessun** evento, nessun errore; legacy mai risposto e poi **reinvitato** ⇒ evento di creazione dalla nuova istanza.
+8. archiviazione ⇒ un `account-archived` con `revision`, `sharingCycle`, `suspendedInvites`; **seconda** archiviazione (nessuna scrittura, `Frontend/public/assets/js/modules/settings/archive-account-service.js:298-303`) ⇒ nessun evento; secondo ripristino (conflitto, `:195`) ⇒ nessun evento; archivia → ripristina → archivia ⇒ tre eventi.
+9. consegna fuori ordine (`__accepted` prima di `__invited`) ⇒ entrambi presenti, nessuna sovrascrittura; ordine di lettura per `at`, `inviteCreatedAt` come indizio causale.
+10. **Rules (M7-AUDIT-5R)**: creazione con `auditRef` valido ⇒ consentita; `auditRef` di tipo o lunghezza errati ⇒ negata; chiave inattesa oltre l'allowlist ⇒ **ancora** negata; creazione completa esistente ⇒ invariata; update del proprietario ⇒ invariato.
+11. nessun dato personale in alcun payload (email, chiave sanificata, id del documento invito, nome Account).
+
+### 6. Limiti aggiornati
+
+- **Il buco residuo** è un solo caso: invito legacy **mai risposto** e **mai reinvitato**, poi eliminato ⇒ nessuna riga. È l'unica transizione senza base opaca possibile, e l'ho preferita a un id inventato che avrebbe prodotto righe indistinguibili.
+- **`auditRef` è scritto dal client**: può essere omesso (client vecchio, anche solo in cache) o riusato (client non conforme) ⇒ riga mancante o persa. Mai un accesso, mai una riga falsa: il client non può scrivere `auditEvents` (`firestore.rules:119-122` e `:126`) e il reinvito scrive un campo solo lato proprietario (`firestore.rules:225`).
+- **`responseAuditRef` è al sicuro dalle Rules** perché lo scrive la callable con l'Admin SDK; il proprietario *potrebbe* riscriverlo con un update non vincolato per campo, con l'effetto limitato di cui sopra. Se si volesse chiudere anche questo, servirebbe una allowlist di campi sull'`update` degli inviti: la propongo come decisione separata (**D-6**), non la includo.
+- **Nessun ordine totale** nel registro, eventi da trigger eventualmente consistenti, `at` autorevole per la retention e non prova di causalità: invariati dal rapporto 3P.
+- **Nessun deploy è autorizzato**: la sequenza di §4 è un piano, e nessuno dei suoi cinque passi è stato eseguito.
+
+**Stato incarico: DA_VERIFICARE** — M7-AUDIT-3P-R1 consegnato da DeepSeek il 2026-09-21; trigger degli inviti corretto in `onDocumentWritten` con macchina a stati `before`/`after` e tre soli casi di nuova istanza, aggiornamenti da ignorare elencati con percorso e riga, legacy distinto in tre stati con la regola unica `auditRef ?? responseAuditRef`, scoperto e dichiarato il vincolo bloccante dell'allowlist di creazione (`firestore.rules:205-223`) con la nuova fetta Rules **M7-AUDIT-5R** e la sequenza Rules → client → trigger; undici casi Emulator, un buco residuo dichiarato e una decisione nuova (D-6); nessun codice, test, commit, push, merge o deploy eseguito.
+
+## Verifica Codex — M7-AUDIT-3P-R1
+
+**APPROVATO per la sola fetta preparatoria M7-AUDIT-3.** La macchina `onDocumentWritten` ora distingue create, update con nuovo `auditRef`, update ordinario e delete; la distinzione dei tre casi legacy è coerente. L'allowlist di creazione in `firestore.rules:205-223` rende necessaria una fetta Rules prima dei client. Nessun deploy separato è autorizzato dal piano.
+
+**Riserva prima dei produttori M7-AUDIT-4/5:** la frase «mai una riga falsa» non è dimostrata: `firestore.rules:225` lascia al proprietario l'update completo dell'invito, quindi può mutare `auditRef`, `responseAuditRef`, `status` e altri campi senza il normale flusso. Un trigger che interpreta ogni cambio di `auditRef` come reinvito potrebbe produrre una riga apparentemente valida senza un vero reinvito. Il registro va descritto come tracciamento best-effort di transizioni Firestore, non prova forense dell'intenzione dell'utente, finché Rules e produttori non vincolano la transizione. Valutare questo insieme a D-6 prima di M7-AUDIT-5; non usarlo per autorizzazioni.
+
+## Incarico Codex — M7-AUDIT-3: helper preparatori del registro
+
+**Stato incarico: PRONTO.** DeepSeek realizzi solo helper puri e test mirati per il formato in allowlist degli eventi e la derivazione di id opachi già disponibili (`auditRef`, `responseAuditRef`, revisione Account), con create-if-absent espresso come contratto testabile senza attivare produttori. Nessuna email, id invito, chiave sanificata, segreto o testo libero nei payload; campi imprevisti rifiutati. Non aggiungere trigger, scritture a `auditEvents`, modifiche a `respondToInvitation`, frontend o Rules in questa fetta. Verificare test mirati e suite pertinente, consegnare un commit locale mirato e rapporto `DA_VERIFICARE`. Nessun push, merge, deploy o dato reale; un incarico attivo alla volta.
+
+## Presa in carico DeepSeek — M7-AUDIT-3: helper preparatori del registro
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base `74e18541`; la verifica di Codex e l'incarico erano nel working tree non committato e sono **conservati** senza alterarne il testo.
+- **Perimetro:** helper puri e test mirati. **Nessun** trigger, scrittura su `auditEvents`, modifica a `respondToInvitation`, frontend o Rules; nessun push, merge, deploy o dato reale.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-AUDIT-3 preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-AUDIT-3: helper preparatori del registro
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. Un solo commit locale mirato; **nessun push, merge o deploy**.
+- **Esito:** due file nuovi, nessun produttore attivato. Il modulo è importato **solo** dal proprio banco (`grep` su tutto il repository: l'unica occorrenza di `audit-event-service` fuori dal modulo è `functions/test/audit-event-service.test.js:14`); `functions/index.js` ha ancora **cinque** riferimenti ad `auditEvents`, invariati.
+
+### 1. Recepimento della riserva di Codex
+
+Accolgo la riserva e **ritiro** la frase «mai una riga falsa» (`docs/DEEPSEEK_COORDINATION.md:3800`). `firestore.rules:225` lascia al proprietario l'update **completo** dell'invito: può riscrivere `auditRef`, `responseAuditRef`, `status` e ogni altro campo senza passare dai flussi normali, quindi un cambio di `auditRef` può produrre una riga che *sembra* un reinvito senza che ci sia stato. Il registro va descritto come **tracciamento best-effort di transizioni Firestore**, non come prova forense dell'intenzione dell'utente, e non va usato per autorizzazioni: l'ho scritto nel preambolo del modulo (`functions/audit-event-service.js:20-23`) perché resti visibile a chi lo userà in M7-AUDIT-5. `D-6` (allowlist di campi sull'`update` degli inviti) resta aperta e va decisa **prima** di M7-AUDIT-5, come chiede Codex.
+
+### 2. Cosa è stato realizzato
+
+`functions/audit-event-service.js` (252 righe, CommonJS, **nessun import di Firebase**: non scrive, non legge, non genera UUID — gli id si derivano da valori già presenti):
+
+| Helper | Riga | Cosa garantisce |
+|---|---|---|
+| `buildAuditEvent(action, fields)` | `functions/audit-event-service.js:117-133` | payload in **allowlist** per le sei azioni nuove; azione fuori elenco ⇒ `AUDIT_EVENT_INVALID`, campo imprevisto o mancante ⇒ `AUDIT_FIELD_INVALID`; payload congelato |
+| tipi dei campi | `functions/audit-event-service.js:29-33` e `:98-111` | identificatori opachi (`^[A-Za-z0-9_-]{1,120}$`), interi non negativi, booleani, `auditRef` in forma UUID, `inviteCreatedAt` in forma ISO rigorosa: **nessun campo di testo libero** |
+| coerenza ospite | `functions/audit-event-service.js:129-131` | `guestUid` ammesso **solo** con `guestKnown: true`: l'indicatore anonimo non può convivere con un identificatore |
+| `inviteRefOf` / `removalRefOf` | `functions/audit-event-service.js:138-153` | base opaca dell'istanza: `auditRef`, per la rimozione `auditRef ?? responseAuditRef`; assente ⇒ `null` (legacy), presente ma malformato ⇒ `AUDIT_REF_INVALID` |
+| `invitedEventId` / `responseEventId` / `removedEventId` | `functions/audit-event-service.js:155-165` | `${base}__invited` / `__accepted|__rejected` / `__removed`; stato fuori elenco o base non opaca ⇒ errore |
+| `accountEventKey` / `accountEventId` | `functions/audit-event-service.js:171-180` | `${chiaveAccount}__${revision}`: `accountId` per i privati, `context_accountId` per le aziende (dove `context` **è** l'aziendaId: `Frontend/public/assets/js/modules/settings/archive-account-service.js:68-69`) |
+| `inviteTransition(before, after)` | `functions/audit-event-service.js:186-208` | macchina a stati di M7-AUDIT-3P-R1 in forma **pura**: `invite-created`, `invite-reinvited` (solo se `auditRef` **cambia**), `invite-removed`, altrimenti `none` con motivo (`AUDIT_REF_MISSING`, `AUDIT_REF_UNCHANGED`, `AUDIT_TRANSITION_INVALID`) |
+| `accountTransition(before, after)` | `functions/audit-event-service.js:210-223` | `account-archived` / `account-restored` dal cambio di `isArchived`; creazione e cancellazione del documento non sono transizioni |
+| `auditWriteDecision(exists, effect)` | `functions/audit-event-service.js:226-238` | **create-if-absent**: con evento presente restituisce `{write: false}` e **nessun** `id`/`payload`, quindi `at` non viene mai sovrascritto; `exists` non booleano ⇒ `AUDIT_DECISION_INVALID` |
+
+Non ho modificato `package.json`: `test:functions-security` esegue già ESLint su tutta la cartella `functions` e `node --test functions/test/*.test.js`, che include il nuovo banco per glob. Il modulo non è elencato nella catena esplicita di `node --check`, che è **parziale per costruzione** (non comprende, per esempio, `shared-vault-service.js`): la sintassi è coperta dal `require` del banco e da ESLint.
+
+### 3. Prove
+
+`functions/test/audit-event-service.test.js` (234 righe, dodici prove):
+
+| Caso | Riga |
+|---|---|
+| payload in allowlist per tutte e sei le azioni, chiavi esatte | `functions/test/audit-event-service.test.js:32` |
+| azione ignota, campo imprevisto (`nomeAccount`, `at`) e campo mancante rifiutati | `functions/test/audit-event-service.test.js:58` |
+| email e testo libero respinti da ogni campo; payload validi senza stringhe personali | `functions/test/audit-event-service.test.js:70` |
+| limite dichiarato: un id opaco ben formato non è distinguibile (vedi §4) | `functions/test/audit-event-service.test.js:89` |
+| tipi e valori incoerenti (`cycle` negativo, frazionario o stringa, ISO non rigoroso, `neutralized` stringa, `guestUid` senza `guestKnown` e viceversa) | `functions/test/audit-event-service.test.js:104` |
+| `AUDIT_PAYLOAD_KEYS` è esattamente l'unione dei campi ammessi | `functions/test/audit-event-service.test.js:118` |
+| basi opache: `auditRef` preferito, ripiego `responseAuditRef`, assente ⇒ `null`, malformato ⇒ errore | `functions/test/audit-event-service.test.js:125` |
+| id distinti per basi e stati diversi; nessun id contiene l'id invito | `functions/test/audit-event-service.test.js:138` |
+| chiave Account privata e aziendale; revisioni distinte ⇒ id distinti | `functions/test/audit-event-service.test.js:151` |
+| `inviteTransition`: create, legacy senza base, reinvito, update ordinario, **risposta legacy che non è un reinvito**, delete con `auditRef`, delete con `responseAuditRef`, delete senza base, entrambi assenti | `functions/test/audit-event-service.test.js:163` |
+| `accountTransition`: archiviazione, ripristino, invariato, creazione, cancellazione | `functions/test/audit-event-service.test.js:194` |
+| `auditWriteDecision`: evento assente ⇒ si scrive; evento presente ⇒ nessun effetto e nessun `payload` | `functions/test/audit-event-service.test.js:209` |
+
+| Verifica | Risultato |
+|---|---|
+| `node --test functions/test/audit-event-service.test.js` | **12/12**, exit 0 |
+| `npm run test:functions-security` (include ESLint su `functions` e `node --test functions/test/*.test.js`) | **154/154**, `fail 0` (erano 142: +12 di questa fetta) |
+| **`npm test` completo (una sola esecuzione)** | **exit 0** — 46 invocazioni di script, 1860 `✔`, nessun `✖`/`not ok`/`AssertionError` (2951 righe) |
+| `node functions/node_modules/eslint/bin/eslint.js --config functions/eslint.config.js functions/audit-event-service.js functions/test/audit-event-service.test.js` | exit 0 |
+| `git diff --check` | pulito |
+
+### 4. Limite dichiarato, emerso scrivendo le prove
+
+Due tentativi di prova **non** potevano fallire come avevo previsto, e ho corretto la pretesa invece del test: la chiave sanificata di un'email (`mario_rossi_example_invalid`) e l'id del documento invito (`account-1_mario_rossi_example_invalid`) sono stringhe `[A-Za-z0-9_-]`, quindi **sintatticamente identiche a un identificatore opaco**. Il validatore non può distinguerle e non pretende di farlo: la prova `functions/test/audit-event-service.test.js:89` **dimostra** che vengono accettate, e la garanzia reale è più stretta di come l'avevo scritta:
+
+- **garantito**: nessuna email (contiene `@`), nessun testo libero, nessun valore non validato per tipo, nessun campo fuori allowlist, nessun id derivato dall'id invito (gli id si costruiscono solo da `auditRef`/`responseAuditRef`/`revision`);
+- **non garantito dal modulo**: che il chiamante non passi come `accountId` una stringa che *contiene* la chiave sanificata. È disciplina dei produttori di M7-AUDIT-5, che devono leggere `accountId`, `ownerId` e `cycle` dai campi del documento e **mai** dall'id del documento. Lo dichiaro qui perché resti un obbligo verificabile, non un'assunzione.
+
+### 5. Cosa questa fetta non fa
+
+Nessun trigger, nessuna scrittura su `auditEvents`, nessuna modifica a `respondToInvitation`, al frontend o alle Rules; nessun produttore importa il modulo. Restano da fare, in ordine: **M7-AUDIT-4** (callable), **M7-AUDIT-5R** (Rules: `auditRef` nell'allowlist di creazione, `firestore.rules:205-223`), **M7-AUDIT-5C** (client, tre writer), **M7-AUDIT-5** (trigger `onDocumentWritten` e Account), **M7-AUDIT-6** (retention), **M7-AUDIT-7** (MD e vista). `D-6` va decisa prima di M7-AUDIT-5.
+
+**Stato incarico: DA_VERIFICARE** — M7-AUDIT-3 consegnato da DeepSeek il 2026-09-21; helper puri `functions/audit-event-service.js` (payload in allowlist, id opachi da `auditRef`/`responseAuditRef`/`revision`, classificatori di transizione, create-if-absent senza sovrascrittura di `at`) con dodici prove mirate `functions/test/audit-event-service.test.js`, `test:functions-security` 154/154 e **`npm test` completo verde (exit 0)**, riserva di Codex recepita con il registro ridefinito come tracciamento best-effort e un limite del validatore dichiarato e provato, nessun produttore attivato, nessuna modifica a Rules/frontend/callable, un commit locale mirato e nessun push, merge o deploy.
