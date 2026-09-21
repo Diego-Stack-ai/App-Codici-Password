@@ -56,7 +56,7 @@ Il collaudo del 09/09/2026 attesta il percorso riuscito descritto sopra. La rele
 Sul commit applicativo indicato, `executeBackupRestore` applica transazioni separate fino a 400 record e carica gli allegati dopo i record. Due prove isolate del client, con servizi Firebase simulati e dati fittizi, confermano che un errore al secondo blocco lascia il primo già accettato e che un errore Storage arriva dopo l’applicazione del record allegato. Il backend conferma nel codice l’atomicità per singolo blocco; non è una transazione globale.
 
 - [ ] progettare e collaudare staging, ripresa o compensazione fra blocchi e allegati;
-- [ ] **PARZIALE (21/09/2026)** verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima: su emulatori reali e dati sintetici, una **nuova** sessione di ripristino dello stesso file classifica i record già applicati — compreso il **metadato dell'allegato i cui byte mancano** — come «invariato» e **non riprova nulla** (`BACKUP_RESTORE_NOTHING_SELECTED`, zero caricamenti): il riferimento resta senza byte anche quando un'altra parte del ripristino riesce. Osservati anche il blocco nella stessa sessione (`BACKUP_STORAGE_RETRY_BLOCKED`) e il fatto che la ricevuta precedente **non** impedisce una nuova esecuzione. **Non** esercitati: collisioni e modifiche intervenute **dopo** l'anteprima, backup di grandi dimensioni, iPhone/Windows. Dettagli nella sezione «Nuovo tentativo dopo un ripristino interrotto»; gate lasciato **aperto**.
+- [ ] **PARZIALE (21/09/2026)** verificare retry fra esecuzioni diverse, collisioni e modifiche intervenute dopo l’anteprima: **retry** — su emulatori reali e dati sintetici una nuova sessione dello stesso file classifica i record già applicati, compreso il metadato dell'allegato i cui byte mancano, come «invariato» e non riprova nulla (`BACKUP_RESTORE_NOTHING_SELECTED`, zero caricamenti), mentre la ricevuta precedente non impedisce una nuova esecuzione se resta un record selezionabile (sezione «Nuovo tentativo dopo un ripristino interrotto»); **modifiche dopo l'anteprima** — il controllo di versione sul percorso reale rifiuta il blocco con `stale-preview` senza scrivere dati, ricevute o audit e senza caricamenti, con **una parzialità dichiarata** nel flusso a più blocchi, dove il rifiuto lascia applicati i blocchi precedenti (sezione «Modifica intervenuta dopo l'anteprima»). **Non** esercitati: iPhone/Windows, backup di grandi dimensioni, sostituzione confermata su collisioni multiple. Gate complessivo lasciato **aperto**.
 - [ ] **NON CHIUSA (21/09/2026)** dimostrare assenza di riferimenti orfani e confronto finale su copia non produttiva: su emulatori reali, con dati sintetici e il percorso reale `executeBackupRestore`, un **upload fallito dopo l'applicazione dei record** lascia il metadato dell'allegato in Firestore (che cita il percorso) **senza** i byte in Storage — riferimento orfano **osservato**, non dedotto. Dettagli e controllo positivo nella sezione qui sotto; gate lasciato **aperto**.
 - [ ] misurare memoria e dimensioni su iPhone e Windows.
 
@@ -94,9 +94,47 @@ Prova su **emulatori reali** (Firestore + Storage), dati interamente sintetici, 
 
 **Controllo per mutazione.** Rendendo sempre vero il filtro sugli «invariato» (`entry.status !== 'unchanged'` → `entry.status === entry.status`), il primo caso diventa **rosso** (`BACKUP_COLLISIONS` invece di `BACKUP_RESTORE_NOTHING_SELECTED`) e gli altri due restano verdi; il file di produzione è poi stato ripristinato con hash identico a `HEAD` (`git hash-object` = `1591885ed5a52ba3eb966b80217a8d5a9a55f339`).
 
-**Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, le **collisioni** e le **modifiche intervenute dopo l'anteprima** (`stale-preview`), i ripristini con più allegati, né l'interfaccia grafica (le caselle disabilitate sono lette dal codice, non da un browser).
+**Cosa resta dedotto.** Non sono esercitati iPhone/Windows, i backup di grandi dimensioni, i ripristini con più allegati, né l'interfaccia grafica (le caselle disabilitate sono lette dal codice, non da un browser). Le **collisioni** e le **modifiche intervenute dopo l'anteprima** sono esercitate più avanti, nella sezione «Modifica intervenuta dopo l'anteprima».
 
 **Nessuna correzione introdotta.** Come richiesto non ho introdotto retry automatici, staging, compensazione, migrazione o nuove politiche: il difetto è registrato e il gate resta **aperto** (nuove domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_NUOVA_SESSIONE.md`, commit separato).
+
+## Modifica intervenuta dopo l'anteprima (verifica 21/09/2026)
+
+Controllo di versione (CAS) osservato sul percorso **reale end-to-end** — client di produzione (`prepareBackupRestore` + `executeBackupRestore`) e callable reale `restoreBackupChunk` — su **emulatori reali** (Firestore + Storage) con dati sintetici: `tests/restore-stale-preview.emulator.test.mjs` (3 casi), runner `scripts/run-restore-stale-emulators.mjs`.
+
+### Prove già presenti prima di questa verifica (censimento richiesto)
+
+| Dove | Che cosa prova già |
+|---|---|
+| `functions/test/backup-receipt-handler.test.js:88-120` | handler con store **in memoria**: creazione, cancellazione e cambiamento al nanosecondo dopo l'anteprima → `stale-preview`, nessuna scrittura; il cambio del **Profilo** blocca l'intero blocco; `overwriteExisting` non aggira il controllo; il retry identico precede il CAS |
+| `experiments/persistent-vault-shell/firebase-backup.test.mjs:97-116` | lato **backend su emulatore**: `profile-change`, `account-created`, `account-deleted` dopo l'anteprima → `stale-preview` con `staleCount`/`staleIndexes`, snapshot invariati, nessuna ricevuta e nessun audit |
+| `tests/backup-restore-session.test.mjs:173-188` | lato **client con callable simulata**: 801 record, blocco obsoleto al primo o al secondo, `progress` accurato, piano invalidato (`BACKUP_PLAN_INVALID`), zero upload |
+| `tests/backup-restore-ui.test.mjs:192` | messaggio della UI quando il servizio segnala `BACKUP_PREVIEW_STALE` (servizio simulato) |
+| `docs/AUDIT_VAULT_SESSION_P0.md:556` | descrizione del controllo sulla base `dc985f64` (versione e classificazione dalla stessa istantanea, applicazione condizionata a tutte le versioni del blocco) |
+
+**Mancava** una prova end-to-end con la modifica concorrente che avviene **nel database** fra l'anteprima del client e la sua applicazione: è quella aggiunta qui. Le prove esistenti restano valide e non sono state modificate.
+
+### Esiti osservati
+
+| Caso | Esito |
+|---|---|
+| **Un blocco, modifica concorrente** (creazione del record destinazione dopo l'anteprima) | **rifiuto**: `BACKUP_PREVIEW_STALE` con `confirmedChunks 0`, `attemptedChunks 1`, `mayHaveApplied false`; il valore concorrente **sopravvive**; nessun record creato, **zero** upload (benché un allegato fosse selezionato), **nessuna** ricevuta, **nessun** audit; il piano è invalidato (`BACKUP_PLAN_INVALID`) |
+| **Controllo positivo** (stessa selezione, nessuna modifica concorrente) | applicato: 2 record e **1 allegato**, byte presenti e identici al backup, 1 ricevuta, 1 audit |
+| **Flusso a più blocchi** (403 record → blocchi da 400 e 3; modifica concorrente su un record del **secondo** blocco) | **parzialità osservata**: il primo blocco è applicato (400 record, 1 ricevuta, 1 audit) e il secondo è rifiutato con `stale-preview` (`confirmedChunks 1`, `mayHaveApplied true`); il valore concorrente sopravvive e la fase Storage **non parte** (`0` upload). Poiché il metadato dell'allegato cade nel **primo** blocco, il rifiuto lascia in Firestore un **riferimento senza byte** creato dal controllo di versione stesso (`storage/object-not-found`), non da un upload fallito |
+
+**Dal codice:** `staleRestoreIndexes` confronta `expectedVersion` con la versione corrente di ogni record **del blocco** e la callable restituisce `stale-preview` **prima** di qualunque scrittura, ricevuta o audit di quel blocco; il client interrompe i blocchi successivi e la fase Storage, e invalida il piano. La verifica è **per blocco**, non globale: i blocchi già applicati restano.
+
+### Controllo per mutazione
+
+Reso sempre vuoto l'esito del controllo (`staleRestoreIndexes` che non segnala più alcun indice), il primo e il terzo caso diventano **rossi** (il valore concorrente verrebbe sovrascritto e il secondo blocco applicato) e il controllo positivo resta verde; `functions/backup-restore-preview.js` è poi stato ripristinato con hash identico a `HEAD` (`git hash-object` = `00cf4dacbe407eb39dda1df7865d05e3747be739`).
+
+### Cosa resta dedotto o non esercitato
+
+iPhone/Windows, backup di grandi dimensioni, blocchi contenenti **più** allegati, sostituzione confermata su collisioni multiple, la UI in un browser (il messaggio è provato con un servizio simulato) e l'esito su un blocco intermedio di un flusso con **più di tre** blocchi. Il rifiuto per modifica concorrente **non** è una compensazione: non annulla i blocchi già applicati.
+
+### Nessuna correzione introdotta
+
+Come richiesto non ho introdotto politiche, compensazioni, staging o retry: comportamento attuale descritto e parzialità dichiarata. Il gate M8 resta **aperto** e **non** è concluso da questo caso (nuove domande per Diego in `docs/M8_DOMANDE_RIPRISTINO_CAS_PARZIALE.md`, commit separato).
 
 ## Protezioni candidate della sessione di ripristino — 13/09/2026
 
