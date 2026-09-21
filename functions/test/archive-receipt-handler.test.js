@@ -17,7 +17,7 @@ const auditPath = 'users/owner/auditEvents/operation';
 const bound = status => ({...receipts.createArchivePurgeBinding({uid: 'owner', command: policy.validatePurgeCommand(command)}), status});
 
 function fixture({missing = false, beforeFinal, failAfterDelete = false, attachments = [], storageFailure = null} = {}) {
-  const states = new Map(), writes = [], reads = [];
+  const states = new Map(), writes = [], reads = [], recursiveDeletePaths = [];
   const counts = {storage: 0, recursiveDelete: 0, transactions: 0};
   // Synthetic Storage recorder: the fixture lists real attachment metadata and
   // logs every bucket.file(path).delete, so the destructive branch is exercised.
@@ -38,6 +38,7 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false, attachm
   const store = {collection: ref, doc: ref,
     recursiveDelete: async reference => {
       counts.recursiveDelete++; storageOrder.push('recursiveDelete'); states.delete(reference.path);
+      recursiveDeletePaths.push(reference.path);
       if (failNextDelete) { failNextDelete = false; throw new Error('synthetic interruption after deletion'); }
       if (beforeFinal) beforeFinal(states);
     },
@@ -66,7 +67,7 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false, attachm
       }})})}; },
     FieldValue: {serverTimestamp: () => 'synthetic-time'}});
   vm.runInContext(ownerGuard + handler, context);
-  return {states, counts, writes, reads, storageDeletes, storageOrder,
+  return {states, counts, writes, reads, storageDeletes, storageOrder, recursiveDeletePaths,
     set storageFailure(value) { failingStoragePath = value; },
     run: (data = command) => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data})};
 }
@@ -169,6 +170,29 @@ test('listed attachment bytes are deleted, in order, before the recursive deleti
   assert.equal(f.states.has(recordPath), false);
   assert.equal(f.states.get(receiptPath).status, 'purged');
   assert.equal(f.states.has(auditPath), true);
+});
+
+// M7-T13: censimento esercitato di che cosa il purge lascia e che cosa elimina.
+// La prova sugli emulatori reali sta in `tests/purge-retention-effects.emulator.test.mjs`.
+
+test('il purge elimina il solo documento Account e lascia cestino, ricevute e registro', async () => {
+  const f = fixture();
+  f.states.set('users/owner/trash/record', {deletedAt: 'synthetic-date', purgeAfterMs: 123});
+  f.states.set(legacyPath, {status: 'processing', accountId: 'unrelated'});
+  f.states.set(receiptPath, bound('processing'));
+  const result = await f.run();
+  assert.equal(result.status, 'purged');
+  assert.deepEqual(f.recursiveDeletePaths, [recordPath],
+    'la cancellazione ricorsiva agisce sul solo documento Account');
+  assert.deepEqual(f.states.get('users/owner/trash/record'), {deletedAt: 'synthetic-date', purgeAfterMs: 123},
+    'il cestino legacy non è toccato, scadenza dichiarata compresa');
+  assert.equal(f.states.get(legacyPath).accountId, 'unrelated',
+    'la ricevuta legacy non è né cancellata né riscritta');
+  assert.equal(f.states.get(receiptPath).status, 'purged',
+    'la ricevuta di idempotenza resta come prova di esito');
+  // `{...}` perché l'oggetto nasce in un realm `vm` diverso da quello del test.
+  assert.deepEqual({...f.states.get(auditPath)}, {action: 'account-purged', actorUid: 'owner', accountId: 'account',
+    context: 'private', at: 'synthetic-time'}, 'l’evento di audit del purge resta nel registro');
 });
 
 test('an attachment path outside the Account prefix aborts before any Storage deletion', async () => {
