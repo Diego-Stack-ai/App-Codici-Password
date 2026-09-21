@@ -47,6 +47,8 @@ Per chiudere il requisito di retention della baseline occorre stabilire, senza a
 
 La cifratura riduce l’esposizione ma non giustifica la conservazione illimitata.
 
+**Censimento collegato (M7-R1, 21/09/2026):** [`M7_RETENTION_CENSIMENTO.md`](./M7_RETENTION_CENSIMENTO.md) documenta il comportamento attuale di cestino, cronologia/audit, allegati e backup con citazioni verificabili, propone opzioni di politica e una matrice di test sintetici e raccoglie le domande decisionali. **Non decide** durate, eccezioni legali o cancellazioni definitive e non approva alcuna retention.
+
 
 ## Riesame dopo evoluzione Profili — 13/09/2026
 
