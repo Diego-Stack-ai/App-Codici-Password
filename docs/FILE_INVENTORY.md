@@ -312,7 +312,7 @@ File censiti: **834**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 899987 | 6152 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 909744 | 6230 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -332,7 +332,7 @@ File censiti: **834**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
 | `docs/M7_DOMANDE_T27_HARD_DELETE.md` | MD | 4089 | 68 | Documentazione: M7 DOMANDE T27 HARD DELETE. |
 | `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 92030 | 574 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 97803 | 604 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
