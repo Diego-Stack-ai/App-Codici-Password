@@ -4023,3 +4023,124 @@ Gli id degli inviti (`<uuid>__invited`, `__accepted`, `__rejected`, `__removed`)
 - Restano valide le dichiarazioni di M7-AUDIT-3: registro come tracciamento **best-effort**, validatore che non distingue una chiave sanificata da un id opaco (obbligo dei produttori), `D-6` da decidere prima di M7-AUDIT-5.
 
 **Stato incarico: DA_VERIFICARE** — M7-AUDIT-3-R2 consegnato da DeepSeek il 2026-09-21; il tipo dell'Account è ora un parametro esplicito del descrittore (`ACCOUNT_TYPES`, `accountIdentityOf`) invece di essere dedotto da `context`, il caso decisivo richiesto da Codex è provato con stesso `accountId` e stessa revisione, la prova vacua di R1 è stata riconosciuta e sostituita, i limiti sono riverificati sui due rami (privato massimo 145, aziendale con confine esatto a 160 e rifiuto a 161), `test:functions-security` 159/159 e **`npm test` completo verde (exit 0)**, nessun campo nuovo nel payload, nessun produttore attivato, un commit locale mirato e nessun push, merge o deploy.
+
+## Verifica Codex — M7-AUDIT-3-R2
+
+**APPROVATO.** Nel commit `0d4c04d2` `accountEventId` riceve ora un descrittore con `type` esplicito; `privato:x:1` e `azienda:privato:x:1` sono distinti. Il test riproduce esattamente stesso Account id e revisione, con companyId `privato`; il separatore `:` è escluso dai componenti, e il limite di 160 caratteri è verificato sui due rami. Nessun produttore importa ancora gli helper. DeepSeek riferisce `test:functions-security` 159/159 e `npm test` verde; Codex ha revisionato il diff senza ripetere la suite completa. Nessun push/deploy.
+
+## Incarico Codex — M7-AUDIT-4P: contratto dell'evento di risposta
+
+**Stato incarico: PRONTO.** Prima di modificare `respondToInvitation`, DeepSeek verifichi in sola lettura il conflitto fra due requisiti del piano: evento di risposta scritto nella stessa transazione (azione ed evento atomici) e audit che non deve mai bloccare l'azione se la scrittura dell'evento fallisce. Analizzare la callable e proporre una scelta coerente con MD sicurezza e M7, distinguendo errori di validazione payload, collisione id, errore Firestore e retry; indicare cosa vede l'utente e cosa finisce nei log, senza segreti. Verificare anche la compatibilità degli inviti legacy senza `auditRef` e delle Rules sul campo `responseAuditRef`. Consegnare nel solo file di coordinamento una proposta, casi Emulator e limiti con `DA_VERIFICARE`; nessun codice, test, commit, push, merge, deploy o dato reale. Un incarico attivo alla volta.
+
+## Presa in carico DeepSeek — M7-AUDIT-4P contratto dell'evento di risposta
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; base `0d4c04d2`; l'incarico di Codex era nel working tree non committato ed è **conservato** senza alterarne il testo.
+- **Perimetro:** analisi **in sola lettura** e proposta. **Nessun** codice, test, commit, push, merge, deploy o dato reale; nessun altro gate avviato.
+
+**Stato incarico: IN_LAVORAZIONE** — M7-AUDIT-4P preso in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — M7-AUDIT-4P contratto dell'evento di risposta
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex. **Nessun commit**: l'incarico chiede solo la proposta.
+- **Esito:** il conflitto è **reale e non dissolvibile in astratto**: atomicità e «non bloccare mai» sono alternative per ogni singola scrittura. La proposta lo rende però quasi irrilevante, restringendo il blocco alla sola classe che non possiamo controllare, e lascia a Diego/Codex la scelta di principio (**D-7**).
+
+### 1. Il conflitto, enunciato con precisione
+
+Il contratto M7-AUDIT-1 §g dice due cose che si toccano: *«l'assenza [dell'evento] non deve mai autorizzare, revocare o bloccare un accesso. Dove l'atomicità è disponibile (callable) l'evento si scrive dentro la transazione»* (`docs/DEEPSEEK_COORDINATION.md:3313`), e l'incarico ora chiede che l'audit non blocchi l'azione **se la scrittura dell'evento fallisce**. In una transazione queste due frasi non possono valere entrambe: se la scrittura dell'evento fallisce, o fallisce anche la risposta (atomico) o la risposta è già committata e l'evento è perso (non atomico). Non c'è una terza via logica: la scelta è **quale dei due mali** si accetta, e per quali classi di errore.
+
+Nota di contesto: `respondToInvitation` non ha un `operationId` proprio e non è idempotente per contratto; la sua unica difesa contro la doppia risposta è `invite.status !== 'pending'` (`functions/index.js:1207`), che scatta **prima** di qualunque scrittura. La transazione scrive due documenti: Account (`functions/index.js:1257`) e invito (`functions/index.js:1264`).
+
+### 2. Le classi di errore, distinte
+
+| Classe | Origine concreta | Chi la può causare | Controllabile da noi? |
+|---|---|---|---|
+| **E1 validazione payload** | `context`/`aziendaId` malformato nell'invito, `cycle` non intero, `guestUid` incoerente con `guestKnown` | un invito scritto male o da un client ostile: i valori vengono **dal documento**, non dal codice nuovo | **sì**: si costruisce e si valida il payload con gli helper puri, e un errore è un valore di ritorno, non un'eccezione fatale |
+| **E2 collisione id** | il documento evento esiste già a quell'id | di fatto impossibile oggi: `functions/index.js:1207` impedisce la seconda risposta sulla stessa istanza, e un reinvito cambia `auditRef` | **sì**: create-if-absent (`functions/audit-event-service.js:274-289`) non scrive e non fallisce |
+| **E3 errore Firestore** | contesa, `ABORTED`, timeout, quota, regole | infrastruttura | **no**: è la stessa classe che già oggi può far fallire la risposta |
+| **E4 ritentativo** | la callable rieseguita (piattaforma, o il client che riprova) | piattaforma o utente | **sì**: già governato da `functions/index.js:1207` e, per l'evento, dal create-if-absent |
+
+### 3. Le opzioni e la matrice delle garanzie
+
+| Opzione | Dove nasce l'evento | «L'audit non blocca mai» | «Il registro non mente» | Costo |
+|---|---|---|---|---|
+| **A — evento dentro la transazione** (piano attuale) | dentro la transazione della callable | **no**, se E3 aborta: fallisce anche la risposta (l'utente ritenta) | **sì**: nessun evento senza risposta, nessuna risposta senza evento | una scrittura in più in una transazione che ne già fa due; lettura in più nella fase di lettura |
+| **B — evento dopo la transazione, nella callable** | dopo il commit | **sì**, se l'errore viene inghiottito | no: la risposta è committata e l'evento può mancare per sempre | se l'errore **non** viene inghiottito, l'utente vede un errore **dopo** una risposta riuscita e ritenta senza capire: peggio di A |
+| **D — evento da trigger sull'invito** | trigger `onDocumentWritten` su `invites/{inviteId}` che riconosce `status` da `pending` a `accepted`/`rejected` | **sì, in assoluto**: la callable non cambia di una riga | no: evento eventualmente consistente, e un trigger definitivamente fallito perde la riga | una quarta fetta di trigger, e il marcatore `responseAuditRef` persistito dal trigger stesso (idempotenza sul proprio `event.id`/marcatore) |
+
+**B è dominata da D**: o l'errore emerge (e allora l'utente riceve un errore per un'azione già avvenuta, il caso peggiore di tutti), o viene inghiottito — e allora è esattamente D, ma con la callable sporcata da un secondo write e dalle sue letture. Non ha senso proporla.
+
+### 4. Proposta: A con la sola classe controllabile resa non bloccante
+
+Raccomando **A**, con una precisazione che ne elimina la parte peggiore:
+
+1. **prima** di `runTransaction`: si genera una volta `responseRef` (`crypto.randomUUID()`), stabile per tutta l'invocazione, e lo si usa **solo** se l'invito non ha un `auditRef` valido;
+2. nella **fase di lettura** della transazione (dopo `functions/index.js:1204` e `:1216`, prima della prima scrittura a `:1257`) si legge anche il documento evento calcolato; l'identità dell'invito si legge con una variante **leniente** che, se `auditRef` è assente **o malformato**, ripiega su `responseRef` senza lanciare — così un marcatore corrotto non aborta la risposta;
+3. la costruzione del payload sta in un `try/catch` **locale** (nessun I/O, non può far fallire la transazione): se lancia, si annota `auditSkipped = <codice stabile>` e **si prosegue** con la risposta — è la classe E1, e non deve bloccare;
+4. le scritture restano quelle di oggi più, **solo** se non saltato e non già presente, `transaction.set(evento, {…payload, at: FieldValue.serverTimestamp()})`; nel caso legacy/fallback si aggiunge `responseAuditRef` alla patch dell'invito (`functions/index.js:1264`);
+5. il valore di ritorno **non cambia** (`{ok: true, status}`, `functions/index.js:1270`) e il client non vede nulla di diverso.
+
+**Regola risultante, da scrivere nel MD quando si implementa:** *un errore controllabile dell'audit non blocca mai l'azione; un errore infrastrutturale blocca azione ed evento insieme, perché il registro non deve contenere righe di azioni non avvenute.* Con A il registro resta **vero**; con D resterebbe **incompleto**. Il prezzo di A è dichiarato: in un caso raro e transitorio l'utente deve ritentare, esattamente come oggi può dover ritentare per la contesa sulla risposta stessa.
+
+Se Diego/Codex preferiscono la garanzia **assoluta** di non blocco, la scelta è **D**, non B: la callable resta intoccata e l'evento arriva dal trigger (che è già in programma per M7-AUDIT-5, quindi il costo è una condizione in più nella sua macchina a stati). Va decisa prima di M7-AUDIT-4 → **D-7**.
+
+### 5. Cosa vede l'utente e cosa finisce nei log
+
+| Esito | Utente | Log di piattaforma (senza segreti) |
+|---|---|---|
+| evento scritto | toast di successo e, se accettato, ricarica (`Frontend/public/assets/js/main-v129.js:575-579`) | niente |
+| E1 saltato | **nessun cambiamento**: successo normale | **una** riga `console.warn('[AUDIT] evento saltato')` con `code` stabile, `action` (`invite-accepted`/`invite-rejected`), `accountId` e `context` opachi, `correlationId: responseRef` |
+| E2 già presente | **nessun cambiamento** | opzionale a livello debug; nessun errore |
+| E3 abort | l'errore esistente: `error_generic` o i due messaggi mappati (`Frontend/public/assets/js/main-v129.js:586-592`); l'utente ritenta | l'errore della callable, come oggi |
+| E4 ritentativo dopo commit | `failed-precondition` (`functions/index.js:1207`) e il messaggio odierno di conflitto (`Frontend/public/assets/js/main-v129.js:590`) | niente di nuovo |
+
+**Cosa non deve mai finire nei log:** l'email, la chiave sanificata e **l'id del documento invito**, che la contiene. Il `correlationId` opaco (`responseRef`) serve proprio a correlare senza rivelare. Segnalo un **contro-esempio già presente**: `functions/index.js:1392` logga `event.params.inviteId` sulle notifiche fallite, quindi oggi i log di piattaforma contengono la chiave sanificata del destinatario. Non è materia di questa fetta (l'incarico è la sola risposta), ma va corretto in M7-AUDIT-7 o in un incarico dedicato, e comunque il nuovo codice non deve copiare quel pattern.
+
+### 6. Inviti legacy senza `auditRef` e Rules su `responseAuditRef`
+
+- **Legacy**: la risposta resta registrabile perché la scrittura originaria è la callable stessa. Con A: `responseRef` generato prima della transazione, evento a `${responseRef}__${status}`, e `responseAuditRef` persistito **nella stessa transazione** solo quando manca un `auditRef` valido; la rimozione successiva userà `${responseAuditRef}__removed` (M7-AUDIT-3P-R1 §2). Un marcatore **malformato** non aborta: si ripiega su `responseRef` e **non** si tocca `auditRef`.
+- **Rules**: nessun ostacolo e nessuna modifica necessaria. La callable usa l'Admin SDK, che **ignora** le Rules; il destinatario non può aggiornare l'invito (`firestore.rules:204` è sola lettura per `isRecipient()`, l'unico `allow update, delete` è `isInviteOwner()` a `firestore.rules:225`), e l'allowlist di **creazione** (`firestore.rules:205-223`) non c'entra perché `responseAuditRef` viene aggiunto **in update** dal backend. Resta il limite noto: il proprietario, con l'update non vincolato per campo, potrebbe riscriverlo (**D-6**).
+
+### 7. Vincoli di implementazione da rispettare (verificati)
+
+1. **Letture prima delle scritture**: Firestore lo impone nelle transazioni; la lettura del documento evento va quindi nella fase di lettura, prima di `functions/index.js:1257`. È un vincolo reale, non stilistico.
+2. **Il banco attuale non lo verificherebbe**: `functions/test/respond-invitation-archived.test.js:23-55` è una transazione finta fedele (versioni di lettura, ritentativo fino a 5 tentativi a `:41-42`, scritture accantonate e applicate solo al commit a `:60-64`), ma **non** applica la regola «prima le letture, poi le scritture»: una `get` dopo una `set` funzionerebbe nel banco e fallirebbe in produzione. La fetta M7-AUDIT-4 deve quindi o aggiungere al banco un'asserzione sull'ordine (`reads` prima di ogni scrittura accantonata: l'array `reads` e la lista accantonata sono già esposti, `functions/test/respond-invitation-archived.test.js:73`) o coprire il caso nell'Emulator.
+3. **Nessun cambio al valore di ritorno** e nessuna nuova lettura fuori dalla transazione (l'invito si legge già lì).
+4. **E1 non deve dipendere dallo stato**: il salto è deterministico e non altera `status`, `sharedWith`, `sharedWithUids`, `acceptedCount`, `visibility` né il documento invito (a parte `responseAuditRef` nel caso legacy).
+
+### 8. Casi di prova proposti (per M7-AUDIT-4, non eseguiti qui)
+
+Sul banco reale di `respondToInvitation` (`functions/test/respond-invitation-archived.test.js`), da estendere con la collezione degli eventi:
+
+1. invito con `auditRef` valido e `accepted` ⇒ evento `${auditRef}__accepted` con `guestUid`, `at` server, **tre** scritture (Account, invito, evento) e `reads` che include il documento evento;
+2. idem con `rejected` ⇒ `${auditRef}__rejected` e `guestKnown: false` senza `guestUid`;
+3. invito **legacy** ⇒ evento `${responseRef}__accepted` e `responseAuditRef` nella patch dell'invito;
+4. **E1**: invito con `aziendaId` malformato (o `cycle` non intero) ⇒ la risposta **riesce**, nessun evento, invito e Account identici al caso valido, **una** riga di log con il codice stabile;
+5. **E1 con marcatore corrotto** (`auditRef: 'non-uuid'`) ⇒ nessun abort, fallback su `responseRef`, `auditRef` invariato;
+6. **E2**: documento evento già presente all'id calcolato ⇒ nessuna sovrascrittura (payload e `at` seminati invariati) e risposta riuscita;
+7. **E3**: `hook` che fa lanciare la scrittura/commit ⇒ né risposta né evento (invariante di consistenza: nessuna riga per un'azione non avvenuta);
+8. **E4**: seconda invocazione dopo un commit ⇒ `failed-precondition` e **zero** scritture;
+9. **ordine letture/scritture** ⇒ nessuna `get` dopo la prima scrittura accantonata (asserzione nuova da aggiungere al banco);
+10. **nessun segreto**: l'evento e la riga di log non contengono email, chiave sanificata né id dell'invito;
+11. se si scegliesse **D**: un aggiornamento di `status` con `auditRef` invariato produce l'evento di risposta **e non** un `invite-reinvited` (non regressione della macchina di M7-AUDIT-3P-R1, `functions/audit-event-service.js:234-256`).
+
+### 9. Decisioni aperte e limiti
+
+- **D-7 (da decidere prima di M7-AUDIT-4)**: A con la regola di §4, oppure D se si vuole il «non bloccare» assoluto. La mia raccomandazione è **A**, perché il registro non deve contenere righe di azioni non avvenute e perché il blocco residuo è della stessa natura di quelli che la risposta già ha.
+- **D-6** resta aperta e ora ha una conseguenza in più: con l'update dell'invito non vincolato per campo, il proprietario può alterare `responseAuditRef` (`firestore.rules:225`), quindi l'id della futura rimozione è manomettibile — sempre con effetti limitati a una riga del proprio registro.
+- **Limiti dichiarati**: nessun codice eseguito; la mappa degli errori e dei percorsi è statica e citata riga per riga; non ho letto dati reali; la scelta fra A e D è di prodotto e non la prendo da solo.
+
+**Stato incarico: DA_VERIFICARE** — M7-AUDIT-4P consegnato da DeepSeek il 2026-09-21; conflitto fra atomicità e «non bloccare» riconosciuto come reale e non dissolvibile, quattro classi di errore distinte (E1 validazione, E2 collisione, E3 Firestore, E4 ritentativo), opzioni A/B/D confrontate con B dominata da D, raccomandazione per **A con la sola classe controllabile resa non bloccante** (payload in `try/catch` locale, identità leniente che ripiega su `responseRef`, create-if-absent, valore di ritorno invariato), tabella di ciò che vede l'utente e di ciò che finisce nei log senza segreti con il contro-esempio di `functions/index.js:1392` segnalato, legacy e Rules verificati (nessuna modifica necessaria, `D-6` resta), vincoli di implementazione inclusa la regola letture-prima-delle-scritture che il banco attuale **non** verificherebbe, undici casi di prova proposti e scelta di principio rimessa a **D-7**; nessun codice, test, commit, push, merge o deploy eseguito.
+
+## Verifica Codex — M7-AUDIT-4P
+
+**APPROVATO come analisi, implementazione M7-AUDIT-4 in attesa della decisione D-7 di Diego.** Il conflitto fra atomicità e non blocco assoluto è reale; la proposta distingue correttamente gli errori controllabili da un commit Firestore fallito e individua la lettura obbligatoria prima delle scritture. Codex ha verificato in sola lettura `functions/index.js:1204-1218` e `:1392`: il log delle notifiche include davvero l'id invito, potenzialmente derivato dall'email, e il messaggio grezzo dell'errore. Il punto merita una correzione indipendente. Nessun produttore audit attivato.
+
+## Incarico Codex — M7-LOG-1: log delle notifiche invito senza identificatori sensibili
+
+**Stato incarico: PRONTO.** DeepSeek corregga solo il logging del fallimento di `onInviteCreated` in `functions/index.js:1392`: non registrare `inviteId` né messaggi grezzi di eccezioni che possono contenere email, chiavi sanificate, indirizzi o payload; conservare un codice tecnico stabile e, se serve correlazione, un identificatore casuale generato senza dati dell'invito. Aggiungere una prova mirata che eserciti il ramo fallito con id invito ed errore contenenti stringhe sentinella sensibili e confermi la loro assenza dal log; conservare il comportamento di invio/notifica e la visibilità operativa dell'errore. Verificare suite pertinente e consegnare un commit locale mirato con `DA_VERIFICARE`. Non toccare M7-AUDIT-4, Rules, frontend, trigger audit, dati reali; nessun push, merge o deploy. Un incarico attivo alla volta.
+
+## Presa in carico Codex — chiusura M7
+
+**Stato incarico DeepSeek: SOSPESO.** Diego ha chiesto il 21/09/2026 a Codex di chiudere direttamente M7. L'incarico M7-LOG-1 non è stato preso in carico da DeepSeek e viene sospeso per evitare due esecutori sullo stesso ramo. DeepSeek deve disarmare il watcher e non modificare repository o file di coordinamento fino a nuova istruzione di Diego. Codex verificherà i gate M7 e lavorerà sul ramo sperimentale, senza push, merge o deploy finché non saranno chiusi e revisionati.
+
+**Primo risultato Codex:** `8fa9bb5c` corregge il log di fallimento delle notifiche, che non include più id invito o messaggi grezzi del provider. Prova dinamica del ramo fallito superata e `test:functions-security` 160/160. L'automazione di sola supervisione DeepSeek è stata messa in pausa perché non corrisponde più al ruolo concordato per questa fase. Restano aperti la scelta D-7 sulla risposta agli inviti, i produttori del registro, la retention runtime a 24 mesi, il protocollo globale purge/ripristino e gli altri gate del censimento M7. M7 non è dichiarato concluso.
