@@ -2,7 +2,7 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **829**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## .firebaserc
 
@@ -312,7 +312,7 @@ File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 866372 | 5912 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 876066 | 5977 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -330,7 +330,7 @@ File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
 | `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
 | `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 79349 | 512 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 83363 | 532 | Documentazione: M7 RETENTION CENSIMENTO. |
 | `docs/M8_BACKUP_RECUPERO.md` | MD | 25427 | 172 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
@@ -751,7 +751,7 @@ File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 17787 | 111 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 17974 | 112 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -784,6 +784,7 @@ File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/run-attachment-removal-emulators.mjs` | MJS | 1288 | 35 | Strumento manutenzione/test: run-attachment-removal-emulators. |
 | `scripts/run-audit-retention-emulators.mjs` | MJS | 1152 | 27 | Strumento manutenzione/test: run-audit-retention-emulators. |
 | `scripts/run-avatar-residues-emulators.mjs` | MJS | 1340 | 36 | Strumento manutenzione/test: run-avatar-residues-emulators. |
+| `scripts/run-company-hard-delete-emulators.mjs` | MJS | 1287 | 35 | Strumento manutenzione/test: run-company-hard-delete-emulators. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1443 | 31 | Strumento manutenzione/test: run-firestore-rules-tests. |
 | `scripts/run-purge-retention-emulators.mjs` | MJS | 1411 | 37 | Strumento manutenzione/test: run-purge-retention-emulators. |
 | `scripts/run-storage-rules-tests.mjs` | MJS | 1848 | 44 | Strumento manutenzione/test: run-storage-rules-tests. |
@@ -857,6 +858,8 @@ File censiti: **826**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/company-detail-readonly.test.mjs` | MJS | 9651 | 148 | Test automatico: company-detail-readonly.test. |
 | `tests/company-form-archive-mount.test.mjs` | MJS | 13965 | 243 | Test automatico: company-form-archive-mount.test. |
 | `tests/company-form-freshness.test.mjs` | MJS | 5063 | 69 | Test automatico: company-form-freshness.test. |
+| `tests/company-hard-delete-residues.emulator.test.mjs` | MJS | 10963 | 172 | Test automatico: company-hard-delete-residues.emulator.test. |
+| `tests/company-hard-delete-residues.test.mjs` | MJS | 6733 | 101 | Test automatico: company-hard-delete-residues.test. |
 | `tests/company-profile.test.mjs` | MJS | 7813 | 74 | Test automatico: company-profile.test. |
 | `tests/consultation-copies.test.mjs` | MJS | 13493 | 220 | Test automatico: consultation-copies.test. |
 | `tests/contact-card-photo.test.mjs` | MJS | 6076 | 85 | Test automatico: contact-card-photo.test. |
