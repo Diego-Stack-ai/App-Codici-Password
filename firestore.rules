@@ -111,8 +111,19 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // M7-AUDIT-2 — Registro tecnico di audit: il proprietario lo consulta, ma
+    // nessun client può creare, modificare o cancellare eventi (decisione M7-R3:
+    // scrittore è solo il backend, che ignora le Rules). Serve anche l'esclusione
+    // dal catch-all qui sotto: regole sovrapposte si combinano in OR, quindi un
+    // diniego specifico non annullerebbe una concessione più ampia.
+    match /users/{userId}/auditEvents/{eventId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
     match /users/{userId}/{collection}/{document=**} {
       allow read, write: if isOwner(userId) &&
+        collection != 'auditEvents' &&
         collection != 'contacts' &&
         collection != 'pushDevices' &&
         collection != 'notificationDeliveries' &&
