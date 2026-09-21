@@ -2936,3 +2936,60 @@ Banchi adeguati al nuovo contratto (nessuna modifica di logica sotto prova): `te
 4. Nessun dato reale toccato; nessun push o deploy.
 
 **Stato incarico: DA_VERIFICARE** — M7-R7C-5 consegnato da DeepSeek il 2026-09-21; lacuna dimostrata e corretta nella revoca dei due pannelli (ID del ciclo corrente, nessuna cancellazione con ciclo malformato) e nella lettura di stato del pannello aziendale, percorso di reinvito verificato su editor dei form privato e azienda, handler Functions ed Emulator delle Rules, controllo negativo 2/6 → 6/6, nessun push eseguito.
+
+## Verifica Codex — M7-R7C-5 percorso reinvito
+
+**Esito: DA_CORREGGERE solo per prova mancante.** Commit di codice `34fc2435` e precisazione documentale `fe8ad555`: la revoca privata/aziendale ora usa l'invito del ciclo corrente e `node --test tests/detail-sharing-revocation-cycle.test.mjs tests/shared-regrant-after-restore.test.mjs` passa **11/11**. Le prove comportamentali coprono i due form, ma il terzo editor `shared/detail-account-mode.js` — che può creare lo stesso nuovo invito da una pagina dettaglio — è coperto soltanto da una guardia statica. L'incarico chiedeva verifica end-to-end dei tre editor; qui manca la prova che una voce `suspended` non sia preselezionata e che selezionarla espressamente produca un nuovo ID/ciclo, preservi l'invito storico e non dia accesso prima dell'accettazione.
+
+**Correzione richiesta a DeepSeek:** aggiungere un banco comportamentale mirato sul modulo reale `shared/detail-account-mode.js` con Account sospeso/ripristinato, nessuna selezione → zero nuovi inviti/grant; selezione esplicita → invito del ciclo corrente e storico intatto; accettazione solo dal nuovo invito; ciclo malformato → zero scritture. Correggere runtime solo se il test trova un difetto. Un solo commit locale per l'aggiunta/correzione, nessun push/deploy; consegna `DA_VERIFICARE`. Non avviare audit, migrazioni o fette successive in parallelo.
+
+**Stato incarico: DA_CORREGGERE** — revisione Codex del 21/09/2026.
+
+## Presa in carico DeepSeek — correzione M7-R7C-5, banco sul terzo editor
+
+- **Presa in carico:** 2026-09-21 (DeepSeek); ramo `integration/vault-shell-v127-security`; commit osservato `fe8ad555`; la revisione Codex era nel working tree non committata ed è **conservata** senza alterarne il testo.
+- **Perimetro:** solo il banco comportamentale mancante sul modulo reale. **Nessun** push, deploy o dato reale; **nessuna fetta successiva avviata**.
+
+**Stato incarico: IN_LAVORAZIONE** — correzione M7-R7C-5 (banco terzo editor) presa in carico da DeepSeek il 2026-09-21.
+
+## Rapporto DeepSeek — correzione M7-R7C-5, banco sul terzo editor
+
+- **Stato:** COMPLETATO — in attesa di verifica Codex.
+- **Commit:** un solo commit locale mirato; base `fe8ad555`; **nessun push o deploy**.
+
+### Il rilievo era fondato
+
+L'incarico chiedeva la verifica dei **tre** editor: i due form avevano banchi comportamentali, `shared/detail-account-mode.js` era coperto solo da una guardia statica. Mancava la prova che, dopo un ripristino, una voce `suspended` non sia preselezionata e che selezionarla espressamente produca un invito del ciclo corrente.
+
+### Banco aggiunto e **nessun difetto di runtime trovato**
+
+`tests/detail-account-mode-reinvite.test.mjs` (5 casi) esegue il **modulo reale** con DOM, rubrica e transazione simulati:
+
+| Caso | Esito |
+|---|---|
+| Voce `suspended` nell'elenco destinatari | **non preselezionata** (casella `checked === false`, `shared/detail-account-mode.js:34,108`) |
+| Salvataggio **senza** selezione | **zero scritture** e avviso «Seleziona almeno un destinatario…» (`:118-127`) |
+| **Selezione espressa** | invito `invites/account-1_guest_example_invalid_c1` con `cycle: 1` e `status: 'pending'` (`:166`), voce `pending`, `sharedWithUids` **vuoto** e `acceptedCount` 0: l'accesso non torna prima dell'accettazione |
+| Invito **storico** del ciclo 0 | **non toccato**: nessuna scrittura su `invites/account-1_guest_example_invalid` |
+| **Ciclo malformato** (`sharingCycle: -1`) | `CICLO_DI_CONDIVISIONE_NON_VALIDO` (`:146`), **zero scritture**, messaggio di errore |
+| Voce **pendente** già selezionata | resta selezionata e **non** riceve un nuovo invito |
+
+**Nessuna correzione di runtime**: il modulo rispetta già il contratto richiesto. Come disposto dall'incarico («correggere runtime solo se il test trova un difetto»), l'unica modifica è l'aggiunta del banco e la sua registrazione in `test:sharing-prototype`.
+
+### Prove
+
+| Verifica | Risultato |
+|---|---|
+| `node --test tests/detail-account-mode-reinvite.test.mjs` (nuovo) | **5/5** |
+| `npm run test:sharing-prototype` | **37/37** |
+| `npm run test:navigation` / `test:history-prototype` / `test:data-access` / `test:functions-security` | 146/146 · 98/98 · 95/95 · 142/142 |
+| `npm run test:js-syntax` | 161 moduli OK |
+| `git diff --check` · `npm run audit:inventory` | pulito · **796 file** |
+
+### Limiti dichiarati
+
+1. Il banco simula DOM e transazione: prova il comportamento del modulo, **non** un'esecuzione su browser reale.
+2. L'**accettazione** del nuovo invito resta provata dove avviene: handler Functions (`functions/test/respond-invitation-archived.test.js`, `INVITE_CYCLE_STALE` e ciclo completo) ed Emulator delle Rules (`tests/archive-guest-suspension.rules.test.mjs`, accesso consentito solo dopo il grant accettato).
+3. Restano aperti e non avviati: audit/migrazioni (R7C-6), inviti orfani, collaudo su dispositivo; candidato **non distribuibile**.
+
+**Stato incarico: DA_VERIFICARE** — correzione M7-R7C-5 consegnata da DeepSeek il 2026-09-21; banco comportamentale sul terzo editor reale (non preselezione, zero scritture senza selezione, invito del ciclo corrente con storico intatto, ciclo malformato senza scritture, pendente invariata), nessun difetto di runtime trovato, sharing 37/37 e suite principali verdi, nessun push eseguito.

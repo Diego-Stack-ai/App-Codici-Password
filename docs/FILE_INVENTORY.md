@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **795**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **796**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## tests
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/detail-sharing-revocation-cycle.test.mjs` | MJS | 5748 | 106 | Test automatico: detail-sharing-revocation-cycle.test. |
+| `tests/detail-account-mode-reinvite.test.mjs` | MJS | 7474 | 133 | Test automatico: detail-account-mode-reinvite.test. |
 | `tests/account-archive-paths.test.mjs` | MJS | 5743 | 86 | Test automatico: account-archive-paths.test. |
 | `tests/account-detail-compact.test.mjs` | MJS | 7958 | 113 | Test automatico: account-detail-compact.test. |
 | `tests/account-field-usage-model.test.mjs` | MJS | 3145 | 70 | Test automatico: account-field-usage-model.test. |
@@ -48,6 +48,7 @@ File censiti: **795**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/deadline-detail-lifecycle.test.mjs` | MJS | 22726 | 295 | Test automatico: deadline-detail-lifecycle.test. |
 | `tests/deadline-model.test.mjs` | MJS | 2208 | 44 | Test automatico: deadline-model.test. |
 | `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
+| `tests/detail-sharing-revocation-cycle.test.mjs` | MJS | 5748 | 106 | Test automatico: detail-sharing-revocation-cycle.test. |
 | `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 7500 | 154 | Test automatico: firestore.profile-widgets.rules.test. |
 | `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
 | `tests/guest-invite-suspension.test.mjs` | MJS | 4890 | 82 | Test automatico: guest-invite-suspension.test. |
@@ -408,7 +409,7 @@ File censiti: **795**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 426451 | 2883 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 433824 | 2947 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -836,7 +837,7 @@ File censiti: **795**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 16779 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 16823 | 106 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
