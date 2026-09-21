@@ -316,15 +316,15 @@ Le durate **non sono decise qui**. Per ogni dimensione sono elencate le opzioni 
 
 ## 9. Matrice di test sintetici per la futura verifica
 
-Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/emulatori. «Esistente» rimanda a una prova già presente; «da realizzare» indica ciò che manca per verificare la politica scelta.
+Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/emulatori. «Esistente» rimanda a una prova già presente; «da realizzare» indica ciò che manca per verificare la politica scelta. **Ogni riga marcata «esistente» è stata verificata leggendo il test citato**: lo scenario descrive la proprietà che quel test dimostra davvero, e dove la prova copre solo una parte dello scenario la riga è marcata «da realizzare» con la parte già coperta indicata a parte.
 
 | ID | Area | Scenario | Atteso | Stato |
 |---|---|---|---|---|
-| T-01 | Cestino Account | archivio un Account privato e uno aziendale; rileggo la lista | `isArchived: true`, `revision+1`, nessun campo di scadenza | esistente (`tests/archive-account-model.test.mjs:8`; `tests/archive-session.test.mjs:147`) |
+| T-01 | Cestino Account | archiviazione di un Account privato e di uno aziendale | scrittura sul percorso corretto, `isArchived: true`, `revision+1`, `purgeAfter` assente | esistente (`tests/account-page-lifecycle.test.mjs:239`; `tests/archive-account-model.test.mjs:8`) |
 | T-02 | Cestino Account | ripristino con revisione cambiata | conflitto, nessuna scrittura | esistente (`tests/archive-session.test.mjs:161`) |
 | T-03 | Purge | purge senza conferma o con proprietario diverso | rifiuto prima di ogni accesso a Firestore/Storage | esistente (`functions/test/archive-owner-handler.test.js:41,52`) |
-| T-04 | Purge | ripetizione dello stesso comando dopo esito incerto | `duplicate`, nessuna seconda cancellazione | esistente (`functions/test/archive-receipt-handler.test.js:112`) |
-| T-05 | Purge | percorso allegato fuori dal prefisso dell'Account | interruzione **prima** di ogni cancellazione | esistente (`functions/test/archive-purge-service.test.js:19`) |
+| T-04 | Purge | ripetizione di un comando con esito già `purged` | `duplicate`, nessuna cancellazione Storage o `recursiveDelete`, nessuna scrittura | esistente (`functions/test/archive-receipt-handler.test.js:79`) |
+| T-05 | Purge | un `storagePath` fuori dal prefisso dell'Account presente nei metadati | purge interrotto **prima** di ogni cancellazione, ricevuta in `processing` | **da realizzare**: il predicato è coperto da `functions/test/archive-purge-service.test.js:19`, il percorso end-to-end no |
 | T-06 | Purge | errore parziale sulle delete Storage | ricevuta resta `processing`, nessun falso `purged` | **da realizzare** (fault injection Storage) |
 | T-07 | Purge | piano di pulizia riferimenti oltre 450 modifiche | transazione finale annullata, nessuna pulizia parziale | esistente (`functions/test/purge-profile-cleanup-handler.test.js:63`) |
 | T-08 | Copie residue | dopo il purge restano `accountWidgets`/`sharedVaultLinks`/inviti | documentare l'esito atteso secondo la politica scelta | **da realizzare** |
@@ -334,7 +334,7 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-12 | Cronologia | il client tenta di cancellare un evento di audit | rifiuto secondo la politica scelta | **da realizzare** (oggi le Rules lo consentono) |
 | T-13 | Cronologia | effetto del purge su `trash`/`auditEvents`/ricevute legacy | definito e verificato | **da realizzare** |
 | T-14 | Allegati | upload senza marcatore `encrypted` per `application/octet-stream` | rifiuto delle Rules | esistente (`tests/storage.rules.test.mjs:69`; `storage.rules:9-21`) |
-| T-15 | Allegati | cancellazione di un allegato da parte dell'utente | oggetto rimosso; nessun metadato pendente | esistente (`tests/private-account-detail-lifecycle.test.mjs:166,172`) |
+| T-15 | Allegati | cancellazione di un allegato da parte dell'utente: percorso completo con esito positivo | oggetto rimosso **e** metadato rimosso, senza residui | **da realizzare**: i test citati in T-32 dimostrano solo l'arresto dopo il cambio di Account, non il percorso completo |
 | T-16 | Allegati | oggetto orfano per prefisso dopo il purge | assente o motivato secondo D4 | **da realizzare** |
 | T-25 | Allegati | purge con `storagePath` reali: il ramo di cancellazione byte è esercitato | cancellazione effettiva e ricevuta `purged` | **da realizzare** (oggi i fake usano `docs: []` e `bucket: () => ({})`) |
 | T-26 | Allegati | rimozione di una riga dagli array `allegati`/`attachments` e cancellazione di una Scadenza | byte non più referenziati: esito definito secondo D4 | **da realizzare** |
@@ -342,13 +342,17 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-28 | Allegati | cambio avatar | il precedente oggetto non resta orfano, o è dichiarato | **da realizzare** |
 | T-29 | Allegati | apertura di un allegato legacy senza `encryption` | comportamento di sicurezza dichiarato (oggi `openExternalUrl` senza Vault Key) | **da realizzare** |
 | T-17 | Backup | header in chiaro con `ownerUid`/`backupId`/`createdAt` | documentato come accettato o rimosso | **da realizzare** (decisione D5/D6) |
-| T-18 | Backup | interruzione fra blocchi: record applicati senza allegati | stato parziale dichiarato, nessun successo | esistente (`tests/backup-restore-session.test.mjs:110`) |
+| T-18 | Backup | errore al secondo blocco o durante il caricamento degli allegati | stato parziale dichiarato, nessun successo | esistente (`tests/backup-restore-session.test.mjs:100,110`) |
 | T-19 | Backup | ricevuta con dati cambiati o comando diverso | rifiuto, nessuna riapplicazione | esistente (`functions/test/backup-restore-receipt.test.js:22`) |
-| T-20 | Backup | registro legacy presente | apply bloccato con motivazione esplicita | esistente (`functions/test/backup-receipt-handler.test.js:36`) |
+| T-20 | Backup | registro legacy presente | apply bloccato con `LEGACY_BACKUP_RESULT_UNVERIFIED`, nessuna scrittura | esistente (`functions/test/backup-receipt-handler.test.js:48`) |
 | T-21 | Backup | importo un backup che contiene un Account poi purgato | comportamento definito secondo D5 | **da realizzare** |
 | T-22 | Trasversale | TTL/lifecycle effettivamente assenti sul progetto | verifica esterna documentata | **da realizzare** (verifica di configurazione, non test di codice) |
 | T-23 | Trasversale | cache del dispositivo dopo purge/logout | esito definito secondo la politica | **da realizzare** |
 | T-24 | Trasversale | copia di consultazione (report/Excel) e dati purgati | nessun residuo non dichiarato | **da realizzare** |
+| T-30 | Cestino Account | lettura della lista dell'Archivio (filtro sugli archiviati) | compaiono solo i record archiviati, con l'identità di contesto corretta | **da realizzare**: la query vive nel repository; i test esistenti coprono staleness e identità della selezione (`tests/archive-session.test.mjs:207,232`), non il filtro |
+| T-31 | Cestino Account | ripristino riuscito | identità privato/azienda conservata, solo stato di archiviazione e revisione aggiornati | esistente (`tests/archive-session.test.mjs:147`) |
+| T-32 | Allegati | cancellazione di un allegato interrotta dal cambio di Account | nessuna scrittura di metadati sotto il nuovo Account; se la conferma arriva dopo il cambio, nessuna operazione | esistente (`tests/private-account-detail-lifecycle.test.mjs:166,172`) |
+| T-33 | Purge | predicato di percorso sicuro su un `storagePath` di un altro proprietario o fuori dal prefisso dell'Account | percorso rifiutato come non sicuro | esistente (`functions/test/archive-purge-service.test.js:19`) |
 
 ## 10. Domande decisionali per Diego
 
