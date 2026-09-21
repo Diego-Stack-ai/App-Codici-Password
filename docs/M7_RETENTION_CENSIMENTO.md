@@ -582,7 +582,7 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 | T-19 | Backup | ricevuta con dati cambiati o comando diverso | rifiuto, nessuna riapplicazione | esistente (`functions/test/backup-restore-receipt.test.js:22`) |
 | T-20 | Backup | registro legacy presente | apply bloccato con `LEGACY_BACKUP_RESULT_UNVERIFIED`, nessuna scrittura | esistente (`functions/test/backup-receipt-handler.test.js:48`) |
 | T-21 | Backup | importo un backup che contiene un Account poi purgato | comportamento definito secondo D5 | **dichiarato e verificato per il comportamento attuale** (M7-T21, §6.8): il ripristino **ricrea** l'Account purgato con i valori memorizzati identici (`isArchived: true`), il metadato e i **byte** dell'allegato e i **riferimenti** in Profilo e Azienda — annullando la pulizia del purge — mentre la ricevuta di purge resta `purged` e blocca una ripetizione con lo stesso `operationId` (con un id nuovo il purge funziona di nuovo); il **file prodotto** non si apre sotto un altro proprietario (`deriveBackupKey` valida l'intestazione) e la callable rifiuta un `expectedOwnerUid` diverso, con i percorsi derivati dall'UID autenticato. Prove: `tests/purged-account-restore.emulator.test.mjs` (3 casi, callable reali); mutazioni rosse. La scelta di prodotto sul significato del purge rispetto ai backup è D5, con domanda in un commit separato (`docs/M7_DOMANDE_T21_RIPRISTINO_DOPO_PURGE.md`) |
-| T-22 | Trasversale | TTL/lifecycle effettivamente assenti sul progetto | verifica esterna documentata | **da realizzare** (verifica di configurazione, non test di codice) |
+| T-22 | Trasversale | TTL/lifecycle effettivamente assenti sul progetto | verifica esterna documentata | **tentata, esito `non verificato`** (M7-T22, §11.1): i file locali **non** dichiarano TTL né lifecycle (le tre `ttl: false` in `firestore.indexes.json` riguardano gli indici), e la **verifica in sola lettura** non è stata possibile — `gcloud` assente, `GOOGLE_APPLICATION_CREDENTIALS` non impostato, nessuna credenziale ADC, Firebase CLI non autenticato e senza comandi TTL/lifecycle. L'assenza **non** è dedotta dal repository: la voce resta **non verificata** finché qualcuno con accesso non esegue i due comandi documentati (progetto `appcodici-password`, bucket `appcodici-password.firebasestorage.app`), registrando fonte, data e output |
 | T-23 | Trasversale | cache del dispositivo dopo purge/logout | esito definito secondo la politica | **dichiarato e verificato per il comportamento attuale** (M7-T23, §6.5): il logout azzera la **sola** sessione Vault in `sessionStorage` e non tocca `localStorage`, IndexedDB (cache Firestore persistente e coda offline) e Cache Storage; il purge è backend e non evacua la cache locale. Nessuna primitiva distruttiva esiste nel runtime; la coda offline resta ma sigillata (Vault Key necessaria); la Cache Storage contiene solo la shell stessa-origine, mai risposte backend. Prove: `tests/device-cache-residues.test.mjs` (7 casi). La **politica** di cancellazione è aperta e le domande per Diego sono raccolte in un commit separato (`docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md`) |
 | T-24 | Trasversale | copia di consultazione (report/Excel) e dati purgati | nessun residuo non dichiarato | **dichiarato e verificato per il comportamento attuale** (M7-T24, §6.6): i due report dell'app (salute credenziali, uso dei campi) sono **solo in memoria** e senza segreti, il primo azzerato alla chiusura; backup `.cpbackup` e vCard `.vcf` sono **file dell'utente** che l'app non può ritirare; un export **nuovo** usa sorgenti confermate e non contiene l'Account purgato, mentre un report rigenerato **dalla cache** può ancora contenerlo; **Excel/PDF/stampa non esistono** nell'app distribuita (solo proiezione di laboratorio). Prove: `tests/consultation-copies.test.mjs` (6 casi). La politica su copie già esportate e avviso all'utente è una decisione di prodotto, raccolta in un commit separato (`docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md`) |
 | T-30 | Cestino Account | lettura della lista dell'Archivio (filtro sugli archiviati) | compaiono solo i record archiviati, con l'identità di contesto corretta | **verificato** (M7-T30): il filtro del profilo privato è nella **query** (`vault-repository.js:29-31`, `where('isArchived','==',true)`) e quello aziendale è **client-side** (`archive-account-service.js:83-89` e `:113-115`); l'identità di contesto (`privato`, oppure id azienda con `businessName`), l'assenza di mescolanza fra contesti e l'invalidazione su cambio utente o blocco del Vault sono provate da `tests/archive-list-filter.test.mjs` (**6 casi**), con `npm run test:history-prototype` 104/104. Il caso del cambio di sessione usa sorgenti **sensibili al proprietario** con Account distinti per A e B e verifica gli uid passati alle letture: un servizio che continuasse a leggere i dati del vecchio proprietario fallisce (controllo per mutazione). Nessun difetto dimostrato: la lista non richiede correzioni |
@@ -618,13 +618,46 @@ Tutti gli scenari usano esclusivamente dati sintetici e ambienti di laboratorio/
 
 **Non verificato da questo repository (richiede accesso esterno o dati reali, non usati):**
 
-1. policy TTL Firestore a livello di progetto (`gcloud firestore fields ttls list`) e assenza di lifecycle/versioning sul bucket Storage (`gcloud storage buckets describe`, `gsutil lifecycle get`);
+1. policy TTL Firestore a livello di progetto (`gcloud firestore fields ttls list`) e assenza di lifecycle/versioning sul bucket Storage (`gcloud storage buckets describe`, `gsutil lifecycle get`) — **esito T-22 in §11.1: tentativo di verifica in sola lettura, accesso esterno NON disponibile, voce ancora `non verificata`**;
 2. corrispondenza fra questo ramo e ciò che è **effettivamente distribuito** (Functions, Rules, Hosting) sul progetto `appcodici-password`;
 3. presenza nei dati reali di metadati legacy (`purgeAfter`, ricevute `archiveOperations`/`backupRestoreOperations`, allegati senza campo `encryption` o senza `storagePath`);
 4. esistenza e quantità di oggetti Storage orfani e prefissi realmente presenti nel bucket (le Rules consentono al proprietario di scrivere qualunque percorso sotto `users/{uid}/**`);
 5. esistenza di file `.cpbackup` già esportati contenenti dati poi purgati;
 6. retention dei log delle Cloud Functions, che possono contenere il payload dei comandi di ripristino;
 7. eventuali procedure operative esterne al repository che eliminino o conservino dati;
+
+### 11.1 Verifica esterna di TTL e lifecycle (M7-T22, 21/09/2026)
+
+**Che cosa dichiarano i file locali (letti, non modificati).**
+
+| File | Dichiarazione | Che cosa significa |
+|---|---|---|
+| `firebase.json` | chiavi `firestore` (`database: (default)`, `location: eur3`, `rules`, `indexes`), `storage` (`rules`), `functions`, `hosting`, `emulators` | **nessuna** sezione TTL e **nessuna** sezione lifecycle: la configurazione di deploy non li prevede (una policy TTL e un lifecycle del bucket non si dichiarano in questi file) |
+| `firestore.indexes.json` | tre `fieldOverrides` con `"ttl": false`: `accounts.sharedWith` (riga 7), `auditEvents.at` (riga 30), `auditEvents.createdAt` (riga 53) | è la forma con cui il file degli **indici** dichiara che quei campi **non** sono campi TTL; **non** è una prova sullo stato del progetto |
+| `firestore.rules`, `storage.rules` | solo autorizzazioni | le Rules **non** possono esprimere né TTL né lifecycle |
+| `.firebaserc` | progetto di default `appcodici-password` | progetto e bucket di riferimento: `appcodici-password.firebasestorage.app` (`firebase-config.js:26`) |
+
+**Tentativo di verifica esterna (in sola lettura).** Data: 21/09/2026. Progetto: `appcodici-password`; bucket: `appcodici-password.firebasestorage.app`.
+
+| Accesso necessario | Esito della sonda |
+|---|---|
+| `gcloud` (per `gcloud firestore fields ttls list`, `gcloud storage buckets describe`) | **assente** sulla macchina |
+| `GOOGLE_APPLICATION_CREDENTIALS` | **non impostato** |
+| Credenziali ADC di `gcloud` (`%APPDATA%\gcloud\application_default_credentials.json`) | **assenti** |
+| Firebase CLI (presente come dipendenza di sviluppo) | **non autenticato** e senza comandi per TTL o lifecycle del bucket |
+
+**Esito: verifica esterna NON eseguita → TTL e lifecycle restano `non verificati`.** Come richiesto, **non** si deduce l'assenza di TTL o di lifecycle dai file del repository: `ttl: false` negli indici riguarda la definizione degli indici, non lo stato del progetto.
+
+**Comandi che completerebbero la verifica (per chi ha accesso, in sola lettura).**
+
+```
+gcloud firestore fields ttls list --project appcodici-password
+gcloud storage buckets describe gs://appcodici-password.firebasestorage.app --format=json
+```
+
+Da registrare quando eseguiti: **fonte** (account e strumento usati), **data**, **progetto/bucket** e **output** (elenco delle policy TTL attive; eventuale blocco `lifecycle`), senza elencare documenti, oggetti o nomi di file.
+
+**Limiti.** Nessuna lista di documenti, oggetti o nomi reali è stata prodotta; nessuna modifica a TTL, lifecycle, Rules o IAM; nessun test di codice è stato aggiunto (la verifica è di configurazione). Nessuna nuova domanda di prodotto: la voce resta un **handoff operativo** verso chi possiede le credenziali.
 8. comportamento in caso di fallimento parziale delle cancellazioni Storage (deducibile, non testato);
 9. configurazione reale di App Check, backup gestiti/PITR e quote del progetto;
 10. copie residue lato browser: `persistentLocalCache` conserva metadati in IndexedDB, `localStorage['codex_profile_avatar_{uid}']` conserva l'URL dell'avatar e nel codice non esiste una rimozione al logout (l'assenza di altre copie nel browser non è dimostrabile staticamente);
