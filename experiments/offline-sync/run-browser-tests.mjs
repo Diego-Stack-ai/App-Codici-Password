@@ -12,7 +12,8 @@ const noLocks = process.argv[3] === '--no-locks';
 const runtimeLease = process.argv[3] === '--runtime-lease';
 const queueUpgrade = process.argv[3] === '--queue-upgrade';
 const mixedContexts = process.argv[3] === '--mixed-contexts';
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts]');
+const twoTabs = process.argv[3] === '--two-tabs';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
@@ -28,6 +29,7 @@ const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true,
         export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
     ['/suite.mjs', runtimeLease ? 'experiments/offline-sync/browser-runtime-lease.mjs'
+        : twoTabs ? 'experiments/offline-sync/browser-two-tabs.mjs'
         : mixedContexts ? 'experiments/offline-sync/browser-mixed-contexts.mjs'
         : queueUpgrade ? 'experiments/offline-sync/browser-queue-upgrade.mjs'
         : noLocks ? 'experiments/offline-sync/browser-no-locks.mjs'
@@ -78,8 +80,13 @@ const profile = await mkdtemp(resolve(tempRoot, 'codex-offline-browser-'));
 try {
     await new Promise(done => server.listen(0, '127.0.0.1', done));
     const sandboxArgs = process.platform === 'linux' && process.getuid?.() === 0 ? ['--no-sandbox'] : [];
+    const origin = `http://127.0.0.1:${server.address().port}/`;
+    // `--two-tabs` serve due **schede reali** dello stesso profilo e della stessa origine: il
+    // browser headless non accetta due target da riga di comando, quindi la seconda scheda viene
+    // aperta dalla prima (`window.open`) e il blocco dei popup va disattivato.
     child = spawn(browserPath, ['--headless=new', ...sandboxArgs, '--disable-gpu', '--no-first-run', '--disable-sync',
-        '--disable-background-networking', `--user-data-dir=${profile}`, `http://127.0.0.1:${server.address().port}/`],
+        '--disable-background-networking', ...(twoTabs ? ['--disable-popup-blocking'] : []),
+        `--user-data-dir=${profile}`, origin],
     {windowsHide: true, stdio: 'ignore'});
     child.on('error', reject);
     child.on('exit', code => { if (code) reject(new Error('BROWSER_EXITED')); });

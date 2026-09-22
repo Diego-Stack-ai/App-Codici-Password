@@ -12,7 +12,8 @@ const paths = candidates.map(group => group.find(path => path && existsSync(path
 const modes = process.argv.includes('--no-locks') ? ['--no-locks']
     : process.argv.includes('--runtime-lease') ? ['--runtime-lease']
     : process.argv.includes('--queue-upgrade') ? ['--queue-upgrade']
-    : process.argv.includes('--mixed-contexts') ? ['--mixed-contexts'] : ['--backend', '--private-backend'];
+    : process.argv.includes('--mixed-contexts') ? ['--mixed-contexts']
+    : process.argv.includes('--two-tabs') ? ['--two-tabs'] : ['--backend', '--private-backend'];
 for (const browser of paths) {
     if (!browser) throw new Error('Chrome/Edge unavailable; set CHROME_PATH and EDGE_PATH to executable paths');
     for (const mode of modes) {
