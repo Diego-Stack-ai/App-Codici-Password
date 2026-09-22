@@ -192,6 +192,28 @@ export async function readOfflineQueueContainers({uid, indexedDb = globalThis.in
     });
 }
 
+// [M6-A-6] Percorso di **sola lettura** dell'app, basato sul lettore compatibile v1/v2 di M6-A-1:
+// apre la coda senza imporre una versione (non crea, non aggiorna, non cancella e non riscrive il
+// database) e restituisce uno **stato esplicito**. Se lo schema non è leggibile — sconosciuto,
+// malformato o copia non compatibile — l'esito è `available: false` con `operations: null` e il
+// motivo: **mai** una coda vuota e **mai** un salvataggio riuscito.
+export async function createOfflineQueueReader({uid, vaultKeyMaterial, indexedDb, signal, isActive = () => true, timeoutMs = 10000} = {}) {
+    if (!uid) throw new Error('OFFLINE_QUEUE_UID_REQUIRED');
+    const key = await deriveOfflineQueueKey(vaultKeyMaterial, uid);
+    return {
+        async read() {
+            try {
+                const {version, containers} = await readOfflineQueueContainers({uid, indexedDb, signal, isActive, timeoutMs});
+                const operations = [];
+                for (const container of containers) operations.push(await openOfflineOperation(container, key, uid));
+                return {available: true, version, operations, reason: null};
+            } catch (error) {
+                return {available: false, version: null, operations: null, reason: error?.code || error?.message};
+            }
+        }
+    };
+}
+
 export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexedDb, signal, isActive = () => true} = {}) {
     if (!uid) throw new Error('OFFLINE_QUEUE_UID_REQUIRED');
     // Derive first: a failed key must not leave an unowned DB connection open.

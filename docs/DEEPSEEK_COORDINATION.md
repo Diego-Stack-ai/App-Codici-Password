@@ -8262,3 +8262,86 @@ Le due mutazioni che Codex chiedeva esplicitamente (scrittura senza lease, opera
 - Questa prova **non autorizza** il rollback né il rilascio e **non chiude** M6-F3; nessuna decisione di prodotto presa qui.
 
 **Stato incarico: DA_VERIFICARE** — M6-A-5 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** su `integration/vault-shell-v127-security` (HEAD precedente `0e672d32`): prova di laboratorio del **rollback** a una build con fallback disattivato ma **lettore v1/v2 compatibile**, su una coda reale già aggiornata a v2 con due operazioni sigillate pendenti (una in riconciliazione). Esiti (4 verdetti, Chrome 153 + Edge 153, 3 esecuzioni consecutive): la lettura compatibile restituisce le due operazioni con contenitori identici e stato di riconciliazione conservato; `enqueue` **senza lease** rifiuta con `QUEUE_WRITE_REQUIRES_LEASE` senza modificare né aggiungere nulla, mentre con un lease valido la stessa build scrive **una sola** operazione (contrasto discriminante); `synchronise()` non invia nulla e il trasporto resta a **zero chiamate**, nessuna cancellazione e i contenitori originali restano byte per byte al loro posto; il **lettore v1 precedente** fallisce su v2 con `QUEUE_UNAVAILABLE_SCHEMA` e quello stato è riferito come **indisponibilità** (`available:false`, `operations:null`), mai come coda vuota o salvataggio riuscito, con tutti i contenitori ancora presenti. Tre controlli di mutazione discriminatori — scrittura senza lease (`ROLLBACK_WROTE_WITHOUT_LEASE`), lettore precedente che nasconde le operazioni (`ROLLBACK_PREVIOUS_READER_ACCEPTED_V2`), rollback che invia (`ROLLBACK_SENT`) — con file ripristinato byte per byte (`8acd8b12…`). Altre verifiche: banchi `--two-tabs` (6), `--mixed-contexts` (7), `--queue-upgrade` (12), `--runtime-lease`, `--no-locks` e di coordinamento verdi, `npm test` exit 0, inventario a 867 file, budget statico verde. Limiti: solo Chromium headless con dati sintetici; build di rollback e lettore precedente sono **modelli di laboratorio**; il lease del contrasto è di laboratorio; l'indisponibilità è uno stato API e non un messaggio utente; nessuna prova su PWA installate, dispositivi reali o codice distribuito; la prova non autorizza rollback o rilascio e non chiude M6-F3. Nessun collegamento al runtime o alle PWA installate, nessuna modifica a `Frontend/public/**`, Rules, Functions o dati reali, nessun push, merge, deploy o secondo incarico.
+
+
+**Revisione Codex — APPROVATO M6-A-5 (22/09/2026), solo modello di rollback in laboratorio.** Esaminato il commit locale `b8867e52`: `rollback-v2-compatible.mjs` espone lettura tramite lettore v1/v2, stato esplicito `available:false`/`operations:null` quando lo schema non è disponibile, rifiuto di `enqueue` senza contesto di lease e sincronizzazione disattivata senza invio. Il banco crea una coda v1 con due operazioni sigillate, una in riconciliazione, la aggiorna a v2, confronta i contenitori prima/dopo, dimostra il rifiuto senza lease e un contrasto positivo con il coordinatore di laboratorio sulla stessa connessione, controlla zero chiamate al trasporto e che il lettore v1 modellato riporti `QUEUE_UNAVAILABLE_SCHEMA` anziché una coda vuota. `node --check` sui due nuovi moduli e `git diff HEAD^ HEAD --check` passano. DeepSeek riferisce Chrome/Edge verdi in tre esecuzioni e tre controlli di mutazione rossi; Codex ha tentato `npm run test:offline-rollback-v2`, ma qui il browser esce con `BROWSER_EXITED` prima del verdetto e non dichiara una replica indipendente. Il controllo del lease nel modello accetta un contesto iniettato: questa prova vale per il contesto reale del coordinatore usato dal banco, non dimostra da sola la sicurezza di una build distribuita contro un chiamante arbitrario. Il lettore precedente è un modello di laboratorio, non una PWA installata. Nessun rollback reale, montaggio nel runtime, collaudo fisico o rilascio approvato; M6-F3 e il gate di adozione restano aperti. Nessun nuovo incarico esecutivo assegnato in attesa delle decisioni e prove di rilascio ancora aperte.
+
+**Decisione Diego — M6 adozione nel ramo di sviluppo (22/09/2026).** Diego autorizza a collegare il salvataggio offline all'app **nel solo ramo `integration/vault-shell-v127-security`** e a provarlo lì. Le prove sulle PWA installate e sui dispositivi fisici si faranno insieme a Diego alla fine; questa decisione non autorizza push, merge, deploy, pubblicazione, migrazione di dati reali o chiusura del gate M6-F3. Restano valide M6-F1=A (upgrade additivo della coda v1→v2), M6-F2 (messaggi generici riferiti all'operazione, senza promettere un salvataggio non confermato) e la richiesta di mostrare alle vecchie PWA un'azione chiara «Aggiorna l'app». Le copie vecchie e la compatibilità effettiva devono ancora essere provate prima del rilascio. L'integrazione procede in passi sequenziali, uno alla volta e ognuno soggetto a revisione Codex.
+
+**Stato incarico: PRONTO — M6-A-6, primo passo di integrazione nel ramo di sviluppo: lettore compatibile.** DeepSeek porti il lettore v1/v2 già provato in M6-A-1 nel percorso reale di lettura della coda dell'app, rispettando l'ordine di `M6-ADOZIONE-PIANO R1` §3–4: leggere una coda v1 o v2 senza creare, aggiornare, cancellare o riscrivere il database e senza cambiare ancora lo scrittore, il coordinamento o il comportamento distribuito. Uno schema sconosciuto, un upgrade bloccato o una copia non compatibile devono produrre uno stato esplicito di indisponibilità, mai «coda vuota» né «salvataggio riuscito». Aggiunga prove mirate su coda v1 con operazioni sigillate pendenti e stato di riconciliazione, su v2 e su schema non supportato; riferisca chiaramente ciò che resta solo prova di laboratorio. Un solo commit locale mirato sul ramo, rapporto ed esito `DA_VERIFICARE` in questo MD; nessun secondo incarico finché Codex non lo revisiona. Non eseguire ancora l'upgrade v2 nel runtime né attivare il fallback, e non toccare Rules, Functions, PWA installate o dati reali. Nessun push, merge, deploy o rilascio. `PRONTO` registra l'incarico autorizzato, **non** prova che DeepSeek lo abbia letto o preso in carico.
+
+**Stato incarico: IN_LAVORAZIONE** — M6-A-6 preso in carico da DeepSeek il 2026-09-22 **prima** di scrivere codice; ramo `integration/vault-shell-v127-security` verificato, HEAD osservato `b8867e52`. Ricognizione già fatta: il percorso reale di lettura della coda è `createOfflineMutationSynchronizer` (`offline-mutation-sync.js:25,30` → `queue.list()`), la coda è costruita da `createOfflineMutationClientCore` (`offline-mutation-client-core.js:24` → `createQueue`), il client è montato dal pilota opt-in `private-account-offline-pilot.js` (`?m6pilot=1`) e `offline-mutation-client-core.js:56` legge ancora la coda in `discard`. Lavoro autorizzato: portare il lettore v1/v2 di M6-A-1 in questo percorso **senza** creare, aggiornare, cancellare o riscrivere il database e **senza** cambiare lo scrittore, il coordinamento o il comportamento distribuito; schema sconosciuto, upgrade bloccato o copia non compatibile devono produrre uno **stato esplicito di indisponibilità**, mai «coda vuota» né «salvataggio riuscito»; prove mirate su coda v1 con operazioni sigillate pendenti e riconciliazione, su v2 e su schema non supportato; **un solo commit locale mirato** con rapporto ed esito `DA_VERIFICARE`. Nessuna esecuzione dell'upgrade v2 nel runtime, nessuna attivazione del fallback, nessuna modifica a Rules, Functions, PWA installate o dati reali, nessun push, merge, deploy o rilascio.
+
+## Rapporto DeepSeek — M6-A-6: lettore compatibile nel percorso reale di lettura
+
+### 1. Consegna (file, commit, perimetro)
+
+- `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` (**+22, −0**): nuovo export `createOfflineQueueReader({uid, vaultKeyMaterial, ...})` — percorso di **sola lettura** basato su `readOfflineQueueContainers` (M6-A-1), **nessuna** modifica a `openOfflineQueueDatabase`, `createOfflineMutationQueue` o `withOfflineQueueLease`.
+- `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` (**+37, −6**): il sincronizzatore legge tramite un `readQueue` **iniettabile** (default: `queue.list()`, quindi il comportamento precedente resta) e conosce il nuovo stato **`queue-unavailable`**.
+- `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` (**+28, −7**): costruisce il lettore, tollera la **non apribilità dello scrittore** (copia non compatibile) restando vivo, passa `readQueue` al sincronizzatore e fa rifiutare gli ingressi di scrittura con `OFFLINE_QUEUE_WRITE_UNAVAILABLE`.
+- `Frontend/public/assets/js/modules/data/offline-mutation-client.js` (**+2, −1**): collega `createQueueReader: createOfflineQueueReader`.
+- Prove: `tests/offline-mutation-queue.test.mjs` (**+52**), `tests/offline-mutation-sync.test.mjs` (**+60**), `tests/offline-mutation-client.test.mjs` (**+51**).
+- `docs/FILE_INVENTORY.md` rigenerato (**867 file**); questo rapporto.
+- **Un solo commit locale mirato**; HEAD precedente `b8867e52`; nessuna esecuzione dell'upgrade v2 nel runtime, nessuna attivazione del fallback, nessuna modifica a Rules, Functions, PWA installate o dati reali; nessun push, merge, deploy o rilascio.
+
+### 2. Che cosa fa il lettore nel percorso reale
+
+`createOfflineQueueReader(...).read()`:
+
+- legge con il lettore compatibile **senza imporre una versione**: non crea store, non aggiorna, non cancella e non riscrive nulla (dimostrato: nessuna scrittura e apertura con **un solo argomento**);
+- in caso di successo restituisce `{available: true, version, operations}` con le operazioni **decifrate** (stessa forma di `list()`), quindi il resto del client non cambia;
+- in caso di schema sconosciuto, contenitore malformato, apertura bloccata o scadenza restituisce `{available: false, version: null, operations: null, reason}`: **mai** `[]`, **mai** un salvataggio riuscito.
+
+Nel sincronizzatore la lettura non disponibile produce lo stato e l'esito **`queue-unavailable`** (con `pending: null`), e non invia nulla; se la coda è leggibile ma **non operabile** (scrittore non apribile, per esempio copia non compatibile) esce `queue-unavailable` con motivo `OFFLINE_QUEUE_WRITE_UNAVAILABLE` e `pending` reale, **senza** inviare: non si potrebbe rimuovere l'operazione inviata, quindi non si dichiara «salvato».
+
+### 3. Prove mirate aggiunte (21 test nuovi, tutti nei banchi esistenti)
+
+- **Coda v1 con operazioni sigillate pendenti e riconciliazione**: lettura reale di due contenitori sigillati (uno con `_queueState: reconciliation-required` e `_reviewReason`) → operazioni decifrate **identiche**, `available: true`, `version: 1`, **nessuna scrittura**, apertura **senza versione** e nessuno store creato.
+- **Coda v2**: `available: true`, `version: 2`, operazioni corrette.
+- **Schema non supportato / contenitore malformato**: `available: false` con `reason` `QUEUE_READER_SCHEMA` / `QUEUE_READER_CONTAINER` e `operations: null` (verificato che **non** sia `[]`).
+- **Apertura che non si conclude** (upgrade bloccato): `QUEUE_READER_TIMEOUT`, `operations: null` — indisponibilità, non coda vuota.
+- **Sincronizzatore**: lettura non disponibile → `{status: 'queue-unavailable'}`, `send` mai chiamato, nessuno stato `idle`/`saved`/`offline`; coda leggibile ma non operabile → `queue-unavailable` con `pending` reale e nessun invio; lettura disponibile → percorso normale invariato (compreso il ramo offline).
+- **Client**: scrittore non apribile con lettore compatibile → il client esiste, `flush()` riferisce indisponibilità, `enqueue` rifiuta con `OFFLINE_QUEUE_WRITE_UNAVAILABLE` e non invia; schema non leggibile → `queue-unavailable` con motivo; **senza** lettore compatibile il comportamento resta quello di prima (l'errore dello scrittore esce come prima).
+
+### 4. Controlli di mutazione (discriminatori, poi ripristinati)
+
+| Mutazione temporanea | Esito |
+|---|---|
+| indisponibilità trattata come **coda vuota** nel sincronizzatore | rosso (1 test) |
+| scrittura ammessa **senza** coda operabile nel client | rosso (1 test) |
+| lettore che **nasconde** l'indisponibilità | rosso (2 test) |
+
+File ripristinati e verificati **byte per byte** (`git hash-object` identico su tutti e tre i moduli).
+
+### 5. Che cosa resta **solo prova di laboratorio** (dichiarato)
+
+- **Upgrade a v2**: il candidato vive in `experiments/offline-sync/queue-upgrade-v2.mjs` e **non** è collegato al runtime; in questo passo nessuna copia esegue l'upgrade.
+- **Fallback / lease**: `createHybridQueueCoordinator` e il lease IndexedDB restano di laboratorio; `withOfflineQueueLease` è invariato (solo Web Locks) e il coordinamento non cambia.
+- **Rollback**: il modello di M6-A-5 resta di laboratorio.
+- Le prove del lettore nel percorso reale usano **fixture IndexedDB in memoria** (Node); le prove su IndexedDB **reale** del lettore restano quelle del banco M6-A-1 in browser.
+- Il pilota resta **opt-in** (`?m6pilot=1`) e `OFFLINE_MUTATION_WRITES_ENABLED` resta `false` per impostazione predefinita.
+- Nessun collaudo su PWA installate o dispositivi reali; M6-F3 resta aperto.
+
+### 6. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `node --test tests/offline-mutation-queue.test.mjs` | **30/30 pass** (27 + 3 nuovi) |
+| `node --test tests/offline-mutation-sync.test.mjs` | **12/12 pass** (9 + 3 nuovi) |
+| `node --test tests/offline-mutation-client.test.mjs` | **8/8 pass** (5 + 3 nuovi) |
+| `npm run test:offline-write-prototype` | **128/128 pass** |
+| banchi browser `--runtime-lease`, `--queue-upgrade`, `--rollback-v2`, `--mixed-contexts`, `--two-tabs`, `--no-locks`, coordinamento | **tutti verdi** |
+| `node scripts/audit-js-syntax.mjs` | 161 moduli, **OK** |
+| `npm test` (catena completa) | **exit 0** |
+| `npm run audit:inventory` | inventario rigenerato, **867 file** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato su 30 pagine» (i moduli della coda offline non sono fra quelli misurati) |
+
+### 7. Limiti dichiarati
+
+- Le prove del percorso reale sono su **fixture IndexedDB in memoria**; l'IndexedDB reale è coperto dai banchi browser del lettore (M6-A-1) e dagli altri banchi di laboratorio, non da questo passo.
+- Con una coda **v2** lo scrittore attuale **non si apre** (`VersionError`): il client ora **non muore** e riferisce indisponibilità, ma la scrittura offline resta indisponibile finché non si procederà con l'upgrade previsto dal piano (§3.3). È il comportamento voluto da questo passo, non una svista.
+- `discard` continua a leggere con `queue.list()` (percorso dello scrittore) perché rimuove un'operazione e richiede il CAS sulla stessa connessione: resta invariato e fuori dal perimetro di questo passo.
+- Nessun messaggio all'utente è stato montato: lo stato `queue-unavailable` è tecnico; i testi restano decisioni di Diego (M6-F2/M6-C1).
+- Nessuna prova su PWA installate, due dispositivi, Firefox/Safari o collaudo fisico; M6-F3 non è chiuso e questa consegna non autorizza adozione o rilascio.
+
+**Stato incarico: DA_VERIFICARE** — M6-A-6 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `b8867e52`): il lettore compatibile v1/v2 di M6-A-1 è ora nel **percorso reale di lettura** dell'app (nuovo `createOfflineQueueReader` nel modulo della coda, sincronizzatore con lettura iniettabile e stato **`queue-unavailable`**, client che costruisce il lettore, tollera lo scrittore non apribile e rifiuta le scritture con `OFFLINE_QUEUE_WRITE_UNAVAILABLE`), **senza** cambiare lo scrittore, il coordinamento o il comportamento distribuito e **senza** eseguire l'upgrade v2 nel runtime o attivare il fallback. Prove: 21 test nuovi (30/30 coda, 12/12 sincronizzatore, 8/8 client, 128/128 `test:offline-write-prototype`) su coda **v1 con operazioni sigillate pendenti e riconciliazione**, coda **v2** e **schema non supportato**/apertura bloccata, con verifica esplicita che l'indisponibilità restituisce `operations: null` (**mai** `[]`) e che non si invia né si dichiara salvato; tre controlli di mutazione discriminatori (indisponibilità trattata come coda vuota, scrittura senza coda operabile, lettore che nasconde l'indisponibilità) con file ripristinati byte per byte; banchi browser tutti verdi, audit di sintassi OK su 161 moduli, `npm test` exit 0, inventario a 867 file, budget statico verde. Resta **solo prova di laboratorio**: candidato di upgrade, coordinatore ibrido/lease, modello di rollback e prove su IndexedDB reale del lettore (banco M6-A-1); il pilota resta opt-in e le scritture disattivate per default; `discard` resta sul percorso dello scrittore; nessun messaggio utente montato. Limiti: prove del percorso reale su fixture in memoria, scrittura offline indisponibile su coda v2 finché non si procede con l'upgrade previsto, nessun collaudo fisico, M6-F3 aperto. Nessun push, merge, deploy o rilascio; nessun secondo incarico avviato.

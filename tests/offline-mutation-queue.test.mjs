@@ -445,3 +445,55 @@ test('comportamento invariato con e senza Web Locks dopo l’aggiunta del lettor
     await assert.rejects(queue.withOfflineQueueLease('owner-a', async () => 'no', null), /OFFLINE_QUEUE_LOCKS_UNAVAILABLE/);
     await assert.rejects(queue.withOfflineQueueLease('owner-a', async () => 'no', {}), /OFFLINE_QUEUE_LOCKS_UNAVAILABLE/);
 });
+
+// ── M6-A-6: percorso di lettura dell'app (sola lettura, v1/v2, indisponibilità) ─────────────
+const sealedRow = async (uid, operationId, extra = {}) => queue.sealOfflineOperation(
+    {uid, operationId, recordId: `record-${operationId}`, value: `fixture-${operationId}`, ...extra},
+    await queue.deriveOfflineQueueKey('FIXTURE-KEY', uid));
+
+test('lettore dell’app su coda v1 con operazioni pendenti e riconciliazione', async () => {
+    const row = await sealedRow('owner-a', 'device:1');
+    const reviewed = await sealedRow('owner-a', 'device:2', {_queueState: 'reconciliation-required', _reviewReason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'});
+    const f = readerFixture({version: 1, rows: [row, reviewed]});
+    const reader = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: f.indexedDb});
+    const result = await reader.read();
+    assert.equal(result.available, true);
+    assert.equal(result.version, 1);
+    assert.deepEqual(result.operations, [
+        {uid: 'owner-a', operationId: 'device:1', recordId: 'record-device:1', value: 'fixture-device:1'},
+        {uid: 'owner-a', operationId: 'device:2', recordId: 'record-device:2', value: 'fixture-device:2',
+            _queueState: 'reconciliation-required', _reviewReason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'}
+    ]);
+    // Sola lettura: nessuna scrittura e apertura senza versione (nessun upgrade richiesto).
+    assert.deepEqual(f.calls.writes, []);
+    assert.deepEqual(f.calls.opens.map(args => args.length), [1]);
+    assert.deepEqual(f.calls.created, []);
+});
+
+test('lettore dell’app su coda v2 e su schema non supportato', async () => {
+    const v2 = readerFixture({version: 2, rows: [await sealedRow('owner-a', 'device:1')]});
+    const readerV2 = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: v2.indexedDb});
+    const resultV2 = await readerV2.read();
+    assert.equal(resultV2.available, true);
+    assert.equal(resultV2.version, 2);
+    assert.deepEqual(resultV2.operations.map(operation => operation.operationId), ['device:1']);
+
+    const unsupported = readerFixture({version: 3, rows: [await sealedRow('owner-a', 'device:1')]});
+    const readerV3 = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: unsupported.indexedDb});
+    const resultV3 = await readerV3.read();
+    // Indisponibilità dichiarata: mai una coda vuota, mai un salvataggio riuscito.
+    assert.deepEqual(resultV3, {available: false, version: null, operations: null, reason: 'QUEUE_READER_SCHEMA'});
+    assert.notDeepEqual(resultV3.operations, []);
+    const malformed = readerFixture({version: 1, rows: [validContainer('owner-b', 'device:1')]});
+    const readerMalformed = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: malformed.indexedDb});
+    assert.equal((await readerMalformed.read()).reason, 'QUEUE_READER_CONTAINER');
+});
+
+test('lettore dell’app: apertura che non si conclude diventa indisponibilità, non coda vuota', async () => {
+    const never = {open() { return {}; }};
+    const reader = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: never, timeoutMs: 5});
+    const result = await reader.read();
+    assert.equal(result.available, false);
+    assert.equal(result.reason, 'QUEUE_READER_TIMEOUT');
+    assert.equal(result.operations, null);
+});

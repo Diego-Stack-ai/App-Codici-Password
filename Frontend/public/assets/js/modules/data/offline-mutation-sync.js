@@ -1,17 +1,23 @@
-const VALID_STATES = new Set(['idle', 'offline', 'syncing', 'conflict', 'recoverable-error', 'reconciliation-required', 'saved']);
+const VALID_STATES = new Set(['idle', 'offline', 'syncing', 'conflict', 'recoverable-error', 'reconciliation-required', 'saved', 'queue-unavailable']);
 
 export function createOfflineMutationSynchronizer({
     uid,
     queue,
     send,
     withLease,
+    // [M6-A-6] Il percorso di lettura è iniettabile: quando è fornito, la coda viene letta con il
+    // lettore compatibile v1/v2 e un esito non leggibile diventa uno **stato esplicito di
+    // indisponibilità** invece di una coda vuota o di un salvataggio riuscito.
+    readQueue = null,
     isOnline = () => navigator.onLine,
     isActive = () => true,
     onState = () => {}
 }) {
-    if (!uid || !queue || typeof send !== 'function' || typeof withLease !== 'function') {
+    if (!uid || (typeof send !== 'function' && !readQueue) || typeof withLease !== 'function') {
         throw new Error('OFFLINE_SYNCHRONIZER_CONFIG_INVALID');
     }
+    if (!queue && !readQueue) throw new Error('OFFLINE_SYNCHRONIZER_CONFIG_INVALID');
+    if (queue && typeof queue.list !== 'function') throw new Error('OFFLINE_SYNCHRONIZER_CONFIG_INVALID');
     let running = null;
 
     function emit(state, detail = {}) {
@@ -19,15 +25,40 @@ export function createOfflineMutationSynchronizer({
         onState({state, ...detail});
     }
 
+    // Lettura unica per entrambi i rami: `available: false` non è mai una coda vuota.
+    async function read() {
+        if (readQueue) {
+            const result = await readQueue();
+            if (result?.available === false) return {available: false, reason: result.reason || 'QUEUE_READER_UNAVAILABLE'};
+            return {available: true, operations: result?.operations ?? []};
+        }
+        return {available: true, operations: await queue.list()};
+    }
+
     async function run() {
         if (!isActive()) return {status: 'recoverable-error'};
+        const read0 = await read();
+        if (!read0.available) {
+            emit('queue-unavailable', {reason: read0.reason, pending: null});
+            return {status: 'queue-unavailable', reason: read0.reason};
+        }
+        if (!queue) {
+            // Coda leggibile ma non operabile (scrittore non disponibile): nessun invio, nessuna
+            // conferma e nessun «salvato», perché non si potrebbe rimuovere l'operazione inviata.
+            emit('queue-unavailable', {reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending: read0.operations.length});
+            return {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'};
+        }
         if (!isOnline()) {
-            const pending = (await queue.list()).length;
-            emit('offline', {pending});
-            return {status: 'offline', pending};
+            emit('offline', {pending: read0.operations.length});
+            return {status: 'offline', pending: read0.operations.length};
         }
         return withLease(uid, async () => {
-            const operations = await queue.list();
+            const read1 = await read();
+            if (!read1.available) {
+                emit('queue-unavailable', {reason: read1.reason, pending: null});
+                return {status: 'queue-unavailable', reason: read1.reason};
+            }
+            const operations = read1.operations;
             emit('syncing', {pending: operations.length});
             let completed = 0;
             for (const operation of operations) {

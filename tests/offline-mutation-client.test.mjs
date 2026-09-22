@@ -86,3 +86,54 @@ test('close invalida sessione e sostituzioni tardive',async()=>{
     assert.equal(active(),true);client.close();assert.equal(active(),false);
     await assert.rejects(client.replace({uid:'owner'},{uid:'owner'}),/SESSION_CHANGED/);assert.equal(called,0);
 });
+
+// ── M6-A-6: copia non compatibile e schema non leggibile restano stati dichiarati ───────────
+const unavailabilityDependencies = ({writerError = null, read = null} = {}) => {
+    const states = []; let sends = 0, closed = 0;
+    return {
+        states, get sends() { return sends; }, get closed() { return closed; },
+        createQueue: async () => { if (writerError) throw writerError; return {list: async () => [], close: () => { closed += 1; }}; },
+        createQueueReader: () => ({read: async () => read}),
+        createSynchronizer: ({queue, readQueue, send, onState}) => ({
+            flush: async () => {
+                const result = await readQueue();
+                if (result?.available === false) { onState({state: 'queue-unavailable', reason: result.reason, pending: null}); return {status: 'queue-unavailable', reason: result.reason}; }
+                if (!queue) { onState({state: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending: result.operations.length}); return {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'}; }
+                sends += 1; return {status: 'saved'};
+            }
+        }),
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        send: async () => { sends += 1; },
+        isOnline: () => true,
+        onState: state => states.push(state)
+    };
+};
+
+test('scrittore non apribile (copia non compatibile) e lettore compatibile: indisponibilità dichiarata, nessun invio', async () => {
+    const deps = unavailabilityDependencies({writerError: Object.assign(new Error('VersionError'), {name: 'VersionError'}),
+        read: {available: true, version: 2, operations: [{operationId: 'op-1'}]}});
+    const client = await createOfflineMutationClientCore({...deps, uid: 'owner', vaultKeyMaterial: 'fixture', enabled: true});
+    assert.deepEqual(await client.flush(), {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'});
+    await assert.rejects(client.enqueue({uid: 'owner', operationId: 'op-2'}), /OFFLINE_QUEUE_WRITE_UNAVAILABLE/);
+    assert.equal(deps.sends, 0);
+    assert.equal(deps.states.at(-1).state, 'queue-unavailable');
+    assert.notEqual(deps.states.at(-1).state, 'saved');
+    client.close();
+});
+
+test('schema non leggibile: indisponibilità con motivo, mai coda vuota', async () => {
+    const deps = unavailabilityDependencies({read: {available: false, version: null, operations: null, reason: 'QUEUE_READER_SCHEMA'}});
+    const client = await createOfflineMutationClientCore({...deps, uid: 'owner', vaultKeyMaterial: 'fixture', enabled: true});
+    assert.deepEqual(await client.flush(), {status: 'queue-unavailable', reason: 'QUEUE_READER_SCHEMA'});
+    assert.deepEqual(deps.states, [{state: 'queue-unavailable', reason: 'QUEUE_READER_SCHEMA', pending: null}]);
+    assert.equal(deps.sends, 0);
+    client.close();
+});
+
+test('senza lettore compatibile il comportamento resta quello di prima', async () => {
+    const error = Object.assign(new Error('VersionError'), {name: 'VersionError'});
+    await assert.rejects(createOfflineMutationClientCore({uid: 'owner', vaultKeyMaterial: 'fixture', enabled: true,
+        createQueue: async () => { throw error; },
+        createSynchronizer: () => ({flush: async () => ({status: 'saved'})}),
+        withLease: async (_uid, task) => task(), send: async () => {}}), /VersionError/);
+});

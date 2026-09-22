@@ -5,6 +5,7 @@ export async function createOfflineMutationClientCore({
     vaultKeyMaterial,
     enabled = OFFLINE_MUTATION_WRITES_ENABLED,
     createQueue,
+    createQueueReader,
     createSynchronizer,
     withLease,
     createChannel,
@@ -21,13 +22,33 @@ export async function createOfflineMutationClientCore({
     const active = () => !closed && isActive();
     const assertActive = () => { if (!active()) throw new Error('OFFLINE_SESSION_CHANGED'); };
     assertActive();
-    const queue = await createQueue({uid, vaultKeyMaterial, isActive: active});
-    if (!active()) { queue.close?.(); throw new Error('OFFLINE_SESSION_CHANGED'); }
-    const synchronizer = createSynchronizer({uid, queue, send, withLease, onState, isOnline, isActive: active});
+    // [M6-A-6] La **lettura** passa dal lettore compatibile v1/v2; lo **scrittore** resta quello di
+    // prima e non viene toccato. Se la coda non è operabile — per esempio una copia non compatibile
+    // con lo schema presente — il client resta vivo e riferisce l'indisponibilità tramite il
+    // sincronizzatore, invece di morire o di far credere che la coda sia vuota.
+    const reader = createQueueReader ? createQueueReader({uid, vaultKeyMaterial, isActive: active}) : null;
+    let queue = null, writeUnavailable = null;
+    try {
+        queue = await createQueue({uid, vaultKeyMaterial, isActive: active});
+    } catch (error) {
+        if (!reader) throw error;
+        writeUnavailable = error?.name || error?.code || error?.message;
+    }
+    if (queue && !active()) { queue.close?.(); throw new Error('OFFLINE_SESSION_CHANGED'); }
+    const readQueue = reader ? () => reader.read() : undefined;
+    const synchronizer = createSynchronizer({uid, queue, readQueue, send, withLease, onState, isOnline, isActive: active});
     const channel = createChannel?.(uid, () => synchronizer.flush()) ?? {notify() {}, close() {}};
+    // Gli ingressi di **scrittura** richiedono la coda operabile: senza di essa rifiutano in modo
+    // dichiarato e non accodano nulla.
+    const assertWritable = () => {
+        assertActive();
+        if (!queue) {
+            throw Object.assign(new Error('OFFLINE_QUEUE_WRITE_UNAVAILABLE'), {code: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', reason: writeUnavailable});
+        }
+    };
     return {
         async enqueue(operation) {
-            assertActive();
+            assertWritable();
             if (operation?.uid !== uid) throw new Error('OFFLINE_OPERATION_SCOPE_INVALID');
             await queue.enqueue(operation, {isActive: active});
             assertActive();
@@ -35,7 +56,7 @@ export async function createOfflineMutationClientCore({
             return synchronizer.flush();
         },
         async replace(expectedOperation, replacement) {
-            assertActive();
+            assertWritable();
             if (expectedOperation?.uid !== uid || replacement?.uid !== uid) throw new Error('OFFLINE_OPERATION_SCOPE_INVALID');
             const result = await withLease(uid, async () => {
                 assertActive();
@@ -49,7 +70,7 @@ export async function createOfflineMutationClientCore({
         },
         flush: () => synchronizer.flush(),
         async discard(operationId) {
-            assertActive();
+            assertWritable();
             if (!operationId) throw new Error('OFFLINE_OPERATION_ID_REQUIRED');
             const result = await withLease(uid, async () => {
                 assertActive();
@@ -62,6 +83,6 @@ export async function createOfflineMutationClientCore({
             assertActive();
             channel.notify();
         },
-        close() { closed = true; channel.close(); queue.close?.(); }
+        close() { closed = true; channel.close(); queue?.close?.(); }
     };
 }
