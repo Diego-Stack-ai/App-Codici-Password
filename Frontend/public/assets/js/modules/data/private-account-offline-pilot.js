@@ -1,5 +1,4 @@
 import {createOfflineMutationClient} from './offline-mutation-client.js';
-import {inspectOfflineQueueSchema, upgradeOfflineQueueSchema} from './offline-mutation-upgrade.js';
 
 const DEVICE_KEY = 'codex_m6_private_account_device_id';
 const HANDOFF_PREFIX = 'codex_m6_private_account_handoff:';
@@ -117,18 +116,6 @@ export async function replacePrivateAccountPilotOperation(options) {
 // del lease e lascia i contenitori sigillati identici. **Nessun** percorso dell'app lo avvia da
 // sé: non è chiamato dalla costruzione del client, dal montaggio della pagina o dalla
 // sincronizzazione. Quando aggiornare le PWA installate resta una decisione di prodotto aperta
-// (M6-F3 e collaudi fisici).
-export async function upgradePrivateAccountPilotQueue({uid, indexedDb, signal, isActive, timeoutMs} = {}) {
-    if (!uid) throw new Error('PRIVATE_ACCOUNT_PILOT_INPUT_INVALID');
-    const before = await inspectOfflineQueueSchema({uid, indexedDb});
-    const outcome = await upgradeOfflineQueueSchema({uid, indexedDb, signal, isActive, timeoutMs});
-    return {...outcome, previousVersion: before.version};
-}
-
-// Stato della coda per il pilota: versione, store e numero di operazioni sigillate **senza**
-// scrivere nulla. Serve a distinguere «coda non leggibile» da «coda vuota».
-export async function inspectPrivateAccountPilotQueue({uid, indexedDb} = {}) {
-    if (!uid) throw new Error('PRIVATE_ACCOUNT_PILOT_INPUT_INVALID');
-    const schema = await inspectOfflineQueueSchema({uid, indexedDb});
-    return {version: schema.version, stores: schema.stores, operations: schema.rows.length};
-}
+// (M6-F3 e collaudi fisici). L'implementazione vive in un modulo senza dipendenze Firebase, così
+// il percorso reale è provabile; qui viene riesportata per i chiamanti del pilota.
+export {inspectPrivateAccountPilotQueue, upgradePrivateAccountPilotQueue} from './private-account-pilot-queue.js';

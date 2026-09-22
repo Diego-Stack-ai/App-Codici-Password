@@ -43,6 +43,7 @@ const paths = new Map([
     ['/queue-upgrade-v2.mjs', 'experiments/offline-sync/queue-upgrade-v2.mjs'],
     ['/rollback-v2-compatible.mjs', 'experiments/offline-sync/rollback-v2-compatible.mjs'],
     ['/offline-mutation-upgrade.js', 'Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js'],
+    ['/private-account-pilot-queue.js', 'Frontend/public/assets/js/modules/data/private-account-pilot-queue.js'],
     ['/offline-mutation-client-core.js', 'Frontend/public/assets/js/modules/data/offline-mutation-client-core.js'],
     ['/offline-mutation-sync.js', 'Frontend/public/assets/js/modules/data/offline-mutation-sync.js'],
     ['/fenced-queue-writer.mjs', 'experiments/offline-sync/fenced-queue-writer.mjs'],

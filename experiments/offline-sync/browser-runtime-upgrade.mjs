@@ -1,6 +1,7 @@
 import {createOfflineMutationQueue, deriveOfflineQueueKey, openOfflineOperation, readOfflineQueueContainers,
     sealOfflineOperation} from './queue.js';
 import {inspectOfflineQueueSchema, upgradeOfflineQueueSchema} from './offline-mutation-upgrade.js';
+import {inspectPrivateAccountPilotQueue, upgradePrivateAccountPilotQueue} from './private-account-pilot-queue.js';
 import {createOfflineMutationClientCore} from './offline-mutation-client-core.js';
 import {createOfflineMutationSynchronizer} from './offline-mutation-sync.js';
 
@@ -156,6 +157,64 @@ try {
         assert(!deletion.blocked && deletion.pending !== true, `E_LEAKED_CONNECTION_${label}`);
     }
     passed.push('nessuna connessione lasciata aperta dalle sequenze provate (la cancellazione dei database sintetici non resta bloccata)');
+
+    // ── F. Percorso **del pilota** (export reale), coda assente — correzione R1 ───────────
+    const missingUid = newUid('pilot-missing');
+    const missingName = queueName(missingUid);
+    same(await rejection(() => upgradePrivateAccountPilotQueue({uid: missingUid})), 'QUEUE_UPGRADE_MISSING', 'F_MISSING_NOT_REFUSED');
+    same(await rejection(() => inspectPrivateAccountPilotQueue({uid: missingUid})), 'QUEUE_UPGRADE_MISSING', 'F_INSPECT_MISSING');
+    const databases = await indexedDB.databases();
+    assert(!databases.some(entry => entry.name === missingName), 'F_MISSING_DATABASE_CREATED');
+    const missingProbe = indexedDB.open(missingName, 1);
+    let missingUpgraded = false;
+    missingProbe.onupgradeneeded = () => { missingUpgraded = true; };
+    const missingDatabase = await requestValue(missingProbe);
+    missingDatabase.close();
+    assert(missingUpgraded, 'F_MISSING_DATABASE_EXISTS');
+    await new Promise(resolve => { const request = indexedDB.deleteDatabase(missingName); request.onsuccess = request.onerror = request.onblocked = () => resolve(); });
+    passed.push('percorso del **pilota** su coda assente: `upgradePrivateAccountPilotQueue` e la sua sonda falliscono con `QUEUE_UPGRADE_MISSING` e **nessun database viene creato** (verificato con `indexedDB.databases()` e con una sonda di apertura a versione 1)');
+
+    // ── G. Percorso del pilota: blocco, scadenza e v1→v2 integro ─────────────────────────
+    const uidG = await createV1Queue('pilot-blocked');
+    const beforeG = await inspectOfflineQueueSchema({uid: uidG});
+    const pilotHolder = await requestValue(indexedDB.open(queueName(uidG)));
+    same(await rejection(() => upgradePrivateAccountPilotQueue({uid: uidG})), 'QUEUE_UPGRADE_BLOCKED', 'G_NOT_BLOCKED');
+    // La sonda del pilota è limitata: non resta appesa dietro la richiesta in sospeso.
+    same(await rejection(() => upgradePrivateAccountPilotQueue({uid: uidG, timeoutMs: 1500})), 'QUEUE_UPGRADE_TIMEOUT', 'G_NOT_BOUNDED');
+    pilotHolder.close();
+    const afterG = await inspectOfflineQueueSchema({uid: uidG});
+    same([afterG.version, afterG.stores], [1, ['encryptedOperations']], 'G_LATE_UPGRADE_COMMITTED');
+    same(canonical(afterG.rows), canonical(beforeG.rows), 'G_LATE_ROWS_CHANGED');
+    sameOutcome(await upgradePrivateAccountPilotQueue({uid: uidG}), {version: 2, created: ['queueLeases'], previousVersion: 1}, 'G_PILOT_UPGRADE_FAILED');
+    const afterG2 = await inspectOfflineQueueSchema({uid: uidG});
+    same(canonical(afterG2.rows), canonical(beforeG.rows), 'G_PILOT_ROWS_CHANGED');
+    const byId2 = rows => new Map(rows.map(row => [row.id, row]));
+    const oldG = byId2(beforeG.rows), newG = byId2(afterG2.rows);
+    assert([...oldG.keys()].every(id => newG.get(id)?.iv === oldG.get(id).iv && newG.get(id)?.ciphertext === oldG.get(id).ciphertext), 'G_PILOT_BYTES_CHANGED');
+    same(await containerIds(uidG), ['device:1', 'device:2'], 'G_PILOT_CONTAINERS_CHANGED');
+    passed.push('percorso del **pilota** con coda v1 reale: blocco deliberato → `QUEUE_UPGRADE_BLOCKED`, sonda **limitata** → `QUEUE_UPGRADE_TIMEOUT` (nessuna attesa indefinita), poi upgrade riuscito con contenitori sigillati identici byte per byte e `previousVersion: 1`');
+
+    // ── H. Percorso del pilota: nessun avvio automatico ──────────────────────────────────
+    const uidH = await createV1Queue('pilot-no-auto');
+    const beforeH = await inspectOfflineQueueSchema({uid: uidH});
+    const pilotStates = [];
+    const pilotClient = await createOfflineMutationClientCore({
+        uid: uidH, vaultKeyMaterial: KEY, enabled: true,
+        createQueue: createOfflineMutationQueue,
+        createQueueReader: options => import('./queue.js').then(queue => queue.createOfflineQueueReader(options)),
+        createSynchronizer: createOfflineMutationSynchronizer,
+        withLease: (id, task) => import('./queue.js').then(queue => queue.withOfflineQueueLease(id, task)),
+        createChannel: () => ({notify() {}, close() {}}),
+        send: async () => ({status: 'conflict', currentRevision: 1}),
+        isOnline: () => true,
+        onState: state => pilotStates.push(state)
+    });
+    await pilotClient.flush();
+    pilotClient.close();
+    const afterH = await inspectOfflineQueueSchema({uid: uidH});
+    same([afterH.version, afterH.stores], [1, ['encryptedOperations']], 'H_AUTOMATIC_UPGRADE');
+    same(canonical(afterH.rows), canonical(beforeH.rows), 'H_ROWS_CHANGED');
+    passed.push('percorso del pilota: costruire il client e sincronizzare su una coda v1 **non** avvia l’upgrade (versione, store e righe invariati); l’upgrade resta solo su invocazione esplicita');
 
     await report({ok: true, passed, browser: navigator.userAgent});
 } catch (error) {

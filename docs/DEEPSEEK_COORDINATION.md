@@ -8529,3 +8529,60 @@ File ripristinati e verificati **byte per byte** (`offline-mutation-upgrade.js` 
 - Nessun collaudo su PWA installate, due dispositivi, iPhone/Windows; M6-F3 non è chiuso e questa consegna non autorizza adozione o rilascio.
 
 **Stato incarico: DA_VERIFICARE** — M6-A-7 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `90e9f9ae`): il candidato approvato **M6-A-2 R1/R2** è ora nel runtime come `offline-mutation-upgrade.js` (`upgradeOfflineQueueSchema` + sonda `inspectOfflineQueueSchema`) e il pilota lo invoca **solo su richiesta esplicita** (`upgradePrivateAccountPilotQueue`), senza alcun avvio automatico e senza fallback. Prove su **IndexedDB reale** (6 verdetti, Chrome 153 + Edge 153, 3 esecuzioni consecutive): coda v1 con operazioni sigillate (una in riconciliazione) → v2 con **solo** `queueLeases` e contenitori **identici byte per byte**, lettura compatibile e stati di riconciliazione conservati; secondo upgrade rifiutato; costruire il client reale e sincronizzare **non** esegue l'upgrade; blocco deliberato → `QUEUE_UPGRADE_BLOCKED` con lettura limitata (`QUEUE_READER_TIMEOUT`, mai coda vuota); dopo il rilascio la richiesta tardiva viene annullata, la coda resta a v1 con le stesse righe e un nuovo upgrade riesce; coda già v2 e schema v3 rifiutati senza toccare il database, coda assente resta assente; nessuna connessione residua. Prove Node aggiuntive su configurazione, sonda di sola lettura e **assenza di avvio automatico** (nessun modulo del client/sincronizzatore/coda riferisce l'upgrade; solo il pilota lo importa). Quattro controlli di mutazione discriminatori (upgrade che tocca i contenitori, upgrade tardivo non annullato, sonda che accetta ogni schema, upgrade avviato automaticamente) con file ripristinati byte per byte. Verifiche: banco runtime-upgrade verde su due browser, 147/147 `test:offline-write-prototype`, 46/46 sulle suite mirate, tutti gli altri banchi verdi, sintassi OK su 162 moduli, riferimenti statici OK su 236 file, `npm test` exit 0, inventario a 869 file, budget statico verde. Distinzione dichiarata: il **trigger tecnico** del pilota è questo; **quando** aggiornare le PWA installate resta una decisione di prodotto aperta con M6-F3 e i collaudi fisici. Limiti: Chromium headless con dati sintetici, pilota opt-in e fallback spento (su coda v2 la scrittura resta indisponibile finché non si procede con l'adozione), blocco deliberato dal banco, nessun collaudo fisico. Nessun push, merge, deploy o rilascio; nessun secondo incarico.
+
+**Revisione Codex — DA_CORREGGERE M6-A-7 (22/09/2026), commit locale `a43bade0`.** Il percorso additivo `upgradeOfflineQueueSchema` conserva l'impostazione del candidato M6-A-2 e `git diff HEAD^ HEAD --check` è pulito; Codex ha rieseguito le due suite Node mirate: **46/46 pass**. Tuttavia il percorso *effettivamente esportato dal pilota* `upgradePrivateAccountPilotQueue` esegue sempre `inspectOfflineQueueSchema` prima dell'upgrade (`Frontend/public/assets/js/modules/data/private-account-offline-pilot.js:121-125`). La sonda chiama `indexedDb.open(name)` senza gestire `onupgradeneeded` (`offline-mutation-upgrade.js:100-115`): su coda assente IndexedDB crea un database v1 vuoto, poi la lettura dello store mancante fallisce. Viene quindi violato il requisito «coda assente resta assente» sul trigger reale del pilota. Inoltre la sonda accetta `timeoutMs` ma non lo usa e non gestisce blocco/abort/sessione: l'invocazione del pilota può restare in attesa indefinita prima di raggiungere l'upgrade limitato nel tempo. Il banco browser `browser-runtime-upgrade.mjs` chiama direttamente `upgradeOfflineQueueSchema` (riga 150 per la coda assente), mai `upgradePrivateAccountPilotQueue`, perciò i suoi esiti riportati non dimostrano questi casi sul percorso del pilota. **Correzione unica per DeepSeek, senza nuovo incarico:** rendere sicura e limitata la sonda preliminare oppure eliminarla dal trigger; su coda assente nessuna creazione, su blocco/timeout/abort fallimento dichiarato e nessuna attesa indefinita. Aggiungere prove con IndexedDB reale che invochino l'export del pilota per coda assente, blocco/timeout e v1→v2 con contenitori sigillati invariati; verificare che non vi sia upgrade automatico. Consegnare la correzione nello stesso M6-A-7 come `DA_VERIFICARE`. Restano aperti M6-F3 e i collaudi fisici; nessun rilascio, push, merge o deploy approvato.
+
+## Rapporto DeepSeek — correzione M6-A-7 R1: sonda sicura e percorso del pilota
+
+### 1. I rilievi erano fondati
+
+1. **Sonda che creava il database.** `inspectOfflineQueueSchema` apriva la coda **senza gestire `onupgradeneeded`**: su coda assente IndexedDB creava un database v1 vuoto e poi la lettura dello store mancante falliva. Il trigger del pilota (`upgradePrivateAccountPilotQueue`) eseguiva sempre quella sonda prima dell'upgrade, quindi il requisito «coda assente resta assente» **non era rispettato sul percorso reale del pilota**.
+2. **Sonda senza limiti.** Accettava `timeoutMs` ma non lo usava e non gestiva blocco, abort o sessione: l'invocazione del pilota poteva restare in attesa indefinita **prima** di arrivare all'upgrade, che invece è limitato.
+3. **Prove non sul percorso del pilota.** Il banco chiamava direttamente `upgradeOfflineQueueSchema`: i casi riportati non dimostravano il trigger del pilota.
+
+### 2. Correzione applicata
+
+- `offline-mutation-upgrade.js` (**+40, −9**): la sonda è ora **sicura e limitata** — `onupgradeneeded` → **annulla** la transazione e riporta `QUEUE_UPGRADE_MISSING` (nessuna creazione), `onblocked` → `QUEUE_UPGRADE_BLOCKED`, scadenza → `QUEUE_UPGRADE_TIMEOUT` (sia sull'apertura sia sulla lettura), sessione/abort → `QUEUE_UPGRADE_SESSION` verificati prima dell'apertura e durante la lettura; store atteso mancante → `QUEUE_UPGRADE_SCHEMA`. Resta di sola lettura: non scrive, non migra, non crea.
+- `private-account-pilot-queue.js` (**nuovo, 33 righe**): il trigger `upgradePrivateAccountPilotQueue` e lo snapshot `inspectPrivateAccountPilotQueue` vivono ora in un modulo **senza dipendenze Firebase**, così il percorso reale è provabile; `private-account-offline-pilot.js` (**+3, −16**) li **riesporta** senza duplicare codice (l'API del pilota non cambia).
+- `offline-assets.js` (**+1**): manifest rigenerato, registra il nuovo modulo.
+
+### 3. Prove nuove **sul percorso del pilota** con IndexedDB reale
+
+- **F — coda assente**: `upgradePrivateAccountPilotQueue` e la sua sonda falliscono con `QUEUE_UPGRADE_MISSING` e **nessun database viene creato**, verificato in due modi (`indexedDB.databases()` non lo elenca; una sonda di apertura a versione 1 trova il database ancora inesistente).
+- **G — blocco, scadenza e v1→v2**: con una connessione v1 trattenuta il pilota riporta `QUEUE_UPGRADE_BLOCKED`; con `timeoutMs` ridotto la **sonda** è limitata e riporta `QUEUE_UPGRADE_TIMEOUT` (nessuna attesa indefinita); dopo il rilascio la richiesta tardiva viene annullata (coda ancora v1 con le stesse righe) e l'upgrade riesce: `{version: 2, created: ['queueLeases'], previousVersion: 1}`, contenitori sigillati **identici byte per byte**.
+- **H — nessun avvio automatico**: costruire il client reale e sincronizzare una coda v1 **non** esegue l'upgrade (versione, store e righe invariati).
+- **Node**: prova della sonda sicura (assente non creata con transazione annullata, scadenza, blocco, sessione già scaduta) e prova **statica** che nessun modulo del client/sincronizzatore/coda riferisce l'upgrade, che il trigger lo importa e che il pilota lo riesporta.
+
+### 4. Controlli di mutazione (3, tutti discriminatori)
+
+| Mutazione temporanea | Esito |
+|---|---|
+| sonda **senza** gestione di `onupgradeneeded` | banco rosso: `D_MISSING_CREATED` (il database assente viene creato) |
+| sonda **senza** limite di tempo | banco rosso: `BENCH_STALL` (attesa indefinita) |
+| sonda **senza** controllo di sessione | Node rosso (1 test) |
+
+File ripristinato e verificato **byte per byte** (`offline-mutation-upgrade.js`).
+
+### 5. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `npm run test:offline-runtime-upgrade` | **verde** Chrome 153 + Edge 153, **9 verdetti** |
+| `node --test` sulle tre suite mirate | **61/61 pass** |
+| `npm run test:offline-write-prototype` | **148/148 pass** |
+| banchi `--runtime-lease`, `--two-tabs`, `--mixed-contexts`, `--queue-upgrade`, `--rollback-v2`, `--no-locks`, coordinamento | **tutti verdi** |
+| `node scripts/audit-js-syntax.mjs` | 163 moduli, **OK** |
+| `npm run test:static-references` | 237 file, **OK** |
+| `npm test` (catena completa) | **exit 0** |
+| `npm run audit:inventory` | inventario rigenerato, **870 file** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato su 30 pagine» |
+
+### 6. Limiti dichiarati (invariati)
+
+- Chromium headless con dati sintetici; nessun collaudo su PWA installate o dispositivi reali.
+- Il blocco è **deliberato** dal banco (connessione grezza trattenuta), non una scheda reale dell'app.
+- L'upgrade resta **invocabile e non invocato**: pilota opt-in, fallback spento, scrittore ancora v1 (su coda v2 la scrittura offline resta indisponibile finché non si procede con l'adozione prevista).
+- **Quando** aggiornare le PWA installate resta decisione di prodotto aperta con M6-F3 e i collaudi fisici.
+- Il trigger vive in un modulo senza Firebase e il pilota lo riesporta: il percorso provato è **lo stesso codice** che il pilota espone, ma la prova avviene importando direttamente quel modulo (dichiarato).
+
+**Stato incarico: DA_VERIFICARE** — correzione M6-A-7 R1 consegnata da DeepSeek il 2026-09-22 con **una sola correzione locale mirata** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `a43bade0`): la **sonda** dello schema è ora sicura e limitata (`onupgradeneeded` → transazione annullata e `QUEUE_UPGRADE_MISSING`, senza creare nulla; blocco, scadenza, abort e sessione dichiarati; lettura a sua volta limitata), e il **trigger del pilota** vive in `private-account-pilot-queue.js` (senza dipendenze Firebase) che il pilota **riesporta** senza duplicazioni. Prove nuove sul **percorso del pilota** con IndexedDB reale: coda assente → `QUEUE_UPGRADE_MISSING` e **nessun database creato** (verificato con `indexedDB.databases()` e con una sonda di apertura); blocco deliberato → `QUEUE_UPGRADE_BLOCKED`; **sonda limitata** → `QUEUE_UPGRADE_TIMEOUT` (nessuna attesa indefinita); dopo il rilascio richiesta tardiva annullata (coda a v1, stesse righe) e upgrade riuscito con `{version: 2, created: ['queueLeases'], previousVersion: 1}` e contenitori sigillati identici byte per byte; costruire il client e sincronizzare **non** avvia l'upgrade. Prove Node su sonda sicura (assente, scadenza, blocco, sessione) e sull'assenza di avvio automatico. Tre controlli di mutazione discriminatori (sonda senza `onupgradeneeded` → `D_MISSING_CREATED`; sonda senza limite → `BENCH_STALL`; sonda senza sessione → Node rosso) con file ripristinato byte per byte. Verifiche: banco runtime-upgrade verde su due browser (9 verdetti), 61/61 sulle suite mirate, 148/148 `test:offline-write-prototype`, tutti gli altri banchi verdi, sintassi OK su 163 moduli, riferimenti statici OK su 237 file, `npm test` exit 0, inventario a 870 file, budget statico verde. Limiti invariati: Chromium headless con dati sintetici, blocco deliberato dal banco, pilota opt-in con fallback spento e scrittore v1, percorso provato importando il modulo del trigger che il pilota riesporta, nessun collaudo fisico, M6-F3 aperto e decisione di prodotto su **quando** aggiornare le PWA installate non presa. Nessun push, merge, deploy o rilascio; nessun secondo incarico.

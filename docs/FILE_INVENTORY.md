@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js` | JS | 6863 | 117 | Supporto frontend: offline-mutation-upgrade. |
+| `Frontend/public/assets/js/modules/data/private-account-pilot-queue.js` | JS | 1752 | 28 | Supporto frontend: private-account-pilot-queue. |
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 143121 | 1023 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -120,7 +120,8 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1189 | 22 | Supporto frontend: offline-mutation-client. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 20398 | 373 | Supporto frontend: offline-mutation-queue. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 7383 | 132 | Supporto frontend: offline-mutation-sync. |
-| `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 5009 | 135 | Supporto frontend: private-account-offline-pilot. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js` | JS | 8561 | 148 | Supporto frontend: offline-mutation-upgrade. |
+| `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 4267 | 122 | Supporto frontend: private-account-offline-pilot. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 687 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
 | `Frontend/public/assets/js/modules/data/shared-vault-data-client.js` | JS | 3256 | 70 | Supporto frontend: shared-vault-data-client. |
@@ -245,7 +246,7 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 8139 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 67093 | 823 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 10306 | 243 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 10362 | 244 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13808 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15687 | 260 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
@@ -256,11 +257,116 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/sw.js` | JS | 3932 | 95 | Service worker: shell offline, cache runtime, push in background e deep link. |
 | `Frontend/public/termini.html` | HTML | 11553 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
 
+## .firebaserc
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.firebaserc` | CONFIG | 65 | 6 | Associa Firebase CLI al progetto appcodici-password. |
+
+## .github
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.github/copilot-instructions.md` | MD | 1885 | 29 | Documentazione: copilot-instructions. |
+| `.github/workflows/firebase-deploy.yml` | YML | 1880 | 74 | File di progetto: firebase-deploy. |
+
+## .gitignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.gitignore` | CONFIG | 1715 | 89 | Esclusioni Git per file generati o locali. |
+
+## .vscode
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
+| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
+
+## archive
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `archive/home-experiments/home-confronto.js` | JS | 59 | 2 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home-nebbia.js` | JS | 58 | 2 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home-v126.html` | HTML | 548 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home-v127.html` | HTML | 548 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home-v128.html` | HTML | 553 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home-v129.html` | HTML | 558 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home_confronto.html` | HTML | 592 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home_confronto_legacy.css` | CSS | 2717 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+| `archive/home-experiments/home_nebbia.html` | HTML | 605 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
+
+## docs
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
+| `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
+| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
+| `docs/A4_CENSIMENTO_DOCUMENTI.md` | MD | 2143 | 12 | Documentazione: A4 CENSIMENTO DOCUMENTI. |
+| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
+| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
+| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 32060 | 488 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
+| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1311276 | 8534 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
+| `docs/M10_DOMANDE_AUDIT_INDIPENDENTE.md` | MD | 2974 | 45 | Documentazione: M10 DOMANDE AUDIT INDIPENDENTE. |
+| `docs/M10_DOMANDE_GUIDA_E_PRIVACY.md` | MD | 3700 | 54 | Documentazione: M10 DOMANDE GUIDA E PRIVACY. |
+| `docs/M10_GUIDA_UTENTE_BOZZA.md` | MD | 13207 | 145 | Documentazione: M10 GUIDA UTENTE BOZZA. |
+| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
+| `docs/M10_REVISIONE_LOCALE.md` | MD | 18683 | 222 | Documentazione: M10 REVISIONE LOCALE. |
+| `docs/M10_REVISIONE_PRIVACY_PRELIMINARE.md` | MD | 12065 | 135 | Documentazione: M10 REVISIONE PRIVACY PRELIMINARE. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
+| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
+| `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
+| `docs/M6_DOMANDE_CACHE_ESPULSA.md` | MD | 3273 | 49 | Documentazione: M6 DOMANDE CACHE ESPULSA. |
+| `docs/M6_DOMANDE_FALLBACK_WEB_LOCKS.md` | MD | 3267 | 48 | Documentazione: M6 DOMANDE FALLBACK WEB LOCKS. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 87601 | 535 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/M7_DOMANDE_T08_COPIE_CONDIVISE.md` | MD | 3447 | 63 | Documentazione: M7 DOMANDE T08 COPIE CONDIVISE. |
+| `docs/M7_DOMANDE_T17_INTESTAZIONE_BACKUP.md` | MD | 3295 | 56 | Documentazione: M7 DOMANDE T17 INTESTAZIONE BACKUP. |
+| `docs/M7_DOMANDE_T21_RIPRISTINO_DOPO_PURGE.md` | MD | 3401 | 59 | Documentazione: M7 DOMANDE T21 RIPRISTINO DOPO PURGE. |
+| `docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md` | MD | 4177 | 70 | Documentazione: M7 DOMANDE T23 CACHE DISPOSITIVO. |
+| `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
+| `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
+| `docs/M7_DOMANDE_T27_HARD_DELETE.md` | MD | 4089 | 68 | Documentazione: M7 DOMANDE T27 HARD DELETE. |
+| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
+| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 111806 | 679 | Documentazione: M7 RETENTION CENSIMENTO. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 43649 | 287 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M8_DOMANDE_RIPRISTINO_CAS_PARZIALE.md` | MD | 3665 | 56 | Documentazione: M8 DOMANDE RIPRISTINO CAS PARZIALE. |
+| `docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md` | MD | 2889 | 51 | Documentazione: M8 DOMANDE RIPRISTINO INTERROTTO. |
+| `docs/M8_DOMANDE_RIPRISTINO_NUOVA_SESSIONE.md` | MD | 3648 | 56 | Documentazione: M8 DOMANDE RIPRISTINO NUOVA SESSIONE. |
+| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5588 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
+| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 108986 | 709 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 130176 | 742 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
+| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
+
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/offline-sync/browser-runtime-upgrade.mjs` | MJS | 12539 | 164 | File di progetto: browser-runtime-upgrade. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -286,6 +392,7 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/browser-queue-upgrade.mjs` | MJS | 21105 | 282 | File di progetto: browser-queue-upgrade. |
 | `experiments/offline-sync/browser-rollback-v2.mjs` | MJS | 9458 | 121 | File di progetto: browser-rollback-v2. |
 | `experiments/offline-sync/browser-runtime-lease.mjs` | MJS | 21624 | 328 | File di progetto: browser-runtime-lease. |
+| `experiments/offline-sync/browser-runtime-upgrade.mjs` | MJS | 17452 | 223 | File di progetto: browser-runtime-upgrade. |
 | `experiments/offline-sync/browser-two-tabs.mjs` | MJS | 25165 | 380 | File di progetto: browser-two-tabs. |
 | `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
 | `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3194 | 54 | File di progetto: conflict-note-proposal. |
@@ -308,7 +415,7 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
 | `experiments/offline-sync/queue-upgrade-v2.mjs` | MJS | 7749 | 128 | File di progetto: queue-upgrade-v2. |
 | `experiments/offline-sync/rollback-v2-compatible.mjs` | MJS | 4333 | 71 | File di progetto: rollback-v2-compatible. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 9249 | 119 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 9363 | 120 | File di progetto: run-browser-tests. |
 | `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1682 | 28 | File di progetto: run-emulated-browsers. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2762 | 51 | File di progetto: account-detail-reader. |
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7479 | 121 | File di progetto: account-detail-reader.test. |
@@ -587,112 +694,6 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3663 | 70 | File di progetto: record-sharing-crypto.test. |
 | `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1707 | 53 | File di progetto: storage.candidate. |
 
-## .firebaserc
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.firebaserc` | CONFIG | 65 | 6 | Associa Firebase CLI al progetto appcodici-password. |
-
-## .github
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.github/copilot-instructions.md` | MD | 1885 | 29 | Documentazione: copilot-instructions. |
-| `.github/workflows/firebase-deploy.yml` | YML | 1880 | 74 | File di progetto: firebase-deploy. |
-
-## .gitignore
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1715 | 89 | Esclusioni Git per file generati o locali. |
-
-## .vscode
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
-| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
-
-## archive
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `archive/home-experiments/home-confronto.js` | JS | 59 | 2 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home-nebbia.js` | JS | 58 | 2 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home-v126.html` | HTML | 548 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home-v127.html` | HTML | 548 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home-v128.html` | HTML | 553 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home-v129.html` | HTML | 558 | 14 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home_confronto.html` | HTML | 592 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home_confronto_legacy.css` | CSS | 2717 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-| `archive/home-experiments/home_nebbia.html` | HTML | 605 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-
-## docs
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md` | MD | 4814 | 42 | Documentazione: A1B CENSIMENTO CONTATTI AZIENDALI. |
-| `docs/A2_CENSIMENTO_INDIRIZZI.md` | MD | 5971 | 52 | Documentazione: A2 CENSIMENTO INDIRIZZI. |
-| `docs/A3_CENSIMENTO_UTENZE.md` | MD | 5054 | 35 | Documentazione: A3 CENSIMENTO UTENZE. |
-| `docs/A4_CENSIMENTO_DOCUMENTI.md` | MD | 2143 | 12 | Documentazione: A4 CENSIMENTO DOCUMENTI. |
-| `docs/AGENTE_CODEX_EVOLUZIONE.md` | MD | 15382 | 217 | Documentazione: AGENTE CODEX EVOLUZIONE. |
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 8133 | 119 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/ARCHITETTURA_SICUREZZA_V1.md` | MD | 24511 | 379 | Documentazione: ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | MD | 21779 | 240 | Documentazione: AUDIT MARKDOWN ARCHITETTURA SICUREZZA V1. |
-| `docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md` | MD | 10234 | 276 | Documentazione: AUDIT PROGETTO FASE1 FOTOGRAFIA. |
-| `docs/AUDIT_PROGETTO_FASE2_STATICO.md` | MD | 32060 | 488 | Documentazione: AUDIT PROGETTO FASE2 STATICO. |
-| `docs/AUDIT_VAULT_SESSION_P0.md` | MD | 167299 | 946 | Documentazione: AUDIT VAULT SESSION P0. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1299697 | 8461 | Documentazione: DEEPSEEK COORDINATION. |
-| `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
-| `docs/M10_DOMANDE_AUDIT_INDIPENDENTE.md` | MD | 2974 | 45 | Documentazione: M10 DOMANDE AUDIT INDIPENDENTE. |
-| `docs/M10_DOMANDE_GUIDA_E_PRIVACY.md` | MD | 3700 | 54 | Documentazione: M10 DOMANDE GUIDA E PRIVACY. |
-| `docs/M10_GUIDA_UTENTE_BOZZA.md` | MD | 13207 | 145 | Documentazione: M10 GUIDA UTENTE BOZZA. |
-| `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
-| `docs/M10_REVISIONE_LOCALE.md` | MD | 18683 | 222 | Documentazione: M10 REVISIONE LOCALE. |
-| `docs/M10_REVISIONE_PRIVACY_PRELIMINARE.md` | MD | 12065 | 135 | Documentazione: M10 REVISIONE PRIVACY PRELIMINARE. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
-| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10273 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
-| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6508 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_CHECKLIST_IPHONE.md` | MD | 6983 | 101 | Documentazione: M6 CHECKLIST IPHONE. |
-| `docs/M6_DOMANDE_CACHE_ESPULSA.md` | MD | 3273 | 49 | Documentazione: M6 DOMANDE CACHE ESPULSA. |
-| `docs/M6_DOMANDE_FALLBACK_WEB_LOCKS.md` | MD | 3267 | 48 | Documentazione: M6 DOMANDE FALLBACK WEB LOCKS. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 87601 | 535 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 24920 | 178 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M7_DOMANDE_T08_COPIE_CONDIVISE.md` | MD | 3447 | 63 | Documentazione: M7 DOMANDE T08 COPIE CONDIVISE. |
-| `docs/M7_DOMANDE_T17_INTESTAZIONE_BACKUP.md` | MD | 3295 | 56 | Documentazione: M7 DOMANDE T17 INTESTAZIONE BACKUP. |
-| `docs/M7_DOMANDE_T21_RIPRISTINO_DOPO_PURGE.md` | MD | 3401 | 59 | Documentazione: M7 DOMANDE T21 RIPRISTINO DOPO PURGE. |
-| `docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md` | MD | 4177 | 70 | Documentazione: M7 DOMANDE T23 CACHE DISPOSITIVO. |
-| `docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md` | MD | 3922 | 67 | Documentazione: M7 DOMANDE T24 COPIE CONSULTAZIONE. |
-| `docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md` | MD | 3498 | 58 | Documentazione: M7 DOMANDE T26 RESIDUI RIMOZIONE. |
-| `docs/M7_DOMANDE_T27_HARD_DELETE.md` | MD | 4089 | 68 | Documentazione: M7 DOMANDE T27 HARD DELETE. |
-| `docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md` | MD | 28636 | 187 | Documentazione: M7 MAPPA ELIMINAZIONE CONDIVISIONE. |
-| `docs/M7_RETENTION_CENSIMENTO.md` | MD | 111806 | 679 | Documentazione: M7 RETENTION CENSIMENTO. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 43649 | 287 | Documentazione: M8 BACKUP RECUPERO. |
-| `docs/M8_DOMANDE_RIPRISTINO_CAS_PARZIALE.md` | MD | 3665 | 56 | Documentazione: M8 DOMANDE RIPRISTINO CAS PARZIALE. |
-| `docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md` | MD | 2889 | 51 | Documentazione: M8 DOMANDE RIPRISTINO INTERROTTO. |
-| `docs/M8_DOMANDE_RIPRISTINO_NUOVA_SESSIONE.md` | MD | 3648 | 56 | Documentazione: M8 DOMANDE RIPRISTINO NUOVA SESSIONE. |
-| `docs/M9_SALUTE_CREDENZIALI.md` | MD | 5350 | 50 | Documentazione: M9 SALUTE CREDENZIALI. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 3540 | 48 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5588 | 84 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 6683 | 107 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PASSAGGIO_CONSEGNE_2026-09-16.md` | MD | 16647 | 128 | Documentazione: PASSAGGIO CONSEGNE 2026-09-16. |
-| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | MD | 7959 | 213 | Documentazione: PIANO AUDIT COMPLETO PROGETTO. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 108986 | 709 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | MD | 130176 | 742 | Documentazione: PROFILO ACCOUNT WIDGET CACHE ROADMAP. |
-| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | MD | 3471 | 51 | Documentazione: RISPOSTA INCIDENTI E RECUPERO. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3872 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/SETUP_LINUX_CLOUD.md` | MD | 8106 | 64 | Documentazione: SETUP LINUX CLOUD. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 11708 | 129 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 14436 | 169 | Documentazione: VAULT KEY CONTRACT. |
-
 ## firebase.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -919,7 +920,7 @@ File censiti: **869**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/new-account-shared-link.test.mjs` | MJS | 2601 | 33 | Test automatico: new-account-shared-link.test. |
 | `tests/offline-account-widgets.test.mjs` | MJS | 6182 | 60 | Test automatico: offline-account-widgets.test. |
 | `tests/offline-mutation-client.test.mjs` | MJS | 17682 | 281 | Test automatico: offline-mutation-client.test. |
-| `tests/offline-mutation-queue.test.mjs` | MJS | 34442 | 548 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 36099 | 572 | Test automatico: offline-mutation-queue.test. |
 | `tests/offline-mutation-sync.test.mjs` | MJS | 13647 | 221 | Test automatico: offline-mutation-sync.test. |
 | `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
 | `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |

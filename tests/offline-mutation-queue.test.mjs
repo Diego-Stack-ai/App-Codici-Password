@@ -541,7 +541,31 @@ test('nessun percorso dell’app avvia l’upgrade da sé: solo il pilota lo inv
         const text = await readFile(new URL(`../Frontend/public/assets/js/modules/data/${file}`, import.meta.url), 'utf8');
         assert.equal(/upgradeOfflineQueueSchema|offline-mutation-upgrade/.test(text), false, `${file} non deve avviare l'upgrade`);
     }
+    const trigger = await readFile(new URL('../Frontend/public/assets/js/modules/data/private-account-pilot-queue.js', import.meta.url), 'utf8');
+    assert.equal(trigger.includes("from './offline-mutation-upgrade.js'"), true);
+    assert.equal(trigger.includes('upgradePrivateAccountPilotQueue'), true);
     const pilot = await readFile(new URL('../Frontend/public/assets/js/modules/data/private-account-offline-pilot.js', import.meta.url), 'utf8');
-    assert.equal(pilot.includes("from './offline-mutation-upgrade.js'"), true);
-    assert.equal(pilot.includes('upgradePrivateAccountPilotQueue'), true);
+    assert.equal(pilot.includes("from './private-account-pilot-queue.js'"), true, 'il pilota deve riesportare il trigger');
+});
+
+test('sonda sicura: coda assente non creata, blocco e scadenza dichiarati', async () => {
+    // Coda assente: la richiesta di apertura riceve `onupgradeneeded` e la transazione va annullata.
+    const missing = {aborted: false, open() {
+        const request = {transaction: {abort() { missing.aborted = true; }}};
+        setImmediate(() => request.onupgradeneeded?.());
+        return request;
+    }};
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: missing}), /QUEUE_UPGRADE_MISSING/);
+    assert.equal(missing.aborted, true);
+    // Apertura che non risponde: scadenza dichiarata, nessuna attesa indefinita.
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: {open() { return {}; }}, timeoutMs: 5}), /QUEUE_UPGRADE_TIMEOUT/);
+    // Blocco dichiarato.
+    const blocked = {open() {
+        const request = {transaction: {abort() {}}};
+        setImmediate(() => request.onblocked?.());
+        return request;
+    }};
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: blocked}), /QUEUE_UPGRADE_BLOCKED/);
+    // Sessione già scaduta: nessuna apertura.
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: {open() { assert.fail('non deve aprire'); }}, isActive: () => false}), /QUEUE_UPGRADE_SESSION/);
 });

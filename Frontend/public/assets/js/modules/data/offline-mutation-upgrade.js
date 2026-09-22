@@ -95,20 +95,51 @@ export async function upgradeOfflineQueueSchema({uid, indexedDb = globalThis.ind
     return {version: outcome.version, created: ['queueLeases']};
 }
 
-// Sonda di sola lettura: versione, store e righe grezze della coda. Serve alle prove e alla
-// diagnostica del pilota; non scrive e non migra.
-export async function inspectOfflineQueueSchema({uid, indexedDb = globalThis.indexedDB, timeoutMs = 10000} = {}) {
-    if (typeof uid !== 'string' || !uid || !indexedDb || !Number.isSafeInteger(timeoutMs) || timeoutMs < 1) throw fail('QUEUE_UPGRADE_CONFIG');
-    const database = await requestValue(indexedDb.open(`codex-offline-queue-${uid}`));
+// Sonda di sola lettura: versione, store e righe grezze della coda. Non scrive e non migra, e
+// **non crea** un database assente: se la coda non esiste la richiesta di apertura riceve
+// `onupgradeneeded`, la transazione viene annullata e l'esito è `QUEUE_UPGRADE_MISSING`. Tutte le
+// attese sono limitate nel tempo e la sessione viene verificata, così il chiamante non resta mai
+// appeso e non nasce nulla per sbaglio.
+export async function inspectOfflineQueueSchema({uid, indexedDb = globalThis.indexedDB, signal, isActive = () => true, timeoutMs = 10000} = {}) {
+    if (typeof uid !== 'string' || !uid || !indexedDb || typeof isActive !== 'function' ||
+        !Number.isSafeInteger(timeoutMs) || timeoutMs < 1) throw fail('QUEUE_UPGRADE_CONFIG');
+    const name = `codex-offline-queue-${uid}`;
+    const check = () => { if (signal?.aborted || !isActive()) throw fail('QUEUE_UPGRADE_SESSION'); };
+    check();
+    const probe = indexedDb.open(name);
+    let probeSettled = false;
+    await new Promise((resolve, reject) => {
+        const settle = error => {
+            if (probeSettled) return;
+            probeSettled = true; clearTimeout(timer);
+            if (error) reject(error); else resolve();
+        };
+        const timer = setTimeout(() => settle(fail('QUEUE_UPGRADE_TIMEOUT')), timeoutMs);
+        probe.onupgradeneeded = () => { probe.transaction.abort(); settle(fail('QUEUE_UPGRADE_MISSING')); };
+        probe.onblocked = () => settle(fail('QUEUE_UPGRADE_BLOCKED'));
+        probe.onerror = () => settle(probe.error || fail('QUEUE_UPGRADE_OPEN'));
+        probe.onsuccess = () => {
+            if (probeSettled) { probe.result?.close(); return; }
+            settle(null);
+        };
+    });
+    const database = probe.result;
     try {
+        check();
+        if (!database.objectStoreNames.contains('encryptedOperations')) throw fail('QUEUE_UPGRADE_SCHEMA');
         const rows = [];
         const request = database.transaction('encryptedOperations', 'readonly').objectStore('encryptedOperations').openCursor();
         await new Promise((resolve, reject) => {
-            request.onerror = () => reject(request.error || fail('QUEUE_UPGRADE_READ'));
+            const timer = setTimeout(() => reject(fail('QUEUE_UPGRADE_TIMEOUT')), timeoutMs);
+            const done = error => { clearTimeout(timer); if (error) reject(error); else resolve(); };
+            request.onerror = () => done(request.error || fail('QUEUE_UPGRADE_READ'));
             request.onsuccess = () => {
-                const cursor = request.result;
-                if (!cursor) { resolve(); return; }
-                rows.push(cursor.value); cursor.continue();
+                try {
+                    check();
+                    const cursor = request.result;
+                    if (!cursor) { done(null); return; }
+                    rows.push(cursor.value); cursor.continue();
+                } catch (error) { done(error); }
             };
         });
         return {version: database.version, stores: [...database.objectStoreNames].sort(), rows};
