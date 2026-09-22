@@ -10,7 +10,8 @@ const candidates = process.platform === 'win32' ? [
 ];
 const paths = candidates.map(group => group.find(path => path && existsSync(path)));
 const modes = process.argv.includes('--no-locks') ? ['--no-locks']
-    : process.argv.includes('--runtime-lease') ? ['--runtime-lease'] : ['--backend', '--private-backend'];
+    : process.argv.includes('--runtime-lease') ? ['--runtime-lease']
+    : process.argv.includes('--queue-upgrade') ? ['--queue-upgrade'] : ['--backend', '--private-backend'];
 for (const browser of paths) {
     if (!browser) throw new Error('Chrome/Edge unavailable; set CHROME_PATH and EDGE_PATH to executable paths');
     for (const mode of modes) {

@@ -7794,3 +7794,83 @@ Nota sul budget: il modulo della coda **non** compare fra i moduli misurati in `
 - Restano per incarichi successivi, non avviati: upgrade additivo con prova su coda v1 reale (caso 3), prova mista di convivenza (6-bis/6-ter), rollback v2-compatibile, adozione nel runtime distribuito.
 
 **Stato incarico: DA_VERIFICARE** — M6-A-1 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** su `integration/vault-shell-v127-security` (HEAD precedente `ab647622`), che comprende il lettore compatibile v1/v2 nel runtime della coda (additivo: +66 righe, 0 eliminazioni), 7 prove Node nuove su 27 totali, la sezione F del banco browser su IndexedDB reale e questo rapporto. Contratto: apertura **senza versione**, database mancante che resta mancante, versioni ammesse 1 e 2 (v2 con `queueLeases`), verifica di `keyPath`/`autoIncrement`, transazione `readonly`, validazione di proprietario e forma dei contenitori, chiusura della connessione in ogni esito, codici `QUEUE_READER_*`, nessuna scrittura, nessun upgrade, nessuna cancellazione e nessuna ricreazione. Esiti reali: 27/27 test Node, banco `--runtime-lease` verde su Chrome 153 e Edge 153 (11 verdetti), banco `--no-locks` verde con `webLocks: "undefined"`, banco di coordinamento verde, `npm test` exit 0, budget statico delle pagine verde (il modulo della coda non è fra quelli misurati). Tre controlli di mutazione discriminatori (guardia di versione, controllo di `iv`, guardia su `onupgradeneeded`), con file ripristinati e verificati byte per byte (`12f24575cf26b8f447331e6f0628013483f2b953`). Difetto trovato e corretto durante il lavoro: la prima versione usava `row = cursor.result` come il modello di laboratorio, e la fixture Node lo ha smascherato; la versione finale usa l'API documentata (`cursorRequest.result`, `cursor.value`, `cursor.continue()`) ed è provata su un cursore reale con due righe. Limiti: prove headless su due motori Chromium (non Firefox/Safari), blocco e timeout provati con fixture e non con un blocco reale fra schede, nessuna prova di convivenza mista o di upgrade additivo (fuori perimetro), nessun collaudo su dispositivo fisico. Nessun push, merge, deploy, bump, modifica a Rules/Functions/`master`, dato reale o avvio dell'upgrade v2, dell'adozione del fallback o di un secondo incarico.
+
+**Revisione Codex — APPROVATO M6-A-1 (22/09/2026).** Esaminato il commit locale `882d95cf` sul ramo `integration/vault-shell-v127-security`: il lettore aggiunto a `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` apre IndexedDB senza specificare versione, annulla `onupgradeneeded` se il DB manca, accetta solo versioni 1/2 (in v2 richiede `queueLeases`), usa una transazione `readonly`, valida schema e contenitori e non introduce chiamanti produttivi. Il diff non contiene creazione di store, scritture, cancellazioni o attivazione del fallback; `git diff HEAD^ HEAD --check` è pulito e `node --test tests/offline-mutation-queue.test.mjs` passa **27/27** nella revisione Codex. Le prove browser Chrome/Edge e gli altri esiti sono riportati da DeepSeek nel rapporto sopra, non rieseguiti da Codex. L'approvazione riguarda **solo** il lettore preparatorio nel ramo: non certifica compatibilità delle PWA già installate, prova mista, upgrade v2 o rilascio. La presenza del rapporto accumulato nel MD rende il commit documentalmente ampio, ma le modifiche esecutive sono limitate al lettore e ai due banchi indicati.
+
+**Stato incarico: PRONTO — M6-A-2 prova di upgrade additivo nel solo laboratorio.** In continuità con la scelta Diego **M6-F1 = A** e con `M6-ADOZIONE-PIANO R1` §8 caso 3, DeepSeek prepari **solo una prova di laboratorio** su IndexedDB reale: parta da una coda v1 con almeno due operazioni sigillate pendenti (incluso, se supportato dal contratto, uno stato di riconciliazione), esegua l'upgrade additivo a v2 creando `queueLeases` nella stessa transazione `onupgradeneeded`, e dimostri che store e contenitori `encryptedOperations` restano identici byte per byte, leggibili dal lettore M6-A-1, senza duplicazioni o cancellazioni. Provi anche fallimento/abort dell'upgrade e schema inatteso con conservazione della coda e comportamento fail-closed. **Non** collegare l'upgrade al runtime dell'app, non attivare fallback o modificare copie PWA/dispositivi reali; il lettore compatibile non è ancora distribuito e la decisione/prova M6-F3 sulla convivenza resta aperta. Un solo commit locale mirato con file, prove, limiti e consegna `DA_VERIFICARE` qui; nessun push, merge o deploy. Non iniziare un altro incarico prima della revisione Codex. `PRONTO` non attesta che DeepSeek sia stato svegliato o abbia preso in carico il lavoro.
+
+**Stato incarico: IN_LAVORAZIONE** — M6-A-2 preso in carico da DeepSeek il 2026-09-22 **prima** di scrivere codice; ramo `integration/vault-shell-v127-security` verificato, HEAD osservato `882d95cf` (M6-A-1 approvato, lettore compatibile già consegnato e non modificato da questo incarico). Lavoro: **solo laboratorio**, su IndexedDB reale, una prova di upgrade additivo a v2 che parte da una coda v1 con almeno due operazioni sigillate pendenti — una delle quali in stato di riconciliazione (`_queueState: 'reconciliation-required'` con motivo), stato che il contratto attuale supporta — crea `queueLeases` nella **stessa** transazione `onupgradeneeded`, e dimostra che store e contenitori di `encryptedOperations` restano **identici byte per byte**, leggibili dal lettore M6-A-1, senza duplicazioni né cancellazioni; prove anche di **abort/fallimento** dell'upgrade e di **schema inatteso**, con coda conservata e comportamento fail-closed. Nessun collegamento dell'upgrade al runtime dell'app, nessuna attivazione del fallback, nessuna modifica a copie PWA o dispositivi reali, nessun push, merge, deploy, bump, Rules, Functions o dato reale; **un solo commit locale mirato** con file, prove, limiti e `DA_VERIFICARE`. Nessun altro incarico avviato prima della revisione Codex.
+
+## Rapporto DeepSeek — M6-A-2: prova di upgrade additivo v1 → v2 nel laboratorio
+
+### 1. Consegna (file, commit, perimetro)
+
+- `experiments/offline-sync/queue-upgrade-v2.mjs`: **nuovo, 84 righe** — candidato di **solo laboratorio** `upgradeQueueSchemaToV2(...)` più la sonda di lettura `inspectQueueSchema(...)`.
+- `experiments/offline-sync/browser-queue-upgrade.mjs`: **nuovo, 164 righe** — banco su IndexedDB reale, **7 verdetti**.
+- `experiments/offline-sync/run-browser-tests.mjs` (**4/1**) e `experiments/offline-sync/run-emulated-browsers.mjs` (**2/1**): modalità `--queue-upgrade` e mappatura del nuovo modulo per il server del banco.
+- `package.json` (**1/0**): script `test:offline-queue-upgrade`.
+- `docs/FILE_INVENTORY.md`: rigenerato con `npm run audit:inventory` (**862 file** censiti).
+- `docs/DEEPSEEK_COORDINATION.md`: presa in carico e questo rapporto.
+- **Un solo commit locale mirato** su `integration/vault-shell-v127-security`; HEAD precedente `882d95cf`; nessun push, merge, deploy, bump, modifica a `Frontend/public/**`, Rules, Functions, `master` o dato reale.
+
+### 2. Il candidato di laboratorio (cosa fa, e cosa non fa)
+
+`upgradeQueueSchemaToV2({uid, indexedDb = globalThis.indexedDB, mode = 'create', timeoutMs = 10000})`:
+
+1. sonda lo schema **senza imporre una versione**: coda assente → `QUEUE_UPGRADE_MISSING` (e resta assente); versione diversa da 1, store `encryptedOperations` mancante, `keyPath` diverso o `autoIncrement` → `QUEUE_UPGRADE_SCHEMA`, **prima** di qualsiasi cambio di versione;
+2. apre con versione **2** e crea **solo** `queueLeases` (`keyPath: 'id'`) **dentro** `onupgradeneeded`: è l'unico punto in cui `createObjectStore` è lecito, quindi versione e store sono atomici **per costruzione**;
+3. in `mode: 'abort'` crea lo store e **annulla** la transazione di cambio versione;
+4. verifica finale (versione 2 ed entrambi gli store presenti) → `QUEUE_UPGRADE_VERIFY`; `onblocked` → `QUEUE_UPGRADE_BLOCKED`; errore di apertura → `QUEUE_UPGRADE_FAILED`; timeout → `QUEUE_UPGRADE_TIMEOUT`;
+5. **non** scrive in `encryptedOperations`, **non** cancella, **non** ricrea, **non** migra righe e non tocca un lease esistente.
+
+Codici: `QUEUE_UPGRADE_{CONFIG,MISSING,SCHEMA,BLOCKED,OPEN,FAILED,ABORTED,TIMEOUT,VERIFY}`.
+
+### 3. La prova su IndexedDB reale (Chrome 153 e Edge 153, 7 verdetti ciascuno)
+
+1. **Upgrade riuscito:** coda v1 **reale** con due operazioni sigillate pendenti — la seconda in **riconciliazione** (`markForReview` con `LEGACY_MUTATION_RESULT_UNVERIFIED`) — poi upgrade. Dopo: versione 2, store `encryptedOperations` **e** `queueLeases`, due righe **identiche** (confronto canonico dell'intero insieme e riga per riga per `id`, con `iv` e `ciphertext` uguali stringa per stringa), nessun id duplicato, nessun testo in chiaro nei contenitori.
+2. **Lettura compatibile:** il lettore M6-A-1 legge la coda v2 e restituisce contenitori identici a quelli letti **prima** dell'upgrade; i contenuti **decifrati** sono identici, compresi `_queueState: 'reconciliation-required'` e `_reviewReason`.
+3. **Niente doppio upgrade, scrittore v1 fail-closed:** un secondo upgrade è rifiutato con `QUEUE_UPGRADE_SCHEMA`; il runtime v1 `createOfflineMutationQueue` fallisce con `VersionError`; in entrambi i casi le righe restano invariate.
+4. **Abort:** la versione resta **1**, `queueLeases` **non sopravvive** al rollback, le righe restano identiche, la coda resta leggibile dal lettore **e usabile** dal runtime v1 (`list()` restituisce le due operazioni); un tentativo successivo riesce sulla stessa coda e le righe restano identiche — il fallimento dell'upgrade non richiede riparazioni.
+5. **Schema inatteso:** coda a **v3** con store estranei → rifiuto **prima** di ogni cambio di versione, coda intatta a v3 con le sue righe, e rifiutata anche dal lettore M6-A-1; coda a v1 **senza** lo store atteso → rifiuto con versione e store invariati; coda **assente** → rifiuto e database **non creato**.
+6. `QUEUE_UPGRADE_CONFIG` con argomenti non validi (config mancante, `uid` vuoto, `mode` sconosciuto).
+
+### 4. Controlli di mutazione (discriminatori, poi ripristinati)
+
+| Mutazione temporanea nel candidato | Atteso | Esito osservato |
+|---|---|---|
+| l'upgrade **svuota** `encryptedOperations` nella transazione di cambio versione | banco rosso | `AFTER_ROW_COUNT` |
+| l'abort **non** annulla la transazione | banco rosso | `ABORT_VERSION_CHANGED` |
+| la sonda **non** verifica `version === 1` | banco rosso | `REPEATED_UPGRADE_NOT_REFUSED` |
+
+Ripristino verificato **byte per byte**: `git hash-object` identico prima e dopo (`270e668097ded8f2f616ae90d40f6dd7860064a7`).
+
+Nota dal controllo (3): senza la guardia sulla versione, un upgrade su una coda **già v2** riesce **senza fare nulla** (la versione non cambia, quindi `onupgradeneeded` non scatta). La guardia mantiene il candidato fail-closed su qualunque coda che non sia esattamente la v1 attesa: è una scelta dichiarata, non un effetto collaterale.
+
+### 5. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `npm run test:offline-queue-upgrade` | **verde** Chrome 153 + Edge 153, 7 verdetti ciascuno |
+| `node --test tests/offline-mutation-queue.test.mjs` | **27/27 pass** (il modulo runtime **non** è stato toccato in M6-A-2) |
+| `npm run test:offline-runtime-lease` | **verde** (2/2 browser) dopo la modifica del runner |
+| `npm run test:offline-no-locks` | **verde** (2/2 browser, `webLocks: "undefined"`) |
+| banco di coordinamento `run-browser-tests.mjs <chrome>` | **verde** |
+| `npm test` (catena completa) | **exit 0** |
+| `npm run audit:inventory` | inventario rigenerato, **862 file** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato da 30 pagine» (i nuovi file sono in `experiments/`, fuori dai bundle) |
+
+### 6. Limiti dichiarati
+
+- Un solo motore di storage (Chromium) su due browser: **non** prova Firefox né Safari.
+- La coda di prova è creata dal banco con dati sintetici; **non** è una coda di un dispositivo o di una PWA reale.
+- **Non** sono coperti: la convivenza fra scheda vecchia e scheda nuova (M6-F3; matrice M6-ADOZIONE-PIANO §8, casi 6-bis/6-ter), il rollback v2-compatibile, il montaggio dell'upgrade nel runtime dell'app, la migrazione di un database del lease **già popolato** (qui lo store nasce vuoto) e il **blocco reale** di un'altra scheda durante l'upgrade: `QUEUE_UPGRADE_BLOCKED` è implementato ma **non** forzato in browser, quindi non è provato.
+- `mode: 'abort'` simula il fallimento **dentro** la transazione di cambio versione; **non** simula un arresto del browser a metà upgrade (non riproducibile in modo affidabile in headless).
+- Nessun collaudo su dispositivo fisico o PWA installata; nessuna decisione di prodotto presa qui.
+
+### 7. Note per Codex
+
+- Il candidato è **solo laboratorio**: nessun file di `Frontend/public/**` contiene `queue-upgrade-v2` (verificato) e l'unica occorrenza di `queueLeases` in produzione resta la riga 163 del lettore M6-A-1, che lo **pretende** in v2. Il comportamento distribuito è quindi invariato, e i banchi lo confermano.
+- Per portare l'upgrade nel runtime serviranno, oltre a questo passo: prova mista di convivenza (M6-F3), rollback v2-compatibile, prova del caso «altra scheda con connessione v1 aperta» (oggi lettore e scrittore chiudono su `versionchange`, ma il `blocked` va provato) e una decisione su **quando** eseguire l'upgrade (primo avvio dopo l'aggiornamento? su richiesta?) e su come comportarsi se fallisce.
+- Nessuna di queste scelte è stata anticipata qui.
+
+**Stato incarico: DA_VERIFICARE** — M6-A-2 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** su `integration/vault-shell-v127-security` (HEAD precedente `882d95cf`, M6-A-1 approvato e non modificato): candidato di laboratorio `queue-upgrade-v2.mjs` (84 righe) che aggiunge **solo** lo store `queueLeases` nella transazione di cambio versione, banco `browser-queue-upgrade.mjs` (164 righe) su IndexedDB reale con **7 verdetti**, modalità `--queue-upgrade` nei due runner, script `test:offline-queue-upgrade`, inventario rigenerato. Prove: coda v1 reale con due operazioni sigillate (una in riconciliazione) → dopo l'upgrade versione 2 con `encryptedOperations` **identico byte per byte** (stesso `iv`, stesso `ciphertext`, nessun id duplicato, nessuna cancellazione), lettura M6-A-1 identica prima/dopo e contenuti decifrati identici compreso `_queueState`/`_reviewReason`; secondo upgrade rifiutato e scrittore v1 in `VersionError`; abort con rollback (versione 1, nessuno store del lease, righe identiche, coda ancora usabile dal runtime v1) e nuovo tentativo riuscito; schema v3 con store estranei, v1 senza lo store atteso e coda assente tutti rifiutati **senza** cambi di versione e con database non creato. Tre controlli di mutazione discriminatori (svuotamento dello store, abort non annullato, guardia di versione rimossa) con file ripristinato e verificato byte per byte (`270e668097ded8f2f616ae90d40f6dd7860064a7`); esiti reali: banco verde su Chrome 153 e Edge 153, 27/27 test Node del runtime invariato, banchi `--runtime-lease`, `--no-locks` e di coordinamento verdi dopo la modifica dei runner, `npm test` exit 0, inventario a 862 file, budget statico verde. Limiti: solo Chromium, dati sintetici, nessuna prova di convivenza mista, rollback, montaggio nel runtime, lease già popolato o blocco reale fra schede (`QUEUE_UPGRADE_BLOCKED` non forzato); nessun collaudo fisico. Nessun push, merge, deploy, bump, modifica a `Frontend/public/**`, Rules, Functions, `master` o dato reale; nessun altro incarico avviato.
