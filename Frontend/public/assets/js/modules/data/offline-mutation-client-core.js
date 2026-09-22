@@ -26,16 +26,30 @@ export async function createOfflineMutationClientCore({
     // prima e non viene toccato. Se la coda non è operabile — per esempio una copia non compatibile
     // con lo schema presente — il client resta vivo e riferisce l'indisponibilità tramite il
     // sincronizzatore, invece di morire o di far credere che la coda sia vuota.
-    const reader = createQueueReader ? createQueueReader({uid, vaultKeyMaterial, isActive: active}) : null;
+    // [M6-A-6 R2] La factory del lettore è **asincrona** (deriva la chiave): va attesa, e se la
+    // sessione cambia nel frattempo non si lascia aperto nulla. Se la creazione fallisce il
+    // percorso di lettura resta dichiaratamente indisponibile, senza far morire il client.
+    let reader = null, readerUnavailable = null;
+    if (createQueueReader) {
+        try {
+            reader = await createQueueReader({uid, vaultKeyMaterial, isActive: active});
+        } catch (error) {
+            if (error?.message === 'OFFLINE_SESSION_CHANGED') throw error;
+            readerUnavailable = error?.code || error?.message || 'QUEUE_READER_UNAVAILABLE';
+        }
+        if (reader && !active()) { reader.close?.(); reader = null; throw new Error('OFFLINE_SESSION_CHANGED'); }
+    }
     let queue = null, writeUnavailable = null;
     try {
         queue = await createQueue({uid, vaultKeyMaterial, isActive: active});
     } catch (error) {
-        if (!reader) throw error;
+        if (!reader && !readerUnavailable) throw error;
         writeUnavailable = error?.name || error?.code || error?.message;
     }
     if (queue && !active()) { queue.close?.(); throw new Error('OFFLINE_SESSION_CHANGED'); }
-    const readQueue = reader ? () => reader.read() : undefined;
+    const readQueue = createQueueReader
+        ? (reader ? () => reader.read() : () => ({available: false, version: null, operations: null, reason: readerUnavailable}))
+        : undefined;
     const synchronizer = createSynchronizer({uid, queue, readQueue, send, withLease, onState, isOnline, isActive: active});
     const channel = createChannel?.(uid, () => synchronizer.flush()) ?? {notify() {}, close() {}};
     // Gli ingressi di **scrittura** richiedono la coda operabile: senza di essa — perché non è mai

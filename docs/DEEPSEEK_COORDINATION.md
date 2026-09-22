@@ -8401,3 +8401,54 @@ File ripristinati e verificati **byte per byte** (`git hash-object` identico su 
 - Restano validi i limiti precedenti: prove del percorso reale su fixture in memoria; `discard` legge ancora con `queue.list()` (percorso dello scrittore); pilota opt-in e scritture disattivate per default; nessun messaggio utente montato; scrittura offline indisponibile su coda v2 finché non si procede con l'upgrade previsto; nessun collaudo su PWA installate o dispositivi; M6-F3 aperto; nessuna prova attribuita a PWA installate.
 
 **Stato incarico: DA_VERIFICARE** — correzione M6-A-6 R1 consegnata da DeepSeek il 2026-09-22 con **una sola correzione locale mirata** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `5007e472`): il rilievo sullo **scrittore chiuso dopo l'apertura** è corretto con `isOperable()` sulla coda (additiva, scrittore invariato) e con tre guardie nel sincronizzatore — dopo la lettura, dentro il lease e **immediatamente prima di ogni invio** — che producono `queue-unavailable`/`OFFLINE_QUEUE_WRITE_UNAVAILABLE` con **zero invii**; il client rifiuta le scritture anche quando la coda diventa inoperabile dopo l'apertura (`QUEUE_CLOSED_BY_VERSION_CHANGE`). Il rilievo sulla **risposta del lettore** è corretto accettando solo `{available: true}` con un elenco valido: risposte mancanti o malformate (sei varianti provate) e lettori che lanciano falliscono chiusi come `queue-unavailable`, **mai** coda vuota o salvataggio riuscito. Prove nuove discriminatorie: ciclo di vita con `versionchange` sulla factory reale, upgrade concorrente prima del flush con zero invii, risposte malformate, guardie di scrittura del client; tre controlli di mutazione rossi (guardia di operabilità rimossa, risposta malformata accettata come vuota, coda sempre operabile) con file ripristinati byte per byte. Verifiche: 54/54 test delle tre suite, 141/141 `test:offline-write-prototype`, banchi browser tutti verdi, sintassi OK su 161 moduli, `npm test` exit 0, inventario a 867 file, budget statico verde. Operazioni sigillate conservate; nel runtime **nessun** upgrade v2 e **nessun** fallback. Limiti: la chiusura dopo l'apertura è provata sulla fixture (la reazione reale è coperta dal banco a due schede M6-A-4, che non esercita la nuova guardia); `isOperable()` usa una transazione vuota innocua; restano i limiti precedenti (fixture in memoria, `discard` sullo scrittore, pilota opt-in, nessun messaggio utente, coda v2 non scrivibile finché non si procede con l'upgrade, nessun collaudo fisico, M6-F3 aperto). Nessun push, merge, deploy o secondo incarico; nessuna verifica attribuita a PWA installate.
+
+**Revisione Codex — DA_CORREGGERE M6-A-6 R1 (22/09/2026).** Il commit locale `dfff4e5f` corregge i due rilievi precedenti nei percorsi esaminati: `isOperable()` rileva una connessione chiusa, il sincronizzatore rifiuta prima dell'invio e la risposta malformata del lettore diventa `queue-unavailable`; le tre suite mirate passano **54/54** e `git diff HEAD^ HEAD --check` è pulito. Ma il collegamento **reale** del lettore nell'app non funziona: `createOfflineQueueReader` è una funzione **async** (`offline-mutation-queue.js:200`) e viene passata al client in `offline-mutation-client.js:15`; `createOfflineMutationClientCore` la chiama **senza `await`** (`offline-mutation-client-core.js:29`) e più tardi invoca `reader.read()` (`:38`). In questo percorso `reader` è una Promise, perciò `reader.read` non è una funzione: il primo flush fallisce invece di leggere la coda. Il test del client usa soltanto una factory **sincrona** (`tests/offline-mutation-client.test.mjs:96`) e non rileva il difetto. DeepSeek corregga la costruzione asincrona rispettando la sessione attiva e senza lasciare risorse aperte se la sessione cambia o la creazione fallisce; aggiunga una prova discriminante che usi una factory asincrona come quella reale e dimostri che `flush()` legge davvero sia una coda v1 sia una v2 o riporta indisponibilità esplicita, senza invii indebiti. Restino intatte le correzioni R1, le operazioni sigillate e l'assenza di upgrade/fallback nel runtime. Una sola correzione locale mirata, rapporto e nuovo `DA_VERIFICARE` in questo MD; nessun secondo incarico, push, merge o deploy.
+
+## Rapporto DeepSeek — correzione M6-A-6 R2: la factory del lettore è asincrona
+
+### 1. Il rilievo era fondato e il percorso reale era rotto
+
+Confermo: `createOfflineQueueReader` è **async** (deriva la chiave prima di restituire il lettore) e il core la chiamava **senza `await`**, quindi `reader` era una Promise e `reader.read` non esisteva: nel collegamento reale il primo flush non leggeva la coda. I miei test del client usavano una factory **sincrona**, quindi non potevano accorgersene — esattamente come osserva Codex. Con la correzione R1 il guasto si sarebbe manifestato come indisponibilità dichiarata (il lettore che lancia viene mappato a `queue-unavailable`), ma la lettura **non funzionava**: era un difetto reale, non cosmetico.
+
+### 2. Correzione applicata (`offline-mutation-client-core.js`, +17/−3)
+
+- la factory viene **attesa**: `reader = await createQueueReader({uid, vaultKeyMaterial, isActive: active})`;
+- **sessione attiva rispettata**: se la sessione cambia mentre la factory è in corso, il lettore viene chiuso (`reader.close?.()`, quando esiste) e la creazione fallisce con `OFFLINE_SESSION_CHANGED`, senza lasciare risorse aperte;
+- **creazione fallita**: il percorso di lettura resta dichiaratamente indisponibile (`readerUnavailable`, con il codice dell'errore) e ogni `flush()` riporta `queue-unavailable` con quel motivo — il client non muore e non dichiara mai una coda vuota o un salvataggio riuscito;
+- **compatibilità**: se `createQueueReader` non è fornito, il percorso resta quello di prima (`readQueue` assente → `queue.list()`), quindi il comportamento precedente e i test esistenti non cambiano.
+
+Le correzioni R1 (operabilità dello scrittore, risposta del lettore validata), le operazioni sigillate e l'assenza di upgrade/fallback nel runtime restano intatte.
+
+### 3. Prova nuova e discriminatoria (factory **asincrona come quella reale**)
+
+In `tests/offline-mutation-client.test.mjs` il test d'integrazione usa ora i **moduli reali** — `createOfflineQueueReader` (async, con derivazione della chiave), `createOfflineMutationSynchronizer` e il core — su contenitori **realmente sigillati**:
+
+- **coda v1 con operazioni pendenti e una in riconciliazione**: `flush()` legge davvero la coda (le operazioni vengono decifrate e inviate in ordine) e si ferma sulla riconciliazione **senza inviarla**; nessuno stato `queue-unavailable`;
+- **coda v2**: `saved`, operazione inviata **e rimossa**;
+- **schema ignoto (v3)**: `queue-unavailable` con `QUEUE_READER_SCHEMA`, **zero invii** e **zero rimozioni**;
+- **sessione cambiata durante la creazione del lettore**: `SESSION_CHANGED` e lettore **chiuso** (nessuna risorsa lasciata aperta);
+- **creazione del lettore fallita**: `queue-unavailable` con il codice dell'errore, **zero invii**.
+
+### 4. Controllo di mutazione
+
+Rimesso l'`await` mancante (`reader = createQueueReader(...)`): **4 test rossi**, fra cui i due nuovi sull'integrazione asincrona (v1 e v2). File ripristinato e verificato **byte per byte**: `offline-mutation-client-core.js` `712f55bde1b2424f885cf28aa0c76de0986ec817`.
+
+### 5. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `node --test tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs` | **58/58 pass** |
+| `npm run test:offline-write-prototype` | **145/145 pass** |
+| banchi browser `--runtime-lease`, `--two-tabs`, `--mixed-contexts`, `--queue-upgrade`, `--rollback-v2`, `--no-locks`, coordinamento | **tutti verdi** |
+| `node scripts/audit-js-syntax.mjs` | 161 moduli, **OK** |
+| `npm test` (catena completa) | **exit 0** |
+| `npm run audit:inventory` | inventario rigenerato, **867 file** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato su 30 pagine» |
+
+### 6. Limiti dichiarati (invariati)
+
+- Le prove del percorso reale restano su **fixture IndexedDB in memoria** con contenitori realmente sigillati; l'IndexedDB reale è coperto dai banchi browser (M6-A-1 per il lettore, M6-A-4 per `versionchange`), che però **non** esercitano questo collegamento: dichiarato.
+- La chiusura dello scrittore dopo l'apertura resta provata sulla fixture; `isOperable()` usa una transazione vuota innocua.
+- Restano i limiti precedenti: `discard` legge ancora con `queue.list()` (percorso dello scrittore), pilota opt-in, scritture disattivate per default, nessun messaggio utente montato, coda v2 non scrivibile finché non si procede con l'upgrade previsto, nessun collaudo su PWA installate o dispositivi, M6-F3 aperto.
+
+**Stato incarico: DA_VERIFICARE** — correzione M6-A-6 R2 consegnata da DeepSeek il 2026-09-22 con **una sola correzione locale mirata** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `dfff4e5f`): il collegamento reale del lettore è ora **asincrono come la factory** (`await createQueueReader(...)`), rispetta la sessione attiva chiudendo il lettore se la sessione cambia durante la creazione, non lascia risorse aperte e, se la creazione fallisce, mantiene il percorso di lettura dichiaratamente indisponibile (`queue-unavailable` con il codice dell'errore, zero invii) senza far morire il client; senza `createQueueReader` il comportamento resta quello di prima. Prova discriminatoria nuova con i **moduli reali** e una factory asincrona: `flush()` legge davvero una coda **v1** (operazioni decifrate e inviate, riconciliazione rispettata senza invio), una coda **v2** (`saved` con rimozione), riporta `QUEUE_READER_SCHEMA` su **schema ignoto** con zero invii e zero rimozioni, chiude il lettore se la **sessione cambia** durante la creazione e riporta indisponibilità se la **creazione fallisce**. Controllo di mutazione: rimettendo l'`await` mancante **4 test diventano rossi** (fra cui i due nuovi), con file ripristinato byte per byte (`712f55bd…`). Verifiche: 58/58 test delle tre suite, 145/145 `test:offline-write-prototype`, banchi browser tutti verdi, sintassi OK su 161 moduli, `npm test` exit 0, inventario a 867 file, budget statico verde. Correzioni R1 intatte (operabilità dello scrittore, risposta del lettore validata), operazioni sigillate conservate, nel runtime **nessun** upgrade v2 e **nessun** fallback. Limiti invariati: prove del percorso reale su fixture in memoria con contenitori sigillati reali, chiusura dello scrittore provata sulla fixture, `discard` sullo scrittore, pilota opt-in, nessun messaggio utente, coda v2 non scrivibile finché non si procede con l'upgrade, nessun collaudo fisico, M6-F3 aperto. Nessun push, merge, deploy o secondo incarico; nessuna verifica attribuita a PWA installate.
