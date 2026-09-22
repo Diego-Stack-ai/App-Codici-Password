@@ -15,7 +15,8 @@ const mixedContexts = process.argv[3] === '--mixed-contexts';
 const twoTabs = process.argv[3] === '--two-tabs';
 const rollbackV2 = process.argv[3] === '--rollback-v2';
 const runtimeUpgrade = process.argv[3] === '--runtime-upgrade';
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs || rollbackV2 || runtimeUpgrade)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs|--rollback-v2|--runtime-upgrade]');
+const mutationLease = process.argv[3] === '--mutation-lease';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs || rollbackV2 || runtimeUpgrade || mutationLease)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs|--rollback-v2|--runtime-upgrade|--mutation-lease]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
@@ -32,6 +33,7 @@ const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true,
 const paths = new Map([
     ['/suite.mjs', runtimeLease ? 'experiments/offline-sync/browser-runtime-lease.mjs'
         : runtimeUpgrade ? 'experiments/offline-sync/browser-runtime-upgrade.mjs'
+        : mutationLease ? 'experiments/offline-sync/browser-mutation-lease.mjs'
         : rollbackV2 ? 'experiments/offline-sync/browser-rollback-v2.mjs'
         : twoTabs ? 'experiments/offline-sync/browser-two-tabs.mjs'
         : mixedContexts ? 'experiments/offline-sync/browser-mixed-contexts.mjs'
@@ -59,6 +61,7 @@ const paths = new Map([
     ['/worker.mjs', 'experiments/offline-sync/browser-coordination-worker.mjs'],
     ['/hybrid-queue-coordinator.mjs', 'experiments/offline-sync/hybrid-queue-coordinator.mjs'],
     ['/indexeddb-queue-lease.mjs', 'experiments/offline-sync/indexeddb-queue-lease.mjs'],
+    ['/offline-mutation-lease.mjs', 'experiments/offline-sync/offline-mutation-lease.mjs'],
     ['/queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
     ['/crypto-utils.js', 'Frontend/public/assets/js/modules/core/crypto-utils.js']
 ]);

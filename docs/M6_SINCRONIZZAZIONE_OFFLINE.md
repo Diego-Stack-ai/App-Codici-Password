@@ -532,3 +532,37 @@ Pagina `experiments/persistent-vault-shell/emulator-evicted-check.mjs`, nel flus
 - Il controllo di rete della pagina **non governa le richieste del service worker** (verificato: con la cache vuota la richiesta riesce comunque): l'«indisponibilità offline assoluta» con cache espulsa **non è riproducibile** in modo affidabile qui. Il banco prova l'assenza dalla cache, non l'assenza di rete.
 - Restano fuori: iPhone/PWA fisica, **tutte** le categorie di pagina di produzione, i file Storage, l'espulsione reale per pressione di quota del browser, l'avvio a freddo dopo riavvio del dispositivo.
 - **Nessun gate è chiuso**: la dimensione «cache espulsa» della riga M6-1 è ora **documentata e parzialmente esercitata**, non verificata. Le domande per il proprietario sono in [M6_DOMANDE_CACHE_ESPULSA.md](./M6_DOMANDE_CACHE_ESPULSA.md) (commit separato).
+
+## M6-A-8b — Coordinatore lease isolato sul database v2 già esistente, 22/09/2026
+
+Laboratorio, dati sintetici, profilo browser usa e getta, solo loopback. **`Frontend/public/**`, Functions e Rules restano invariati** (`git diff --name-only -- Frontend functions firestore.rules storage.rules` vuoto: il commit tocca `experiments/offline-sync/**`, `package.json` e i due MD di progetto). Il candidato `experiments/offline-sync/offline-mutation-lease.mjs` è **isolato**: non importa nulla, nessun file di `Frontend/public/**` lo nomina (prova statica nella suite), non è collegato a `withOfflineQueueLease`, al client, al sincronizzatore o al pilota e `withOfflineQueueLease` continua a rifiutare con `OFFLINE_QUEUE_LOCKS_UNAVAILABLE` quando Web Locks manca: **nessun fallback è abilitato** e nessuna copia PWA è coinvolta.
+
+### Contratto del candidato
+
+Apre il database della coda **senza imporre una versione** (né downgrade né upgrade automatico; un database assente resta assente) e accetta **solo** lo schema v2 con `encryptedOperations` e `queueLeases` entrambi `keyPath:'id'` e `autoIncrement:false`. Le transazioni che apre nominano **solo** `queueLeases`: `encryptedOperations` è scritto unicamente dalla transazione protetta del chiamante, mai dal coordinatore. Offre acquisizione con **token monotono** (il rilascio conserva il contatore: nessuna finestra ABA), rinnovo, rilascio, **timeout di acquisizione** limitato con rilascio del lease tardivo senza eseguire il task, e **fencing** con `guardTransaction` nella stessa transazione del chiamante (una connessione diversa o una transazione in sola lettura sono rifiutate). Rifiuti dichiarati con codice stabile: `LEASE_DATABASE_MISSING`, `LEASE_SCHEMA_V1`, `LEASE_SCHEMA_UNSUPPORTED`, `LEASE_SCHEMA_MALFORMED`, `LEASE_SESSION_INACTIVE`, `LEASE_BUSY`, `LEASE_ACQUIRE_TIMEOUT`, `LEASE_TRANSACTION_FAILED`, `LEASE_RECORD_INVALID`, `LEASE_TOKEN_EXHAUSTED`, `LEASE_CLOCK_INVALID`/`REVERSED`, `LEASE_LOST`, `LEASE_CONTEXT_CLOSED`, `LEASE_GUARD_INVALID`, `LEASE_ASYNC_MUTATION_FORBIDDEN`.
+
+### Prove Node sul modulo reale (12/12)
+
+Fixture IndexedDB in memoria con bozza, commit alla conclusione, abort con rollback, richieste differite e iniezione di un guasto di transazione. Casi: apertura v2 con percorso protetto e rilascio; rifiuti su **coda assente, schema v1, schema v3, store del lease mancante, chiave errata e incremento attivo** (sei casi, tutti con task mai eseguito, zero scritture, nessuno store creato e `encryptedOperations` intatto); sessione scaduta prima e **durante** il task; **contesa fra due contesti** (il secondo riceve `{acquired:false, reason:'LEASE_BUSY'}`, non esegue e non scrive; il gate viene rilasciato **prima** di attendere il titolare); **rilascio dopo errore** con token che avanza; **timeout** su transazione che non si conclude, con lease tardivo rilasciato e task mai eseguito; **fencing** con il record del lease sostituito da un **altro titolare prima** di `guardTransaction` → `LEASE_LOST`, transazione annullata e **zero scritture** su `encryptedOperations`; transazione fallita; rinnovo e token anti-ABA; record malformato senza riparazioni; isolamento statico del modulo. Suite mirate: **167/167** in `npm run test:offline-write-prototype` (155 preesistenti + 12 nuove); `test:js-syntax` 163 moduli, `test:static-references` 237 file, `audit-offline-shell`, `test:release-hardening` tutti **exit 0**.
+
+### Banco browser sul layout v2 reale (7 verdetti, ripetibile)
+
+`npm run test:offline-mutation-lease` (`run-emulated-browsers.mjs --mutation-lease`), pagina reale e IndexedDB reale: una coda dell'app con due operazioni sigillate viene **aggiornata a v2** e il coordinatore lavora sul `queueLeases` dello **stesso** database. **Chrome 153 e Edge 153**: `ok: true` con **7 verdetti**, **3 esecuzioni identiche per browser (6/6)**. Verdetti: apertura sul layout reale senza migrazione e scrittura protetta sulla coda vera con rilascio del lease; rifiuti su coda v1 reale (resta v1 senza store del lease, righe identiche), coda assente (`LEASE_DATABASE_MISSING`, nessun database creato — verificato con `indexedDB.databases()`) e v2 con struttura errata (`LEASE_SCHEMA_MALFORMED`); contesa fra due contesti con `LEASE_BUSY` e token che avanza; rilascio dopo errore; fencing con takeover e contenitori identici byte per byte; token anti-ABA e **timeout deterministico** (transazione readwrite trattenuta sullo store del lease + budget di 60 ms → `LEASE_ACQUIRE_TIMEOUT`, task mai eseguito, lease tardivo rilasciato); nessuna connessione lasciata aperta (la cancellazione dei database sintetici non resta bloccata).
+
+### Controlli di discriminazione (mutazioni temporanee, poi ripristinate)
+
+| Mutazione sul modulo reale | Esito atteso | Esito ottenuto |
+|---|---|---|
+| Fencing senza il controllo di possesso (`owned`) | rosso sul caso di fencing | **rosso** (`LEASE_BENCH_FENCING`/`LEASE_LOST`), 1 test |
+| Rilascio del lease tardivo neutralizzato dopo la scadenza | rosso sul caso di timeout | **rosso** (`timeout di acquisizione`), 1 test |
+| Rifiuto dello schema v1 neutralizzato | rosso sui rifiuti | **rosso** (`rifiuti dichiarati`), 1 test |
+
+Il modulo è stato ripristinato **byte per byte** (`sha256 6D687FC7AAEDED36709B53E89C9D5FDC377EA5C1B0DB1FA65F7E2F9E66D3E731`) e la suite è tornata **12/12**.
+
+### Limiti dichiarati
+
+- È un **candidato di laboratorio**: browser headless, dati sintetici, una sola pagina con due contesti del coordinatore; **non** due schede reali, **non** Worker, **non** due dispositivi, **non** PWA installate.
+- L'adozione nel **runtime** non è fatta: il coordinatore **non** è collegato a `withOfflineQueueLease`, al client, al sincronizzatore o al pilota, e il fallback resta spento. Restano aperti il punto 4 dell'ordine preparatorio di `M6-ADOZIONE-PIANO R1` (§3.4) e il caso 4 della sua matrice §8; **M6-F3** (quando aggiornare le copie PWA installate) è aperto e nessuna decisione di prodotto è stata presa.
+- Il fencing protegge le **scritture IndexedDB** nella transazione del chiamante e **non ritira** una richiesta di rete già inviata: le ricevute idempotenti del backend restano necessarie. Il timeout copre **solo l'acquisizione**, non la durata del task; la conferma dell'esito di una transazione del chiamante resta dell'attesa del chiamante — il coordinatore non trasforma mai una transazione fallita in una riuscita.
+- L'isolamento è provato **staticamente** su `Frontend/public/**`; non è una prova di sicurezza contro un'inclusione futura nel runtime.
+- **Nessun gate è chiuso** e la matrice delle copie PWA, il collaudo fisico e il rilascio restano fuori da questo passo.
