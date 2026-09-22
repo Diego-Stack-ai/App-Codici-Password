@@ -167,16 +167,27 @@ Le voci seguenti **non** sono difetti dimostrati: sono igiene, ambito da chiarir
 Per un eventuale difetto l'incarico prevede prova e proposta di correzione, **senza** modificare il
 codice qui.
 
-1. **Igiene dei log — APPLICATA (M10-LOG-1, 22/09/2026).** Le **9** chiamate che registravano
-   l'**oggetto errore** (`security-manager.js:66,112,131,185,429,488,539` e `vault-session.js:40,70`,
-   righe **prima** dell'intervento) ora emettono **solo un'etichetta stabile e sanificata** attraverso un
-   helper locale `logErrorLabel(value)`, che accetta un `code`/`name` breve e prevedibile
-   (`/^[A-Za-z][A-Za-z0-9_./-]{0,63}$/`) e in ogni altro caso restituisce `'Error'`: **mai** oggetto,
-   messaggio, stack, percorso o dati della cassaforte. Flusso degli errori e comportamento visibile
-   **invariati**. Prove in `tests/vault-session.test.mjs`: payload dei log nei percorsi di persistenza
-   fallita e ripristino fallito, valore non-`Error`, e controllo meccanico su **entrambi** i moduli;
-   due controlli di discriminazione (ripristino di una singola chiamata grezza → test rossi). Il punto
-   resta soggetto alla verifica di Codex.
+1. **Igiene dei log — APPLICATA (M10-LOG-1, 22/09/2026; irrobustita in R1).** Le **9** chiamate che
+   registravano l'**oggetto errore** (`security-manager.js:66,112,131,185,429,488,539` e
+   `vault-session.js:40,70`, righe **prima** dell'intervento) ora emettono **solo un'etichetta
+   diagnostica**, prodotta da `logErrorLabel(value)` (definito in `vault-session.js` e importato da
+   `security-manager.js`). Due proprietà, entrambe verificate da test:
+   - **solo etichette note** — l'helper accetta `code`/`name` soltanto se compare in una **lista chiusa**
+     di codici/nomi diagnostici (`permission-denied`, `unavailable`, `not-found`, `failed-precondition`,
+     `unauthenticated`, `OperationError`, `InvalidStateError`, `Error`); qualunque altro valore, **anche
+     se sintatticamente valido come un segreto**, diventa `'Error'` (la sola verifica di forma non
+     garantisce l'assenza di segreti: rilievo R1 di Codex);
+   - **lettura protetta** — `code`/`name` sono letti dentro `try`/`catch`: un getter che lancia
+     restituisce `'Error'` invece di propagare l'eccezione, così il flusso del chiamante resta quello
+     originale (pulizia della sessione e ritorno `false`/`null` inclusi).
+   Flusso degli errori e comportamento visibile **invariati**; **mai** oggetto, messaggio, stack, percorso
+   o dati della cassaforte. Prove in `tests/vault-session.test.mjs` (**8** test): log nei percorsi di
+   persistenza e ripristino, **codice valido ma sensibile** → `'Error'`, **getter che lancia** → nessuna
+   eccezione e pulizia/ritorno invariati, valore non-`Error`, controllo meccanico sui due moduli; tre
+   controlli di discriminazione (chiamata grezza ripristinata → rosso; allowlist sostituita dal solo
+   pattern → rosso sul caso sensibile; protezione rimossa → rosso sul getter). L'helper non porta
+   commento: è documentato qui e specificato dai test, per non incidere sul budget statico delle pagine.
+   Il punto resta soggetto alla verifica di Codex.
 2. **Bundle di terze parti con sink HTML.** `qrcode.min.js` usa `innerHTML` per la tabella di fallback;
    il contenuto deriva da dati QR generati dall'app (non HTML) e il contenitore è creato dalla libreria.
    *Proposta:* includerlo nell'ambito dell'audit indipendente e, se si vuole, sostituire la libreria con

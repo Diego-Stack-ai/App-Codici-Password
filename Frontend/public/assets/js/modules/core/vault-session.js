@@ -3,7 +3,8 @@ const SESSION_KEY = 'vault_session_v1';
 const WRAPPING_KEY = 'codex_vault_session_wrapping_key_v1';
 let sessionGeneration = 0;
 
-export const logErrorLabel = v => { const c = typeof v?.code === 'string' ? v.code : typeof v?.name === 'string' ? v.name : ''; return /^[A-Za-z][\w./-]{0,63}$/.test(c) ? c : 'Error'; };
+const LOG_LABELS = '|permission-denied|unavailable|not-found|failed-precondition|unauthenticated|OperationError|InvalidStateError|Error|';
+export const logErrorLabel = v => { try { const c = String(typeof v?.code === 'string' ? v.code : v?.name ?? ''); return LOG_LABELS.includes('|' + c + '|') ? c : 'Error'; } catch { return 'Error'; } };
 
 const toBase64 = bytes => {
     let binary = '';

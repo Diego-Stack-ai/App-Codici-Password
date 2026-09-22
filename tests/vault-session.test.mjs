@@ -53,7 +53,7 @@ test('persistenza fallita: il log riceve solo l’etichetta, mai oggetto, messag
   sessionStorage.setItem = () => {
     const error = new Error(`messaggio con ${secret}`);
     error.name = 'SyntheticError';
-    error.code = 'synthetic-secret-code';
+    error.code = 'permission-denied';
     error.details = {secret};
     throw error;
   };
@@ -65,11 +65,42 @@ test('persistenza fallita: il log riceve solo l’etichetta, mai oggetto, messag
   const [message, label] = outcome.captured[0];
   assert.equal(message, '[Vault Session] Persistenza non disponibile:');
   assert.match(label, labelPattern);
-  assert.equal(label, 'synthetic-secret-code');
+  assert.equal(label, 'permission-denied');
   const text = JSON.stringify(outcome.captured) + String(outcome.captured[0][0]) + String(outcome.captured[0][1]);
   for (const leak of [secret, 'messaggio', 'details', 'SyntheticError', 'at ']) {
     assert.equal(text.includes(leak), false, `il log non deve contenere ${leak}`);
   }
+});
+
+// M10-LOG-1 R1: un codice sintatticamente valido ma arbitrario non è un'etichetta diagnostica.
+test('codice valido ma sensibile: diventa l’etichetta generica, mai il valore', async () => {
+  const sensitive = 'SYNTHETIC_SECRET_PASSWORD';
+  const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
+  sessionStorage.setItem = () => { throw Object.assign(new Error('x'), {code: sensitive}); };
+  let outcome;
+  try { outcome = await captureWarnings(() => saveVaultSession('vault-key-material', 'uid-a')); }
+  finally { sessionStorage.setItem = originalSetItem; }
+  assert.equal(outcome.result, false);
+  assert.equal(outcome.captured[0][1], 'Error');
+  assert.equal(JSON.stringify(outcome.captured).includes(sensitive), false);
+});
+
+// M10-LOG-1 R1: la lettura delle proprietà non deve poter interrompere il flusso del chiamante.
+test('getter che lancia: nessuna eccezione dall’helper, pulizia e ritorno invariati', async () => {
+  const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
+  originalSetItem('vault_session_v1', 'SYNTHETIC-RESIDUE');
+  const hostile = {};
+  Object.defineProperty(hostile, 'code', {get() { throw new Error('getter failed'); }});
+  sessionStorage.setItem = () => { throw hostile; };
+  let outcome;
+  try { outcome = await captureWarnings(() => saveVaultSession('vault-key-material', 'uid-a')); }
+  finally { sessionStorage.setItem = originalSetItem; }
+  assert.equal(outcome.result, false);
+  assert.equal(outcome.captured.length, 1);
+  assert.equal(outcome.captured[0][1], 'Error');
+  assert.equal(JSON.stringify(outcome.captured).includes('getter failed'), false);
+  assert.equal(sessionStorage.getItem('vault_session_v1'), null, 'la pulizia della sessione deve restare invariata');
+  assert.equal(sessionStorage.getItem('codex_vault_session_wrapping_key_v1'), null);
 });
 
 test('valore non-Error: il log riceve l’etichetta generica', async () => {
