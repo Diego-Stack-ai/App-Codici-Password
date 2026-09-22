@@ -126,6 +126,72 @@ export async function openOfflineQueueDatabase(uid, indexedDb = globalThis.index
     });
 }
 
+// [M6-A-1] Lettore compatibile v1/v2, in sola lettura: apre senza versione (un database
+// mancante resta mancante), non crea store, non migra e non scrive. Schema non riconosciuto
+// o contenitore malformato falliscono chiusi, senza cancellare o ricreare il database.
+export async function readOfflineQueueContainers({uid, indexedDb = globalThis.indexedDB, signal, isActive = () => true, timeoutMs = 10000} = {}) {
+    if (typeof uid !== 'string' || !uid || !indexedDb || typeof isActive !== 'function' ||
+        !Number.isSafeInteger(timeoutMs) || timeoutMs < 1) throw new Error('QUEUE_READER_CONFIG');
+    const check = () => { if (signal?.aborted || !isActive()) throw new Error('QUEUE_READER_SESSION'); };
+    check();
+    return new Promise((resolve, reject) => {
+        let settled = false, database = null, transaction = null;
+        const containers = [];
+        const finish = (error, version) => {
+            if (settled) { database?.close(); return; }
+            settled = true; clearTimeout(timer); signal?.removeEventListener('abort', abort);
+            if (error) { try { transaction?.abort(); } catch { /* transazione già conclusa */ } containers.length = 0; }
+            database?.close();
+            if (error) reject(error); else resolve({version, containers});
+        };
+        const abort = () => finish(new Error('QUEUE_READER_SESSION'));
+        const timer = setTimeout(() => finish(new Error('QUEUE_READER_TIMEOUT')), timeoutMs);
+        signal?.addEventListener('abort', abort, {once: true});
+        let request;
+        try { request = indexedDb.open(`codex-offline-queue-${uid}`); }
+        catch (error) { finish(error); return; }
+        request.onupgradeneeded = () => { request.transaction.abort(); finish(new Error('QUEUE_READER_MISSING')); };
+        request.onerror = () => finish(request.error || new Error('QUEUE_READER_OPEN'));
+        request.onblocked = () => finish(new Error('QUEUE_READER_BLOCKED'));
+        request.onsuccess = () => {
+            database = request.result;
+            if (settled) { database.close(); return; }
+            database.onversionchange = () => finish(new Error('QUEUE_READER_VERSION_CHANGED'));
+            try {
+                check();
+                if (![1, 2].includes(database.version)) throw new Error('QUEUE_READER_SCHEMA');
+                const stores = database.version === 2 ? [STORE, 'queueLeases'] : [STORE];
+                if (stores.some(name => !database.objectStoreNames.contains(name))) throw new Error('QUEUE_READER_SCHEMA');
+                transaction = database.transaction(stores, 'readonly');
+                transaction.onabort = transaction.onerror = () => finish(new Error('QUEUE_READER_TRANSACTION'));
+                transaction.oncomplete = () => { try { check(); finish(null, database.version); } catch (error) { finish(error); } };
+                for (const name of stores) {
+                    const store = transaction.objectStore(name);
+                    if (store.keyPath !== 'id' || store.autoIncrement) throw new Error('QUEUE_READER_SCHEMA');
+                }
+                const cursorRequest = transaction.objectStore(STORE).openCursor();
+                cursorRequest.onerror = () => finish(new Error('QUEUE_READER_READ'));
+                cursorRequest.onsuccess = () => {
+                    if (settled) return;
+                    try {
+                        check();
+                        // `result` è il cursore finché ci sono righe, `null` alla fine.
+                        const cursor = cursorRequest.result;
+                        if (!cursor) return;
+                        const value = cursor.value;
+                        if (value?.uid !== uid || value.schemaVersion !== 1 || typeof value.operationId !== 'string' ||
+                            !value.operationId || value.id !== `${uid}:${value.operationId}` ||
+                            typeof value.iv !== 'string' || typeof value.ciphertext !== 'string') {
+                            throw new Error('QUEUE_READER_CONTAINER');
+                        }
+                        containers.push(value); cursor.continue();
+                    } catch (error) { finish(error); }
+                };
+            } catch (error) { finish(error); }
+        };
+    });
+}
+
 export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexedDb, signal, isActive = () => true} = {}) {
     if (!uid) throw new Error('OFFLINE_QUEUE_UID_REQUIRED');
     // Derive first: a failed key must not leave an unowned DB connection open.

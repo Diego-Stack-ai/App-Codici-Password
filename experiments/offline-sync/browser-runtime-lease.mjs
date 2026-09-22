@@ -1,5 +1,5 @@
 import {createHybridQueueCoordinator} from './hybrid-queue-coordinator.mjs';
-import {createOfflineMutationQueue, withOfflineQueueLease} from './queue.js';
+import {createOfflineMutationQueue, readOfflineQueueContainers, withOfflineQueueLease} from './queue.js';
 import {createOfflineMutationSynchronizer} from './Frontend/public/assets/js/modules/data/offline-mutation-sync.js';
 import {createOfflineMutationClientCore} from './Frontend/public/assets/js/modules/data/offline-mutation-client-core.js';
 
@@ -70,6 +70,7 @@ function stallingDatabase() {
     return {data, database, release: () => open(), get completions() { return completions; }, now: () => clock};
 }
 
+const nativeLocks = navigator.locks;
 let leaseDb, coreLeaseDb, core, reader;
 try {
     // ── A. Web Locks disponibile: comportamento attuale del runtime, invariato ────────────
@@ -194,6 +195,127 @@ try {
     reader = await createOfflineMutationQueue({uid: coreUid, vaultKeyMaterial: KEY});
     assert((await reader.list()).length === 0, 'CORE_DISCARD_LEFT_OPERATION');
     passed.push('coda reale + `withLease` iniettato: `discard` acquisisce dal coordinatore, segnala OFFLINE_QUEUE_BUSY quando il lease è occupato e rimuove l’operazione quando lo ottiene');
+
+    // ── F. Lettore compatibile del runtime (M6-A-1) su IndexedDB reale ───────────────────
+    // Il banco prepara i database (solo laboratorio), il runtime li legge e basta. La stessa
+    // batteria gira con Web Locks assente e con Web Locks di piattaforma presente: il lettore
+    // non deve dipenderne. Nessun upgrade, nessuna scrittura, schema ignoto → fallisce chiuso.
+    const restore = value => Object.defineProperty(navigator, 'locks', {value, configurable: true});
+    const openDatabase = async (name, version) => {
+        const request = version === undefined ? indexedDB.open(name) : indexedDB.open(name, version);
+        let upgraded = false;
+        request.onupgradeneeded = () => { upgraded = true; };
+        const database = await requestValue(request);
+        return {database, upgraded};
+    };
+    const inspect = async (name, store) => {
+        const {database, upgraded} = await openDatabase(name);
+        try {
+            const rows = await requestValue(database.transaction(store, 'readonly').objectStore(store).getAll());
+            return {upgraded, version: database.version, stores: [...database.objectStoreNames].sort(), rows};
+        } finally { database.close(); }
+    };
+    const createDatabase = (name, version, stores, seed) => {
+        const request = indexedDB.open(name, version);
+        return new Promise((resolve, reject) => {
+            request.onupgradeneeded = () => {
+                for (const store of stores) request.result.createObjectStore(store, {keyPath: 'id'});
+                seed?.(request.transaction);
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    };
+    const deleteDatabase = name => new Promise(resolve => {
+        const request = indexedDB.deleteDatabase(name);
+        request.onsuccess = request.onerror = request.onblocked = () => resolve();
+    });
+    const rejection = async task => { try { await task(); return null; } catch (error) { return error.message; } };
+
+    async function readerBattery(label) {
+        // 1) coda v1 reale con due operazioni sigillate: il lettore le restituisce senza chiave
+        const uid = `runtime-reader-${label}-${crypto.randomUUID()}`;
+        const queue = await createOfflineMutationQueue({uid, vaultKeyMaterial: KEY});
+        await queue.enqueue({uid, operationId: 'device:1', recordId: 'record-1', value: 'fixture-1'});
+        await queue.enqueue({uid, operationId: 'device:2', recordId: 'record-2', value: 'fixture-2'});
+        queue.close();
+        const read = await readOfflineQueueContainers({uid});
+        same(read.version, 1, 'READER_V1_VERSION');
+        same(read.containers.map(row => row.operationId).sort(), ['device:1', 'device:2'], 'READER_V1_IDS');
+        assert(read.containers.every(row => row.uid === uid && row.schemaVersion === 1 &&
+            row.id === `${uid}:${row.operationId}` && typeof row.iv === 'string' && typeof row.ciphertext === 'string'),
+            'READER_V1_CONTAINER_SHAPE');
+        assert(!JSON.stringify(read.containers).includes('fixture-'), 'READER_V1_LEAKED_CLEARTEXT');
+        const after = await inspect(`codex-offline-queue-${uid}`, 'encryptedOperations');
+        assert(!after.upgraded && after.version === 1, 'READER_V1_TRIGGERED_UPGRADE');
+        same(after.stores, ['encryptedOperations'], 'READER_V1_STORES_CHANGED');
+        same(after.rows.map(row => row.id).sort(), [`${uid}:device:1`, `${uid}:device:2`], 'READER_V1_ROWS_CHANGED');
+        assert(after.rows.every(row => row.iv === read.containers.find(item => item.id === row.id).iv), 'READER_V1_ROWS_REWRITTEN');
+
+        // 2) database mancante: resta mancante, nessuno store creato
+        const missingUid = `runtime-reader-missing-${crypto.randomUUID()}`;
+        const missingName = `codex-offline-queue-${missingUid}`;
+        same(await rejection(() => readOfflineQueueContainers({uid: missingUid})), 'QUEUE_READER_MISSING', 'READER_MISSING_CODE');
+        const probe = await openDatabase(missingName, 1);
+        assert(probe.upgraded && probe.database.objectStoreNames.length === 0, 'READER_MISSING_CREATED_DATABASE');
+        probe.database.close();
+        await deleteDatabase(missingName);
+
+        // 3) schema v2 con store del lease: accettato; un v2 senza `queueLeases` fallisce chiuso
+        const v2Uid = `runtime-reader-v2-${crypto.randomUUID()}`;
+        const v2Name = `codex-offline-queue-${v2Uid}`;
+        const seeded = await createDatabase(v2Name, 2, ['encryptedOperations', 'queueLeases'],
+            transaction => transaction.objectStore('encryptedOperations').put({id: `${v2Uid}:device:1`, uid: v2Uid,
+                operationId: 'device:1', schemaVersion: 1, iv: 'SYNTHETIC-IV', ciphertext: 'SYNTHETIC-CIPHERTEXT', queuedAt: 1}));
+        seeded.close();
+        const version2 = await readOfflineQueueContainers({uid: v2Uid});
+        same(version2.version, 2, 'READER_V2_VERSION');
+        same(version2.containers.map(row => row.operationId), ['device:1'], 'READER_V2_IDS');
+        const noLeaseUid = `runtime-reader-nolease-${crypto.randomUUID()}`;
+        const noLease = await createDatabase(`codex-offline-queue-${noLeaseUid}`, 2, ['encryptedOperations']);
+        noLease.close();
+        same(await rejection(() => readOfflineQueueContainers({uid: noLeaseUid})), 'QUEUE_READER_SCHEMA', 'READER_V2_LEASE_STORE_NOT_REQUIRED');
+
+        // 4) versione futura: fallisce chiuso e non tocca il database (né cancella né ricrea)
+        const v3Uid = `runtime-reader-v3-${crypto.randomUUID()}`;
+        const v3Name = `codex-offline-queue-${v3Uid}`;
+        const future = await createDatabase(v3Name, 3, ['encryptedOperations', 'futuri']);
+        future.close();
+        same(await rejection(() => readOfflineQueueContainers({uid: v3Uid})), 'QUEUE_READER_SCHEMA', 'READER_V3_CODE');
+        const untouched = await inspect(v3Name, 'encryptedOperations');
+        assert(!untouched.upgraded && untouched.version === 3, 'READER_V3_TOUCHED_DATABASE');
+        same(untouched.stores, ['encryptedOperations', 'futuri'], 'READER_V3_STORES_CHANGED');
+
+        // 5) contenitore malformato o di un altro proprietario: fallisce chiuso e non rimuove righe
+        const badUid = `runtime-reader-bad-${crypto.randomUUID()}`;
+        const badName = `codex-offline-queue-${badUid}`;
+        const alien = await createDatabase(badName, 1, ['encryptedOperations'], transaction => {
+            const store = transaction.objectStore('encryptedOperations');
+            store.put({id: `${badUid}:device:1`, uid: 'altro-proprietario', operationId: 'device:1', schemaVersion: 1,
+                iv: 'SYNTHETIC-IV', ciphertext: 'SYNTHETIC-CIPHERTEXT', queuedAt: 1});
+            store.put({id: `${badUid}:device:2`, uid: badUid, operationId: 'device:2', schemaVersion: 1, iv: 'SYNTHETIC-IV', queuedAt: 2});
+        });
+        alien.close();
+        same(await rejection(() => readOfflineQueueContainers({uid: badUid})), 'QUEUE_READER_CONTAINER', 'READER_MALFORMED_CODE');
+        const stillThere = await inspect(badName, 'encryptedOperations');
+        same(stillThere.rows.map(row => row.id).sort(), [`${badUid}:device:1`, `${badUid}:device:2`], 'READER_MALFORMED_REMOVED_ROWS');
+    }
+
+    restore(undefined);
+    await readerBattery('nolocks');
+    passed.push('Web Locks assente: il lettore compatibile v1/v2 restituisce i contenitori sigillati reali, non migra, non scrive, lascia intatto il database e fallisce chiuso su schema ignoto o contenitore malformato');
+    restore(nativeLocks);
+    await readerBattery('native');
+    passed.push('Web Locks di piattaforma presente: la stessa batteria del lettore dà lo stesso esito — il lettore non consulta e non richiede Web Locks');
+    const poisoned = `runtime-reader-poison-${crypto.randomUUID()}`;
+    const poisonedName = `codex-offline-queue-${poisoned}`;
+    const seededRaw = await createDatabase(poisonedName, 1, ['encryptedOperations']);
+    seededRaw.close();
+    restore({request() { throw new Error('READER_CONSULTED_LOCKS'); }});
+    const poisonedRead = await readOfflineQueueContainers({uid: poisoned});
+    same(poisonedRead.containers, [], 'READER_POISONED_CONTAINERS');
+    passed.push('Web Locks sostituito da uno stub che lancia: la lettura riesce comunque — nessuna chiamata a `navigator.locks` da parte del lettore');
+    restore(nativeLocks);
 
     await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, passed,
         browser: navigator.userAgent, webLocks: typeof navigator.locks})});
