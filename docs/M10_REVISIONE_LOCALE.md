@@ -92,13 +92,21 @@ positivi** (per esempio su `trashSyncRecord`).
    `data/account-widget-client.js:33`, `data/shared-vault-data-client.js:14`,
    `privato/profilo-actions.js:65`, `privato/profilo-widgets.js:56` e
    `shared/account-note-editor.js:25`.
-   **Percorsi WebCrypto autonomi, da NON attribuire al parametro:** le 10 occorrenze di
-   `crypto.subtle.encrypt` nei moduli non passano da `deriveKey`/PBKDF2 a 100 000 —
-   `core/crypto-utils.js:87,125,214` (interni: involucro KEK e passo AES-GCM di `encrypt` stesso),
-   `core/sharing-identity.js:35`, `core/vault-session.js:30`, `core/webauthn-manager.js:203`,
-   `data/offline-mutation-queue.js:43`, `settings/backup-crypto.js:78`,
-   `shared/attachment-security.js:42,51` — e la versione precedente di questa mappa li elencava per
-   errore fra i call site di `encrypt`.
+   **Le 10 occorrenze di `crypto.subtle.encrypt` vanno classificate in tre gruppi distinti** (corretto
+   il 22/09 dopo la revisione Codex, che ha rilevato la contraddizione precedente):
+   **1 interna al flusso `encrypt()`** — `core/crypto-utils.js:214`, il passo AES-GCM della funzione
+   stessa, che **segue** `deriveKey` a `:212` e quindi **usa** il PBKDF2 a 100 000;
+   **2 nel flusso Vault a 600 000** — `core/crypto-utils.js:87` (`createVaultVerifier` →
+   `deriveVerifierKey`, `VERIFIER_ITERATIONS`) e `core/crypto-utils.js:125` (`wrapVaultKey` →
+   `deriveKek`, `KEK_ITERATIONS`);
+   **7 percorsi WebCrypto autonomi**, che non passano da `deriveKey` e quindi **non** usano né il
+   parametro a 100 000 né quello a 600 000 — `core/sharing-identity.js:35`, `core/vault-session.js:30`,
+   `core/webauthn-manager.js:203`, `data/offline-mutation-queue.js:43`, `settings/backup-crypto.js:78`,
+   `shared/attachment-security.js:42,51`.
+   La versione precedente di questa mappa elencava per errore fra i call site di `encrypt`
+   `attachment-security.js`, `sharing-identity.js`, `vault-session.js`, `webauthn-manager.js` e
+   `offline-mutation-queue.js`, e fra i percorsi «autonomi» anche il passo interno `:214` e i due usi
+   Vault a 600 000 (`:87`, `:125`).
    **Quale segreto entra:** `generateVaultKey()` produce 32 byte casuali; il keyring `CPVK2:` porta
    `primaryKey` (casuale) e `legacyKey` — e nei due call site di `security-manager.js:265,573` il
    `legacyKey` è la **Master Password**. Per i record cifrati con la chiave casuale le iterazioni contano
