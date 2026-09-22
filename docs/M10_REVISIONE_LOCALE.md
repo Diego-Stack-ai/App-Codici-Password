@@ -99,21 +99,22 @@ positivi** (per esempio su `trashSyncRecord`).
    **2 nel flusso Vault a 600 000** — `core/crypto-utils.js:87` (`createVaultVerifier` →
    `deriveVerifierKey`, `VERIFIER_ITERATIONS`) e `core/crypto-utils.js:125` (`wrapVaultKey` →
    `deriveKek`, `KEK_ITERATIONS`);
-   **7 percorsi WebCrypto con KDF proprio**, che **non** passano da `crypto-utils.deriveKey` (quindi non
-   usano il parametro a 100 000 né quello a 600 000 *di quel modulo*), ma **non** sono privi di
-   derivazione: ognuno ha la sua, verificata uno per uno il 22/09 dopo la revisione Codex R3 —
-   **HKDF-SHA256**: `core/sharing-identity.js:35` (`deriveWrappingKey`),
+   **7 operazioni WebCrypto separate da `crypto-utils.encrypt()`, con fonti di chiave diverse: alcune
+   derivate, altre casuali o fornite dal chiamante** — nessuna passa da `crypto-utils.deriveKey` (quindi
+   nessuna usa il parametro a 100 000 né quello a 600 000 *di quel modulo*), ma **non** tutte derivano
+   una chiave: la classificazione puntuale, verificata una per una il 22/09 dopo le revisioni Codex R3-R5,
+   è **HKDF-SHA256**: `core/sharing-identity.js:35` (`deriveWrappingKey`),
    `data/offline-mutation-queue.js:43` (`deriveOfflineQueueKey`),
-   `shared/attachment-security.js:42,51` (`deriveAttachmentWrappingKey`, con chiave di file casuale a
-   32 byte); **chiave AES-GCM casuale di sessione** (32 byte in `sessionStorage`):
-   `core/vault-session.js:30` (`getSessionKey`); **chiave fornita dal chiamante** (PRF WebAuthn):
-   `core/webauthn-manager.js:203` (`encryptVaultSecret`); **PBKDF2-SHA256 a 600 000 iterazioni proprie**:
-   `settings/backup-crypto.js:78` (`encryptBackupEntry` con la chiave di `deriveBackupKey`, parametro
-   `KDF_ITERATIONS = 600000` a `:5`, passato a PBKDF2 a `:69-70`).
+   `shared/attachment-security.js:51` (`deriveAttachmentWrappingKey`); **chiave casuale**: chiave di file a
+   32 byte per `shared/attachment-security.js:42`, chiave AES-GCM di sessione a 32 byte in
+   `sessionStorage` per `core/vault-session.js:30` (`getSessionKey`); **chiave fornita dal chiamante**
+   (PRF WebAuthn): `core/webauthn-manager.js:203` (`encryptVaultSecret`); **PBKDF2-SHA256 a 600 000
+   iterazioni proprie**: `settings/backup-crypto.js:78` (`encryptBackupEntry` con la chiave di
+   `deriveBackupKey`, parametro `KDF_ITERATIONS = 600000` a `:5`, passato a PBKDF2 a `:69-70`).
    Quindi il **600 000** compare in **due contesti distinti e non intercambiabili** — il
    verificatore/KEK del Vault in `crypto-utils.js` e il KDF del **file di backup** in
-   `backup-crypto.js` — mentre la cifratura dei **campi** resta a 100 000; i restanti percorsi usano
-   HKDF, una chiave di sessione casuale o una chiave fornita dal chiamante.
+   `backup-crypto.js` — mentre la cifratura dei **campi** resta a 100 000; le altre operazioni usano
+   HKDF, chiavi casuali o chiavi fornite dal chiamante.
    La versione precedente di questa mappa elencava per errore fra i call site di `encrypt`
    `attachment-security.js`, `sharing-identity.js`, `vault-session.js`, `webauthn-manager.js` e
    `offline-mutation-queue.js`, e fra i percorsi «autonomi» anche il passo interno `:214` e i due usi
