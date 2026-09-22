@@ -169,3 +169,52 @@ test('lettura disponibile: il percorso normale resta invariato', async () => {
     });
     assert.deepEqual(await offline.flush(), {status: 'offline', pending: 1});
 });
+
+test('scrittore chiuso da un upgrade dopo l’apertura: nessun invio e indisponibilità dichiarata', async () => {
+    const states = []; let sends = 0;
+    const sync = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        // La connessione v1 è stata chiusa da un upgrade concorrente: `isOperable()` è falso, ma
+        // l'oggetto coda è ancora non nullo e il lettore compatibile vede già le operazioni v2.
+        queue: {list: async () => [{operationId: 'op-1'}], remove: async () => assert.fail('remove su scrittore chiuso'), isOperable: () => false},
+        readQueue: async () => ({available: true, version: 2, operations: [{operationId: 'op-1'}]}),
+        send: async () => { sends += 1; return {status: 'applied'}; },
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true,
+        onState: state => states.push(state)
+    });
+    assert.deepEqual(await sync.flush(), {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'});
+    assert.equal(sends, 0);
+    assert.deepEqual(states, [{state: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending: 1}]);
+});
+
+test('risposta mancante o malformata del lettore fallisce chiusa, mai coda vuota', async () => {
+    const responses = [undefined, null, {}, {available: true}, {available: true, operations: null}, {available: 'yes', operations: []}];
+    for (const response of responses) {
+        const states = []; let sends = 0;
+        const sync = createOfflineMutationSynchronizer({
+            uid: 'owner-a',
+            queue: {list: async () => assert.fail('la lettura passa dal lettore iniettato'), remove: async () => assert.fail('remove')},
+            readQueue: async () => response,
+            send: async () => { sends += 1; return {status: 'applied'}; },
+            withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+            isOnline: () => true,
+            onState: state => states.push(state)
+        });
+        const result = await sync.flush();
+        assert.equal(result.status, 'queue-unavailable', `risposta ${JSON.stringify(response)}`);
+        assert.equal(result.reason, 'QUEUE_READER_UNAVAILABLE');
+        assert.equal(sends, 0);
+        assert.equal(states.some(state => ['idle', 'saved', 'offline'].includes(state.state)), false);
+    }
+    // Anche un lettore che **lancia** fallisce chiuso, con il proprio codice.
+    const throwing = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        queue: {list: async () => assert.fail('no'), remove: async () => assert.fail('remove')},
+        readQueue: async () => { throw Object.assign(new Error('scaduto'), {code: 'QUEUE_READER_TIMEOUT'}); },
+        send: async () => assert.fail('nessun invio'),
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true
+    });
+    assert.deepEqual(await throwing.flush(), {status: 'queue-unavailable', reason: 'QUEUE_READER_TIMEOUT'});
+});

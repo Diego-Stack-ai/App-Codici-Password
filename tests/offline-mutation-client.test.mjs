@@ -137,3 +137,18 @@ test('senza lettore compatibile il comportamento resta quello di prima', async (
         createSynchronizer: () => ({flush: async () => ({status: 'saved'})}),
         withLease: async (_uid, task) => task(), send: async () => {}}), /VersionError/);
 });
+
+test('scrittore chiuso da un upgrade dopo l’apertura: le scritture rifiutano in modo dichiarato', async () => {
+    let closed = false, enqueued = 0;
+    const deps = unavailabilityDependencies({read: {available: true, version: 2, operations: [{operationId: 'op-1'}]}});
+    const client = await createOfflineMutationClientCore({...deps, uid: 'owner', vaultKeyMaterial: 'fixture', enabled: true,
+        createQueue: async () => ({isOperable: () => !closed, enqueue: async () => { enqueued += 1; }, list: async () => [], close() {}}),
+        createSynchronizer: () => ({flush: async () => ({status: 'saved'})})});
+    await client.enqueue({uid: 'owner', operationId: 'op-1'});
+    assert.equal(enqueued, 1);
+    closed = true;
+    await assert.rejects(client.enqueue({uid: 'owner', operationId: 'op-2'}), /OFFLINE_QUEUE_WRITE_UNAVAILABLE/);
+    await assert.rejects(client.replace({uid: 'owner', operationId: 'op-1'}, {uid: 'owner', operationId: 'op-2'}), /OFFLINE_QUEUE_WRITE_UNAVAILABLE/);
+    assert.equal(enqueued, 1);
+    client.close();
+});

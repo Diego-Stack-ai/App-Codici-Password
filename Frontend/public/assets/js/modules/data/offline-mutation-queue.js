@@ -340,6 +340,13 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             };
             try { await done; } catch (error) { throw failure || error; }
         },
+        // [M6-A-6 R1] La connessione dello scrittore può essere chiusa **dopo** l'apertura da un
+        // upgrade concorrente (reazione a `versionchange`). La coda non è più operabile e la
+        // sincronizzazione deve rifiutare **prima** di qualsiasi effetto, non dopo un invio.
+        isOperable() {
+            try { database.transaction(STORE); return true; }
+            catch { return false; }
+        },
         close() { database.close(); }
     };
 }

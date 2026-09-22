@@ -38,12 +38,17 @@ export async function createOfflineMutationClientCore({
     const readQueue = reader ? () => reader.read() : undefined;
     const synchronizer = createSynchronizer({uid, queue, readQueue, send, withLease, onState, isOnline, isActive: active});
     const channel = createChannel?.(uid, () => synchronizer.flush()) ?? {notify() {}, close() {}};
-    // Gli ingressi di **scrittura** richiedono la coda operabile: senza di essa rifiutano in modo
-    // dichiarato e non accodano nulla.
+    // Gli ingressi di **scrittura** richiedono la coda operabile: senza di essa — perché non è mai
+    // stata aperta o perché un upgrade concorrente ne ha chiuso la connessione **dopo** l'apertura
+    // — rifiutano in modo dichiarato e non accodano nulla.
     const assertWritable = () => {
         assertActive();
-        if (!queue) {
-            throw Object.assign(new Error('OFFLINE_QUEUE_WRITE_UNAVAILABLE'), {code: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', reason: writeUnavailable});
+        const closedAfterOpen = !!queue && typeof queue.isOperable === 'function' && queue.isOperable() === false;
+        if (!queue || closedAfterOpen) {
+            throw Object.assign(new Error('OFFLINE_QUEUE_WRITE_UNAVAILABLE'), {
+                code: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE',
+                reason: writeUnavailable || 'QUEUE_CLOSED_BY_VERSION_CHANGE'
+            });
         }
     };
     return {

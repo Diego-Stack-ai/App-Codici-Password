@@ -141,10 +141,10 @@ File censiti: **867**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 4303 | 101 | Sessione Vault cifrata e limitata alla scheda/browser session. |
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7326 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
 | `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 2964 | 74 | Supporto frontend: account-widget-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 4216 | 89 | Supporto frontend: offline-mutation-client-core. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 4565 | 94 | Supporto frontend: offline-mutation-client-core. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1189 | 22 | Supporto frontend: offline-mutation-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 19970 | 366 | Supporto frontend: offline-mutation-queue. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 5863 | 110 | Supporto frontend: offline-mutation-sync. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 20398 | 373 | Supporto frontend: offline-mutation-queue. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 7383 | 132 | Supporto frontend: offline-mutation-sync. |
 | `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 3578 | 114 | Supporto frontend: private-account-offline-pilot. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 687 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
@@ -313,7 +313,7 @@ File censiti: **867**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1268478 | 8274 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1279871 | 8350 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -916,9 +916,9 @@ File censiti: **867**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
 | `tests/new-account-shared-link.test.mjs` | MJS | 2601 | 33 | Test automatico: new-account-shared-link.test. |
 | `tests/offline-account-widgets.test.mjs` | MJS | 6182 | 60 | Test automatico: offline-account-widgets.test. |
-| `tests/offline-mutation-client.test.mjs` | MJS | 8693 | 140 | Test automatico: offline-mutation-client.test. |
-| `tests/offline-mutation-queue.test.mjs` | MJS | 30932 | 500 | Test automatico: offline-mutation-queue.test. |
-| `tests/offline-mutation-sync.test.mjs` | MJS | 10576 | 172 | Test automatico: offline-mutation-sync.test. |
+| `tests/offline-mutation-client.test.mjs` | MJS | 9759 | 155 | Test automatico: offline-mutation-client.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 32057 | 520 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-mutation-sync.test.mjs` | MJS | 13647 | 221 | Test automatico: offline-mutation-sync.test. |
 | `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
 | `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |
 | `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18090 | 228 | Test automatico: private-account-detail-lifecycle.test. |

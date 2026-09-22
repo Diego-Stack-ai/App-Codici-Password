@@ -25,15 +25,32 @@ export function createOfflineMutationSynchronizer({
         onState({state, ...detail});
     }
 
-    // Lettura unica per entrambi i rami: `available: false` non è mai una coda vuota.
+    // Lettura unica per entrambi i rami: solo `{available: true}` con un **elenco valido** è una
+    // lettura riuscita. Qualunque altra risposta — mancante, malformata, o un errore — fallisce
+    // chiusa come indisponibilità: **mai** una coda vuota.
     async function read() {
-        if (readQueue) {
-            const result = await readQueue();
-            if (result?.available === false) return {available: false, reason: result.reason || 'QUEUE_READER_UNAVAILABLE'};
-            return {available: true, operations: result?.operations ?? []};
+        try {
+            if (readQueue) {
+                const result = await readQueue();
+                if (result?.available !== true || !Array.isArray(result.operations)) {
+                    return {available: false, reason: result?.reason || 'QUEUE_READER_UNAVAILABLE'};
+                }
+                return {available: true, operations: result.operations};
+            }
+            return {available: true, operations: await queue.list()};
+        } catch (error) {
+            return {available: false, reason: error?.code || error?.message || 'QUEUE_READER_UNAVAILABLE'};
         }
-        return {available: true, operations: await queue.list()};
     }
+
+    // Lo scrittore può diventare non operabile **dopo** l'apertura (upgrade concorrente che chiude
+    // la connessione): in quel caso non si invia nulla, perché non si potrebbe rimuovere
+    // l'operazione inviata e la coda non sarebbe più governabile.
+    const writerUnavailable = () => !!queue && typeof queue.isOperable === 'function' && queue.isOperable() === false;
+    const writerUnavailableResult = pending => {
+        emit('queue-unavailable', {reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending});
+        return {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'};
+    };
 
     async function run() {
         if (!isActive()) return {status: 'recoverable-error'};
@@ -48,6 +65,7 @@ export function createOfflineMutationSynchronizer({
             emit('queue-unavailable', {reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending: read0.operations.length});
             return {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'};
         }
+        if (writerUnavailable()) return writerUnavailableResult(read0.operations.length);
         if (!isOnline()) {
             emit('offline', {pending: read0.operations.length});
             return {status: 'offline', pending: read0.operations.length};
@@ -58,6 +76,7 @@ export function createOfflineMutationSynchronizer({
                 emit('queue-unavailable', {reason: read1.reason, pending: null});
                 return {status: 'queue-unavailable', reason: read1.reason};
             }
+            if (writerUnavailable()) return writerUnavailableResult(read1.operations.length);
             const operations = read1.operations;
             emit('syncing', {pending: operations.length});
             let completed = 0;
@@ -68,6 +87,9 @@ export function createOfflineMutationSynchronizer({
                         emit('reconciliation-required', {operation, pending: operations.length - completed});
                         return {status: 'reconciliation-required', operation, completed};
                     }
+                    // Guardia immediatamente prima dell'effetto: se lo scrittore è stato chiuso da
+                    // un upgrade concorrente non si invia nulla.
+                    if (writerUnavailable()) return writerUnavailableResult(operations.length - completed);
                     const result = await send(operation);
                     if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED');
                     if (result.status === 'conflict') {

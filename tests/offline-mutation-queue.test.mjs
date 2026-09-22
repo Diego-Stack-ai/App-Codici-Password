@@ -252,7 +252,11 @@ test('scope review reason stays inside encrypted payload and survives reopening'
 });
 
 function openingFixture() {
-    const request = {}, database = {closed: 0, close() { this.closed++; }};
+    const request = {};
+    const database = {closed: 0, close() { this.closed++; }, transaction() {
+        if (this.closed) throw Object.assign(new Error('la connessione è chiusa'), {name: 'InvalidStateError'});
+        return {};
+    }};
     const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, 1); return request; }};
     return {request, database, indexedDb, succeed() { request.result = database; request.onsuccess(); }};
 }
@@ -264,6 +268,22 @@ test('database lifecycle closes on version change without deleting or upgrading 
     assert.equal(f.database.closed, 0);
     f.database.onversionchange({newVersion: 2});
     assert.equal(f.database.closed, 1);
+});
+
+test('lo scrittore chiuso da un upgrade concorrente non è più operabile', async () => {
+    const f = openingFixture();
+    const pending = queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: f.indexedDb});
+    // `createOfflineMutationQueue` deriva prima la chiave, quindi la richiesta viene aperta al giro
+    // successivo: si attende che il gestore sia installato prima di simularne l'esito.
+    while (typeof f.request.onsuccess !== 'function') await new Promise(resolve => setImmediate(resolve));
+    f.succeed();
+    const instance = await pending;
+    assert.equal(instance.isOperable(), true);
+    // Un'altra scheda esegue l'upgrade: la reazione a `versionchange` chiude la connessione v1,
+    // ma l'oggetto coda resta in mano al chiamante.
+    f.database.onversionchange({newVersion: 2});
+    assert.equal(f.database.closed, 1);
+    assert.equal(instance.isOperable(), false);
 });
 
 test('blocked and timed-out opens reject and close late success instead of leaking a handle', async () => {

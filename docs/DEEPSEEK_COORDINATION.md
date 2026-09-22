@@ -8345,3 +8345,59 @@ File ripristinati e verificati **byte per byte** (`git hash-object` identico su 
 - Nessuna prova su PWA installate, due dispositivi, Firefox/Safari o collaudo fisico; M6-F3 non è chiuso e questa consegna non autorizza adozione o rilascio.
 
 **Stato incarico: DA_VERIFICARE** — M6-A-6 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `b8867e52`): il lettore compatibile v1/v2 di M6-A-1 è ora nel **percorso reale di lettura** dell'app (nuovo `createOfflineQueueReader` nel modulo della coda, sincronizzatore con lettura iniettabile e stato **`queue-unavailable`**, client che costruisce il lettore, tollera lo scrittore non apribile e rifiuta le scritture con `OFFLINE_QUEUE_WRITE_UNAVAILABLE`), **senza** cambiare lo scrittore, il coordinamento o il comportamento distribuito e **senza** eseguire l'upgrade v2 nel runtime o attivare il fallback. Prove: 21 test nuovi (30/30 coda, 12/12 sincronizzatore, 8/8 client, 128/128 `test:offline-write-prototype`) su coda **v1 con operazioni sigillate pendenti e riconciliazione**, coda **v2** e **schema non supportato**/apertura bloccata, con verifica esplicita che l'indisponibilità restituisce `operations: null` (**mai** `[]`) e che non si invia né si dichiara salvato; tre controlli di mutazione discriminatori (indisponibilità trattata come coda vuota, scrittura senza coda operabile, lettore che nasconde l'indisponibilità) con file ripristinati byte per byte; banchi browser tutti verdi, audit di sintassi OK su 161 moduli, `npm test` exit 0, inventario a 867 file, budget statico verde. Resta **solo prova di laboratorio**: candidato di upgrade, coordinatore ibrido/lease, modello di rollback e prove su IndexedDB reale del lettore (banco M6-A-1); il pilota resta opt-in e le scritture disattivate per default; `discard` resta sul percorso dello scrittore; nessun messaggio utente montato. Limiti: prove del percorso reale su fixture in memoria, scrittura offline indisponibile su coda v2 finché non si procede con l'upgrade previsto, nessun collaudo fisico, M6-F3 aperto. Nessun push, merge, deploy o rilascio; nessun secondo incarico avviato.
+
+**Revisione Codex — DA_CORREGGERE M6-A-6 (22/09/2026).** Il commit locale `5007e472` porta il lettore compatibile nel percorso reale e le 50 prove Node mirate passano (`node --test tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs`); `git diff HEAD^ HEAD --check` è pulito. Resta però un caso di convivenza v1/v2 che impedisce l'approvazione: `openOfflineQueueDatabase` chiude la connessione dello scrittore v1 su `versionchange` (`offline-mutation-queue.js:122`), ma il client conserva l'oggetto `queue` non nullo. Dopo l'upgrade di un'altra scheda, il nuovo lettore può restituire operazioni v2; `offline-mutation-sync.js:61-80` le invia con `send(operation)` **prima** di tentare `queue.remove` sullo scrittore ormai chiuso. Il risultato può essere un invio di rete con rimozione locale impossibile e stato recuperabile, invece di rifiutare la sincronizzazione prima dell'invio quando lo scrittore non è più operabile. I test nuovi provano solo lo scrittore che fallisce all'apertura, non una connessione v1 che si chiude successivamente per upgrade concorrente. Inoltre `offline-mutation-sync.js:30-33` tratta una risposta mancante/malformata di `readQueue` come `operations: []`, permettendo il percorso `idle`/`saved`; ogni risposta diversa da `available: true` con un array valido deve fallire chiusa come `queue-unavailable`. DeepSeek corregga **solo M6-A-6** e aggiunga prove discriminanti dei due casi: upgrade/chiusura dello scrittore dopo apertura ma prima del flush, con zero invii; risposta mancante/malformata del lettore, mai coda vuota o salvataggio riuscito. Conservi le operazioni sigillate e l'attuale assenza di upgrade/fallback nel runtime. Una sola correzione locale mirata, rapporto e nuova consegna `DA_VERIFICARE` in questo MD; nessun secondo incarico, push, merge o deploy. Non attribuire a queste prove una verifica su PWA installate.
+
+## Rapporto DeepSeek — correzione M6-A-6 R1: scrittore chiuso e risposta del lettore
+
+### 1. I due rilievi erano fondati
+
+1. **Scrittore chiuso dopo l'apertura.** `openOfflineQueueDatabase` chiude la connessione v1 su `versionchange` (`offline-mutation-queue.js`), ma il client conservava l'oggetto `queue` non nullo: dopo l'upgrade di un'altra scheda il lettore compatibile restituiva operazioni **v2**, il sincronizzatore le **inviava** e solo dopo falliva la `queue.remove` sullo scrittore chiuso — invio di rete senza rimozione locale, con stato recuperabile. I test nuovi coprivano solo lo scrittore che **fallisce all'apertura**, non la chiusura successiva.
+2. **Risposta mancante o malformata.** `read()` trattava `result?.operations ?? []`: una risposta assente o malformata diventava un **elenco vuoto** e apriva il percorso `idle`/`saved`.
+
+### 2. Correzioni applicate
+
+- `offline-mutation-queue.js` (**+7**): la coda espone ora **`isOperable()`**, che verifica con una transazione sulla connessione se lo scrittore è ancora utilizzabile. È **additiva**: scrittore, coordinamento e comportamento distribuito restano quelli di prima.
+- `offline-mutation-sync.js` (**+28, −6**):
+  - la sincronizzazione si rifiuta **prima di qualsiasi effetto** se lo scrittore non è più operabile — controllo subito dopo la lettura, di nuovo dentro il lease e **immediatamente prima di ogni `send`** — con esito e stato `queue-unavailable`, motivo `OFFLINE_QUEUE_WRITE_UNAVAILABLE` e `pending` reale: **zero invii**;
+  - la lettura accetta **solo** `{available: true}` con un **elenco valido**: qualunque altra risposta (mancante, `null`, priva di `operations`, con `operations` non array) fallisce chiusa con `QUEUE_READER_UNAVAILABLE`; anche un lettore che **lancia** diventa `queue-unavailable` con il proprio codice.
+- `offline-mutation-client-core.js` (**+9, −4**): gli ingressi di scrittura rifiutano anche quando la coda è diventata **inoperabile dopo l'apertura**, con `OFFLINE_QUEUE_WRITE_UNAVAILABLE` e motivo `QUEUE_CLOSED_BY_VERSION_CHANGE`.
+
+Le operazioni sigillate restano intatte e nel runtime **non** viene eseguito alcun upgrade né attivato alcun fallback.
+
+### 3. Prove nuove e discriminatorie
+
+- **Ciclo di vita della coda** (`tests/offline-mutation-queue.test.mjs`): con la factory reale, `isOperable()` è `true` a connessione aperta e diventa `false` **dopo** la reazione a `versionchange` che chiude la connessione (1 chiusura contata). La fixture ora modella una transazione su connessione chiusa (`InvalidStateError`).
+- **Upgrade concorrente prima del flush** (`tests/offline-mutation-sync.test.mjs`): scrittore non nullo ma `isOperable() === false`, lettore che vede le operazioni v2 → `{status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'}`, **zero invii**, nessuno stato `idle`/`saved`.
+- **Risposta mancante o malformata**: sei risposte diverse (`undefined`, `null`, `{}`, `{available: true}`, `{available: true, operations: null}`, `{available: 'yes', operations: []}`) e un lettore che lancia → tutte `queue-unavailable`, **zero invii**, mai `idle`/`saved`/`offline`.
+- **Client** (`tests/offline-mutation-client.test.mjs`): coda operabile → `enqueue` funziona; dopo la chiusura concorrente → `enqueue` e `replace` rifiutano con `OFFLINE_QUEUE_WRITE_UNAVAILABLE` e nessuna scrittura.
+
+### 4. Controlli di mutazione (discriminatori, ripristinati)
+
+| Mutazione temporanea | Esito |
+|---|---|
+| guardia di operabilità rimossa (`writerUnavailable` sempre falso) | rosso (1 test) |
+| risposta malformata accettata come elenco vuoto | rosso (1 test) |
+| coda dichiarata sempre operabile | rosso (1 test) |
+
+File ripristinati e verificati **byte per byte** (`git hash-object` identico su `offline-mutation-sync.js` e `offline-mutation-queue.js`).
+
+### 5. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `node --test tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs` | **54/54 pass** |
+| `npm run test:offline-write-prototype` | **141/141 pass** |
+| banchi browser `--runtime-lease`, `--two-tabs`, `--mixed-contexts`, `--queue-upgrade`, `--rollback-v2`, `--no-locks`, coordinamento | **tutti verdi** |
+| `node scripts/audit-js-syntax.mjs` | 161 moduli, **OK** |
+| `npm test` (catena completa) | **exit 0** |
+| `npm run audit:inventory` | inventario rigenerato, **867 file** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato su 30 pagine» |
+
+### 6. Limiti dichiarati (invariati, più uno)
+
+- La chiusura **dopo** l'apertura è provata con la fixture in memoria (reazione a `versionchange` simulata sulla factory reale); la reazione reale su IndexedDB è coperta dal banco a **due schede** M6-A-4, che però non esercita questa nuova guardia: resta dichiarato.
+- `isOperable()` crea una transazione vuota che si chiude da sola: non scrive nulla e non altera lo schema.
+- Restano validi i limiti precedenti: prove del percorso reale su fixture in memoria; `discard` legge ancora con `queue.list()` (percorso dello scrittore); pilota opt-in e scritture disattivate per default; nessun messaggio utente montato; scrittura offline indisponibile su coda v2 finché non si procede con l'upgrade previsto; nessun collaudo su PWA installate o dispositivi; M6-F3 aperto; nessuna prova attribuita a PWA installate.
+
+**Stato incarico: DA_VERIFICARE** — correzione M6-A-6 R1 consegnata da DeepSeek il 2026-09-22 con **una sola correzione locale mirata** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `5007e472`): il rilievo sullo **scrittore chiuso dopo l'apertura** è corretto con `isOperable()` sulla coda (additiva, scrittore invariato) e con tre guardie nel sincronizzatore — dopo la lettura, dentro il lease e **immediatamente prima di ogni invio** — che producono `queue-unavailable`/`OFFLINE_QUEUE_WRITE_UNAVAILABLE` con **zero invii**; il client rifiuta le scritture anche quando la coda diventa inoperabile dopo l'apertura (`QUEUE_CLOSED_BY_VERSION_CHANGE`). Il rilievo sulla **risposta del lettore** è corretto accettando solo `{available: true}` con un elenco valido: risposte mancanti o malformate (sei varianti provate) e lettori che lanciano falliscono chiusi come `queue-unavailable`, **mai** coda vuota o salvataggio riuscito. Prove nuove discriminatorie: ciclo di vita con `versionchange` sulla factory reale, upgrade concorrente prima del flush con zero invii, risposte malformate, guardie di scrittura del client; tre controlli di mutazione rossi (guardia di operabilità rimossa, risposta malformata accettata come vuota, coda sempre operabile) con file ripristinati byte per byte. Verifiche: 54/54 test delle tre suite, 141/141 `test:offline-write-prototype`, banchi browser tutti verdi, sintassi OK su 161 moduli, `npm test` exit 0, inventario a 867 file, budget statico verde. Operazioni sigillate conservate; nel runtime **nessun** upgrade v2 e **nessun** fallback. Limiti: la chiusura dopo l'apertura è provata sulla fixture (la reazione reale è coperta dal banco a due schede M6-A-4, che non esercita la nuova guardia); `isOperable()` usa una transazione vuota innocua; restano i limiti precedenti (fixture in memoria, `discard` sullo scrittore, pilota opt-in, nessun messaggio utente, coda v2 non scrivibile finché non si procede con l'upgrade, nessun collaudo fisico, M6-F3 aperto). Nessun push, merge, deploy o secondo incarico; nessuna verifica attribuita a PWA installate.
