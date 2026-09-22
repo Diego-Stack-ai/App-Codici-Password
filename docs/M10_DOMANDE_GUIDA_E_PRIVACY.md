@@ -26,9 +26,10 @@
    interessati, obblighi di conservazione) e come si interfaccia con le decisioni **D8** (obblighi
    legali) e **D7** (livello di prova richiesto)? La revisione preliminare
    (`docs/M10_REVISIONE_PRIVACY_PRELIMINARE.md`) **non** è un parere legale.
-5. **Q7 — Copie sul dispositivo**: l'utente può cancellare le copie locali di consultazione? Oggi
-   **nulla** viene cancellato al logout o dopo il purge (D10, D11). La guida finale deve dirlo in modo
-   esplicito; la scelta resta nelle domande già raccolte.
+5. **Q7 — Copie sul dispositivo**: al logout l'app cancella da sé **solo la sessione Vault in
+   `sessionStorage`**; bozze, cache IndexedDB, coda offline, `localStorage` e shell PWA **restano**, e
+   dopo il purge nessuna copia locale viene evacuata (D10, D11). L'utente deve poter cancellare anche
+   quelle copie (comando dedicato), o basta dichiararlo nella guida finale?
 6. **Q8 — Informativa e trasparenza sull'audit**: il registro tecnico è conservato **24 mesi** e la
    vista utente **non esiste**. Deve comparire nell'informativa (con quale formulazione) o resta una
    scelta tecnica documentata solo nei contratti?

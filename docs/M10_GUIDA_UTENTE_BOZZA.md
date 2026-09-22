@@ -29,7 +29,7 @@ pagina e un solo modulo inizializzatore.
 | Sblocco del Vault con Master Password | deriva la chiave (KEK) e apre la chiave del Vault | `modules/core/crypto-utils.js` (PBKDF2-SHA256 600 000 per verificatore/KEK) | [V] |
 | Sblocco biometrico (passkey/WebAuthn PRF) | secondo fattore locale con estensione PRF; fail-closed se il PRF non c'è | `modules/core/webauthn-manager.js`, `security-manager.js` | [V] nei test di laboratorio; [E] su dispositivo |
 | Recupero MFA con codice | password + codice di recupero **monouso**, limite per email+IP, codice conservato per hash | `functions/index.js` (`recoverMfaWithCode`) | [V] lettura del codice e test Functions; [E] prova reale |
-| Blocco, logout e pulizia | blocco Vault, logout, pulizia di copie e chiavi di sessione | `logout-session.js`, `vault-session.js` | [V] |
+| Blocco, logout e pulizia | blocco del Vault e logout; viene cancellata la **sessione Vault in `sessionStorage`** (payload incapsulato, chiave di wrapping e due chiavi storiche), mentre bozze, cache IndexedDB, coda offline, `localStorage` e shell PWA **restano sul dispositivo** | `logout-session.js`, `vault-session.js:94-99` | [V] |
 | Sessione cifrata nella scheda | la chiave del Vault è incapsulata; **la chiave di wrapping vive in `sessionStorage`** | `vault-session.js:3` (`getSessionKey`) | [V] come comportamento attuale; **[C]/[E]** la bonifica è il P0 noto (`AUDIT_VAULT_SESSION_P0.md`) |
 
 > **Nota di trasparenza:** il P0 della chiave di wrapping in `sessionStorage` è **aperto** e va dichiarato
@@ -79,7 +79,7 @@ pagina e un solo modulo inizializzatore.
 | Funzione | Che cosa fa | Fonte | Stato |
 |---|---|---|---|
 | Archivio Account (cestino) | archiviazione, ripristino e cancellazione definitiva con conferma forte; **nessuna scadenza automatica** | `archivio_account.html`, `functions/index.js` (`purgeArchivedAccount`) | [V] |
-| Cosa resta dopo il purge | il purge elimina solo gli allegati elencati; restano widget, copie condivise, inviti, prefissi non coperti | `docs/M7_RETENTION_CENSIMENTO.md` §3.4, §3.6, §3.7; T-08/T-09/T-16/T-21/T-27 | [V] come comportamento attuale; **decisioni aperte** (D4, D14) |
+| Cosa resta dopo il purge | il purge elimina solo gli allegati elencati; restano widget, copie condivise, inviti, prefissi non coperti e le **copie locali** (cache, bozze, coda, shell) | `docs/M7_RETENTION_CENSIMENTO.md` §3.4, §3.6, §3.7, §6.5; T-08/T-09/T-16/T-21/T-27 | [V] come comportamento attuale; **decisioni aperte** (D4, D10, D11, D14) |
 | Cronologia e audit tecnico | eventi tecnici per UID, senza interfaccia utente; retention a **24 mesi** decisa dal proprietario e implementata **solo nel ramo** | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:114-171` | [C] implementato non distribuito; [E] rilascio e monitoraggio |
 | Vista utente della cronologia | **non esiste** | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` (censimento in sola lettura) | [V] assenza verificata |
 

@@ -16,7 +16,7 @@
 | Metadati degli allegati | Firestore, sotto `users/{uid}/accounts/{aid}/attachments/**` e prefissi collegati | `docs/M7_RETENTION_CENSIMENTO.md` §5.1 |
 | Byte degli allegati | **Firebase Storage**, sotto gli stessi prefissi | `storage.rules`; `docs/M7_RETENTION_CENSIMENTO.md` §5.4 |
 | Identità e sessioni | **Firebase Auth**; copia locale gestita dall'SDK | `docs/M7_RETENTION_CENSIMENTO.md` §6.5 (T-23) |
-| Copie sul dispositivo (cache di consultazione) | cache persistente di Firestore (IndexedDB), copie in memoria, bozze in `sessionStorage`; **nulla viene cancellato al logout o dopo il purge** | `docs/M7_RETENTION_CENSIMENTO.md` §6.5-6.6 (T-23, T-24; decisioni D10, D11) |
+| Copie sul dispositivo (cache di consultazione) | cache persistente di Firestore (IndexedDB), copie in memoria, bozze in `sessionStorage`; **al logout viene cancellata la sola sessione Vault** (`vault_session_v1`, chiave di wrapping, `vault_s_key`, `vault_s_expiry`), mentre bozze, cache IndexedDB, coda offline, `localStorage` e shell PWA **restano**; dopo il purge nessuna di queste viene evacuata | `docs/M7_RETENTION_CENSIMENTO.md` §6.5-6.6 (T-23, T-24; decisioni D10, D11); `vault-session.js:94-99` |
 | Chiave di sessione del Vault | `sessionStorage` (chiave di wrapping + payload incapsulato) | `vault-session.js:3` (`getSessionKey`); **P0 noto** in `AUDIT_VAULT_SESSION_P0.md` |
 | Coda offline cifrata | IndexedDB (contenitore cifrato, lease) | `modules/data/offline-mutation-queue.js`; `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` |
 | Shell dell'app offline | Cache Storage del service worker (solo asset di stessa origine) | `sw.js`; `docs/M10_REVISIONE_LOCALE.md` §4.11 |
@@ -44,7 +44,7 @@
 | Eventi non databili | conservati come `unverifiable`, **mai** cancellati automaticamente | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:143` |
 | Archivio Account (cestino) | **nessuna scadenza automatica**: permane fino alla cancellazione manuale | `docs/M7_RETENTION_CENSIMENTO.md` §7, D1 |
 | Ricevute di idempotenza, backup, log di piattaforma, Account archiviati | **fuori** dalla retention dei 24 mesi | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:129` |
-| Copie sul dispositivo (cache, bozze, copie di consultazione) | **non** cancellate al logout né dopo il purge | `docs/M7_RETENTION_CENSIMENTO.md` §6.5-6.6 (D10, D11) |
+| Copie sul dispositivo (cache, bozze, copie di consultazione) | al **logout** viene cancellata la **sola sessione Vault in `sessionStorage`** (4 elementi, `vault-session.js:94-99`); restano bozze `sessionStorage`, envelope e verifier in `localStorage`, cache Firestore in IndexedDB, coda offline, shell PWA e file dell'utente. Dopo il **purge** nessuna di queste copie viene evacuata | `docs/M7_RETENTION_CENSIMENTO.md` §6.5-6.6, tabella M7-T23 (D10, D11) |
 | TTL Firestore e lifecycle del bucket | **configurazione reale non verificata** (serve accesso esterno) | `docs/M7_RETENTION_CENSIMENTO.md` §11.1 (T-22) |
 | Obblighi legali di conservazione | **dipendenza dichiarata**, nessuna deroga inventata (D8 rinviata) | `docs/M7_RETENTION_CENSIMENTO.md` §8 D8; `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:168` |
 
@@ -88,16 +88,28 @@
 | Consultare i propri dati | sì, dopo lo sblocco | `docs/DATA_ACCESS_CONTRACT.md` |
 | Esportare un backup | sì, file locale cifrato | `docs/M8_BACKUP_RECUPERO.md` |
 | Cancellare un Account | sì, con conferma forte; il purge lascia copie residue elencate | `docs/M7_RETENTION_CENSIMENTO.md` §3.4 |
-| Cancellare copie sul dispositivo | **non previsto**: nulla viene cancellato al logout o dopo il purge | `docs/M7_RETENTION_CENSIMENTO.md` §6.5-6.6 |
+| Cancellare copie sul dispositivo | **parziale**: al logout l'app cancella da sé solo la sessione Vault in `sessionStorage`; **nessun comando** cancella bozze, cache IndexedDB, coda offline, `localStorage` o shell PWA | `docs/M7_RETENTION_CENSIMENTO.md` §6.5-6.6; `vault-session.js:94-99` |
 | Vedere la cronologia tecnica | **non previsto** (nessuna interfaccia) | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` |
 | Richiedere la cancellazione anticipata di un evento di audit | **non previsto** (registro non cancellabile dal client) | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:116` |
 | Informative pubblicate | `privacy.html` e `termini.html` esistono; **contenuto non riesaminato qui** | `docs/CANONICAL_PAGE_REGISTRY.md` |
 
 ## 8. Punti incerti e dipendenze (nessuna decisione presa qui)
 
-1. **D1–D16** (retention, residui del purge, backup, messaggi, prove di irraggiungibilità, obblighi
-   legali, copie sul dispositivo, hard-delete, copie condivise, intestazione del backup, ripristino dopo
-   purge): **aperte**, elencate in `docs/M7_RETENTION_CENSIMENTO.md` §8 e §10.
+1. **Decisioni D1–D16: stato distinto, non «tutte aperte».**
+   - **Decise:** **D3** — il registro tecnico `auditEvents` è conservato **24 mesi** con cancellazione
+     controllata dal backend (decisione del proprietario del 21/09/2026), **implementata solo nel ramo e
+     non distribuita**; la convenzione della finestra (mesi di calendario) è decisa e implementata
+     (`docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:116,165`; `docs/CENSIMENTO_GATE_M6_M10.md:24`). **La durata
+     non si richiede di nuovo.**
+   - **Rinviata:** **D8** (obblighi legali di conservazione) — dipendenza dichiarata, nessuna deroga
+     inventata (`docs/M7_CRONOLOGIA_CESTINO_AUDIT.md:168`).
+   - **Parziali:** **D3**, per le parti non coperte dalla durata (permanenza delle altre famiglie,
+     rimozione della scrittura client sul registro, eventuale anonimizzazione al purge).
+   - **Ancora aperte:** **D1, D2, D4, D5, D6, D7, D9, D10–D16** (durata del cestino, cancellazione
+     immediata, residui del purge, backup e ricevute, messaggi all'utente, prova di irraggiungibilità,
+     ordine di lavoro, copie sul dispositivo, copie di consultazione, residui alla rimozione, hard-delete
+     di Azienda, copie condivise, intestazione del backup, ripristino dopo il purge), elencate in
+     `docs/M7_RETENTION_CENSIMENTO.md` §8 e §10.
 2. **TTL Firestore e lifecycle del bucket**: stato reale **non verificato** (T-22): richiede accesso
    esterno (`gcloud`), non deducibile dai file del repository.
 3. **P0 della chiave di wrapping in `sessionStorage`**: aperto (`docs/AUDIT_VAULT_SESSION_P0.md`).
