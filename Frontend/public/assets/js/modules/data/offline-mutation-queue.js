@@ -243,7 +243,23 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
     // Derive first: a failed key must not leave an unowned DB connection open.
     const key = await deriveOfflineQueueKey(vaultKeyMaterial, uid);
     const database = await openOfflineQueueDatabase(uid, indexedDb, {signal, isActive});
-    async function swap(expectedOperation, replacement, {isActive = () => true} = {}, sameId = false) {
+    // [M6-A-8c R1] Fencing del lease sulle scritture della coda. Quando il chiamante fornisce un
+    // **contesto di lease** (solo il percorso del pilota con il fallback attivo), la transazione
+    // readwrite finale nasce dalla **stessa connessione** del coordinatore e comprende lo store del
+    // lease: `guardTransaction` verifica nella stessa transazione che il token sia ancora nostro e
+    // solo allora esegue il confronto e la scrittura. Un titolare scaduto o subentrato riceve
+    // `LEASE_LOST` e la transazione viene annullata: **zero** inserimenti, sostituzioni o rimozioni.
+    // Senza contesto — percorso Web Locks e ogni altro chiamante — il codice è quello di sempre.
+    function writeTransaction(lease) {
+        return lease
+            ? lease.transaction([STORE, LEASE_STORE], 'readwrite')
+            : database.transaction(STORE, 'readwrite');
+    }
+    function guarded(tx, lease, onValid, onInvalid) {
+        if (lease) { lease.guardTransaction(tx, onValid, onInvalid); return; }
+        onValid();
+    }
+    async function swap(expectedOperation, replacement, {isActive = () => true, lease = null} = {}, sameId = false) {
             const checkActive = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
             checkActive();
             const expected = JSON.parse(JSON.stringify(expectedOperation));
@@ -266,31 +282,34 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             sealed.queuedAt = original.queuedAt;
 
             // Crypto must finish before IndexedDB starts: the final transaction only performs the CAS and writes.
-            const tx = database.transaction(STORE, 'readwrite');
+            const tx = writeTransaction(lease);
             const done = transactionDone(tx);
             const store = tx.objectStore(STORE);
-            const current = store.get(original.id);
-            const collision = store.get(sealed.id);
             let remaining = 2, failure;
-            const commit = () => {
-                if (--remaining) return;
-                try { checkActive(); } catch (error) { failure = error; return tx.abort(); }
-                if (!current.result || comparableJson(current.result) !== comparableJson(original)) {
-                    failure = new Error('OFFLINE_REPLACEMENT_CHANGED');
-                } else if (!sameId && collision.result) {
-                    failure = new Error('OFFLINE_REPLACEMENT_EXISTS');
-                }
-                if (failure) return tx.abort();
-                store.delete(original.id);
-                store.add(sealed);
+            const run = () => {
+                const current = store.get(original.id);
+                const collision = store.get(sealed.id);
+                const commit = () => {
+                    if (--remaining) return;
+                    try { checkActive(); } catch (error) { failure = error; return tx.abort(); }
+                    if (!current.result || comparableJson(current.result) !== comparableJson(original)) {
+                        failure = new Error('OFFLINE_REPLACEMENT_CHANGED');
+                    } else if (!sameId && collision.result) {
+                        failure = new Error('OFFLINE_REPLACEMENT_EXISTS');
+                    }
+                    if (failure) return tx.abort();
+                    store.delete(original.id);
+                    store.add(sealed);
+                };
+                current.onsuccess = commit;
+                collision.onsuccess = commit;
             };
-            current.onsuccess = commit;
-            collision.onsuccess = commit;
+            guarded(tx, lease, run, error => { failure = error; });
             try { await done; } catch (error) { throw failure || error; }
             return sealed.operationId;
     }
     return {
-        async enqueue(operation, {isActive = () => true} = {}) {
+        async enqueue(operation, {isActive = () => true, lease = null} = {}) {
             const check = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
             check();
             const expected = JSON.parse(JSON.stringify(operation));
@@ -304,16 +323,20 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             }
             const container = original || await sealOfflineOperation(expected, key);
             check();
-            const tx = database.transaction(STORE, 'readwrite');
-            const done = transactionDone(tx), store = tx.objectStore(STORE), current = store.get(container.id);
+            const tx = writeTransaction(lease);
+            const done = transactionDone(tx), store = tx.objectStore(STORE);
             let failure;
-            current.onsuccess = () => {
-                try { check(); } catch (error) { failure = error; return tx.abort(); }
-                if (comparableJson(current.result) !== comparableJson(original)) {
-                    failure = new Error('OFFLINE_OPERATION_CHANGED'); return tx.abort();
-                }
-                if (!original) store.add(container);
+            const run = () => {
+                const current = store.get(container.id);
+                current.onsuccess = () => {
+                    try { check(); } catch (error) { failure = error; return tx.abort(); }
+                    if (comparableJson(current.result) !== comparableJson(original)) {
+                        failure = new Error('OFFLINE_OPERATION_CHANGED'); return tx.abort();
+                    }
+                    if (!original) store.add(container);
+                };
             };
+            guarded(tx, lease, run, error => { failure = error; });
             try { await done; } catch (error) { throw failure || error; }
             return container.operationId;
         },
@@ -338,7 +361,7 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             for (const container of containers) operations.push(await openOfflineOperation(container, key, uid));
             return operations;
         },
-        async remove(expectedOperation, {isActive = () => true} = {}) {
+        async remove(expectedOperation, {isActive = () => true, lease = null} = {}) {
             const check = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
             check();
             const expected = JSON.parse(JSON.stringify(expectedOperation));
@@ -352,16 +375,20 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
                 throw new Error('OFFLINE_ACK_CHANGED');
             }
             check();
-            const tx = database.transaction(STORE, 'readwrite');
-            const done = transactionDone(tx), store = tx.objectStore(STORE), current = store.get(original.id);
+            const tx = writeTransaction(lease);
+            const done = transactionDone(tx), store = tx.objectStore(STORE);
             let failure;
-            current.onsuccess = () => {
-                try { check(); } catch (error) { failure = error; return tx.abort(); }
-                if (!current.result || comparableJson(current.result) !== comparableJson(original)) {
-                    failure = new Error('OFFLINE_ACK_CHANGED'); return tx.abort();
-                }
-                store.delete(original.id);
+            const run = () => {
+                const current = store.get(original.id);
+                current.onsuccess = () => {
+                    try { check(); } catch (error) { failure = error; return tx.abort(); }
+                    if (!current.result || comparableJson(current.result) !== comparableJson(original)) {
+                        failure = new Error('OFFLINE_ACK_CHANGED'); return tx.abort();
+                    }
+                    store.delete(original.id);
+                };
             };
+            guarded(tx, lease, run, error => { failure = error; });
             try { await done; } catch (error) { throw failure || error; }
         },
         // [M6-A-8a] Versione effettiva dello schema usato dallo scrittore (1 o 2).

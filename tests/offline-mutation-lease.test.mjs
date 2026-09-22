@@ -286,14 +286,14 @@ test('il collegamento è solo nel pilota: coda, client, sincronizzatore e upgrad
 });
 
 // ── 3. Client e sincronizzatore del pilota sul percorso reale v2 ────────────────────────────────
-const buildClient = async ({f, holderId, sent, states, send, uid = UID}) => {
+const buildClient = async ({f, holderId, sent, states, send, uid = UID, ...leaseOptions}) => {
     const client = await createOfflineMutationClientCore({
         uid, vaultKeyMaterial: KEY, enabled: true,
         createQueue: options => queue.createOfflineMutationQueue({...options, indexedDb: f.indexedDb}),
         createQueueReader: options => queue.createOfflineQueueReader({...options, indexedDb: f.indexedDb}),
         createSynchronizer: createOfflineMutationSynchronizer,
         // Esattamente il confine che il pilota inietta con l'opt-in attivo e Web Locks assente.
-        withLease: lease.resolveOfflineQueueLease({uid, leaseFallback: true, locks: null, holderId, indexedDb: f.indexedDb}),
+        withLease: lease.resolveOfflineQueueLease({uid, leaseFallback: true, locks: null, holderId, indexedDb: f.indexedDb, ...leaseOptions}),
         createChannel: () => ({notify() {}, close() {}}),
         send, isOnline: () => true, onState: state => states.push(state)
     });
@@ -370,4 +370,124 @@ test('client e sincronizzatore reali su coda v1: fail-closed dichiarato, nessun 
     assert.deepEqual(f.calls.created, [], 'nessuno store creato');
     assert.deepEqual(writesOn(f.calls, 'queueLeases'), [], 'nessuna scrittura sul lease');
     client.close();
+});
+
+// ── 4. M6-A-8c R1: fencing atomico delle scritture reali della coda ─────────────────────────────
+const fencedTransactions = f => f.calls.transactions.filter(tx => tx.mode === 'readwrite'
+    && tx.stores.includes('queueLeases') && tx.stores.includes('encryptedOperations'));
+
+test('R1 fencing atomico: un titolare scaduto non accoda, non sostituisce, non marca e non rimuove', async () => {
+    let clock = 1000;
+    const f = databaseFixture();
+    const instance = await queue.createOfflineMutationQueue({uid: UID, vaultKeyMaterial: KEY, indexedDb: f.indexedDb});
+    // L'operazione attesa è quella accodata: il confronto dei contenitori usa la stessa forma che
+    // `list()` restituirebbe dopo la decifratura.
+    const pending = {uid: UID, operationId: 'device:1', recordId: 'record-1', value: 'fixture-1'};
+    await instance.enqueue(pending);
+    const container = structuredClone(f.store('encryptedOperations').get(`${UID}:device:1`));
+    const stale = lease.resolveOfflineQueueLease({uid: UID, leaseFallback: true, locks: null,
+        indexedDb: f.indexedDb, holderId: 'page-a', ttlMs: 100, now: () => clock});
+    const cases = [
+        ['enqueue', context => instance.enqueue({uid: UID, operationId: 'device:9', recordId: 'record-9', value: 'x'}, {lease: context})],
+        ['replace', context => instance.replace(pending, {...pending, operationId: 'device:2', value: 'sostituito'}, {lease: context})],
+        ['markForReview', context => instance.markForReview(pending, {lease: context})],
+        ['remove', context => instance.remove(pending, {lease: context})]
+    ];
+    let base = 1000;
+    for (const [name, run] of cases) {
+        clock = base;
+        // Il titolare è scaduto **prima** della scrittura reale: la stessa transazione che scriverebbe
+        // verifica il token e annulla tutto.
+        assert.equal(await rejection(() => stale(UID, async context => { clock = base + 200; return await run(context); })),
+            'LEASE_LOST', name);
+        assert.equal(f.store('encryptedOperations').size, 1, `${name}: zero scritture/rimozioni`);
+        assert.deepEqual(f.store('encryptedOperations').get(`${UID}:device:1`), container, `${name}: contenitore invariato`);
+        assert.ok(fencedTransactions(f).length >= 1, `${name}: transazione fenced sul lease`);
+        base += 1000;
+    }
+    // Il **nuovo** titolare prosegue e completa la rimozione.
+    clock = base + 200;
+    const current = lease.resolveOfflineQueueLease({uid: UID, leaseFallback: true, locks: null,
+        indexedDb: f.indexedDb, holderId: 'page-b', ttlMs: 100, now: () => clock});
+    await current(UID, async context => { await instance.remove(pending, {lease: context}); });
+    assert.equal(f.store('encryptedOperations').size, 0, 'il nuovo titolare completa la rimozione');
+    instance.close();
+});
+
+test('R1 ritardo/sospensione oltre TTL durante la sincronizzazione: nessuna conferma, nessuna rimozione, nessuna riuscita', async () => {
+    let clock = 1000;
+    const f = databaseFixture();
+    await seedOperation(f, 'device:1');
+    const sent = [];
+    const stale = await buildClient({f, holderId: 'page-a', sent, states: [], ttlMs: 100, now: () => clock,
+        send: async operation => { sent.push(operation.operationId); clock = 1200; return {status: 'applied'}; }});
+    assert.equal(await rejection(() => stale.flush()), 'LEASE_LOST', 'il vecchio titolare non dichiara una riuscita');
+    assert.deepEqual(sent, ['device:1'], 'l’invio era già partito: il fencing non ritira la rete');
+    assert.equal(f.store('encryptedOperations').size, 1, 'nessuna rimozione: la conferma è stata rifiutata');
+    assert.equal(f.record().holderId, 'page-a', 'il record scaduto non viene riscritto dal vecchio titolare');
+    // Il nuovo titolare subentra e completa la conferma.
+    const currentSent = [];
+    const current = await buildClient({f, holderId: 'page-b', sent: currentSent, states: [], ttlMs: 100, now: () => clock,
+        send: async operation => { currentSent.push(operation.operationId); return {status: 'applied'}; }});
+    assert.deepEqual(await current.flush(), {acquired: true, value: {status: 'saved', completed: 1}});
+    assert.deepEqual(currentSent, ['device:1']);
+    assert.equal(f.store('encryptedOperations').size, 0, 'il nuovo titolare conferma e rimuove');
+    stale.close(); current.close();
+});
+
+test('R1 lease occupato: l’accodamento resta conservato senza token e nessuna sincronizzazione è dichiarata', async () => {
+    const f = databaseFixture();
+    const holder = lease.resolveOfflineQueueLease({uid: UID, leaseFallback: true, locks: null, indexedDb: f.indexedDb, holderId: 'page-a'});
+    let release, entered = false;
+    const gate = new Promise(resolve => { release = resolve; });
+    const holding = holder(UID, async () => { entered = true; await gate; return 'holder'; });
+    await waitFor(() => entered);
+    const other = await buildClient({f, holderId: 'page-b', sent: [], states: [],
+        send: async operation => ({status: 'applied', operationId: operation.operationId})});
+    const outcome = await other.enqueue({uid: UID, operationId: 'device:1', recordId: 'record-1', value: 'fixture-1'});
+    assert.equal(f.store('encryptedOperations').size, 1, 'la modifica dell’utente è conservata');
+    assert.equal(outcome?.acquired === true, false, 'nessuna riuscita dichiarata con il confine occupato');
+    release();
+    assert.deepEqual(await holding, {acquired: true, value: 'holder'});
+    other.close();
+});
+
+test('R1 percorso Web Locks: nessuna transazione sul lease e comportamento invariato', async () => {    const f = databaseFixture();
+    const locks = fakeLocks();
+    const sent = [];
+    const client = await createOfflineMutationClientCore({
+        uid: UID, vaultKeyMaterial: KEY, enabled: true,
+        createQueue: options => queue.createOfflineMutationQueue({...options, indexedDb: f.indexedDb}),
+        createQueueReader: options => queue.createOfflineQueueReader({...options, indexedDb: f.indexedDb}),
+        createSynchronizer: createOfflineMutationSynchronizer,
+        withLease: lease.resolveOfflineQueueLease({uid: UID, leaseFallback: true, locks, indexedDb: f.indexedDb}),
+        createChannel: () => ({notify() {}, close() {}}),
+        send: async operation => { sent.push(operation.operationId); return {status: 'applied'}; },
+        isOnline: () => true, onState: () => {}
+    });
+    await client.enqueue({uid: UID, operationId: 'device:1', recordId: 'record-1', value: 'fixture-1'});
+    assert.deepEqual(sent, ['device:1'], 'il percorso di piattaforma sincronizza come prima');
+    assert.equal(f.store('encryptedOperations').size, 0);
+    assert.deepEqual(locks.names, [NAME, NAME], 'accodamento e sincronizzazione passano dal lock di piattaforma');
+    assert.deepEqual(fencedTransactions(f), [], 'nessuna transazione fenced: il percorso Web Locks non usa il lease');
+    assert.equal(f.record(), undefined, 'nessun record di lease creato');
+    client.close();
+});
+
+test('R1 un confine che riferisce LEASE_LOST non lascia scrivere senza token', async () => {
+    let enqueued = 0;
+    const dependencies = error => ({uid: UID, vaultKeyMaterial: KEY, enabled: true,
+        createQueue: async () => ({isOperable: () => true, enqueue: async () => { enqueued += 1; },
+            list: async () => [], close() {}}),
+        createSynchronizer: () => ({flush: async () => ({status: 'saved'})}),
+        withLease: async () => { throw error; }, send: async () => {}});
+    // Token **preso e perso**: nessuna scrittura, esito dichiarato.
+    const lost = await createOfflineMutationClientCore(dependencies(Object.assign(new Error('LEASE_LOST'), {code: 'LEASE_LOST'})));
+    assert.equal(await rejection(() => lost.enqueue({uid: UID, operationId: 'device:1', recordId: 'record-1', value: 'x'})), 'LEASE_LOST');
+    assert.equal(enqueued, 0, 'nessuna scrittura senza token dopo una perdita');
+    // Token **mai preso** (API di piattaforma assente): l’accodamento resta conservato come prima.
+    const off = await createOfflineMutationClientCore(dependencies(Object.assign(new Error('OFFLINE_QUEUE_LOCKS_UNAVAILABLE'), {code: 'OFFLINE_QUEUE_LOCKS_UNAVAILABLE'})));
+    assert.deepEqual(await off.enqueue({uid: UID, operationId: 'device:2', recordId: 'record-2', value: 'x'}), {status: 'saved'});
+    assert.equal(enqueued, 1, 'la conservazione della modifica non cambia quando nessun token esiste');
+    lost.close(); off.close();
 });

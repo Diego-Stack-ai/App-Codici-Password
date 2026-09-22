@@ -1,5 +1,13 @@
 export const OFFLINE_MUTATION_WRITES_ENABLED = false;
 
+// [M6-A-8c R1] Rifiuti del confine che significano «un token preso è stato perso» oppure «la
+// sessione è cambiata»: in questi casi la coda **non** va scritta. Ogni altro rifiuto del confine
+// (occupato, API di piattaforma assente, lease indisponibile, acquisizione scaduta) lascia
+// l'accodamento possibile **senza** token, come nel comportamento precedente: la modifica
+// dell'utente va conservata e l'indisponibilità viene riferita.
+const FENCED_WRITE_REFUSALS = new Set(['LEASE_LOST', 'LEASE_CONTEXT_CLOSED', 'LEASE_SESSION_INACTIVE',
+    'OFFLINE_SESSION_CHANGED', 'LEASE_ASYNC_MUTATION_FORBIDDEN', 'LEASE_GUARD_INVALID']);
+
 export async function createOfflineMutationClientCore({
     uid,
     vaultKeyMaterial,
@@ -69,17 +77,40 @@ export async function createOfflineMutationClientCore({
         async enqueue(operation) {
             assertWritable();
             if (operation?.uid !== uid) throw new Error('OFFLINE_OPERATION_SCOPE_INVALID');
-            await queue.enqueue(operation, {isActive: active});
-            assertActive();
+            // [M6-A-8c R1] L'accodamento passa dal confine **con il token** quando il confine può
+            // essere acquisito: la verifica del lease e l'inserimento stanno nella stessa
+            // transazione, quindi un titolare scaduto o subentrato non accoda nulla. La
+            // conservazione della modifica non deve però dipendere da un lock: se nessun token è mai
+            // stato preso (confine occupato, API di piattaforma assente, lease indisponibile,
+            // acquisizione scaduta) si accoda **senza** token come prima; se invece un token preso
+            // viene perso o la sessione cambia, l'esito è un rifiuto e **non** si scrive.
+            let queued = false, taskStarted = false, boundaryError = null;
+            try {
+                const result = await withLease(uid, async lease => {
+                    taskStarted = true;
+                    assertActive();
+                    await queue.enqueue(operation, {isActive: active, lease: lease ?? null});
+                    queued = true;
+                    return {queued: true};
+                });
+                if (result?.acquired === false) queued = false;
+            } catch (error) { boundaryError = error; }
+            if (!queued) {
+                if (taskStarted || (boundaryError && FENCED_WRITE_REFUSALS.has(boundaryError.code || boundaryError.message))) {
+                    throw boundaryError;
+                }
+                assertActive();
+                await queue.enqueue(operation, {isActive: active});
+            }
             channel.notify();
             return synchronizer.flush();
         },
         async replace(expectedOperation, replacement) {
             assertWritable();
             if (expectedOperation?.uid !== uid || replacement?.uid !== uid) throw new Error('OFFLINE_OPERATION_SCOPE_INVALID');
-            const result = await withLease(uid, async () => {
+            const result = await withLease(uid, async lease => {
                 assertActive();
-                await queue.replace(expectedOperation, replacement, {isActive: active});
+                await queue.replace(expectedOperation, replacement, {isActive: active, lease: lease ?? null});
                 return {status: 'replaced'};
             });
             if (result?.acquired === false) return {status: 'recoverable-error'};
@@ -91,17 +122,17 @@ export async function createOfflineMutationClientCore({
         async discard(operationId) {
             assertWritable();
             if (!operationId) throw new Error('OFFLINE_OPERATION_ID_REQUIRED');
-            const result = await withLease(uid, async () => {
+            const result = await withLease(uid, async lease => {
                 assertActive();
                 const expected = (await queue.list()).find(operation => operation.operationId === operationId);
                 assertActive();
                 if (!expected) throw new Error('OFFLINE_ACK_MISSING');
-                await queue.remove(expected, {isActive: active});
+                await queue.remove(expected, {isActive: active, lease: lease ?? null});
             });
             if (result?.acquired === false) throw new Error('OFFLINE_QUEUE_BUSY');
             assertActive();
             channel.notify();
         },
-        close() { closed = true; channel.close(); queue?.close?.(); }
+        close() { closed = true; channel.close(); queue?.close?.(); withLease?.close?.(); }
     };
 }

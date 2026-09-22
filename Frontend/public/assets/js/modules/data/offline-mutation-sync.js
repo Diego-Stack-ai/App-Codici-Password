@@ -70,7 +70,12 @@ export function createOfflineMutationSynchronizer({
             emit('offline', {pending: read0.operations.length});
             return {status: 'offline', pending: read0.operations.length};
         }
-        return withLease(uid, async () => {
+        // [M6-A-8c R1] Il contesto del lease (quando il confine è quello del fallback) viene passato
+        // alle mutazioni della coda: la conferma e la marcatura per revisione verificano il token
+        // nella **stessa** transazione, quindi un titolare scaduto o subentrato non rimuove e non
+        // riscrive nulla. Sul percorso Web Locks il contesto è `undefined` e il comportamento resta
+        // quello di sempre.
+        return withLease(uid, async lease => {
             const read1 = await read();
             if (!read1.available) {
                 emit('queue-unavailable', {reason: read1.reason, pending: null});
@@ -99,13 +104,13 @@ export function createOfflineMutationSynchronizer({
                     if (result.status !== 'applied') {
                         throw new Error('OFFLINE_SYNC_RESULT_INVALID');
                     }
-                    await queue.remove(operation, {isActive});
+                    await queue.remove(operation, {isActive, lease: lease ?? null});
                     if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED');
                     completed += 1;
                 } catch (error) {
                     if (isActive() && ['failed-precondition', 'functions/failed-precondition'].includes(error?.code) && ['LEGACY_MUTATION_RESULT_UNVERIFIED', 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'].includes(error?.details?.reason)) {
                         let heldOperation;
-                        try { heldOperation = await queue.markForReview(operation, {isActive, reviewReason: error.details.reason}); }
+                        try { heldOperation = await queue.markForReview(operation, {isActive, lease: lease ?? null, reviewReason: error.details.reason}); }
                         catch (storageError) {
                             emit('recoverable-error', {operationId: operation.operationId, pending: operations.length - completed});
                             return {status: 'recoverable-error', error: storageError, completed};

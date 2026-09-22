@@ -171,20 +171,30 @@ export function createOfflineMutationLeaseCoordinator({uid, holderId, indexedDb 
         });
     }
     function createHandle(token, {signal, isActive}) {
-        let live = true;
+        let live = true, lost = false;
         const checkLive = () => {
-            if (!live) throw fail('LEASE_CONTEXT_CLOSED');
+            // Un contesto chiuso perché il lease è stato **perso** riferisce `LEASE_LOST` (è quella
+            // la causa); un contesto chiuso perché il coordinamento è finito regolarmente riferisce
+            // `LEASE_CONTEXT_CLOSED`.
+            if (!live) throw fail(lost ? 'LEASE_LOST' : 'LEASE_CONTEXT_CLOSED');
             checkSession(signal, isActive);
         };
         return Object.freeze({
             token,
             holderId,
+            // [M6-A-8c R1] Transazione sulla **stessa connessione** del coordinatore, con lo store del
+            // lease nello scope: è ciò che rende possibile verificare il token e scrivere la coda
+            // nella **stessa** transazione (`guardTransaction` rifiuta una connessione diversa).
+            transaction(stores, mode = 'readwrite') {
+                if (!database) throw fail('LEASE_DATABASE_UNAVAILABLE');
+                return database.transaction(stores, mode);
+            },
             // Il possesso è sempre verificato sul record persistito, non in memoria.
             isCurrent: async () => { try { checkLive(); } catch { return false; } return await leaseTransaction('readonly', (record, at) => owned(record, token, at)); },
             async checkCurrent() {
                 checkLive();
                 const current = await leaseTransaction('readonly', (record, at) => owned(record, token, at));
-                if (!current) { live = false; throw fail('LEASE_LOST'); }
+                if (!current) { live = false; lost = true; throw fail('LEASE_LOST'); }
                 return true;
             },
             async renew() {
@@ -194,7 +204,7 @@ export function createOfflineMutationLeaseCoordinator({uid, holderId, indexedDb 
                     store.put({...record, updatedAt: at, expiresAt: at + ttlMs});
                     return true;
                 });
-                if (!renewed) live = false;
+                if (!renewed) { live = false; lost = true; }
                 return renewed;
             },
             async release() {
@@ -239,7 +249,7 @@ export function createOfflineMutationLeaseCoordinator({uid, holderId, indexedDb 
                             throw fail('LEASE_ASYNC_MUTATION_FORBIDDEN');
                         }
                     } catch (error) {
-                        if (error.code === 'LEASE_LOST') live = false;
+                        if (error.code === 'LEASE_LOST') { live = false; lost = true; }
                         try { tx.abort(); } catch { /* già conclusa */ }
                         onInvalid(error);
                     }
@@ -362,7 +372,7 @@ export function resolveOfflineQueueLease({uid, leaseFallback = false, locks, isA
         return coordinator;
     };
     const currentLocks = () => (locks === undefined ? globalThis.navigator?.locks : locks);
-    return async function withLease(id, task) {
+    const withLease = async function withLease(id, task) {
         // 1. Web Locks presente: percorso di sempre, prioritario; il lease IndexedDB non si apre.
         if (currentLocks()?.request) return withOfflineQueueLease(id, task, currentLocks());
         // 2. API assente e opt-in spento: rifiuto invariato del runtime, nessun task eseguito.
@@ -371,6 +381,14 @@ export function resolveOfflineQueueLease({uid, leaseFallback = false, locks, isA
         if (id !== uid) throw fail('OFFLINE_LEASE_SCOPE_MISMATCH');
         const leaseCoordinator = coordinatorFor();
         if (!leaseCoordinator) throw coordinatorFailure;
-        return leaseCoordinator.run(task, {isActive: session});
+        // [M6-A-8c R1] Il task riceve il **contesto del lease** (token compreso): le mutazioni della
+        // coda lo usano per verificare il possesso e scrivere nella stessa transazione. Sul percorso
+        // di piattaforma il task è invocato senza argomenti, quindi il contesto è `undefined` e le
+        // mutazioni restano quelle di sempre.
+        return leaseCoordinator.run(handle => task(handle), {isActive: session});
     };
+    // Chiusura della connessione del coordinatore (se è stata creata): i client del pilota sono di
+    // vita breve e non devono lasciare connessioni aperte.
+    withLease.close = () => { if (coordinator) coordinator.close(); };
+    return withLease;
 }

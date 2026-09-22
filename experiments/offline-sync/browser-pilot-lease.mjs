@@ -46,12 +46,12 @@ const report = async payload => {
 setTimeout(() => report({ok: false, passed, code: 'BENCH_STALL'}), 30000);
 
 // Il confine del pilota: client e sincronizzatore **reali**, con il risolutore reale come `withLease`.
-const buildClient = async ({uid, holderId, sent, states, send, leaseFallback = true}) => createOfflineMutationClientCore({
+const buildClient = async ({uid, holderId, sent, states, send, leaseFallback = true, ...leaseOptions}) => createOfflineMutationClientCore({
     uid, vaultKeyMaterial: KEY, enabled: true,
     createQueue: options => createOfflineMutationQueue(options),
     createQueueReader: options => createOfflineQueueReader(options),
     createSynchronizer: createOfflineMutationSynchronizer,
-    withLease: resolveOfflineQueueLease({uid, leaseFallback, holderId}),
+    withLease: resolveOfflineQueueLease({uid, leaseFallback, holderId, ...leaseOptions}),
     createChannel: () => ({notify() {}, close() {}}),
     send, isOnline: () => true, onState: state => states.push(state)
 });
@@ -168,7 +168,29 @@ try {
     same((await readLease(uid)).holderId, null, 'PILOT_LEASE_RECOVERED_RELEASE');
     passed.push('errore del trasporto: il sincronizzatore reale riporta `recoverable-error`, il lease viene rilasciato, l’operazione resta in coda e un contesto successivo la invia e la conferma — nessuna riuscita ambigua');
 
-    // ── 6. Coda v1 reale e coda assente: fail-closed, nessun upgrade ─────────────────────
+    // ── 6. R1: fencing atomico — un titolare scaduto non conferma e non rimuove ──────────
+    await seed(uid, ['device:7']);
+    let clock = Date.now();
+    const staleSent = [];
+    const staleClient = await buildClient({uid, holderId: 'page-stale', sent: staleSent, states: [], ttlMs: 50,
+        now: () => clock,
+        send: async operation => { staleSent.push(operation.operationId); clock += 1000; return {status: 'applied', operationId: operation.operationId}; }});
+    same(await rejection(() => staleClient.flush()), 'LEASE_LOST', 'PILOT_LEASE_R1_STALE');
+    same(staleSent, ['device:7'], 'PILOT_LEASE_R1_SENT');
+    same((await inspectQueueSchema({uid})).rows.length, 1, 'PILOT_LEASE_R1_REMOVED');
+    const takeoverSent = [];
+    // Lo stesso orologio del titolare scaduto: il record è oltre il TTL, quindi il subentro è lecito.
+    const takeoverClient = await buildClient({uid, holderId: 'page-takeover', sent: takeoverSent, states: [],
+        now: () => clock,
+        send: async operation => { takeoverSent.push(operation.operationId); return {status: 'applied', operationId: operation.operationId}; }});
+    same((await takeoverClient.flush())?.value?.status, 'saved', 'PILOT_LEASE_R1_TAKEOVER');
+    same(takeoverSent, ['device:7'], 'PILOT_LEASE_R1_TAKEOVER_SENT');
+    same((await inspectQueueSchema({uid})).rows.length, 0, 'PILOT_LEASE_R1_TAKEOVER_REMOVED');
+    staleClient.close();
+    takeoverClient.close();
+    passed.push('R1 fencing atomico su IndexedDB reale: con il titolare scaduto oltre il TTL la conferma è rifiutata con `LEASE_LOST`, l’operazione **non** viene rimossa e il vecchio titolare non dichiara alcuna riuscita; il nuovo titolare subentra e completa invio e conferma');
+
+    // ── 7. Coda v1 reale e coda assente: fail-closed, nessun upgrade ─────────────────────
     const v1Uid = `pilot-lease-v1-${crypto.randomUUID()}`;
     const v1Queue = await createOfflineMutationQueue({uid: v1Uid, vaultKeyMaterial: KEY});
     await v1Queue.enqueue({uid: v1Uid, operationId: 'device:1', recordId: 'record-1', value: 'fixture'});
