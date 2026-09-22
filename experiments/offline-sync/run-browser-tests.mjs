@@ -14,7 +14,8 @@ const queueUpgrade = process.argv[3] === '--queue-upgrade';
 const mixedContexts = process.argv[3] === '--mixed-contexts';
 const twoTabs = process.argv[3] === '--two-tabs';
 const rollbackV2 = process.argv[3] === '--rollback-v2';
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs || rollbackV2)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs|--rollback-v2]');
+const runtimeUpgrade = process.argv[3] === '--runtime-upgrade';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs || rollbackV2 || runtimeUpgrade)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs|--rollback-v2|--runtime-upgrade]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
@@ -30,6 +31,7 @@ const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true,
         export {createMemoryVault} from './experiments/persistent-vault-shell/memory-vault.mjs';`}})).outputFiles[0].text : null;
 const paths = new Map([
     ['/suite.mjs', runtimeLease ? 'experiments/offline-sync/browser-runtime-lease.mjs'
+        : runtimeUpgrade ? 'experiments/offline-sync/browser-runtime-upgrade.mjs'
         : rollbackV2 ? 'experiments/offline-sync/browser-rollback-v2.mjs'
         : twoTabs ? 'experiments/offline-sync/browser-two-tabs.mjs'
         : mixedContexts ? 'experiments/offline-sync/browser-mixed-contexts.mjs'
@@ -40,6 +42,9 @@ const paths = new Map([
     ['/compatible-queue-reader.mjs', 'experiments/offline-sync/compatible-queue-reader.mjs'],
     ['/queue-upgrade-v2.mjs', 'experiments/offline-sync/queue-upgrade-v2.mjs'],
     ['/rollback-v2-compatible.mjs', 'experiments/offline-sync/rollback-v2-compatible.mjs'],
+    ['/offline-mutation-upgrade.js', 'Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js'],
+    ['/offline-mutation-client-core.js', 'Frontend/public/assets/js/modules/data/offline-mutation-client-core.js'],
+    ['/offline-mutation-sync.js', 'Frontend/public/assets/js/modules/data/offline-mutation-sync.js'],
     ['/fenced-queue-writer.mjs', 'experiments/offline-sync/fenced-queue-writer.mjs'],
     ['/fenced-queue-client.mjs', 'experiments/offline-sync/fenced-queue-client.mjs'],
     ['/offline-save-panel.mjs', 'experiments/offline-sync/offline-save-panel.mjs'],

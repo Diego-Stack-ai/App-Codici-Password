@@ -4,6 +4,8 @@ import test from 'node:test';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-queue.js', import.meta.url), 'utf8');
 const queue = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const upgradeSource = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js', import.meta.url), 'utf8');
+const upgrade = await import(`data:text/javascript;base64,${Buffer.from(upgradeSource).toString('base64')}`);
 const syncSource = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-sync.js', import.meta.url), 'utf8');
 const {createOfflineMutationSynchronizer} = await import(`data:text/javascript;base64,${Buffer.from(syncSource).toString('base64')}`);
 
@@ -335,7 +337,7 @@ function readerFixture({version = 1, names = null, rows = [], missing = false, k
         }
         const database = {
             version,
-            objectStoreNames: {contains: name => stores.includes(name)},
+            objectStoreNames: Object.assign([...stores], {contains: name => stores.includes(name)}),
             onversionchange: null,
             close() { calls.closes += 1; },
             transaction(requested, mode) {
@@ -516,4 +518,30 @@ test('lettore dell’app: apertura che non si conclude diventa indisponibilità,
     assert.equal(result.available, false);
     assert.equal(result.reason, 'QUEUE_READER_TIMEOUT');
     assert.equal(result.operations, null);
+});
+
+// ── M6-A-7: upgrade del runtime invocabile solo esplicitamente ──────────────────────────────
+test('upgrade del runtime: configurazione rifiutata e sonda di sola lettura', async () => {
+    await assert.rejects(upgrade.upgradeOfflineQueueSchema({uid: '', indexedDb: {}}), /QUEUE_UPGRADE_CONFIG/);
+    await assert.rejects(upgrade.upgradeOfflineQueueSchema({uid: 'owner-a', indexedDb: null}), /QUEUE_UPGRADE_CONFIG/);
+    await assert.rejects(upgrade.upgradeOfflineQueueSchema({uid: 'owner-a', indexedDb: {}, timeoutMs: 0}), /QUEUE_UPGRADE_CONFIG/);
+    // Sonda su coda v2 e su schema ignoto: nessuna scrittura, versione e store reali.
+    const row = await sealedRow('owner-a', 'device:1');
+    const v2 = readerFixture({version: 2, rows: [row]});
+    assert.deepEqual(await upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: v2.indexedDb}),
+        {version: 2, stores: ['encryptedOperations', 'queueLeases'], rows: [row]});
+    assert.deepEqual(v2.calls.writes, []);
+    const v3 = readerFixture({version: 3, rows: [row]});
+    assert.equal((await upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: v3.indexedDb})).version, 3);
+});
+
+test('nessun percorso dell’app avvia l’upgrade da sé: solo il pilota lo invoca', async () => {
+    const automatic = ['offline-mutation-client-core.js', 'offline-mutation-client.js', 'offline-mutation-sync.js', 'offline-mutation-queue.js'];
+    for (const file of automatic) {
+        const text = await readFile(new URL(`../Frontend/public/assets/js/modules/data/${file}`, import.meta.url), 'utf8');
+        assert.equal(/upgradeOfflineQueueSchema|offline-mutation-upgrade/.test(text), false, `${file} non deve avviare l'upgrade`);
+    }
+    const pilot = await readFile(new URL('../Frontend/public/assets/js/modules/data/private-account-offline-pilot.js', import.meta.url), 'utf8');
+    assert.equal(pilot.includes("from './offline-mutation-upgrade.js'"), true);
+    assert.equal(pilot.includes('upgradePrivateAccountPilotQueue'), true);
 });

@@ -17,7 +17,7 @@ function readerFixture({version = 1, rows = []} = {}) {
         const request = {};
         const database = {
             version,
-            objectStoreNames: {contains: name => stores.includes(name)},
+            objectStoreNames: Object.assign([...stores], {contains: name => stores.includes(name)}),
             onversionchange: null,
             close() {},
             transaction() {
