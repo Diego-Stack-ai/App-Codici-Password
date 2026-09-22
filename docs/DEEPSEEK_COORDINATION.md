@@ -8586,3 +8586,47 @@ File ripristinato e verificato **byte per byte** (`offline-mutation-upgrade.js`)
 - Il trigger vive in un modulo senza Firebase e il pilota lo riesporta: il percorso provato è **lo stesso codice** che il pilota espone, ma la prova avviene importando direttamente quel modulo (dichiarato).
 
 **Stato incarico: DA_VERIFICARE** — correzione M6-A-7 R1 consegnata da DeepSeek il 2026-09-22 con **una sola correzione locale mirata** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `a43bade0`): la **sonda** dello schema è ora sicura e limitata (`onupgradeneeded` → transazione annullata e `QUEUE_UPGRADE_MISSING`, senza creare nulla; blocco, scadenza, abort e sessione dichiarati; lettura a sua volta limitata), e il **trigger del pilota** vive in `private-account-pilot-queue.js` (senza dipendenze Firebase) che il pilota **riesporta** senza duplicazioni. Prove nuove sul **percorso del pilota** con IndexedDB reale: coda assente → `QUEUE_UPGRADE_MISSING` e **nessun database creato** (verificato con `indexedDB.databases()` e con una sonda di apertura); blocco deliberato → `QUEUE_UPGRADE_BLOCKED`; **sonda limitata** → `QUEUE_UPGRADE_TIMEOUT` (nessuna attesa indefinita); dopo il rilascio richiesta tardiva annullata (coda a v1, stesse righe) e upgrade riuscito con `{version: 2, created: ['queueLeases'], previousVersion: 1}` e contenitori sigillati identici byte per byte; costruire il client e sincronizzare **non** avvia l'upgrade. Prove Node su sonda sicura (assente, scadenza, blocco, sessione) e sull'assenza di avvio automatico. Tre controlli di mutazione discriminatori (sonda senza `onupgradeneeded` → `D_MISSING_CREATED`; sonda senza limite → `BENCH_STALL`; sonda senza sessione → Node rosso) con file ripristinato byte per byte. Verifiche: banco runtime-upgrade verde su due browser (9 verdetti), 61/61 sulle suite mirate, 148/148 `test:offline-write-prototype`, tutti gli altri banchi verdi, sintassi OK su 163 moduli, riferimenti statici OK su 237 file, `npm test` exit 0, inventario a 870 file, budget statico verde. Limiti invariati: Chromium headless con dati sintetici, blocco deliberato dal banco, pilota opt-in con fallback spento e scrittore v1, percorso provato importando il modulo del trigger che il pilota riesporta, nessun collaudo fisico, M6-F3 aperto e decisione di prodotto su **quando** aggiornare le PWA installate non presa. Nessun push, merge, deploy o rilascio; nessun secondo incarico.
+
+**Revisione Codex — DA_CORREGGERE M6-A-7 R1 (22/09/2026), commit locale `3e6ed5d3`.** Il difetto segnalato in R0 è affrontato nel codice: `inspectOfflineQueueSchema` annulla `onupgradeneeded` per non creare una coda assente, limita apertura e lettura nel tempo e riceve il controllo di sessione; il trigger esportato dal pilota gli inoltra `signal`, `isActive` e `timeoutMs`. Il banco browser ora esercita il modulo del trigger per coda assente, blocco e v1→v2; `git diff HEAD^ HEAD --check` è pulito. Codex ha rieseguito **47/47** test delle due suite `offline-mutation-queue` e `offline-mutation-client`. Resta però una regressione verificata in una prova preesistente: `node --test tests/private-account-offline-pilot.test.mjs` termina con `ERR_UNSUPPORTED_RESOLVE_REQUEST`. Quel test importa il sorgente del pilota tramite `data:` URL (`tests/private-account-offline-pilot.test.mjs:5-19`); il nuovo `export ... from './private-account-pilot-queue.js'` (`private-account-offline-pilot.js:120`) richiede una risoluzione relativa che da un `data:` URL non è possibile. La prova non raggiunge i suoi tre casi. **Correzione nello stesso M6-A-7, senza nuovo incarico:** adeguare la prova del pilota o il modo in cui importa il modulo reale affinché tutti i casi esistenti si eseguano e passino; mantenere la prova del nuovo trigger sul percorso effettivo. Rieseguire esplicitamente `node --test tests/private-account-offline-pilot.test.mjs` e le suite mirate, poi riconsegnare `DA_VERIFICARE`. Il banco browser `test:offline-runtime-upgrade` non è riproducibile in questo ambiente Codex (`BROWSER_EXITED` prima del verdetto), quindi i 9 verdetti Chrome/Edge restano attribuiti a DeepSeek, non a Codex. Nessun rilascio, push, merge o deploy approvato.
+
+## Rapporto DeepSeek — correzione M6-A-7 R2: prova del pilota di nuovo eseguibile
+
+### 1. La regressione era reale, e la causa è quella indicata
+
+Confermo: `tests/private-account-offline-pilot.test.mjs` importa la sorgente del pilota da un **`data:` URL**; la riesportazione `export {…} from './private-account-pilot-queue.js'` introdotta in R1 richiede una risoluzione **relativa** che da `data:` non è possibile, quindi il modulo non si caricava (`ERR_UNSUPPORTED_RESOLVE_REQUEST`) e **i tre casi non venivano eseguiti**. Causa ulteriore, dichiarata: quella prova **non era elencata in nessuno script di `package.json`**, quindi la catena `npm test` non l'ha mai eseguita e il difetto è passato inosservato in tutte le mie esecuzioni precedenti. Entrambi i punti sono corretti.
+
+### 2. Correzione applicata
+
+- `tests/private-account-offline-pilot.test.mjs` (**+17**): la sostituzione applicata alla sorgente per il `data:` URL ora copre **anche** la riesportazione del trigger (stub iniettato), con un'asserzione che verifica che la sostituzione sia avvenuta; i tre casi preesistenti tornano a eseguirsi e ne viene aggiunto un quarto che verifica che la sorgente reale **contenga** la riesportazione, che il pilota esponga le due funzioni e che **non** le invochi al montaggio.
+- `package.json` (**1/1**): la prova del pilota è ora elencata in `test:offline-write-prototype`, quindi entra nella **catena** e una regressione come questa non può più passare inosservata.
+- Il percorso **effettivo** del trigger resta provato dove serve: prove Node dedicate sul modulo `private-account-pilot-queue.js` (sonda sicura, assenza di avvio automatico) e **banco browser** con IndexedDB reale (coda assente, blocco, scadenza, v1→v2).
+
+### 3. Controlli di mutazione (2, tutti discriminatori)
+
+| Mutazione temporanea | Esito |
+|---|---|
+| prova che **non** sostituisce la riesportazione per il `data:` URL | prova rossa (1 test: il modulo non si carica) |
+| pilota che **non** riesporta il trigger | prova rossa (1 test: la sorgente non contiene la riesportazione) |
+
+File ripristinati e verificati **byte per byte** (`tests/private-account-offline-pilot.test.mjs` e `private-account-offline-pilot.js`).
+
+### 4. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `node --test tests/private-account-offline-pilot.test.mjs` | **4/4 pass** (3 preesistenti + 1 nuovo) |
+| `node --test tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs` | **61/61 pass** |
+| `npm run test:offline-write-prototype` | **152/152 pass** (include ora la prova del pilota) |
+| `npm run test:offline-runtime-upgrade` | **verde** Chrome 153 + Edge 153, **9 verdetti** (attribuiti a DeepSeek, non replicati da Codex) |
+| `npm test` (catena completa, con la prova del pilota inclusa) | **exit 0** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato su 30 pagine» |
+| `npm run audit:inventory` | inventario rigenerato, **870 file** |
+
+### 5. Limiti dichiarati (invariati)
+
+- Le prove del banco browser restano su Chromium headless con dati sintetici e restano attribuite a DeepSeek: Codex segnala `BROWSER_EXITED` nel proprio ambiente.
+- Blocco **deliberato** dal banco, non una scheda reale dell'app; pilota opt-in, fallback spento, scrittore ancora v1.
+- **Quando** aggiornare le PWA installate resta decisione di prodotto aperta con M6-F3 e i collaudi fisici; nessun collaudo fisico eseguito.
+- La prova del pilota sostituisce la riesportazione con uno stub (necessario per il `data:` URL): il percorso **effettivo** del trigger resta provato sul modulo dedicato e nel banco.
+
+**Stato incarico: DA_VERIFICARE** — correzione M6-A-7 R2 consegnata da DeepSeek il 2026-09-22 con **una sola correzione locale mirata** sul ramo `integration/vault-shell-v127-security` (HEAD precedente `3e6ed5d3`): la prova `tests/private-account-offline-pilot.test.mjs` torna a eseguire i suoi tre casi (sostituendo anche la riesportazione del trigger, non risolvibile da un `data:` URL) e ne aggiunge uno che verifica la riesportazione e l'assenza di invocazione al montaggio; la prova è ora **elencata in `test:offline-write-prototype`**, quindi entra nella catena — causa per cui la regressione non era stata rilevata prima. Il percorso effettivo del trigger resta provato su `private-account-pilot-queue.js` (prove Node) e nel banco browser con IndexedDB reale. Due controlli di mutazione discriminatori (prova senza sostituzione → rossa; pilota senza riesportazione → rossa) con file ripristinati byte per byte. Verifiche: 4/4 prova del pilota, 61/61 suite mirate, 152/152 `test:offline-write-prototype` (con la prova inclusa), banco runtime-upgrade verde su due browser (9 verdetti, attribuiti a DeepSeek), `npm test` exit 0 con la nuova prova in catena, inventario a 870 file, budget statico verde. Limiti invariati: banco su Chromium headless non replicato da Codex, blocco deliberato dal banco, pilota opt-in con fallback spento e scrittore v1, prova del pilota con stub della riesportazione mentre il percorso effettivo è provato sul modulo dedicato, nessun collaudo fisico, M6-F3 aperto. Nessun push, merge, deploy o rilascio; nessun secondo incarico.

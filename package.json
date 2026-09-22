@@ -77,7 +77,7 @@
     "test:restore-stale-emulators": "node scripts/run-restore-stale-emulators.mjs",
     "test:restore-collisions-emulators": "node scripts/run-restore-collisions-emulators.mjs",
     "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs tests/sharing-two-device.test.mjs tests/shared-regrant-after-restore.test.mjs tests/guest-invite-suspension.test.mjs tests/detail-sharing-revocation-cycle.test.mjs tests/detail-account-mode-reinvite.test.mjs",
-    "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs tests/private-account-offline-policy.test.mjs tests/private-account-recovery.test.mjs tests/private-form-lazy-banking.test.mjs",
+    "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs tests/private-account-offline-policy.test.mjs tests/private-account-offline-pilot.test.mjs tests/private-account-recovery.test.mjs tests/private-form-lazy-banking.test.mjs",
     "test:offline-no-locks": "node experiments/offline-sync/run-emulated-browsers.mjs --no-locks",
     "test:offline-runtime-lease": "node experiments/offline-sync/run-emulated-browsers.mjs --runtime-lease",
     "test:offline-queue-upgrade": "node experiments/offline-sync/run-emulated-browsers.mjs --queue-upgrade",

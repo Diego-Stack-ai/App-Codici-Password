@@ -4,11 +4,36 @@
 
 File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 
+## .firebaserc
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.firebaserc` | CONFIG | 65 | 6 | Associa Firebase CLI al progetto appcodici-password. |
+
+## .github
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.github/copilot-instructions.md` | MD | 1885 | 29 | Documentazione: copilot-instructions. |
+| `.github/workflows/firebase-deploy.yml` | YML | 1880 | 74 | File di progetto: firebase-deploy. |
+
+## .gitignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.gitignore` | CONFIG | 1715 | 89 | Esclusioni Git per file generati o locali. |
+
+## .vscode
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
+| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
+
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/data/private-account-pilot-queue.js` | JS | 1752 | 28 | Supporto frontend: private-account-pilot-queue. |
 | `Frontend/GUIDA.md` | MD | 17185 | 142 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 143121 | 1023 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3971 | 83 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -122,6 +147,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 7383 | 132 | Supporto frontend: offline-mutation-sync. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js` | JS | 8561 | 148 | Supporto frontend: offline-mutation-upgrade. |
 | `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 4267 | 122 | Supporto frontend: private-account-offline-pilot. |
+| `Frontend/public/assets/js/modules/data/private-account-pilot-queue.js` | JS | 1752 | 28 | Supporto frontend: private-account-pilot-queue. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 687 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2733 | 70 | Supporto frontend: shared-record-reader. |
 | `Frontend/public/assets/js/modules/data/shared-vault-data-client.js` | JS | 3256 | 70 | Supporto frontend: shared-vault-data-client. |
@@ -246,7 +272,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 8139 | 166 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 909 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 67093 | 823 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 10362 | 244 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 10421 | 245 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13808 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15687 | 260 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1396 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
@@ -256,32 +282,6 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/scadenze.html` | HTML | 5569 | 109 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/sw.js` | JS | 3932 | 95 | Service worker: shell offline, cache runtime, push in background e deep link. |
 | `Frontend/public/termini.html` | HTML | 11553 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
-
-## .firebaserc
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.firebaserc` | CONFIG | 65 | 6 | Associa Firebase CLI al progetto appcodici-password. |
-
-## .github
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.github/copilot-instructions.md` | MD | 1885 | 29 | Documentazione: copilot-instructions. |
-| `.github/workflows/firebase-deploy.yml` | YML | 1880 | 74 | File di progetto: firebase-deploy. |
-
-## .gitignore
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1715 | 89 | Esclusioni Git per file generati o locali. |
-
-## .vscode
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
-| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
 
 ## archive
 
@@ -315,7 +315,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1311276 | 8534 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1320335 | 8591 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -778,7 +778,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 19628 | 125 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 19673 | 125 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -925,7 +925,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
 | `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |
 | `tests/private-account-detail-lifecycle.test.mjs` | MJS | 18090 | 228 | Test automatico: private-account-detail-lifecycle.test. |
-| `tests/private-account-offline-pilot.test.mjs` | MJS | 2790 | 45 | Test automatico: private-account-offline-pilot.test. |
+| `tests/private-account-offline-pilot.test.mjs` | MJS | 4318 | 62 | Test automatico: private-account-offline-pilot.test. |
 | `tests/private-account-offline-policy.test.mjs` | MJS | 1352 | 23 | Test automatico: private-account-offline-policy.test. |
 | `tests/private-account-recovery.test.mjs` | MJS | 10689 | 112 | Test automatico: private-account-recovery.test. |
 | `tests/private-auth-gate.test.mjs` | MJS | 7879 | 128 | Test automatico: private-auth-gate.test. |
