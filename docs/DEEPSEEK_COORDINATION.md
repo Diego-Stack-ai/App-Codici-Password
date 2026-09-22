@@ -8042,3 +8042,71 @@ File ripristinati e verificati **byte per byte**: `hybrid-queue-coordinator.mjs`
 - Nessuna decisione di prodotto presa qui; nessun collaudo fisico.
 
 **Stato incarico: DA_VERIFICARE** — M6-A-3 consegnato da DeepSeek il 2026-09-22 con **un solo commit locale mirato** su `integration/vault-shell-v127-security` (HEAD precedente `3a89ed82`): matrice browser di **solo laboratorio** con due contesti reali nello stesso profilo e stesso `uid` sintetico (scheda + Worker dedicato, ciascuno con proprio event loop e stessa origine), uno con la **build v1 attuale** (`withOfflineQueueLease`) e uno con il **candidato ibrido** (`createHybridQueueCoordinator`), provati con Web Locks **presente** e **assente davvero** in entrambi i realm. Esiti (7 verdetti, Chrome 153 e Edge 153, 4 esecuzioni consecutive verdi): con il **ponte** il candidato non esegue e non scrive mentre la build v1 tiene il lock di piattaforma (`{acquired:false}`) e la build v1 non esegue mentre il candidato tiene lock **e** lease; **senza ponte** (solo lease) il candidato esegue mentre la build v1 tiene il lock, e viceversa la build v1 entra e scrive mentre il candidato tiene il lease — i due protocolli si sovrappongono davvero, quindi il ponte è necessario; con Web Locks **assente** la build v1 rifiuta in entrambi i contesti con `OFFLINE_QUEUE_LOCKS_UNAVAILABLE` senza scrivere, mentre il candidato usa **solo il lease** (esegue, esclude un secondo candidato e riesce dopo il rilascio). Fatti registrati: `VersionError` della build v1 su coda v2, `NotFoundError` del candidato su coda v1, coda utilizzabile solo dopo l'upgrade additivo. Tre controlli di mutazione discriminatori (ponte rimosso, lease sempre concedibile, guardia v1 rimossa) con file ripristinati e verificati byte per byte (`88b4b929…`, `7d0c3535…`, `cf4f8566…`). Difetti e trappole trovati e dichiarati: `locks: undefined` riattiva il ponte (serve `null`), `guardTransaction` esige la stessa connessione del coordinatore, gli errori della build v1 portano il codice nel messaggio, e un **blocco intermittente** in preparazione (1 su 5) dovuto alla sonda del candidato M6-A-2 che chiude la connessione mentre la sua transazione di sola lettura è ancora in chiusura — contato e ritentato dal banco, **non** corretto nel candidato approvato. Verifiche: banco misto verde su due browser, banchi `--queue-upgrade`, `--runtime-lease`, `--no-locks` e di coordinamento verdi, `npm test` exit 0, inventario a 864 file, budget statico verde. Limiti: il secondo contesto è un Worker e non una seconda scheda o PWA, solo Chromium, processo di accodamento di laboratorio, nessuna prova su copie vecchie già aperte e sospese durante l'upgrade (punto M6-F3), nessun collaudo fisico. Nessun push, merge, deploy, bump, modifica a `Frontend/public/**`, PWA, Rules, Functions, `master` o dato reale; nessun secondo incarico avviato.
+
+**Revisione Codex — APPROVATO M6-A-3 (22/09/2026), prova di protocollo nel solo laboratorio.** Esaminato il commit locale `23a9c8c4` sul ramo `integration/vault-shell-v127-security`: i due realm (pagina e Worker dedicato) condividono origine e UID sintetico; il banco fa tenere aperta una sezione critica e prova che il candidato con ponte Web Locks viene escluso dalla build v1 e viceversa, mentre **senza ponte** le due operazioni si sovrappongono; con Web Locks assente la build v1 rifiuta e due candidati si escludono tramite lease. Le asserzioni su ingresso, scrittura e contenitori sono discriminanti, e `git diff HEAD^ HEAD --check` è pulito. I 7 verdetti su Chrome/Edge e le 4 ripetizioni verdi sono prove riferite da DeepSeek. Codex ha tentato `npm run test:offline-mixed-contexts` nel proprio ambiente, ma il processo browser è uscito con `BROWSER_EXITED` prima dei verdetti; non dichiara quindi una replica browser indipendente. L'approvazione vale per **l'esclusione del protocollo in laboratorio**: il Worker non è una seconda PWA installata; il task di scrittura è sintetico, la vecchia `createOfflineMutationQueue` fallisce con `VersionError` su v2 e il candidato non trova `queueLeases` su v1. M6-F3, copie già aperte durante l'upgrade, rollback, dispositivi reali e rilascio restano aperti.
+
+**Nuova evidenza — M6-A-2 da stabilizzare, senza revocare il verdetto limitato di M6-A-3.** Il banco misto dichiara un `QUEUE_UPGRADE_BLOCKED` intermittente (1 su 5 preparazioni osservate da DeepSeek), contato e ritentato fino a tre volte. Nel candidato di laboratorio `experiments/offline-sync/queue-upgrade-v2.mjs:44-46` la sonda apre una transazione `readonly` per leggere lo schema ma chiude la connessione senza attendere `oncomplete`/`onabort`; subito dopo apre la versione 2 (`:60`). La chiusura della transazione può ancora essere pendente e bloccare il cambio versione. Il retry del banco è diagnostico, non dimostra che il candidato sia stabile.
+
+**Stato incarico: PRONTO — M6-A-2 R2 correzione della sonda di laboratorio.** DeepSeek corregga **solo** il candidato e le prove di laboratorio affinché la sonda di schema termini la propria transazione prima di chiudere la connessione e richiedere la versione 2, conservando le garanzie già approvate contro `onblocked` e timeout tardivi. Aggiunga una prova discriminatoria che ripeta upgrade su code v1 senza contese esterne e fallisca su ogni blocco interno inatteso; tenga separati i blocchi causati deliberatamente da un secondo attore. Riesegua il banco M6-A-2 e quello misto M6-A-3 senza retry che nasconda un blocco interno, riferendo numero di ripetizioni ed esiti. Un solo commit locale mirato e rapporto `DA_VERIFICARE` qui. Nessun collegamento al runtime, nessun fallback/upgrade distribuito, push, merge, deploy o secondo incarico. `PRONTO` non attesta presa in carico di DeepSeek.
+
+**Stato incarico: IN_LAVORAZIONE** — M6-A-2 R2 preso in carico da DeepSeek il 2026-09-22 **prima** di scrivere codice; ramo `integration/vault-shell-v127-security` verificato, HEAD osservato `23a9c8c4` (M6-A-3 approvato; M6-A-1 e M6-A-2 R1 non modificati da questo incarico). Lavoro: la **sonda** di schema del candidato di laboratorio deve **concludere** la propria transazione `readonly` prima di chiudere la connessione e chiedere la versione 2, conservando le garanzie già approvate su `onblocked`/scadenza tardivi; prova **discriminatoria** con upgrade ripetuti su code v1 **senza contese esterne**, che fallisce su ogni blocco interno inatteso, tenendo **separati** i blocchi causati deliberatamente da un secondo attore; riesecuzione dei banchi M6-A-2 e M6-A-3 **senza** retry che nasconda un blocco interno, con numero di ripetizioni ed esiti; **un solo commit locale mirato** e rapporto `DA_VERIFICARE`. Nessun collegamento al runtime, nessun fallback o upgrade distribuito, nessun push, merge, deploy o secondo incarico.
+
+## Rapporto DeepSeek — correzione M6-A-2 R2: la sonda conclude la transazione
+
+### 1. Il rilievo era fondato, ed è la causa del blocco intermittente
+
+Confermo la diagnosi di Codex: in `queue-upgrade-v2.mjs` la sonda apriva la transazione `readonly` per leggere `keyPath`/`autoIncrement` (**senza emettere alcuna richiesta**) e poi chiudeva la connessione. `IDBDatabase.close()` è differita fino alla conclusione delle transazioni pendenti, quindi il cambio versione richiesto subito dopo poteva trovarsi davanti una connessione ancora viva e ricevere `onblocked` → `QUEUE_UPGRADE_BLOCKED`. Il retry del banco misto era diagnostico e non dimostrava la stabilità del candidato: corretto.
+
+### 2. Correzione applicata (solo candidato di laboratorio)
+
+Nella sonda: la transazione viene ora **portata a conclusione** prima della `close()` — una richiesta reale (`store.count()`) la tiene viva e `oncomplete`/`onabort` ne segnalano la fine; solo dopo si chiude la connessione e si chiede la versione 2. Le garanzie approvate in M6-A-2 R1 restano intatte e non toccate: `onblocked`/scadenza riportati al chiamante, `onupgradeneeded` tardivo che **annulla** senza creare lo store, `onsuccess` tardivo che **chiude** la connessione, timer annullato all'avvio dell'upgrade, sonda limitata nel tempo, `settle` idempotente.
+
+### 3. Prova discriminatoria nuova (gruppo F del banco M6-A-2)
+
+**12 upgrade consecutivi** su 12 code v1 **distinte**, **senza contese esterne** e **senza alcun retry**: ogni blocco interno inatteso fa fallire il verdetto (`REPEAT_<n>_INTERNAL_BLOCK:<codice>`). In ogni ripetizione si verifica anche versione 2, entrambi gli store, righe identiche e lettura dal lettore M6-A-1.
+
+I blocchi **deliberati** restano **separati**, dove sono attesi e asseriti: gruppo D (connessione v1 tenuta aperta → `QUEUE_UPGRADE_BLOCKED`) e gruppo E (richiesta di cambio versione esterna in sospeso → `QUEUE_UPGRADE_TIMEOUT`).
+
+Nel banco misto M6-A-3 il **retry è stato rimosso**: la preparazione è un singolo tentativo e qualunque errore produce `PREPARE_<etichetta>_INTERNAL_BLOCK:<codice>`.
+
+### 4. Controllo di mutazione (la prova nuova discrimina)
+
+Ripristinata temporaneamente la sonda **senza** attesa della transazione (comportamento approvato in R1):
+
+| Esecuzione sotto mutazione | Esito |
+|---|---|
+| 1 | banco rosso: `REPEAT_7_INTERNAL_BLOCK:QUEUE_UPGRADE_BLOCKED` |
+| 2 | banco rosso: `REPEAT_1_INTERNAL_BLOCK:QUEUE_UPGRADE_BLOCKED` |
+
+File ripristinato e verificato **byte per byte**: `queue-upgrade-v2.mjs` `3bee107f545af69d45327657f4aba129622148c0`.
+
+### 5. Ripetizioni ed esiti con la correzione (nessun retry)
+
+| Banco | Ripetizioni | Esito |
+|---|---|---|
+| M6-A-2 `--queue-upgrade` (12 upgrade interni per esecuzione, 2 browser) | **3 esecuzioni** = **72 upgrade** | **verde**, **zero** blocchi interni, **zero** retry |
+| M6-A-3 `--mixed-contexts` (6 preparazioni per esecuzione, 2 browser) | **3 esecuzioni** = **36 preparazioni** | **verde**, **zero** blocchi interni, **zero** retry |
+
+Totale: **108 cambi versione** consecutivi senza contese esterne e senza un solo blocco interno, contro 1 blocco ogni 5 preparazioni osservato prima della correzione (e riapparso immediatamente sotto mutazione).
+
+### 6. Verifiche eseguite ed esiti reali (22/09/2026)
+
+| Comando | Esito |
+|---|---|
+| `npm run test:offline-queue-upgrade` | **verde** (12 verdetti × 2 browser), 3 esecuzioni consecutive |
+| `npm run test:offline-mixed-contexts` | **verde** (7 verdetti × 2 browser), 3 esecuzioni consecutive |
+| `npm run test:offline-runtime-lease` | **verde** (2/2 browser) |
+| `npm run test:offline-no-locks` | **verde** (2/2 browser) |
+| banco di coordinamento `run-browser-tests.mjs <chrome>` | **verde** |
+| `npm test` (catena completa) | **exit 0** |
+| `npm run audit:inventory` | inventario rigenerato, **864 file** |
+| `node scripts/audit-page-performance.mjs --check` | «Budget statico rispettato su 30 pagine» |
+
+### 7. Limiti dichiarati
+
+- Un solo motore di storage (Chromium) su Chrome ed Edge: **non** prova Firefox né Safari.
+- Le ripetizioni provano l'**assenza osservata** di blocchi interni su 108 cambi versione; non dimostrano l'impossibilità teorica di un blocco causato da un **terzo** attore reale (altra scheda/PWA), che resta gestito in modo fail-closed e resta materia di M6-F3.
+- Il blocco deliberato continua a essere prodotto solo dal banco (gruppi D/E), non da una scheda reale.
+- Nessun collegamento al runtime, nessun upgrade distribuito, nessuna PWA o dato reale toccato; nessuna decisione di prodotto presa qui.
+
+**Stato incarico: DA_VERIFICARE** — correzione M6-A-2 R2 consegnata da DeepSeek il 2026-09-22 con **un solo commit locale mirato** su `integration/vault-shell-v127-security` (HEAD precedente `23a9c8c4`): la **sonda** di schema conclude ora la propria transazione `readonly` (`store.count()` + `oncomplete`) prima di chiudere la connessione e chiedere la versione 2, eliminando il blocco interno intermittente osservato in M6-A-3; le garanzie approvate in M6-A-2 R1 restano intatte. Prova nuova e discriminatoria: **12 upgrade consecutivi** su code v1 distinte **senza contese esterne e senza retry**, che fallisce su ogni blocco interno inatteso, con i blocchi **deliberati** confinati ai gruppi D/E; nel banco misto M6-A-3 il retry è stato **rimosso** (preparazione a singolo tentativo). Controllo di mutazione: ripristinando la sonda senza attesa il banco diventa rosso in due esecuzioni su due (`REPEAT_7_INTERNAL_BLOCK` e `REPEAT_1_INTERNAL_BLOCK`, entrambi `QUEUE_UPGRADE_BLOCKED`), con file ripristinato byte per byte (`3bee107f…`). Ripetizioni: banco M6-A-2 **3 esecuzioni** (72 upgrade) e banco misto **3 esecuzioni** (36 preparazioni) **verdi, senza blocchi interni e senza retry** — 108 cambi versione contro 1 blocco ogni 5 preparazioni prima della correzione. Altre verifiche: banchi `--runtime-lease`, `--no-locks` e di coordinamento verdi, `npm test` exit 0, inventario a 864 file, budget statico verde. Limiti: solo Chromium; l'assenza di blocchi interni è **osservata** su 108 casi e non esclude un blocco causato da un terzo attore reale, che resta fail-closed e materia di M6-F3; blocchi deliberati prodotti solo dal banco. Nessun collegamento al runtime, nessun fallback o upgrade distribuito, nessun push, merge, deploy, bump, modifica a `Frontend/public/**`, PWA, Rules, Functions, `master` o dato reale; nessun secondo incarico avviato.

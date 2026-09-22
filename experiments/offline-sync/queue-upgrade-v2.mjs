@@ -41,8 +41,20 @@ export async function upgradeQueueSchemaToV2({uid, indexedDb = globalThis.indexe
     const current = probe.result;
     try {
         if (current.version !== 1 || !current.objectStoreNames.contains('encryptedOperations')) throw fail('QUEUE_UPGRADE_SCHEMA');
-        const store = current.transaction('encryptedOperations', 'readonly').objectStore('encryptedOperations');
+        // La transazione della sonda deve **concludersi** prima di chiudere la connessione:
+        // `close()` attende le transazioni pendenti, e una chiusura ancora in sospeso può
+        // bloccare il cambio di versione richiesto subito dopo (blocco interno osservato in
+        // M6-A-3: 1 preparazione su 5). Una richiesta reale tiene viva la transazione e
+        // `oncomplete` ne segnala la conclusione; senza richieste la transazione si chiuderebbe
+        // da sola ma senza un punto di attesa osservabile.
+        const transaction = current.transaction('encryptedOperations', 'readonly');
+        const store = transaction.objectStore('encryptedOperations');
         if (store.keyPath !== 'id' || store.autoIncrement) throw fail('QUEUE_UPGRADE_SCHEMA');
+        await new Promise((resolve, reject) => {
+            store.count();
+            transaction.oncomplete = () => resolve();
+            transaction.onabort = transaction.onerror = () => reject(fail('QUEUE_UPGRADE_SCHEMA'));
+        });
     } finally { current.close(); }
 
     // 2. Cambio di versione additivo: lo store del lease nasce **dentro** `onupgradeneeded`,

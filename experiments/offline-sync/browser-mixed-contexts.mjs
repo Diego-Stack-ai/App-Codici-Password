@@ -84,27 +84,18 @@ const workerCall = data => startWorkerTask(data).result;
 // (M6-A-2) così esistono sia `encryptedOperations` sia `queueLeases` — lo schema che il
 // candidato ibrido richiede.
 //
-// **Blocco intermittente osservato (dichiarato).** La sonda del candidato M6-A-2 non emette
-// richieste sulla sua transazione di sola lettura, quindi la `close()` può completarsi mentre la
-// transazione è ancora in chiusura: l'apertura a versione 2 che segue subito può ricevere
-// `onblocked` e il candidato riporta `QUEUE_UPGRADE_BLOCKED` (fail-closed, ma intermittente).
-// Il banco **conta** i blocchi osservati e ritenta una volta, invece di nasconderli.
-let observedBlocks = 0;
+// **Nessun retry (correzione M6-A-2 R2).** Un blocco interno qui è un difetto del candidato, non
+// una condizione da nascondere: la preparazione viene eseguita una volta sola e qualunque errore
+// fa fallire il verdetto. I blocchi **deliberati** (connessione tenuta aperta, richiesta di
+// cambio versione esterna) vivono nel banco M6-A-2, dove sono attesi e asseriti.
 const prepareQueue = async label => {
     const uid = `mixed-${label}-${crypto.randomUUID()}`;
     const queue = await createOfflineMutationQueue({uid, vaultKeyMaterial: KEY});
     await queue.enqueue({uid, operationId: 'seed', recordId: 'record-seed', value: 'seed'});
     queue.close();
     let upgrade = null;
-    for (let attempt = 1; attempt <= 3; attempt++) {
-        try { upgrade = await upgradeQueueSchemaToV2({uid}); break; }
-        catch (error) {
-            const code = error.code || error.message;
-            if (code !== 'QUEUE_UPGRADE_BLOCKED' || attempt === 3) throw error;
-            observedBlocks++;
-            await sleep(50);
-        }
-    }
+    try { upgrade = await upgradeQueueSchemaToV2({uid}); }
+    catch (error) { throw new Error(`PREPARE_${label}_INTERNAL_BLOCK:${error.code || error.message}`); }
     same(upgrade.version, 2, `PREPARE_${label}_VERSION`);
     return uid;
 };
@@ -227,7 +218,7 @@ try {
     v1Database.close();
     assert(leaseOnV1, 'LEASE_ON_V1_DID_NOT_FAIL');
     same((await upgradeQueueSchemaToV2({uid: v1Uid})).version, 2, 'C_UPGRADE_VERSION');
-    passed.push(`C fatti registrati: su una coda già v2 la build v1 attuale fallisce con ${oldBuildFailure} (apre con versione 1); su una coda v1 il candidato ibrido fallisce con ${leaseOnV1} (manca lo store del lease) e solo dopo l'upgrade additivo la stessa coda torna utilizzabile — in una convivenza reale la copia vecchia ancora aperta resta il punto critico; blocchi di preparazione osservati in questa esecuzione: ${observedBlocks} (ogni blocco è stato riportato dal candidato come QUEUE_UPGRADE_BLOCKED e superato con un nuovo tentativo)`);
+    passed.push(`C fatti registrati: su una coda già v2 la build v1 attuale fallisce con ${oldBuildFailure} (apre con versione 1); su una coda v1 il candidato ibrido fallisce con ${leaseOnV1} (manca lo store del lease) e solo dopo l'upgrade additivo la stessa coda torna utilizzabile — in una convivenza reale la copia vecchia ancora aperta resta il punto critico`);
 
     await report({ok: true, passed, browser: navigator.userAgent, pageWebLocks: typeof navigator.locks});
 } catch (error) {

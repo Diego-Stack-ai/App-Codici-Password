@@ -252,6 +252,29 @@ try {
     assert(!externalDeletion.blocked && externalDeletion.pending !== true, 'EXTERNAL_LEAKED_CONNECTION');
     passed.push('richiesta di cambio versione esterna in sospeso: la sonda del candidato scade invece di restare appesa (nessuna richiesta di cambio versione creata da noi, righe identiche) e il successo tardivo della sonda chiude la connessione — la cancellazione del database non resta bloccata');
 
+    // ── F. Stabilità del cambio versione: upgrade ripetuti **senza contese esterne** ────────
+    // Nessun retry: un solo blocco interno inatteso è un fallimento della prova. I blocchi
+    // deliberati (connessione v1 tenuta aperta, richiesta di cambio versione esterna) restano
+    // confinati ai gruppi D ed E, dove sono attesi e asseriti.
+    const repetitions = 12;
+    for (let round = 0; round < repetitions; round++) {
+        const repeatUid = `queue-upgrade-repeat-${round}-${crypto.randomUUID()}`;
+        const repeatQueue = await createOfflineMutationQueue({uid: repeatUid, vaultKeyMaterial: KEY});
+        await repeatQueue.enqueue({uid: repeatUid, operationId: 'seed', recordId: 'record-seed', value: 'seed'});
+        repeatQueue.close();
+        const repeatBefore = await inspectQueueSchema({uid: repeatUid});
+        let repeatUpgrade = null, repeatCode = null;
+        try { repeatUpgrade = await upgradeQueueSchemaToV2({uid: repeatUid}); }
+        catch (error) { repeatCode = error.code || error.message; }
+        assert(repeatCode === null, `REPEAT_${round}_INTERNAL_BLOCK:${repeatCode}`);
+        same(repeatUpgrade.version, 2, `REPEAT_${round}_VERSION`);
+        const repeatAfter = await inspectQueueSchema({uid: repeatUid});
+        same([repeatAfter.version, repeatAfter.stores], [2, ['encryptedOperations', 'queueLeases']], `REPEAT_${round}_SCHEMA`);
+        same(canonical(repeatAfter.rows), canonical(repeatBefore.rows), `REPEAT_${round}_ROWS_CHANGED`);
+        same((await readOfflineQueueContainers({uid: repeatUid})).containers.length, 1, `REPEAT_${round}_READER`);
+    }
+    passed.push(`${repetitions} upgrade consecutivi su code v1 distinte, senza contese esterne e senza retry: zero blocchi interni inattesi, versione 2 con entrambi gli store e righe identiche in ogni ripetizione`);
+
     await report({ok: true, passed, browser: navigator.userAgent});
 } catch (error) {
     await report({ok: false, passed, code: error.code || error.message});
