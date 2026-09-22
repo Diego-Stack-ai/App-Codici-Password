@@ -566,3 +566,41 @@ Il modulo è stato ripristinato **byte per byte** (`sha256 6D687FC7AAEDED36709B5
 - Il fencing protegge le **scritture IndexedDB** nella transazione del chiamante e **non ritira** una richiesta di rete già inviata: le ricevute idempotenti del backend restano necessarie. Il timeout copre **solo l'acquisizione**, non la durata del task; la conferma dell'esito di una transazione del chiamante resta dell'attesa del chiamante — il coordinatore non trasforma mai una transazione fallita in una riuscita.
 - L'isolamento è provato **staticamente** su `Frontend/public/**`; non è una prova di sicurezza contro un'inclusione futura nel runtime.
 - **Nessun gate è chiuso** e la matrice delle copie PWA, il collaudo fisico e il rilascio restano fuori da questo passo.
+
+## M6-A-8c — Adozione controllata del lease nel solo pilota di sviluppo, 22/09/2026
+
+Laboratorio con dati sintetici e profilo browser usa e getta. Il coordinatore approvato in M6-A-8b è stato portato nel **runtime di sviluppo** con una **copia runtime** e collegato **esclusivamente** al pilota account privato, dietro **opt-in esplicito e spento per default**. Nessun Service Worker, nessuna PWA installata, nessun dato reale, nessuna modifica a Rules/Functions.
+
+### Regola di adozione (un punto solo: `resolveOfflineQueueLease`)
+
+| Situazione | Confine `withLease` usato |
+|---|---|
+| `navigator.locks` **presente** | percorso di piattaforma di sempre (`withOfflineQueueLease`), **prioritario e invariato**; il lease IndexedDB non viene nemmeno aperto |
+| `navigator.locks` **assente**, opt-in **spento** (default) | rifiuto invariato del runtime: `OFFLINE_QUEUE_LOCKS_UNAVAILABLE`, nessun task eseguito |
+| `navigator.locks` **assente**, opt-in **acceso** (`?m6lease=1`, che si aggiunge a `?m6pilot=1`) | lease IndexedDB sul **database della coda** (`codex-offline-queue-<uid>`), **solo schema v2 valido** (`encryptedOperations` + `queueLeases`, entrambi `keyPath:'id'`, nessun `autoIncrement`) |
+
+L'API è letta **a ogni chiamata**, il coordinatore è creato **pigramente** (così la presenza di Web Locks non dipende dall'IndexedDB) e il default è spento: nessuna attivazione globale, automatica o produttiva. Un database assente, uno schema v1, uno schema non supportato o malformato, un lease occupato (`{acquired:false, reason:'LEASE_BUSY'}`, stessa forma del Web Lock occupato), una sessione scaduta e una transazione fallita **non** producono mai una riuscita: il rifiuto è esplicito e il task non viene eseguito. Il coordinatore **non** crea database, **non** esegue upgrade (il trigger M6-A-7 resta separato e **non** viene invocato) e **non** ripara schemi; le sue transazioni nominano solo `queueLeases`.
+
+### File e integrazione
+
+- **Nuovo** `Frontend/public/assets/js/modules/data/offline-mutation-lease.js`: copia runtime del coordinatore approvato (stessi codici e stessa semantica: acquisizione, rilascio, rinnovo, timeout con rilascio del lease tardivo, token anti-ABA, fencing) più il risolutore della tabella qui sopra.
+- `Frontend/public/assets/js/modules/data/offline-mutation-client.js`: **un solo** punto di iniezione (`withLease: options?.withLease ?? withOfflineQueueLease`). Il default resta quello di sempre per **ogni** altro chiamante.
+- `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js`: predicato `isPrivateAccountLeaseFallbackEnabled` (`?m6lease=1`) e passaggio del risolutore **solo** con l'opt-in; la chiave `withLease` non viene passata altrimenti.
+- `Frontend/public/offline-assets.js`: rigenerato dal pretest (243 risorse): è l'unico effetto sulla shell offline; `sw.js` non è toccato e nessun deploy avviene.
+- Nessun file di `Frontend/public/**` importa da `experiments/`: la copia runtime è autonoma e importa solo `./offline-mutation-queue.js`.
+
+### Prove
+
+- **22 prove** fra la suite nuova (`tests/offline-mutation-lease.test.mjs`, 14 casi: regola di adozione, rifiuti, contesa fra due contesti, timeout, errore del task, sessione scaduta, assenza di IndexedDB, collegamento solo nel pilota) e la suite del pilota estesa (`tests/private-account-offline-pilot.test.mjs`, 8 casi). Sul **percorso reale**: client e sincronizzatore veri con coda e lettore veri su una coda v2 in memoria, con **contesa fra due contesti**, **rilascio dopo errore** e fail-closed su coda v1 senza upgrade.
+- `npm run test:offline-write-prototype`: **185/185** (167 prima + 18).
+- **Controlli di mutazione discriminatori (4)**: priorità Web Locks neutralizzata → rosso; default dell'opt-in acceso → rosso; rifiuto dello schema v1 neutralizzato → rosso; iniezione del confine nel pilota rimossa → rosso. File ripristinati **byte per byte** (`sha256 C25F79C0…F3947ED` per il modulo runtime, `sha256 F1CF0ED2…1E09AAE` per il pilota) e suite di nuovo 22/22.
+- **Banco browser `--pilot-lease`** (`npm run test:offline-pilot-lease`) su coda v2 **reale**: **6 verdetti** e **6/6 esecuzioni identiche** (3 su Chrome 153, 3 su Edge 153) — Web Locks presente senza alcun record di lease; opt-in spento che rifiuta; opt-in acceso che sincronizza sotto lease e lo rilascia; contesa fra due contesti reali; rilascio dopo errore del trasporto; v1 reale e coda assente fail-closed senza upgrade.
+- Audit: `test:js-syntax` 164 moduli, `test:static-references` 238 file, `audit-offline-shell` 243 risorse, `test:release-hardening`, `test:performance-budget` (30 pagine), `test:dependencies` (nessuna dipendenza circolare su 164 file), `test:lightweight`, `test:data-access`, `test:security` (88 controlli) — tutti **exit 0**.
+
+### Limiti dichiarati
+
+- Il **default distribuito non cambia**: senza opt-in (o con `navigator.locks` presente) il confine resta quello di sempre e `withOfflineQueueLease` continua a rifiutare quando l'API manca. Lo schema della coda **distribuita** resta la v1 con il solo `encryptedOperations`: il percorso lease funziona solo su una coda che una copia ha già portato a v2 con l'upgrade **esplicito** M6-A-7.
+- Il confine adottato usa il lease per l'**esclusione reciproca**, come oggi il Web Lock di piattaforma: il **fencing transazionale** resta nel modulo ed è provato dalle suite, ma **non** viene iniettato nelle scritture esistenti della coda (il percorso Web Locks non le fence: introdurlo qui cambierebbe il contratto). Il fencing non ritira comunque una richiesta di rete già inviata: servono le ricevute idempotenti del server.
+- Prove su **una sola pagina** con due contesti del coordinatore: non due schede reali, non Worker, non dispositivi, non PWA installate; il banco rimuove `navigator.locks` nel proprio realm dopo il primo scenario e usa un profilo usa e getta.
+- L'adozione è di **sviluppo** e resta subordinata alle decisioni di prodotto: **M6-F3** (quando aggiornare le copie PWA installate), matrice delle copie, messaggio temporaneo e collaudi fisici restano aperti. `docs/CENSIMENTO_GATE_M6_M10.md` non è stato toccato: la sua riga M6-2 resta corretta per il **default distribuito** (rifiuto senza Web Locks, schema v1).
+- Il `npm test` **globale** non è stato eseguito in questa sessione: sono state eseguite le suite e gli audit elencati sopra.

@@ -14,7 +14,12 @@ export function createOfflineMutationClient(options) {
         createQueue: createOfflineMutationQueue,
         createQueueReader: createOfflineQueueReader,
         createSynchronizer: createOfflineMutationSynchronizer,
-        withLease: withOfflineQueueLease,
+        // [M6-A-8c] Il confine `withLease` resta **quello di sempre** (`withOfflineQueueLease`) per
+        // ogni chiamante. Solo un'iniezione **esplicita** lo sostituisce: oggi lo fa il pilota
+        // account privato e soltanto sotto il suo opt-in (`?m6lease=1` più assenza reale di Web
+        // Locks). Nessun percorso dell'app cambia comportamento per il solo fatto che questo file
+        // conosca il lease.
+        withLease: options?.withLease ?? withOfflineQueueLease,
         createChannel: createOfflineQueueChannel,
         send: operation => callable(operation).then(result => result.data)
     });

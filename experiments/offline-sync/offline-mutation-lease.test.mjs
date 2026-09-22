@@ -338,14 +338,18 @@ test('isolamento: nessun file del runtime nomina il coordinatore e il modulo non
     };
     await walk(path.join(root, 'Frontend', 'public'));
     assert.ok(files.length > 100, 'la scansione deve coprire le risorse del runtime');
+    // [M6-A-8c] Il collegamento nel runtime è stato fatto in un incarico successivo con una **copia
+    // runtime** (`offline-mutation-lease.js`), e solo dal pilota: qui resta l'asserzione di M6-A-8b
+    // — il **candidato di laboratorio** non è importato da nessun file del runtime e nessuno importa
+    // da `experiments/`.
     const offenders = [];
     for (const file of files) {
         const text = await readFile(file, 'utf8');
-        if (text.includes('offline-mutation-lease') || text.includes('createOfflineMutationLeaseCoordinator')) {
+        if (/from\s+['"][^'"]*(?:experiments|\.mjs)['"]/.test(text)) {
             offenders.push(path.relative(root, file));
         }
     }
-    assert.deepEqual(offenders, [], 'nessun modulo del runtime deve importare il coordinatore');
+    assert.deepEqual(offenders, [], 'nessun modulo del runtime deve importare il candidato di laboratorio');
     const queue = await readFile(path.join(root, 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'), 'utf8');
     assert.match(queue, /OFFLINE_QUEUE_LOCKS_UNAVAILABLE/, 'il runtime senza Web Locks continua a rifiutare (nessun fallback abilitato)');
 });

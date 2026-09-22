@@ -1,4 +1,5 @@
 import {createOfflineMutationClient} from './offline-mutation-client.js';
+import {resolveOfflineQueueLease} from './offline-mutation-lease.js';
 
 const DEVICE_KEY = 'codex_m6_private_account_device_id';
 const HANDOFF_PREFIX = 'codex_m6_private_account_handoff:';
@@ -6,6 +7,14 @@ const HANDOFF_TTL_MS = 60_000;
 
 export function isPrivateAccountPilotEnabled(search = globalThis.location?.search || '') {
     return new URLSearchParams(search).get('m6pilot') === '1';
+}
+
+// [M6-A-8c] Opt-in **esplicito** del lease IndexedDB nel pilota, spento per default: serve
+// `?m6lease=1` (in aggiunta a `?m6pilot=1`, che abilita il pilota) e comunque Web Locks deve
+// mancare davvero, perché il percorso di piattaforma resta prioritario. Il parametro è l'unico modo
+// per accendere il lease; nessun percorso lo attiva da sé.
+export function isPrivateAccountLeaseFallbackEnabled(search = globalThis.location?.search || '') {
+    return new URLSearchParams(search).get('m6lease') === '1';
 }
 
 function deviceId() {
@@ -65,14 +74,22 @@ export function consumePrivateAccountHandoff(uid, storage = sessionStorage) {
     }
 }
 
-export async function createPrivateAccountPilotClient({uid, vaultKeyMaterial, onState, isActive}) {
+export async function createPrivateAccountPilotClient({uid, vaultKeyMaterial, onState, isActive,
+    leaseFallback = isPrivateAccountLeaseFallbackEnabled(), locks, indexedDb, holderId} = {}) {
     return createOfflineMutationClient({
         uid,
         vaultKeyMaterial,
         enabled: true,
         callableName: 'applyPrivateAccountMutation',
         onState,
-        isActive
+        isActive,
+        // [M6-A-8c] Senza opt-in la chiave `withLease` **non** viene passata: il client usa il confine
+        // di sempre (`withOfflineQueueLease`) e il comportamento è identico a prima. Con l'opt-in il
+        // risolutore decide a ogni chiamata: Web Locks se c'è, altrimenti il lease IndexedDB sul
+        // database della coda (solo schema v2 valido, nessuna creazione, nessun upgrade).
+        ...(leaseFallback === true
+            ? {withLease: resolveOfflineQueueLease({uid, leaseFallback: true, isActive, locks, indexedDb, holderId})}
+            : {})
     });
 }
 

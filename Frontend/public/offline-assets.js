@@ -105,6 +105,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/data/account-widget-client.js",
   "assets/js/modules/data/offline-mutation-client-core.js",
   "assets/js/modules/data/offline-mutation-client.js",
+  "assets/js/modules/data/offline-mutation-lease.js",
   "assets/js/modules/data/offline-mutation-queue.js",
   "assets/js/modules/data/offline-mutation-sync.js",
   "assets/js/modules/data/offline-mutation-upgrade.js",
