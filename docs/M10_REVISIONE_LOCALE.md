@@ -80,11 +80,25 @@ positivi** (per esempio su `trashSyncRecord`).
    keyring (`encryptionKeyCandidates`, `:273`). **Conseguenza:** alzare il parametro **non** è una
    modifica di una riga — richiede ri-cifratura/migrazione di tutti i campi oppure un meccanismo di
    iterazioni candidate, quindi una decisione da prendere con l'audit.
-   **Che cosa passa da `encrypt`** (33 call site nei moduli): `form-azienda-save.js` (10) e
-   `form-privato-save.js` (8) — campi di Account aziendali e privati, comprese le credenziali bancarie;
-   `ma_save.js` (5) e `profilo-sync.js` (5) — dati aziendali e Profilo; `attachment-security.js` (2);
-   poi `dati_azienda.js`, `sharing-identity.js`, `vault-session.js`, `webauthn-manager.js`,
-   `account-widget-client.js`, `offline-mutation-queue.js`, `shared-vault-data-client.js`.
+   **Che cosa passa da `encrypt`** — **34 chiamate dirette** nei moduli (la definizione è
+   `crypto-utils.js:197`), conteggiate con
+   `git grep` escludendo `crypto.subtle.encrypt` e riprodotte con
+   `rg --pcre2 '(?<!\.)\bencrypt\(' Frontend/public/assets/js/modules --glob '*.js'` → **35 righe**,
+   cioè **34 chiamate + la definizione**: `azienda/form-azienda-save.js` **10**
+   (`:65,66,67,69,70,71,80,88,90,91`) e `privato/form-privato-save.js` **8**
+   (`:86,87,88,90,102,106,107,108`) — campi di Account aziendali e privati, comprese le credenziali
+   bancarie; `azienda/ma_save.js` **5** (`:98,105,112,121,127`) e `privato/profilo-sync.js` **5**
+   (`:60,68,69,78,92`) — dati aziendali e Profilo; poi `azienda/dati_azienda.js:156`,
+   `data/account-widget-client.js:33`, `data/shared-vault-data-client.js:14`,
+   `privato/profilo-actions.js:65`, `privato/profilo-widgets.js:56` e
+   `shared/account-note-editor.js:25`.
+   **Percorsi WebCrypto autonomi, da NON attribuire al parametro:** le 10 occorrenze di
+   `crypto.subtle.encrypt` nei moduli non passano da `deriveKey`/PBKDF2 a 100 000 —
+   `core/crypto-utils.js:87,125,214` (interni: involucro KEK e passo AES-GCM di `encrypt` stesso),
+   `core/sharing-identity.js:35`, `core/vault-session.js:30`, `core/webauthn-manager.js:203`,
+   `data/offline-mutation-queue.js:43`, `settings/backup-crypto.js:78`,
+   `shared/attachment-security.js:42,51` — e la versione precedente di questa mappa li elencava per
+   errore fra i call site di `encrypt`.
    **Quale segreto entra:** `generateVaultKey()` produce 32 byte casuali; il keyring `CPVK2:` porta
    `primaryKey` (casuale) e `legacyKey` — e nei due call site di `security-manager.js:265,573` il
    `legacyKey` è la **Master Password**. Per i record cifrati con la chiave casuale le iterazioni contano
