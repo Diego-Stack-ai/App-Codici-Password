@@ -137,7 +137,8 @@ positivi** (per esempio su `trashSyncRecord`).
    plaintext **per quanto visto**. Il campione **non** è esaustivo: `security-manager.js` registra un
    **oggetto errore** in **7** chiamate (righe 66, 112, 131, 185, 429, 488, 539), non solo nelle due
    citate in §5.1. Nessuna delle due affermazioni è una prova di sfruttabilità: sono igiene da
-   completare.
+   completare — e le **9** chiamate sono state sanificate in M10-LOG-1 (§5.1), con l'elenco sopra
+   riferito alle righe **prima** dell'intervento.
 6. **DOM e iniezione.** Nessun `innerHTML`, `insertAdjacentHTML`, `document.write`, `eval` o
    `new Function` nel codice applicativo: i DOM sono costruiti con `createElement`/`textContent`. I soli
    riscontri sono nei **bundle di terze parti** (`qrcode.min.js` costruisce una tabella via `innerHTML`;
@@ -166,13 +167,16 @@ Le voci seguenti **non** sono difetti dimostrati: sono igiene, ambito da chiarir
 Per un eventuale difetto l'incarico prevede prova e proposta di correzione, **senza** modificare il
 codice qui.
 
-1. **Igiene dei log (proposta di correzione, basso rischio).** Nei moduli di sicurezza **9** chiamate
-   registrano l'**oggetto errore**: `security-manager.js:66,112,131,185,429,488,539` e
-   `vault-session.js:40,70`; il resto del codice usa la sola `e.name`/messaggio (per esempio
-   `crypto-utils.js:227`). *Perché conta:* un errore dell'SDK può contenere percorso o dettagli della
-   richiesta. *Proposta:* registrare solo `e?.name || 'Error'` in quelle nove chiamate.
-   *Verifica proposta:* grep di controllo che nei moduli di sicurezza nessuna `console.*` riceva un
-   oggetto errore; `npm test` verde. **Non applicata**: serve un incarico esecutivo.
+1. **Igiene dei log — APPLICATA (M10-LOG-1, 22/09/2026).** Le **9** chiamate che registravano
+   l'**oggetto errore** (`security-manager.js:66,112,131,185,429,488,539` e `vault-session.js:40,70`,
+   righe **prima** dell'intervento) ora emettono **solo un'etichetta stabile e sanificata** attraverso un
+   helper locale `logErrorLabel(value)`, che accetta un `code`/`name` breve e prevedibile
+   (`/^[A-Za-z][A-Za-z0-9_./-]{0,63}$/`) e in ogni altro caso restituisce `'Error'`: **mai** oggetto,
+   messaggio, stack, percorso o dati della cassaforte. Flusso degli errori e comportamento visibile
+   **invariati**. Prove in `tests/vault-session.test.mjs`: payload dei log nei percorsi di persistenza
+   fallita e ripristino fallito, valore non-`Error`, e controllo meccanico su **entrambi** i moduli;
+   due controlli di discriminazione (ripristino di una singola chiamata grezza → test rossi). Il punto
+   resta soggetto alla verifica di Codex.
 2. **Bundle di terze parti con sink HTML.** `qrcode.min.js` usa `innerHTML` per la tabella di fallback;
    il contenuto deriva da dati QR generati dall'app (non HTML) e il contenitore è creato dalla libreria.
    *Proposta:* includerlo nell'ambito dell'audit indipendente e, se si vuole, sostituire la libreria con

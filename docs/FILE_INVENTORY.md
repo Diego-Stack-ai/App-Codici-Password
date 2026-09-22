@@ -136,9 +136,9 @@ File censiti: **857**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/crypto-utils.js` | JS | 12441 | 332 | Primitive KDF, AES-GCM, verifier e codifiche crittografiche. |
 | `Frontend/public/assets/js/modules/core/mfa-manager.js` | JS | 4798 | 108 | Enroll, rimozione, recupero e revoca sessioni TOTP. |
 | `Frontend/public/assets/js/modules/core/password-policy.js` | JS | 3229 | 76 | Supporto frontend: password-policy. |
-| `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 25016 | 606 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
+| `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 25138 | 607 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
 | `Frontend/public/assets/js/modules/core/sharing-identity.js` | JS | 4101 | 78 | Supporto frontend: sharing-identity. |
-| `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 3928 | 98 | Sessione Vault cifrata e limitata alla scheda/browser session. |
+| `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 4148 | 100 | Sessione Vault cifrata e limitata alla scheda/browser session. |
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7326 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
 | `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 2964 | 74 | Supporto frontend: account-widget-client. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 3015 | 68 | Supporto frontend: offline-mutation-client-core. |
@@ -313,14 +313,14 @@ File censiti: **857**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1089818 | 7284 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1098370 | 7322 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/GUIDA_PROGETTO.md` | MD | 10578 | 162 | Documentazione: GUIDA PROGETTO. |
 | `docs/M10_DOMANDE_AUDIT_INDIPENDENTE.md` | MD | 2974 | 45 | Documentazione: M10 DOMANDE AUDIT INDIPENDENTE. |
 | `docs/M10_HARDENING_RILASCIO.md` | MD | 12006 | 99 | Documentazione: M10 HARDENING RILASCIO. |
-| `docs/M10_REVISIONE_LOCALE.md` | MD | 17214 | 207 | Documentazione: M10 REVISIONE LOCALE. |
+| `docs/M10_REVISIONE_LOCALE.md` | MD | 17638 | 211 | Documentazione: M10 REVISIONE LOCALE. |
 | `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8778 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/M5_COLLAUDO_DUE_DISPOSITIVI.md` | MD | 1427 | 17 | Documentazione: M5 COLLAUDO DUE DISPOSITIVI. |
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19358 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
@@ -953,7 +953,7 @@ File censiti: **857**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/swipe-lifecycle.test.mjs` | MJS | 11318 | 211 | Test automatico: swipe-lifecycle.test. |
 | `tests/vault-logout.test.mjs` | MJS | 4848 | 95 | Test automatico: vault-logout.test. |
 | `tests/vault-session-races.test.mjs` | MJS | 10680 | 233 | Test automatico: vault-session-races.test. |
-| `tests/vault-session.test.mjs` | MJS | 1865 | 39 | Test automatico: vault-session.test. |
+| `tests/vault-session.test.mjs` | MJS | 5739 | 114 | Test automatico: vault-session.test. |
 | `tests/widget-common-picker.test.mjs` | MJS | 4738 | 40 | Test automatico: widget-common-picker.test. |
 
 ## Duplicati esatti

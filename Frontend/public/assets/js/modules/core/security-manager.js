@@ -10,7 +10,7 @@ import { db, auth } from '../../firebase-config.js?v=1.2.127';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
-import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
+import { saveVaultSession, restoreVaultSession, clearVaultSession, logErrorLabel } from './vault-session.js';
 import { evaluatePassword, firstPasswordPolicyError, passwordPolicyMessage } from './password-policy.js';
 import { getFirstCompany, getFirstPrivateAccount, getUserProfile, getUserSetting } from '../data/vault-repository.js';
 
@@ -19,6 +19,7 @@ let _vaultAutoUnlock = false;
 let _isSoftLocked = false;
 let _unlockPromise = null;
 let _sessionGeneration = 0;
+
 
 function invalidatePendingUnlock() {
     _sessionGeneration++;
@@ -63,7 +64,7 @@ async function createVerifier(masterPassword, uid) {
     try {
         await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier: verifier }, { merge: true });
     } catch (e) {
-        console.error('Firestore verifier write failed:', e);
+        console.error('Firestore verifier write failed:', logErrorLabel(e));
         throw e;
     }
     
@@ -109,7 +110,7 @@ async function verifyMasterPassword(masterPassword, uid) {
                 localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
             }
         } catch (e) {
-            console.error('Failed to fetch verifier from Firestore', e);
+            console.error('Failed to fetch verifier from Firestore', logErrorLabel(e));
             throw new Error('NETWORK_REQUIRED_FOR_SECURITY_SYNC');
         }
     }
@@ -128,7 +129,7 @@ async function verifyMasterPassword(masterPassword, uid) {
             // Upgrade opportunistico: un errore di rete non deve impedire lo
             // sblocco offline già verificato con il formato precedente.
             migrateVerifierV1(masterPassword, uid, verifier).catch(error => {
-                console.warn('Vault verifier v2 migration deferred:', error);
+                console.warn('Vault verifier v2 migration deferred:', logErrorLabel(error));
             });
         }
         return verified;
@@ -182,7 +183,7 @@ async function migrateLegacyVault(candidatePassword, uid) {
             return false;
         }
     } catch (e) {
-        console.error('Migration check failed:', e);
+        console.error('Migration check failed:', logErrorLabel(e));
         throw new Error('NETWORK_REQUIRED_FOR_SECURITY_SYNC');
     }
 }
@@ -426,7 +427,7 @@ export async function resetVault() {
         try {
             await updateDoc(doc(db, "users", uid), { settings_biometric: false });
         } catch (error) {
-            console.error("Biometric preference cleanup failed", error);
+            console.error("Biometric preference cleanup failed", logErrorLabel(error));
             showToast("Accesso biometrico rimosso dal dispositivo; sincronizzazione non riuscita.", "warning");
             syncFailed = true;
         }
@@ -485,7 +486,7 @@ async function tryBiometricUnlock() {
         if (e.message === 'NETWORK_REQUIRED_FOR_SECURITY_SYNC') {
             showToast('Connessione necessaria per verifica sicurezza offline.', 'warning');
         } else {
-            console.error('[SECURITY-AUDIT] Biometric recovery failed:', e);
+            console.error('[SECURITY-AUDIT] Biometric recovery failed:', logErrorLabel(e));
         }
         return null;
     }
@@ -536,7 +537,7 @@ export async function enableBiometricUnlock(pass) {
         showToast("Biometria PRF configurata localmente in modo sicuro", "success");
         return true;
     } catch (e) {
-        console.error("Biometric setup failed", e);
+        console.error("Biometric setup failed", logErrorLabel(e));
         if (e.message === 'PRF_NOT_SUPPORTED') {
             showToast("Il dispositivo non supporta l'estensione PRF. Impossibile usare la biometria offline.", "error");
             // Se fallisce, eliminiamo anche la falsa biometria se c'era

@@ -3,6 +3,8 @@ const SESSION_KEY = 'vault_session_v1';
 const WRAPPING_KEY = 'codex_vault_session_wrapping_key_v1';
 let sessionGeneration = 0;
 
+export const logErrorLabel = v => { const c = typeof v?.code === 'string' ? v.code : typeof v?.name === 'string' ? v.name : ''; return /^[A-Za-z][\w./-]{0,63}$/.test(c) ? c : 'Error'; };
+
 const toBase64 = bytes => {
     let binary = '';
     bytes.forEach(byte => { binary += String.fromCharCode(byte); });
@@ -37,7 +39,7 @@ export async function saveVaultSession(vaultKeyMaterial, uid, expiresAt = null) 
         return true;
     } catch (error) {
         if (generation !== sessionGeneration) return false;
-        console.warn('[Vault Session] Persistenza non disponibile:', error);
+        console.warn('[Vault Session] Persistenza non disponibile:', logErrorLabel(error));
         clearVaultSession();
         return false;
     }
@@ -67,7 +69,7 @@ export async function restoreVaultSession(uid) {
         return new TextDecoder().decode(decrypted);
     } catch (error) {
         if (generation !== sessionGeneration) return null;
-        console.warn('[Vault Session] Ripristino non riuscito:', error);
+        console.warn('[Vault Session] Ripristino non riuscito:', logErrorLabel(error));
         clearVaultSession();
         return null;
     }
