@@ -54,6 +54,9 @@ export function createOfflineMutationLeaseCoordinator({uid, holderId, indexedDb 
     const name = databaseName ?? `${DATABASE_PREFIX}${uid}`;
     let database = null;
     let opening = null;
+    // [M6-A-8d] Corsa di acquisizione in corso: la chiusura non deve abbandonarla, altrimenti un
+    // lease arrivato **dopo** la scadenza resterebbe trattenuto fino alla sua scadenza naturale.
+    let pending = null;
 
     function time() {
         const value = now();
@@ -289,7 +292,10 @@ export function createOfflineMutationLeaseCoordinator({uid, holderId, indexedDb 
             }
             return handle;
         })();
+        const tracked = attempt.finally(() => { if (pending === tracked) pending = null; });
+        pending = tracked;
         attempt.catch(() => {}); // il ramo perdente della corsa non deve emergere come rifiuto non gestito
+        tracked.catch(() => {}); // l'esito è riferito da `acquire`/`run`: nessun rifiuto non gestito
         try {
             const handle = await Promise.race([attempt, deadline]);
             if (handle && expired) {
@@ -340,9 +346,17 @@ export function createOfflineMutationLeaseCoordinator({uid, holderId, indexedDb 
             return database.transaction(stores, mode);
         },
         close() {
-            if (!database) return;
-            try { database.close(); } catch { /* connessione già chiusa */ }
-            database = null;
+            // [M6-A-8d] Un'acquisizione **in corso** non viene abbandonata: la connessione si chiude
+            // dopo che la corsa è conclusa, così un lease arrivato in ritardo viene rilasciato (come
+            // verificano le prove) invece di restare trattenuto fino alla scadenza naturale.
+            const inFlight = pending;
+            const finish = () => {
+                if (!database) return;
+                try { database.close(); } catch { /* connessione già chiusa */ }
+                database = null;
+            };
+            if (!inFlight) { finish(); return Promise.resolve(); }
+            return inFlight.then(finish, finish);
         }
     });
 }

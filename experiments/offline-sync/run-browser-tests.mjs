@@ -17,7 +17,8 @@ const rollbackV2 = process.argv[3] === '--rollback-v2';
 const runtimeUpgrade = process.argv[3] === '--runtime-upgrade';
 const mutationLease = process.argv[3] === '--mutation-lease';
 const pilotLease = process.argv[3] === '--pilot-lease';
-if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs || rollbackV2 || runtimeUpgrade || mutationLease || pilotLease)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs|--rollback-v2|--runtime-upgrade|--mutation-lease|--pilot-lease]');
+const pilotLeaseWorker = process.argv[3] === '--pilot-lease-worker';
+if (!browserPath || (process.argv.length !== 3 && !(process.argv.length === 4 && (backendMode || noLocks || runtimeLease || queueUpgrade || mixedContexts || twoTabs || rollbackV2 || runtimeUpgrade || mutationLease || pilotLease || pilotLeaseWorker)))) throw new Error('Usage: node run-browser-tests.mjs <browser-executable> [--backend|--private-backend|--no-locks|--runtime-lease|--queue-upgrade|--mixed-contexts|--two-tabs|--rollback-v2|--runtime-upgrade|--mutation-lease|--pilot-lease|--pilot-lease-worker]');
 const bridge = backendMode ? await (await import('./emulated-backend-bridge.mjs')).createEmulatedBackendBridge({privateAccounts: process.argv[3] === '--private-backend'}) : null;
 const root = resolve(import.meta.dirname, '../..');
 const sdkBundle = backendMode ? (await build({absWorkingDir: root, bundle: true, write: false, format: 'esm', platform: 'browser',
@@ -36,6 +37,7 @@ const paths = new Map([
         : runtimeUpgrade ? 'experiments/offline-sync/browser-runtime-upgrade.mjs'
         : mutationLease ? 'experiments/offline-sync/browser-mutation-lease.mjs'
         : pilotLease ? 'experiments/offline-sync/browser-pilot-lease.mjs'
+        : pilotLeaseWorker ? 'experiments/offline-sync/browser-pilot-lease-worker.mjs'
         : rollbackV2 ? 'experiments/offline-sync/browser-rollback-v2.mjs'
         : twoTabs ? 'experiments/offline-sync/browser-two-tabs.mjs'
         : mixedContexts ? 'experiments/offline-sync/browser-mixed-contexts.mjs'
@@ -66,6 +68,7 @@ const paths = new Map([
     ['/offline-mutation-lease.mjs', 'experiments/offline-sync/offline-mutation-lease.mjs'],
     ['/offline-mutation-lease.js', 'Frontend/public/assets/js/modules/data/offline-mutation-lease.js'],
     ['/offline-mutation-queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
+    ['/pilot-lease-worker.mjs', 'experiments/offline-sync/pilot-lease-worker.mjs'],
     ['/queue.js', 'Frontend/public/assets/js/modules/data/offline-mutation-queue.js'],
     ['/crypto-utils.js', 'Frontend/public/assets/js/modules/core/crypto-utils.js']
 ]);

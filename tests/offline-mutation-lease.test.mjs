@@ -491,3 +491,25 @@ test('R1 un confine che riferisce LEASE_LOST non lascia scrivere senza token', a
     assert.equal(enqueued, 1, 'la conservazione della modifica non cambia quando nessun token esiste');
     lost.close(); off.close();
 });
+
+// ── M6-A-8d: la chiusura del confine non abbandona un'acquisizione in corso ─────────────────────
+test('chiusura durante un’acquisizione bloccata: il lease tardivo è rilasciato prima della chiusura', async () => {
+    const f = databaseFixture({stall: true});
+    const coordinator = lease.createOfflineMutationLeaseCoordinator({uid: UID, holderId: 'page-a',
+        indexedDb: f.indexedDb, now: () => 1000, ttlMs: 30000, acquireTimeoutMs: 20});
+    let ran = false;
+    assert.equal(await rejection(() => coordinator.run(async () => { ran = true; })), 'LEASE_ACQUIRE_TIMEOUT');
+    assert.equal(ran, false);
+    const closing = coordinator.close(); // chiusura richiesta **mentre** l'acquisizione è in corso
+    f.releaseStall();
+    await closing;
+    assert.equal(f.record().holderId, null, 'il lease tardivo è rilasciato prima della chiusura');
+    assert.equal(f.record().expiresAt, 0);
+    assert.deepEqual(writesOn(f.calls, 'encryptedOperations'), [], 'nessuna scrittura nella coda');
+    // Controprova: senza acquisizione in corso la chiusura è immediata e non tocca nulla.
+    const settled = databaseFixture();
+    const idle = lease.createOfflineMutationLeaseCoordinator({uid: UID, holderId: 'page-b', indexedDb: settled.indexedDb});
+    await idle.open();
+    await idle.close();
+    assert.equal(settled.record(), undefined, 'nessun lease creato da una chiusura a vuoto');
+});
