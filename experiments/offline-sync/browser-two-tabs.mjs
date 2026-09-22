@@ -91,8 +91,10 @@ if (PEER) {
                 return {closed: true};
             }
             case 'old-open': {
-                // Build v1 attuale su una coda già v2.
-                try { const queue = await createOfflineMutationQueue({uid: args.uid, vaultKeyMaterial: KEY}); queue.close(); return {error: null}; }
+                // [M6-A-8a] Una build **precedente** apre con versione 1: è quello che fa il codice
+                // distribuito prima dell'adozione, ed è il caso che deve fallire in modo dichiarato.
+                // (Il modulo attuale, compatibile, aprirebbe senza versione e funzionerebbe.)
+                try { await requestValue(indexedDB.open(queueName(args.uid), 1)); return {error: null}; }
                 catch (error) { return {error: error.name || codeOf(error)}; }
             }
             case 'old-list': {

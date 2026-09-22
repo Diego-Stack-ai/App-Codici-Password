@@ -39,9 +39,20 @@ try {
     try { observer.transaction('encryptedOperations'); } catch (error) { closed = error.name === 'InvalidStateError'; }
     assert(closed, 'OLD_CONNECTION_STILL_OPEN');
     passed.push('schema upgrade closes cooperative old handles and preserves ciphertext byte-for-byte');
-    try { await openOfflineQueueDatabase(uid); throw new Error('LEGACY_REOPEN_ALLOWED'); }
+    // [M6-A-8a] Lo scrittore del runtime ora **convive** con lo schema v2 già presente: apre senza
+    // imporre una versione, valida gli store previsti e non migra nulla. La build **precedente**
+    // (che apriva con versione 1) resta quella che rifiuta, e viene modellata esplicitamente qui.
+    const upgraded = await openOfflineQueueDatabase(uid);
+    const upgradedAgain = await requestValue(indexedDB.open(name));
+    assert(upgradedAgain.version === 2 && upgradedAgain.objectStoreNames.contains('queueLeases'), 'WRITER_V2_SCHEMA');
+    assert(upgraded.version === 2, 'WRITER_V2_VERSION');
+    upgraded.close(); upgradedAgain.close();
+    const stillThere = await readCompatibleQueue({uid});
+    assert(JSON.stringify(stillThere.containers) === JSON.stringify([original]), 'WRITER_V2_CHANGED_DATA');
+    passed.push('scrittore compatibile: apre la coda già v2 (store del lease nello stesso database) senza migrare e senza alterare i contenitori sigillati');
+    try { await requestValue(indexedDB.open(name, 1)); throw new Error('LEGACY_REOPEN_ALLOWED'); }
     catch (error) { assert(error.name === 'VersionError', 'LEGACY_REOPEN_NOT_VERSION_ERROR'); }
-    passed.push('version 1 opener refuses upgraded schema without recreation or deletion');
+    passed.push('la build precedente (apertura con versione 1) rifiuta lo schema aggiornato senza ricreare né cancellare');
     const v2 = await readCompatibleQueue({uid});
     assert(v2.version === 2 && JSON.stringify(v2.containers) === JSON.stringify([original]), 'COMPAT_V2');
     passed.push('compatible reader reads schema 2 without downgrade and preserves ciphertext');

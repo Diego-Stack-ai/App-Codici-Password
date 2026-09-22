@@ -1,5 +1,6 @@
 const DB_VERSION = 1;
 const STORE = 'encryptedOperations';
+const LEASE_STORE = 'queueLeases';
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -93,7 +94,10 @@ export async function openOfflineQueueDatabase(uid, indexedDb = globalThis.index
     check();
     return new Promise((resolve, reject) => {
         let settled = false;
-        const request = indexedDb.open(`codex-offline-queue-${uid}`, DB_VERSION);
+        // [M6-A-8a] Apertura **senza imporre una versione**: un database v1 o v2 esistente viene usato
+        // così com'è (né downgrade né upgrade automatico); uno assente nasce v1 con lo stesso store
+        // di prima. L'upgrade a v2 resta un'azione esplicita e separata.
+        const request = indexedDb.open(`codex-offline-queue-${uid}`);
         const finish = (error, database) => {
             if (settled) { database?.close(); return; }
             settled = true;
@@ -120,7 +124,17 @@ export async function openOfflineQueueDatabase(uid, indexedDb = globalThis.index
             const database = request.result;
             // Cooperate with a future upgrade; old handles cannot start new transactions.
             database.onversionchange = () => database.close();
-            try { check(); } catch (error) { database.close(); finish(error); return; }
+            try {
+                check();
+                // [M6-A-8a] Lo scrittore convive con uno schema **già** aggiornato: ammessi v1
+                // (solo operazioni) e v2 (operazioni + store del lease, nello stesso database).
+                // Nessun downgrade, nessun upgrade automatico; qualunque altro schema — o store
+                // attesi mancanti — fallisce **chiuso** con indisponibilità dichiarata.
+                const stores = database.version === 2 ? [STORE, LEASE_STORE] : [STORE];
+                if (![1, 2].includes(database.version) || stores.some(name => !database.objectStoreNames.contains(name))) {
+                    throw new Error('OFFLINE_QUEUE_SCHEMA_UNSUPPORTED');
+                }
+            } catch (error) { database.close(); finish(error); return; }
             finish(null, database);
         };
     });
@@ -340,6 +354,8 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             };
             try { await done; } catch (error) { throw failure || error; }
         },
+        // [M6-A-8a] Versione effettiva dello schema usato dallo scrittore (1 o 2).
+        version: database.version,
         // [M6-A-6 R1] La connessione dello scrittore può essere chiusa **dopo** l'apertura da un
         // upgrade concorrente (reazione a `versionchange`). La coda non è più operabile e la
         // sincronizzazione deve rifiutare **prima** di qualsiasi effetto, non dopo un invio.

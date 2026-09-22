@@ -225,6 +225,9 @@ function indexedFixture() {
     const data = new Map();
     let tail = Promise.resolve();
     const database = {
+        // [M6-A-8a] Lo scrittore valida versione e store attesi dello schema.
+        version: 1,
+        objectStoreNames: Object.assign(['encryptedOperations'], {contains: name => name === 'encryptedOperations'}),
         close() {},
         transaction(_store, mode) {
             const requests = [];

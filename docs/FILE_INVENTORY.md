@@ -142,8 +142,8 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7326 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
 | `Frontend/public/assets/js/modules/data/account-widget-client.js` | JS | 2964 | 74 | Supporto frontend: account-widget-client. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-client-core.js` | JS | 5408 | 108 | Supporto frontend: offline-mutation-client-core. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1189 | 22 | Supporto frontend: offline-mutation-client. |
-| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 20398 | 373 | Supporto frontend: offline-mutation-queue. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-client.js` | JS | 1210 | 22 | Supporto frontend: offline-mutation-client. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 21167 | 389 | Supporto frontend: offline-mutation-queue. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 7383 | 132 | Supporto frontend: offline-mutation-sync. |
 | `Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js` | JS | 8561 | 148 | Supporto frontend: offline-mutation-upgrade. |
 | `Frontend/public/assets/js/modules/data/private-account-offline-pilot.js` | JS | 4267 | 122 | Supporto frontend: private-account-offline-pilot. |
@@ -315,7 +315,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1320335 | 8591 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1334669 | 8647 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -385,7 +385,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/history-recovery/history-model.test.mjs` | MJS | 1597 | 24 | File di progetto: history-model.test. |
 | `experiments/offline-sync/browser-backend-sync.mjs` | MJS | 26806 | 320 | File di progetto: browser-backend-sync. |
 | `experiments/offline-sync/browser-coordination-worker.mjs` | MJS | 1857 | 30 | File di progetto: browser-coordination-worker. |
-| `experiments/offline-sync/browser-coordination.mjs` | MJS | 17832 | 239 | File di progetto: browser-coordination. |
+| `experiments/offline-sync/browser-coordination.mjs` | MJS | 18853 | 250 | File di progetto: browser-coordination. |
 | `experiments/offline-sync/browser-mixed-contexts-worker.mjs` | MJS | 4773 | 77 | File di progetto: browser-mixed-contexts-worker. |
 | `experiments/offline-sync/browser-mixed-contexts.mjs` | MJS | 15264 | 228 | File di progetto: browser-mixed-contexts. |
 | `experiments/offline-sync/browser-no-locks.mjs` | MJS | 12715 | 195 | File di progetto: browser-no-locks. |
@@ -393,7 +393,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/browser-rollback-v2.mjs` | MJS | 9458 | 121 | File di progetto: browser-rollback-v2. |
 | `experiments/offline-sync/browser-runtime-lease.mjs` | MJS | 21624 | 328 | File di progetto: browser-runtime-lease. |
 | `experiments/offline-sync/browser-runtime-upgrade.mjs` | MJS | 17452 | 223 | File di progetto: browser-runtime-upgrade. |
-| `experiments/offline-sync/browser-two-tabs.mjs` | MJS | 25165 | 380 | File di progetto: browser-two-tabs. |
+| `experiments/offline-sync/browser-two-tabs.mjs` | MJS | 25365 | 382 | File di progetto: browser-two-tabs. |
 | `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
 | `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3194 | 54 | File di progetto: conflict-note-proposal. |
 | `experiments/offline-sync/conflict-note-proposal.test.mjs` | MJS | 4444 | 62 | File di progetto: conflict-note-proposal.test. |
@@ -415,8 +415,8 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
 | `experiments/offline-sync/queue-upgrade-v2.mjs` | MJS | 7749 | 128 | File di progetto: queue-upgrade-v2. |
 | `experiments/offline-sync/rollback-v2-compatible.mjs` | MJS | 4333 | 71 | File di progetto: rollback-v2-compatible. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 9363 | 120 | File di progetto: run-browser-tests. |
-| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1682 | 28 | File di progetto: run-emulated-browsers. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 9372 | 120 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1685 | 28 | File di progetto: run-emulated-browsers. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2762 | 51 | File di progetto: account-detail-reader. |
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7479 | 121 | File di progetto: account-detail-reader.test. |
 | `experiments/persistent-vault-shell/account-note-candidate-rules.mjs` | MJS | 728 | 12 | File di progetto: account-note-candidate-rules. |
@@ -778,7 +778,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 19673 | 125 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 19676 | 125 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -920,7 +920,7 @@ File censiti: **870**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/new-account-shared-link.test.mjs` | MJS | 2601 | 33 | Test automatico: new-account-shared-link.test. |
 | `tests/offline-account-widgets.test.mjs` | MJS | 6182 | 60 | Test automatico: offline-account-widgets.test. |
 | `tests/offline-mutation-client.test.mjs` | MJS | 17682 | 281 | Test automatico: offline-mutation-client.test. |
-| `tests/offline-mutation-queue.test.mjs` | MJS | 36099 | 572 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 39221 | 624 | Test automatico: offline-mutation-queue.test. |
 | `tests/offline-mutation-sync.test.mjs` | MJS | 13647 | 221 | Test automatico: offline-mutation-sync.test. |
 | `tests/offline-profile-readiness.test.mjs` | MJS | 5318 | 97 | Test automatico: offline-profile-readiness.test. |
 | `tests/offline-sync.rules.test.mjs` | MJS | 2139 | 42 | Test automatico: offline-sync.rules.test. |

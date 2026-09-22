@@ -54,10 +54,12 @@ test('BroadcastChannel notifica soltanto la coda dello stesso utente', () => {
 });
 
 // Transactional in-memory IndexedDB boundary: requests, serial transactions and rollback on abort.
-function indexedFixture() {
+function indexedFixture({version = 1, stores = ['encryptedOperations']} = {}) {
     const data = new Map();
     let tail = Promise.resolve(), beforeWrite, failAdd = false;
     const database = {
+        version,
+        objectStoreNames: Object.assign([...stores], {contains: name => stores.includes(name)}),
         close() {},
         transaction(_store, mode) {
             const requests = [];
@@ -255,11 +257,14 @@ test('scope review reason stays inside encrypted payload and survives reopening'
 
 function openingFixture() {
     const request = {};
-    const database = {closed: 0, close() { this.closed++; }, transaction() {
+    const database = {version: 1, closed: 0,
+        objectStoreNames: Object.assign(['encryptedOperations'], {contains: name => name === 'encryptedOperations'}),
+        close() { this.closed++; }, transaction() {
         if (this.closed) throw Object.assign(new Error('la connessione è chiusa'), {name: 'InvalidStateError'});
         return {};
     }};
-    const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, 1); return request; }};
+    // [M6-A-8a] lo scrittore apre **senza imporre una versione**: la fixture lo verifica.
+    const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, undefined); return request; }};
     return {request, database, indexedDb, succeed() { request.result = database; request.onsuccess(); }};
 }
 
@@ -546,6 +551,53 @@ test('nessun percorso dell’app avvia l’upgrade da sé: solo il pilota lo inv
     assert.equal(trigger.includes('upgradePrivateAccountPilotQueue'), true);
     const pilot = await readFile(new URL('../Frontend/public/assets/js/modules/data/private-account-offline-pilot.js', import.meta.url), 'utf8');
     assert.equal(pilot.includes("from './private-account-pilot-queue.js'"), true, 'il pilota deve riesportare il trigger');
+});
+
+// ── M6-A-8a: compatibilità dello scrittore con coda v1/v2 già esistente ─────────────────────
+test('scrittore compatibile: coda v2 già presente con store del lease nello stesso database', async () => {
+    const idb = indexedFixture({version: 2, stores: ['encryptedOperations', 'queueLeases']});
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: idb.indexedDb});
+    assert.equal(instance.version, 2);
+    await instance.enqueue(oldOperation);
+    assert.equal((await instance.list()).length, 1);
+    assert.equal(idb.data.size, 1);
+    instance.close();
+});
+
+test('scrittore compatibile: coda assente nasce v1, schema ignoto fallisce chiuso', async () => {
+    const created = [], names = [];
+    const missing = {aborted: false, open() {
+        const request = {transaction: {abort() { missing.aborted = true; }}};
+        setImmediate(() => {
+            request.result = {version: 1,
+                close() {},
+                onversionchange: null,
+                objectStoreNames: Object.assign(names, {contains: name => names.includes(name)}),
+                createObjectStore(name) { names.push(name); created.push(name); return {createIndex() {}}; }};
+            request.onupgradeneeded?.();
+            request.onsuccess?.();
+        });
+        return request;
+    }};
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: missing});
+    assert.equal(instance.version, 1);
+    // Nessun downgrade né upgrade: nasce **solo** lo store delle operazioni, mai quello del lease.
+    assert.deepEqual(created, ['encryptedOperations']);
+    assert.equal(missing.aborted, false);
+    instance.close();
+
+    // Schema ignoto (v3): indisponibilità dichiarata, nessuna ricreazione del database.
+    const unknown = readerFixture({version: 3, rows: []});
+    await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: unknown.indexedDb}),
+        /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/);
+    assert.deepEqual(unknown.calls.created, []);
+    assert.deepEqual(unknown.calls.writes, []);
+
+    // v2 dichiarato ma con lo store del lease mancante: fallisce chiuso senza crearlo.
+    const incomplete = readerFixture({version: 2, names: ['encryptedOperations'], rows: []});
+    await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: incomplete.indexedDb}),
+        /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/);
+    assert.deepEqual(incomplete.calls.created, []);
 });
 
 test('sonda sicura: coda assente non creata, blocco e scadenza dichiarati', async () => {

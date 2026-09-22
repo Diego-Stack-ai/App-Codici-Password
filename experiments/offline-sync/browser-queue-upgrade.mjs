@@ -112,8 +112,13 @@ try {
     const afterSecond = await inspectQueueSchema({uid});
     same(afterSecond.version, 2, 'REPEATED_UPGRADE_VERSION');
     same(canonical(afterSecond.rows), canonical(before.rows), 'REPEATED_UPGRADE_CHANGED_ROWS');
+    // [M6-A-8a] Lo scrittore del runtime ora **convive** con lo schema v2: la build precedente
+    // (apertura con versione 1) resta quella che rifiuta, ed è modellata esplicitamente qui.
+    const upgradedWriter = await createOfflineMutationQueue({uid, vaultKeyMaterial: KEY});
+    same(upgradedWriter.version, 2, 'WRITER_NOT_COMPATIBLE_V2');
+    upgradedWriter.close();
     let writerName = null;
-    try { await createOfflineMutationQueue({uid, vaultKeyMaterial: KEY}); } catch (error) { writerName = error.name; }
+    try { await requestValue(indexedDB.open(`codex-offline-queue-${uid}`, 1)); } catch (error) { writerName = error.name; }
     same(writerName, 'VersionError', 'OLD_WRITER_ACCEPTED_SCHEMA_2');
     const afterWriter = await inspectQueueSchema({uid});
     same(canonical(afterWriter.rows), canonical(before.rows), 'OLD_WRITER_CHANGED_ROWS');

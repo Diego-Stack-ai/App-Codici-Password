@@ -203,8 +203,13 @@ try {
     setLocks(nativeLocks);
 
     // ── C. Fatti registrati: VersionError della build vecchia su coda v2, lease assente su v1
+    // [M6-A-8a] La build **precedente** apre con versione 1: è quella che rifiuta lo schema v2,
+    // mentre lo scrittore attuale (compatibile) apre la stessa coda senza migrare nulla.
+    const compatibleWriter = await createOfflineMutationQueue({uid: leaseUid, vaultKeyMaterial: KEY});
+    same(compatibleWriter.version, 2, 'WRITER_NOT_COMPATIBLE_V2');
+    compatibleWriter.close();
     let oldBuildFailure = null;
-    try { await createOfflineMutationQueue({uid: leaseUid, vaultKeyMaterial: KEY}); }
+    try { await requestValue(indexedDB.open(`codex-offline-queue-${leaseUid}`, 1)); }
     catch (error) { oldBuildFailure = error.name || error.code || error.message; }
     same(oldBuildFailure, 'VersionError', 'OLD_BUILD_NOT_VERSION_ERROR');
     const v1Uid = `mixed-c-v1-${crypto.randomUUID()}`;
