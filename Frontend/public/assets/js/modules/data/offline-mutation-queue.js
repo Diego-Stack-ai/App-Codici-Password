@@ -134,6 +134,16 @@ export async function openOfflineQueueDatabase(uid, indexedDb = globalThis.index
                 if (![1, 2].includes(database.version) || stores.some(name => !database.objectStoreNames.contains(name))) {
                     throw new Error('OFFLINE_QUEUE_SCHEMA_UNSUPPORTED');
                 }
+                // [M6-A-8a R1] Non basta la **presenza**: la struttura di ciascuno store atteso deve
+                // essere quella prevista (`keyPath === 'id'`, nessun `autoIncrement`), la stessa che
+                // verifica il lettore compatibile. Altrimenti lo scrittore rifiuta **prima** di
+                // qualunque scrittura o conferma, invece di accodare su una coda che poi non sarebbe
+                // leggibile per la sincronizzazione.
+                const transaction = database.transaction(stores, 'readonly');
+                for (const name of stores) {
+                    const store = transaction.objectStore(name);
+                    if (store.keyPath !== 'id' || store.autoIncrement) throw new Error('OFFLINE_QUEUE_SCHEMA_UNSUPPORTED');
+                }
             } catch (error) { database.close(); finish(error); return; }
             finish(null, database);
         };

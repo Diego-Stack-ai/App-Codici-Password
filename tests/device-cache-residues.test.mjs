@@ -234,6 +234,8 @@ function indexedFixture() {
             const tx = {aborted: false, abort() { this.aborted = true; }, objectStore: () => store};
             const request = (action, key, value) => { const req = {}; requests.push({action, key, value, req}); return req; };
             const store = {
+                // [M6-A-8a R1] Lo scrittore valida anche la **struttura** degli store attesi.
+                keyPath: 'id', autoIncrement: false,
                 get: key => request('get', key), put: value => request('put', value.id, value),
                 add: value => request('add', value.id, value), delete: key => request('delete', key),
                 index: () => ({getAll: () => request('all')})

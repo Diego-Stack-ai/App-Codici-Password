@@ -66,6 +66,7 @@ function indexedFixture({version = 1, stores = ['encryptedOperations']} = {}) {
             const tx = {aborted: false, abort() { this.aborted = true; }, objectStore: () => store};
             const request = (action, key, value) => { const req = {}; requests.push({action,key,value,req}); return req; };
             const store = {
+                keyPath: 'id', autoIncrement: false,
                 get: key => request('get', key), put: value => request('put', value.id, value),
                 add: value => request('add', value.id, value), delete: key => request('delete', key),
                 index: () => ({getAll: () => request('all')})
@@ -259,10 +260,11 @@ function openingFixture() {
     const request = {};
     const database = {version: 1, closed: 0,
         objectStoreNames: Object.assign(['encryptedOperations'], {contains: name => name === 'encryptedOperations'}),
-        close() { this.closed++; }, transaction() {
-        if (this.closed) throw Object.assign(new Error('la connessione è chiusa'), {name: 'InvalidStateError'});
-        return {};
-    }};
+        close() { this.closed++; },
+        transaction() {
+            if (this.closed) throw Object.assign(new Error('la connessione è chiusa'), {name: 'InvalidStateError'});
+            return {objectStore: () => ({keyPath: 'id', autoIncrement: false})};
+        }};
     // [M6-A-8a] lo scrittore apre **senza imporre una versione**: la fixture lo verifica.
     const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, undefined); return request; }};
     return {request, database, indexedDb, succeed() { request.result = database; request.onsuccess(); }};
@@ -571,6 +573,7 @@ test('scrittore compatibile: coda assente nasce v1, schema ignoto fallisce chius
         setImmediate(() => {
             request.result = {version: 1,
                 close() {},
+                transaction: () => ({objectStore: () => ({keyPath: 'id', autoIncrement: false})}),
                 onversionchange: null,
                 objectStoreNames: Object.assign(names, {contains: name => names.includes(name)}),
                 createObjectStore(name) { names.push(name); created.push(name); return {createIndex() {}}; }};
@@ -598,6 +601,28 @@ test('scrittore compatibile: coda assente nasce v1, schema ignoto fallisce chius
     await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: incomplete.indexedDb}),
         /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/);
     assert.deepEqual(incomplete.calls.created, []);
+});
+
+test('scrittore compatibile: store presenti ma con struttura errata rifiutati (R1)', async () => {
+    // Presenza ≠ struttura: la stessa validazione del lettore compatibile (`keyPath === 'id'`,
+    // nessun `autoIncrement`) deve valere **prima** di qualunque scrittura o conferma.
+    for (const [label, options] of [
+        ['v2 con keyPath errato', {version: 2, rows: [], keyPath: 'chiave'}],
+        ['v2 con autoIncrement attivo', {version: 2, rows: [], autoIncrement: true}],
+        ['v1 con keyPath errato', {version: 1, rows: [], keyPath: 'chiave'}],
+        ['v1 con autoIncrement attivo', {version: 1, rows: [], autoIncrement: true}]
+    ]) {
+        const malformed = readerFixture(options);
+        await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: malformed.indexedDb}),
+            /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/, label);
+        assert.deepEqual(malformed.calls.writes, [], `${label}: nessuna scrittura`);
+        assert.deepEqual(malformed.calls.created, [], `${label}: nessuno store creato`);
+    }
+    // Riferimento positivo: la stessa fixture con la struttura corretta viene accettata.
+    const valid = readerFixture({version: 2, rows: []});
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: valid.indexedDb});
+    assert.equal(instance.version, 2);
+    instance.close();
 });
 
 test('sonda sicura: coda assente non creata, blocco e scadenza dichiarati', async () => {
