@@ -99,10 +99,21 @@ positivi** (per esempio su `trashSyncRecord`).
    **2 nel flusso Vault a 600 000** — `core/crypto-utils.js:87` (`createVaultVerifier` →
    `deriveVerifierKey`, `VERIFIER_ITERATIONS`) e `core/crypto-utils.js:125` (`wrapVaultKey` →
    `deriveKek`, `KEK_ITERATIONS`);
-   **7 percorsi WebCrypto autonomi**, che non passano da `deriveKey` e quindi **non** usano né il
-   parametro a 100 000 né quello a 600 000 — `core/sharing-identity.js:35`, `core/vault-session.js:30`,
-   `core/webauthn-manager.js:203`, `data/offline-mutation-queue.js:43`, `settings/backup-crypto.js:78`,
-   `shared/attachment-security.js:42,51`.
+   **7 percorsi WebCrypto con KDF proprio**, che **non** passano da `crypto-utils.deriveKey` (quindi non
+   usano il parametro a 100 000 né quello a 600 000 *di quel modulo*), ma **non** sono privi di
+   derivazione: ognuno ha la sua, verificata uno per uno il 22/09 dopo la revisione Codex R3 —
+   **HKDF-SHA256**: `core/sharing-identity.js:35` (`deriveWrappingKey`),
+   `data/offline-mutation-queue.js:43` (`deriveOfflineQueueKey`),
+   `shared/attachment-security.js:42,51` (`deriveAttachmentWrappingKey`, con chiave di file casuale a
+   32 byte); **chiave AES-GCM casuale di sessione** (32 byte in `sessionStorage`):
+   `core/vault-session.js:30` (`getSessionKey`); **chiave fornita dal chiamante** (PRF WebAuthn):
+   `core/webauthn-manager.js:203` (`encryptVaultSecret`); **PBKDF2-SHA256 a 600 000 iterazioni proprie**:
+   `settings/backup-crypto.js:78` (`encryptBackupEntry` con la chiave di `deriveBackupKey`, parametro
+   `KDF_ITERATIONS = 600000` a `:5`, passato a PBKDF2 a `:69-70`).
+   Quindi il **600 000** compare in **due contesti distinti e non intercambiabili** — il
+   verificatore/KEK del Vault in `crypto-utils.js` e il KDF del **file di backup** in
+   `backup-crypto.js` — mentre la cifratura dei **campi** resta a 100 000; i restanti percorsi usano
+   HKDF, una chiave di sessione casuale o una chiave fornita dal chiamante.
    La versione precedente di questa mappa elencava per errore fra i call site di `encrypt`
    `attachment-security.js`, `sharing-identity.js`, `vault-session.js`, `webauthn-manager.js` e
    `offline-mutation-queue.js`, e fra i percorsi «autonomi» anche il passo interno `:214` e i due usi
