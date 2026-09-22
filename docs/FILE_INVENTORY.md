@@ -2,13 +2,14 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **865**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **867**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/offline-sync/browser-two-tabs.mjs` | MJS | 25165 | 380 | File di progetto: browser-two-tabs. |
+| `experiments/offline-sync/browser-rollback-v2.mjs` | MJS | 9458 | 121 | File di progetto: browser-rollback-v2. |
+| `experiments/offline-sync/rollback-v2-compatible.mjs` | MJS | 4333 | 71 | File di progetto: rollback-v2-compatible. |
 | `experiments/backup-recovery/backup-format.mjs` | MJS | 5714 | 85 | File di progetto: backup-format. |
 | `experiments/backup-recovery/backup-format.test.mjs` | MJS | 3890 | 55 | File di progetto: backup-format.test. |
 | `experiments/card-importer/README.md` | MD | 3411 | 70 | Documentazione: README. |
@@ -33,6 +34,7 @@ File censiti: **865**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/browser-no-locks.mjs` | MJS | 12715 | 195 | File di progetto: browser-no-locks. |
 | `experiments/offline-sync/browser-queue-upgrade.mjs` | MJS | 21105 | 282 | File di progetto: browser-queue-upgrade. |
 | `experiments/offline-sync/browser-runtime-lease.mjs` | MJS | 21624 | 328 | File di progetto: browser-runtime-lease. |
+| `experiments/offline-sync/browser-two-tabs.mjs` | MJS | 25165 | 380 | File di progetto: browser-two-tabs. |
 | `experiments/offline-sync/compatible-queue-reader.mjs` | MJS | 4088 | 68 | File di progetto: compatible-queue-reader. |
 | `experiments/offline-sync/conflict-note-proposal.mjs` | MJS | 3194 | 54 | File di progetto: conflict-note-proposal. |
 | `experiments/offline-sync/conflict-note-proposal.test.mjs` | MJS | 4444 | 62 | File di progetto: conflict-note-proposal.test. |
@@ -53,8 +55,8 @@ File censiti: **865**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/offline-sync/offline-save-panel.mjs` | MJS | 17064 | 235 | File di progetto: offline-save-panel. |
 | `experiments/offline-sync/offline-save-panel.test.mjs` | MJS | 19586 | 307 | File di progetto: offline-save-panel.test. |
 | `experiments/offline-sync/queue-upgrade-v2.mjs` | MJS | 7749 | 128 | File di progetto: queue-upgrade-v2. |
-| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 8491 | 111 | File di progetto: run-browser-tests. |
-| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1544 | 26 | File di progetto: run-emulated-browsers. |
+| `experiments/offline-sync/run-browser-tests.mjs` | MJS | 8741 | 114 | File di progetto: run-browser-tests. |
+| `experiments/offline-sync/run-emulated-browsers.mjs` | MJS | 1609 | 27 | File di progetto: run-emulated-browsers. |
 | `experiments/persistent-vault-shell/account-detail-reader.mjs` | MJS | 2762 | 51 | File di progetto: account-detail-reader. |
 | `experiments/persistent-vault-shell/account-detail-reader.test.mjs` | MJS | 7479 | 121 | File di progetto: account-detail-reader.test. |
 | `experiments/persistent-vault-shell/account-note-candidate-rules.mjs` | MJS | 728 | 12 | File di progetto: account-note-candidate-rules. |
@@ -641,7 +643,7 @@ File censiti: **865**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 3501 | 55 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/CENSIMENTO_GATE_M6_M10.md` | MD | 14644 | 85 | Documentazione: CENSIMENTO GATE M6 M10. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 10374 | 94 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/DEEPSEEK_COORDINATION.md` | MD | 1239144 | 8124 | Documentazione: DEEPSEEK COORDINATION. |
+| `docs/DEEPSEEK_COORDINATION.md` | MD | 1254734 | 8198 | Documentazione: DEEPSEEK COORDINATION. |
 | `docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md` | MD | 28863 | 154 | Documentazione: DS-002A ALLEGATI DOCUMENTI CONTRATTO. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 9012 | 71 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 13788 | 113 | Documentazione: FUNCTIONAL DATA CONTRACT. |
@@ -773,7 +775,7 @@ File censiti: **865**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 19410 | 123 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 19515 | 124 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
