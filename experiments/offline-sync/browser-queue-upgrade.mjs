@@ -32,6 +32,17 @@ const createDatabase = (name, version, stores, seed) => {
     });
 };
 
+// Cancellazione con esito osservabile: se una connessione resta aperta, la richiesta viene
+// bloccata e non si conclude — è la sonda per le connessioni lasciate in giro.
+const deleteDatabaseChecked = (name, waitMs = 500) => new Promise(resolve => {
+    const request = indexedDB.deleteDatabase(name);
+    let blocked = false;
+    const timer = setTimeout(() => resolve({blocked, pending: true}), waitMs);
+    request.onblocked = () => { blocked = true; };
+    request.onsuccess = () => { clearTimeout(timer); resolve({blocked}); };
+    request.onerror = () => { clearTimeout(timer); resolve({blocked, error: request.error?.name}); };
+});
+
 // Coda v1 reale con due operazioni sigillate pendenti, di cui una in riconciliazione.
 async function createV1QueueWithPendingOperations(label) {
     const uid = `queue-upgrade-${label}-${crypto.randomUUID()}`;
@@ -44,6 +55,16 @@ async function createV1QueueWithPendingOperations(label) {
     queue.close();
     return {uid, first, marked};
 }
+
+let reported = false;
+const report = async payload => {
+    if (reported) return;
+    reported = true;
+    await fetch('/result', {method: 'POST', body: JSON.stringify(payload)});
+};
+// Sorveglianza: se una sequenza non si conclude, il banco riporta comunque i verdetti già
+// raggiunti invece di farsi uccidere dal timeout del runner senza informazioni.
+setTimeout(() => report({ok: false, passed, code: 'BENCH_STALL'}), 30000);
 
 try {
     // ── A. Upgrade additivo: contenitori identici byte per byte, lettura compatibile ──────
@@ -158,7 +179,80 @@ try {
     await new Promise(resolve => { const request = indexedDB.deleteDatabase(missingName); request.onsuccess = request.onerror = request.onblocked = () => resolve(); });
     passed.push('coda v1 senza lo store atteso e coda assente: nessun cambio di versione, nessuno store creato, fail-closed in entrambi i casi');
 
-    await fetch('/result', {method: 'POST', body: JSON.stringify({ok: true, passed, browser: navigator.userAgent})});
+    // ── D. Blocco reale: segnale al chiamante, rilascio tardivo, coda intatta e nessuna
+    //      connessione lasciata aperta (correzione M6-A-2 R1) ────────────────────────────────
+    for (const {label, timeoutMs, expected} of [
+        {label: 'blocked', timeoutMs: 2000, expected: ['QUEUE_UPGRADE_BLOCKED']},
+        {label: 'timeout', timeoutMs: 1, expected: ['QUEUE_UPGRADE_TIMEOUT', 'QUEUE_UPGRADE_BLOCKED']}
+    ]) {
+        const held = await createV1QueueWithPendingOperations(label);
+        const heldName = `codex-offline-queue-${held.uid}`;
+        const heldBefore = await inspectQueueSchema({uid: held.uid});
+        // Connessione v1 tenuta aperta **senza** chiusura su `versionchange`: l'upgrade va in blocco.
+        const holder = await requestValue(indexedDB.open(heldName));
+        same(holder.version, 1, `HELD_${label}_HOLDER_VERSION`);
+        const code = await rejection(() => upgradeQueueSchemaToV2({uid: held.uid, timeoutMs}));
+        assert(expected.includes(code), `HELD_${label}_UNEXPECTED_${code}`);
+        holder.close();
+        // Barriera deterministica: un'apertura senza versione si accoda **dopo** il cambio di
+        // versione rimasto in sospeso, quindi quando risponde la sequenza è conclusa.
+        const heldAfter = await inspectQueueSchema({uid: held.uid});
+        same(heldAfter.version, 1, `HELD_${label}_LATE_VERSION_CHANGED`);
+        same(heldAfter.stores, ['encryptedOperations'], `HELD_${label}_LATE_LEASE_STORE`);
+        same(canonical(heldAfter.rows), canonical(heldBefore.rows), `HELD_${label}_LATE_ROWS_CHANGED`);
+        const heldRead = await readOfflineQueueContainers({uid: held.uid});
+        same(heldRead.version, 1, `HELD_${label}_READER_VERSION`);
+        same(heldRead.containers.map(row => row.operationId).sort(), ['device:1', 'device:2'], `HELD_${label}_READER_IDS`);
+        const heldWriter = await createOfflineMutationQueue({uid: held.uid, vaultKeyMaterial: KEY});
+        same((await heldWriter.list()).map(operation => operation.operationId).sort(), ['device:1', 'device:2'], `HELD_${label}_QUEUE_UNUSABLE`);
+        heldWriter.close();
+        const heldDeletion = await deleteDatabaseChecked(heldName);
+        assert(!heldDeletion.blocked && heldDeletion.pending !== true, `HELD_${label}_LEAKED_CONNECTION`);
+        passed.push(`blocco reale (${label}): con una connessione v1 tenuta aperta il chiamante riceve ${code}; dopo il rilascio tardivo il database resta a versione 1 senza store del lease, con le righe identiche, ancora leggibile dal lettore M6-A-1 e usabile dallo scrittore v1, e la cancellazione non resta bloccata — nessuna connessione lasciata aperta`);
+    }
+
+    // Scadenza e avvio dell'upgrade: il chiamante non può ricevere un errore mentre lo schema
+    // cambia, e un errore ricevuto non può convivere con un database portato a v2.
+    const raced = await createV1QueueWithPendingOperations('raced');
+    const racedBefore = await inspectQueueSchema({uid: raced.uid});
+    let racedCode = null, racedVersion = null;
+    try { racedVersion = (await upgradeQueueSchemaToV2({uid: raced.uid, timeoutMs: 1})).version; }
+    catch (error) { racedCode = error.code || error.message; }
+    const racedAfter = await inspectQueueSchema({uid: raced.uid});
+    same(canonical(racedAfter.rows), canonical(racedBefore.rows), 'SHORT_BUDGET_ROWS_CHANGED');
+    if (racedCode === null) {
+        same([racedVersion, racedAfter.version], [2, 2], 'SHORT_BUDGET_SUCCESS_WITHOUT_UPGRADE');
+        same(racedAfter.stores, ['encryptedOperations', 'queueLeases'], 'SHORT_BUDGET_STORES');
+    } else {
+        same(racedCode, 'QUEUE_UPGRADE_TIMEOUT', 'SHORT_BUDGET_UNEXPECTED_CODE');
+        same([racedAfter.version, racedAfter.stores], [1, ['encryptedOperations']], 'SHORT_BUDGET_FAILED_BUT_UPGRADED');
+    }
+    passed.push(`budget di scadenza di 1 ms su una coda avviabile: esito coerente — ${racedCode === null ? 'upgrade portato a termine e riportato come riuscito (versione 2)' : 'scadenza riportata al chiamante con database rimasto a versione 1'}; in nessun caso il chiamante riceve un errore mentre lo schema cambia`);
+
+    // ── E. Richiesta di cambio versione **esterna** in sospeso: la sonda del candidato resta
+    //      accodata, quindi deve scadere invece di restare appesa (difetto trovato dal banco in
+    //      M6-A-2 R1); quando la richiesta esterna porta il database a v2, il successo tardivo
+    //      della sonda deve chiudere la connessione.
+    const externalBlocked = await createV1QueueWithPendingOperations('external');
+    const externalName = `codex-offline-queue-${externalBlocked.uid}`;
+    const externalBefore = await inspectQueueSchema({uid: externalBlocked.uid});
+    const blockHolder = await requestValue(indexedDB.open(externalName));
+    const externalRequest = indexedDB.open(externalName, 2);
+    let externalCreated = false;
+    externalRequest.onupgradeneeded = () => { externalCreated = true; externalRequest.result.createObjectStore('queueLeases', {keyPath: 'id'}); };
+    same(await rejection(() => upgradeQueueSchemaToV2({uid: externalBlocked.uid, timeoutMs: 150})), 'QUEUE_UPGRADE_TIMEOUT', 'EXTERNAL_NOT_BOUNDED');
+    blockHolder.close();
+    const external = await requestValue(externalRequest);
+    assert(externalCreated, 'EXTERNAL_DID_NOT_UPGRADE');
+    same([external.version, [...external.objectStoreNames].sort()], [2, ['encryptedOperations', 'queueLeases']], 'EXTERNAL_SCHEMA');
+    external.close();
+    const externalAfter = await inspectQueueSchema({uid: externalBlocked.uid});
+    same(canonical(externalAfter.rows), canonical(externalBefore.rows), 'EXTERNAL_ROWS_CHANGED');
+    const externalDeletion = await deleteDatabaseChecked(externalName);
+    assert(!externalDeletion.blocked && externalDeletion.pending !== true, 'EXTERNAL_LEAKED_CONNECTION');
+    passed.push('richiesta di cambio versione esterna in sospeso: la sonda del candidato scade invece di restare appesa (nessuna richiesta di cambio versione creata da noi, righe identiche) e il successo tardivo della sonda chiude la connessione — la cancellazione del database non resta bloccata');
+
+    await report({ok: true, passed, browser: navigator.userAgent});
 } catch (error) {
-    await fetch('/result', {method: 'POST', body: JSON.stringify({ok: false, passed, code: error.code || error.message})});
+    await report({ok: false, passed, code: error.code || error.message});
 }

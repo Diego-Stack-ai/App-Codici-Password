@@ -16,12 +16,27 @@ export async function upgradeQueueSchemaToV2({uid, indexedDb = globalThis.indexe
 
     // 1. Lettura dello schema **senza imporre una versione**: una coda assente resta assente e
     //    uno schema che non è la v1 attesa viene rifiutato prima di qualsiasi cambio di versione.
+    //    La sonda è **limitata nel tempo**: una richiesta di apertura senza versione resta
+    //    accodata dietro una richiesta di cambio versione in sospeso (comportamento osservato
+    //    del motore), quindi senza limite il candidato resterebbe appeso invece di fallire
+    //    chiuso. Alla scadenza nessuna richiesta di cambio versione è stata creata: la coda non
+    //    può essere stata toccata da noi. Un successo tardivo della sonda chiude la connessione.
     const probe = indexedDb.open(name);
+    let probeSettled = false;
     await new Promise((resolve, reject) => {
-        probe.onupgradeneeded = () => { probe.transaction.abort(); reject(fail('QUEUE_UPGRADE_MISSING')); };
-        probe.onerror = () => reject(probe.error || fail('QUEUE_UPGRADE_OPEN'));
-        probe.onblocked = () => reject(fail('QUEUE_UPGRADE_BLOCKED'));
-        probe.onsuccess = () => resolve();
+        const settle = error => {
+            if (probeSettled) return;
+            probeSettled = true; clearTimeout(timer);
+            if (error) reject(error); else resolve();
+        };
+        const timer = setTimeout(() => settle(fail('QUEUE_UPGRADE_TIMEOUT')), timeoutMs);
+        probe.onupgradeneeded = () => { probe.transaction.abort(); settle(fail('QUEUE_UPGRADE_MISSING')); };
+        probe.onblocked = () => settle(fail('QUEUE_UPGRADE_BLOCKED'));
+        probe.onerror = () => settle(probe.error || fail('QUEUE_UPGRADE_OPEN'));
+        probe.onsuccess = () => {
+            if (probeSettled) { probe.result?.close(); return; }
+            settle(null);
+        };
     });
     const current = probe.result;
     try {
@@ -33,12 +48,27 @@ export async function upgradeQueueSchemaToV2({uid, indexedDb = globalThis.indexe
     // 2. Cambio di versione additivo: lo store del lease nasce **dentro** `onupgradeneeded`,
     //    cioè nella stessa transazione che porta il database a 2 (è l'unico punto in cui
     //    `createObjectStore` è lecito, quindi versione e store sono atomici per costruzione).
+    //
+    //    Semantica di blocco e scadenza (correzione M6-A-2 R1). Il chiamante non deve mai
+    //    ricevere un errore mentre lo schema sta cambiando, e un errore già ricevuto non deve
+    //    permettere a un upgrade tardivo di andare a buon fine:
+    //    - `onblocked` o scadenza **prima** dell'avvio → il chiamante riceve l'errore; un
+    //      `onupgradeneeded` tardivo **annulla** la transazione e non crea nulla; un
+    //      `onsuccess` tardivo **chiude** la connessione;
+    //    - scadenza **dopo** l'avvio dell'upgrade → non esiste: il timer viene annullato appena
+    //      `onupgradeneeded` parte e si attende l'esito definitivo della transazione.
     const request = indexedDb.open(name, 2);
-    let abortReason = null;
+    let abortReason = null, settled = false, timer = null;
     const done = new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(fail('QUEUE_UPGRADE_TIMEOUT')), timeoutMs);
-        const settle = (error, value) => { clearTimeout(timer); error ? reject(error) : resolve(value); };
+        const settle = (error, value) => {
+            if (settled) return;
+            settled = true; clearTimeout(timer);
+            if (error) reject(error); else resolve(value);
+        };
+        timer = setTimeout(() => settle(fail('QUEUE_UPGRADE_TIMEOUT')), timeoutMs);
         request.onupgradeneeded = () => {
+            clearTimeout(timer);
+            if (settled) { request.transaction.abort(); return; }
             try {
                 const database = request.result;
                 if (database.objectStoreNames.contains('encryptedOperations') === false) {
@@ -50,8 +80,9 @@ export async function upgradeQueueSchemaToV2({uid, indexedDb = globalThis.indexe
         };
         request.onblocked = () => settle(fail('QUEUE_UPGRADE_BLOCKED'));
         request.onerror = () => settle(abortReason || request.error || fail('QUEUE_UPGRADE_FAILED'));
-        request.onsuccess = async () => {
+        request.onsuccess = () => {
             const database = request.result;
+            if (settled) { database.close(); return; }
             try {
                 if (mode === 'abort') throw fail('QUEUE_UPGRADE_ABORTED');
                 if (database.version !== 2 || !database.objectStoreNames.contains('encryptedOperations') ||
