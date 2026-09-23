@@ -18,7 +18,8 @@ const modes = process.argv.includes('--no-locks') ? ['--no-locks']
     : process.argv.includes('--runtime-upgrade') ? ['--runtime-upgrade']
     : process.argv.includes('--mutation-lease') ? ['--mutation-lease']
     : process.argv.includes('--pilot-lease') ? ['--pilot-lease']
-    : process.argv.includes('--pilot-lease-worker') ? ['--pilot-lease-worker'] : ['--backend', '--private-backend'];
+    : process.argv.includes('--pilot-lease-worker') ? ['--pilot-lease-worker']
+    : process.argv.includes('--mixed-current') ? ['--mixed-current'] : ['--backend', '--private-backend'];
 for (const browser of paths) {
     if (!browser) throw new Error('Chrome/Edge unavailable; set CHROME_PATH and EDGE_PATH to executable paths');
     for (const mode of modes) {
