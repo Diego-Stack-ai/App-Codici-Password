@@ -9,6 +9,15 @@
 > `M10_HARDENING_RILASCIO.md`, più `PASSAGGIO_CONSEGNE_2026-09-16.md` e `AUDIT_PROGETTO_FASE2_STATICO.md`.
 > **Perimetro:** nessun codice o test toccato, nessuna implementazione del passo consigliato, nessuna
 > domanda nuova (le decisioni già raccolte restano nei file M7/M8 citati).
+>
+> **Nota di aggiornamento.** Questa è la fotografia **originaria** del censimento: **21/09/2026**, ramo
+> `integration/vault-shell-v127-security` a HEAD `de780b8e`, sola lettura, nessun gate chiuso. Per gli
+> aggiornamenti **successivi** a quella data fanno riferimento [STATO_CORRENTE_M0_M10.md](./STATO_CORRENTE_M0_M10.md)
+> (vista operativa datata, **non normativa**) e [REGISTRO_DECISIONI.md](./REGISTRO_DECISIONI.md) (indice
+> **non normativo** di decisioni e approvazioni già presenti nelle fonti). Il censimento **non è un quadro
+> corrente completo** oltre la propria data: le righe dei gate **non** sono aggiornate qui e l'allineamento
+> esteso è **rinviato** a un incarico separato. Baseline e contratti restano normativi e mantengono la
+> **precedenza**.
 
 **Legenda dipendenze:** **Diego** = decisione di prodotto o collaudo fisico del proprietario ·
 **Esterno** = accesso a console/credenziali/fornitore o audit indipendente · **Dispositivo** = prova

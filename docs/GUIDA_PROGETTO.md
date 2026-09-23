@@ -6,6 +6,7 @@
 > **Area:** gerarchia e manutenzione documentale.
 > **Dipendenze:** [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e mappa dei contratti della sezione 4.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+> **Orientamento (non normativo):** [STATO_CORRENTE_M0_M10.md](./STATO_CORRENTE_M0_M10.md) raccoglie una vista operativa **datata** dello stato documentato; [REGISTRO_DECISIONI.md](./REGISTRO_DECISIONI.md) indicizza decisioni e approvazioni **già presenti nelle fonti**. Entrambi sono **non normativi** e **non sostituiscono** baseline, contratti, piano o fonti originali: baseline e contratti mantengono la **precedenza normativa**.
 
 ## Stato corrente e consegna — 16/09/2026
 

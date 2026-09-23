@@ -476,6 +476,8 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 
 Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` è la guida implementativa subordinata alla baseline sicurezza e ai contratti specialistici; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.
 
+> **Viste di orientamento (non normative):** [STATO_CORRENTE_M0_M10.md](./STATO_CORRENTE_M0_M10.md) raccoglie una vista operativa **datata** dello stato documentato; [REGISTRO_DECISIONI.md](./REGISTRO_DECISIONI.md) indicizza decisioni e approvazioni **già presenti nelle fonti**. Entrambe sono **non normative** e **non sostituiscono** questo piano, la baseline, i contratti o le fonti originali: baseline e contratti mantengono la **precedenza normativa**.
+
 ## Avanzamento strutturale successivo — 12/09/2026
 
 La richiesta del product owner di proseguire fino alla fine del programma autorizza l’implementazione autonoma dei blocchi ordinari; non chiude i gate specialistici e non autorizza implicitamente migrazioni distruttive, modifiche della baseline o rilascio in produzione. Le chiusure M0–M4 della tabella precedente restano storiche e non equivalgono alla risoluzione dei finding dell’audit successivo.

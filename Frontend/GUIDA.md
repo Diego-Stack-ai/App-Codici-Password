@@ -6,6 +6,7 @@
 > **Verifica documentale:** 12 settembre 2026.\
 > **Area:** frontend, UI, accesso dati, sicurezza e manutenzione.\
 > **Dipendenze:** contratti collegati nelle sezioni seguenti; [registro aggiornamenti](./GUIDA_AGGIORNAMENTI.md).\
+> **Orientamento (non normativo):** [STATO_CORRENTE_M0_M10.md](../docs/STATO_CORRENTE_M0_M10.md) raccoglie una vista operativa **datata** dello stato documentato; [REGISTRO_DECISIONI.md](../docs/REGISTRO_DECISIONI.md) indicizza decisioni e approvazioni **già presenti nelle fonti**. Entrambi sono **non normativi** e **non sostituiscono** baseline, contratti, guide o fonti originali: baseline e contratti mantengono la **precedenza normativa**.\
 > **Sostituisce:** le prescrizioni V7/V8 della precedente revisione di questo stesso file, conservate nella cronologia Git. Non sostituisce la baseline o i contratti specialistici.
 
 ## 1. Uso della guida

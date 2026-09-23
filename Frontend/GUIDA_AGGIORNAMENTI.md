@@ -6,6 +6,7 @@
 > **Area:** release e attività aperte.
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e contratti d’area collegati nel testo.
 > **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+> **Orientamento (non normativo):** [STATO_CORRENTE_M0_M10.md](../docs/STATO_CORRENTE_M0_M10.md) raccoglie una vista operativa **datata** dello stato documentato; [REGISTRO_DECISIONI.md](../docs/REGISTRO_DECISIONI.md) indicizza decisioni e approvazioni **già presenti nelle fonti**. Entrambi sono **non normativi** e **non sostituiscono** questo registro, la baseline, i contratti o le fonti originali: baseline e contratti mantengono la **precedenza normativa**.
 
 ## Stato corrente e consegna — 16/09/2026
 
