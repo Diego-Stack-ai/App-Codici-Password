@@ -68,7 +68,7 @@ autorizzazione deploy.
 
 ### M6-A-8e — Approvazione della consegna (esterna al repository)
 
-- **Stato:** approvazione registrata **come evento esterno**, limitata al commit indicato
+- **Stato:** DECISA (limitatamente all'evento «approvazione consegna»)
 - **Perimetro e residuo:** approvazione della **sola consegna M6-A-8e** (casi 6, 6-bis, 6-ter come **evidenza di laboratorio**) sul commit **`3b7b96a6`**. Nel repository la voce resta `DA_VERIFICARE`. **Residuo aperto:** M6 e i gate fisici, PWA e produttivi restano aperti; **M6-F3** resta aperto.
 - **Tipo:** approvazione consegna (distinta da chiusura gate e da autorizzazione deploy)
 - **Autorità, data, fonte:** **Sol — 23/09/2026 — chat Harness** (comunicazione esterna al repository). Prova nel repository: [DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) (`:8757`, rapporto `DA_VERIFICARE`); limiti dichiarati in [M6_SINCRONIZZAZIONE_OFFLINE.md](./M6_SINCRONIZZAZIONE_OFFLINE.md) (§M6-A-8e).
@@ -76,15 +76,53 @@ autorizzazione deploy.
 - **Effetti consentiti:** considerare approvata **quella** consegna su **quel** commit, nei limiti in cui è dimostrata dalle prove del repository.
 - **Effetti NON autorizzati:** chiusura di M6 o di M6-1/M6-2/M6-3/M6-F3; chiusura dei gate fisici, PWA o produttivi; deploy, push, merge o rilascio; estensione dell'approvazione ad altri commit.
 
-### M6-A-8b · M6-A-8c · M6-A-8c R1 · M6-A-8d — Approvazioni **non rintracciate**
+### Altre approvazioni esterne della serie M6-A-8 (chat Harness)
 
-- **Stato:** APERTA (nessuna approvazione rintracciata nel repository)
-- **Perimetro e residuo:** i commit `583c3d7c` (8b), `a200a334` (8c), `d0a1d71c` (8c R1), `6ab70723` (8d) risultano nel repository **solo** con rapporti `DA_VERIFICARE` ([DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) `:8749`, `:8751`, `:8753`, `:8755`). **Nessuna approvazione è presunta** in questa sede.
-- **Tipo:** approvazione consegna (non rintracciata)
-- **Autorità, data, fonte:** nessuna autorità rintracciabile nel repository per una approvazione; date dei rapporti: 22–23/09/2026.
-- **Sostituisce/integra:** **nessuna fonte sostituita rintracciata**.
-- **Effetti consentiti:** trattare le consegne come **in attesa di revisione rintracciabile**.
-- **Effetti NON autorizzati:** dichiarare approvate, chiuse o distribuibili queste consegne; dedurre approvazioni da lavori successivi.
+Le consegne seguenti hanno una **comunicazione esterna esplicita** nella chat Harness, con gli **stessi
+limiti** di M6-A-8e: nel repository restano registrate come `DA_VERIFICARE` e l'approvazione copre
+**solo** la consegna e **solo** il commit indicato.
+
+#### M6-A-8b — Approvazione della consegna
+
+- **Stato:** DECISA (limitatamente all'evento «approvazione consegna»)
+- **Perimetro e residuo:** sola consegna M6-A-8b (coordinatore lease isolato) sul commit **`583c3d7c`**, con le relative prove di laboratorio. Nel repository resta `DA_VERIFICARE`. **Residuo aperto:** M6, i gate fisici/PWA/produttivi e M6-F3 restano aperti.
+- **Tipo:** approvazione consegna
+- **Autorità, data, fonte:** comunicazione esterna in **chat Harness** («APPROVATO M6-A-8b — commit `583c3d7c`…»), **senza data esplicita nel messaggio**; commit `583c3d7c` con data Git 22/09/2026. Prova nel repository: [DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) (`:8749`, rapporto `DA_VERIFICARE`).
+- **Sostituisce/integra:** **integra** il rapporto `DA_VERIFICARE` di M6-A-8b; **nessuna fonte sostituita rintracciata**.
+- **Effetti consentiti:** considerare approvata quella consegna su quel commit, nei limiti delle prove del repository.
+- **Effetti NON autorizzati:** chiusura di M6 o dei gate; deploy, push, merge o rilascio; estensione ad altri commit o deduzione di approvazioni da incarichi successivi.
+
+#### M6-A-8c R1 — Approvazione della consegna
+
+- **Stato:** DECISA (limitatamente all'evento «approvazione consegna»)
+- **Perimetro e residuo:** sola consegna M6-A-8c R1 (fencing atomico delle scritture della coda) sul commit **`d0a1d71c`**, con le relative prove Node e di banco. Nel repository resta `DA_VERIFICARE`. **Residuo aperto:** M6, i gate fisici/PWA/produttivi e M6-F3 restano aperti; il rinnovo durante task lunghi resta non implementato.
+- **Tipo:** approvazione consegna
+- **Autorità, data, fonte:** comunicazione esterna in **chat Harness** («APPROVATO M6-A-8c R1 — commit `d0a1d71c`…»), **senza data esplicita nel messaggio**; commit `d0a1d71c` con data Git 23/09/2026. Prova nel repository: [DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) (`:8753`, rapporto `DA_VERIFICARE`).
+- **Sostituisce/integra:** **integra** il rapporto `DA_VERIFICARE` di M6-A-8c R1; **non** estende l'approvazione alla consegna **M6-A-8c base** (`a200a334`).
+- **Effetti consentiti:** considerare approvata quella consegna su quel commit, nei limiti delle prove del repository.
+- **Effetti NON autorizzati:** chiusura di M6 o dei gate; deploy, push, merge o rilascio; estensione ad altri commit; considerare approvata la consegna base 8c.
+
+#### M6-A-8d — Approvazione della consegna
+
+- **Stato:** DECISA (limitatamente all'evento «approvazione consegna»)
+- **Perimetro e residuo:** sola consegna M6-A-8d (prova pagina + Worker sul pilota lease, caso 5 della matrice) sul commit **`6ab70723`**, con le relative prove Node e di banco. Nel repository resta `DA_VERIFICARE`. **Residuo aperto:** M6, i gate fisici/PWA/produttivi e M6-F3 restano aperti.
+- **Tipo:** approvazione consegna
+- **Autorità, data, fonte:** comunicazione esterna in **chat Harness** («APPROVATO M6-A-8d — commit `6ab70723`…»), **senza data esplicita nel messaggio**; commit `6ab70723` con data Git 23/09/2026. Prova nel repository: [DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) (`:8755`, rapporto `DA_VERIFICARE`).
+- **Sostituisce/integra:** **integra** il rapporto `DA_VERIFICARE` di M6-A-8d; **nessuna fonte sostituita rintracciata**.
+- **Effetti consentiti:** considerare approvata quella consegna su quel commit, nei limiti delle prove del repository.
+- **Effetti NON autorizzati:** chiusura di M6 o dei gate; deploy, push, merge o rilascio; estensione ad altri commit o deduzione di approvazioni da incarichi successivi.
+
+### M6-A-8c (base) — Approvazione **non rintracciata**; correzione richiesta
+
+- **Stato:** APERTA
+- **Perimetro e residuo:** il commit **`a200a334`** (M6-A-8c base) risulta nel repository **solo** con un rapporto `DA_VERIFICARE` ([DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) `:8751`); la comunicazione esterna in chat Harness relativa a quella consegna è una **richiesta di correzione** («M6-A-8c non ancora approvato»), seguita dalla correzione **R1** approvata. **Non** esiste una comunicazione esplicita di approvazione della consegna base. **Residuo aperto:** la consegna base resta **non approvata**.
+- **Tipo:** approvazione consegna (non accordata)
+- **Autorità, data, fonte:** comunicazione esterna in **chat Harness**, **senza data esplicita nel messaggio**; commit `a200a334` con data Git 23/09/2026; prova nel repository `:8751`.
+- **Sostituisce/integra:** **nessuna fonte sostituita rintracciata**: le fonti originali restano invariate e la correzione R1 è un evento distinto, registrato sopra.
+- **Effetti consentiti:** trattare la consegna base come **non approvata** e la sua correzione R1 come l'evento approvato.
+- **Effetti NON autorizzati:** dichiarare approvata la consegna base; estendere a essa l'approvazione di R1; dedurre approvazioni da incarichi successivi.
+
+**Nota di completezza.** Nel primo contenuto di questo registro **nessun'altra** consegna della serie M6-A-8 resta priva di una comunicazione esplicita: 8b, 8c R1, 8d ed 8e hanno approvazioni esterne registrate sopra, mentre 8c **base** è registrata come non approvata. Restano **fuori** da questo primo contenuto le altre consegne e i gate, che non vengono dedotti da qui.
 
 ## 2. M7 — retention e audit (solo decisioni del 21/09/2026)
 
@@ -110,8 +148,8 @@ autorizzazione deploy.
 
 ### M7-D3 — Registro tecnico `auditEvents` a 24 mesi (solo ramo, non distribuito)
 
-- **Stato:** DECISA con parti residue
-- **Perimetro e residuo:** gli eventi tecnici di `users/{uid}/auditEvents` sono conservati **24 mesi** dal timestamp autorevole e poi cancellati da un processo **controllato dal backend**; il client non può creare, modificare o cancellare singoli eventi. La finestra è **24 mesi di calendario**. L'attuazione è **solo nel ramo e non distribuita**. **Residuo aperto:** permanenza delle **altre famiglie** (ricevute di idempotenza, backup, log di piattaforma, Account archiviati restano **fuori** dalla finestra e senza scadenza automatica); **rimozione della scrittura client**; bonifica dei record storici senza `at`; vista utente del registro; rilascio del job (cadenza, ambiente, monitoraggio, rollback); distribuzione delle Rules del ramo.
+- **Stato:** PARZIALE
+- **Perimetro e residuo:** gli eventi tecnici di `users/{uid}/auditEvents` sono conservati **24 mesi** dal timestamp autorevole e poi cancellati da un processo **controllato dal backend**; il client non può creare, modificare o cancellare singoli eventi. La finestra è **24 mesi di calendario**. L'attuazione è **solo nel ramo e non distribuita**. **Residuo aperto (parte non decisa):** permanenza delle **altre famiglie** (ricevute di idempotenza, backup, log di piattaforma, Account archiviati restano **fuori** dalla finestra e senza scadenza automatica); **rimozione della scrittura client**; bonifica dei record storici senza `at`; vista utente del registro; rilascio del job (cadenza, ambiente, monitoraggio, rollback); distribuzione delle Rules del ramo.
 - **Tipo:** decisione di prodotto (durata) + decisione tecnica (attuazione nel ramo)
 - **Autorità, data, fonte:** Diego — **21/09/2026** — [M7_CRONOLOGIA_CESTINO_AUDIT.md](./M7_CRONOLOGIA_CESTINO_AUDIT.md) (`:116`, `:125`, `:190`); registrazione in [DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) (`:1230`–`:1232`, «Correzione decisione Diego — M7-R3 audit: 24 mesi»).
 - **Sostituisce/integra:** **sostituisce** la precedente indicazione di **12 mesi** per il solo registro ([DEEPSEEK_COORDINATION.md](./DEEPSEEK_COORDINATION.md) `:1253`: «la precedente indicazione di 12 mesi è superata»; [M7_CRONOLOGIA_CESTINO_AUDIT.md](./M7_CRONOLOGIA_CESTINO_AUDIT.md) `:116`); integra D3 del censimento.
