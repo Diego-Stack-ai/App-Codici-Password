@@ -18,6 +18,16 @@ globalThis.document = {createElement: tag => new Node(tag)};
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function fixture() { return {root: new Node('root'), control: new AbortController()}; }
 
+test('linked action detecting lock clears the whole profile without waiting for abort', async () => {
+    const f=fixture();let locked=false,opened=0;
+    await mountProfileShell(f.root,{unlocked:true,signal:f.control.signal,assertUnlocked(){if(locked)throw Error('VAULT_LOCKED');}},{
+        readSection:async()=>[{group:'Synthetic',label:'Name',value:'synthetic private name',link:{domain:'private',id:'account'}}],
+        linkedAccounts:{open:async()=>{opened++;}},onOpenAccount(){opened++;}});
+    const values=f.root.querySelectorAll('dd'),button=f.root.querySelectorAll('button').find(node=>node.textContent==='Apri Account collegato');
+    locked=true;button.dispatchEvent(new Event('click'));await tick();
+    assert.equal(opened,0);assert.equal(f.root.children.length,0);assert.ok(values.every(node=>node.textContent===''));
+});
+
 test('profile link actions refresh after save and discard callbacks after navigation', async () => {
     for (const linked of [false, true]) {
         const f = fixture(), reads = []; let callbacks, closed = 0;

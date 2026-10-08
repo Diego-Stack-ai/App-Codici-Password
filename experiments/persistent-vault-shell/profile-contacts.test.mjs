@@ -63,6 +63,16 @@ function fixture(record = records()) {
         prepare: draft => prepareProfileContacts({context, getUser: () => ({uid: state.uid}), record: structuredClone(stored.get(path)),
             snapshot: snapshots(stored.get(path)), draft, operationId: 'operation', hash})};
 }
+test('prepared contacts cannot be replayed under another authenticated owner', async () => {
+    const f = fixture();
+    const request = await f.prepare({creates: [{collection: 'contactPhones', id: 'phone-new', fields: {number: '123'}}]});
+    const other = {...records(), ownerId: 'other'};
+    f.stored.set('users/other', structuredClone(other));
+    await assert.rejects(f.handler(request, {auth: {uid: 'other'}, app: {appId: 'synthetic'}}), /OWNER_MISMATCH/);
+    assert.deepEqual(f.stored.get('users/other'), other);
+    assert.equal(request.expectedOwnerUid, 'owner');
+});
+
 test('emails and telephones are created, updated and deleted through one frozen request', async () => {
     const f = fixture(), before = structuredClone(f.stored.get(f.path));
     const request = await f.prepare({

@@ -10,7 +10,7 @@ export function createProfileDocumentAttachmentsReader({context, getUser, reposi
     isOnline = () => globalThis.navigator?.onLine !== false}) {
     const uid = context.user?.uid;
     let disposed = false;
-    const dispose = () => {disposed = true;};
+    const dispose = () => {disposed = true; context.signal.removeEventListener('abort', dispose);};
     const check = () => {
         if (disposed || context.signal.aborted || !uid || getUser()?.uid !== uid) {disposed = true; throw Error('VIEW_DISPOSED');}
         context.assertUnlocked();

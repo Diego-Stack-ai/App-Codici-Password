@@ -15,7 +15,7 @@ function fixture(hash = value => createHash('sha256').update(value).digest('hex'
         for (const [key, value] of staged) records.set(key, value);
         return result;
     }};
-    const data = {companyId: 'company', operationId: 'first', expectedConfig: null,
+    const data = {companyId: 'company', operationId: 'first', expectedConfig: null, expectedOwnerUid: 'owner',
         selection: {...readCompanyQrSelection({}).selection, ragioneSociale: true}};
     return {records, path, data, trusted: {auth: {uid: 'owner'}, app: {appId: 'synthetic'}},
         run: createCompanyQrSelectionHandler({db, hash, timestamp: () => 123})};

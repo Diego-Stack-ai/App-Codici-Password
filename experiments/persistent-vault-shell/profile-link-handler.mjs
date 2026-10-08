@@ -3,7 +3,7 @@ import {readProfileLinkContact, planProfileLink} from './profile-link-plan.mjs';
 
 // Candidate only: source, old/new inverse references and receipt are one Admin
 // transaction. No credential values are copied between profiles and Accounts.
-export function createProfileLinkHandler({db, hash, timestamp, deleteField, models}) {
+export function createProfileLinkHandler({db, hash, timestamp, deleteField, models, beforeAccountWrite}) {
     const fail = code => {throw Error(code);};
     return async (input, trusted) => {
         const uid = trusted?.auth?.uid;
@@ -51,6 +51,19 @@ export function createProfileLinkHandler({db, hash, timestamp, deleteField, mode
             // Validate metadata for every participant before staging writes.
             const oldPatch = plan.oldAccountPatch ? referencePatch(oldAccount, plan.oldAccountPatch) : null;
             const nextPatch = plan.nextAccountPatch ? referencePatch(nextAccount, plan.nextAccountPatch) : null;
+            const fenceCommits = [];
+            if (beforeAccountWrite) {
+                // Complete all participant reads before staging any fence/profile write.
+                const paths = new Set();
+                for (const participant of [oldPatch ? oldRef : null, nextPatch ? nextRef : null]) {
+                    if (!participant) continue;
+                    const key = participant.path ?? participant;
+                    if (paths.has(key)) continue;
+                    paths.add(key);
+                    fenceCommits.push(await beforeAccountWrite(transaction, participant));
+                }
+            }
+            for (const commitFence of fenceCommits) commitFence();
             transaction.update(sourceRef, {...plan.sourcePatch, _profileLinkRevision: revision + 1,
                 _profileLinkSchemaVersion: 1, _profileLinkUpdatedAt: timestamp()});
             if (oldPatch) transaction.update(oldRef, oldPatch);

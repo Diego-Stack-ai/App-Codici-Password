@@ -1,13 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {companyAddressBasis, companyAddressesRevision, companySeatValue,
     validateCompanyAddressesRequest} from './company-addresses-contract.mjs';
 import {prepareCompanyAddresses} from './prepare-company-addresses.mjs';
 import {createCompanyAddressesHandler} from './company-addresses-handler.mjs';
+import {createCompanyAddressesEditorSource} from './company-addresses-editor-source.mjs';
+
+test('company address draft is detached before confirmed read', async () => {
+    const record=records(),abort=new AbortController();
+    const editor=createCompanyAddressesEditorSource({context:{user:{uid:'owner'},signal:abort.signal,assertUnlocked(){}},
+        getUser:()=>({uid:'owner'}),hash,createId:()=> 'sede-new',isOnline:()=>true,
+        source:{domain:'company',companyId:'company',read:async()=>structuredClone(record)}});
+    await editor.load(); const draft={updates:[{id:'sede-filiale',fields:{citta:'ORIGINAL'}}]};
+    const pending=editor.prepare(draft,'snapshot'); draft.updates[0].fields.citta='CHANGED';
+    assert.equal((await pending).operations[0].fields.citta,'ORIGINAL'); editor.dispose();
+});
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const COMPANY = 'users/owner/aziende/company';
+test('browser laboratory seeds both company addresses in the canonical plain format', async () => {
+    const source = await readFile(new URL('./emulator-browser.mjs', import.meta.url), 'utf8');
+    assert.match(source, /indirizzoSede: 'Sede fittizia'/);
+    assert.match(source, /altreSedi: \[\{indirizzo: 'Filiale fittizia'\}\]/);
+    assert.doesNotMatch(source, /(?:indirizzoSede|indirizzo): await encrypted\('(?:Sede|Filiale) fittizia'\)/);
+});
+test('multiple deletions cannot shift the QR protection onto another row', async () => {
+    const record = records();
+    record.altreSedi = [
+        {id: 'sede-first', qr: false},
+        {id: 'sede-protected', qr: true}
+    ];
+    const f = fixture(record);
+    const request = {target: {domain: 'company', companyId: 'company'}, expectedOwnerUid: 'owner',
+        expectedRevision: 1, operationId: 'multi-delete',
+        operations: record.altreSedi.map(item => ({kind: 'address-delete', id: item.id, basis: hash(companyAddressBasis(item))}))};
+    await assert.rejects(f.handler(request, f.trusted), /QR_SELECTED/);
+    assert.deepEqual(f.stored.get(COMPANY), record);
+});
 // The real company schema: the legal seat as top-level strings, repeatable
 // `altreSedi` rows with and without a stable id, an index-derived id written by the
 // legacy form, a row published on the digital card, and company fields that must

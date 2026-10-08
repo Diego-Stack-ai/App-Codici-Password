@@ -129,7 +129,7 @@ test('company contacts candidate writes, guards and receipts on synthetic emulat
         /COMPANY_CONTACTS_LINKED/);
     // …and the service refuses it again when a client sends the operation directly.
     const direct = async (operation, operationId, before) => ({target: {domain: 'company', companyId: 'company'},
-        expectedRevision: (await db.doc(path).get()).data()._companyContactsRevision, operationId, operations: [operation]});
+        expectedOwnerUid: uid, expectedRevision: (await db.doc(path).get()).data()._companyContactsRevision, operationId, operations: [operation]});
     const current = (await db.doc(path).get()).data();
     await assert.rejects(run(await direct({kind: 'email-extra-delete', id: 'company-email-selected',
         basis: hash(companyContactBasis(current.emails.extra[1]))}, 'direct-selected'), trusted), /COMPANY_CONTACTS_QR_SELECTED/);
@@ -203,7 +203,7 @@ test('an unverifiable card configuration refuses every company emptying and dele
     // simply reappear: the service refuses the emptying with a dedicated code.
     await db.doc(path).update({emails: {pec: {tipo: 'PEC'}, amministrazione: {}, personale: {}, extra: []}});
     const legacy = (await db.doc(path).get()).data();
-    const direct = {target: {domain: 'company', companyId: 'company'}, expectedRevision: legacy._companyContactsRevision,
+    const direct = {target: {domain: 'company', companyId: 'company'}, expectedOwnerUid: uid, expectedRevision: legacy._companyContactsRevision,
         operationId: 'legacy-fallback', operations: [{kind: 'email-slot', id: 'pec', fields: {email: ''},
             basis: hash(companyContactBasis(legacy.emails.pec))}]};
     await assert.rejects(run(direct, trusted), /COMPANY_CONTACTS_LEGACY_FALLBACK/);

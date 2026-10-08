@@ -3,13 +3,14 @@ import {prepareCompanyQrSelection, normalizeCompanyQrExpectedConfig, readCompany
 import {createQrSelectionSaveController} from './qr-selection-save-controller.mjs';
 import {mountQrSelectionEditor} from './qr-selection-editor-view.mjs';
 
-export function createCompanyQrRequest(prepared, operationId) {
+export function createCompanyQrRequest(prepared, operationId, expectedOwnerUid) {
     if (typeof prepared.companyId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(prepared.companyId)) throw Error('COMPANY_INVALID');
     const selection = prepareCompanyQrSelection(prepared.selection);
     const expectedConfig = normalizeCompanyQrExpectedConfig(prepared.expectedConfig);
     const revision = readCompanyQrSelection(expectedConfig === null ? {} : {qrConfig: expectedConfig}).revision;
     if (prepared.expectedRevision !== revision) throw Error('REVISION_INVALID');
-    return Object.freeze({companyId: prepared.companyId, selection, expectedConfig, operationId});
+    if (typeof expectedOwnerUid !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(expectedOwnerUid)) throw Error('OWNER_INVALID');
+    return Object.freeze({companyId: prepared.companyId, selection, expectedConfig, operationId, expectedOwnerUid});
 }
 
 export async function mountCompanyQrEditor(root, context, {getUser, source, submit, isOnline}) {

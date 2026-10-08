@@ -38,6 +38,7 @@ export function createPrivateAddressesHandler({db, hash, timestamp}) {
         if (!privateAddressUid(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validatePrivateAddressesRequest(data), {expectedRevision, operations, operationId} = request;
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const digest = await hash(JSON.stringify({uid, ...request}));
         const recordRef = db.doc(`users/${uid}`);
         const receiptRef = db.doc(`mutationResults/${uid}/operations/profile-addresses-${operationId}`);

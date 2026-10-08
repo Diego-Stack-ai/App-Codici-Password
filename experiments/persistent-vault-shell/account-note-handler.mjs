@@ -3,7 +3,7 @@ import {profileTextId, profileTextHash} from './profile-text-contract.mjs';
 
 // Laboratory candidate. The callable must supply verified Auth/App Check.
 // Online-only note patch; no expansion of the M6 full-record offline writer.
-export function createAccountNoteHandler({db, hash, timestamp}) {
+export function createAccountNoteHandler({db, hash, timestamp, beforeAccountWrite}) {
     const fail = code => {throw Error(code);};
     return async (data, trusted) => {
         const uid = trusted?.auth?.uid;
@@ -30,6 +30,8 @@ export function createAccountNoteHandler({db, hash, timestamp}) {
             }
             if (basis.revision !== expectedRevision) fail('REVISION_CONFLICT');
             if (await hash(basis.value) !== expectedFingerprint) fail('NOTE_CONFLICT');
+            const commitFence = beforeAccountWrite ? await beforeAccountWrite(transaction, ref) : null;
+            if (commitFence) commitFence();
             transaction.update(ref, {note, revision: expectedRevision + 1, schemaVersion: 1, updatedAt: timestamp()});
             transaction.create(receiptRef, {kind: 'account-note', ownerId: uid, digest, revision: expectedRevision + 1, createdAt: timestamp()});
             return {status: 'confirmed', revision: expectedRevision + 1};

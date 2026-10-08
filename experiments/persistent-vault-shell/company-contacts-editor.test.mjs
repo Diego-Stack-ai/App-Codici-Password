@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mountCompanyContactsEditorProvider} from './company-contacts-editor-provider.mjs';
+import {createCompanyContactsEditorSource} from './company-contacts-editor-source.mjs';
+
+test('company contact draft is detached before confirmed read', async () => {
+    const f=fixture(), source=createCompanyContactsEditorSource(f.options); await source.load();
+    const draft={updates:[{id:'company-email-1',fields:{tipo:'ORIGINAL'}}]};
+    const pending=source.prepare(draft,'snapshot'); draft.updates[0].fields.tipo='CHANGED';
+    assert.equal((await pending).operations[0].fields.tipo,'ORIGINAL'); source.dispose();
+});
 
 const hash = value => createHash('sha256').update(value).digest('hex');
 const cipher = value => `${Buffer.alloc(48, 42).toString('base64')}${Buffer.from(String(value)).toString('base64')}`;

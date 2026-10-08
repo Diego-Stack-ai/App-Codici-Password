@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createMemoryVault} from './memory-vault.mjs';
-import {createProtectedSession} from './protected-session.mjs';
+import {createProtectedSession} from './test-support/protected-session.mjs';
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 function fixture({factory, now} = {}) {
     let user = {uid: 'A'}, observer, closed = 0, invoked = 0, supplied, context;

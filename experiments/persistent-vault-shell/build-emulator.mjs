@@ -2,10 +2,11 @@ import {build} from 'esbuild';
 import {mkdir, copyFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const base = import.meta.dirname, publicRoot = resolve(base, '../../Frontend/public');
-export async function buildEmulator({persistent = false} = {}) {
-    await mkdir(`${base}/dist/emulator-site/assets/images`, {recursive: true});
-    await mkdir(`${base}/dist/emulator-site/assets/js/vendor`, {recursive: true});
-    await mkdir(`${base}/dist/emulator-site/assets/pdf`, {recursive: true});
+export async function buildEmulator({persistent = false, realFunctions = false, preview = false} = {}) {
+    const site = `${base}/dist/${preview ? 'manual-preview' : 'emulator-site'}`;
+    await mkdir(`${site}/assets/images`, {recursive: true});
+    await mkdir(`${site}/assets/js/vendor`, {recursive: true});
+    await mkdir(`${site}/assets/pdf`, {recursive: true});
     const deny = 'const deny = () => {throw new Error("EMULATOR_READ_ONLY")};';
     const boundaries = {
         // A demo project cannot fall through to real resources: `functions` exists as an
@@ -21,9 +22,9 @@ export async function buildEmulator({persistent = false} = {}) {
         'translations.js': `export const t = key => ({label_user:'Utente', label_account:'Codice', label_password:'Password', no_accounts_found:'Nessun account trovato'})[key] || key;`,
         'private-account-offline-pilot.js': `${deny} export {deny as consumePrivateAccountHandoff};`
     };
-    const result = await build({entryPoints: [`${base}/emulator-entry.mjs`], outfile: `${base}/dist/emulator-site/emulator.js`,
+    const result = await build({entryPoints: [`${base}/emulator-entry.mjs`], outfile: `${site}/emulator.js`,
         bundle: true, format: 'esm', platform: 'browser', metafile: true, target: ['safari16', 'chrome110'], logLevel: 'warning', external: ['/company-summary-pdf.js'],
-        define: {__EMULATOR_PERSISTENT_CACHE__: JSON.stringify(persistent)},
+        define: {__EMULATOR_PERSISTENT_CACHE__: JSON.stringify(persistent), __EMULATOR_REAL_FUNCTIONS__: JSON.stringify(realFunctions)},
         plugins: [{name: 'emulator-boundaries', setup(builder) {
             builder.onResolve({filter: /\.js(?:\?.*)?$/}, args => {
                 const name = args.path.split('/').pop().split('?')[0];
@@ -38,14 +39,15 @@ export async function buildEmulator({persistent = false} = {}) {
         if (!inputs.some(name => name.endsWith(expected))) throw new Error(`MISSING_CANONICAL_MODULE: ${expected}`);
     }
     if (inputs.some(name => !name.startsWith('emulator:') && /(?:firebase-config|security-manager|vault-session|fixture-repository|dettaglio_account_privato|dettaglio_account_azienda)\.(?:js|mjs)$/.test(name))) throw new Error('UNEXPECTED_PRODUCTION_SESSION');
-    await writeFile(`${base}/dist/emulator-inputs.json`, JSON.stringify(inputs, null, 2));
-    for (const name of ['emulator.html', 'emulator.css']) await copyFile(`${base}/${name}`, `${base}/dist/emulator-site/${name}`);
-    await copyFile(`${publicRoot}/assets/fonts/material-symbols/material-symbols-0.woff2`, `${base}/dist/emulator-site/symbols.woff2`);
-    await copyFile(`${publicRoot}/assets/images/google-avatar.png`, `${base}/dist/emulator-site/assets/images/google-avatar.png`);
-    await copyFile(`${publicRoot}/assets/js/vendor/qrcode.min.js`, `${base}/dist/emulator-site/assets/js/vendor/qrcode.min.js`);
-    await build({entryPoints: [`${base}/company-summary-pdf.mjs`], outfile: `${base}/dist/emulator-site/company-summary-pdf.js`,
+    await writeFile(preview ? `${site}/inputs.json` : `${base}/dist/emulator-inputs.json`, JSON.stringify(inputs, null, 2));
+    for (const name of ['emulator.html', 'emulator.css']) await copyFile(`${base}/${name}`, `${site}/${name}`);
+    await copyFile(`${publicRoot}/assets/js/private-auth-gate.js`, `${site}/assets/js/private-auth-gate.js`);
+    await copyFile(`${publicRoot}/assets/fonts/material-symbols/material-symbols-0.woff2`, `${site}/symbols.woff2`);
+    await copyFile(`${publicRoot}/assets/images/google-avatar.png`, `${site}/assets/images/google-avatar.png`);
+    await copyFile(`${publicRoot}/assets/js/vendor/qrcode.min.js`, `${site}/assets/js/vendor/qrcode.min.js`);
+    await build({entryPoints: [`${base}/company-summary-pdf.mjs`], outfile: `${site}/company-summary-pdf.js`,
         bundle: true, minify: true, format: 'esm', platform: 'browser', target: ['safari16', 'chrome110'], logLevel: 'warning'});
     for (const name of ['LiberationSans-Regular.ttf', 'LiberationSans-Bold.ttf', 'LICENSE_LIBERATION']) {
-        await copyFile(`${base}/assets/pdf/${name}`, `${base}/dist/emulator-site/assets/pdf/${name}`);
+        await copyFile(`${base}/assets/pdf/${name}`, `${site}/assets/pdf/${name}`);
     }
 }

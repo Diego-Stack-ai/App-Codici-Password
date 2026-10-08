@@ -151,6 +151,7 @@ export function createCompanyContactsEditorSource({context, getUser, source, isE
                 templates: Object.freeze({emailExtra: Object.freeze(template)})});
         },
         async prepare(draft, operationId) {
+            draft = structuredClone(draft);
             check();
             if (!loaded || !isOnline()) fail('COMPANY_CONTACTS_SAVE_UNAVAILABLE');
             const current = await read(true); check();

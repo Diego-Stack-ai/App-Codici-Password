@@ -13,6 +13,17 @@ if ('serviceWorker' in navigator) {
 } else document.querySelector('#offline').textContent = 'Browser senza supporto offline';
 let mounts = 0, cleanups = 0;
 let demoUser = {uid: 'demo-user'}, identityObserver;
+// This standalone cryptographic fixture has no Firebase policy. Its explicit
+// demo-only authority must never be reused by the Firebase entry point.
+let demoTicket = null, demoDisposed = false;
+const demoAdmission = {
+    async check({ticket}) {
+        return !demoDisposed && demoUser?.uid === 'demo-user' && ticket && ticket === demoTicket
+            ? {ok: true, uid: 'demo-user', online: false} : {ok: false, code: 'demo-refused'};
+    },
+    invalidate() {demoTicket = null;},
+    dispose() {demoDisposed = true; demoTicket = null;}
+};
 const route = () => ['account', 'private', 'company'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -55,6 +66,9 @@ async function mount({signal, route: name, unlocked, read}) {
     return cleanup;
 }
 const session = createProtectedSession({
+    admission: demoAdmission,
+    getTicket: () => !demoDisposed && demoUser?.uid === 'demo-user' ? (demoTicket ??= Object.freeze({})) : null,
+    isTicketActive: ticket => !demoDisposed && demoUser?.uid === 'demo-user' && Boolean(ticket) && ticket === demoTicket,
     getUser: () => demoUser,
     subscribeUser: listener => { identityObserver = listener; return () => { identityObserver = null; }; },
     createVault: callbacks => createMemoryVault({unlockKey: fixture.unlockKey, decryptRecord, ...callbacks}),

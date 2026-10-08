@@ -23,25 +23,26 @@ export function createProfileDocumentAttachmentCapability({context, getUser, sea
     context.signal.addEventListener('abort', dispose, {once: true});
     return Object.freeze({dispose,
         async sealImage({bytes, documentId, attachmentId}) {
-            check();
-            if (!documentAttachmentBytes(bytes)) throw Error('DOCUMENT_IMAGE_NOT_ALLOWED');
-            if (!documentAttachmentSize(bytes.byteLength)) throw Error('DOCUMENT_IMAGE_NOT_ALLOWED');
-            const size = bytes.byteLength;
-            const storagePath = documentImageStoragePath({uid, documentId, attachmentId});
-            const aad = documentAttachmentAad({uid, documentId, attachmentId, storagePath});
-            let sealed;
+            let size, storagePath, aad, sealed;
             try {
+                check();
+                if (!documentAttachmentBytes(bytes)) throw Error('DOCUMENT_IMAGE_NOT_ALLOWED');
+                if (!documentAttachmentSize(bytes.byteLength)) throw Error('DOCUMENT_IMAGE_NOT_ALLOWED');
+                size = bytes.byteLength;
+                storagePath = documentImageStoragePath({uid, documentId, attachmentId});
+                aad = documentAttachmentAad({uid, documentId, attachmentId, storagePath});
                 check();
                 sealed = await seal({bytes, aad, uid, documentId, attachmentId, storagePath});
                 check();
             } finally {
-                bytes.fill(0);
+                if (documentAttachmentBytes(bytes)) bytes.fill(0);
             }
             if (!documentAttachmentObject(sealed) || !documentAttachmentBytes(sealed.payload) || !sealed.payload.byteLength) {
                 throw Error('DOCUMENT_ATTACHMENT_SEAL_FAILED');
             }
             const envelope = documentAttachmentEnvelope(sealed.envelope);
             const digest = await SHA256(sealed.payload);
+            check();
             if (!documentAttachmentDigest(digest)) throw Error('DOCUMENT_ATTACHMENT_SEAL_FAILED');
             const payload = sealed.payload;
             return Object.freeze({payload, envelope, digest, size, storagePath, aad});
@@ -58,7 +59,8 @@ export function createProfileDocumentAttachmentCapability({context, getUser, sea
             const aad = documentAttachmentAad({uid, documentId, attachmentId, storagePath});
             check();
             const plaintext = await open({payload, envelope, aad, uid, documentId, attachmentId, storagePath});
-            check();
+            try { check(); }
+            catch (error) { plaintext?.fill?.(0); throw error; }
             if (!documentAttachmentBytes(plaintext) || !plaintext.byteLength) throw Error('DOCUMENT_ATTACHMENT_OPEN_FAILED');
             return plaintext;
         }});

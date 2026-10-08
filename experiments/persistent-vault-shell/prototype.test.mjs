@@ -208,6 +208,95 @@ test('cleanup failure aborts navigation, reports once and permits a later safe m
     assert.equal(mounts, 1);
 });
 
+test('a stale asynchronous disposer is awaited and its rejection reaches the error boundary', async () => {
+    const mount = deferred(), cleanup = deferred();
+    const failure = new Error('synthetic asynchronous cleanup failure');
+    const reports = [];
+    let calls = 0, completed = false;
+    const router = createRouter({onError: error => reports.push(error), routes: {
+        overview: () => mount.promise,
+        account: () => {}
+    }});
+    const old = router.navigate('overview').then(() => {completed = true;});
+    await router.navigate('account');
+    mount.resolve(async () => {calls++; await cleanup.promise; throw failure;});
+    await new Promise(resolve => setImmediate(resolve));
+    const finishedTooEarly = completed;
+    cleanup.resolve();
+    await old;
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(finishedTooEarly, false);
+    assert.equal(calls, 1);
+    assert.deepEqual(reports, [failure]);
+    router.stop();
+});
+
+test('pending stop cleanup blocks navigation without automatic restart', async () => {
+    const pending = deferred(); let calls = 0, mounts = 0, signal;
+    const router = createRouter({routes: {
+        overview: context => {signal = context.signal; return () => {calls++; return pending.promise;};},
+        account: () => {mounts++;}
+    }});
+    await router.navigate('overview');
+    await router.navigate('account');
+    router.stop(); router.stop();
+    const earlyMounts = mounts;
+    pending.resolve();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(signal.aborted, true);
+    assert.equal(calls, 1);
+    assert.equal(earlyMounts, 0);
+    assert.equal(mounts, 0);
+    await router.navigate('account');
+    assert.equal(mounts, 1);
+});
+
+test('async stop rejection reports once while reentrant navigation stays blocked', async () => {
+    const pending = deferred(), errors = []; let mounts = 0;
+    const failure = new Error('synthetic stop rejection');
+    const router = createRouter({onError: error => {
+        errors.push(error); router.stop(); void router.navigate('account');
+    }, routes: {
+        overview: () => async () => {await pending.promise; throw failure;},
+        account: () => {mounts++;}
+    }});
+    await router.navigate('overview');
+    await router.navigate('account');
+    pending.resolve();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(errors, [failure]);
+    assert.equal(mounts, 0);
+});
+
+test('abort and disposer reentrancy cannot mount during stop', async () => {
+    let mounts = 0, calls = 0;
+    const router = createRouter({routes: {
+        overview: ({signal}) => {
+            signal.addEventListener('abort', () => {void router.navigate('account');});
+            return () => {calls++; void router.navigate('account');};
+        },
+        account: () => {mounts++;}
+    }});
+    await router.navigate('overview');
+    router.stop();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(calls, 1);
+    assert.equal(mounts, 0);
+});
+
+test('throwing then getter is reported once without mounting', async () => {
+    const errors = []; let mounts = 0;
+    const failure = new Error('synthetic then getter');
+    const router = createRouter({onError: error => errors.push(error), routes: {
+        overview: () => () => ({get then() {throw failure;}}),
+        account: () => {mounts++;}
+    }});
+    await router.navigate('overview');
+    await router.navigate('account');
+    assert.deepEqual(errors, [failure]);
+    assert.equal(mounts, 0);
+});
+
 test('late asynchronous cleanup failures are reported instead of silently ignored', async () => {
     const pending = deferred(); let reports = 0;
     const router = createRouter({onError: () => reports++, routes: {

@@ -77,6 +77,6 @@ export async function prepareProfileContacts({context, getUser, record, snapshot
     }
     if (!operations.length) throw Error('PROFILE_CONTACTS_UNCHANGED');
     check();
-    return validateProfileContactsRequest({target: {domain: 'private'}, expectedRevision: revision,
+    return validateProfileContactsRequest({target: {domain: 'private'}, expectedOwnerUid: uid, expectedRevision: revision,
         operations, operationId});
 }

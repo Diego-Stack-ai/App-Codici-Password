@@ -15,6 +15,7 @@ export function createCompanyAddressesHandler({db, hash, timestamp}) {
         if (!id(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validateCompanyAddressesRequest(data), {expectedRevision, operations, operationId} = request;
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const companyId = request.target.companyId;
         const digest = await hash(JSON.stringify({uid, ...request}));
         const companyRef = db.doc(`users/${uid}/aziende/${companyId}`);
@@ -71,7 +72,8 @@ export function createCompanyAddressesHandler({db, hash, timestamp}) {
                     touchedRows = true;
                     continue;
                 }
-                const refusal = companyAddressDeleteRefusal(matches[0], {qrIncluded: qr.extras?.[index] === true});
+                const originalIndex = stored.findIndex(item => item.id === operation.id);
+                const refusal = companyAddressDeleteRefusal(matches[0], {qrIncluded: qr.extras?.[originalIndex] === true});
                 if (refusal) fail(refusal);
                 addresses.splice(index, 1);
                 touchedRows = true;

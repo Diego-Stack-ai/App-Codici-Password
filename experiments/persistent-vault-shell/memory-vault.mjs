@@ -108,7 +108,8 @@ export function createMemoryVault({unlockKey, decryptRecord, encryptValue, sealB
             assertCurrent(owner, epoch);
             if (typeof openBytes !== 'function') throw new Error('SEAL_UNAVAILABLE');
             const plaintext = await openBytes(key, {payload, envelope, aad});
-            assertCurrent(owner, epoch);
+            try { assertCurrent(owner, epoch); }
+            catch (error) { plaintext?.fill?.(0); throw error; }
             if (!plaintext?.byteLength) throw new Error('OPEN_FAILED');
             return plaintext;
         },

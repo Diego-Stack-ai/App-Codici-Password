@@ -1,11 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import {createPrivateAddressesEditorSource} from './private-addresses-editor-source.mjs';
 import {privateAddressBasis, privateAddressesRevision, validatePrivateAddressesRequest} from './private-addresses-contract.mjs';
 import {preparePrivateAddresses} from './prepare-private-addresses.mjs';
 import {createPrivateAddressesHandler} from './private-addresses-handler.mjs';
 
 const hash = value => createHash('sha256').update(value).digest('hex');
+
+test('private address draft is detached before confirmed read', async () => {
+    const record=records(), abort=new AbortController();
+    const editor=createPrivateAddressesEditorSource({context:{user:{uid:'owner'},signal:abort.signal,assertUnlocked(){}},
+        getUser:()=>({uid:'owner'}),hash,createId:()=> 'address-new',isOnline:()=>true,
+        repository:{getUserProfileConfirmed:async()=>structuredClone(record),getUserProfile:async()=>structuredClone(record),getUserSetting:async()=>null}});
+    await editor.load(); const draft={updates:[{id:'address-home',fields:{city:'ORIGINAL'}}]};
+    const pending=editor.prepare(draft,'snapshot'); draft.updates[0].fields.city='CHANGED';
+    assert.equal((await pending).operations[0].fields.city,'ORIGINAL'); editor.dispose();
+});
+test('actual laboratory address seed is readable before editing and keeps utilities encrypted', async () => {
+    const source = await readFile(new URL('./emulator-browser.mjs', import.meta.url), 'utf8');
+    const expression = source.match(/userAddresses: (\[.*\]),\r?\n\s*documenti:/)?.[1];
+    assert.ok(expression, 'locate the actual laboratory seed, not a separate fixture');
+    const calls = [];
+    const encrypted = async value => {calls.push(value); return `encrypted:${value}`;};
+    const rows = await new (Object.getPrototypeOf(async function() {}).constructor)('encrypted', `return ${expression}`)(encrypted);
+    assert.equal(rows[0].address, 'Via fittizia');
+    assert.deepEqual(calls, ['POD-FITTIZIO']);
+    assert.equal(rows[0].utilities[0].value, 'encrypted:POD-FITTIZIO');
+    const record = {userAddresses: rows}, abort = new AbortController();
+    const editor = createPrivateAddressesEditorSource({
+        context: {user: {uid: 'synthetic'}, signal: abort.signal, assertUnlocked() {}},
+        getUser: () => ({uid: 'synthetic'}), hash, createId: () => 'new-address', isOnline: () => true,
+        repository: {getUserProfileConfirmed: async () => record, getUserProfile: async () => record,
+            getUserSetting: async () => null}
+    });
+    const loaded = await editor.load();
+    assert.equal(loaded.rows[0].fields.find(field => field.key === 'address').value, 'Via fittizia');
+    abort.abort();
+    await assert.rejects(editor.load(), /VIEW_DISPOSED/);
+});
 const cipher = value => `${Buffer.alloc(48, 42).toString('base64')}${Buffer.from(String(value)).toString('base64')}`;
 // The real private schema: address fields in clear, only the nested utility value
 // encrypted, Account references inside the utilities, a legacy id derived from the

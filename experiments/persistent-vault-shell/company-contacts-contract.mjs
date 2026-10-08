@@ -299,8 +299,9 @@ export function companyContactMutationFields(kind, fields) {
     return Object.freeze(result);
 }
 export function validateCompanyContactsRequest(data) {
-    const allowed = ['target', 'expectedRevision', 'operations', 'operationId'];
+    const allowed = ['target', 'expectedOwnerUid', 'expectedRevision', 'operations', 'operationId'];
     if (!object(data) || Object.keys(data).length !== allowed.length || Object.keys(data).some(key => !allowed.includes(key)) ||
+        typeof data.expectedOwnerUid !== 'string' || !COMPANY_ID_PATTERN.test(data.expectedOwnerUid) ||
         !COMPANY_ID_PATTERN.test(data.operationId ?? '') || !Number.isSafeInteger(data.expectedRevision) ||
         data.expectedRevision < 0 || data.expectedRevision >= Number.MAX_SAFE_INTEGER ||
         !Array.isArray(data.operations) || !data.operations.length || data.operations.length > 50) {
@@ -345,6 +346,6 @@ export function validateCompanyContactsRequest(data) {
         }
         operations.push(Object.freeze({kind: raw.kind, id: raw.id, basis: raw.basis}));
     }
-    return Object.freeze({target, expectedRevision: data.expectedRevision, operations: Object.freeze(operations),
+    return Object.freeze({target, expectedOwnerUid: data.expectedOwnerUid, expectedRevision: data.expectedRevision, operations: Object.freeze(operations),
         operationId: data.operationId});
 }

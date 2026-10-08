@@ -76,5 +76,5 @@ export async function preparePrivateUtilities({context, getUser, record, parentA
     if (!operations.length) throw Error(PRIVATE_UTILITY_REFUSALS.UNCHANGED);
     check();
     return validatePrivateUtilitiesRequest({target: {domain: 'private'}, parentAddressId, expectedRevision: revision,
-        operations, operationId});
+        operations, operationId, expectedOwnerUid: uid});
 }

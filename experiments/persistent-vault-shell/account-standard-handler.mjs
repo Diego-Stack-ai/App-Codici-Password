@@ -1,7 +1,7 @@
 import {validateAccountStandardRequest, accountStandardBasis} from './account-standard-contract.mjs';
 import {profileTextId, profileTextHash} from './profile-text-contract.mjs';
 
-export function createAccountStandardHandler({db, hash, timestamp}) {
+export function createAccountStandardHandler({db, hash, timestamp, beforeAccountWrite}) {
     const fail = code => {throw Error(code);};
     return async (data, trusted) => {
         const uid = trusted?.auth?.uid;
@@ -30,6 +30,8 @@ export function createAccountStandardHandler({db, hash, timestamp}) {
             const basis = accountStandardBasis(snapshot.data(), uid, account);
             if (basis.revision !== expectedRevision) fail('REVISION_CONFLICT');
             if (await hash(basis.fingerprintInput) !== expectedFingerprint) fail('ACCOUNT_STANDARD_CONFLICT');
+            const commitFence = beforeAccountWrite ? await beforeAccountWrite(transaction, ref) : null;
+            if (commitFence) commitFence();
             transaction.update(ref, {...patch, revision: expectedRevision + 1, schemaVersion: 1, updatedAt: timestamp()});
             transaction.create(receiptRef, {kind: 'account-standard', ownerId: uid, digest, revision: expectedRevision + 1, createdAt: timestamp()});
             return {status: 'confirmed', revision: expectedRevision + 1};

@@ -60,6 +60,7 @@ export function createPrivateUtilitiesEditorSource({context, getUser, repository
         },
         async prepare(draft, operationId) {
             check(); if (!loaded || !isOnline()) throw Error('PROFILE_SAVE_UNAVAILABLE');
+            draft = structuredClone(draft);
             const current = await read(true); check();
             if (signature(current) !== loaded.signature) throw Error('PROFILE_CHANGED');
             const request = await preparePrivateUtilities({context, getUser, record: current, parentAddressId,

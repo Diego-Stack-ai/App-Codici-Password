@@ -35,7 +35,7 @@ export const privateUtilityId = value => {
 };
 // The parent address is addressed by its persisted id only: a legacy address id is
 // not an identity and its utilities are therefore not addressable either.
-export const privateUtilityParentId = value => typeof value === 'string' && value.length <= 256 &&
+export const privateUtilityParentId = value => typeof value === 'string' && value.length > 0 && value.length <= 256 &&
     !/[\u0000-\u001f/]/.test(value) && !value.includes('-legacy-') ? value : null;
 export function privateUtilityFields(fields) {
     if (!object(fields)) fail();
@@ -129,9 +129,9 @@ export function privateUtilitiesTarget(value) {
     return Object.freeze({domain: 'private'});
 }
 export function validatePrivateUtilitiesRequest(data) {
-    const allowed = ['target', 'parentAddressId', 'expectedRevision', 'operations', 'operationId'];
+    const allowed = ['target', 'parentAddressId', 'expectedRevision', 'operations', 'operationId', 'expectedOwnerUid'];
     if (!object(data) || Object.keys(data).length !== allowed.length || Object.keys(data).some(key => !allowed.includes(key)) ||
-        !UID_PATTERN.test(data.operationId ?? '') || privateUtilityParentId(data.parentAddressId) === null ||
+        !UID_PATTERN.test(data.operationId ?? '') || !privateUtilityUid(data.expectedOwnerUid) || privateUtilityParentId(data.parentAddressId) === null ||
         !Number.isSafeInteger(data.expectedRevision) || data.expectedRevision < 0 ||
         data.expectedRevision >= Number.MAX_SAFE_INTEGER || !Array.isArray(data.operations) ||
         !data.operations.length || data.operations.length > 50) fail();
@@ -157,5 +157,5 @@ export function validatePrivateUtilitiesRequest(data) {
         operations.push(Object.freeze({kind: 'delete', id: raw.id, basis: raw.basis}));
     }
     return Object.freeze({target, parentAddressId: data.parentAddressId, expectedRevision: data.expectedRevision,
-        operations: Object.freeze(operations), operationId: data.operationId});
+        operations: Object.freeze(operations), operationId: data.operationId, expectedOwnerUid: data.expectedOwnerUid});
 }

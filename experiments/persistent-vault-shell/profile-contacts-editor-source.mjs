@@ -113,6 +113,7 @@ export function createProfileContactsEditorSource({context, getUser, repository,
             return Object.freeze({revision, canSave: isOnline(), rows: Object.freeze(rows), templates: Object.freeze(templates)});
         },
         async prepare(draft, operationId) {
+            draft = structuredClone(draft);
             check();
             if (!loaded || !isOnline()) throw Error('PROFILE_SAVE_UNAVAILABLE');
             const current = await read(true); check();

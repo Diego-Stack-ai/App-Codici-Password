@@ -6,11 +6,65 @@ import {bindBrowserSession, clearLegacyUnlock} from './browser-session-boundary.
 
 // Candidate integration, not imported by the published application or preview.
 // The caller supplies initialized SDK instances and an abortable password UI.
-export function createFirebaseSession({auth, db, cryptoApi, requestPassword, routes, createQueueClient, onState, onError}) {
+export function createFirebaseSession({auth, db, cryptoApi, requestPassword, routes, createQueueClient, admission, getTicket, isTicketActive, presentation, onState, onError, browserTarget = globalThis}) {
+    if (typeof presentation?.invalidate !== 'function' || typeof presentation?.dispose !== 'function') throw new TypeError('INVALID_PRESENTATION');
     // Fail before creating a session if legacy storage cannot be cleared.
     clearLegacyUnlock(globalThis.sessionStorage);
     const getUser = () => auth.currentUser;
-    const subscribeUser = listener => onAuthStateChanged(auth, listener);
+    const listeners = new Set();
+    let closed = false, unsubscribeAuth, detach, session;
+    let observedUid, initialized = false, authEpoch = 0, draining = false, pending;
+    const subscribeUser = listener => {
+        if (closed) throw new Error('SESSION_DISPOSED');
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+    };
+    function dispose() {
+        if (closed) return;
+        closed = true; authEpoch++; pending = undefined; listeners.clear();
+        try {detach?.();}
+        finally {try {session?.dispose();}
+            finally {try {unsubscribeAuth?.();} finally {presentation.dispose();}}}
+    }
+    function onAuthEvent(user) {
+        if (closed) return;
+        pending = {user, epoch: ++authEpoch};
+        if (draining) return;
+        draining = true;
+        try {
+            while (pending && !closed) {
+                const event = pending; pending = undefined;
+                let failed = false, failure;
+                const attempt = fn => {try {return fn();} catch (error) {if (!failed) {failed = true; failure = error;}}};
+                const uid = attempt(() => event.user?.uid ?? null);
+                const currentUid = attempt(() => getUser()?.uid ?? null);
+                const start = !initialized || uid !== observedUid;
+                if (failed || uid !== currentUid || start) {
+                    attempt(() => presentation.invalidate());
+                    attempt(() => session.lock());
+                }
+                if (!failed && uid === currentUid && !closed && event.epoch === authEpoch) {
+                    initialized = true; observedUid = uid;
+                    for (const listener of [...listeners]) {
+                        if (closed || event.epoch !== authEpoch) break;
+                        if (listeners.has(listener)) attempt(() => listener(event.user));
+                    }
+                    if (!failed && !closed && event.epoch === authEpoch && start && uid) {
+                        const latest = attempt(() => getUser()?.uid ?? null);
+                        if (!failed && latest === uid && !closed && event.epoch === authEpoch) {
+                            attempt(() => presentation.beginIdentity?.());
+                        }
+                    }
+                }
+                if (failed) {
+                    // A broken observer is terminal, including falsy thrown values.
+                    attempt(dispose);
+                    if (typeof onError === 'function') onError(failure);
+                    else throw failure;
+                }
+            }
+        } finally {draining = false;}
+    }
     const assertActive = (signal, uid) => {
         if (signal.aborted || auth.currentUser?.uid !== uid) throw new Error('VIEW_DISPOSED');
     };
@@ -37,7 +91,7 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
             return context.read({ownerId: uid, ciphertext: record[field]});
         }
     })]));
-    const session = createProtectedSession({getUser, subscribeUser, routes: boundRoutes, onState, onError,
+    try {session = createProtectedSession({getUser, subscribeUser, routes: boundRoutes, onState, onError, admission, getTicket, isTicketActive,
         createVault: callbacks => {
             const adapter = createLegacyAdapter({getUser, subscribeUser, cryptoApi, requestPassword, ...callbacks,
                 openQueueWithKey: typeof createQueueClient === 'function'
@@ -51,11 +105,24 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
             });
             return {unlock: () => adapter.unlock(), read: (uid, record) => adapter.read(record),
                 encrypt: (uid, value) => adapter.encrypt(value),
+                sealImage: (uid, options) => adapter.sealImage(options),
+                openImage: (uid, options) => adapter.openImage(options),
                 openQueue: (uid, options) => adapter.openQueue(options),
                 lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
         }
     });
-    const detach = bindBrowserSession(session);
-    return Object.freeze({...session, logout: () => session.logout(() => signOut(auth)),
-        dispose() { detach(); session.dispose(); }});
+        detach = bindBrowserSession(session, browserTarget);
+        // Establish the initial epoch only after both internal listeners exist.
+        onAuthEvent(getUser());
+        if (closed) throw new Error('AUTH_OBSERVER_INITIALIZATION_FAILED');
+        const off = onAuthStateChanged(auth, onAuthEvent, error => {
+            try {dispose();} finally {if (typeof onError === 'function') onError(error);}
+        });
+        if (closed) off(); else unsubscribeAuth = off;
+    } catch (error) {try {dispose();} finally {throw error;}}
+    return Object.freeze({...session, logout: () => session.logout(async () => {
+        presentation.invalidate();
+        try {await signOut(auth);} finally {presentation.invalidate();}
+    }),
+        dispose});
 }

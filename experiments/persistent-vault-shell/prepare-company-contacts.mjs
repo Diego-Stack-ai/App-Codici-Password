@@ -127,5 +127,5 @@ export async function prepareCompanyContacts({context, getUser, source, record, 
     }
     check();
     return validateCompanyContactsRequest({target: {domain: 'company', companyId: source.companyId},
-        expectedRevision: revision, operations, operationId});
+        expectedOwnerUid: uid, expectedRevision: revision, operations, operationId});
 }

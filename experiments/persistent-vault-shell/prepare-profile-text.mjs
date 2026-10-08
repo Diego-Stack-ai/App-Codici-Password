@@ -27,5 +27,5 @@ export async function prepareProfileText({context, getUser, source, target: requ
         if (!profileTextCipher(ciphertext) || (value !== '' && ciphertext === value)) throw Error('ENCRYPTION_FAILED');
         encrypted[field] = ciphertext;
     }
-    check(); return validateProfileTextRequest({target, changes: encrypted, expected, expectedRevision: revision, operationId});
+    check(); return validateProfileTextRequest({target, changes: encrypted, expected, expectedRevision: revision, operationId, expectedOwnerUid: uid});
 }

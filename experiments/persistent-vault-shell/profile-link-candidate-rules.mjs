@@ -7,13 +7,13 @@ export function withProfileLinkCandidateRules(original) {
     const oldCompany = JSON.stringify(['qrConfig', ...PROFILE_TEXT_FIELDS.company, ...PROFILE_TEXT_METADATA]);
     if (rules.split(oldPrivate).length !== 3 || rules.split(oldCompany).length !== 3 ||
         rules.split("collection != 'contacts' &&").length !== 2 ||
-        rules.split('    match /users/{userId}/aziende/{companyId}/{collection}/{document=**} {\n      allow read, write: if isOwner(userId);').length !== 2) throw Error('RULES_BASE_CHANGED');
+        rules.split("      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read, update, delete: if isOwner(userId);\n        allow create: if isOwner(userId) && (childCollection != 'accounts' ||\n          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));\n      }").length !== 2) throw Error('RULES_BASE_CHANGED');
     rules = rules.replaceAll(oldPrivate, JSON.stringify([...PROFILE_TEXT_FIELDS.private, ...PROFILE_TEXT_METADATA, ...PROFILE_LINK_METADATA,
         'contactEmails', 'contactPhones', 'documenti', 'userAddresses']))
         .replaceAll(oldCompany, JSON.stringify(['qrConfig', ...PROFILE_TEXT_FIELDS.company, ...PROFILE_TEXT_METADATA, ...PROFILE_LINK_METADATA, 'emails', 'phoneAccountLinks']))
         .replace("collection != 'contacts' &&", "collection != 'accounts' && collection != 'contacts' &&")
-        .replace('    match /users/{userId}/aziende/{companyId}/{collection}/{document=**} {\n      allow read, write: if isOwner(userId);',
-            "    match /users/{userId}/aziende/{companyId}/{collection}/{document=**} {\n      allow read, write: if isOwner(userId) && collection != 'accounts';");
+        .replace("      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read, update, delete: if isOwner(userId);\n        allow create: if isOwner(userId) && (childCollection != 'accounts' ||\n          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));\n      }",
+            "      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read, update, delete: if isOwner(userId) && childCollection != 'accounts';\n        allow create: if isOwner(userId) && childCollection != 'accounts';\n      }");
     const protectedFields = JSON.stringify([...PROFILE_LINK_METADATA, 'linkedProfileField', 'linkedProfileFields', 'linkedCompanyProfileField', 'linkedCompanyProfileFields']);
     const accountRule = path => `    match ${path} {
       allow read: if isOwner(userId);

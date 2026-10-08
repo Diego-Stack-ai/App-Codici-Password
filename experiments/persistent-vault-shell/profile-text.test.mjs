@@ -96,3 +96,14 @@ test('untrusted context and missing, archived or foreign-owned profiles never cr
         await assert.rejects(f.run(request, f.trusted)); assert.deepEqual([...f.records], before);
     }
 });
+
+test('a prepared request is bound to its original owner even if another profile has identical fields', async () => {
+    const f = fixture(), request = await prepareProfileText(f.options);
+    f.records.set('users/other', {...f.options.source, ownerId: 'other'});
+    const before = structuredClone([...f.records]);
+    await assert.rejects(f.run(request, {auth: {uid: 'other'}, app: {appId: 'test'}}), /OWNER_MISMATCH/);
+    assert.deepEqual([...f.records], before);
+    const {expectedOwnerUid, ...missing} = request;
+    assert.equal(expectedOwnerUid, 'owner');
+    assert.throws(() => validateProfileTextRequest(missing), /PROFILE_TEXT_INVALID/);
+});

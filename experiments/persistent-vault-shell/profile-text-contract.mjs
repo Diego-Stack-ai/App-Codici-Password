@@ -40,9 +40,9 @@ export function profileTextCipher(value) {
 
 // Snapshot the entire request before any asynchronous hashing/transaction.
 export function validateProfileTextRequest(data) {
-    const allowed = ['target', 'changes', 'expected', 'expectedRevision', 'operationId'];
+    const allowed = ['target', 'changes', 'expected', 'expectedRevision', 'operationId', 'expectedOwnerUid'];
     if (!profileTextObject(data) || Object.keys(data).length !== allowed.length ||
-        Object.keys(data).some(key => !allowed.includes(key)) || !profileTextId(data.operationId) ||
+        Object.keys(data).some(key => !allowed.includes(key)) || !profileTextId(data.operationId) || !profileTextId(data.expectedOwnerUid) ||
         !Number.isSafeInteger(data.expectedRevision) || data.expectedRevision < 0 || data.expectedRevision >= Number.MAX_SAFE_INTEGER ||
         !profileTextObject(data.changes) || !profileTextObject(data.expected)) profileTextInvalid();
     const target = profileTextTarget(data.target), fields = Object.keys(data.changes).sort();
@@ -56,5 +56,5 @@ export function validateProfileTextRequest(data) {
     }
     if (Object.values(changes).reduce((sum, value) => sum + value.length, 0) > 200000) profileTextInvalid();
     return Object.freeze({target, changes: Object.freeze(changes), expected: Object.freeze(expected),
-        expectedRevision: data.expectedRevision, operationId: data.operationId});
+        expectedRevision: data.expectedRevision, operationId: data.operationId, expectedOwnerUid: data.expectedOwnerUid});
 }

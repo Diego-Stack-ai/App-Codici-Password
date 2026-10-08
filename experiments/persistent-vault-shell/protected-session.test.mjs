@@ -1,8 +1,201 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createProtectedSession} from './protected-session.mjs';
+import {createProtectedSession} from './test-support/protected-session.mjs';
 import {createMemoryVault} from './memory-vault.mjs';
+import {createSyntheticTestAdmission} from './test-support/synthetic-admission.mjs';
+import {createProtectedSession as createAdmissionSession} from './protected-session.mjs';
+import {createRestoreStageReader} from './restore-stage-reader.mjs';
+import {createRestoreStageClient} from './restore-stage-client.mjs';
+
+test('view signal aborts pending stage client fetch on session lock', async t => {
+    let context, readyResolve;
+    const ready = new Promise(resolve => {readyResolve = resolve;});
+    const session = createProtectedSession({getUser: () => ({uid: 'a'}),
+        subscribeUser: () => () => {}, routes: {attachments: value => {context = value;}},
+        createVault: callbacks => createMemoryVault({...callbacks, unlockKey: async () => ({}), decryptRecord: async () => ''})});
+    t.after(() => session.dispose()); await session.unlock(); await session.navigate('attachments');
+    const client = createRestoreStageClient({endpoint: 'http://127.0.0.1:4188/download', origin: 'http://127.0.0.1:4188',
+        signal: context.signal, isActive() {try {context.assertUnlocked(); return true;} catch {return false;}},
+        getCredentials: async () => ({idToken: 'synthetic', appCheckToken: 'synthetic'}),
+        fetchImpl: (_url, {signal}) => new Promise((_resolve, reject) => {
+            assert.equal(signal, context.signal);
+            signal.addEventListener('abort', () => reject(new Error('FETCH_ABORTED')), {once: true}); readyResolve();
+        })});
+    const pending = client({stageId: 'a'.repeat(64)}), rejected = assert.rejects(pending, /FETCH_ABORTED/);
+    await ready; session.lock(); await rejected; assert.equal(context.signal.aborted, true);
+});
+
+test('stage reader bound to route cannot deliver after lock and same-owner unlock', async t => {
+    let context, resolve;
+    const session = createProtectedSession({getUser: () => ({uid: 'a'}),
+        subscribeUser: () => () => {}, routes: {attachments: value => {context = value;}},
+        createVault: callbacks => createMemoryVault({...callbacks, unlockKey: async () => ({}), decryptRecord: async () => ''})});
+    t.after(() => session.dispose());
+    await session.unlock(); await session.navigate('attachments');
+    const oldContext = context;
+    const reader = createRestoreStageReader({isActive() {
+        try {oldContext.assertUnlocked(); return true;} catch {return false;}
+    }, readPublished: () => new Promise(yes => {resolve = yes;})});
+    const pending = reader.read('a'.repeat(64));
+    session.lock(); await session.unlock(); await session.navigate('attachments');
+    assert.notEqual(context, oldContext); context.assertUnlocked();
+    const bytes = new Uint8Array([1, 2]);
+    resolve({bytes, size: 2, generation: '1', sha256: 'b'.repeat(64)});
+    await assert.rejects(pending, /INACTIVE/);
+    assert.deepEqual([...bytes], [0, 0]);
+    await assert.rejects(reader.read('a'.repeat(64)), /INACTIVE/);
+});
+
+test('admission cleanup failure cannot retain Vault keys or skip physical teardown', async () => {
+    const getUser = () => ({uid: 'a'}), events = [];
+    const authority = createSyntheticTestAdmission({getUser});
+    let failCleanup = false, vault;
+    const session = createAdmissionSession({...authority, getUser,
+        admission: {...authority.admission,
+            invalidate() {authority.admission.invalidate(); if (failCleanup) throw new Error('invalidate-failed');},
+            dispose() {events.push('admission'); authority.admission.dispose(); throw new Error('dispose-failed');}},
+        subscribeUser: () => () => events.push('unsubscribe'), routes: {},
+        createVault: callbacks => {
+            vault = createMemoryVault({...callbacks, unlockKey: async () => ({}), decryptRecord: async () => ''});
+            return {...vault, dispose() {events.push('vault');}};
+        }});
+    await session.unlock(); failCleanup = true;
+    assert.throws(() => session.dispose(), /dispose-failed/);
+    assert.equal(vault.isUnlocked(), false);
+    assert.deepEqual(events, ['admission', 'vault', 'unsubscribe']);
+    assert.equal(session.check(), false);
+    await assert.rejects(session.unlock(), /SESSION_DISPOSED/);
+    session.dispose();
+});
+
+test('identity reader failure closes an already unlocked Vault before propagating', async () => {
+    let broken = false, vault;
+    const failure = new Error('synthetic-identity-unavailable');
+    const getUser = () => {if (broken) throw failure; return {uid: 'a'};};
+    const session = createAdmissionSession({...createSyntheticTestAdmission({getUser}), getUser,
+        subscribeUser: () => () => {}, routes: {},
+        createVault: callbacks => vault = createMemoryVault({...callbacks, unlockKey: async () => ({}), decryptRecord: async () => ''})});
+    await session.unlock(); assert.equal(vault.isUnlocked(), true);
+    broken = true;
+    assert.throws(() => session.check(), error => error === failure);
+    assert.equal(vault.isUnlocked(), false);
+    session.dispose();
+});
+
+test('core requires admission; lock during admission prevents physical unlock', async () => {
+    assert.throws(() => createAdmissionSession({}), /INVALID_ADMISSION_DEPENDENCY/);
+    let resolve, unlocks = 0;
+    const authority = createSyntheticTestAdmission({getUser: () => ({uid: 'a'})});
+    const session = createAdmissionSession({...authority, getUser: () => ({uid: 'a'}),
+        subscribeUser: () => () => {}, routes: {},
+        admission: {...authority.admission, check: () => new Promise(yes => {resolve = yes;})},
+        createVault: callbacks => createMemoryVault({...callbacks, unlockKey: async () => {unlocks++; return {};}, decryptRecord: async () => ''})});
+    const pending = session.unlock(), rejected = assert.rejects(pending, /ATTEMPT_OBSOLETE/);
+    await assert.rejects(session.unlock(), /UNLOCK_PENDING/);
+    session.lock(); resolve({ok: true, uid: 'a'}); await rejected;
+    assert.equal(unlocks, 0); assert.equal(session.check(), false); session.dispose();
+});
+
+test('integrated admission navigation is latest-wins and refusal physically locks', async () => {
+    const pending = [], mounted = [];
+    const authority = createSyntheticTestAdmission({getUser: () => ({uid: 'a'})});
+    let defer = false;
+    const session = createAdmissionSession({...authority, getUser: () => ({uid: 'a'}),
+        subscribeUser: () => () => {}, routes: {a: () => {mounted.push('a');}, b: () => {mounted.push('b');}},
+        admission: {...authority.admission, check: args => defer ? new Promise(resolve => pending.push(resolve)) : authority.admission.check(args)},
+        createVault: callbacks => createMemoryVault({...callbacks, unlockKey: async () => ({}), decryptRecord: async () => ''})});
+    await session.unlock(); defer = true;
+    const first = session.navigate('a'), last = session.navigate('b');
+    pending[1]({ok: true, uid: 'a'}); await last;
+    pending[0]({ok: true, uid: 'a'}); await first;
+    assert.deepEqual(mounted, ['b']);
+    const denied = session.navigate('a'), rejected = assert.rejects(denied, /ADMISSION_REFUSED/);
+    pending[2]({ok: false}); await rejected;
+    assert.equal(session.check(), false); session.dispose();
+});
+
+test('explicit synthetic admission cannot revive an observed A/B/A ticket or forged ticket', async () => {
+    let user = {uid: 'a'};
+    const fixture = createSyntheticTestAdmission({getUser: () => user});
+    const a = fixture.getTicket();
+    assert.equal((await fixture.admission.check({ticket: a})).ok, true);
+    assert.equal((await fixture.admission.check({ticket: {}})).ok, false);
+    user = {uid: 'b'};
+    assert.equal(fixture.isTicketActive(a), false);
+    user = {uid: 'a'};
+    assert.equal(fixture.isTicketActive(a), false);
+    const fresh = fixture.getTicket();
+    fixture.admission.invalidate();
+    assert.equal(fixture.isTicketActive(fresh), false);
+    fixture.admission.dispose();
+    assert.equal(fixture.getTicket(), null);
+    assert.equal((await fixture.admission.check({ticket: a})).ok, false);
+});
+
+test('synthetic admission rejects identity-reader reentrant disposal', async () => {
+    let disposeDuringRead = false, fixture;
+    fixture = createSyntheticTestAdmission({getUser() {
+        if (disposeDuringRead) fixture.admission.dispose();
+        return {uid: 'a'};
+    }});
+    const ticket = fixture.getTicket();
+    disposeDuringRead = true;
+    assert.equal((await fixture.admission.check({ticket})).ok, false);
+    assert.equal(fixture.getTicket(), null);
+});
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
+
+test('failed authentication subscription releases the Vault created during bootstrap', () => {
+    const events = [], failure = new Error('synthetic-subscribe-failed');
+    assert.throws(() => createProtectedSession({getUser: () => ({uid: 'a'}), routes: {},
+        subscribeUser() {throw failure;},
+        createVault: () => ({lock: reason => events.push(reason), dispose: () => events.push('disposed')})
+    }), error => error === failure);
+    assert.deepEqual(events, ['bootstrap-failed', 'disposed']);
+});
+
+test('failed unlocked notification clears the real memory Vault before rejecting', async () => {
+    let vault;
+    const failure = new Error('synthetic-render-failed');
+    const session = createProtectedSession({
+        getUser: () => ({uid: 'synthetic-a'}), subscribeUser: () => () => {}, routes: {},
+        createVault: callbacks => vault = createMemoryVault({unlockKey: async () => ({}),
+            decryptRecord: async () => 'synthetic', ...callbacks}),
+        onState({state}) {if (state === 'unlocked') throw failure;}
+    });
+    await assert.rejects(session.unlock(), error => error === failure);
+    assert.equal(vault.isUnlocked(), false);
+    assert.equal(session.check(), false);
+    session.dispose();
+});
+
+test('physical unlock stays single-flight through lock until the old attempt settles', async () => {
+    const pending = deferred(); let calls = 0;
+    const f = fixture({unlockKey: () => {calls++; return calls === 1 ? pending.promise : Promise.resolve({});}});
+    const first = f.session.unlock();
+    const cancelled = assert.rejects(first, /UNLOCK_CANCELLED/);
+    await assert.rejects(f.session.unlock(), /UNLOCK_PENDING/);
+    assert.equal(calls, 1);
+    f.session.lock();
+    await assert.rejects(f.session.unlock(), /UNLOCK_PENDING/);
+    assert.equal(calls, 1);
+    pending.resolve({}); await cancelled;
+    assert.equal(f.session.check(), false);
+    await f.session.unlock();
+    assert.equal(calls, 2); assert.equal(f.session.check(), true);
+    f.session.dispose();
+});
+
+test('failed unlock releases physical single-flight for an explicit retry', async () => {
+    let reject, calls = 0;
+    const pending = new Promise((_, no) => {reject = no;});
+    const f = fixture({unlockKey: () => {calls++; return calls === 1 ? pending : Promise.resolve({});}});
+    const first = f.session.unlock(); const failed = assert.rejects(first, /synthetic-failure/);
+    reject(new Error('synthetic-failure')); await failed;
+    await f.session.unlock();
+    assert.equal(calls, 2); assert.equal(f.session.check(), true);
+    f.session.dispose();
+});
 function fixture(options = {}) {
     let user = {uid: 'a'}, observer, unsubscribes = 0, vault;
     const contexts = [], states = [];

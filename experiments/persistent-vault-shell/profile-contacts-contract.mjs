@@ -106,10 +106,10 @@ export function profileContactsTarget(value) {
     return Object.freeze({domain: 'private'});
 }
 export function validateProfileContactsRequest(data) {
-    const allowed = ['target', 'expectedRevision', 'operations', 'operationId'];
+    const allowed = ['target', 'expectedOwnerUid', 'expectedRevision', 'operations', 'operationId'];
     if (!profileContactsObject(data) || Object.keys(data).length !== allowed.length ||
         Object.keys(data).some(key => !allowed.includes(key)) ||
-        !profileContactsUid(data.operationId) || !Number.isSafeInteger(data.expectedRevision) ||
+        !profileContactsUid(data.expectedOwnerUid) || !profileContactsUid(data.operationId) || !Number.isSafeInteger(data.expectedRevision) ||
         data.expectedRevision < 0 || data.expectedRevision >= Number.MAX_SAFE_INTEGER ||
         !Array.isArray(data.operations) || !data.operations.length || data.operations.length > 50) profileContactsInvalid();
     const target = profileContactsTarget(data.target), seen = new Set(), operations = [];
@@ -133,6 +133,6 @@ export function validateProfileContactsRequest(data) {
         }
         operations.push(Object.freeze({kind: 'delete', collection, id: raw.id, basis: raw.basis}));
     }
-    return Object.freeze({target, expectedRevision: data.expectedRevision,
+    return Object.freeze({target, expectedOwnerUid: data.expectedOwnerUid, expectedRevision: data.expectedRevision,
         operations: Object.freeze(operations), operationId: data.operationId});
 }

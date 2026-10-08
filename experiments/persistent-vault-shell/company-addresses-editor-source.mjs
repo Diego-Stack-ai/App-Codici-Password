@@ -88,6 +88,7 @@ export function createCompanyAddressesEditorSource({context, getUser, source, ha
                 qrState: qr.state, rows: Object.freeze(rows), templates: Object.freeze(templates)});
         },
         async prepare(draft, operationId) {
+            draft = structuredClone(draft);
             check();
             if (!loaded || !isOnline()) fail('COMPANY_SAVE_UNAVAILABLE');
             const current = await read(true); check();

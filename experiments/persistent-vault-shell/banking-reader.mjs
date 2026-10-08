@@ -73,7 +73,7 @@ export function createBankingReader({context, getUser, repository, selection, no
             return Object.freeze({bankId, index, fields: Object.freeze(fields(bank, bankFields)),
                 cards: Object.freeze((bank.cards || []).map((card, cardIndex) => Object.freeze({index: cardIndex,
                     fields: Object.freeze(fields(card, cardFields)), read: field => read(field, cardIndex)}))),
-                read: field => read(field)});
+                assertCurrent: async () => {await resolve(); check();}, read: field => read(field)});
         }));
     };
 }

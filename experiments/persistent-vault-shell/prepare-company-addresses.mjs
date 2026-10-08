@@ -88,5 +88,5 @@ export async function prepareCompanyAddresses({context, getUser, source, record,
     if (!operations.length) throw Error(COMPANY_ADDRESS_REFUSALS.UNCHANGED);
     check();
     return validateCompanyAddressesRequest({target: {domain: 'company', companyId: source.companyId},
-        expectedRevision: revision, operations, operationId});
+        expectedOwnerUid: uid, expectedRevision: revision, operations, operationId});
 }

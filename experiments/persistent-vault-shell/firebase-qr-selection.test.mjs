@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc, getDoc, setDoc, updateDoc, deleteField} from 'firebase/firestore';
+import {doc, getDoc, setDoc, updateDoc, deleteDoc, deleteField} from 'firebase/firestore';
 import {withQrSelectionCandidateRules} from './qr-selection-candidate-rules.mjs';
 import {createPrivateQrSelectionHandler} from './qr-selection-handler.mjs';
 import {createQrSelectionEditorSource} from './qr-selection-editor-source.mjs';
@@ -38,7 +38,7 @@ test('candidate QR selection transaction and closed direct-write Rules on synthe
     await assertSucceeds(setDoc(doc(owner, `users/${uid}/settings/unrelated`), {enabled: true}));
     const run = createPrivateQrSelectionHandler({db, hash: value => createHash('sha256').update(value).digest('hex'), timestamp: () => FieldValue.serverTimestamp()});
     const trusted = {auth: {uid}, app: {appId: 'synthetic-context-not-http-attestation'}};
-    const data = {operationId: 'first', expectedRevision: 0, selection: {nome: true, cognome: false, cf: false, nascita: false, photo: false, phones: ['phone'], emails: [], addresses: []}};
+    const data = {operationId: 'first', expectedRevision: 0, expectedOwnerUid: uid, selection: {nome: true, cognome: false, cf: false, nascita: false, photo: false, phones: ['phone'], emails: [], addresses: []}};
     assert.deepEqual(await run(data, trusted), {status: 'confirmed', revision: 1});
     const saved = await assertSucceeds(getDoc(doc(owner, settingPath)));
     assert.deepEqual(saved.data().phones, ['phone']);
@@ -85,6 +85,9 @@ test('candidate QR selection transaction and closed direct-write Rules on synthe
             emails: {extra: [{qr: false, password: 'enc:SYNTHETIC'}]}, altreSedi: [{qr: true}]};
         await db.doc(companyPath).set(originalCompany);
         await assertSucceeds(getDoc(doc(owner, companyPath)));
+        await assertFails(deleteDoc(doc(owner, companyPath)));
+        await assertSucceeds(setDoc(doc(owner, `${companyPath}/unrelated/fixture`), {synthetic: true}));
+        await assertFails(setDoc(doc(other, `${companyPath}/unrelated/fixture`), {synthetic: false}));
         await assertFails(getDoc(doc(other, companyPath)));
         await assertFails(updateDoc(doc(owner, companyPath), {qrConfig: {telefonoAzienda: true}}));
         await assertFails(setDoc(doc(owner, `users/${uid}/aziende/new-with-qr`), {qrConfig: {}}));
@@ -93,7 +96,7 @@ test('candidate QR selection transaction and closed direct-write Rules on synthe
         await assertFails(updateDoc(doc(other, companyPath), {ragioneSociale: 'enc:OTHER'}));
         const companyRun = createCompanyQrSelectionHandler({db, hash: value => createHash('sha256').update(value).digest('hex'),
             timestamp: () => FieldValue.serverTimestamp()});
-        const companyData = {companyId, operationId: 'company-first', expectedConfig: null,
+        const companyData = {companyId, operationId: 'company-first', expectedConfig: null, expectedOwnerUid: uid,
             selection: {...readCompanyQrSelection({}).selection, ragioneSociale: true}};
         assert.deepEqual(await companyRun(companyData, trusted), {status: 'confirmed', revision: 1});
         assert.deepEqual(await companyRun(companyData, trusted), {status: 'confirmed', revision: 1});

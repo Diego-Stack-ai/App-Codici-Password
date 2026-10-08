@@ -190,7 +190,7 @@ test('empty and delete guards refuse a linked, published or legacy row and nothi
         COMPANY_CONTACT_REFUSALS.ID_DERIVED, 'identity is decided before the card selection');
 });
 test('the company request allowlist keeps the company schema apart from the private one', () => {
-    const request = {target: {domain: 'company', companyId: 'company'}, expectedRevision: 1, operationId: 'operation',
+    const request = {target: {domain: 'company', companyId: 'company'}, expectedOwnerUid: 'owner', expectedRevision: 1, operationId: 'operation',
         operations: [{kind: 'email-slot', id: 'pec', basis: 'a'.repeat(64), fields: {email: 'nuova@example.invalid'}},
             {kind: 'phone-slot', id: 'telefonoAzienda', basis: 'b'.repeat(64), value: '0110000000'},
             {kind: 'email-extra-create', id: 'company-email-1', fields: {email: 'x@example.invalid', qr: true}},

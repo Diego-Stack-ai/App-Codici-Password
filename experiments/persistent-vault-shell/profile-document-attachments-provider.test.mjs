@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {getEventListeners} from 'node:events';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {createProfileDocumentAttachmentsProvider} from './profile-document-attachments-provider.mjs';
@@ -17,6 +18,11 @@ const tick = () => new Promise(setImmediate);
 // The mounted path crosses several awaited layers (reader, planner, capability,
 // service), so the assertions wait on a real timer instead of a single turn.
 const settle = () => new Promise(resolve => setTimeout(resolve, 10));
+async function waitUntil(predicate) {
+    const deadline = Date.now() + 2000;
+    while (!predicate() && Date.now() < deadline) await tick();
+    assert.ok(predicate(), 'mounted operation did not reach its expected state');
+}
 const envelope = () => ({type: 'profile-document-attachment-envelope', version: 1, cipher: 'AES-GCM-256',
     keyWrap: 'HKDF-SHA256+A256GCM', contentIv: 'AAAAAAAAAAAAAAAA', wrapSalt: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
     wrapIv: 'AAAAAAAAAAAAAAAA', wrappedFileKey: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'});
@@ -70,15 +76,30 @@ function fixture({online = true, documents = [{id: 'document-1', type: 'Patente'
     const mount = createProfileDocumentAttachmentsProvider({context, getUser: () => ({uid: state.uid}), repository, service,
         hash, isOnline: () => online, objectUrl, trusted: {auth: {uid: state.uid}, app: {appId: 'fixture'}},
         createAttachmentId: () => 'attachment-1', createOperationId: () => 'operation-1'});
-    return {state, abort, context, mount, root: new Node('root'), documents};
+    return {state, abort, context, mount, root: new Node('root'), documents, repository};
 }
+
+test('failed initial mount releases its abort listeners and allows a clean retry', async () => {
+    const f = fixture();
+    const read = f.repository.readDocuments;
+    const baseline = getEventListeners(f.abort.signal, 'abort').length;
+    f.repository.readDocuments = async () => {throw Error('SYNTHETIC_READ_FAILURE');};
+    await assert.rejects(f.mount(f.root), /SYNTHETIC_READ_FAILURE/);
+    assert.equal(getEventListeners(f.abort.signal, 'abort').length, baseline);
+    assert.equal(f.root.children.length, 0);
+    f.repository.readDocuments = read;
+    const dispose = await f.mount(f.root);
+    assert.ok(rows(f.root).length > 0);
+    dispose();
+    assert.equal(getEventListeners(f.abort.signal, 'abort').length, baseline);
+});
 test('the provider mounts the Allegato action inside the documents section and marks the legacy rows', async () => {
     const f = fixture();
     const root = new Node('panel');
     const dispose = await f.mount(root, {signal: f.abort.signal});
     const [allowed, legacy] = rows(root);
     assert.deepEqual(walk(allowed).filter(node => node.dataset?.documentAttachmentAction).map(node => node.dataset.documentAttachmentAction),
-        ['edit', 'trash', 'attach']);
+        ['attach'], 'integrated provider must not expose inert document edit/trash buttons');
     assert.equal(action(legacy, 'attach')[0].disabled, true);
     assert.match(walk(legacy).find(node => node.dataset?.documentAttachmentLegacy === 'true').textContent, /senza ID persistito/);
     action(rows(root)[0], 'attach')[0].dispatchEvent(new Event('click'));
@@ -99,7 +120,7 @@ test('the mounted surface uploads several files, refreshes the gallery and delet
     assert.equal(input.multiple, true);
     input.files = [{name: 'a.jpg', type: 'image/jpeg', arrayBuffer: async () => Uint8Array.from([1, 2, 3])}];
     input.dispatchEvent(new Event('change'));
-    await settle();
+    await waitUntil(() => f.state.uploads.length === 1 && items(root).length === 1);
     assert.equal(f.state.sealed, 1, 'the bytes are sealed through the session capability');
     assert.equal(f.state.uploads.length, 1);
     assert.equal(f.state.uploads[0].documentId, 'document-1');
@@ -114,7 +135,7 @@ test('the mounted surface uploads several files, refreshes the gallery and delet
     action(walk(root).find(node => node.dataset?.documentAttachmentPreview === 'true'), 'close')[0].dispatchEvent(new Event('click'));
     assert.deepEqual(f.state.revoked, ['blob:1']);
     action(items(root)[0], 'delete')[0].dispatchEvent(new Event('click'));
-    await settle();
+    await waitUntil(() => f.state.removes.length === 1 && items(root).length === 0);
     assert.equal(f.state.removes.length, 1);
     assert.equal(items(root).length, 0, 'the gallery refreshes right after the deletion');
     dispose();

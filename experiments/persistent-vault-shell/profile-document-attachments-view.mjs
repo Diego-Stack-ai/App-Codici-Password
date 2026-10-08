@@ -21,7 +21,7 @@ const message = (host, key) => {
     return node;
 };
 export function mountProfileDocumentAttachments(root, {source, documents = [], isOnline = () => true,
-    confirm = async () => true, canEdit = () => true}) {
+    confirm = async () => true, canEdit = () => true, documentActions = true}) {
     const controls = new AbortController();
     const status = message(root, 'documentAttachmentStatus');
     const rowsHost = document.createElement('div');
@@ -29,9 +29,13 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
     root.append(rowsHost, panel);
     const rows = [], galleryHost = document.createElement('div');
     let activeDocumentId = null, busy = false;
+    let disposed = false, revision = 0, previewRevision = 0;
+    const current = ticket => !disposed && ticket === revision;
     const model = () => ({documents: documents.map(entry => ({...entry,
         identity: documentAttachmentIdentity(documents, entry.id)}))});
     function render(projection = null) {
+        if (disposed) return;
+        const ticket = revision;
         const online = isOnline();
         panel.replaceChildren();
         const file = document.createElement('input');
@@ -40,19 +44,20 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
         file.dataset.documentAttachmentAction = 'input';
         file.disabled = busy || !online || !projection?.canWrite;
         file.addEventListener('change', async () => {
-            if (busy || !online) return;
+            if (!current(ticket) || busy || !isOnline() || !projection?.canWrite) return;
             busy = true;
             try {
                 const outcome = await source.upload(file.files ?? []);
+                if (!current(ticket)) return;
                 const failed = outcome.results.filter(result => result.status !== 'confirmed');
                 text(status, failed.length
                     ? `${failed.length} allegati non caricati (${failed.map(result => result.code).join(', ')})`
                     : `${outcome.results.length} allegati caricati`);
             } catch (error) {
-                text(status, `Caricamento non riuscito: ${error.message}`);
+                if (current(ticket)) text(status, `Caricamento non riuscito: ${error.message}`);
             } finally {
                 busy = false;
-                await refresh();
+                if (current(ticket)) await refresh();
             }
         }, {signal: controls.signal});
         panel.append(file);
@@ -66,25 +71,31 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
             const open = button(item, 'Apri', 'open');
             open.disabled = busy || !online || !attachment.available;
             open.addEventListener('click', async () => {
+                if (!current(ticket) || busy || !isOnline() || !attachment.available) return;
+                const opening = ++previewRevision;
                 try {
                     const opened = await source.open(attachment.attachmentId);
-                    show(opened);
+                    if (current(ticket) && opening === previewRevision) show(opened);
                 } catch (error) {
-                    text(status, `Apertura non riuscita: ${error.message}`);
+                    if (current(ticket) && opening === previewRevision) text(status, `Apertura non riuscita: ${error.message}`);
                 }
             }, {signal: controls.signal});
             const remove = button(item, 'Cancella', 'delete');
-            remove.disabled = busy || !online || attachment.status !== 'ready';
+            remove.disabled = busy || !online || !projection?.canWrite || attachment.status !== 'ready';
             remove.addEventListener('click', async () => {
-                if (!await confirm()) return;
+                if (!current(ticket) || busy || !isOnline() || !projection?.canWrite || attachment.status !== 'ready') return;
+                busy = true;
                 try {
+                    if (!await confirm() || !current(ticket) || !isOnline()) return;
                     const outcome = await source.remove(attachment.attachmentId);
+                    if (!current(ticket)) return;
                     text(status, outcome.status === 'confirmed' ? 'Allegato cancellato'
                         : `Cancellazione non completata (${outcome.code})`);
                 } catch (error) {
-                    text(status, `Cancellazione non riuscita: ${error.message}`);
+                    if (current(ticket)) text(status, `Cancellazione non riuscita: ${error.message}`);
                 } finally {
-                    await refresh();
+                    busy = false;
+                    if (current(ticket)) await refresh();
                 }
             }, {signal: controls.signal});
             galleryHost.append(item);
@@ -95,25 +106,30 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
         text(invalid, `${projection.invalid.length} allegati non verificabili`);
     }
     function show(opened) {
+        for (const node of Array.from(panel.children)) if (node.dataset?.documentAttachmentPreview === 'true') node.remove();
         const preview = document.createElement('figure');
         preview.dataset.documentAttachmentPreview = 'true';
         const image = document.createElement('img');
         image.src = opened.url;
         image.alt = 'Anteprima allegato';
         const close = button(preview, 'Chiudi', 'close');
-        close.addEventListener('click', () => {source.close(); preview.remove();}, {signal: controls.signal});
+        close.addEventListener('click', () => {previewRevision++; source.close(); preview.remove();}, {signal: controls.signal});
         preview.append(image, close);
         panel.append(preview);
     }
     async function refresh() {
+        if (disposed) return;
+        const ticket = ++revision; previewRevision++; source.close();
+        panel.replaceChildren();
         try {
             const projection = activeDocumentId ? await source.load(activeDocumentId) : null;
+            if (!current(ticket)) return;
             render(projection);
             if (projection && !projection.canWrite) {
                 text(status, projection.online ? 'Consultazione: allegati non modificabili' : 'Offline: sola consultazione degli allegati');
             }
         } catch (error) {
-            text(status, `Allegati non disponibili: ${error.message}`);
+            if (current(ticket)) text(status, `Allegati non disponibili: ${error.message}`);
         }
     }
     for (const document_ of model().documents) {
@@ -122,10 +138,12 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
         row.dataset.documentId = document_.id ?? '';
         row.append(text(document.createElement('span'), document_.type ?? document_.id ?? 'Documento'));
         const actions = document.createElement('div');
-        const edit = button(actions, 'Modifica', 'edit');
-        edit.disabled = !canEdit(document_) || !document_.identity.allowed;
-        const trash = button(actions, 'Cestino', 'trash');
-        trash.disabled = !canEdit(document_) || !document_.identity.allowed;
+        if (documentActions) {
+            const edit = button(actions, 'Modifica', 'edit');
+            edit.disabled = !canEdit(document_) || !document_.identity.allowed;
+            const trash = button(actions, 'Cestino', 'trash');
+            trash.disabled = !canEdit(document_) || !document_.identity.allowed;
+        }
         const attach = button(actions, 'Allegato', 'attach');
         attach.disabled = !document_.identity.allowed;
         if (!document_.identity.allowed) {
@@ -133,6 +151,7 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
             text(legacy, 'Documento senza ID persistito univoco: gli allegati non sono disponibili.');
         } else {
             attach.addEventListener('click', async () => {
+                if (disposed || busy) return;
                 activeDocumentId = document_.id;
                 text(status, 'Allegati del documento');
                 await refresh();
@@ -145,6 +164,10 @@ export function mountProfileDocumentAttachments(root, {source, documents = [], i
     void refresh();
     return Object.freeze({
         rows: Object.freeze(rows),
-        dispose() {controls.abort(); source.revoke(); panel.replaceChildren();}
+        dispose() {
+            if (disposed) return;
+            disposed = true; revision++; previewRevision++;
+            controls.abort(); source.revoke(); panel.replaceChildren(); status.textContent = '';
+        }
     });
 }

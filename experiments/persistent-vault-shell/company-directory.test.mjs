@@ -58,3 +58,12 @@ test('empty directory renders an explicit empty state',async()=>{
     const f=fixture(),root=new Node('root');const cleanup=await mountCompanyDirectory(root,f.context,{readCompanies:async()=>[],onOpenProfile(){},onOpenAccounts(){}});
     assert.ok(root.querySelectorAll('p').some(node=>node.textContent==='Nessuna azienda trovata.'));assert.equal(root.querySelectorAll('button').length,0);cleanup();
 });
+
+test('lock detected by a directory action clears visible and retained names without waiting for abort',async()=>{
+    const f=fixture(),root=new Node('root');let opened=0;
+    await mountCompanyDirectory(root,f.context,{readCompanies:f.read,onOpenProfile(){opened++;},onOpenAccounts(){opened++;}});
+    const title=root.querySelectorAll('h3')[0],button=root.querySelectorAll('button')[0],search=root.querySelectorAll('input')[0];
+    search.value='synthetic search';f.lock();button.dispatchEvent(new Event('click'));
+    assert.equal(opened,0);assert.equal(root.children.length,0);assert.equal(title.textContent,'');assert.equal(search.value,'');
+    button.dispatchEvent(new Event('click'));assert.equal(opened,0);
+});

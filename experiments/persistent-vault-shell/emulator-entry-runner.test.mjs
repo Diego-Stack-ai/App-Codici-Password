@@ -1,6 +1,102 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
+import {createShellCommands} from './shell-commands.mjs';
+import {seedEmulatorAdmission} from './emulator-admission-seed.mjs';
+import {readFile} from 'node:fs/promises';
+import {runInNewContext} from 'node:vm';
+
+test('actual entry does not activate private gate when lock cancels pending login', async () => {
+    const source = await readFile(new URL('./emulator-entry.mjs', import.meta.url), 'utf8');
+    const match = source.match(/signIn: (async \(\) => \{[\s\S]*?\n    \}),\n    getSelectedRoute:/);
+    assert.ok(match, 'exercise the actual entry signIn callback');
+    let finish, activations = 0;
+    const scope = {activationEpoch: 0, usePrivateGate: true, auth: {}, byId: () => ({value: 'a'}),
+        signInWithEmailAndPassword: () => new Promise(resolve => {finish = resolve;}),
+        activatePrivateGate: async () => {activations++;}};
+    const login = runInNewContext(`(${match[1]})`, scope);
+    const pending = login();
+    scope.activationEpoch++; // commandSession.lock and pagehide both revoke this epoch.
+    finish();
+    await assert.rejects(pending, /AUTH_CHANGED/);
+    assert.equal(activations, 0);
+});
+
+for (const cancelled of [false, true]) {
+    test(`actual entry private gate script completion ${cancelled ? 'rejects revoked activation' : 'creates session and admits initial route'}`, async () => {
+        const source = await readFile(new URL('./emulator-entry.mjs', import.meta.url), 'utf8');
+        const start = source.indexOf('async function activatePrivateGate()');
+        const end = source.indexOf("window.addEventListener('pagehide'", start);
+        assert.ok(start >= 0 && end > start);
+        const calls = [];
+        let script;
+        const gate = {reject: () => calls.push('reject')};
+        const scope = {gateAttempted: false, activationEpoch: 0, auth: {currentUser: {uid: 'a'}},
+            selectedRoute: 'private', window: {privateAuthGate: gate},
+            session: {dispose: () => calls.push('old.dispose')},
+            document: {createElement: () => ({}), head: {append(value) {script = value; calls.push('append');}}},
+            createPrivateGatePresentation(options) {assert.equal(options.gate, gate); calls.push('presentation'); return {};},
+            createSession() {calls.push('session'); return {dispose: () => calls.push('new.dispose'), navigate: async route => calls.push(route)};}};
+        const activate = runInNewContext(`${source.slice(start, end)}\nactivatePrivateGate;`, scope);
+        const pending = activate();
+        assert.deepEqual(calls, ['old.dispose', 'append']);
+        assert.equal(script.src, '/assets/js/private-auth-gate.js');
+        if (cancelled) scope.activationEpoch++;
+        script.onload();
+        if (cancelled) {
+            await assert.rejects(pending, /AUTH_CHANGED/);
+            assert.deepEqual(calls, ['old.dispose', 'append', 'old.dispose', 'reject']);
+        } else {
+            await pending;
+            assert.deepEqual(calls, ['old.dispose', 'append', 'presentation', 'session', 'private']);
+        }
+        await assert.rejects(activate(), /GATE_RELOAD_REQUIRED/);
+    });
+}
+
+test('emulator admission reuses initialized App Check and rejects missing instance or wrong origin', async () => {
+    // Execute the actual module body with synthetic SDK dependencies, no network.
+    const source = (await readFile(new URL('./emulator-firebase.mjs', import.meta.url), 'utf8'))
+        .replace(/^import .*;\r?\n/gm, '').replace(/export /g, '') + '\nrequireEmulatorAppCheck;';
+    function fixture(instance, origin = 'http://127.0.0.1:4188') {
+        const location = {origin};
+        let initializations = 0;
+        const sdk = Object.fromEntries(['getFunctions', 'connectFunctionsEmulator', 'initializeAuth',
+            'connectAuthEmulator', 'getFirestore', 'initializeFirestore', 'persistentLocalCache',
+            'persistentMultipleTabManager', 'connectFirestoreEmulator', 'getStorage',
+            'connectStorageEmulator'].map(name => [name, () => ({})]));
+        const requireInstance = runInNewContext(source, {...sdk, location,
+            initializeApp: () => ({}), inMemoryPersistence: {}, indexedDBLocalPersistence: {},
+            CustomProvider: class {}, initializeAppCheck() {initializations++; return instance;}});
+        return {requireInstance, location, count: () => initializations};
+    }
+    const instance = {}, ready = fixture(instance);
+    assert.equal(ready.requireInstance(), instance);
+    assert.equal(ready.requireInstance(), instance);
+    assert.equal(ready.count(), 1);
+    ready.location.origin = 'https://example.invalid';
+    assert.throws(ready.requireInstance, /LOCAL_EMULATOR_ONLY/);
+    assert.throws(() => fixture(undefined).requireInstance(), /EMULATOR_APPCHECK_NOT_INITIALIZED/);
+    assert.throws(() => fixture(instance, 'http://localhost:4188'), /LOCAL_EMULATOR_ONLY/);
+});
+
+test('admission seed is restricted to exact demo loopback and known synthetic owners', async () => {
+    const calls = [];
+    const options = {projectId: 'demo-vault-shell', authHost: '127.0.0.1:9099', firestoreHost: '127.0.0.1:8085',
+        uid: 'synthetic-a', email: 'a@example.invalid',
+        getUser: async uid => ({uid, email: 'a@example.invalid'}),
+        updateUser: async (...args) => calls.push(['auth', ...args]),
+        writePolicy: async (...args) => calls.push(['policy', ...args])};
+    for (const change of [{projectId: 'production'}, {authHost: 'localhost:9099'},
+        {firestoreHost: 'remote:8085'}, {email: 'real@example.com'}, {uid: 'a/b'},
+        {getUser: async () => ({uid: 'other', email: options.email})}]) {
+        await assert.rejects(seedEmulatorAdmission({...options, ...change}));
+        assert.deepEqual(calls, []);
+    }
+    await seedEmulatorAdmission(options);
+    assert.deepEqual(calls, [['auth', 'synthetic-a', {emailVerified: true}],
+        ['policy', 'synthetic-a', {passwordPolicyVersion: 1}]]);
+});
 import {assertEveryBrowserReported, awaitDevToolsEndpoint} from './emulator-network-control.mjs';
 
 // Deterministic regression for the endpoint/exit race of the entry runner: a
@@ -14,6 +110,77 @@ const fakeBrowser = () => {
     return child;
 };
 const endpointLine = 'DevTools listening on ws://127.0.0.1:9333/devtools/browser/fixture\n';
+
+const commandTick = () => new Promise(resolve => setImmediate(resolve));
+function commandFixture(overrides = {}) {
+    const controls = Object.fromEntries(['login', 'unlock', 'lock', 'logout', 'private', 'profile', 'companies'].map(name => [name, new EventTarget()]));
+    const events = [], busy = [], errors = [];
+    const session = {lock: () => events.push('lock'), unlock: async () => {},
+        logout: async () => events.push('logout'), navigate: async route => events.push(route)};
+    const deps = {session, controls, signIn: async () => {}, getSelectedRoute: () => 'overview',
+        navigateList: route => events.push(route), setBusy: value => busy.push(value),
+        clearMessage() {}, refreshControls() {}, showError: error => errors.push(error), ...overrides};
+    return {deps, controls, events, busy, errors, click: name => controls[name].dispatchEvent(new Event('click'))};
+}
+for (const operation of ['login', 'unlock']) {
+    test(`${operation} completion after lock cannot navigate or overlap a second operation`, async () => {
+        let resolve, calls = 0;
+        const pending = new Promise(yes => {resolve = yes;});
+        const fixture = commandFixture();
+        const action = () => {calls++; return pending;};
+        if (operation === 'login') fixture.deps.signIn = action;
+        else fixture.deps.session.unlock = action;
+        const commands = createShellCommands(fixture.deps);
+        fixture.click(operation); fixture.click('lock'); fixture.click(operation);
+        assert.equal(calls, 1); assert.deepEqual(fixture.busy, [true]);
+        resolve(); await commandTick();
+        assert.deepEqual(fixture.events, ['lock']);
+        assert.deepEqual(fixture.busy, [true, false]);
+        fixture.click(operation); await commandTick();
+        assert.equal(calls, 2); assert.deepEqual(fixture.events, ['lock', 'overview']);
+        commands.dispose();
+    });
+}
+test('disposed commands detach every control and suppress pending completion UI', async () => {
+    let resolve;
+    const fixture = commandFixture({signIn: () => new Promise(yes => {resolve = yes;})});
+    const commands = createShellCommands(fixture.deps);
+    fixture.click('login'); commands.dispose(); commands.dispose();
+    for (const name of Object.keys(fixture.controls)) fixture.click(name);
+    resolve(); await commandTick();
+    assert.deepEqual(fixture.events, []); assert.deepEqual(fixture.busy, [true]);
+});
+test('failed partial command binding removes prior listeners', async () => {
+    const fixture = commandFixture();
+    delete fixture.controls.profile;
+    assert.throws(() => createShellCommands(fixture.deps), /profile/);
+    fixture.click('login'); fixture.click('private'); await commandTick();
+    assert.deepEqual(fixture.events, []); assert.deepEqual(fixture.busy, []);
+});
+test('route commands remain independent while authentication is pending', async () => {
+    let resolve;
+    const fixture = commandFixture({signIn: () => new Promise(yes => {resolve = yes;})});
+    const commands = createShellCommands(fixture.deps);
+    fixture.click('login');
+    for (const name of ['private', 'profile', 'companies']) fixture.click(name);
+    assert.deepEqual(fixture.events, ['private', 'profile', 'companies']);
+    resolve(); await commandTick(); commands.dispose();
+});
+test('obsolete rejection stays silent and UI startup failure releases command busy', async () => {
+    let reject;
+    const fixture = commandFixture({signIn: () => new Promise((yes, no) => {reject = no;})});
+    const commands = createShellCommands(fixture.deps);
+    fixture.click('login'); fixture.click('lock'); reject(Error('synthetic late rejection'));
+    await commandTick();
+    assert.deepEqual(fixture.errors, []); assert.deepEqual(fixture.busy, [true, false]);
+    commands.dispose();
+    let starts = 0;
+    const broken = commandFixture({clearMessage() {throw Error('synthetic UI failure');}, signIn() {starts++;}});
+    const binding = createShellCommands(broken.deps);
+    broken.click('login'); broken.click('login'); await commandTick();
+    assert.equal(starts, 0); assert.equal(broken.errors.length, 2);
+    assert.deepEqual(broken.busy, [true, false, true, false]); binding.dispose();
+});
 test('the endpoint is awaited once and reported', async () => {
     const child = fakeBrowser();
     const pending = awaitDevToolsEndpoint(child, {timeoutMs: 200});

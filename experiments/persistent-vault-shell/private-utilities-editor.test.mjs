@@ -35,6 +35,13 @@ test('linked deletion and unstable identities fail closed, while a new ID is per
     const id=f.source.createId(),request=await f.source.prepare({creates:[{id,fields:{type:'Fibra',value:'ABC'}}]},'create');assert.equal(request.operations[0].id,id);});
 test('offline, lock, logout and abort revoke writes and leave consultation read-only',async()=>{const off=fixture({online:false});assert.equal((await off.source.load()).canSave,false);await assert.rejects(off.source.prepare({},'x'),/SAVE_UNAVAILABLE/);
     for(const mode of ['lock','logout','abort']){const f=fixture();await f.source.load();if(mode==='lock')f.state.locked=true;if(mode==='logout')f.state.uid='other';if(mode==='abort')f.abort.abort();await assert.rejects(f.source.prepare({updates:[{id:'utility-one',fields:{type:'X'}}]},mode));}});
+test('utility draft is fixed at prepare invocation, before confirmed read resolves', async () => {
+    const f=fixture(); await f.source.load();
+    const draft={updates:[{id:'utility-one',fields:{type:'ORIGINAL'}}]};
+    const pending=f.source.prepare(draft,'snapshot'); draft.updates[0].fields.type='CHANGED';
+    assert.equal((await pending).operations[0].fields.type,'ORIGINAL');
+});
+
 test('candidate Rules close the utilities metadata through the existing A2 transform',()=>{const base=readFileSync(new URL('../../firestore.rules',import.meta.url),'utf8');
     const patched=withPrivateUtilitiesCandidateRules(base);assert.match(patched,/_profileUtilitiesRevision/);assert.match(patched,/_profileUtilitiesUpdatedAt/);
     assert.throws(()=>withPrivateUtilitiesCandidateRules(patched),/RULES_ALREADY_PATCHED|RULES_BASE_CHANGED/);});

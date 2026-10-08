@@ -18,6 +18,16 @@ test('canonical address and document fields work with explicitly supported legac
     assert.deepEqual((await f.read('addresses')).map(row => row.value), ['Via fittizia', '1']);
     assert.deepEqual((await f.read('documents')).map(row => row.value), ['ABC']);
 });
+test('document details display their note without reading credentials', async () => {
+    const f = fixture({documenti: [{name: 'Documento fittizio', note: 'enc:Nota salvata', password: 'enc:SECRET', pin: 'enc:PIN'}]});
+    assert.deepEqual(await f.read('documents'), [
+        {group: 'Documento 1', label: 'Nome documento', value: 'Documento fittizio'},
+        {group: 'Documento 1', label: 'Note', value: 'Nota salvata'}
+    ]);
+    assert.deepEqual(f.reads, ['enc:Nota salvata']);
+    f.lock(); await assert.rejects(f.read('documents'), /VAULT_LOCKED/);
+});
+
 test('contacts retain distinct source links to the same Account without reading profile passwords', async () => {
     const f = fixture({contactEmails: [{id: 'email', address: 'enc:a@example.invalid', linkedAccountId: 'shared', password: 'enc:DO-NOT-READ'}],
         contactPhones: [{id: 'phone', number: 'enc:000', linkedAccountId: 'shared'}]});

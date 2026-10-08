@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createLegacyAdapter} from './legacy-adapter.mjs';
-import {createProtectedSession} from './protected-session.mjs';
+import {createProtectedSession} from './test-support/protected-session.mjs';
+import {openDocumentImageBytes} from './profile-document-attachment-seal.mjs';
 const source = await readFile(new URL('../../Frontend/public/assets/js/modules/core/crypto-utils.js', import.meta.url), 'utf8');
 const cryptoApi = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const master = 'SOLO-FIXTURE!123456';
@@ -23,6 +24,16 @@ function fixture(options = {}) {
     return {adapter, changeUser(value) { user = value; observer(value); }, get unsubscribed() { return unsubscribed; }};
 }
 
+test('adapter preserves explicit lock reasons and the default manual reason', () => {
+    const reasons = [];
+    const f = fixture({onLock: reason => reasons.push(reason)});
+    f.adapter.lock('admission-refused');
+    f.adapter.lock('auth-change');
+    f.adapter.lock();
+    assert.deepEqual(reasons, ['admission-refused', 'auth-change', 'manual']);
+    f.adapter.dispose();
+});
+
 test('current v2 verifier/envelope decrypt the original record without rewriting it', async () => {
     const f = fixture();
     const record = Object.freeze({ownerId: 'a', ciphertext});
@@ -32,6 +43,36 @@ test('current v2 verifier/envelope decrypt the original record without rewriting
     f.adapter.dispose();
     assert.equal(f.unsubscribed, true);
     await assert.rejects(f.adapter.read(record), /AUTH_REQUIRED/);
+});
+
+test('binary adapter uses the existing random primary key for raw and CPVK2 material', async () => {
+    const aad = 'synthetic-owner-document-attachment';
+    for (const material of [randomKey, cryptoApi.createVaultKeyring(randomKey, 'LEGACY-TEXT-ONLY')]) {
+        const wrapped = await cryptoApi.wrapVaultKey(material, master);
+        const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+        await f.adapter.unlock();
+        const bytes = Uint8Array.from([1, 2, 3, 4]);
+        const sealed = await f.adapter.sealImage({bytes, aad});
+        assert.deepEqual(await f.adapter.openImage({...sealed, aad}), bytes);
+        const originalKey = Uint8Array.from(atob(randomKey), c => c.charCodeAt(0));
+        try {assert.deepEqual(await openDocumentImageBytes(originalKey, {...sealed, aad}), bytes);}
+        finally {originalKey.fill(0);}
+        await assert.rejects(f.adapter.openImage({...sealed, aad: 'another-document'}));
+        f.adapter.lock();
+        await assert.rejects(f.adapter.openImage({...sealed, aad}), /VAULT_LOCKED/);
+        assert.equal(f.adapter.key, undefined);
+        f.adapter.dispose();
+    }
+});
+
+test('binary adapter never derives a new key from legacy text or falls back to the keyring legacy key', async () => {
+    for (const material of ['LEGACY-TEXT-ONLY', cryptoApi.createVaultKeyring('invalid-primary', randomKey)]) {
+        const wrapped = await cryptoApi.wrapVaultKey(material, master);
+        const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+        await f.adapter.unlock();
+        await assert.rejects(f.adapter.sealImage({bytes: Uint8Array.of(1), aad: 'synthetic'}), /BINARY_VAULT_KEY_UNSUPPORTED/);
+        f.adapter.dispose();
+    }
 });
 
 test('adapter encrypts with the original crypto API and supports a round trip without exposing the key', async () => {

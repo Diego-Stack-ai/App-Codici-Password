@@ -1,7 +1,6 @@
 import {validateProfileTextRequest, profileTextId, profileTextRevision, profileTextBasis} from './profile-text-contract.mjs';
 
-// Candidate backend only; the future callable must supply verified Auth and
-// App Check context. Never exported by production Functions in this increment.
+// Auth and App Check are supplied exclusively by the callable middleware.
 export function createProfileTextHandler({db, hash, timestamp}) {
     const fail = code => {throw Error(code);};
     return async (data, trusted) => {
@@ -9,6 +8,7 @@ export function createProfileTextHandler({db, hash, timestamp}) {
         if (!profileTextId(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validateProfileTextRequest(data), {target, changes, expected, expectedRevision, operationId} = request;
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const digest = await hash(JSON.stringify({uid, ...request}));
         const path = target.domain === 'private' ? `users/${uid}` : `users/${uid}/aziende/${target.companyId}`;
         const recordRef = db.doc(path), receiptRef = db.doc(`mutationResults/${uid}/operations/profile-text-${operationId}`);
@@ -24,6 +24,7 @@ export function createProfileTextHandler({db, hash, timestamp}) {
             if (!snapshot.exists) fail('PROFILE_UNAVAILABLE');
             const record = snapshot.data(), revision = profileTextRevision(record);
             if (record.ownerId !== undefined && record.ownerId !== uid) fail('PROFILE_UNAVAILABLE');
+            if (target.domain === 'company' && record.id !== undefined && record.id !== target.companyId) fail('PROFILE_UNAVAILABLE');
             if (revision !== expectedRevision) fail('REVISION_CONFLICT');
             for (const field of Object.keys(changes)) {
                 if (await hash(profileTextBasis(record, field)) !== expected[field]) fail('FIELD_CONFLICT');
