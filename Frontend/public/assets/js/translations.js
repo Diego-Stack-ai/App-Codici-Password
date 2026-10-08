@@ -239,7 +239,7 @@ const _it = {
         privacy_7_title: "7. Comunicazione e condivisione",
         read_only_desc: "Memorandum o Account condiviso in sola lettura",
         read_only_mode: "Modalità lettura",
-        shared_attachments_unavailable: "Gli allegati del proprietario non sono inclusi nella condivisione.",
+        shared_attachments_unavailable: "Allegati condivisi in preparazione.",
         privacy_8_text: "I dati sono conservati finché l’account è attivo. Alla cancellazione, i dati vengono rimossi entro tempi tecnici compatibili con la piattaforma.",
         privacy_8_title: "8. Periodo di conservazione",
         privacy_9_text: "Accesso, rettifica, cancellazione, limitazione, portabilità e opposizione. È possibile revocare il consenso alle notifiche dalle impostazioni.",

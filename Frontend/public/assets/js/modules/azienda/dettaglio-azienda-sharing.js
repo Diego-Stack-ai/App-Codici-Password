@@ -5,7 +5,7 @@
  * Init: initSharingModule(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.138';
+import { auth, db } from '../../firebase-config.js?v=1.2.139';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';

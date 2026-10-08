@@ -18,6 +18,24 @@ service cloud.firestore {
     function isGuestReadableAccount() {
       return isAcceptedGuest() && resource.data.get('isArchived', false) == false;
     }
+    function isAcceptedPrivateAccountGuest(userId, accountId) {
+      let path = /databases/$(database)/documents/users/$(userId)/accounts/$(accountId);
+      let account = get(path);
+      return isAuth() && exists(path) && account.data.get('isArchived', false) == false &&
+        request.auth.uid in account.data.get('sharedWithUids', []);
+    }
+    function isAcceptedCompanyAccountGuest(userId, companyId, accountId) {
+      let path = /databases/$(database)/documents/users/$(userId)/aziende/$(companyId)/accounts/$(accountId);
+      let account = get(path);
+      return isAuth() && exists(path) && account.data.get('isArchived', false) == false &&
+        request.auth.uid in account.data.get('sharedWithUids', []);
+    }
+    function hasSafeRecipientAttachmentEnvelope() {
+      // Questo indice viene scritto dalla Cloud Function soltanto nella stessa
+      // operazione che pubblica la busta personale ed elimina il vecchio URL.
+      // Essendo un array, Firestore può verificare anche le query di elenco.
+      return request.auth.uid in resource.data.get('sharedReadyRecipientUids', []);
+    }
 
     // Solo Cloud Functions (Admin SDK) può leggere o scrivere i codici di recupero.
     match /mfaRecovery/{userId} {
@@ -134,7 +152,21 @@ service cloud.firestore {
         collection != 'profileWidgets' &&
         collection != 'accountWidgets' &&
         collection != 'sharedVaultData' &&
-        collection != 'sharedVaultLinks';
+        collection != 'sharedVaultLinks' &&
+        collection != 'cryptoIdentity';
+    }
+
+    // Identità ECDH M5: soltanto la chiave pubblica è leggibile dagli utenti
+    // autenticati. La busta privata è leggibile esclusivamente dal suo titolare;
+    // entrambe sono create dal backend e non sostituibili dal client.
+    match /cryptoPublicKeys/{userId} {
+      allow get: if isAuth();
+      allow list, write: if false;
+    }
+
+    match /users/{userId}/cryptoIdentity/{identityId} {
+      allow get: if isOwner(userId) && identityId == 'current';
+      allow list, write: if false;
     }
 
     // Company deletion must use the coordinated server protocol. A stale or
@@ -200,8 +232,16 @@ service cloud.firestore {
     match /users/{userId}/accounts/{accountId} {
       allow get, list: if isGuestReadableAccount();
     }
+    match /users/{userId}/accounts/{accountId}/attachments/{attachmentId} {
+      allow get, list: if isAcceptedPrivateAccountGuest(userId, accountId) &&
+        hasSafeRecipientAttachmentEnvelope();
+    }
     match /users/{userId}/aziende/{aziendaId}/accounts/{accountId} {
       allow get, list: if isGuestReadableAccount();
+    }
+    match /users/{userId}/aziende/{aziendaId}/accounts/{accountId}/attachments/{attachmentId} {
+      allow get, list: if isAcceptedCompanyAccountGuest(userId, aziendaId, accountId) &&
+        hasSafeRecipientAttachmentEnvelope();
     }
     match /{path=**}/accounts/{accountId} {
       allow get, list: if isGuestReadableAccount();

@@ -20,11 +20,36 @@ service firebase.storage {
             request.resource.metadata.encrypted == 'v1'));
     }
 
+    function isAcceptedPrivateAccountGuest(userId, accountId) {
+      let path = /databases/(default)/documents/users/$(userId)/accounts/$(accountId);
+      let account = firestore.get(path);
+      return request.auth != null && firestore.exists(path) && account.data.get('isArchived', false) == false &&
+        request.auth.uid in account.data.get('sharedWithUids', []);
+    }
+
+    function isAcceptedCompanyAccountGuest(userId, companyId, accountId) {
+      let path = /databases/(default)/documents/users/$(userId)/aziende/$(companyId)/accounts/$(accountId);
+      let account = firestore.get(path);
+      return request.auth != null && firestore.exists(path) && account.data.get('isArchived', false) == false &&
+        request.auth.uid in account.data.get('sharedWithUids', []);
+    }
+
     // Materiale editoriale dell'app: leggibile esclusivamente dopo il login.
     // Il client non può creare, sostituire o cancellare questi file.
     match /app-media/{allPaths=**} {
       allow read: if request.auth != null;
       allow write: if false;
+    }
+
+    // Il destinatario può scaricare soltanto i byte cifrati dell'Account ancora
+    // condiviso. La decifratura richiede inoltre la sua busta personale salvata
+    // nei metadati Firestore; la revoca dell'ACL blocca subito il download.
+    match /users/{userId}/accounts/{accountId}/attachments/{allPaths=**} {
+      allow read: if isOwner(userId) || isAcceptedPrivateAccountGuest(userId, accountId);
+    }
+
+    match /users/{userId}/aziende/{companyId}/accounts/{accountId}/attachments/{allPaths=**} {
+      allow read: if isOwner(userId) || isAcceptedCompanyAccountGuest(userId, companyId, accountId);
     }
 
     // Tutti gli oggetti applicativi sono confinati nello spazio dell'UID.

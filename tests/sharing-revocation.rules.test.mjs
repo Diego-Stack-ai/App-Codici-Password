@@ -2,7 +2,7 @@ import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {collection, deleteDoc, doc, getDoc, runTransaction, setDoc, updateDoc} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, getDocs, query, runTransaction, setDoc, updateDoc, where} from 'firebase/firestore';
 
 // M7-R4 correzione (revisione Codex 21/09/2026): prova mirata sulla revoca di un
 // ospite che ha già accettato. La transazione reale del dettaglio privato
@@ -115,6 +115,32 @@ test('l\'ospite accettato legge prima della revoca e non legge più dopo', async
   await assertSucceeds(getDoc(doc(asGuest(), ...accountPath)));
   await assertSucceeds(revocationTransaction(asOwner(), {notifyGuest: false}));
   await assertFails(getDoc(doc(asGuest(), ...accountPath)));
+});
+
+test('l’ospite legge i metadati allegato soltanto finché il Memorandum è condiviso', async () => {
+  const attachmentPath = [...accountPath, 'attachments', 'attachment-1'];
+  await testEnv.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), ...attachmentPath), {
+    name: 'fixture.pdf', storagePath: `users/${OWNER}/accounts/${ACCOUNT}/attachments/fixture.bin`,
+    encryption: {version: 1}, recipientKeyEnvelopes: {[GUEST]: {version: 1}},
+    sharedReadyRecipientUids: [GUEST]
+  }));
+  await assertSucceeds(getDoc(doc(asGuest(), ...attachmentPath)));
+  await assertSucceeds(getDocs(query(collection(asGuest(), ...accountPath, 'attachments'),
+    where('sharedReadyRecipientUids', 'array-contains', GUEST))));
+  await assertFails(getDoc(doc(asStranger(), ...attachmentPath)));
+  await assertSucceeds(revocationTransaction(asOwner(), {notifyGuest: false}));
+  await assertFails(getDoc(doc(asGuest(), ...attachmentPath)));
+});
+
+test('i metadati allegato restano chiusi senza la preparazione backend per il destinatario', async () => {
+  const missingEnvelope = [...accountPath, 'attachments', 'missing-envelope'];
+  await testEnv.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    await setDoc(doc(db, ...missingEnvelope), {
+      name: 'non-pronto.pdf', storagePath: 'safe/path', encryption: {version: 1}, recipientKeyEnvelopes: {}
+    });
+  });
+  await assertFails(getDoc(doc(asGuest(), ...missingEnvelope)));
 });
 
 test('un utente non proprietario non modifica l\'Account né l\'invito', async () => {

@@ -210,18 +210,14 @@ test('private late attachment list and decrypted bytes cannot render or open aft
     }
 });
 
-test('shared read-only detail explains that owner attachments are not shared without querying them', async () => {
+test('shared read-only detail queries the authorized owner attachment collection', async () => {
     const f = attachmentFixture();
     let reads = 0;
-    f.context.t = key => key === 'shared_attachments_unavailable'
-        ? 'Gli allegati del proprietario non sono inclusi nella condivisione.'
-        : '';
     f.context.listPrivateAccountAttachments = async () => { reads++; return []; };
-    f.init('A', {readOnly: true});
+    f.init('A', {readOnly: true, currentUid: 'guest'});
     await f.context.loadPrivateAttachments();
-    assert.equal(reads, 0);
-    assert.equal(f.nodes['attachments-list'].children[0].textContent,
-        'Gli allegati del proprietario non sono inclusi nella condivisione.');
+    assert.equal(reads, 1);
+    assert.equal(f.nodes['attachments-list'].children[0].textContent, 'Nessun allegato');
 });
 
 test('private sharing confirmation and transaction reads cannot revoke under a new account', async () => {

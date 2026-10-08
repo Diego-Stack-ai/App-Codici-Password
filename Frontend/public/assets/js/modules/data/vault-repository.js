@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.138';
+import {db} from '../../firebase-config.js?v=1.2.139';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -71,6 +71,12 @@ export const getCompanyAccountConfirmed = (uid, companyId, accountId) => readCon
 export const getUserSetting = (uid, settingId) => getRecordByPath(`users/${uid}/settings/${settingId}`);
 export const getUserSettingConfirmed = (uid, settingId) => readConfirmedRecord(
     doc(db, 'users', uid, 'settings', settingId));
+export const getSharingPublicIdentity = (uid, confirmed = false) => confirmed
+    ? readConfirmedRecord(doc(db, 'cryptoPublicKeys', uid))
+    : readRecord(`sharing-public-identity:${uid}`, doc(db, 'cryptoPublicKeys', uid));
+export const getSharingPrivateIdentity = (uid, confirmed = false) => confirmed
+    ? readConfirmedRecord(doc(db, 'users', uid, 'cryptoIdentity', 'current'))
+    : readRecord(`sharing-private-identity:${uid}`, doc(db, 'users', uid, 'cryptoIdentity', 'current'));
 
 export const listCompanies = uid => readRecords(`companies:${uid}`,
     collection(db, 'users', uid, 'aziende'));
@@ -106,17 +112,19 @@ export const getDeadlineNotification = (uid, notificationId) =>
 export const listDeadlineNotifications = uid => readRecords(`deadline-notifications:${uid}`,
     collection(db, 'users', uid, 'deadlineNotifications'));
 
-export const listCompanyAccountAttachments = (uid, companyId, accountId) =>
-    readRecords(`company-account-attachments:${uid}:${companyId}:${accountId}`, query(
-        collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'),
-        orderBy('createdAt', 'desc')
-    ));
+export const listCompanyAccountAttachments = (uid, companyId, accountId, recipientUid = '') =>
+    readRecords(`company-account-attachments:${uid}:${companyId}:${accountId}:${recipientUid}`, recipientUid
+        ? query(collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'),
+            where('sharedReadyRecipientUids', 'array-contains', recipientUid))
+        : query(collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'),
+            orderBy('createdAt', 'desc')));
 
-export const listPrivateAccountAttachments = (uid, accountId) =>
-    readRecords(`private-account-attachments:${uid}:${accountId}`, query(
-        collection(db, 'users', uid, 'accounts', accountId, 'attachments'),
-        orderBy('createdAt', 'desc')
-    ));
+export const listPrivateAccountAttachments = (uid, accountId, recipientUid = '') =>
+    readRecords(`private-account-attachments:${uid}:${accountId}:${recipientUid}`, recipientUid
+        ? query(collection(db, 'users', uid, 'accounts', accountId, 'attachments'),
+            where('sharedReadyRecipientUids', 'array-contains', recipientUid))
+        : query(collection(db, 'users', uid, 'accounts', accountId, 'attachments'),
+            orderBy('createdAt', 'desc')));
 
 export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
 // M7-R7C-4: quando l'Account è sospeso il get è negato dalle Rules; l'invito del

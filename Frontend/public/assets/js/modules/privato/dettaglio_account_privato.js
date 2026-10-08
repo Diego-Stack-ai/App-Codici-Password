@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.138';
+import { auth, db } from '../../firebase-config.js?v=1.2.139';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -281,7 +281,8 @@ async function loadAccount(mount = mounted) {
             signal.addEventListener('abort', cancel, {once: true});
             return pending.finally(() => { confirmationPending = false; signal.removeEventListener('abort', cancel); });
         };
-        initPrivateAttachmentModule({ownerId: lookupOwner, accountId: resolvedId, readOnly, isActive: actionActive, signal, confirm});
+        initPrivateAttachmentModule({ownerId: lookupOwner, currentUid: lookupUid, accountId: resolvedId,
+            account: loaded, readOnly, isActive: actionActive, signal, confirm});
         initPrivateSharingModule({currentUid: lookupUid, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
         setupEditAction(resolvedId, actionActive);
         if (!readOnly) updateDoc(docRef, {views: increment(1)}).catch(error => { if (active()) logError('UpdateViews', error); });
@@ -308,9 +309,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.138').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.139').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.138').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.139').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());
