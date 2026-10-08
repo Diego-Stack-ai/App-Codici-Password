@@ -104,7 +104,7 @@ await build({
   legalComments: 'none'
 });
 
-const cacheableExtensions = new Set(['.html', '.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2']);
+const cacheableExtensions = new Set(['.html', '.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
 const onlineOnlyDiagnostics = new Set([
   'prova.html',
   'assets/css/prova.css',

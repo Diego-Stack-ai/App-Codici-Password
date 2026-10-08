@@ -221,6 +221,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/vendor/firebase-runtime.js",
   "assets/js/vendor/firebase-sw-runtime.js",
   "assets/js/vendor/qrcode.min.js",
+  "assets/pdf/LiberationSans-Bold.ttf",
+  "assets/pdf/LiberationSans-Regular.ttf",
   "configurazione_automezzi.html",
   "configurazione_documenti.html",
   "configurazione_generali.html",

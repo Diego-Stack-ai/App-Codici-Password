@@ -8,7 +8,7 @@ import {runInNewContext} from 'node:vm';
 
 test('actual entry does not activate private gate when lock cancels pending login', async () => {
     const source = await readFile(new URL('./emulator-entry.mjs', import.meta.url), 'utf8');
-    const match = source.match(/signIn: (async \(\) => \{[\s\S]*?\n    \}),\n    getSelectedRoute:/);
+    const match = source.match(/signIn: (async \(\) => \{[\s\S]*?\r?\n    \}),?\r?\n    getSelectedRoute:/);
     assert.ok(match, 'exercise the actual entry signIn callback');
     let finish, activations = 0;
     const scope = {activationEpoch: 0, usePrivateGate: true, auth: {}, byId: () => ({value: 'a'}),
