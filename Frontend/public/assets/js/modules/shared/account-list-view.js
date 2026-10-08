@@ -5,6 +5,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { accountModeFromRecord } from './account-mode-model.js';
 import { createCardSecretResolver } from './card-secret.js';
+import { createAccountAvatar } from './account-avatar.js';
 
 function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false, signal, resolveSecret) {
     const rowId = crypto.randomUUID();
@@ -108,10 +109,7 @@ function createAccountCard(account, options) {
             createElement('div', { className: 'account-card-layout' }, [
                 createElement('div', { className: 'account-card-left' }, [
                     createElement('div', { className: 'account-icon-box' }, [
-                        createElement('img', {
-                            className: 'account-avatar',
-                            src: account.logo || account.avatar || 'assets/images/google-avatar.png'
-                        }),
+                        createAccountAvatar(account),
                         createElement('div', { className: `account-badge-dot ${theme.accent}` })
                     ]),
                     createElement('div', { className: 'account-card-info-group' }, [

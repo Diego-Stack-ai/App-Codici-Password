@@ -4,14 +4,17 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
 const root = new URL('../Frontend/public/', import.meta.url);
-const [init, core, settings, settingsScript, privateAccounts, companyAccounts, coreUi] = await Promise.all([
+const [init, core, settings, settingsScript, privateAccounts, companyAccounts, coreUi, accountAvatar, accountList, privateArea] = await Promise.all([
   readFile(new URL('assets/js/theme-init.js', root), 'utf8'),
   readFile(new URL('assets/css/core.css', root), 'utf8'),
   readFile(new URL('impostazioni.html', root), 'utf8'),
   readFile(new URL('assets/js/modules/settings/impostazioni.js', root), 'utf8'),
   readFile(new URL('assets/css/account_privati.css', root), 'utf8'),
   readFile(new URL('assets/css/account_azienda.css', root), 'utf8'),
-  readFile(new URL('assets/css/core_ui.css', root), 'utf8')
+  readFile(new URL('assets/css/core_ui.css', root), 'utf8'),
+  readFile(new URL('assets/js/modules/shared/account-avatar.js', root), 'utf8'),
+  readFile(new URL('assets/js/modules/shared/account-list-view.js', root), 'utf8'),
+  readFile(new URL('assets/js/modules/privato/area_privata.js', root), 'utf8')
 ]);
 
 function luminance(hex) {
@@ -74,4 +77,15 @@ test('new calming accents retain readable contrast in light and dark modes', () 
     assert.ok(contrast(palette.light, 'ffffff') >= 4.5);
     assert.ok(contrast(palette.dark, palette.darkBg) >= 4.5);
   }
+});
+
+test('Accounts without a custom image use the palette-aware Codex logo everywhere', () => {
+  assert.match(accountAvatar, /account\.logo \|\| account\.avatar/);
+  assert.match(accountAvatar, /textContent: 'shield_lock'/);
+  assert.doesNotMatch(accountAvatar + accountList + privateArea, /google-avatar\.png/);
+  for (const css of [privateAccounts, companyAccounts]) {
+    assert.match(css, /\.account-default-logo\s*\{[^}]*var\(--accent\)/s);
+  }
+  assert.match(accountList, /createAccountAvatar\(account\)/);
+  assert.match(privateArea, /createAccountAvatar\(data\)/);
 });

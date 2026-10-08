@@ -9,7 +9,7 @@
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.136';
+import { db, functions } from '../../firebase-config.js?v=1.2.137';
 import { LOG } from '../../logger.js';
 import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -20,6 +20,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {listAcceptedInvites, listContacts, listPrivateAccounts, listTopPrivateAccounts} from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
+import { createAccountAvatar } from '../shared/account-avatar.js';
 
 // State locale per evitare reload inutili
 let _isInitialized = false;
@@ -164,7 +165,6 @@ async function loadTopAccounts(uid) {
 }
 
 function createMicroAccountCard(id, data) {
-    const avatar = data.logo || data.avatar || 'assets/images/google-avatar.png';
     const mode = accountModeFromRecord(data);
     const isMemo = mode.startsWith('memo-');
     const isShared = mode.endsWith('-shared');
@@ -182,7 +182,7 @@ function createMicroAccountCard(id, data) {
             createElement('div', { className: 'account-card-layout' }, [
                 createElement('div', { className: 'account-card-left' }, [
                     createElement('div', { className: 'account-icon-box' }, [
-                        createElement('img', { className: 'account-avatar', src: avatar }), // class account-avatar not specialized but image fills box
+                        createAccountAvatar(data),
                         createElement('div', { className: `account-badge-dot ${badgeClass}` })
                     ]),
                     createElement('div', { className: 'account-card-info-group' }, [

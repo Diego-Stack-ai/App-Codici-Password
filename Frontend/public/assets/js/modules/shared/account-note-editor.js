@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.136';
+import {auth, db} from '../../firebase-config.js?v=1.2.137';
 import {doc, runTransaction, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {ensureVaultKeyMaterial, encrypt, decrypt} from '../core/security-manager.js';
 import {createElement} from '../../dom-utils.js';
