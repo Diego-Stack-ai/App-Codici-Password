@@ -814,6 +814,32 @@ select.shared-account-select-control optgroup {
     margin-top: var(--space-4, 1rem);
 }
 
+.account-widget-actions {
+    display: grid;
+    gap: var(--space-3, 0.75rem);
+    margin-bottom: var(--space-4, 1rem);
+    padding: var(--space-3, 0.75rem);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--surface-glass);
+}
+
+.account-widget-existing-picker {
+    min-width: 0;
+}
+
+.account-widget-picker-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2, 0.5rem);
+    align-items: center;
+}
+
+.account-widget-actions > #btn-add-account-widget {
+    justify-self: start;
+    gap: var(--space-2, 0.5rem);
+}
+
 .account-widget-card-actions {
     display: flex;
     gap: var(--space-2, 0.5rem);
@@ -934,6 +960,16 @@ select.shared-account-select-control optgroup {
 }
 
 @media (max-width: 520px) {
+    .account-widget-picker-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .account-widget-picker-row .btn-modal,
+    .account-widget-actions > #btn-add-account-widget {
+        width: 100%;
+        justify-content: center;
+    }
+
     .account-widget-editor-field {
         grid-template-columns: 1fr auto;
     }

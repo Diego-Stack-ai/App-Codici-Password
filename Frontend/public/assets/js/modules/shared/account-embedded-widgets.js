@@ -5,21 +5,12 @@ import {
     createAccountWidget, deleteAccountWidget, updateAccountWidget
 } from '../data/account-widget-client.js';
 import {
-    listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultDataConfirmed
+    listAccountWidgets, listAccountWidgetsConfirmed
 } from '../data/vault-repository.js';
-import {linkSharedCredential} from '../data/shared-vault-data-client.js';
 import {createAccountWidgetLifecycle, clearWidgetValues} from './account-widget-lifecycle.js';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
 
-
-function availableCommonCredentials(records, widgets, context) {
-    const linked = new Set(widgets.filter(widget => widget.kind === 'shared-reference' &&
-        widget.context === context.context && widget.accountId === context.accountId &&
-        (context.context !== 'company' || widget.companyId === context.companyId))
-        .map(widget => widget.sharedDataId));
-    return records.filter(record => !linked.has(record.id));
-}
 
 async function editableFields(widget) {
     if (!widget) return [{id: newId('field'), label: '', value: '', encrypted: false}];
@@ -94,14 +85,14 @@ function widgetData(widget, fields, collapsed = widget?.collapsed === true) {
     };
 }
 
-async function openEditor(widget, context, refresh, templates = [], commonRecords = []) {
-    if (!context.active()) return;
+async function openEditor(widget, context, refresh) {
+    if (!context.active()) return false;
     let fields;
     try { fields = await editableFields(widget); } catch {
         if (context.active()) showToast('Impossibile aprire i campi del Widget.', 'warning');
-        return;
+        return false;
     }
-    if (!context.active()) { fields.forEach(field => { field.value = ''; }); return; }
+    if (!context.active()) { fields.forEach(field => { field.value = ''; }); return false; }
     const overlay = createElement('div', {className: 'modal-overlay active'});
     let closed = false, unregister = () => {};
     const close = () => {
@@ -132,34 +123,6 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
     placement.value = selectedBankId;
     const fieldList = createElement('div', {className: 'account-widget-editor-fields'});
     fields.forEach(field => fieldList.appendChild(fieldRow(field)));
-    const templateSelect = !widget && (templates.length || commonRecords.length) ? createElement('select', {
-        className: 'shared-account-select-control', 'aria-label': 'Modello widget o credenziale comune'
-    }, [
-        createElement('option', {value: '', textContent: 'Crea widget personalizzato'}),
-        ...templates.map((template, index) => createElement('option', {
-            value: String(index), textContent: `Modello: ${template.title} · ${template.fields.length} campi`
-        })),
-        ...commonRecords.map((record, index) => createElement('option', {
-            value: `common:${index}`, textContent: `Collega credenziale comune: ${record.title || 'Senza titolo'}`
-        }))
-    ]) : null;
-    templateSelect?.addEventListener('change', () => {
-        const common = templateSelect.value.startsWith('common:');
-        placement.hidden = common;
-        title.hidden = fieldList.hidden = addField.hidden = common;
-        title.required = !common;
-        save.textContent = common ? 'Collega credenziale comune' : 'Salva';
-        if (templateSelect.value === '') return;
-        if (common) return;
-        const template = templates[Number(templateSelect.value)];
-        if (!template) return;
-        title.value = template.title;
-        clearElement(fieldList);
-        template.fields.forEach(field => fieldList.appendChild(fieldRow({
-            id: newId('field'), label: field.label, type: field.type,
-            encrypted: field.encrypted === true, value: ''
-        })));
-    });
     const addField = createElement('button', {
         type: 'button', className: 'btn-modal btn-secondary', textContent: 'Aggiungi campo',
         onclick: () => fieldList.appendChild(fieldRow())
@@ -169,25 +132,6 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
     form.addEventListener('submit', async event => {
         event.preventDefault();
         if (save.disabled || closed || !context.active()) return;
-        if (templateSelect?.value.startsWith('common:')) {
-            const record = commonRecords[Number(templateSelect.value.slice(7))];
-            if (!record || !context.editable || context.readOnly || !context.active?.()) return;
-            save.disabled = true;
-            try {
-                await linkSharedCredential(record.id, Number(record.revision || 0), {
-                    context: context.context, accountId: context.accountId,
-                    ...(context.context === 'company' ? {companyId: context.companyId} : {}),
-                    order: 0, collapsed: false
-                });
-                close();
-                if (!context.active()) return;
-                await context.onSharedLinked?.();
-                if (context.active()) showToast('Credenziale comune collegata. I valori restano condivisi.', 'success');
-            } catch {
-                if (context.active()) showToast('Collegamento non completato. Aggiorna e riprova.', 'error');
-            } finally { save.disabled = false; }
-            return;
-        }
         if (placement.value && context.isBankSaved && !context.isBankSaved(placement.value)) {
             showToast('Salva prima l’Account per registrare il conto bancario, poi riapri Modifica e aggiungi il Widget. I campi inseriti qui restano disponibili.', 'warning');
             return;
@@ -224,8 +168,8 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
     });
     setChildren(form, [
         createElement('h2', {className: 'modal-title', textContent: widget ? 'Modifica widget' : 'Nuovo widget'}),
-        createElement('p', {className: 'modal-text', textContent: 'Crea campi per questo Account oppure collega una Credenziale comune: i suoi valori restano condivisi con gli altri Account.'}),
-        templateSelect, placement, title, fieldList, addField,
+        createElement('p', {className: 'modal-text', textContent: 'Definisci un nuovo tipo di Widget e i campi da usare in questo Account.'}),
+        placement, title, fieldList, addField,
         createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
             createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
             save
@@ -236,6 +180,7 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
     }, [form]));
     document.body.appendChild(overlay);
     title.focus();
+    return true;
 }
 
 async function reveal(button, field, context) {
@@ -425,6 +370,9 @@ export async function initAccountEmbeddedWidgets(context) {
     const section = document.getElementById('account-widgets-section');
     const list = document.getElementById('account-widgets-list');
     const add = document.getElementById('btn-add-account-widget');
+    const templateSelect = document.getElementById('account-widget-template-select');
+    const attachTemplate = document.getElementById('btn-attach-account-widget');
+    const widgetActions = document.getElementById('account-widget-actions');
     const emptyController = {
         destroy() {},
         hasPendingChanges: () => false,
@@ -435,12 +383,19 @@ export async function initAccountEmbeddedWidgets(context) {
     if (!section || !list || !context?.uid || !context.accountId) return emptyController;
     const lifecycle = createAccountWidgetLifecycle(context, {section, list, add});
     context = {...context, ...lifecycle};
+    const editable = context.editable === true && context.readOnly !== true;
+    widgetActions?.classList.toggle('hidden', !editable);
     if (context.readOnly) { section.classList.add('hidden'); return {...emptyController, destroy: lifecycle.destroy}; }
     let readVersion = 0;
     let availableTemplates = [];
+    let templateChoices = new Map();
     const cards = new Map();
     context.registerCleanup(() => {
         availableTemplates = [];
+        templateChoices.clear();
+        if (templateSelect) { templateSelect.value = ''; clearElement(templateSelect); }
+        if (attachTemplate) { attachTemplate.onclick = null; attachTemplate.disabled = true; }
+        widgetActions?.classList.add('hidden');
         for (const {card} of cards.values()) { card.destroy?.(); card.remove(); }
         cards.clear();
     });
@@ -468,16 +423,73 @@ export async function initAccountEmbeddedWidgets(context) {
             return false;
         }
         try {
-            const [records, currentWidgets] = await Promise.all([
-                listSharedVaultDataConfirmed(context.uid), listAccountWidgetsConfirmed(context.uid)
-            ]);
-            if (!context.active()) return false;
-            await openEditor(null, {...context, bankId: typeof bankId === 'string' ? bankId : null}, refresh, availableTemplates,
-                typeof bankId === 'string' ? [] : availableCommonCredentials(records, currentWidgets, context));
-            return true;
+            return await openEditor(null, {...context, bankId: typeof bankId === 'string' ? bankId : null}, refresh);
         } catch {
             if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
             return false;
+        }
+    };
+    const updateTemplateMenu = () => {
+        if (!templateSelect || !attachTemplate) return;
+        templateChoices = new Map();
+        const choices = [];
+        const bankHosts = [...document.querySelectorAll('[data-bank-widget-id]')];
+        availableTemplates.forEach((template, templateIndex) => {
+            if (template.bankId) {
+                bankHosts.forEach((host, bankIndex) => {
+                    const value = `${templateIndex}:bank:${bankIndex}`;
+                    templateChoices.set(value, {template, bankId: host.dataset.bankWidgetId});
+                    choices.push(createElement('option', {
+                        value,
+                        textContent: `Widget bancario: ${template.title} → Conto #${bankIndex + 1}`
+                    }));
+                });
+                return;
+            }
+            const value = `${templateIndex}:account`;
+            templateChoices.set(value, {template, bankId: null});
+            choices.push(createElement('option', {value, textContent: `Widget: ${template.title}`}));
+        });
+        setChildren(templateSelect, [
+            createElement('option', {
+                value: '',
+                textContent: choices.length ? 'Scegli un widget già creato…' : 'Nessun widget già creato'
+            }),
+            ...choices
+        ]);
+        templateSelect.disabled = choices.length === 0;
+        templateSelect.value = '';
+        attachTemplate.disabled = true;
+    };
+    const addSelectedTemplate = async () => {
+        if (!editable || !context.active() || !templateSelect || !attachTemplate) return false;
+        const choice = templateChoices.get(templateSelect.value);
+        if (!choice) return false;
+        if (!navigator.onLine) {
+            showToast('L’aggiunta di un Widget richiede internet.', 'warning');
+            return false;
+        }
+        attachTemplate.disabled = true;
+        try {
+            const fields = (choice.template.fields || []).map((field, order) => ({
+                id: newId('field'), label: field.label, type: field.type,
+                encrypted: field.encrypted === true, value: '', order
+            }));
+            await createAccountWidget(widgetData({
+                ...choice.template,
+                bankId: choice.bankId,
+                order: cards.size,
+                collapsed: false
+            }, fields, false), context);
+            if (!context.active()) return false;
+            await refresh(true);
+            if (context.active()) showToast(choice.bankId ? 'Widget aggiunto al conto bancario.' : 'Widget aggiunto all’Account.', 'success');
+            return true;
+        } catch (error) {
+            if (context.active()) showToast(error.message || 'Aggiunta del Widget non riuscita.', 'error');
+            return false;
+        } finally {
+            if (context.active()) attachTemplate.disabled = !templateSelect.value;
         }
     };
     const refresh = async confirmed => {
@@ -493,7 +505,7 @@ export async function initAccountEmbeddedWidgets(context) {
         const seenTemplates = new Set();
         const templates = allWidgets.filter(widget => {
             if (widget.kind !== 'embedded' || !Array.isArray(widget.fields) || !widget.fields.length) return false;
-            const signature = `${widget.title}|${widget.fields.map(field => `${field.label}:${field.type}`).join('|')}`;
+            const signature = `${widget.bankId ? 'bank' : 'account'}|${widget.title}|${widget.fields.map(field => `${field.label}:${field.type}`).join('|')}`;
             if (seenTemplates.has(signature)) return false;
             seenTemplates.add(signature);
             return true;
@@ -506,6 +518,7 @@ export async function initAccountEmbeddedWidgets(context) {
             return;
         }
         availableTemplates = templates;
+        updateTemplateMenu();
         for (const {card} of cards.values()) { card.destroy?.(); card.remove(); }
         cards.clear();
         clearWidgetValues(list);
@@ -516,8 +529,12 @@ export async function initAccountEmbeddedWidgets(context) {
         }, context, refresh)}));
         placeBankWidgets();
         if (add) {
-            add.classList.toggle('hidden', !context.editable);
+            add.classList.toggle('hidden', !editable);
             add.onclick = openNewWidget;
+        }
+        if (templateSelect && attachTemplate) {
+            templateSelect.onchange = () => { attachTemplate.disabled = !templateChoices.has(templateSelect.value); };
+            attachTemplate.onclick = addSelectedTemplate;
         }
     };
     try { await refresh(false); } catch (error) { lifecycle.destroy(); throw error; }
