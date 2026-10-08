@@ -204,11 +204,28 @@ function selectorModal(records, close, onSelect) {
     credentialSelect.addEventListener('change', () => { confirm.disabled = !credentialSelect.value; });
     setChildren(overlay, createElement('section', {className: 'modal-box shared-account-selector', role: 'dialog', 'aria-modal': 'true'}, [
         createElement('h2', {className: 'modal-title', textContent: 'Collega Credenziale comune'}),
-        createElement('p', {className: 'modal-text', textContent: records.length ? 'Scegli un dato centrale esistente.' : 'Non ci sono altre Credenziali comuni disponibili. Creane una dalle Impostazioni.'}),
+        createElement('p', {className: 'modal-text', textContent: 'Questa funzione collega all’Account una Credenziale comune già creata nelle Impostazioni. Non ne crea una copia: tutti gli Account collegati usano lo stesso dato centrale.'}),
+        createElement('p', {className: 'modal-text', textContent: 'Se modifichi la Credenziale comune, la modifica sarà disponibile in tutti gli Account collegati. Scollegarla da questo Account non elimina la Credenziale comune né gli altri collegamenti.'}),
+        createElement('p', {className: 'modal-text', textContent: records.length ? 'Seleziona la Credenziale comune da mostrare in questo Account.' : 'Non ci sono altre Credenziali comuni disponibili. Puoi crearne una dalle Impostazioni.'}),
         credentialSelect,
         createElement('div', {className: 'modal-actions'}, [
             createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => close(overlay)}),
             confirm
+        ])
+    ]));
+    return overlay;
+}
+
+function newAccountExplanationModal(onContinue) {
+    const overlay = createElement('div', {className: 'modal-overlay active'});
+    const close = () => overlay.remove();
+    setChildren(overlay, createElement('section', {className: 'modal-box shared-account-selector', role: 'dialog', 'aria-modal': 'true'}, [
+        createElement('h2', {className: 'modal-title', textContent: 'Collega Credenziale comune'}),
+        createElement('p', {className: 'modal-text', textContent: 'Questa funzione salva prima il nuovo Account e poi permette di collegargli una Credenziale comune già creata nelle Impostazioni.'}),
+        createElement('p', {className: 'modal-text', textContent: 'La Credenziale non viene duplicata: le modifiche al dato centrale saranno disponibili in tutti gli Account collegati. Scollegarla in seguito non eliminerà la Credenziale comune.'}),
+        createElement('div', {className: 'modal-actions'}, [
+            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
+            createElement('button', {type: 'button', className: 'btn-modal btn-primary', textContent: 'Salva e continua', onclick: () => { close(); onContinue(); }})
         ])
     ]));
     return overlay;
@@ -225,8 +242,11 @@ export function initNewAccountSharedCredentials({saveButtonId}) {
         if (!navigator.onLine) return showToast('Salva online l’Account prima di collegare una credenziale comune.', 'warning');
         const save = document.getElementById(saveButtonId);
         if (!save || save.disabled) return;
-        save.dataset.openSharedCredentials = 'true';
-        save.click();
+        document.body.appendChild(newAccountExplanationModal(() => {
+            if (save.disabled || !navigator.onLine) return;
+            save.dataset.openSharedCredentials = 'true';
+            save.click();
+        }));
     };
 }
 
