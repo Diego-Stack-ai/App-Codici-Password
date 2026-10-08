@@ -30,7 +30,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
 import * as firebaseRuntime from './firebase-config.js?v=1.2.127';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
@@ -165,7 +165,101 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let inviteUnsubscribe = null;
 
+    // --- N1: avvisi di revoca ---
+    let n1CallbackEpoch = 0;
+    let n1Notices = null;
+    let n1PageHidden = false;
+    const n1IdPattern = /^n1rev-n-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    function stopN1ShareRevokedNotices() {
+        const previous = n1Notices;
+        n1Notices = null;
+        previous?.unsubscribe?.();
+        previous?.modal?.remove();
+        previous?.pending.clear();
+    }
+    window.addEventListener('pagehide', () => {
+        n1PageHidden = true;
+        ++n1CallbackEpoch;
+        stopN1ShareRevokedNotices();
+    });
+    window.addEventListener('private-auth-blocked', () => {
+        ++n1CallbackEpoch;
+        stopN1ShareRevokedNotices();
+    });
+    function startN1ShareRevokedNotices(uid, attempt, epoch) {
+        const gate = window.privateAuthGate;
+        const current = () => !n1PageHidden && epoch === n1CallbackEpoch && auth.currentUser?.uid === uid
+            && (!gate || (gate.active(attempt) && gate.isReady()));
+        if (!uid || !current()) return;
+        stopN1ShareRevokedNotices();
+        const state = {pending: new Set(), recent: [], token: null, modal: null, unsubscribe: null};
+        n1Notices = state;
+        const active = () => n1Notices === state && current();
+        const pump = () => {
+            if (!active() || state.token || !state.pending.size) return;
+            const id = state.pending.values().next().value;
+            state.pending.delete(id);
+            const token = {id, busy: false};
+            state.token = token;
+            const button = createElement('button', {
+                className: 'w-full p-4 rounded-2xl bg-purple-600 text-white', textContent: 'HO CAPITO (OK)',
+                onclick: async () => {
+                    if (!active() || state.token !== token || token.busy) return;
+                    token.busy = true;
+                    button.disabled = true;
+                    state.modal?.remove();
+                    state.modal = null;
+                    try {
+                        await updateDoc(doc(db, 'users', uid, 'notifications', id), {read: true});
+                        if (active()) {
+                            state.recent.push(id);
+                            if (state.recent.length > 50) state.recent.shift();
+                        }
+                    } catch {
+                        if (active()) state.pending.add(id);
+                        console.warn('[N1] conferma non registrata');
+                    } finally {
+                        if (state.token === token) {
+                            state.token = null;
+                            if (active()) pump();
+                        }
+                    }
+                }
+            });
+            state.modal = createElement('div', {id: 'n1-share-revoked-modal', className: 'modal-overlay active'}, [
+                createElement('div', {className: 'modal-box pb-8'}, [
+                    createElement('h3', {className: 'modal-title text-center', textContent: 'Accesso revocato'}),
+                    createElement('p', {className: 'modal-text text-center',
+                        textContent: "Il tuo accesso a un account condiviso e' terminato."}),
+                    createElement('div', {className: 'modal-actions'}, [button])
+                ])
+            ]);
+            document.body.appendChild(state.modal);
+        };
+        state.unsubscribe = onSnapshot(query(collection(db, 'users', uid, 'notifications'),
+            where('read', '==', false), where('type', '==', 'share_revoked'),
+            where('n1Protocol', '==', 'n1-invite-revocation'), limit(20)), snapshot => {
+            if (!active()) return;
+            const ids = snapshot.docs.filter(item => n1IdPattern.test(item.id)
+                && item.data()?.type === 'share_revoked' && item.data()?.read === false
+                && item.data()?.n1Protocol === 'n1-invite-revocation').map(item => item.id);
+            state.pending = new Set(ids.filter(id => id !== state.token?.id && !state.recent.includes(id)));
+            if (state.token && !state.token.busy && !ids.includes(state.token.id)) {
+                state.modal?.remove();
+                state.modal = null;
+                state.token = null;
+            }
+            pump();
+        }, () => {
+            if (n1Notices === state) stopN1ShareRevokedNotices();
+            console.warn('[N1] avvisi non disponibili');
+        });
+    }
+    // --- fine N1 avvisi di revoca ---
+
     onAuthStateChanged(auth, async (user) => {
+        const n1Epoch = ++n1CallbackEpoch;
+        stopN1ShareRevokedNotices();
         const gate = window.privateAuthGate;
         const authAttempt = gate?.begin(user?.uid);
         if (gate && authAttempt === null) { inviteUnsubscribe?.(); return; }
@@ -332,6 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         console.warn("[V3.1-SECURITY] Check if your emails in Auth and Firestore match exactly (case-sensitive).");
                     }
                 });
+                startN1ShareRevokedNotices(user.uid, authAttempt, n1Epoch);
 
             } catch (error) {
                 if (gate && !gate.isReady()) gate.reject('error');

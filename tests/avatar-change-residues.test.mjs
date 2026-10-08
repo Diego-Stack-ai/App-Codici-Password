@@ -21,11 +21,13 @@ const urlOf = path => `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/$
 const pathOf = url => decodeURIComponent(String(url).split('/o/')[1].split('?')[0]);
 const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const avatarModule = strip(await readFile(
-    new URL('../Frontend/public/assets/js/modules/privato/profilo-ui.js', import.meta.url), 'utf8'));
+    new URL('../Frontend/public/assets/js/modules/privato/profilo-ui.js', import.meta.url), 'utf8'))
+    .replace("import('../shared/attachment-security.js')", 'Promise.resolve({createStorageObjectName, MAX_AVATAR_BYTES, validateAttachmentFile})');
 const securityModule = strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8'));
 
 function fixture({previous = null, uid = 'A'} = {}) {
+    const events = new EventTarget();
     const bucket = new Map(previous ? [[previous, Uint8Array.from([1, 2, 3])]] : []);
     const users = new Map([[uid, {}]]);
     if (previous) users.get(uid).photoURL = urlOf(previous);
@@ -37,13 +39,14 @@ function fixture({previous = null, uid = 'A'} = {}) {
         'profile-avatar': {src: '', classList: {remove() {}}}
     };
     const context = vm.createContext({
+        addEventListener: events.addEventListener.bind(events),
         File, crypto, TextEncoder, TextDecoder, console: {warn() {}}, Date, localStorage: {
             setItem: (key, value) => cache.set(key, value),
             getItem: key => cache.get(key) ?? null,
             removeItem: key => cache.delete(key)
         },
         document: {getElementById: id => nodes[id] || null},
-        db: {}, storage: {},
+        db: {}, storage: {}, auth: {get currentUser() {return {uid: currentUid};}},
         ref: (_storage, path) => path,
         doc: (_db, ...path) => path.join('/'),
         uploadBytes: async (path, data) => {
@@ -77,6 +80,7 @@ function fixture({previous = null, uid = 'A'} = {}) {
     const file = (name = 'avatar.jpg', type = 'image/jpeg') =>
         new File([Uint8Array.from([4, 5, 6])], name, {type});
     return {context, nodes, bucket, users, cache, operations, writes, toasts, errors, hooks, urlOf, pathOf,
+        dispatch: name => events.dispatchEvent(new Event(name)),
         upload: async (name, type) => {
             nodes['avatar-input'].value = 'synthetic';
             const handle = nodes['avatar-input'].onchange;
@@ -156,7 +160,7 @@ test('T-28: un errore parziale lascia il riferimento vecchio e può creare un or
     }
 });
 
-test('T-28: cambio di sessione durante il caricamento, dove finiscono byte e riferimento', async () => {
+test('avatar: cambio di sessione durante upload impedisce riferimento, cache e UI tardivi', async () => {
     const previous = 'users/A/avatar_1700000000000_old.jpg';
     const f = fixture({previous});
     let release;
@@ -168,20 +172,68 @@ test('T-28: cambio di sessione durante il caricamento, dove finiscono byte e rif
     };
     const pending = f.upload();
     await new Promise(setImmediate);
-    // La sessione cambia mentre il caricamento è in corso: `setupAvatarEdit` ha
-    // già letto l'uid all'inizio, quindi non c'è alcun controllo di sessione.
+    // La richiesta già partita può terminare; i passi successivi devono fermarsi.
     f.setUid('B');
     release();
     await pending;
 
     const [, path] = f.operations[0];
     assert.match(path, /^users\/A\//, 'l’oggetto è stato caricato sotto il proprietario iniziale');
-    assert.deepEqual(f.writes.map(([reference]) => reference), ['users/A'],
-        'il riferimento è stato scritto sotto il proprietario iniziale');
-    assert.equal(f.photoURL(), urlOf(path));
+    assert.deepEqual(f.writes, []);
+    assert.equal(f.photoURL(), urlOf(previous));
+    assert.equal(f.cache.size, 0);
+    assert.equal(f.nodes['profile-avatar'].src, '');
+    assert.equal(f.toasts.some(([message]) => message === 'avatar_updated'), false);
     assert.equal([...f.bucket.keys()].some(key => key.startsWith('users/B/')), false,
         'nessun oggetto creato sotto il proprietario nuovo');
-    assert.deepEqual(f.orphans(), [previous], 'il vecchio avatar resta orfano come nel percorso normale');
+    assert.deepEqual(f.orphans(), [path], 'upload già completato: pulizia non introdotta implicitamente');
+});
+
+for (const stage of ['getDownloadURL', 'updateDoc']) {
+    test(`avatar: cambio UID durante ${stage} non aggiorna cache o vista`, async () => {
+        const f = fixture();
+        let release;
+        f.hooks[stage] = async () => new Promise(resolve => { release = resolve; });
+        const pending = f.upload();
+        await new Promise(setImmediate);
+        assert.equal(typeof release, 'function');
+        f.setUid('B');
+        release(urlOf('users/A/avatar_synthetic.jpg'));
+        await pending;
+        assert.equal(f.cache.size, 0);
+        assert.equal(f.nodes['profile-avatar'].src, '');
+        assert.equal(f.toasts.some(([message]) => message === 'avatar_updated'), false);
+        assert.deepEqual(f.writes, []);
+    });
+}
+
+test('avatar: rimontaggio durante upload invalida il completamento anche con stesso UID', async () => {
+    const f = fixture();
+    let release;
+    f.hooks.uploadBytes = async () => new Promise(resolve => { release = resolve; });
+    const pending = f.upload();
+    await new Promise(setImmediate);
+    f.context.setupAvatarEdit();
+    release();
+    await pending;
+    assert.deepEqual(f.writes, []);
+    assert.equal(f.cache.size, 0);
+    assert.equal(f.nodes['profile-avatar'].src, '');
+});
+
+test('avatar: lock e uscita interrompono completamenti in attesa anche con UID invariato', async () => {
+    for (const event of ['vault-session-locked', 'pagehide']) {
+        for (const stage of ['uploadBytes', 'getDownloadURL', 'updateDoc']) {
+            const f = fixture(); let release;
+            f.hooks[stage] = async () => new Promise(resolve => { release = resolve; });
+            const pending = f.upload(); await new Promise(setImmediate);
+            f.dispatch(event); release(urlOf('users/A/avatar_synthetic.jpg')); await pending;
+            assert.equal(f.cache.size, 0, `${event}/${stage}`);
+            assert.equal(f.nodes['profile-avatar'].src, '');
+            assert.equal(f.toasts.some(([message]) => message === 'avatar_updated'), false);
+            assert.deepEqual(f.writes, []);
+        }
+    }
 });
 
 test('T-28: un file non immagine non tocca né Storage né documento', async () => {

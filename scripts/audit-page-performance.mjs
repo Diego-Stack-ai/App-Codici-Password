@@ -1,11 +1,12 @@
+import { writeGeneratedDocSection } from './lib/generated-doc-section.mjs';
 import { gzipSync } from 'node:zlib';
-import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const publicRoot = path.join(root, 'Frontend', 'public');
-const output = path.join(root, 'docs', 'PAGE_PERFORMANCE_BASELINE.md');
+const output = path.join(root, 'docs', 'evidenze', 'INVENTARI.md');
 const budgetFile = path.join(root, 'scripts', 'page-performance-budget.json');
 const checkOnly = process.argv.includes('--check');
 const pageModules = {
@@ -133,7 +134,7 @@ for (const row of rows) {
 }
 
 if (!checkOnly) {
-  await writeFile(output, markdown, 'utf8');
+  await writeGeneratedDocSection(output, 'pages', markdown);
   console.log(`Baseline pagine scritta in ${path.relative(root, output)} (${rows.length} pagine).`);
 }
 

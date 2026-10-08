@@ -123,6 +123,7 @@ service cloud.firestore {
 
     match /users/{userId}/{collection}/{document=**} {
       allow read, write: if isOwner(userId) &&
+        collection != 'aziende' &&
         collection != 'auditEvents' &&
         collection != 'contacts' &&
         collection != 'pushDevices' &&
@@ -134,6 +135,22 @@ service cloud.firestore {
         collection != 'accountWidgets' &&
         collection != 'sharedVaultData' &&
         collection != 'sharedVaultLinks';
+    }
+
+    // Company deletion must use the coordinated server protocol. A stale or
+    // custom client must not bypass the UI guard and orphan its Accounts.
+    match /users/{userId}/aziende/{companyId} {
+      allow read, create, update: if isOwner(userId);
+      allow delete: if false;
+      // Preserve existing descendant permissions, not a recursive grant on the
+      // company document itself (recursive wildcards also match zero segments).
+      match /{childCollection}/{childDocument}/{rest=**} {
+        allow read, update, delete: if isOwner(userId);
+        // Require the Company in the resulting atomic state. This also permits
+        // a legitimate batch that creates Company and Account together.
+        allow create: if isOwner(userId) && (childCollection != 'accounts' ||
+          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));
+      }
     }
 
     match /users/{userId}/contacts/{contactId} {
@@ -224,6 +241,12 @@ service cloud.firestore {
           (resource.data.keys().hasAny(['responseAuditRef']) &&
             request.resource.data.get('responseAuditRef', null) == resource.data.get('responseAuditRef', null));
       }
+      // Backend-only binding: preserve unchanged or remove for legacy full-replace.
+      function keepsAcceptanceReceipt() {
+        return !request.resource.data.keys().hasAny(['acceptanceReceipt']) ||
+          (resource.data.keys().hasAny(['acceptanceReceipt']) &&
+            request.resource.data.get('acceptanceReceipt', null) == resource.data.get('acceptanceReceipt', null));
+      }
 
       allow get, list: if isInviteOwner() || isRecipient();
       allow create: if isAuth() &&
@@ -265,10 +288,11 @@ service cloud.firestore {
       // i flussi censiti, quindi una loro modifica è negata.
       allow update: if isInviteOwner() &&
         keepsResponseAuditRef() &&
+        keepsAcceptanceReceipt() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'auditRef', 'status', 'cycle', 'createdAt', 'accountName', 'type',
           'notifyPush', 'notifyEmail', 'senderNotified', 'sharingState',
-          'suspendedAt', 'guestUid', 'respondedAt', 'responseAuditRef'
+          'suspendedAt', 'guestUid', 'respondedAt', 'responseAuditRef', 'acceptanceReceipt'
         ]) &&
         (!request.resource.data.keys().hasAny(['auditRef']) ||
           isOpaqueInviteRef(request.resource.data.get('auditRef', '')));

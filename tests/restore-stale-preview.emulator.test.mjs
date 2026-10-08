@@ -53,12 +53,13 @@ const adminApp = initializeApp({projectId: PROJECT_ID}, `m8t-stale-${process.pid
 const adminDb = getFirestore(adminApp);
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',
     'buildRestorePreview', 'staleRestoreIndexes', 'decodeFirestoreValue', 'restoreChunkDecision',
-    'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt',
+    'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt', 'preserveRestoreAuthority',
     'onCall', 'getFirestore', `${restoreSlice}\nreturn exports.restoreBackupChunk;`)({}, HttpsError, Timestamp,
     FieldValue, {log() {}, warn() {}, error() {}}, restorePreview.buildRestorePreview, restorePreview.staleRestoreIndexes,
     restoreService.decodeFirestoreValue, restoreService.restoreChunkDecision, restoreService.safeRestoreAudit,
     restoreService.validateRestoreChunk, restoreReceipts.createBackupRestoreBinding,
-    restoreReceipts.verifyBackupRestoreReceipt, (_options, run) => run, () => adminDb);
+    restoreReceipts.verifyBackupRestoreReceipt, requireFunctions('./backup-restore-authority.js').preserveRestoreAuthority,
+    (_options, run) => run, () => adminDb);
 
 // ── Export sintetico: profilo + N Account + un allegato ─────────────────────
 function buildBackup(accountCount = 1) {
@@ -76,7 +77,8 @@ function buildBackup(accountCount = 1) {
         password: MARKER, isArchived: true, revision: 1}));
     repositories.listBackupPrivateAttachments = async (_uid, accountId) => accountId !== 'account-1' ? []
         : [{id: 'att-1', name: 'Allegato.pdf', storagePath: OBJECT_PATH, type: 'application/pdf', size: BYTES.length}];
-    repositories.getBytes = async () => BYTES;
+    // Each SDK read owns its buffer; export may wipe it without altering the seed.
+    repositories.getBytes = async () => BYTES.slice();
     const names = Object.keys(repositories);
     const factory = new Function(...names, 'auth', 'navigator', 'window', 'onAuthStateChanged', 'addEventListener',
         'removeEventListener', 'createBackupExportBuffer', 'createBackupRecordBuffer', 'generateRecoveryKey',

@@ -19,7 +19,20 @@ import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypt
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
 import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.127';
 import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.127';
-import { savePrivateAccount } from './form-privato-save.js';
+async function savePrivateAccount(...args) {
+    let module;
+    try { module = await import('./form-privato-save.js'); }
+    catch {
+        if (args[0]?.isActive?.()) {
+            showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
+            const button = document.getElementById('btn-save-footer');
+            if (button) button.disabled = false;
+        }
+        return;
+    }
+    return module.savePrivateAccount(...args);
+}
+import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -32,6 +45,8 @@ let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
 let currentRevision = 0;
+let loadContext = null;
+globalThis.addEventListener?.('vault-session-locked', () => loadContext?.invalidate());
 let hasLinkedProfileField = false;
 let accountWidgetController = null;
 let formVersion = 0;
@@ -180,6 +195,8 @@ async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevisio
  */
 
 export async function initFormAccountPrivato(user) {
+    const credentialsForm = document.getElementById('account-credentials-form');
+    if (credentialsForm) credentialsForm.onsubmit = event => event.preventDefault();
     savedBankIds = new Set();
     
     if (!user) return;
@@ -187,11 +204,18 @@ export async function initFormAccountPrivato(user) {
     const version = ++formVersion;
     const active = () => version === formVersion && auth.currentUser?.uid === user.uid;
     recoveryOperation = null;
-    window.addEventListener('pagehide', () => { if (version === formVersion) formVersion++; }, {once:true});
 
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
     isEditing = !!currentDocId;
+    loadContext?.invalidate();
+    loadContext = createAccountLoadContext({recordId: currentDocId, mode: isEditing ? 'edit' : 'create'});
+    const pagehideContext = loadContext;
+    window.addEventListener('pagehide', () => {
+        if (version !== formVersion) return;
+        formVersion++;
+        pagehideContext?.invalidate();
+    }, {once:true});
     document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
     if (isEditing) {
         ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.add('hidden'));
@@ -233,6 +257,16 @@ export async function initFormAccountPrivato(user) {
             title: t('save') || 'Salva',
             onclick: async () => {
                 saveBtn.disabled = true;
+                const saveContext = loadContext;
+                const saveUid = currentUid;
+                const saveDocId = currentDocId;
+                const sessionLive = () => active() && saveContext === loadContext
+                    && currentUid === saveUid && currentDocId === saveDocId && isAccountSaveAllowed(saveContext);
+                if (!isAccountSaveAllowed(saveContext)) {
+                    showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                    saveBtn.disabled = false;
+                    return;
+                }
                 try {
                     await accountWidgetController?.savePendingChanges();
                 } catch (error) {
@@ -240,18 +274,24 @@ export async function initFormAccountPrivato(user) {
                     saveBtn.disabled = false;
                     return;
                 }
+                if (!sessionLive()) {
+                    showToast('Sessione o Account cambiati: salvataggio annullato.', 'warning');
+                    saveBtn.disabled = false;
+                    return;
+                }
                 await savePrivateAccount({
                     bankAccounts,
                     invitedEmails,
                     isExplicitMemo,
-                    currentUid,
-                    currentDocId,
+                    currentUid: saveUid,
+                    currentDocId: saveDocId,
                     isEditing,
                     baseRevision: currentRevision,
                     profileContactLinkDraft,
                     hasLinkedProfileField,
+                    loadContext: saveContext,
                     recoveryOperation,
-                    isActive: active
+                    isActive: sessionLive
                 });
             }
         }, [
@@ -405,18 +445,24 @@ export async function initFormAccountPrivato(user) {
  * LOADING ENGINE
  */
 async function loadData() {
+    const context = loadContext;
+    const loadToken = context?.beginLoad() ?? null;
+    const live = () => Boolean(context) && context === loadContext && context.isCurrent(loadToken);
     try {
         const data = navigator.onLine
             ? await getPrivateAccountConfirmed(currentUid, currentDocId)
             : await getPrivateAccount(currentUid, currentDocId);
+        if (!live()) return;
         if (!data) {
             showToast(t('account_not_found'), "error");
+            context.markFailed(loadToken, 'ACCOUNT_LOAD_UNAVAILABLE');
             if (profileContactLinkDraft) throw new Error('Account non disponibile per il collegamento.');
             return;
         }
         currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
         hasLinkedProfileField = Boolean(data.linkedProfileField?.id || data.linkedCompanyProfileField?.id);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        const setDecrypted = (id, val) => { if (val !== undefined) setVal(id, val); };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario
         let vaultKeyMaterial = null;
@@ -426,6 +472,7 @@ async function loadData() {
                 vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
                 showToast("Dati cifrati: chiave obbligatoria.", "error");
+                context.markFailed(loadToken, 'ACCOUNT_VAULT_KEY_UNAVAILABLE');
                 if (profileContactLinkDraft) throw e;
                 history.back();
                 return;
@@ -434,23 +481,36 @@ async function loadData() {
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
-            if (profileContactLinkDraft) return decodeProfileContactValue(val, vaultKeyMaterial);
-            try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
+            if (profileContactLinkDraft) {
+                try { return await decodeProfileContactValue(val, vaultKeyMaterial); }
+                catch (e) {
+                    if (context.markFailed(loadToken, 'ACCOUNT_DECRYPT_FAILED')) showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                    throw e;
+                }
+            }
+            // Il decrypt permissivo restituisce sentinelle: il validatore le rifiuta.
+            try { return await decodeProfileContactValue(val, vaultKeyMaterial); }
+            catch (e) {
+                if (context.markFailed(loadToken, 'ACCOUNT_DECRYPT_FAILED')) showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                return undefined;
+            }
         };
 
+        if (!live()) return;
         const [username, accountCode, password, note] = await Promise.all([
             decryptIfPossible(data.username),
             decryptIfPossible(data.account || data.codice),
             decryptIfPossible(data.password),
             decryptIfPossible(data.note)
         ]);
+        if (!live()) return;
 
         setVal('account-name', data.nomeAccount);
-        setVal('account-username', username);
-        setVal('account-code', accountCode);
-        setVal('account-password', password);
+        setDecrypted('account-username', username);
+        setDecrypted('account-code', accountCode);
+        setDecrypted('account-password', password);
         setVal('account-url', data.url || data.sitoWeb);
-        setVal('account-note', note);
+        setDecrypted('account-note', note);
 
         // Referente (Root or Object support)
         const ref = data.referente || {};
@@ -476,6 +536,7 @@ async function loadData() {
             })));
         }
 
+        if (!live()) return;
         const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData) {
@@ -523,7 +584,9 @@ async function loadData() {
             document.getElementById('logo-placeholder').classList.add('hidden');
         }
 
+        if (live()) context.markLoaded(loadToken);
     } catch (e) {
+        context?.markFailed(loadToken, 'ACCOUNT_LOAD_FAILED');
         logError("LoadData", e);
         if (profileContactLinkDraft) throw e;
     }

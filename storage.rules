@@ -30,9 +30,17 @@ service firebase.storage {
     // Tutti gli oggetti applicativi sono confinati nello spazio dell'UID.
     // La lettura resta limitata al proprietario: la condivisione degli allegati
     // richiederà un protocollo crittografico dedicato nella fase P3.
-    match /users/{userId}/{allPaths=**} {
-      allow read, delete: if isOwner(userId);
-      allow create, update: if isOwner(userId) && isAllowedUpload();
+    match /users/{userId}/{namespace}/{allPaths=**} {
+      allow read, delete: if isOwner(userId) && namespace != 'restoreObjects';
+      allow create, update: if isOwner(userId) && namespace != 'restoreObjects' && isAllowedUpload();
+    }
+
+    // Reserved M8 namespace. Creation must use the server's Storage generation
+    // precondition, not a client-side existence check (concurrent uploads race).
+    // No client, including the owner, may create, replace or remove these bytes.
+    match /users/{userId}/restoreObjects/{objectId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
     }
 
     // Chiusura esplicita per qualsiasi percorso non riconosciuto.

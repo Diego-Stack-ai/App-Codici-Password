@@ -1,3 +1,4 @@
+const {preserveRestoreAuthority} = require('./backup-restore-authority');
 function invalid() { throw new Error('BACKUP_VERSION_INVALID'); }
 function validateExpectedVersion(value) {
   if (!value || Object.getPrototypeOf(value) !== Object.prototype || typeof value.exists !== 'boolean') invalid();
@@ -50,7 +51,9 @@ function buildRestorePreview(records, snapshots) {
     // behavior while the version still covers every persisted field.
     const data = {...snapshot.data()};
     delete data.id;
-    return {index, status: canonical(encodeBackupComparisonValue(data)) === canonical(record.data) ? 'unchanged' : 'changed', expectedVersion};
+    const encoded = encodeBackupComparisonValue(data);
+    const target = preserveRestoreAuthority(record.path, record.data, encoded);
+    return {index, status: canonical(encoded) === canonical(target) ? 'unchanged' : 'changed', expectedVersion};
   })};
 }
 function staleRestoreIndexes(records, snapshots) {

@@ -139,7 +139,7 @@ function showCredentialHealthResults(report, action) {
         createElement('h3', {id: 'credential-health-title', className: 'modal-title', textContent: 'Salute credenziali'}),
         createElement('p', {
             className: 'modal-text',
-            textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria.`
+            textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria. I dati disponibili possono provenire dalla cache: il risultato non garantisce di includere le ultime modifiche su altri dispositivi.`
         }),
         list,
         createElement('p', {
@@ -478,7 +478,7 @@ function setupEncryptedRestore(user) {
                 const changedCount = selectedEntries.filter(entry => entry.status === 'changed').length;
                 const typed = await showBackupRestoreInput(currentAction,
                     'Conferma ripristino selettivo', 'RIPRISTINA',
-                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Scrivi RIPRISTINA per continuare.`
+                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Il backup può ricreare elementi eliminati definitivamente. Le vecchie condivisioni del backup non vengono riattivate; gli accessi degli Account attivi esistenti restano invariati, quelli degli Account archiviati non vengono riattivati. Scrivi RIPRISTINA per continuare.`
                 );
                 currentAction.check();
                 if (typed !== 'RIPRISTINA') return;
@@ -492,7 +492,7 @@ function setupEncryptedRestore(user) {
             }
             const typed = await showBackupRestoreInput(currentAction,
                 'Conferma ripristino', 'RIPRISTINA',
-                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Scrivi RIPRISTINA per applicare i dati.`
+                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Il backup può ricreare elementi eliminati definitivamente, senza riattivare le vecchie condivisioni. Scrivi RIPRISTINA per applicare i dati.`
             );
             currentAction.check();
             if (typed !== 'RIPRISTINA') return;
@@ -510,6 +510,10 @@ function setupEncryptedRestore(user) {
             }
             if (error?.code === 'BACKUP_PREVIEW_STALE' || error?.message === 'BACKUP_PREVIEW_STALE') {
                 showToast('I dati sono cambiati dopo l’anteprima. Riapri il backup per confrontarli di nuovo prima del ripristino.', 'warning');
+                return;
+            }
+            if (error?.code === 'BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED' || error?.message === 'BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED') {
+                showToast('Ripristino bloccato: una data nel backup ha una precisione che il database non può conservare esattamente. Nessun arrotondamento è stato applicato.', 'warning');
                 return;
             }
             const collision = error?.code === 'BACKUP_COLLISIONS' || String(error?.message || '').startsWith('BACKUP_COLLISIONS:');

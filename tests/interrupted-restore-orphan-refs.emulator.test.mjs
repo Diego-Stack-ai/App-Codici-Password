@@ -7,7 +7,7 @@ import {getBytes, ref as storageRef, uploadBytes as storageUpload} from 'firebas
 
 // M8 — Riferimenti ad allegati dopo un **ripristino interrotto**.
 //
-// Gate aperto in `docs/M8_BACKUP_RECUPERO.md`: «dimostrare assenza di riferimenti
+// Gate aperto in `docs/regole/BACKUP.md`: «dimostrare assenza di riferimenti
 // orfani e confronto finale su copia non produttiva».
 //
 // Percorso reale: `executeBackupRestore` (client) applica i **record a blocchi
@@ -47,12 +47,13 @@ const adminApp = initializeApp({projectId: PROJECT_ID}, `m8-orphans-${process.pi
 const adminDb = getFirestore(adminApp);
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',
     'buildRestorePreview', 'staleRestoreIndexes', 'decodeFirestoreValue', 'restoreChunkDecision',
-    'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt',
+    'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt', 'preserveRestoreAuthority',
     'onCall', 'getFirestore', `${restoreSlice}\nreturn exports.restoreBackupChunk;`)({}, HttpsError, Timestamp,
     FieldValue, {log() {}, warn() {}, error() {}}, restorePreview.buildRestorePreview, restorePreview.staleRestoreIndexes,
     restoreService.decodeFirestoreValue, restoreService.restoreChunkDecision, restoreService.safeRestoreAudit,
     restoreService.validateRestoreChunk, restoreReceipts.createBackupRestoreBinding,
-    restoreReceipts.verifyBackupRestoreReceipt, (_options, run) => run, () => adminDb);
+    restoreReceipts.verifyBackupRestoreReceipt, requireFunctions('./backup-restore-authority.js').preserveRestoreAuthority,
+    (_options, run) => run, () => adminDb);
 
 // ── Export sintetico: profilo + Account con un allegato ──────────────────────
 function buildBackup() {
@@ -69,7 +70,8 @@ function buildBackup() {
         password: MARKER, isArchived: true, revision: 1}];
     repositories.listBackupPrivateAttachments = async () => [{id: 'att-1', name: 'Allegato.pdf',
         storagePath: OBJECT_PATH, type: 'application/pdf', size: BYTES.length}];
-    repositories.getBytes = async () => BYTES;
+    // Each SDK read owns its buffer; export may wipe it without altering the seed.
+    repositories.getBytes = async () => BYTES.slice();
     const names = Object.keys(repositories);
     const factory = new Function(...names, 'auth', 'navigator', 'window', 'onAuthStateChanged', 'addEventListener',
         'removeEventListener', 'createBackupExportBuffer', 'createBackupRecordBuffer', 'generateRecoveryKey',

@@ -13,7 +13,7 @@ import {deleteDoc, deleteField, doc, getDoc, runTransaction, setDoc, updateDoc} 
 // scriverebbe (guestUid, respondedAt, responseAuditRef, sharingState,
 // suspendedAt) sono seminati con le Rules disattivate, perché l'Admin SDK le
 // ignora: il banco prova **il comportamento dei client** su quei documenti.
-const PROJECT_ID = 'codici-password-invite-audit-ref-test';
+const PROJECT_ID = 'demo-codici-password-invite-audit-ref-test';
 const OWNER = 'owner', GUEST = 'guest', STRANGER = 'stranger';
 const ACCOUNT = 'account-1';
 const EMAIL = 'guest@example.invalid';
@@ -21,6 +21,8 @@ const OWNER_EMAIL = 'owner@example.invalid';
 const GUEST_UID = 'guest-uid';
 const REF_A = '11111111-1111-4111-8111-111111111111';
 const REF_B = '22222222-2222-4222-8222-222222222222';
+const ACCEPTANCE_RECEIPT = {schemaVersion: 1, nonce: REF_A, guestUid: GUEST_UID,
+    ownerUid: OWNER, accountId: ACCOUNT, kind: 'private', companyId: null, cycle: 0};
 const INVITE_ID = `${ACCOUNT}_guest_example_invalid`;
 let testEnv;
 
@@ -78,6 +80,42 @@ after(async () => {
 // ─────────────────────────────────────────────────────────────
 // Creazione: `auditRef` facoltativo con forma validata
 // ─────────────────────────────────────────────────────────────
+
+test('N1: client cannot create or introduce acceptanceReceipt, including null', async () => {
+    for (const value of [ACCEPTANCE_RECEIPT, null]) {
+        await assertFails(setDoc(doc(asOwner(), 'invites', INVITE_ID), invitePayload({acceptanceReceipt: value})));
+    }
+    await seed(INVITE_ID, invitePayload());
+    for (const value of [ACCEPTANCE_RECEIPT, null]) {
+        await assertFails(updateDoc(doc(asOwner(), 'invites', INVITE_ID), {acceptanceReceipt: value}));
+    }
+});
+
+test('N1: preserve receipt unchanged, deny changing recipient or nonce', async () => {
+    await seed(INVITE_ID, invitePayload({acceptanceReceipt: ACCEPTANCE_RECEIPT}));
+    await assertSucceeds(updateDoc(doc(asOwner(), 'invites', INVITE_ID),
+        {acceptanceReceipt: ACCEPTANCE_RECEIPT, senderNotified: true}));
+    for (const change of [{guestUid: 'other'}, {nonce: REF_B}, {cycle: 1}]) {
+        await assertFails(updateDoc(doc(asOwner(), 'invites', INVITE_ID),
+            {acceptanceReceipt: {...ACCEPTANCE_RECEIPT, ...change}}));
+    }
+});
+
+test('N1: legacy update omitting receipt preserves it unchanged', async () => {
+    await seed(INVITE_ID, invitePayload({acceptanceReceipt: ACCEPTANCE_RECEIPT}));
+    await assertSucceeds(updateDoc(doc(asOwner(), 'invites', INVITE_ID), {senderNotified: true}));
+    const stored = await readAsAdmin(INVITE_ID);
+    assert.deepEqual(stored.data().acceptanceReceipt, ACCEPTANCE_RECEIPT);
+    assert.equal(stored.data().senderNotified, true);
+});
+
+test('N1: legacy full replacement and explicit removal remain allowed', async () => {
+    await seed(INVITE_ID, invitePayload({acceptanceReceipt: ACCEPTANCE_RECEIPT}));
+    await assertSucceeds(setDoc(doc(asOwner(), 'invites', INVITE_ID), invitePayload()));
+    assert.equal((await readAsAdmin(INVITE_ID)).data().acceptanceReceipt, undefined);
+    await seed(INVITE_ID, invitePayload({acceptanceReceipt: ACCEPTANCE_RECEIPT}));
+    await assertSucceeds(updateDoc(doc(asOwner(), 'invites', INVITE_ID), {acceptanceReceipt: deleteField()}));
+});
 
 test('creazione: auditRef valido (anche maiuscolo) e assenza legacy sono ammessi', async () => {
     const db = asOwner();

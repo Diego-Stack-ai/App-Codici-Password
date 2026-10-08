@@ -118,9 +118,7 @@ export async function renderGuests(guests) {
         return;
     }
 
-    let needsUpdate = false;
-    let updatedGuests = [...guests];
-
+    // Il rendering non persiste snapshot: conserva formato e modifiche concorrenti.
     for (let i = 0; i < guests.length; i++) {
         let item = guests[i];
         if (typeof item !== 'object') item = { email: item, status: 'accepted' };
@@ -143,11 +141,7 @@ export async function renderGuests(guests) {
                         isPending = false;
                         displayStatus = t('status_accepted') || 'Accettato';
                         statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-                        updatedGuests[i] = { ...item, status: 'accepted' };
-                        needsUpdate = true;
                     } else if (invData.status === 'rejected') {
-                        updatedGuests[i] = { ...item, status: 'rejected' };
-                        needsUpdate = true;
                         continue;
                     }
                 }
@@ -184,14 +178,6 @@ export async function renderGuests(guests) {
         list.appendChild(div);
     }
 
-    if (needsUpdate && !_isReadOnly && active()) {
-        try {
-            const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId);
-            const { updateDoc } = await import("/assets/js/vendor/firebase-runtime.js");
-            if (!active()) return;
-            await updateDoc(docRef, { sharedWith: updatedGuests });
-        } catch (e) { console.error("Auto-Healing di Stato update failed", e); }
-    }
 }
 
 /**

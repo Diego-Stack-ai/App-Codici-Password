@@ -32,7 +32,7 @@ export async function initArchivioAccount(user, options = {}) {
     mountedArchive?.destroy();
     if (!user) return;
     const uid = user.uid;
-    let allArchived = [], currentSwipeList = null, currentContext = 'all';
+    let allArchived = [], currentSwipeList = null, currentContext = 'all', archiveLoaded = false;
     let destroyed = false, generation = 0, unsubscribe = () => {}, pendingConfirmation = null, mutationPending = false;
     const controller = new AbortController(), cleanups = new Set();
     const container = document.getElementById('accounts-container');
@@ -270,6 +270,7 @@ async function loadCompanies() {
 
 async function loadArchived() {
     if (!container || !active()) return;
+    archiveLoaded = false;
     const loadGeneration = ++generation;
     const loadContext = currentContext;
     const loadActive = () => active() && loadGeneration === generation;
@@ -286,15 +287,21 @@ async function loadArchived() {
         const records = await loadArchivedAccounts(uid, loadContext, {signal: controller.signal, isActive: loadActive});
         if (!loadActive()) return;
         allArchived = records;
+        archiveLoaded = true;
         filterAndRender();
     } catch (e) {
         if (!loadActive()) return;
+        clearElement(container);
+        container.appendChild(createUiState({
+            kind: 'error',
+            message: t('error_generic') || "Errore durante il caricamento dell'archivio"
+        }));
         showToast(t('error_generic') || "Errore durante il caricamento dell'archivio", "error");
     }
 }
 
 function filterAndRender() {
-    if (!active()) return;
+    if (!active() || !archiveLoaded) return;
     currentSwipeList?.destroy();
     currentSwipeList = null;
     const searchVal = searchInput?.value.toLowerCase() || '';

@@ -96,6 +96,42 @@ function fixture(withUi = false) {
     };
 }
 
+test('archive search preserves loading and failed states instead of showing an empty archive', async () => {
+    const f = fixture(true), gate = deferred();
+    f.context.listArchivedPrivateAccounts = async () => { await gate.promise; throw new Error('SYNTHETIC_FAILURE'); };
+    const pending = f.init();
+    await tick();
+    assert.equal(f.nodes['accounts-container'].children[0].kind, 'loading');
+    f.search.value = 'synthetic'; f.search.oninput();
+    assert.equal(f.nodes['accounts-container'].children[0].kind, 'loading');
+    gate.resolve(); await pending;
+    assert.equal(f.nodes['accounts-container'].children[0].kind, 'error');
+    f.search.oninput();
+    assert.equal(f.nodes['accounts-container'].children[0].kind, 'error');
+    assert.equal(f.writes.length, 0);
+    assert.equal(f.calls.length, 0);
+});
+
+test('archive late failed mount cannot replace a newer successful list or show a toast', async () => {
+    const f = fixture(true), gate = deferred();
+    f.context.listArchivedPrivateAccounts = async () => { await gate.promise; throw new Error('OLD_FAILURE'); };
+    const oldMount = f.init(); await tick();
+    f.context.listArchivedPrivateAccounts = async () => [];
+    await f.init();
+    assert.equal(f.nodes['accounts-container'].children[0].kind, 'empty');
+    gate.resolve(); await oldMount;
+    assert.equal(f.nodes['accounts-container'].children[0].kind, 'empty');
+    assert.equal(f.toasts.length, 0);
+});
+
+test('archive failed read after lock does not become a visible source error', async () => {
+    const f = fixture(true), gate = deferred();
+    f.context.listArchivedPrivateAccounts = async () => { await gate.promise; throw new Error('AbortError'); };
+    const pending = f.init(); await tick(); f.lock(); gate.resolve(); await pending;
+    assert.equal(f.nodes['accounts-container'].children.length, 0);
+    assert.equal(f.toasts.length, 0);
+});
+
 test('purge binds captured owner and target while SDK token lookup can cross a microtask', async () => {
     const f = fixture(), target = account('original');
     const pending = f.context.deleteArchivedAccount('A', target);

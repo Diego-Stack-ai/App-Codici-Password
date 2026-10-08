@@ -95,11 +95,10 @@ async function loadAllCompanyArchives(uid, check) {
     check();
     const results = await Promise.allSettled(companies.map(company => loadCompanyArchive(uid, company, check)));
     check();
-    return results.flatMap((result, index) => {
-        if (result.status === 'fulfilled') return result.value;
-        console.warn('[ARCHIVIO] Una sorgente aziendale non è disponibile.');
-        return [];
-    });
+    if (results.some(result => result.status === 'rejected')) {
+        throw new Error('ARCHIVE_SOURCE_UNAVAILABLE');
+    }
+    return results.flatMap(result => result.value);
 }
 
 async function loadSpecificCompanyArchive(uid, companyId, check) {
@@ -153,11 +152,10 @@ export async function loadArchivedAccounts(uid, context = 'all', options = {}) {
             loadAllCompanyArchives(uid, check)
         ]);
         check();
-        accounts = [privateResult, companyResult].flatMap(result => {
-            if (result.status === 'fulfilled') return result.value;
-            console.warn('[ARCHIVIO] Una sorgente non è disponibile.');
-            return [];
-        });
+        if ([privateResult, companyResult].some(result => result.status === 'rejected')) {
+            throw new Error('ARCHIVE_SOURCE_UNAVAILABLE');
+        }
+        accounts = [...privateResult.value, ...companyResult.value];
     } else {
         accounts = await loadSpecificCompanyArchive(uid, context, check);
     }

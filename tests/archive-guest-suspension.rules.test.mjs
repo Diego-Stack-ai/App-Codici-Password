@@ -9,7 +9,7 @@ import {collection, doc, getDoc, getDocs, query, runTransaction, setDoc, updateD
 // Rules Emulator con dati sintetici e le Rules di PRODUZIONE del ramo candidato.
 // Limite dichiarato: le Rules valgono per le letture di rete; una copia già
 // presente nella cache offline non viene revocata da questa condizione.
-const PROJECT_ID = 'codici-password-archive-suspension-test';
+const PROJECT_ID = 'demo-codici-password-archive-suspension-test';
 const OWNER = 'owner', GUEST = 'guest', PENDING = 'pending-guest', STRANGER = 'stranger';
 const ACCOUNT = 'account-1', ARCHIVED = 'archived-1', COMPANY = 'company-1';
 const EMAIL_KEY = 'guest_example_invalid';

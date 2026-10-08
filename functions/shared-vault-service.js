@@ -172,7 +172,24 @@ function revisionDecision({exists, currentRevision = 0, expectedRevision, previo
   return {status: "applied", duplicate: false, revision: currentRevision + 1};
 }
 
+function sharedVaultUnlinkMatches(command, link, widget) {
+  const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const validId = value => typeof value === 'string' && IDENTIFIER_PATTERN.test(value);
+  const empty = value => value === undefined || value === null || value === '';
+  if (!object(command) || !object(command.link) || !object(link) || !object(widget)) return false;
+  const identity = command.link;
+  if (!['private', 'company'].includes(identity.context) || !validId(identity.accountId)) return false;
+  if (identity.context === 'company' ? !validId(identity.companyId) : !empty(identity.companyId)) return false;
+  if (![command.sharedDataId, command.linkId, command.widgetId].every(validId)) return false;
+  const matches = record => record.context === identity.context && record.accountId === identity.accountId &&
+    (identity.context === 'company' ? record.companyId === identity.companyId : empty(record.companyId));
+  return matches(link) && matches(widget) && link.sharedDataId === command.sharedDataId &&
+    widget.sharedDataId === command.sharedDataId && link.widgetId === command.widgetId &&
+    widget.linkId === command.linkId && widget.kind === 'shared-reference';
+}
+
 module.exports = {
+  sharedVaultUnlinkMatches,
   MAX_FIELDS,
   accountPath,
   revisionDecision,

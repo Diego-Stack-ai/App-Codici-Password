@@ -46,3 +46,17 @@ test('analysis error clears retained plaintext and same IDs from different compa
     await assert.rejects(f.run(), /synthetic failure/);
     assert.equal(retained.every(record => record.password === ''), true); assert.equal(f.observers.size, 0);
 });
+
+test('caratterizzazione: errore lettura confermata usa cache senza metadati di freschezza', async () => {
+    const f = fixture();
+    f.context.navigator.onLine = true;
+    let cachedReads = 0;
+    f.context.listPrivateAccountsConfirmed = async () => { throw new Error('SYNTHETIC_NETWORK_FAILURE'); };
+    f.context.listPrivateAccounts = async () => { cachedReads++; return f.records; };
+    const report = await f.run();
+    assert.equal(cachedReads, 1);
+    assert.equal(report.scanned, 1);
+    assert.equal(report.unavailable, 0, 'non leggibile riguarda decifratura, non freschezza');
+    assert.equal(Object.hasOwn(report, 'freshness'), false,
+        'caratterizzazione del limite attuale, non requisito di aggiornamento superato');
+});

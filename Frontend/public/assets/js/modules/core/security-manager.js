@@ -10,7 +10,7 @@ import { db, auth } from '../../firebase-config.js?v=1.2.127';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
-import { saveVaultSession, restoreVaultSession, clearVaultSession, logErrorLabel } from './vault-session.js';
+import { saveVaultSession, restoreVaultSession, clearVaultSession, getVaultSessionExpiry, logErrorLabel } from './vault-session.js';
 import { evaluatePassword, firstPasswordPolicyError, passwordPolicyMessage } from './password-policy.js';
 import { getFirstCompany, getFirstPrivateAccount, getUserProfile, getUserSetting } from '../data/vault-repository.js';
 
@@ -231,6 +231,13 @@ export function isAutoUnlockActive() {
     const scopedKey = getStorageKey(uid);
     if (scopedKey && localStorage.getItem(scopedKey)) return true;
     return false;
+}
+
+// Read-only state check: never prompt or recover a key to authorize an export.
+export function isVaultUnlocked() {
+    const expiry = getVaultSessionExpiry();
+    return Boolean(_vaultKeyMaterial && !_isSoftLocked && _currentUid &&
+        auth.currentUser?.uid === _currentUid && (!expiry || Date.now() < expiry));
 }
 
 function getEnvelopeStorageKey(uid) {

@@ -112,6 +112,14 @@ const allFixture = () => fixture({
     companyAccounts: {'A/company-1': [account('c1', 'company-1'), account('c2', 'company-1', false)]}
 });
 
+for (const source of ['listArchivedPrivateAccounts', 'listCompanies', 'listCompanyAccounts']) {
+    test(`Archivio: errore ${source} non diventa elenco completo parziale`, async () => {
+        const f = allFixture();
+        f.context[source] = async () => { throw new Error('SYNTHETIC_READ_FAILURE'); };
+        await assert.rejects(f.context.loadArchivedAccounts('A', 'all'), /ARCHIVE_SOURCE_UNAVAILABLE/);
+    });
+}
+
 test('T-30: nella lista compaiono solo gli archiviati, con il contesto corretto', async () => {
     const f = allFixture();
     const listed = await f.context.loadArchivedAccounts('A', 'all');

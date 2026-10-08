@@ -71,11 +71,17 @@ decryptAttachmentBytes = async (bytes, encryption, vaultKey) => {
 
 // Un realm per percorso: stesso comportamento atteso, moduli diversi.
 function realm(kind) {
+    const events = new EventTarget(), observers = new Set();
+    const auth = {currentUser: {uid: 'A'}};
     const opened = [], toasts = [], errors = [], reads = [], decrypts = [];
     const state = {keyRequests: 0, active: true, openResult: {opener: 'synthetic'}, openThrows: false};
     const nodes = {'attachments-list': {children: [], appendChild(child) { this.children.push(child); }}};
+    nodes['allegati-list'] = {children: [], isConnected: true};
     const context = vm.createContext({
         __decrypts: decrypts,
+        auth,
+        addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
+        onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         document: {body: {style: {}}, getElementById: id => nodes[id] ?? null, querySelector: () => null,
             querySelectorAll: () => []},
         window: {open: (url, target, features) => {
@@ -111,9 +117,11 @@ function realm(kind) {
         context.initAttachmentModule({ownerUid: 'A', currentAziendaId: 'company', currentId: 'one',
             readOnly: false, isActive: () => state.active});
     }
-    return {opened, toasts, errors, reads, decrypts, state,
+    return {opened, toasts, errors, reads, decrypts, state, context, observers, nodes,
+        lock: () => events.dispatchEvent(new Event('vault-session-locked')),
+        changeUid: uid => { auth.currentUser = {uid}; for (const callback of observers) callback(auth.currentUser); },
         invalidate: () => { state.active = false; mount?.destroy(); },
-        open: attachment => (kind === 'incorporato' ? context.openCompanyAttachment(attachment)
+        open: attachment => (kind === 'incorporato' ? context.openCompanyAttachment(attachment, () => state.active)
             : context.openAttachment(attachment))};
 }
 
@@ -193,14 +201,14 @@ test('T-29: i protocolli attivi e gli URL non validi vengono rifiutati prima di 
     }
 });
 
-test('T-29: un popup bloccato è riportato come successo; un\'eccezione no', async () => {
+test('T-29: ritorno nullo non distingue noopener da blocco; eccezione segnalata', async () => {
     for (const [name, build] of openers) {
         const f = build();
-        f.state.openResult = null; // il browser blocca la nuova scheda: `window.open` restituisce null
+        f.state.openResult = null; // Anche noopener può restituire null con scheda aperta.
         await f.open(LEGACY);
         // Comportamento attuale di `openExternalUrl`: la funzione restituisce
-        // `true` anche quando non è stata aperta alcuna finestra, quindi il ramo
-        // legacy non segnala nulla e non chiede la Vault Key.
+        // `true` indica il tentativo senza eccezione, non la consegna verificata.
+        // Il banco non dimostra che il browser abbia bloccato la finestra.
         assert.equal(f.state.keyRequests, 0, `${name}: la Vault Key non viene richiesta`);
         assert.deepEqual(f.reads, [], `${name}: nessun byte letto`);
         assert.equal(f.opened.length, 1, `${name}: il tentativo di apertura è avvenuto`);
@@ -215,9 +223,9 @@ test('T-29: un popup bloccato è riportato come successo; un\'eccezione no', asy
     assert.equal(throwing.toasts.length, 1, 'l\'eccezione viene mostrata come errore');
 });
 
-test('T-29: a sessione invalidata il ramo legacy non apre nulla (tranne il percorso senza controllo)', async () => {
+test('T-29: a sessione invalidata il ramo legacy non apre nulla', async () => {
     for (const [name, build] of [['privato', () => realm('privato')], ['aziendale', () => realm('aziendale')],
-        ['scadenza', deadlineRealm]]) {
+        ['scadenza', deadlineRealm], ['incorporato', () => realm('incorporato')]]) {
         const f = build();
         f.invalidate();
         await f.open(LEGACY);
@@ -225,19 +233,62 @@ test('T-29: a sessione invalidata il ramo legacy non apre nulla (tranne il perco
         assert.equal(f.state.keyRequests, 0, `${name}: nessuna Vault Key`);
         assert.deepEqual(f.reads, [], `${name}: nessuna lettura`);
     }
-    // Il percorso degli allegati incorporati nell'anagrafica aziendale **non** ha
-    // alcun parametro di sessione: è una differenza dichiarata, non una svista
-    // del banco.
-    const incorporato = realm('incorporato');
-    incorporato.invalidate();
-    await incorporato.open(LEGACY);
-    assert.equal(incorporato.opened.length, 1,
-        'il percorso incorporato apre senza controllo di sessione: comportamento attuale, dichiarato');
+});
+
+test('allegato incorporato: lock e cambio UID durante chiave/byte/decifratura impediscono apertura tardiva', async () => {
+    const sealed = await sealedAttachment();
+    for (const phase of ['ensureVaultKeyMaterial', 'getBytes', 'decryptAttachmentBytes']) {
+        for (const action of ['lock', 'changeUid']) {
+            const f = realm('incorporato'); f.state.ciphertext = sealed.ciphertext;
+            let entered, release;
+            const started = new Promise(resolve => { entered = resolve; });
+            const wait = new Promise(resolve => { release = resolve; });
+            const original = f.context[phase];
+            f.context[phase] = async (...args) => { const value = await original(...args); entered(); await wait; return value; };
+            const pending = f.open(sealed.attachment); await started;
+            f[action]('B'); release(); await pending;
+            assert.equal(f.opened.length, 0, `${phase}/${action}`);
+            assert.equal(f.toasts.length, 0);
+            assert.equal(f.observers.size, 0);
+        }
+    }
+});
+
+test('allegato incorporato: azioni del rendering precedente e contenitore rimosso sono inattive', async () => {
+    const f = realm('incorporato');
+    const container = f.nodes['allegati-list'];
+    f.context.renderCompanyEmbeddedAttachments([LEGACY]);
+    const old = container.children[0].onclick;
+    f.context.renderCompanyEmbeddedAttachments([LEGACY]);
+    await old();
+    assert.equal(f.opened.length, 0);
+    const current = container.children[0].onclick;
+    await current();
+    assert.equal(f.opened.length, 1);
+    container.isConnected = false;
+    await current();
+    assert.equal(f.opened.length, 1);
+    assert.equal(f.observers.size, 0);
+});
+
+test('allegato incorporato: errore di lettura dopo lock non mostra errore tardivo e rimuove osservatori', async () => {
+    const f = realm('incorporato');
+    let reject;
+    f.context.getBytes = async () => new Promise((_resolve, fail) => { reject = fail; });
+    const pending = f.open({encryption: {}, storagePath: CIPHERTEXT_PATH});
+    await new Promise(setImmediate);
+    f.lock(); reject(new DOMException('Synthetic cancellation', 'AbortError'));
+    await pending;
+    assert.equal(f.errors.length, 0);
+    assert.equal(f.toasts.length, 0);
+    assert.equal(f.opened.length, 0);
+    assert.equal(f.observers.size, 0);
 });
 
 test('T-29: il ramo cifrato è diverso — Vault Key, byte con tetto, decifratura e URL blob', async () => {
     const sealed = await sealedAttachment();
-    const f = realm('privato');
+    for (const kind of ['privato', 'incorporato']) {
+    const f = realm(kind);
     f.state.ciphertext = sealed.ciphertext;
     await f.open(sealed.attachment);
     assert.equal(f.state.keyRequests, 1, 'la Vault Key viene richiesta una volta');
@@ -250,6 +301,8 @@ test('T-29: il ramo cifrato è diverso — Vault Key, byte con tetto, decifratur
     assert.equal(f.opened.length, 1, 'si apre l\'oggetto decifrato');
     assert.match(f.opened[0].url, /^blob:/, 'il ramo cifrato apre un URL blob, non un URL esterno');
     assert.deepEqual(f.errors, [], 'nessun errore nel percorso positivo');
+    assert.equal(f.observers.size, 0, 'osservatori temporanei rimossi');
+    }
 });
 
 test('T-29: nel ramo cifrato manca il percorso o l\'involucro è malformato', async () => {

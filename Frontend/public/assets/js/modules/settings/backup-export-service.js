@@ -182,8 +182,15 @@ export async function exportOwnerBackup(uid, options = {}) {
         for (const storagePath of storagePaths) {
             check();
             const content = await getBytes(ref(storage, storagePath), MAX_ATTACHMENT_BYTES);
-            check();
-            await append({kind: 'attachment', storagePath, content: bytesToBase64(content)});
+            const bytes = ArrayBuffer.isView(content)
+                ? new Uint8Array(content.buffer, content.byteOffset, content.byteLength)
+                : new Uint8Array(content);
+            try {
+                check();
+                await append({kind: 'attachment', storagePath, content: bytesToBase64(bytes)});
+            } finally {
+                bytes.fill(0);
+            }
         }
         await append({kind: 'footer', entryCount: sequence, recordCount: records.length, attachmentCount: storagePaths.length});
         await sink.close();

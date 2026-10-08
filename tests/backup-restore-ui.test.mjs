@@ -168,6 +168,17 @@ test('partial apply shows a warning instead of success or an invalid-backup clai
     assert.equal(f.plan.recoveryKey, ''); assert.equal(f.observers.size, 0);
 });
 
+test('confirmation warns about recreating purged data and never reviving backup sharing', async () => {
+    const f = fixture(); f.setup('A'); const pending = f.select();
+    f.confirm('synthetic recovery'); await tick();
+    const visible = f.nodes.filter(node => node.isConnected).map(node => node.textContent || '').join(' ');
+    assert.match(visible, /ricreare elementi eliminati definitivamente/);
+    assert.match(visible, /senza riattivare le vecchie condivisioni/);
+    assert.equal(f.executions.length, 0, 'warning precedes explicit confirmation');
+    f.lock(); await pending;
+    assert.equal(f.executions.length, 0);
+});
+
 test('pagehide during confirmation clears the dialog and prevents execution', async () => {
     const f = fixture(); f.setup('A'); const pending = f.select();
     f.confirm('synthetic recovery'); await tick();

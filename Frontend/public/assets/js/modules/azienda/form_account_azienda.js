@@ -16,13 +16,37 @@ import { t } from '../../translations.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.127';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { saveAccount, deleteAccount } from './form-azienda-save.js';
+async function saveAccount(...args) {
+    let module;
+    try { module = await import('./form-azienda-save.js'); }
+    catch {
+        if (args[0]?.loadContext === loadContext && isAccountSaveAllowed(loadContext)) {
+            showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
+            const button = document.getElementById('save-btn-footer');
+            if (button) button.disabled = false;
+        }
+        return;
+    }
+    return module.saveAccount(...args);
+}
+async function deleteAccount(...args) {
+    const epoch = mountEpoch;
+    let module;
+    try { module = await import('./form-azienda-save.js'); }
+    catch {
+        if (epoch === mountEpoch) showToast('Impossibile caricare l’archiviazione. Riprova.', 'error');
+        return;
+    }
+    if (epoch !== mountEpoch || !markerConfirmed) return;
+    return module.deleteAccount(...args);
+}
 import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
 import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.127';
 import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.127';
+import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -37,6 +61,8 @@ let invitedEmails = [];
 let accountWidgetController = null;
 let profileContactLinkDraft = null;
 let baseUpdatedAt = '';
+let loadContext = null;
+globalThis.addEventListener?.('vault-session-locked', () => loadContext?.invalidate());
 // Marker osservato all'apertura del modulo: è il termine di paragone
 // dell'archiviazione, così una modifica concorrente non viene sovrascritta.
 let observedRevision;
@@ -68,6 +94,8 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
 
 // --- INITIALIZATION ---
 export async function initFormAccountAzienda(user) {
+    const credentialsForm = document.getElementById('account-credentials-form');
+    if (credentialsForm) credentialsForm.onsubmit = event => event.preventDefault();
     savedBankIds = new Set();
 
     if (!user) return;
@@ -88,6 +116,15 @@ export async function initFormAccountAzienda(user) {
             draft.companyId === currentAziendaId && ['email', 'phone', 'utility', 'document'].includes(draft.contactType)) profileContactLinkDraft = draft;
     } catch { profileContactLinkDraft = null; }
     isEditing = !!currentDocId;
+    loadContext?.invalidate();
+    loadContext = createAccountLoadContext({recordId: currentDocId, mode: isEditing ? 'edit' : 'create'});
+    const pagehideMount = mountEpoch;
+    const pagehideContext = loadContext;
+    window.addEventListener('pagehide', () => {
+        if (pagehideMount !== mountEpoch) return;
+        mountEpoch += 1;
+        pagehideContext?.invalidate();
+    }, {once:true});
     document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
     if (isEditing) {
         ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.add('hidden'));
@@ -199,6 +236,15 @@ function initBaseUI() {
             title: t('save') || 'Salva',
             onclick: async () => {
                 saveBtn.disabled = true;
+                const saveContext = loadContext;
+                const saveMount = mountEpoch;
+                const saveUid = currentUid;
+                const saveDocId = currentDocId;
+                if (!isAccountSaveAllowed(saveContext)) {
+                    showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                    saveBtn.disabled = false;
+                    return;
+                }
                 try {
                     await accountWidgetController?.savePendingChanges();
                 } catch (error) {
@@ -206,9 +252,16 @@ function initBaseUI() {
                     saveBtn.disabled = false;
                     return;
                 }
+                if (saveContext !== loadContext || saveMount !== mountEpoch
+                    || currentUid !== saveUid || currentDocId !== saveDocId) {
+                    showToast('Sessione o Account cambiati: salvataggio annullato.', 'warning');
+                    saveBtn.disabled = false;
+                    return;
+                }
                 await saveAccount({
-                    bankAccounts, invitedEmails, isExplicitMemo, currentUid,
-                    currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt
+                    bankAccounts, invitedEmails, isExplicitMemo, currentUid: saveUid,
+                    currentDocId: saveDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt,
+                    loadContext: saveContext
                 });
             }
         }, [
@@ -240,13 +293,17 @@ async function loadData() {
     // superato è identica.
     const mount = mountEpoch;
     const stale = () => mount !== mountEpoch;
+    const context = loadContext;
+    const loadToken = context?.beginLoad() ?? null;
+    const live = () => Boolean(context) && !stale() && context === loadContext && context.isCurrent(loadToken);
     try {
         const data = await getCompanyAccount(currentUid, currentAziendaId, currentDocId);
         // Il montaggio può essere stato superato durante l'attesa: da qui in poi
         // nessuno stato di modulo viene toccato.
-        if (stale()) return;
+        if (!live()) return;
         if (!data) {
             showToast(t('account_not_found'), "error");
+            context.markFailed(loadToken, 'ACCOUNT_LOAD_UNAVAILABLE');
             if (profileContactLinkDraft) throw new Error('Account non disponibile.');
             return;
         }
@@ -259,6 +316,7 @@ async function loadData() {
             recipientEmail: data.recipientEmail
         };
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        const setDecrypted = (id, val) => { if (val !== undefined) setVal(id, val); };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)
         let vaultKeyMaterial = null;
@@ -268,17 +326,29 @@ async function loadData() {
                 vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
                 showToast("Dati cifrati: chiave obbligatoria.", "error");
+                context.markFailed(loadToken, 'ACCOUNT_VAULT_KEY_UNAVAILABLE');
                 if (profileContactLinkDraft) throw e;
                 history.back();
                 return;
             }
-            if (stale()) return;
+            if (!live()) return;
         }
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
-            if (profileContactLinkDraft) return decryptRequiredValue(val, vaultKeyMaterial);
-            try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
+            if (profileContactLinkDraft) {
+                try { return await decryptRequiredValue(val, vaultKeyMaterial); }
+                catch (e) {
+                    if (context.markFailed(loadToken, 'ACCOUNT_DECRYPT_FAILED')) showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                    throw e;
+                }
+            }
+            // Il decrypt permissivo restituisce sentinelle: il validatore le rifiuta.
+            try { return await decryptRequiredValue(val, vaultKeyMaterial); }
+            catch (e) {
+                if (context.markFailed(loadToken, 'ACCOUNT_DECRYPT_FAILED')) showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                return undefined;
+            }
         };
 
         const [username, accountCode, password, registrationNumber, companyCode, note] = await Promise.all([
@@ -289,16 +359,16 @@ async function loadData() {
             decryptIfPossible(data.codiceSocieta),
             decryptIfPossible(data.note)
         ]);
-        if (stale()) return;
+        if (!live()) return;
 
         setVal('account-name', data.nomeAccount);
-        setVal('account-username', username);
-        setVal('account-code', accountCode);
-        setVal('account-password', password);
+        setDecrypted('account-username', username);
+        setDecrypted('account-code', accountCode);
+        setDecrypted('account-password', password);
         setVal('account-url', data.url || data.sitoWeb);
-        setVal('account-numero-iscrizione', registrationNumber);
-        setVal('account-codice-societa', companyCode);
-        setVal('account-note', note);
+        setDecrypted('account-numero-iscrizione', registrationNumber);
+        setDecrypted('account-codice-societa', companyCode);
+        setDecrypted('account-note', note);
         setVal('ref-name', data.referenteNome || data.referente?.nome);
         setVal('ref-phone', data.referenteTelefono || data.referente?.telefono);
         setVal('ref-mobile', data.referenteCellulare || data.referente?.cellulare);
@@ -320,8 +390,8 @@ async function loadData() {
                 })))
             })));
         }
-        if (stale()) return;
 
+        if (!live()) return;
         const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData || data.isBanking) {
@@ -371,8 +441,9 @@ async function loadData() {
         // montaggio ancora corrente può arrivare qui.
         if (stale()) return;
         markerConfirmed = true;
+        if (live()) context.markLoaded(loadToken);
 
-    } catch (e) { logError("LoadData", e); if (profileContactLinkDraft) throw e; }
+    } catch (e) { context?.markFailed(loadToken, 'ACCOUNT_LOAD_FAILED'); logError("LoadData", e); if (profileContactLinkDraft) throw e; }
     finally { if (!stale()) toggleLoading(false); }
 }
 

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
@@ -45,12 +47,14 @@ if (/\bauth\.currentUser\b/.test(privateSharing)) {
 }
 assert.match(privateSharing, /delete sharedWith\[normalizedEmail\][\s\S]+sharedWithUids/,
     'La revoca privata non rimuove l’ospite o non ricalcola gli UID accettati');
-assert.match(homeDeadlineInbox, /unread\.slice\(0, 10\)/,
-    'La Home non limita il lavoro dell’inbox Scadenze');
+// Verify the actual renderer: ten per page AFTER dedup, all later pages reachable.
+// This replaces syntax-specific checks, not the bounded-render/window contracts.
+const reminderChecks = spawnSync(process.execPath, ['--test', ...['deadline-reminders.test.mjs', 'deadline-list-calendar.test.mjs'].map(name => fileURLToPath(new URL(`../tests/${name}`, import.meta.url)))], {encoding: 'utf8'});
+assert.equal(reminderChecks.status, 0, `Regressioni promemoria/limiti Home:\n${reminderChecks.stdout}\n${reminderChecks.stderr}`);
 assert.match(homeDeadlineInbox, /dettaglio_scadenza\.html\?id=\$\{encodeURIComponent\(notification\.deadlineId\)\}&notification=\$\{encodeURIComponent\(notification\.id\)\}/,
     'L’inbox Home non apre la Scadenza e la consegna specifiche');
-assert.match(homeDeadlineDashboard, /thirtyDaysLater\.setDate\(today\.getDate\(\) \+ 30\)/,
-    'La dashboard Home non applica la finestra di 30 giorni');
+assert.match(homeDeadlineDashboard, /deadlineBucket\(deadline, today\)/,
+    'La dashboard Home non usa il calendario condiviso (finestra verificata dal renderer)');
 assert.match(homeDeadlineDashboard, /items\.slice\(0, 3\)/,
     'La dashboard Home non limita le anteprime per sezione');
 assert.match(deadline, /createDeadlineConfigController\(\{[\s\S]+recipientController/,

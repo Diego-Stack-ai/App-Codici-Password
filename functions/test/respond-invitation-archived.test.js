@@ -19,7 +19,9 @@ const {inviteRefOf, responseEventId, buildAuditEvent, auditWriteDecision} = requ
 // funzionerebbe, in produzione no.
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const emailGuard = source.slice(source.indexOf('function sanitizeEmail('), source.indexOf('function normalizeEmail('));
-const handler = source.slice(source.indexOf('exports.respondToInvitation'), source.indexOf('exports.deleteContactIfUnused'));
+const handler = source.slice(source.indexOf('exports.respondToInvitation'), source.indexOf('// Separate from audit trigger:'));
+const {buildAcceptanceReceipt} = require('../invite-acceptance-receipt');
+const DELETE_FIELD = Symbol('delete-field');
 
 const EMAIL = 'guest@example.invalid';
 // `sanitizeEmail` sostituisce ogni carattere non alfanumerico con `_`.
@@ -64,7 +66,7 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
         [INVITE_PATH, invite]
     ]);
     const versions = new Map();
-    const reads = [], writes = [], journal = [], auditLogs = [];
+    const reads = [], writes = [], journal = [], auditLogs = [], receiptInputs = [];
     let attempts = 0;
     const reference = path => ({path});
     const store = {
@@ -95,7 +97,9 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
                 // applicata, come in una transazione che fallisce.
                 commitHook?.({attempt, staged, documents, versions});
                 for (const [path, patch] of staged) {
-                    documents.set(path, {...documents.get(path), ...patch});
+                    const next = {...documents.get(path), ...patch};
+                    for (const key of Object.keys(next)) if (next[key] === DELETE_FIELD) delete next[key];
+                    documents.set(path, next);
                     versions.set(path, (versions.get(path) || 0) + 1);
                     writes.push([path, patch]);
                 }
@@ -106,11 +110,16 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
     };
     const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, run) => run,
         admin: {firestore: () => store}, structuredClone, crypto: {randomUUID},
-        FieldValue: {serverTimestamp: () => SERVER_TIMESTAMP},
+        FieldValue: {serverTimestamp: () => SERVER_TIMESTAMP, delete: () => DELETE_FIELD},
+        buildAcceptanceReceipt: input => {
+            const copy = structuredClone(input);
+            receiptInputs.push(copy);
+            return buildAcceptanceReceipt(copy);
+        },
         console: {warn: (...args) => auditLogs.push(args)},
         inviteRefOf, responseEventId, buildAuditEvent, auditWriteDecision});
     vm.runInContext(emailGuard + handler, context);
-    return {documents, writes, reads, journal, auditLogs, get attempts() { return attempts; },
+    return {documents, writes, reads, journal, auditLogs, receiptInputs, get attempts() { return attempts; },
         archive: () => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), isArchived: true});
             versions.set(ACCOUNT_PATH, (versions.get(ACCOUNT_PATH) || 0) + 1); },
         bumpCycle: value => { documents.set(ACCOUNT_PATH, {...documents.get(ACCOUNT_PATH), sharingCycle: value});
@@ -120,6 +129,47 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
             data: {inviteId: INVITE_ID, status: requested}
         })};
 }
+
+test('N1: ricevuta server atomica distinta da auditRef, rifiuto elimina legame precedente', async () => {
+    const f = fixture();
+    await f.respond();
+    const receipt = f.documents.get(INVITE_PATH).acceptanceReceipt;
+    assert.equal(receipt.guestUid, UID);
+    assert.equal(receipt.ownerUid, 'A');
+    assert.equal(receipt.kind, 'private');
+    assert.equal(receipt.cycle, 0);
+    assert.match(receipt.nonce, UUID);
+    assert.notEqual(receipt.nonce, AUDIT_REF);
+    const rejected = fixture();
+    rejected.documents.get(INVITE_PATH).acceptanceReceipt = receipt;
+    await rejected.respond('rejected');
+    assert.equal('acceptanceReceipt' in rejected.documents.get(INVITE_PATH), false);
+});
+
+test('N1: retry reale del gestore conserva il nonce e applica una sola ricevuta', async () => {
+    const f = fixture({hook: ({path, attempt, versions}) => {
+        if (path === ACCOUNT_PATH && attempt === 1) versions.set(path, 1);
+    }});
+    await f.respond();
+    assert.equal(f.attempts, 2);
+    assert.equal(f.receiptInputs.length, 2);
+    assert.match(f.receiptInputs[0].nonce, UUID);
+    assert.equal(f.receiptInputs[0].nonce, f.receiptInputs[1].nonce);
+    assert.equal(f.documents.get(INVITE_PATH).acceptanceReceipt.nonce, f.receiptInputs[0].nonce);
+    assert.equal(f.writes.filter(([path]) => path === INVITE_PATH).length, 1);
+});
+
+test('N1: identificatore legacy non supportato elimina ricevuta obsoleta senza negare accettazione', async () => {
+    const f = fixture();
+    const companyPath = 'users/A/aziende/A@B/accounts/account';
+    f.documents.set(companyPath, structuredClone(f.documents.get(ACCOUNT_PATH)));
+    f.documents.set(INVITE_PATH, {...f.documents.get(INVITE_PATH), aziendaId: 'A@B',
+        acceptanceReceipt: {nonce: 'obsolete'}});
+    assert.deepEqual({...await f.respond()}, {ok: true, status: 'accepted'});
+    assert.equal(f.receiptInputs.length, 1);
+    assert.equal('acceptanceReceipt' in f.documents.get(INVITE_PATH), false);
+    assert.deepEqual([...f.documents.get(companyPath).sharedWithUids], [UID]);
+});
 
 test('invito su Account archiviato: errore chiaro, nessuna scrittura, invito e condivisione intatti', async () => {
     for (const status of ['accepted', 'rejected']) {

@@ -75,7 +75,7 @@ assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visu
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
 
 // Compatibilità funzionale legacy: questi controlli non certificano la separazione
-// fra chiave e ciphertext, ancora aperta in AUDIT_VAULT_SESSION_P0.md.
+// fra chiave e ciphertext, ancora aperta in docs/evidenze/AUDIT.md.
 assert.match(security, /restoreVaultSession\(uid\)/, 'La chiave Vault non viene ripristinata tra le pagine');
 assert.match(security, /saveVaultSession\(_vaultKeyMaterial, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
 assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza condivisa tra pagine');
@@ -181,7 +181,11 @@ assert.match(firebaseConfig, /firebaseapp\.com[\s\S]*?location\.replace[\s\S]*?C
 assert.match(serviceWorker, /cache\.put\(request, response\.clone\(\)\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
 assert.doesNotMatch(firestoreRules, /visibility[^\n]+==\s*['"]shared['"]/, 'La visibilità shared concede ancora accesso generico');
-assert.doesNotMatch(firestoreRules, /allow\s+read,\s*update/, 'Un ospite può ancora modificare account altrui');
+assert.doesNotMatch(
+    firestoreRules,
+    /allow\s+[^;]*\b(?:write|create|update|delete)\b[^;]*:\s*if[^;]*(?:isAcceptedGuest|isGuestReadableAccount)\s*\(/s,
+    'Un ospite può ancora modificare account altrui'
+);
 assert.match(firestoreRules, /request\.auth\.uid in resource\.data\.get\('sharedWithUids', \[\]\)/, 'La lettura condivisa non richiede un UID accettato');
 assert.doesNotMatch(firestoreRules, /request\.query\.filters\.size/, 'Gli inviti accettano ancora una query con filtro arbitrario');
 // M7-AUDIT-5R: l'aggiornamento dell'invito è ora separato dalla cancellazione ed
@@ -244,7 +248,8 @@ assert.match(cloudFunctions, /revokeRefreshTokens\(user\.uid\)/, 'Il recupero 2F
 assert.match(firestoreRules, /match \/mfaRecovery\/\{userId\}[\s\S]*?allow read, write: if false;/, 'I codici recupero sono accessibili direttamente dal client');
 assert.match(firestoreRules, /match \/mfaRecoveryAttempts\/\{attemptId\}[\s\S]*?allow read, write: if false;/, 'I contatori recupero sono accessibili direttamente dal client');
 assert.equal(firebaseJson.storage?.rules, 'storage.rules', 'Le regole Storage non sono collegate a firebase.json');
-assert.match(storageRules, /match \/users\/\{userId\}\/\{allPaths=\*\*\}/, 'Storage non confina gli oggetti nello spazio UID');
+assert.match(storageRules, /match \/users\/\{userId\}\/\{namespace\}\/\{allPaths=\*\*\} \{\s*allow read, delete: if isOwner\(userId\) && namespace != 'restoreObjects';\s*allow create, update: if isOwner\(userId\) && namespace != 'restoreObjects' && isAllowedUpload\(\);\s*\}/, 'Storage deve confinare gli oggetti nello spazio UID e preservare la riserva restoreObjects');
+assert.match(storageRules, /match \/users\/\{userId\}\/restoreObjects\/\{objectId\} \{\s*allow read: if isOwner\(userId\);\s*allow write: if false;\s*\}/, 'Gli oggetti di ripristino devono restare non modificabili dal client');
 assert.match(storageRules, /request\.auth\.uid == userId/, 'Storage non verifica la proprietà tramite UID');
 assert.match(storageRules, /request\.resource\.size <= 25 \* 1024 \* 1024/, 'Storage non impone il limite di 25 MB');
 assert.match(storageRules, /request\.resource\.contentType\.matches/, 'Storage non applica una allowlist dei MIME type');
@@ -297,4 +302,4 @@ assert.match(security, /export async function changeMasterPassword/, 'Cambio Mas
 assert.match(settingsHtml, /id="btn-change-master-password"/, 'Cambio Master Password non esposto in Impostazioni');
 assert.match(coreUi, /passwordType[\s\S]*?bindPasswordChecklist/, 'Il cambio Master Password non mostra i requisiti dinamici');
 
-console.log('Audit sicurezza e offline: 88 controlli superati.');
+console.log('Audit statico sicurezza e offline completato: tutte le asserzioni eseguite sono superate. Non equivale al collaudo completo dell’app.');

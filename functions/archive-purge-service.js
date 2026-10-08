@@ -1,7 +1,11 @@
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,160}$/;
 
+// Temporary safety interlock approved by the owner. No request/env override.
+function isArchivePurgeSuspended() { return true; }
+
 function requireIdentifier(value) {
-  const normalized = String(value || "").trim();
+  if (typeof value !== 'string') throw new Error('INVALID_IDENTIFIER');
+  const normalized = value;
   if (!IDENTIFIER_PATTERN.test(normalized)) throw new Error("INVALID_IDENTIFIER");
   return normalized;
 }
@@ -14,10 +18,10 @@ function validatePurgeCommand(input = {}) {
     operationId: requireIdentifier(input.operationId),
     context,
     companyId: context === "company" ? requireIdentifier(input.companyId) : null,
-    expectedRevision: Number(input.expectedRevision),
+    expectedRevision: input.expectedRevision,
     confirmation: input.confirmation === "DELETE_FOREVER"
   };
-  if (!Number.isInteger(command.expectedRevision) || command.expectedRevision < 0) {
+  if (!Number.isSafeInteger(command.expectedRevision) || command.expectedRevision < 0) {
     throw new Error("INVALID_REVISION");
   }
   return command;
@@ -44,7 +48,8 @@ function purgeDecision({record, expectedRevision, confirmed, previous}) {
   if (previous?.status === "processing" && !record) return {status: "resume", duplicate: false};
   if (!record) return {status: "not-found", duplicate: false};
   if (record.isArchived !== true) return {status: "not-archived", duplicate: false};
-  const currentRevision = Number.isInteger(record.revision) ? record.revision : 0;
+  const currentRevision = Object.hasOwn(record, 'revision') ? record.revision : 0;
+  if (!Number.isSafeInteger(currentRevision) || currentRevision < 0) return {status: 'invalid-revision', duplicate: false};
   if (currentRevision !== expectedRevision) return {status: "conflict", duplicate: false, revision: currentRevision};
   if (!confirmed) return {status: "confirmation-required", duplicate: false};
   return {status: "ready", duplicate: false, revision: currentRevision};
@@ -110,7 +115,32 @@ function planProfileReferenceCleanup(source, command, {company = false} = {}) {
   return patch;
 }
 
+// Conservative preflight only: this does not fence later concurrent writers.
+function assertNoExternalAccountReferences(command, widgets, links) {
+  const invalid = () => { throw new Error('ARCHIVE_PURGE_EXTERNAL_REFERENCES_UNVERIFIED'); };
+  const identity = value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) invalid();
+    if (!['private', 'company'].includes(value.context)) invalid();
+    if (typeof value.accountId !== 'string' || !IDENTIFIER_PATTERN.test(value.accountId)) invalid();
+    if (value.context === 'company') {
+      if (typeof value.companyId !== 'string' || !IDENTIFIER_PATTERN.test(value.companyId)) invalid();
+    } else if (value.companyId != null && value.companyId !== '') invalid();
+    return value;
+  };
+  identity(command);
+  if (!Array.isArray(widgets) || !Array.isArray(links)) invalid();
+  for (const records of [widgets, links]) {
+    for (const record of records) {
+      identity(record);
+      if (record.context === command.context && record.accountId === command.accountId &&
+          (command.context === 'private' || record.companyId === command.companyId)) invalid();
+    }
+  }
+}
+
 module.exports = {
+  isArchivePurgeSuspended,
+  assertNoExternalAccountReferences,
   accountPath,
   isSafeAttachmentPath,
   purgeDecision,

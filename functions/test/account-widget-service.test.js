@@ -9,6 +9,23 @@ const {
 const field = {id: "f1", label: "Risposta", type: "sensitive", encrypted: true,
   valueEnc: "ciphertext", includeInQr: false, copyable: false};
 
+test("revisioni widget ammettono solo incrementi interi rappresentabili", () => {
+  for (const action of ["update", "delete"]) {
+    const input = {action, operationId: "op-boundary", widgetId: "widget-boundary",
+      context: "private", accountId: "account-boundary", data: {title: "Sintetico", fields: [field]}};
+    for (const expectedRevision of [null, 0, -1, 1.5, Number.MAX_SAFE_INTEGER,
+      Number.MAX_SAFE_INTEGER + 1, Infinity]) {
+      assert.throws(() => validateAccountWidgetCommand({...input, expectedRevision}),
+        /ACCOUNT_WIDGET_REVISION_INVALID/, `${action}: ${expectedRevision}`);
+    }
+    const command = validateAccountWidgetCommand({...input, expectedRevision: Number.MAX_SAFE_INTEGER - 1});
+    const result = revisionDecision({exists: true, currentRevision: command.expectedRevision,
+      expectedRevision: command.expectedRevision, action});
+    assert.equal(result.revision, Number.MAX_SAFE_INTEGER);
+    assert.equal(Number.isSafeInteger(result.revision), true);
+  }
+});
+
 test("valida lo stesso widget incorporato per privato e azienda", () => {
   const privateCommand = validateAccountWidgetCommand({
     action: "create", operationId: "op-1", widgetId: "w-1", context: "private", accountId: "a-1",

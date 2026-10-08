@@ -1,7 +1,7 @@
 import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {initializeTestEnvironment} from '@firebase/rules-unit-testing';
+import {initializeTestEnvironment, assertFails} from '@firebase/rules-unit-testing';
 import {doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
 import {getBytes, getDownloadURL, listAll, ref, uploadBytes} from 'firebase/storage';
 
@@ -14,7 +14,8 @@ import {getBytes, getDownloadURL, listAll, ref, uploadBytes} from 'firebase/stor
 // registro di chiamate.
 const strip = text => text.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const avatarModule = strip(await readFile(
-    new URL('../Frontend/public/assets/js/modules/privato/profilo-ui.js', import.meta.url), 'utf8'));
+    new URL('../Frontend/public/assets/js/modules/privato/profilo-ui.js', import.meta.url), 'utf8'))
+    .replace("import('../shared/attachment-security.js')", 'Promise.resolve({createStorageObjectName, MAX_AVATAR_BYTES, validateAttachmentFile})');
 const securityModule = strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8'));
 
@@ -38,7 +39,7 @@ function mount({uid = OWNER} = {}) {
     // («custom Object»), che è un artefatto del banco e non del percorso reale.
     const factory = new Function('document', 'localStorage', 'db', 'storage', 'ref', 'uploadBytes', 'getDownloadURL',
         'doc', 'updateDoc', 'showToast', 'showConfirmModal', 'showInputModal', 't', 'logError', 'createElement',
-        'clearElement', 'File', 'crypto', 'TextEncoder', 'console',
+        'clearElement', 'File', 'crypto', 'TextEncoder', 'console', 'auth',
         `${securityModule}\n${avatarModule}\nreturn {initUIModule, setupAvatarEdit};`);
     const module = factory(
         {getElementById: id => nodes[id] || null},
@@ -47,7 +48,7 @@ function mount({uid = OWNER} = {}) {
         db, storage, ref, uploadBytes, getDownloadURL, doc, updateDoc,
         (...args) => toasts.push(args), async () => true, async () => null, value => value,
         (...args) => errors.push(args), (tag, props = {}, children = []) => ({tag, ...props, children}),
-        node => { node.children = []; }, File, crypto, TextEncoder, {warn() {}});
+        node => { node.children = []; }, File, crypto, TextEncoder, {warn() {}}, {currentUser: {uid}});
     module.initUIModule(() => ({currentUserUid: uid, profileLabels: []}));
     module.setupAvatarEdit();
     return {db, storage, cache, toasts, errors, nodes,
@@ -56,8 +57,17 @@ function mount({uid = OWNER} = {}) {
 }
 
 const photoURL = async (db, uid) => (await getDoc(doc(db, 'users', uid))).data()?.photoURL ?? null;
-const objectNames = async (storage, uid) =>
-    (await listAll(ref(storage, `users/${uid}`))).items.map(item => item.name).sort();
+const objectNames = async (storage, uid) => {
+    // Root enumeration is no longer a client capability: the namespace rule
+    // deliberately reserves restoreObjects. Inspect residues as test admin,
+    // while uploads and byte reads below still exercise the owner's real Rules.
+    await assertFails(listAll(ref(storage, `users/${uid}`)));
+    let names;
+    await testEnv.withSecurityRulesDisabled(async context => {
+        names = (await listAll(ref(context.storage(), `users/${uid}`))).items.map(item => item.name).sort();
+    });
+    return names;
+};
 
 before(async () => {
     testEnv = await initializeTestEnvironment({

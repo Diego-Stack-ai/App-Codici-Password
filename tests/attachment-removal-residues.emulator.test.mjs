@@ -27,6 +27,7 @@ const sliceFunction = (source, name) => {
 const detailSource = await read('../Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js');
 const saveSource = strip(await read('../Frontend/public/assets/js/modules/scadenze/deadline-save-service.js'));
 const securitySource = strip(await read('../Frontend/public/assets/js/modules/shared/attachment-security.js'));
+const configSource = strip(await read('../Frontend/public/assets/js/modules/scadenze/deadline-config-model.js'));
 
 const PROJECT_ID = 'codici-password-attachment-removal';
 const OWNER = 'owner-removal';
@@ -53,7 +54,7 @@ function saveDeadlineFixture() {
     const factory = new Function('db', 'storage', 'addDoc', 'arrayUnion', 'collection', 'doc',
         'getDownloadURL', 'ref', 'setDoc', 'Timestamp', 'updateDoc', 'uploadBytes', 'writeBatch',
         'LOG', 'ensureVaultKeyMaterial', 'getUserProfile', 'deadlineRecipientFields', 'console',
-        `${securitySource}\n${saveSource}\nreturn {saveDeadline};`);
+        `${configSource}\n${securitySource}\n${saveSource}\nreturn {saveDeadline};`);
     const module = factory(db, storage, addDoc, arrayUnion, collection, doc, getDownloadURL, ref, setDoc,
         Timestamp, updateDoc, uploadBytes, writeBatch, () => {}, async () => 'synthetic-vault-key',
         async () => ({documenti: []}), () => ({recipients: []}), {warn() {}});

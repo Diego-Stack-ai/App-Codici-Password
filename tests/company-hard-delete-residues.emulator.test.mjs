@@ -2,12 +2,12 @@ import {after, before, beforeEach, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
-import {initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {deleteDoc, doc, getDoc, getDocs, setDoc} from 'firebase/firestore';
+import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
+import {collection, getDocsFromServer, limit, query, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, writeBatch} from 'firebase/firestore';
 import {getBytes, listAll, ref, uploadBytes} from 'firebase/storage';
 
 // M7-T27 — Prove su **Emulator reali** dei due percorsi di hard-delete:
-//   1. l'Azienda cancellata dal **client** (`deleteCompany`, un solo `deleteDoc`);
+//   1. l'Azienda preservata dal blocco intermedio del client (`deleteCompany`);
 //   2. l'Account aziendale eliminato dal **purge backend** (callable reale).
 // Le verifiche finali leggono l'emulatore: documenti e sottocollezioni rimasti,
 // riferimenti in altri documenti, oggetti Storage prima e dopo.
@@ -54,9 +54,9 @@ const purge = purgeFactory({}, HttpsError, FieldValue, {log() {}, warn() {}, err
 async function deleteCompany(uid, companyId) {
     const source = strip(await read('../Frontend/public/assets/js/modules/azienda/company-list-service.js'));
     const db = testEnv.authenticatedContext(uid).firestore();
-    const factory = new Function('db', 'deleteDoc', 'doc', 'updateDoc',
+    const factory = new Function('db', 'auth', 'collection', 'getDocsFromServer', 'limit', 'query', 'doc', 'updateDoc',
         `${source}\nreturn {deleteCompany};`);
-    return factory(db, deleteDoc, doc, () => {}).deleteCompany(uid, companyId);
+    return factory(db, {currentUser: {uid}}, collection, getDocsFromServer, limit, query, doc, () => {}).deleteCompany(uid, companyId);
 }
 
 const exists = async path => (await adminDb.doc(path).get()).exists;
@@ -100,7 +100,34 @@ async function seedCompany(companyId, accountId, {archived = false} = {}) {
     return objectPath;
 }
 
-test('T-27 su emulatore: l’Azienda cancellata dal client lascia sottocollezione, byte e riferimenti', async () => {
+test('T-27 Rules: direct or batched company deletion cannot bypass the client guard', async () => {
+    await seedCompany('company-a', 'account-a');
+    const db = testEnv.authenticatedContext(OWNER).firestore();
+    const parent = doc(db, `users/${OWNER}/aziende/company-a`);
+    const child = doc(db, `users/${OWNER}/aziende/company-a/accounts/account-a`);
+    await assertFails(deleteDoc(parent));
+    const batch = writeBatch(db); batch.delete(child); batch.delete(parent);
+    await assertFails(batch.commit());
+    assert.equal(await exists(`users/${OWNER}/aziende/company-a`), true);
+    assert.equal(await exists(`users/${OWNER}/aziende/company-a/accounts/account-a`), true);
+    await adminDb.doc(`users/${OWNER}/aziende/empty`).set({ragioneSociale: 'Synthetic empty'});
+    await assertFails(deleteDoc(doc(db, `users/${OWNER}/aziende/empty`)));
+});
+
+test('T-27 Rules: owner creation, edits and descendants remain allowed, other owners denied', async () => {
+    const db = testEnv.authenticatedContext(OWNER).firestore();
+    const parent = doc(db, `users/${OWNER}/aziende/company-new`);
+    await assertSucceeds(setDoc(parent, {ragioneSociale: 'Synthetic'}));
+    await assertSucceeds(updateDoc(parent, {ragioneSociale: 'Changed synthetic'}));
+    const path = `users/${OWNER}/aziende/company-new/accounts/account-new/attachments/file`;
+    await assertSucceeds(setDoc(doc(db, path), {name: 'synthetic'}));
+    await assertSucceeds(deleteDoc(doc(db, path)));
+    const other = testEnv.authenticatedContext('other-owner').firestore();
+    await assertFails(setDoc(doc(other, `users/${OWNER}/aziende/company-new`), {}));
+    await assertFails(setDoc(doc(other, path), {}));
+});
+
+test('T-27 su emulatore: il blocco client preserva Azienda, Account, byte e riferimenti', async () => {
     const objectA = await seedCompany('company-a', 'acc-a');
     const objectB = await seedCompany('company-b', 'acc-b');
     const companyFormObject = `users/${OWNER}/aziende_allegati/modulo.pdf`;
@@ -109,21 +136,21 @@ test('T-27 su emulatore: l’Azienda cancellata dal client lascia sottocollezion
         {linkedAccountId: 'acc-a', linkedAccountCompanyId: 'company-a', email: 'a@example.invalid'},
         {linkedAccountId: 'acc-b', linkedAccountCompanyId: 'company-b', email: 'b@example.invalid'}]});
 
-    await deleteCompany(OWNER, 'company-a');
+    await assert.rejects(deleteCompany(OWNER, 'company-a'), {code: 'COMPANY_NOT_EMPTY'});
 
-    // Eliminato: solo il documento Azienda.
-    assert.equal(await exists(`users/${OWNER}/aziende/company-a`), false, 'il documento Azienda è eliminato');
-    // Rimasti: sottocollezione Account e suoi metadati (orfani, non ricorsivi).
+    // Nessuna eliminazione: il documento Azienda resta con i suoi figli.
+    assert.equal(await exists(`users/${OWNER}/aziende/company-a`), true, 'il documento Azienda è preservato');
+    // Sottocollezione Account e metadati restano associati al genitore presente.
     assert.equal(await exists(`users/${OWNER}/aziende/company-a/accounts/acc-a`), true,
-        'l’Account aziendale resta: il delete non è ricorsivo');
+        'l’Account aziendale resta associato alla sua Azienda');
     assert.equal(await exists(`users/${OWNER}/aziende/company-a/accounts/acc-a/attachments/att-1`), true,
         'i metadati dell’allegato restano');
     assert.deepEqual(await items(`users/${OWNER}/aziende/company-a/accounts/acc-a/attachments`), ['allegato.pdf'],
-        'i byte dell’Account orfano restano nello Storage');
+        'i byte dell’Account restano nello Storage');
     assert.deepEqual(new Uint8Array(await getBytes(ref(testEnv.authenticatedContext(OWNER).storage(), objectA))), BYTES);
     assert.deepEqual(await items(`users/${OWNER}/aziende_allegati`), ['modulo.pdf'],
         'gli allegati del form Azienda restano');
-    // Riferimenti: restano, puntano a un’Azienda che non esiste più.
+    // Riferimenti: restano e puntano a un’Azienda ancora presente.
     const profile = await data(`users/${OWNER}`);
     assert.deepEqual(profile.contactEmails.map(item => item.linkedAccountCompanyId), ['company-a', 'company-b'],
         'i riferimenti nel Profilo non vengono toccati');

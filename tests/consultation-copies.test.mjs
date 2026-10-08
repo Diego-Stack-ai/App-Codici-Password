@@ -194,9 +194,9 @@ test('T-24: l’export del backup richiede la rete, non filtra gli archiviati e 
     assert.equal(/showSaveFilePicker[\s\S]{0,200}remove/.test(backupService), false);
 });
 
-// ── 4. Excel e PDF: non esistono nell'app distribuita ──────────────────────
+// ── 4. Indicatori di export nel checkout locale: non è una prova di produzione ──
 
-test('T-24: nell’app distribuita non esistono export Excel, PDF o stampa', async () => {
+test('T-24: indicatori storici XLSX/stampa assenti nei moduli locali e proiezione Excel non montata', async () => {
     const files = [];
     const walk = async directory => {
         for (const entry of await readdir(directory, {withFileTypes: true})) {
@@ -208,12 +208,12 @@ test('T-24: nell’app distribuita non esistono export Excel, PDF o stampa', asy
     await walk(root);
     for (const needle of ['xlsx', 'SheetJS', 'jspdf', 'window.print', 'html2pdf']) {
         const hits = files.filter(file => file.text.includes(needle)).map(file => file.path);
-        assert.deepEqual(hits, [], `${needle} non deve esistere nel runtime distribuito`);
+        assert.deepEqual(hits, [], `${needle}: indicatore assente nel checkout esaminato, non verifica remota`);
     }
-    // L'unica proiezione Excel è di laboratorio e non è montata in produzione.
+    // Questo controllo non esclude altre librerie PDF, altri rami o release distribuite.
     const projection = await readFile(new URL('../experiments/persistent-vault-shell/excel-export-projection.mjs', import.meta.url), 'utf8');
     assert.match(projection, /Experimental adaptation/i, 'il file di laboratorio dichiara la propria natura');
     assert.match(projection, /EXCEL_MASK/, 'la proiezione maschera i valori sensibili');
     const mounted = files.filter(file => file.text.includes('excel-export-projection'));
-    assert.deepEqual(mounted, [], 'nessun modulo distribuito importa la proiezione Excel');
+    assert.deepEqual(mounted, [], 'nessun modulo locale esaminato importa la proiezione Excel');
 });

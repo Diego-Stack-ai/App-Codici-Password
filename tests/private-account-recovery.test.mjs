@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+const guardSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js', import.meta.url), 'utf8');
+const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadContext, isAccountSaveAllowed} =
+    await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
 const path='../Frontend/public/assets/js/modules/privato/';
 const formSource=await readFile(new URL(path+'form_account_privato.js',import.meta.url),'utf8');
 const restoreSource=formSource.slice(formSource.indexOf('async function restoreM6ConflictDraft'),formSource.indexOf('// --- INITIALIZATION ---'));
@@ -32,7 +35,7 @@ async function saveFixture(status,{recover=true,active=true,expireBeforeNavigati
  const button={disabled:false,dataset:{},setAttribute(){}};
  const nodes={'btn-save-footer':button,'account-name':{value:'Fixture'}};
  const pilotFixture={replacePrivateAccountPilotOperation:async()=>{replaced++;return status},enqueuePrivateAccountPilot:async()=>{enqueued++;return status},storePrivateAccountHandoff:()=>handoffs++};
- const sandbox={pilotFixture,document:{getElementById:id=>nodes[id],querySelector:()=>null},auth:{currentUser:{uid:'owner'}},db:{},
+ const sandbox={pilotFixture,isAccountSaveAllowed,assertAccountSaveAllowed,DECRYPT_FAILURE_MESSAGE,document:{getElementById:id=>nodes[id],querySelector:()=>null},auth:{currentUser:{uid:'owner'}},db:{},
   showToast:message=>messages.push(message),hasInvalidCardExpiry:()=>false,ensureVaultKeyMaterial:async()=> 'key',encrypt:async v=>v?'cipher':'',
   accountModeFromFlags:()=> 'account-private',validateAccountMode:()=>({}),recordFieldsFromAccountMode:()=>({type:'account',visibility:'private'}),
   classifyPrivateAccountOfflineWrite:()=>({eligible:true}),navigator:{onLine:true},doc:()=>({id:'record'}),t:x=>x,console:{error(){}},
@@ -41,7 +44,7 @@ async function saveFixture(status,{recover=true,active=true,expireBeforeNavigati
  source=source.replace(/^import[\s\S]*?;\r?\n/gm,'').replace('export async function','async function').replace("await import('../data/private-account-offline-pilot.js')",'pilotFixture');
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
  await sandbox.savePrivateAccount({bankAccounts:[],invitedEmails:[],currentUid:'owner',currentDocId:'record',isEditing:true,baseRevision:1,
-  recoveryOperation:recover?{uid:'owner',operationId:'old',recordId:'record',_reviewReason:reviewReason}:null,isActive:()=>active});
+  recoveryOperation:recover?{uid:'owner',operationId:'old',recordId:'record',_reviewReason:reviewReason}:null,loadContext:createAccountLoadContext({mode:'create'}),isActive:()=>active});
  return {replaced,enqueued,handoffs,messages,navigations,button};
 }
 

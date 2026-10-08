@@ -4,6 +4,9 @@ const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
 const {HttpsError} = require('firebase-functions/v2/https');
 const policy = require('../archive-purge-service');
+// Historical algorithm coverage only; live interlock is tested separately.
+// This override exists only in the isolated VM fixture, never in the endpoint.
+const legacyPolicy = {...policy, isArchivePurgeSuspended: () => false};
 const receipts = require('../archive-purge-receipt');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
@@ -57,7 +60,7 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false, attachm
       writes.push(...staged);
       return result;
     }};
-  const context = vm.createContext({...policy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...legacyPolicy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
     getFirestore: () => store,
     getStorage: () => { counts.storage++; return {bucket: () => ({file: path => ({
       delete: async options => {
@@ -160,8 +163,7 @@ test('missing deletion confirmation is rejected even for a previously completed 
 
 test('listed attachment bytes are deleted, in order, before the recursive deletion', async () => {
   const paths = ['users/owner/accounts/account/attachments/a.bin', 'users/owner/accounts/account/attachments/b.bin'];
-  const f = fixture({attachments: [{storagePath: paths[0]}, {url: 'https://example.invalid/legacy'},
-    {storagePath: paths[1]}, {name: 'synthetic-without-path'}]});
+  const f = fixture({attachments: paths.map(storagePath => ({storagePath}))});
   const result = await f.run();
   assert.equal(result.status, 'purged');
   assert.deepEqual(f.storageOrder, ['list', 'delete', 'delete', 'recursiveDelete']);
@@ -170,6 +172,19 @@ test('listed attachment bytes are deleted, in order, before the recursive deleti
   assert.equal(f.states.has(recordPath), false);
   assert.equal(f.states.get(receiptPath).status, 'purged');
   assert.equal(f.states.has(auditPath), true);
+});
+
+test('a legacy URL-only attachment aborts the whole purge before deleting any valid listed file', async () => {
+  const f = fixture({attachments: [
+    {storagePath: 'users/owner/accounts/account/attachments/a.bin'},
+    {url: 'https://example.invalid/legacy'}
+  ]});
+  await assert.rejects(f.run(), error => error.code === 'failed-precondition');
+  assert.deepEqual(f.storageDeletes, []);
+  assert.deepEqual(f.recursiveDeletePaths, []);
+  assert.equal(f.states.has(recordPath), true);
+  assert.equal(f.states.get(receiptPath).status, 'processing');
+  assert.equal(f.states.has(auditPath), false);
 });
 
 // M7-T13: censimento esercitato di che cosa il purge lascia e che cosa elimina.

@@ -6,6 +6,7 @@ const projectRoot = resolve(import.meta.dirname, '..');
 const configRoot = resolve(projectRoot, '.codex-tmp', 'firebase-config');
 const firebaseCli = resolve(projectRoot, 'node_modules', 'firebase-tools', 'lib', 'bin', 'firebase.js');
 const testFiles = [
+  resolve(projectRoot, 'tests', 'notification-rules.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'firestore.profile-widgets.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'sharing-prototype.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'offline-sync.rules.test.mjs'),
@@ -18,7 +19,7 @@ const testFiles = [
 mkdirSync(configRoot, {recursive: true});
 
 const result = spawnSync(process.execPath, [
-  firebaseCli, 'emulators:exec', '--project', 'codici-password-rules-test', '--only', 'firestore',
+  firebaseCli, 'emulators:exec', '--project', 'demo-codici-password-rules-test', '--only', 'firestore',
   `${JSON.stringify(process.execPath)} --test ${testFiles.map(file => JSON.stringify(file)).join(' ')}`,
 ], {
   cwd: projectRoot,

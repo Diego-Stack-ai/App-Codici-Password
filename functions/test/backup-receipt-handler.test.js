@@ -5,6 +5,7 @@ const {readFileSync} = require('node:fs');
 const service = require('../backup-restore-service');
 const receipts = require('../backup-restore-receipt');
 const previewApi = require('../backup-restore-preview');
+const authorityApi = require('../backup-restore-authority');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const handler = source.slice(source.indexOf('exports.restoreBackupChunk ='), source.indexOf('exports.getAppPresentation ='));
 const original = {expectedOwnerUid: 'owner', operationId: 'restore:fixture:0', backupId: 'fixture', chunkIndex: 0,
@@ -25,13 +26,36 @@ function fixture() {
     return result;
   }};
   class HttpsError extends Error { constructor(code, message, details) { super(message); this.code = code; this.details = details; } }
-  const context = vm.createContext({...service, ...receipts, ...previewApi, Buffer, exports: {}, HttpsError,
+  const context = vm.createContext({...service, ...receipts, ...previewApi, ...authorityApi, Buffer, exports: {}, HttpsError,
     onCall: (_options, run) => run, getFirestore: () => store, FieldValue: {serverTimestamp: () => 'time'}});
   vm.runInContext(handler, context);
   return {data, writes, versions, run: (command = original) => context.exports.restoreBackupChunk({auth: {uid: 'owner'}, data: command})};
 }
 const resultPath = 'mutationResults/owner/operations/restore:fixture:0';
 const legacyPath = 'users/owner/backupRestoreOperations/restore:fixture:0';
+
+test('actual restore handler never resurrects old recipients and preserves live access on overwrite', async () => {
+  for (const existing of [false, true]) {
+    const f = fixture(), path = 'users/owner/accounts/record';
+    const live = {password: 'current', sharedWith: {live: {uid: 'current-guest', status: 'accepted'}},
+      sharedWithUids: ['current-guest'], acceptedCount: 1, visibility: 'shared', sharingCycle: 9};
+    if (existing) f.data.set(path, live);
+    const record = {...original.records[0], data: {password: 'backup', sharedWith: {old: {uid: 'old-guest', status: 'accepted'}},
+      sharedWithUids: ['old-guest'], acceptedCount: 1, visibility: 'shared', sharingCycle: 2}};
+    const preview = await f.run({...original, mode: 'preview', records: [record]});
+    const command = {...original, overwriteExisting: existing,
+      confirmation: existing ? 'RESTORE_SELECTED_OVERWRITE' : 'RESTORE_VALIDATED',
+      records: [{...record, expectedVersion: preview.entries[0].expectedVersion}]};
+    assert.equal((await f.run(command)).status, 'applied');
+    const restored = f.data.get(path);
+    assert.equal(restored.password, 'backup');
+    assert.deepEqual(restored.sharedWithUids, existing ? ['current-guest'] : []);
+    assert.equal(JSON.stringify(restored).includes('old-guest'), false);
+    assert.equal((await f.run(command)).duplicate, true);
+    const compared = await f.run({...original, mode: 'preview', records: [record]});
+    assert.equal(compared.entries[0].status, 'unchanged');
+  }
+});
 
 test('backup applies with a backend receipt and replays without reapplying changed current data', async () => {
   const f = fixture(); assert.equal((await f.run()).status, 'applied');

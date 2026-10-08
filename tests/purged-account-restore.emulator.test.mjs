@@ -54,6 +54,16 @@ process.env.STORAGE_EMULATOR_HOST ??= `http://${process.env.FIREBASE_STORAGE_EMU
 const adminApp = initializeApp({projectId: PROJECT_ID, storageBucket: PROJECT_ID}, `purged-restore-${process.pid}`);
 const adminDb = getFirestore(adminApp);
 const bucket = getStorage(adminApp).bucket(PROJECT_ID);
+let afterPurgeDelete;
+const purgeStore = {
+    collection: (...args) => adminDb.collection(...args),
+    doc: (...args) => adminDb.doc(...args),
+    runTransaction: (...args) => adminDb.runTransaction(...args),
+    recursiveDelete: async reference => {
+        await adminDb.recursiveDelete(reference);
+        await afterPurgeDelete?.(reference);
+    }
+};
 
 const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console',
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
@@ -61,17 +71,18 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
     {log() {}, warn() {}, error() {}}, policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision,
     policy.planProfileReferenceCleanup, policy.validatePurgeCommand, purgeReceipts.createArchivePurgeBinding,
-    purgeReceipts.verifyArchivePurgeReceipt, (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}));
+    purgeReceipts.verifyArchivePurgeReceipt, (_options, run) => run, () => purgeStore, () => ({bucket: () => bucket}));
 
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',
     'buildRestorePreview', 'staleRestoreIndexes', 'decodeFirestoreValue', 'restoreChunkDecision',
-    'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt',
+    'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt', 'preserveRestoreAuthority',
     'onCall', 'getFirestore',
     `${restoreSlice}\nreturn exports.restoreBackupChunk;`)({}, HttpsError, Timestamp, FieldValue,
     {log() {}, warn() {}, error() {}}, restorePreview.buildRestorePreview, restorePreview.staleRestoreIndexes,
     restoreService.decodeFirestoreValue, restoreService.restoreChunkDecision, restoreService.safeRestoreAudit,
     restoreService.validateRestoreChunk, restoreReceipts.createBackupRestoreBinding,
-    restoreReceipts.verifyBackupRestoreReceipt, (_options, run) => run, () => adminDb);
+    restoreReceipts.verifyBackupRestoreReceipt, requireFunctions('./backup-restore-authority.js').preserveRestoreAuthority,
+    (_options, run) => run, () => adminDb);
 
 // ── Seed sintetico: profilo, Account archiviato con allegato, Azienda collegata ──
 async function seed() {
@@ -106,7 +117,8 @@ function buildBackup() {
         username: 'synthetic-user', password: MARKERS.password, note: MARKERS.note, isArchived: true, revision: 1}];
     repositories.listBackupPrivateAttachments = async () => [{id: 'att-1', name: 'Allegato.pdf',
         storagePath: OBJECT_PATH, type: 'application/pdf', size: BYTES.length}];
-    repositories.getBytes = async () => BYTES;
+    // Each SDK read owns its buffer; export may wipe it without altering the seed.
+    repositories.getBytes = async () => BYTES.slice();
     const names = Object.keys(repositories);
     const factory = new Function(...names, 'auth', 'navigator', 'window', 'onAuthStateChanged', 'addEventListener',
         'removeEventListener', 'createBackupExportBuffer', 'createBackupRecordBuffer', 'generateRecoveryKey',
@@ -171,6 +183,7 @@ before(async () => {
     });
 });
 beforeEach(async () => {
+    afterPurgeDelete = undefined;
     await testEnv.clearFirestore();
     await testEnv.clearStorage();
 });
@@ -186,6 +199,31 @@ async function exportThenPurge() {
     assert.equal(purged.status, 'purged');
     return purged;
 }
+
+test('purge preflight preserves Account, attachment bytes and references when cleanup is malformed', async () => {
+    await seed();
+    await adminDb.doc(`users/${OWNER}/aziende/company-1`).update({emails: []});
+    await assert.rejects(purge({auth: {uid: OWNER}, data: command}), error => error.code === 'failed-precondition');
+    assert.equal(await exists(`users/${OWNER}/accounts/account-1`), true);
+    assert.equal(await exists(`users/${OWNER}/accounts/account-1/attachments/att-1`), true);
+    assert.deepEqual(new Uint8Array((await bucket.file(OBJECT_PATH).download())[0]), BYTES);
+    assert.equal((await data(`users/${OWNER}`)).contactEmails[0].linkedAccountId, 'account-1');
+    assert.equal(await exists(`mutationResults/${OWNER}/operations/purge:1`), false);
+    assert.equal(await exists(`users/${OWNER}/auditEvents/purge:1`), false);
+});
+
+test('injected Account recreation after delete prevents final reference cleanup in real Firestore', async () => {
+    await seed();
+    const restored = {nomeAccount: 'Synthetic recreated', isArchived: false, revision: 2};
+    afterPurgeDelete = reference => reference.set(restored);
+    await assert.rejects(purge({auth: {uid: OWNER}, data: command}),
+        error => error.details?.reason === 'ARCHIVE_PURGE_ACCOUNT_RECREATED');
+    assert.deepEqual(await data(`users/${OWNER}/accounts/account-1`), restored);
+    assert.equal((await data(`users/${OWNER}`)).contactEmails[0].linkedAccountId, 'account-1');
+    assert.equal((await data(`users/${OWNER}/aziende/company-1`)).emails.pec.linkedAccountId, 'account-1');
+    assert.equal((await data(`mutationResults/${OWNER}/operations/purge:1`)).status, 'processing');
+    assert.equal(await exists(`users/${OWNER}/auditEvents/purge:1`), false);
+});
 
 test('T-21 su emulatore: il ripristino ricrea l’Account purgato con allegati e riferimenti', async () => {
     await exportThenPurge();

@@ -20,6 +20,7 @@ import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode 
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
+import { DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -28,7 +29,11 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
  * Salva o aggiorna un account aziendale con crittografia e gestione condivisione.
  * @param {Object} ctx - Stato corrente del form
  */
-export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '' }) {
+export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '', loadContext = null }) {
+    if (!isAccountSaveAllowed(loadContext)) {
+        showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+        return;
+    }
     const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
     let savedAccountId = currentDocId;
@@ -154,6 +159,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         let retainedProfilePassword = false;
 
         // --- ATOMIC TRANSACTION V3.1 ---
+        assertAccountSaveAllowed(loadContext);
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
             savedAccountId = accRef.id;
@@ -190,6 +196,10 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
 
             // 2. NOW EXECUTE ALL WRITES
+            assertAccountSaveAllowed(loadContext);
+            if (auth.currentUser?.uid !== currentUid) {
+                throw Object.assign(new Error('ACCOUNT_SAVE_SESSION_CHANGED'), {code: 'ACCOUNT_SAVE_SESSION_CHANGED'});
+            }
             const finalData = { ...data };
             if (linkedContact) {
                 const updatedProfile = {...profileSnap.data(), ...patchProfileAccountItem(profileSnap.data(), profileContactLinkDraft, linkedContact)};

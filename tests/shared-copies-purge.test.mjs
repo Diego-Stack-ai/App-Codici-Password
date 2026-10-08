@@ -15,12 +15,22 @@ const rulesSource = await read('../firestore.rules');
 const archiveService = await readFile(new URL('assets/js/modules/settings/archive-account-service.js', root), 'utf8')
     .then(text => text.replace(/\r\n/g, '\n'));
 
-test('T-08: il purge non scrive su inviti, copie condivise né condivisioni di Scadenze', () => {
-    for (const identifier of ['invites', 'accountWidgets', 'sharedVaultData', 'sharedVaultLinks',
+test('T-08: algoritmo sospeso legge widget/link nel preflight, senza cleanup delle copie condivise', () => {
+    // Characterization of retained source, not evidence that purge is enabled or safe.
+    assert.match(purgeSlice, /if \(isArchivePurgeSuspended\(\)\)/);
+    assert.match(purgeSlice, /ARCHIVE_PURGE_TEMPORARILY_SUSPENDED/);
+    for (const identifier of ['invites', 'sharedVaultData',
         'deadlineShares', 'receivedDeadlines', 'sharingState', 'suspendedAt']) {
         assert.equal(purgeSlice.includes(identifier), false,
             `il purge non deve nominare ${identifier}`);
     }
+    for (const identifier of ['accountWidgets', 'sharedVaultLinks']) {
+        const reads = [...purgeSlice.matchAll(new RegExp(`transaction\\.get\\(userRef\\.collection\\('${identifier}'\\)\\)`, 'g'))];
+        assert.equal(reads.length, 1, `${identifier}: una lettura preventiva esplicita`);
+        assert.equal(purgeSlice.split(identifier).length - 1, 1,
+            `${identifier}: nessun altro uso diretto nel corpo storico`);
+    }
+    assert.match(purgeSlice, /assertNoExternalAccountReferences\(command,/);
     // Le uniche scritture finali sono: pulizia dei riferimenti, ricevuta e registro.
     assert.match(purgeSlice, /transaction\.set\(operationRef, \{status: "purged"/);
     assert.match(purgeSlice, /action: "account-purged"/);
@@ -63,9 +73,18 @@ test('T-08: la condivisione delle Scadenze è un altro percorso', () => {
 });
 
 test('T-08: nessun job o percorso di pulizia per copie condivise e inviti', () => {
-    // Solo due schedulazioni in Functions: scadenze e retention del registro.
-    const schedules = [...indexSource.matchAll(/onSchedule\(/g)].length;
-    assert.equal(schedules, 2, 'solo due job pianificati nel backend');
+    // N1 aggiunge solo la retention dei marcatori, non delle copie o degli inviti.
+    const schedules = [...indexSource.matchAll(/exports\.(\w+) = onSchedule\(/g)]
+        .map(match => match[1]).sort();
+    assert.deepEqual(schedules, ['checkDeadlines', 'cleanupInviteRevocationMarkers',
+        'purgeExpiredAuditEvents']);
+    const markerCleanup = indexSource.slice(indexSource.indexOf('exports.cleanupInviteRevocationMarkers'),
+        indexSource.indexOf('function contactMatchesDeadline'));
+    assert.match(markerCleanup, /runAcceptanceMarkerCleanup\(/);
+    assert.match(markerCleanup, /statePath: "sharingNotificationRetention\/scan"/);
+    for (const collection of ['invites', 'accountWidgets', 'sharedVaultData', 'sharedVaultLinks']) {
+        assert.equal(markerCleanup.includes(`"${collection}"`), false);
+    }
     assert.match(indexSource, /exports\.checkDeadlines = onSchedule\(/);
     assert.match(indexSource, /exports\.purgeExpiredAuditEvents = onSchedule\(/);
     // La retention del registro scansiona solo `auditEvents`.

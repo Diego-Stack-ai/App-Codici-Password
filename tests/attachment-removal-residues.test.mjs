@@ -35,16 +35,16 @@ const deadlineDetail = await read('assets/js/modules/scadenze/dettaglio_scadenza
 
 test('T-26: rimuovere una riga da `allegati` toglie il riferimento e lascia i byte', async () => {
     // Nessuna primitiva di cancellazione degli oggetti nei moduli del form
-    // azienda; l'unico `deleteDoc` di `ma_save.js` cancella l'**intera Azienda**
-    // (`ma_save.js:204`), non una riga di `allegati`.
+    // azienda; la cancellazione dell'intera Azienda è ora delegata al servizio
+    // protetto. Questo non elimina i byte della singola riga rimossa.
     for (const [name, source] of [['ma_state', maState], ['ma_attachments', maAttachments]]) {
         for (const needle of ['deleteObject', 'deleteDoc', 'updateDoc']) {
             assert.equal(source.includes(needle), false, `${name}: il percorso non deve usare ${needle}`);
         }
     }
     assert.equal(maSave.includes('deleteObject'), false, 'ma_save non cancella mai un oggetto allegato');
-    assert.match(maSave, /deleteDoc\(doc\(db, "users", state\.currentUid, "aziende", state\.currentAziendaId\)\)/,
-        'l’unico deleteDoc del modulo elimina l’intera Azienda');
+    assert.equal(maSave.includes('deleteDoc'), false, 'nessun hard-delete diretto Azienda');
+    assert.match(maSave, /await deleteCompany\(/, 'eliminazione Azienda passa dal servizio protetto');
     const context = vm.createContext({
         document: {getElementById: () => null}, console: {warn() {}}, t: value => value,
         createElement: (tag, props = {}) => ({tag, ...props}), setChildren() {}, clearElement() {}

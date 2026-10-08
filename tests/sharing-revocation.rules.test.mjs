@@ -12,7 +12,7 @@ import {collection, deleteDoc, doc, getDoc, runTransaction, setDoc, updateDoc} f
 // users/{guestUid}/notifications. Questo test verifica, con le Rules di
 // PRODUZIONE e dati sintetici, se quella transazione viene accettata o rifiutata
 // nella sua interezza, e se il rifiuto lascia l'Account invariato.
-const PROJECT_ID = 'codici-password-sharing-revocation-test';
+const PROJECT_ID = 'demo-codici-password-sharing-revocation-test';
 const OWNER = 'owner', GUEST = 'guest', ACCOUNT = 'account-1';
 const EMAIL_KEY = 'guest_example_invalid';
 const INVITE_ID = `${ACCOUNT}_${EMAIL_KEY}`;

@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 // M7-T27 — Hard-delete di Azienda e di Account aziendale: comportamento attuale.
 //
 // Due percorsi **diversi**, e questo banco prova ciò che l'Emulator non copre
-// bene: le asserzioni di sorgente del delete diretto e la semantica della pulizia
+// bene: le asserzioni di sorgente del blocco client e la semantica della pulizia
 // dei riferimenti del purge aziendale, con la verifica del **rischio di
 // ripulire riferimenti di altri Account**.
 //
@@ -21,19 +21,21 @@ const companyListService = await read('assets/js/modules/azienda/company-list-se
 const maSave = await read('assets/js/modules/azienda/ma_save.js');
 const archiveService = await read('assets/js/modules/settings/archive-account-service.js');
 
-test('T-27: l’hard-delete dell’Azienda dal client è un solo deleteDoc, senza ricorsione né Storage', () => {
+test('T-27: il client blocca la cancellazione Azienda in attesa del protocollo server', () => {
     const fn = companyListService.slice(companyListService.indexOf('export async function deleteCompany'));
-    assert.match(fn, /await deleteDoc\(doc\(db, 'users', uid, 'aziende', companyId\)\);/,
-        'il delete è quello del documento Azienda');
-    for (const needle of ['recursiveDelete', 'deleteObject', 'collection(', 'batch', 'runTransaction']) {
+    assert.match(fn, /getDocsFromServer/);
+    assert.match(fn, /COMPANY_NOT_EMPTY/);
+    assert.match(fn, /COMPANY_DELETE_PROTOCOL_REQUIRED/);
+    for (const needle of ['recursiveDelete', 'deleteObject', 'deleteDoc', 'batch', 'runTransaction']) {
         assert.equal(fn.includes(needle), false, `deleteCompany non deve usare ${needle}`);
     }
-    // Il percorso della form fa la stessa cosa, dopo conferma, e poi reindirizza.
+    // La form delega dopo conferma; il blocco impedisce il ramo di successo.
     assert.match(maSave, /if \(!await showConfirmModal\([\s\S]{0,120}\) return;/,
         'la form chiede conferma prima di eliminare');
-    assert.match(maSave, /await deleteDoc\(doc\(db, "users", state\.currentUid, "aziende", state\.currentAziendaId\)\);/);
+    assert.match(maSave, /await deleteCompany\(uid, companyId\)/);
+    assert.equal(maSave.includes('deleteDoc'), false);
     assert.match(maSave, /setTimeout\(\(\) => window\.location\.href = 'lista_aziende\.html', 1000\);/,
-        'dopo il delete la form reindirizza: nessuna pulizia aggiuntiva');
+        'il ramo successo conserva il redirect, ma il servizio intermedio rifiuta sempre');
     // Nessun modulo del client **invoca** una cancellazione ricorsiva: la parola
     // compare solo in un commento che rimanda al protocollo del backend.
     assert.equal(/recursiveDelete\s*\(/.test(archiveService), false);

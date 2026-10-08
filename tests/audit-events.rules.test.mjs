@@ -15,7 +15,7 @@ import {collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc} from 'fi
 // (non sono esclusi dal catch-all e la loro decisione è separata); nessuna
 // asserzione li riguarda. Le Rules valgono per le letture di rete: una copia già
 // presente nella cache offline non viene revocata da questo blocco.
-const PROJECT_ID = 'codici-password-audit-events-rules-test';
+const PROJECT_ID = 'demo-codici-password-audit-events-rules-test';
 const OWNER = 'owner';
 const OTHER = 'other';
 const EVENT_ID = 'event-1';

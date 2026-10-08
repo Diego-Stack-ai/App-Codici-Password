@@ -33,7 +33,7 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
             entries: command.records.map((_record, index) => ({index, status: 'missing', expectedVersion: {exists: false}}))
         } : {status: 'applied'}}),
         httpsCallable: () => async command => { calls.push({uid: auth.currentUser?.uid, command}); return context.respond(command); },
-        uploadBytes: async (...args) => uploads.push(args),
+        uploadBytes: async (path, bytes, metadata) => uploads.push([path, bytes.slice(), metadata]),
     });
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,restoreRecordKey,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
@@ -51,6 +51,17 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
     };
 }
+
+test('malformed typed data in a later chunk rejects the entire source before any callable or upload', async () => {
+    const f = fixture(401);
+    const lines = (await f.file.text()).split('\n').map(JSON.parse);
+    lines[401].data.binary = {$type: 'bytes', value: [256]};
+    f.setFileContent(lines.map(JSON.stringify).join('\n'));
+    await assert.rejects(f.prepare(), /BACKUP_TYPED_VALUE_INVALID/);
+    assert.equal(f.calls.length, 0);
+    assert.equal(f.uploads.length, 0);
+    assert.equal(f.observers.size, 0);
+});
 
 test('a prepared plan is immediately cleared on UID change and cannot write under the next identity', async () => {
     const f = fixture(), plan = await f.prepare();
@@ -89,9 +100,9 @@ test('lock cancels a pending stream read and releases its reader without publish
 });
 
 test('lock after an apply was sent stops the next chunk without claiming the first request was cancelled', async () => {
-    const f = fixture(401), plan = await f.prepare(), gate = deferred();
-    f.context.respond = () => gate.promise;
-    const pending = f.context.executeBackupRestore(plan); f.lock(); gate.resolve({data: {status: 'applied'}});
+    const f = fixture(401), plan = await f.prepare(), gate = deferred(), sent = deferred();
+    f.context.respond = () => { sent.resolve(); return gate.promise; };
+    const pending = f.context.executeBackupRestore(plan); await sent.promise; f.lock(); gate.resolve({data: {status: 'applied'}});
     await assert.rejects(pending, error => error.code === 'BACKUP_SESSION_INVALIDATED' && error.progress.mayHaveApplied && error.progress.attemptedChunks === 1);
     assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
     assert.equal(plan.recoveryKey, ''); assert.equal(f.uploads.length, 0);
@@ -151,6 +162,8 @@ test('preview rejects old servers and incomplete, duplicate, inconsistent or mal
     const changed = time => ({index: 0, status: 'changed', expectedVersion: {exists: true, updateTime: time}});
     const invalid = [
         {status: 'ready', collisionCount: 0},
+        {status: 'collision', duplicate: false, collisionCount: 1},
+        {status: 'applied', duplicate: true},
         {previewVersion: 2, entries: [missing(0), missing(1)]},
         {previewVersion: 1, entries: [missing(0)]},
         {previewVersion: 1, entries: [missing(0), missing(0)]},
@@ -265,10 +278,11 @@ test('retry selection is immutable and replacing public plan fields cannot alter
 });
 
 test('single flight rejects concurrent executions without another Firestore call', async () => {
-    const f = fixture(), plan = await f.prepare(), gate = deferred();
-    f.context.respond = () => gate.promise;
+    const f = fixture(), plan = await f.prepare(), gate = deferred(), sent = deferred();
+    f.context.respond = () => { sent.resolve(); return gate.promise; };
     const first = f.context.executeBackupRestore(plan);
     await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => error.code === 'BACKUP_RESTORE_IN_PROGRESS' && !error.retryable);
+    await sent.promise;
     assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
     gate.resolve({data: {status: 'applied'}}); await first;
     f.context.releaseBackupRestore(plan);
@@ -504,8 +518,8 @@ test('changed attachment at the same path between scans cannot be uploaded or re
     // Public fields cannot replace the private manifest captured on preparation.
     plan.attachmentDigests = new Map([[path, 'replacement']]);
     await assert.rejects(f.context.executeBackupRestore(plan), error => {
-        assert.equal(error.retryable, false); assert.equal(error.progress.confirmedChunks, 1);
-        assert.equal(error.progress.uploaded, 0); assert.equal(error.progress.mayHaveApplied, true);
+        assert.equal(error.retryable, false); assert.equal(error.progress.confirmedChunks, 0);
+        assert.equal(error.progress.uploaded, 0); assert.equal(error.progress.mayHaveApplied, false);
         return true;
     });
     assert.equal(f.uploads.length, 0);
@@ -529,7 +543,7 @@ test('unchanged attachment envelope preserves the previewed bytes and successful
     f.context.releaseBackupRestore(plan);
 });
 
-test('changed duplicate or missing later selected attachment reports partial progress without a wrong second upload', async () => {
+test('changed duplicate or missing later selected attachment fails before any mutation', async () => {
     const first = 'users/A/first', second = 'users/A/second';
     const records = [{kind: 'record', scope: 'company', id: 'company', data: {files: [{storagePath: first}, {storagePath: second}]}}];
     for (const attachments of [
@@ -540,9 +554,9 @@ test('changed duplicate or missing later selected attachment reports partial pro
         const f = fixture(); replaceBackupEntries(f, records, [blob(first), blob(second)]);
         const plan = await f.prepare(); replaceBackupEntries(f, records, attachments);
         await assert.rejects(f.context.executeBackupRestore(plan), error => error.retryable === false &&
-            error.progress.uploaded === 1 && error.progress.mayHaveApplied);
-        assert.deepEqual(f.uploads.map(args => args[0]), [first]);
-        assert.deepEqual([...f.uploads[0][1]], [65]);
+            error.progress.uploaded === 0 && !error.progress.mayHaveApplied);
+        assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0);
+        assert.deepEqual(f.uploads, []);
         f.context.releaseBackupRestore(plan);
     }
 });
@@ -594,4 +608,74 @@ test('shared physical widget destination and profile aliases cannot appear twice
         const f = fixture(); replaceBackupEntries(f, pair.map(record => ({...record, kind: 'record', data: {}})), []);
         await assert.rejects(f.prepare(), /BACKUP_RECORD_DUPLICATE/); assert.equal(f.calls.length, 0);
     }
+});
+
+test('a backup changed after preview is rejected before any apply or upload', async () => {
+    for (const change of ['truncate', 'record', 'attachment', 'header']) {
+        const f = fixture(1, true), plan = await f.prepare();
+        const original = (await f.file.text()).split('\n');
+        if (change === 'truncate') original.pop();
+        if (change === 'record') original[1] = original[1].replace('Synthetic', 'Altered');
+        if (change === 'attachment') original[3] = original[3].replace('QQ==', 'Qg==');
+        if (change === 'header') original[0] = original[0].replace('fixture', 'different');
+        f.setFileContent(original.join('\n'));
+        await assert.rejects(f.context.executeBackupRestore(plan));
+        assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 0, change);
+        assert.equal(f.uploads.length, 0, change);
+        f.context.releaseBackupRestore(plan);
+    }
+});
+
+test('changed source blocks an uncertain retry without erasing its possible prior effects', async () => {
+    const f = fixture(1, true), plan = await f.prepare();
+    f.context.respond = async () => { throw new Error('synthetic lost response'); };
+    await assert.rejects(f.context.executeBackupRestore(plan), error => error.retryable && error.progress.mayHaveApplied);
+    f.setFileContent((await f.file.text()).replace('Synthetic', 'Changed after uncertain apply'));
+    f.context.respond = async () => { throw new Error('must not resend'); };
+    await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => {
+        assert.equal(error.retryable, false);
+        assert.equal(error.progress.mayHaveApplied, true);
+        assert.equal(error.progress.attemptedChunks, 1);
+        assert.equal(error.progress.confirmedChunks, 0);
+        return true;
+    });
+    assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
+    assert.equal(f.uploads.length, 0);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('attachment upload buffers are cleared on success, rejection and a lock during transfer', async () => {
+    for (const outcome of ['success', 'rejection', 'lock']) {
+        const f = fixture(1, true), plan = await f.prepare();
+        let retained;
+        f.context.uploadBytes = async (_path, bytes) => {
+            retained = bytes;
+            assert.deepEqual([...bytes], [65]);
+            if (outcome === 'lock') f.lock();
+            if (outcome === 'rejection') throw new Error('synthetic-transfer-failure');
+        };
+        if (outcome === 'success') {
+            assert.equal((await f.context.executeBackupRestore(plan)).attachmentCount, 1);
+        } else {
+            await assert.rejects(f.context.executeBackupRestore(plan));
+        }
+        assert.deepEqual([...retained], [0]);
+        f.context.releaseBackupRestore(plan);
+    }
+});
+
+test('preview validation releases temporary decoded attachment bytes immediately', async () => {
+    const f = fixture(1, true), decoded = [];
+    class TrackedBytes extends Uint8Array {
+        static from(...args) {
+            const bytes = Uint8Array.from(...args);
+            decoded.push(bytes);
+            return bytes;
+        }
+    }
+    f.context.Uint8Array = TrackedBytes;
+    const plan = await f.prepare();
+    assert.equal(decoded.length, 1);
+    assert.deepEqual([...decoded[0]], [0]);
+    f.context.releaseBackupRestore(plan);
 });

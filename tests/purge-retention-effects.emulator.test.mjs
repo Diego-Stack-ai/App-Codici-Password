@@ -12,7 +12,7 @@ import {createRequire} from 'node:module';
 // Storage e Firestore sono quelli veri degli emulatori, con l'Admin SDK del
 // runtime Functions: nessun magazzino simulato.
 //
-// Il censimento (§2, §3.4, §4.5 di `docs/M7_RETENTION_CENSIMENTO.md`) qui passa
+// Il censimento (§2, §3.4, §4.5 di `docs/evidenze/INVENTARI.md`) qui passa
 // da lettura del codice a comportamento esercitato.
 const PROJECT_ID = 'codici-password-purge-retention-test';
 assert.match(String(process.env.FIRESTORE_EMULATOR_HOST || ''), /^127\.0\.0\.1:\d+$/,

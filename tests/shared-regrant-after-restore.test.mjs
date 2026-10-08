@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+const guardSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js', import.meta.url), 'utf8');
+const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadContext, isAccountSaveAllowed} =
+    await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
 
 // M7-R7C-2 correzione (revisione Codex 21/09/2026) — il percorso REALE di
 // scrittura della condivisione ricalcola `sharedWithUids` dalle voci di
@@ -84,6 +87,7 @@ async function fixture(accountState = restoredAccount(), company = false) {
         validateAccountMode: () => ({}),
         findProfileAccountItem: () => null, patchProfileAccountItem: profile => profile, profileAccountReferences: () => [],
         linkProfileEmailToAccount: () => ({}), isProfileEmailPasswordTransferred: () => false, prepareCompanyProfileLink: () => ({}),
+        isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE,
         document: {getElementById: id => fields[id] || null, querySelector: () => null}, navigator: {onLine: true},
         sessionStorage: {removeItem: () => {}}, setTimeout: () => {}, console: {error: () => {}, warn: () => {}}
     });
@@ -93,11 +97,11 @@ async function fixture(accountState = restoredAccount(), company = false) {
         save: invitedEmails => company ? context.saveAccount({
             bankAccounts: [], invitedEmails, isExplicitMemo: false, currentUid: 'owner',
             currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: true,
-            profileContactLinkDraft: null, baseRevision: 2
+            profileContactLinkDraft: null, baseRevision: 2, loadContext: createAccountLoadContext({mode: 'create'})
         }) : context.savePrivateAccount({
             bankAccounts: [], invitedEmails, isExplicitMemo: false, currentUid: 'owner',
             currentDocId: 'account-1', currentAziendaId: '', isEditing: true,
-            profileContactLinkDraft: null, baseRevision: 2
+            profileContactLinkDraft: null, baseRevision: 2, loadContext: createAccountLoadContext({mode: 'create'})
         })};
 }
 

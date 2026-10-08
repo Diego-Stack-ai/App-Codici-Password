@@ -16,6 +16,6 @@
     "offlineFirstUsefulContentMs": 1000,
     "coldOnlineFirstUsefulContentMs": 3000,
     "maxDuplicateEquivalentRequests": 0,
-    "notes": "Baseline manuale registrata in docs/RUNTIME_PERFORMANCE_BASELINE.md. Gli obiettivi restano gate di confronto manuale finché la raccolta runtime non è automatizzata."
+    "notes": "Baseline manuale registrata in docs/evidenze/COLLAUDI.md. Gli obiettivi restano gate di confronto manuale finché la raccolta runtime non è automatizzata."
   }
 }

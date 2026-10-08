@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+const guardSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js', import.meta.url), 'utf8');
+const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadContext, isAccountSaveAllowed} =
+    await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
 
 const moduleRoot = new URL('../Frontend/public/assets/js/modules/', import.meta.url);
 async function sourceModule(path) {
@@ -140,6 +143,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         auth: { currentUser: { uid: 'owner', email: 'owner@example.test' } }, db: {}, LOG: () => {},
         doc: (...parts) => parts.length === 1 ? ref(parts[0], 'new-account') : ref(...parts), collection: ref,
         increment: amount => amount, deleteField: () => 'DELETE',
+        isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE,
         runTransaction: async (db, callback) => {
             const staged = [];
             await callback({
@@ -163,7 +167,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
     dependencies.decryptRequiredValue = dependencies.decodeProfileContactValue;
     const method = company ? 'saveAccount' : 'savePrivateAccount';
     const controller = await loadController(company ? 'azienda/form-azienda-save.js' : 'privato/form-privato-save.js', dependencies, [method]);
-    await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1,
+    await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1, loadContext: createAccountLoadContext({mode: 'create'}),
         profileContactLinkDraft: { profileContactId: sourceCompany && type === 'phone' ? 'telefonoAzienda' : 'contact-1', contactType: type, ownerUid: 'owner', ...(type==='utility'?{parentAddressId:'address'}:{}), ...(sourceCompany ? {sourceCompanyId:'source',contactValue:type==='phone'?contact.number:contact.address} : {}), ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
     return { committed, contact, messages, draftRemoved, profileKey };
 }
