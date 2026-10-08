@@ -59,6 +59,9 @@ test('same UID A to B rejects late company A record and mounts only company B de
  assert.equal(f.nodes['detail-username'].value,'B-user');assert.equal(f.nodes['hero-title'].textContent,'B');assert.equal(f.writes.length,1);assert.equal(f.writes[0].path,'users/owner/aziende/second/accounts/B');
  assert.ok(f.modules.every(([,scope])=>(scope.accountId||scope.currentId)==='B'));
 });
+test('company owner detail exposes account type conversion controls',async()=>{
+ const f=fixture();await f.init();const mode=f.modules.find(([name])=>name==='mode');assert.ok(mode);assert.equal(mode[1].compactView,false);assert.equal(mode[1].readOnly,false);
+});
 test('late vault key or decryption cannot render old record into next company',async()=>{
  for(const stage of ['key','decrypt']){const f=fixture(),gate=deferred();f.read(async()=>({_encrypted:true,nomeAccount:'A',username:'cipher'}));if(stage==='key')f.context.ensureVaultKeyMaterial=()=>gate.promise;else f.context.decryptIfPossible=()=>gate.promise;
  const first=f.init();await new Promise(r=>setImmediate(r));f.window.location.search='?id=B&aziendaId=second';f.read(async()=>({nomeAccount:'B',username:'B-user'}));await f.init();gate.resolve('old-plaintext');await first;assert.equal(f.nodes['detail-username'].value,'B-user');assert.equal(f.writes.length,1);}

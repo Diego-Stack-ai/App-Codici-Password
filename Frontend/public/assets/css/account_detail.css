@@ -77,6 +77,7 @@
 .field-input {
     width: 100%;
     flex: 1;
+    min-width: 0;
     border: none !important;
     outline: none !important;
     background: transparent !important;
@@ -85,7 +86,31 @@
     font-size: var(--fs-xs);
 }
 
+/* I valori bancari leggibili restano su una riga e sono scorribili solo se necessario. */
+.glass-field-readable {
+    min-height: 3.5rem;
+}
+
+.field-value-readable {
+    min-width: 0;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: clamp(0.65rem, 2.8vw, var(--fs-xs));
+    line-height: 1.4;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.field-value-readable::-webkit-scrollbar {
+    display: none;
+}
+
 .detail-field-actions {
+    flex-shrink: 0;
     margin-left: 0.5rem;
     display: flex;
     align-items: center;
