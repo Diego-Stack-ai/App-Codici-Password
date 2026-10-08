@@ -1,5 +1,7 @@
 # Stato
 
+08/10/2026 — preparata la versione 1.2.135: l’avviso globale di una modifica offline identifica ora per nome l’Account privato coinvolto e offre l’apertura diretta del relativo modulo. La coda e la politica di riconciliazione non cambiano; la correzione riguarda la chiarezza e la navigazione del popup. Test mirato e suite offline-write verdi (209/209); pubblicazione Hosting autorizzata, esito remoto da registrare separatamente. Functions, Rules, indici e dati invariati.
+
 08/10/2026 — preparata la versione 1.2.134 con quattro palette d’identità selezionabili in Impostazioni: Blu, Verde, Rosso e Sabbia. La scelta è indipendente da chiaro/automatico/scuro, viene validata e applicata prima del rendering; i principali blu fissi dei componenti condivisi e delle pagine sono stati ricondotti ai token, lasciando invariati colori di stato e categorie. Test dedicati, suite statiche e budget prestazionale verdi; pubblicazione Hosting autorizzata, esito remoto da registrare separatamente. Functions, Rules, indici e dati invariati.
 
 08/10/2026 — preparata la 1.2.133 per correggere la riconciliazione delle modifiche Account offline: coordinatore senza polling su avvio Vault/online/ritorno visibile/eventi coda; conflitti di record diversi non bloccano il form; “Mantieni server” elimina e verifica tutte le operazioni dello stesso record. Suite offline-write 208/208 prima del rilascio. Modifica limitata al client Hosting, senza Functions, Rules, indici o dati; pubblicazione autorizzata, esito remoto da registrare separatamente.

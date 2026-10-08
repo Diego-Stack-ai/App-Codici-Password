@@ -1,5 +1,7 @@
 # Incarico corrente
 
+08/10/2026 — Diego autorizza la pubblicazione della correzione dell’avviso globale per le modifiche offline degli Account privati. Il popup deve identificare l’Account interessato e permettere di aprirlo direttamente. Perimetro: incremento a 1.2.135, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.
+
 08/10/2026 — Diego autorizza la pubblicazione delle quattro palette colore sull’app principale. Perimetro: incremento a 1.2.134, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.
 
 08/10/2026 — Diego autorizza l’implementazione locale del selettore colore dell’app con quattro palette complete: Blu, Verde, Rosso e Sabbia. Ogni palette deve avere tonalità coordinate nelle modalità chiara e scura e sostituire i colori d’identità senza confondere errori, avvertimenti e conferme. Perimetro client/UI e test; nessun commit, push o deploy implicito.
