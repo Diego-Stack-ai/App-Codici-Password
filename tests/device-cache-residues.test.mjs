@@ -213,7 +213,7 @@ test('T-23: le chiavi della cache conservano la query string, ma solo per la she
     let activation = null;
     f.listeners.get('activate')({waitUntil: promise => { activation = promise; }});
     await activation;
-    assert.deepEqual(f.deleted, ['codex-shell-v1.2.126'],
+    assert.deepEqual(f.deleted, ['codex-shell-v1.2.126', 'codex-shell-v1.2.127'],
         'le cache estranee e quella corrente non vengono toccate');
 });
 
