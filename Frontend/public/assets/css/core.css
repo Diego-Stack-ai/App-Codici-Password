@@ -108,6 +108,10 @@ body,
     --accent-rgb: 19, 127, 236;
     --accent-surface: #e3f2fd;
     --accent-surface-strong: #1e3a8a;
+    --account-card-bg: color-mix(in srgb, var(--accent) 18%, var(--card-bg));
+    --account-card-border: color-mix(in srgb, var(--accent) 32%, var(--card-border));
+    --account-card-field-bg: rgb(var(--accent-rgb) / 8%);
+    --account-card-control-bg: rgb(var(--accent-rgb) / 12%);
 
     --base-box-gradient: linear-gradient(135deg, #e0f2fe 0%, #60a5fa 100%);
     --glow-color: radial-gradient(ellipse at 50% 0%, rgb(var(--accent-rgb) / 45%) 0%, rgb(var(--accent-rgb) / 10%) 50%, transparent 70%);
@@ -163,6 +167,29 @@ body,
     --accent-surface: #f7edd8;
     --accent-surface-strong: #614619;
     --base-box-gradient: linear-gradient(135deg, #fff8e9 0%, #d8bc82 100%);
+}
+
+:root[data-color-theme="petrol"] {
+    --accent: #0f766e;
+    --accent-rgb: 15, 118, 110;
+}
+
+:root[data-color-theme="lavender"] {
+    --accent: #6750a4;
+    --accent-rgb: 103, 80, 164;
+}
+
+:root[data-color-theme="dusty-rose"] {
+    --accent: #855466;
+    --accent-rgb: 133, 84, 102;
+}
+
+:root:is([data-color-theme="petrol"], [data-color-theme="lavender"], [data-color-theme="dusty-rose"]) {
+    --bg-primary: color-mix(in srgb, var(--accent) 10%, #fff);
+    --viewport-edge-color: color-mix(in srgb, var(--accent) 4%, #fff);
+    --accent-surface: color-mix(in srgb, var(--accent) 13%, #fff);
+    --accent-surface-strong: color-mix(in srgb, var(--accent) 82%, #111827);
+    --base-box-gradient: linear-gradient(135deg, var(--viewport-edge-color), color-mix(in srgb, var(--accent) 42%, #fff));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -229,6 +256,29 @@ body,
     --accent: #e0b968;
     --accent-rgb: 224, 185, 104;
     --base-box-gradient: linear-gradient(135deg, #66502a 0%, #151006 100%);
+}
+
+.dark[data-color-theme="petrol"] {
+    --accent: #5eead4;
+    --accent-rgb: 94, 234, 212;
+}
+
+.dark[data-color-theme="lavender"] {
+    --accent: #c4b5fd;
+    --accent-rgb: 196, 181, 253;
+}
+
+.dark[data-color-theme="dusty-rose"] {
+    --accent: #d9a7b8;
+    --accent-rgb: 217, 167, 184;
+}
+
+.dark:is([data-color-theme="petrol"], [data-color-theme="lavender"], [data-color-theme="dusty-rose"]) {
+    --bg-primary: color-mix(in srgb, var(--accent) 10%, #05080b);
+    --viewport-edge-color: color-mix(in srgb, var(--accent) 15%, #05080b);
+    --accent-surface: color-mix(in srgb, var(--accent) 20%, #05080b);
+    --accent-surface-strong: color-mix(in srgb, var(--accent) 32%, #05080b);
+    --base-box-gradient: linear-gradient(135deg, color-mix(in srgb, var(--accent) 38%, #05080b), #05080b);
 }
 
 

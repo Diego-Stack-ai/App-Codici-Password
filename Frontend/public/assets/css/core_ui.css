@@ -1,4 +1,3 @@
-/* --- QR LENS ICON (Zoom) --- */
 .qr-preview-box {
     position: relative;
     display: inline-block;
@@ -27,17 +26,11 @@
     color: var(--accent);
 }
 
-/* ==========================================================================
-   CORE UI (V5.0) - Global Components (Modals, Toasts, Misc)
-   ========================================================================== */
-
-/* --- 1. MODAL SYSTEM --- */
 .modal-overlay {
     position: fixed;
     inset: 0;
     z-index: var(--z-modal, 1100);
     background: rgba(15, 23, 42, 0.3);
-    /* Meno scuro */
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -56,7 +49,6 @@
 .modal-box {
     background: var(--accent-surface);
     backdrop-filter: none;
-    /* Rimuovo blur sfondo interno per solidità colore */
     border: 2px solid #fff;
     border-radius: var(--radius-xl, 30px);
     padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 4vw, 2rem);
@@ -66,7 +58,6 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     text-align: left;
-    /* Default a sinistra per tutto il contenuto */
     box-shadow: 0 25px 50px -12px rgb(var(--accent-rgb) / 25%);
     transform: scale(0.9);
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -74,14 +65,12 @@
     overflow: hidden;
 }
 
-/* Dark Mode Override per Modal (Restored) */
 .dark .modal-box {
     background: var(--accent-surface-strong);
     border: 1px solid rgb(var(--accent-rgb) / 50%);
     box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
 }
 
-/* --- CUSTOM SELECT DROPDOWN (Rounded & Contextual) --- */
 .custom-select-menu {
     position: absolute;
     top: calc(100% + 5px);
@@ -89,7 +78,6 @@
     width: 100%;
     background: white;
     border-radius: 16px;
-    /* Arrotondato - Richiesta UI Pagina */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     z-index: var(--z-popover);
     opacity: 0;
@@ -98,11 +86,9 @@
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     max-height: 250px;
-    /* Piu spazio */
     overflow-y: auto;
 }
 
-/* --- ANTI-AUTOFILL UTILITY (V5.9.2) --- */
 .anti-autofill-trap {
     position: absolute;
     width: 0;
@@ -130,9 +116,7 @@
 .custom-option {
     padding: 12px 16px;
     font-size: var(--fs-xs);
-    /* Normalizzato da 0.95rem */
     color: var(--text-primary);
-    /* Rimosso hardcoded #1e293b */
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
     transition: background 0.2s;
@@ -147,7 +131,6 @@
     background: rgb(var(--accent-rgb) / 8%);
 }
 
-/* Dark Mode Override */
 .dark .custom-select-menu {
     background: var(--accent-surface-strong);
     border: 1px solid rgb(var(--accent-rgb) / 30%);
@@ -167,7 +150,6 @@
     transform: scale(1);
 }
 
-/* --- MODAL PROFILE BOX (QR Code / Profile modals) --- */
 .modal-profile-box {
     background: var(--accent-surface);
     border: 2px solid white;
@@ -196,10 +178,8 @@
 }
 
 .modal-box-qr {
-    /* Variante specifica per QR */
     padding: 1.5rem;
     padding-bottom: 5.5rem;
-    /* spazio per il bottone assoluto */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -207,11 +187,9 @@
     min-height: 400px;
 }
 
-/* Titolo centrato nel popup QR */
 .modal-overlay .modal-box-qr .modal-title {
     text-align: center;
     font: var(--font-card-title);
-    /* Normalizzato da 1.1rem/900 */
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-primary);
@@ -222,7 +200,6 @@
     color: #e2e8f0;
 }
 
-/* Pulsante Chiudi a larghezza piena nel popup QR */
 .modal-overlay .modal-box-qr .btn-modal {
     width: 100%;
     flex: none;
@@ -231,7 +208,6 @@
     border: 1.5px solid rgba(15, 23, 42, 0.12);
     border-radius: 99px;
     height: 3.5rem;
-    /* Aumentato per comfort touch standard */
     font: var(--font-button);
 }
 
@@ -251,7 +227,6 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Pulsante CHIUDI ancorato in fondo al modal QR (position:absolute) */
 .modal-overlay .modal-box-qr .btn-modal-close {
     position: absolute;
     bottom: 1.25rem;
@@ -260,7 +235,6 @@
     width: auto;
 }
 
-/* Il contenitore QR si adatta al canvas (nessun width forzato) */
 .qr-zoom-container {
     display: inline-flex;
     align-items: center;
@@ -308,7 +282,6 @@
     width: 40px;
     background: var(--accent);
     margin: 0 0 1.5rem 0;
-    /* Align Left */
     border-radius: 10px;
     opacity: 0.6;
 }
@@ -350,7 +323,6 @@
 
 .modal-title {
     font: var(--font-h2);
-    /* Ricalibrato per gerarchia: 1.25rem invece di 1.6rem */
     margin-bottom: 0.75rem;
     color: var(--text-primary);
     letter-spacing: -0.02em;
@@ -371,7 +343,6 @@
 
 .modal-text {
     font-size: var(--fs-base);
-    /* 1rem invece di 1.05rem */
     color: var(--text-secondary);
     margin-bottom: 2.25rem;
     line-height: var(--lh-relaxed);
@@ -384,7 +355,6 @@
 .modal-actions {
     display: flex;
     align-items: center;
-    /* Allineamento verticale esatto */
     justify-content: center;
     gap: 1rem;
     width: 100%;
@@ -398,7 +368,6 @@
     min-height: var(--control-height-lg, 52px);
     padding: 0 1rem;
     margin: 0;
-    /* Reset margini ereditati */
     border-radius: 18px;
     border: 1px solid transparent;
     font: var(--font-button);
@@ -445,7 +414,6 @@
     box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
 }
 
-/* --- 2. TOAST NOTIFICATIONS --- */
 #toast {
     position: fixed;
     left: 50%;
@@ -474,7 +442,6 @@
     gap: 10px;
 }
 
-/* --- 3. QR CODE GLOBAL STYLES --- */
 .qr-code-box,
 .qr-code-display {
     background: var(--qr-bg);
@@ -482,14 +449,12 @@
     border-radius: 12px;
 }
 
-/* --- 4. FAB BUTTON SYSTEM (Centralized V5.0) --- */
 .fab-group {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 1.25rem;
     margin-bottom: 0;
-    /* Rimosso margine per centrare meglio nel footer basso */
     z-index: var(--z-popover);
 }
 
@@ -497,7 +462,6 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    /* Rotondo perfetto stile App */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -519,7 +483,6 @@
     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Color Variants */
 .btn-fab-scadenza {
     background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
     width: 60px;
@@ -548,7 +511,6 @@
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
-/* btn-fab-neutral: definito dopo btn-fab-action — la cascade garantisce override senza !important */
 .btn-fab-neutral {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(12px);
@@ -562,7 +524,6 @@
     color: rgba(255, 255, 255, 0.8);
 }
 
-/* Secondary Footer Buttons (Theme, Settings) */
 .btn-footer-secondary {
     width: 44px;
     height: 44px;
@@ -578,7 +539,6 @@
     transition: all 0.2s ease;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    /* Resets for <button> tag */
     appearance: none;
     -webkit-appearance: none;
     outline: none;
@@ -659,9 +619,9 @@
     display: grid;
     gap: 12px;
     padding: 16px;
-    border: 1px solid rgb(255 255 255 / 34%);
+    border: 1px solid var(--account-card-border);
     border-radius: 18px;
-    background: rgb(255 255 255 / 12%);
+    background: var(--account-card-bg);
 }
 
 .shared-account-card-heading,
@@ -675,7 +635,7 @@
     min-height: 46px;
     padding: 10px 12px;
     border-radius: 13px;
-    background: rgb(255 255 255 / 10%);
+    background: var(--account-card-field-bg);
 }
 
 .shared-account-field strong {
@@ -699,9 +659,9 @@
     height: 42px;
     margin-left: auto;
     padding: 0;
-    border: 1px solid rgb(255 255 255 / 42%);
+    border: 1px solid var(--account-card-border);
     border-radius: 50%;
-    background: rgb(255 255 255 / 18%);
+    background: var(--account-card-control-bg);
     color: var(--accent, var(--accent));
     box-shadow: 0 5px 14px rgb(15 23 42 / 12%);
     place-items: center;
@@ -721,8 +681,8 @@
 }
 
 .dark .shared-account-reveal {
-    background: rgb(255 255 255 / 10%);
-    color: #bfdbfe;
+    background: var(--account-card-control-bg);
+    color: var(--accent);
 }
 
 .dark .shared-account-unlink {
@@ -752,8 +712,8 @@ select.shared-account-select-control {
 
 select.shared-account-select-control option,
 select.shared-account-select-control optgroup {
-    background: #e3f2fd;
-    color: #172033;
+    background: var(--accent-surface);
+    color: var(--text-primary);
 }
 
 .dark select.shared-account-select-control {
@@ -762,8 +722,8 @@ select.shared-account-select-control optgroup {
 
 .dark select.shared-account-select-control option,
 .dark select.shared-account-select-control optgroup {
-    background: #1e3a8a;
-    color: #f8fafc;
+    background: var(--accent-surface-strong);
+    color: var(--text-primary);
 }
 
 .account-widget-editor-modal {

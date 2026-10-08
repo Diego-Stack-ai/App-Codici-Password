@@ -142,11 +142,11 @@
 
 /* Main Card Content (On Top) */
 .account-card .swipe-content {
-    background: rgba(20, 53, 126, 0.5);
+    background: var(--account-card-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--account-card-border);
     border-radius: 20px;
     padding: 1rem;
     width: 100%;
@@ -161,11 +161,7 @@
 
 /* Light Mode Override */
 html:not(.dark) .account-card .swipe-content {
-    background: rgba(219, 234, 254, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-color: #bae6fd;
-    color: #0f172a;
+    color: var(--text-primary);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -255,7 +251,7 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 html:not(.dark) .account-card-title {
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .account-card-subtitle {
@@ -269,7 +265,7 @@ html:not(.dark) .account-card-title {
 }
 
 html:not(.dark) .account-card-subtitle {
-    color: #334155;
+    color: var(--text-secondary);
 }
 
 /* Right Side Actions */

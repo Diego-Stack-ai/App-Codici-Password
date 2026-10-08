@@ -1,5 +1,13 @@
 # Collaudi
 
+## 08/10/2026 — sette palette confrontabili (locale)
+
+Aggiunte Petrolio (`#0f766e`/`#5eead4`), Lavanda (`#6750a4`/`#c4b5fd`) e Rosa polvere (`#855466`/`#d9a7b8`) alle quattro palette esistenti, con coppie accento chiaro/scuro e superfici derivate. Verificati applicazione anticipata, allowlist di sette valori, sette comandi in Impostazioni e contrasto minimo 4,5:1 degli accenti nuovi nei casi automatici. `test:ui-foundations` 5/5, `test:css`, `test:js-syntax` su 172 moduli, `test:static-references` su 246 file, `test:performance-budget` su 30 pagine e `git diff --check` superati. Puliti commenti CSS obsoleti senza cambiare regole. Confronto visivo chiaro/scuro su PC e telefono ancora da eseguire; nessuna pubblicazione.
+
+## 08/10/2026 — card Account collegate alle palette (locale)
+
+Verificato che le liste Account private e aziendali usino i token `--account-card-bg` e `--account-card-border`, derivati dal colore d’identità selezionato, senza conservare gli sfondi blu fissi precedenti. Le card delle credenziali condivise usano gli stessi token e tonalità derivate per campi e controlli. Restano distinti i colori semantici dei tipi di Account e degli stati funzionali. `test:ui-foundations` 4/4, `test:css`, `test:static-references`, `test:performance-budget` su 30 pagine e `git diff --check` superati. Nessuna pubblicazione eseguita.
+
 ## 08/10/2026 — identificazione Account nell’avviso offline
 
 Verificato che il coordinatore globale utilizzi l’operazione in attesa per mostrare il nome dell’Account privato interessato, proponga “Apri Account” e navighi al modulo esatto tramite l’identificativo codificato; “Più tardi” conserva la modifica in coda. La navigazione resta subordinata alla sessione utente corrente. Test mirato 2/2, `test:offline-write-prototype` 209/209, controllo sintattico di 172 moduli, riferimenti statici su 246 file e `git diff --check` superati. Functions, Rules, indici e dati non modificati.

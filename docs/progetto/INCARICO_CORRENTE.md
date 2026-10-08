@@ -1,5 +1,7 @@
 # Incarico corrente
 
+08/10/2026 — Diego autorizza la pubblicazione delle card collegate al tema e delle tre nuove palette confrontabili Petrolio, Lavanda e Rosa polvere, mantenendo Blu, Verde, Rosso e Sabbia. Perimetro: incremento a 1.2.136, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.
+
 08/10/2026 — Diego autorizza la pubblicazione della correzione dell’avviso globale per le modifiche offline degli Account privati. Il popup deve identificare l’Account interessato e permettere di aprirlo direttamente. Perimetro: incremento a 1.2.135, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.
 
 08/10/2026 — Diego autorizza la pubblicazione delle quattro palette colore sull’app principale. Perimetro: incremento a 1.2.134, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.
