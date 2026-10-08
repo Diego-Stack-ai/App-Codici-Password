@@ -1,4 +1,4 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.136';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.137';
 import { deleteField, doc, httpsCallable, onAuthStateChanged, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createArchiveMetadata } from './archive-account-model.js';

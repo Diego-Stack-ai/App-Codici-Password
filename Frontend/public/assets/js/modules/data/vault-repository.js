@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.136';
+import {db} from '../../firebase-config.js?v=1.2.137';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 

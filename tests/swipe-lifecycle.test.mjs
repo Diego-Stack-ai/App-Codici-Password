@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const root = new URL('../Frontend/public/assets/js/', import.meta.url);
 const source = await readFile(new URL('swipe-list-v6.js', root), 'utf8');
+const accountAvatarSource = await readFile(new URL('modules/shared/account-avatar.js', root), 'utf8');
 const listSource = await readFile(new URL('modules/shared/account-list-view.js', root), 'utf8');
 const events = ['touchstart', 'touchmove', 'touchend', 'mousedown', 'mousemove', 'mouseup', 'click'];
 
@@ -27,6 +28,7 @@ function fixture() {
         createCardSecretResolver: () => async () => 'fixture',
     });
     vm.runInContext(source.replace(/^\uFEFF/, '').replace(/^import .*;$/gm, '').replace('export class', 'class'), context);
+    vm.runInContext(accountAvatarSource.replace(/^import .*;$/gm, '').replace('export function', 'function'), context);
     vm.runInContext(listSource.replace(/^import .*;$/gm, '').replace('export function', 'function'), context);
     return {document, timers, context, run: code => vm.runInContext(code, context)};
 }
