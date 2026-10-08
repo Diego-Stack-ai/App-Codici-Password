@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.137';
+import { auth, db } from '../../firebase-config.js?v=1.2.138';
 import { doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -67,8 +67,8 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                         showToast('Per passare a Memorandum apri Modifica e cancella manualmente Utente, Account/Codice e Password.', 'warning');
                         return;
                     }
-                    if (validation.reason === 'shared-account-without-credentials') {
-                        showToast('Un Account condiviso deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
+                    if (validation.reason === 'account-without-credentials') {
+                        showToast('Un Account deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
                         return;
                     }
                     selectedMode = key;

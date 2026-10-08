@@ -34,6 +34,6 @@ export function recordFieldsFromAccountMode(mode) {
 export function validateAccountMode(mode, account = {}) {
     const hasCredentials = hasAccountCredentials(account);
     if (mode.startsWith('memo-') && hasCredentials) return { valid: false, reason: 'memo-has-credentials' };
-    if (mode === ACCOUNT_MODES.SHARED && !hasCredentials) return { valid: false, reason: 'shared-account-without-credentials' };
+    if (mode.startsWith('account-') && !hasCredentials) return { valid: false, reason: 'account-without-credentials' };
     return { valid: true, reason: null };
 }

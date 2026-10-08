@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.137';
+import { db, storage } from '../../firebase-config.js?v=1.2.138';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -163,6 +163,16 @@ export async function loadPrivateAttachments(mount = mounted) {
     const {ownerId, accountId} = mount;
     const container = document.getElementById('attachments-list');
     if (!container) return;
+
+    if (mount.readOnly) {
+        clearElement(container);
+        container.appendChild(createElement('p', {
+            className: 'text-[10px] text-white/40 text-center py-4 leading-relaxed',
+            textContent: t('shared_attachments_unavailable') ||
+                'Gli allegati del proprietario non sono inclusi nella condivisione.'
+        }));
+        return;
+    }
 
     try {
         const attachments = await listPrivateAccountAttachments(ownerId, accountId);
