@@ -1,28 +1,11 @@
-# Istruzioni per gli agenti AI
+# Istruzioni degli agenti — Codici & Password
 
-> **Stato:** attivo  
-> **Autorità:** punto di ingresso per gli strumenti integrati con GitHub  
-> **Ultima verifica:** 11 settembre 2026
+Leggere [indice e regole documentali](../docs/LEGGIMI.md), [stato](../docs/progetto/STATO.md) e [incarico corrente](../docs/progetto/INCARICO_CORRENTE.md). Leggere quindi la [baseline sicurezza](../docs/regole/SICUREZZA.md), i contratti e le decisioni pertinenti. La cronologia si consulta solo quando necessaria.
 
-Questo file indica l’ordine di lettura. Non duplica le regole del progetto.
+La struttura è chiusa a **31 MD**. Solo un ordine esplicito di Diego autorizza aggiunte, eliminazioni, rinomine, spostamenti o modifica dell’elenco/controlli. Non creare README, AGENTS, nuovi piani o rapporti Markdown fuori elenco. Aggiornare i contenuti necessari all’incarico nello stesso lavoro; nessuna approvazione aggiuntiva per normale manutenzione documentale già autorizzata.
 
-Prima di analizzare o modificare il codice, leggere integralmente:
+Solo INCARICO_CORRENTE abilita lavoro: gli ordini nello storico non sono eseguibili. Un solo esecutore; nessuna auto-approvazione. Non dedurre commit, push, merge, deploy o incarichi successivi da un test verde. La skill di orchestrazione non amplia i permessi del progetto.
 
-1. [`docs/GUIDA_PROGETTO.md`](../docs/GUIDA_PROGETTO.md) — indice, gerarchia e mappa delle fonti;
-2. [`docs/ARCHITETTURA_SICUREZZA_V1.md`](../docs/ARCHITETTURA_SICUREZZA_V1.md) — baseline vincolante per sicurezza e dati;
-3. [`Frontend/GUIDA.md`](../Frontend/GUIDA.md) — regole consolidate di implementazione e UI;
-4. [`Frontend/GUIDA_AGGIORNAMENTI.md`](../Frontend/GUIDA_AGGIORNAMENTI.md) — attività aperte, rischi e roadmap;
-5. il contratto specialistico dell’area interessata, individuato tramite la Guida progetto.
+Distinguere decisioni, runtime del ramo, laboratorio, produzione e storico. Preservare dati, compatibilità, sicurezza e gate; niente segreti in log, screenshot o rapporti. Una modifica alle regole di un dominio aggiorna il relativo contratto; una nuova domanda entra nella raccolta esistente dopo aver cercato eventuali risposte.
 
-Regole obbligatorie:
-
-- verificare codice, test, `firebase.json`, `firestore.rules`, `storage.rules`, indici e Functions; un MD non certifica il runtime;
-- distinguere sempre stato reale, target, laboratorio e storico;
-- non reintrodurre script di importazione, schemi legacy o documentazione duplicata;
-- non modificare condivisioni, crittografia, chiavi, Rules, Functions, dati reali o deploy senza checklist, test, rollback e approvazione esplicita;
-- non inserire segreti, token, dati personali o contenuti del Vault in commit, log, screenshot o report;
-- preservare i fallback legacy finché inventario e migrazione non sono approvati;
-- aggiornare il contratto interessato nello stesso lavoro che cambia una regola consolidata;
-- aggiornare `GUIDA_AGGIORNAMENTI.md` quando cambia lo stato di un’attività;
-- archiviare o marcare come storico un documento superato: non lasciarlo apparentemente autorevole;
-- in caso di conflitto documentale prevale la gerarchia definita in `docs/GUIDA_PROGETTO.md`.
+Prima della consegna eseguire `npm run test:docs`; indicare fonti lette, documenti aggiornati o motivo della non necessità, verifiche e limiti. Il controllo automatico non sostituisce la revisione della coerenza fra decisioni, stato e requisiti.
