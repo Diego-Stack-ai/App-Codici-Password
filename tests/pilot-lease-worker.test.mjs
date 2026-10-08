@@ -152,8 +152,14 @@ test('il Worker usa i moduli runtime, rimuove Web Locks e non importa da experim
 
 // ── Comandi del Worker ──────────────────────────────────────────────────────────────────────────
 test('con Web Locks di piattaforma presente il Worker resta sul percorso di piattaforma', async () => {
-    // Node espone un `navigator.locks` reale: è l'occasione per provare in Node il **primo** ramo del
+    // Node espone Web Locks solo su alcune piattaforme/build. Quando manca, il banco installa
+    // l'equivalente minimo dell'API di piattaforma per provare comunque il **primo** ramo del
     // risolutore — Web Locks prioritario, nessun record di lease creato.
+    if (typeof navigator.locks?.request !== 'function') {
+        Object.defineProperty(navigator, 'locks', {configurable: true, value: {
+            request: async (_name, _options, task) => task({name: _name, mode: 'exclusive'})
+        }});
+    }
     assert.equal(typeof navigator.locks?.request, 'function', 'Node deve offrire Web Locks per questo caso');
     const f = databaseFixture();
     await seed(f, ['device:1']);
