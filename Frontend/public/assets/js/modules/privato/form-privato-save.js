@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.137';
+import { auth, db } from '../../firebase-config.js?v=1.2.138';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -81,8 +81,8 @@ export async function savePrivateAccount({
         if (btnSave) btnSave.disabled = false;
         return;
     }
-    if (modeValidation.reason === 'shared-account-without-credentials') {
-        showToast('Un Account condiviso deve contenere almeno una credenziale.', 'warning');
+    if (modeValidation.reason === 'account-without-credentials') {
+        showToast('Un Account deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
         if (btnSave) btnSave.disabled = false;
         return;
     }

@@ -23,9 +23,13 @@ test('non consente credenziali nei memorandum', () => {
     }
 });
 
-test('un account condiviso richiede almeno una credenziale', () => {
-    assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.SHARED, {}).reason, 'shared-account-without-credentials');
+test('ogni account richiede almeno una credenziale, mentre i memorandum possono esserne privi', () => {
+    assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.PRIVATE, {}).reason, 'account-without-credentials');
+    assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.SHARED, {}).reason, 'account-without-credentials');
     assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.SHARED, { codice: '123' }).valid, true);
+    assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.PRIVATE, { password: 'secret' }).valid, true);
+    assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.MEMO_PRIVATE, {}).valid, true);
+    assert.equal(model.validateAccountMode(model.ACCOUNT_MODES.MEMO_SHARED, {}).valid, true);
 });
 
 test('la conversione in campi persistiti è deterministica', () => {

@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.137';
+import { auth, db } from '../../firebase-config.js?v=1.2.138';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField
@@ -123,8 +123,8 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         if (btnSave) btnSave.disabled = false;
         return;
     }
-    if (modeValidation.reason === 'shared-account-without-credentials') {
-        showToast('Un Account condiviso deve contenere almeno una credenziale.', 'warning');
+    if (modeValidation.reason === 'account-without-credentials') {
+        showToast('Un Account deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
         if (btnSave) btnSave.disabled = false;
         return;
     }
