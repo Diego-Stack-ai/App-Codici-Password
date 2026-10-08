@@ -226,6 +226,9 @@ h3.settings-desc {
 .swatch-green { background: #177245; }
 .swatch-red { background: #9f2348; }
 .swatch-sand { background: #a97828; }
+.swatch-petrol { background: #0f766e; }
+.swatch-lavender { background: #6750a4; }
+.swatch-dusty-rose { background: #855466; }
 
 @media (max-width: 520px) {
     .color-theme-selector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
