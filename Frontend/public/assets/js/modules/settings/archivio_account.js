@@ -32,7 +32,7 @@ export async function initArchivioAccount(user, options = {}) {
     mountedArchive?.destroy();
     if (!user) return;
     const uid = user.uid;
-    let allArchived = [], currentSwipeList = null, currentContext = 'all';
+    let allArchived = [], currentSwipeList = null, currentContext = 'all', archiveLoaded = false;
     let destroyed = false, generation = 0, unsubscribe = () => {}, pendingConfirmation = null, mutationPending = false;
     const controller = new AbortController(), cleanups = new Set();
     const container = document.getElementById('accounts-container');
@@ -270,6 +270,7 @@ async function loadCompanies() {
 
 async function loadArchived() {
     if (!container || !active()) return;
+    archiveLoaded = false;
     const loadGeneration = ++generation;
     const loadContext = currentContext;
     const loadActive = () => active() && loadGeneration === generation;
@@ -286,15 +287,21 @@ async function loadArchived() {
         const records = await loadArchivedAccounts(uid, loadContext, {signal: controller.signal, isActive: loadActive});
         if (!loadActive()) return;
         allArchived = records;
+        archiveLoaded = true;
         filterAndRender();
     } catch (e) {
         if (!loadActive()) return;
+        clearElement(container);
+        container.appendChild(createUiState({
+            kind: 'error',
+            message: t('error_generic') || "Errore durante il caricamento dell'archivio"
+        }));
         showToast(t('error_generic') || "Errore durante il caricamento dell'archivio", "error");
     }
 }
 
 function filterAndRender() {
-    if (!active()) return;
+    if (!active() || !archiveLoaded) return;
     currentSwipeList?.destroy();
     currentSwipeList = null;
     const searchVal = searchInput?.value.toLowerCase() || '';
@@ -388,9 +395,12 @@ async function handleRestore(key) {
 
     mutationPending = true;
     try {
-        await restoreArchivedAccount(uid, {...item}, serviceOptions);
+        const restored = await restoreArchivedAccount(uid, {...item}, serviceOptions);
         if (!active()) return;
-        showToast(t('success_restored') || "Ripristinato", "success");
+        // M7-R7C-2: se il ripristino ha dovuto neutralizzare una condivisione
+        // precedente (Account archiviato prima del protocollo), il proprietario
+        // deve sapere che serve un nuovo invito.
+        showToast(restored?.neutralized ? t('success_restored_sharing_revoked') : (t('success_restored') || "Ripristinato"), "success");
         allArchived = allArchived.filter(account => identity(account) !== key);
         const el = [...container.children].find(row => row.dataset.key === key);
         if (el) {

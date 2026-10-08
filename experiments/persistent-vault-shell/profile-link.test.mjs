@@ -28,7 +28,7 @@ test('origin capabilities require stable private identities and canonical compan
     assert.equal(company({raw: {emails: {extra: [{email: 'cipher'}]}}, item: {id: 'extra-0'}, collection: 'contactEmails'}), null);
     assert.equal(company({raw: {}, item, collection: 'utilities', parentAddressId: 'address'}), null);
 });
-function fixture(company = false) {
+function fixture(company = false, beforeAccountWrite) {
     const source = company ? {domain: 'company', companyId: 'origin', type: 'email', id: 'pec'} : {domain: 'private', type: 'phone', id: 'mobile'};
     const sourcePath = company ? 'users/owner/aziende/origin' : 'users/owner';
     const old = {linkedAccountId: 'old', linkedAccountCompanyId: ''};
@@ -49,8 +49,28 @@ function fixture(company = false) {
     const request = () => ({source, account: {domain: 'company', companyId: 'destination', id: 'next'}, expectedAccount: {domain: 'private', id: 'old'},
         expectedRevision: 0, expectedFingerprint: hash(readProfileLinkContact(records.get(sourcePath), source, models).fingerprintInput), operationId: 'op', expectedOwnerUid: 'owner'});
     return {source, sourcePath, records, request, trusted: {auth: {uid: 'owner'}, app: {appId: 'synthetic'}},
-        run: createProfileLinkHandler({db, hash, models, timestamp: () => 123, deleteField: () => deleted})};
+        run: createProfileLinkHandler({db, hash, models, beforeAccountWrite, timestamp: () => 123, deleteField: () => deleted})};
 }
+
+test('link fence reads both Accounts before committing and blocked participant leaves all data unchanged', async () => {
+    for (const blocked of ['old', 'next', null]) {
+        const events = [];
+        const f = fixture(false, async (_transaction, ref) => {
+            events.push(`read:${ref}`);
+            if (blocked && ref.endsWith(`/${blocked}`)) throw Error('PURGE_WRITE_BLOCKED');
+            return () => events.push(`commit:${ref}`);
+        });
+        const before = structuredClone([...f.records]);
+        if (blocked) {
+            await assert.rejects(f.run(f.request(), f.trusted), /PURGE_WRITE_BLOCKED/);
+            assert.deepEqual([...f.records], before);
+            assert.equal(events.some(event => event.startsWith('commit:')), false);
+        } else {
+            await f.run(f.request(), f.trusted);
+            assert.deepEqual(events.map(event => event.split(':')[0]), ['read', 'read', 'commit', 'commit']);
+        }
+    }
+});
 test('wrong expected owner and aliased company parents reject without writes or receipts', async () => {
     for (const kind of ['owner', 'source', 'destination']) {
         const f = fixture(true), request = f.request();

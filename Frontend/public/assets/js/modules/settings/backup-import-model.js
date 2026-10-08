@@ -1,6 +1,40 @@
 const MAX_RECORDS = 400;
 const MAX_CHUNK_BYTES = 7 * 1024 * 1024;
 
+export function validateRestoreTypes(data) {
+    const pending = [data];
+    const seen = new Set();
+    const invalid = () => { throw new Error('BACKUP_TYPED_VALUE_INVALID'); };
+    while (pending.length) {
+        const value = pending.pop();
+        if (!value || typeof value !== 'object') continue;
+        if (seen.has(value)) invalid();
+        seen.add(value);
+        if (Array.isArray(value)) {
+            for (const child of value) pending.push(child);
+            continue;
+        }
+        const keys = Object.keys(value).sort().join(',');
+        if (value.$type === 'timestamp') {
+            if (keys !== '$type,nanoseconds,seconds' || !Number.isSafeInteger(value.seconds) ||
+                value.seconds < -62135596800 || value.seconds > 253402300799 ||
+                !Number.isInteger(value.nanoseconds) || value.nanoseconds < 0 || value.nanoseconds > 999999999) invalid();
+            if (value.nanoseconds % 1000 !== 0) throw new Error('BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED');
+        } else if (value.$type === 'date') {
+            if (keys !== '$type,value' || typeof value.value !== 'string' ||
+                !Number.isFinite(Date.parse(value.value)) || new Date(value.value).toISOString() !== value.value) invalid();
+        } else if (value.$type === 'bytes') {
+            if (keys !== '$type,value' || !Array.isArray(value.value) || Object.keys(value.value).length !== value.value.length) invalid();
+            for (let index = 0; index < value.value.length; index++) {
+                const byte = value.value[index];
+                if (!Object.hasOwn(value.value, index) || !Number.isInteger(byte) || byte < 0 || byte > 255) invalid();
+            }
+        } else {
+            for (const child of Object.values(value)) pending.push(child);
+        }
+    }
+}
+
 export function validateRestoreStoragePath(storagePath, uid) {
     const prefix = `users/${String(uid || '').trim()}/`;
     if (!uid || typeof storagePath !== 'string' || !storagePath.startsWith(prefix) ||
@@ -16,6 +50,9 @@ export function chunkRestoreRecords(records) {
     let current = [];
     let currentBytes = 0;
     for (const record of records) {
+        // Validate the entire selection before returning any executable chunks.
+        // A malformed later record must not fail only after earlier chunks commit.
+        validateRestoreTypes(record.data);
         const bytes = new TextEncoder().encode(JSON.stringify(record.data)).byteLength;
         if (bytes > 800 * 1024) throw new Error('BACKUP_RECORD_TOO_LARGE');
         if (current.length && (current.length >= MAX_RECORDS || currentBytes + bytes > MAX_CHUNK_BYTES)) {

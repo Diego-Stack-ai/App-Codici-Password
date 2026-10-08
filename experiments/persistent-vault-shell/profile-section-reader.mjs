@@ -10,7 +10,7 @@ const fields = {
     addresses: [['address', 'Indirizzo'], ['civic', 'Numero civico'], ['city', 'Città'], ['cap', 'CAP'], ['province', 'Provincia']],
     documents: [['name', 'Nome documento'], ['num_serie', 'Numero documento'], ['cf_value', 'Codice fiscale'], ['id_number', 'Identificativo'],
         ['license_number', 'Numero patente'], ['cf', 'Codice fiscale'], ['rilasciato_da', 'Rilasciato da'],
-        ['luogo_rilascio', 'Luogo di rilascio'], ['expiry_date', 'Scadenza']]
+        ['luogo_rilascio', 'Luogo di rilascio'], ['expiry_date', 'Scadenza'], ['note', 'Note']]
 };
 export const PROFILE_SECTIONS = Object.freeze({personal: 'Anagrafica', contacts: 'Contatti', addresses: 'Indirizzi', documents: 'Documenti'});
 

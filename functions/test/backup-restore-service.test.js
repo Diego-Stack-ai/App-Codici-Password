@@ -4,6 +4,22 @@ const {
   decodeFirestoreValue, restoreChunkDecision, restorePath, safeRestoreAudit, validateRestoreChunk
 } = require("../backup-restore-service");
 
+test('security settings cannot enter preview or apply chunks, even with overwrite confirmation', () => {
+  for (const mode of ['preview', 'apply']) {
+    for (const id of ['security', ' security ']) {
+      const input = {expectedOwnerUid: 'owner', operationId: 'op', backupId: 'b',
+        chunkIndex: 0, chunkCount: 1, mode, overwriteExisting: true,
+        confirmation: 'RESTORE_SELECTED_OVERWRITE', records: [
+          {scope: 'contact', id: 'safe', data: {}, expectedVersion: {exists: false}},
+          {scope: 'settings', id, data: {verifier: 'synthetic-old'}, expectedVersion: {exists: false}}
+        ]};
+      const before = structuredClone(input);
+      assert.throws(() => validateRestoreChunk(input, 'owner'), {code: 'BACKUP_SECURITY_SETTINGS_EXCLUDED'});
+      assert.deepEqual(input, before);
+    }
+  }
+});
+
 test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
   assert.equal(restorePath("owner", {scope: "profile"}), "users/owner");
   assert.equal(restorePath("owner", {scope: "private-account", id: "a1"}), "users/owner/accounts/a1");
@@ -50,12 +66,31 @@ test("il proprietario atteso è obbligatorio e non viene convertito implicitamen
 
 test("ricostruisce tipi Firestore soltanto tramite factory esplicite", () => {
   const decoded = decodeFirestoreValue({
-    at: {$type: "timestamp", seconds: 1, nanoseconds: 2},
+    at: {$type: "timestamp", seconds: 1, nanoseconds: 2000},
     bytes: {$type: "bytes", value: [3, 4]}, date: {$type: "date", value: "2030-01-01T00:00:00.000Z"}
   }, {timestamp: (seconds, nanoseconds) => ({seconds, nanoseconds}), bytes: value => [...value]});
-  assert.deepEqual(decoded.at, {seconds: 1, nanoseconds: 2});
+  assert.deepEqual(decoded.at, {seconds: 1, nanoseconds: 2000});
   assert.deepEqual(decoded.bytes, [3, 4]);
   assert.equal(decoded.date.toISOString(), "2030-01-01T00:00:00.000Z");
+});
+
+test("rifiuta byte fuori intervallo o frazionari anziché convertirli silenziosamente", () => {
+  let calls = 0;
+  const types = {bytes: value => { calls++; return value; }};
+  const sparse = new Array(1); sparse.extra = 1;
+  for (const value of [[256], [-1], [1.5], ['1'], [null], {0: 1, length: 1}, sparse]) {
+    assert.throws(() => decodeFirestoreValue({$type: 'bytes', value}, types), /BACKUP_TYPED_VALUE_INVALID/);
+  }
+  assert.equal(calls, 0);
+});
+
+test("rifiuta date normalizzate e dati aggiuntivi nei tipi serializzati", () => {
+  for (const value of [{$type: 'date', value: 'not-a-date'},
+    {$type: 'date', value: '2030-02-30T00:00:00.000Z'},
+    {$type: 'bytes', value: [1], storagePath: 'users/owner/file'},
+    {$type: 'timestamp', seconds: 1, nanoseconds: 0, hidden: true}]) {
+    assert.throws(() => decodeFirestoreValue(value, {bytes: x => x, timestamp: (s, n) => [s, n]}), /BACKUP_TYPED_VALUE_INVALID/);
+  }
 });
 
 test("blocca collisioni e rende idempotente un chunk già applicato", () => {

@@ -27,6 +27,13 @@ function fixture({selection = {emails: ['email-home'], phones: [0]}, failSelecti
             getUserSetting: async () => {if (failSelection) throw Error('SETTING_UNAVAILABLE'); return selection;}}};
     return {state, abort, context, options, source: createProfileContactsEditorSource(options)};
 }
+test('contact draft is detached before confirmed read', async () => {
+    const f=fixture(); await f.source.load();
+    const draft={updates:[{collection:'contactPhones',id:'phone-other',fields:{label:'ORIGINAL'}}]};
+    const pending=f.source.prepare(draft,'snapshot'); draft.updates[0].fields.label='CHANGED';
+    assert.equal((await pending).operations[0].fields.label,'ORIGINAL'); f.source.dispose();
+});
+
 test('the source projects labels, id presence, links and the QR selection', async () => {
     const f = fixture(), model = await f.source.load();
     assert.equal(model.canSave, true); assert.equal(model.revision, 3);

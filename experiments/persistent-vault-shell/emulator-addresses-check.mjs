@@ -139,8 +139,8 @@ function companyEnvironment({qrConfig = {qrLegale: true, aziendaEmail: true, adm
 }
 try {
     for (const endpoint of ['applyPrivateAddressesMutation', 'applyCompanyAddressesMutation', 'applyPrivateDocumentsMutation']) {
-        const denied = await fetch(`/demo-vault-shell/europe-west1/${endpoint}`, {method: 'POST', body: '{}'});
-        record(`endpoint A2 ${endpoint}: richiesta anonima respinta dal bridge reale`, denied.status === 401, `status=${denied.status}`);
+        const denied = await fetch(`${globalThis.__localFunctionsOrigin || ''}/demo-vault-shell/europe-west1/${endpoint}`, {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({data: {}})});
+        record(`endpoint A2 ${endpoint}: richiesta anonima respinta (${globalThis.__localFunctionsOrigin ? 'Functions emulator' : 'bridge'})`, denied.status === 401, `status=${denied.status}`);
     }
     // ── Private addresses ────────────────────────────────────────────────────
     const priv = privateEnvironment();

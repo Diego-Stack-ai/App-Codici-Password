@@ -7,6 +7,7 @@ const {HttpsError} = require('firebase-functions/v2/https');
 const backupService = require('../backup-restore-service');
 const backupReceipt = require('../backup-restore-receipt');
 const previewApi = require('../backup-restore-preview');
+const authorityApi = require('../backup-restore-authority');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const start = source.indexOf('exports.restoreBackupChunk =');
 const end = source.indexOf('exports.getAppPresentation =', start);
@@ -22,7 +23,7 @@ function fixture() {
       set: (...args) => writes.push(args),
     })};
   const context = vm.createContext({
-    exports: {}, HttpsError, ...backupService, ...backupReceipt, ...previewApi, onCall: (_options, handler) => handler,
+    exports: {}, HttpsError, ...backupService, ...backupReceipt, ...previewApi, ...authorityApi, onCall: (_options, handler) => handler,
     getFirestore: () => { storeAccesses += 1; return store; },
     FieldValue: {serverTimestamp: () => 'synthetic-time'},
   });

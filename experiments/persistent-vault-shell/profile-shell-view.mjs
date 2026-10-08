@@ -28,7 +28,11 @@ export async function mountProfileShell(root, context, {readSection, readOvervie
         caption.textContent = 'Password Account collegato'; value.textContent = '••••••••';
         const result = document.createElement('span'); result.setAttribute('role', 'status');
         let revealed = false;
-        const active = () => { if (!current(ticket)) return false; context.assertUnlocked(); return true; };
+        const active = () => {
+            if (!current(ticket)) return false;
+            try { context.assertUnlocked(); return true; }
+            catch (error) { dispose(); throw error; }
+        };
         function button(label, action) {
             const node = document.createElement('button'); node.type = 'button'; node.textContent = label;
             node.addEventListener('click', async () => {

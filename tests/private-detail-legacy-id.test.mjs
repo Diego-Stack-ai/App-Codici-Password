@@ -10,7 +10,8 @@ const source = await readFile(new URL('../Frontend/public/assets/js/modules/priv
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function deferred() { let resolve; const promise = new Promise(done => { resolve = done; }); return {promise, resolve}; }
 
-function fixture({missing = false, pending = null, directPending = null, search = '?id=legacy-alias'} = {}) {
+function fixture({missing = false, pending = null, directPending = null, search = '?id=legacy-alias', suspended = false,
+    denied = false, networkError = false, online = true} = {}) {
     const calls = [], footer = {children: []};
     let failNextRead = false;
     const attachmentClasses = new Set();
@@ -19,7 +20,7 @@ function fixture({missing = false, pending = null, directPending = null, search 
     const physical = () => ({id: 'physical-document', nomeAccount: 'Synthetic account'});
     const createElement = (tag, props = {}, children = []) => ({tag, ...props, children});
     const context = vm.createContext({readErrorMessage, window, URLSearchParams, AbortController, auth: {currentUser: null}, onAuthStateChanged: () => () => {},
-        navigator: {onLine: true}, console, db: {}, LOG() {}, logError: (...args) => calls.push(['error', ...args]),
+        navigator: {onLine: online}, console, db: {}, LOG() {}, logError: (...args) => calls.push(['error', ...args]),
         document: {getElementById: id => id === 'footer-center-actions' ? footer : id === 'btn-add-attachment' ? attachmentButton : null,
             querySelector: () => null, querySelectorAll: () => []},
         createElement, clearElement: node => { node.children = []; }, setChildren: (node, child) => { node.children = [child]; },
@@ -32,8 +33,23 @@ function fixture({missing = false, pending = null, directPending = null, search 
             if (directPending && id === 'legacy-alias') return directPending.promise;
             return !missing && id === 'physical-document' ? physical() : null;
         },
-        getPrivateAccountConfirmed: async (uid, id) => { calls.push(['confirmed', uid, id]); return null; },
+        getPrivateAccountConfirmed: async (uid, id) => {
+            calls.push(['confirmed', uid, id]);
+            // M7-R7C-4: per un ospite online l'autorizzazione si conferma sul server;
+            // un diniego o un errore di rete non ammettono fallback locali.
+            const viewer = context.auth.currentUser?.uid;
+            const guest = Boolean(viewer) && viewer !== uid;
+            if (!guest) return null;
+            if (networkError) throw new Error('NETWORK_ERROR');
+            return denied || missing ? null : physical();
+        },
         findPrivateAccountByLegacyId: async (uid, id) => { calls.push(['legacy', uid, id]); return pending ? pending.promise : missing ? null : physical(); },
+        // M7-R7C-4: per un Account sospeso la lettura dell'Account è negata dalle
+        // Rules; il riconoscimento passa dall'invito del destinatario.
+        findSuspendedGuestInvite: async (ownerId, accountId, email, companyId) => {
+            calls.push(['suspended-invite', ownerId, accountId, email, companyId]);
+            return suspended ? {accountId, ownerId, aziendaId: companyId, sharingState: 'suspended', accountName: 'Account sintetico'} : null;
+        },
         initPrivateAttachmentModule: data => calls.push(['attachments-init', data]),
         loadPrivateAttachments: async () => calls.push(['attachments-load']),
         openSourceSelector: () => calls.push(['attachment-open']),
@@ -94,6 +110,26 @@ test('a missing account leaves record actions unavailable', async () => {
     assert.equal(f.calls.find(([type]) => type === 'toast')[1], 'account_not_found');
 });
 
+test('deep link a un Account sospeso: stato dedicato, nessuna azione e nessun contenuto', async () => {
+    const f = fixture({missing: true, suspended: true, search: '?id=legacy-alias&ownerId=other-owner'});
+    await f.init(); await tick();
+    assert.equal(f.findEdit(), undefined, 'nessuna azione di modifica');
+    assert.equal(f.calls.some(([type]) => ['get', 'update', 'attachments-init', 'attachments-load', 'sharing-init', 'sharing-render', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false,
+        'la sospensione viene verificata prima di leggere l\'Account e di inizializzare contenuti');
+    assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['account_suspended_label', 'warning']);
+});
+
+test('deep link sospeso con Account già in cache: nessuna lettura, nessun render', async () => {
+    // L'Account esiste e sarebbe leggibile dalla cache persistente: la sospensione
+    // nota deve fermare tutto PRIMA della lettura.
+    const f = fixture({suspended: true, search: '?id=legacy-alias&ownerId=other-owner'});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => type === 'get'), false, 'nessuna lettura dell\'Account, nemmeno dalla cache');
+    assert.equal(f.findEdit(), undefined);
+    assert.equal(f.calls.some(([type]) => ['update', 'attachments-init', 'sharing-init', 'mode', 'banking', 'widgets', 'credentials'].includes(type)), false);
+    assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['account_suspended_label', 'warning']);
+});
+
 test('reload after legacy resolution reads the physical document directly', async () => {
     const f = fixture(); await f.init(); await tick();
     const reload = f.calls.find(([type]) => type === 'sharing-init')[1].onReload;
@@ -105,7 +141,10 @@ test('reload after legacy resolution reads the physical document directly', asyn
 
 test('shared read-only lookup keeps the owner and physical ID without enabling mutations', async () => {
     const f = fixture({search: '?id=legacy-alias&ownerId=other-owner'}); await f.init(); await tick();
-    assert.equal(f.calls.find(([type]) => type === 'legacy')[1], 'other-owner');
+    // M7-R7C-4: online l'ospite passa dalla lettura confermata dal server e non dal
+    // percorso legacy, che non deve aggirare un eventuale diniego.
+    assert.equal(f.calls.find(([type]) => type === 'confirmed')[1], 'other-owner');
+    assert.equal(f.calls.some(([type]) => type === 'legacy'), false);
     const sharing = f.calls.find(([type]) => type === 'sharing-init')[1];
     assert.equal(sharing.ownerId, 'other-owner'); assert.equal(sharing.accountId, 'physical-document');
     assert.equal(sharing.readOnly, true);
@@ -113,6 +152,31 @@ test('shared read-only lookup keeps the owner and physical ID without enabling m
     assert.equal(f.calls.some(([type]) => type === 'update'), false);
     f.calls.find(([type]) => type === 'banking')[1].onAddBanking();
     assert.equal(f.window.location.href, '');
+});
+
+test('guest offline keeps the agreed consultation, including the legacy resolution', async () => {
+    const f = fixture({search: '?id=legacy-alias&ownerId=other-owner', online: false});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => type === 'confirmed'), false, 'offline non si interroga il server');
+    assert.equal(f.calls.find(([type]) => type === 'legacy')[1], 'other-owner');
+    assert.equal(f.calls.find(([type]) => type === 'sharing-init')[1].readOnly, true);
+});
+
+test('guest online con invito revocato e Account in cache: nessun render dal locale', async () => {
+    const f = fixture({denied: true, search: '?id=physical-document&ownerId=other-owner'});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => type === 'get'), false, 'nessuna lettura dalla cache');
+    assert.equal(f.calls.some(([type]) => ['attachments-init', 'sharing-init', 'mode', 'banking', 'widgets', 'credentials', 'update'].includes(type)), false);
+    assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['account_not_found', 'error']);
+});
+
+test('guest online con errore di rete: nessun render e messaggio di verifica impossibile', async () => {
+    const f = fixture({networkError: true, search: '?id=physical-document&ownerId=other-owner'});
+    await f.init(); await tick();
+    assert.equal(f.calls.some(([type]) => type === 'get'), false);
+    assert.equal(f.calls.some(([type]) => ['attachments-init', 'sharing-init', 'mode', 'banking', 'widgets', 'credentials', 'update'].includes(type)), false);
+    assert.deepEqual(f.calls.find(([type]) => type === 'toast').slice(1), ['guest_authorization_unverified', 'error']);
+    assert.ok(f.calls.some(([type]) => type === 'error'), 'l\'errore viene registrato');
 });
 
 test('an already canonical URL does not invoke the legacy lookup', async () => {

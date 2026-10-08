@@ -1,0 +1,26 @@
+import {mkdirSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {resolve} from 'node:path';
+
+// M7-AUDIT-6 — Esegue il banco del job di retention del registro contro
+// Firestore Emulator, con dati sintetici. Nessun progetto reale: il banco
+// verifica da sé di avere `FIRESTORE_EMULATOR_HOST` impostato.
+const projectRoot = resolve(import.meta.dirname, '..');
+const configRoot = resolve(projectRoot, '.codex-tmp', 'firebase-config');
+const firebaseCli = resolve(projectRoot, 'node_modules', 'firebase-tools', 'lib', 'bin', 'firebase.js');
+const testFiles = [
+  resolve(projectRoot, 'tests', 'audit-retention.emulator.test.mjs')
+];
+mkdirSync(configRoot, {recursive: true});
+
+const result = spawnSync(process.execPath, [
+  firebaseCli, 'emulators:exec', '--project', 'codici-password-audit-retention-test', '--only', 'firestore',
+  `${JSON.stringify(process.execPath)} --test ${testFiles.map(file => JSON.stringify(file)).join(' ')}`,
+], {
+  cwd: projectRoot,
+  env: {...process.env, XDG_CONFIG_HOME: configRoot},
+  stdio: 'inherit',
+  shell: false,
+});
+if (result.error) throw result.error;
+process.exit(result.status ?? 1);

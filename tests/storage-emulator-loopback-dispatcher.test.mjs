@@ -8,6 +8,19 @@ const {
   isLoopbackOrigin,
 } = require('../scripts/storage-emulator-loopback-dispatcher.cjs');
 
+test('dispatcher lifecycle closes and destroys both transports and validates dependencies', async () => {
+  const calls = [];
+  const error = new Error('synthetic');
+  const fake = name => ({dispatch() {}, async close() { calls.push(`${name}:close`); },
+    async destroy(reason) { assert.equal(reason, error); calls.push(`${name}:destroy`); }});
+  const dispatcher = createLoopbackDispatcher(fake('direct'), fake('proxy'));
+  await dispatcher.close();
+  await dispatcher.destroy(error);
+  assert.deepEqual(calls.sort(), ['direct:close', 'direct:destroy', 'proxy:close', 'proxy:destroy']);
+  assert.throws(() => createLoopbackDispatcher({}, fake('proxy')), TypeError);
+  assert.throws(() => createLoopbackDispatcher(fake('direct'), null), TypeError);
+});
+
 test('only exact numeric loopback and localhost origins are direct', () => {
   for (const origin of [
     'http://127.0.0.1:8080',

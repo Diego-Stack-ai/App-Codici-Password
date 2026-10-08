@@ -10,13 +10,13 @@ export function validateProfileAccountCreateRequest(value) {
     const keys = ['source', 'scope', 'name', 'username', 'password', 'transferLegacyPassword', 'expectedLegacyPassword',
         'expectedFingerprint', 'expectedRevision', 'operationId', 'expectedOwnerUid'];
     if (!exact(value, keys) || !id(value.operationId) || !id(value.expectedOwnerUid) ||
-        typeof value.name !== 'string' || !value.name.trim() || value.name.length > 240 ||
-        typeof value.username !== 'string' || value.username.length > 4000 ||
+        !cipher(value.name) || value.name.length > 240 ||
+        typeof value.username !== 'string' || (value.username && !cipher(value.username)) || value.username.length > 4000 ||
         typeof value.password !== 'string' || (value.password && !cipher(value.password)) ||
         typeof value.transferLegacyPassword !== 'boolean' ||
         typeof value.expectedLegacyPassword !== 'string' || (value.expectedLegacyPassword && !cipher(value.expectedLegacyPassword)) ||
         typeof value.expectedFingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(value.expectedFingerprint) ||
-        !Number.isSafeInteger(value.expectedRevision) || value.expectedRevision < 0) fail();
+        !Number.isSafeInteger(value.expectedRevision) || value.expectedRevision < 0 || value.expectedRevision >= Number.MAX_SAFE_INTEGER) fail();
     const source = profileLinkSource(value.source);
     if (!object(value.scope) || !['private', 'company'].includes(value.scope.domain) ||
         !exact(value.scope, value.scope.domain === 'private' ? ['domain'] : ['domain', 'companyId']) ||

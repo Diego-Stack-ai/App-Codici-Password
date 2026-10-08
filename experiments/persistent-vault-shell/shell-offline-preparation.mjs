@@ -1,12 +1,15 @@
 // Coordinates the canonical ciphertext prefetch without tying it to a route.
 // In-flight SDK reads cannot be cancelled; stale results never update this UI.
 export function createShellOfflinePreparation({getUser, prepare, onState, events = globalThis, isOnline = () => globalThis.navigator?.onLine !== false}) {
-    let generation = 0, disposed = false, pending;
+    let generation = 0, disposed = false, pending, activeUid = null;
     const current = (ticket, uid) => !disposed && ticket === generation && getUser()?.uid === uid;
-    function clear() { generation++; pending = undefined; if (!disposed) onState('idle'); }
+    function clear() { generation++; pending = undefined; activeUid = null; if (!disposed) onState('idle'); }
     function refresh() {
         const uid = getUser()?.uid;
         if (disposed || !uid) return Promise.resolve(null);
+        // Only the explicit refresh from the unlocked bootstrap arms reconnect.
+        // Identity alone, or a previous owner's refresh, is not that permission.
+        activeUid = uid;
         if (!isOnline()) { onState('offline'); return Promise.resolve(null); }
         if (pending?.uid === uid) return pending.promise;
         const ticket = ++generation;
@@ -22,8 +25,9 @@ export function createShellOfflinePreparation({getUser, prepare, onState, events
             .finally(() => { if (current(ticket, uid)) pending = undefined; });
         pending = {uid, promise}; return promise;
     }
-    const online = () => { void refresh(); };
-    const offline = () => { generation++; pending = undefined; if (!disposed && getUser()?.uid) onState('offline'); };
+    const active = () => !disposed && activeUid !== null && getUser()?.uid === activeUid;
+    const online = () => { if (active()) void refresh(); };
+    const offline = () => { generation++; pending = undefined; if (active()) onState('offline'); };
     events.addEventListener('online', online);
     events.addEventListener('offline', offline);
     return Object.freeze({refresh, clear, dispose() { if (disposed) return; clear(); disposed = true; events.removeEventListener('online', online); events.removeEventListener('offline', offline); }});

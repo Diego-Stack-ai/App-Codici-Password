@@ -1,0 +1,37 @@
+name: Documentazione controllata
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verifica elenco, collegamenti e regressioni del controllo
+        run: npm run test:docs
+      - name: Confronta la struttura con la base
+        if: github.event_name == 'pull_request'
+        env:
+          DOCS_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if git cat-file -e "${DOCS_BASE_SHA}:scripts/docs-manifest.json" 2>/dev/null; then
+            node scripts/audit-docs.mjs --base "$DOCS_BASE_SHA"
+          else
+            echo "Prima adozione: nessun manifesto precedente da confrontare. Elenco e link verificati; resta necessaria la revisione della struttura autorizzata da Diego."
+          fi
+
+# Nessun deploy. Per rendere questo job obbligatorio sul server occorre una
+# regola di protezione del repository. La prima adozione e ogni cambio della
+# struttura richiedono la revisione esplicita di Diego. La prima adozione non ha
+# una precedente lista da confrontare; i controlli dell'elenco restano eseguiti.

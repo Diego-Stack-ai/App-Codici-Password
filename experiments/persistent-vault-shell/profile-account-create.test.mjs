@@ -94,3 +94,62 @@ test('client preparation proposes the origin, encrypts form values and transfers
     assert.deepEqual(encrypted, ['Posta', 'mail@example.invalid']); assert.equal(request.password, cipher('legacy'));
     abort.abort(); await assert.rejects(source.prepare({scope: {domain: 'private'}, name: 'x', username: '', operationId: 'later'}), /VIEW_DISPOSED/);
 });
+
+test('receipt replay rejects wrong owner, kind and revision without modifying records', async () => {
+    for (const patch of [{ownerId: 'other'}, {kind: 'other'}, {revision: 99}]) {
+        const f = fixture(), request = f.request();
+        await f.run(request, f.trusted);
+        const receipt = f.records.get('mutationResults/owner/operations/profile-account-create-operation');
+        Object.assign(receipt, patch);
+        const before = structuredClone([...f.records]);
+        await assert.rejects(f.run(request, f.trusted), /OPERATION_CONFLICT/);
+        assert.deepEqual([...f.records], before);
+    }
+});
+
+test('creation rejects inconsistent source identity and destination company id before writing', async () => {
+    for (const company of [false, true]) {
+        const f = fixture({company}), request = f.request();
+        f.records.get(f.sourcePath).ownerId = 'other';
+        const before = structuredClone([...f.records]);
+        await assert.rejects(f.run(request, f.trusted), /OWNER_MISMATCH/);
+        assert.deepEqual([...f.records], before);
+    }
+    const f = fixture({company: true}), request = f.request();
+    f.records.get(f.sourcePath).id = 'different';
+    await assert.rejects(f.run(request, f.trusted), /OWNER_MISMATCH/);
+    const g = fixture(), destination = g.request({scope: {domain: 'company', companyId: 'firm'}});
+    g.records.get('users/owner/aziende/firm').id = 'different';
+    const before = structuredClone([...g.records]);
+    await assert.rejects(g.run(destination, g.trusted), /COMPANY_UNAVAILABLE/);
+    assert.deepEqual([...g.records], before);
+});
+
+test('legacy transfer retains the new link and emits no delete sentinel inside arrays', async () => {
+    for (const type of ['email', 'utility']) {
+        const f = fixture({type});
+        const result = await f.run(f.request({transfer: true}), f.trusted);
+        const current = readProfileLinkContact(f.records.get(f.sourcePath), f.source, models);
+        assert.equal(current.account?.id, result.account.id);
+        assert.equal(current.contact.extra, 'keep');
+        assert.equal(Object.hasOwn(current.contact, type === 'email' ? 'password' : 'passwordLegacy'), false);
+    }
+});
+
+test('company legacy transfer removes only the transferred stored copy and preserves link', async () => {
+    const f = fixture({company: true});
+    const result = await f.run(f.request({transfer: true}), f.trusted);
+    const profile = f.records.get(f.sourcePath);
+    assert.equal(Object.hasOwn(profile.emails.pec, 'password'), false);
+    assert.equal(profile.emails.pec.extra, 'keep');
+    assert.equal(profile.emails.pec.linkedAccountId, result.account.id);
+});
+
+test('creation rejects plaintext credential fields and revision overflow before writes', async () => {
+    for (const patch of [{name: 'Plain name'}, {username: 'plain-user'}, {expectedRevision: Number.MAX_SAFE_INTEGER}]) {
+        const f = fixture(), request = {...f.request(), ...patch};
+        const before = structuredClone([...f.records]);
+        await assert.rejects(f.run(request, f.trusted), /PROFILE_ACCOUNT_CREATE_INVALID/);
+        assert.deepEqual([...f.records], before);
+    }
+});

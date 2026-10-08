@@ -10,7 +10,7 @@ const envelope = {type: 'profile-document-attachment-envelope', version: 1, ciph
     wrapIv: 'AAAAAAAAAAAAAAAA', wrappedFileKey: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'};
 const plaintext = () => Uint8Array.from([1, 2, 3, 4]);
 function sourceFixture({online = true, locked = false, attachmentStatus = 'ready', available = true,
-    uploadStatuses = ['confirmed'], removeStatus = 'confirmed', refused = false} = {}) {
+    uploadStatuses = ['confirmed'], removeStatus = 'confirmed', refused = false, validateImageBytes} = {}) {
     const abort = new AbortController(), state = {uid, online, locked, revoked: [], created: 0, clears: 0, downloads: 0};
     const context = {user: {uid}, signal: abort.signal, assertUnlocked() {if (state.locked) throw Error('VAULT_LOCKED');}};
     const bytes = plaintext();
@@ -43,9 +43,117 @@ function sourceFixture({online = true, locked = false, attachmentStatus = 'ready
         objectUrl, isOnline: () => state.online, createOperationId: () => `operation-${state.created}`
     };
     const source = createProfileDocumentAttachmentsSource({context, getUser: () => ({uid: state.uid}),
-        ...collaborators});
-    return {state, abort, context, source, bytes};
+        ...collaborators, validateImageBytes});
+    return {state, abort, context, source, bytes, collaborators};
 }
+
+test('oversized browser files are rejected before allocating or planning their bytes', async () => {
+    const f = sourceFixture(); await f.source.load(documentId);
+    let reads = 0, plans = 0, writes = 0;
+    f.collaborators.planner.upload = async () => {plans++;};
+    f.collaborators.service.upload = async () => {writes++;};
+    const result = await f.source.upload([{type: 'image/png', size: 10 * 1024 * 1024 + 1,
+        async arrayBuffer() {reads++; return plaintext().buffer;}}]);
+    assert.equal(result.results[0].code, 'SIZE_NOT_ALLOWED');
+    assert.equal(reads, 0); assert.equal(plans, 0); assert.equal(writes, 0);
+    f.source.dispose();
+});
+
+test('image signature refusal clears bytes and never reaches encryption or upload', async () => {
+    let inspected, plans = 0, writes = 0;
+    const f = sourceFixture({validateImageBytes(bytes) {inspected = bytes; throw Error('IMAGE_SIGNATURE_MISMATCH');}});
+    await f.source.load(documentId);
+    f.collaborators.planner.upload = async () => {plans++;};
+    f.collaborators.service.upload = async () => {writes++;};
+    const outcome = await f.source.upload([{type: 'image/png', size: 4, arrayBuffer: async () => plaintext().buffer}]);
+    assert.equal(outcome.results[0].code, 'IMAGE_SIGNATURE_MISMATCH');
+    assert.equal(plans, 0); assert.equal(writes, 0); assert.ok(inspected.every(byte => byte === 0));
+    f.source.dispose();
+});
+
+test('upload clears its owned buffer when preparation fails before sealing', async () => {
+    const f = sourceFixture(); await f.source.load(documentId);
+    let captured, writes = 0;
+    f.collaborators.planner.upload = async ({bytes}) => {captured = bytes; throw Error('READ_FAILED');};
+    f.collaborators.service.upload = async () => {writes++;};
+    const result = await f.source.upload([{type: 'image/jpeg', arrayBuffer: async () => plaintext().buffer}]);
+    assert.equal(result.results[0].code, 'READ_FAILED');
+    assert.equal(writes, 0);
+    assert.ok(captured.every(byte => byte === 0));
+    f.source.dispose();
+});
+
+test('upload stops after revocation during file read or preparation, including refused plans', async () => {
+    for (const boundary of ['read', 'prepared', 'refused']) {
+        const f = sourceFixture(); await f.source.load(documentId);
+        let reads = 0, plans = 0, writes = 0, captured;
+        f.collaborators.planner.upload = async ({bytes}) => {
+            plans++; captured = bytes; f.abort.abort();
+            return boundary === 'refused' ? {status: 'refused', code: 'LIMIT'}
+                : {status: 'prepared', command: {attachmentId}, payload: new Uint8Array([9]), digest: 'a'};
+        };
+        f.collaborators.service.upload = async () => {writes++; return {status: 'confirmed'};};
+        const file = {type: 'image/jpeg', async arrayBuffer() {
+            reads++; if (boundary === 'read') f.abort.abort(); return plaintext().buffer;
+        }};
+        await assert.rejects(f.source.upload([file, file]), /VIEW_DISPOSED/);
+        assert.equal(writes, 0, boundary);
+        assert.equal(reads, 1, boundary);
+        assert.equal(plans, boundary === 'read' ? 0 : 1, boundary);
+        if (captured) assert.ok(captured.every(byte => byte === 0));
+        f.source.dispose();
+    }
+});
+
+test('remove does not submit a prepared command after abort, lock or owner change', async () => {
+    for (const boundary of ['abort', 'lock', 'owner']) {
+        const f = sourceFixture(); await f.source.load(documentId);
+        let writes = 0;
+        f.collaborators.planner.remove = async () => {
+            if (boundary === 'abort') f.abort.abort();
+            if (boundary === 'lock') f.state.locked = true;
+            if (boundary === 'owner') f.state.uid = 'foreign';
+            return {status: 'prepared', command: {attachmentId}, digest: 'a'};
+        };
+        f.collaborators.service.remove = async () => {writes++; return {status: 'confirmed'};};
+        await assert.rejects(f.source.remove(attachmentId), /VIEW_DISPOSED|VAULT_LOCKED/);
+        assert.equal(writes, 0, boundary);
+        f.source.dispose();
+    }
+});
+
+test('an already submitted upload may finish but revocation prevents the next file', async () => {
+    const f = sourceFixture(); await f.source.load(documentId);
+    let writes = 0, reads = 0, captured;
+    const prepare = f.collaborators.planner.upload;
+    f.collaborators.planner.upload = async options => {captured = options.bytes; return prepare(options);};
+    f.collaborators.service.upload = async () => {
+        writes++; f.abort.abort(); return {status: 'confirmed', attachmentId};
+    };
+    const file = {type: 'image/jpeg', async arrayBuffer() {reads++; return plaintext().buffer;}};
+    await assert.rejects(f.source.upload([file, file]), /VIEW_DISPOSED/);
+    assert.equal(writes, 1, 'the call already submitted cannot be undone');
+    assert.equal(reads, 1);
+    assert.ok(captured.every(byte => byte === 0));
+    f.source.dispose();
+});
+
+test('rejected late previews and object URL failures clear plaintext without publishing a preview', async () => {
+    for (const boundary of ['abort', 'url-error']) {
+        const f = sourceFixture();
+        await f.source.load(documentId);
+        f.collaborators.capability.openImage = async () => {
+            if (boundary === 'abort') f.abort.abort();
+            return f.bytes;
+        };
+        if (boundary === 'url-error') f.collaborators.objectUrl.create = () => {throw Error('URL_FAILED');};
+        await assert.rejects(f.source.open(attachmentId), /VIEW_DISPOSED|URL_FAILED/);
+        assert.ok(f.bytes.every(byte => byte === 0));
+        assert.equal(f.source.preview(), null);
+        assert.equal(f.state.created, 0);
+        f.source.dispose();
+    }
+});
 test('the source projects the reader and refuses to write while offline', async () => {
     const f = sourceFixture({online: false});
     const model = await f.source.load(documentId);
@@ -77,6 +185,7 @@ test('the source refuses a plan refusal without calling the service', async () =
     const f = sourceFixture({refused: true});
     await f.source.load(documentId);
     let called = false;
+    f.collaborators.service.upload = async () => {called = true; throw Error('UNEXPECTED_WRITE');};
     const source = f.source;
     const outcome = await source.upload([{name: 'foto.jpg', type: 'image/jpeg', arrayBuffer: async () => plaintext()}]);
     assert.equal(outcome.results[0].status, 'refused');
@@ -179,6 +288,58 @@ function viewFixture({attachments = [], canWrite = true, online = true, confirm 
 }
 const attachment = overrides => ({attachmentId, mimeType: 'image/jpeg', size: 4, digest: 'a'.repeat(64), status: 'ready',
     schemaVersion: 1, available: true, ...overrides});
+
+test('read-only gallery rejects delete and upload even when disabled controls receive synthetic events', async () => {
+    const f = viewFixture({attachments: [attachment({})], canWrite: false}); await tick();
+    action(rows(f.root)[0], 'attach')[0].dispatchEvent(new Event('click')); await tick();
+    assert.equal(action(f.root, 'delete')[0].disabled, true);
+    action(f.root, 'delete')[0].dispatchEvent(new Event('click'));
+    const input = action(f.root, 'input')[0]; input.files = [{name: 'synthetic.jpg'}]; input.dispatchEvent(new Event('change'));
+    await tick(); assert.equal(f.calls.remove.length, 0); assert.equal(f.calls.upload.length, 0); f.view.dispose();
+});
+
+test('a confirmation delivered after disposal never calls remove or reload', async () => {
+    let answer; const f = viewFixture({attachments: [attachment({})], confirm: () => new Promise(resolve => {answer = resolve;})});
+    await tick(); action(rows(f.root)[0], 'attach')[0].dispatchEvent(new Event('click')); await tick();
+    action(f.root, 'delete')[0].dispatchEvent(new Event('click')); f.view.dispose(); answer(true); await tick();
+    assert.equal(f.calls.remove.length, 0); assert.equal(f.calls.load.length, 1);
+});
+
+test('late gallery load cannot rebuild a disposed panel', async () => {
+    const f = viewFixture(); await tick(); let release;
+    f.source.load = () => new Promise(resolve => {release = resolve;});
+    action(rows(f.root)[0], 'attach')[0].dispatchEvent(new Event('click'));
+    f.view.dispose(); release({canWrite: true, online: true, attachments: [attachment({})]}); await tick();
+    assert.equal(items(f.root).length, 0); assert.equal(action(f.root, 'input').length, 0);
+});
+
+test('source load results cannot move selection backwards when responses arrive out of order', async () => {
+    const f = sourceFixture(); const releases = {};
+    f.collaborators.reader.read = id => new Promise(resolve => {releases[id] = resolve;});
+    const first = f.source.load('old'), denied = assert.rejects(first, /DOCUMENT_SELECTION_CHANGED/);
+    const second = f.source.load(documentId);
+    releases[documentId]({documentId, allowed: true, attachments: [], invalid: []}); await second;
+    releases.old({documentId: 'old', allowed: true, attachments: [], invalid: []}); await denied;
+    assert.equal((await f.source.open(attachmentId)).attachmentId, attachmentId); f.source.dispose();
+});
+
+test('switching document during file read cannot redirect its upload to the new document', async () => {
+    const f = sourceFixture(); await f.source.load(documentId); let release, plans = 0;
+    f.collaborators.planner.upload = async () => {plans++;};
+    const pending = f.source.upload([{type:'image/jpeg', arrayBuffer: () => new Promise(resolve => {release = resolve;})}]);
+    const denied = assert.rejects(pending, /DOCUMENT_SELECTION_CHANGED/);
+    f.collaborators.reader.read = async () => ({documentId:'new', allowed:true, attachments:[], invalid:[]});
+    await f.source.load('new'); release(plaintext().buffer); await denied;
+    assert.equal(plans, 0); f.source.dispose();
+});
+
+test('close while decryption is pending prevents recreating a preview and clears plaintext', async () => {
+    const f = sourceFixture(); await f.source.load(documentId); let release;
+    f.collaborators.capability.openImage = () => new Promise(resolve => {release = resolve;});
+    const pending = f.source.open(attachmentId), denied = assert.rejects(pending, /PREVIEW_CHANGED/);
+    await tick(); f.source.close(); release(f.bytes); await denied;
+    assert.equal(f.state.created, 0); assert.ok(f.bytes.every(byte => byte === 0)); f.source.dispose();
+});
 test('the Allegato action sits next to Modifica and Cestino, and legacy documents explain themselves', async () => {
     const f = viewFixture();
     await tick();
@@ -208,8 +369,9 @@ test('the gallery lists the attachments and opening shows a revocable preview', 
     assert.deepEqual(f.calls.open, [attachmentId]);
     const preview = walk(f.root).find(node => node.dataset?.documentAttachmentPreview === 'true');
     assert.equal(walk(preview).find(node => node.tag === 'img').src, `blob:${attachmentId}`);
+    const closesBeforeClick = f.calls.close;
     action(preview, 'close')[0].dispatchEvent(new Event('click'));
-    assert.equal(f.calls.close, 1);
+    assert.equal(f.calls.close, closesBeforeClick + 1);
     assert.equal(walk(f.root).some(node => node.dataset?.documentAttachmentPreview === 'true'), false);
     f.view.dispose();
     assert.equal(f.calls.revoke, 1, 'disposing the view revokes whatever the source still holds');

@@ -1,5 +1,6 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
+import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -83,7 +84,28 @@ export function renderCompanyContacts(data, companyId, reload) {
     setChildren(document.getElementById('email-list-container'),contacts.emails.length ? contacts.emails.map(e=>card(e,'email')) : [text('Nessuna email. Usa Modifica contatti per aggiungerla.')]);
     setChildren(document.getElementById('company-phone-list'),contacts.phones.length ? contacts.phones.map(p=>card(p,'phone')) : [text('Nessun telefono. Usa Modifica contatti per aggiungerlo.')]);
 }
+let pdfCleanup, pdfRoot, pdfGeneration = 0, pdfOwnerUid, pdfLifecycleStarted = false;
+function clearCompanyPdf() {
+    pdfGeneration++;
+    pdfCleanup?.(); pdfCleanup = null;
+    pdfRoot?.replaceChildren(); pdfRoot = null;
+}
+function startCompanyPdfLifecycle() {
+    if (pdfLifecycleStarted) return;
+    pdfLifecycleStarted = true;
+    pdfOwnerUid = auth.currentUser?.uid;
+    for (const event of ['pagehide', 'private-auth-blocked', 'vault-session-locked']) {
+        window.addEventListener(event, clearCompanyPdf);
+    }
+    onAuthStateChanged(auth, user => {
+        if (user?.uid !== pdfOwnerUid) clearCompanyPdf();
+        pdfOwnerUid = user?.uid;
+    });
+}
 export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
+    startCompanyPdfLifecycle();
+    clearCompanyPdf();
+    const ownerUid = auth.currentUser?.uid;
     const tabs = [...document.querySelectorAll('[data-company-tab]')];
     styleCompanySections(companyId);
     tabs.forEach(tab => {
@@ -93,10 +115,27 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
         tab.setAttribute('aria-controls',panels.map(panel=>panel.id).join(' '));
     });
     const activate = name => {
+        clearCompanyPdf();
+        const generation = pdfGeneration;
         if (!tabs.some(tab=>tab.dataset.companyTab===name)) name='overview';
         tabs.forEach(tab=>{const active=tab.dataset.companyTab===name;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
         document.querySelectorAll('[data-company-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.companyPanel!==name));
         sessionStorage.setItem('company-profile-tab:'+companyId,name);
+        if (name === 'pdf-summary') {
+            const root = document.getElementById('company-pdf-summary');
+            if (!root || !ownerUid || auth.currentUser?.uid !== ownerUid) return;
+            pdfRoot = root;
+            root.textContent = 'Caricamento scheda PDF…';
+            import('./pdf/company-summary-entry.js').then(({mountCompanySummary}) => {
+                if (generation === pdfGeneration && root.isConnected && auth.currentUser?.uid === ownerUid) {
+                    pdfCleanup = mountCompanySummary(root, companyId);
+                }
+            }).catch(() => {
+                if (generation === pdfGeneration && root.isConnected && auth.currentUser?.uid === ownerUid) {
+                    root.textContent = 'Scheda PDF non disponibile. Riprova online.';
+                }
+            });
+        }
     };
     tabs.forEach((tab,index)=>{tab.onclick=()=>activate(tab.dataset.companyTab);tab.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowLeft'?-1:1)+tabs.length)%tabs.length;tabs[next].focus();activate(tabs[next].dataset.companyTab);};});
     const summary=[['badge','Partita IVA',data.partitaIva,'personal'],['mail','Email principale',companyProfileContacts(data).emails[0]?.address,'contacts'],['call','Telefono',data.telefonoAzienda,'contacts'],['home','Sede legale',[data.indirizzoSede,data.civicoSede,data.cittaSede].filter(Boolean).join(' '),'addresses']];

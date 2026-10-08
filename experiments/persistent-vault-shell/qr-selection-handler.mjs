@@ -12,8 +12,9 @@ export function createPrivateQrSelectionHandler({db, hash, timestamp}) {
         const uid = trusted?.auth?.uid;
         if (!id(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
-        if (!keys(data, ['selection', 'expectedRevision', 'operationId']) || !id(data.operationId) ||
+        if (!keys(data, ['selection', 'expectedRevision', 'operationId', 'expectedOwnerUid']) || !id(data.operationId) || !id(data.expectedOwnerUid) ||
             !Number.isSafeInteger(data.expectedRevision) || data.expectedRevision < 0 || data.expectedRevision >= Number.MAX_SAFE_INTEGER) fail('INVALID_ARGUMENT');
+        if (data.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         // Wire requests must already use stable IDs. Index migration belongs to
         // the editor snapshot; accepting indexes here could select a moved row.
         if (!keys(data.selection, [...PRIVATE_QR_SCALARS, 'phones', 'emails', 'addresses'])) fail('INVALID_ARGUMENT');

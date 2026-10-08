@@ -12,6 +12,7 @@ const sharingTest = resolve(projectRoot, 'tests', 'sharing-prototype.storage.rul
 mkdirSync(configRoot, {recursive: true});
 
 function run(projectId, emulators, testFile) {
+  if (!projectId.startsWith('demo-')) throw new Error('Only demo emulator projects are allowed');
   const result = spawnSync(process.execPath, [
     firebaseCli,
     'emulators:exec',
@@ -38,6 +39,6 @@ function run(projectId, emulators, testFile) {
   return result.status ?? 1;
 }
 
-const productionStatus = run('codici-password-rules-test', 'storage', productionTest);
+const productionStatus = run('demo-codici-password-rules-test', 'firestore,storage', productionTest);
 if (productionStatus !== 0) process.exit(productionStatus);
-process.exit(run('codici-password-sharing-storage-test', 'firestore,storage', sharingTest));
+process.exit(run('demo-codici-password-sharing-storage-test', 'firestore,storage', sharingTest));

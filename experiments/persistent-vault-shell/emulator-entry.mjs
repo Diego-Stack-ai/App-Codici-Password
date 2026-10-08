@@ -1,4 +1,5 @@
 import {signInWithEmailAndPassword} from 'firebase/auth';
+import {createShellCommands} from './shell-commands.mjs';
 import {httpsCallable} from 'firebase/functions';
 import {mountPrivateQrEditor} from './private-qr-editor-provider.mjs';
 import {mountCompanyQrEditor} from './company-qr-editor-provider.mjs';
@@ -11,7 +12,11 @@ import {mountPrivateDocumentsEditorProvider} from './private-documents-editor-pr
 import {createCompanySummaryReader} from './company-summary-reader.mjs';
 import {mountCompanySummaryView} from './company-summary-view.mjs';
 import {createCompanyPdfActions} from './company-summary-browser.mjs';
-import {auth, db, functions} from './emulator-firebase.mjs';
+import {auth, db, functions, storage, requireEmulatorAppCheck} from './emulator-firebase.mjs';
+import {createLocalPresentation} from './local-presentation.mjs';
+import {createPrivateGatePresentation} from './private-gate-presentation.mjs';
+import {createFirebaseAdmission} from './firebase-admission.mjs';
+import {createFirebaseProfileDocumentAttachments} from './firebase-profile-document-attachments.mjs';
 import {openEmulatorQueue} from './emulator-queue.mjs';
 import {createFirebasePrivateNoteSource} from './firebase-private-note-source.mjs';
 import {createPrivateNotePanelProvider} from './private-note-panel-provider.mjs';
@@ -58,10 +63,23 @@ import {listCompanies, listCompaniesConfirmed} from '../../Frontend/public/asset
 import {readErrorMessage} from '../../Frontend/public/assets/js/modules/shared/read-error-message.js';
 import {createAccountWidgetReader} from './account-widget-reader.mjs';
 import {mountAccountWidgetView} from './account-widget-view.mjs';
+import {createAccountWidgetEditorSource} from './account-widget-editor-source.mjs';
+import {mountAccountWidgetEditor} from './account-widget-editor-view.mjs';
+import {mountAccountWidgetCreate} from './account-widget-create-view.mjs';
+import {createSharedWidgetEditorSource} from './shared-widget-editor-source.mjs';
+import {createRestoreResumeSource} from './restore-resume-source.mjs';
+import {mountRestoreResume} from './restore-resume-view.mjs';
+import {createRestoreStageSource} from './restore-stage-source.mjs';
+import {createRestoreStageUploadClient} from './restore-stage-upload-client.mjs';
+import {createBankingEditSource} from './banking-edit-source.mjs';
+import {mountBankingEditor} from './banking-edit-view.mjs';
+import {createBankingLifecycleSource} from './banking-lifecycle-source.mjs';
+import {mountBankingLifecycle} from './banking-lifecycle-view.mjs';
+import {prepareEmbeddedAccountWidget, prepareSharedVaultData} from '../../Frontend/public/assets/js/modules/data/shared-vault-data-model.js';
 import {createBankingReader} from './banking-reader.mjs';
 import {mountBankingView} from './banking-view.mjs';
 import {normalizeEditableBankingAccounts} from '../../Frontend/public/assets/js/modules/shared/banking-model.js';
-import {listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
+import {listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultData, listSharedVaultDataConfirmed, listSharedVaultLinksConfirmed} from '../../Frontend/public/assets/js/modules/data/vault-repository.js';
 
 const byId = id => document.getElementById(id);
 const content = byId('content'), status = byId('status'), message = byId('message');
@@ -145,14 +163,80 @@ const mountDetail = context => {
                 }});
         },
         mountWidgets: async root => {
-            const generic = await mountAccountWidgetView(root, context, {reader: {
+            let editorCleanup, opening = false;
+            const openWidgetEditor = async (widgetId, bankId) => {
+                if (opening) return; opening = true;
+                try {
+                    editorCleanup?.();
+                    const uid = context.user.uid;
+                    const source = createAccountWidgetEditorSource({context, getUser: () => auth.currentUser,
+                        account: {context: selection.domain, accountId: selection.id, ...(bankId ? {bankId} : {}), ...(selection.domain === 'company' ? {companyId: selection.companyId} : {})},
+                        prepare: prepareEmbeddedAccountWidget, isEncryptedValue: cryptoApi.isEncryptedValue,
+                        isOnline: () => navigator.onLine,
+                        listConfirmed: () => listAccountWidgetsConfirmed(uid),
+                        readAccount: () => selection.domain === 'private' ? getPrivateAccountConfirmed(uid, selection.id) : getCompanyAccountConfirmed(uid, selection.companyId, selection.id),
+                        submit: async command => {
+                            if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                            return (await httpsCallable(functions, 'manageAccountWidget')(command)).data;
+                        }});
+                    editorCleanup = widgetId === undefined
+                        ? mountAccountWidgetCreate(root, context, {source, onSaved: () => session.navigate('detail')})
+                        : await mountAccountWidgetEditor(root, context, {source, widgetId, onSaved: () => session.navigate('detail')});
+                } finally {opening = false;}
+            };
+            const editShared = async widgetId => {
+                if (opening) return; opening = true;
+                try {
+                    editorCleanup?.(); const uid = context.user.uid;
+                    const source = createSharedWidgetEditorSource({context, getUser: () => auth.currentUser,
+                        account: {context: selection.domain, accountId: selection.id, ...(selection.domain === 'company' ? {companyId: selection.companyId} : {})},
+                        readAccount: () => selection.domain === 'private' ? getPrivateAccountConfirmed(uid, selection.id) : getCompanyAccountConfirmed(uid, selection.companyId, selection.id),
+                        listWidgets: () => listAccountWidgetsConfirmed(uid), listLinks: () => listSharedVaultLinksConfirmed(uid),
+                        listShared: () => listSharedVaultDataConfirmed(uid), prepare: prepareSharedVaultData,
+                        isEncryptedValue: cryptoApi.isEncryptedValue, isOnline: () => navigator.onLine,
+                        submit: async command => {
+                            if (location.origin !== 'http://127.0.0.1:4188' || auth.app.options.projectId !== 'demo-vault-shell') throw Error('LOCAL_EMULATOR_ONLY');
+                            return (await httpsCallable(functions, 'manageSharedVaultData')(command)).data;
+                        }});
+                    editorCleanup = await mountAccountWidgetEditor(root, context, {source, widgetId,
+                        notice: 'Salvare modifica la credenziale comune in tutti gli Account collegati. Scollegare rimuove solo il collegamento da questo Account, senza cancellare la credenziale comune.',
+                        onSaved: () => session.navigate('detail')});
+                } finally {opening = false;}
+            };
+            const generic = await mountAccountWidgetView(root, context, {onEdit: openWidgetEditor, onEditShared: editShared, onCreate: () => openWidgetEditor(), reader: {
                 list: async () => (await widgetReader.list()).filter(widget => !widget.bankId), read: (...args) => widgetReader.read(...args)}});
             try {
                 const banking = await mountBankingView(root, context, {widgetReader,
+                    onLifecycle: typeof __EMULATOR_REAL_FUNCTIONS__ !== 'undefined' && __EMULATOR_REAL_FUNCTIONS__ ? undefined : async (action, target) => {
+                        if (opening) return; opening = true;
+                        try {
+                            editorCleanup?.(); const uid = context.user.uid;
+                            const source = createBankingLifecycleSource({context, getUser: () => auth.currentUser, account: selection,
+                                assertCurrent: target.assertCurrent,
+                                readRecord: () => selection.domain === 'private' ? getPrivateAccountConfirmed(uid, selection.id) : getCompanyAccountConfirmed(uid, selection.companyId, selection.id),
+                                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                                isEncryptedValue: cryptoApi.isEncryptedValue, isOnline: () => navigator.onLine,
+                                submit: async data => (await httpsCallable(functions, 'applyBankingLifecycle')(data)).data});
+                            editorCleanup = mountBankingLifecycle(root, context, {source, action, ...target, onSaved: () => session.navigate('detail')});
+                        } finally {opening = false;}
+                    },
+                    onEditBank: typeof __EMULATOR_REAL_FUNCTIONS__ !== 'undefined' && __EMULATOR_REAL_FUNCTIONS__ ? undefined : async (bankId, cardIndex) => {
+                        if (opening) return; opening = true;
+                        try {
+                            editorCleanup?.(); const uid = context.user.uid;
+                            const source = createBankingEditSource({context, getUser: () => auth.currentUser, account: selection, bankId, cardIndex,
+                                readRecord: () => selection.domain === 'private' ? getPrivateAccountConfirmed(uid, selection.id) : getCompanyAccountConfirmed(uid, selection.companyId, selection.id),
+                                hash: async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join(''),
+                                isEncryptedValue: cryptoApi.isEncryptedValue, isOnline: () => navigator.onLine,
+                                submit: async data => (await httpsCallable(functions, 'applyBankingEdit')(data)).data});
+                            editorCleanup = await mountBankingEditor(root, context, {source, onSaved: () => session.navigate('detail')});
+                        } finally {opening = false;}
+                    },
+                    onEditWidget: openWidgetEditor, onCreateWidget: bankId => openWidgetEditor(undefined, bankId),
                     listBanks: createBankingReader({context, getUser: () => auth.currentUser, selection, normalize: normalizeEditableBankingAccounts,
                         isEncryptedValue: cryptoApi.isEncryptedValue, repository: {getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}})});
-                return () => {try {banking();} finally {generic();}};
-            } catch (error) {generic(); throw error;}
+                return () => {try {editorCleanup?.(); banking();} finally {generic();}};
+            } catch (error) {editorCleanup?.(); generic(); throw error;}
         },
         backLabel: ['profile', 'companyProfile'].includes(detailReturnRoute) ? 'Torna al profilo' : 'Torna alla lista', onBack: () => navigateList(detailReturnRoute)});
 };
@@ -237,6 +321,8 @@ const mountProfile = context => {
                     onUtilityLink: onLink,
                     createId: prefix => privateProfileModel.createProfileItemId(prefix)});
         },
+        mountDocumentAttachments: company ? undefined : (root, {signal}) =>
+            createFirebaseProfileDocumentAttachments({context: {...context, signal}, auth, db, storage, functions})(root, {signal}),
         mountDocumentsEditor: company ? undefined : (root, {signal, onSaved, onCancel, onLink}) => {
             const scoped = {...context, signal}, getUser = () => auth.currentUser;
             return mountPrivateDocumentsEditorProvider(root, scoped, {getUser, onSaved, onCancel, onLink,
@@ -300,10 +386,36 @@ const mountProfile = context => {
             repository: {getUserProfile, getUserProfileConfirmed, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed}}),
         onOpenAccount(selection) { context.assertUnlocked(); selectedAccount = selection; detailReturnRoute = context.route; selectedRoute = 'detail'; void session.navigate('detail'); }});
 };
-const session = createFirebaseSession({auth, db, cryptoApi,
+const usePrivateGate = new URL(location.href).searchParams.get('privateGate') === '1';
+let session, activationEpoch = 0, gateAttempted = false;
+const mountResume = context => {
+    content.replaceChildren();
+    if (typeof __EMULATOR_REAL_FUNCTIONS__ !== 'undefined' && __EMULATOR_REAL_FUNCTIONS__) {
+        const notice = document.createElement('p');
+        notice.textContent = 'Ripresa M8 disponibile solo sul bridge del laboratorio isolato, non sulle Functions5001. Nessuna richiesta inviata.';
+        content.append(notice); return () => notice.remove();
+    }
+    const isActive = () => {
+        try {context.assertUnlocked(); return !context.signal.aborted && auth.currentUser?.uid === context.user.uid;}
+        catch {return false;}
+    };
+    const attachmentPreparer = createRestoreStageSource({uid: context.user.uid, isActive, signal: context.signal,
+        submit: async data => (await httpsCallable(functions, 'manageRestoreStage')(data)).data,
+        upload: createRestoreStageUploadClient({endpoint: `${location.origin}/restore-stage/upload`, origin: location.origin,
+            fetchImpl: fetch, isActive, signal: context.signal,
+            getCredentials: async () => ({idToken: await auth.currentUser.getIdToken(), appCheckToken: 'synthetic-app-check'})})});
+    const source = createRestoreResumeSource({context, attachmentPreparer, getUser: () => auth.currentUser,
+        isOnline: () => navigator.onLine, submit: async data => (await httpsCallable(functions, 'manageRestoreResume')(data)).data});
+    return mountRestoreResume(content, context, {source});
+};
+function createSession(presentation) {
+const admission = createFirebaseAdmission({auth, db, presentationGate: presentation,
+    isOnline: () => navigator.onLine, enableAppCheck: requireEmulatorAppCheck, requiredPolicyVersion: 1});
+return createFirebaseSession({auth, db, cryptoApi, presentation, admission,
+    getTicket: presentation.getTicket, isTicketActive: presentation.active,
     createQueueClient: scope => openEmulatorQueue({auth, functions, ...scope}),
     requestPassword: options => requestMaster(byId('master-dialog'), options),
-    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile, companyProfile: mountProfile, companies: mountCompanies},
+    routes: {overview: mount, private: mount, company: mount, detail: mountDetail, profile: mountProfile, companyProfile: mountProfile, companies: mountCompanies, resume: mountResume},
     onState({state}) {
         if (state === 'unlocked') void offlinePreparation.refresh();
         else offlinePreparation.clear();
@@ -319,25 +431,61 @@ const session = createFirebaseSession({auth, db, cryptoApi,
         refreshControls();
     }, onError: showError
 });
-async function run(action) {
-    if (busy) return;
-    busy = true; message.textContent = ''; refreshControls();
-    try { await action(); } catch (error) { showError(error); }
-    finally { busy = false; refreshControls(); }
 }
-byId('login').addEventListener('click', () => run(async () => {
-    await signInWithEmailAndPassword(auth, `${byId('identity').value}@example.invalid`, 'LOGIN-SOLO-EMULATORE!123');
-    await session.navigate(selectedRoute);
-}));
-byId('unlock').addEventListener('click', () => run(async () => { await session.unlock(); await session.navigate(selectedRoute); }));
-byId('lock').addEventListener('click', () => session.lock());
-byId('logout').addEventListener('click', () => run(() => session.logout()));
-for (const route of ['private', 'profile', 'companies']) byId(route).addEventListener('click', () => {
-    navigateList(route);
+session = createSession(createLocalPresentation({origin: location.origin, getUser: () => auth.currentUser}));
+async function activatePrivateGate() {
+    if (gateAttempted) throw new Error('GATE_RELOAD_REQUIRED');
+    gateAttempted = true;
+    const mine = ++activationEpoch, uid = auth.currentUser?.uid;
+    session.dispose();
+    try {
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '/assets/js/private-auth-gate.js';
+            script.onload = resolve;
+            script.onerror = () => reject(new Error('PRIVATE_GATE_LOAD_FAILED'));
+            document.head.append(script);
+        });
+        if (mine !== activationEpoch || !uid || auth.currentUser?.uid !== uid) throw new Error('AUTH_CHANGED');
+        session = createSession(createPrivateGatePresentation({gate: window.privateAuthGate, getUser: () => auth.currentUser}));
+        await session.navigate(selectedRoute);
+    } catch (error) {
+        try {session.dispose();} finally {window.privateAuthGate?.reject();}
+        throw error;
+    }
+}
+window.addEventListener('pagehide', () => {activationEpoch++;});
+const commandSession = {
+    navigate: (...args) => session.navigate(...args),
+    unlock: (...args) => session.unlock(...args),
+    lock() {activationEpoch++; return session.lock();},
+    async logout() {
+        activationEpoch++;
+        try {return await session.logout();}
+        finally {
+            if (usePrivateGate && gateAttempted) {
+                try {shellCommands.dispose();} finally {try {session.dispose();} finally {location.reload();}}
+            }
+        }
+    }
+};
+const shellCommands = createShellCommands({
+    session: commandSession,
+    signIn: async () => {
+        const mine = activationEpoch;
+        await signInWithEmailAndPassword(auth, `${byId('identity').value}@example.invalid`, 'LOGIN-SOLO-EMULATORE!123');
+        if (mine !== activationEpoch) throw new Error('AUTH_CHANGED');
+        if (usePrivateGate) await activatePrivateGate();
+    },
+    getSelectedRoute: () => selectedRoute,
+    navigateList,
+    controls: Object.fromEntries(['login', 'unlock', 'lock', 'logout', 'private', 'profile', 'companies', 'resume'].map(name => [name, byId(name)])),
+    setBusy: value => {busy = value;},
+    clearMessage: () => {message.textContent = '';},
+    showError, refreshControls
 });
-document.addEventListener('pointerdown', () => session.touch());
-document.addEventListener('keydown', () => session.touch());
-document.addEventListener('visibilitychange', () => { if (document.hidden) session.lock('background'); });
-window.addEventListener('pagehide', () => session.lock('pagehide'));
-setInterval(() => session.check(), 1000);
+// Only detaches these command listeners; session lifecycle remains separately owned.
+export const disposeShellCommands = () => shellCommands.dispose();
+// Activity, background/bfcache locking and expiry checks are owned and disposed
+// by the Firebase session boundary, not by this laboratory entry point.
 refreshControls();

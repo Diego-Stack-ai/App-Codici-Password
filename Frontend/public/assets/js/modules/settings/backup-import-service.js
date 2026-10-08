@@ -158,7 +158,10 @@ function attachmentBytes(content) {
         throw new Error('BACKUP_ATTACHMENT_CONTENT_INVALID');
     }
     const bytes = base64ToBytes(content);
-    if (!bytes.length || bytes.byteLength > MAX_ATTACHMENT_BYTES) throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
+    if (!bytes.length || bytes.byteLength > MAX_ATTACHMENT_BYTES) {
+        bytes.fill(0);
+        throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
+    }
     return bytes;
 }
 
@@ -258,7 +261,7 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
             else {
                 const path = validateRestoreStoragePath(entry.storagePath, uid);
                 if (storagePaths.has(path)) throw new Error('BACKUP_ATTACHMENT_DUPLICATE');
-                attachmentBytes(entry.content);
+                attachmentBytes(entry.content).fill(0);
                 if (typeof digest !== 'string' || !digest) throw new Error('BACKUP_ATTACHMENT_DIGEST_INVALID');
                 const characters = path.length + digest.length;
                 if (attachmentDigests.size >= MAX_RESTORE_ATTACHMENTS ||
@@ -306,7 +309,7 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
             storagePaths: [...storagePaths], comparison, collisionCount: collisions
         };
         session.source = {file, recoveryKey, backupId: scan.header.backupId,
-            records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
+            headerText: JSON.stringify(scan.header), records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
             counts: freezeRestoreValue(scan.counts), collisionCount: collisions,
             storagePaths: freezeRestoreValue([...storagePaths]), attachmentDigests};
         session.own(() => {
@@ -380,6 +383,29 @@ function prepareRestoreExecution(session, selection) {
         inFlight: false, blocked: false, result: null};
 }
 
+async function verifyRestoreSource(session) {
+    const source = session.source;
+    let recordIndex = 0;
+    const visited = new Set();
+    const scan = await scanBackup(source.file, session.uid, source.recoveryKey, (entry, digest) => {
+        if (entry.kind === 'record') {
+            if (JSON.stringify(entry) !== JSON.stringify(source.records[recordIndex++])) {
+                throw new Error('BACKUP_SOURCE_CHANGED');
+            }
+        } else {
+            const path = validateRestoreStoragePath(entry.storagePath, session.uid);
+            if (visited.has(path) || !source.attachmentDigests.has(path) || source.attachmentDigests.get(path) !== digest) {
+                throw new Error('BACKUP_SOURCE_CHANGED');
+            }
+            visited.add(path);
+            attachmentBytes(entry.content).fill(0);
+        }
+    }, session.check, session.signal);
+    session.check();
+    if (recordIndex !== source.records.length || visited.size !== source.attachmentDigests.size ||
+        JSON.stringify(scan.header) !== source.headerText) throw new Error('BACKUP_SOURCE_CHANGED');
+}
+
 export async function executeBackupRestore(plan, selectedIndexes = null, {retry = false} = {}) {
     const session = sessions.get(plan);
     if (!session || plan.uid !== session.uid) throw new Error('BACKUP_PLAN_INVALID');
@@ -400,9 +426,14 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
     }
     execution.inFlight = true;
     const source = session.source;
-    let stage = 'firestore';
+    let stage = 'validation';
     let previouslyPossible = false;
     try {
+        // Revalidate the authenticated complete stream before the first write,
+        // including retries. This is not a substitute for server-side staging.
+        await verifyRestoreSource(session);
+        check();
+        stage = 'firestore';
         const restoreChunk = httpsCallable(functions, 'restoreBackupChunk');
         for (let index = execution.confirmedChunks; index < execution.commands.length; index += 1) {
             check();
@@ -443,13 +474,17 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
             }
             visitedStoragePaths.add(storagePath);
             const bytes = attachmentBytes(entry.content);
-            check();
-            execution.storageStarted = true;
-            await uploadBytes(ref(storage, storagePath), bytes, {
-                contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}
-            });
-            check();
-            execution.uploaded += 1;
+            try {
+                check();
+                execution.storageStarted = true;
+                await uploadBytes(ref(storage, storagePath), bytes, {
+                    contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}
+                });
+                check();
+                execution.uploaded += 1;
+            } finally {
+                bytes.fill(0);
+            }
         }, check, session.signal);
         check();
         const expectedAttachments = selectedStoragePaths.size;

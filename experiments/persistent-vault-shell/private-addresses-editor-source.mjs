@@ -105,6 +105,7 @@ export function createPrivateAddressesEditorSource({context, getUser, repository
                 qrState: qr.state, rows: Object.freeze(rows), templates: Object.freeze(templates)});
         },
         async prepare(draft, operationId) {
+            draft = structuredClone(draft);
             check();
             if (!loaded || !isOnline()) fail('PROFILE_SAVE_UNAVAILABLE');
             const current = await read(true); check();

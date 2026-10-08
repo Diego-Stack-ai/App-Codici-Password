@@ -5,33 +5,45 @@
 import { createElement, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { listDeadlines } from '../data/vault-repository.js';
-import { deadlineDate, deadlinePresentation } from '../scadenze/deadline-model.js';
+import { auth } from '../../firebase-config.js?v=1.2.127';
+import { currentDiffDays, deadlineBucket, deadlinePresentation } from '../scadenze/deadline-model.js';
 
-export async function renderHomeDeadlineDashboard(user) {
+let dashboardEpoch = 0;
+
+export function clearHomeDeadlineDashboard() {
+    ++dashboardEpoch;
+    renderDeadlineGroup('upcoming', []);
+    renderDeadlineGroup('expired', []);
+}
+
+export async function renderHomeDeadlineDashboard(user, isCurrent = () => true) {
+    const epoch = ++dashboardEpoch;
+    const active = () => epoch === dashboardEpoch && auth.currentUser?.uid === user?.uid
+        && isCurrent() && (!window.privateAuthGate || window.privateAuthGate.isReady());
+    if (!user?.uid || !active()) return;
     try {
+        const records = await listDeadlines(user.uid);
+        if (!active()) return;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const thirtyDaysLater = new Date(today);
-        thirtyDaysLater.setDate(today.getDate() + 30);
 
         const expired = [];
         const upcoming = [];
-        for (const deadline of await listDeadlines(user.uid)) {
+        for (const deadline of records) {
             if (deadline.completed) continue;
-            const dueDate = deadlineDate(deadline);
-            if (!dueDate) continue;
-            dueDate.setHours(0, 0, 0, 0);
-
-            if (dueDate < today) expired.push({ ...deadline, dateObj: dueDate });
-            else if (dueDate <= thirtyDaysLater) upcoming.push({ ...deadline, dateObj: dueDate });
+            const bucket = deadlineBucket(deadline, today);
+            const diffDays = currentDiffDays(deadline.dueDate || deadline.date, today);
+            if (bucket === 'urgent') expired.push({ ...deadline, diffDays });
+            else if (bucket === 'upcoming') upcoming.push({ ...deadline, diffDays });
         }
 
-        expired.sort((left, right) => left.dateObj - right.dateObj);
-        upcoming.sort((left, right) => left.dateObj - right.dateObj);
+        expired.sort((left, right) => left.diffDays - right.diffDays);
+        upcoming.sort((left, right) => left.diffDays - right.diffDays);
         renderDeadlineGroup('upcoming', upcoming, today);
         renderDeadlineGroup('expired', expired, today);
     } catch (error) {
-        console.error('Errore caricamento dashboard:', error);
+        if (active()) clearHomeDeadlineDashboard();
+        throw error;
     }
 }
 
@@ -49,7 +61,7 @@ function renderDeadlineGroup(prefix, items, today) {
 }
 
 function renderMiniItem(item, today) {
-    const diffDays = Math.ceil((item.dateObj - today) / (1000 * 60 * 60 * 24));
+    const diffDays = item.diffDays;
     let label = '';
     if (diffDays < 0) label = t('expired');
     else if (diffDays === 0) label = t('today');

@@ -1,9 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createAccountStandardEditorSource} from './account-standard-editor-source.mjs';
 import {mountAccountStandardEditor} from './account-standard-editor-view.mjs';
 const hash = value => createHash('sha256').update(value).digest('hex'), cipher = value => Buffer.alloc(48, value.charCodeAt(0) || 42).toString('base64');
+test('laboratory CSS masks only passwords and Master input, not every editor field', async () => {
+    const css = await readFile(new URL('./emulator.css', import.meta.url), 'utf8');
+    const masked = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter(([, , body]) => /-webkit-text-security\s*:\s*disc/.test(body));
+    assert.equal(masked.length, 1);
+    assert.deepEqual(masked[0][1].replace(/\/\*[\s\S]*?\*\//g, '').trim().split(','),
+        ['input[type="password"]', '#unlock-value']);
+});
 function fixture(company = false) {
     const abort = new AbortController(), state = {uid: 'owner', online: true, locked: false, record: {id: 'account', ownerId: 'owner', schemaVersion: 1, revision: 2,
         nomeAccount: cipher('Title'), username: cipher('User'), account: cipher('Code'), password: cipher('Secret'), url: 'https://example.invalid', note: cipher('Keep'),
@@ -20,6 +29,14 @@ for (const company of [false, true]) test(`source reads and prepares ${company ?
     const f = fixture(company), model = await f.source.load(); assert.equal(model.values.password, 'Secret'); assert.equal(model.values.url, 'https://example.invalid');
     const request = await f.source.prepare({password: '', url: ''}, 'op'); assert.deepEqual(request.patch, {password: '', url: ''});
     assert.doesNotMatch(JSON.stringify(request), /Keep|linkedProfileFields|banking/);
+});
+test('standard editor captures submitted changes before its confirmed-read await', async () => {
+    const f = fixture(); await f.source.load();
+    const changes = {password: 'Original'};
+    const pending = f.source.prepare(changes, 'op');
+    changes.password = 'Changed';
+    assert.equal((await pending).patch.password, cipher('Original'));
+    f.source.dispose();
 });
 test('offline is read-only and lifecycle or confirmed changes revoke preparation', async () => {
     const f = fixture(); f.state.online = false; assert.equal((await f.source.load()).canSave, false); await assert.rejects(f.source.prepare({url: ''}, 'op'));

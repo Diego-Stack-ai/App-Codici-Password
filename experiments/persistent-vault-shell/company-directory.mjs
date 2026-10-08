@@ -45,7 +45,11 @@ export async function mountCompanyDirectory(root, context, {readCompanies, onOpe
     search.placeholder = 'Cerca azienda'; search.setAttribute('aria-label', 'Cerca azienda'); search.dataset.companySearch = 'true';
     const list = document.createElement('div'), status = document.createElement('p'); status.setAttribute('role', 'status');
     status.textContent = 'Caricamento aziende…';
-    const active = () => { if (disposed || context.signal.aborted) return false; context.assertUnlocked(); return true; };
+    const active = () => {
+        if (disposed || context.signal.aborted) return false;
+        try { context.assertUnlocked(); return true; }
+        catch (error) { dispose(); throw error; }
+    };
     const clearList = () => { renderControls?.abort(); for (const node of list.querySelectorAll('h3')) node.textContent = ''; list.replaceChildren(); };
     const dispose = () => {
         if (disposed) return;

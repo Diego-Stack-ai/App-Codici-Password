@@ -71,5 +71,5 @@ export async function preparePrivateAddresses({context, getUser, record, snapsho
     }
     if (!operations.length) throw Error(PRIVATE_ADDRESS_REFUSALS.UNCHANGED);
     check();
-    return validatePrivateAddressesRequest({target: {domain: 'private'}, expectedRevision: revision, operations, operationId});
+    return validatePrivateAddressesRequest({target: {domain: 'private'}, expectedOwnerUid: uid, expectedRevision: revision, operations, operationId});
 }

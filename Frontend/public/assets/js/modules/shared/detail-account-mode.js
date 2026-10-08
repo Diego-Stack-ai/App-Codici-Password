@@ -1,8 +1,8 @@
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
-import { collection, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
+import { doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { listContacts } from '../data/vault-repository.js';
 import { accountModeFromRecord, hasAccountCredentials, validateAccountMode } from './account-mode-model.js';
 
@@ -31,7 +31,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     }
     const initialMode = accountModeFromRecord(account);
     let selectedMode = initialMode;
-    let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean));
+    let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean));
     let contacts = [];
     try {
         contacts = (await listContacts(ownerId))
@@ -105,7 +105,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 });
             }
         }
-        const emailsChanged = [...selectedEmails].sort().join('|') !== Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean).sort().join('|');
+        const emailsChanged = [...selectedEmails].sort().join('|') !== Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean).sort().join('|');
         saveButton.classList.toggle('hidden', selectedMode === initialMode && !emailsChanged);
     };
 
@@ -139,35 +139,42 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
                 if (!snap.exists()) throw new Error('Account non trovato');
                 const stored = snap.data();
+                // M7-R7C-1: il ciclo identifica la generazione degli inviti. Un
+                // valore malformato chiude il salvataggio invece di scrivere su un
+                // ID incerto.
+                const cycle = sharingCycleOf(stored);
+                if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
                 const sharedWith = { ...(stored.sharedWith || {}) };
                 const requestedKeys = new Set([...selectedEmails].map(sanitizeEmail));
 
                 for (const key of Object.keys(sharedWith)) {
                     if (!isShared || !requestedKeys.has(key)) {
-                        const guest = sharedWith[key];
                         delete sharedWith[key];
-                        transaction.delete(doc(db, 'invites', `${accountId}_${key}`));
-                        if (guest?.status === 'accepted' && guest.uid) {
-                            transaction.set(doc(collection(db, 'users', guest.uid, 'notifications')), {
-                                title: 'Accesso revocato', message: `Il proprietario ha rimosso il tuo accesso a: ${stored.nomeAccount || 'un account condiviso'}.`,
-                                accountName: stored.nomeAccount || 'Account', type: 'share_revoked', ownerEmail: auth.currentUser?.email || 'Proprietario', timestamp: new Date().toISOString(), read: false
-                            });
-                        }
+                        transaction.delete(doc(db, 'invites', inviteIdForGuest(accountId, key, cycle)));
+                        // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
                 }
 
                 if (isShared) {
                     for (const email of selectedEmails) {
                         const key = sanitizeEmail(email);
-                        if (!sharedWith[key] || sharedWith[key].status === 'rejected') {
+                        // `suspended` è reinvitabile solo perché l'utente lo ha
+                        // riselezionato: gli ospiti sospesi non sono preselezionati.
+                        if (!sharedWith[key] || sharedWith[key].status === 'rejected' || sharedWith[key].status === 'suspended') {
                             sharedWith[key] = { email, status: 'pending', uid: null };
                             const invite = {
-                                inviteId: `${accountId}_${key}`, accountId, ownerId, senderId: ownerId,
+                                inviteId: inviteIdForGuest(accountId, key, cycle),
+                                // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
+                                // ogni creazione e a ogni reinvito. L'id dell'evento di
+                                // registro si deriva solo da qui, mai dall'email, dalla
+                                // sua chiave sanificata o dall'id del documento.
+                                auditRef: crypto.randomUUID(),
+                                accountId, ownerId, senderId: ownerId,
                                 senderEmail: auth.currentUser?.email || '', recipientEmail: email,
                                 accountName: stored.nomeAccount || '', type: isMemo ? 'memo' : 'account',
                                 notifyPush: document.getElementById('account-mode-notify-push')?.checked === true,
                                 notifyEmail: document.getElementById('account-mode-notify-email')?.checked === true,
-                                status: 'pending', createdAt: new Date().toISOString()
+                                status: 'pending', cycle, createdAt: new Date().toISOString()
                             };
                             if (aziendaId) invite.aziendaId = aziendaId;
                             transaction.set(doc(db, 'invites', invite.inviteId), invite);

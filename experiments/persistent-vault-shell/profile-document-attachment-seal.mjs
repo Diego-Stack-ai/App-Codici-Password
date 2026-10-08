@@ -15,6 +15,34 @@ const encoder = new TextEncoder();
 const randomBytes = length => globalThis.crypto.getRandomValues(new Uint8Array(length));
 const encode = bytes => btoa(String.fromCharCode(...bytes));
 const decode = value => Uint8Array.from(atob(value), character => character.charCodeAt(0));
+// Candidate bridge for generateVaultKey()/CPVK2: decode the existing random
+// 256-bit primary key, never hash a legacy password or try a fallback key.
+// No new derivation or envelope format; temporary owned byte copies are cleared.
+async function withPrimaryVaultBytes(material, operation) {
+    let primary = material, ringBytes, key;
+    try {
+        if (typeof primary !== 'string') throw Error('BINARY_VAULT_KEY_UNSUPPORTED');
+        if (primary.startsWith('CPVK2:')) {
+            ringBytes = decode(primary.slice(6));
+            primary = JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(ringBytes))?.primaryKey;
+        }
+        if (typeof primary !== 'string' || !/^[A-Za-z0-9+/]{43}=$/.test(primary)) {
+            throw Error('BINARY_VAULT_KEY_UNSUPPORTED');
+        }
+        key = decode(primary);
+        if (key.byteLength !== 32 || encode(key) !== primary) throw Error('BINARY_VAULT_KEY_UNSUPPORTED');
+    } catch {
+        ringBytes?.fill(0); key?.fill(0);
+        throw Error('BINARY_VAULT_KEY_UNSUPPORTED');
+    }
+    ringBytes?.fill(0);
+    try {return await operation(key);}
+    finally {key.fill(0);}
+}
+export const sealDocumentImageWithVaultMaterial = (material, options) =>
+    withPrimaryVaultBytes(material, key => sealDocumentImageBytes(key, options));
+export const openDocumentImageWithVaultMaterial = (material, options) =>
+    withPrimaryVaultBytes(material, key => openDocumentImageBytes(key, options));
 const seamFailure = () => {throw Error('DOCUMENT_ATTACHMENT_SEAL_FAILED');};
 const openFailure = () => {throw Error('DOCUMENT_ATTACHMENT_OPEN_FAILED');};
 const assertVaultKey = value => {

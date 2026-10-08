@@ -10,16 +10,17 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
 import {
-    doc, collection, runTransaction, deleteDoc, deleteField
+    doc, collection, runTransaction, deleteField
 } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from '../../ui-core-v129.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { logError, sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, logError, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
+import { DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -28,7 +29,11 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
  * Salva o aggiorna un account aziendale con crittografia e gestione condivisione.
  * @param {Object} ctx - Stato corrente del form
  */
-export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '' }) {
+export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '', loadContext = null }) {
+    if (!isAccountSaveAllowed(loadContext)) {
+        showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+        return;
+    }
     const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
     let savedAccountId = currentDocId;
@@ -154,6 +159,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         let retainedProfilePassword = false;
 
         // --- ATOMIC TRANSACTION V3.1 ---
+        assertAccountSaveAllowed(loadContext);
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
             savedAccountId = accRef.id;
@@ -184,8 +190,16 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 linkedContact.linkedAccountCompanyId = currentAziendaId;
             }
             let currentSharedWith = oldData?.sharedWith || {};
+            // M7-R7C-1: ciclo di condivisione dell'Account (0 = legacy). Un valore
+            // malformato chiude il salvataggio invece di scrivere su un ID incerto.
+            const sharingCycle = sharingCycleOf(oldData);
+            if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
 
             // 2. NOW EXECUTE ALL WRITES
+            assertAccountSaveAllowed(loadContext);
+            if (auth.currentUser?.uid !== currentUid) {
+                throw Object.assign(new Error('ACCOUNT_SAVE_SESSION_CHANGED'), {code: 'ACCOUNT_SAVE_SESSION_CHANGED'});
+            }
             const finalData = { ...data };
             if (linkedContact) {
                 const updatedProfile = {...profileSnap.data(), ...patchProfileAccountItem(profileSnap.data(), profileContactLinkDraft, linkedContact)};
@@ -200,22 +214,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    const guest = currentSharedWith[sKey];
-                    transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
 
-                    // Notifica Guest (se aveva accettato)
-                    if (guest && guest.status === 'accepted' && guest.uid) {
-                        const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
-                        transaction.set(guestNotifRef, {
-                            title: "Accesso Revocato",
-                            message: `Il proprietario ha reso privato l'account aziendale: ${data.nomeAccount || 'condiviso'}. Il tuo accesso è terminato.`,
-                            accountName: data.nomeAccount || 'Account',
-                            type: "share_revoked",
-                            ownerEmail: auth.currentUser?.email || 'Proprietario',
-                            timestamp: new Date().toISOString(),
-                            read: false
-                        });
-                    }
+                    // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
                 finalData.sharedWith = {};
                 finalData.sharedWithUids = [];
@@ -230,23 +231,10 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 // Rimuovi quelli sbiancati dalla UI
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
-                        const guest = currentSharedWith[oldKey];
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
+                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, sharingCycle)));
 
-                        // Notifica Guest (se aveva accettato)
-                        if (guest && guest.status === 'accepted' && guest.uid) {
-                            const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
-                            transaction.set(guestNotifRef, {
-                                title: "Accesso Revocato",
-                                message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account aziendale condiviso'}.`,
-                                accountName: data.nomeAccount || 'Account',
-                                type: "share_revoked",
-                                ownerEmail: auth.currentUser?.email || 'Proprietario',
-                                timestamp: new Date().toISOString(),
-                                read: false
-                            });
-                        }
+                        // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
                 }
 
@@ -256,7 +244,10 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                     const existingGuest = finalData.sharedWith[sKey];
 
                     // FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito
-                    if (!existingGuest || existingGuest.status === 'rejected') {
+                    // M7-R7C-1: anche una voce `suspended` (Account archiviato e
+                    // ripristinato) richiede un NUOVO invito: è reinvitabile solo
+                    // perché l'utente l'ha riselezionata nel modulo.
+                    if (!existingGuest || existingGuest.status === 'rejected' || existingGuest.status === 'suspended') {
                         finalData.sharedWith[sKey] = {
                             email: email,
                             status: 'pending',
@@ -264,8 +255,13 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                         };
 
                         // Crea Invito
-                        transaction.set(doc(db, "invites", `${targetId}_${sKey}`), {
-                            inviteId: `${targetId}_${sKey}`,
+                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
+                            inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
+                            // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
+                            // ogni creazione e a ogni reinvito. L'id dell'evento di
+                            // registro si deriva solo da qui, mai dall'email, dalla
+                            // sua chiave sanificata o dall'id del documento.
+                            auditRef: crypto.randomUUID(),
                             accountId: targetId,
                             aziendaId: currentAziendaId,
                             ownerId: currentUid,
@@ -277,6 +273,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                             notifyPush: document.getElementById('invite-notify-push')?.checked === true,
                             notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
                             status: 'pending',
+                            cycle: sharingCycle,
                             createdAt: new Date().toISOString()
                         });
 
@@ -343,14 +340,42 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 }
 
 /**
- * Cancella un account aziendale da Firestore.
+ * Sposta nell'Archivio un account aziendale: la cancellazione definitiva resta
+ * possibile soltanto dall'Archivio, con una conferma esplicita.
  * @param {Object} ctx - Contesto con ID dell'account
  */
-export async function deleteAccount({ currentUid, currentAziendaId, currentDocId }) {
-    if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) return;
+export async function deleteAccount({ currentUid, currentAziendaId, currentDocId, observedRevision, observedUpdatedAt, observedSharing = null }) {
+    // Import differito: il servizio di Archivio (e con esso il modello dei
+    // destinatari) non entra nella closure iniziale della pagina (budget dei
+    // moduli statici) e viene caricato soltanto quando l'utente conferma.
+    let archiveAccount, archiveConfirmMessage;
     try {
-        await deleteDoc(doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentDocId));
-        showToast(t('success_deleted'), "success");
+        ({ archiveAccount, archiveConfirmMessage } = await import('../settings/archive-account-service.js'));
+    } catch (e) {
+        logError("Archive", e);
+        showToast(t('error_generic'), "error");
+        return;
+    }
+    // M7-R7B4: avviso informativo sui destinatari, ricavato dal documento
+    // caricato all'apertura (nessuna lettura nuova, nessun segreto).
+    if (!await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(observedSharing, t))) return;
+    try {
+        // Si usa il marker OSSERVATO all'apertura del modulo: una rilettura
+        // appena prima dell'archiviazione renderebbe invisibile una modifica
+        // concorrente avvenuta dopo l'apertura. Se manca un marker affidabile
+        // l'operazione fallisce chiusa e invita ad aggiornare.
+        if (observedRevision === undefined && !observedUpdatedAt) {
+            showToast(t('archive_conflict_refresh'), "error");
+            return;
+        }
+        const result = await archiveAccount(currentUid, {id: currentDocId, context: currentAziendaId,
+            revision: observedRevision, updatedAt: observedUpdatedAt});
+        showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'), "success");
         setTimeout(() => window.location.href = `account_azienda.html?id=${currentAziendaId}`, 1000);
-    } catch (e) { logError("Delete", e); showToast(t('error_generic'), "error"); }
+    } catch (e) {
+        logError("Archive", e);
+        if (['ARCHIVE_CONFLICT', 'ARCHIVE_UPDATED_AT_CONFLICT', 'ARCHIVE_MARKER_MISSING'].includes(e?.code)) showToast(t('archive_conflict_refresh'), "error");
+        else if (e?.code === 'ARCHIVE_ACCOUNT_MISSING') showToast(t('archive_missing_refresh'), "error");
+        else showToast(t('error_generic'), "error");
+    }
 }

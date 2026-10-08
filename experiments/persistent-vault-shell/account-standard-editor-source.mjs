@@ -31,6 +31,7 @@ export function createAccountStandardEditorSource({context, getUser, repository,
         basis = source; return Object.freeze({canSave: isOnline(), values: Object.freeze(model)});
     }, async prepare(changes, operationId) {
         check(); if (!basis || !isOnline()) throw Error('ACCOUNT_STANDARD_SAVE_UNAVAILABLE');
+        changes = structuredClone(changes);
         const expected = basis, ticket = generation, current = await read(true); check();
         const now = accountStandardBasis(current, uid, selection), was = accountStandardBasis(expected, uid, selection);
         if (ticket !== generation || basis !== expected || now.revision !== was.revision || now.fingerprintInput !== was.fingerprintInput) throw Error('ACCOUNT_STANDARD_CHANGED');

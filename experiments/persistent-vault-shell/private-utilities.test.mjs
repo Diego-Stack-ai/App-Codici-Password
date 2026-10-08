@@ -103,10 +103,10 @@ test('a linked utility and a derived identity are never deleted, and the card ne
     assert.equal(f.stored.get(f.path)._profileUtilitiesRevision, 1);
     // A derived identity is refused by the validator too.
     assert.throws(() => validatePrivateUtilitiesRequest({target: {domain: 'private'}, parentAddressId: 'address-home',
-        expectedRevision: 1, operationId: 'operation', operations: [{kind: 'delete', id: 'utility-address-home-legacy-1a2b',
+        expectedRevision: 1, operationId: 'operation', expectedOwnerUid: 'owner', operations: [{kind: 'delete', id: 'utility-address-home-legacy-1a2b',
             basis: 'a'.repeat(64)}]}), /PROFILE_UTILITIES_INVALID/);
     assert.throws(() => validatePrivateUtilitiesRequest({target: {domain: 'private'}, parentAddressId: 'address-legacy-9',
-        expectedRevision: 1, operationId: 'operation', operations: [{kind: 'delete', id: 'utility-free', basis: 'a'.repeat(64)}]}),
+        expectedRevision: 1, operationId: 'operation', expectedOwnerUid: 'owner', operations: [{kind: 'delete', id: 'utility-free', basis: 'a'.repeat(64)}]}),
         /PROFILE_UTILITIES_INVALID/, 'a legacy parent address is not an addressable parent');
     // The digital card publishes only the `ADR` line of a selected address
     // (`qr_code_utils-v2.js`) and never serializes `utilities[]`: including the

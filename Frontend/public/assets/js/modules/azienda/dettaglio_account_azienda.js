@@ -12,7 +12,7 @@ import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { logError } from '../../utils.js';
+import { logError, sharingCycleOf } from '../../utils.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
@@ -23,7 +23,7 @@ import {
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
-import {getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
+import {findSuspendedGuestInvite, getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -139,9 +139,41 @@ async function loadAccount(mount = mounted) {
     const active = () => mount.active() && version === mount.version && !signal.aborted;
     setupActions(() => active() && mount.loaded, mount.fileInputs);
     const {uid: loadViewerId, owner: loadOwnerId, company: companyId, id: accountId} = mount.scope;
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     try {
+        // M7-R7C-4: per un ospite l'autorizzazione va stabilita PRIMA di leggere o
+        // renderizzare. Online serve una lettura CONFERMATA DAL SERVER: la copia in
+        // cache non prova un grant attuale, quindi un diniego non ammette fallback
+        // locale. Offline resta la consultazione concordata.
+        let account = null;
+        if (loadOwnerId !== loadViewerId) {
+            const suspended = await findSuspendedGuestInvite(loadOwnerId, accountId, auth.currentUser?.email, companyId);
+            if (!active()) return;
+            if (suspended) {
+                showToast(t('account_suspended_label'), "warning");
+                setTimeout(() => { if (active()) history.back(); }, 1000);
+                return;
+            }
+            if (!offline) {
+                try {
+                    account = await getCompanyAccountConfirmed(loadOwnerId, companyId, accountId);
+                } catch (error) {
+                    if (!active()) return;
+                    logError('GuestAuthorization', error);
+                    showToast(t('guest_authorization_unverified'), "error");
+                    setTimeout(() => { if (active()) history.back(); }, 1000);
+                    return;
+                }
+                if (!active()) return;
+                if (!account) {
+                    showToast(t('account_not_found'), "error");
+                    setTimeout(() => { if (active()) history.back(); }, 1000);
+                    return;
+                }
+            }
+        }
         const docRef = doc(db, "users", loadOwnerId, "aziende", companyId, "accounts", accountId);
-        const account = await (requireServerRefresh
+        if (!account) account = await (requireServerRefresh
             ? getCompanyAccountConfirmed(loadOwnerId, companyId, accountId)
             : getCompanyAccount(loadOwnerId, companyId, accountId));
 
@@ -218,7 +250,7 @@ async function loadAccount(mount = mounted) {
         };
         const reload = () => mount.active() && loadAccount(mount);
         initAttachmentModule({ownerUid: loadOwnerId, currentAziendaId: companyId, currentId: accountId, readOnly: isReadOnly, isActive: actionActive, signal, confirm});
-        initSharingModule({currentUid: loadViewerId, currentAziendaId: companyId, currentId: accountId, isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        initSharingModule({currentUid: loadViewerId, currentAziendaId: companyId, currentId: accountId, isReadOnly, onReload: reload, isActive: actionActive, signal, confirm, sharingCycle: sharingCycleOf(loaded)});
         if (!isReadOnly && loadOwnerId === loadViewerId) {
             updateDoc(docRef, {views: increment(1)}).catch(e => { if (active()) logError('UpdateViews', e); });
         }

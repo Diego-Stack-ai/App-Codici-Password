@@ -109,3 +109,112 @@ test('scope rejection is held persistently and never retried as a network failur
     const reopened=await createOfflineMutationSynchronizer(options).flush();
     assert.equal(reopened.status,'reconciliation-required');assert.equal(calls,1);
 });
+
+// ── M6-A-6: indisponibilità dichiarata nel percorso reale di lettura ───────────────────────
+test('lettura non disponibile diventa stato esplicito, mai coda vuota o salvataggio riuscito', async () => {
+    const states = []; let sends = 0;
+    const sync = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        queue: {list: async () => assert.fail('la coda non va letta dal vecchio percorso'), remove: async () => assert.fail('remove')},
+        readQueue: async () => ({available: false, version: null, operations: null, reason: 'QUEUE_READER_SCHEMA'}),
+        send: async () => { sends += 1; },
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true,
+        onState: state => states.push(state)
+    });
+    assert.deepEqual(await sync.flush(), {status: 'queue-unavailable', reason: 'QUEUE_READER_SCHEMA'});
+    assert.equal(sends, 0);
+    assert.deepEqual(states, [{state: 'queue-unavailable', reason: 'QUEUE_READER_SCHEMA', pending: null}]);
+    assert.equal(states.some(state => ['idle', 'saved', 'offline'].includes(state.state)), false);
+});
+
+test('coda leggibile ma non operabile: indisponibilità senza invio e senza conferme', async () => {
+    const states = [];
+    const sync = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        queue: null,
+        readQueue: async () => ({available: true, version: 2, operations: [{operationId: 'op-1'}, {operationId: 'op-2'}]}),
+        send: async () => assert.fail('nessun invio senza scrittore'),
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true,
+        onState: state => states.push(state)
+    });
+    assert.deepEqual(await sync.flush(), {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'});
+    assert.deepEqual(states, [{state: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending: 2}]);
+});
+
+test('lettura disponibile: il percorso normale resta invariato', async () => {
+    const removed = []; const states = [];
+    const sync = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        queue: {list: async () => assert.fail('la lettura passa dal lettore iniettato'), remove: async operation => removed.push(operation.operationId)},
+        readQueue: async () => ({available: true, version: 1, operations: [{operationId: 'op-1'}, {operationId: 'op-2'}]}),
+        send: async () => ({status: 'applied'}),
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true,
+        onState: state => states.push(state)
+    });
+    const lease = await sync.flush();
+    assert.equal(lease.value.status, 'saved');
+    assert.deepEqual(removed, ['op-1', 'op-2']);
+    assert.deepEqual(states.map(state => state.state), ['syncing', 'saved']);
+
+    const offline = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        queue: {list: async () => assert.fail('la lettura passa dal lettore iniettato')},
+        readQueue: async () => ({available: true, version: 2, operations: [{operationId: 'op-1'}]}),
+        send: async () => assert.fail('offline'),
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => false
+    });
+    assert.deepEqual(await offline.flush(), {status: 'offline', pending: 1});
+});
+
+test('scrittore chiuso da un upgrade dopo l’apertura: nessun invio e indisponibilità dichiarata', async () => {
+    const states = []; let sends = 0;
+    const sync = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        // La connessione v1 è stata chiusa da un upgrade concorrente: `isOperable()` è falso, ma
+        // l'oggetto coda è ancora non nullo e il lettore compatibile vede già le operazioni v2.
+        queue: {list: async () => [{operationId: 'op-1'}], remove: async () => assert.fail('remove su scrittore chiuso'), isOperable: () => false},
+        readQueue: async () => ({available: true, version: 2, operations: [{operationId: 'op-1'}]}),
+        send: async () => { sends += 1; return {status: 'applied'}; },
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true,
+        onState: state => states.push(state)
+    });
+    assert.deepEqual(await sync.flush(), {status: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE'});
+    assert.equal(sends, 0);
+    assert.deepEqual(states, [{state: 'queue-unavailable', reason: 'OFFLINE_QUEUE_WRITE_UNAVAILABLE', pending: 1}]);
+});
+
+test('risposta mancante o malformata del lettore fallisce chiusa, mai coda vuota', async () => {
+    const responses = [undefined, null, {}, {available: true}, {available: true, operations: null}, {available: 'yes', operations: []}];
+    for (const response of responses) {
+        const states = []; let sends = 0;
+        const sync = createOfflineMutationSynchronizer({
+            uid: 'owner-a',
+            queue: {list: async () => assert.fail('la lettura passa dal lettore iniettato'), remove: async () => assert.fail('remove')},
+            readQueue: async () => response,
+            send: async () => { sends += 1; return {status: 'applied'}; },
+            withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+            isOnline: () => true,
+            onState: state => states.push(state)
+        });
+        const result = await sync.flush();
+        assert.equal(result.status, 'queue-unavailable', `risposta ${JSON.stringify(response)}`);
+        assert.equal(result.reason, 'QUEUE_READER_UNAVAILABLE');
+        assert.equal(sends, 0);
+        assert.equal(states.some(state => ['idle', 'saved', 'offline'].includes(state.state)), false);
+    }
+    // Anche un lettore che **lancia** fallisce chiuso, con il proprio codice.
+    const throwing = createOfflineMutationSynchronizer({
+        uid: 'owner-a',
+        queue: {list: async () => assert.fail('no'), remove: async () => assert.fail('remove')},
+        readQueue: async () => { throw Object.assign(new Error('scaduto'), {code: 'QUEUE_READER_TIMEOUT'}); },
+        send: async () => assert.fail('nessun invio'),
+        withLease: async (_uid, task) => ({acquired: true, value: await task()}),
+        isOnline: () => true
+    });
+    assert.deepEqual(await throwing.flush(), {status: 'queue-unavailable', reason: 'QUEUE_READER_TIMEOUT'});
+});

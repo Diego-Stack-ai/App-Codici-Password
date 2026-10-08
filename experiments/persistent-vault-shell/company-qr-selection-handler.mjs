@@ -9,9 +9,10 @@ export function createCompanyQrSelectionHandler({db, hash, timestamp}) {
         const uid = trusted?.auth?.uid;
         if (!id(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
-        const allowed = ['companyId', 'operationId', 'expectedConfig', 'selection'];
+        const allowed = ['companyId', 'operationId', 'expectedConfig', 'selection', 'expectedOwnerUid'];
         if (!data || typeof data !== 'object' || Array.isArray(data) || Object.keys(data).length !== allowed.length ||
-            Object.keys(data).some(key => !allowed.includes(key)) || !id(data.companyId) || !id(data.operationId)) fail('INVALID_ARGUMENT');
+            Object.keys(data).some(key => !allowed.includes(key)) || !id(data.companyId) || !id(data.operationId) || !id(data.expectedOwnerUid)) fail('INVALID_ARGUMENT');
+        if (data.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const {companyId, operationId} = data;
         // Copy and validate all request data before the first asynchronous step.
         const selection = prepareCompanyQrSelection(data.selection);
@@ -32,6 +33,7 @@ export function createCompanyQrSelectionHandler({db, hash, timestamp}) {
             if (!snapshot.exists) fail('COMPANY_UNAVAILABLE');
             const record = snapshot.data();
             if (record.isArchived || (record.ownerId !== undefined && record.ownerId !== uid)) fail('COMPANY_UNAVAILABLE');
+            if (record.id !== undefined && record.id !== companyId) fail('COMPANY_UNAVAILABLE');
             const current = readCompanyQrSelection(record);
             // Full config comparison also detects a legacy writer that does not
             // advance the revision. Map insertion order is irrelevant.

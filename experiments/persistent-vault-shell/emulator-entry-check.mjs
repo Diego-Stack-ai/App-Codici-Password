@@ -13,6 +13,28 @@ const network = async offline => {
     await wait(() => navigator.onLine === !offline, 'NETWORK_STATE');
 };
 const profileChecks = [];
+// Exercise the mounted application providers, not the isolated editor fixtures.
+async function checkFieldRoundtrip({label, field, save, editor, value, name}) {
+    const button = () => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
+    const open = async () => {
+        await wait(() => button(), name + '_ACTION'); button().click();
+        await wait(() => document.querySelector(field) && !document.querySelector(field).disabled, name + '_EDITOR');
+    };
+    await open();
+    const original = document.querySelector(field).value;
+    for (const next of [value, original]) {
+        const input = document.querySelector(field); input.value = next;
+        document.querySelector(save).click();
+        await wait(() => !document.querySelector(editor) && button(), name + '_SAVED');
+        assert(input.value === '', name + '_DRAFT_CLEAR');
+        await open();
+        assert(document.querySelector(field).value === next, name + '_PERSISTED');
+    }
+    // Leaving the section discards only the unchanged editor, not the saved record.
+    document.querySelector('[data-profile-section="overview"]').click();
+    await wait(() => !document.querySelector(editor), name + '_EXIT');
+    profileChecks.push(name + ': authenticated UI save, reopen and restore');
+}
 async function checkProfileLink(mode, id, target) {
     const action = kind => document.querySelector(`[data-profile-link-source="${id}"][data-profile-link-action="${kind}"]`);
     const button = label => [...byId('content').querySelectorAll('button')].find(node => node.textContent === label);
@@ -269,6 +291,12 @@ async function checkCompanyProfile(mode) {
     document.querySelector('[data-company-profile="company"]').click();
     await wait(()=>byId('content').textContent.includes('IVA-FITTIZIA'),'COMPANY_PROFILE');
     await checkAnagraphic(mode, true);
+    if (mode === 'online') {
+        document.querySelector('[data-profile-section="addresses"]').click();
+        await checkFieldRoundtrip({label: 'Modifica indirizzi', field: '[data-address-field="cittaSede"]', save: '[data-address-action="save"]', editor: '[data-addresses-editor]', value: 'Citta laboratorio', name: 'company addresses'});
+        document.querySelector('[data-profile-section="contacts"]').click();
+        await checkFieldRoundtrip({label: 'Modifica contatti', field: '[data-company-id="telefonoAzienda"] [data-company-field="number"]', save: '[data-company-action="save"]', editor: '[data-company-contacts-editor]', value: '222222222', name: 'company contacts'});
+    }
     const buttons=label=>[...byId('content').querySelectorAll('button')].filter(node=>node.textContent===label);
     document.querySelector('[data-profile-section="contacts"]').click();
     await wait(()=>byId('content').textContent.includes('pec@example.invalid'),'COMPANY_CONTACTS');
@@ -331,6 +359,18 @@ async function checkProfile(mode) {
     [...byId('content').querySelectorAll('button')].find(node => node.textContent === 'Apri Anagrafica').click();
     await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'PROFILE_OVERVIEW_NAVIGATION');
     await checkAnagraphic(mode, false);
+    if (mode === 'online') {
+        for (const spec of [
+            {section: 'addresses', label: 'Modifica indirizzi', field: '[data-address-field="city"]', save: '[data-address-action="save"]', editor: '[data-addresses-editor]', value: 'Citta laboratorio', name: 'private addresses'},
+            {section: 'addresses', label: 'Modifica indirizzi', field: '[data-utility-field="value"]', save: '[data-utility-action="save"]', editor: '[data-addresses-editor]', value: 'POD-LAB-AGGIORNATO', name: 'private utilities'},
+            {section: 'documents', label: 'Modifica documenti', field: '[data-document-field="note"]', save: '[data-document-action="save"]', editor: '[data-documents-editor]', value: 'Nota documento laboratorio', name: 'private documents'}
+        ]) {
+            document.querySelector(`[data-profile-section="${spec.section}"]`).click();
+            await checkFieldRoundtrip(spec);
+        }
+        document.querySelector('[data-profile-section="personal"]').click();
+        await wait(() => byId('content').textContent.includes('Nota anagrafica fittizia'), 'PERSONAL_RETURN');
+    }
     const profileNote = [...byId('content').querySelectorAll('dd')].find(node => node.textContent === 'Nota anagrafica fittizia');
     assert(profileNote, 'PROFILE_NOTE');
     await wait(() => document.querySelector('[data-profile-widget="fixture"] > button'), 'PROFILE_WIDGET_MOUNT');
@@ -413,11 +453,12 @@ async function checkProfile(mode) {
     profileChecks.push('profile canonical identity contacts addresses documents rendered '+mode+' without reload', 'profile detached plaintext cleared '+mode);
 }
 try {
-    const denied = await fetch('/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', body: '{}'});
+    const endpointOrigin = globalThis.__localFunctionsOrigin || '';
+    const denied = await fetch(endpointOrigin + '/demo-vault-shell/europe-west1/applyPrivateAccountMutation', {method: 'POST', headers: {'content-type': 'application/json'}, body: '{"data":{}}'});
     assert(denied.status === 401, 'UNAUTHENTICATED_BRIDGE_ACCEPTED');
     for (const headers of [{}, {'x-firebase-appcheck': 'synthetic-app-check', authorization: 'Bearer invalid'}]) {
         for (const endpoint of ['applyPrivateQrSelection', 'applyCompanyQrSelection', 'applyProfileTextMutation', 'applyAccountNoteMutation', 'applyAccountStandardMutation', 'applyProfileLinkMutation', 'applyProfileAccountCreate', 'applyProfileContactsMutation', 'applyCompanyContactsMutation', 'applyPrivateAddressesMutation', 'applyCompanyAddressesMutation']) {
-            const qrDenied = await fetch('/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers, body: '{}'});
+            const qrDenied = await fetch(endpointOrigin + '/demo-vault-shell/europe-west1/' + endpoint, {method: 'POST', headers: {'content-type': 'application/json', ...headers}, body: '{"data":{}}'});
             assert(qrDenied.status === 401, 'QR_UNAUTHENTICATED_BRIDGE_ACCEPTED');
         }
     }

@@ -1,18 +1,35 @@
 import {createRouter} from './router.mjs';
+import {createAdmissionCoordinator} from './admission-coordinator.mjs';
 
 // Candidate bootstrap coordinator. Identity and Vault are supplied explicitly.
 // Routes receive an owner-bound reader, never a key or the raw Vault object.
-export function createProtectedSession({getUser, subscribeUser, createVault, routes, onState = () => {}, onError = () => {}}) {
+export function createProtectedSession({getUser, subscribeUser, createVault, routes, admission, getTicket, isTicketActive, onState = () => {}, onError = () => {}}) {
+    for (const fn of [getTicket, isTicketActive, admission?.check, admission?.invalidate, admission?.dispose]) {
+        if (typeof fn !== 'function') throw new TypeError('INVALID_ADMISSION_DEPENDENCY');
+    }
     let disposed = false, observedUid = getUser()?.uid || null;
     let revision = 0, unlocking = 0, router, loggingOut = false;
+    let unlockInFlight = false, coordinator;
     const report = state => onState({state, uid: observedUid});
     const vault = createVault({onLock(reason) {
         if (reason !== 'unlock-start') unlocking++;
-        router?.stop();
-        if (!disposed) report(observedUid ? 'locked' : 'signed-out');
+        try {if (reason !== 'unlock-start') coordinator?.invalidate();}
+        finally {try {router?.stop();}
+            finally {if (!disposed) report(observedUid ? 'locked' : 'signed-out');}}
     }});
+    coordinator = createAdmissionCoordinator({getUser, getTicket, isTicketActive, admission,
+        onRefused: () => vault.lock('admission-refused')});
     function synchronize() {
-        const uid = getUser()?.uid || null;
+        let uid;
+        try {uid = getUser()?.uid || null;}
+        catch (error) {
+            // Losing the identity source must revoke existing capabilities too,
+            // not merely reject the operation which happened to observe it.
+            observedUid = null;
+            revision++;
+            vault.lock('auth-unavailable');
+            throw error;
+        }
         if (uid !== observedUid) {
             observedUid = uid;
             revision++;
@@ -64,15 +81,26 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
                 if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
                 assertOwner(uid, epoch);
                 const plaintext = await vault.openImage(uid, {payload, envelope, aad});
-                assertOwner(uid, epoch);
-                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                try {
+                    assertOwner(uid, epoch);
+                    if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                } catch (error) { plaintext?.fill?.(0); throw error; }
                 return plaintext;
             }
         });
     }]));
     router = createRouter({routes: ownedRoutes, onError(error) { vault.lock('view-error'); onError(error); }});
-    const unsubscribe = subscribeUser(() => { if (!disposed) synchronize(); });
-    synchronize();
+    let unsubscribe;
+    try {
+        unsubscribe = subscribeUser(() => { if (!disposed) synchronize(); });
+        synchronize();
+    } catch (error) {
+        disposed = true;
+        revision++;
+        try {vault.lock('bootstrap-failed');}
+        finally {try {coordinator.dispose();} finally {try {vault.dispose?.();} finally {unsubscribe?.();}}}
+        throw error;
+    }
     return Object.freeze({
         // Bootstrap-only capability: intentionally absent from route contexts.
         async openMutationQueue(options) {
@@ -102,21 +130,53 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
             }
             catch (error) { queue.close(); throw error; }
         },
-        navigate(route) {
-            if (disposed) return Promise.resolve();
-            synchronize();
-            return router.navigate(route);
+        async navigate(route) {
+            if (disposed) return;
+            try {
+                const uid = synchronize(), epoch = revision;
+                if (!uid) return;
+                const admissionAttempt = coordinator.begin('navigate');
+                await coordinator.check(admissionAttempt);
+                assertOwner(uid, epoch);
+                coordinator.assertCurrent(admissionAttempt);
+                if (disposed || revision !== epoch || observedUid !== uid) return;
+                return await router.navigate(route);
+            } catch (error) {
+                if (!disposed) synchronize();
+                if (error.message !== 'ATTEMPT_OBSOLETE') throw error;
+            }
         },
         async unlock() {
             if (disposed) throw new Error('SESSION_DISPOSED');
             if (loggingOut) throw new Error('LOGOUT_PENDING');
+            if (unlockInFlight) throw new Error('UNLOCK_PENDING');
             const uid = synchronize(), epoch = revision;
             if (!uid) throw new Error('AUTH_REQUIRED');
             const attempt = ++unlocking;
-            await vault.unlock(uid);
-            assertOwner(uid, epoch);
-            if (attempt !== unlocking) throw new Error('UNLOCK_CANCELLED');
-            report('unlocked');
+            // Lock invalidates the result immediately, but an underlying password
+            // derivation may still be running. Do not overlap a second attempt.
+            unlockInFlight = true;
+            try {
+                const admissionAttempt = coordinator.begin('unlock');
+                await coordinator.check(admissionAttempt);
+                assertOwner(uid, epoch);
+                if (attempt !== unlocking) throw new Error('UNLOCK_CANCELLED');
+                await vault.unlock(uid);
+                assertOwner(uid, epoch);
+                if (attempt !== unlocking) throw new Error('UNLOCK_CANCELLED');
+                coordinator.assertCurrent(admissionAttempt);
+                if (disposed || revision !== epoch || unlocking !== attempt) throw new Error('UNLOCK_CANCELLED');
+                try {report('unlocked');}
+                catch (error) {
+                    // A failed UI notification must not leave this attempt's key live.
+                    // Reentrant lock/disposal already invalidated its ownership.
+                    if (!disposed && revision === epoch && unlocking === attempt && observedUid === uid) vault.lock('report-failed');
+                    throw error;
+                }
+            } catch (error) {
+                if (!disposed) synchronize();
+                throw error;
+            } finally { unlockInFlight = false; }
         },
         lock(reason = 'manual') { if (!disposed) vault.lock(reason); },
         async logout(signOut) {
@@ -134,7 +194,7 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
             disposed = true;
             revision++;
             try { vault.lock('dispose'); }
-            finally { try { vault.dispose?.(); } finally { unsubscribe(); } }
+            finally {try {coordinator.dispose();} finally { try { vault.dispose?.(); } finally { unsubscribe(); } }}
         }
     });
 }

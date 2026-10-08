@@ -1,8 +1,8 @@
 import {contactBasis, contactRevision, profileContactsObject, profileContactsUid, validateProfileContactsRequest} from './profile-contacts-contract.mjs';
 import {preparePrivateQrSelection} from './qr-selection-contract.mjs';
 
-// Candidate backend only; the future callable must supply verified Auth and App
-// Check context. Never exported by production Functions in this increment.
+// The callable supplies verified Auth and App Check context. Local integration
+// does not attest deployment or real App Check validation.
 const QR_KEYS = Object.freeze({contactEmails: 'emails', contactPhones: 'phones'});
 const QR_SCHEMA_VERSION = 1;
 export function createProfileContactsHandler({db, hash, timestamp}) {
@@ -37,6 +37,7 @@ export function createProfileContactsHandler({db, hash, timestamp}) {
         if (!profileContactsUid(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validateProfileContactsRequest(data), {expectedRevision, operations, operationId} = request;
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const digest = await hash(JSON.stringify({uid, ...request}));
         const recordRef = db.doc(`users/${uid}`);
         const receiptRef = db.doc(`mutationResults/${uid}/operations/profile-contacts-${operationId}`);

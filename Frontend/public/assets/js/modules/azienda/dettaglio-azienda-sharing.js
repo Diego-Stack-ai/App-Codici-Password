@@ -6,12 +6,11 @@
  */
 
 import { auth, db } from '../../firebase-config.js?v=1.2.127';
-import { LOG } from '../../logger.js';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { getInvite } from '../data/vault-repository.js';
 
 // --- STATE (inizializzato da initSharingModule, immutabile per tutta la vita della pagina) ---
@@ -21,6 +20,7 @@ let _currentId = null;
 let _isReadOnly = false;
 let _active = () => true, _version = 0, _confirm = showConfirmModal;
 let _onReload = null; // callback per ricaricare i dati dal modulo principale
+let _sharingCycle = 0; // ciclo di condivisione dell'Account (0 = legacy)
 
 /**
  * Inizializza il modulo con il contesto dell'account corrente.
@@ -28,7 +28,8 @@ let _onReload = null; // callback per ricaricare i dati dal modulo principale
  * @param {Object} ctx
  * @param {Function} ctx.onReload - callback asincrono per ricaricare loadAccount()
  */
-export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal, sharingCycle = 0 }) {
+    _sharingCycle = Number.isSafeInteger(sharingCycle) && sharingCycle >= 0 ? sharingCycle : 0;
     _confirm = confirmAction;
     const version = ++_version;
     _active = () => version === _version && !signal?.aborted && isActive();
@@ -117,9 +118,7 @@ export async function renderGuests(guests) {
         return;
     }
 
-    let needsUpdate = false;
-    let updatedGuests = [...guests];
-
+    // Il rendering non persiste snapshot: conserva formato e modifiche concorrenti.
     for (let i = 0; i < guests.length; i++) {
         let item = guests[i];
         if (typeof item !== 'object') item = { email: item, status: 'accepted' };
@@ -133,7 +132,7 @@ export async function renderGuests(guests) {
 
         if (isPending) {
             try {
-                const inviteId = `${_currentId}_${sanitizeEmail(displayEmail)}`;
+                const inviteId = inviteIdForGuest(_currentId, sanitizeEmail(displayEmail), _sharingCycle);
                 const invData = await getInvite(inviteId);
                 if (!active()) return;
 
@@ -142,11 +141,7 @@ export async function renderGuests(guests) {
                         isPending = false;
                         displayStatus = t('status_accepted') || 'Accettato';
                         statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-                        updatedGuests[i] = { ...item, status: 'accepted' };
-                        needsUpdate = true;
                     } else if (invData.status === 'rejected') {
-                        updatedGuests[i] = { ...item, status: 'rejected' };
-                        needsUpdate = true;
                         continue;
                     }
                 }
@@ -183,14 +178,6 @@ export async function renderGuests(guests) {
         list.appendChild(div);
     }
 
-    if (needsUpdate && !_isReadOnly && active()) {
-        try {
-            const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId);
-            const { updateDoc } = await import("/assets/js/vendor/firebase-runtime.js");
-            if (!active()) return;
-            await updateDoc(docRef, { sharedWith: updatedGuests });
-        } catch (e) { console.error("Auto-Healing di Stato update failed", e); }
-    }
 }
 
 /**
@@ -213,14 +200,17 @@ async function revokeRecipientV3(email) {
             if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
             const accRef = doc(db, "users", uid, "aziende", company, "accounts", account);
             const targetSanitized = sanitizeEmail(email);
-            const inviteId = `${account}_${targetSanitized}`;
-            const invRef = doc(db, "invites", inviteId);
 
             const accSnap = await transaction.get(accRef);
             if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
             if (!accSnap.exists()) return;
 
             const data = accSnap.data();
+            // M7-R7C-5: l'invito da revocare è quello del ciclo CORRENTE: con un ID
+            // storico la cancellazione non colpirebbe nulla dopo un ripristino.
+            const cycle = sharingCycleOf(data);
+            if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
+            const invRef = doc(db, "invites", inviteIdForGuest(account, targetSanitized, cycle));
             const sharedWith = { ...data.sharedWith } || {};
             const wasAccepted = sharedWith[targetSanitized]?.status === 'accepted';
 
@@ -264,21 +254,7 @@ async function revokeRecipientV3(email) {
                 read: false
             });
 
-            // 4. Notifica all'ospite (se aveva accettato)
-            const guestUid = wasAccepted ? data.sharedWith[targetSanitized]?.uid : null;
-            if (guestUid) {
-                const guestNotifRef = doc(collection(db, "users", guestUid, "notifications"));
-                transaction.set(guestNotifRef, {
-                    title: "Accesso Revocato",
-                    message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
-                    accountName: data.nomeAccount || 'Account',
-                    type: "share_revoked",
-                    ownerEmail: auth.currentUser?.email || 'Proprietario',
-                    timestamp: new Date().toISOString(),
-                    read: false
-                });
-                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
-            }
+            // 4. Notifica all'ospite: richiede un backend dedicato, non implementata.
         });
 
         if (!active()) return;

@@ -28,6 +28,13 @@ function restorePath(uid, record) {
   const owner = identifier(uid);
   if (!SCOPES.has(record.scope)) throw new Error("BACKUP_SCOPE_INVALID");
   const id = record.scope === "profile" ? owner : identifier(record.id);
+  // Recovery files are content, not authority to replace the live Vault keys.
+  // Reject before preview/apply transactions, including forged client requests.
+  if (record.scope === 'settings' && id === 'security') {
+    const error = new Error('BACKUP_SECURITY_SETTINGS_EXCLUDED');
+    error.code = 'BACKUP_SECURITY_SETTINGS_EXCLUDED';
+    throw error;
+  }
   const root = `users/${owner}`;
   const paths = {
     profile: root,
@@ -114,11 +121,31 @@ function decodeFirestoreValue(value, types = {}) {
   if (Array.isArray(value)) return value.map(item => decodeFirestoreValue(item, types));
   if (!value || typeof value !== "object") return value;
   if (value.$type === "timestamp") {
+    if (Object.keys(value).sort().join(',') !== '$type,nanoseconds,seconds' ||
+        !Number.isSafeInteger(value.seconds) || value.seconds < -62135596800 || value.seconds > 253402300799 ||
+        !Number.isInteger(value.nanoseconds) || value.nanoseconds < 0 || value.nanoseconds > 999999999) {
+      throw new Error('BACKUP_TYPED_VALUE_INVALID');
+    }
+    if (value.nanoseconds % 1000 !== 0) throw new Error('BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED');
     if (!types.timestamp) throw new Error("BACKUP_TIMESTAMP_FACTORY_REQUIRED");
     return types.timestamp(value.seconds, value.nanoseconds);
   }
-  if (value.$type === "date") return new Date(value.value);
+  if (value.$type === "date") {
+    if (Object.keys(value).sort().join(',') !== '$type,value' || typeof value.value !== 'string' ||
+        !Number.isFinite(Date.parse(value.value)) || new Date(value.value).toISOString() !== value.value) {
+      throw new Error('BACKUP_TYPED_VALUE_INVALID');
+    }
+    return new Date(value.value);
+  }
   if (value.$type === "bytes") {
+    if (Object.keys(value).sort().join(',') !== '$type,value' || !Array.isArray(value.value) ||
+        Object.keys(value.value).length !== value.value.length ||
+        value.value.some(byte => !Number.isInteger(byte) || byte < 0 || byte > 255)) {
+      throw new Error('BACKUP_TYPED_VALUE_INVALID');
+    }
+    for (let index = 0; index < value.value.length; index++) {
+      if (!Object.hasOwn(value.value, index)) throw new Error('BACKUP_TYPED_VALUE_INVALID');
+    }
     if (!types.bytes) throw new Error("BACKUP_BYTES_FACTORY_REQUIRED");
     return types.bytes(Uint8Array.from(value.value));
   }

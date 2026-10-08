@@ -13,6 +13,7 @@ export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
         if (!privateUtilityUid(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validatePrivateUtilitiesRequest(data);
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const {parentAddressId, expectedRevision, operations, operationId} = request;
         const digest = await hash(JSON.stringify({uid, ...request}));
         const recordRef = db.doc(`users/${uid}`);
@@ -32,9 +33,9 @@ export function createPrivateUtilitiesHandler({db, hash, timestamp}) {
             const revision = privateUtilitiesRevision(record);
             if (revision !== expectedRevision) fail('REVISION_CONFLICT');
             // All reads happen before the first write, as Firestore requires.
-            let parent, stored;
+            let stored;
             try {
-                ({parent, utilities: stored} = privateUtilityParent(record, parentAddressId));
+                ({utilities: stored} = privateUtilityParent(record, parentAddressId));
             } catch (error) {
                 return fail(error.message);
             }

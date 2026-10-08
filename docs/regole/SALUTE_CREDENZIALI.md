@@ -1,0 +1,74 @@
+# Salute credenziali
+
+> Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
+> Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
+
+## Indice delle fonti conservate
+
+- [M9_SALUTE_CREDENZIALI.md](#fonte-docs-m9-salute-credenziali-md-l1)
+
+<a id="fonte-docs-m9-salute-credenziali-md-l1"></a>
+
+## Fonte: M9_SALUTE_CREDENZIALI.md — righe originali 1–49
+
+> Provenienza: `docs/M9_SALUTE_CREDENZIALI.md` a `2900ccc0`.
+
+<a id="fonte-docs-m9-salute-credenziali-md-m9--salute-credenziali-e-integrazioni"></a>
+
+## M9 — Salute credenziali e integrazioni
+
+> **Stato:** analisi locale implementata e iPhone collaudato; Windows aperto, rete disattivata.
+> **Autorità:** contratto specialistico e registro prove; prevale la baseline sicurezza.
+> **Revisione:** 12/09/2026, documentazione v1.1; riferimento applicativo v1.2.110, commit `fa555d49d45e3a3545d09bc862645e84ba386862`.
+> **Area:** salute credenziali.
+> **Dipendenze:** [Guida progetto](../LEGGIMI.md) e contratti d’area collegati nel testo.
+> **Sostituisce:** la precedente revisione di questo file; nessun nuovo contratto. Audit e collaudi mantengono le date originali.
+
+<a id="fonte-docs-m9-salute-credenziali-md-confine-di-sicurezza"></a>
+
+### Confine di sicurezza
+
+L'analisi di password deboli, duplicate e datate avviene soltanto in memoria, sul dispositivo e dopo lo sblocco del Vault. Il risultato contiene esclusivamente identificatore del record e categorie di rischio. Le impronte usate per trovare duplicati sono HMAC con una chiave casuale effimera: non vengono persistite, sincronizzate o registrate.
+
+Il laboratorio k-anonimo calcola SHA-1 unicamente per interoperare con servizi di controllo violazioni basati su range: soltanto i primi cinque caratteri potrebbero essere inviati. L'integrazione di rete resta disattivata finché provider, privacy, timeout, cache, risposta e consenso non sono verificati. Password, suffisso e hash completo non devono mai lasciare il dispositivo.
+
+Una passkey salvata per accedere a un servizio è un dato del record e non può sbloccare il Vault. La passkey WebAuthn/PRF locale di sblocco resta disciplinata da `VAULT_KEY_CONTRACT.md`.
+
+Autofill ed estensione browser costituiscono un progetto separato: richiedono associazione forte dell'origine, conferma esplicita, protezione da phishing, messaggistica autenticata e un audit dedicato. Non entrano nel bootstrap della PWA.
+
+<a id="fonte-docs-m9-salute-credenziali-md-gate"></a>
+
+### Gate
+
+- [x] rilevamento locale debole, duplicata e datata dimostrato con fixture;
+- [x] risultati privi di password e impronte persistenti;
+- [x] contratto k-anonimo definito e testato senza rete;
+- [x] passkey servizio distinta dalla passkey di sblocco Vault;
+- [x] autofill separato dal progetto PWA e dal percorso critico;
+- [x] integrazione UI caricata su richiesta dopo lo sblocco: analisi Web Crypto in memoria di Account privati e aziendali, senza persistenza di password o impronte;
+- [x] collaudo fisico su iPhone: apertura, scorrimento completo, chiusura e riservatezza dei risultati verificati dal product owner il 10/09/2026;
+- [x] classificazione Debole, Media e Forte verificata su dati di prova; duplicazione e anzianità restano segnalazioni indipendenti;
+- [ ] verifica privacy e sicurezza del provider prima di abilitare il controllo violazioni;
+- [ ] collaudo fisico e accessibile su Windows.
+
+M9 non abilita automaticamente alcuna integrazione esterna.
+
+La certificazione iPhone della v1.2.90 ha confermato 9 password analizzate, 8 Account da verificare e il riconoscimento dell'Account di prova con password robusta come `Forte`. La finestra mostra soltanto nome, area e valutazioni: non espone password, hash o impronte.
+
+Per i record correnti la data dedicata `passwordUpdatedAt` ha precedenza. Nei record legacy che non la possiedono, `updatedAt` è usata soltanto come stima prudenziale dell'ultimo salvataggio delle credenziali; una futura modifica dello schema dovrà aggiornare la data dedicata esclusivamente quando cambia la password.
+
+<a id="fonte-docs-m9-salute-credenziali-md-ciclo-di-vita-dellanalisi--candidata-13092026"></a>
+
+#### Ciclo di vita dell'analisi — candidata 13/09/2026
+
+Base `0586aa63`, ramo `experiment/m9-health-session`: l'analisi verifica proprietario e sessione dopo sblocco, letture, decifratura e HMAC. Blocco, pagehide e cambio UID invalidano i risultati pendenti, interrompono i passaggi successivi e rimuovono subito il dialogo già visibile. Gli errori non espongono più messaggi del provider nei log. I record decifrati trattenuti dal servizio vengono svuotati anche in caso di errore; impronte e risultati interni del modello vengono rilasciati nel finally. Non è possibile annullare un'operazione Web Crypto già partita né garantire la cancellazione fisica delle stringhe immutabili dal motore JS.
+
+Gli ID dei risultati includono contesto, azienda e Account: lo stesso ID Account in due aziende non scambia più le etichette. Test sintetici interrompono ogni attesa critica con blocco e cambio UID, verificano pulizia dopo errore, risultati aziendali distinti, rimozione immediata del dialogo e assenza di doppio avvio. Nessuna integrazione di rete, modifica alla cifratura o nuovo collaudo fisico M9; i gate del provider e dei dispositivi rimangono aperti.
+
+<a id="fonte-docs-m9-salute-credenziali-md-tastiera-nel-pannello-dei-risultati--candidata-14092026"></a>
+
+#### Tastiera nel pannello dei risultati — candidata 14/09/2026
+
+Base `3ed53656`, ramo `experiment/m9-health-keyboard`: elenco scorrevole raggiungibile da tastiera con nome accessibile e focus visibile; Tab e Shift+Tab restano fra elenco e Chiudi. Escape chiude e restituisce il focus al comando precedente soltanto se la sessione è ancora valida. Alla dismissione il listener viene rimosso e un callback trattenuto non sposta il focus.
+
+20 test UI superati, inclusi ciclo nei due sensi, Escape, ritorno del focus e invalidazione; CSS e suite completa npm test superati. Sono verifiche automatiche del comportamento, non collaudo fisico Windows/Narrator o iPhone/VoiceOver. Provider esterno ancora disattivato, senza nuove richieste di rete; nessun deploy.

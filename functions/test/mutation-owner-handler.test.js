@@ -7,10 +7,14 @@ const binding = require('../mutation-result-binding');
 const privateService = require('../private-account-mutation-service');
 const offlineService = require('../offline-sync-service');
 const sharedService = require('../shared-vault-service');
+const sharedReceipt = require('../shared-vault-receipt');
+const widgetReceipt = require('../account-widget-receipt');
 const widgetService = require('../account-widget-service');
 const scopeService = require('../private-account-write-scope');
+const recoveryService = require('../history-recovery-service');
+const recoveryReceipt = require('../recovery-command-receipt');
 const source = readFileSync(require.resolve('../index'), 'utf8');
-const start = source.indexOf('function verifiedMutationRetry('), end = source.indexOf('async function runRecoveryCommand(', start);
+const start = source.indexOf('function verifiedMutationRetry('), end = source.indexOf('exports.purgeArchivedAccount =', start);
 assert.ok(start >= 0 && end > start);
 const cipher = 'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB';
 const base = {schemaVersion: 1, uid: 'A', operationId: 'owner-bound', deviceId: 'device', recordId: 'record', expectedRevision: 0};
@@ -21,6 +25,8 @@ const cases = [
   ['applyOfflineMutation', 'uid', {...base, encryptedPayload: cipher}],
   ['manageAccountWidget', 'expectedOwnerUid', {expectedOwnerUid: 'A', action: 'create', operationId: 'widget-op', widgetId: 'widget', context: 'private', accountId: 'record', data: {title: 'Synthetic', fields: [field]}}],
   ['manageSharedVaultData', 'expectedOwnerUid', {expectedOwnerUid: 'A', action: 'create', operationId: 'shared-op', sharedDataId: 'shared', data: {title: 'Synthetic', fields: [field]}}],
+  ['trashSyncRecord', 'expectedOwnerUid', {expectedOwnerUid: 'A', recordId: 'record', operationId: 'trash-op', expectedRevision: 0}],
+  ['restoreSyncRecord', 'expectedOwnerUid', {expectedOwnerUid: 'A', recordId: 'record', operationId: 'restore-op', expectedRevision: 0}],
 ];
 
 function fixture(name) {
@@ -30,14 +36,16 @@ function fixture(name) {
   const store = {collection: path => reference(path), doc: path => reference(path), runTransaction: callback => callback({
     get: async ref => {
       reads.push(ref.path);
-      const exists = name === 'manageAccountWidget' && ref.path === 'users/A/accounts/record';
+      const exists = (name === 'manageAccountWidget' && ref.path === 'users/A/accounts/record') ||
+        (name === 'trashSyncRecord' && ref.path === 'users/A/syncRecords/record') ||
+        (name === 'restoreSyncRecord' && ref.path === 'users/A/trash/record');
       return {exists, data: () => exists ? {type: 'account', visibility: 'private'} : undefined, docs: []};
     },
     set: (...args) => writes.push(args), delete: (...args) => writes.push(args),
   })};
   const context = vm.createContext({
-    exports: {}, HttpsError, ...binding, ...privateService, ...offlineService, ...sharedService, ...widgetService, ...scopeService,
-    onCall: (_options, handler) => handler,
+    exports: {}, HttpsError, ...binding, ...privateService, ...offlineService, ...sharedService, ...sharedReceipt, ...widgetReceipt, ...widgetService, ...scopeService, ...recoveryService, ...recoveryReceipt,
+    require: () => require('../reference-callables'), onCall: (_options, handler) => handler,
     getFirestore: () => { accesses += 1; return store; }, FieldValue: {serverTimestamp: () => 'synthetic-time'},
   });
   vm.runInContext(source.slice(start, end), context, {filename: 'index.js:owner-bound-mutations'});
@@ -58,7 +66,8 @@ for (const [name, ownerField, command] of cases) {
 
   test(`${name}: the correctly bound caller retains the normal apply behavior`, async () => {
     const f = fixture(name), result = await f.run(command);
-    assert.equal(result.status, 'applied'); assert.ok(f.writes.length >= 2);
+    const expected = {trashSyncRecord: 'trashed', restoreSyncRecord: 'restored'}[name] || 'applied';
+    assert.equal(result.status, expected); assert.ok(f.writes.length >= 2);
     assert.ok(f.reads.every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path)));
     assert.ok(f.writes.every(([ref]) => /^(users|mutationResults)\/A(?:\/|$)/.test(ref.path)));
   });

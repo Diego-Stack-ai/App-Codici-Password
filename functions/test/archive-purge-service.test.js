@@ -1,8 +1,47 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
-  accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand
+  accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
+  assertNoExternalAccountReferences
 } = require("../archive-purge-service");
+
+test('external preflight separates account namespaces and preserves inputs', () => {
+  const targets = [{context: 'private', accountId: 'a', companyId: null},
+    {context: 'company', accountId: 'a', companyId: 'c'}];
+  for (const target of targets) {
+    for (const slot of [0, 1]) {
+      const lists = [[], []];
+      lists[slot] = [Object.freeze({...target})];
+      assert.throws(() => assertNoExternalAccountReferences(target, ...lists));
+      lists[slot] = [Object.freeze({...target, accountId: 'other'})];
+      const before = JSON.stringify(lists);
+      assert.doesNotThrow(() => assertNoExternalAccountReferences(Object.freeze(target), ...lists));
+      assert.equal(JSON.stringify(lists), before);
+    }
+  }
+  assert.doesNotThrow(() => assertNoExternalAccountReferences(targets[0], [targets[1]], []));
+  assert.throws(() => assertNoExternalAccountReferences(targets[0], [targets[0]], [targets[0]]));
+  assert.throws(() => assertNoExternalAccountReferences(targets[0], [targets[1]], [targets[0]]));
+  assert.throws(() => assertNoExternalAccountReferences(targets[0], [targets[0]], [targets[1]]));
+  assert.doesNotThrow(() => assertNoExternalAccountReferences(targets[1], [targets[0]],
+    [{...targets[1], companyId: 'other'}]));
+  for (const companyId of [undefined, null, '']) {
+    assert.doesNotThrow(() => assertNoExternalAccountReferences(targets[0],
+      [{context: 'private', accountId: 'other', companyId}], []));
+  }
+});
+
+test('external preflight fails closed on ambiguous identities and missing collections', () => {
+  const target = {context: 'private', accountId: 'a'};
+  for (const invalid of [null, undefined, [], {}, {context: 'unknown', accountId: 'x'},
+    {context: 'private', accountId: 'x', companyId: 'c'}, {context: 'company', accountId: 'x'},
+    ...['', 'a/b', 42, 'x'.repeat(161)].map(accountId => ({context: 'private', accountId}))]) {
+    assert.throws(() => assertNoExternalAccountReferences(target, [invalid], []));
+    assert.throws(() => assertNoExternalAccountReferences(target, [], [invalid]));
+  }
+  assert.throws(() => assertNoExternalAccountReferences(target, null, []));
+  assert.throws(() => assertNoExternalAccountReferences(target, [], undefined));
+});
 
 test("accetta soltanto account privati o aziendali con identificatori sicuri", () => {
   const privateCommand = validatePurgeCommand({
@@ -23,6 +62,18 @@ test("costruisce il percorso aziendale senza accettare attraversamenti", () => {
   assert.equal(accountPath("u1", command), "users/u1/aziende/c1/accounts/a1");
   assert.equal(isSafeAttachmentPath("u1", command, "users/u1/aziende/c1/accounts/a1/attachments/file.pdf"), true);
   assert.equal(isSafeAttachmentPath("u1", command, "users/u2/aziende/c1/accounts/a1/attachments/file.pdf"), false);
+});
+
+test('purge never coerces malformed identifiers or revisions into a destructive command', () => {
+  const command = {accountId: 'a1', operationId: 'op1', context: 'private', expectedRevision: 0, confirmation: 'DELETE_FOREVER'};
+  for (const patch of [{accountId: 1}, {accountId: ' a1 '}, {operationId: {}}, {expectedRevision: '0'},
+    {expectedRevision: null}, {expectedRevision: false}, {expectedRevision: Number.MAX_SAFE_INTEGER + 1}]) {
+    assert.throws(() => validatePurgeCommand({...command, ...patch}), /INVALID/);
+  }
+  for (const revision of ['0', null, false, -1, 0.5, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(purgeDecision({record: {isArchived: true, revision}, expectedRevision: 0, confirmed: true}).status, 'invalid-revision');
+  }
+  assert.equal(purgeDecision({record: {isArchived: true}, expectedRevision: 0, confirmed: true}).status, 'ready');
 });
 
 test("la cancellazione richiede sempre archivio, revisione e conferma manuale", () => {

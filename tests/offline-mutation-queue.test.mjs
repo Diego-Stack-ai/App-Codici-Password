@@ -4,6 +4,8 @@ import test from 'node:test';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-queue.js', import.meta.url), 'utf8');
 const queue = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const upgradeSource = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-upgrade.js', import.meta.url), 'utf8');
+const upgrade = await import(`data:text/javascript;base64,${Buffer.from(upgradeSource).toString('base64')}`);
 const syncSource = await readFile(new URL('../Frontend/public/assets/js/modules/data/offline-mutation-sync.js', import.meta.url), 'utf8');
 const {createOfflineMutationSynchronizer} = await import(`data:text/javascript;base64,${Buffer.from(syncSource).toString('base64')}`);
 
@@ -52,16 +54,19 @@ test('BroadcastChannel notifica soltanto la coda dello stesso utente', () => {
 });
 
 // Transactional in-memory IndexedDB boundary: requests, serial transactions and rollback on abort.
-function indexedFixture() {
+function indexedFixture({version = 1, stores = ['encryptedOperations']} = {}) {
     const data = new Map();
     let tail = Promise.resolve(), beforeWrite, failAdd = false;
     const database = {
+        version,
+        objectStoreNames: Object.assign([...stores], {contains: name => stores.includes(name)}),
         close() {},
         transaction(_store, mode) {
             const requests = [];
             const tx = {aborted: false, abort() { this.aborted = true; }, objectStore: () => store};
             const request = (action, key, value) => { const req = {}; requests.push({action,key,value,req}); return req; };
             const store = {
+                keyPath: 'id', autoIncrement: false,
                 get: key => request('get', key), put: value => request('put', value.id, value),
                 add: value => request('add', value.id, value), delete: key => request('delete', key),
                 index: () => ({getAll: () => request('all')})
@@ -252,8 +257,16 @@ test('scope review reason stays inside encrypted payload and survives reopening'
 });
 
 function openingFixture() {
-    const request = {}, database = {closed: 0, close() { this.closed++; }};
-    const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, 1); return request; }};
+    const request = {};
+    const database = {version: 1, closed: 0,
+        objectStoreNames: Object.assign(['encryptedOperations'], {contains: name => name === 'encryptedOperations'}),
+        close() { this.closed++; },
+        transaction() {
+            if (this.closed) throw Object.assign(new Error('la connessione è chiusa'), {name: 'InvalidStateError'});
+            return {objectStore: () => ({keyPath: 'id', autoIncrement: false})};
+        }};
+    // [M6-A-8a] lo scrittore apre **senza imporre una versione**: la fixture lo verifica.
+    const indexedDb = {open(name, version) { assert.equal(name, 'codex-offline-queue-owner-a'); assert.equal(version, undefined); return request; }};
     return {request, database, indexedDb, succeed() { request.result = database; request.onsuccess(); }};
 }
 
@@ -264,6 +277,22 @@ test('database lifecycle closes on version change without deleting or upgrading 
     assert.equal(f.database.closed, 0);
     f.database.onversionchange({newVersion: 2});
     assert.equal(f.database.closed, 1);
+});
+
+test('lo scrittore chiuso da un upgrade concorrente non è più operabile', async () => {
+    const f = openingFixture();
+    const pending = queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: f.indexedDb});
+    // `createOfflineMutationQueue` deriva prima la chiave, quindi la richiesta viene aperta al giro
+    // successivo: si attende che il gestore sia installato prima di simularne l'esito.
+    while (typeof f.request.onsuccess !== 'function') await new Promise(resolve => setImmediate(resolve));
+    f.succeed();
+    const instance = await pending;
+    assert.equal(instance.isOperable(), true);
+    // Un'altra scheda esegue l'upgrade: la reazione a `versionchange` chiude la connessione v1,
+    // ma l'oggetto coda resta in mano al chiamante.
+    f.database.onversionchange({newVersion: 2});
+    assert.equal(f.database.closed, 1);
+    assert.equal(instance.isOperable(), false);
 });
 
 test('blocked and timed-out opens reject and close late success instead of leaking a handle', async () => {
@@ -297,4 +326,323 @@ test('database open errors propagate and invalid key or inactive session does no
     const noOpen = {open() { assert.fail('database must not open'); }};
     await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: '', indexedDb: noOpen}), /KEY_REQUIRED/);
     await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'fixture', indexedDb: noOpen, isActive: () => false}), /SESSION_CHANGED/);
+});
+
+// ── M6-A-1: lettore compatibile v1/v2, sola lettura e nessun upgrade ────────
+const validContainer = (uid, operationId, extra = {}) => ({id: `${uid}:${operationId}`, uid, operationId,
+    schemaVersion: 1, iv: 'FIXTURE-IV', ciphertext: 'FIXTURE-CIPHERTEXT', queuedAt: 1, ...extra});
+
+function readerFixture({version = 1, names = null, rows = [], missing = false, keyPath = 'id', autoIncrement = false} = {}) {
+    const calls = {opens: [], created: [], writes: [], transactions: [], aborts: 0, closes: 0, upgradeAborts: 0};
+    const stores = names ?? (version === 2 ? ['encryptedOperations', 'queueLeases'] : ['encryptedOperations']);
+    const indexedDb = {open(...args) {
+        calls.opens.push(args);
+        const request = {transaction: {abort() { calls.upgradeAborts += 1; }}};
+        if (missing) {
+            setImmediate(() => { request.onupgradeneeded?.(); request.onerror?.(); });
+            return request;
+        }
+        const database = {
+            version,
+            objectStoreNames: Object.assign([...stores], {contains: name => stores.includes(name)}),
+            onversionchange: null,
+            close() { calls.closes += 1; },
+            transaction(requested, mode) {
+                calls.transactions.push({requested: [...(Array.isArray(requested) ? requested : [requested])], mode});
+                const tx = {aborted: false, error: null, oncomplete: null, onabort: null, onerror: null,
+                    abort() { this.aborted = true; calls.aborts += 1; },
+                    objectStore: () => ({
+                        keyPath, autoIncrement,
+                        put() { calls.writes.push('put'); }, add() { calls.writes.push('add'); },
+                        delete() { calls.writes.push('delete'); }, clear() { calls.writes.push('clear'); },
+                        openCursor() {
+                            // API reale: la richiesta espone `result` = cursore finché ci sono
+                            // righe e `null` alla fine; il cursore espone `value` e `continue()`.
+                            const cursor = {value: undefined};
+                            const request = {result: null, onsuccess: null, onerror: null};
+                            let index = 0;
+                            const step = () => setImmediate(() => {
+                                if (index < rows.length) {
+                                    cursor.value = structuredClone(rows[index++]);
+                                    request.result = cursor;
+                                    request.onsuccess?.();
+                                    return;
+                                }
+                                request.result = null; request.onsuccess?.();
+                                setImmediate(() => { tx.aborted ? tx.onabort?.() : tx.oncomplete?.(); });
+                            });
+                            cursor.continue = step;
+                            step();
+                            return request;
+                        }
+                    })};
+                return tx;
+            }
+        };
+        setImmediate(() => { request.result = database; request.onsuccess?.(); });
+        return request;
+    }};
+    return {calls, indexedDb};
+}
+
+const readerCases = [
+    {name: 'schema v1 con coda pendente', options: {version: 1, rows: [validContainer('owner-a', 'device:1'), validContainer('owner-a', 'device:2')]},
+        expect: {version: 1, operationIds: ['device:1', 'device:2']}},
+    {name: 'schema v2 con store del lease', options: {version: 2, rows: [validContainer('owner-a', 'device:1')]},
+        expect: {version: 2, operationIds: ['device:1']}}
+];
+
+for (const {name, options, expect: expected} of readerCases) {
+    test(`lettore compatibile: ${name}`, async () => {
+        const f = readerFixture(options);
+        const result = await queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: f.indexedDb});
+        assert.equal(result.version, expected.version);
+        assert.deepEqual(result.containers.map(row => row.operationId), expected.operationIds);
+        assert.deepEqual(f.calls.opens.map(args => args.length), [1], 'apertura senza versione: nessun upgrade richiesto');
+        assert.deepEqual(f.calls.created, [], 'nessuno store creato');
+        assert.deepEqual(f.calls.writes, [], 'nessuna scrittura');
+        assert.deepEqual(f.calls.transactions.map(tx => tx.mode), ['readonly']);
+        assert.deepEqual(f.calls.transactions[0].requested,
+            expected.version === 2 ? ['encryptedOperations', 'queueLeases'] : ['encryptedOperations']);
+        assert.equal(f.calls.upgradeAborts, 0);
+        assert.equal(f.calls.closes >= 1, true, 'connessione chiusa');
+    });
+}
+
+test('lettore compatibile: database mancante resta mancante, nessuno store creato', async () => {
+    const f = readerFixture({missing: true});
+    await assert.rejects(queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: f.indexedDb}), /QUEUE_READER_MISSING/);
+    assert.equal(f.calls.upgradeAborts, 1, 'upgrade annullato: il database non nasce');
+    assert.deepEqual(f.calls.created, []);
+    assert.deepEqual(f.calls.writes, []);
+    assert.deepEqual(f.calls.transactions, []);
+});
+
+test('lettore compatibile: schema non supportato o malformato fallisce chiuso', async () => {
+    const cases = [
+        {options: {version: 3}, code: /QUEUE_READER_SCHEMA/},
+        {options: {version: 2, names: ['encryptedOperations']}, code: /QUEUE_READER_SCHEMA/},
+        {options: {version: 1, names: ['altraCollection']}, code: /QUEUE_READER_SCHEMA/},
+        {options: {version: 1, keyPath: 'chiave'}, code: /QUEUE_READER_SCHEMA/},
+        {options: {version: 1, autoIncrement: true}, code: /QUEUE_READER_SCHEMA/}
+    ];
+    for (const {options, code} of cases) {
+        const f = readerFixture({rows: [validContainer('owner-a', 'device:1')], ...options});
+        await assert.rejects(queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: f.indexedDb}), code);
+        assert.deepEqual(f.calls.created, [], 'schema non supportato: nessuno store creato');
+        assert.deepEqual(f.calls.writes, [], 'schema non supportato: nessuna scrittura');
+    }
+});
+
+test('lettore compatibile: contenitore malformato fallisce chiuso senza scrivere', async () => {
+    const malformed = [
+        validContainer('owner-a', 'device:1', {schemaVersion: 2}),
+        validContainer('owner-a', 'device:1', {id: 'owner-a:altro'}),
+        validContainer('owner-a', 'device:1', {uid: 'owner-b'}),
+        {...validContainer('owner-a', 'device:1'), ciphertext: undefined},
+        {...validContainer('owner-a', 'device:1'), iv: 12}
+    ];
+    for (const row of malformed) {
+        const f = readerFixture({rows: [row]});
+        await assert.rejects(queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: f.indexedDb}), /QUEUE_READER_(CONTAINER|SCHEMA)/);
+        assert.deepEqual(f.calls.writes, []);
+    }
+});
+
+test('lettore compatibile: sessione non attiva, abort e timeout non aprono né scrivono', async () => {
+    const inactive = readerFixture({rows: [validContainer('owner-a', 'device:1')]});
+    await assert.rejects(queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: inactive.indexedDb, isActive: () => false}), /QUEUE_READER_SESSION/);
+    assert.deepEqual(inactive.calls.opens, [], 'sessione non attiva: nessuna apertura');
+
+    const invalid = readerFixture({rows: []});
+    await assert.rejects(queue.readOfflineQueueContainers({uid: '', indexedDb: invalid.indexedDb}), /QUEUE_READER_CONFIG/);
+    assert.deepEqual(invalid.calls.opens, []);
+
+    const timedOut = readerFixture({rows: [validContainer('owner-a', 'device:1')]});
+    const never = {open() { return {}; }};
+    await assert.rejects(queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: never, timeoutMs: 5}), /QUEUE_READER_TIMEOUT/);
+    await assert.rejects(queue.readOfflineQueueContainers({uid: 'owner-a', indexedDb: timedOut.indexedDb, timeoutMs: 5,
+        isActive: () => false}), /QUEUE_READER_SESSION/);
+    assert.deepEqual(timedOut.calls.writes, []);
+});
+
+test('comportamento invariato con e senza Web Locks dopo l’aggiunta del lettore', async () => {
+    const locks = {request: async (_name, _options, callback) => callback({name: 'lock'})};
+    assert.deepEqual(await queue.withOfflineQueueLease('owner-a', async () => 'eseguito', locks), {acquired: true, value: 'eseguito'});
+    // Node espone `navigator.locks`: per simulare l'API assente si passa `null` esplicito,
+    // mentre il ramo reale «API assente» è provato in browser dal banco M6-2 (`webLocks: "undefined"`).
+    await assert.rejects(queue.withOfflineQueueLease('owner-a', async () => 'no', null), /OFFLINE_QUEUE_LOCKS_UNAVAILABLE/);
+    await assert.rejects(queue.withOfflineQueueLease('owner-a', async () => 'no', {}), /OFFLINE_QUEUE_LOCKS_UNAVAILABLE/);
+});
+
+// ── M6-A-6: percorso di lettura dell'app (sola lettura, v1/v2, indisponibilità) ─────────────
+const sealedRow = async (uid, operationId, extra = {}) => queue.sealOfflineOperation(
+    {uid, operationId, recordId: `record-${operationId}`, value: `fixture-${operationId}`, ...extra},
+    await queue.deriveOfflineQueueKey('FIXTURE-KEY', uid));
+
+test('lettore dell’app su coda v1 con operazioni pendenti e riconciliazione', async () => {
+    const row = await sealedRow('owner-a', 'device:1');
+    const reviewed = await sealedRow('owner-a', 'device:2', {_queueState: 'reconciliation-required', _reviewReason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'});
+    const f = readerFixture({version: 1, rows: [row, reviewed]});
+    const reader = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: f.indexedDb});
+    const result = await reader.read();
+    assert.equal(result.available, true);
+    assert.equal(result.version, 1);
+    assert.deepEqual(result.operations, [
+        {uid: 'owner-a', operationId: 'device:1', recordId: 'record-device:1', value: 'fixture-device:1'},
+        {uid: 'owner-a', operationId: 'device:2', recordId: 'record-device:2', value: 'fixture-device:2',
+            _queueState: 'reconciliation-required', _reviewReason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'}
+    ]);
+    // Sola lettura: nessuna scrittura e apertura senza versione (nessun upgrade richiesto).
+    assert.deepEqual(f.calls.writes, []);
+    assert.deepEqual(f.calls.opens.map(args => args.length), [1]);
+    assert.deepEqual(f.calls.created, []);
+});
+
+test('lettore dell’app su coda v2 e su schema non supportato', async () => {
+    const v2 = readerFixture({version: 2, rows: [await sealedRow('owner-a', 'device:1')]});
+    const readerV2 = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: v2.indexedDb});
+    const resultV2 = await readerV2.read();
+    assert.equal(resultV2.available, true);
+    assert.equal(resultV2.version, 2);
+    assert.deepEqual(resultV2.operations.map(operation => operation.operationId), ['device:1']);
+
+    const unsupported = readerFixture({version: 3, rows: [await sealedRow('owner-a', 'device:1')]});
+    const readerV3 = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: unsupported.indexedDb});
+    const resultV3 = await readerV3.read();
+    // Indisponibilità dichiarata: mai una coda vuota, mai un salvataggio riuscito.
+    assert.deepEqual(resultV3, {available: false, version: null, operations: null, reason: 'QUEUE_READER_SCHEMA'});
+    assert.notDeepEqual(resultV3.operations, []);
+    const malformed = readerFixture({version: 1, rows: [validContainer('owner-b', 'device:1')]});
+    const readerMalformed = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: malformed.indexedDb});
+    assert.equal((await readerMalformed.read()).reason, 'QUEUE_READER_CONTAINER');
+});
+
+test('lettore dell’app: apertura che non si conclude diventa indisponibilità, non coda vuota', async () => {
+    const never = {open() { return {}; }};
+    const reader = await queue.createOfflineQueueReader({uid: 'owner-a', vaultKeyMaterial: 'FIXTURE-KEY', indexedDb: never, timeoutMs: 5});
+    const result = await reader.read();
+    assert.equal(result.available, false);
+    assert.equal(result.reason, 'QUEUE_READER_TIMEOUT');
+    assert.equal(result.operations, null);
+});
+
+// ── M6-A-7: upgrade del runtime invocabile solo esplicitamente ──────────────────────────────
+test('upgrade del runtime: configurazione rifiutata e sonda di sola lettura', async () => {
+    await assert.rejects(upgrade.upgradeOfflineQueueSchema({uid: '', indexedDb: {}}), /QUEUE_UPGRADE_CONFIG/);
+    await assert.rejects(upgrade.upgradeOfflineQueueSchema({uid: 'owner-a', indexedDb: null}), /QUEUE_UPGRADE_CONFIG/);
+    await assert.rejects(upgrade.upgradeOfflineQueueSchema({uid: 'owner-a', indexedDb: {}, timeoutMs: 0}), /QUEUE_UPGRADE_CONFIG/);
+    // Sonda su coda v2 e su schema ignoto: nessuna scrittura, versione e store reali.
+    const row = await sealedRow('owner-a', 'device:1');
+    const v2 = readerFixture({version: 2, rows: [row]});
+    assert.deepEqual(await upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: v2.indexedDb}),
+        {version: 2, stores: ['encryptedOperations', 'queueLeases'], rows: [row]});
+    assert.deepEqual(v2.calls.writes, []);
+    const v3 = readerFixture({version: 3, rows: [row]});
+    assert.equal((await upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: v3.indexedDb})).version, 3);
+});
+
+test('nessun percorso dell’app avvia l’upgrade da sé: solo il pilota lo invoca', async () => {
+    const automatic = ['offline-mutation-client-core.js', 'offline-mutation-client.js', 'offline-mutation-sync.js', 'offline-mutation-queue.js'];
+    for (const file of automatic) {
+        const text = await readFile(new URL(`../Frontend/public/assets/js/modules/data/${file}`, import.meta.url), 'utf8');
+        assert.equal(/upgradeOfflineQueueSchema|offline-mutation-upgrade/.test(text), false, `${file} non deve avviare l'upgrade`);
+    }
+    const trigger = await readFile(new URL('../Frontend/public/assets/js/modules/data/private-account-pilot-queue.js', import.meta.url), 'utf8');
+    assert.equal(trigger.includes("from './offline-mutation-upgrade.js'"), true);
+    assert.equal(trigger.includes('upgradePrivateAccountPilotQueue'), true);
+    const pilot = await readFile(new URL('../Frontend/public/assets/js/modules/data/private-account-offline-pilot.js', import.meta.url), 'utf8');
+    assert.equal(pilot.includes("from './private-account-pilot-queue.js'"), true, 'il pilota deve riesportare il trigger');
+});
+
+// ── M6-A-8a: compatibilità dello scrittore con coda v1/v2 già esistente ─────────────────────
+test('scrittore compatibile: coda v2 già presente con store del lease nello stesso database', async () => {
+    const idb = indexedFixture({version: 2, stores: ['encryptedOperations', 'queueLeases']});
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: idb.indexedDb});
+    assert.equal(instance.version, 2);
+    await instance.enqueue(oldOperation);
+    assert.equal((await instance.list()).length, 1);
+    assert.equal(idb.data.size, 1);
+    instance.close();
+});
+
+test('scrittore compatibile: coda assente nasce v1, schema ignoto fallisce chiuso', async () => {
+    const created = [], names = [];
+    const missing = {aborted: false, open() {
+        const request = {transaction: {abort() { missing.aborted = true; }}};
+        setImmediate(() => {
+            request.result = {version: 1,
+                close() {},
+                transaction: () => ({objectStore: () => ({keyPath: 'id', autoIncrement: false})}),
+                onversionchange: null,
+                objectStoreNames: Object.assign(names, {contains: name => names.includes(name)}),
+                createObjectStore(name) { names.push(name); created.push(name); return {createIndex() {}}; }};
+            request.onupgradeneeded?.();
+            request.onsuccess?.();
+        });
+        return request;
+    }};
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: missing});
+    assert.equal(instance.version, 1);
+    // Nessun downgrade né upgrade: nasce **solo** lo store delle operazioni, mai quello del lease.
+    assert.deepEqual(created, ['encryptedOperations']);
+    assert.equal(missing.aborted, false);
+    instance.close();
+
+    // Schema ignoto (v3): indisponibilità dichiarata, nessuna ricreazione del database.
+    const unknown = readerFixture({version: 3, rows: []});
+    await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: unknown.indexedDb}),
+        /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/);
+    assert.deepEqual(unknown.calls.created, []);
+    assert.deepEqual(unknown.calls.writes, []);
+
+    // v2 dichiarato ma con lo store del lease mancante: fallisce chiuso senza crearlo.
+    const incomplete = readerFixture({version: 2, names: ['encryptedOperations'], rows: []});
+    await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: incomplete.indexedDb}),
+        /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/);
+    assert.deepEqual(incomplete.calls.created, []);
+});
+
+test('scrittore compatibile: store presenti ma con struttura errata rifiutati (R1)', async () => {
+    // Presenza ≠ struttura: la stessa validazione del lettore compatibile (`keyPath === 'id'`,
+    // nessun `autoIncrement`) deve valere **prima** di qualunque scrittura o conferma.
+    for (const [label, options] of [
+        ['v2 con keyPath errato', {version: 2, rows: [], keyPath: 'chiave'}],
+        ['v2 con autoIncrement attivo', {version: 2, rows: [], autoIncrement: true}],
+        ['v1 con keyPath errato', {version: 1, rows: [], keyPath: 'chiave'}],
+        ['v1 con autoIncrement attivo', {version: 1, rows: [], autoIncrement: true}]
+    ]) {
+        const malformed = readerFixture(options);
+        await assert.rejects(queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: malformed.indexedDb}),
+            /OFFLINE_QUEUE_SCHEMA_UNSUPPORTED/, label);
+        assert.deepEqual(malformed.calls.writes, [], `${label}: nessuna scrittura`);
+        assert.deepEqual(malformed.calls.created, [], `${label}: nessuno store creato`);
+    }
+    // Riferimento positivo: la stessa fixture con la struttura corretta viene accettata.
+    const valid = readerFixture({version: 2, rows: []});
+    const instance = await queue.createOfflineMutationQueue({uid: 'owner-a', vaultKeyMaterial: 'SYNTHETIC-KEY', indexedDb: valid.indexedDb});
+    assert.equal(instance.version, 2);
+    instance.close();
+});
+
+test('sonda sicura: coda assente non creata, blocco e scadenza dichiarati', async () => {
+    // Coda assente: la richiesta di apertura riceve `onupgradeneeded` e la transazione va annullata.
+    const missing = {aborted: false, open() {
+        const request = {transaction: {abort() { missing.aborted = true; }}};
+        setImmediate(() => request.onupgradeneeded?.());
+        return request;
+    }};
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: missing}), /QUEUE_UPGRADE_MISSING/);
+    assert.equal(missing.aborted, true);
+    // Apertura che non risponde: scadenza dichiarata, nessuna attesa indefinita.
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: {open() { return {}; }}, timeoutMs: 5}), /QUEUE_UPGRADE_TIMEOUT/);
+    // Blocco dichiarato.
+    const blocked = {open() {
+        const request = {transaction: {abort() {}}};
+        setImmediate(() => request.onblocked?.());
+        return request;
+    }};
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: blocked}), /QUEUE_UPGRADE_BLOCKED/);
+    // Sessione già scaduta: nessuna apertura.
+    await assert.rejects(upgrade.inspectOfflineQueueSchema({uid: 'owner-a', indexedDb: {open() { assert.fail('non deve aprire'); }}, isActive: () => false}), /QUEUE_UPGRADE_SESSION/);
 });

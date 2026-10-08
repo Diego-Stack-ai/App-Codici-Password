@@ -51,6 +51,28 @@ test('valid export closes once and releases lifecycle listeners', async () => {
     assert.equal(f.writes.length, 4); assert.equal(f.stats().closed, 1); assert.equal(f.stats().aborted, 0); assert.equal(f.observers.size, 0);
 });
 
+test('export clears downloaded attachment memory after success, encryption failure or late lock', async () => {
+    for (const outcome of ['success', 'failure', 'lock']) {
+        for (const useView of [true, false]) {
+            const f = fixture();
+            const bytes = new Uint8Array([17, 18]);
+            f.context.getBytes = async () => useView ? bytes : bytes.buffer;
+            const encrypt = f.context.encryptBackupEntry;
+            f.context.encryptBackupEntry = async options => {
+                if (options.entry.kind === 'attachment') {
+                    assert.equal(options.entry.content, 'ERI=');
+                    if (outcome === 'failure') throw new Error('synthetic');
+                    if (outcome === 'lock') f.context.auth.currentUser = null;
+                }
+                return encrypt(options);
+            };
+            if (outcome === 'success') await f.context.exportOwnerBackup('A');
+            else await assert.rejects(f.context.exportOwnerBackup('A'));
+            assert.deepEqual([...bytes], [0, 0]);
+        }
+    }
+});
+
 test('wrong owner is rejected before opening any file', async () => {
     const f = fixture(); f.context.window.showSaveFilePicker = () => { assert.fail('unexpected picker'); };
     await assert.rejects(f.context.exportOwnerBackup('B'), {code: 'BACKUP_SESSION_INVALIDATED'});
@@ -60,6 +82,22 @@ test('provider failure does not disclose provider details', async () => {
     const f = fixture(); f.context.deriveBackupKey = async () => { throw new Error('sensitive provider detail'); };
     await assert.rejects(f.context.exportOwnerBackup('A'), {message: 'BACKUP_EXPORT_FAILED', code: 'BACKUP_EXPORT_FAILED'});
     assert.equal(f.observers.size, 0);
+});
+
+test('attachment sink failure aborts partial output, clears bytes and never closes or returns key', async () => {
+    const f = fixture();
+    const bytes = new Uint8Array([21, 22]);
+    let aborted = 0, closed = 0;
+    f.context.getBytes = async () => bytes;
+    f.context.window.showSaveFilePicker = async () => ({createWritable: async () => ({
+        write: async value => {
+            if (JSON.parse(value).kind === 'attachment') throw new Error('synthetic sink failure');
+        },
+        abort: async () => {aborted++;}, close: async () => {closed++;}
+    })});
+    await assert.rejects(f.context.exportOwnerBackup('A'), {code: 'BACKUP_EXPORT_FAILED'});
+    assert.equal(aborted, 1); assert.equal(closed, 0);
+    assert.deepEqual([...bytes], [0, 0]); assert.equal(f.observers.size, 0);
 });
 
 test('buffer admits exact cumulative boundary and can only release one complete Blob', async () => {

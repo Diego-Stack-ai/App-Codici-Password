@@ -20,6 +20,7 @@ export function createCompanyContactsHandler({db, hash, timestamp}) {
         if (!id(uid)) fail('UNAUTHENTICATED');
         if (typeof trusted?.app?.appId !== 'string' || !trusted.app.appId) fail('APP_CHECK_REQUIRED');
         const request = validateCompanyContactsRequest(data), {expectedRevision, operations, operationId} = request;
+        if (request.expectedOwnerUid !== uid) fail('OWNER_MISMATCH');
         const companyId = request.target.companyId;
         const digest = await hash(JSON.stringify({uid, ...request}));
         const companyRef = db.doc(`users/${uid}/aziende/${companyId}`);
@@ -96,7 +97,8 @@ export function createCompanyContactsHandler({db, hash, timestamp}) {
                     touchedExtras = true;
                     continue;
                 }
-                const refusal = companyContactExtraDeleteRefusal(matches[0], {qrIncluded: qr.extras?.[index] === true});
+                const originalIndex = (record.emails?.extra ?? []).findIndex(item => item.id === operation.id);
+                const refusal = companyContactExtraDeleteRefusal(matches[0], {qrIncluded: qr.extras?.[originalIndex] === true});
                 if (refusal) fail(refusal);
                 extras.splice(index, 1);
                 touchedExtras = true;

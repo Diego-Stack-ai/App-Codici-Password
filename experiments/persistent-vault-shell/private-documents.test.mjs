@@ -15,3 +15,25 @@ test('delete is blocked by Account, QR, attachments and ambiguous state',async()
 test('legacy identities and foreign fields are never addressable',async()=>{const f=fixture();await assert.rejects(f.prepare({deletes:[{id:'document-legacy-dead'}]}));const request=await f.prepare({updates:[{id:'document-free',fields:{type:'Nuovo'}}]});assert.throws(()=>validatePrivateDocumentsRequest({...request,operations:[{kind:'update',id:'document-free',basis:'a'.repeat(64),fields:{linkedAccountId:'x'}}]}),/INVALID/);});
 test('fingerprint, revision and idempotent receipt protect concurrent changes',async()=>{const f=fixture(),request=await f.prepare({updates:[{id:'document-free',fields:{type:'Documento'}}]});f.stored.get('users/owner').documenti[2].unknown='changed';await assert.rejects(f.handler(request,f.trusted),/DOCUMENT_CONFLICT/);const g=fixture(),valid=await g.prepare({updates:[{id:'document-free',fields:{type:'Documento'}}]});assert.deepEqual(await g.handler(valid,g.trusted),{status:'confirmed',revision:2});assert.deepEqual(await g.handler(valid,g.trusted),{status:'confirmed',revision:2});const changed={...valid,operations:[{...valid.operations[0],basis:hash(privateDocumentBasis({...record().documenti[2],x:1}))}]};await assert.rejects(g.handler(changed,g.trusted),/OPERATION_CONFLICT/);});
 test('revoked, locked and changed sessions cannot prepare plaintext',async()=>{const f=fixture();f.state.locked=true;await assert.rejects(f.prepare({updates:[{id:'document-free',fields:{note:'secret'}}]}),/LOCKED/);f.state.locked=false;f.abort.abort();await assert.rejects(f.prepare({updates:[{id:'document-free',fields:{note:'secret'}}]}),/VIEW_DISPOSED/);});
+
+test('document request rejects extra operation keys, duplicate ids, empty ids and revision overflow', async () => {
+ const f=fixture(), request=await f.prepare({creates:[{id:'document-new',fields:{type:'Tessera'}}]});
+ const op=request.operations[0];
+ for(const operations of [[{...op,unknown:true}],[op,op],[{kind:'delete',id:'',basis:'a'.repeat(64)}]]) {
+  assert.throws(()=>validatePrivateDocumentsRequest({...request,operations}),/PROFILE_DOCUMENTS_INVALID/);
+ }
+ assert.throws(()=>validatePrivateDocumentsRequest({...request,expectedRevision:Number.MAX_SAFE_INTEGER}),/PROFILE_DOCUMENTS_INVALID/);
+});
+
+test('document mutation binds original owner, stored owner and receipt kind', async () => {
+ const f=fixture(),request=await f.prepare({updates:[{id:'document-free',fields:{type:'New'}}]});
+ f.stored.set('users/other',{...record(),ownerId:'other'});
+ const before=structuredClone([...f.stored]);
+ await assert.rejects(f.handler(request,{auth:{uid:'other'},app:{appId:'lab'}}),/OWNER_MISMATCH/);
+ assert.deepEqual([...f.stored],before);
+ f.stored.get('users/owner').ownerId='other';
+ await assert.rejects(f.handler(request,f.trusted),/OWNER_MISMATCH/);
+ f.stored.get('users/owner').ownerId='owner'; await f.handler(request,f.trusted);
+ f.stored.get('mutationResults/owner/operations/profile-documents-operation').kind='other';
+ await assert.rejects(f.handler(request,f.trusted),/OPERATION_CONFLICT/);
+});

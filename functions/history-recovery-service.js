@@ -4,25 +4,29 @@ const ALLOWED_ACTIONS = new Set(['trashed', 'restored', 'purged']);
 
 function validateRecoveryCommand(value) {
   const command = value || {};
-  if (!ID_PATTERN.test(String(command.recordId || '')) ||
-      !ID_PATTERN.test(String(command.operationId || '')) ||
-      !Number.isInteger(command.expectedRevision) || command.expectedRevision < 0) {
+  if (typeof command.recordId !== 'string' || !ID_PATTERN.test(command.recordId) ||
+      typeof command.operationId !== 'string' || !ID_PATTERN.test(command.operationId) ||
+      !Number.isSafeInteger(command.expectedRevision) || command.expectedRevision < 0 || command.expectedRevision >= Number.MAX_SAFE_INTEGER) {
     throw new Error('RECOVERY_COMMAND_INVALID');
   }
   return {recordId: command.recordId, operationId: command.operationId, expectedRevision: command.expectedRevision};
 }
 
-function trashDecision({recordExists, currentRevision, expectedRevision, alreadyProcessed}) {
+function trashDecision({recordExists, trashExists, currentRevision, expectedRevision, alreadyProcessed}) {
   if (alreadyProcessed) return {status: 'trashed', duplicate: true};
   if (!recordExists) return {status: 'not-found', duplicate: false};
+  if (trashExists) return {status: 'conflict', duplicate: false};
   if (currentRevision !== expectedRevision) return {status: 'conflict', currentRevision, duplicate: false};
   return {status: 'trashed', revision: currentRevision, duplicate: false};
 }
 
-function restoreDecision({trashExists, destinationExists, trashedRevision, alreadyProcessed}) {
+function restoreDecision({trashExists, destinationExists, trashedRevision, expectedRevision, alreadyProcessed}) {
   if (alreadyProcessed) return {status: 'restored', duplicate: true};
   if (!trashExists) return {status: 'not-found', duplicate: false};
   if (destinationExists) return {status: 'conflict', duplicate: false};
+  if (expectedRevision !== undefined && trashedRevision !== expectedRevision) {
+    return {status: 'conflict', currentRevision: trashedRevision, duplicate: false};
+  }
   return {status: 'restored', revision: trashedRevision + 1, duplicate: false};
 }
 

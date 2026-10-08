@@ -12,7 +12,7 @@ function fixture() {
         for (const [key, value] of staged) records.set(key, value);
         return result;
     }};
-    const data = {operationId: 'operation', expectedRevision: 0,
+    const data = {operationId: 'operation', expectedRevision: 0, expectedOwnerUid: 'owner',
         selection: {nome: true, cognome: false, cf: false, nascita: false, photo: false, phones: ['phone'], emails: [], addresses: []}};
     return {records, data, trusted: {auth: {uid: 'owner'}, app: {appId: 'trusted-app'}},
         run: createPrivateQrSelectionHandler({db, hash: value => createHash('sha256').update(value).digest('hex'), timestamp: () => 123})};

@@ -1,6 +1,7 @@
 import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.127';
 import {
     multiFactor,
+    onAuthStateChanged,
     TotpMultiFactorGenerator
 } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -14,8 +15,10 @@ export function getTotpEnrollment(user = auth.currentUser) {
     ) || null;
 }
 
-function requestEnrollmentCode(qrUri, secretKey) {
-    return new Promise(async (resolve) => {
+function requestEnrollmentCode(qrUri, secretKey, expectedUser = auth.currentUser) {
+    return new Promise((resolve, reject) => {
+        let settled = false;
+        let unsubscribe = () => {};
         const qrTarget = createElement('div', { className: 'mfa-qr', id: 'mfa-qr-target' });
         const codeInput = createElement('input', {
             className: 'input',
@@ -27,10 +30,29 @@ function requestEnrollmentCode(qrUri, secretKey) {
             placeholder: '000000'
         });
         const modal = createElement('div', { className: 'modal-overlay active', id: 'mfa-enrollment-modal' });
+        const secretLabel = createElement('code', { className: 'mfa-secret', textContent: secretKey });
+        const cleanup = () => {
+            unsubscribe();
+            codeInput.value = '';
+            secretLabel.textContent = '';
+            qrTarget.replaceChildren();
+            qrTarget.removeAttribute('title');
+            qrUri = '';
+            secretKey = '';
+            modal.remove();
+        };
 
         const finish = (value) => {
-            modal.remove();
+            if (settled) return;
+            settled = true;
+            cleanup();
             resolve(value);
+        };
+        const fail = error => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            reject(error);
         };
 
         const card = createElement('div', { className: 'modal-box' }, [
@@ -38,7 +60,7 @@ function requestEnrollmentCode(qrUri, secretKey) {
             createElement('p', { className: 'modal-text', textContent: 'Scansiona il QR con Google Authenticator, Microsoft Authenticator, Password di Apple o un’altra app TOTP.' }),
             qrTarget,
             createElement('p', { className: 'mfa-secret-label', textContent: 'Chiave manuale' }),
-            createElement('code', { className: 'mfa-secret', textContent: secretKey }),
+            secretLabel,
             createElement('label', { className: 'label', htmlFor: 'mfa-enrollment-code', textContent: 'Codice di verifica' }),
             codeInput,
             createElement('div', { className: 'modal-actions' }, [
@@ -57,25 +79,42 @@ function requestEnrollmentCode(qrUri, secretKey) {
 
         setChildren(modal, card);
         document.body.appendChild(modal);
-        await ensureQRCodeLib();
-        renderQRCode(qrTarget, qrUri, { width: 210, height: 210, colorDark: '#000000', colorLight: '#ffffff', correctLevel: 2 });
-        codeInput.focus();
+        try {
+            unsubscribe = onAuthStateChanged(auth, current => {
+                if (current !== expectedUser) fail(new Error('Sessione cambiata. Configurazione 2FA interrotta.'));
+            });
+            if (settled) unsubscribe();
+        } catch (error) { fail(error); return; }
+        Promise.resolve().then(() => ensureQRCodeLib()).then(() => {
+            if (settled) return;
+            renderQRCode(qrTarget, qrUri, { width: 210, height: 210, colorDark: '#000000', colorLight: '#ffffff', correctLevel: 2, exactText: true });
+            codeInput.focus();
+        }).catch(fail);
     });
 }
 
 export async function enrollTotp(user = auth.currentUser) {
     if (!user) throw new Error('Utente non autenticato.');
+    const assertCurrentUser = () => {
+        if (auth.currentUser !== user) throw new Error('Sessione cambiata. Verifica lo stato della 2FA prima di riprovare.');
+    };
+    assertCurrentUser();
     if (!user.emailVerified) throw new Error('Verifica prima il tuo indirizzo email.');
     if (getTotpEnrollment(user)) return true;
 
     const session = await multiFactor(user).getSession();
+    assertCurrentUser();
     const secret = await TotpMultiFactorGenerator.generateSecret(session);
+    assertCurrentUser();
     const qrUri = secret.generateQrCodeUrl(user.email, 'Codici & Password');
-    const code = await requestEnrollmentCode(qrUri, secret.secretKey);
+    const code = await requestEnrollmentCode(qrUri, secret.secretKey, user);
     if (!code) return false;
+    assertCurrentUser();
 
     const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code);
     await multiFactor(user).enroll(assertion, 'App Authenticator');
+    // A request already sent may have succeeded; do not refresh an obsolete user or claim rollback.
+    assertCurrentUser();
     await user.getIdToken(true);
     return true;
 }

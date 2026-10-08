@@ -10,10 +10,9 @@ export function withProfileTextCandidateRules(original) {
     if (rules.split(root).length !== 2 || rules.split("hasAny(['qrConfig'])").length !== 3) throw Error('RULES_BASE_CHANGED');
     const companyProtected = JSON.stringify(['qrConfig', ...PROFILE_TEXT_FIELDS.company, ...PROFILE_TEXT_METADATA]);
     const privateProtected = JSON.stringify([...PROFILE_TEXT_FIELDS.private, ...PROFILE_TEXT_METADATA]);
-    const companyDelete = '    match /users/{userId}/aziende/{companyId} {\n      allow read, delete: if isOwner(userId);';
+    const companyDelete = '    match /users/{userId}/aziende/{companyId} {\n      allow read: if isOwner(userId);\n      allow delete: if false;';
     if (rules.split(companyDelete).length !== 2) throw Error('RULES_BASE_CHANGED');
-    return rules.replace(companyDelete, '    match /users/{userId}/aziende/{companyId} {\n      allow read: if isOwner(userId);\n      allow delete: if false;')
-        .replaceAll("hasAny(['qrConfig'])", `hasAny(${companyProtected})`).replace(root,
+    return rules.replaceAll("hasAny(['qrConfig'])", `hasAny(${companyProtected})`).replace(root,
         `    match /users/{userId} {
       allow read: if isOwner(userId);
       allow create: if isOwner(userId) && !request.resource.data.keys().hasAny(${privateProtected});

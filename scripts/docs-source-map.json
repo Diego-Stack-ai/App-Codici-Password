@@ -1,0 +1,1256 @@
+{
+  "baseline": "2900ccc0bbd83997de8e50d260b1868f33bc5e38",
+  "hashAlgorithm": "sha256",
+  "hashInput": "git-blob-bytes",
+  "sourceFiles": 71,
+  "targetFiles": 31,
+  "segments": [
+    {
+      "source": ".github/copilot-instructions.md",
+      "sourceSha256": "544bf094bb7f2912ce0def0e7dd23f6ff652fc5908fcda2a79867a5ab78f2846",
+      "sourceBlob": "d795fd28e2391ac732c720236681f28afb7e135a",
+      "sourceSha256Bytes": "5c9ebed8b649bafa8b677b6b82b8f4a2a29674af35033ebcfc158ee22cc853f9",
+      "startLine": 1,
+      "endLine": 28,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-github-copilot-instructions-md-l1"
+    },
+    {
+      "source": "Frontend/GUIDA.md",
+      "sourceSha256": "8106de8fb134d5c827a3ebe35869a552779ed9e31025ddc1671922142c70043a",
+      "sourceBlob": "2f219a6698fc43251e132f4289753c83672ac2b4",
+      "sourceSha256Bytes": "5358a38b26902c73827b6159ae126ba058e6d4cf33ec45579f501d1e8868a1bb",
+      "startLine": 1,
+      "endLine": 115,
+      "target": "docs/regole/INTERFACCIA.md",
+      "anchor": "fonte-frontend-guida-md-l1"
+    },
+    {
+      "source": "Frontend/GUIDA.md",
+      "sourceSha256": "8106de8fb134d5c827a3ebe35869a552779ed9e31025ddc1671922142c70043a",
+      "sourceBlob": "2f219a6698fc43251e132f4289753c83672ac2b4",
+      "sourceSha256Bytes": "5358a38b26902c73827b6159ae126ba058e6d4cf33ec45579f501d1e8868a1bb",
+      "startLine": 116,
+      "endLine": 142,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-frontend-guida-md-l116"
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "sourceSha256": "7bd86bb78da842786c3c97e234f8c8c19ba6f3db4ac15b8ffdd8d6ec10580812",
+      "sourceBlob": "f8ff10275358896d9872ba9f3495597b3e16c321",
+      "sourceSha256Bytes": "30a5e17d20c5ff1ace26cd77d0c2be3fe4de8cb3101e791c32aac0a9b8f5fde7",
+      "startLine": 1,
+      "endLine": 1023,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-frontend-guida-aggiornamenti-md-l1"
+    },
+    {
+      "source": "docs/A1B_CENSIMENTO_CONTATTI_AZIENDALI.md",
+      "sourceSha256": "b3684543712f98e92fdc07bd2d120da1a68b67500483b94dc1d962709f84e200",
+      "sourceBlob": "5bbba6c0493c9c45a090020a50b09521053370f1",
+      "sourceSha256Bytes": "b3684543712f98e92fdc07bd2d120da1a68b67500483b94dc1d962709f84e200",
+      "startLine": 1,
+      "endLine": 41,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-docs-a1b-censimento-contatti-aziendali-md-l1"
+    },
+    {
+      "source": "docs/A2_CENSIMENTO_INDIRIZZI.md",
+      "sourceSha256": "28af0cee6affec21521ff7a9ca35ef08ab7ab0eca44f41c8da35d1106008d237",
+      "sourceBlob": "44aca7fe5530539d997b5f7bc83f6118488d11ea",
+      "sourceSha256Bytes": "28af0cee6affec21521ff7a9ca35ef08ab7ab0eca44f41c8da35d1106008d237",
+      "startLine": 1,
+      "endLine": 51,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-docs-a2-censimento-indirizzi-md-l1"
+    },
+    {
+      "source": "docs/A3_CENSIMENTO_UTENZE.md",
+      "sourceSha256": "7148a431a486f1116c2f74c17ef401a1764c0bf1494b82e0f757b459d4ce57b8",
+      "sourceBlob": "c1d0827dd200892f7c7f052bef3ae883bb036d8e",
+      "sourceSha256Bytes": "7148a431a486f1116c2f74c17ef401a1764c0bf1494b82e0f757b459d4ce57b8",
+      "startLine": 1,
+      "endLine": 34,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-docs-a3-censimento-utenze-md-l1"
+    },
+    {
+      "source": "docs/A4_CENSIMENTO_DOCUMENTI.md",
+      "sourceSha256": "98fa579503731e7188fe822378fb1b460a1af8acd8de201640cc636095146c8b",
+      "sourceBlob": "79e3d436a9332b6d5915845257c5f75fd5564fc7",
+      "sourceSha256Bytes": "98fa579503731e7188fe822378fb1b460a1af8acd8de201640cc636095146c8b",
+      "startLine": 1,
+      "endLine": 11,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-docs-a4-censimento-documenti-md-l1"
+    },
+    {
+      "source": "docs/AGENTE_CODEX_EVOLUZIONE.md",
+      "sourceSha256": "cab6a71b9420b710e757ba2256abdb9af0a6308b3056a9297cc1386c0ef19f2d",
+      "sourceBlob": "5b0414895a37953a95954980b4fdc593ae71f624",
+      "sourceSha256Bytes": "7f7d5f2373ecd2e1c91ccbc5fbd0f185d8744bf9565e10d036a31407fa79e27a",
+      "startLine": 1,
+      "endLine": 216,
+      "target": "docs/sviluppo/ASSISTENTE_APP.md",
+      "anchor": "fonte-docs-agente-codex-evoluzione-md-l1"
+    },
+    {
+      "source": "docs/APP_ARCHITECTURE_AUDIT.md",
+      "sourceSha256": "cbdfe669e2ebfe12dc694555328bb4384daa39b0fcd06526a17f982369f72714",
+      "sourceBlob": "d918dfb97c8185023b7b7b1f76a786fc3197419e",
+      "sourceSha256Bytes": "ae20cb995562d0c1e378f18cfaaaf33435782360fd2953ee668c374b7bef69db",
+      "startLine": 1,
+      "endLine": 118,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-app-architecture-audit-md-l1"
+    },
+    {
+      "source": "docs/ARCHITETTURA_SICUREZZA_V1.md",
+      "sourceSha256": "111988ed534883bf60ed05d12ee083ff2bc73907b00f25014ca208ad313c7edc",
+      "sourceBlob": "1b4622d83b71d64449d94929cbebcbf3e6b80264",
+      "sourceSha256Bytes": "6f9946fbfcd8c157826cc57d8cdc2a4c4a99a140f13f49f825cb987089291a80",
+      "startLine": 1,
+      "endLine": 378,
+      "target": "docs/regole/SICUREZZA.md",
+      "anchor": "fonte-docs-architettura-sicurezza-v1-md-l1"
+    },
+    {
+      "source": "docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md",
+      "sourceSha256": "5ccc3eefed4a4cb1bd18c9ab5a9a8321235822bcf7a5aa36a3028fc1f078ee2a",
+      "sourceBlob": "505cd985e45e653c6e6b10d342a6f214ebefbde9",
+      "sourceSha256Bytes": "f897cc2330965278886438f55b75c2f9d01f276e09174f81cb8d5abf9f138b8c",
+      "startLine": 1,
+      "endLine": 239,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-audit-markdown-architettura-sicurezza-v1-md-l1"
+    },
+    {
+      "source": "docs/AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md",
+      "sourceSha256": "c1c4d6fc9ca84dc27adbc4a12e089e634fff83cbe7d747e6652edf4805ba28b9",
+      "sourceBlob": "366091d2956da8819857a38d24892f5b07142489",
+      "sourceSha256Bytes": "982eb42f3e7dc127db1ac8132aa1959212cc1abfd800f0536baf54c6e11b9290",
+      "startLine": 1,
+      "endLine": 275,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-audit-progetto-fase1-fotografia-md-l1"
+    },
+    {
+      "source": "docs/AUDIT_PROGETTO_FASE2_STATICO.md",
+      "sourceSha256": "563734daadfb87c1fea0b96dea39f40539accc829d2d571ea5a6b964e982c9b9",
+      "sourceBlob": "deb54381fbb10cc5dd793dc417945a49a1887382",
+      "sourceSha256Bytes": "b5d3ccd0e919fe657cf1a108ea7f3272fd02edc2f90eeb3afa54f3879386a0fd",
+      "startLine": 1,
+      "endLine": 487,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-audit-progetto-fase2-statico-md-l1"
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "sourceSha256": "1d72530341f74cbe34c2628a9bbc7f4392ed26c4423cdb6ce8df466b658e71ce",
+      "sourceBlob": "f88bad4fb07dc46aacfd0320e3608a45d90cc634",
+      "sourceSha256Bytes": "7fed6b2d2d75340606915cc88a73cd4ab0c5ab90b8d522c8192986394987b3be",
+      "startLine": 1,
+      "endLine": 119,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-audit-vault-session-p0-md-l1"
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "sourceSha256": "1d72530341f74cbe34c2628a9bbc7f4392ed26c4423cdb6ce8df466b658e71ce",
+      "sourceBlob": "f88bad4fb07dc46aacfd0320e3608a45d90cc634",
+      "sourceSha256Bytes": "7fed6b2d2d75340606915cc88a73cd4ab0c5ab90b8d522c8192986394987b3be",
+      "startLine": 120,
+      "endLine": 945,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-audit-vault-session-p0-md-l120"
+    },
+    {
+      "source": "docs/CANONICAL_PAGE_REGISTRY.md",
+      "sourceSha256": "7324b6f29b17ac5bc8d0f1f506a56c27504b0d33d500f1510fa39b1b90f87fb5",
+      "sourceBlob": "aa470b55f34e77b161a62eec14f6fa1e4a99147f",
+      "sourceSha256Bytes": "bcf4debff428fd1e8eb37fa6f3126b7d4e5b66dc89b35b9e7615bc26b35a57e1",
+      "startLine": 1,
+      "endLine": 54,
+      "target": "docs/regole/INTERFACCIA.md",
+      "anchor": "fonte-docs-canonical-page-registry-md-l1"
+    },
+    {
+      "source": "docs/CENSIMENTO_GATE_M6_M10.md",
+      "sourceSha256": "be9fea4a66d1a67b55845492fdbb029eaa37799d29cd45f1e5398d92b3c1e32a",
+      "sourceBlob": "8c5bacf99b5d595eabb943bc4609f028ca94051b",
+      "sourceSha256Bytes": "be9fea4a66d1a67b55845492fdbb029eaa37799d29cd45f1e5398d92b3c1e32a",
+      "startLine": 1,
+      "endLine": 93,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-censimento-gate-m6-m10-md-l1"
+    },
+    {
+      "source": "docs/DATA_ACCESS_CONTRACT.md",
+      "sourceSha256": "305d5faafa73470b9a71c753225239662a83829483e14d02a919340b8e952880",
+      "sourceBlob": "ede43d10fc93a82f846279f5e5f1981a30e888d3",
+      "sourceSha256Bytes": "a57d07af0e3c34e2b617fc51a5382ff3249f8568232929c1cdc15f5b697a3e15",
+      "startLine": 1,
+      "endLine": 93,
+      "target": "docs/regole/DATI.md",
+      "anchor": "fonte-docs-data-access-contract-md-l1"
+    },
+    {
+      "source": "docs/DEEPSEEK_COORDINATION.md",
+      "sourceSha256": "c2211f15f5395427224809548d0a199e675f95357725863c88f4c2f45ca04f3d",
+      "sourceBlob": "345983e7f32b1051b0e954acd44ee57157371cc7",
+      "sourceSha256Bytes": "c2211f15f5395427224809548d0a199e675f95357725863c88f4c2f45ca04f3d",
+      "startLine": 1,
+      "endLine": 8757,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-deepseek-coordination-md-l1"
+    },
+    {
+      "source": "docs/DS-002A_ALLEGATI_DOCUMENTI_CONTRATTO.md",
+      "sourceSha256": "68d1aaf0698c24d38ecb19454852003de61a7143695b6074b7b989177e593ecb",
+      "sourceBlob": "7668e13df13aa5ef33138e23d448cd911e79f2ba",
+      "sourceSha256Bytes": "68d1aaf0698c24d38ecb19454852003de61a7143695b6074b7b989177e593ecb",
+      "startLine": 1,
+      "endLine": 153,
+      "target": "docs/sviluppo/ALLEGATI_DOCUMENTI.md",
+      "anchor": "fonte-docs-ds-002a-allegati-documenti-contratto-md-l1"
+    },
+    {
+      "source": "docs/ENCRYPTED_FIELD_INVENTORY.md",
+      "sourceSha256": "983f91e0287a5a9e67f8f667d47a445bad95b3e87ecb2ad776ec1f15e26dfa28",
+      "sourceBlob": "b634cc9eb0dbce46c96c17455332d39f8b62850c",
+      "sourceSha256Bytes": "8ca3bf762bd89ce0d1d2755e96b06a1defd859ddfb4b6a553934cdb6ef27f22f",
+      "startLine": 1,
+      "endLine": 70,
+      "target": "docs/evidenze/INVENTARI.md",
+      "anchor": "fonte-docs-encrypted-field-inventory-md-l1"
+    },
+    {
+      "source": "docs/FILE_INVENTORY.md",
+      "sourceSha256": "81455adbcbe716d37d2bdc650ae3891cdc4123c96d334dba81d88ab068e79bec",
+      "sourceBlob": "f85edc1f9a05e6072bcc14f2be5f69dc564ca8c7",
+      "sourceSha256Bytes": "81455adbcbe716d37d2bdc650ae3891cdc4123c96d334dba81d88ab068e79bec",
+      "startLine": 1,
+      "endLine": 974,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-file-inventory-md-l1"
+    },
+    {
+      "source": "docs/FUNCTIONAL_DATA_CONTRACT.md",
+      "sourceSha256": "d9f97f95d36a4ee85aea994f23b9d193cd10cda2ef2e33a357f463c523d210ad",
+      "sourceBlob": "01e1926003198e500bfc93b1c37af9ce46a48067",
+      "sourceSha256Bytes": "c2b40eb842e203183cbca82ef06f2b132212bebc77f2afaae663a4cbd210df24",
+      "startLine": 1,
+      "endLine": 112,
+      "target": "docs/regole/DATI.md",
+      "anchor": "fonte-docs-functional-data-contract-md-l1"
+    },
+    {
+      "source": "docs/GUIDA_PROGETTO.md",
+      "sourceSha256": "74149d22bd25c17a1ee686ab243840b4676518cda8693350b90d07dcff5952c5",
+      "sourceBlob": "8e3a0ebaeb4df423182d4e0d390ecc67da76befc",
+      "sourceSha256Bytes": "e01ed7845c5b7019af1fc83095a4367151d22743facea15469ff6605992ba299",
+      "startLine": 1,
+      "endLine": 162,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-guida-progetto-md-l1"
+    },
+    {
+      "source": "docs/M10_DOMANDE_AUDIT_INDIPENDENTE.md",
+      "sourceSha256": "fae0863c10241e9fb3b65d9f8d854c01ed6db49f15cb733213003dc87ddcb9ad",
+      "sourceBlob": "103543dde22695641480c26b948584cb16f57e11",
+      "sourceSha256Bytes": "fae0863c10241e9fb3b65d9f8d854c01ed6db49f15cb733213003dc87ddcb9ad",
+      "startLine": 1,
+      "endLine": 44,
+      "target": "docs/domande/M10_RILASCIO.md",
+      "anchor": "fonte-docs-m10-domande-audit-indipendente-md-l1"
+    },
+    {
+      "source": "docs/M10_DOMANDE_GUIDA_E_PRIVACY.md",
+      "sourceSha256": "ef438ad25b70950c3d6d03f7e8d058bb798926a70f6dbd4f4d965ab96f368f16",
+      "sourceBlob": "a5916230321a19c2f7e0f009eff3dbc7e3e0bfaa",
+      "sourceSha256Bytes": "ef438ad25b70950c3d6d03f7e8d058bb798926a70f6dbd4f4d965ab96f368f16",
+      "startLine": 1,
+      "endLine": 53,
+      "target": "docs/domande/M10_RILASCIO.md",
+      "anchor": "fonte-docs-m10-domande-guida-e-privacy-md-l1"
+    },
+    {
+      "source": "docs/M10_GUIDA_UTENTE_BOZZA.md",
+      "sourceSha256": "77dc5dbe6250e69604d083c9ced354ad962ec8e42dffe3e7fb66203586fd60b1",
+      "sourceBlob": "8e2cdbc255c30c08138ffcdb8246176a33dd032d",
+      "sourceSha256Bytes": "77dc5dbe6250e69604d083c9ced354ad962ec8e42dffe3e7fb66203586fd60b1",
+      "startLine": 1,
+      "endLine": 144,
+      "target": "docs/utente/GUIDA.md",
+      "anchor": "fonte-docs-m10-guida-utente-bozza-md-l1"
+    },
+    {
+      "source": "docs/M10_HARDENING_RILASCIO.md",
+      "sourceSha256": "4b7b79f63ce61a638dacdab0d73b577d003d7c3138cf5d4c8222bcb83b216aa3",
+      "sourceBlob": "84af3b46b79da60f2d5bf1e47f2c786cbae57b27",
+      "sourceSha256Bytes": "ddf626d92bfdad86c08c84d875960b212f286b6fa03e5e2fb61c7d24af36e24b",
+      "startLine": 1,
+      "endLine": 98,
+      "target": "docs/regole/RILASCIO.md",
+      "anchor": "fonte-docs-m10-hardening-rilascio-md-l1"
+    },
+    {
+      "source": "docs/M10_REVISIONE_LOCALE.md",
+      "sourceSha256": "c677038f9e049794a7c086769025155348ced600abe3057c5dfee3713d0b3758",
+      "sourceBlob": "c3dd6543702249b61f519425e7d4e8de13f4d92c",
+      "sourceSha256Bytes": "c677038f9e049794a7c086769025155348ced600abe3057c5dfee3713d0b3758",
+      "startLine": 1,
+      "endLine": 221,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-m10-revisione-locale-md-l1"
+    },
+    {
+      "source": "docs/M10_REVISIONE_PRIVACY_PRELIMINARE.md",
+      "sourceSha256": "54b5b73f2522899832f29f85eba8d73e59f1ffd16958f0f559d6f7c79a66cec0",
+      "sourceBlob": "a82aff48711213231002769e4a1af2e41da5b33a",
+      "sourceSha256Bytes": "54b5b73f2522899832f29f85eba8d73e59f1ffd16958f0f559d6f7c79a66cec0",
+      "startLine": 1,
+      "endLine": 134,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-m10-revisione-privacy-preliminare-md-l1"
+    },
+    {
+      "source": "docs/M4_VISUAL_ACCEPTANCE.md",
+      "sourceSha256": "406a83ea3b76ac1b89c187017e4b833609cc9b4da314917fed4bdefa4cff942e",
+      "sourceBlob": "48fbfdf0252aeea7511fd2a652fdfc25bde4e8e3",
+      "sourceSha256Bytes": "2ba02354be4413dc169bb639153ea5f0d0110e03ba64fc38600980b383ba8fcc",
+      "startLine": 1,
+      "endLine": 38,
+      "target": "docs/procedure/COLLAUDI.md",
+      "anchor": "fonte-docs-m4-visual-acceptance-md-l1"
+    },
+    {
+      "source": "docs/M4_VISUAL_ACCEPTANCE.md",
+      "sourceSha256": "406a83ea3b76ac1b89c187017e4b833609cc9b4da314917fed4bdefa4cff942e",
+      "sourceBlob": "48fbfdf0252aeea7511fd2a652fdfc25bde4e8e3",
+      "sourceSha256Bytes": "2ba02354be4413dc169bb639153ea5f0d0110e03ba64fc38600980b383ba8fcc",
+      "startLine": 39,
+      "endLine": 81,
+      "target": "docs/evidenze/COLLAUDI.md",
+      "anchor": "fonte-docs-m4-visual-acceptance-md-l39"
+    },
+    {
+      "source": "docs/M5_COLLAUDO_DUE_DISPOSITIVI.md",
+      "sourceSha256": "7262244634d19e1831f19e1072a504604261e2ac09624c85f0aa777c7ee07bf5",
+      "sourceBlob": "9f0a4c8eea4f84a1ba27abed01d953b1dabff4b1",
+      "sourceSha256Bytes": "6d79f0169b2a1808962bc0923a2c1cbd08c4a6b664a347d518ea454205e7e9cc",
+      "startLine": 1,
+      "endLine": 16,
+      "target": "docs/procedure/COLLAUDI.md",
+      "anchor": "fonte-docs-m5-collaudo-due-dispositivi-md-l1"
+    },
+    {
+      "source": "docs/M5_CONDIVISIONE_THREAT_MODEL.md",
+      "sourceSha256": "dc8692704e41ad3af6450e0dabc8725cdb4bbc5cef9d99d04cffc88ca098a4ae",
+      "sourceBlob": "cb02b4edc04cbd584c6336129852f0ac5be133a6",
+      "sourceSha256Bytes": "7bd3c49ceadbd175c6a9a6c683210506ee91bbdaffbc29865ca91e6d65cf6307",
+      "startLine": 1,
+      "endLine": 206,
+      "target": "docs/regole/CONDIVISIONE.md",
+      "anchor": "fonte-docs-m5-condivisione-threat-model-md-l1"
+    },
+    {
+      "source": "docs/M5_INVENTARIO_DATI_CONDIVISI.md",
+      "sourceSha256": "2fa1939305fe8a49a45f199630075d388d1b7ab483d6a46f1d9cd0ac5cea5aa6",
+      "sourceBlob": "1edf9d5ce08b75620d3c4ea6165b51cc87c98d41",
+      "sourceSha256Bytes": "7b8dcc57d6a22dd087bc4249605bbf10b7ec3e077fae02a6e0a8448662d72586",
+      "startLine": 1,
+      "endLine": 117,
+      "target": "docs/evidenze/INVENTARI.md",
+      "anchor": "fonte-docs-m5-inventario-dati-condivisi-md-l1"
+    },
+    {
+      "source": "docs/M5_PIANO_INTEGRAZIONE.md",
+      "sourceSha256": "ddcf8386d3c042a7863a3d5141e24ea3294b2e9c4c6f21193dcf4879ca7a48dd",
+      "sourceBlob": "ad2bc11eb0158de0cd13cb486c81ea9d4394ff8f",
+      "sourceSha256Bytes": "f0565bc43cc9ba51ef93a66a2645237f7e45984680b35ee3f515bfe07cda222b",
+      "startLine": 1,
+      "endLine": 114,
+      "target": "docs/regole/CONDIVISIONE.md",
+      "anchor": "fonte-docs-m5-piano-integrazione-md-l1"
+    },
+    {
+      "source": "docs/M6_CHECKLIST_IPHONE.md",
+      "sourceSha256": "81fffc6fce9bc6253723c608afac7eb518fc6e19a754a9f5d6589266211192da",
+      "sourceBlob": "19a5785070826c58ac7edac69a0e2cc2f021f172",
+      "sourceSha256Bytes": "81fffc6fce9bc6253723c608afac7eb518fc6e19a754a9f5d6589266211192da",
+      "startLine": 1,
+      "endLine": 163,
+      "target": "docs/procedure/COLLAUDI.md",
+      "anchor": "fonte-docs-m6-checklist-iphone-md-l1"
+    },
+    {
+      "source": "docs/M6_DOMANDE_CACHE_ESPULSA.md",
+      "sourceSha256": "73c224ba58e833cede30709b8ee8938cf4990736c538773c48ddd2ad8961628e",
+      "sourceBlob": "e0f9dbb87f918f388e73aab1328ba6cf019e232d",
+      "sourceSha256Bytes": "73c224ba58e833cede30709b8ee8938cf4990736c538773c48ddd2ad8961628e",
+      "startLine": 1,
+      "endLine": 48,
+      "target": "docs/domande/M6_OFFLINE.md",
+      "anchor": "fonte-docs-m6-domande-cache-espulsa-md-l1"
+    },
+    {
+      "source": "docs/M6_DOMANDE_FALLBACK_WEB_LOCKS.md",
+      "sourceSha256": "5f0b526b11b0062d6f87ffdb6ef7e2fe0524e472ba5501121d1962aeb2b3035b",
+      "sourceBlob": "dfa8fd71e727f703d665949dc9e1f5aacca4a198",
+      "sourceSha256Bytes": "5f0b526b11b0062d6f87ffdb6ef7e2fe0524e472ba5501121d1962aeb2b3035b",
+      "startLine": 1,
+      "endLine": 47,
+      "target": "docs/domande/M6_OFFLINE.md",
+      "anchor": "fonte-docs-m6-domande-fallback-web-locks-md-l1"
+    },
+    {
+      "source": "docs/M6_SINCRONIZZAZIONE_OFFLINE.md",
+      "sourceSha256": "6bad9c5745a05f02274cffc1f1f99651950126c99a2da9df494e457208c21b75",
+      "sourceBlob": "3809f6d08bec33874eeb609675c1c169363d659c",
+      "sourceSha256Bytes": "3d0959448b2406203fa5c5bf8b78a5bbe26239ffda343b21db61bde76e01b60d",
+      "startLine": 1,
+      "endLine": 93,
+      "target": "docs/regole/OFFLINE.md",
+      "anchor": "fonte-docs-m6-sincronizzazione-offline-md-l1"
+    },
+    {
+      "source": "docs/M6_SINCRONIZZAZIONE_OFFLINE.md",
+      "sourceSha256": "6bad9c5745a05f02274cffc1f1f99651950126c99a2da9df494e457208c21b75",
+      "sourceBlob": "3809f6d08bec33874eeb609675c1c169363d659c",
+      "sourceSha256Bytes": "3d0959448b2406203fa5c5bf8b78a5bbe26239ffda343b21db61bde76e01b60d",
+      "startLine": 94,
+      "endLine": 679,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-m6-sincronizzazione-offline-md-l94"
+    },
+    {
+      "source": "docs/M7_CRONOLOGIA_CESTINO_AUDIT.md",
+      "sourceSha256": "e28259fe01ea301496605836827fd64fa4e51392e7dc7ac5dacb5c800e0ecef5",
+      "sourceBlob": "e37803e4a841073031395ed186fb08ea54594cfc",
+      "sourceSha256Bytes": "12be117cab366f9ce7caa857469f608ce57093da1b9e263e977a807780b5e214",
+      "startLine": 1,
+      "endLine": 177,
+      "target": "docs/regole/CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-cronologia-cestino-audit-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T08_COPIE_CONDIVISE.md",
+      "sourceSha256": "fd25dfed8c324f476ffe53a13b7c30d64827cbffb3d867f7b63b00cb2cedc9db",
+      "sourceBlob": "ed907ba327a0c5e446bb2840d4e4b9f67a9cd420",
+      "sourceSha256Bytes": "fd25dfed8c324f476ffe53a13b7c30d64827cbffb3d867f7b63b00cb2cedc9db",
+      "startLine": 1,
+      "endLine": 62,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t08-copie-condivise-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T17_INTESTAZIONE_BACKUP.md",
+      "sourceSha256": "b78db435249a2667e0a709fc3534ffc94a90c73a82873d7dc28d45dd58a84e39",
+      "sourceBlob": "8f664e99d90581d880f4164da53e2486a1818c84",
+      "sourceSha256Bytes": "b78db435249a2667e0a709fc3534ffc94a90c73a82873d7dc28d45dd58a84e39",
+      "startLine": 1,
+      "endLine": 55,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t17-intestazione-backup-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T21_RIPRISTINO_DOPO_PURGE.md",
+      "sourceSha256": "121ca0b109237e47eeb6ed2105b0c20df865733b9f1a31808ec456be73fbfab4",
+      "sourceBlob": "708a5d3755bc8490c8540d095780e55d500f986e",
+      "sourceSha256Bytes": "121ca0b109237e47eeb6ed2105b0c20df865733b9f1a31808ec456be73fbfab4",
+      "startLine": 1,
+      "endLine": 58,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t21-ripristino-dopo-purge-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T23_CACHE_DISPOSITIVO.md",
+      "sourceSha256": "48247aa2079e75487cd44b9ef18acad1cccef94d8921b15adbcb13256c0f0fd1",
+      "sourceBlob": "395b81cd119f7f241295c8bbfb51d67211bede0c",
+      "sourceSha256Bytes": "48247aa2079e75487cd44b9ef18acad1cccef94d8921b15adbcb13256c0f0fd1",
+      "startLine": 1,
+      "endLine": 69,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t23-cache-dispositivo-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T24_COPIE_CONSULTAZIONE.md",
+      "sourceSha256": "676eb4dcf470044f7320d7645b62d3ecb647cd148150af3b209272f9fc826d91",
+      "sourceBlob": "17d1a6470e1e7bf44b67d2ed91125c3eb5fc2880",
+      "sourceSha256Bytes": "676eb4dcf470044f7320d7645b62d3ecb647cd148150af3b209272f9fc826d91",
+      "startLine": 1,
+      "endLine": 66,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t24-copie-consultazione-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T26_RESIDUI_RIMOZIONE.md",
+      "sourceSha256": "b228128cbda49c929ce22aeb4fcaced7d7919cae503fae6e671567c998495d2e",
+      "sourceBlob": "8a2925393ecff251ff14ff2d292ba8366101bf91",
+      "sourceSha256Bytes": "b228128cbda49c929ce22aeb4fcaced7d7919cae503fae6e671567c998495d2e",
+      "startLine": 1,
+      "endLine": 57,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t26-residui-rimozione-md-l1"
+    },
+    {
+      "source": "docs/M7_DOMANDE_T27_HARD_DELETE.md",
+      "sourceSha256": "a0de12351285a5e614327ce0b5ee98c834ba56f7ef3ef9cb1bfc9792f5b94480",
+      "sourceBlob": "84e1fc9d698217e8cbb6ee8bee662ee584e79622",
+      "sourceSha256Bytes": "a0de12351285a5e614327ce0b5ee98c834ba56f7ef3ef9cb1bfc9792f5b94480",
+      "startLine": 1,
+      "endLine": 67,
+      "target": "docs/domande/M7_CANCELLAZIONE.md",
+      "anchor": "fonte-docs-m7-domande-t27-hard-delete-md-l1"
+    },
+    {
+      "source": "docs/M7_MAPPA_ELIMINAZIONE_CONDIVISIONE.md",
+      "sourceSha256": "9aed897b288c0484e2e7c8eb47aba42e35843c10e6cf03dc622cbc6a0ddc4cfb",
+      "sourceBlob": "e68fb4589430a1f041b00ba01a729e480fbac11d",
+      "sourceSha256Bytes": "9aed897b288c0484e2e7c8eb47aba42e35843c10e6cf03dc622cbc6a0ddc4cfb",
+      "startLine": 1,
+      "endLine": 186,
+      "target": "docs/evidenze/INVENTARI.md",
+      "anchor": "fonte-docs-m7-mappa-eliminazione-condivisione-md-l1"
+    },
+    {
+      "source": "docs/M7_RETENTION_CENSIMENTO.md",
+      "sourceSha256": "1b95106fa99e318e6e97ff7633880828bc124a91363e477fcf7328c1b3494d67",
+      "sourceBlob": "1891c8554c0651465dddbbf44fa7878bb5424802",
+      "sourceSha256Bytes": "1b95106fa99e318e6e97ff7633880828bc124a91363e477fcf7328c1b3494d67",
+      "startLine": 1,
+      "endLine": 678,
+      "target": "docs/evidenze/INVENTARI.md",
+      "anchor": "fonte-docs-m7-retention-censimento-md-l1"
+    },
+    {
+      "source": "docs/M8_BACKUP_RECUPERO.md",
+      "sourceSha256": "0e2363bf249a6beb9b04295e0da2b0572b437e7e40c27b103e048d1974c6e903",
+      "sourceBlob": "d2e54dbc39357975ca2b3fdb01d1ba6e3e6c0d35",
+      "sourceSha256Bytes": "a7a74e11adf31b5e1fadcd105083727a305e31fb923ae957d5403dd4b29efb3e",
+      "startLine": 1,
+      "endLine": 64,
+      "target": "docs/regole/BACKUP.md",
+      "anchor": "fonte-docs-m8-backup-recupero-md-l1"
+    },
+    {
+      "source": "docs/M8_BACKUP_RECUPERO.md",
+      "sourceSha256": "0e2363bf249a6beb9b04295e0da2b0572b437e7e40c27b103e048d1974c6e903",
+      "sourceBlob": "d2e54dbc39357975ca2b3fdb01d1ba6e3e6c0d35",
+      "sourceSha256Bytes": "a7a74e11adf31b5e1fadcd105083727a305e31fb923ae957d5403dd4b29efb3e",
+      "startLine": 65,
+      "endLine": 286,
+      "target": "docs/evidenze/AUDIT.md",
+      "anchor": "fonte-docs-m8-backup-recupero-md-l65"
+    },
+    {
+      "source": "docs/M8_DOMANDE_RIPRISTINO_CAS_PARZIALE.md",
+      "sourceSha256": "95c5b859f18968ff3d0cf8266d3e438f94aa6e4e468c3b3720b17d5793b63249",
+      "sourceBlob": "c697ad05f71311efc7a08c818a00c6f9e3accd57",
+      "sourceSha256Bytes": "95c5b859f18968ff3d0cf8266d3e438f94aa6e4e468c3b3720b17d5793b63249",
+      "startLine": 1,
+      "endLine": 55,
+      "target": "docs/domande/M8_RECUPERO.md",
+      "anchor": "fonte-docs-m8-domande-ripristino-cas-parziale-md-l1"
+    },
+    {
+      "source": "docs/M8_DOMANDE_RIPRISTINO_INTERROTTO.md",
+      "sourceSha256": "9e3c698903e6c09db9d345fdac0fb7d8cf5ca82006c65f3d0e34f4c97205e30e",
+      "sourceBlob": "a1b4e6c3e7aa96b244352c5172ae5b0e4294e367",
+      "sourceSha256Bytes": "9e3c698903e6c09db9d345fdac0fb7d8cf5ca82006c65f3d0e34f4c97205e30e",
+      "startLine": 1,
+      "endLine": 50,
+      "target": "docs/domande/M8_RECUPERO.md",
+      "anchor": "fonte-docs-m8-domande-ripristino-interrotto-md-l1"
+    },
+    {
+      "source": "docs/M8_DOMANDE_RIPRISTINO_NUOVA_SESSIONE.md",
+      "sourceSha256": "9171db477bcba7adf7a3eb192a580e4609570ed83dde6a0012c41ec23d507929",
+      "sourceBlob": "5967e76aaaf55d8b84bf2b196c00bc8c24adf373",
+      "sourceSha256Bytes": "9171db477bcba7adf7a3eb192a580e4609570ed83dde6a0012c41ec23d507929",
+      "startLine": 1,
+      "endLine": 55,
+      "target": "docs/domande/M8_RECUPERO.md",
+      "anchor": "fonte-docs-m8-domande-ripristino-nuova-sessione-md-l1"
+    },
+    {
+      "source": "docs/M9_SALUTE_CREDENZIALI.md",
+      "sourceSha256": "9f226e35b320bf01fc221f20ba655eee8324c1f97abfac00f57d2c54a7fa15cc",
+      "sourceBlob": "dc2ecd3a88660c2692dfaff83bf46bf6bad4f873",
+      "sourceSha256Bytes": "6937a96af6e0fe2ddf32db8b15cd3614374dd441e5700cc251b3e7cedc735c5e",
+      "startLine": 1,
+      "endLine": 49,
+      "target": "docs/regole/SALUTE_CREDENZIALI.md",
+      "anchor": "fonte-docs-m9-salute-credenziali-md-l1"
+    },
+    {
+      "source": "docs/OFFLINE_WRITE_CONFLICT_POLICY.md",
+      "sourceSha256": "b76de05943c3b49fe2e2948a78a8734b1e1d315b188d9b89396b9eb77c7feffc",
+      "sourceBlob": "918a9d2d77ce128135e149596a4767a42b00b106",
+      "sourceSha256Bytes": "cdc0e0f65707fe72366314121d52a0f8b22959afa3b8ac1c5edbb2e6f0d21e00",
+      "startLine": 1,
+      "endLine": 47,
+      "target": "docs/regole/OFFLINE.md",
+      "anchor": "fonte-docs-offline-write-conflict-policy-md-l1"
+    },
+    {
+      "source": "docs/PAGE_PERFORMANCE_BASELINE.md",
+      "sourceSha256": "742fd08e0dc6be3999fbefde973fd3a3b414de83a8208db9cf410077ca599112",
+      "sourceBlob": "d7a9245b2e62ea0da0a20ae306f6c3c5a286ba23",
+      "sourceSha256Bytes": "1d3a29efa682d13719951c2f26ed067d94ff5036123f1064da132d730ea74b74",
+      "startLine": 1,
+      "endLine": 83,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-page-performance-baseline-md-l1"
+    },
+    {
+      "source": "docs/PAGE_SHELL_CONTRACT.md",
+      "sourceSha256": "961f46783ae1895f974b1adc809cbc82c204d2ac3dfd2ee5dd5034a9f7e19e75",
+      "sourceBlob": "2633180d71cad41cfdcc94e88be9b09efd169d5c",
+      "sourceSha256Bytes": "fe3aaf0f27d061647caf605ff184d9034a2acea103d9201341a7c1d49029e0ec",
+      "startLine": 1,
+      "endLine": 106,
+      "target": "docs/regole/INTERFACCIA.md",
+      "anchor": "fonte-docs-page-shell-contract-md-l1"
+    },
+    {
+      "source": "docs/PASSAGGIO_CONSEGNE_2026-09-16.md",
+      "sourceSha256": "beb0abd054a02037c87feab0b828c0a06359c3c6f1d7f633ed1ead9e2d1feb80",
+      "sourceBlob": "5bce416e00d2070d7e4298743af0d07c82872978",
+      "sourceSha256Bytes": "beb0abd054a02037c87feab0b828c0a06359c3c6f1d7f633ed1ead9e2d1feb80",
+      "startLine": 1,
+      "endLine": 127,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-passaggio-consegne-2026-09-16-md-l1"
+    },
+    {
+      "source": "docs/PIANO_AUDIT_COMPLETO_PROGETTO.md",
+      "sourceSha256": "9194705dfe451e5c5f92de20eaa5af5c6cb97916ac1c6dcec148cb6a60a1df1a",
+      "sourceBlob": "b98f31d5708d8d0f7a072e22a9e08ccee10fbbfd",
+      "sourceSha256Bytes": "1dd59ea3bca0f27f5000f044eea7f761a145a99d1770780966c3df93cbe4dbca",
+      "startLine": 1,
+      "endLine": 212,
+      "target": "docs/progetto/PROGRAMMA.md",
+      "anchor": "fonte-docs-piano-audit-completo-progetto-md-l1"
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "sourceSha256": "0e576929ea80f7a483073d5a708140ec1c3bcc1272bc60961eecff5af80e91e5",
+      "sourceBlob": "3633f53e7f6af6d67336433cdcc7a09cc28d783e",
+      "sourceSha256Bytes": "06f75e77ba51211dbb24204d247b0242a279d2a3a17ce864ccf93b80f6ed8a6c",
+      "startLine": 1,
+      "endLine": 182,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-piano-maturita-professionale-md-l1"
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "sourceSha256": "0e576929ea80f7a483073d5a708140ec1c3bcc1272bc60961eecff5af80e91e5",
+      "sourceBlob": "3633f53e7f6af6d67336433cdcc7a09cc28d783e",
+      "sourceSha256Bytes": "06f75e77ba51211dbb24204d247b0242a279d2a3a17ce864ccf93b80f6ed8a6c",
+      "startLine": 183,
+      "endLine": 459,
+      "target": "docs/progetto/PROGRAMMA.md",
+      "anchor": "fonte-docs-piano-maturita-professionale-md-l183"
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "sourceSha256": "0e576929ea80f7a483073d5a708140ec1c3bcc1272bc60961eecff5af80e91e5",
+      "sourceBlob": "3633f53e7f6af6d67336433cdcc7a09cc28d783e",
+      "sourceSha256Bytes": "06f75e77ba51211dbb24204d247b0242a279d2a3a17ce864ccf93b80f6ed8a6c",
+      "startLine": 460,
+      "endLine": 710,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-piano-maturita-professionale-md-l460"
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "sourceSha256": "b164f38c07ac562ccc1d006a8a89ee9aadd58154ac38da7f263051ff22930f4d",
+      "sourceBlob": "a37fa63804350587a0bdfa9be4700ef27063f83b",
+      "sourceSha256Bytes": "0edf2ee6b2095237153541fb283c90f0a39d3aab688c3696302f99ea02fb544a",
+      "startLine": 1,
+      "endLine": 476,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-profilo-account-widget-cache-roadmap-md-l1"
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "sourceSha256": "b164f38c07ac562ccc1d006a8a89ee9aadd58154ac38da7f263051ff22930f4d",
+      "sourceBlob": "a37fa63804350587a0bdfa9be4700ef27063f83b",
+      "sourceSha256Bytes": "0edf2ee6b2095237153541fb283c90f0a39d3aab688c3696302f99ea02fb544a",
+      "startLine": 477,
+      "endLine": 648,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-docs-profilo-account-widget-cache-roadmap-md-l477"
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "sourceSha256": "b164f38c07ac562ccc1d006a8a89ee9aadd58154ac38da7f263051ff22930f4d",
+      "sourceBlob": "a37fa63804350587a0bdfa9be4700ef27063f83b",
+      "sourceSha256Bytes": "0edf2ee6b2095237153541fb283c90f0a39d3aab688c3696302f99ea02fb544a",
+      "startLine": 649,
+      "endLine": 684,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-profilo-account-widget-cache-roadmap-md-l649"
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "sourceSha256": "b164f38c07ac562ccc1d006a8a89ee9aadd58154ac38da7f263051ff22930f4d",
+      "sourceBlob": "a37fa63804350587a0bdfa9be4700ef27063f83b",
+      "sourceSha256Bytes": "0edf2ee6b2095237153541fb283c90f0a39d3aab688c3696302f99ea02fb544a",
+      "startLine": 685,
+      "endLine": 701,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-docs-profilo-account-widget-cache-roadmap-md-l685"
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "sourceSha256": "b164f38c07ac562ccc1d006a8a89ee9aadd58154ac38da7f263051ff22930f4d",
+      "sourceBlob": "a37fa63804350587a0bdfa9be4700ef27063f83b",
+      "sourceSha256Bytes": "0edf2ee6b2095237153541fb283c90f0a39d3aab688c3696302f99ea02fb544a",
+      "startLine": 702,
+      "endLine": 741,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-docs-profilo-account-widget-cache-roadmap-md-l702"
+    },
+    {
+      "source": "docs/REGISTRO_DECISIONI.md",
+      "sourceSha256": "dac2f4f241e48a106eb06f497a7faaf31108ef727315ff69b6fef8d09b30998f",
+      "sourceBlob": "dcb25b529956afaf4eaf30007fb3e1b3a57b66a0",
+      "sourceSha256Bytes": "dac2f4f241e48a106eb06f497a7faaf31108ef727315ff69b6fef8d09b30998f",
+      "startLine": 1,
+      "endLine": 257,
+      "target": "docs/progetto/DECISIONI.md",
+      "anchor": "fonte-docs-registro-decisioni-md-l1"
+    },
+    {
+      "source": "docs/RISPOSTA_INCIDENTI_E_RECUPERO.md",
+      "sourceSha256": "4e279d82606819c5d1516b01083bc50f7771fde8f72bac622eac028e14b86c91",
+      "sourceBlob": "48a663231fbec946151c3b40408ba3ac49d0cef0",
+      "sourceSha256Bytes": "3243b11ced67fba08ce4b68f07d6996ea39582ae0bd46e1a1e408e8894a88a3a",
+      "startLine": 1,
+      "endLine": 50,
+      "target": "docs/procedure/GESTIONE_INCIDENTI.md",
+      "anchor": "fonte-docs-risposta-incidenti-e-recupero-md-l1"
+    },
+    {
+      "source": "docs/RUNTIME_PERFORMANCE_BASELINE.md",
+      "sourceSha256": "8d3ca0b227446dfcee278b8725bf1d59e8db7a13effd6b8775ce2eebeda0875e",
+      "sourceBlob": "9eec8057534f59ddb3768dad280f31ee7cc6ea6a",
+      "sourceSha256Bytes": "222f87a9bdca4d92ad9f59148077ce37064eca9a4ff14a3c59e7ccfc5ac129ad",
+      "startLine": 1,
+      "endLine": 55,
+      "target": "docs/evidenze/COLLAUDI.md",
+      "anchor": "fonte-docs-runtime-performance-baseline-md-l1"
+    },
+    {
+      "source": "docs/SETUP_LINUX_CLOUD.md",
+      "sourceSha256": "65b7c2dbf5ab2807e3cd79aa6ec58386d1eac74c62336cf1037875da828fa660",
+      "sourceBlob": "e97e5a735e78b0a78e15b277b993a65fb5022d52",
+      "sourceSha256Bytes": "571f7a3698eab884ffc50098472f57e64fb2d4b941a7c170fcdce6cab3da7184",
+      "startLine": 1,
+      "endLine": 63,
+      "target": "docs/procedure/AMBIENTE_DI_TEST.md",
+      "anchor": "fonte-docs-setup-linux-cloud-md-l1"
+    },
+    {
+      "source": "docs/STATO_CORRENTE_M0_M10.md",
+      "sourceSha256": "f3d92c5c0fe659d556b86d6803c1ef1afb0043e8e3672a270eb704e7f9981f81",
+      "sourceBlob": "885559ff1b13f90cf89f6e572f388a64a567a08c",
+      "sourceSha256Bytes": "f3d92c5c0fe659d556b86d6803c1ef1afb0043e8e3672a270eb704e7f9981f81",
+      "startLine": 1,
+      "endLine": 107,
+      "target": "docs/progetto/STATO.md",
+      "anchor": "fonte-docs-stato-corrente-m0-m10-md-l1"
+    },
+    {
+      "source": "docs/UI_DESIGN_SYSTEM_CONTRACT.md",
+      "sourceSha256": "41ee38f82f40da829ae8f47cd53381ffe4e90bfd11413da89dc3300d42332338",
+      "sourceBlob": "eb1d04ee3181b17a4236d608bbd3ea7c7432e3bb",
+      "sourceSha256Bytes": "c7ee5a5f9b5b91247beea037b8949d11c07fafb9cc43327bf49c4a17a8e0c47b",
+      "startLine": 1,
+      "endLine": 128,
+      "target": "docs/regole/INTERFACCIA.md",
+      "anchor": "fonte-docs-ui-design-system-contract-md-l1"
+    },
+    {
+      "source": "docs/VAULT_KEY_CONTRACT.md",
+      "sourceSha256": "5d41bc80e26ec205ca20109cd6c1595fded6b7d03f192aff9b71a184e73856f4",
+      "sourceBlob": "ab4b0067636b60678d7d56b8c34dd1c83d9faeb5",
+      "sourceSha256Bytes": "d64c7db56c8604c0599a026318d6bdbca13f2a01d7a3051948cc599c10b021aa",
+      "startLine": 1,
+      "endLine": 168,
+      "target": "docs/regole/VAULT.md",
+      "anchor": "fonte-docs-vault-key-contract-md-l1"
+    },
+    {
+      "source": "experiments/card-importer/README.md",
+      "sourceSha256": "ed2d89dc5b0f8ac4ac099a1c6c2c9fefea679592dd04ea0fb8416100045b184d",
+      "sourceBlob": "75d844686fc88a2234045414f87fde6406761934",
+      "sourceSha256Bytes": "cd1079f977f063b22ff40bea2a1e1badf1c78de0f3ff2f8b136d31b433f98ed5",
+      "startLine": 1,
+      "endLine": 69,
+      "target": "docs/storico/REGISTRO.md",
+      "anchor": "fonte-experiments-card-importer-readme-md-l1"
+    },
+    {
+      "source": "experiments/card-importer/REAL_IMAGE_AUDIT.md",
+      "sourceSha256": "bc3caa89fd8fae80f374adc04101e7182c861d203c680456cce4f0541b64fa33",
+      "sourceBlob": "1942187788ac9c3f3627fb09a197c10abdd076fd",
+      "sourceSha256Bytes": "08a151f0bb6641ade1ad5d1d6521dcbdc080dc433ca244cc039f85ba33711848",
+      "startLine": 1,
+      "endLine": 48,
+      "target": "docs/evidenze/COLLAUDI.md",
+      "anchor": "fonte-experiments-card-importer-real-image-audit-md-l1"
+    },
+    {
+      "source": "experiments/persistent-vault-shell/docs/A5_CREAZIONE_ACCOUNT_DAL_COLLEGAMENTO.md",
+      "sourceSha256": "7526a434ac1a8466b95eb3898d9357daa09e8d2bd992e89312370f8479066d02",
+      "sourceBlob": "be776a9741745b42679573e476dfa2a923e1881b",
+      "sourceSha256Bytes": "7526a434ac1a8466b95eb3898d9357daa09e8d2bd992e89312370f8479066d02",
+      "startLine": 1,
+      "endLine": 13,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-experiments-persistent-vault-shell-docs-a5-creazione-account-dal-collegamento-md-l1"
+    },
+    {
+      "source": "experiments/persistent-vault-shell/docs/A6_EDITOR_CREDENZIALI_STANDARD.md",
+      "sourceSha256": "59f733fa4d9cc0236a12ff3666086dbd3e6b4f485c97ca02d2208d0894ca4f71",
+      "sourceBlob": "e3bbdbf4a2e30b8790b2e8c864217727b863075c",
+      "sourceSha256Bytes": "59f733fa4d9cc0236a12ff3666086dbd3e6b4f485c97ca02d2208d0894ca4f71",
+      "startLine": 1,
+      "endLine": 23,
+      "target": "docs/sviluppo/PROFILO_E_ACCOUNT.md",
+      "anchor": "fonte-experiments-persistent-vault-shell-docs-a6-editor-credenziali-standard-md-l1"
+    }
+  ],
+  "deduplications": [
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-08d9cd393a091d6f3c14",
+      "characters": 334
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-f636e27ad49e91eedb4c",
+      "characters": 346
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-ada9e7634d901b96c227",
+      "characters": 412
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-6a290a10a02522ca436a",
+      "characters": 411
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-d7d8233e745b45b89eec",
+      "characters": 417
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-51e2750e49c31d3d89ed",
+      "characters": 538
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-661d082c54fed1d62db6",
+      "characters": 338
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-a618f7edc8c53f523d5e",
+      "characters": 346
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-03418c75cfef0a7abc35",
+      "characters": 284
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-9e3b097c025c28b5ee25",
+      "characters": 353
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-416be26ee8d3e13391dc",
+      "characters": 402
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-16523fb6c0681aa5e608",
+      "characters": 459
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-f698211c6613f5518d1a",
+      "characters": 279
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-e0714bf2d621d1bc96f0",
+      "characters": 416
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-8727c516e120d79918d2",
+      "characters": 610
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-fd64c079b1b0ae9c001c",
+      "characters": 339
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-6ae3a3ace3548151ad99",
+      "characters": 318
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-2495d259d0112e62a3cf",
+      "characters": 441
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-3c3df23f38c5b609f6ab",
+      "characters": 519
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-81ee3fab4f57afe21854",
+      "characters": 644
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-a495d92a5d221c6015e5",
+      "characters": 475
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-20fe8f9ab5b2c3940ca8",
+      "characters": 532
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-76c923c67d8e09a2dd06",
+      "characters": 349
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-b5cde02373b8c35a5c67",
+      "characters": 262
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-8ee6ad98fde154dc820e",
+      "characters": 404
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-03019818157021f2a79e",
+      "characters": 434
+    },
+    {
+      "source": "Frontend/GUIDA_AGGIORNAMENTI.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-ff302c198868ac6f8f83",
+      "characters": 408
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-f636e27ad49e91eedb4c",
+      "characters": 346
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-ada9e7634d901b96c227",
+      "characters": 412
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-6a290a10a02522ca436a",
+      "characters": 411
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-d7d8233e745b45b89eec",
+      "characters": 417
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-51e2750e49c31d3d89ed",
+      "characters": 538
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-661d082c54fed1d62db6",
+      "characters": 338
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-a618f7edc8c53f523d5e",
+      "characters": 346
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-03418c75cfef0a7abc35",
+      "characters": 284
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-9e3b097c025c28b5ee25",
+      "characters": 353
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-416be26ee8d3e13391dc",
+      "characters": 402
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-2495d259d0112e62a3cf",
+      "characters": 441
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-3c3df23f38c5b609f6ab",
+      "characters": 519
+    },
+    {
+      "source": "docs/AUDIT_VAULT_SESSION_P0.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-81ee3fab4f57afe21854",
+      "characters": 644
+    },
+    {
+      "source": "docs/GUIDA_PROGETTO.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-de766ad58b604e2f18c2",
+      "characters": 369
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-de766ad58b604e2f18c2",
+      "characters": 369
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-f636e27ad49e91eedb4c",
+      "characters": 346
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-ada9e7634d901b96c227",
+      "characters": 412
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-6a290a10a02522ca436a",
+      "characters": 411
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-d7d8233e745b45b89eec",
+      "characters": 417
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-51e2750e49c31d3d89ed",
+      "characters": 538
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-661d082c54fed1d62db6",
+      "characters": 338
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-a618f7edc8c53f523d5e",
+      "characters": 346
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-03418c75cfef0a7abc35",
+      "characters": 284
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-9e3b097c025c28b5ee25",
+      "characters": 353
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-416be26ee8d3e13391dc",
+      "characters": 402
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-16523fb6c0681aa5e608",
+      "characters": 459
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-f698211c6613f5518d1a",
+      "characters": 279
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-700cab0ff0ecc32abda9",
+      "characters": 692
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-39464c15016f17a89735",
+      "characters": 503
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-2495d259d0112e62a3cf",
+      "characters": 441
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-3c3df23f38c5b609f6ab",
+      "characters": 519
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-81ee3fab4f57afe21854",
+      "characters": 644
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-a495d92a5d221c6015e5",
+      "characters": 475
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-20fe8f9ab5b2c3940ca8",
+      "characters": 532
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-76c923c67d8e09a2dd06",
+      "characters": 349
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-b5cde02373b8c35a5c67",
+      "characters": 262
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-8ee6ad98fde154dc820e",
+      "characters": 404
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-03019818157021f2a79e",
+      "characters": 434
+    },
+    {
+      "source": "docs/PIANO_MATURITA_PROFESSIONALE.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/evidenze/AUDIT.md#evidenza-ff302c198868ac6f8f83",
+      "characters": 408
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-de766ad58b604e2f18c2",
+      "characters": 369
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-d75b5f35812292829eec",
+      "characters": 526
+    },
+    {
+      "source": "docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md",
+      "target": "docs/storico/REGISTRO.md",
+      "evidence": "docs/storico/REGISTRO.md#evidenza-e9e26b6115c8d6e7fe33",
+      "characters": 606
+    }
+  ],
+  "editorialCorrections": [
+    "M7 purge: manuale attuale distinto da politica richiesta",
+    "M7 audit: altre famiglie escluse dalla finestra audit, decisione D1 separata",
+    "M7 D2: percorso manuale già presente, testi e verifiche residui",
+    "M6 C1/C2/C3: stato per domanda e indice delle decisioni",
+    "Ordini storici non eseguibili",
+    "Aggiornati in STATO e DECISIONI i residui documentali ormai riconciliati, senza chiudere gate applicativi",
+    "Corretto il precedente elenco che escludeva C1/C2, ora indicizzate",
+    "Vecchie etichette domande aperte esplicitamente riferite alla raccolta originaria",
+    "Riferimenti di riga originali legati alla base, non alle nuove righe"
+  ]
+}

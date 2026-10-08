@@ -33,3 +33,25 @@ test('network loss invalidates a pending readiness result',async()=>{
     f.network(false);f.events.dispatchEvent(new Event('offline'));release({complete:true});await pending;
     assert.equal(f.states.at(-1),'offline');assert.ok(!f.states.includes('ready'));f.service.dispose();
 });
+
+test('network events cannot start preparation before unlock or restart it after clear', async () => {
+    let calls = 0; const f = fixture(async () => {calls++; return {complete: true};});
+    f.events.dispatchEvent(new Event('online')); await Promise.resolve();
+    assert.equal(calls, 0, 'identity alone is not an active preparation session');
+    await f.service.refresh(); assert.equal(calls, 1);
+    f.service.clear();
+    f.events.dispatchEvent(new Event('offline')); f.events.dispatchEvent(new Event('online'));
+    await Promise.resolve();
+    assert.equal(calls, 1); assert.equal(f.states.at(-1), 'idle');
+    await f.service.refresh(); assert.equal(calls, 2, 'explicit new unlock can resume preparation');
+    f.service.dispose();
+});
+
+test('reconnect cannot transfer an old preparation permission to a different UID', async () => {
+    const owners = []; const f = fixture(async user => {owners.push(user.uid); return {complete: true};});
+    await f.service.refresh(); f.user('b');
+    f.events.dispatchEvent(new Event('online')); await Promise.resolve();
+    assert.deepEqual(owners, ['a']);
+    await f.service.refresh(); assert.deepEqual(owners, ['a', 'b']);
+    f.service.dispose();
+});

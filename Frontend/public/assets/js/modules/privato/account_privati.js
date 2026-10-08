@@ -6,7 +6,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
 
 import { db } from '../../firebase-config.js?v=1.2.127';
 import { LOG } from '../../logger.js';
-import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -14,14 +14,14 @@ import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
     getRecordByPath,
-    getUserProfile,
     listAcceptedInvites,
     listPrivateAccounts,
     listPrivateAccountsConfirmed
 } from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
-import {createArchiveMetadata} from '../settings/archive-account-model.js';
+import { archiveAccount } from '../settings/archive-account-service.js';
+import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -81,6 +81,7 @@ export function mountAccountPrivati(user, options = {}) {
         getSubtitle: account => account.username || account.email || 'Utente Nascosto',
         onNavigate(account) {
             if (signal.aborted) return;
+            if (account._suspended) return; // M7-R7C-4: nessuna apertura per un accesso sospeso
             if (account._aziendaId) {
                 navigate(`dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`);
             } else {
@@ -202,6 +203,23 @@ export function mountAccountPrivati(user, options = {}) {
                         return null;
                     }
 
+                    // M7-R7C-4: un invito sospeso (Account nell'Archivio) non concede
+                    // lettura e non si tenta il get sull'Account, negato dalle Rules:
+                    // la card si costruisce dal solo invito, con il nome che già
+                    // contiene e nessun altro dato.
+                    if (inv.sharingState === 'suspended') {
+                        return {
+                            id: inv.accountId,
+                            nomeAccount: inv.accountName || '',
+                            isOwner: false,
+                            ownerId: senderId,
+                            _isGuest: true,
+                            _suspended: true,
+                            _aziendaId: inv.aziendaId || '',
+                            cycle: inv.cycle
+                        };
+                    }
+
                     let accPath = `users/${senderId}/accounts/${inv.accountId}`;
                     // Consider empty string or null as no azienda
                     if (inv.aziendaId && inv.aziendaId.trim() !== "") {
@@ -223,7 +241,19 @@ export function mountAccountPrivati(user, options = {}) {
                 }
                 return null;
             });
-            sharedWithMe = (await waitFor(Promise.all(invitePromises))).filter(Boolean);
+            // Più inviti dello stesso Account (cicli diversi) non devono produrre
+            // due card: vince l'accesso attivo, altrimenti il ciclo più recente.
+            const byAccount = new Map();
+            for (const record of (await waitFor(Promise.all(invitePromises))).filter(Boolean)) {
+                const key = [record.ownerId, record._aziendaId || '', record.id].join('|');
+                const current = byAccount.get(key);
+                if (!current) { byAccount.set(key, record); continue; }
+                const better = (current._suspended && !record._suspended)
+                    || (Boolean(current._suspended) === Boolean(record._suspended)
+                        && (record.cycle ?? 0) > (current.cycle ?? 0));
+                if (better) byAccount.set(key, record);
+            }
+            sharedWithMe = [...byAccount.values()];
             LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
 
             // 2. Own Accounts
@@ -362,20 +392,37 @@ export function mountAccountPrivati(user, options = {}) {
         }
     }
 
+    // Esiti concorrenti dell'archiviazione canonica: chiedono un aggiornamento
+    // esplicito della lista invece di dichiarare un fallimento generico.
+    function archiveErrorMessage(error) {
+        if (error?.code === 'ARCHIVE_CONFLICT' || error?.code === 'ARCHIVE_UPDATED_AT_CONFLICT'
+            || error?.code === 'ARCHIVE_MARKER_MISSING') return t('archive_conflict_refresh');
+        if (error?.code === 'ARCHIVE_ACCOUNT_MISSING') return t('archive_missing_refresh');
+        return readErrorMessage(error, t('error_generic'));
+    }
+
     async function handleArchive(item) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
-        try {
-            const account = allAccounts.find(candidate => candidate.id === id);
-            await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), createArchiveMetadata(account));
+        const account = allAccounts.find(candidate => candidate.id === id);
+        // M7-R7B4: il gesto «Archivio» non ha conferma; se l'Account ha
+        // destinatari si mostra l'avviso, altrimenti resta l'azione immediata.
+        if (archiveRecipients(account).length) {
+            const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
             if (signal.aborted) return;
-            showToast(t('success_archived'));
+            if (!confirmed) { filterAndRender(); return; }
+        }
+        try {
+            const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision, updatedAt: account?.updatedAt});
+            if (signal.aborted) return;
+            showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_archived'));
             allAccounts = allAccounts.filter(a => a.id !== id);
             filterAndRender();
         } catch (e) {
             if (signal.aborted) return;
             logError("Archive", e);
+            showToast(archiveErrorMessage(e), "error");
         }
     }
 
@@ -383,31 +430,21 @@ export function mountAccountPrivati(user, options = {}) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
         if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
-        const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'));
+        const account = allAccounts.find(candidate => candidate.id === id);
+        // M7-R7B4: avviso informativo sui destinatari che perderanno l'accesso.
+        const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
         if (signal.aborted) return;
         if (!confirmed) { filterAndRender(); return; }
         try {
-            const userRef = doc(db, 'users', currentUser.uid);
-            const userProfile = await waitFor(getUserProfile(currentUser.uid));
-            const emails = userProfile?.contactEmails || [];
-            const hasProfileLink = emails.some(email => email.linkedAccountId === id);
-            const batch = writeBatch(db);
-            batch.delete(doc(db, "users", currentUser.uid, "accounts", id));
-            if (hasProfileLink) {
-                batch.update(userRef, {
-                    contactEmails: emails.map(email => email.linkedAccountId === id
-                        ? { ...email, linkedAccountId: null }
-                        : email)
-                });
-            }
-            await batch.commit();
+            const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision, updatedAt: account?.updatedAt});
             if (signal.aborted) return;
-            showToast(t('success_deleted'));
+            showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'));
             allAccounts = allAccounts.filter(a => a.id !== id);
             filterAndRender();
         } catch (e) {
             if (signal.aborted) return;
             logError("Delete", e);
+            showToast(archiveErrorMessage(e), "error");
         }
     }
 

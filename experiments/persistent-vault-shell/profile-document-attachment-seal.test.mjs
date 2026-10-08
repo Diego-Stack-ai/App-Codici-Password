@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {openDocumentImageBytes, sealDocumentImageBytes} from './profile-document-attachment-seal.mjs';
+import {openDocumentImageBytes, sealDocumentImageBytes, openDocumentImageWithVaultMaterial,
+    sealDocumentImageWithVaultMaterial} from './profile-document-attachment-seal.mjs';
 import {createProfileDocumentAttachmentCapability} from './profile-document-attachment-capability.mjs';
 import {createMemoryVault} from './memory-vault.mjs';
-import {createProtectedSession} from './protected-session.mjs';
+import {createProtectedSession} from './test-support/protected-session.mjs';
 import {documentAttachmentAad, documentImageStoragePath, documentAttachmentEnvelope}
     from './profile-document-attachments-contract.mjs';
 
@@ -15,6 +16,72 @@ const otherAad = documentAttachmentAad({uid: 'other', documentId, attachmentId: 
     storagePath: documentImageStoragePath({uid: 'other', documentId, attachmentId})});
 const vaultKey = Uint8Array.from({length: 32}, (unused, index) => index + 1);
 const plaintext = () => Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8]);
+
+test('binary material rejects malformed keyrings and noncanonical primary keys with a fixed error', async () => {
+    const ring = value => 'CPVK2:' + Buffer.from(JSON.stringify(value)).toString('base64');
+    const canonical = Buffer.from(vaultKey).toString('base64');
+    const noncanonical = canonical.slice(0, -2) + 'B=';
+    for (const material of [null, 42, '', 'CPVK2:***', ring({}), ring({primaryKey: null}),
+        ring({primaryKey: 42}), ring({primaryKey: noncanonical}), canonical.slice(0, -1)]) {
+        await assert.rejects(sealDocumentImageWithVaultMaterial(material, {bytes: plaintext(), aad}),
+            error => error.message === 'BINARY_VAULT_KEY_UNSUPPORTED');
+    }
+});
+
+test('parallel binary material operations keep independent scratch keys and preserve caller bytes', async () => {
+    const material = Buffer.from(vaultKey).toString('base64');
+    const inputs = [plaintext(), Uint8Array.of(9, 10, 11)];
+    const originals = inputs.map(bytes => bytes.slice());
+    const sealed = await Promise.all(inputs.map(bytes => sealDocumentImageWithVaultMaterial(material, {bytes, aad})));
+    const opened = await Promise.all(sealed.map(value => openDocumentImageWithVaultMaterial(material, {...value, aad})));
+    assert.deepEqual(opened, originals);
+    assert.deepEqual(inputs, originals);
+});
+
+test('seal capability clears owned plaintext even when rejected before encryption', async () => {
+    for (const boundary of ['abort', 'owner', 'locked', 'identity']) {
+        const abort = new AbortController();
+        const bytes = plaintext(); let calls = 0;
+        const capability = createProfileDocumentAttachmentCapability({
+            context: {user: {uid}, signal: abort.signal, assertUnlocked() {
+                if (boundary === 'locked') throw Error('VAULT_LOCKED');
+            }}, getUser: () => ({uid: boundary === 'owner' ? 'foreign' : uid}),
+            seal: async () => {calls++; throw Error('UNEXPECTED_SEAL');}});
+        if (boundary === 'abort') abort.abort();
+        await assert.rejects(capability.sealImage({bytes,
+            documentId: boundary === 'identity' ? '' : documentId, attachmentId}));
+        assert.equal(calls, 0);
+        assert.ok(bytes.every(byte => byte === 0), boundary);
+        capability.dispose();
+    }
+});
+
+test('late binary plaintext is cleared when a Vault lock or route change rejects its delivery', async () => {
+    for (const boundary of ['lock', 'route']) {
+        let release;
+        const bytes = plaintext();
+        const f = sessionFixture({openBytes: () => new Promise(resolve => {release = resolve;})});
+        await f.session.unlock(); await f.session.navigate('private');
+        const pending = f.contexts.at(-1).openImage({payload: plaintext(), envelope: {}, aad});
+        const rejected = assert.rejects(pending, /VAULT_LOCKED|VIEW_DISPOSED/);
+        if (boundary === 'lock') f.session.lock(); else await f.session.navigate('private');
+        release(bytes); await rejected;
+        assert.ok(bytes.every(byte => byte === 0), `${boundary}: rejected plaintext must be cleared`);
+        f.session.dispose();
+    }
+});
+
+test('revoked document capability clears late plaintext from its opener', async () => {
+    const abort = new AbortController(); let release;
+    const bytes = plaintext();
+    const capability = createProfileDocumentAttachmentCapability({
+        context: {user: {uid}, signal: abort.signal, assertUnlocked() {}}, getUser: () => ({uid}),
+        seal: async () => {}, open: () => new Promise(resolve => {release = resolve;})});
+    const pending = capability.openImage({payload: plaintext(), envelope: {}, documentId, attachmentId});
+    const rejected = assert.rejects(pending, /VIEW_DISPOSED/);
+    abort.abort(); release(bytes); await rejected;
+    assert.ok(bytes.every(byte => byte === 0));
+});
 function sessionFixture(options = {}) {
     let user = {uid}, observer, vault;
     const contexts = [], states = [];

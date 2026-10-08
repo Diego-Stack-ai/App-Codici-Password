@@ -13,7 +13,7 @@ import {planProfileDocumentAttachmentDelete, planProfileDocumentAttachmentUpload
 // closes everything: the view, the source (which revokes the Object URL and clears
 // the plaintext) and the capability.
 export function createProfileDocumentAttachmentsProvider({context, getUser, repository, service, hash, isOnline,
-    objectUrl, trusted, createAttachmentId, createOperationId}) {
+    objectUrl, trusted, createAttachmentId, createOperationId, confirm, validateImageBytes}) {
     if (!repository || ['readProfile', 'readDocuments', 'listAttachments', 'readAttachment', 'download']
         .some(name => typeof repository[name] !== 'function')) throw Error('DOCUMENT_ATTACHMENT_PROVIDER_INVALID');
     const readProfile = (uid, confirmed) => repository.readProfile(uid, confirmed);
@@ -28,7 +28,7 @@ export function createProfileDocumentAttachmentsProvider({context, getUser, repo
         const source = createProfileDocumentAttachmentsSource({context: scoped, getUser, reader,
             repository: {read: (uid, attachmentId) => repository.readAttachment(uid, attachmentId),
                 download: (uid, reference) => repository.download(uid, reference)},
-            capability, service, isOnline, objectUrl, trusted, createOperationId,
+            capability, service, isOnline, objectUrl, trusted, createOperationId, validateImageBytes,
             // The limit and the document identity are always decided on a freshly
             // read profile and record list, never on what the view happens to show.
             planner: {
@@ -45,12 +45,16 @@ export function createProfileDocumentAttachmentsProvider({context, getUser, repo
         const dispose = () => {
             if (disposed) return;
             disposed = true;
-            try {view?.dispose();} finally {try {source.dispose();} finally {capability.dispose();}}
+            try {view?.dispose();} finally {
+                try {source.dispose();} finally {try {reader.dispose();} finally {capability.dispose();}}
+            }
         };
-        const documents = await repository.readDocuments();
-        if (disposed || scoped.signal.aborted) {dispose(); throw Error('VIEW_DISPOSED');}
-        view = mountProfileDocumentAttachments(root, {source, documents, isOnline});
-        if (disposed || scoped.signal.aborted) dispose();
-        return dispose;
+        try {
+            const documents = await repository.readDocuments();
+            if (disposed || scoped.signal.aborted) {dispose(); throw Error('VIEW_DISPOSED');}
+            view = mountProfileDocumentAttachments(root, {source, documents, isOnline, confirm, documentActions: false});
+            if (disposed || scoped.signal.aborted) dispose();
+            return dispose;
+        } catch (error) {dispose(); throw error;}
     };
 }

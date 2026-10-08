@@ -1,4 +1,5 @@
 import {createMemoryVault} from './memory-vault.mjs';
+import {sealDocumentImageWithVaultMaterial, openDocumentImageWithVaultMaterial} from './profile-document-attachment-seal.mjs';
 
 // Candidate cryptographic bridge. Firebase/UI/crypto dependencies are explicit;
 // no provisioning, legacy migration, persistence or production activation.
@@ -12,6 +13,7 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
     const assertOwner = uid => { if (owner() !== uid) throw new Error('AUTH_CHANGED'); };
     const vault = createMemoryVault({
         onLock, now, timeoutMs, openQueueWithKey,
+        sealBytes: sealDocumentImageWithVaultMaterial, openBytes: openDocumentImageWithVaultMaterial,
         async unlockKey(uid, {signal}) {
             const assertActive = () => {
                 assertOwner(uid);
@@ -52,7 +54,19 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
     });
     return Object.freeze({
         unlock: () => vault.unlock(owner()),
-        lock: () => vault.lock(),
+        lock: reason => vault.lock(reason),
+        async sealImage(options) {
+            const uid = owner();
+            const sealed = await vault.sealImage(uid, options);
+            assertOwner(uid);
+            return sealed;
+        },
+        async openImage(options) {
+            const uid = owner();
+            const plaintext = await vault.openImage(uid, options);
+            try {assertOwner(uid); return plaintext;}
+            catch (error) {plaintext.fill(0); throw error;}
+        },
         async openQueue(options) {
             const uid = owner(), queue = await vault.openQueue(uid, options);
             try { assertOwner(uid); return queue; }

@@ -111,6 +111,24 @@ function securityFixture(overrides = {}) {
     return {context, auth, saves, authObserver, run: code => vm.runInContext(code, context)};
 }
 
+test('read-only unlock predicate requires current identity, RAM key and unexpired unlocked session', () => {
+    let expiry = null;
+    const f = securityFixture({getVaultSessionExpiry: () => expiry});
+    assert.equal(f.run('isVaultUnlocked()'), false);
+    f.run("_vaultKeyMaterial = 'synthetic-key'");
+    assert.equal(f.run('isVaultUnlocked()'), true);
+    expiry = Date.now() - 1;
+    assert.equal(f.run('isVaultUnlocked()'), false);
+    expiry = Date.now() + 60000;
+    assert.equal(f.run('isVaultUnlocked()'), true);
+    f.auth.currentUser = {uid: 'uid-b'};
+    assert.equal(f.run('isVaultUnlocked()'), false);
+    f.auth.currentUser = {uid: 'uid-a'};
+    f.run('_isSoftLocked = true');
+    assert.equal(f.run('isVaultUnlocked()'), false);
+    assert.equal(f.saves.length, 0);
+});
+
 for (const action of ['softLock()', 'clearSession()', 'resetVault()']) {
     test(`${action} emits a payload-free lock event after clearing the key with the same UID`, async () => {
         const events = [];

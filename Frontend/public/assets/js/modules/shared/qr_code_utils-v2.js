@@ -147,7 +147,7 @@ export function renderQRCode(container, text, options = {}) {
             message.style.cssText = 'color:red; font-size:0.75rem; text-align:center; padding:10px;';
             message.append('Dati eccessivi', document.createElement('br'), 'per il QR Code');
             container.replaceChildren(message);
-            showToast("Dati eccessivi. Riduci i campi.", "warning");
+            // Il messaggio nel contenitore non dipende da funzioni UI globali.
         }
     }
 }

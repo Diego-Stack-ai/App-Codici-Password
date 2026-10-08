@@ -4,6 +4,9 @@ const {readFileSync} = require('node:fs');
 const vm = require('node:vm');
 const {HttpsError} = require('firebase-functions/v2/https');
 const policy = require('../archive-purge-service');
+// Historical algorithm coverage only; live interlock is tested separately.
+// This override exists only in the isolated VM fixture, never in the endpoint.
+const legacyPolicy = {...policy, isArchivePurgeSuspended: () => false};
 const receipts = require('../archive-purge-receipt');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
@@ -15,20 +18,21 @@ function fixture() {
   const accesses = {validation: 0, firestore: 0, storage: 0, recursiveDelete: 0};
   const reads = [], writes = [];
   const states = new Map();
+  states.set('users/A/accounts/account', {isArchived: true, revision: 1});
   const ref = path => ({path, collection: key => ref(`${path}/${key}`), doc: key => ref(`${path}/${key}`),
     get: async () => { reads.push(path); return {docs: []}; }});
   const store = {collection: ref, doc: ref,
-    recursiveDelete: async reference => { accesses.recursiveDelete++; writes.push(reference.path); },
+    recursiveDelete: async reference => { accesses.recursiveDelete++; writes.push(reference.path); states.delete(reference.path); },
     runTransaction: async callback => callback({
       get: async reference => {
         reads.push(reference.path);
-        const record = reference.path === 'users/A/accounts/account' ? {isArchived: true, revision: 1} : states.get(reference.path);
+        const record = states.get(reference.path);
         return {exists: !!record, data: () => record, docs: []};
       },
       set: (reference, value) => { writes.push(reference.path); states.set(reference.path, {...states.get(reference.path), ...value}); },
       update: reference => writes.push(reference.path),
     })};
-  const context = vm.createContext({...policy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...legacyPolicy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
     validatePurgeCommand: data => { accesses.validation++; return policy.validatePurgeCommand(data); },
     getFirestore: () => { accesses.firestore++; return store; },
     getStorage: () => { accesses.storage++; return {bucket: () => ({})}; },

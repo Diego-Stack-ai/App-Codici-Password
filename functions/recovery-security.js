@@ -6,6 +6,13 @@ const RECOVERY_WINDOW_MS = 15 * 60 * 1000;
 const RECOVERY_BLOCK_MS = 30 * 60 * 1000;
 const RECOVERY_MAX_ATTEMPTS = 5;
 
+function hasRecentAuthentication(token, now = Date.now()) {
+  const seconds = token?.auth_time;
+  if (!Number.isSafeInteger(seconds) || seconds <= 0 || !Number.isSafeInteger(now) || now < 0) return false;
+  const currentSeconds = Math.floor(now / 1000);
+  return seconds <= currentSeconds && currentSeconds - seconds <= 300;
+}
+
 function normalizeRecoveryCode(value) {
   return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
@@ -15,10 +22,9 @@ function recoveryCodeHash(value) {
 }
 
 function generateRecoveryCode() {
-  const bytes = crypto.randomBytes(RECOVERY_CODE_LENGTH);
   let raw = '';
   for (let i = 0; i < RECOVERY_CODE_LENGTH; i += 1) {
-    raw += RECOVERY_ALPHABET[bytes[i] % RECOVERY_ALPHABET.length];
+    raw += RECOVERY_ALPHABET[crypto.randomInt(RECOVERY_ALPHABET.length)];
   }
   return raw.match(/.{1,4}/g).join('-');
 }
@@ -30,13 +36,22 @@ function recoveryAttemptId(email, ipAddress) {
 }
 
 function nextRecoveryAttemptState(previous, now = Date.now()) {
-  const state = previous || {};
-  if (Number(state.blockedUntil || 0) > now) {
-    return {allowed: false, blockedUntil: Number(state.blockedUntil)};
+  const validInteger = value => Number.isSafeInteger(value) && value >= 0;
+  if (!validInteger(now) || now > Number.MAX_SAFE_INTEGER - RECOVERY_BLOCK_MS) {
+    throw new Error('RECOVERY_ATTEMPT_STATE');
   }
-  const sameWindow = Number(state.windowStartedAt || 0) > now - RECOVERY_WINDOW_MS;
-  const attempts = (sameWindow ? Number(state.attempts || 0) : 0) + 1;
-  const windowStartedAt = sameWindow ? Number(state.windowStartedAt) : now;
+  const state = previous == null ? {attempts: 0, windowStartedAt: now, blockedUntil: 0} : previous;
+  if (typeof state !== 'object' || Array.isArray(state) ||
+      !validInteger(state.attempts) || !validInteger(state.windowStartedAt) ||
+      !validInteger(state.blockedUntil) || state.attempts >= Number.MAX_SAFE_INTEGER) {
+    throw new Error('RECOVERY_ATTEMPT_STATE');
+  }
+  if (state.blockedUntil > now) {
+    return {allowed: false, attempts: state.attempts, windowStartedAt: state.windowStartedAt, blockedUntil: state.blockedUntil};
+  }
+  const sameWindow = state.windowStartedAt > now - RECOVERY_WINDOW_MS;
+  const attempts = (sameWindow ? state.attempts : 0) + 1;
+  const windowStartedAt = sameWindow ? state.windowStartedAt : now;
   if (attempts > RECOVERY_MAX_ATTEMPTS) {
     return {allowed: false, attempts, windowStartedAt, blockedUntil: now + RECOVERY_BLOCK_MS};
   }
@@ -45,6 +60,7 @@ function nextRecoveryAttemptState(previous, now = Date.now()) {
 
 module.exports = {
   RECOVERY_CODE_LENGTH,
+  hasRecentAuthentication,
   generateRecoveryCode,
   nextRecoveryAttemptState,
   normalizeRecoveryCode,

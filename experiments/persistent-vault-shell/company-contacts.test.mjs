@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {companyContactBasis, companyContactCipher, companyContactsRevision, companyContactsView,
     validateCompanyContactsRequest} from './company-contacts-contract.mjs';
@@ -12,6 +13,24 @@ const cipher = value => `${Buffer.alloc(48, 42).toString('base64')}${Buffer.from
 const isCipher = value => typeof value === 'string' && value !== '' && value.length >= 60 && value.length % 4 === 0 &&
     /^[A-Za-z0-9+/]+={0,2}$/.test(value);
 const COMPANY = 'users/owner/aziende/company';
+test('browser fixture uses canonical plain company phone without weakening encrypted emails', async () => {
+    const seed = await readFile(new URL('./emulator-browser.mjs', import.meta.url), 'utf8');
+    assert.ok(seed.includes("telefonoAzienda: '111111111'"), 'company phone must be a plain fixture');
+    assert.ok(seed.includes("email: await encrypted('pec@example.invalid')"));
+});
+test('multiple deletions cannot shift the QR protection onto another row', async () => {
+    const record = records();
+    record.emails.extra = [
+        {id: 'company-email-first', qr: false},
+        {id: 'company-email-protected', qr: true}
+    ];
+    const f = fixture(record);
+    const request = {target: {domain: 'company', companyId: 'company'}, expectedOwnerUid: 'owner',
+        expectedRevision: 1, operationId: 'multi-delete',
+        operations: record.emails.extra.map(item => ({kind: 'email-extra-delete', id: item.id, basis: hash(companyContactBasis(item))}))};
+    await assert.rejects(f.handler(request, f.trusted), /QR_SELECTED/);
+    assert.deepEqual(f.stored.get(COMPANY), record);
+});
 // The real company schema: fixed e-mail slots (one with a legacy password, one
 // linked to an Account), a repeatable list with and without a stable id, plain
 // telephone strings, a link map, a card selection, unknown fields, a legacy
@@ -224,7 +243,7 @@ test('a linked or published contact cannot be emptied and a legacy fallback cann
     // the slot, and hiding it would need a separate, explicit migration.
     const legacy = fixture({...records(), emails: {pec: {tipo: 'PEC'}, amministrazione: {}, personale: {}, extra: []}});
     legacy.stored.get(legacy.path).qrConfig = {aziendaEmail: false};
-    const direct = {target: {domain: 'company', companyId: 'company'}, expectedRevision: 1, operationId: 'operation',
+    const direct = {target: {domain: 'company', companyId: 'company'}, expectedOwnerUid: 'owner', expectedRevision: 1, operationId: 'operation',
         operations: [{kind: 'email-slot', id: 'pec', fields: {email: ''},
             basis: hash(companyContactBasis(legacy.stored.get(legacy.path).emails.pec))}]};
     await assert.rejects(legacy.handler(direct, legacy.trusted), /COMPANY_CONTACTS_LEGACY_FALLBACK/);

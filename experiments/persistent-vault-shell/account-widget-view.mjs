@@ -1,6 +1,6 @@
-// Consultation-only shell composition: canonical Widget class names, capability reads,
-// no legacy session manager or editor/writer imports.
-export async function mountAccountWidgetView(root, context, {reader, allowSecretCopy = false, copyText = value => navigator.clipboard.writeText(value)}) {
+// Shell composition: canonical Widget class names, capability reads and optional
+// scoped edit callback; no legacy session manager or editor/writer imports.
+export async function mountAccountWidgetView(root, context, {reader, onEdit, onEditShared, onCreate, allowSecretCopy = false, copyText = value => navigator.clipboard.writeText(value)}) {
     const host = document.createElement('section'); host.className = 'account-widgets-section';
     const status = document.createElement('p'); status.setAttribute('role', 'status');
     const controls = new AbortController(), values = [], texts = [];
@@ -27,6 +27,15 @@ export async function mountAccountWidgetView(root, context, {reader, allowSecret
         check(); context.signal.addEventListener('abort', dispose, {once: true});
         host.append(status); root.append(host);
         const widgets = await reader.list(); check();
+        if (typeof onCreate === 'function') {
+            const create = label('button', 'Nuovo widget'); create.type = 'button';
+            create.addEventListener('click', async () => {
+                try {check(); create.disabled = true; await onCreate();}
+                catch {if (!disposed) status.textContent = 'Creazione non disponibile. Riapri il dettaglio.';}
+                finally {if (!disposed) create.disabled = false;}
+            }, {signal: controls.signal});
+            host.append(create);
+        }
         let bankDeferred = false;
         for (const widget of widgets) {
             check();
@@ -74,10 +83,20 @@ export async function mountAccountWidgetView(root, context, {reader, allowSecret
                 }
                 card.append(row);
             }
+            const editCallback = widget.kind === 'embedded' ? onEdit : widget.kind === 'shared-reference' ? onEditShared : undefined;
+            if (typeof editCallback === 'function') {
+                const edit = label('button', widget.kind === 'shared-reference' ? 'Modifica credenziale comune' : 'Modifica widget'); edit.type = 'button';
+                edit.addEventListener('click', async () => {
+                    try {check(); edit.disabled = true; await editCallback(widget.id);}
+                    catch {if (!disposed) status.textContent = 'Editor non disponibile. Riapri il dettaglio.';}
+                    finally {if (!disposed) edit.disabled = false;}
+                }, {signal: controls.signal});
+                card.append(edit);
+            }
             host.append(card);
         }
         if (bankDeferred) status.textContent = 'I campi collegati ai conti saranno disponibili nel modulo bancario della shell.';
-        if (!widgets.length) host.hidden = true;
+        if (!widgets.length && typeof onCreate !== 'function') host.hidden = true;
         check(); return dispose;
     } catch {
         if (disposed || context.signal.aborted) { dispose(); return dispose; }

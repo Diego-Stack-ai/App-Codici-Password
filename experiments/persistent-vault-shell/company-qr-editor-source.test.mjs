@@ -20,8 +20,9 @@ test('company editor projects fourteen labels without reading secrets and prepar
     assert.equal(view.choices.length, 14); assert.doesNotMatch(JSON.stringify(view), /SECRET|password|ownerId/);
     assert.equal(view.selection.telefonoAzienda, false);
     const prepared = await f.editor.prepare({...view.selection, telefonoAzienda: true});
-    const request = createCompanyQrRequest(prepared, 'op');
-    assert.deepEqual(Object.keys(request).sort(), ['companyId', 'expectedConfig', 'operationId', 'selection']);
+    const request = createCompanyQrRequest(prepared, 'op', 'owner');
+    assert.deepEqual(Object.keys(request).sort(), ['companyId', 'expectedConfig', 'expectedOwnerUid', 'operationId', 'selection']);
+    assert.equal(request.expectedOwnerUid, 'owner');
     assert.equal(request.companyId, 'company'); assert.equal(request.selection.telefonoAzienda, true);
     assert.ok(Object.isFrozen(request) && Object.isFrozen(request.selection) && Object.isFrozen(request.expectedConfig));
     assert.ok(f.state.reads.every(value => value.uid === 'owner' && value.confirmed));

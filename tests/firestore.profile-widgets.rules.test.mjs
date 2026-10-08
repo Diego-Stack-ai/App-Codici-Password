@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
 import {collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc} from 'firebase/firestore';
 
-const PROJECT_ID = 'codici-password-rules-test';
+const PROJECT_ID = 'demo-codici-password-rules-test';
 const OWNER_UID = 'owner-user';
 const OTHER_UID = 'other-user';
 let testEnv;

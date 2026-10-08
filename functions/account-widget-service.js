@@ -59,7 +59,8 @@ function validateAccountWidgetCommand(input = {}) {
     ...widgetContext(input)
   };
   if (action !== "create") {
-    if (!Number.isInteger(input.expectedRevision) || input.expectedRevision < 1) {
+    if (!Number.isSafeInteger(input.expectedRevision) || input.expectedRevision < 1 ||
+        input.expectedRevision >= Number.MAX_SAFE_INTEGER) {
       throw new Error("ACCOUNT_WIDGET_REVISION_INVALID");
     }
     command.expectedRevision = input.expectedRevision;

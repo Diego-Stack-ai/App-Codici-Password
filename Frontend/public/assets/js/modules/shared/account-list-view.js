@@ -82,14 +82,19 @@ function createAccountCard(account, options) {
     const isMemo = mode.startsWith('memo-');
     const isShared = mode.endsWith('-shared');
     const isPinned = Boolean(account.isPinned);
+    // M7-R7C-4: un accesso sospeso (Account nell'Archivio) resta riconoscibile
+    // nella lista, ma la card non è apribile e non mostra contenuti dell'Account:
+    // i suoi dati arrivano dal solo invito.
+    const suspended = account._suspended === true;
     const themeKey = isShared && isMemo ? 'shared_memo' : isShared ? 'shared' : isMemo ? 'memo' : 'standard';
     const theme = options.themes[themeKey];
 
     return createElement('div', {
         className: 'account-card swipe-row',
-        dataset: { id: account.id, owner: String(account.isOwner), action: 'navigate' },
+        dataset: { id: account.id, owner: String(account.isOwner), action: suspended ? 'suspended' : 'navigate' },
         onclick: event => {
             if (event.target.closest('button')) return;
+            if (suspended) return;
             options.onNavigate(account);
         }
     }, [
@@ -116,11 +121,11 @@ function createAccountCard(account, options) {
                         }),
                         createElement('p', {
                             className: 'account-card-subtitle',
-                            textContent: options.getSubtitle(account)
+                            textContent: suspended ? t('account_suspended_label') : options.getSubtitle(account)
                         })
                     ])
                 ]),
-                options.readOnly ? null : createElement('div', { className: 'account-card-right' }, [
+                options.readOnly || suspended ? null : createElement('div', { className: 'account-card-right' }, [
                     createElement('button', {
                         className: `btn-mini-action ${isPinned ? 'active' : ''}`,
                         onclick: event => {

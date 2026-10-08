@@ -5,7 +5,7 @@ import {createRequire} from 'node:module';
 import {initializeApp, deleteApp} from 'firebase/app';
 import {initializeAuth, inMemoryPersistence, connectAuthEmulator, createUserWithEmailAndPassword} from 'firebase/auth';
 import {getFirestore, connectFirestoreEmulator, doc, setDoc, updateDoc, deleteDoc, getDocFromServer, terminate} from 'firebase/firestore';
-import {createFirebaseSession} from './firebase-session.mjs';
+import {createFirebaseSession} from './test-support/firebase-session.mjs';
 import {preparePrivateAccountMutation} from './prepare-private-account-mutation.mjs';
 import {createPrivateAccountSaveController} from './private-account-save-controller.mjs';
 
@@ -46,7 +46,11 @@ test('original private-account handler persists prepared ciphertext in the demo 
         const record = {ownerId: user.uid, schemaVersion: 1, revision: 1, type: 'account', visibility: 'private', _encrypted: true,
             nomeAccount: 'Titolo legacy sintetico', url: 'https://example.invalid'};
         for (const field of ['username', 'account', 'password', 'note']) record[field] = await cryptoApi.encrypt(`ORIGINAL-${suffix}-${field}`, key);
-        await setDoc(doc(db, 'users', user.uid, 'accounts', 'fixture'), record);
+        // Fixture preparation is not a client-create authorization test. The
+        // browser laboratory installs candidate rules denying legacy client
+        // writes; seed this legacy record administratively on the guarded demo
+        // emulator only. All handler/read/receipt-denial assertions stay intact.
+        await getAdminFirestore().doc(`users/${user.uid}/accounts/fixture`).set(record);
         client.originalPassword = record.password;
         client.session = createFirebaseSession({auth, db, cryptoApi, requestPassword: async () => master,
             routes: {overview: context => { client.context = context; }}});
