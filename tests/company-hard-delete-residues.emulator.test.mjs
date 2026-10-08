@@ -41,13 +41,16 @@ const adminApp = initializeApp({projectId: PROJECT_ID, storageBucket: `${PROJECT
     `company-delete-${process.pid}`);
 const adminDb = getFirestore(adminApp);
 let bucket = null;
-const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'console',
+const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'isArchivePurgeSuspended',
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
+    'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, {log() {}, warn() {}, error() {}},
+    () => false,
     policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
-    policy.validatePurgeCommand, receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
+    policy.validatePurgeCommand, policy.assertNoExternalAccountReferences,
+    receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
     (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}));
 
 // Client: stesso codice di produzione usato dall'app, con i veri SDK web.

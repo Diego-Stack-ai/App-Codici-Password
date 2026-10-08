@@ -65,12 +65,16 @@ const purgeStore = {
     }
 };
 
-const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console',
+const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'isArchivePurgeSuspended',
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
+    'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
-    {log() {}, warn() {}, error() {}}, policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision,
-    policy.planProfileReferenceCleanup, policy.validatePurgeCommand, purgeReceipts.createArchivePurgeBinding,
+    {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision,
+    policy.planProfileReferenceCleanup, policy.validatePurgeCommand,
+    // Historical purge/restore characterization: live purge safety interlocks
+    // are verified separately and intentionally bypassed in this laboratory.
+    () => {}, purgeReceipts.createArchivePurgeBinding,
     purgeReceipts.verifyArchivePurgeReceipt, (_options, run) => run, () => purgeStore, () => ({bucket: () => bucket}));
 
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',

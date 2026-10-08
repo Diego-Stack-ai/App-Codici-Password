@@ -40,6 +40,7 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
         await setDoc(doc(client.db, 'users', user.uid, 'settings', 'security'), {verifier, vaultKeyEnvelope});
         const ciphertext = await cryptoApi.encrypt(`SECRET-FITTIZIO-${suffix}`, key);
         await setDoc(doc(client.db, 'users', user.uid, 'accounts', 'private'), {ownerId: user.uid, _encrypted: true, password: ciphertext});
+        await setDoc(doc(client.db, 'users', user.uid, 'aziende', 'company'), {ownerId: user.uid, name: `Company ${suffix}`});
         await setDoc(doc(client.db, 'users', user.uid, 'aziende', 'company', 'accounts', 'company-record'), {ownerId: user.uid, _encrypted: true, username: ciphertext});
         return {uid: user.uid, email, ciphertext};
     }

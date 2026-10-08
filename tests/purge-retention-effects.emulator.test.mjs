@@ -44,13 +44,16 @@ const bucket = getStorage(app).bucket(`${PROJECT_ID}.appspot.com`);
 
 // Il purge viene montato con `new Function`, quindi **nello stesso realm**
 // dell'Admin SDK; `onCall` esegue direttamente il corpo della callable.
-const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'Timestamp', 'console',
+const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'Timestamp', 'console', 'isArchivePurgeSuspended',
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
+    'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, Timestamp, {log() {}, warn() {}, error() {}},
+    () => false,
     policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
-    policy.validatePurgeCommand, receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
+    policy.validatePurgeCommand, policy.assertNoExternalAccountReferences,
+    receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
     (_options, run) => run, () => db, () => ({bucket: () => bucket}));
 
 const silentConsole = {log() {}, warn() {}, error() {}};
@@ -113,9 +116,13 @@ async function seedAll() {
     await db.doc(`users/${OWNER}/trash/trashed-record`).set({deletedAt: OLD, purgeAfterMs: NOW - DAY, payload: 'synthetic'});
     await db.doc(legacyReceiptPath).set({status: 'processing', accountId: 'unrelated-account', context: 'private'});
     await db.doc(`users/${OWNER}/operationResults/operation-1`).set({createdAt: OLD});
-    await db.doc(`users/${OWNER}/accountWidgets/widget-1`).set({title: 'synthetic'});
+    await db.doc(`users/${OWNER}/accountWidgets/widget-1`).set({
+        title: 'synthetic', context: 'private', accountId: 'unrelated-account'
+    });
     await db.doc(`users/${OWNER}/sharedVaultData/shared-1`).set({ownerId: OWNER});
-    await db.doc(`users/${OWNER}/sharedVaultLinks/link-1`).set({recordId: 'shared-1'});
+    await db.doc(`users/${OWNER}/sharedVaultLinks/link-1`).set({
+        recordId: 'shared-1', context: 'private', accountId: 'unrelated-account'
+    });
     await db.doc(`users/${OWNER}/auditEvents/previous-event`).set({action: 'trashed', actorUid: OWNER, at: OLD});
     // Una ricevuta di idempotenza **fidata** in `processing`: è il caso di ripresa.
     // Serve anche a mostrare che una ricevuta legacy presente non viene cancellata
