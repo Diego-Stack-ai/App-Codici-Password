@@ -4,12 +4,13 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-shared-credentials.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/export (async )?function/g, '$1function');
 test('new account link action saves first and never links an absent record', () => {
-    let clicks = 0, visible = false;
+    let clicks = 0, visible = false, destroyed;
     const add = {}, save = {disabled:false,dataset:{},click(){clicks++;}};
     const nodes = {'shared-credentials-section':{classList:{remove(){visible=true;}}},'btn-link-shared-credential':add,save};
-    const sandbox = {document:{getElementById:id=>nodes[id]},navigator:{onLine:true},showToast(){}};
+    const sandbox = {destroyAccountWidgetMount:section=>{destroyed=section;},document:{getElementById:id=>nodes[id]},navigator:{onLine:true},showToast(){}};
     vm.createContext(sandbox);vm.runInContext(source,sandbox);
     sandbox.initNewAccountSharedCredentials({saveButtonId:'save'});
+    assert.equal(destroyed,nodes['shared-credentials-section']);
     assert.equal(visible,true);assert.match(add.textContent,/Salva Account/);
     add.onclick();assert.equal(clicks,1);assert.equal(save.dataset.openSharedCredentials,'true');
     save.disabled=true;add.onclick();assert.equal(clicks,1);

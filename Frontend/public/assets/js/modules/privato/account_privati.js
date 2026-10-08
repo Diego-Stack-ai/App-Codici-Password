@@ -6,7 +6,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
 
 import { db } from '../../firebase-config.js?v=1.2.128';
 import { LOG } from '../../logger.js';
-import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -14,313 +14,442 @@ import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
     getRecordByPath,
-    getUserProfile,
     listAcceptedInvites,
     listPrivateAccounts,
     listPrivateAccountsConfirmed
 } from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
-import {createArchiveMetadata} from '../settings/archive-account-model.js';
+import { archiveAccount } from '../settings/archive-account-service.js';
+import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
 
-// --- STATE ---
-let allAccounts = [];
-let currentUser = null;
-let sortOrder = 'asc';
-
-const THEMES = {
-    standard: { accent: 'bg-blue-500', text: 'text-blue-400' },
-    shared: { accent: 'bg-purple-500', text: 'text-purple-400' },
-    memo: { accent: 'bg-amber-500', text: 'text-amber-400' },
-    shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
-};
-
-const accountListView = createAccountListView({
-    themes: THEMES,
-    emptyStateClass: 'text-center py-10',
-    emptyTextClass: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6',
-    getSubtitle: account => account.username || account.email || 'Utente Nascosto',
-    onNavigate(account) {
-        if (account._aziendaId) {
-            window.location.href = `dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`;
-        } else {
-            window.location.href = `dettaglio_account_privato.html?id=${account.id}${account.isOwner ? '' : `&ownerId=${account.ownerId}`}`;
-        }
-    },
-    onPin: togglePin,
-    onDelete: handleDelete,
-    onArchive: handleArchive
-});
-
-/**
- * ACCOUNT PRIVATI MODULE (V5.0 ADAPTER)
- * Gestione liste account: personali, condivisi, memorandum.
- * - Entry Point: initAccountPrivati(user)
- */
-
-export async function initAccountPrivati(user) {
-    
-    if (!user) return;
-    currentUser = user;
-
-    // Nota: initComponents() rimosso (gestito da main.js)
-
-    setupUI();
-    await loadAccounts();
-    
+// Compatibility entry point: one active mount per canonical document.
+let activeMount = null;
+export async function initAccountPrivati(user, options = {}) {
+    activeMount?.destroy();
+    const mounted = mountAccountPrivati(user, options);
+    activeMount = mounted;
+    await mounted.ready;
+    return mounted.destroy;
 }
 
-function setupUI() {
-    // Override freccia back -> sempre verso area_privata.html
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.href = 'area_privata.html'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
+// Each mount owns its state, listeners and pending consumers.
+export function mountAccountPrivati(user, options = {}) {
+    const lifecycle = new AbortController();
+    const signal = lifecycle.signal;
+    const query = options.search ?? window.location.search;
+    const navigate = url => {
+        if (signal.aborted) return;
+        if (options.navigate) options.navigate(url);
+        else window.location.href = url;
+    };
+    const content = document.getElementById('accounts-container');
+    function assertActive() { if (signal.aborted) throw new DOMException('Page unmounted', 'AbortError'); }
+    async function waitFor(promise) { const result = await promise; assertActive(); return result; }
+    async function readField(record, field) {
+        assertActive();
+        return waitFor(options.readField(record, field));
+    }
+    function destroy() {
+        if (signal.aborted) return;
+        lifecycle.abort();
+        options.signal?.removeEventListener('abort', destroy);
+        accountListView.destroy();
+        allAccounts = [];
+        currentUser = null;
+        if (content) clearElement(content);
     }
 
-    const searchInput = document.getElementById('account-search');
-    if (searchInput) {
-        searchInput.addEventListener('input', filterAndRender);
-    }
+    // --- STATE ---
+    let allAccounts = [];
+    let currentUser = null;
+    let sortOrder = 'asc';
 
-    // Sort Button Logic (Toggle)
-    const sortBtn = document.getElementById('sort-btn');
-    const sortLabel = document.getElementById('sort-label');
+    const THEMES = {
+        standard: { accent: 'bg-blue-500', text: 'text-blue-400' },
+        shared: { accent: 'bg-purple-500', text: 'text-purple-400' },
+        memo: { accent: 'bg-amber-500', text: 'text-amber-400' },
+        shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
+    };
 
-    if (sortBtn && sortLabel) {
-        sortBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Toggle Sort Order
-            sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
-
-            // Update UI
-            sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
-
-            // Re-render
-            filterAndRender();
-        });
-    }
-
-    // Aggiungi pulsanti FAB nel footer center
-    const fCenter = document.getElementById('footer-center-actions');
-    if (fCenter) {
-        clearElement(fCenter);
-        const type = new URLSearchParams(window.location.search).get('type') || 'standard';
-        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
-            createElement('a', {
-                href: 'archivio_account.html',
-                className: 'btn-fab-action btn-fab-archive',
-                title: t('account_archive') || 'Archivio',
-                dataset: { label: t('archive') || 'Archivio' }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
-            ]),
-            createElement('button', {
-                id: 'add-account-btn',
-                className: 'btn-fab-action btn-fab-scadenza',
-                title: t('add_account') || 'Nuovo Account',
-                dataset: { label: t('add_short') || 'Aggiungi' },
-                onclick: () => window.location.href = `form_account_privato.html?type=${type}`
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
-            ])
-        ]));
-    }
-}
-
-/**
- * LOADING ENGINE
- */
-async function loadAccounts() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('m6refresh') === '1') && navigator.onLine;
-        let sharedWithMe = [];
-
-        // 1. Invitations Accepted
-        LOG('[ACCOUNTS] Searching invites for authenticated user');
-        // Account propri e inviti sono indipendenti: avviamo entrambe le letture
-        // subito, mantenendo invariato il successivo assemblaggio delle card.
-        const ownAccountsPromise = requireServerRefresh
-            ? listPrivateAccountsConfirmed(currentUser.uid)
-            : listPrivateAccounts(currentUser.uid);
-        const invites = await listAcceptedInvites(currentUser.email);
-        LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
-
-        const invitePromises = invites.map(async inv => {
-            const inviteId = inv.id;
-            try {
-                const senderId = inv.senderId || inv.senderUid || inv.ownerId;
-                if (!senderId) {
-                    console.error(`[ACCOUNTS] Invite ${inviteId} skipped: missing sender/owner ID`);
-                    return null;
-                }
-
-                let accPath = `users/${senderId}/accounts/${inv.accountId}`;
-                // Consider empty string or null as no azienda
-                if (inv.aziendaId && inv.aziendaId.trim() !== "") {
-                    accPath = `users/${senderId}/aziende/${inv.aziendaId}/accounts/${inv.accountId}`;
-                }
-
-                LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
-                const sharedAccount = await getRecordByPath(accPath);
-
-                if (sharedAccount) {
-                    LOG('[ACCOUNTS] Shared account loaded');
-                    return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
-                } else {
-                    console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
-                }
-            } catch (e) {
-                console.error(`[ACCOUNTS] ERROR loading ${inviteId}:`, e.message);
+    const accountListView = createAccountListView({
+        resolveSecret: options.readField ? readField : undefined,
+        readOnly: options.readOnly === true,
+        themes: THEMES,
+        emptyStateClass: 'text-center py-10',
+        emptyTextClass: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6',
+        getSubtitle: account => account.username || account.email || 'Utente Nascosto',
+        onNavigate(account) {
+            if (signal.aborted) return;
+            if (account._suspended) return; // M7-R7C-4: nessuna apertura per un accesso sospeso
+            if (account._aziendaId) {
+                navigate(`dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`);
+            } else {
+                navigate(`dettaglio_account_privato.html?id=${account.id}${account.isOwner ? '' : `&ownerId=${account.ownerId}`}`);
             }
-            return null;
-        });
-        sharedWithMe = (await Promise.all(invitePromises)).filter(Boolean);
-        LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
+        },
+        onPin: togglePin,
+        onDelete: handleDelete,
+        onArchive: handleArchive
+    });
 
-        // 2. Own Accounts
-        LOG('[ACCOUNTS] Loading own accounts');
-        const ownRecords = await ownAccountsPromise;
-        if (requireServerRefresh) {
-            const pilot = await import('../data/private-account-offline-pilot.js');
-            const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
-            if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) {
-                ownRecords.push(handoffRecord);
-            }
-        }
-        LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
-        const ownAccounts = ownRecords.map(data => {
-            const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
-            return {
-                ...data,
-                id: data.id,
-                isOwner: isRealOwner,
-                ownerId: data.ownerId || currentUser.uid,
-                _isGuest: !isRealOwner
-            };
-        }).filter(a => !a.isArchived);
+    /**
+     * ACCOUNT PRIVATI MODULE (V5.0 ADAPTER)
+     * Gestione liste account: personali, condivisi, memorandum.
+     * - Entry Point: initAccountPrivati(user)
+     */
 
-        allAccounts = [...ownAccounts, ...sharedWithMe];
+    async function start() {
+    
+        if (!user) return;
+        currentUser = user;
 
-        if (requireServerRefresh) {
-            urlParams.delete('afterWrite');
-            urlParams.delete('m6refresh');
-            const cleanQuery = urlParams.toString();
-            window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+        // Nota: initComponents() rimosso (gestito da main.js)
+
+        setupUI();
+        await loadAccounts();
+    
+    }
+
+    function setupUI() {
+        // Override freccia back -> sempre verso area_privata.html
+        const hLeft = document.getElementById('header-left');
+        if (hLeft) {
+            clearElement(hLeft);
+            setChildren(hLeft, createElement('button', {
+                className: 'btn-icon-header',
+                onclick: () => navigate('area_privata.html')
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+            ]));
         }
 
-        // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
-        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
-        if (vaultKeyMaterial) {
-            allAccounts = await Promise.all(allAccounts.map(async acc => {
-                if (acc._encrypted) {
-                    try {
-                        acc.username = acc.username ? await decrypt(acc.username, vaultKeyMaterial) : acc.username;
-                        acc.account = acc.account ? await decrypt(acc.account, vaultKeyMaterial) : acc.account;
-                        // La password non è visibile né ricercabile nella lista:
-                        // resta cifrata finché non viene aperto il dettaglio.
-                    } catch (e) {
-                        console.error("[Accounts] Decryption failed for:", acc.id, e);
+        const searchInput = document.getElementById('account-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterAndRender, {signal});
+        }
+
+        // Sort Button Logic (Toggle)
+        const sortBtn = document.getElementById('sort-btn');
+        const sortLabel = document.getElementById('sort-label');
+
+        if (sortBtn && sortLabel) {
+            sortLabel.textContent = 'A-Z';
+            sortBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Toggle Sort Order
+                sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
+
+                // Update UI
+                sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
+
+                // Re-render
+                filterAndRender();
+            }, {signal});
+        }
+
+        // Aggiungi pulsanti FAB nel footer center
+        const fCenter = document.getElementById('footer-center-actions');
+        if (fCenter && !options.readOnly) {
+            clearElement(fCenter);
+            const type = new URLSearchParams(query).get('type') || 'standard';
+            setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+                createElement('a', {
+                    href: 'archivio_account.html',
+                    className: 'btn-fab-action btn-fab-archive',
+                    title: t('account_archive') || 'Archivio',
+                    dataset: { label: t('archive') || 'Archivio' }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
+                ]),
+                createElement('button', {
+                    id: 'add-account-btn',
+                    className: 'btn-fab-action btn-fab-scadenza',
+                    title: t('add_account') || 'Nuovo Account',
+                    dataset: { label: t('add_short') || 'Aggiungi' },
+                    onclick: () => navigate(`form_account_privato.html?type=${type}`)
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                ])
+            ]));
+        }
+    }
+
+    /**
+     * LOADING ENGINE
+     */
+    async function loadAccounts() {
+        try {
+            const urlParams = new URLSearchParams(query);
+            const requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('m6refresh') === '1') && navigator.onLine;
+            let sharedWithMe = [];
+
+            // 1. Invitations Accepted
+            LOG('[ACCOUNTS] Searching invites for authenticated user');
+            // Account propri e inviti sono indipendenti: avviamo entrambe le letture
+            // subito, mantenendo invariato il successivo assemblaggio delle card.
+            const ownAccountsPromise = requireServerRefresh
+                ? listPrivateAccountsConfirmed(currentUser.uid)
+                : listPrivateAccounts(currentUser.uid);
+            const [ownResult, invites] = await waitFor(Promise.all([ownAccountsPromise, listAcceptedInvites(currentUser.email)]));
+            LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
+
+            const invitePromises = invites.map(async inv => {
+                const inviteId = inv.id;
+                try {
+                    const senderId = inv.senderId || inv.senderUid || inv.ownerId;
+                    if (!senderId) {
+                        console.error(`[ACCOUNTS] Invite ${inviteId} skipped: missing sender/owner ID`);
+                        return null;
                     }
+
+                    // M7-R7C-4: un invito sospeso (Account nell'Archivio) non concede
+                    // lettura e non si tenta il get sull'Account, negato dalle Rules:
+                    // la card si costruisce dal solo invito, con il nome che già
+                    // contiene e nessun altro dato.
+                    if (inv.sharingState === 'suspended') {
+                        return {
+                            id: inv.accountId,
+                            nomeAccount: inv.accountName || '',
+                            isOwner: false,
+                            ownerId: senderId,
+                            _isGuest: true,
+                            _suspended: true,
+                            _aziendaId: inv.aziendaId || '',
+                            cycle: inv.cycle
+                        };
+                    }
+
+                    let accPath = `users/${senderId}/accounts/${inv.accountId}`;
+                    // Consider empty string or null as no azienda
+                    if (inv.aziendaId && inv.aziendaId.trim() !== "") {
+                        accPath = `users/${senderId}/aziende/${inv.aziendaId}/accounts/${inv.accountId}`;
+                    }
+
+                    LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
+                    const sharedAccount = await waitFor(getRecordByPath(accPath));
+
+                    if (sharedAccount) {
+                        LOG('[ACCOUNTS] Shared account loaded');
+                        return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
+                    } else {
+                        console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
+                    }
+                } catch (e) {
+                    if (signal.aborted) return;
+                    console.error(`[ACCOUNTS] ERROR loading ${inviteId}:`, e.message);
                 }
-                return acc;
-            }));
-        }
-
-        filterAndRender();
-    } catch (e) {
-        logError("LoadAccounts", e);
-        showToast(readErrorMessage(e, t('error_generic')), "error");
-    }
-}
-
-/**
- * FILTER & RENDER
- */
-function filterAndRender() {
-    const type = new URLSearchParams(window.location.search).get('type') || 'standard';
-    const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
-
-    let filtered = allAccounts.filter(acc => {
-        const mode = accountModeFromRecord(acc);
-        if (type === 'standard') return mode === 'account-private';
-        if (type === 'shared') return mode === 'account-shared';
-        if (type === 'memo') return mode === 'memo-private';
-        if (type === 'shared_memo') return mode === 'memo-shared';
-        return true;
-    });
-
-    if (searchVal) {
-        filtered = filtered.filter(acc =>
-            (acc.nomeAccount || '').toLowerCase().includes(searchVal) ||
-            (acc.username || '').toLowerCase().includes(searchVal)
-        );
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        const nA = (a.nomeAccount || '').toLowerCase();
-        const nB = (b.nomeAccount || '').toLowerCase();
-        return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
-    });
-
-    accountListView.render(filtered);
-}
-
-/**
- * ACTIONS
- */
-async function togglePin(acc) {
-    if (!acc.isOwner) { showToast(t('error_only_owner_pin') || "Solo il proprietario può fissare l'account", "info"); return; }
-    try {
-        const newVal = !acc.isPinned;
-        await updateDoc(doc(db, "users", currentUser.uid, "accounts", acc.id), { isPinned: newVal });
-        acc.isPinned = newVal;
-        filterAndRender();
-    } catch (e) { logError("Pin", e); }
-}
-
-async function handleArchive(item) {
-    const id = item.dataset.id;
-    if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
-    try {
-        const account = allAccounts.find(candidate => candidate.id === id);
-        await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), createArchiveMetadata(account));
-        showToast(t('success_archived'));
-        allAccounts = allAccounts.filter(a => a.id !== id);
-        filterAndRender();
-    } catch (e) { logError("Archive", e); }
-}
-
-async function handleDelete(item) {
-    const id = item.dataset.id;
-    if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
-    if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) { filterAndRender(); return; }
-    try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userProfile = await getUserProfile(currentUser.uid);
-        const emails = userProfile?.contactEmails || [];
-        const hasProfileLink = emails.some(email => email.linkedAccountId === id);
-        const batch = writeBatch(db);
-        batch.delete(doc(db, "users", currentUser.uid, "accounts", id));
-        if (hasProfileLink) {
-            batch.update(userRef, {
-                contactEmails: emails.map(email => email.linkedAccountId === id
-                    ? { ...email, linkedAccountId: null }
-                    : email)
+                return null;
             });
+            // Più inviti dello stesso Account (cicli diversi) non devono produrre
+            // due card: vince l'accesso attivo, altrimenti il ciclo più recente.
+            const byAccount = new Map();
+            for (const record of (await waitFor(Promise.all(invitePromises))).filter(Boolean)) {
+                const key = [record.ownerId, record._aziendaId || '', record.id].join('|');
+                const current = byAccount.get(key);
+                if (!current) { byAccount.set(key, record); continue; }
+                const better = (current._suspended && !record._suspended)
+                    || (Boolean(current._suspended) === Boolean(record._suspended)
+                        && (record.cycle ?? 0) > (current.cycle ?? 0));
+                if (better) byAccount.set(key, record);
+            }
+            sharedWithMe = [...byAccount.values()];
+            LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
+
+            // 2. Own Accounts
+            LOG('[ACCOUNTS] Loading own accounts');
+            const ownRecords = ownResult.map(record => ({...record}));
+            if (requireServerRefresh) {
+                const pilot = await waitFor(import('../data/private-account-offline-pilot.js'));
+                const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
+                if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) {
+                    ownRecords.push(handoffRecord);
+                }
+            }
+            LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
+            const ownAccounts = ownRecords.map(data => {
+                // A scoped reader must see malformed explicit ownership unchanged.
+                const ownerId = options.readField && Object.hasOwn(data, 'ownerId')
+                    ? data.ownerId : (data.ownerId || currentUser.uid);
+                const isRealOwner = options.readField
+                    ? ownerId === currentUser.uid : (!data.ownerId || data.ownerId === currentUser.uid);
+                return {
+                    ...data,
+                    id: data.id,
+                    isOwner: isRealOwner,
+                    ownerId,
+                    _isGuest: !isRealOwner
+                };
+            }).filter(a => !a.isArchived);
+
+            allAccounts = [...ownAccounts, ...sharedWithMe];
+
+            if (requireServerRefresh) {
+                urlParams.delete('afterWrite');
+                urlParams.delete('m6refresh');
+                const cleanQuery = urlParams.toString();
+                if (options.replaceQuery) options.replaceQuery(cleanQuery);
+                else window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+            }
+
+            if (options.readField) {
+                // The view owns these plaintext copies; passwords remain ciphertext
+                // until an explicit reveal/copy request through the same capability.
+                allAccounts = (await waitFor(Promise.all(allAccounts.map(async record => {
+                    const visible = {...record};
+                    try {
+                        for (const field of ['nomeAccount', 'username', 'account']) {
+                            if (record[field] != null && record[field] !== '') {
+                                visible[field] = await readField(record, field);
+                            }
+                        }
+                        return visible;
+                    } catch {
+                        assertActive();
+                        return null; // Reject the entire record; never render a fallback.
+                    }
+                })))).filter(Boolean);
+            } else {
+            // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
+            const vaultKeyMaterial = await waitFor(ensureVaultKeyMaterial().catch(() => null));
+            if (vaultKeyMaterial) {
+                allAccounts = await waitFor(Promise.all(allAccounts.map(async acc => {
+                    if (acc._encrypted) {
+                        try {
+                            acc.username = acc.username ? await waitFor(decrypt(acc.username, vaultKeyMaterial)) : acc.username;
+                            acc.account = acc.account ? await waitFor(decrypt(acc.account, vaultKeyMaterial)) : acc.account;
+                            // La password non è visibile né ricercabile nella lista:
+                            // resta cifrata finché non viene aperto il dettaglio.
+                        } catch (e) {
+                            if (signal.aborted) return;
+                            console.error("[Accounts] Decryption failed for:", acc.id, e);
+                        }
+                    }
+                    return acc;
+                })));
+            }
+
+            }
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("LoadAccounts", e);
+            showToast(readErrorMessage(e, t('error_generic')), "error");
         }
-        await batch.commit();
-        showToast(t('success_deleted'));
-        allAccounts = allAccounts.filter(a => a.id !== id);
-        filterAndRender();
-    } catch (e) { logError("Delete", e); }
+    }
+
+    /**
+     * FILTER & RENDER
+     */
+    function filterAndRender() {
+        if (signal.aborted) return;
+        const type = new URLSearchParams(query).get('type') || 'standard';
+        const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
+
+        let filtered = allAccounts.filter(acc => {
+            const mode = accountModeFromRecord(acc);
+            if (type === 'standard') return mode === 'account-private';
+            if (type === 'shared') return mode === 'account-shared';
+            if (type === 'memo') return mode === 'memo-private';
+            if (type === 'shared_memo') return mode === 'memo-shared';
+            return true;
+        });
+
+        if (searchVal) {
+            filtered = filtered.filter(acc =>
+                (acc.nomeAccount || '').toLowerCase().includes(searchVal) ||
+                (acc.username || '').toLowerCase().includes(searchVal)
+            );
+        }
+
+        // Sort
+        filtered.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            const nA = (a.nomeAccount || '').toLowerCase();
+            const nB = (b.nomeAccount || '').toLowerCase();
+            return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
+        });
+
+        accountListView.render(filtered);
+    }
+
+    /**
+     * ACTIONS
+     */
+    async function togglePin(acc) {
+        if (signal.aborted || options.readOnly) return;
+        if (!acc.isOwner) { showToast(t('error_only_owner_pin') || "Solo il proprietario può fissare l'account", "info"); return; }
+        try {
+            const newVal = !acc.isPinned;
+            await updateDoc(doc(db, "users", currentUser.uid, "accounts", acc.id), { isPinned: newVal });
+            if (signal.aborted) return;
+            acc.isPinned = newVal;
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("Pin", e);
+        }
+    }
+
+    // Esiti concorrenti dell'archiviazione canonica: chiedono un aggiornamento
+    // esplicito della lista invece di dichiarare un fallimento generico.
+    function archiveErrorMessage(error) {
+        if (error?.code === 'ARCHIVE_CONFLICT' || error?.code === 'ARCHIVE_UPDATED_AT_CONFLICT'
+            || error?.code === 'ARCHIVE_MARKER_MISSING') return t('archive_conflict_refresh');
+        if (error?.code === 'ARCHIVE_ACCOUNT_MISSING') return t('archive_missing_refresh');
+        return readErrorMessage(error, t('error_generic'));
+    }
+
+    async function handleArchive(item) {
+        if (signal.aborted || options.readOnly) return;
+        const id = item.dataset.id;
+        if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
+        const account = allAccounts.find(candidate => candidate.id === id);
+        // M7-R7B4: il gesto «Archivio» non ha conferma; se l'Account ha
+        // destinatari si mostra l'avviso, altrimenti resta l'azione immediata.
+        if (archiveRecipients(account).length) {
+            const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
+            if (signal.aborted) return;
+            if (!confirmed) { filterAndRender(); return; }
+        }
+        try {
+            const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision, updatedAt: account?.updatedAt});
+            if (signal.aborted) return;
+            showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_archived'));
+            allAccounts = allAccounts.filter(a => a.id !== id);
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("Archive", e);
+            showToast(archiveErrorMessage(e), "error");
+        }
+    }
+
+    async function handleDelete(item) {
+        if (signal.aborted || options.readOnly) return;
+        const id = item.dataset.id;
+        if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
+        const account = allAccounts.find(candidate => candidate.id === id);
+        // M7-R7B4: avviso informativo sui destinatari che perderanno l'accesso.
+        const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
+        if (signal.aborted) return;
+        if (!confirmed) { filterAndRender(); return; }
+        try {
+            const result = await archiveAccount(currentUser.uid, {id, context: 'privato', revision: account?.revision, updatedAt: account?.updatedAt});
+            if (signal.aborted) return;
+            showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'));
+            allAccounts = allAccounts.filter(a => a.id !== id);
+            filterAndRender();
+        } catch (e) {
+            if (signal.aborted) return;
+            logError("Delete", e);
+            showToast(archiveErrorMessage(e), "error");
+        }
+    }
+
+    options.signal?.addEventListener('abort', destroy, {once: true});
+    if (options.signal?.aborted) destroy();
+    const ready = signal.aborted ? Promise.resolve() : start();
+    return Object.freeze({ready, destroy});
 }

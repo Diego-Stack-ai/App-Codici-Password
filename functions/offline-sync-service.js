@@ -3,10 +3,10 @@ const MAX_CIPHERTEXT_LENGTH = 300000;
 
 function validateOfflineMutation(value) {
   const operation = value || {};
-  if (!ID_PATTERN.test(String(operation.operationId || '')) ||
-      !ID_PATTERN.test(String(operation.recordId || '')) ||
-      !ID_PATTERN.test(String(operation.deviceId || '')) ||
-      !Number.isInteger(operation.expectedRevision) || operation.expectedRevision < 0 ||
+  if (typeof operation.operationId !== 'string' || !ID_PATTERN.test(operation.operationId) ||
+      typeof operation.recordId !== 'string' || !ID_PATTERN.test(operation.recordId) ||
+      typeof operation.deviceId !== 'string' || !ID_PATTERN.test(operation.deviceId) ||
+      !Number.isSafeInteger(operation.expectedRevision) || operation.expectedRevision < 0 || operation.expectedRevision >= Number.MAX_SAFE_INTEGER ||
       operation.schemaVersion !== 1 ||
       typeof operation.encryptedPayload !== 'string' ||
       operation.encryptedPayload.length < 16 || operation.encryptedPayload.length > MAX_CIPHERTEXT_LENGTH) {

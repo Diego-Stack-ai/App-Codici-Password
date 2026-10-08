@@ -15,21 +15,28 @@ import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { createStorageObjectName, MAX_AVATAR_BYTES, validateAttachmentFile } from '../shared/attachment-security.js';
 
 let _getState = null;
+let avatarOperation = 0;
+// Una sola coppia di listener per modulo: invalida le attese senza
+// fingere di annullare richieste già inviate al backend.
+const invalidateAvatarOperation = () => { avatarOperation++; };
+globalThis.addEventListener?.('vault-session-locked', invalidateAvatarOperation);
+globalThis.addEventListener?.('pagehide', invalidateAvatarOperation);
 
 /**
  * Inizializza il modulo UI del profilo.
  * @param {Function} getState - () => { currentUserUid, profileLabels }
  */
 export function initUIModule(getState) {
+    avatarOperation++;
     _getState = getState;
 }
 
 // ─── AVATAR ───────────────────────────────────────────────────────────────────
 
 export function setupAvatarEdit() {
+    avatarOperation++;
     const input = document.getElementById('avatar-input');
     const avatarImg = document.getElementById('profile-avatar');
     if (!input) return;
@@ -38,15 +45,28 @@ export function setupAvatarEdit() {
         const file = e.target.files[0];
         const { currentUserUid } = _getState();
         if (!file || !currentUserUid) return;
-        try { validateAttachmentFile(file, { imageOnly: true, maxBytes: MAX_AVATAR_BYTES }); }
-        catch (error) { showToast(error.message, 'error'); input.value = ''; return; }
+        const operation = ++avatarOperation;
+        const getState = _getState;
+        const active = () => operation === avatarOperation && getState === _getState
+            && auth.currentUser?.uid === currentUserUid && getState().currentUserUid === currentUserUid
+            && document.getElementById('avatar-input') === input;
+        let attachmentSecurity;
+        try {
+            attachmentSecurity = await import('../shared/attachment-security.js');
+            if (!active()) return;
+            attachmentSecurity.validateAttachmentFile(file, { imageOnly: true, maxBytes: attachmentSecurity.MAX_AVATAR_BYTES });
+        }
+        catch (error) { if (active()) { showToast(error.message, 'error'); input.value = ''; } return; }
 
         showToast(t('uploading_avatar') || 'Caricamento avatar...', 'info');
         try {
-            const sRef = ref(storage, `users/${currentUserUid}/avatar_${createStorageObjectName(file)}`);
+            const sRef = ref(storage, `users/${currentUserUid}/avatar_${attachmentSecurity.createStorageObjectName(file)}`);
             await uploadBytes(sRef, file);
+            if (!active()) return;
             const url = await getDownloadURL(sRef);
+            if (!active()) return;
             await updateDoc(doc(db, 'users', currentUserUid), { photoURL: url });
+            if (!active()) return;
             localStorage.setItem(`codex_profile_avatar_${currentUserUid}`, url);
             if (avatarImg) {
                 avatarImg.src = url;
@@ -54,6 +74,7 @@ export function setupAvatarEdit() {
             }
             showToast(t('avatar_updated') || 'Avatar aggiornato!');
         } catch (error) {
+            if (!active()) return;
             logError('AvatarUpload', error);
             showToast(t('error_upload'), 'error');
         }

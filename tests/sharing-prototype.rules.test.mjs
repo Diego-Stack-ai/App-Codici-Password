@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
 import {Timestamp, deleteDoc, doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
 
-const PROJECT_ID = 'codici-password-sharing-rules-test';
+const PROJECT_ID = 'demo-codici-password-sharing-rules-test';
 const OWNER = 'fixture-owner';
 const RECIPIENT = 'fixture-recipient';
 const STRANGER = 'fixture-stranger';

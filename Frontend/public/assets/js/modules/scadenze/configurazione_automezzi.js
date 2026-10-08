@@ -150,7 +150,12 @@ async function saveInlineEdit() {
 
         if (!name || !name.trim()) return;
 
-        currentConfig = updateDeadlineType(currentConfig, index, { name, period, freq });
+        try {
+            currentConfig = updateDeadlineType(currentConfig, index, { name, period, freq });
+        } catch (error) {
+            showToast(error.message, 'error');
+            return;
+        }
     } else {
         const val = document.getElementById(`edit-item-${list}-${index}`)?.value;
         if (val === undefined || !val.trim()) return;
@@ -256,7 +261,12 @@ async function addTypeItem() {
     const freq = await showInputModal(t('prompt_freq_days'), "7");
     if (freq === null) return;
 
-    currentConfig = appendDeadlineType(currentConfig, { name, period, freq });
+    try {
+        currentConfig = appendDeadlineType(currentConfig, { name, period, freq });
+    } catch (error) {
+        showToast(error.message, 'error');
+        return;
+    }
     saveConfig();
 }
 

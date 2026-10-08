@@ -55,11 +55,13 @@ function encryptionKeyCandidates(keyMaterial) {
         throw new Error('VAULT_KEYRING_INVALID');
     }
 }
+async function importPasswordMaterial(password) {
+    const encoded = new TextEncoder().encode(String(password).normalize('NFC').trim());
+    try { return await crypto.subtle.importKey('raw', encoded, 'PBKDF2', false, ['deriveKey']); }
+    finally { encoded.fill(0); }
+}
 async function deriveKek(masterPassword, salt) {
-    const material = await crypto.subtle.importKey(
-        'raw', new TextEncoder().encode(String(masterPassword).normalize('NFC').trim()),
-        'PBKDF2', false, ['deriveKey']
-    );
+    const material = await importPasswordMaterial(masterPassword);
     return crypto.subtle.deriveKey(
         { name: 'PBKDF2', salt, iterations: KEK_ITERATIONS, hash: 'SHA-256' },
         material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
@@ -70,10 +72,7 @@ async function deriveVerifierKey(masterPassword, salt, iterations = VERIFIER_ITE
     if (!Number.isInteger(iterations) || iterations < VERIFIER_ITERATIONS) {
         throw new Error('VAULT_VERIFIER_KDF_INVALID');
     }
-    const material = await crypto.subtle.importKey(
-        'raw', new TextEncoder().encode(String(masterPassword).normalize('NFC').trim()),
-        'PBKDF2', false, ['deriveKey']
-    );
+    const material = await importPasswordMaterial(masterPassword);
     return crypto.subtle.deriveKey(
         { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
         material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
@@ -122,9 +121,11 @@ export async function wrapVaultKey(vaultKey, masterPassword, keyOrigin = 'random
     const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
     const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
     const kek = await deriveKek(masterPassword, salt);
-    const ciphertext = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv }, kek, new TextEncoder().encode(vaultKey)
-    );
+    const encodedKey = new TextEncoder().encode(vaultKey);
+    let ciphertext;
+    try {
+        ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, kek, encodedKey);
+    } finally { encodedKey.fill(0); }
     return {
         version: 2,
         type: 'vault-key-envelope',
@@ -140,7 +141,9 @@ export async function wrapVaultKey(vaultKey, masterPassword, keyOrigin = 'random
 }
 
 export async function unwrapVaultKey(envelope, masterPassword) {
-    if (envelope?.version !== 2 || envelope?.type !== 'vault-key-envelope') {
+    if (envelope?.version !== 2 || envelope?.type !== 'vault-key-envelope' ||
+        envelope.kdf !== 'PBKDF2-SHA256' || envelope.cipher !== 'AES-GCM-256' ||
+        envelope.iterations !== KEK_ITERATIONS) {
         throw new Error('VAULT_ENVELOPE_INVALID');
     }
     const salt = base64ToBuffer(envelope.salt);
@@ -148,7 +151,8 @@ export async function unwrapVaultKey(envelope, masterPassword) {
     const ciphertext = base64ToBuffer(envelope.wrappedKey);
     const kek = await deriveKek(masterPassword, salt);
     const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, kek, ciphertext);
-    return new TextDecoder().decode(plaintext);
+    try { return new TextDecoder().decode(plaintext); }
+    finally { new Uint8Array(plaintext).fill(0); }
 }
 
 /**
@@ -158,20 +162,8 @@ export async function unwrapVaultKey(envelope, masterPassword) {
 async function deriveKey(password, salt) {
     if (!password) throw new Error("Password mancante per derivazione");
 
-    // [SAFARI FIX] Normalizzazione NFC + Trim
-    const cleanPass = String(password).normalize('NFC').trim();
-    const encoder = new TextEncoder();
-    const encodedPass = encoder.encode(cleanPass);
-
-    /* [CRYPTO-AUDIT] Derivazione chiave in corso... */
-
-    const passwordKey = await crypto.subtle.importKey(
-        "raw",
-        encodedPass,
-        "PBKDF2",
-        false,
-        ["deriveKey"]
-    );
+    // Same NFC + trim normalization, with bounded lifetime of encoded bytes.
+    const passwordKey = await importPasswordMaterial(password);
 
     const key = await crypto.subtle.deriveKey(
         {

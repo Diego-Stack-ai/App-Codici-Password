@@ -91,13 +91,13 @@ test('deleting a bank blocks only its own widgets and rechecks after confirmatio
 
 for (const area of ['privato', 'azienda']) test(`${area} bank plus explains saving first without a widget controller`, async () => {
     const text = await readFile(new URL(`../Frontend/public/assets/js/modules/${area}/form_account_${area}.js`, import.meta.url), 'utf8');
-    const start = text.indexOf('const rerender = () => renderBankAccounts(');
-    const end = text.indexOf('\n});', start) + 4;
-    assert.ok(start >= 0 && end > start);
-    let options; const messages = [], ids = [];
-    const realm = vm.createContext({bankAccounts: [], accountWidgetController: null, showToast: message => messages.push(message),
-        renderBankAccounts: (_banks, _render, config) => {options = config;}});
-    vm.runInContext(text.slice(start, end) + '\nrerender();', realm);
+    const start = text.indexOf('onAddWidget: bankId => {') + 'onAddWidget: '.length;
+    const end = text.indexOf('onWidgetsMount:', start);
+    assert.ok(start >= 'onAddWidget: '.length && end > start);
+    const callback = text.slice(start, end).trim().replace(/,$/, '');
+    const messages = [], ids = [];
+    const realm = vm.createContext({accountWidgetController: null, active: () => true, showToast: message => messages.push(message)});
+    const options = {onAddWidget: vm.runInContext('(' + callback + ')', realm)};
     options.onAddWidget('bank'); assert.match(messages[0], /Salva prima/);
     realm.accountWidgetController = {openNewWidget: id => ids.push(id)};
     options.onAddWidget('bank'); assert.deepEqual(ids, ['bank']);

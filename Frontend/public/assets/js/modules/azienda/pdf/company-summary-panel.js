@@ -16,6 +16,7 @@ export function mountCompanyPdfPanel(root, companyId, dependencies) {
     const check = () => {checkIdentity(); if (!isUnlocked()) {dispose(); throw Error('PDF_VAULT_LOCKED');}};
     events.addEventListener('pagehide', dispose, {signal: abort.signal});
     events.addEventListener('private-auth-blocked', dispose, {signal: abort.signal});
+    events.addEventListener('vault-session-locked', dispose, {signal: abort.signal});
     events.addEventListener('vault-state-changed', () => {if (!isUnlocked()) dispose();}, {signal: abort.signal});
     unsubscribe = subscribeAuth(user => {if (user?.uid !== uid) dispose();});
     if (disposed) unsubscribe?.();

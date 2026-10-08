@@ -3,6 +3,8 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const root = process.cwd();
+// Build the lazy PDF dependency before collecting the offline static assets.
+await import('./build-company-pdf.mjs');
 const publicDir = path.join(root, 'Frontend', 'public');
 const jsDir = path.join(publicDir, 'assets', 'js');
 const vendorDir = path.join(jsDir, 'vendor');

@@ -8,7 +8,8 @@
 
 import { state } from './ma_state.js';
 import { db, storage } from '../../firebase-config.js?v=1.2.128';
-import { doc, updateDoc, deleteDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteCompany, companyDeletionMessage } from './company-list-service.js';
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -199,12 +200,14 @@ export async function saveAzienda() {
 // ─── DELETE ───────────────────────────────────────────────────────────────────
 
 export async function deleteAzienda() {
+    const uid = state.currentUid, companyId = state.currentAziendaId;
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg') || "Eliminare definitivamente l'azienda?")) return;
     try {
-        await deleteDoc(doc(db, "users", state.currentUid, "aziende", state.currentAziendaId));
+        if (uid !== state.currentUid || companyId !== state.currentAziendaId) throw Object.assign(new Error('COMPANY_DELETE_SESSION_CHANGED'), {code: 'COMPANY_DELETE_SESSION_CHANGED'});
+        await deleteCompany(uid, companyId);
         showToast(t('success_deleted'), "success");
         setTimeout(() => window.location.href = 'lista_aziende.html', 1000);
-    } catch (e) { logError("Delete", e); showToast(t('error_generic'), "error"); }
+    } catch (e) { logError("Delete", e); showToast(companyDeletionMessage(e), "error"); }
 }
 
 // ─── RESIZE IMAGE ─────────────────────────────────────────────────────────────

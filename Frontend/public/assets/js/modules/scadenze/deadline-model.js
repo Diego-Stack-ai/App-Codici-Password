@@ -24,6 +24,11 @@ export function deadlineInputDate(isoValue, displayValue) {
 export function deadlineDate(record = {}) {
     const value = record.dueDate || record.date;
     if (!value) return null;
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const [year, month, day] = value.split('-').map(Number);
+        const result = new Date(year, month - 1, day);
+        return result.getFullYear() === year && result.getMonth() === month - 1 && result.getDate() === day ? result : null;
+    }
     if (typeof value.toDate === 'function') {
         const result = value.toDate();
         return Number.isNaN(result?.getTime?.()) ? null : result;
@@ -35,6 +40,50 @@ export function deadlineDate(record = {}) {
     }
     const result = new Date(value);
     return Number.isNaN(result.getTime()) ? null : result;
+}
+
+// Calendar ordinals avoid 23/25-hour DST days and preserve local date-only input.
+export function currentDiffDays(value, now = new Date()) {
+    const due = deadlineDate({dueDate: value});
+    const today = deadlineDate({dueDate: now});
+    if (!due || !today) return null;
+    const ordinal = date => Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000;
+    return ordinal(due) - ordinal(today);
+}
+
+export function deadlineBucket(record = {}, now = new Date()) {
+    const days = currentDiffDays(record.dueDate || record.date, now);
+    return days === null ? null : days < 0 ? 'urgent' : days <= 30 ? 'upcoming' : 'later';
+}
+
+// Project per-stage events without deleting history or touching the deadline.
+export function projectDeadlineReminders(notifications, deadlines, now = new Date()) {
+    const current = new Map();
+    const stamp = item => item.updatedAt?.toMillis?.() || item.createdAt?.toMillis?.() || 0;
+    const rank = item => Number.isSafeInteger(item.diffDays) && item.diffDays >= 0 ? item.diffDays : Infinity;
+    const priority = item => item.status === 'resolved' ? 2 : item.status === 'viewed' ? 1 : 0;
+    const better = (next, previous) => rank(next) < rank(previous)
+        || (rank(next) === rank(previous) && (stamp(next) > stamp(previous)
+            || (stamp(next) === stamp(previous) && (priority(next) > priority(previous)
+                || (priority(next) === priority(previous) && next.id < previous.id)))));
+    for (const notification of notifications) {
+        if (!notification || typeof notification.id !== 'string' || !notification.id
+            || typeof notification.deadlineId !== 'string' || !notification.deadlineId
+            || !['unread', 'viewed', 'resolved'].includes(notification.status)) continue;
+        const deadline = deadlines.get(notification.deadlineId);
+        if (!deadline || deadline.completed) continue;
+        const due = deadlineDateInputFields(deadline).isoValue;
+        const notifiedDue = deadlineDateInputFields({dueDate: notification.dueDate}).isoValue;
+        if (!due || due !== notifiedDue) continue;
+        const days = currentDiffDays(due, now);
+        if (days === null || days < 0) continue;
+        const previous = current.get(notification.deadlineId);
+        if (!previous || better(notification, previous.notification)) {
+            current.set(notification.deadlineId, {notification, deadline, dueDate: due, diffDays: days});
+        }
+    }
+    return [...current.values()].filter(item => item.notification.status !== 'resolved')
+        .sort((a, b) => a.diffDays - b.diffDays || a.notification.deadlineId.localeCompare(b.notification.deadlineId));
 }
 
 export function deadlinePresentation(record = {}) {

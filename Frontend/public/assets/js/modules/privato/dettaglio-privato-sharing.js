@@ -4,32 +4,37 @@
  */
 
 import { auth, db } from '../../firebase-config.js?v=1.2.128';
-import { LOG } from '../../logger.js';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 
-let currentUid = null;
-let ownerId = null;
-let accountId = null;
-let readOnly = true;
-let onReload = null;
+let mounted = null;
 
 export function initPrivateSharingModule(context) {
-    currentUid = context.currentUid;
-    ownerId = context.ownerId;
-    accountId = context.accountId;
-    readOnly = Boolean(context.readOnly);
-    onReload = context.onReload;
+    mounted?.destroy();
+    let destroyed = false;
+    const mount = {currentUid: context.currentUid, ownerId: context.ownerId, accountId: context.accountId,
+        readOnly: Boolean(context.readOnly), onReload: context.onReload, confirm: context.confirm || showConfirmModal,
+        active() {
+            if (!destroyed && (mounted !== mount || context.signal?.aborted || (context.isActive && !context.isActive()))) mount.destroy();
+            return !destroyed;
+        },
+        destroy() { destroyed = true; context.signal?.removeEventListener('abort', mount.destroy); }
+    };
+    mounted = mount;
+    context.signal?.addEventListener('abort', mount.destroy, {once: true});
+    mount.active();
+    return mount;
 }
 
 function normalizeEmailForLookup(email) {
     return String(email || '').trim().toLowerCase();
 }
 
-export function renderPrivateSharingMap(account, contactNames = new Map()) {
+export function renderPrivateSharingMap(account, contactNames = new Map(), mount = mounted) {
+    if (!mount?.active()) return;
     const listContainer = document.getElementById('guests-list');
     const managementSection = document.getElementById('shared-management-section');
     if (!listContainer) return;
@@ -58,10 +63,10 @@ export function renderPrivateSharingMap(account, contactNames = new Map()) {
             textContent: displayStatus
         })];
 
-        if (!readOnly) {
+        if (!mount.readOnly) {
             actions.push(createElement('button', {
                 className: 'ml-2 p-2 rounded-lg bg-transparent border-none text-red-600 hover:text-red-500 hover:scale-110 transition-all cursor-pointer flex items-center justify-center sharing-revoke-button',
-                onclick: () => revokeRecipient(invitation.email)
+                onclick: () => revokeRecipient(invitation.email, mount)
             }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })]));
         }
 
@@ -83,28 +88,35 @@ export function renderPrivateSharingMap(account, contactNames = new Map()) {
     }
 }
 
-async function revokeRecipient(email) {
-    if (!email || readOnly || currentUid !== ownerId) return;
-    const confirmed = await showConfirmModal(
+async function revokeRecipient(email, mount = mounted) {
+    if (!mount?.active() || !email || mount.readOnly || mount.currentUid !== mount.ownerId) return;
+    const {ownerId, accountId, onReload} = mount;
+    const confirmAction = mount.confirm;
+    const ownerEmail = auth.currentUser?.email || 'Proprietario';
+    const confirmed = await confirmAction(
         t('confirm_revoke_title') || 'REVOCA ACCESSO',
         `${t('confirm_revoke_msg') || "Vuoi rimuovere l'accesso per"} ${email}?`,
         t('revoke') || 'Revoca'
     );
-    if (!confirmed) return;
+    if (!mount.active() || !confirmed) return;
 
     try {
         await runTransaction(db, async transaction => {
+            if (!mount.active()) return;
             const accountRef = doc(db, 'users', ownerId, 'accounts', accountId);
             const normalizedEmail = sanitizeEmail(email);
-            const inviteRef = doc(db, 'invites', `${accountId}_${normalizedEmail}`);
             const snapshot = await transaction.get(accountRef);
-            if (!snapshot.exists()) return;
+            if (!mount.active() || !snapshot.exists()) return;
 
             const data = snapshot.data();
+            // M7-R7C-5: l'invito da revocare è quello del ciclo CORRENTE. Con un ID
+            // storico la cancellazione non colpirebbe nulla dopo un ripristino.
+            const cycle = sharingCycleOf(data);
+            if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
+            const inviteRef = doc(db, 'invites', inviteIdForGuest(accountId, normalizedEmail, cycle));
             const sharedWith = { ...(data.sharedWith || {}) };
             const revokedInvitation = sharedWith[normalizedEmail];
             const wasAccepted = revokedInvitation?.status === 'accepted';
-            const guestUid = wasAccepted ? revokedInvitation?.uid : null;
             delete sharedWith[normalizedEmail];
 
             const hasActiveGuests = Object.values(sharedWith)
@@ -137,23 +149,13 @@ async function revokeRecipient(email) {
                 read: false
             });
 
-            if (guestUid) {
-                transaction.set(doc(collection(db, 'users', guestUid, 'notifications')), {
-                    title: 'Accesso Revocato',
-                    message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
-                    accountName: data.nomeAccount || 'Account',
-                    type: 'share_revoked',
-                    ownerEmail: auth.currentUser?.email || 'Proprietario',
-                    timestamp: new Date().toISOString(),
-                    read: false
-                });
-                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
-            }
+            // Notifica all'ospite: richiede un backend dedicato, non implementata.
         });
-
+        if (!mount.active()) return;
         showToast('Accesso revocato con successo');
         if (onReload) await onReload();
     } catch (error) {
+        if (!mount.active()) return;
         console.error('RevokeRecipient failed', error);
         showToast(t('error_generic'), 'error');
     }

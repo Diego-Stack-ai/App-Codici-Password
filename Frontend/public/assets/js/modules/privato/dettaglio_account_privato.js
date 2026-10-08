@@ -4,13 +4,13 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { db, auth } from '../../firebase-config.js?v=1.2.128';
+import { auth, db } from '../../firebase-config.js?v=1.2.128';
 import { LOG } from '../../logger.js';
-import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { logError, formatDateToIT } from '../../utils.js';
+import { logError } from '../../utils.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
@@ -18,6 +18,7 @@ import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
 import {
     findPrivateAccountByLegacyId,
+    findSuspendedGuestInvite,
     getPrivateAccount,
     getPrivateAccountConfirmed
 } from '../data/vault-repository.js';
@@ -27,10 +28,36 @@ import { initPrivateSharingModule, renderPrivateSharingMap } from './dettaglio-p
 // --- STATE ---
 let currentUid = null;
 let currentId = null;
+let requestedId = null;
+let loadVersion = 0;
 let ownerId = null;
 let isReadOnly = false;
 let accountData = null;
 let requireServerRefresh = false;
+let mounted = null;
+
+function clearPrivateDetail(view = document) {
+    for (const id of ['detail-nomeAccount', 'detail-username', 'detail-account', 'detail-password', 'detail-website',
+        'detail-referenteNome', 'detail-referenteTelefono', 'detail-referenteCellulare', 'input-camera', 'input-gallery', 'input-file']) {
+        const node = view.getElementById(id);
+        if (node) { node.value = ''; node.onchange = null; }
+    }
+    const password = view.getElementById('detail-password');
+    if (password) { password.type = 'password'; password.classList?.add('base-shield'); }
+    for (const id of ['header-nome-account', 'hero-title', 'detail-note', 'attachments-list', 'guests-list', 'banking-content', 'footer-center-actions']) {
+        const node = view.getElementById(id);
+        if (node) { for (const input of node.querySelectorAll?.('input') || []) input.value = ''; clearElement(node); }
+    }
+    const avatar = view.getElementById('detail-avatar');
+    if (avatar) { avatar.style.backgroundImage = 'none'; clearElement(avatar); }
+    for (const node of view.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle')) node.onclick = null;
+    const add = view.getElementById('btn-add-attachment');
+    if (add) { add.onclick = null; add.classList.add('hidden'); }
+    const modal = view.getElementById('source-selector-modal');
+    if (modal) { modal.classList.remove('active'); modal.classList.add('hidden'); }
+    for (const banner of view.querySelectorAll('.read-only-banner')) banner.remove();
+    if (view.body) view.body.style.overflow = '';
+}
 
 // --- INITIALIZATION ---
 /**
@@ -39,16 +66,24 @@ let requireServerRefresh = false;
  * - Entry Point: initDettaglioAccountPrivato(user)
  */
 
-export async function initDettaglioAccountPrivato(user) {
-    
-    if (!user) return;
+export async function initDettaglioAccountPrivato(user, options = {}) {
+    mounted?.destroy();
+    if (!user) return {destroy() {}};
+    loadVersion++;
     currentUid = user.uid;
 
     const params = new URLSearchParams(window.location.search);
-    currentId = params.get('id');
+    requestedId = params.get('id');
+    currentId = null;
+    accountData = null;
+    const attachmentButton = document.getElementById('btn-add-attachment');
+    if (attachmentButton) {
+        attachmentButton.onclick = null;
+        attachmentButton.classList.add('hidden');
+    }
     requireServerRefresh = (params.get('afterWrite') === '1' || params.get('m6refresh') === '1') && navigator.onLine;
 
-    if (!currentId) {
+    if (!requestedId) {
         showToast(t('missing_id') || "ID mancante", "error");
         window.location.href = 'account_privati.html';
         return;
@@ -56,7 +91,51 @@ export async function initDettaglioAccountPrivato(user) {
 
     ownerId = params.get('ownerId') || user.uid;
     isReadOnly = (ownerId !== currentUid);
+    const scope = Object.freeze({uid: currentUid, owner: ownerId, requestedId});
+    const root = document.querySelector('.base-container');
+    const owned = new Map();
+    const selectors = new Map();
+    const ownedView = {
+        getElementById(id) { if (!owned.has(id)) owned.set(id, document.getElementById(id)); return owned.get(id); },
+        querySelectorAll(selector) { if (!selectors.has(selector)) selectors.set(selector, [...document.querySelectorAll(selector)]); return selectors.get(selector); },
+        body: document.body
+    };
+    clearPrivateDetail(ownedView);
+    let disposed = false, unsubscribe = () => {};
+    const mount = {scope, version: 0, resolvedId: null, loaded: false, banners: new Set(), loadAbort: new AbortController(),
+        active() {
+            if (!disposed && (mounted !== mount || options.signal?.aborted || root?.isConnected === false ||
+                auth.currentUser?.uid !== scope.uid || (options.isActive && !options.isActive()))) mount.destroy();
+            return !disposed;
+        },
+        destroy() {
+            if (disposed) return;
+            disposed = true; mount.loaded = false;
+            mount.loadAbort.abort(); unsubscribe();
+            for (const banner of mount.banners) banner?.remove();
+            mount.banners.clear();
+            options.signal?.removeEventListener('abort', mount.destroy);
+            globalThis.removeEventListener?.('vault-session-locked', mount.destroy);
+            globalThis.removeEventListener?.('pagehide', mount.destroy);
+            if (mounted === mount) { accountData = null; currentId = null; clearPrivateDetail(ownedView); document.title = 'Dettaglio'; }
+        }
+    };
+    mounted = mount;
+    options.signal?.addEventListener('abort', mount.destroy, {once: true});
+    globalThis.addEventListener?.('vault-session-locked', mount.destroy, {once: true});
+    globalThis.addEventListener?.('pagehide', mount.destroy, {once: true});
+    unsubscribe = onAuthStateChanged(auth, current => { if (current?.uid !== scope.uid) mount.destroy(); });
+    if (!mount.active()) { unsubscribe(); return mount; }
 
+    // No record actions are available until the repository resolves its physical ID.
+    const footer = document.getElementById('footer-center-actions');
+    if (footer) clearElement(footer);
+    setupActions(() => mount.active() && mount.loaded);
+    await loadAccount(mount);
+    return mount;
+}
+
+function setupEditAction(resolvedId, active) {
     // Aggiungi pulsante Edit nel footer (solo se non è read-only)
     if (!isReadOnly) {
         const fCenter = document.getElementById('footer-center-actions');
@@ -67,8 +146,8 @@ export async function initDettaglioAccountPrivato(user) {
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
                 onclick: () => {
-                    LOG('[dettaglio] Navigating to form with ID:', currentId);
-                    window.location.href = `form_account_privato.html?id=${encodeURIComponent(currentId)}`;
+                    if (!active() || !currentId || currentId !== resolvedId || isReadOnly) return;
+                    window.location.href = `form_account_privato.html?id=${encodeURIComponent(resolvedId)}`;
                 }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
@@ -77,30 +156,75 @@ export async function initDettaglioAccountPrivato(user) {
         }
     }
 
-    if (isReadOnly) setupReadOnlyUI();
-    setupActions();
-    initPrivateAttachmentModule({ ownerId, accountId: currentId, readOnly: isReadOnly });
-    initPrivateSharingModule({ currentUid, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
-
-    await loadAccount();
-
-    
 }
 /**
  * LOADING ENGINE
  */
-let noteLoadAbort = null;
-async function loadAccount() {
-    noteLoadAbort?.abort();
-    noteLoadAbort = new AbortController();
-    const noteSignal = noteLoadAbort.signal, noteOwner = ownerId;
+async function loadAccount(mount = mounted) {
+    if (!mount?.active()) return;
+    mount.loadAbort.abort();
+    mount.loadAbort = new AbortController();
+    const signal = mount.loadAbort.signal;
+    const version = ++mount.version;
+    loadVersion++;
+    mount.loaded = false;
+    accountData = null;
+    clearPrivateDetail();
+    mount.banners.clear();
+    const attachmentButton = document.getElementById('btn-add-attachment');
+    if (attachmentButton) {
+        attachmentButton.onclick = null;
+        attachmentButton.classList.add('hidden');
+    }
+    const lookupId = mount.resolvedId || mount.scope.requestedId, lookupOwner = mount.scope.owner, lookupUid = mount.scope.uid;
+    const readOnly = lookupOwner !== lookupUid;
+    const active = () => mount.active() && version === mount.version && !signal.aborted;
+    const actionActive = () => active() && mount.loaded;
+    const decryptActive = async (value, key) => {
+        if (!active()) throw new Error('PRIVATE_DETAIL_INVALIDATED');
+        const clear = await decryptIfPossible(value, key);
+        if (!active()) throw new Error('PRIVATE_DETAIL_INVALIDATED');
+        return clear;
+    };
+    setupActions(actionActive);
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     try {
-        accountData = await (requireServerRefresh
-            ? getPrivateAccountConfirmed(ownerId, currentId)
-            : getPrivateAccount(ownerId, currentId))
-            || await findPrivateAccountByLegacyId(ownerId, currentId);
-        if (!accountData) { showToast(t('account_not_found'), "error"); return; }
-        const storedNote = accountData.note, noteAccountId = accountData.id;
+        // M7-R7C-4: per un ospite l'autorizzazione va stabilita PRIMA di leggere o
+        // renderizzare. Online serve una lettura CONFERMATA DAL SERVER: la copia in
+        // cache non prova un grant attuale, quindi non si usa alcun fallback locale
+        // né il percorso legacy quando il server nega o non risponde. Offline resta
+        // la consultazione concordata, con il blocco se la sospensione è nota.
+        let loaded = null;
+        let legacyLookupAllowed = true;
+        if (lookupOwner !== lookupUid) {
+            const suspended = await findSuspendedGuestInvite(lookupOwner, lookupId, auth.currentUser?.email, '');
+            if (!active()) return;
+            if (suspended) { showToast(t('account_suspended_label'), "warning"); return; }
+            if (!offline) {
+                try {
+                    loaded = await getPrivateAccountConfirmed(lookupOwner, lookupId);
+                } catch (error) {
+                    if (!active()) return;
+                    logError('GuestAuthorization', error);
+                    showToast(t('guest_authorization_unverified'), "error");
+                    return;
+                }
+                if (!active()) return;
+                if (!loaded) { showToast(t('account_not_found'), "error"); return; }
+                legacyLookupAllowed = false;
+            }
+        }
+        if (!loaded) loaded = await (requireServerRefresh
+            ? getPrivateAccountConfirmed(lookupOwner, lookupId)
+            : getPrivateAccount(lookupOwner, lookupId));
+        if (!active()) return;
+        if (!loaded && legacyLookupAllowed) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
+        if (!active()) return;
+        if (!loaded) { showToast(t('account_not_found'), "error"); return; }
+        loaded = {...loaded};
+        const storedNote = loaded.note;
+        const resolvedId = loaded.id;
+        mount.resolvedId = resolvedId;
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
@@ -109,60 +233,90 @@ async function loadAccount() {
             const cleanQuery = cleanParams.toString();
             window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
         }
-        const docRef = doc(db, "users", ownerId, "accounts", accountData.id);
-        if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
+        const docRef = doc(db, "users", lookupOwner, "accounts", resolvedId);
 
         // 🔐 PROTOCOLLO BLINDA (Auto-Unlock Compliant)
-        if (accountData._encrypted) {
+        if (loaded._encrypted) {
             try {
                 const vaultKeyMaterial = await ensureVaultKeyMaterial();
-                [accountData.username, accountData.account, accountData.password, accountData.note] = await Promise.all([
-                    decryptIfPossible(accountData.username, vaultKeyMaterial),
-                    decryptIfPossible(accountData.account, vaultKeyMaterial),
-                    decryptIfPossible(accountData.password, vaultKeyMaterial),
-                    decryptIfPossible(accountData.note, vaultKeyMaterial)
+                if (!active()) return;
+                [loaded.username, loaded.account, loaded.password, loaded.note] = await Promise.all([
+                    decryptActive(loaded.username, vaultKeyMaterial),
+                    decryptActive(loaded.account, vaultKeyMaterial),
+                    decryptActive(loaded.password, vaultKeyMaterial),
+                    decryptActive(loaded.note, vaultKeyMaterial)
                 ]);
-                if (Array.isArray(accountData.banking)) {
-                    accountData.banking = await Promise.all(accountData.banking.map(async b => ({
+                if (!active()) return;
+                if (Array.isArray(loaded.banking)) {
+                    loaded.banking = await Promise.all(loaded.banking.map(async b => ({
                         ...b,
-                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, vaultKeyMaterial),
+                        passwordDispositiva: await decryptActive(b.passwordDispositiva, vaultKeyMaterial),
                         cards: await Promise.all((b.cards || []).map(async c => ({
                             ...c,
-                            cardNumber: await decryptIfPossible(c.cardNumber, vaultKeyMaterial),
-                            pin: await decryptIfPossible(c.pin, vaultKeyMaterial),
-                            ccv: await decryptIfPossible(c.ccv, vaultKeyMaterial)
+                            cardNumber: await decryptActive(c.cardNumber, vaultKeyMaterial),
+                            pin: await decryptActive(c.pin, vaultKeyMaterial),
+                            ccv: await decryptActive(c.ccv, vaultKeyMaterial)
                         })))
                     })));
                 }
             } catch (e) {
+                if (!active()) return;
                 console.warn("[Dettaglio] Decrittazione saltata o annullata.");
                 showToast("Dati cifrati: sbloccare la Vault per visualizzare.", "warning");
             }
         }
 
-        renderAccount(accountData);
-        const noteAccount = accountData;
+        if (!active()) return;
+        accountData = loaded;
+        currentId = resolvedId;
+        mount.loaded = true;
+        const reload = () => mount.active() && loadAccount(mount);
+        let confirmationPending = false;
+        const confirm = (...args) => {
+            if (!actionActive() || confirmationPending) return Promise.resolve(false);
+            confirmationPending = true;
+            const pending = showConfirmModal(...args);
+            const modal = document.getElementById('protocol-confirm-modal');
+            const cancel = () => { modal?.querySelector('#confirm-cancel-btn')?.click(); modal?.remove(); };
+            signal.addEventListener('abort', cancel, {once: true});
+            return pending.finally(() => { confirmationPending = false; signal.removeEventListener('abort', cancel); });
+        };
+        initPrivateAttachmentModule({ownerId: lookupOwner, accountId: resolvedId, readOnly, isActive: actionActive, signal, confirm});
+        initPrivateSharingModule({currentUid: lookupUid, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        setupEditAction(resolvedId, actionActive);
+        if (!readOnly) updateDoc(docRef, {views: increment(1)}).catch(error => { if (active()) logError('UpdateViews', error); });
+        renderAccount(loaded, actionActive);
         import('../shared/account-note-editor.js').then(module => {
-            if (!noteSignal.aborted && auth.currentUser?.uid === noteOwner) module.initAccountNoteEditor({
-                account: noteAccount, storedNote, ownerId: noteOwner, accountId: noteAccountId,
-                readOnly: isReadOnly, signal: noteSignal});
+            if (!actionActive()) return;
+            module.initAccountNoteEditor({account: loaded, storedNote,
+                ownerId: lookupOwner, accountId: resolvedId,
+                readOnly: readOnly, signal, isActive: actionActive});
         }).catch(() => {
-            if (!noteSignal.aborted) {
+            if (actionActive()) {
                 console.error('[Account note] Inizializzazione editor non riuscita.');
                 showToast('Editor note non disponibile.', 'error');
             }
         });
-        const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, compactView: true, onReload: loadAccount });
-        renderPrivateSharingMap(accountData, contactNames);
+        const contactNames = await initDetailAccountMode({compactView: true, account: loaded, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        if (!active()) return;
+        renderPrivateSharingMap(loaded, contactNames);
         await loadPrivateAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.128').then(({initAccountSharedCredentials}) =>
-            initAccountSharedCredentials({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly, compactView: true})
-        ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
-        import('../shared/account-embedded-widgets.js?v=1.2.128').then(({initAccountEmbeddedWidgets}) =>
-            initAccountEmbeddedWidgets({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly})
-        ).catch(error => console.warn('[ACCOUNT WIDGETS] Caricamento saltato.', error));
-        setupActions();
+        if (!active()) return;
+        const widgetContext = {compactView: true, uid: lookupUid, context: 'private', accountId: resolvedId, readOnly, active: actionActive, signal};
+        const initWidget = async (module, name) => {
+            if (!active()) return;
+            const controller = await module[name](widgetContext);
+            if (!active()) controller?.destroy();
+        };
+        import('../shared/account-shared-credentials.js?v=1.2.128').then(module => initWidget(module, 'initAccountSharedCredentials'))
+            .catch(error => { if (active()) logError('SharedCredentials', error); });
+        import('../shared/account-embedded-widgets.js?v=1.2.128').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+            .catch(error => { if (active()) logError('AccountWidgets', error); });
+        setupActions(actionActive);
+        if (readOnly) mount.banners.add(setupReadOnlyUI());
     } catch (e) {
+        if (!active()) return;
+        mount.loaded = false;
         logError("LoadAccount", e);
         showToast(readErrorMessage(e, t('error_loading')), "error");
     }
@@ -171,7 +325,10 @@ async function loadAccount() {
 /**
  * RENDERING
  */
-function renderAccount(acc) {
+function renderAccount(acc, active) {
+    if (!active()) return;
+    const resolvedId = acc.id;
+    const renderedVersion = loadVersion;
     document.title = acc.nomeAccount || 'Dettaglio';
 
     // Accent Colors
@@ -242,10 +399,11 @@ function renderAccount(acc) {
     if (secRef) secRef.classList.toggle('hidden', !hasRefData);
 
     renderAccountBanking(acc, {
-        isReadOnly,
+        isReadOnly, isActive: active,
         promptText: t('banking_hint'),
         onAddBanking: () => {
-            window.location.href = `form_account_privato.html?id=${encodeURIComponent(currentId)}`;
+            if (!active() || !currentId || currentId !== resolvedId || isReadOnly) return;
+            window.location.href = `form_account_privato.html?id=${encodeURIComponent(resolvedId)}`;
         }
     });
 
@@ -267,6 +425,7 @@ function renderAccount(acc) {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = (e) => {
                 e.preventDefault();
+                if (!active() || isReadOnly || !currentId || currentId !== resolvedId || loadVersion !== renderedVersion) return;
                 LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
                 openSourceSelector();
             };
@@ -298,12 +457,14 @@ function setupReadOnlyUI() {
     if (saveBar) saveBar.classList.add('hidden');
     const footerEdit = document.getElementById('btn-edit-footer');
     if (footerEdit) footerEdit.remove();
+    return banner;
 }
 
-function setupActions() {
+function setupActions(active) {
     // Copy Buttons
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.onclick = () => {
+            if (!active()) return;
             const container = btn.closest('.detail-field-box') || btn.closest('.glass-field-container');
             const input = container?.querySelector('input');
             if (input && input.value) {
@@ -317,6 +478,7 @@ function setupActions() {
     const toggleBtn = document.getElementById('toggle-password');
     if (toggleBtn) {
         toggleBtn.onclick = () => {
+            if (!active()) return;
             const input = document.getElementById('detail-password');
             if (input) {
                 const isPass = input.type === 'password';
@@ -331,6 +493,7 @@ function setupActions() {
     const openWebBtn = document.getElementById('open-website');
     if (openWebBtn) {
         openWebBtn.onclick = () => {
+            if (!active()) return;
             const url = document.getElementById('detail-website')?.value;
             if (url && !openExternalUrl(url)) showToast('Indirizzo non valido.', 'error');
         };
@@ -340,6 +503,7 @@ function setupActions() {
     const copyNoteBtn = document.getElementById('copy-note');
     if (copyNoteBtn) {
         copyNoteBtn.onclick = () => {
+            if (!active()) return;
             const note = document.getElementById('detail-note')?.textContent;
             if (note && note !== '-') {
                 navigator.clipboard.writeText(note);
@@ -354,6 +518,7 @@ function setupActions() {
     const bankChevron = document.getElementById('banking-chevron');
     if (bankToggle && bankContent) {
         bankToggle.onclick = () => {
+            if (!active()) return;
             const isHidden = bankContent.classList.toggle('hidden');
             if (bankChevron) {
                 bankChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';

@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
 import {doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
 
-const PROJECT_ID = 'codici-password-offline-sync-test';
+const PROJECT_ID = 'demo-codici-password-offline-sync-test';
 const OWNER = 'fixture-owner';
 const OTHER = 'fixture-other';
 let testEnv;

@@ -21,6 +21,7 @@ import {
     validateAttachmentFile
 } from '../shared/attachment-security.js';
 import { deadlineRecipientFields } from './deadline-recipient-model.js';
+import { validateDeadlineFrequency } from './deadline-config-model.js';
 
 const CONFIG_DOCUMENT_BY_MODE = Object.freeze({
     automezzi: 'deadlineConfig',
@@ -134,6 +135,7 @@ export async function saveDeadline({
     onProgress = () => {}
 }) {
     if (!user?.uid) throw new Error('Utente non autenticato');
+    const frequency = validateDeadlineFrequency(data?.notif_frequency);
 
     const uploadedAttachments = await uploadDeadlineAttachments({
         userId: user.uid,
@@ -146,6 +148,7 @@ export async function saveDeadline({
     const recipientFields = deadlineRecipientFields(recipients);
     const deadlineData = {
         ...data,
+        notif_frequency: frequency,
         uid: user.uid,
         mode,
         attachments: [...existingAttachments, ...uploadedAttachments],

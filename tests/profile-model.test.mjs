@@ -7,6 +7,23 @@ const model = await import(`data:text/javascript;base64,${Buffer.from(source).to
 const qrSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js', import.meta.url), 'utf8');
 const qr = await import(`data:text/javascript;base64,${Buffer.from(qrSource).toString('base64')}`);
 
+test('vCard independently rejects sensitive, ambiguous and unsupported custom fields', () => {
+    const unsafe = ['password', 'pin', 'puk', 'secret', 'sensitive', 'attachment', 'pdf', 'photo', 'unknown'].map(type =>
+        ({type, label: type, encrypted: false, value: 'NEVER_EXPORT', includeInQr: true}));
+    unsafe.push({type: 'text', encrypted: false, sensitivity: 'secret', value: 'NEVER_EXPORT', includeInQr: true},
+        {type: 'text', encrypted: false, valueEnc: 'ciphertext', value: 'NEVER_EXPORT', includeInQr: true},
+        {type: 'text', encrypted: 'false', value: 'NEVER_EXPORT', includeInQr: true});
+    const result = qr.buildVCard({}, {}, {customFields: [...unsafe, {type: 'text', label: 'Legacy', value: 'Allowed', includeInQr: true}]});
+    assert.doesNotMatch(result, /NEVER_EXPORT|ciphertext/); assert.match(result, /NOTE:Legacy: Allowed/);
+});
+
+test('vCard escapes CR and LF in birthday and legacy contact fields instead of creating properties', () => {
+    const result = qr.buildVCard({birth_date: '2000-01-01\rPHOTO:injected', contactPhones: [{shareQr: true, number: '123\r\nNOTE:injected'}],
+        contactEmails: [{shareQr: true, address: 'mail\nURL:injected'}]}, {nascita: true, contactPhones: true, contactEmails: true});
+    assert.doesNotMatch(result, /\r|\n(?:PHOTO|NOTE|URL):injected/);
+    assert.match(result, /BDAY:2000-01-01\\nPHOTO:injected/);
+});
+
 test('normalizza i dati legacy con ID stabili senza mutare la sorgente', () => {
     const sourceProfile = { contactPhones: [{ number: '123' }], contactEmails: [{ address: 'a@example.test' }] };
     const first = model.normalizeLegacyProfile(sourceProfile);

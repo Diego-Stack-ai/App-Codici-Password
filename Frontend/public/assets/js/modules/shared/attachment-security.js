@@ -24,48 +24,58 @@ function base64ToBytes(value) {
 }
 
 async function deriveAttachmentWrappingKey(vaultKey, salt) {
-    const material = await crypto.subtle.importKey(
-        'raw', new TextEncoder().encode(String(vaultKey)), 'HKDF', false, ['deriveKey']
-    );
-    return crypto.subtle.deriveKey(
-        {name: 'HKDF', hash: 'SHA-256', salt, info: ATTACHMENT_AAD},
-        material, {name: 'AES-GCM', length: 256}, false, ['encrypt', 'decrypt']
-    );
+    const materialBytes = new TextEncoder().encode(String(vaultKey));
+    try {
+        const material = await crypto.subtle.importKey('raw', materialBytes, 'HKDF', false, ['deriveKey']);
+        return await crypto.subtle.deriveKey(
+            {name: 'HKDF', hash: 'SHA-256', salt, info: ATTACHMENT_AAD},
+            material, {name: 'AES-GCM', length: 256}, false, ['encrypt', 'decrypt']
+        );
+    } finally {
+        materialBytes.fill(0);
+    }
 }
 
 export async function encryptAttachmentFile(file, vaultKey) {
     validateAttachmentFile(file);
     if (!vaultKey) throw new Error('VAULT_KEY_REQUIRED');
     const fileKeyBytes = crypto.getRandomValues(new Uint8Array(32));
-    const fileKey = await crypto.subtle.importKey('raw', fileKeyBytes, 'AES-GCM', false, ['encrypt']);
-    const contentIv = crypto.getRandomValues(new Uint8Array(12));
-    const ciphertext = await crypto.subtle.encrypt(
-        {name: 'AES-GCM', iv: contentIv, additionalData: ATTACHMENT_AAD},
-        fileKey,
-        await file.arrayBuffer()
-    );
+    let plaintext = null;
+    try {
+        const fileKey = await crypto.subtle.importKey('raw', fileKeyBytes, 'AES-GCM', false, ['encrypt']);
+        const contentIv = crypto.getRandomValues(new Uint8Array(12));
+        plaintext = new Uint8Array(await file.arrayBuffer());
+        const ciphertext = await crypto.subtle.encrypt(
+            {name: 'AES-GCM', iv: contentIv, additionalData: ATTACHMENT_AAD},
+            fileKey,
+            plaintext
+        );
 
-    const wrapSalt = crypto.getRandomValues(new Uint8Array(32));
-    const wrapIv = crypto.getRandomValues(new Uint8Array(12));
-    const wrappingKey = await deriveAttachmentWrappingKey(vaultKey, wrapSalt);
-    const wrappedFileKey = await crypto.subtle.encrypt(
-        {name: 'AES-GCM', iv: wrapIv, additionalData: ATTACHMENT_AAD}, wrappingKey, fileKeyBytes
-    );
+        const wrapSalt = crypto.getRandomValues(new Uint8Array(32));
+        const wrapIv = crypto.getRandomValues(new Uint8Array(12));
+        const wrappingKey = await deriveAttachmentWrappingKey(vaultKey, wrapSalt);
+        const wrappedFileKey = await crypto.subtle.encrypt(
+            {name: 'AES-GCM', iv: wrapIv, additionalData: ATTACHMENT_AAD}, wrappingKey, fileKeyBytes
+        );
 
-    return {
-        blob: new Blob([ciphertext], {type: 'application/octet-stream'}),
-        metadata: {
-            version: 1,
-            cipher: 'AES-GCM-256',
-            keyWrap: 'HKDF-SHA256+A256GCM',
-            contentIv: bytesToBase64(contentIv),
-            wrapSalt: bytesToBase64(wrapSalt),
-            wrapIv: bytesToBase64(wrapIv),
-            wrappedFileKey: bytesToBase64(wrappedFileKey),
-            originalType: file.type,
-            originalSize: file.size
-        }
-    };
+        return {
+            blob: new Blob([ciphertext], {type: 'application/octet-stream'}),
+            metadata: {
+                version: 1,
+                cipher: 'AES-GCM-256',
+                keyWrap: 'HKDF-SHA256+A256GCM',
+                contentIv: bytesToBase64(contentIv),
+                wrapSalt: bytesToBase64(wrapSalt),
+                wrapIv: bytesToBase64(wrapIv),
+                wrappedFileKey: bytesToBase64(wrappedFileKey),
+                originalType: file.type,
+                originalSize: file.size
+            }
+        };
+    } finally {
+        plaintext?.fill(0);
+        fileKeyBytes.fill(0);
+    }
 }
 
 export async function decryptAttachmentBytes(ciphertext, encryption, vaultKey) {
@@ -73,17 +83,21 @@ export async function decryptAttachmentBytes(ciphertext, encryption, vaultKey) {
         throw new Error('ATTACHMENT_ENCRYPTION_INVALID');
     }
     const wrappingKey = await deriveAttachmentWrappingKey(vaultKey, base64ToBytes(encryption.wrapSalt));
-    const fileKeyBytes = await crypto.subtle.decrypt(
+    const fileKeyBytes = new Uint8Array(await crypto.subtle.decrypt(
         {name: 'AES-GCM', iv: base64ToBytes(encryption.wrapIv), additionalData: ATTACHMENT_AAD},
         wrappingKey,
         base64ToBytes(encryption.wrappedFileKey)
-    );
-    const fileKey = await crypto.subtle.importKey('raw', fileKeyBytes, 'AES-GCM', false, ['decrypt']);
-    return crypto.subtle.decrypt(
-        {name: 'AES-GCM', iv: base64ToBytes(encryption.contentIv), additionalData: ATTACHMENT_AAD},
-        fileKey,
-        ciphertext
-    );
+    ));
+    try {
+        const fileKey = await crypto.subtle.importKey('raw', fileKeyBytes, 'AES-GCM', false, ['decrypt']);
+        return await crypto.subtle.decrypt(
+            {name: 'AES-GCM', iv: base64ToBytes(encryption.contentIv), additionalData: ATTACHMENT_AAD},
+            fileKey,
+            ciphertext
+        );
+    } finally {
+        fileKeyBytes.fill(0);
+    }
 }
 
 export function openDecryptedAttachment(bytes, attachment) {

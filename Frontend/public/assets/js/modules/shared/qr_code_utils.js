@@ -77,9 +77,26 @@ export function buildVCard(userData, inclusions, options = {}) {
  * @param {Object} options - {width, height, colorDark, colorLight, correctLevel}
  */
 export function renderQRCode(container, text, options = {}) {
-    if (!container || typeof QRCode === 'undefined') return;
+    if (!container || typeof QRCode === 'undefined') {
+        if (options.exactText === true) throw new Error('QR non disponibile. Riprova la configurazione.');
+        return;
+    }
     // Remove previous QR canvases/images
     container.querySelectorAll('canvas,img').forEach(el => el.remove());
+
+    // Protocol URIs (for example TOTP) must never receive vCard padding or fallback text.
+    // Propagate failure without logging potentially sensitive encoder input.
+    if (options.exactText === true) {
+        new QRCode(container, {
+            text,
+            width: options.width || 104,
+            height: options.height || 104,
+            colorDark: options.colorDark || '#000000',
+            colorLight: options.colorLight || '#E3F2FD',
+            correctLevel: options.correctLevel ?? QRCode.CorrectLevel?.M ?? 1
+        });
+        return;
+    }
 
     // HACK: Aggiungi padding alla fine dei dati per forzare la libreria a scegliere una Versione QR più grande (TypeNumber maggiore).
     // La libreria qrcode.js attuale sottostima l'overhead binario, causando overflow se il Type scelto è 'giusto giusto'.
@@ -117,7 +134,7 @@ export function renderQRCode(container, text, options = {}) {
             message.style.cssText = 'color:red; font-size:0.75rem; text-align:center; padding:10px;';
             message.append('Dati eccessivi', document.createElement('br'), 'per il QR Code');
             container.replaceChildren(message);
-            showToast("Dati eccessivi. Riduci i campi.", "warning");
+            // Il messaggio nel contenitore non dipende da funzioni UI globali.
         }
     }
 }

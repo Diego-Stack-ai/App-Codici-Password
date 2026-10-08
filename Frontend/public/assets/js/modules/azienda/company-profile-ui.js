@@ -1,11 +1,12 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
 import { auth, db } from '../../firebase-config.js?v=1.2.128';
+import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
-import { getPrivateAccountConfirmed, getCompanyAccountConfirmed, listPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
+import { getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed, listPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
 import { showProfileAccountPicker } from '../privato/profilo-modal.js';
 import { profileAccountUrl } from '../privato/profile-model.js';
 import { companyProfileContacts, companyProfileDraft, findCompanyProfileContact, companyContactLinkPatch, companyAccountReferences } from './company-profile-model.js';
@@ -37,8 +38,12 @@ async function readLinkedPassword(contact) {
     const uid = auth.currentUser?.uid;
     const key = await ensureVaultKeyMaterial();
     if (!uid || auth.currentUser?.uid !== uid || !key) throw new Error('Vault bloccato');
-    const account = contact.linkedAccountCompanyId ? await getCompanyAccountConfirmed(uid, contact.linkedAccountCompanyId, contact.linkedAccountId) : await getPrivateAccountConfirmed(uid, contact.linkedAccountId);
+    const offline = globalThis.navigator?.onLine === false;
+    const account = contact.linkedAccountCompanyId
+        ? await (offline ? getCompanyAccount : getCompanyAccountConfirmed)(uid, contact.linkedAccountCompanyId, contact.linkedAccountId)
+        : await (offline ? getPrivateAccount : getPrivateAccountConfirmed)(uid, contact.linkedAccountId);
     if (!account || account.isArchived) throw new Error('Account mancante');
+    if (auth.currentUser?.uid !== uid || (Object.hasOwn(account, 'ownerId') && account.ownerId !== uid)) throw new Error('Sessione cambiata');
     const value = await decryptRequiredValue(account.password, key);
     if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata');
     return value;
@@ -79,9 +84,28 @@ export function renderCompanyContacts(data, companyId, reload) {
     setChildren(document.getElementById('email-list-container'),contacts.emails.length ? contacts.emails.map(e=>card(e,'email')) : [text('Nessuna email. Usa Modifica contatti per aggiungerla.')]);
     setChildren(document.getElementById('company-phone-list'),contacts.phones.length ? contacts.phones.map(p=>card(p,'phone')) : [text('Nessun telefono. Usa Modifica contatti per aggiungerlo.')]);
 }
-let pdfCleanup, pdfGeneration = 0;
+let pdfCleanup, pdfRoot, pdfGeneration = 0, pdfOwnerUid, pdfLifecycleStarted = false;
+function clearCompanyPdf() {
+    pdfGeneration++;
+    pdfCleanup?.(); pdfCleanup = null;
+    pdfRoot?.replaceChildren(); pdfRoot = null;
+}
+function startCompanyPdfLifecycle() {
+    if (pdfLifecycleStarted) return;
+    pdfLifecycleStarted = true;
+    pdfOwnerUid = auth.currentUser?.uid;
+    for (const event of ['pagehide', 'private-auth-blocked', 'vault-session-locked']) {
+        window.addEventListener(event, clearCompanyPdf);
+    }
+    onAuthStateChanged(auth, user => {
+        if (user?.uid !== pdfOwnerUid) clearCompanyPdf();
+        pdfOwnerUid = user?.uid;
+    });
+}
 export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
-    pdfCleanup?.(); pdfCleanup = null; pdfGeneration++;
+    startCompanyPdfLifecycle();
+    clearCompanyPdf();
+    const ownerUid = auth.currentUser?.uid;
     const tabs = [...document.querySelectorAll('[data-company-tab]')];
     styleCompanySections(companyId);
     tabs.forEach(tab => {
@@ -91,17 +115,26 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
         tab.setAttribute('aria-controls',panels.map(panel=>panel.id).join(' '));
     });
     const activate = name => {
-        pdfCleanup?.(); pdfCleanup = null; const generation = ++pdfGeneration;
+        clearCompanyPdf();
+        const generation = pdfGeneration;
         if (!tabs.some(tab=>tab.dataset.companyTab===name)) name='overview';
         tabs.forEach(tab=>{const active=tab.dataset.companyTab===name;tab.classList.toggle('is-active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
         document.querySelectorAll('[data-company-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.companyPanel!==name));
         sessionStorage.setItem('company-profile-tab:'+companyId,name);
         if (name === 'pdf-summary') {
             const root = document.getElementById('company-pdf-summary');
+            if (!root || !ownerUid || auth.currentUser?.uid !== ownerUid) return;
+            pdfRoot = root;
             root.textContent = 'Caricamento scheda PDF…';
             import('./pdf/company-summary-entry.js').then(({mountCompanySummary}) => {
-                if (generation === pdfGeneration) pdfCleanup = mountCompanySummary(root, companyId);
-            }).catch(() => {if (generation === pdfGeneration) root.textContent = 'Scheda PDF non disponibile. Riprova online.';});
+                if (generation === pdfGeneration && root.isConnected && auth.currentUser?.uid === ownerUid) {
+                    pdfCleanup = mountCompanySummary(root, companyId);
+                }
+            }).catch(() => {
+                if (generation === pdfGeneration && root.isConnected && auth.currentUser?.uid === ownerUid) {
+                    root.textContent = 'Scheda PDF non disponibile. Riprova online.';
+                }
+            });
         }
     };
     tabs.forEach((tab,index)=>{tab.onclick=()=>activate(tab.dataset.companyTab);tab.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowLeft'?-1:1)+tabs.length)%tabs.length;tabs[next].focus();activate(tabs[next].dataset.companyTab);};});
@@ -120,11 +153,11 @@ export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
         ])
     ]);
     const qr=document.getElementById('company-digital-card');
-    const options=[['ragioneSociale','Ragione sociale'],['partitaIva','Partita IVA'],['codiceSDI','Codice SDI'],['numeroCCIAA','CCIAA'],['dataIscrizione','Data iscrizione'],['referenteNome','Nome referente'],['referenteCognome','Cognome referente'],['referenteTitolo','Ruolo referente'],['referenteCellulare','Cellulare referente'],['aziendaEmail','PEC'],['adminEmail','Email amministrazione'],['persEmail','Email personale'],['qrLegale','Sede legale']];
+    const options=[['ragioneSociale','Ragione sociale'],['partitaIva','Partita IVA'],['codiceSDI','Codice SDI'],['numeroCCIAA','CCIAA'],['dataIscrizione','Data iscrizione'],['referenteNome','Nome referente'],['referenteCognome','Cognome referente'],['referenteTitolo','Ruolo referente'],['referenteCellulare','Cellulare referente'],['telefonoAzienda','Telefono aziendale'],['aziendaEmail','PEC'],['adminEmail','Email amministrazione'],['persEmail','Email personale'],['qrLegale','Sede legale']];
     const preview=createElement('div',{className:'company-qr-preview'});
     const config={...data.qrConfig};
     const refresh=()=>{ const vcard=buildVCard({...data,qrConfig:config}); renderQRCode(preview,vcard,{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'}); const capacity=document.getElementById('company-qr-capacity'); if(capacity) { const bytes=new TextEncoder().encode(vcard).length; capacity.textContent=bytes>1200 ? `Il QR contiene ${bytes} byte: riduci i campi per renderlo più facile da leggere.` : `Capacità utilizzata: ${bytes} byte.`; capacity.classList.toggle('is-warning',bytes>1200); } };
-    const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
+    const checks=options.map(([key,label])=>createElement('label',{className:'digital-card-choice'},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail','telefonoAzienda'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
     const save=button('Salva selezione',async()=>{try{save.disabled=true;await updateDoc(doc(db,'users',auth.currentUser.uid,'aziende',companyId),{qrConfig:config});showToast('Tessera aggiornata','success');await reload();}catch{showToast('Impossibile salvare la tessera','error');}finally{save.disabled=false;}});
     const download=button('Scarica contatto',()=>{const blob=new Blob([buildVCard({...data,qrConfig:config})],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
     setChildren(qr,[createElement('div',{className:'digital-card-layout'},[

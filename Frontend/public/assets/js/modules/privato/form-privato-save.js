@@ -5,13 +5,14 @@ import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
+import { DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -22,11 +23,23 @@ export async function savePrivateAccount({
     isEditing,
     baseRevision = 0,
     profileContactLinkDraft,
-    hasLinkedProfileField = false
+    recoveryOperation = null,
+    isActive = () => auth.currentUser?.uid === currentUid,
+    hasLinkedProfileField = false,
+    loadContext = null
 }) {
+    if (!isActive()) return;
+    if (!isAccountSaveAllowed(loadContext)) {
+        showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+        return;
+    }
     const get = id => document.getElementById(id)?.value.trim() || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
+    if (recoveryOperation?._reviewReason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED') {
+        showToast('Questo Account richiede una modifica completa. Riaprilo per scegliere: la copia offline resta cifrata e non viene applicata dal salvataggio ridotto.', 'warning');
+        return;
+    }
     let savedAccountId = currentDocId;
 
     if (hasInvalidCardExpiry(bankAccounts)) {
@@ -161,7 +174,11 @@ export async function savePrivateAccount({
     }
 
     try {
+        if (!isActive()) throw new Error('RECOVERY_SESSION_CHANGED');
         const pilotEligible = offlinePolicy.eligible;
+        if (recoveryOperation && (!pilotEligible || recoveryOperation.uid !== currentUid || recoveryOperation.recordId !== currentDocId)) {
+            throw new Error('RECOVERY_ACCOUNT_SCOPE_CHANGED');
+        }
         if (pilotEligible) {
             const pilotModule = await import('../data/private-account-offline-pilot.js');
             const accountRef = isEditing
@@ -170,7 +187,11 @@ export async function savePrivateAccount({
             const pilotRecord = {...data};
             if (!isEditing) pilotRecord.createdAt = new Date().toISOString();
             let lastState = null;
-            const result = await pilotModule.enqueuePrivateAccountPilot({
+            const submit = recoveryOperation ? pilotModule.replacePrivateAccountPilotOperation : pilotModule.enqueuePrivateAccountPilot;
+            assertAccountSaveAllowed(loadContext);
+            const result = await submit({
+                recoveryOperation,
+                isActive,
                 uid: currentUid,
                 vaultKeyMaterial,
                 recordId: accountRef.id,
@@ -178,10 +199,18 @@ export async function savePrivateAccount({
                 record: pilotRecord,
                 onState: state => { lastState = state; }
             });
+            if (!isActive()) return;
             const outcome = result?.value || result;
+            if (lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required') {
+                const operation = outcome?.operation || lastState?.operation;
+                const unsupported = [operation?._reviewReason, outcome?.reason, lastState?.reason].includes('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+                showToast(unsupported ? 'Questo Account ora richiede una modifica completa. Riaprilo per scegliere: la copia offline resta cifrata e non sarà reinviata automaticamente.' : 'Vecchia modifica da verificare. Riapri l’Account: la copia cifrata resta conservata.', 'warning');
+                if (btnSave) { btnSave.disabled = true; btnSave.dataset.m6Queued = 'true'; }
+                return;
+            }
             if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 showToast('Conflitto: questo account è stato modificato su un altro dispositivo.', 'warning');
-                if (btnSave) btnSave.disabled = false;
+                if (btnSave) { btnSave.disabled = true; btnSave.dataset.m6Queued = 'true'; }
                 return;
             }
             if (outcome?.status === 'offline') {
@@ -193,7 +222,7 @@ export async function savePrivateAccount({
                 }
                 return;
             }
-            if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
+            if (lastState?.state === 'recoverable-error' || outcome?.status !== 'saved') {
                 showToast('Invio temporaneamente non disponibile. La modifica cifrata resta conservata sul dispositivo.', 'warning');
                 if (btnSave) {
                     btnSave.disabled = true;
@@ -209,6 +238,7 @@ export async function savePrivateAccount({
             });
             showToast(t('success_save'), "success");
             setTimeout(() => {
+                if (!isActive()) return;
                 const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
                     ? `form_account_privato.html?id=${accountRef.id}&linkShared=1#shared-credentials-section`
                     : isEditing
@@ -221,6 +251,7 @@ export async function savePrivateAccount({
 
         // --- ATOMIC TRANSACTION V3.1 ---
         let retainedProfilePassword = false;
+        assertAccountSaveAllowed(loadContext);
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
             savedAccountId = accRef.id;
@@ -249,8 +280,16 @@ export async function savePrivateAccount({
                     : { ...email, linkedAccountId: targetId };
             }
             let currentSharedWith = oldData?.sharedWith || {};
+            // M7-R7C-1: ciclo di condivisione dell'Account (0 = legacy). Un valore
+            // malformato chiude il salvataggio invece di scrivere su un ID incerto.
+            const sharingCycle = sharingCycleOf(oldData);
+            if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
 
             // 2. NOW EXECUTE ALL WRITES
+            assertAccountSaveAllowed(loadContext);
+            if (auth.currentUser?.uid !== currentUid) {
+                throw Object.assign(new Error('ACCOUNT_SAVE_SESSION_CHANGED'), {code: 'ACCOUNT_SAVE_SESSION_CHANGED'});
+            }
             let finalData = { ...data };
             if (linkedContact) {
                 const updatedProfile = {...profileUserSnap.data(), ...patchProfileAccountItem(profileUserSnap.data(), profileContactLinkDraft, linkedContact)};
@@ -268,22 +307,9 @@ export async function savePrivateAccount({
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    const guest = currentSharedWith[sKey];
-                    transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
 
-                    // [NEW] Notifica Guest (se aveva accettato)
-                    if (guest && guest.status === 'accepted' && guest.uid) {
-                        const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
-                        transaction.set(guestNotifRef, {
-                            title: "Accesso Revocato",
-                            message: `Il proprietario ha reso privato l'account: ${data.nomeAccount || 'condiviso'}. Il tuo accesso è terminato.`,
-                            accountName: data.nomeAccount || 'Account',
-                            type: "share_revoked",
-                            ownerEmail: auth.currentUser?.email || 'Proprietario',
-                            timestamp: new Date().toISOString(),
-                            read: false
-                        });
-                    }
+                    // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
                 finalData.sharedWith = {};
                 finalData.sharedWithUids = [];
@@ -298,23 +324,10 @@ export async function savePrivateAccount({
                 // Rimuovi quelli sbiancati dalla UI
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
-                        const guest = currentSharedWith[oldKey];
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
+                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, sharingCycle)));
 
-                        // [NEW] Notifica Guest (se aveva accettato)
-                        if (guest && guest.status === 'accepted' && guest.uid) {
-                            const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
-                            transaction.set(guestNotifRef, {
-                                title: "Accesso Revocato",
-                                message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
-                                accountName: data.nomeAccount || 'Account',
-                                type: "share_revoked",
-                                ownerEmail: auth.currentUser?.email || 'Proprietario',
-                                timestamp: new Date().toISOString(),
-                                read: false
-                            });
-                        }
+                        // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
                 }
 
@@ -325,7 +338,10 @@ export async function savePrivateAccount({
                     const existingGuest = finalData.sharedWith[sKey];
 
                     // --- FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito ---
-                    if (!existingGuest || existingGuest.status === 'rejected') {
+                    // M7-R7C-1: anche una voce `suspended` (Account archiviato e
+                    // ripristinato) richiede un NUOVO invito: è reinvitabile solo
+                    // perché l'utente l'ha riselezionata nel modulo.
+                    if (!existingGuest || existingGuest.status === 'rejected' || existingGuest.status === 'suspended') {
                         // Nuovo Guest o Reset di un rifiutato
                         finalData.sharedWith[sKey] = {
                             email: email,
@@ -334,8 +350,13 @@ export async function savePrivateAccount({
                         };
 
                         // Crea Invito
-                        transaction.set(doc(db, "invites", `${targetId}_${sKey}`), {
-                            inviteId: `${targetId}_${sKey}`,
+                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
+                            inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
+                            // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
+                            // ogni creazione e a ogni reinvito. L'id dell'evento di
+                            // registro si deriva solo da qui, mai dall'email, dalla
+                            // sua chiave sanificata o dall'id del documento.
+                            auditRef: crypto.randomUUID(),
                             accountId: targetId,
                             ownerId: currentUid,
                             senderId: currentUid,
@@ -346,6 +367,7 @@ export async function savePrivateAccount({
                             notifyPush: document.getElementById('invite-notify-push')?.checked === true,
                             notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
                             status: 'pending',
+                            cycle: sharingCycle,
                             createdAt: new Date().toISOString()
                         });
 
@@ -401,6 +423,7 @@ export async function savePrivateAccount({
             ? 'Account collegato. La password diversa è stata conservata nel Profilo.'
             : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
+            if (!isActive()) return;
             const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
                 ? `form_account_privato.html?id=${savedAccountId}&linkShared=1#shared-credentials-section`
                 : isEditing

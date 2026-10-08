@@ -1,6 +1,40 @@
 const MAX_RECORDS = 400;
 const MAX_CHUNK_BYTES = 7 * 1024 * 1024;
 
+export function validateRestoreTypes(data) {
+    const pending = [data];
+    const seen = new Set();
+    const invalid = () => { throw new Error('BACKUP_TYPED_VALUE_INVALID'); };
+    while (pending.length) {
+        const value = pending.pop();
+        if (!value || typeof value !== 'object') continue;
+        if (seen.has(value)) invalid();
+        seen.add(value);
+        if (Array.isArray(value)) {
+            for (const child of value) pending.push(child);
+            continue;
+        }
+        const keys = Object.keys(value).sort().join(',');
+        if (value.$type === 'timestamp') {
+            if (keys !== '$type,nanoseconds,seconds' || !Number.isSafeInteger(value.seconds) ||
+                value.seconds < -62135596800 || value.seconds > 253402300799 ||
+                !Number.isInteger(value.nanoseconds) || value.nanoseconds < 0 || value.nanoseconds > 999999999) invalid();
+            if (value.nanoseconds % 1000 !== 0) throw new Error('BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED');
+        } else if (value.$type === 'date') {
+            if (keys !== '$type,value' || typeof value.value !== 'string' ||
+                !Number.isFinite(Date.parse(value.value)) || new Date(value.value).toISOString() !== value.value) invalid();
+        } else if (value.$type === 'bytes') {
+            if (keys !== '$type,value' || !Array.isArray(value.value) || Object.keys(value.value).length !== value.value.length) invalid();
+            for (let index = 0; index < value.value.length; index++) {
+                const byte = value.value[index];
+                if (!Object.hasOwn(value.value, index) || !Number.isInteger(byte) || byte < 0 || byte > 255) invalid();
+            }
+        } else {
+            for (const child of Object.values(value)) pending.push(child);
+        }
+    }
+}
+
 export function validateRestoreStoragePath(storagePath, uid) {
     const prefix = `users/${String(uid || '').trim()}/`;
     if (!uid || typeof storagePath !== 'string' || !storagePath.startsWith(prefix) ||
@@ -16,6 +50,9 @@ export function chunkRestoreRecords(records) {
     let current = [];
     let currentBytes = 0;
     for (const record of records) {
+        // Validate the entire selection before returning any executable chunks.
+        // A malformed later record must not fail only after earlier chunks commit.
+        validateRestoreTypes(record.data);
         const bytes = new TextEncoder().encode(JSON.stringify(record.data)).byteLength;
         if (bytes > 800 * 1024) throw new Error('BACKUP_RECORD_TOO_LARGE');
         if (current.length && (current.length >= MAX_RECORDS || currentBytes + bytes > MAX_CHUNK_BYTES)) {
@@ -35,10 +72,29 @@ export function validateBackupFooter(footer, counts) {
     return true;
 }
 
-function restoreRecordKey(record = {}) {
-    return [
-        record.scope, record.id, record.companyId || '', record.accountId || '', record.sharedDataId || ''
-    ].join(':');
+export function restoreRecordKey(record = {}) {
+    const id = value => {
+        const normalized = String(value || '').trim();
+        if (!/^[A-Za-z0-9._:-]{1,160}$/.test(normalized)) throw new Error('BACKUP_IDENTIFIER_INVALID');
+        return normalized;
+    };
+    // Match backend destination identity, including shared widget collection.
+    // JSON tuples avoid collisions when valid identifiers contain colons.
+    const key = (...parts) => JSON.stringify(parts);
+    if (record.scope === 'profile') return key('profile');
+    const recordId = id(record.id);
+    switch (record.scope) {
+        case 'settings': case 'private-account': case 'company': case 'deadline':
+        case 'contact': case 'profile-widget': case 'shared-vault-data':
+            return key(record.scope, recordId);
+        case 'company-account': return key(record.scope, id(record.companyId), recordId);
+        case 'private-account-attachment': return key(record.scope, id(record.accountId), recordId);
+        case 'company-account-attachment': return key(record.scope, id(record.companyId), id(record.accountId), recordId);
+        case 'company-account-widget': id(record.companyId); // fall through: both contexts use accountWidgets
+        case 'private-account-widget': id(record.accountId); return key('account-widget', recordId);
+        case 'shared-vault-data-link': id(record.sharedDataId); return key(record.scope, recordId);
+        default: throw new Error('BACKUP_SCOPE_INVALID');
+    }
 }
 
 function canonicalJson(value) {

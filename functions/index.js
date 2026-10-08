@@ -8,25 +8,35 @@
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentDeleted, onDocumentUpdated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const { Bytes, FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
+const { FieldPath, FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { getStorage } = require("firebase-admin/storage");
 const nodemailer = require("nodemailer");
+const deadlineCalendar = require("./deadline-calendar");
+const recipientDeliveryLedger = require("./recipient-delivery-ledger");
 const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions");
 const {
     generateRecoveryCode,
+    hasRecentAuthentication,
     nextRecoveryAttemptState,
     normalizeRecoveryCode,
     recoveryAttemptId,
     recoveryCodeHash
 } = require("./recovery-security");
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
+const {buildAcceptanceReceipt} = require("./invite-acceptance-receipt");
+const {parseCloudEventTime} = require("./invite-acceptance-event-time");
+const {runInviteRevocationNotification, runAcceptanceMarkerCleanup} = require("./invite-revocation-notification");
+const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require("./mutation-result-binding");
+const {assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope} = require("./private-account-write-scope");
+const {buildRestorePreview, staleRestoreIndexes} = require('./backup-restore-preview');
+const {preserveRestoreAuthority} = require('./backup-restore-authority');
 const {
     privateAccountMutationDecision, validatePrivateAccountMutation
 } = require("./private-account-mutation-service");
@@ -34,17 +44,24 @@ const {
     RETENTION_MS, restoreDecision, safeAudit, trashDecision, validateRecoveryCommand
 } = require("./history-recovery-service");
 const {
-    accountPath, isSafeAttachmentPath, purgeDecision, unlinkProfileEmails, validatePurgeCommand
+    accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
+    assertNoExternalAccountReferences, isArchivePurgeSuspended
 } = require("./archive-purge-service");
 const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
+const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./backup-restore-receipt");
+const {createArchivePurgeBinding, verifyArchivePurgeReceipt} = require("./archive-purge-receipt");
+const {createRecoveryBinding, verifyRecoveryReceipt} = require("./recovery-command-receipt");
+const {createVaultAccountCallables} = require('./vault-account-runtime');
 const {
-    revisionDecision, sharedVaultPaths, validateSharedVaultCommand
-} = require("./shared-vault-service");
+    accountEventId, accountTransition, auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition,
+    invitedEventId, removedEventId, responseEventId
+} = require("./audit-event-service");
 const {
-    accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData
-} = require("./account-widget-service");
+    DEFAULT_BATCH_SIZE, MAX_EVENTS_PER_RUN, auditEventPath, classifyAuditEvent, planAuditRetention,
+    runAuditRetention
+} = require("./audit-retention-service");
 
 initializeApp();
 
@@ -55,10 +72,73 @@ firestore.FieldValue = FieldValue;
 const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 
+const vaultAccounts = createVaultAccountCallables({db: getFirestore(),
+    hash: value => crypto.createHash('sha256').update(value).digest('hex'),
+    timestamp: () => FieldValue.serverTimestamp(), deleteField: () => FieldValue.delete(), HttpsError});
+exports.applyAccountNoteMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.note(request));
+exports.applyAccountStandardMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.standard(request));
+exports.applyProfileLinkMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.link(request));
+exports.applyProfileAccountCreate = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.create(request));
+exports.applyProfileTextMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.text(request));
+exports.applyPrivateQrSelection = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.privateQr(request));
+exports.applyCompanyQrSelection = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.companyQr(request));
+exports.applyPrivateDocumentsMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.documents(request));
+exports.applyPrivateUtilitiesMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.utilities(request));
+exports.applyProfileContactsMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.contacts(request));
+exports.applyPrivateAddressesMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.privateAddresses(request));
+exports.applyCompanyAddressesMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.companyAddresses(request));
+exports.applyCompanyContactsMutation = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.companyContacts(request));
+
+function verifiedMutationRetry(resultSnapshot, legacySnapshot, binding) {
+    if (resultSnapshot.exists) {
+        try { return verifyMutationResult(resultSnapshot.data(), binding); }
+        catch (error) {
+            if (error.code === 'OPERATION_BINDING_MISMATCH') {
+                throw new HttpsError('already-exists', 'Identificatore operazione già utilizzato.');
+            }
+            throw new HttpsError('failed-precondition', 'Esito operazione non verificabile.');
+        }
+    }
+    // Legacy results were owner-writable: never trust or silently reapply them.
+    if (legacySnapshot.exists) throw new HttpsError(
+        'failed-precondition',
+        'Esito precedente da verificare prima di riprovare.',
+        {reason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'}
+    );
+    return null;
+}
+
+function verifiedCurrentRevision(recordSnapshot) {
+    try { return currentMutationRevision(recordSnapshot.data()); }
+    catch { throw new HttpsError('failed-precondition', 'Revisione record non valida.'); }
+}
+
+function requireMutationOwner(request, field = 'uid') {
+    if (typeof request.data?.[field] !== 'string' || request.data[field] !== request.auth.uid) {
+        throw new HttpsError('failed-precondition', 'La sessione della modifica è cambiata. Riapri il modulo.', {
+            reason: 'MUTATION_OWNER_MISMATCH'
+        });
+    }
+}
+
 exports.applyOfflineMutation = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async (request) => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request);
         let operation;
         try {
             operation = validateOfflineMutation(request.data);
@@ -68,14 +148,17 @@ exports.applyOfflineMutation = onCall(
         const store = getFirestore();
         const userRef = store.collection("users").doc(request.auth.uid);
         const recordRef = userRef.collection("syncRecords").doc(operation.recordId);
-        const resultRef = userRef.collection("operationResults").doc(operation.operationId);
+        const resultRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(operation.operationId);
+        const legacyRef = userRef.collection("operationResults").doc(operation.operationId);
+        const binding = createMutationBinding({uid: request.auth.uid, domain: 'offline-sync', operation});
         return store.runTransaction(async (transaction) => {
-            const [recordSnapshot, resultSnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(resultRef)
+            const [recordSnapshot, resultSnapshot, legacySnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
-            const currentRevision = Number(recordSnapshot.data()?.revision || 0);
+            const previous = verifiedMutationRetry(resultSnapshot, legacySnapshot, binding);
+            const currentRevision = verifiedCurrentRevision(recordSnapshot);
             const decision = mutationDecision(
-                currentRevision, operation, resultSnapshot.exists ? resultSnapshot.data() : null
+                currentRevision, operation, previous
             );
             if (decision.duplicate) return decision;
             if (decision.status === "applied") {
@@ -89,8 +172,7 @@ exports.applyOfflineMutation = onCall(
             }
             transaction.set(resultRef, {
                 ...decision,
-                ownerUid: request.auth.uid,
-                deviceId: operation.deviceId,
+                ...binding,
                 createdAt: FieldValue.serverTimestamp()
             });
             return decision;
@@ -102,6 +184,7 @@ exports.applyPrivateAccountMutation = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request);
         let operation;
         try { operation = validatePrivateAccountMutation(request.data); } catch {
             throw new HttpsError("invalid-argument", "Account privato offline non valido.");
@@ -109,18 +192,33 @@ exports.applyPrivateAccountMutation = onCall(
         const store = getFirestore();
         const userRef = store.collection("users").doc(request.auth.uid);
         const recordRef = userRef.collection("accounts").doc(operation.recordId);
-        const resultRef = userRef.collection("operationResults").doc(operation.operationId);
+        const resultRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(operation.operationId);
+        const legacyRef = userRef.collection("operationResults").doc(operation.operationId);
+        const binding = createMutationBinding({uid: request.auth.uid, domain: 'private-account', operation});
         return store.runTransaction(async transaction => {
-            const [recordSnapshot, resultSnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(resultRef)
+            const [recordSnapshot, resultSnapshot, legacySnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
-            const previous = resultSnapshot.exists ? resultSnapshot.data() : null;
-            if (previous && (previous.domain !== "private-account" || previous.recordId !== operation.recordId)) {
-                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            const previous = verifiedMutationRetry(resultSnapshot, legacySnapshot, binding);
+            // A trusted retry reports its original result without mutating the
+            // current document, even if its scope has legitimately changed since.
+            if (previous) return {...previous, duplicate: true};
+            const [profileSnapshot, companiesSnapshot] = await Promise.all([
+                transaction.get(userRef), transaction.get(userRef.collection('aziende'))
+            ]);
+            try {
+                if (recordSnapshot.exists) assertPrivateAccountWriteScope({uid: request.auth.uid, record: recordSnapshot.data()});
+                assertPrivateAccountReferenceScope({recordId: operation.recordId,
+                    record: recordSnapshot.exists ? recordSnapshot.data() : null,
+                    profile: profileSnapshot.exists ? profileSnapshot.data() : {},
+                    companies: companiesSnapshot.docs.map(snapshot => snapshot.data())});
+            } catch {
+                throw new HttpsError('failed-precondition', 'Questo Account richiede il percorso di modifica completo.',
+                    {reason: 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'});
             }
             const result = privateAccountMutationDecision({
                 exists: recordSnapshot.exists,
-                currentRevision: Number(recordSnapshot.data()?.revision || 0),
+                currentRevision: verifiedCurrentRevision(recordSnapshot),
                 expectedRevision: operation.expectedRevision,
                 previous
             });
@@ -133,10 +231,7 @@ exports.applyPrivateAccountMutation = onCall(
             }, {merge: recordSnapshot.exists});
             transaction.set(resultRef, {
                 ...result,
-                domain: "private-account",
-                recordId: operation.recordId,
-                ownerUid: request.auth.uid,
-                deviceId: operation.deviceId,
+                ...binding,
                 createdAt: FieldValue.serverTimestamp()
             });
             return result;
@@ -146,204 +241,20 @@ exports.applyPrivateAccountMutation = onCall(
 
 exports.manageSharedVaultData = onCall(
     {region: "europe-west1", enforceAppCheck: true},
-    async request => {
-        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
-        let command;
-        try {
-            command = validateSharedVaultCommand(request.data);
-        } catch {
-            throw new HttpsError("invalid-argument", "Operazione Credenziale comune non valida.");
-        }
-        const store = getFirestore();
-        const paths = sharedVaultPaths(request.auth.uid, command);
-        const dataRef = store.doc(paths.data);
-        const operationRef = store.doc(paths.operation);
-        return store.runTransaction(async transaction => {
-            const reads = [transaction.get(dataRef), transaction.get(operationRef)];
-            let linkRef = null;
-            let widgetRef = null;
-            let accountRef = null;
-            let linksQuery = null;
-            if (paths.link) {
-                linkRef = store.doc(paths.link);
-                widgetRef = store.doc(paths.widget);
-                accountRef = store.doc(paths.account);
-                reads.push(transaction.get(linkRef), transaction.get(widgetRef), transaction.get(accountRef));
-            }
-            if (command.action === "delete") {
-                linksQuery = store.collection(`users/${request.auth.uid}/sharedVaultLinks`)
-                    .where("sharedDataId", "==", command.sharedDataId).limit(1);
-                reads.push(transaction.get(linksQuery));
-            }
-            const snapshots = await Promise.all(reads);
-            const dataSnapshot = snapshots[0];
-            const operationSnapshot = snapshots[1];
-            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
-            if (previous && (previous.domain !== "shared-vault" ||
-                previous.sharedDataId !== command.sharedDataId || previous.action !== command.action)) {
-                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
-            }
-            const decision = revisionDecision({
-                exists: dataSnapshot.exists,
-                currentRevision: Number(dataSnapshot.data()?.revision || 0),
-                expectedRevision: command.expectedRevision,
-                previous,
-                action: command.action
-            });
-            if (decision.duplicate || decision.status !== "applied") return decision;
-
-            const now = FieldValue.serverTimestamp();
-            if (command.action === "create" || command.action === "update") {
-                const payload = {
-                    ...command.data,
-                    revision: decision.revision,
-                    updatedAt: now
-                };
-                const createdAt = command.action === "create" ? now : dataSnapshot.data().createdAt;
-                if (createdAt !== undefined) payload.createdAt = createdAt;
-                transaction.set(dataRef, payload);
-            } else if (command.action === "link") {
-                const [linkSnapshot, widgetSnapshot, accountSnapshot] = snapshots.slice(2, 5);
-                if (!accountSnapshot.exists) throw new HttpsError("not-found", "Account non trovato.");
-                if (linkSnapshot.exists || widgetSnapshot.exists) {
-                    throw new HttpsError("already-exists", "Credenziale già collegata.");
-                }
-                const linkPayload = {
-                    ...command.link,
-                    sharedDataId: command.sharedDataId,
-                    widgetId: command.widgetId,
-                    schemaVersion: 1,
-                    createdAt: now,
-                    updatedAt: now
-                };
-                transaction.set(linkRef, linkPayload);
-                transaction.set(widgetRef, {
-                    ...command.link,
-                    kind: "shared-reference",
-                    sharedDataId: command.sharedDataId,
-                    linkId: command.linkId,
-                    schemaVersion: 1,
-                    createdAt: now,
-                    updatedAt: now
-                });
-                transaction.update(dataRef, {revision: decision.revision, updatedAt: now});
-            } else if (command.action === "unlink") {
-                const [linkSnapshot, widgetSnapshot] = snapshots.slice(2, 4);
-                if (!linkSnapshot.exists || !widgetSnapshot.exists ||
-                    linkSnapshot.data().sharedDataId !== command.sharedDataId ||
-                    widgetSnapshot.data().sharedDataId !== command.sharedDataId) {
-                    throw new HttpsError("failed-precondition", "Collegamento non coerente.");
-                }
-                transaction.delete(linkRef);
-                transaction.delete(widgetRef);
-                transaction.update(dataRef, {revision: decision.revision, updatedAt: now});
-            } else if (command.action === "delete") {
-                const linksSnapshot = snapshots[2];
-                if (!linksSnapshot.empty) {
-                    throw new HttpsError("failed-precondition", "Scollega prima tutti gli Account.");
-                }
-                transaction.delete(dataRef);
-            }
-            transaction.set(operationRef, {
-                ...decision,
-                domain: "shared-vault",
-                action: command.action,
-                sharedDataId: command.sharedDataId,
-                ownerUid: request.auth.uid,
-                createdAt: now
-            });
-            transaction.set(store.collection("users").doc(request.auth.uid)
-                .collection("auditEvents").doc(command.operationId), {
-                action: `shared-vault-${command.action}`,
-                sharedDataId: command.sharedDataId,
-                operationId: command.operationId,
-                revision: decision.revision,
-                createdAt: now
-            });
-            return decision;
-        });
-    }
+    request => require('./reference-callables').createReferenceCallables({
+        onCall: (_options, handler) => handler, getFirestore, FieldValue, HttpsError, requireMutationOwner
+    }).manageSharedVaultData(request)
 );
-
 exports.manageAccountWidget = onCall(
     {region: "europe-west1", enforceAppCheck: true},
-    async request => {
-        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
-        let command;
-        try {
-            command = validateAccountWidgetCommand(request.data);
-        } catch (error) {
-            const validationCode = /^ACCOUNT_WIDGET_|^SHARED_VAULT_/.test(String(error?.message || ""))
-                ? error.message
-                : "ACCOUNT_WIDGET_COMMAND_INVALID";
-            console.warn("[ACCOUNT_WIDGET] Comando rifiutato", {validationCode});
-            throw new HttpsError(
-                "invalid-argument",
-                `Operazione Widget Account non valida (${validationCode}).`
-            );
-        }
-        const store = getFirestore();
-        const paths = accountWidgetPaths(request.auth.uid, command);
-        const accountRef = store.doc(paths.account);
-        const widgetRef = store.doc(paths.widget);
-        const operationRef = store.doc(paths.operation);
-        return store.runTransaction(async transaction => {
-            const [accountSnapshot, widgetSnapshot, operationSnapshot] = await Promise.all([
-                transaction.get(accountRef), transaction.get(widgetRef), transaction.get(operationRef)
-            ]);
-            if (!accountSnapshot.exists) throw new HttpsError("not-found", "Account non trovato.");
-            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
-            if (previous && (previous.domain !== "account-widget" || previous.widgetId !== command.widgetId ||
-                previous.action !== command.action)) {
-                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
-            }
-            if (widgetSnapshot.exists && !widgetBelongsToCommand(widgetSnapshot.data(), command)) {
-                throw new HttpsError("failed-precondition", "Il Widget appartiene a un altro Account.");
-            }
-            const decision = revisionDecision({
-                exists: widgetSnapshot.exists,
-                currentRevision: Number(widgetSnapshot.data()?.revision || 0),
-                expectedRevision: command.expectedRevision,
-                previous,
-                action: command.action
-            });
-            if (decision.duplicate || decision.status !== "applied") return decision;
-            let widgetData;
-            try {
-                widgetData = resolveAccountWidgetBankData(command, accountSnapshot.data(), widgetSnapshot.data());
-            } catch {
-                throw new HttpsError("failed-precondition", "Il conto bancario collegato al Widget non è disponibile.");
-            }
-            const now = FieldValue.serverTimestamp();
-            if (command.action === "delete") transaction.delete(widgetRef);
-            else transaction.set(widgetRef, {
-                ...widgetData,
-                context: command.context,
-                accountId: command.accountId,
-                ...(command.context === "company" ? {companyId: command.companyId} : {}),
-                revision: decision.revision,
-                createdAt: command.action === "create" ? now : widgetSnapshot.data().createdAt,
-                updatedAt: now
-            });
-            transaction.set(operationRef, {
-                ...decision, domain: "account-widget", action: command.action,
-                widgetId: command.widgetId, ownerUid: request.auth.uid, createdAt: now
-            });
-            transaction.set(store.collection("users").doc(request.auth.uid)
-                .collection("auditEvents").doc(command.operationId), {
-                action: `account-widget-${command.action}`,
-                widgetId: command.widgetId,
-                operationId: command.operationId,
-                revision: decision.revision,
-                createdAt: now
-            });
-            return decision;
-        });
-    }
+    request => require('./reference-callables').createReferenceCallables({
+        onCall: (_options, handler) => handler, getFirestore, FieldValue, HttpsError, requireMutationOwner
+    }).manageAccountWidget(request)
 );
 
 async function runRecoveryCommand(request, mode) {
     if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+    requireMutationOwner(request, 'expectedOwnerUid');
     let command;
     try { command = validateRecoveryCommand(request.data); } catch {
         throw new HttpsError("invalid-argument", "Comando di recupero non valido.");
@@ -352,20 +263,33 @@ async function runRecoveryCommand(request, mode) {
     const userRef = store.collection("users").doc(request.auth.uid);
     const recordRef = userRef.collection("syncRecords").doc(command.recordId);
     const trashRef = userRef.collection("trash").doc(command.recordId);
-    const resultRef = userRef.collection("operationResults").doc(command.operationId);
+    const resultRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(command.operationId);
+    const legacyRef = userRef.collection("operationResults").doc(command.operationId);
+    const binding = createRecoveryBinding(request.auth.uid, mode, command);
     return store.runTransaction(async transaction => {
-        const [record, trash, previous] = await Promise.all([
-            transaction.get(recordRef), transaction.get(trashRef), transaction.get(resultRef)
+        const [record, trash, previous, legacy] = await Promise.all([
+            transaction.get(recordRef), transaction.get(trashRef), transaction.get(resultRef), transaction.get(legacyRef)
         ]);
+        if (previous.exists) {
+            try { return verifyRecoveryReceipt(previous.data(), binding); } catch (error) {
+                throw new HttpsError(error.code === 'RECOVERY_BINDING_MISMATCH' ? 'already-exists' : 'failed-precondition',
+                    'Esito del recupero non verificabile.');
+            }
+        }
+        if (legacy.exists) throw new HttpsError('failed-precondition', 'Esito precedente da verificare.', {
+            reason: 'LEGACY_MUTATION_RESULT_UNVERIFIED'
+        });
         const result = mode === "trash" ? trashDecision({
             recordExists: record.exists,
-            currentRevision: Number(record.data()?.revision || 0),
+            trashExists: trash.exists,
+            currentRevision: verifiedCurrentRevision(record),
             expectedRevision: command.expectedRevision,
             alreadyProcessed: previous.exists
         }) : restoreDecision({
             trashExists: trash.exists,
             destinationExists: record.exists,
-            trashedRevision: Number(trash.data()?.revision || 0),
+            trashedRevision: verifiedCurrentRevision(trash),
+            expectedRevision: command.expectedRevision,
             alreadyProcessed: previous.exists
         });
         if (result.duplicate || !["trashed", "restored"].includes(result.status)) return result;
@@ -378,7 +302,7 @@ async function runRecoveryCommand(request, mode) {
             delete restored.deletedAt; delete restored.purgeAfterMs;
             transaction.set(recordRef, restored); transaction.delete(trashRef);
         }
-        transaction.set(resultRef, {...result, ownerUid: request.auth.uid, createdAt: FieldValue.serverTimestamp()});
+        transaction.set(resultRef, {...result, ...binding, createdAt: FieldValue.serverTimestamp()});
         transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
             ...safeAudit({action, actorUid: request.auth.uid, recordId: command.recordId, operationId: command.operationId}),
             at: FieldValue.serverTimestamp()
@@ -394,23 +318,55 @@ exports.purgeArchivedAccount = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
+        if (isArchivePurgeSuspended()) {
+            throw new HttpsError('failed-precondition',
+                'Eliminazione definitiva temporaneamente sospesa per sicurezza. Archivio e ripristino restano disponibili.',
+                {reason: 'ARCHIVE_PURGE_TEMPORARILY_SUSPENDED'});
+        }
         let command;
         try { command = validatePurgeCommand(request.data); } catch {
             throw new HttpsError("invalid-argument", "Comando di eliminazione non valido.");
         }
-        const store = getFirestore();
+        if (!command.confirmation) throw new HttpsError("failed-precondition", "Conferma eliminazione mancante.");
         const ownerUid = request.auth.uid;
+        let binding;
+        try { binding = createArchivePurgeBinding({uid: ownerUid, command}); }
+        catch { throw new HttpsError("invalid-argument", "Comando di eliminazione non verificabile."); }
+        const verifyReceipt = snapshot => {
+            try { return verifyArchivePurgeReceipt(snapshot.exists ? snapshot.data() : null, binding); }
+            catch { throw new HttpsError("failed-precondition", "Esito della cancellazione non verificabile.",
+                {reason: "ARCHIVE_RESULT_UNVERIFIED"}); }
+        };
+        const store = getFirestore();
         const userRef = store.collection("users").doc(ownerUid);
         const recordRef = store.doc(accountPath(ownerUid, command));
-        const operationRef = userRef.collection("archiveOperations").doc(command.operationId);
+        const operationRef = store.collection("mutationResults").doc(ownerUid).collection("operations").doc(command.operationId);
+        const legacyRef = userRef.collection("archiveOperations").doc(command.operationId);
+        const planReferenceCleanup = (profileSnapshot, companiesSnapshot) => {
+            const cleanup = [];
+            const plan = (snapshot, reference, company) => {
+                if (!snapshot.exists) return;
+                const patch = planProfileReferenceCleanup(snapshot.data(), command, {company});
+                if (Object.keys(patch).length) cleanup.push({reference, patch});
+            };
+            try {
+                plan(profileSnapshot, userRef, false);
+                for (const company of companiesSnapshot.docs) plan(company, company.ref, true);
+            } catch {
+                throw new HttpsError('failed-precondition', 'Riferimenti non verificabili: eliminazione interrotta.');
+            }
+            if (cleanup.length > 450) throw new HttpsError('failed-precondition', 'Pulizia riferimenti troppo estesa.');
+            return cleanup;
+        };
         const preparation = await store.runTransaction(async transaction => {
-            const [recordSnapshot, operationSnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(operationRef)
+            const [recordSnapshot, operationSnapshot, legacySnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(operationRef), transaction.get(legacyRef)
             ]);
-            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
-            if (previous && (previous.accountId !== command.accountId ||
-                previous.context !== command.context || previous.companyId !== command.companyId)) {
-                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            const previous = operationSnapshot.exists ? verifyReceipt(operationSnapshot) : null;
+            if (!previous && legacySnapshot.exists) {
+                throw new HttpsError("failed-precondition", "La precedente cancellazione richiede una verifica.",
+                    {reason: "LEGACY_ARCHIVE_RESULT_UNVERIFIED"});
             }
             const decision = purgeDecision({
                 record: recordSnapshot.exists ? recordSnapshot.data() : null,
@@ -419,11 +375,28 @@ exports.purgeArchivedAccount = onCall(
                 previous
             });
             if (decision.duplicate || !["ready", "resume"].includes(decision.status)) return decision;
+            // Reject an already unplannable cleanup before deleting any data.
+            // This preflight is not a fence against later concurrent writers.
+            const [profileSnapshot, companiesSnapshot] = await Promise.all([
+                transaction.get(userRef), transaction.get(userRef.collection('aziende'))
+            ]);
+            planReferenceCleanup(profileSnapshot, companiesSnapshot);
+            const [widgetsSnapshot, linksSnapshot] = await Promise.all([
+                transaction.get(userRef.collection('accountWidgets')),
+                transaction.get(userRef.collection('sharedVaultLinks'))
+            ]);
+            try {
+                assertNoExternalAccountReferences(command,
+                    widgetsSnapshot.docs.map(snapshot => snapshot.data()),
+                    linksSnapshot.docs.map(snapshot => snapshot.data()));
+            } catch {
+                throw new HttpsError('failed-precondition', 'Riferimenti esterni non verificabili: eliminazione interrotta.',
+                    {reason: 'ARCHIVE_PURGE_EXTERNAL_REFERENCES_UNVERIFIED'});
+            }
             if (decision.status === "resume") return decision;
             transaction.set(operationRef, {
-                status: "processing", ownerUid, accountId: command.accountId,
-                context: command.context, companyId: command.companyId,
-                createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+                ...binding, status: "processing",
+                ...(previous ? {} : {createdAt: FieldValue.serverTimestamp()}), updatedAt: FieldValue.serverTimestamp()
             }, {merge: true});
             return decision;
         });
@@ -433,7 +406,8 @@ exports.purgeArchivedAccount = onCall(
         }
 
         const attachments = await recordRef.collection("attachments").get();
-        const storagePaths = attachments.docs.map(snapshot => snapshot.data()?.storagePath).filter(Boolean);
+        // Missing paths are not absent attachments: preserve their metadata for repair.
+        const storagePaths = attachments.docs.map(snapshot => snapshot.data()?.storagePath);
         if (storagePaths.some(path => !isSafeAttachmentPath(ownerUid, command, path))) {
             throw new HttpsError("failed-precondition", "Percorso allegato non sicuro: eliminazione interrotta.");
         }
@@ -441,20 +415,30 @@ exports.purgeArchivedAccount = onCall(
         await Promise.all(storagePaths.map(path => bucket.file(path).delete({ignoreNotFound: true})));
         await store.recursiveDelete(recordRef);
 
-        await store.runTransaction(async transaction => {
-            const profileSnapshot = await transaction.get(userRef);
-            if (command.context === "private" && profileSnapshot.exists) {
-                const existingEmails = profileSnapshot.data()?.contactEmails;
-                const unlinkedEmails = unlinkProfileEmails(existingEmails, command.accountId);
-                if (Array.isArray(unlinkedEmails)) transaction.update(userRef, {contactEmails: unlinkedEmails});
+        return store.runTransaction(async transaction => {
+            // Full query: never silently truncate the set of referring companies.
+            // Reads and all planning precede writes; retries re-read current data.
+            const [profileSnapshot, companiesSnapshot, receiptSnapshot, currentRecordSnapshot] = await Promise.all([
+                transaction.get(userRef), transaction.get(userRef.collection('aziende')), transaction.get(operationRef),
+                transaction.get(recordRef)
+            ]);
+            const receipt = verifyReceipt(receiptSnapshot);
+            if (receipt.status === 'purged') return receipt;
+            if (currentRecordSnapshot.exists) {
+                throw new HttpsError('failed-precondition', 'Account ricreato: pulizia riferimenti interrotta.',
+                    {reason: 'ARCHIVE_PURGE_ACCOUNT_RECREATED'});
             }
+            const cleanup = planReferenceCleanup(profileSnapshot, companiesSnapshot);
+            // Conservative write budget including receipt/audit. An oversized or
+            // malformed plan leaves processing resumable, never falsely purged.
+            for (const {reference, patch} of cleanup) transaction.update(reference, patch);
             transaction.set(operationRef, {status: "purged", updatedAt: FieldValue.serverTimestamp()}, {merge: true});
             transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
                 action: "account-purged", actorUid: ownerUid, accountId: command.accountId,
                 context: command.context, at: FieldValue.serverTimestamp()
             });
+            return {status: "purged", duplicate: false};
         });
-        return {status: "purged", duplicate: false};
     }
 );
 
@@ -463,46 +447,69 @@ exports.restoreBackupChunk = onCall(
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
         let command;
-        try { command = validateRestoreChunk(request.data, request.auth.uid); } catch {
+        try { command = validateRestoreChunk(request.data, request.auth.uid); } catch (error) {
+            if (error.code === 'BACKUP_SECURITY_SETTINGS_EXCLUDED') {
+                throw new HttpsError('failed-precondition',
+                    'Le impostazioni di sicurezza del backup sono escluse: quelle attuali vengono mantenute.',
+                    {reason: 'BACKUP_SECURITY_SETTINGS_EXCLUDED'});
+            }
+            if (error.code === "BACKUP_OWNER_MISMATCH") {
+                throw new HttpsError("failed-precondition", "La sessione del ripristino è cambiata. Riapri il backup.", {
+                    reason: "BACKUP_OWNER_MISMATCH"
+                });
+            }
             throw new HttpsError("invalid-argument", "Chunk di ripristino non valido.");
         }
         const store = getFirestore();
         const userRef = store.collection("users").doc(request.auth.uid);
-        const operationRef = userRef.collection("backupRestoreOperations").doc(command.operationId);
+        const operationRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(command.operationId);
+        const legacyRef = userRef.collection("backupRestoreOperations").doc(command.operationId);
+        const binding = command.mode === "apply" ? createBackupRestoreBinding({uid: request.auth.uid, command}) : null;
         return store.runTransaction(async transaction => {
             const references = command.records.map(record => store.doc(record.path));
-            const [previous, ...snapshots] = await Promise.all([
-                transaction.get(operationRef), ...references.map(reference => transaction.get(reference))
+            const [previous, legacy, ...snapshots] = await Promise.all([
+                transaction.get(operationRef), transaction.get(legacyRef),
+                ...references.map(reference => transaction.get(reference))
             ]);
-            if (previous.exists) {
-                const data = previous.data();
-                if (data.backupId !== command.backupId || data.chunkIndex !== command.chunkIndex) {
-                    throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            if (command.mode === "apply") {
+                if (previous.exists) {
+                    try { return verifyBackupRestoreReceipt(previous.data(), binding); }
+                    catch {
+                        throw new HttpsError("failed-precondition", "Esito del ripristino non compatibile con la richiesta.",
+                            {reason: "BACKUP_RESULT_UNVERIFIED"});
+                    }
+                }
+                if (legacy.exists) {
+                    throw new HttpsError("failed-precondition", "Il precedente ripristino richiede una verifica.",
+                        {reason: "LEGACY_BACKUP_RESULT_UNVERIFIED"});
                 }
             }
             const collisions = snapshots
-                .map((snapshot, index) => snapshot.exists && command.records[index].path !== `users/${request.auth.uid}`
+                .map((snapshot, index) => snapshot.exists
                     ? command.records[index].path : null)
                 .filter(Boolean);
             const decision = restoreChunkDecision({
-                previous: previous.exists ? previous.data() : null,
+                previous: null,
                 collisions,
                 overwriteExisting: command.mode === "apply" && command.overwriteExisting && command.overwriteConfirmed
             });
-            if (decision.duplicate || command.mode === "preview") return decision;
+            if (command.mode === "preview") return {...decision, ...buildRestorePreview(command.records, snapshots)};
             if (!command.confirmed) throw new HttpsError("failed-precondition", "Conferma ripristino mancante.");
+            const staleIndexes = staleRestoreIndexes(command.records, snapshots);
+            if (staleIndexes.length) return {status: 'stale-preview', duplicate: false, staleCount: staleIndexes.length, staleIndexes};
             if (decision.status !== "ready") return decision;
             command.records.forEach((record, index) => {
                 const data = decodeFirestoreValue(record.data, {
                     timestamp: (seconds, nanoseconds) => new Timestamp(seconds, nanoseconds),
-                    bytes: value => Bytes.fromUint8Array(value)
+                    bytes: value => Buffer.from(value)
                 });
-                transaction.set(references[index], data, {merge: record.path === `users/${request.auth.uid}`});
+                transaction.set(references[index], preserveRestoreAuthority(record.path, data,
+                    snapshots[index].exists ? snapshots[index].data() : null),
+                {merge: record.path === `users/${request.auth.uid}`});
             });
             const result = {status: "applied", duplicate: false, recordCount: command.records.length};
             transaction.set(operationRef, {
-                ...result, backupId: command.backupId, chunkIndex: command.chunkIndex,
-                chunkCount: command.chunkCount, ownerUid: request.auth.uid,
+                ...result, ...binding,
                 appliedAt: FieldValue.serverTimestamp()
             });
             transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
@@ -565,8 +572,7 @@ exports.createMfaRecoveryCodes = onCall(
     { region: "europe-west1", enforceAppCheck: true },
     async (request) => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
-        const authAgeSeconds = Math.floor(Date.now() / 1000) - Number(request.auth.token.auth_time || 0);
-        if (authAgeSeconds > 300) {
+        if (!hasRecentAuthentication(request.auth.token)) {
             throw new HttpsError("failed-precondition", "Accedi nuovamente prima di generare i codici.");
         }
         const user = await admin.auth().getUser(request.auth.uid);
@@ -601,13 +607,19 @@ exports.recoverMfaWithCode = onCall(
         let recoveryAttemptAllowed = false;
         await db.runTransaction(async (transaction) => {
             const attemptSnap = await transaction.get(attemptRef);
-            const next = nextRecoveryAttemptState(attemptSnap.exists ? attemptSnap.data() : null);
+            let next;
+            try {
+                next = nextRecoveryAttemptState(attemptSnap.exists ? attemptSnap.data() : null);
+            } catch (error) {
+                if (error?.message !== 'RECOVERY_ATTEMPT_STATE') throw error;
+                throw new HttpsError("failed-precondition", "Recupero non disponibile: verifica dello stato di sicurezza necessaria. Nessun codice consumato.");
+            }
             recoveryAttemptAllowed = next.allowed;
             transaction.set(attemptRef, {
                 emailHash: crypto.createHash("sha256").update(email, "utf8").digest("hex"),
-                attempts: next.attempts || 0,
-                windowStartedAt: next.windowStartedAt || Date.now(),
-                blockedUntil: next.blockedUntil || 0,
+                attempts: next.attempts,
+                windowStartedAt: next.windowStartedAt,
+                blockedUntil: next.blockedUntil,
                 updatedAt: admin.firestore.FieldValue.serverTimestamp()
             });
         });
@@ -622,10 +634,18 @@ exports.recoverMfaWithCode = onCall(
             body: JSON.stringify({ email, password, returnSecureToken: true })
         });
         const authResult = await response.json();
-        const firstFactorAccepted = response.ok || String(authResult?.error?.message || "").startsWith("MFA_REQUIRED");
+        const authenticatedUid = authResult?.localId;
+        const firstFactorAccepted = response.ok && typeof authenticatedUid === "string" &&
+            authenticatedUid.length > 0 && !authenticatedUid.includes("/") &&
+            (typeof authResult.idToken === "string" && authResult.idToken.length > 0 ||
+                typeof authResult.mfaPendingCredential === "string" && authResult.mfaPendingCredential.length > 0);
         if (!firstFactorAccepted) throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
 
-        const user = await admin.auth().getUserByEmail(email);
+        const user = await admin.auth().getUser(authenticatedUid);
+        if (user.uid !== authenticatedUid || user.disabled ||
+            typeof user.email !== "string" || user.email.trim().toLowerCase() !== email) {
+            throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
+        }
         const recoveryRef = db.collection("mfaRecovery").doc(user.uid);
         await db.runTransaction(async (transaction) => {
             const recovery = await transaction.get(recoveryRef);
@@ -797,12 +817,9 @@ function shouldSendPush(scadenza, diffDays, forceImmediate = false, lastField = 
     if (forceImmediate) return true;
     const frequency = Math.max(1, Number(scadenza.notif_frequency || 7));
     if (!scadenza[lastField]) return true;
-    const lastPush = new Date(scadenza[lastField]);
-    lastPush.setHours(0, 0, 0, 0);
-    if (Number.isNaN(lastPush.getTime())) return true;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return Math.floor((today - lastPush) / (1000 * 60 * 60 * 24)) >= frequency;
+    const lastDay = deadlineCalendar.day(scadenza[lastField]);
+    if (lastDay === null) return true;
+    return deadlineCalendar.distance(lastDay, deadlineCalendar.day(new Date())) >= frequency;
 }
 
 async function activePushDevices(db, uid, scope = "deadlines") {
@@ -817,16 +834,16 @@ async function activePushDevices(db, uid, scope = "deadlines") {
 
 async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, diffDays, options = {}) {
     const sharedRecipients = await syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza);
-    if (!shouldSendPush(scadenza, diffDays, options.forceImmediate === true, "lastRecipientPushNotifiedAt")) return;
     const recipients = deadlineRecipients(scadenza).filter((recipient) => recipient.sendPush);
     if (!recipients.length) return;
     const text = pushText(scadenza, diffDays);
     let sent = 0;
+    const deadlineRef = db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId);
     for (const recipient of recipients) {
         let recipientUser;
         try { recipientUser = await admin.auth().getUserByEmail(recipient.email); }
         catch (error) {
-            if (error.code !== "auth/user-not-found") console.error("[RECIPIENT LOOKUP FAILED]", error.code || error.message);
+            if (error.code !== "auth/user-not-found") console.error("[RECIPIENT LOOKUP FAILED]", "RECIPIENT_LOOKUP_FAILED");
             continue;
         }
         if (!sharedRecipients.has(recipientUser.uid)) continue;
@@ -837,7 +854,21 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
         const devices = await activePushDevices(db, recipientUser.uid, "deadlines");
         for (const device of devices) {
             try {
-                await admin.messaging().send({
+                const outcome = await recipientDeliveryLedger.deliver({db,
+                    identity: {ownerUid, deadlineId, dueDate: scadenza.dueDate,
+                        recipient: JSON.stringify([recipientUser.uid, device.id]), channel: "push"},
+                    frequency: scadenza.notif_frequency, forceImmediate: options.forceImmediate === true,
+                    legacyLastSentAt: scadenza.lastRecipientPushNotifiedAt,
+                    now: () => Date.now(),
+                    eligible: async () => {
+                        if (!await recipientDeliveryLedger.isEligible({docRef: deadlineRef, dueDate: scadenza.dueDate,
+                            recipient, channel: "push", recipients: deadlineRecipients, now: () => Date.now()})) return false;
+                        const current = await device.ref.get();
+                        const data = current.data();
+                        const scopes = Array.isArray(data?.notificationScopes) ? data.notificationScopes : [data?.notificationScope];
+                        return current.exists && data.enabled === true && data.token === device.data().token && scopes.includes("deadlines");
+                    },
+                    send: () => admin.messaging().send({
                     token: device.data().token,
                     data: {
                         eventType: "external_deadline",
@@ -847,18 +878,28 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
                         deliveryTag: `external-${deadlineId}-${device.id}`
                     },
                     webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
+                    })
                 });
-                sent += 1;
+                if (outcome.status === "sent") sent += 1;
+                if (outcome.status === "policy-blocked") console.error("[RECIPIENT LEDGER]", "CADENCE_RETENTION_DECISION_REQUIRED");
             } catch (error) {
                 const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"].includes(error.code);
-                if (invalid) await device.ref.set({ enabled: false, status: "invalid", invalidatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
-                console.error(`[RECIPIENT PUSH FAILED] ${deadlineId}/${device.id}:`, error.code || error.message);
+                if (invalid) await db.runTransaction(async transaction => {
+                    const current = await transaction.get(device.ref);
+                    if (current.exists && current.data().token === device.data().token) {
+                        transaction.set(device.ref, {enabled: false, status: "invalid",
+                            invalidatedAt: admin.firestore.FieldValue.serverTimestamp()}, {merge: true});
+                    }
+                });
+                console.error("[RECIPIENT PUSH FAILED]", "RECIPIENT_DELIVERY_FAILED");
             }
         }
     }
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    await db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId)
-        .update({ lastRecipientPushNotifiedAt: today.toISOString().split("T")[0] });
+    // Informational only: per-recipient/device ledger controls retries/cadence.
+    if (sent > 0) {
+        await db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId)
+            .update({ lastRecipientPushNotifiedAt: deadlineCalendar.day(new Date()) });
+    }
     console.log(`[RECIPIENT PUSH] ${deadlineId}: ${sent} dispositivi raggiunti`);
 }
 
@@ -928,10 +969,8 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
     }
 
     if ((acceptedCount > 0 || devices.length === 0) && !retryableFailure) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
         await db.collection("users").doc(uid).collection("scadenze").doc(deadlineId).update({
-            lastPushNotifiedAt: today.toISOString().split("T")[0]
+            lastPushNotifiedAt: deadlineCalendar.day(new Date())
         });
     }
 }
@@ -954,20 +993,18 @@ exports.sendDeadlinePushTest = onCall(
             return { ok: false, cooldownSeconds: Math.ceil((60000 - (now - lastTest)) / 1000) };
         }
         await deviceRef.set({ lastTestAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = deadlineCalendar.day(new Date());
         const deadlines = await db.collection("users").doc(request.auth.uid).collection("scadenze")
             .where("completed", "==", false).get();
         const upcoming = deadlines.docs.map((item) => {
             const data = item.data();
-            const dueDate = new Date(data.dueDate);
-            dueDate.setHours(0, 0, 0, 0);
-            return { id: item.id, data, dueDate };
-        }).filter((item) => !Number.isNaN(item.dueDate.getTime()) && item.dueDate >= today)
-            .sort((left, right) => left.dueDate - right.dueDate)[0];
+            const dueDay = deadlineCalendar.day(data.dueDate);
+            return { id: item.id, data, dueDay };
+        }).filter((item) => item.dueDay !== null && deadlineCalendar.distance(today, item.dueDay) >= 0)
+            .sort((left, right) => left.dueDay.localeCompare(right.dueDay))[0];
 
         const deadlineId = upcoming?.id || "";
-        const diffDays = upcoming ? Math.ceil((upcoming.dueDate - today) / (1000 * 60 * 60 * 24)) : 0;
+        const diffDays = upcoming ? deadlineCalendar.distance(today, upcoming.dueDay) : 0;
         const text = upcoming
             ? pushText(upcoming.data, diffDays)
             : { title: "Codici & Password", body: "Notifica scadenza di prova" };
@@ -1016,6 +1053,7 @@ exports.manageReceivedDeadline = onCall(
     { region: "europe-west1", enforceAppCheck: true },
     async (request) => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
         const shareId = String(request.data?.receivedDeadlineId || "");
         const action = String(request.data?.action || "");
         const nextDueDate = String(request.data?.nextDueDate || "");
@@ -1105,7 +1143,18 @@ exports.respondToInvitation = onCall(
 
         const firestore = admin.firestore();
         const inviteRef = firestore.collection("invites").doc(inviteId);
-        await firestore.runTransaction(async (transaction) => {
+        // M7-AUDIT-4: base opaca generata una sola volta per invocazione, quindi
+        // stabile anche se la transazione viene ritentata. È usata solo quando
+        // l'invito non ha un `auditRef` valido (invito legacy o marcatore corrotto).
+        const responseRef = crypto.randomUUID();
+        // Independent of client auditRef; stable across transaction retries.
+        const acceptanceNonce = crypto.randomUUID();
+        const auditOutcome = await firestore.runTransaction(async (transaction) => {
+            // Esito dell'audit del tentativo **in corso**: Firestore può rieseguire
+            // questa callback, quindi vale solo il tentativo che arriva al commit. Il
+            // codice di salto è locale al tentativo: quello di un tentativo scartato
+            // non deve sopravvivere e far loggare un salto che non è avvenuto.
+            let auditSkipCode = null;
             const inviteSnap = await transaction.get(inviteRef);
             if (!inviteSnap.exists) throw new HttpsError("not-found", "Invito non trovato.");
             const invite = inviteSnap.data();
@@ -1122,6 +1171,32 @@ exports.respondToInvitation = onCall(
             if (!accountSnap.exists) throw new HttpsError("not-found", "Account condiviso non trovato.");
 
             const account = accountSnap.data();
+            // M7-R7B3: un Account nell'Archivio è sospeso. La risposta a un invito
+            // pendente non deve riattivare la condivisione né modificare l'invito:
+            // si fallisce con un errore chiaro e senza alcuna scrittura. La lettura
+            // dell'Account avviene dentro la transazione, quindi un'archiviazione
+            // concorrente fra lettura e scrittura provoca il ritentativo e questo
+            // controllo viene rieseguito sullo stato aggiornato.
+            if (account.isArchived === true) {
+                throw new HttpsError("failed-precondition",
+                    "Account nell'Archivio: l'invito resta in attesa finché l'Account è sospeso.",
+                    {reason: "ACCOUNT_ARCHIVED"});
+            }
+            // M7-R7C-1: il ciclo dell'invito deve coincidere con quello dell'Account.
+            // Assenza = ciclo legacy 0; valori non interi, negativi o non sicuri
+            // vengono rifiutati invece di essere interpretati. L'incremento del ciclo
+            // avviene nella stessa transazione dell'archiviazione, quindi una
+            // risposta tardiva a un invito del ciclo precedente è negata e non può
+            // ricreare `sharedWithUids` dopo il ripristino.
+            const cycleOf = value => value === undefined ? 0
+                : (Number.isSafeInteger(value) && value >= 0 ? value : null);
+            const inviteCycle = cycleOf(invite.cycle);
+            const accountCycle = cycleOf(account.sharingCycle);
+            if (inviteCycle === null || accountCycle === null || inviteCycle !== accountCycle) {
+                throw new HttpsError("failed-precondition",
+                    "Invito non più valido: l'Account è cambiato. Serve un nuovo invito.",
+                    {reason: "INVITE_CYCLE_STALE"});
+            }
             const sharedWith = { ...(account.sharedWith || {}) };
             const guestKey = sanitizeEmail(email);
             const guest = sharedWith[guestKey];
@@ -1133,6 +1208,55 @@ exports.respondToInvitation = onCall(
             const sharedWithUids = [...new Set(acceptedGuests.map((item) => item.uid))];
             const hasActive = Object.values(sharedWith).some((item) => ["pending", "accepted"].includes(item?.status));
 
+            // M7-AUDIT-4 (opzione A, decisione D-7) — evento del registro tecnico
+            // scritto nella stessa transazione della risposta: un errore Firestore
+            // ferma insieme risposta ed evento, quindi il registro non contiene mai
+            // una riga per un'azione non avvenuta. Un payload non valido è la sola
+            // classe controllabile e non blocca la risposta: si annota un codice
+            // stabile e si prosegue senza evento.
+            let auditBase = null;
+            // Marcatore assente o corrotto: non è un errore fatale, si ripiega sulla
+            // base casuale senza toccare `auditRef`.
+            try { auditBase = inviteRefOf(invite); } catch { auditBase = null; }
+            // Invito legacy (o marcatore corrotto): la scrittura originaria è questa
+            // callable, quindi la base opaca diventa `responseRef`, persistito
+            // sull'invito come `responseAuditRef` per la futura rimozione (M7-AUDIT-3P-R1).
+            const auditLegacy = auditBase === null;
+            if (auditLegacy) auditBase = responseRef;
+            let auditPlan = null;
+            try {
+                const auditFields = {
+                    actorUid: invite.ownerId,
+                    accountId: invite.accountId,
+                    context: invite.aziendaId || "privato",
+                    cycle: inviteCycle,
+                    guestKnown: status === "accepted"
+                };
+                if (status === "accepted") auditFields.guestUid = uid;
+                const auditId = responseEventId(auditBase, status);
+                auditPlan = {
+                    id: auditId,
+                    path: `users/${invite.ownerId}/auditEvents/${auditId}`,
+                    payload: buildAuditEvent(`invite-${status}`, auditFields)
+                };
+            } catch (error) {
+                auditPlan = null;
+                auditSkipCode = String((error && error.code) || "AUDIT_EVENT_INVALID");
+            }
+            // Letture prima delle scritture: il documento evento si legge nella fase
+            // di lettura della transazione, prima della prima `update` (vincolo reale
+            // di Firestore, non stilistico).
+            let auditWrite = false;
+            if (auditPlan) {
+                const auditSnapshot = await transaction.get(firestore.doc(auditPlan.path));
+                try {
+                    auditWrite = auditWriteDecision(auditSnapshot.exists === true, auditPlan).write;
+                } catch (error) {
+                    auditWrite = false;
+                    auditSkipCode = String((error && error.code) || "AUDIT_DECISION_INVALID");
+                }
+            }
+
             transaction.update(accountRef, {
                 sharedWith,
                 sharedWithUids,
@@ -1140,14 +1264,68 @@ exports.respondToInvitation = onCall(
                 visibility: hasActive ? "shared" : "private",
                 updatedAt: new Date().toISOString()
             });
-            transaction.update(inviteRef, {
+            const invitePatch = {
                 status,
                 guestUid: status === "accepted" ? uid : null,
                 respondedAt: new Date().toISOString()
-            });
+            };
+            if (auditLegacy) invitePatch.responseAuditRef = responseRef;
+            // Never retain an earlier recipient binding after a new response.
+            invitePatch.acceptanceReceipt = FieldValue.delete();
+            if (status === "accepted") {
+                try {
+                    invitePatch.acceptanceReceipt = buildAcceptanceReceipt({
+                        nonce: acceptanceNonce, guestUid: uid, ownerUid: invite.ownerId,
+                        accountId: invite.accountId, kind: invite.aziendaId ? "company" : "private",
+                        companyId: invite.aziendaId || null, cycle: inviteCycle
+                    });
+                } catch {
+                    // Conservative unsupported identifiers: response remains compatible,
+                    // but no authoritative revocation notification can be generated.
+                }
+            }
+            transaction.update(inviteRef, invitePatch);
+            // Create-if-absent: un evento già presente non viene riscritto, quindi
+            // `at` resta quello della prima scrittura.
+            if (auditPlan && auditWrite) {
+                transaction.set(firestore.doc(auditPlan.path), {
+                    ...auditPlan.payload, at: FieldValue.serverTimestamp()
+                });
+            }
+            return {auditSkipCode};
         });
+        if (auditOutcome.auditSkipCode) {
+            // Nessun dato dell'invito nei log: solo un codice stabile, l'azione e un
+            // correlatore casuale. Email, chiave sanificata e id del documento invito
+            // non devono mai finire nei log.
+            console.warn("[AUDIT] evento saltato", {
+                code: auditOutcome.auditSkipCode, action: `invite-${status}`, correlationId: responseRef
+            });
+        }
         return { ok: true, status };
     }
+);
+
+// Separate from audit trigger: audit skips must not suppress N1 handling.
+exports.onInviteDeletedNotification = onDocumentDeleted(
+    {document: "invites/{inviteId}", region: "europe-west1", retry: true,
+        memory: "256MiB", timeoutSeconds: 60},
+    async event => {
+        const parsed = parseCloudEventTime(event.time);
+        if (!parsed.ok || !event.data) return;
+        await runInviteRevocationNotification({db: admin.firestore(), inviteId: event.params.inviteId,
+            before: event.data.data(), eventTimeMillis: parsed.millis,
+            now: () => Date.now(), serverTimestamp: () => FieldValue.serverTimestamp()});
+    }
+);
+
+// Logical expiry is 30 days; bounded periodic physical cleanup may run later.
+exports.cleanupInviteRevocationMarkers = onSchedule(
+    {schedule: "30 3 * * *", timeZone: "Europe/Rome", region: "europe-west1",
+        memory: "512MiB", timeoutSeconds: 540, retryCount: 3},
+    async () => runAcceptanceMarkerCleanup({db: admin.firestore(),
+        statePath: "sharingNotificationRetention/scan", limit: 100,
+        now: () => Date.now(), serverTimestamp: () => FieldValue.serverTimestamp()})
 );
 
 function contactMatchesDeadline(deadline, contactId, email) {
@@ -1268,23 +1446,216 @@ exports.onInviteCreated = onDocumentCreated(
         }
         const results = await Promise.allSettled(tasks);
         results.filter((result) => result.status === "rejected")
-            .forEach((result) => console.error(`[INVITE NOTIFICATION FAILED] ${event.params.inviteId}:`, result.reason?.message || result.reason));
+            .forEach(() => console.error("[INVITE NOTIFICATION FAILED] DELIVERY_FAILED"));
     }
+);
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-5I — Registro tecnico degli inviti
+// ─────────────────────────────────────────────────────────────
+// Trigger **separato** da `onInviteCreated`, che porta i segreti Gmail: qui non
+// si invia nulla, non si legge l'email del destinatario, la sua chiave
+// sanificata o l'id del documento invito (che la contiene), e non si tocca la
+// condivisione. Si scrive una sola riga nel registro del **proprietario**
+// dell'invito, con id opaco derivato dalla base dell'istanza (`auditRef`, o
+// `responseAuditRef` per un invito legacy già risposto) e create-if-absent, così
+// una riconsegna non duplica l'evento né riscrive `at`. Senza base opaca valida
+// non si inventa alcuna riga: la scelta D-5 registrata da Codex il 21/09/2026
+// preferisce una riga mancante a una riga sintetica indistinguibile.
+exports.onInviteWritten = onDocumentWritten(
+    {
+        document: "invites/{inviteId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+        // Gli eventi da trigger sono at-least-once: l'idempotenza dell'id è
+        // l'unica difesa contro i duplicati, e il ritentativo va dichiarato.
+        retry: true,
+    },
+    async (event) => {
+        const before = event.data?.before?.data() ?? null;
+        const after = event.data?.after?.data() ?? null;
+        const transition = inviteTransition(before, after);
+        if (transition.kind === "none") {
+            // Un marcatore presente ma malformato è un difetto di registrazione,
+            // non di sicurezza: si annota un codice stabile e non si scrive nulla.
+            if (transition.reason === "AUDIT_REF_INVALID") {
+                console.warn("[AUDIT] invito ignorato: base opaca non valida", {code: transition.reason});
+            }
+            return;
+        }
+        const removed = transition.kind === "invite-removed";
+        const source = removed ? before : after;
+        const action = removed ? "invite-removed" : "invite-created";
+        let effect;
+        try {
+            const fields = {
+                actorUid: source.ownerId,
+                accountId: source.accountId,
+                context: source.aziendaId || "privato",
+                cycle: source.cycle === undefined ? 0 : source.cycle
+            };
+            if (removed) {
+                // Il correlatore del destinatario solo se già noto: su un rifiuto
+                // la callable scrive `guestUid: null`, quindi resta anonimo.
+                const known = typeof source.guestUid === "string" && source.guestUid.length > 0;
+                fields.guestKnown = known;
+                if (known) fields.guestUid = source.guestUid;
+            } else if (typeof source.createdAt === "string") {
+                fields.inviteCreatedAt = source.createdAt;
+            }
+            effect = {
+                id: removed ? removedEventId(transition.ref) : invitedEventId(transition.ref),
+                payload: buildAuditEvent(action, fields)
+            };
+        } catch (error) {
+            // Classe controllabile: payload non valido. Nessun evento e una sola
+            // riga, senza dati dell'invito e senza messaggi grezzi.
+            console.warn("[AUDIT] evento invito saltato", {
+                code: String((error && error.code) || "AUDIT_EVENT_INVALID")
+            });
+            return;
+        }
+        const eventDocument = firestore().doc(`users/${source.ownerId}/auditEvents/${effect.id}`);
+        await firestore().runTransaction(async (transaction) => {
+            const snapshot = await transaction.get(eventDocument);
+            const decision = auditWriteDecision(snapshot.exists === true, effect);
+            if (decision.write) {
+                transaction.set(eventDocument, {...decision.payload, at: FieldValue.serverTimestamp()});
+            }
+        });
+    }
+);
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-5A — Registro tecnico di archiviazione e ripristino degli Account
+// ─────────────────────────────────────────────────────────────
+// Due trigger `onDocumentUpdated`, uno per percorso: l'identità dell'Account
+// viene dal **percorso autorevole** (`event.params`) e il tipo è un parametro
+// esplicito — mai dedotto dal valore di `context` — così un'azienda il cui id è
+// `privato` non collide con il profilo privato (M7-AUDIT-3-R2). Si scrive una
+// sola riga nel registro del proprietario, con id opaco `${chiaveAccount}:${revision}`
+// e create-if-absent, quindi una riconsegna — o un secondo ciclo
+// archivia→ripristina→archivia — non sovrascrive nulla.
+//
+// **Metrica dei contatori (correzione M7-AUDIT-5A).** Il documento Account non
+// contiene i contatori delle transazioni client e il trigger **non può** sapere
+// quanti **documenti invito** siano stati aggiornati: quei contatori vivono solo
+// in memoria nel client (`settings/archive-account-service.js:185-259` e
+// `:290-356`) e una voce di condivisione può non avere alcun invito. Il payload
+// usa quindi nomi espliciti — `suspendedSharingEntries` /
+// `neutralizedSharingEntries` — e conta le **voci di `sharedWith` che passano da
+// `pending`/`accepted` a `suspended`** confrontando `before` e `after`: una voce
+// già sospesa prima non viene ricontata e un ripristino **non** neutralizzato
+// vale **0**, anche se nel documento restano voci sospese. La metrica differisce
+// **deliberatamente** dall'esito del client (che conta documenti invito): sono
+// due quantità diverse e il registro non promette la seconda. `neutralized` e
+// `sharingCycle` restano separati e derivati dall'avanzamento del ciclo, che la
+// transazione di ripristino compie esattamente quando neutralizza (`:235-248`).
+async function recordAccountTransitionAudit(type, event) {
+    const before = event.data?.before?.data() ?? null;
+    const after = event.data?.after?.data() ?? null;
+    const transition = accountTransition(before, after);
+    if (transition.kind === "none") return;
+    const archived = transition.kind === "account-archived";
+    const params = event.params || {};
+    let effect;
+    try {
+        const descriptor = type === "privato"
+            ? {type: "privato", accountId: params.accountId}
+            : {type: "azienda", companyId: params.aziendaId, accountId: params.accountId};
+        const beforeSharing = before ? before.sharedWith : undefined;
+        const afterSharing = after.sharedWith;
+        for (const sharing of [beforeSharing, afterSharing]) {
+            if (sharing !== undefined && (typeof sharing !== "object" || sharing === null || Array.isArray(sharing))) {
+                const invalid = new Error("AUDIT_FIELD_INVALID");
+                invalid.code = "AUDIT_FIELD_INVALID";
+                throw invalid;
+            }
+        }
+        // Voci portate in stato `suspended` da questa scrittura: non i documenti
+        // invito (che il trigger non può contare) e non le voci già sospese.
+        const wasActive = entry => entry?.status === "pending" || entry?.status === "accepted";
+        const suspended = Object.keys(afterSharing || {}).filter(key =>
+            wasActive(beforeSharing ? beforeSharing[key] : undefined)
+            && afterSharing[key]?.status === "suspended").length;
+        const sharingCycle = after.sharingCycle === undefined ? 0 : after.sharingCycle;
+        const previousCycle = before.sharingCycle === undefined ? 0 : before.sharingCycle;
+        const fields = {
+            actorUid: params.uid,
+            accountId: params.accountId,
+            context: type === "privato" ? "privato" : params.aziendaId,
+            cycle: sharingCycle,
+            revision: after.revision,
+            sharingCycle
+        };
+        if (archived) {
+            fields.suspendedSharingEntries = suspended;
+        } else {
+            fields.neutralized = sharingCycle !== previousCycle;
+            fields.neutralizedSharingEntries = suspended;
+        }
+        effect = {
+            id: accountEventId(descriptor, after.revision),
+            payload: buildAuditEvent(transition.kind, fields)
+        };
+    } catch (error) {
+        // Classe controllabile: dati del documento non validi. Nessun evento e
+        // una sola riga con codice stabile, senza dati dell'Account; la
+        // scrittura di archiviazione o ripristino è già committata e non viene
+        // toccata.
+        console.warn("[AUDIT] evento Account saltato", {
+            code: String((error && error.code) || "AUDIT_EVENT_INVALID"), action: transition.kind
+        });
+        return;
+    }
+    const eventDocument = firestore().doc(`users/${params.uid}/auditEvents/${effect.id}`);
+    await firestore().runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(eventDocument);
+        const decision = auditWriteDecision(snapshot.exists === true, effect);
+        if (decision.write) {
+            transaction.set(eventDocument, {...decision.payload, at: FieldValue.serverTimestamp()});
+        }
+    });
+}
+
+exports.onPrivateAccountWritten = onDocumentUpdated(
+    {
+        document: "users/{uid}/accounts/{accountId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+        retry: true,
+    },
+    (event) => recordAccountTransitionAudit("privato", event)
+);
+
+exports.onCompanyAccountWritten = onDocumentUpdated(
+    {
+        document: "users/{uid}/aziende/{aziendaId}/accounts/{accountId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+        retry: true,
+    },
+    (event) => recordAccountTransitionAudit("azienda", event)
 );
 
 // ─────────────────────────────────────────────────────────────
 // UTILITY — Componi e invia una email per una scadenza
 // ─────────────────────────────────────────────────────────────
-async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
-    const dueDate = new Date(s.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
+function escapeHtml(value) {
+    return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 
-    const dueDateFormatted = dueDate.toLocaleDateString("it-IT", {
-        day: "2-digit", month: "long", year: "numeric",
-    });
+async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
+    const dueDay = deadlineCalendar.day(s.dueDate);
+    if (dueDay === null) throw new Error("Data scadenza non valida.");
+    const dueDateFormatted = deadlineCalendar.format(dueDay);
 
     const templateText = s.templateText || s.type || "una scadenza";
-    const veicolo = s.veicolo_modello ? ` ${s.veicolo_modello}` : "";
+    const veicolo = s.veicolo_modello ? ` ${escapeHtml(s.veicolo_modello)}` : "";
 
     const giorniLabel =
         diffDays === 0 ? "⚠️ OGGI" :
@@ -1313,21 +1684,21 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     <div class="header">
       <h1>⏰ Promemoria Scadenza</h1>
     </div>
-    <p>Gentile <strong>${s.name || "Utente"}</strong>,</p>
+    <p>Gentile <strong>${escapeHtml(s.name || "Utente")}</strong>,</p>
     <p>ti ricordiamo che sta per scadere:</p>
 
     <div class="label">Oggetto</div>
-    <div class="value">📋 ${templateText}${veicolo}</div>
+    <div class="value">📋 ${escapeHtml(templateText)}${veicolo}</div>
 
     <div class="label">Categoria</div>
-    <div class="value">🏷️ ${s.type || "—"}</div>
+    <div class="value">🏷️ ${escapeHtml(s.type || "—")}</div>
 
     <div class="label">Data scadenza</div>
     <div class="value">📅 ${dueDateFormatted}</div>
 
     <div class="badge">⏳ Scade ${giorniLabel}</div>
 
-    ${s.notes ? `<div class="label">Note</div><div class="value" style="font-weight:normal;color:#555;">${s.notes}</div>` : ""}
+    ${s.notes ? `<div class="label">Note</div><div class="value" style="font-weight:normal;color:#555;">${escapeHtml(s.notes)}</div>` : ""}
 
     <p style="color:#555;font-size:14px;">Provvedi al rinnovo per tempo.</p>
 
@@ -1355,7 +1726,7 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
                 }
             } catch (error) {
                 if (error.code !== "auth/user-not-found") {
-                    console.error("[EMAIL RECIPIENT LOOKUP FAILED]", error.code || error.message);
+                    console.error("[EMAIL RECIPIENT LOOKUP FAILED]", "EMAIL_LOOKUP_FAILED");
                 }
             }
         }
@@ -1363,22 +1734,30 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
             ? "Se gestisci tu questa scadenza, apri l'app per registrare l'esecuzione o aggiornare la prossima data."
             : "Apri l'app per consultare la scadenza ricevuta.";
         const callToAction = `<div style="text-align:center;margin:24px 0;"><p style="color:#555;font-size:14px;">${instruction}</p><a class="button" href="${appUrl}">${buttonLabel}</a></div>`;
-        return transporter.sendMail({
+        return recipientDeliveryLedger.deliver({db: docRef.firestore,
+            identity: {ownerUid, deadlineId: docRef.id, dueDate: s.dueDate, recipient: recipient.email, channel: "email"},
+            frequency: s.notif_frequency, legacyLastSentAt: s.lastNotifiedAt, now: () => Date.now(),
+            eligible: () => recipientDeliveryLedger.isEligible({docRef, dueDate: s.dueDate, recipient,
+                channel: "email", recipients: deadlineRecipients, now: () => Date.now()}),
+            send: () => transporter.sendMail({
             from: `"Codex Notifiche" <${gmailUser}>`,
             to: recipient.email,
             subject: `⚠️ Scadenza in arrivo — ${s.type || templateText}`,
             html: emailBody.replace('    <div class="footer">', `${callToAction}\n    <div class="footer">`),
+            })
         });
     }));
-    const sentCount = results.filter((result) => result.status === "fulfilled").length;
-    results.filter((result) => result.status === "rejected").forEach((result) => console.error("[EMAIL RECIPIENT FAILED]", result.reason?.message || result.reason));
-    if (!sentCount) throw new Error("Nessun destinatario email raggiunto.");
+    const sentCount = results.filter((result) => result.status === "fulfilled" && result.value.status === "sent").length;
+    if (results.some(result => result.value?.status === "policy-blocked")) console.error("[RECIPIENT LEDGER]", "CADENCE_RETENTION_DECISION_REQUIRED");
+    results.filter((result) => result.status === "rejected").forEach(() => console.error("[EMAIL RECIPIENT FAILED]", "EMAIL_DELIVERY_FAILED"));
+    if (!sentCount) {
+        if (results.some(result => result.status === "rejected" || result.value?.status === "uncertain")) throw new Error("Nessun destinatario email raggiunto.");
+        return false;
+    }
 
-    // Aggiorna lastNotifiedAt per evitare duplicati dallo scheduler
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Informational only: never suppress failed recipients with a global marker.
     await docRef.update({
-        lastNotifiedAt: today.toISOString().split("T")[0],
+        lastNotifiedAt: deadlineCalendar.day(new Date()),
     });
 
     console.log(`[OK] Email inviata a ${sentCount}/${recipients.length} destinatari (diffDays: ${diffDays})`);
@@ -1399,16 +1778,17 @@ exports.checkDeadlines = onSchedule(
     },
     async () => {
         const db = admin.firestore();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = deadlineCalendar.day(new Date());
 
         const gmailUser = GMAIL_USER.value();
         const gmailPass = GMAIL_APP_PASSWORD.value();
         const transporter = createTransporter(gmailUser, gmailPass);
 
-        console.log(`[SCHEDULER] Controllo scadenze: ${today.toISOString().split("T")[0]}`);
+        console.log(`[SCHEDULER] Controllo scadenze: ${today}`);
 
         try {
+            try { await recipientDeliveryLedger.cleanup(db); }
+            catch { console.error("[RECIPIENT LEDGER CLEANUP]", "CLEANUP_FAILED"); }
             const usersSnap = await db.collection("users").get();
 
             for (const userDoc of usersSnap.docs) {
@@ -1423,13 +1803,12 @@ exports.checkDeadlines = onSchedule(
                     const s = sDoc.data();
                     if (!s.dueDate) continue;
 
-                    const dueDate = new Date(s.dueDate);
-                    dueDate.setHours(0, 0, 0, 0);
-                    const diffMs = dueDate - today;
-                    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                    const dueDay = deadlineCalendar.day(s.dueDate);
+                    if (dueDay === null) continue;
+                    const diffDays = deadlineCalendar.distance(today, dueDay);
+                    if (diffDays === null) continue;
 
                     const daysBefore = s.notif_days_before || 14;
-                    const freqDays = s.notif_frequency || 7;
 
                     // Scadenze già passate: stop
                     if (diffDays < 0) continue;
@@ -1451,18 +1830,8 @@ exports.checkDeadlines = onSchedule(
 
                     if (!deadlineRecipients(s).some((recipient) => recipient.sendEmail)) continue;
 
-                    // Giorno 0: invia SEMPRE
-                    // Altri giorni: rispetta la frequenza
-                    if (diffDays > 0) {
-                        const lastNotified = s.lastNotifiedAt
-                            ? new Date(s.lastNotifiedAt) : null;
-                        if (lastNotified) {
-                            const daysSinceLast = Math.floor(
-                                (today - lastNotified) / (1000 * 60 * 60 * 24)
-                            );
-                            if (daysSinceLast < freqDays) continue;
-                        }
-                    }
+                    // Each recipient owns its cadence; a global partial-success
+                    // marker must never suppress another recipient's retry.
 
                     try {
                         await sendScadenzaEmail(transporter, gmailUser, s, diffDays, sDoc.ref);
@@ -1503,14 +1872,11 @@ exports.onScadenzaCreated = onDocumentCreated(
         // Verifica campi minimi
         if (!s.dueDate || s.completed) return;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const dueDate = new Date(s.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-
-        const diffMs = dueDate - today;
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const today = deadlineCalendar.day(new Date());
+        const dueDay = deadlineCalendar.day(s.dueDate);
+        if (dueDay === null) return;
+        const diffDays = deadlineCalendar.distance(today, dueDay);
+        if (diffDays === null) return;
 
         const daysBefore = s.notif_days_before || 14;
 
@@ -1607,4 +1973,266 @@ exports.onScadenzaDeleted = onDocumentDeleted(
             console.error(`[RECEIVED DEADLINE CLEANUP FAILED] ${event.params.scadenzaId}:`, error.message);
         }
     }
+);
+
+// ─────────────────────────────────────────────────────────────
+// M7-AUDIT-6 — Retention del registro tecnico (24 mesi di calendario)
+// ─────────────────────────────────────────────────────────────
+// Job pianificato che cancella **solo** gli eventi scaduti e databili di
+// `users/{uid}/auditEvents`. La logica pura (finestra, data efficace,
+// classificazione, piano, esecuzione) sta in `./audit-retention-service`; qui
+// vivono la scoperta e la cancellazione confermata.
+//
+// Difese sul confinamento: la scoperta usa una query di **gruppo di collezioni**
+// (così trova anche le sottocollezioni il cui documento padre `users/{uid}` non
+// esiste), ma ogni risultato viene ricondotto al percorso atteso da
+// `auditEventPath(uid, id)` e **respinto** se non coincide: un `auditEvents`
+// annidato altrove non viene mai cancellato.
+//
+// Conferma atomica: la via rapida usa una precondizione di versione
+// (`delete(ref, {lastUpdateTime})`), quindi cancella solo la versione che il
+// classificatore ha dichiarato scaduta; se il documento è cambiato o sparito la
+// transazione di ripiego rilegge la **versione corrente**, la riclassifica e
+// cancella solo ciò che è ancora scaduto.
+const AUDIT_RETENTION_PAGE_SIZE = 200;
+const AUDIT_RETENTION_MAX_BATCHES_PER_RUN = 50;
+// Tetto **per proprietario**: senza di esso un singolo proprietario con uno
+// storico enorme consumerebbe l'intero budget del run e gli altri non
+// progredirebbero (rilievo della revisione M7-AUDIT-6).
+const AUDIT_RETENTION_MAX_BATCHES_PER_OWNER = 10;
+// Tetto di **scansione**: conta le **letture** effettive (percorsi respinti e
+// duplicati compresi), non i documenti raccolti, ed è separato dal budget di
+// cancellazione: i documenti vecchi ma non cancellabili non devono impedire di
+// raggiungere gli eventi scaduti che vengono dopo.
+const AUDIT_RETENTION_MAX_SCAN = 20_000;
+// Stato del job: un cursore per campo, così la scansione **avanza fra i run**
+// anche quando il prefisso non cancellabile è più lungo del tetto di scansione.
+// È un documento di servizio, fuori dal registro e fuori dai dati utente: il job
+// non lo cancella mai e il client non può leggerlo né scriverlo (nessuna regola
+// lo copre, quindi vale il diniego predefinito di Firestore).
+const AUDIT_RETENTION_STATE_PATH = "auditRetentionState/scan";
+// Finestra grossolana della query: 24 mesi di calendario sono sempre almeno 730
+// giorni, quindi 700 giorni è un sovrainsieme sicuro di ciò che può essere
+// scaduto. Il classificatore resta l'unica autorità sulla cancellazione.
+const AUDIT_RETENTION_COARSE_CUTOFF_MS = 700 * 24 * 60 * 60 * 1000;
+// Campi su cui il job cerca la data efficace: `at` per tutte le famiglie,
+// `createdAt` per le due che non scrivono `at` (la politica la applica il
+// classificatore, non la query).
+const AUDIT_RETENTION_DATE_FIELDS = Object.freeze(["at", "createdAt"]);
+const FIREBASE_FAILED_PRECONDITION = 9;
+
+function isPreconditionFailure(error) {
+    const code = error?.code;
+    return code === FIREBASE_FAILED_PRECONDITION || code === "failed-precondition" ||
+        /FAILED_PRECONDITION|PRECONDITION/i.test(String(error?.message || ""));
+}
+
+function usableCursor(cursor) {
+    return Boolean(cursor) && typeof cursor.path === "string" && cursor.path.length > 0 &&
+        cursor.value !== undefined && cursor.value !== null;
+}
+
+// I cursori sono dati di servizio: un contenuto malformato non deve fermare la
+// retention, si riparte semplicemente dall'inizio di quel campo.
+async function readAuditRetentionCursors(db) {
+    const snapshot = await db.doc(AUDIT_RETENTION_STATE_PATH).get();
+    const stored = snapshot.exists ? snapshot.data() : null;
+    const cursors = {};
+    for (const field of AUDIT_RETENTION_DATE_FIELDS) {
+        const candidate = stored?.cursors?.[field];
+        cursors[field] = usableCursor(candidate) ? {value: candidate.value, path: candidate.path} : null;
+    }
+    return cursors;
+}
+
+async function saveAuditRetentionCursors(db, cursors) {
+    const stored = {};
+    for (const field of AUDIT_RETENTION_DATE_FIELDS) {
+        const cursor = cursors[field];
+        stored[field] = usableCursor(cursor) ? {value: cursor.value, path: cursor.path} : null;
+    }
+    await db.doc(AUDIT_RETENTION_STATE_PATH).set(
+        {cursors: stored, updatedAt: FieldValue.serverTimestamp()}, {merge: false});
+}
+
+// Scoperta: due query di gruppo (una per campo, perché un filtro di intervallo
+// non ne copre due), paginazione con cursore sull'**istantanea completa** —
+// stabile anche quando più proprietari hanno lo stesso id — e deduplica per
+// percorso completo.
+//
+// `cursors` sono i cursori di partenza (uno per campo, `null` = dall'inizio) e
+// `cursors` nel risultato sono quelli aggiornati: avanzano quando la scansione
+// del campo è stata interrotta dal tetto di letture, tornano `null` quando la
+// query è esaurita (il giro successivo riparte dall'inizio, così nessun evento
+// resta fuori per sempre). `truncated` dice se il tetto di **letture** è stato
+// raggiunto con altre pagine da leggere: in quel caso il job non può dichiarare
+// il completamento.
+async function collectExpiredAuditEvents(db, cutoff, {
+    pageSize = AUDIT_RETENTION_PAGE_SIZE, maxScan = AUDIT_RETENTION_MAX_SCAN, cursors = {}
+} = {}) {
+    const collected = new Map();
+    const rejected = [];
+    const nextCursors = {};
+    let scanned = 0, truncated = false;
+    for (const field of AUDIT_RETENTION_DATE_FIELDS) {
+        const start = usableCursor(cursors[field]) ? cursors[field] : null;
+        let cursor = start, exhausted = false, advanced = false;
+        for (;;) {
+            // Il budget conta le **letture**: un percorso respinto o un duplicato
+            // consuma il tetto come qualunque altro documento letto.
+            if (scanned >= maxScan) { truncated = true; break; }
+            let query = db.collectionGroup("auditEvents")
+                .where(field, "<=", cutoff)
+                .orderBy(field)
+                .orderBy(FieldPath.documentId())
+                .limit(pageSize);
+            if (cursor) query = query.startAfter(cursor.value, cursor.path);
+            const page = await query.get();
+            if (page.empty) { exhausted = true; break; }
+            for (const snapshot of page.docs) {
+                scanned++;
+                advanced = true;
+                cursor = {value: snapshot.data()[field], path: snapshot.ref.path};
+                const owner = snapshot.ref.parent ? snapshot.ref.parent.parent : null;
+                const uid = owner ? owner.id : null;
+                let expected = null;
+                try { expected = auditEventPath(uid, snapshot.ref.id); } catch { expected = null; }
+                if (expected !== snapshot.ref.path) {
+                    rejected.push({path: snapshot.ref.path, code: "AUDIT_RETENTION_PATH_FORBIDDEN"});
+                    continue;
+                }
+                if (!collected.has(snapshot.ref.path)) {
+                    collected.set(snapshot.ref.path, {
+                        uid, id: snapshot.ref.id, path: snapshot.ref.path,
+                        data: snapshot.data(), updateTime: snapshot.updateTime
+                    });
+                }
+            }
+            if (page.size < pageSize) { exhausted = true; break; }
+        }
+        // Esaurita: si riparte dall'inizio al giro successivo. Interrotta dal
+        // tetto: si riprende da dove si era arrivati. Non toccata: resta com'era.
+        nextCursors[field] = exhausted ? null : (advanced ? cursor : start);
+    }
+    return {entries: [...collected.values()], rejected, truncated, scanned, cursors: nextCursors};
+}
+
+// Cancellazione di un lotto con conferma della versione. Ritorna il numero di
+// documenti effettivamente cancellati (un documento sparito o non più scaduto
+// non è una cancellazione).
+//
+// Il conteggio **non** vive dentro il callback ritentabile: `runTransaction` può
+// rieseguirlo più volte su conflitto, e un contatore esterno sommerebbe
+// cancellazioni solo tentate. Il callback **restituisce** i percorsi cancellati
+// e `runTransaction` risolve con il valore del tentativo che ha committato.
+async function deleteAuditBatchWithConfirmation(db, batch, now, updateTimes) {
+    const references = batch.paths.map(path => db.doc(path));
+    const versions = batch.paths.map(path => updateTimes.get(path));
+    if (versions.every(version => version !== undefined)) {
+        const writer = db.batch();
+        references.forEach((reference, index) => writer.delete(reference, {lastUpdateTime: versions[index]}));
+        try {
+            await writer.commit();
+            return batch.paths.length;
+        } catch (error) {
+            if (!isPreconditionFailure(error)) throw error;
+            // Versione cambiata o documento sparito: si passa alla conferma
+            // atomica, senza dichiarare cancellato ciò che non lo è.
+        }
+    }
+    const committed = await db.runTransaction(async (transaction) => {
+        const snapshots = await transaction.getAll(...references);
+        const deleted = [];
+        for (const snapshot of snapshots) {
+            if (!snapshot.exists) continue;
+            if (classifyAuditEvent(snapshot.data(), now) !== "expired") continue;
+            transaction.delete(snapshot.ref);
+            deleted.push(snapshot.ref.path);
+        }
+        return deleted;
+    });
+    return Array.isArray(committed) ? committed.length : 0;
+}
+
+async function runAuditRetentionJob(db, {
+    now = Date.now(),
+    pageSize = AUDIT_RETENTION_PAGE_SIZE,
+    maxScan = AUDIT_RETENTION_MAX_SCAN,
+    batchSize = DEFAULT_BATCH_SIZE,
+    maxBatches = AUDIT_RETENTION_MAX_BATCHES_PER_RUN,
+    maxBatchesPerOwner = AUDIT_RETENTION_MAX_BATCHES_PER_OWNER
+} = {}) {
+    const cutoff = Timestamp.fromMillis(now - AUDIT_RETENTION_COARSE_CUTOFF_MS);
+    const previousCursors = await readAuditRetentionCursors(db);
+    const {entries, rejected, truncated, scanned, cursors} =
+        await collectExpiredAuditEvents(db, cutoff, {pageSize, maxScan, cursors: previousCursors});
+    const updateTimes = new Map(entries.map(entry => [entry.path, entry.updateTime]));
+    const byOwner = new Map();
+    for (const entry of entries) {
+        if (!byOwner.has(entry.uid)) byOwner.set(entry.uid, []);
+        byOwner.get(entry.uid).push({id: entry.id, ...entry.data});
+    }
+    const counters = {scanned, planned: 0, deleted: 0, retained: 0, unverifiable: 0, batches: 0, planErrors: 0};
+    // Una scansione troncata significa «potrebbero restare eventi scaduti»:
+    // il run non può dichiararsi completato.
+    let status = truncated ? "interrupted" : "completed";
+    // La finestra è «pulita» solo se tutto ciò che è stato letto è stato gestito:
+    // un errore di piano, un lotto saltato per budget o un lotto fallito la
+    // lasciano sporca e i cursori **non** avanzano, così il run successivo
+    // rilegge la stessa finestra e nessun evento viene perso.
+    let windowClean = true;
+    for (const [uid, events] of byOwner) {
+        if (counters.batches >= maxBatches) { status = "interrupted"; windowClean = false; break; }
+        let ownerBatches = 0;
+        for (let offset = 0; offset < events.length; offset += MAX_EVENTS_PER_RUN) {
+            const ownerBudget = Math.min(maxBatchesPerOwner - ownerBatches, maxBatches - counters.batches);
+            if (ownerBudget <= 0) { status = "interrupted"; windowClean = false; break; }
+            let plan;
+            try {
+                plan = planAuditRetention({uid, events: events.slice(offset, offset + MAX_EVENTS_PER_RUN), now, batchSize});
+            } catch (error) {
+                // Documenti letti ma non valutati: il run **non** è completo e lo
+                // stato lo dichiara, invece di proseguire come se nulla fosse.
+                counters.planErrors++;
+                status = "partial";
+                windowClean = false;
+                console.warn("[AUDIT] retention: piano saltato", {
+                    code: String(error?.code || "AUDIT_RETENTION_INPUT_INVALID")
+                });
+                continue;
+            }
+            counters.retained += plan.retained.length;
+            counters.unverifiable += plan.unverifiable.length;
+            const allowed = plan.batches.slice(0, ownerBudget);
+            if (allowed.length < plan.batches.length) { status = "interrupted"; windowClean = false; }
+            counters.planned += allowed.reduce((total, batch) => total + batch.ids.length, 0);
+            const report = await runAuditRetention({
+                plan: {...plan, batches: allowed},
+                deleteBatch: async (batch) => {
+                    counters.deleted += await deleteAuditBatchWithConfirmation(db, batch, now, updateTimes);
+                }
+            });
+            counters.batches += report.completed;
+            ownerBatches += report.completed;
+            if (report.status !== "completed") { status = report.status; windowClean = false; break; }
+        }
+        if (counters.batches >= maxBatches) { status = "interrupted"; windowClean = false; }
+    }
+    if (windowClean) await saveAuditRetentionCursors(db, cursors);
+    // Log di soli conteggi e codici: nessun uid, nessun id, nessun contenuto.
+    console.log("[AUDIT] retention registro",
+        {status, truncated, cursorsSaved: windowClean, ...counters, rejectedPaths: rejected.length});
+    return Object.freeze({...counters, status, truncated, cursorsSaved: windowClean, rejectedPaths: rejected.length});
+}
+
+exports.purgeExpiredAuditEvents = onSchedule(
+    {
+        schedule: "0 3 * * *",
+        timeZone: "Europe/Rome",
+        region: "europe-west1",
+        memory: "512MiB",
+        timeoutSeconds: 540,
+        retryCount: 3,
+    },
+    () => runAuditRetentionJob(firestore())
 );

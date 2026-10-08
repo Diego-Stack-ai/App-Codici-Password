@@ -1,4 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
+import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
+import {auth} from '../../firebase-config.js?v=1.2.128';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -10,7 +12,6 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.128';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
@@ -18,7 +19,20 @@ import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypt
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
 import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.128';
 import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.128';
-import { savePrivateAccount } from './form-privato-save.js';
+async function savePrivateAccount(...args) {
+    let module;
+    try { module = await import('./form-privato-save.js'); }
+    catch {
+        if (args[0]?.isActive?.()) {
+            showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
+            const button = document.getElementById('btn-save-footer');
+            if (button) button.disabled = false;
+        }
+        return;
+    }
+    return module.savePrivateAccount(...args);
+}
+import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -31,17 +45,37 @@ let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
 let currentRevision = 0;
+let loadContext = null;
+globalThis.addEventListener?.('vault-session-locked', () => loadContext?.invalidate());
 let hasLinkedProfileField = false;
 let accountWidgetController = null;
+let formVersion = 0;
+let recoveryOperation = null;
 
-// Re-render callback per banking-renderer.js
-const rerender = () => renderBankAccounts(bankAccounts, rerender, {
-    onAddWidget: bankId => {
-        if (accountWidgetController) return accountWidgetController.openNewWidget(bankId);
-        showToast('Salva prima l’Account, poi aggiungi i Widget del conto.', 'warning');
-    },
-    onWidgetsMount: () => accountWidgetController?.placeBankWidgets()
-});
+let bankingRenderVersion = 0;
+const rerender = async () => {
+    const version = formVersion, uid = currentUid, rendering = ++bankingRenderVersion;
+    const active = () => version === formVersion && uid === currentUid && auth.currentUser?.uid === uid && rendering === bankingRenderVersion;
+    if (!active()) return;
+    if (!bankAccounts.length) {
+        const container = document.getElementById('iban-list-container');
+        if (container) clearElement(container);
+        return;
+    }
+    try {
+        const {renderBankAccounts} = await import('../shared/banking-renderer.js');
+        if (active()) renderBankAccounts(bankAccounts, rerender, {
+            onAddWidget: bankId => {
+                if (!active()) return;
+                if (accountWidgetController) return accountWidgetController.openNewWidget(bankId);
+                showToast('Salva prima l’Account, poi aggiungi i Widget del conto.', 'warning');
+            },
+            onWidgetsMount: () => active() && accountWidgetController?.placeBankWidgets()
+        });
+    } catch {
+        if (active()) showToast('Impossibile visualizzare i dati bancari. Riprova ad aprire la sezione.', 'warning');
+    }
+};
 
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -53,7 +87,7 @@ function getPrivateAccountListDestination({refresh = false} = {}) {
     return `account_privati.html?${params.toString()}`;
 }
 
-function showM6ConflictChoice() {
+function showM6ConflictChoice(reconciliation = false, unsupported = false) {
     return new Promise(resolve => {
         document.getElementById('m6-conflict-modal')?.remove();
         const modal = createElement('div', {id: 'm6-conflict-modal', className: 'modal-overlay'});
@@ -66,7 +100,7 @@ function showM6ConflictChoice() {
             textContent: 'Mantieni server',
             onclick: () => close('server')
         });
-        const recoverLocal = createElement('button', {
+        const recoverLocal = unsupported ? null : createElement('button', {
             className: 'btn-modal btn-secondary',
             textContent: 'Recupera locale',
             onclick: () => close('local')
@@ -78,10 +112,10 @@ function showM6ConflictChoice() {
         });
         setChildren(modal, createElement('div', {className: 'modal-box'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Conflitto di sincronizzazione'}),
+            createElement('h3', {className: 'modal-title', textContent: unsupported ? 'Account da modificare nel modulo completo' : reconciliation ? 'Salvataggio precedente da verificare' : 'Conflitto di sincronizzazione'}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
+                textContent: unsupported ? 'Questo Account ora richiede una modifica completa: la copia offline non può essere applicata con il salvataggio ridotto. Decidi più tardi conserva la copia cifrata. Mantieni server elimina questa copia offline e conserva i dati del server.' : reconciliation ? 'Non possiamo confermare l’esito di una vecchia modifica. La copia cifrata resta conservata: scegli il server oppure recuperala nel modulo per controllarla e salvarla di nuovo.' : 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
             }),
             createElement('div', {className: 'modal-actions'}, [decideLater, recoverLocal, keepServer])
         ]));
@@ -124,13 +158,14 @@ function showM6ForeignConflictChoice(accountName) {
     });
 }
 
-async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision) {
+async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision, active) {
+    if (!Number.isInteger(serverRevision) || serverRevision < 0) throw new Error('RECOVERY_REVISION_INVALID');
     const record = operation.record || {};
     const decrypted = await Promise.all([
-        decrypt(record.username || '', vaultKeyMaterial),
-        decrypt(record.account || '', vaultKeyMaterial),
-        decrypt(record.password || '', vaultKeyMaterial),
-        decrypt(record.note || '', vaultKeyMaterial)
+        decodeProfileContactValue(record.username || '', vaultKeyMaterial),
+        decodeProfileContactValue(record.account || '', vaultKeyMaterial),
+        decodeProfileContactValue(record.password || '', vaultKeyMaterial),
+        decodeProfileContactValue(record.note || '', vaultKeyMaterial)
     ]);
     const values = {
         'account-name': record.nomeAccount || '',
@@ -143,11 +178,13 @@ async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevisio
         'ref-phone': record.referenteTelefono || '',
         'ref-mobile': record.referenteCellulare || ''
     };
+    if (!active()) throw new Error('RECOVERY_SESSION_CHANGED');
     for (const [id, value] of Object.entries(values)) {
         const input = document.getElementById(id);
         if (input) input.value = value;
     }
-    currentRevision = Number(serverRevision || currentRevision);
+    currentRevision = serverRevision;
+    recoveryOperation = structuredClone(operation);
 }
 
 // --- INITIALIZATION ---
@@ -158,14 +195,27 @@ async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevisio
  */
 
 export async function initFormAccountPrivato(user) {
+    const credentialsForm = document.getElementById('account-credentials-form');
+    if (credentialsForm) credentialsForm.onsubmit = event => event.preventDefault();
     savedBankIds = new Set();
     
     if (!user) return;
     currentUid = user.uid;
+    const version = ++formVersion;
+    const active = () => version === formVersion && auth.currentUser?.uid === user.uid;
+    recoveryOperation = null;
 
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
     isEditing = !!currentDocId;
+    loadContext?.invalidate();
+    loadContext = createAccountLoadContext({recordId: currentDocId, mode: isEditing ? 'edit' : 'create'});
+    const pagehideContext = loadContext;
+    window.addEventListener('pagehide', () => {
+        if (version !== formVersion) return;
+        formVersion++;
+        pagehideContext?.invalidate();
+    }, {once:true});
     document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
     if (isEditing) {
         ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.add('hidden'));
@@ -207,6 +257,16 @@ export async function initFormAccountPrivato(user) {
             title: t('save') || 'Salva',
             onclick: async () => {
                 saveBtn.disabled = true;
+                const saveContext = loadContext;
+                const saveUid = currentUid;
+                const saveDocId = currentDocId;
+                const sessionLive = () => active() && saveContext === loadContext
+                    && currentUid === saveUid && currentDocId === saveDocId && isAccountSaveAllowed(saveContext);
+                if (!isAccountSaveAllowed(saveContext)) {
+                    showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                    saveBtn.disabled = false;
+                    return;
+                }
                 try {
                     await accountWidgetController?.savePendingChanges();
                 } catch (error) {
@@ -214,16 +274,24 @@ export async function initFormAccountPrivato(user) {
                     saveBtn.disabled = false;
                     return;
                 }
+                if (!sessionLive()) {
+                    showToast('Sessione o Account cambiati: salvataggio annullato.', 'warning');
+                    saveBtn.disabled = false;
+                    return;
+                }
                 await savePrivateAccount({
                     bankAccounts,
                     invitedEmails,
                     isExplicitMemo,
-                    currentUid,
-                    currentDocId,
+                    currentUid: saveUid,
+                    currentDocId: saveDocId,
                     isEditing,
                     baseRevision: currentRevision,
                     profileContactLinkDraft,
-                    hasLinkedProfileField
+                    hasLinkedProfileField,
+                    loadContext: saveContext,
+                    recoveryOperation,
+                    isActive: sessionLive
                 });
             }
         }, [
@@ -311,34 +379,42 @@ export async function initFormAccountPrivato(user) {
             const result = await pilot.flushPrivateAccountPilot({
                 uid: currentUid,
                 vaultKeyMaterial,
+                isActive: active,
                 onState: state => { lastState = state; }
             });
             const outcome = result?.value || result;
-            if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
+            if (!active()) return;
+            const reconciliation = lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required';
+            if (reconciliation || lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 const operation = outcome?.operation || lastState?.operation;
-                const serverRevision = outcome?.result?.currentRevision || lastState?.result?.currentRevision;
-                showToast('Conflitto M6: nessuna modifica è stata sovrascritta.', 'warning');
-                if (operation?.operationId && operation.recordId === currentDocId) {
-                    const choice = await showM6ConflictChoice();
-                    if (choice === 'server' || choice === 'local') {
-                        await pilot.discardPrivateAccountPilotOperation({
-                            uid: currentUid,
-                            vaultKeyMaterial,
-                            operationId: operation.operationId
-                        });
-                    }
+                const unsupported = [operation?._reviewReason, outcome?.reason, lastState?.reason].includes('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+                const saveButton = document.getElementById('btn-save-footer');
+                if (saveButton) saveButton.disabled = true;
+                showToast(unsupported ? 'Questo Account richiede una modifica completa. La copia offline resta cifrata e non sarà reinviata automaticamente.' : 'Una modifica offline richiede una verifica. La copia cifrata è conservata.', 'warning');
+                if (operation?.operationId && operation.uid === user.uid && operation.recordId === currentDocId) {
+                    const choice = await showM6ConflictChoice(reconciliation, unsupported);
+                    if (!active()) return;
                     if (choice === 'server') {
+                        await pilot.discardPrivateAccountPilotOperation({
+                            uid: user.uid, vaultKeyMaterial, isActive: active, operationId: operation.operationId
+                        });
+                        if (!active()) return;
                         showToast('Versione del server mantenuta.', 'success');
-                        setTimeout(() => window.location.replace(getPrivateAccountListDestination({refresh: true})), 600);
-                    } else if (choice === 'local') {
-                        await restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision);
-                        showToast('Modifica offline recuperata. Controllala e premi Salva per applicarla.', 'warning');
+                        setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 600);
+                    } else if (choice === 'local' && !unsupported) {
+                        const server = await getPrivateAccountConfirmed(user.uid, operation.recordId);
+                        if (!active()) return;
+                        if (!canRecoverPrivateAccount(server, user.uid) || server.type !== operation.record?.type) {
+                            throw new Error('RECOVERY_ACCOUNT_SCOPE_CHANGED');
+                        }
+                        const revision = server.revision === undefined ? 0 : server.revision;
+                        await restoreM6ConflictDraft(operation, vaultKeyMaterial, revision, active);
+                        if (saveButton) saveButton.disabled = false;
+                        showToast('Modifica recuperata. La copia offline resta conservata finché premi Salva.', 'warning');
                     }
                 } else if (operation?.recordId) {
                     const openAccount = await showM6ForeignConflictChoice(operation.record?.nomeAccount);
-                    if (openAccount) {
-                        window.location.replace(`form_account_privato.html?id=${encodeURIComponent(operation.recordId)}`);
-                    }
+                    if (openAccount && active()) window.location.replace(`form_account_privato.html?id=${encodeURIComponent(operation.recordId)}`);
                 }
             } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
                 showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
@@ -353,9 +429,10 @@ export async function initFormAccountPrivato(user) {
                     });
                 }
                 showToast('Sincronizzazione M6 completata.', 'success');
-                setTimeout(() => window.location.replace(getPrivateAccountListDestination({refresh: true})), 800);
+                setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 800);
             }
         } catch (error) {
+            if (!active()) return;
             logError('M6PilotResume', error);
             showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
         }
@@ -368,18 +445,24 @@ export async function initFormAccountPrivato(user) {
  * LOADING ENGINE
  */
 async function loadData() {
+    const context = loadContext;
+    const loadToken = context?.beginLoad() ?? null;
+    const live = () => Boolean(context) && context === loadContext && context.isCurrent(loadToken);
     try {
         const data = navigator.onLine
             ? await getPrivateAccountConfirmed(currentUid, currentDocId)
             : await getPrivateAccount(currentUid, currentDocId);
+        if (!live()) return;
         if (!data) {
             showToast(t('account_not_found'), "error");
+            context.markFailed(loadToken, 'ACCOUNT_LOAD_UNAVAILABLE');
             if (profileContactLinkDraft) throw new Error('Account non disponibile per il collegamento.');
             return;
         }
         currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
         hasLinkedProfileField = Boolean(data.linkedProfileField?.id || data.linkedCompanyProfileField?.id);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        const setDecrypted = (id, val) => { if (val !== undefined) setVal(id, val); };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario
         let vaultKeyMaterial = null;
@@ -389,6 +472,7 @@ async function loadData() {
                 vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
                 showToast("Dati cifrati: chiave obbligatoria.", "error");
+                context.markFailed(loadToken, 'ACCOUNT_VAULT_KEY_UNAVAILABLE');
                 if (profileContactLinkDraft) throw e;
                 history.back();
                 return;
@@ -397,23 +481,36 @@ async function loadData() {
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
-            if (profileContactLinkDraft) return decodeProfileContactValue(val, vaultKeyMaterial);
-            try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
+            if (profileContactLinkDraft) {
+                try { return await decodeProfileContactValue(val, vaultKeyMaterial); }
+                catch (e) {
+                    if (context.markFailed(loadToken, 'ACCOUNT_DECRYPT_FAILED')) showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                    throw e;
+                }
+            }
+            // Il decrypt permissivo restituisce sentinelle: il validatore le rifiuta.
+            try { return await decodeProfileContactValue(val, vaultKeyMaterial); }
+            catch (e) {
+                if (context.markFailed(loadToken, 'ACCOUNT_DECRYPT_FAILED')) showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
+                return undefined;
+            }
         };
 
+        if (!live()) return;
         const [username, accountCode, password, note] = await Promise.all([
             decryptIfPossible(data.username),
             decryptIfPossible(data.account || data.codice),
             decryptIfPossible(data.password),
             decryptIfPossible(data.note)
         ]);
+        if (!live()) return;
 
         setVal('account-name', data.nomeAccount);
-        setVal('account-username', username);
-        setVal('account-code', accountCode);
-        setVal('account-password', password);
+        setDecrypted('account-username', username);
+        setDecrypted('account-code', accountCode);
+        setDecrypted('account-password', password);
         setVal('account-url', data.url || data.sitoWeb);
-        setVal('account-note', note);
+        setDecrypted('account-note', note);
 
         // Referente (Root or Object support)
         const ref = data.referente || {};
@@ -439,19 +536,20 @@ async function loadData() {
             })));
         }
 
+        if (!live()) return;
         const hasRealData = hasRealBankingData({banking: loadedBanking});
 
         if (hasRealData) {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            rerender();
+            await rerender();
         } else {
             // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
             document.getElementById('flag-banking').checked = false;
             document.getElementById('banking-section').classList.add('hidden');
             bankAccounts = loadedBanking.filter(bank => bank.bankId);
-            rerender();
+            await rerender();
         }
 
         isExplicitMemo = data.isExplicitMemo || false;
@@ -470,7 +568,7 @@ async function loadData() {
             const mgmt = document.getElementById('shared-management');
             if (mgmt) mgmt.classList.remove('hidden');
             if (data.sharedWith) {
-                invitedEmails = Object.values(data.sharedWith).map(g => g.email);
+                invitedEmails = Object.values(data.sharedWith).filter(guest => guest?.status !== 'suspended').map(g => g.email);
             } else {
                 const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
                 invitedEmails = [...emails];
@@ -486,7 +584,9 @@ async function loadData() {
             document.getElementById('logo-placeholder').classList.add('hidden');
         }
 
+        if (live()) context.markLoaded(loadToken);
     } catch (e) {
+        context?.markFailed(loadToken, 'ACCOUNT_LOAD_FAILED');
         logError("LoadData", e);
         if (profileContactLinkDraft) throw e;
     }

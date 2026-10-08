@@ -1290,6 +1290,11 @@ h3.settings-desc {
     background: rgba(255, 255, 255, 0.05);
 }
 
+.credential-health-list:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
 .credential-health-identity {
     display: grid;
     min-width: 0;

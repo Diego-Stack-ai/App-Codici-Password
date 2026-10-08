@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
+import {functionsEmulatorTargets} from './functions-emulator-targets.mjs';
 
-const PROJECT_ID = process.env.GCLOUD_PROJECT || 'demo-codici-password';
-const AUTH_BASE = `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099'}`;
-const FUNCTIONS_BASE = `http://${process.env.FUNCTIONS_EMULATOR_HOST || '127.0.0.1:5001'}/${PROJECT_ID}/europe-west1`;
+const {authBase: AUTH_BASE, functionsBase: FUNCTIONS_BASE} = functionsEmulatorTargets(process.env);
 const EMULATOR_APP_CHECK = 'eyJhbGciOiJub25lIn0.eyJhcHBfaWQiOiJkZW1vLWNvZGljaS1wYXNzd29yZCJ9.';
 
 async function callable(name, data, token = null) {

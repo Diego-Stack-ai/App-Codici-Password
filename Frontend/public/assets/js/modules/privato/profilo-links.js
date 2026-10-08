@@ -4,7 +4,7 @@ import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { showProfileAccountPicker } from './profilo-modal.js';
-import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
+import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 import {
     buildProfileAccountLinkDraft, profileAccountUrl, profileAccountReferences,
     buildProfileDocumentDeadlineDraft,
@@ -16,10 +16,12 @@ export async function readLinkedEmailAccountPassword(email) {
     if (!uid || !email?.linkedAccountId) throw new Error('Account non collegato.');
     const key = await ensureVaultKeyMaterial();
     if (!key || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per leggere la password.');
+    const offline = globalThis.navigator?.onLine === false;
     const account = email.linkedAccountCompanyId
-        ? await getCompanyAccountConfirmed(uid, email.linkedAccountCompanyId, email.linkedAccountId)
-        : await getPrivateAccountConfirmed(uid, email.linkedAccountId);
+        ? await (offline ? getCompanyAccount : getCompanyAccountConfirmed)(uid, email.linkedAccountCompanyId, email.linkedAccountId)
+        : await (offline ? getPrivateAccount : getPrivateAccountConfirmed)(uid, email.linkedAccountId);
     if (!account || account.isArchived) throw new Error('Account collegato non disponibile.');
+    if (auth.currentUser?.uid !== uid || (Object.hasOwn(account, 'ownerId') && account.ownerId !== uid)) throw new Error('Sessione cambiata.');
     const password = await decryptRequiredValue(account.password, key);
     if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata.');
     return password || '';

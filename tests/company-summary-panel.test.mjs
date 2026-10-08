@@ -21,7 +21,7 @@ test('production adapter scopes company reads and excludes passwords', async()=>
     const f=setup();await tick();const value=await f.options.read(selection);
     assert.match(JSON.stringify(value),/Società/);assert.doesNotMatch(JSON.stringify(value),/DO-NOT-EXPORT/);f.cleanup();
 });
-for(const event of ['lock','change','pagehide','private-auth-blocked'])test('production PDF revokes on '+event,async()=>{
+for(const event of ['lock','change','pagehide','private-auth-blocked','vault-session-locked'])test('production PDF revokes on '+event,async()=>{
     const f=setup();await tick();if(event==='lock'||event==='change')f[event]();else f.events.dispatchEvent(new Event(event));
     assert.equal(f.context.signal.aborted,true);assert.equal(f.disposed,2);await assert.rejects(f.options.read(selection));
 });

@@ -4,7 +4,7 @@ import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/
 import {Timestamp, doc, setDoc} from 'firebase/firestore';
 import {getBytes, ref, uploadBytes} from 'firebase/storage';
 
-const PROJECT_ID = 'codici-password-sharing-storage-test';
+const PROJECT_ID = 'demo-codici-password-sharing-storage-test';
 const OWNER = 'fixture-owner';
 const RECIPIENT = 'fixture-recipient';
 const STRANGER = 'fixture-stranger';

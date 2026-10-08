@@ -11,7 +11,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import {listCompanies} from '../data/vault-repository.js';
-import { deleteCompany, setCompanyPinned } from './company-list-service.js';
+import { deleteCompany, companyDeletionMessage, setCompanyPinned } from './company-list-service.js';
 import { createUiState } from '../shared/ui-state-view.js';
 
 // --- STATE ---
@@ -248,18 +248,20 @@ function toggleDeleteMode() {
 }
 
 async function deleteAziendaList(id, name) {
+    const uid = currentUser?.uid;
     const title = t('confirm_delete_company_title') || "ELIMINAZIONE DEFINITIVA";
-    const msg = (t('confirm_delete_company_msg') || "Sei sicuro di voler eliminare \"{name}\"? Questa operazione cancellerà anche tutti gli account associati.").replace('{name}', name);
+    const msg = `Eliminare l'azienda "${name}"? Se contiene Account, anche archiviati, l'operazione verrà bloccata.`;
 
     if (!await showConfirmModal(title, msg)) return;
 
     try {
+        if (currentUser?.uid !== uid) throw Object.assign(new Error('COMPANY_DELETE_SESSION_CHANGED'), {code: 'COMPANY_DELETE_SESSION_CHANGED'});
         await deleteCompany(currentUser.uid, id);
         showToast(t('success_deleted') || "Azienda eliminata", "success");
         allAziende = allAziende.filter(a => a.id !== id);
         renderAziende();
     } catch (e) {
         logError("DeleteList", e);
-        showToast(t('error_generic') || "Errore durante l'eliminazione", "error");
+        showToast(companyDeletionMessage(e), "error");
     }
 }

@@ -13,8 +13,7 @@ import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { getUserProfile, listCompanies } from '../data/vault-repository.js';
 import { initHomePresentation } from './home-presentation.js';
-import { renderHomeDeadlineInbox } from './home-deadline-inbox.js';
-import { renderHomeDeadlineDashboard } from './home-deadline-dashboard.js';
+import { initHomeDeadlineReminders } from './home-deadline-inbox.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -60,8 +59,7 @@ export async function initHomePage(user) {
     const [settingsResult] = await Promise.allSettled([
         getUserProfile(user.uid),
         renderHeaderUser(user),
-        renderHomeDeadlineDashboard(user),
-        renderHomeDeadlineInbox(user)
+        initHomeDeadlineReminders(user)
     ]);
 
     const settingsData = settingsResult.status === 'fulfilled' ? settingsResult.value : null;

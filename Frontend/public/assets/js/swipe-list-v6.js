@@ -26,20 +26,33 @@ export class SwipeList {
     }
 
     init() {
-        // Delegate events
+        this.destroy();
+        this.events = new AbortController();
+        this.timers = new Set();
+        for (const [event, handler, options] of [
+            ['touchstart', 'handleStart', {passive: true}],
+            ['touchmove', 'handleMove', {passive: false}],
+            ['touchend', 'handleEnd'], ['mousedown', 'handleStart'],
+            ['mousemove', 'handleMove'], ['mouseup', 'handleEnd'],
+            ['click', 'handleClick', {capture: true}]
+        ]) document.addEventListener(event, this[handler].bind(this), {...options, signal: this.events.signal});
+    }
 
-        // Touch
-        document.addEventListener('touchstart', this.handleStart.bind(this), { passive: true });
-        document.addEventListener('touchmove', this.handleMove.bind(this), { passive: false });
-        document.addEventListener('touchend', this.handleEnd.bind(this));
+    destroy() {
+        this.events?.abort();
+        this.timers?.forEach(clearTimeout);
+        this.timers?.clear();
+        this.closeAll();
+        this.isDragging = this.blockNextClick = false;
+    }
 
-        // Mouse (Desktop)
-        document.addEventListener('mousedown', this.handleStart.bind(this));
-        document.addEventListener('mousemove', this.handleMove.bind(this));
-        document.addEventListener('mouseup', this.handleEnd.bind(this));
-
-        // Block Click if we were dragging
-        document.addEventListener('click', this.handleClick.bind(this), true); // Capture phase CRITICAL
+    later(callback, delay) {
+        if (this.events.signal.aborted) return;
+        const timer = setTimeout(() => {
+            this.timers.delete(timer);
+            if (!this.events.signal.aborted) callback();
+        }, delay);
+        this.timers.add(timer);
     }
 
     handleClick(e) {
@@ -125,7 +138,7 @@ export class SwipeList {
         if (this.hasMoved) {
             this.blockNextClick = true;
             // In case click doesn't fire (e.g. mouse moved off), clear it shortly
-            setTimeout(() => { this.blockNextClick = false; }, 100);
+            this.later(() => { this.blockNextClick = false; }, 100);
         }
 
         const content = this.activeItem.querySelector('.swipe-content');
@@ -195,7 +208,7 @@ export class SwipeList {
 
             // 2. Collapse Height ("Slittare verso l'alto")
             // Start shrinking almost immediately so the list moves up while the card exits
-            setTimeout(() => {
+            this.later(() => {
                 // Add margins to transition to ensure gap removal
                 item.style.transition = 'max-height 0.3s ease-out, margin 0.3s ease-out, opacity 0.2s ease-out';
                 item.style.maxHeight = '0px';
@@ -210,7 +223,7 @@ export class SwipeList {
                 }
 
                 // 4. Remove from DOM after transition
-                setTimeout(() => item.remove(), 350);
+                this.later(() => item.remove(), 350);
 
             }, 100);
         }

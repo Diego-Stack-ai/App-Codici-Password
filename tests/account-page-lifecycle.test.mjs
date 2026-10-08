@@ -1,0 +1,433 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {getEventListeners} from 'node:events';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+// M7-R7B4: le liste usano il modello reale dei destinatari; il banco lo inietta
+// nel contesto perché gli `import` vengono rimossi dai sorgenti sotto prova.
+const archiveModelSource = await readFile(new URL('../Frontend/public/assets/js/modules/settings/archive-account-model.js', import.meta.url), 'utf8');
+const {archiveRecipients, archiveConfirmMessage} = await import('data:text/javascript;base64,' + Buffer.from(archiveModelSource).toString('base64'));
+
+
+const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
+const tick = () => new Promise(resolve => setImmediate(resolve));
+const user = {uid: 'fixture-user', email: 'fixture@example.invalid'};
+const MARKER = '2026-01-01T00:00:00.000Z';
+const records = () => [{id: 'b', nomeAccount: 'Beta', revision: 1, updatedAt: MARKER},
+    {id: 'a', nomeAccount: 'Alfa', revision: 1, updatedAt: MARKER}];
+async function fixture(company, overrides = {}) {
+    const elements = Object.fromEntries(['account-search', 'sort-btn', 'sort-label', 'accounts-container'].map(id => {
+        const node = new EventTarget(); node.value = ''; return [id, node];
+    }));
+    const views = [], writes = [], toasts = [], navigations = [], confirmations = [];
+    const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
+    const context = vm.createContext({readErrorMessage, archiveRecipients, archiveConfirmMessage,
+        window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
+        navigator: {onLine: true}, console, db: {}, LOG() {}, logError() {}, t: value => value,
+        clearElement: node => { node.children = []; }, setChildren: (node, children) => { node.children = children; },
+        createElement: (tag, props, children) => ({tag, props, children}),
+        createAccountListView: options => {
+            const view = {options, renders: [], destroyed: 0, render(rows) { this.renders.push(rows); }, destroy() { this.destroyed++; }};
+            views.push(view); return view;
+        },
+        accountModeFromRecord: row => row.mode || 'account-private', createArchiveMetadata: () => ({isArchived: true}),
+        // M7-R6: le liste non scrivono più direttamente, delegano al servizio di
+        // Archivio. Qui se ne riproduce il contratto osservabile: percorso per
+        // contesto, metadati canonici e fallimento chiuso senza marker osservato.
+        auth: {currentUser: {uid: user.uid}},
+        archiveAccount: async (uid, account) => {
+            if (account.revision === undefined && !account.updatedAt) {
+                throw Object.assign(new Error('ARCHIVE_MARKER_MISSING'), {code: 'ARCHIVE_MARKER_MISSING'});
+            }
+            const path = account.context === 'privato'
+                ? `users/${uid}/accounts/${account.id}`
+                : `users/${uid}/aziende/${account.context}/accounts/${account.id}`;
+            writes.push([path, {isArchived: true, archiveSchemaVersion: 2, revision: (account.revision ?? 0) + 1}]);
+            return {status: 'archived', id: account.id, context: account.context};
+        },
+        listPrivateAccounts: async () => records(), listPrivateAccountsConfirmed: async () => records(),
+        listAcceptedInvites: async () => [], getRecordByPath: async () => null,
+        listCompanyAccounts: async () => records(), ensureVaultKeyMaterial: async () => null,
+        decrypt: async () => 'decrypted-fixture', getUserProfile: async () => ({contactEmails: []}),
+        showConfirmModal: async (title, message) => { confirmations.push({title, message}); return true; },
+        showToast: (...args) => toasts.push(args),
+        doc: (...parts) => parts.slice(1).join('/'),
+        updateDoc: async (...args) => { writes.push(args); }, deleteDoc: async (...args) => { writes.push(args); },
+        writeBatch: () => ({delete: (...args) => writes.push(args), update: (...args) => writes.push(args), commit: async () => {}}),
+        ...overrides
+    });
+    const name = company ? 'azienda/account_azienda' : 'privato/account_privati';
+    const source = await readFile(new URL(`../Frontend/public/assets/js/modules/${name}.js`, import.meta.url), 'utf8');
+    vm.runInContext(source.replace(/^import[\s\S]*?;\r?$/gm, '').replace(/^export /gm, ''), context);
+    const mountName = company ? 'mountAccountAziendaList' : 'mountAccountPrivati';
+    const initName = company ? 'initAccountAziendaList' : 'initAccountPrivati';
+    return {elements, views, writes, toasts, navigations, confirmations,
+        mount: options => context[mountName](user, {navigate: url => navigations.push(url), ...options}),
+        init: () => context[initName](user),
+    };
+}
+
+test('private: scoped reader receives explicit invalid owners unchanged and excludes their records', async () => {
+    const invalidOwners = [null, false, '', undefined, 0];
+    const source = invalidOwners.map((ownerId, index) => ({id: `invalid-${index}`, ownerId, nomeAccount: 'cipher-invalid'}));
+    source.push({id: 'missing', nomeAccount: 'cipher-missing'}, {id: 'valid', ownerId: user.uid, nomeAccount: 'cipher-valid'});
+    const f = await fixture(false, {listPrivateAccounts: async () => source});
+    const seen = new Map();
+    const mounted = f.mount({readOnly: true, readField: async record => {
+        seen.set(record.id, record.ownerId);
+        if (Object.hasOwn(record, 'ownerId') && record.ownerId !== user.uid) throw new Error('OWNER_MISMATCH');
+        return record.id;
+    }});
+    await mounted.ready;
+    for (const [index, ownerId] of invalidOwners.entries()) assert.equal(seen.get(`invalid-${index}`), ownerId);
+    assert.equal(seen.get('missing'), user.uid);
+    assert.equal(seen.get('valid'), user.uid);
+    assert.equal(f.views[0].renders[0].map(record => record.id).join(','), 'missing,valid');
+    assert.equal(Object.hasOwn(source.at(-2), 'ownerId'), false, 'repository record is not mutated');
+    mounted.destroy();
+});
+
+test('private: legacy mount retains its existing fallback for explicit falsy owners', async () => {
+    const source = [null, false, '', undefined, 0].map((ownerId, index) => ({id: String(index), ownerId, nomeAccount: `Account ${index}`}));
+    const f = await fixture(false, {listPrivateAccounts: async () => source});
+    const mounted = f.mount();
+    await mounted.ready;
+    assert.equal(f.views[0].renders[0].length, source.length);
+    for (const record of f.views[0].renders[0]) {
+        assert.equal(record.ownerId, user.uid);
+        assert.equal(record.isOwner, true);
+        assert.equal(record._isGuest, false);
+    }
+    mounted.destroy();
+});
+
+for (const company of [false, true]) {
+    const label = company ? 'company' : 'private';
+    test(`${label}: scoped reader decrypts searchable copies and resolves password only on demand`, async () => {
+        const ciphertext = {id: 'a', nomeAccount: 'cipher-title', username: 'cipher-user', account: 'cipher-code', password: 'cipher-password', _encrypted: true};
+        const load = async () => [ciphertext];
+        let legacyReads = 0;
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load,
+            ensureVaultKeyMaterial: async () => { legacyReads++; throw new Error('LEGACY_FORBIDDEN'); }});
+        const calls = [];
+        const mounted = f.mount({readOnly: true, readField: async (record, field) => {
+            calls.push(field);
+            assert.equal(record[field], ciphertext[field]);
+            return {nomeAccount: 'Searchable title', username: 'Visible user', account: 'Visible code', password: 'Lazy secret'}[field];
+        }});
+        await mounted.ready;
+        const view = f.views[0], visible = view.renders[0][0];
+        assert.equal(legacyReads, 0);
+        assert.deepEqual(calls, ['nomeAccount', 'username', 'account']);
+        assert.equal(visible.password, 'cipher-password');
+        assert.equal(ciphertext.username, 'cipher-user');
+        assert.equal(ciphertext.nomeAccount, 'cipher-title');
+        f.elements['account-search'].value = 'searchable';
+        f.elements['account-search'].dispatchEvent(new Event('input'));
+        assert.equal(view.renders.at(-1).length, 1);
+        assert.equal(await view.options.resolveSecret(visible, 'password'), 'Lazy secret');
+        mounted.destroy();
+        await assert.rejects(view.options.resolveSecret(visible, 'password'), {name: 'AbortError'});
+        assert.deepEqual(calls, ['nomeAccount', 'username', 'account', 'password']);
+    });
+    test(`${label}: scoped reader excludes rejected records without plaintext or ciphertext fallback`, async () => {
+        const load = async () => [{id: 'bad', nomeAccount: 'plain-rejected', username: 'cipher-user'}, {id: 'good', nomeAccount: 'cipher-good'}];
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load});
+        const mounted = f.mount({readField: async record => {
+            if (record.id === 'bad') throw new Error('CIPHERTEXT_REQUIRED');
+            return 'Accepted title';
+        }});
+        await mounted.ready;
+        assert.equal(f.views[0].renders[0].length, 1);
+        assert.equal(f.views[0].renders[0][0].id, 'good');
+        assert.doesNotMatch(JSON.stringify(f.views[0].renders), /plain-rejected|cipher-user/);
+        mounted.destroy();
+    });
+    test(`${label}: scoped reader completion after abort cannot render or read another field`, async () => {
+        const pending = deferred(); let reads = 0;
+        const load = async () => [{id: 'x', nomeAccount: 'cipher-title', username: 'cipher-user'}];
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load});
+        const mounted = f.mount({readField: () => { reads++; return pending.promise; }});
+        await tick(); mounted.destroy(); pending.resolve('Stale plaintext'); await mounted.ready;
+        assert.equal(reads, 1);
+        assert.equal(f.views[0].renders.length, 0);
+    });
+    test(`${label}: search, sort and remount keep exactly one listener and reset ordering`, async () => {
+        const f = await fixture(company);
+        await f.init();
+        const last = () => f.views.at(-1).renders.at(-1).map(row => row.id).join(',');
+        assert.equal(last(), 'a,b');
+        f.elements['sort-btn'].dispatchEvent(new Event('click'));
+        assert.equal(last(), 'b,a');
+        const dispose = await f.init();
+        assert.equal(last(), 'a,b');
+        assert.equal(f.elements['sort-label'].textContent, 'A-Z');
+        assert.equal(getEventListeners(f.elements['sort-btn'], 'click').length, 1);
+        f.elements['account-search'].value = 'Beta';
+        f.elements['account-search'].dispatchEvent(new Event('input'));
+        assert.equal(last(), 'b');
+        dispose(); dispose();
+        assert.equal(getEventListeners(f.elements['account-search'], 'input').length, 0);
+        assert.equal(getEventListeners(f.elements['sort-btn'], 'click').length, 0);
+        assert.equal(f.views.at(-1).destroyed, 1);
+    });
+    test(`${label}: a slow old load cannot render over a new mount`, async () => {
+        const pending = deferred(); let loads = 0;
+        const load = () => ++loads === 1 ? pending.promise : Promise.resolve(records());
+        const f = await fixture(company, {listCompanyAccounts: load, listPrivateAccounts: load});
+        const old = f.mount(); old.destroy();
+        const current = f.mount(); await current.ready;
+        pending.resolve(records()); await old.ready;
+        assert.equal(f.views[0].renders.length, 0);
+        assert.equal(f.views[1].renders.length, 1);
+        assert.equal(f.toasts.length, 0);
+        current.destroy();
+    });
+    test(`${label}: abort during decrypt suppresses plaintext render and subsequent field decrypt`, async () => {
+        const pending = deferred(); let decrypts = 0;
+        const load = async () => [{id: 'x', _encrypted: true, username: 'cipher-1', account: 'cipher-2'}];
+        const f = await fixture(company, {listPrivateAccounts: load, listCompanyAccounts: load,
+            ensureVaultKeyMaterial: async () => 'fixture-key', decrypt: () => { decrypts++; return pending.promise; }});
+        const controller = new AbortController();
+        const mounted = f.mount({signal: controller.signal}); await tick();
+        assert.equal(decrypts, 1);
+        controller.abort(); pending.resolve('fixture-clear'); await mounted.ready;
+        assert.equal(decrypts, 1);
+        assert.equal(f.views[0].renders.length, 0);
+    });
+    test(`${label}: leaving during delete confirmation never submits a write`, async () => {
+        const pending = deferred();
+        const f = await fixture(company, {showConfirmModal: () => pending.promise});
+        const mounted = f.mount(); await mounted.ready;
+        const action = f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
+        mounted.destroy(); pending.resolve(true); await action;
+        assert.equal(f.writes.length, 0);
+        assert.equal(f.toasts.length, 0);
+    });
+    test(`${label}: an already submitted pin completes without updating the next view`, async () => {
+        const pending = deferred(); let submitted = 0;
+        const f = await fixture(company, {updateDoc: () => { submitted++; return pending.promise; }});
+        const mounted = f.mount(); await mounted.ready;
+        const row = f.views[0].renders[0][0];
+        const action = f.views[0].options.onPin(row);
+        mounted.destroy(); pending.resolve(); await action;
+        assert.equal(submitted, 1);
+        assert.equal(row.isPinned, undefined);
+        assert.equal(f.views[0].renders.length, 1);
+    });
+    test(`${label}: active pin uses the correct owner path and retains working navigation`, async () => {
+        const f = await fixture(company); const mounted = f.mount(); await mounted.ready;
+        const row = f.views[0].renders[0][0];
+        await f.views[0].options.onPin(row);
+        assert.equal(f.writes[0][0], company ? 'users/fixture-user/aziende/company-fixture/accounts/a' : 'users/fixture-user/accounts/a');
+        assert.equal(row.isPinned, true);
+        f.views[0].options.onNavigate(row);
+        assert.equal(f.navigations[0], company ? 'dettaglio_account_azienda.html?id=a&aziendaId=company-fixture' : 'dettaglio_account_privato.html?id=a');
+        mounted.destroy(); f.views[0].options.onNavigate(row);
+        assert.equal(f.navigations.length, 1);
+    });
+    test(`${label}: an already aborted mount does not load data or attach UI listeners`, async () => {
+        let loads = 0;
+        const f = await fixture(company, {listPrivateAccounts: () => { loads++; }, listCompanyAccounts: () => { loads++; }});
+        const controller = new AbortController(); controller.abort();
+        const mounted = f.mount({signal: controller.signal}); await mounted.ready;
+        assert.equal(loads, 0);
+        assert.equal(getEventListeners(f.elements['sort-btn'], 'click').length, 0);
+    });
+}
+
+test('private: annullare la conferma non produce alcuna scrittura', async () => {
+    const pending = deferred();
+    const f = await fixture(false, {showConfirmModal: () => pending.promise});
+    const mounted = f.mount(); await mounted.ready;
+    const action = f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
+    await tick(); mounted.destroy(); pending.resolve(false); await action;
+    assert.equal(f.writes.length, 0);
+});
+
+test('private: own-account rejection is handled even while accepted invites are pending', async () => {
+    const invites = deferred();
+    const f = await fixture(false, {listPrivateAccounts: async () => { throw new Error('fixture'); }, listAcceptedInvites: () => invites.promise});
+    const mounted = f.mount(); await mounted.ready;
+    assert.equal(f.toasts.length, 1);
+    assert.equal(f.views[0].renders.length, 0);
+    invites.resolve([]); mounted.destroy();
+});
+
+// M7-R7C-4 — vista ospite: l'accesso sospeso resta riconoscibile senza aprire
+// l'Account, che le Rules negano; più inviti dello stesso Account non Duplicano.
+const guestInvite = (overrides = {}) => ({id: 'invite-1', accountId: 'shared-account', accountName: 'Banca Sintetica',
+    ownerId: 'other-owner', senderId: 'other-owner', recipientEmail: 'fixture@example.invalid',
+    status: 'accepted', ...overrides});
+
+test('private: un invito sospeso produce una card senza leggere l\'Account', async () => {
+    const reads = [];
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite({sharingState: 'suspended', cycle: 1})],
+        getRecordByPath: async path => { reads.push(path); return null; }
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const rows = f.views[0].renders.at(-1).filter(row => row._isGuest === true);
+    assert.equal(rows.length, 1, 'la card dell\'accesso sospeso resta visibile');
+    assert.equal(rows[0]._suspended, true);
+    assert.equal(rows[0].nomeAccount, 'Banca Sintetica', 'solo il nome contenuto nell\'invito');
+    assert.equal(rows[0].ownerId, 'other-owner');
+    assert.equal(rows[0].isOwner, false);
+    assert.equal(rows[0].username, undefined, 'nessun contenuto dell\'Account');
+    assert.equal(rows[0].password, undefined);
+    assert.deepEqual(reads, [], 'nessuna lettura dell\'Account negato dalle Rules');
+    mounted.destroy();
+});
+
+test('private: un invito attivo continua a leggere l\'Account e a produrre la card normale', async () => {
+    const reads = [];
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite()],
+        getRecordByPath: async path => { reads.push(path); return {id: 'shared-account', nomeAccount: 'Banca Sintetica', username: 'utente'}; }
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const guest = f.views[0].renders.at(-1).find(row => row._isGuest === true);
+    assert.deepEqual(reads, ['users/other-owner/accounts/shared-account']);
+    assert.equal(guest._suspended, undefined);
+    assert.equal(guest.username, 'utente');
+    mounted.destroy();
+});
+
+test('private: due inviti dello stesso Account danno una sola card e vince l\'accesso attivo', async () => {
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite({sharingState: 'suspended', cycle: 4}), guestInvite()],
+        getRecordByPath: async () => ({id: 'shared-account', nomeAccount: 'Banca Sintetica', username: 'utente'})
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const guests = f.views[0].renders.at(-1).filter(row => row._isGuest === true);
+    assert.equal(guests.length, 1, 'nessun duplicato');
+    assert.equal(guests[0]._suspended, undefined, 'vince l\'accesso attivo');
+    assert.equal(guests[0].username, 'utente');
+    mounted.destroy();
+});
+
+test('private: fra due inviti sospesi resta il ciclo più recente', async () => {
+    const f = await fixture(false, {
+        listAcceptedInvites: async () => [guestInvite({id: 'old', sharingState: 'suspended', cycle: 1}),
+            guestInvite({id: 'new', sharingState: 'suspended', cycle: 3})],
+        getRecordByPath: async () => { throw new Error('nessuna lettura attesa'); }
+    });
+    const mounted = f.mount(); await mounted.ready;
+    const guests = f.views[0].renders.at(-1).filter(row => row._isGuest === true);
+    assert.equal(guests.length, 1);
+    assert.equal(guests[0].cycle, 3);
+    assert.equal(guests[0]._suspended, true);
+    mounted.destroy();
+});
+
+for (const company of [false, true]) {
+    test(`${company ? 'company' : 'private'}: active archive and delete retain their write destinations`, async () => {
+        const f = await fixture(company); const mounted = f.mount(); await mounted.ready;
+        const actions = f.views[0].options;
+        await actions.onArchive({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.writes[0][0], company ? 'users/fixture-user/aziende/company-fixture/accounts/a' : 'users/fixture-user/accounts/a');
+        assert.equal(f.writes[0][1].isArchived, true);
+        await actions.onDelete({dataset: {id: 'b', owner: 'true'}});
+        assert.equal(f.writes[1][0], company ? 'users/fixture-user/aziende/company-fixture/accounts/b' : 'users/fixture-user/accounts/b');
+        assert.equal(f.views[0].renders.at(-1).length, 0);
+        mounted.destroy();
+    });
+}
+
+// M7-R7B4 — avviso destinatari prima dell'archiviazione.
+const sharedRows = () => [
+    {id: 'a', nomeAccount: 'Alfa', revision: 1, updatedAt: MARKER, password: 'SYNTH-PASSWORD', note: 'SYNTH-NOTE', sharedWith: {
+        first: {email: 'one@example.invalid', status: 'accepted'},
+        second: {email: 'two@example.invalid', status: 'pending'},
+        third: {email: 'rejected@example.invalid', status: 'rejected'}
+    }},
+    {id: 'b', nomeAccount: 'Beta', revision: 1, updatedAt: MARKER,
+        sharedWithEmails: ['legacy@example.invalid', 'one@example.invalid'],
+        recipientEmail: 'legacy@example.invalid'}
+];
+const withRows = (company, rows) => company
+    ? {listCompanyAccounts: async () => rows}
+    : {listPrivateAccounts: async () => rows, listPrivateAccountsConfirmed: async () => rows};
+
+for (const company of [false, true]) {
+    const label = company ? 'company' : 'private';
+
+    test(`${label}: il popup dell'eliminazione elenca i destinatari e nessun segreto`, async () => {
+        const f = await fixture(company, withRows(company, sharedRows()));
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.confirmations.length, 1);
+        assert.equal(f.confirmations[0].title, 'confirm_archive_title');
+        const message = f.confirmations[0].message;
+        assert.match(message, /one@example\.invalid/);
+        assert.match(message, /two@example\.invalid/);
+        assert.match(message, /confirm_archive_suspend_msg/);
+        assert.match(message, /confirm_archive_recipients_caveat/);
+        assert.equal(message.includes('rejected@example.invalid'), false, 'un destinatario rifiutato non ha accesso');
+        assert.equal(message.includes('SYNTH-PASSWORD'), false);
+        assert.equal(message.includes('SYNTH-NOTE'), false);
+        assert.equal(f.writes.length, 1, 'la conferma porta a una sola scrittura');
+        mounted.destroy();
+    });
+
+    test(`${label}: il popup unisce e deduplica le forme legacy`, async () => {
+        const f = await fixture(company, withRows(company, sharedRows()));
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onDelete({dataset: {id: 'b', owner: 'true'}});
+        const message = f.confirmations[0].message;
+        assert.equal(message.match(/legacy@example\.invalid/g).length, 1);
+        assert.equal(message.match(/one@example\.invalid/g).length, 1);
+        mounted.destroy();
+    });
+
+    test(`${label}: il gesto Archivio chiede conferma solo agli Account con destinatari`, async () => {
+        const rows = sharedRows().concat([{id: 'c', nomeAccount: 'Gamma', revision: 1, updatedAt: MARKER}]);
+        const f = await fixture(company, withRows(company, rows));
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onArchive({dataset: {id: 'c', owner: 'true'}});
+        assert.equal(f.confirmations.length, 0, 'un Account senza condivisioni resta immediato');
+        assert.equal(f.writes.length, 1);
+        await f.views[0].options.onArchive({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.confirmations.length, 1, 'un Account condiviso chiede conferma');
+        assert.match(f.confirmations[0].message, /one@example\.invalid/);
+        assert.equal(f.writes.length, 2);
+        mounted.destroy();
+    });
+
+    test(`${label}: annullare l'avviso nel gesto Archivio non scrive`, async () => {
+        const f = await fixture(company, {showConfirmModal: async () => false, ...withRows(company, sharedRows())});
+        const mounted = f.mount(); await mounted.ready;
+        await f.views[0].options.onArchive({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.writes.length, 0);
+        mounted.destroy();
+    });
+}
+
+test('private: l\'archiviazione confermata non tocca più i collegamenti del Profilo (decisione M7-R6)', async () => {
+    const f = await fixture(false, {getUserProfile: async () => ({contactEmails: [
+        {email: 'fixture@example.invalid', linkedAccountId: 'a'}, {email: 'other@example.invalid', linkedAccountId: 'b'}
+    ]})});
+    const mounted = f.mount(); await mounted.ready;
+    await f.views[0].options.onDelete({dataset: {id: 'a', owner: 'true'}});
+    assert.equal(f.writes.length, 1, 'solo l\'archiviazione: nessuna scrittura sul documento del Profilo');
+    assert.equal(f.writes[0][0], 'users/fixture-user/accounts/a');
+    assert.equal(f.writes[0][1].isArchived, true);
+    mounted.destroy();
+});
+
+for (const company of [false, true]) {
+    test(`${company ? 'company' : 'private'}: read-only mount rejects every write callback`, async () => {
+        const f = await fixture(company);
+        const mounted = f.mount({readOnly: true}); await mounted.ready;
+        const view = f.views[0];
+        assert.equal(view.options.readOnly, true);
+        await view.options.onPin(view.renders[0][0]);
+        await view.options.onArchive({dataset: {id: 'a', owner: 'true'}});
+        await view.options.onDelete({dataset: {id: 'a', owner: 'true'}});
+        assert.equal(f.writes.length, 0);
+        assert.equal(f.toasts.length, 0);
+        mounted.destroy();
+    });
+}

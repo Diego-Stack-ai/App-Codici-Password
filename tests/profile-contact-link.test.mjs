@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+const guardSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/credential-decrypt-guard.js', import.meta.url), 'utf8');
+const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadContext, isAccountSaveAllowed} =
+    await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
 
 const moduleRoot = new URL('../Frontend/public/assets/js/modules/', import.meta.url);
 async function sourceModule(path) {
@@ -11,6 +14,10 @@ const model = await sourceModule('privato/profile-model.js');
 const companyModel = await sourceModule('azienda/company-profile-model.js');
 const modes = await sourceModule('shared/account-mode-model.js');
 const crypto = await sourceModule('core/crypto-utils.js');
+// M7-FIX-1B: gli scrittori reali usano `sanitizeEmail`, `sharingCycleOf` e
+// `inviteIdForGuest` da `utils.js`; il banco inietta gli helper REALI (nessuno
+// stub) perché gli import vengono rimossi dal caricatore.
+const utils = await sourceModule('../utils.js');
 
 // Esegue il codice applicativo reale sostituendo solo i confini browser/Firebase.
 async function loadController(path, dependencies, exports) {
@@ -132,10 +139,11 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         return { path, id: path.split('/').at(-1) };
     }
     const dependencies = {
-        ...model, ...modes,
+        ...utils, ...model, ...modes,
         auth: { currentUser: { uid: 'owner', email: 'owner@example.test' } }, db: {}, LOG: () => {},
         doc: (...parts) => parts.length === 1 ? ref(parts[0], 'new-account') : ref(...parts), collection: ref,
         increment: amount => amount, deleteField: () => 'DELETE',
+        isAccountSaveAllowed, assertAccountSaveAllowed, DECRYPT_FAILURE_MESSAGE,
         runTransaction: async (db, callback) => {
             const staged = [];
             await callback({
@@ -159,7 +167,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
     dependencies.decryptRequiredValue = dependencies.decodeProfileContactValue;
     const method = company ? 'saveAccount' : 'savePrivateAccount';
     const controller = await loadController(company ? 'azienda/form-azienda-save.js' : 'privato/form-privato-save.js', dependencies, [method]);
-    await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1,
+    await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1, loadContext: createAccountLoadContext({mode: 'create'}),
         profileContactLinkDraft: { profileContactId: sourceCompany && type === 'phone' ? 'telefonoAzienda' : 'contact-1', contactType: type, ownerUid: 'owner', ...(type==='utility'?{parentAddressId:'address'}:{}), ...(sourceCompany ? {sourceCompanyId:'source',contactValue:type==='phone'?contact.number:contact.address} : {}), ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
     return { committed, contact, messages, draftRemoved, profileKey };
 }
@@ -342,4 +350,32 @@ test('Eliminare un telefono conserva i riferimenti di email, utenze e documenti 
  let patch;
  const ctrl=await loadController('privato/profilo-links.js',{...model,auth:{currentUser:{uid:'owner'}},db:{},doc:(db,...parts)=>parts.join('/'),deleteField:()=> 'DELETE',showToast:()=>{},runTransaction:async(db,cb)=>cb({get:async ref=>({exists:()=>true,data:()=>ref==='users/owner'?profile:{linkedProfileField:{type:'phone',id:'removed'}}}),update:(ref,data)=>{patch=data;}})},['refreshProfileAccountReferences']);
  await ctrl.refreshProfileAccountReferences('a');assert.deepEqual(patch.linkedProfileFields.map(x=>x.type),['email','document','utility']);assert.deepEqual(patch.linkedProfileField,{type:'email',id:'e'});
+});
+
+for (const sourceCompany of [false, true]) for (const company of [false, true]) test(`consultazione offline password collegata: profilo aziendale=${sourceCompany}, Account aziendale=${company}`, async () => {
+    const calls = [];
+    const fn = sourceCompany ? 'readLinkedPassword' : 'readLinkedEmailAccountPassword';
+    const controller = await loadController(sourceCompany ? 'azienda/company-profile-ui.js' : 'privato/profilo-links.js', {
+        globalThis: {navigator: {onLine: false}}, auth: {currentUser: {uid: 'owner'}}, ensureVaultKeyMaterial: async () => 'vault',
+        getPrivateAccount: async (...args) => { calls.push(args); return {ownerId: 'owner', password: 'cached-cipher'}; },
+        getCompanyAccount: async (...args) => { calls.push(args); return {ownerId: 'owner', password: 'cached-cipher'}; },
+        getPrivateAccountConfirmed: async () => { throw new Error('SERVER_MUST_NOT_BE_USED'); },
+        getCompanyAccountConfirmed: async () => { throw new Error('SERVER_MUST_NOT_BE_USED'); },
+        decryptRequiredValue: async value => { assert.equal(value, 'cached-cipher'); return 'synthetic-secret'; }
+    }, [fn]);
+    assert.equal(await controller[fn]({linkedAccountId: 'account', ...(company ? {linkedAccountCompanyId: 'company'} : {})}), 'synthetic-secret');
+    assert.deepEqual(calls, [company ? ['owner', 'company', 'account'] : ['owner', 'account']]);
+});
+
+for (const sourceCompany of [false, true]) test(`cache mancante o proprietario discordante non espongono password, profilo aziendale=${sourceCompany}`, async () => {
+    let record = null, decrypted = 0;
+    const fn = sourceCompany ? 'readLinkedPassword' : 'readLinkedEmailAccountPassword';
+    const controller = await loadController(sourceCompany ? 'azienda/company-profile-ui.js' : 'privato/profilo-links.js', {
+        globalThis: {navigator: {onLine: false}}, auth: {currentUser: {uid: 'owner'}}, ensureVaultKeyMaterial: async () => 'vault',
+        getPrivateAccount: async () => record, getCompanyAccount: async () => record,
+        decryptRequiredValue: async () => { decrypted++; return 'secret'; }
+    }, [fn]);
+    await assert.rejects(controller[fn]({linkedAccountId: 'account'}));
+    record = {ownerId: 'other', password: 'cipher'}; await assert.rejects(controller[fn]({linkedAccountId: 'account'}));
+    assert.equal(decrypted, 0);
 });

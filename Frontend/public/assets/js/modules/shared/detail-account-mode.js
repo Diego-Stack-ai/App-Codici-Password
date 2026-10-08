@@ -1,15 +1,17 @@
 import { auth, db } from '../../firebase-config.js?v=1.2.128';
-import { collection, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
+import { doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
-import { sanitizeEmail } from '../../utils.js';
+import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { listContacts } from '../data/vault-repository.js';
 import { accountModeFromRecord, hasAccountCredentials, validateAccountMode } from './account-mode-model.js';
 
 const fullName = contact => [contact?.nome, contact?.cognome].filter(Boolean).join(' ').trim() || contact?.email || '';
 const normalizeEmail = email => String(email || '').trim().toLowerCase();
 
-export async function initDetailAccountMode({ account, ownerId, accountId, aziendaId = null, readOnly = false, compactView = false, onReload }) {
+export async function initDetailAccountMode({ account, ownerId, accountId, aziendaId = null, readOnly = false, compactView = false, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+    const active = () => !signal?.aborted && isActive();
+    if (!active()) return;
     const section = document.getElementById('account-mode-section');
     const options = document.getElementById('account-mode-options');
     const contactArea = document.getElementById('account-mode-contacts');
@@ -29,16 +31,18 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     }
     const initialMode = accountModeFromRecord(account);
     let selectedMode = initialMode;
-    let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean));
+    let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean));
     let contacts = [];
     try {
         contacts = (await listContacts(ownerId))
             .filter(item => item.active !== false && normalizeEmail(item.email))
             .sort((a, b) => fullName(a).localeCompare(fullName(b), 'it'));
     } catch (error) {
+        if (!active()) return;
         console.warn('[AccountMode] Rubrica non disponibile', error);
     }
 
+    if (!active()) return;
     if (compactView) return new Map(contacts.map(contact => [normalizeEmail(contact.email), fullName(contact)]));
     const definitions = [
         ['account-private', 'Account', 'lock'],
@@ -49,6 +53,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
 
     const hasCredentials = () => hasAccountCredentials(account);
     const render = () => {
+        if (!active()) return;
         clearElement(options);
         definitions.forEach(([key, label, icon]) => {
             options.appendChild(createElement('button', {
@@ -56,6 +61,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 className: `account-mode-option${selectedMode === key ? ' is-active' : ''}`,
                 dataset: { mode: key },
                 onclick: () => {
+                    if (!active()) return;
                     const validation = validateAccountMode(key, account);
                     if (validation.reason === 'memo-has-credentials') {
                         showToast('Per passare a Memorandum apri Modifica e cancella manualmente Utente, Account/Codice e Password.', 'warning');
@@ -99,7 +105,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 });
             }
         }
-        const emailsChanged = [...selectedEmails].sort().join('|') !== Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean).sort().join('|');
+        const emailsChanged = [...selectedEmails].sort().join('|') !== Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean).sort().join('|');
         saveButton.classList.toggle('hidden', selectedMode === initialMode && !emailsChanged);
     };
 
@@ -110,13 +116,14 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     };
 
     saveButton.onclick = async () => {
+        if (!active()) return;
         const isShared = selectedMode.endsWith('-shared');
         const isMemo = selectedMode.startsWith('memo-');
         if (isMemo && hasCredentials()) return showToast('Cancella manualmente le tre credenziali dal form Modifica prima di usare Memorandum.', 'warning');
         if (isShared && !selectedEmails.size) return showToast('Seleziona almeno un destinatario per la condivisione.', 'warning');
         if (!isShared && Object.keys(account.sharedWith || {}).length) {
-            const ok = await showConfirmModal('Interrompere la condivisione?', 'Gli accessi attivi e gli inviti pendenti saranno revocati.', 'Continua');
-            if (!ok) return;
+            const ok = await confirmAction('Interrompere la condivisione?', 'Gli accessi attivi e gli inviti pendenti saranno revocati.', 'Continua');
+            if (!active() || !ok) return;
         }
 
         saveButton.disabled = true;
@@ -125,39 +132,49 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 ? ['users', ownerId, 'aziende', aziendaId, 'accounts', accountId]
                 : ['users', ownerId, 'accounts', accountId];
             const accountRef = doc(db, ...path);
+            if (!active()) return;
             await runTransaction(db, async transaction => {
+                if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
                 const snap = await transaction.get(accountRef);
+                if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
                 if (!snap.exists()) throw new Error('Account non trovato');
                 const stored = snap.data();
+                // M7-R7C-1: il ciclo identifica la generazione degli inviti. Un
+                // valore malformato chiude il salvataggio invece di scrivere su un
+                // ID incerto.
+                const cycle = sharingCycleOf(stored);
+                if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
                 const sharedWith = { ...(stored.sharedWith || {}) };
                 const requestedKeys = new Set([...selectedEmails].map(sanitizeEmail));
 
                 for (const key of Object.keys(sharedWith)) {
                     if (!isShared || !requestedKeys.has(key)) {
-                        const guest = sharedWith[key];
                         delete sharedWith[key];
-                        transaction.delete(doc(db, 'invites', `${accountId}_${key}`));
-                        if (guest?.status === 'accepted' && guest.uid) {
-                            transaction.set(doc(collection(db, 'users', guest.uid, 'notifications')), {
-                                title: 'Accesso revocato', message: `Il proprietario ha rimosso il tuo accesso a: ${stored.nomeAccount || 'un account condiviso'}.`,
-                                accountName: stored.nomeAccount || 'Account', type: 'share_revoked', ownerEmail: auth.currentUser?.email || 'Proprietario', timestamp: new Date().toISOString(), read: false
-                            });
-                        }
+                        transaction.delete(doc(db, 'invites', inviteIdForGuest(accountId, key, cycle)));
+                        // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
                 }
 
                 if (isShared) {
                     for (const email of selectedEmails) {
                         const key = sanitizeEmail(email);
-                        if (!sharedWith[key] || sharedWith[key].status === 'rejected') {
+                        // `suspended` è reinvitabile solo perché l'utente lo ha
+                        // riselezionato: gli ospiti sospesi non sono preselezionati.
+                        if (!sharedWith[key] || sharedWith[key].status === 'rejected' || sharedWith[key].status === 'suspended') {
                             sharedWith[key] = { email, status: 'pending', uid: null };
                             const invite = {
-                                inviteId: `${accountId}_${key}`, accountId, ownerId, senderId: ownerId,
+                                inviteId: inviteIdForGuest(accountId, key, cycle),
+                                // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
+                                // ogni creazione e a ogni reinvito. L'id dell'evento di
+                                // registro si deriva solo da qui, mai dall'email, dalla
+                                // sua chiave sanificata o dall'id del documento.
+                                auditRef: crypto.randomUUID(),
+                                accountId, ownerId, senderId: ownerId,
                                 senderEmail: auth.currentUser?.email || '', recipientEmail: email,
                                 accountName: stored.nomeAccount || '', type: isMemo ? 'memo' : 'account',
                                 notifyPush: document.getElementById('account-mode-notify-push')?.checked === true,
                                 notifyEmail: document.getElementById('account-mode-notify-email')?.checked === true,
-                                status: 'pending', createdAt: new Date().toISOString()
+                                status: 'pending', cycle, createdAt: new Date().toISOString()
                             };
                             if (aziendaId) invite.aziendaId = aziendaId;
                             transaction.set(doc(db, 'invites', invite.inviteId), invite);
@@ -174,13 +191,15 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                     updatedAt: new Date().toISOString()
                 });
             });
+            if (!active()) return;
             showToast('Tipologia e condivisione aggiornate.');
             await onReload?.();
         } catch (error) {
+            if (!active()) return;
             console.error('[AccountMode] Salvataggio fallito', error);
             showToast('Impossibile salvare la modifica.', 'error');
         } finally {
-            saveButton.disabled = false;
+            if (active()) saveButton.disabled = false;
         }
     };
 

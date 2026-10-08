@@ -1,16 +1,17 @@
+import { writeGeneratedDocSection } from './lib/generated-doc-section.mjs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { access, readFile, writeFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const output = path.join(root, 'docs', 'FILE_INVENTORY.md');
+const output = path.join(root, 'docs', 'evidenze', 'INVENTARI.md');
 const candidates = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root })
   .toString('utf8').split('\0').filter(Boolean)
   .filter(file => !file.includes('node_modules/') && !file.startsWith('.codex-worktrees/'))
   .filter(file => !path.basename(file).startsWith('~$'))
-  .filter(file => file !== 'docs/FILE_INVENTORY.md');
+  .filter(file => file !== 'docs/evidenze/INVENTARI.md');
 const tracked = [];
 for (const file of candidates) {
   try {
@@ -122,5 +123,5 @@ markdown += '## Duplicati esatti\n\n';
 markdown += duplicates.length ? duplicates.map(group => `- ${group.map(file => `\`${file}\``).join(' = ')}`).join('\n') : 'Nessun file sorgente è identico byte-per-byte.';
 markdown += '\n';
 
-await writeFile(output, markdown, 'utf8');
+await writeGeneratedDocSection(output, 'files', markdown);
 console.log(`Inventario scritto: ${path.relative(root, output)} (${rows.length} file).`);

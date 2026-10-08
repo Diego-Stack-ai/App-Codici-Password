@@ -10,6 +10,14 @@ service cloud.firestore {
     function isAcceptedGuest() {
       return isAuth() && request.auth.uid in resource.data.get('sharedWithUids', []);
     }
+    // M7-R7B1a: un Account nell'Archivio è sospeso per gli ospiti, in lettura e
+    // in elenco. Il confronto è esplicito (`== false`) perché un valore
+    // malformato non apra la lettura. Il proprietario non passa da queste regole
+    // (match generico proprietario) e conserva l'accesso all'Archivio; inviti e
+    // campi `sharedWith`/`sharedWithUids` non vengono toccati da questa condizione.
+    function isGuestReadableAccount() {
+      return isAcceptedGuest() && resource.data.get('isArchived', false) == false;
+    }
 
     // Solo Cloud Functions (Admin SDK) può leggere o scrivere i codici di recupero.
     match /mfaRecovery/{userId} {
@@ -23,6 +31,13 @@ service cloud.firestore {
     // Indice tecnico degli UID usato solo dal backend per revocare copie ricevute.
     match /deadlineShares/{shareId} {
       allow read, write: if false;
+    }
+
+    // Esiti delle mutazioni attestati dal backend. Il namespace non eredita
+    // le autorizzazioni generiche delle raccolte proprietario.
+    match /mutationResults/{userId}/operations/{operationId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
     }
 
     match /users/{userId} {
@@ -89,17 +104,53 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Esiti storici: consultabili, ma mai creabili o alterabili dal client.
+    // Il blocco non certifica la provenienza dei documenti già esistenti.
+    match /users/{userId}/operationResults/{operationId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    // M7-AUDIT-2 — Registro tecnico di audit: il proprietario lo consulta, ma
+    // nessun client può creare, modificare o cancellare eventi (decisione M7-R3:
+    // scrittore è solo il backend, che ignora le Rules). Serve anche l'esclusione
+    // dal catch-all qui sotto: regole sovrapposte si combinano in OR, quindi un
+    // diniego specifico non annullerebbe una concessione più ampia.
+    match /users/{userId}/auditEvents/{eventId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
     match /users/{userId}/{collection}/{document=**} {
       allow read, write: if isOwner(userId) &&
+        collection != 'aziende' &&
+        collection != 'auditEvents' &&
         collection != 'contacts' &&
         collection != 'pushDevices' &&
         collection != 'notificationDeliveries' &&
         collection != 'deadlineNotifications' &&
         collection != 'receivedDeadlines' &&
+        collection != 'operationResults' &&
         collection != 'profileWidgets' &&
         collection != 'accountWidgets' &&
         collection != 'sharedVaultData' &&
         collection != 'sharedVaultLinks';
+    }
+
+    // Company deletion must use the coordinated server protocol. A stale or
+    // custom client must not bypass the UI guard and orphan its Accounts.
+    match /users/{userId}/aziende/{companyId} {
+      allow read, create, update: if isOwner(userId);
+      allow delete: if false;
+      // Preserve existing descendant permissions, not a recursive grant on the
+      // company document itself (recursive wildcards also match zero segments).
+      match /{childCollection}/{childDocument}/{rest=**} {
+        allow read, update, delete: if isOwner(userId);
+        // Require the Company in the resulting atomic state. This also permits
+        // a legitimate batch that creates Company and Account together.
+        allow create: if isOwner(userId) && (childCollection != 'accounts' ||
+          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));
+      }
     }
 
     match /users/{userId}/contacts/{contactId} {
@@ -147,13 +198,13 @@ service cloud.firestore {
     }
 
     match /users/{userId}/accounts/{accountId} {
-      allow get, list: if isAcceptedGuest();
+      allow get, list: if isGuestReadableAccount();
     }
     match /users/{userId}/aziende/{aziendaId}/accounts/{accountId} {
-      allow get, list: if isAcceptedGuest();
+      allow get, list: if isGuestReadableAccount();
     }
     match /{path=**}/accounts/{accountId} {
-      allow get, list: if isAcceptedGuest();
+      allow get, list: if isGuestReadableAccount();
     }
 
     match /invites/{inviteId} {
@@ -166,13 +217,49 @@ service cloud.firestore {
       function isRecipient() {
         return isAuth() && resource.data.get('recipientEmail', '').lower() == myEmail();
       }
+      // M7-AUDIT-5R — forma del marcatore opaco dell'istanza di invito
+      // (M7-AUDIT-3P-R1): UUID canonico, come lo genera `crypto.randomUUID()`.
+      // Maiuscole ammesse, coerentemente con il validatore degli helper
+      // (`functions/audit-event-service.js:34`, regex case-insensitive).
+      function isOpaqueInviteRef(value) {
+        return value is string &&
+          value.matches('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+      }
+      // `responseAuditRef` lo scrive **solo** la callable Admin, che ignora le
+      // Rules. Un client non può inserirlo né modificarlo (compreso inserirlo
+      // nullo, che il trigger leggerebbe come assente), ma può **conservarlo
+      // invariato**: gli aggiornamenti di merge (`updateDoc`, `transaction.update`)
+      // non lo toccano e il campo resta nel documento risultante — è il caso di
+      // «rifiutato → Archivia» e dell'archiviazione/ripristino dell'Account.
+      // Può anche **rimuoverlo**, perché la `set` senza merge del reinvito
+      // sostituisce il documento e scrive un `auditRef` nuovo: la base vecchia
+      // appartiene a un'istanza morta. Limite dichiarato (D-8, decisione di Diego
+      // del 21/09/2026): la rimozione isolata resta possibile e tocca solo il
+      // registro best-effort di chi la esegue.
+      function keepsResponseAuditRef() {
+        return !request.resource.data.keys().hasAny(['responseAuditRef']) ||
+          (resource.data.keys().hasAny(['responseAuditRef']) &&
+            request.resource.data.get('responseAuditRef', null) == resource.data.get('responseAuditRef', null));
+      }
+      // Backend-only binding: preserve unchanged or remove for legacy full-replace.
+      function keepsAcceptanceReceipt() {
+        return !request.resource.data.keys().hasAny(['acceptanceReceipt']) ||
+          (resource.data.keys().hasAny(['acceptanceReceipt']) &&
+            request.resource.data.get('acceptanceReceipt', null) == resource.data.get('acceptanceReceipt', null));
+      }
 
       allow get, list: if isInviteOwner() || isRecipient();
       allow create: if isAuth() &&
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
-          'status', 'createdAt', 'notifyPush', 'notifyEmail'
+          'status', 'createdAt', 'notifyPush', 'notifyEmail', 'cycle',
+          // M7-AUDIT-5R: marcatore opaco dell'istanza, scritto dai client di
+          // M7-AUDIT-5C. **Facoltativo**: un client in cache che non lo invia
+          // continua a creare inviti (finestra legacy dichiarata); se presente
+          // deve avere forma valida, altrimenti l'id del registro non sarebbe
+          // derivabile in modo univoco.
+          'auditRef'
         ]) &&
         request.resource.data.get('ownerId', '') == request.auth.uid &&
         request.resource.data.get('senderId', '') == request.auth.uid &&
@@ -181,9 +268,38 @@ service cloud.firestore {
         request.resource.data.get('recipientEmail', '').size() > 3 &&
         request.resource.data.get('notifyPush', false) is bool &&
         request.resource.data.get('notifyEmail', false) is bool &&
-        request.resource.data.get('status', '') == 'pending';
+        request.resource.data.get('status', '') == 'pending' &&
+        // M7-R7C-1: `cycle` è l'unico campo nuovo ammesso e deve essere un intero
+        // sicuro non negativo. L'assenza resta valida (creazioni legacy = ciclo 0).
+        request.resource.data.get('cycle', 0) is int &&
+        request.resource.data.get('cycle', 0) >= 0 &&
+        request.resource.data.get('cycle', 0) <= 9007199254740991 &&
+        (!request.resource.data.keys().hasAny(['auditRef']) ||
+          isOpaqueInviteRef(request.resource.data.get('auditRef', '')));
 
-      allow update, delete: if isInviteOwner();
+      // M7-AUDIT-5R — campi aggiornabili ristretti (decisione D-6 di Codex del
+      // 21/09/2026, allowlist verificata in M7-AUDIT-5P-R1 §3). `affectedKeys()`
+      // comprende le chiavi **rimosse**, quindi l'elenco contiene anche i campi
+      // che il reinvito full-replace fa sparire (`guestUid`, `respondedAt`,
+      // `responseAuditRef`, `sharingState`, `suspendedAt`, `senderNotified`) e
+      // `cycle`, che il primo update di un invito legacy senza ciclo aggiunge con
+      // valore 0. Restano fuori `ownerId`, `senderId`, `senderEmail`,
+      // `recipientEmail`, `inviteId`, `accountId`, `aziendaId`: invariati in tutti
+      // i flussi censiti, quindi una loro modifica è negata.
+      allow update: if isInviteOwner() &&
+        keepsResponseAuditRef() &&
+        keepsAcceptanceReceipt() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'auditRef', 'status', 'cycle', 'createdAt', 'accountName', 'type',
+          'notifyPush', 'notifyEmail', 'senderNotified', 'sharingState',
+          'suspendedAt', 'guestUid', 'respondedAt', 'responseAuditRef', 'acceptanceReceipt'
+        ]) &&
+        (!request.resource.data.keys().hasAny(['auditRef']) ||
+          isOpaqueInviteRef(request.resource.data.get('auditRef', '')));
+
+      // La revoca resta al proprietario, senza vincoli di campo: `delete` non
+      // scrive nulla e non ha campi da limitare.
+      allow delete: if isInviteOwner();
     }
   }
 }

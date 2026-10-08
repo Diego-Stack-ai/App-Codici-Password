@@ -1,0 +1,40 @@
+:root{font-family:system-ui,sans-serif;color:#153047;background:#e8f3fd}body{margin:0;padding:24px}main{max-width:760px;margin:36px auto}h1{font-size:2rem}button,select,input{font:inherit;padding:12px;border-radius:12px;border:1px solid #94afc4}button{background:#087fe9;color:white;cursor:pointer}button:disabled{opacity:.5;cursor:default}.actions,nav{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}label{display:block;margin:12px 0 6px}section{background:white;border-radius:16px;padding:24px;min-height:64px;overflow-wrap:anywhere}details{margin-top:24px}dialog{max-width:420px;border:0;border-radius:20px;padding:28px}dialog::backdrop{background:#15304788}input{box-sizing:border-box;width:100%}#message{color:#a11726}button:focus-visible,input:focus-visible{outline:3px solid #153047;outline-offset:3px}
+/* Only secret inputs are masked; the Master prompt deliberately uses type=text. */
+input[type="password"],#unlock-value{-webkit-text-security:disc}
+@font-face{font-family:Symbols;src:url('/symbols.woff2') format('woff2');font-display:swap}
+.material-symbols-outlined{font-family:Symbols,sans-serif;font-weight:normal;font-style:normal;font-size:22px;line-height:1}
+#account-search{-webkit-text-security:none;margin-bottom:12px}
+.swipe-action-bg{display:none}
+.account-card{padding:16px;border-radius:12px;background:#edf5fc;margin-top:12px;overflow:hidden}
+.account-avatar{width:36px;height:36px;border-radius:50%}
+.account-card-left,.account-card-layout,.account-card-right{display:flex;align-items:center;gap:12px}
+.account-card-title{margin:0;font-size:1rem}
+.account-card-subtitle{margin:4px 0}
+.account-data-row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.account-data-value{overflow-wrap:anywhere;flex:1}
+.account-data-label{font-size:.85rem}
+.btn-mini-action{padding:10px;display:inline-flex;align-items:center;justify-content:center}
+.detail-extra-fields{margin-top:20px;padding:0}
+.detail-extra-field{padding:16px 0;border-top:1px solid #c8d8e6}
+.detail-extra-field pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.5}
+.detail-extra-field p{overflow-wrap:anywhere}
+.account-widgets-section{padding:0;margin-top:20px}
+.account-widgets-section .shared-account-card{padding:16px;border:1px solid #c8d8e6;border-radius:12px;margin:12px 0}
+.account-widgets-section .shared-account-field{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}
+.account-widgets-section .shared-account-field strong{flex-basis:100%}
+.account-widgets-section .shared-account-value{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.account-widgets-section button{max-width:100%;white-space:normal}
+.banking-shell{padding:0;margin-top:20px}.bank-account{border:1px solid #94afc4;border-radius:14px;padding:16px;margin:16px 0}.bank-account .account-widgets-section{margin-top:0}
+.company-pdf-card{display:grid;gap:20px}
+.company-pdf-description{color:#4b6274;line-height:1.6;margin:0}
+.company-pdf-choices{display:flex;flex-wrap:wrap;gap:12px 24px;padding:16px;border:1px solid #94afc4;border-radius:12px}
+.company-pdf-choices legend{padding:0 8px;font-weight:600}
+.company-pdf-choices label{display:flex;align-items:center;gap:8px;min-height:36px;cursor:pointer;margin:0}
+.company-pdf-choices input{width:18px;height:18px;accent-color:#087fe9}
+.company-pdf-actions{display:flex;flex-wrap:wrap;gap:10px}
+.company-pdf-preview{overflow-wrap:anywhere}
+.company-pdf-preview h3{margin:20px 0 12px}
+.company-pdf-preview dl{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,2fr);gap:10px 20px;margin:0}
+.company-pdf-preview dt{color:#4b6274}
+.company-pdf-preview dd{margin:0;white-space:pre-wrap}
+@media (max-width:600px){.company-pdf-preview dl{grid-template-columns:1fr;gap:6px}.company-pdf-preview dd{margin-bottom:10px}}

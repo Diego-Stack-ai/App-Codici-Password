@@ -25,7 +25,7 @@ test('shared update preserves identity across encryption before sending', async 
     const saving = f.client.updateSharedCredential('shared', 4, {value:'synthetic'});
     f.release();
     assert.equal((await saving).status, 'applied');
-    assert.deepEqual(f.calls, [{sharedDataId:'shared', action:'update', expectedRevision:4, data:{value:'cipher:synthetic'}}]);
+    assert.deepEqual(f.calls, [{sharedDataId:'shared', action:'update', expectedRevision:4, data:{value:'cipher:synthetic'}, expectedOwnerUid:'owner'}]);
 });
 test('shared update never sends after logout or UID change during encryption', async () => {
     for (const user of [null, {uid:'other'}]) {
@@ -35,5 +35,44 @@ test('shared update never sends after logout or UID change during encryption', a
         f.release();
         await assert.rejects(saving, /Sessione cambiata/);
         assert.equal(f.calls.length, 0);
+    }
+});
+
+test('shared link, unlink and delete bind the initiating owner before invoking the transport', async () => {
+    for (const method of ['linkSharedCredential', 'unlinkSharedCredential', 'deleteSharedCredential']) {
+        const f = await fixture();
+        await f.client[method]('shared', 4, {context: 'private', accountId: 'record'});
+        assert.equal(f.calls.length, 1);
+        assert.equal(f.calls[0].expectedOwnerUid, 'owner');
+        f.auth.currentUser = null;
+        await assert.rejects(f.client[method]('shared', 4, {context: 'private', accountId: 'record'}), /Sessione cambiata/);
+        assert.equal(f.calls.length, 1);
+    }
+});
+
+
+test('shared update never sends after form teardown with the same UID',async()=>{
+ const f=await fixture();let active=true;
+ const saving=f.client.updateSharedCredential('shared',4,{value:'synthetic'},{isActive:()=>active});
+ active=false;f.release();await assert.rejects(saving,/Sessione cambiata/);assert.equal(f.calls.length,0);
+});
+
+
+test('shared creation keeps the initiating session through encryption', async () => {
+    for (const change of ['none', 'logout', 'uid', 'view']) {
+        const f = await fixture();
+        let active = true;
+        const saving = f.client.createSharedCredential({value:'synthetic'}, 'new', {isActive:()=>active});
+        if (change === 'logout') f.auth.currentUser = null;
+        if (change === 'uid') f.auth.currentUser = {uid:'other'};
+        if (change === 'view') active = false;
+        f.release();
+        if (change === 'none') {
+            assert.equal((await saving).status, 'applied');
+            assert.equal(f.calls.length, 1);
+        } else {
+            await assert.rejects(saving, /Sessione cambiata/);
+            assert.equal(f.calls.length, 0);
+        }
     }
 });

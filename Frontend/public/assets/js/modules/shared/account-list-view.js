@@ -6,9 +6,15 @@ import { logError } from '../../utils.js';
 import { accountModeFromRecord } from './account-mode-model.js';
 import { createCardSecretResolver } from './card-secret.js';
 
-function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false) {
+function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false, signal, resolveSecret) {
     const rowId = crypto.randomUUID();
-    const resolveCopyValue = createCardSecretResolver(copyValue, encrypted && isPassword);
+    const resolve = resolveSecret || createCardSecretResolver(copyValue, encrypted && isPassword);
+    const resolveCopyValue = async () => {
+        if (signal.aborted) throw new Error('VIEW_DISPOSED');
+        const value = await resolve();
+        if (signal.aborted) throw new Error('VIEW_DISPOSED');
+        return value;
+    };
     return createElement('div', { className: 'account-data-row' }, [
         createElement('span', { className: 'account-data-label', textContent: `${label}:` }),
         createElement('span', {
@@ -26,13 +32,16 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                         const icon = event.currentTarget.querySelector('span');
                         if (!value || !icon) return;
                         if (value.textContent === '••••••••') {
-                            value.textContent = await resolveCopyValue();
+                            const revealed = await resolveCopyValue();
+                            if (signal.aborted) return;
+                            value.textContent = revealed;
                             icon.textContent = 'visibility_off';
                         } else {
                             value.textContent = '••••••••';
                             icon.textContent = 'visibility';
                         }
                     } catch (error) {
+                        if (signal.aborted) return;
                         logError('RevealCardPassword', error);
                         showToast(t('error_generic'), 'error');
                     }
@@ -46,11 +55,16 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                 onclick: async event => {
                     event.stopPropagation();
                     try {
-                        await navigator.clipboard.writeText(isPassword
+                        if (signal.aborted) throw new Error('VIEW_DISPOSED');
+                        const value = isPassword
                             ? await resolveCopyValue()
-                            : (copyValue || displayValue));
+                            : (copyValue || displayValue);
+                        if (signal.aborted) return;
+                        await navigator.clipboard.writeText(value);
+                        if (signal.aborted) return;
                         showToast(t('copied') || 'Copiato!');
                     } catch (error) {
+                        if (signal.aborted) return;
                         logError('CopyCardValue', error);
                         showToast(t('error_generic'), 'error');
                     }
@@ -68,14 +82,19 @@ function createAccountCard(account, options) {
     const isMemo = mode.startsWith('memo-');
     const isShared = mode.endsWith('-shared');
     const isPinned = Boolean(account.isPinned);
+    // M7-R7C-4: un accesso sospeso (Account nell'Archivio) resta riconoscibile
+    // nella lista, ma la card non è apribile e non mostra contenuti dell'Account:
+    // i suoi dati arrivano dal solo invito.
+    const suspended = account._suspended === true;
     const themeKey = isShared && isMemo ? 'shared_memo' : isShared ? 'shared' : isMemo ? 'memo' : 'standard';
     const theme = options.themes[themeKey];
 
     return createElement('div', {
         className: 'account-card swipe-row',
-        dataset: { id: account.id, owner: String(account.isOwner), action: 'navigate' },
+        dataset: { id: account.id, owner: String(account.isOwner), action: suspended ? 'suspended' : 'navigate' },
         onclick: event => {
             if (event.target.closest('button')) return;
+            if (suspended) return;
             options.onNavigate(account);
         }
     }, [
@@ -102,11 +121,11 @@ function createAccountCard(account, options) {
                         }),
                         createElement('p', {
                             className: 'account-card-subtitle',
-                            textContent: options.getSubtitle(account)
+                            textContent: suspended ? t('account_suspended_label') : options.getSubtitle(account)
                         })
                     ])
                 ]),
-                createElement('div', { className: 'account-card-right' }, [
+                options.readOnly || suspended ? null : createElement('div', { className: 'account-card-right' }, [
                     createElement('button', {
                         className: `btn-mini-action ${isPinned ? 'active' : ''}`,
                         onclick: event => {
@@ -120,9 +139,10 @@ function createAccountCard(account, options) {
                 ])
             ]),
             createElement('div', { className: 'account-data-display' }, [
-                account.username ? createDataRow(t('label_user'), account.username) : null,
-                account.account ? createDataRow(t('label_account'), account.account) : null,
-                account.password ? createDataRow(t('label_password'), '••••••••', account.password, true, account._encrypted) : null
+                account.username ? createDataRow(t('label_user'), account.username, null, false, false, options.signal) : null,
+                account.account ? createDataRow(t('label_account'), account.account, null, false, false, options.signal) : null,
+                account.password ? createDataRow(t('label_password'), '••••••••', account.password, true, account._encrypted, options.signal,
+                    options.resolveSecret ? () => options.resolveSecret(account, 'password') : undefined) : null
             ].filter(Boolean))
         ])
     ]);
@@ -130,9 +150,19 @@ function createAccountCard(account, options) {
 
 export function createAccountListView(options) {
     let swipeList = null;
+    let lifecycle = new AbortController();
 
     return Object.freeze({
+        destroy() {
+            lifecycle.abort();
+            swipeList?.destroy();
+            swipeList = null;
+        },
         render(accounts) {
+            lifecycle.abort();
+            lifecycle = new AbortController();
+            swipeList?.destroy();
+            swipeList = null;
             const container = document.getElementById(options.containerId || 'accounts-container');
             if (!container) return;
             clearElement(container);
@@ -147,8 +177,8 @@ export function createAccountListView(options) {
                 return;
             }
 
-            setChildren(container, accounts.map(account => createAccountCard(account, options)));
-            swipeList = null;
+            setChildren(container, accounts.map(account => createAccountCard(account, {...options, signal: lifecycle.signal})));
+            if (options.readOnly) return;
             swipeList = new SwipeList('.swipe-row', {
                 threshold: 0.15,
                 onSwipeLeft: options.onDelete,

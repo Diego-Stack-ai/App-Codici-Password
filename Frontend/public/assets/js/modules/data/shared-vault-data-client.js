@@ -14,9 +14,10 @@ async function encryptedPayload(data) {
     return prepareSharedVaultData(data, value => encrypt(value, vaultKeyMaterial));
 }
 
-async function send(command) {
+async function send(command, uid = auth.currentUser?.uid) {
+    if (!uid || auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata. Riapri la modifica.');
     if (!navigator.onLine) throw new Error('Le Credenziali comuni si modificano soltanto online.');
-    const response = await manageSharedVaultData(command);
+    const response = await manageSharedVaultData({...command, expectedOwnerUid: uid});
     if (response.data?.status !== 'applied') {
         const error = new Error(response.data?.status === 'conflict'
             ? 'La Credenziale comune è stata modificata altrove. Aggiorna e riprova.'
@@ -27,20 +28,24 @@ async function send(command) {
     return response.data;
 }
 
-export async function createSharedCredential(data, sharedDataId) {
+export async function createSharedCredential(data, sharedDataId, {isActive = () => true} = {}) {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !isActive()) throw new Error('Accesso richiesto.');
     const ids = createSharedVaultIdentifiers(sharedDataId);
-    return send({...ids, action: 'create', data: await encryptedPayload(data)});
+    const payload = await encryptedPayload(data);
+    if (auth.currentUser?.uid !== uid || !isActive()) throw new Error('Sessione cambiata. Riapri la modifica.');
+    return send({...ids, action: 'create', data: payload}, uid);
 }
 
-export async function updateSharedCredential(sharedDataId, expectedRevision, data) {
+export async function updateSharedCredential(sharedDataId, expectedRevision, data, {isActive = () => true} = {}) {
     const uid = auth.currentUser?.uid;
-    if (!uid) throw new Error('Accesso richiesto.');
+    if (!uid || !isActive()) throw new Error('Accesso richiesto.');
     const payload = await encryptedPayload(data);
-    if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata. Riapri la modifica.');
+    if (auth.currentUser?.uid !== uid || !isActive()) throw new Error('Sessione cambiata. Riapri la modifica.');
     return send({
         ...createSharedVaultIdentifiers(sharedDataId), action: 'update', expectedRevision,
         data: payload
-    });
+    }, uid);
 }
 
 export async function linkSharedCredential(sharedDataId, expectedRevision, link) {

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
 const root = new URL('../Frontend/public/', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
 const asModule = text => 'data:text/javascript;base64,' + Buffer.from(text).toString('base64');
@@ -13,6 +14,35 @@ const user = {nome:'Èva', cognome:'D’Amico', photoURL:avatar};
 const raw = buildVCard(user, {photo:true, nome:true, phones:['p']}, {contactPhones:[{id:'p',number:'+39 0000'}]});
 const payload = buildProfileQrPayload(raw, 'https://appcodici-password.web.app');
 const card = readContactCard(new URL(payload).hash);
+
+test('QR overflow renders its inline warning without an undefined global toast', async () => {
+    for (const file of ['qr_code_utils.js', 'qr_code_utils-v2.js']) {
+        let attempts = 0, rendered;
+        const context = vm.createContext({
+            QRCode: function () { attempts++; throw new Error('synthetic overflow'); },
+            console: {error() {}},
+            document: {createElement: tag => ({tag, style: {}, append(...children) { this.children = children; }})}
+        });
+        vm.runInContext((await read('assets/js/modules/shared/' + file)).replace(/^export /gm, ''), context);
+        const container = {querySelectorAll: () => [], replaceChildren: node => { rendered = node; }};
+        assert.doesNotThrow(() => context.renderQRCode(container, 'synthetic'), file);
+        assert.equal(attempts, 2);
+        assert.equal(rendered.children[0], 'Dati eccessivi');
+    }
+});
+
+test('bundled QR table fallback encodes hostile text as modules, not HTML', async () => {
+    const container = {childNodes: [{offsetWidth: 100, offsetHeight: 100, style: {}}]};
+    const context = vm.createContext({document: {documentElement: {tagName: 'HTML'}},
+        navigator: {userAgent: 'synthetic'}, window: {}});
+    vm.runInContext(await read('assets/js/vendor/qrcode.min.js'), context);
+    const text = '<img src=x onerror="synthetic()"><script>synthetic()</script>';
+    new context.QRCode(container, {text, width: 104, height: 104, colorDark: '#000000', colorLight: '#ffffff'});
+    assert.equal(container.title, text, 'payload retained as title property, not markup');
+    assert.match(container.innerHTML, /^<table/);
+    assert.doesNotMatch(container.innerHTML, /img|script|onerror|synthetic/);
+    assert.match(container.innerHTML, /background-color:#(?:000000|ffffff)/);
+});
 
 test('received preview exposes every selected contact field and preserves escaped values', () => {
     const vcard = buildVCard({...user, birth_date:'1980-01-02', birth_place:'Roma'}, {photo:true,nome:true,nascita:true,phones:['p','f'],emails:['e'],addresses:['a']}, {

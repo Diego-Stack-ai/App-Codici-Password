@@ -5,15 +5,16 @@ import {db} from '../../firebase-config.js?v=1.2.128';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
-const records = snapshot => snapshot.docs.map(item => ({id: item.id, ...item.data()}));
+const record = snapshot => ({...snapshot.data(), id: snapshot.id});
+const records = snapshot => snapshot.docs.map(record);
 const readRecords = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(records);
 const readRecord = (key, reference) => coalesceRead(key, () => getDocSmart(reference)).then(snapshot =>
-    snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
+    snapshot.exists() ? record(snapshot) : null);
 const readFirstRecord = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(snapshot =>
-    snapshot.empty ? null : {id: snapshot.docs[0].id, ...snapshot.docs[0].data()});
+    snapshot.empty ? null : record(snapshot.docs[0]));
 const readConfirmedRecords = reference => getDocsServerConfirmed(reference).then(records);
 const readConfirmedRecord = reference => getDocServerConfirmed(reference).then(snapshot =>
-    snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
+    snapshot.exists() ? record(snapshot) : null);
 
 export const listPrivateAccounts = uid => readRecords(`accounts:${uid}`,
     collection(db, 'users', uid, 'accounts'));
@@ -34,14 +35,20 @@ export const listTopPrivateAccounts = (uid, maximum = 10) => readRecords(`top-ac
         collection(db, 'users', uid, 'accounts'), orderBy('views', 'desc'), limit(maximum)
     ));
 
+const acceptedInvitesQuery = email => query(
+    collection(db, 'invites'),
+    where('recipientEmail', '==', String(email || '').trim().toLowerCase()),
+    where('status', '==', 'accepted')
+);
+
 export const listAcceptedInvites = email => {
     const normalizedEmail = String(email || '').trim().toLowerCase();
-    return readRecords(`accepted-invites:${normalizedEmail}`, query(
-        collection(db, 'invites'),
-        where('recipientEmail', '==', normalizedEmail),
-        where('status', '==', 'accepted')
-    ));
+    return readRecords(`accepted-invites:${normalizedEmail}`, acceptedInvitesQuery(normalizedEmail));
 };
+
+// M7-R7C-4: variante confermata dal server, usata quando il dispositivo è online
+// per non far nascondere a una copia in cache una sospensione già nota.
+export const listAcceptedInvitesConfirmed = email => readConfirmedRecords(acceptedInvitesQuery(email));
 
 export const getRecordByPath = recordPath => readRecord(`record:${recordPath}`, doc(db, recordPath));
 
@@ -49,12 +56,10 @@ export const getPrivateAccount = (uid, accountId) => getRecordByPath(`users/${ui
 export const getPrivateAccountConfirmed = (uid, accountId) => readConfirmedRecord(
     doc(db, 'users', uid, 'accounts', accountId));
 
-export const findPrivateAccountByLegacyId = (uid, accountId) => coalesceRead(`legacy-account:${uid}:${accountId}`, async () => {
-    const snapshot = await getDocsSmart(query(
+export const findPrivateAccountByLegacyId = (uid, accountId) => coalesceRead(`legacy-account:${uid}:${accountId}`, () =>
+    getDocsSmart(query(
         collection(db, 'users', uid, 'accounts'), where('id', '==', accountId), limit(1)
-    ));
-    return snapshot.empty ? null : {id: snapshot.docs[0].id, ...snapshot.docs[0].data()};
-});
+    ))).then(snapshot => snapshot.empty ? null : record(snapshot.docs[0]));
 
 export const getCompany = (uid, companyId) => getRecordByPath(`users/${uid}/aziende/${companyId}`);
 export const getCompanyConfirmed = (uid, companyId) => readConfirmedRecord(
@@ -64,6 +69,8 @@ export const getCompanyAccount = (uid, companyId, accountId) =>
 export const getCompanyAccountConfirmed = (uid, companyId, accountId) => readConfirmedRecord(
     doc(db, 'users', uid, 'aziende', companyId, 'accounts', accountId));
 export const getUserSetting = (uid, settingId) => getRecordByPath(`users/${uid}/settings/${settingId}`);
+export const getUserSettingConfirmed = (uid, settingId) => readConfirmedRecord(
+    doc(db, 'users', uid, 'settings', settingId));
 
 export const listCompanies = uid => readRecords(`companies:${uid}`,
     collection(db, 'users', uid, 'aziende'));
@@ -112,12 +119,27 @@ export const listPrivateAccountAttachments = (uid, accountId) =>
     ));
 
 export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
+// M7-R7C-4: quando l'Account è sospeso il get è negato dalle Rules; l'invito del
+// destinatario è l'unica fonte lecita per riconoscere lo stato senza aprire
+// contenuti. Online l'elenco è confermato dal server, così una copia in cache non
+// può nascondere una sospensione nota; offline resta la copia locale, e il limite
+// di un invito non aggiornato è dichiarato (il server non protegge offline).
+export const findSuspendedGuestInvite = async (ownerId, accountId, email, companyId = '') => {
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    const invites = offline ? await listAcceptedInvites(email) : await listAcceptedInvitesConfirmed(email);
+    return invites.find(invite => invite.accountId === accountId
+        && (invite.ownerId || invite.senderId) === ownerId
+        && String(invite.aziendaId || '') === String(companyId || '')
+        && invite.sharingState === 'suspended') || null;
+};
 export const getPushDevice = (uid, deviceId) => getRecordByPath(`users/${uid}/pushDevices/${deviceId}`);
 
 export const listContacts = uid => readRecords(`contacts:${uid}`,
     collection(db, 'users', uid, 'contacts'));
 
 export const listProfileWidgets = uid => readRecords(`profile-widgets:${uid}`,
+    collection(db, 'users', uid, 'profileWidgets'));
+export const listProfileWidgetsConfirmed = uid => readConfirmedRecords(
     collection(db, 'users', uid, 'profileWidgets'));
 export const listSharedVaultData = uid => readRecords(`shared-vault-data:${uid}`,
     collection(db, 'users', uid, 'sharedVaultData'));
@@ -144,6 +166,7 @@ export const listEmbeddedAccountWidgetsConfirmed = async (uid, account) =>
         .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
 
 export const getUserProfile = uid => readRecord(`profile:${uid}`, doc(db, 'users', uid));
+export const getUserProfileConfirmed = uid => readConfirmedRecord(doc(db, 'users', uid));
 
 // M8: fotografia server-confermata dei soli domini proprietari ammessi dal
 // contratto backup. Non usa cache perché un file incompleto sembrerebbe valido.

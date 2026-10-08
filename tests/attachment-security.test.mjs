@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {webcrypto} from 'node:crypto';
 
 globalThis.File = class File {
   constructor(name, type, size, bytes = null) {
@@ -17,6 +18,77 @@ const source = await readFile(
   'utf8',
 );
 const security = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+
+async function withCryptoProbe(fault, run) {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+  const captured = [];
+  const calls = {};
+  const subtle = new Proxy(webcrypto.subtle, {get(target, name) {
+    const method = target[name];
+    if (typeof method !== 'function') return method;
+    return async (...args) => {
+      const call = `${name}:${calls[name] = (calls[name] || 0) + 1}`;
+      if (name === 'importKey') captured.push(args[1]);
+      if (name === 'encrypt' && calls[name] === 1) captured.push(args[2]);
+      if (call === fault) throw new Error('INJECTED');
+      return method.apply(target, args);
+    };
+  }});
+  Object.defineProperty(globalThis, 'crypto', {configurable: true, value: {
+    subtle, getRandomValues: webcrypto.getRandomValues.bind(webcrypto),
+  }});
+  try { await run(captured, calls); }
+  finally { Object.defineProperty(globalThis, 'crypto', descriptor); }
+}
+
+function assertWiped(buffers) {
+  assert.ok(buffers.length > 0);
+  for (const buffer of buffers) {
+    const bytes = ArrayBuffer.isView(buffer)
+      ? new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength) : new Uint8Array(buffer);
+    assert.ok(bytes.every(byte => byte === 0), 'owned secret buffer must be zeroed');
+  }
+}
+
+for (const fault of [null, 'importKey:1', 'encrypt:1', 'importKey:2', 'deriveKey:1', 'encrypt:2', 'read']) {
+  test(`encrypt wipes owned buffers on ${fault || 'success'} without changing File`, async () => {
+    const clear = new TextEncoder().encode('synthetic attachment');
+    const file = new File('test.txt', 'text/plain', clear.length, clear);
+    let reads = 0;
+    const read = file.arrayBuffer.bind(file);
+    file.arrayBuffer = async () => { reads++; if (fault === 'read') throw new Error('INJECTED'); return read(); };
+    await withCryptoProbe(fault, async (buffers) => {
+      if (fault) await assert.rejects(security.encryptAttachmentFile(file, 'synthetic-key'), /INJECTED/);
+      else {
+        const result = await security.encryptAttachmentFile(file, 'synthetic-key');
+        assertWiped(buffers);
+        assert.deepEqual([result.metadata.contentIv, result.metadata.wrapSalt, result.metadata.wrapIv]
+          .map(value => Buffer.from(value, 'base64').length), [12, 32, 12]);
+        const restored = await security.decryptAttachmentBytes(await result.blob.arrayBuffer(), result.metadata, 'synthetic-key');
+        assert.deepEqual(new Uint8Array(restored), clear);
+      }
+      assertWiped(buffers);
+    });
+    assert.equal(reads, fault === 'importKey:1' ? 0 : 1);
+    assert.deepEqual(file.bytes, new TextEncoder().encode('synthetic attachment'));
+  });
+}
+
+for (const fault of [null, 'importKey:1', 'deriveKey:1', 'decrypt:1', 'importKey:2', 'decrypt:2', 'wrong-key']) {
+  test(`decrypt wipes owned keys on ${fault || 'success'} and preserves caller ciphertext`, async () => {
+    const clear = new TextEncoder().encode('synthetic attachment');
+    const encrypted = await security.encryptAttachmentFile(new File('test.txt', 'text/plain', clear.length, clear), 'synthetic-key');
+    const ciphertext = new Uint8Array(await encrypted.blob.arrayBuffer());
+    const before = ciphertext.slice();
+    await withCryptoProbe(fault, async (buffers) => {
+      const pending = security.decryptAttachmentBytes(ciphertext, encrypted.metadata, fault === 'wrong-key' ? 'wrong' : 'synthetic-key');
+      if (fault) await assert.rejects(pending);
+      else assert.deepEqual(new Uint8Array(await pending), clear);
+      assertWiped(buffers);
+      assert.deepEqual(ciphertext, before);
+    });
+  });
+}
 
 test('accetta file previsti e rifiuta dimensioni o MIME pericolosi', () => {
   assert.doesNotThrow(() => security.validateAttachmentFile(new File('doc.pdf', 'application/pdf', 1024)));

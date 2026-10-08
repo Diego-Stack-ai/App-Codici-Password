@@ -10,6 +10,7 @@ import {
     normalizeDeadlineConfig,
     removeDeadlineListItem,
     updateDeadlineListItem,
+    validateDeadlineFrequency,
     updateDeadlineType
 } from './deadline-config-model.js';
 
@@ -267,6 +268,10 @@ export function createDeadlineConfigController({ recipientController, onRender =
         const config = currentConfig();
         const exists = (config[target.field] || []).some(item => itemName(item) === itemName(value));
         if (exists) return showToast('Valore già esistente', 'info');
+        if (target.field === 'deadlineTypes') {
+            try { validateDeadlineFrequency(value?.freq); }
+            catch (error) { return showToast(error.message, 'error'); }
+        }
         const nextConfig = target.field === 'deadlineTypes'
             ? appendDeadlineType(config, value)
             : appendDeadlineListItem(config, target.field, value);
@@ -290,6 +295,10 @@ export function createDeadlineConfigController({ recipientController, onRender =
         const config = currentConfig();
         const index = (config[target.field] || []).findIndex(item => itemName(item) === oldValue);
         if (index < 0) return;
+        if (target.field === 'deadlineTypes') {
+            try { validateDeadlineFrequency(config[target.field][index]?.freq); }
+            catch (error) { return showToast(error.message, 'error'); }
+        }
         const nextConfig = target.field === 'deadlineTypes'
             ? updateDeadlineType(config, index, { ...config[target.field][index], name: newValue.trim() })
             : updateDeadlineListItem(config, target.field, index, newValue);

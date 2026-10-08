@@ -4,7 +4,7 @@
  */
 
 import { auth, db } from '../../firebase-config.js?v=1.2.128';
-import { signOut } from "/assets/js/vendor/firebase-runtime.js";
+import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
@@ -63,7 +63,8 @@ function setupSharedCredentials(user) {
     });
 }
 
-function showCredentialHealthResults(report) {
+function showCredentialHealthResults(report, action) {
+    action.check();
     const flagLabels = {weak: 'Debole', duplicate: 'Duplicata', dated: 'Datata'};
     const strengthLabels = {weak: 'Debole', medium: 'Media', strong: 'Forte'};
     const modal = createElement('div', {
@@ -73,17 +74,33 @@ function showCredentialHealthResults(report) {
     const closeButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Chiudi'});
     const previouslyFocused = document.activeElement;
     const close = () => {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            modal.remove();
-            previouslyFocused?.focus?.();
-        }, 300);
+        const restoreFocus = action.active();
+        action.dispose();
+        if (restoreFocus && previouslyFocused?.isConnected) previouslyFocused.focus?.();
     };
-    closeButton.addEventListener('click', close);
-    modal.addEventListener('keydown', event => {
-        if (event.key === 'Escape') close();
+    const timer = setTimeout(() => {
+        if (!action.active()) return;
+        modal.classList.add('active'); closeButton.focus();
+    }, 10);
+    action.own(() => {
+        clearTimeout(timer); modal.replaceChildren(); modal.remove(); report.results.length = 0;
     });
-    const list = createElement('div', {className: 'credential-health-list'});
+    closeButton.addEventListener('click', close);
+    const list = createElement('div', {
+        className: 'credential-health-list', tabIndex: 0,
+        role: 'region', 'aria-label': 'Risultati del controllo credenziali'
+    });
+    const onKeydown = event => {
+        if (!action.active()) return;
+        if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); }
+        else if (event.key === 'Tab') {
+            event.preventDefault();
+            const controls = [list, closeButton], index = controls.indexOf(document.activeElement);
+            controls[event.shiftKey ? (index <= 0 ? controls.length - 1 : index - 1) : (index + 1) % controls.length].focus();
+        }
+    };
+    modal.addEventListener('keydown', onKeydown);
+    action.own(() => modal.removeEventListener('keydown', onKeydown));
     if (!report.results.length) {
         list.appendChild(createElement('p', {
             className: 'credential-health-empty',
@@ -122,7 +139,7 @@ function showCredentialHealthResults(report) {
         createElement('h3', {id: 'credential-health-title', className: 'modal-title', textContent: 'Salute credenziali'}),
         createElement('p', {
             className: 'modal-text',
-            textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria.`
+            textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria. I dati disponibili possono provenire dalla cache: il risultato non garantisce di includere le ultime modifiche su altri dispositivi.`
         }),
         list,
         createElement('p', {
@@ -132,36 +149,46 @@ function showCredentialHealthResults(report) {
         createElement('div', {className: 'modal-actions'}, [closeButton])
     ]));
     document.body.appendChild(modal);
-    setTimeout(() => {
-        modal.classList.add('active');
-        closeButton.focus();
-    }, 10);
 }
 
+let disposeCredentialHealthSetup = () => {};
 function setupCredentialHealth(user) {
+    disposeCredentialHealthSetup();
     const button = document.getElementById('btn-credential-health');
     if (!button) return;
-    button.addEventListener('click', async () => {
+    let action = null, running = false;
+    const click = async () => {
+        if (running || auth.currentUser?.uid !== user.uid) return;
+        action?.dispose();
+        const current = action = createBackupRestoreAction(user.uid, button);
+        running = true;
         button.disabled = true;
         const working = showBackupWorking(
             'Salute credenziali',
-            'Analisi locale delle credenziali in corso…'
+            'Analisi locale delle credenziali in corso…', current
         );
         try {
             const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.128');
-            const report = await inspectOwnerCredentialHealth(user.uid);
+            current.check();
+            const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
+            current.check();
             working.close();
-            showCredentialHealthResults(report);
+            showCredentialHealthResults(report, current);
         } catch (error) {
             working.close();
-            if (error?.message !== 'USER_CANCELLED') {
-                console.warn('[CREDENTIAL HEALTH] Analisi non disponibile.', error?.message);
+            if (current.active() && error?.message !== 'USER_CANCELLED') {
                 showToast('Controllo non completato. Nessun dato è stato salvato.', 'error');
             }
+            current.dispose();
         } finally {
-            button.disabled = false;
+            if (action === current) { button.disabled = false; running = false; }
         }
-    });
+    };
+    button.addEventListener('click', click);
+    disposeCredentialHealthSetup = () => {
+        action?.dispose(); action = null; running = false; button.disabled = false;
+        button.removeEventListener('click', click);
+    };
 }
 
 function usageReportText(report) {
@@ -289,80 +316,242 @@ function setupAccountFieldUsage(user) {
     });
 }
 
+let disposeRestoreSetup = () => {};
+
+function createBackupRestoreAction(uid, button) {
+    const controller = new AbortController();
+    const cleanups = new Set();
+    let unsubscribe = () => {};
+    const dispose = () => {
+        if (controller.signal.aborted) return;
+        controller.abort();
+        unsubscribe();
+        globalThis.removeEventListener('vault-session-locked', dispose);
+        globalThis.removeEventListener('pagehide', dispose);
+        for (const cleanup of [...cleanups]) cleanup();
+        cleanups.clear();
+    };
+    const active = () => {
+        if (!controller.signal.aborted && (auth.currentUser?.uid !== uid || button.isConnected === false)) dispose();
+        return !controller.signal.aborted;
+    };
+    const check = () => { if (!active()) throw new Error('BACKUP_SESSION_INVALIDATED'); };
+    const own = cleanup => {
+        if (!active()) { cleanup(); return () => {}; }
+        cleanups.add(cleanup);
+        return () => cleanups.delete(cleanup);
+    };
+    globalThis.addEventListener('vault-session-locked', dispose);
+    globalThis.addEventListener('pagehide', dispose);
+    unsubscribe = onAuthStateChanged(auth, user => { if (user?.uid !== uid) dispose(); });
+    if (controller.signal.aborted) unsubscribe();
+    return {active, check, own, dispose, signal: controller.signal};
+}
+
+function showBackupRestoreInput(action, title, placeholder, description, secret = false) {
+    return new Promise(resolve => {
+        if (!action.active()) return resolve(null);
+        let settled = false, unregister = () => {};
+        const previousFocus = document.activeElement;
+        const input = createElement('input', {
+            type: 'text', value: '', placeholder, autocomplete: 'off', autocapitalize: 'off',
+            spellcheck: false, 'data-form-type': 'other', 'data-1p-ignore': 'true', 'data-lpignore': 'true',
+            className: `glass-field modal-input-glass${secret ? ' vault-secret-input' : ''}`,
+            'aria-label': title
+        });
+        const close = value => {
+            if (settled) return;
+            settled = true;
+            input.value = '';
+            modal.remove();
+            unregister();
+            resolve(value);
+            if (action.active() && previousFocus?.isConnected) previousFocus.focus();
+        };
+        const modal = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('form', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': title,
+                onsubmit: event => { event.preventDefault(); if (action.active()) close(input.value); }}, [
+                createElement('h3', {className: 'modal-title', textContent: title}),
+                createElement('p', {className: 'modal-text', textContent: description}), input,
+                createElement('div', {className: 'modal-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => close(null)}),
+                    createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Conferma'})
+                ])
+            ])
+        ]);
+        modal.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); close(null); } });
+        unregister = action.own(() => close(null));
+        document.body.appendChild(modal);
+        input.focus();
+    });
+}
+
+function showBackupRestoreRetry(action) {
+    return new Promise(resolve => {
+        if (!action.active()) return resolve(false);
+        let settled = false, unregister = () => {};
+        const previousFocus = document.activeElement;
+        const close = value => {
+            if (settled) return;
+            settled = true; modal.remove(); unregister(); resolve(value);
+            if (action.active() && previousFocus?.isConnected) previousFocus.focus();
+        };
+        const retry = createElement('button', {type: 'button', className: 'btn-modal btn-primary',
+            textContent: 'Verifica e riprendi', onclick: () => { if (action.active()) close(true); }});
+        const modal = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('section', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Risposta non ricevuta'}, [
+                createElement('h3', {className: 'modal-title', textContent: 'Risposta non ricevuta'}),
+                createElement('p', {className: 'modal-text', textContent: 'Il server potrebbe aver già applicato una parte del ripristino. Puoi verificarne l’esito e riprendere gli elementi mancanti mantenendo la selezione confermata.'}),
+                createElement('div', {className: 'modal-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Interrompi', onclick: () => close(false)}), retry
+                ])
+            ])
+        ]);
+        modal.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); close(false); } });
+        unregister = action.own(() => close(false));
+        document.body.appendChild(modal); retry.focus();
+    });
+}
+
 function setupEncryptedRestore(user) {
+    disposeRestoreSetup();
     const button = document.getElementById('btn-restore-encrypted-backup');
-    if (!button) return;
+    if (!button || auth.currentUser?.uid !== user.uid) return;
+    button.disabled = false;
     const input = createElement('input', {
         type: 'file', accept: '.cpbackup,application/x-codici-password-backup', className: 'hidden'
     });
     document.body.appendChild(input);
-    button.addEventListener('click', () => input.click());
+    let action = null, running = false, setupDisposed = false;
+    const selectFile = () => { if (!setupDisposed && !running && auth.currentUser?.uid === user.uid) input.click(); };
+    button.addEventListener('click', selectFile);
+    disposeRestoreSetup = () => { setupDisposed = true; action?.dispose(); input.remove(); button.removeEventListener('click', selectFile); };
     input.addEventListener('change', async () => {
         const file = input.files?.[0];
         input.value = '';
-        if (!file) return;
-        const recoveryKey = await showInputModal(
-            'Recovery Key del backup', '', 'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx',
-            'La chiave viene usata soltanto in memoria per verificare e aprire questo file.',
-            {vaultSecret: true}
-        );
-        if (!recoveryKey) return;
+        if (!file || setupDisposed || running || auth.currentUser?.uid !== user.uid) return;
+        running = true;
+        action = createBackupRestoreAction(user.uid, button);
+        const currentAction = action;
         button.disabled = true;
-        let working = showBackupWorking('Verifica completa del backup…', 'Il file viene aperto e controllato voce per voce. Non chiudere la pagina.');
+        let working = null, plan = null, release = () => {}, recoveryKey = '';
         try {
-            const {prepareBackupRestore, executeBackupRestore} = await import('./backup-import-service.js');
-            const plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase());
+            recoveryKey = await showBackupRestoreInput(currentAction, 'Recovery Key del backup',
+                'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx',
+                'La chiave viene usata soltanto in memoria per verificare e aprire questo file.', true);
+            currentAction.check();
+            if (!recoveryKey) return;
+            working = showBackupWorking('Verifica completa del backup…', 'Il file viene aperto e controllato voce per voce.', currentAction);
+            const {prepareBackupRestore, executeBackupRestore, releaseBackupRestore} = await import('./backup-import-service.js');
+            const executeWithRetry = async (selectedIndexes = null) => {
+                let retry = false;
+                while (true) {
+                    currentAction.check();
+                    try { return await executeBackupRestore(plan, selectedIndexes, {retry}); }
+                    catch (error) {
+                        currentAction.check();
+                        if (error?.retryable !== true || !['BACKUP_FIRESTORE_UNCERTAIN', 'BACKUP_RETRY_REQUIRED'].includes(error.code)) throw error;
+                        working?.close(); working = null;
+                        const resume = await showBackupRestoreRetry(currentAction);
+                        currentAction.check();
+                        if (!resume) throw error;
+                        retry = true;
+                        working = showBackupWorking('Verifica e ripresa del ripristino…', 'Gli elementi già applicati vengono riconosciuti prima di proseguire.', currentAction);
+                    }
+                }
+            };
+            currentAction.check();
+            release = () => { if (plan) releaseBackupRestore(plan); plan = null; recoveryKey = ''; };
+            currentAction.own(release);
+            plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase(), {
+                signal: currentAction.signal, isActive: currentAction.active
+            });
+            recoveryKey = '';
+            currentAction.check();
             working.close();
             working = null;
             if (plan.collisionCount) {
-                const selectedIndexes = await showBackupRestorePreview(plan);
+                const selectedIndexes = await showBackupRestorePreview(plan, currentAction);
+                currentAction.check();
                 if (!selectedIndexes.length) return;
                 const selectedEntries = plan.comparison.entries.filter(entry => selectedIndexes.includes(entry.index));
                 const changedCount = selectedEntries.filter(entry => entry.status === 'changed').length;
-                const typed = await showInputModal(
-                    'Conferma ripristino selettivo', '', 'RIPRISTINA',
-                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Scrivi RIPRISTINA per continuare.`
+                const typed = await showBackupRestoreInput(currentAction,
+                    'Conferma ripristino selettivo', 'RIPRISTINA',
+                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Il backup può ricreare elementi eliminati definitivamente. Le vecchie condivisioni del backup non vengono riattivate; gli accessi degli Account attivi esistenti restano invariati, quelli degli Account archiviati non vengono riattivati. Scrivi RIPRISTINA per continuare.`
                 );
+                currentAction.check();
                 if (typed !== 'RIPRISTINA') return;
-                working = showBackupWorking('Ripristino selettivo in corso…', 'Sto recuperando gli elementi scelti. Non chiudere la pagina.');
-                const result = await executeBackupRestore(plan, selectedIndexes);
+                working = showBackupWorking('Ripristino selettivo in corso…', 'Il blocco ferma i passaggi successivi; le richieste già inviate possono completarsi.', currentAction);
+                const result = await executeWithRetry(selectedIndexes);
+                currentAction.check();
                 working.close();
                 working = null;
-                reloadAfterBackupRestore(result);
+                await reloadAfterBackupRestore(result, currentAction);
                 return;
             }
-            const typed = await showInputModal(
-                'Conferma ripristino', '', 'RIPRISTINA',
-                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Scrivi RIPRISTINA per applicare i dati.`
+            const typed = await showBackupRestoreInput(currentAction,
+                'Conferma ripristino', 'RIPRISTINA',
+                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Il backup può ricreare elementi eliminati definitivamente, senza riattivare le vecchie condivisioni. Scrivi RIPRISTINA per applicare i dati.`
             );
+            currentAction.check();
             if (typed !== 'RIPRISTINA') return;
-            working = showBackupWorking('Ripristino in corso…', 'Sto recuperando record e allegati. Non chiudere la pagina.');
-            const result = await executeBackupRestore(plan);
+            working = showBackupWorking('Ripristino in corso…', 'Il blocco ferma i passaggi successivi; le richieste già inviate possono completarsi.', currentAction);
+            const result = await executeWithRetry();
+            currentAction.check();
             working.close();
             working = null;
-            reloadAfterBackupRestore(result);
+            await reloadAfterBackupRestore(result, currentAction);
         } catch (error) {
-            console.error('[BACKUP] Ripristino non riuscito.', error?.message);
-            const collision = String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
+            if (!currentAction.active()) return;
+            if (error?.progress?.mayHaveApplied) {
+                showToast('Ripristino interrotto: alcuni dati potrebbero essere già stati applicati. Verifica il Vault prima di riprovare.', 'warning');
+                return;
+            }
+            if (error?.code === 'BACKUP_PREVIEW_STALE' || error?.message === 'BACKUP_PREVIEW_STALE') {
+                showToast('I dati sono cambiati dopo l’anteprima. Riapri il backup per confrontarli di nuovo prima del ripristino.', 'warning');
+                return;
+            }
+            if (error?.code === 'BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED' || error?.message === 'BACKUP_TIMESTAMP_PRECISION_UNSUPPORTED') {
+                showToast('Ripristino bloccato: una data nel backup ha una precisione che il database non può conservare esattamente. Nessun arrotondamento è stato applicato.', 'warning');
+                return;
+            }
+            const collision = error?.code === 'BACKUP_COLLISIONS' || String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
+            if (error?.message === 'BACKUP_PREVIEW_CAPACITY_EXCEEDED') {
+                showToast('Questo backup supera la capacità dell’anteprima. Nessun dato è stato ripristinato: conserva il file per un ripristino assistito.', 'warning');
+                return;
+            }
             showToast(collision
                 ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
                 : 'Backup non valido, incompleto o non applicabile.', 'error');
         } finally {
             working?.close();
-            button.disabled = false;
+            release();
+            if (currentAction.active()) button.disabled = false;
+            currentAction.dispose();
+            running = false;
         }
     });
 }
 
-function reloadAfterBackupRestore(result) {
+function reloadAfterBackupRestore(result, action) {
+    action.check();
     showToast(
         `Ripristino completato: ${result.recordCount} elementi e ${result.attachmentCount} allegati. Aggiornamento dati…`,
         'success'
     );
-    setTimeout(() => window.location.reload(), 900);
+    return new Promise(resolve => {
+        let unregister = () => {};
+        const timer = setTimeout(() => {
+            unregister();
+            if (action.active()) window.location.reload();
+            resolve();
+        }, 900);
+        unregister = action.own(() => { clearTimeout(timer); resolve(); });
+    });
 }
 
-function showBackupWorking(title, message) {
+function showBackupWorking(title, message, action) {
     const modal = createElement('div', {
         className: 'modal-overlay backup-working-overlay', role: 'alertdialog',
         'aria-modal': 'true', 'aria-live': 'polite', 'aria-busy': 'true'
@@ -378,18 +567,24 @@ function showBackupWorking(title, message) {
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('active'));
     let closed = false;
-    return {
+    let unregister = () => {};
+    const working = {
         close() {
             if (closed) return;
             closed = true;
             modal.classList.remove('active');
-            setTimeout(() => modal.remove(), 300);
+            modal.remove();
+            unregister();
         }
     };
+    unregister = action?.own(() => working.close()) || unregister;
+    return working;
 }
 
-function showBackupRestorePreview(plan) {
+function showBackupRestorePreview(plan, action) {
     return new Promise(resolve => {
+        if (!action.active()) return resolve([]);
+        let settled = false, unregister = () => {};
         const modal = createElement('div', {className: 'modal-overlay'});
         const closeButton = createElement('button', {
             className: 'btn-modal btn-secondary', textContent: 'Chiudi anteprima'
@@ -441,8 +636,11 @@ function showBackupRestorePreview(plan) {
             ]);
         });
         const close = result => {
-            modal.classList.remove('active');
-            setTimeout(() => { modal.remove(); resolve(result); }, 300);
+            if (settled) return;
+            settled = true;
+            modal.remove();
+            unregister();
+            resolve(result);
         };
         const updateRestoreButton = () => {
             const count = selectable.filter(item => item.checkbox.checked).length;
@@ -451,9 +649,9 @@ function showBackupRestorePreview(plan) {
         };
         selectable.forEach(item => item.checkbox.addEventListener('change', updateRestoreButton));
         closeButton.addEventListener('click', () => close([]));
-        restoreButton.addEventListener('click', () => close(selectable
+        restoreButton.addEventListener('click', () => { if (action.active()) close(selectable
             .filter(item => item.checkbox.checked)
-            .map(item => item.entry.index)));
+            .map(item => item.entry.index)); });
         updateRestoreButton();
         const summaryContent = createElement('div', {className: 'backup-preview-summary-content'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'preview'}),
@@ -479,12 +677,15 @@ function showBackupRestorePreview(plan) {
             createElement('div', {className: 'modal-actions'}, [closeButton, restoreButton])
         ]));
         document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
+        unregister = action.own(() => close([]));
+        setTimeout(() => { if (!settled && action.active()) modal.classList.add('active'); }, 10);
     });
 }
 
-function showRecoveryKeyOnce(recoveryKey, summary) {
+function showRecoveryKeyOnce(recoveryKey, summary, action) {
     return new Promise(resolve => {
+        if (!action.active()) return resolve();
+        let settled = false, unregister = () => {};
         const modal = createElement('div', {className: 'modal-overlay'});
         const keyField = createElement('input', {
             className: 'glass-field modal-input-glass backup-recovery-key-field', value: recoveryKey, readOnly: true,
@@ -495,20 +696,26 @@ function showRecoveryKeyOnce(recoveryKey, summary) {
             className: 'btn-modal btn-primary', textContent: 'Ho salvato la chiave', disabled: true
         });
         const copyButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Copia chiave'});
-        acknowledged.addEventListener('change', () => { closeButton.disabled = !acknowledged.checked; });
+        const close = () => {
+            if (settled) return;
+            settled = true; recoveryKey = ''; keyField.value = ''; copyButton.disabled = closeButton.disabled = true;
+            modal.remove(); unregister(); resolve();
+        };
+        acknowledged.addEventListener('change', () => { if (!settled && action.active()) closeButton.disabled = !acknowledged.checked; });
         copyButton.addEventListener('click', async () => {
+            if (settled || !action.active()) return;
             try {
                 await navigator.clipboard.writeText(recoveryKey);
-                showToast('Recovery Key copiata', 'success');
+                if (!settled && action.active()) showToast('Recovery Key copiata', 'success');
             } catch {
+                if (settled || !action.active()) return;
                 keyField.focus(); keyField.select();
                 showToast('Seleziona e copia manualmente la Recovery Key', 'info');
             }
         });
         closeButton.addEventListener('click', () => {
-            if (!acknowledged.checked) return;
-            modal.classList.remove('active');
-            setTimeout(() => { modal.remove(); resolve(); }, 300);
+            if (!acknowledged.checked || !action.active()) return;
+            close();
         });
         const confirmation = createElement('label', {className: 'backup-key-confirmation'}, [
             acknowledged,
@@ -526,43 +733,60 @@ function showRecoveryKeyOnce(recoveryKey, summary) {
             createElement('div', {className: 'modal-actions'}, [copyButton, closeButton])
         ]));
         document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
+        unregister = action.own(close);
+        setTimeout(() => { if (!settled && action.active()) modal.classList.add('active'); }, 10);
     });
 }
 
+let disposeExportSetup = () => {};
 function setupEncryptedBackup(user) {
+    disposeExportSetup();
     const button = document.getElementById('btn-export-encrypted-backup');
     if (!button) return;
-    button.addEventListener('click', () => {
+    let currentAction;
+    const click = () => {
+        if (button.disabled || auth.currentUser?.uid !== user.uid) return;
+        const action = createBackupRestoreAction(user.uid, button); currentAction = action;
+        button.disabled = true;
         const modal = createElement('div', {className: 'modal-overlay'});
         const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
         const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Preparazione…', disabled: true});
         const modulePromise = import('./backup-export-service.js');
         modulePromise.then(() => {
+            if (!action.active()) return;
             startButton.disabled = false;
             startButton.textContent = 'Scegli file e crea backup';
         }).catch(() => {
-            startButton.textContent = 'Backup non disponibile';
+            if (action.active()) startButton.textContent = 'Backup non disponibile';
         });
-        const close = () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); };
-        cancelButton.addEventListener('click', close);
+        const close = () => modal.remove();
+        action.own(() => { close(); if (currentAction === action) button.disabled = false; });
+        cancelButton.addEventListener('click', () => { if (action.active()) action.dispose(); });
         startButton.addEventListener('click', async () => {
+            if (!action.active() || startButton.disabled) return;
             startButton.disabled = true;
+            let result;
             try {
                 const {exportOwnerBackup} = await modulePromise;
-                const exportPromise = exportOwnerBackup(user.uid);
+                action.check();
+                const exportPromise = exportOwnerBackup(user.uid, {signal: action.signal, isActive: action.active});
                 close();
                 button.disabled = true;
                 showToast('Preparazione backup in corso…', 'info');
-                const result = await exportPromise;
-                await showRecoveryKeyOnce(result.recoveryKey, result);
+                result = await exportPromise;
+                action.check();
+                await showRecoveryKeyOnce(result.recoveryKey, result, action);
             } catch (error) {
-                if (error?.name !== 'AbortError') {
-                    console.error('[BACKUP] Esportazione non riuscita.', error?.message);
-                    showToast('Backup non completato. Nessun dato è stato modificato.', 'error');
+                if (action.active() && error?.name !== 'AbortError') {
+                    showToast(error?.code === 'BACKUP_EXPORT_CAPACITY_EXCEEDED'
+                        ? 'Backup troppo grande per il download in memoria. Ripeti da un browser che consente il salvataggio diretto su file. Nessun dato è stato modificato.'
+                        : error?.code === 'BACKUP_EXPORT_RECORD_CAPACITY_EXCEEDED'
+                            ? 'Il Vault supera la capacità di esportazione attualmente supportata. Il backup non è stato completato; nessun dato è stato modificato.'
+                        : 'Backup non completato. Nessun dato è stato modificato.', 'error');
                 }
             } finally {
-                button.disabled = false;
+                if (result) result.recoveryKey = '';
+                action.dispose();
             }
         });
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
@@ -575,8 +799,10 @@ function setupEncryptedBackup(user) {
             createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
         ]));
         document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
-    });
+        setTimeout(() => { if (action.active()) modal.classList.add('active'); }, 10);
+    };
+    button.addEventListener('click', click);
+    disposeExportSetup = () => { currentAction?.dispose(); button.removeEventListener('click', click); button.disabled = false; };
 }
 
 async function setupSettingsProfileQr(user) {

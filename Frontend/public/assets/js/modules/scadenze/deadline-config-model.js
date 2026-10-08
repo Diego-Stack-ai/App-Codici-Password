@@ -1,3 +1,11 @@
+export function validateDeadlineFrequency(value = 7) {
+    const frequency = Number(value);
+    if (!Number.isInteger(frequency) || frequency < 1 || frequency > 30) {
+        throw new Error('La frequenza degli avvisi deve essere un numero intero da 1 a 30 giorni. Modifica la configurazione del tipo di scadenza.');
+    }
+    return frequency;
+}
+
 export function cloneDeadlineConfig(config = {}) {
     return structuredClone(config);
 }
@@ -28,6 +36,7 @@ export function normalizeDeadlineConfig(config = {}, listKeys = []) {
 }
 
 export function updateDeadlineType(config, index, values) {
+    validateDeadlineFrequency(values?.freq);
     const item = normalizeDeadlineType(values);
     if (!item || !Array.isArray(config.deadlineTypes) || !config.deadlineTypes[index]) return config;
     const deadlineTypes = [...config.deadlineTypes];
@@ -36,6 +45,7 @@ export function updateDeadlineType(config, index, values) {
 }
 
 export function appendDeadlineType(config, values) {
+    validateDeadlineFrequency(values?.freq);
     const item = normalizeDeadlineType(values);
     if (!item) return config;
     return { ...config, deadlineTypes: [...(config.deadlineTypes || []), item] };

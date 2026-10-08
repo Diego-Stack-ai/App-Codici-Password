@@ -14,13 +14,17 @@ test('entrambi i dettagli usano auth importato da Firebase per avviare le note',
         const start = code.indexOf("import('../shared/account-note-editor.js')");
         assert.ok(start >= 0);
         const end = code.indexOf('const contactNames', start);
-        let initialized = false;
-        const context = vm.createContext({auth: {currentUser: {uid: 'owner'}}, noteSignal: {aborted: false}, noteOwner: 'owner',
-            noteAccount: {}, storedNote: '', noteAccountId: 'account', noteCompanyId: 'company', isReadOnly: false,
+        let initialized = false, active = true;
+        const context = vm.createContext({auth: {currentUser: {uid: 'owner'}}, actionActive: () => active,
+            loaded: {}, storedNote: '', accountId: 'account', resolvedId: 'account', companyId: 'company',
+            lookupOwner: 'owner', loadOwnerId: 'owner', signal: new AbortController().signal, readOnly: false, isReadOnly: false,
             console, showToast: () => assert.fail(`${area}: inizializzazione fallita`),
             loadEditor: async () => ({initAccountNoteEditor: () => { initialized = true; }})});
         await vm.runInContext(code.slice(start, end).replace("import('../shared/account-note-editor.js')", 'loadEditor()'), context);
         assert.equal(initialized, true, area);
+        initialized = false; active = false;
+        await vm.runInContext(code.slice(start, end).replace("import('../shared/account-note-editor.js')", 'loadEditor()'), context);
+        assert.equal(initialized, false, `${area}: non riaprire note dopo invalidazione della pagina`);
     }
 });
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-note-editor.js', import.meta.url), 'utf8'))

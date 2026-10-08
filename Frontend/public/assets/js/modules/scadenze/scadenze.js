@@ -4,13 +4,13 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.128';
+import { auth, db } from '../../firebase-config.js?v=1.2.128';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
-import { deadlineDate, deadlinePresentation } from './deadline-model.js';
+import { updateDoc, deleteDoc, doc, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
+import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
 import { initComponents } from '../../components-v129.js?v=1.2.128';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -23,6 +23,11 @@ let activeFilter = 'all';
 let searchQuery = '';
 let sortType = 'date-asc';
 let scadenzeContainer = null; // Module-scoped
+let stopDeadlineList = null;
+let listEpoch = 0;
+let listMount = 0;
+const listActive = () => currentUser?.uid && auth.currentUser?.uid === currentUser.uid
+    && (!window.privateAuthGate || window.privateAuthGate.isReady());
 
 
 /**
@@ -35,10 +40,16 @@ let scadenzeContainer = null; // Module-scoped
 export async function initScadenze(user) {
     
     if (!user) return;
+    stopDeadlineList?.();
     currentUser = user;
+    const mount = ++listMount;
+    const active = () => mount === listMount && listActive();
+    activeFilter = 'all';
+    searchQuery = '';
 
     scadenzeContainer = document.querySelector('#scadenze-list');
     if (!scadenzeContainer) return; // Se non siamo nella pagina scadenze, stop
+    startDeadlineListLifecycle(user.uid);
 
     // Nota: initComponents() rimosso (gestito da main.js)
 
@@ -106,12 +117,13 @@ export async function initScadenze(user) {
 
     // Load Data
     await loadScadenze();
+    if (!active()) return;
 
     // Inizializzazione SwipeList (V6)
     new SwipeList('.deadline-card-owned', {
         threshold: 0.25,
-        onSwipeRight: (item) => archiveScadenza(item.dataset.id),
-        onSwipeLeft: (item) => deleteScadenza(item.dataset.id)
+        onSwipeRight: (item) => active() && archiveScadenza(item.dataset.id),
+        onSwipeLeft: (item) => active() && deleteScadenza(item.dataset.id)
     });
 
     // FAB Button Setup
@@ -122,19 +134,66 @@ export async function initScadenze(user) {
 
 // --- INTERNAL HELPER FUNCTIONS ---
 
+function startDeadlineListLifecycle(uid) {
+    let stopped = false, timer, unsubscribe;
+    const stop = () => {
+        if (stopped) return;
+        stopped = true;
+        ++listMount;
+        ++listEpoch;
+        clearTimeout(timer);
+        unsubscribe?.();
+        currentUser = null;
+        allScadenze = [];
+        clearElement(scadenzeContainer);
+        document.removeEventListener('visibilitychange', visible);
+        window.removeEventListener('pagehide', stop);
+        window.removeEventListener('private-auth-blocked', stop);
+    };
+    const visible = () => {
+        if (!listActive()) { stop(); return; }
+        if (document.visibilityState === 'visible') {
+            renderFilteredScadenze();
+            void loadScadenze();
+        }
+    };
+    const schedule = () => {
+        if (stopped) return;
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        timer = setTimeout(() => {
+            if (!listActive()) { stop(); return; }
+            renderFilteredScadenze();
+            schedule();
+        }, Math.max(1, midnight - now));
+    };
+    stopDeadlineList = stop;
+    document.addEventListener('visibilitychange', visible);
+    window.addEventListener('pagehide', stop);
+    window.addEventListener('private-auth-blocked', stop);
+    unsubscribe = onAuthStateChanged(auth, next => { if (next?.uid !== uid) stop(); });
+    if (stopped) unsubscribe?.();
+    schedule();
+}
+
 async function loadScadenze() {
-    if (!currentUser) return;
+    if (!listActive()) return;
+    const uid = currentUser.uid;
+    const epoch = ++listEpoch;
+    const active = () => listActive() && currentUser.uid === uid && epoch === listEpoch;
     try {
         const [owned, received] = await Promise.all([
-            listDeadlines(currentUser.uid),
-            listReceivedDeadlines(currentUser.uid)
+            listDeadlines(uid),
+            listReceivedDeadlines(uid)
         ]);
+        if (!active()) return;
         allScadenze = [
             ...owned.map(item => ({ ...item, received: false })),
             ...received.map(item => ({ ...item, received: true }))
         ];
         renderFilteredScadenze();
     } catch (error) {
+        if (!active()) return;
         logError("Scadenze Page", error);
         if (scadenzeContainer) {
             const p = createElement('p', { className: 'hero-page-subtitle deadline-error-message', textContent: `Errore: ${error.message}` });
@@ -144,19 +203,15 @@ async function loadScadenze() {
 }
 
 function renderFilteredScadenze() {
-    if (!scadenzeContainer) return;
+    if (!scadenzeContainer || !listActive()) return;
 
     let filtered = [...allScadenze];
     const now = new Date();
-    const thirtyDaysLater = new Date();
-    thirtyDaysLater.setDate(now.getDate() + 30);
 
     // Apply Filter (SEMPRE APPLICATO ORA)
     filtered = filtered.filter(s => {
-        const dueDate = deadlineDate(s);
-        if (!dueDate) return activeFilter === 'completed' && s.completed;
-        const expired = dueDate < now;
-        const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
+        const bucket = deadlineBucket(s, now);
+        if (!bucket) return activeFilter === 'completed' && s.completed;
 
         // CASO SPECIFICO: COMPLETATE
         if (activeFilter === 'completed') {
@@ -167,8 +222,8 @@ function renderFilteredScadenze() {
         // ESCLUDI LE COMPLETATE
         if (s.completed) return false;
 
-        if (activeFilter === 'urgent') return expired;
-        if (activeFilter === 'expiring') return isUpcoming;
+        if (activeFilter === 'urgent') return bucket === 'urgent';
+        if (activeFilter === 'expiring') return bucket === 'upcoming';
 
         // Se siamo qui e activeFilter == 'all', passa (perch� non completata)
         return true;
@@ -224,12 +279,11 @@ function renderFilteredScadenze() {
 }
 
 function createScadenzaCard(scadenza) {
+    const mount = listMount;
     const dueDate = deadlineDate(scadenza) || new Date(0);
-    const now = new Date();
-    const thirtyDaysLater = new Date();
-    thirtyDaysLater.setDate(now.getDate() + 30);
-    const expired = dueDate < now;
-    const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
+    const bucket = deadlineBucket(scadenza);
+    const expired = bucket === 'urgent';
+    const isUpcoming = bucket === 'upcoming';
 
     let stateClass = 'deadline-card-info';
 
@@ -294,6 +348,7 @@ function createScadenzaCard(scadenza) {
     }, scadenza.received ? [swipeContent] : [bgArchive, bgDelete, swipeContent]);
 
     card.onclick = () => {
+        if (mount !== listMount || !listActive()) return;
         window.location.href = card.dataset.href;
     };
 

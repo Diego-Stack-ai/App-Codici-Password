@@ -120,7 +120,7 @@ test('logout lock reaches the real RAM cleanup and explicit login clears the den
     const auth = await readFile(new URL('assets/js/auth.js', root), 'utf8');
     const header = await readFile(new URL('assets/js/components-v129.js', root), 'utf8');
     assert.match(security, /addEventListener\('private-auth-blocked', \(\) => clearSession\(\)\)/);
-    assert.match(security, /export function clearSession\(\) \{\s*_vaultKeyMaterial = null;[\s\S]*?_clearSessionStorage\(\)/);
+    assert.match(security, /export function clearSession\(\) \{\s*invalidatePendingUnlock\(\);\s*_vaultKeyMaterial = null;[\s\S]*?_clearSessionStorage\(\)/);
     assert.match(auth, /sessionStorage\.removeItem\('codex_explicit_logout'\)/);
     assert.match(auth, /sessionStorage\.getItem\('codex_explicit_logout'\) === '1'/);
     for (const source of [auth, header]) assert.match(source, /privateAuthGate\?\.block\(\);[\s\S]*?logoutWithCleanup\(\(\) => signOut\(auth\)\)/);

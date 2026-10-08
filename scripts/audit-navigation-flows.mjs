@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
@@ -43,14 +45,16 @@ if (/\bauth\.currentUser\b/.test(privateSharing)) {
     assert.match(privateSharing, /import \{[^}]*\bauth\b[^}]*\} from ['"]\.\.\/\.\.\/firebase-config\.js/,
         'La condivisione privata usa auth senza importarlo');
 }
-assert.match(privateSharing, /const guestUid = wasAccepted[\s\S]+delete sharedWith\[normalizedEmail\]/,
-    'La revoca privata perde l’UID ospite prima di creare la notifica');
-assert.match(homeDeadlineInbox, /unread\.slice\(0, 10\)/,
-    'La Home non limita il lavoro dell’inbox Scadenze');
+assert.match(privateSharing, /delete sharedWith\[normalizedEmail\][\s\S]+sharedWithUids/,
+    'La revoca privata non rimuove l’ospite o non ricalcola gli UID accettati');
+// Verify the actual renderer: ten per page AFTER dedup, all later pages reachable.
+// This replaces syntax-specific checks, not the bounded-render/window contracts.
+const reminderChecks = spawnSync(process.execPath, ['--test', ...['deadline-reminders.test.mjs', 'deadline-list-calendar.test.mjs'].map(name => fileURLToPath(new URL(`../tests/${name}`, import.meta.url)))], {encoding: 'utf8'});
+assert.equal(reminderChecks.status, 0, `Regressioni promemoria/limiti Home:\n${reminderChecks.stdout}\n${reminderChecks.stderr}`);
 assert.match(homeDeadlineInbox, /dettaglio_scadenza\.html\?id=\$\{encodeURIComponent\(notification\.deadlineId\)\}&notification=\$\{encodeURIComponent\(notification\.id\)\}/,
     'L’inbox Home non apre la Scadenza e la consegna specifiche');
-assert.match(homeDeadlineDashboard, /thirtyDaysLater\.setDate\(today\.getDate\(\) \+ 30\)/,
-    'La dashboard Home non applica la finestra di 30 giorni');
+assert.match(homeDeadlineDashboard, /deadlineBucket\(deadline, today\)/,
+    'La dashboard Home non usa il calendario condiviso (finestra verificata dal renderer)');
 assert.match(homeDeadlineDashboard, /items\.slice\(0, 3\)/,
     'La dashboard Home non limita le anteprime per sezione');
 assert.match(deadline, /createDeadlineConfigController\(\{[\s\S]+recipientController/,
@@ -77,7 +81,7 @@ for (const [name, source] of [['privata', privateAccountList], ['aziendale', com
 }
 assert.match(accountListView, /createCardSecretResolver\(copyValue, encrypted && isPassword\)/,
     'La vista Account condivisa non mantiene la risoluzione lazy delle password');
-assert.match(accountListView, /account\.password \? createDataRow\([^\n]+true, account\._encrypted\)/,
+assert.match(accountListView, /account\.password \? createDataRow\([^\n]+true, account\._encrypted, options\.signal,\s*options\.resolveSecret \? \(\) => options\.resolveSecret\(account, 'password'\) : undefined\)/,
     'La vista Account condivisa non mantiene la password cifrata fino a reveal/copia');
 for (const [name, source] of [['privato', privateDetail], ['aziendale', companyDetail]]) {
     assert.match(source, /renderAccountBanking\(acc, \{/,
@@ -87,7 +91,9 @@ for (const [name, source] of [['privato', privateDetail], ['aziendale', companyD
 }
 assert.match(accountBankingView, /hasRealBankingData\(account\)/,
     'La vista bancaria non applica il modello comune ai dati legacy e canonici');
-assert.match(accountBankingView, /card\.pin \? createReadonlyField\('PIN',[^\n]+true\)/,
+assert.match(accountBankingView, /const field = \(label, value, icon, secret = false\) => createReadonlyField\(label, value, icon, secret, isActive\);/,
+    'La vista bancaria non propaga protezione e validità del contesto ai campi');
+assert.match(accountBankingView, /card\.pin \? field\('PIN', card\.pin, 'dialpad', true\)/,
     'La vista bancaria non protegge visivamente il PIN');
 assert.match(privateAccount, /savePrivateAccount\(\{/,
     'Il form privato non delega il salvataggio al servizio dedicato');
@@ -109,11 +115,11 @@ for (const scope of ['deadlines', 'sharing']) {
 }
 assert.match(pushSettings, /Promise\.all\(\[[\s\S]+setupPushToggle\(user, 'deadlines'\)[\s\S]+setupPushToggle\(user, 'sharing'\)/,
     'Le configurazioni Push non vengono inizializzate in parallelo');
-assert.match(archive, /loadArchivedAccounts\(currentUser\.uid, currentContext\)/,
+assert.match(archive, /loadArchivedAccounts\(uid, loadContext, \{signal: controller\.signal, isActive: loadActive\}\)/,
     'La pagina Archivio non delega il caricamento al servizio dedicato');
 assert.doesNotMatch(archive, /listCompanyAccounts|writeBatch|updateDoc|deleteDoc|\bdecrypt\(/,
     'La pagina Archivio contiene ancora accesso dati, mutazioni o decifratura');
-assert.match(archiveService, /Promise\.allSettled\(\[[\s\S]+loadPrivateArchive\(uid\)[\s\S]+loadAllCompanyArchives\(uid\)/,
+assert.match(archiveService, /Promise\.allSettled\(\[[\s\S]+loadPrivateArchive\(uid, check\)[\s\S]+loadAllCompanyArchives\(uid, check\)/,
     'Il servizio Archivio non carica in parallelo le sorgenti indipendenti');
 assert.doesNotMatch(archiveService, /decrypt\(account\.(?:password|account)/,
     'L’Archivio decifra segreti che non mostra né usa');

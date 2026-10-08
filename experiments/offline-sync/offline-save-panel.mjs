@@ -1,0 +1,234 @@
+// Candidate view boundary. No key, SDK, raw database or unscoped writer reaches the DOM.
+export async function mountOfflineSavePanel(root, {signal, isActive = () => true, createClient, prepare, readConflict,
+    createConflictProposal, onSaved = () => {}, onDiscarded = () => {}, initialNote = '', recoveryRecordId, recoveryOnly = false}) {
+    if (!signal || typeof createClient !== 'function' || typeof prepare !== 'function' || typeof onSaved !== 'function' || typeof onDiscarded !== 'function') throw new Error('SAVE_PANEL_CONFIG');
+    if (recoveryRecordId !== undefined && (typeof recoveryRecordId !== 'string' || !recoveryRecordId)) throw new Error('SAVE_PANEL_CONFIG');
+    if (typeof recoveryOnly !== 'boolean' || (recoveryOnly && recoveryRecordId === undefined)) throw new Error('SAVE_PANEL_CONFIG');
+    const section = document.createElement('section');
+    const label = document.createElement('label'); label.textContent = 'Nota';
+    const input = document.createElement('textarea'); input.value = initialNote; input.autocomplete = 'off'; input.maxLength = 100000;
+    label.append(input);
+    const status = document.createElement('p'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+    const save = document.createElement('button'); save.type = 'button'; save.textContent = 'Salva nota';
+    save.hidden = label.hidden = recoveryOnly;
+    const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Riprova sincronizzazione'; retry.hidden = true;
+    section.append(label, status, save, retry);
+    const discard = document.createElement('button'); discard.type = 'button'; discard.textContent = 'Mantieni i dati online'; discard.hidden = true;
+    const confirm = document.createElement('button'); confirm.type = 'button'; confirm.textContent = 'Conferma: elimina questa modifica locale'; confirm.hidden = true;
+    const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Annulla'; cancel.hidden = true;
+    section.append(discard, confirm, cancel);
+    const compare = document.createElement('button'); compare.type = 'button'; compare.textContent = 'Confronta le note'; compare.hidden = true;
+    const comparison = document.createElement('section'); comparison.hidden = true;
+    const localTitle = document.createElement('h3'); localTitle.textContent = 'Nota locale in attesa';
+    const localText = document.createElement('pre');
+    const onlineTitle = document.createElement('h3'); onlineTitle.textContent = 'Nota online al momento del confronto';
+    const onlineText = document.createElement('pre');
+    comparison.append(localTitle, localText, onlineTitle, onlineText); section.append(compare, comparison);
+    const propose = document.createElement('button'); propose.type = 'button'; propose.textContent = 'Riproporre la nota locale'; propose.hidden = true;
+    const confirmProposal = document.createElement('button'); confirmProposal.type = 'button'; confirmProposal.textContent = 'Conferma: riproponi solo questa nota'; confirmProposal.hidden = true;
+    const cancelProposal = document.createElement('button'); cancelProposal.type = 'button'; cancelProposal.textContent = 'Annulla riproposizione'; cancelProposal.hidden = true;
+    section.append(propose, confirmProposal, cancelProposal);
+    const clearComparison = () => { localText.textContent = onlineText.textContent = ''; comparison.hidden = true; };
+    let disposed = false, busy = false, client, operation, accepted = false, submitted, confirmed = false, refresh, held, proposal;
+    const active = () => !disposed && !signal.aborted && isActive();
+    const dispose = () => {
+        if (disposed) return;
+        disposed = true; input.value = ''; operation = null; submitted = null; held = null; proposal?.close(); proposal = null; client?.close(); client = null;
+        clearComparison(); compare.onclick = null;
+        signal.removeEventListener('abort', dispose); save.onclick = retry.onclick = discard.onclick = confirm.onclick = cancel.onclick = null;
+        propose.onclick = confirmProposal.onclick = cancelProposal.onclick = null; section.remove();
+    };
+    const states = {idle: 'Nessuna modifica in attesa.', offline: 'Modifica conservata sul dispositivo. In attesa di connessione.',
+        syncing: 'Sincronizzazione in corso…', saved: 'Nota salvata.', conflict: 'Account modificato altrove. La copia locale è conservata.',
+        'reconciliation-required': 'Questo Account richiede la modifica completa. La copia locale è conservata.',
+        'recoverable-error': 'Conferma non disponibile. Puoi riprovare senza creare una seconda operazione.'};
+    const update = state => {
+        if (!active() || confirmed) return;
+        if (state === 'saved') return; // Queue-wide completion is not this note's receipt.
+        status.textContent = states[state] || states['recoverable-error'];
+        retry.hidden = !['offline', 'recoverable-error'].includes(state);
+    };
+    const controls = () => {
+        if (!active()) return;
+        save.disabled = recoveryOnly || !client || busy || accepted;
+        input.readOnly = recoveryOnly || busy || accepted || Boolean(operation);
+        retry.disabled = !client || busy;
+        discard.disabled = confirm.disabled = cancel.disabled = !client || busy;
+        compare.disabled = !client || busy;
+        propose.disabled = confirmProposal.disabled = cancelProposal.disabled = !client || busy;
+    };
+    signal.addEventListener('abort', dispose, {once: true});
+    if (!active()) { dispose(); return dispose; }
+    root.append(section); save.disabled = true; input.readOnly = true; status.textContent = 'Preparazione…';
+    try {
+        const opened = await createClient({signal, isActive: active, onState: event => {
+            if (!active() || confirmed) return;
+            if (['conflict', 'reconciliation-required'].includes(event.state)) {
+                if (!submitted || event.operation?.operationId !== submitted.operationId || event.operation?.recordId !== submitted.recordId) {
+                    status.textContent = 'Un’altra modifica blocca la coda. Questa nota resta in attesa.';
+                    retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = true;
+                    propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; proposal?.close(); proposal = null; held = null; clearComparison();
+                    return;
+                }
+                held = structuredClone(event.operation); discard.hidden = false;
+                confirm.hidden = cancel.hidden = true;
+                compare.hidden = typeof readConflict !== 'function' && typeof createConflictProposal !== 'function';
+                propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; proposal?.close(); proposal = null; clearComparison();
+            }
+            update(event.state);
+        },
+            onCommitted: event => {
+                if (!active() || confirmed || !submitted || event.operationId !== submitted.operationId || event.recordId !== submitted.recordId) return;
+                confirmed = accepted = true; operation = held = null; input.value = ''; retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = true;
+                compare.hidden = propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; proposal?.close(); proposal = null; clearComparison();
+                status.textContent = states.saved; controls();
+                refresh = Promise.resolve().then(() => {
+                    if (active()) return onSaved({signal, isActive: active});
+                }).catch(() => {
+                    if (active()) status.textContent = 'Nota salvata. Riapri il dettaglio per aggiornare la visualizzazione.';
+                });
+                return refresh;
+            }});
+        if (!active()) { opened.close(); dispose(); return dispose; }
+        client = opened;
+        if (recoveryRecordId !== undefined) {
+            const result = await client.pendingForRecord(recoveryRecordId);
+            if (!active()) { dispose(); return dispose; }
+            if (result?.acquired !== true || (result.value !== null &&
+                (result.value?.recordId !== recoveryRecordId || typeof result.value.operationId !== 'string' || !result.value.operationId))) {
+                throw new Error('SAVE_PANEL_PENDING_UNAVAILABLE');
+            }
+            if (result.value) {
+                submitted = {operationId: result.value.operationId, recordId: recoveryRecordId};
+                accepted = true; input.value = ''; retry.hidden = false;
+                status.textContent = 'Una modifica di questo Account è già conservata sul dispositivo. Riprendi la sincronizzazione per verificarne l’esito.';
+            }
+        }
+        if (!accepted) status.textContent = recoveryOnly
+            ? 'Nessuna modifica in attesa per questo Account. Per modificare la nota, riapri il dettaglio quando sei online.'
+            : 'Modifica la nota e salva.';
+        controls();
+    } catch {
+        client?.close(); client = null;
+        if (active()) { input.value = ''; input.readOnly = true; save.disabled = true; retry.hidden = true;
+            status.textContent = 'Editor non disponibile. La coda locale è conservata: riapri la pagina.'; }
+        return dispose;
+    }
+    const run = async () => {
+        if (!active() || busy || (recoveryOnly && !accepted)) return;
+        busy = true; controls();
+        try {
+            if (!accepted) {
+                if (!operation) operation = await prepare(input.value, {signal, isActive: active});
+                if (!active()) { operation = null; return; }
+                submitted = {operationId: operation.operationId, recordId: operation.recordId};
+                const result = await client.enqueue(operation);
+                if (!active()) return;
+                if (result?.acquired === false) { update('recoverable-error'); return; }
+                accepted = true;
+                // The encrypted command is now owned by the queue, not this editor.
+                operation = null; input.value = '';
+            } else await client.flush();
+            await refresh;
+        } catch { if (active()) update('recoverable-error'); }
+        finally { busy = false; controls(); }
+    };
+    save.onclick = run; retry.onclick = run;
+    compare.onclick = async () => {
+        if (!active() || busy || !held || (typeof readConflict !== 'function' && typeof createConflictProposal !== 'function')) return;
+        busy = true; controls(); clearComparison();
+        propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true;
+        let openedProposal;
+        try {
+            const snapshot = held;
+            proposal?.close(); proposal = null;
+            let result;
+            if (typeof createConflictProposal === 'function') {
+                openedProposal = await createConflictProposal(structuredClone(snapshot), {signal, isActive: active});
+                if (!active() || held !== snapshot) { openedProposal?.close(); openedProposal = null; return; }
+                result = openedProposal ? openedProposal.comparison : await readConflict(structuredClone(snapshot), {signal, isActive: active});
+            } else result = await readConflict(structuredClone(snapshot), {signal, isActive: active});
+            if (!active() || held !== snapshot) return;
+            if (typeof result?.localNote !== 'string' || typeof result?.onlineNote !== 'string' ||
+                result.localNote.length > 100000 || result.onlineNote.length > 100000) throw new Error('REVIEW_INVALID');
+            localText.textContent = result.localNote; onlineText.textContent = result.onlineNote; comparison.hidden = false;
+            proposal = openedProposal; openedProposal = null;
+            propose.hidden = !proposal;
+        } catch { openedProposal?.close(); if (active()) status.textContent = 'Confronto non disponibile. La modifica locale è conservata.'; }
+        finally { busy = false; controls(); }
+    };
+    propose.onclick = () => {
+        if (!active() || busy || !held || !proposal) return;
+        status.textContent = 'Riproporre solo la nota locale sulla revisione confrontata?';
+        propose.hidden = true; confirmProposal.hidden = cancelProposal.hidden = false;
+    };
+    cancelProposal.onclick = () => {
+        if (!active() || busy || !held || !proposal) return;
+        confirmProposal.hidden = cancelProposal.hidden = true; propose.hidden = false;
+        status.textContent = 'La modifica locale è ancora conservata.';
+    };
+    confirmProposal.onclick = async () => {
+        if (!active() || busy || !held || !proposal || confirmProposal.hidden) return;
+        busy = true; controls();
+        const expected = held, previousSubmitted = submitted, activeProposal = proposal;
+        let replacementStarted = false;
+        try {
+            const replacement = await proposal.prepareReplacement({confirmed: true});
+            if (!active() || held !== expected) return;
+            submitted = {operationId: replacement.operationId, recordId: replacement.recordId};
+            replacementStarted = true;
+            const result = await client.replace(expected, replacement);
+            if (!active()) return;
+            if (confirmed) return; // The bound receipt already completed the view.
+            if (result?.replacementApplied === false) { replacementStarted = false; throw new Error('REPLACE_NOT_CONFIRMED'); }
+            if (held?.operationId === replacement.operationId && held?.recordId === replacement.recordId) return; // A newer server revision conflicted.
+            held = null; activeProposal.close(); if (proposal === activeProposal) proposal = null;
+            discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true;
+            clearComparison(); retry.hidden = false;
+            status.textContent = 'Nota riproposta. Sincronizzazione in corso o in attesa di rete.';
+        } catch {
+            if (!active() || confirmed) return;
+            if (proposal === activeProposal) { activeProposal.close(); proposal = null; }
+            propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true; clearComparison();
+            if (replacementStarted) {
+                // A failure after starting the transaction cannot prove it rolled back.
+                // Keep the new identity for its receipt; retry only the existing queue.
+                held = null; discard.hidden = confirm.hidden = cancel.hidden = compare.hidden = true;
+                retry.hidden = false;
+                status.textContent = 'Conferma non disponibile. Riprova la sincronizzazione della coda esistente.';
+            } else {
+                submitted = previousSubmitted;
+                status.textContent = 'Riproposizione non confermata. La modifica locale è conservata: confronta di nuovo prima di riprovare.';
+            }
+        } finally { busy = false; controls(); }
+    };
+    discard.onclick = () => {
+        if (!active() || busy || !held) return;
+        status.textContent = 'Eliminare solo questa modifica in attesa? I dati online non saranno modificati.';
+        discard.hidden = true; confirm.hidden = cancel.hidden = false;
+    };
+    cancel.onclick = () => {
+        if (!active() || busy || !held) return;
+        confirm.hidden = cancel.hidden = true; discard.hidden = false;
+        status.textContent = 'La modifica locale è ancora conservata.';
+    };
+    confirm.onclick = async () => {
+        if (!active() || busy || !held || confirm.hidden) return;
+        busy = true; controls();
+        try {
+            const result = await client.discard(held);
+            if (!active()) return;
+            if (result?.acquired !== true) throw new Error('DISCARD_NOT_CONFIRMED');
+            confirmed = accepted = true; held = operation = submitted = null; input.value = '';
+            retry.hidden = discard.hidden = confirm.hidden = cancel.hidden = true;
+            compare.hidden = propose.hidden = confirmProposal.hidden = cancelProposal.hidden = true;
+            proposal?.close(); proposal = null; clearComparison();
+            status.textContent = 'Modifica locale eliminata. I dati online sono invariati.';
+            try { await onDiscarded({signal, isActive: active}); }
+            catch { if (active()) status.textContent = 'Modifica locale eliminata. Riapri il dettaglio per aggiornare la visualizzazione.'; }
+        } catch {
+            if (active()) status.textContent = 'Eliminazione non confermata. La coda potrebbe essere cambiata: riapri il dettaglio prima di riprovare.';
+        } finally { busy = false; controls(); }
+    };
+    return dispose;
+}

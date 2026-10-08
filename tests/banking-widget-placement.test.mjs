@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-embedded-widgets.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+const lifecycleSource = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-widget-lifecycle.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 function fixture(editable = true) {
     const all = [], updates = [];
     function element(tag, props = {}, children = []) {
@@ -13,7 +14,7 @@ function fixture(editable = true) {
         }, appendChild(x) {x.remove(); this.children.push(x); x.parent = this; return x;},
         remove() {if(this.parent) this.parent.children = this.parent.children.filter(c => c !== this); this.parent = null;},
         addEventListener(type, fn) {this['on'+type] = fn;}, setAttribute(k,v) {this[k]=v;},
-        querySelector() {return null;}, focus() {}};
+        querySelectorAll(selector) {return this.children.flatMap(child=>[...(selector.split(',').some(q=>q.trim()===child.tag)?[child]:[]),...child.querySelectorAll(selector)]);}, querySelector() {return null;}, focus() {}};
         Object.defineProperty(n, 'firstElementChild', {get() {return this.children[0];}});
         all.push(n); children.filter(Boolean).forEach(x => n.appendChild(x)); return n;
     }
@@ -25,12 +26,12 @@ function fixture(editable = true) {
     const sandbox = {document: {getElementById: id => ids[id], querySelectorAll: () => hosts, body: element('body')},
         createElement: element, clearElement(n) {for(const x of [...n.children]) x.remove();},
         setChildren(n, children) {for(const x of [...n.children]) x.remove(); children.filter(Boolean).forEach(x=>n.appendChild(x));},
-        auth:{currentUser:{uid:'owner'}}, navigator:{onLine:true}, crypto:{randomUUID:()=> 'uuid'},
+        onAuthStateChanged:()=>()=>{}, auth:{currentUser:{uid:'owner'}}, navigator:{onLine:true}, crypto:{randomUUID:()=> 'uuid'},
         ensureVaultKeyMaterial:async()=> 'key', decrypt:async x => x,
         listAccountWidgets:async()=>widgets, listAccountWidgetsConfirmed:async()=>widgets,
         listSharedVaultDataConfirmed:async()=>[], showToast(){},
         updateAccountWidget:async (...args)=>updates.push(args), createAccountWidget:async(...args)=>updates.push(args)};
-    vm.createContext(sandbox); vm.runInContext(source,sandbox);
+    vm.createContext(sandbox); vm.runInContext(lifecycleSource,sandbox); vm.runInContext(source,sandbox);
     return {all, ids, widgets, updates, sandbox, get hosts(){return hosts;},
         remount() {hosts = hosts.map(h=>element('div',{dataset:{...h.dataset}}));},
         init:(extra={})=>sandbox.initAccountEmbeddedWidgets({...extra,uid:'owner',context:'private',accountId:'account',editable})};
@@ -84,4 +85,10 @@ test('moving an existing widget to an unsaved bank preserves editor and avoids t
     await f.all.find(n=>n.tag==='form').onsubmit({preventDefault(){}});
     assert.equal(f.updates.length,0);assert.equal(title.value,'Draft preserved');
     assert.ok(f.sandbox.document.body.children.length);
+});
+
+test('bank card values and detached bank hosts are cleared on lifecycle destroy',async()=>{
+ const f=fixture(); const controller=await f.init();const input=f.all.find(n=>n.className==='account-widget-inline-input');input.value='sensitive draft';
+ controller.destroy(); assert.equal(input.value,'');assert.ok(f.hosts.every(host=>host.children.length===0));
+ controller.placeBankWidgets();assert.ok(f.hosts.every(host=>host.children.length===0));assert.equal(controller.hasPendingChanges(),false);
 });

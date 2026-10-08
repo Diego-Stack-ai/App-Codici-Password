@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 const base='../Frontend/public/assets/js/modules/shared/';
-const sources=await Promise.all(['account-shared-credentials.js','account-embedded-widgets.js'].map(async name=>(await readFile(new URL(base+name,import.meta.url),'utf8')).replace(/^import[\s\S]*?;\r?\n/gm,'').replace(/export (async )?function/g,(_,a)=>`${a||''}function`)));
+const sources=await Promise.all(['account-widget-lifecycle.js','account-shared-credentials.js','account-embedded-widgets.js'].map(async name=>(await readFile(new URL(base+name,import.meta.url),'utf8')).replace(/^import[\s\S]*?;\r?\n/gm,'').replace(/export (async )?function/g,(_,a)=>`${a||''}function`)));
 const deferred=()=>{let resolve;return {promise:new Promise(r=>resolve=r),resolve}};
 function fixture(which=1){
  const nodes=[], listeners=new Set(), toasts=[], writes=[], globalListeners=new Map();
@@ -29,7 +29,7 @@ function fixture(which=1){
  sandbox.addEventListener=(name,callback)=>{if(!globalListeners.has(name))globalListeners.set(name,new Set());globalListeners.get(name).add(callback)};
  sandbox.removeEventListener=(name,callback)=>globalListeners.get(name)?.delete(callback);
  sandbox.dispatchEvent=event=>{for(const callback of [...(globalListeners.get(event.type)||[])])callback(event)};
- vm.createContext(sandbox);vm.runInContext(sources[which-1],sandbox);
+ vm.createContext(sandbox);vm.runInContext(sources[0],sandbox);vm.runInContext(sources[which],sandbox);
  const scope={uid:'A',context:'private',accountId:'one',editable:true};
  const makeLife=(signal)=>sandbox.createAccountWidgetLifecycle({...scope,signal},{section:roots['shared-credentials-section'],list:roots['shared-credentials-list'],add:roots['btn-link-shared-credential']});
  return {sandbox,roots,body,nodes,listeners,toasts,writes,scope,makeLife,globalListeners,lock(){sandbox.dispatchEvent({type:'vault-session-locked'})},logout(){auth.currentUser=null;for(const fn of [...listeners])fn(null)},button:text=>nodes.find(n=>n.textContent===text),get dialogs(){return body.children.filter(n=>n.classList.contains('modal-overlay'))}};

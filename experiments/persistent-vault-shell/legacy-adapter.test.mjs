@@ -1,0 +1,260 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createLegacyAdapter} from './legacy-adapter.mjs';
+import {createProtectedSession} from './test-support/protected-session.mjs';
+import {openDocumentImageBytes} from './profile-document-attachment-seal.mjs';
+const source = await readFile(new URL('../../Frontend/public/assets/js/modules/core/crypto-utils.js', import.meta.url), 'utf8');
+const cryptoApi = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const master = 'SOLO-FIXTURE!123456';
+const marker = 'APP_CODICI_PASSWORD_VAULT_VERIFIER_V1';
+const randomKey = cryptoApi.generateVaultKey();
+const verifier = await cryptoApi.createVaultVerifier(marker, master);
+const envelope = await cryptoApi.wrapVaultKey(randomKey, master);
+const ciphertext = await cryptoApi.encrypt('fixture-current', randomKey);
+function fixture(options = {}) {
+    let user = {uid: 'a'}, observer, unsubscribed = false;
+    const adapter = createLegacyAdapter({
+        getUser: () => user,
+        subscribeUser: fn => { observer = fn; return () => { unsubscribed = true; }; },
+        loadSecurity: async () => ({verifier, vaultKeyEnvelope: envelope}),
+        requestPassword: async () => master, cryptoApi,
+        ...options
+    });
+    return {adapter, changeUser(value) { user = value; observer(value); }, get unsubscribed() { return unsubscribed; }};
+}
+
+test('adapter preserves explicit lock reasons and the default manual reason', () => {
+    const reasons = [];
+    const f = fixture({onLock: reason => reasons.push(reason)});
+    f.adapter.lock('admission-refused');
+    f.adapter.lock('auth-change');
+    f.adapter.lock();
+    assert.deepEqual(reasons, ['admission-refused', 'auth-change', 'manual']);
+    f.adapter.dispose();
+});
+
+test('current v2 verifier/envelope decrypt the original record without rewriting it', async () => {
+    const f = fixture();
+    const record = Object.freeze({ownerId: 'a', ciphertext});
+    await f.adapter.unlock();
+    assert.equal(await f.adapter.read(record), 'fixture-current');
+    assert.equal(record.ciphertext, ciphertext);
+    f.adapter.dispose();
+    assert.equal(f.unsubscribed, true);
+    await assert.rejects(f.adapter.read(record), /AUTH_REQUIRED/);
+});
+
+test('binary adapter uses the existing random primary key for raw and CPVK2 material', async () => {
+    const aad = 'synthetic-owner-document-attachment';
+    for (const material of [randomKey, cryptoApi.createVaultKeyring(randomKey, 'LEGACY-TEXT-ONLY')]) {
+        const wrapped = await cryptoApi.wrapVaultKey(material, master);
+        const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+        await f.adapter.unlock();
+        const bytes = Uint8Array.from([1, 2, 3, 4]);
+        const sealed = await f.adapter.sealImage({bytes, aad});
+        assert.deepEqual(await f.adapter.openImage({...sealed, aad}), bytes);
+        const originalKey = Uint8Array.from(atob(randomKey), c => c.charCodeAt(0));
+        try {assert.deepEqual(await openDocumentImageBytes(originalKey, {...sealed, aad}), bytes);}
+        finally {originalKey.fill(0);}
+        await assert.rejects(f.adapter.openImage({...sealed, aad: 'another-document'}));
+        f.adapter.lock();
+        await assert.rejects(f.adapter.openImage({...sealed, aad}), /VAULT_LOCKED/);
+        assert.equal(f.adapter.key, undefined);
+        f.adapter.dispose();
+    }
+});
+
+test('binary adapter never derives a new key from legacy text or falls back to the keyring legacy key', async () => {
+    for (const material of ['LEGACY-TEXT-ONLY', cryptoApi.createVaultKeyring('invalid-primary', randomKey)]) {
+        const wrapped = await cryptoApi.wrapVaultKey(material, master);
+        const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+        await f.adapter.unlock();
+        await assert.rejects(f.adapter.sealImage({bytes: Uint8Array.of(1), aad: 'synthetic'}), /BINARY_VAULT_KEY_UNSUPPORTED/);
+        f.adapter.dispose();
+    }
+});
+
+test('adapter encrypts with the original crypto API and supports a round trip without exposing the key', async () => {
+    const f = fixture(); await f.adapter.unlock();
+    const encrypted = await f.adapter.encrypt('synthetic-new-value');
+    assert.equal(typeof encrypted, 'string');
+    assert.equal(cryptoApi.isEncryptedValue(encrypted), true);
+    assert.notEqual(encrypted, 'synthetic-new-value');
+    assert.equal(await cryptoApi.decryptRequiredValue(encrypted, randomKey), 'synthetic-new-value');
+    assert.equal(await f.adapter.read({ownerId: 'a', ciphertext: encrypted}), 'synthetic-new-value');
+    assert.equal(f.adapter.key, undefined);
+    await assert.rejects(f.adapter.encrypt(''), /PLAINTEXT_REQUIRED/);
+    f.adapter.dispose();
+    await assert.rejects(f.adapter.encrypt('fixture'), /AUTH_REQUIRED/);
+});
+
+test('CPVK2 encryption uses the primary key while retaining legacy reads', async () => {
+    const ring = cryptoApi.createVaultKeyring(randomKey, 'SYNTHETIC-OLD-KEY');
+    const wrapped = await cryptoApi.wrapVaultKey(ring, master);
+    const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+    await f.adapter.unlock();
+    const encrypted = await f.adapter.encrypt('synthetic-primary-value');
+    assert.equal(await cryptoApi.decryptRequiredValue(encrypted, randomKey), 'synthetic-primary-value');
+    await assert.rejects(cryptoApi.decryptRequiredValue(encrypted, 'SYNTHETIC-OLD-KEY'));
+    f.adapter.dispose();
+});
+
+test('adapter rejects encryption output that is not ciphertext', async () => {
+    const f = fixture({cryptoApi: {...cryptoApi, encrypt: async value => value}});
+    await f.adapter.unlock();
+    await assert.rejects(f.adapter.encrypt('plain-fixture'), /CIPHERTEXT_REQUIRED/);
+    f.adapter.dispose();
+});
+
+test('adapter detects an identity change before releasing pending encryption', async () => {
+    let user = {uid: 'a'}, release;
+    const f = fixture({getUser: () => user, cryptoApi: {...cryptoApi,
+        encrypt: () => new Promise(resolve => { release = resolve; })}});
+    await f.adapter.unlock();
+    const operation = f.adapter.encrypt('fixture');
+    const rejected = assert.rejects(operation, /AUTH_CHANGED/);
+    user = {uid: 'b'}; // Provider notification deliberately delayed.
+    release(ciphertext); await rejected;
+    f.adapter.dispose();
+});
+
+test('CPVK2 keyring retains the existing legacy fallback without migration', async () => {
+    const legacy = 'FIXTURE-LEGACY-KEY';
+    const ring = cryptoApi.createVaultKeyring(randomKey, legacy);
+    const wrapped = await cryptoApi.wrapVaultKey(ring, master);
+    const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+    await f.adapter.unlock();
+    const oldCipher = await cryptoApi.encrypt('fixture-legacy', legacy);
+    assert.equal(await f.adapter.read({ownerId: 'a', ciphertext: oldCipher}), 'fixture-legacy');
+    assert.equal(await f.adapter.read({ownerId: 'a', ciphertext}), 'fixture-current');
+});
+
+test('wrong Master Password does not unlock or invoke a migration', async () => {
+    const f = fixture({requestPassword: async () => 'wrong-fixture'});
+    await assert.rejects(f.adapter.unlock(), /INVALID_MASTER_PASSWORD/);
+    assert.equal(f.adapter.isUnlocked(), false);
+});
+
+test('missing envelope is rejected instead of automatically provisioning data', async () => {
+    const f = fixture({loadSecurity: async () => ({verifier})});
+    await assert.rejects(f.adapter.unlock(), /MIGRATION_REQUIRED/);
+    assert.equal(f.adapter.isUnlocked(), false);
+});
+
+test('tampered envelope cannot unlock', async () => {
+    const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: {...envelope, wrappedKey: 'AAAA'}})});
+    await assert.rejects(f.adapter.unlock());
+    assert.equal(f.adapter.isUnlocked(), false);
+});
+
+test('other owner and plaintext cannot enter the private ciphertext reader', async () => {
+    const f = fixture();
+    await f.adapter.unlock();
+    await assert.rejects(f.adapter.read({ownerId: 'b', ciphertext}), /OWNER_MISMATCH/);
+    await assert.rejects(f.adapter.read({ownerId: 'a', ciphertext: 'plaintext'}), /CIPHERTEXT_REQUIRED/);
+});
+
+test('logout while waiting for Master Password invalidates unlock', async () => {
+    let release, entered;
+    const waiting = new Promise(resolve => { entered = resolve; });
+    const f = fixture({requestPassword: () => { entered(); return new Promise(resolve => { release = resolve; }); }});
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /AUTH_REQUIRED/);
+    await waiting;
+    f.changeUser(null);
+    release(master);
+    await rejected;
+    assert.equal(f.adapter.isUnlocked(), false);
+});
+
+test('switching owner clears the unlocked memory context', async () => {
+    const f = fixture();
+    await f.adapter.unlock();
+    f.changeUser({uid: 'b'});
+    assert.equal(f.adapter.isUnlocked(), false);
+    await assert.rejects(f.adapter.read({ownerId: 'b', ciphertext}), /VAULT_LOCKED/);
+});
+
+test('manual lock during security loading prevents a later password prompt', async () => {
+    let release, loadSignal, prompts = 0;
+    const f = fixture({
+        loadSecurity: (uid, {signal}) => { loadSignal = signal; return new Promise(resolve => { release = resolve; }); },
+        requestPassword: async () => { prompts++; return master; }
+    });
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /UNLOCK_CANCELLED/);
+    f.adapter.lock();
+    assert.equal(loadSignal.aborted, true);
+    release({verifier, vaultKeyEnvelope: envelope});
+    await rejected;
+    assert.equal(prompts, 0);
+});
+
+test('manual lock aborts the password prompt and prevents verifier/decrypt work', async () => {
+    let entered, release, promptSignal, verifications = 0;
+    const waiting = new Promise(resolve => { entered = resolve; });
+    const f = fixture({
+        requestPassword: ({signal}) => { promptSignal = signal; entered(); return new Promise(resolve => { release = resolve; }); },
+        cryptoApi: {...cryptoApi, verifyVaultVerifier: async () => { verifications++; return true; }}
+    });
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /UNLOCK_CANCELLED/);
+    await waiting; f.adapter.lock();
+    assert.equal(promptSignal.aborted, true);
+    release(master); await rejected;
+    assert.equal(verifications, 0);
+});
+
+test('lock during verifier work prevents envelope unwrapping', async () => {
+    let entered, release, unwraps = 0;
+    const waiting = new Promise(resolve => { entered = resolve; });
+    const f = fixture({cryptoApi: {...cryptoApi,
+        verifyVaultVerifier: () => { entered(); return new Promise(resolve => { release = resolve; }); },
+        unwrapVaultKey: async () => { unwraps++; return randomKey; }
+    }});
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /UNLOCK_CANCELLED/);
+    await waiting; f.adapter.lock(); release(true); await rejected;
+    assert.equal(unwraps, 0);
+});
+
+test('dispose unsubscribes once even when the UI lock callback fails', () => {
+    let unsubscribes = 0;
+    const f = fixture({subscribeUser: () => () => unsubscribes++, onLock: () => { throw new Error('UI fixture'); }});
+    assert.throws(() => f.adapter.dispose(), /UI fixture/);
+    f.adapter.dispose();
+    assert.equal(unsubscribes, 1);
+    assert.equal(f.adapter.isUnlocked(), false);
+});
+
+test('protected routing reads real v2 ciphertext through the legacy adapter and releases Auth subscriptions', async () => {
+    let user = {uid: 'a'}, context;
+    const listeners = new Set();
+    const subscribeUser = fn => { listeners.add(fn); return () => listeners.delete(fn); };
+    const session = createProtectedSession({
+        getUser: () => user, subscribeUser,
+        createVault: callbacks => {
+            const adapter = createLegacyAdapter({getUser: () => user, subscribeUser,
+                loadSecurity: async () => ({verifier, vaultKeyEnvelope: envelope}),
+                requestPassword: async () => master, cryptoApi, ...callbacks});
+            return {unlock: () => adapter.unlock(), read: (uid, record) => adapter.read(record),
+                encrypt: (uid, value) => adapter.encrypt(value),
+                lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
+        },
+        routes: {overview: value => { context = value; }}
+    });
+    await session.unlock(); await session.navigate('overview');
+    assert.equal(await context.read({ownerId: 'a', ciphertext}), 'fixture-current');
+    const created = await context.encrypt('synthetic-context-roundtrip');
+    assert.equal(await context.read({ownerId: 'a', ciphertext: created}), 'synthetic-context-roundtrip');
+    const old = context;
+    user = {uid: 'b'};
+    for (const listener of listeners) listener(user);
+    assert.equal(old.signal.aborted, true);
+    assert.equal(session.check(), false);
+    await assert.rejects(old.read({ownerId: 'a', ciphertext}));
+    await assert.rejects(old.encrypt('synthetic-context-roundtrip'), /VIEW_DISPOSED/);
+    session.dispose();
+    assert.equal(listeners.size, 0);
+});

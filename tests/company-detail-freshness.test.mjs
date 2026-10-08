@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
 const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+
 const root = new URL('../Frontend/public/assets/js/', import.meta.url);
 const sources = await Promise.all(['offline-firestore.js', 'modules/data/request-coordinator.js',
     'modules/data/vault-repository.js', 'modules/azienda/dati_azienda.js'].map(path => readFile(new URL(path, root), 'utf8')));

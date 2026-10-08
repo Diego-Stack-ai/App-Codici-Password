@@ -33,7 +33,9 @@ assert.match(privateDetail, /getPrivateAccountConfirmed/,
     'Il dettaglio privato non dispone della lettura confermata dopo write');
 assert.match(companyDetail, /getCompanyAccountConfirmed/,
     'Il dettaglio aziendale non dispone della lettura confermata dopo write');
-assert.match(companyDetail, /initAttachmentModule\(\{ ownerUid: ownerId,[^}]+readOnly: isReadOnly \}\)/,
+assert.match(companyDetail, /const \{uid: loadViewerId, owner: loadOwnerId, company: companyId, id: accountId\} = mount\.scope;/,
+    'Il dettaglio aziendale non cattura il proprietario dal contesto della pagina');
+assert.match(companyDetail, /initAttachmentModule\(\{\s*ownerUid: loadOwnerId, currentAziendaId: companyId, currentId: accountId, readOnly: isReadOnly, isActive: actionActive, signal, confirm\}\)/,
     'Il dettaglio aziendale non passa proprietario e sola lettura agli allegati');
 assert.match(companyAttachments, /listCompanyAccountAttachments\(_ownerUid,/,
     'Gli allegati aziendali condivisi vengono letti sotto lo UID del visitatore');
