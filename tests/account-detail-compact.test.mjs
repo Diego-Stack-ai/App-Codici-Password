@@ -102,6 +102,31 @@ test('new banking fields retain copy guards and readonly banking hides add actio
     assert.equal(copies.length, 2);
 });
 
+test('banking view renders the complete IBAN in a responsive single-line value', async () => {
+    const created = [], nodes = {
+        'section-banking': node(),
+        'banking-content': node(),
+        'add-banking-prompt': node(),
+        'btn-banking-info': node()
+    };
+    const realm = vm.createContext({
+        crypto: {randomUUID: () => 'iban'},
+        createElement: (tag, props, children) => { const item = node({tag, ...props, children, prepend() {}}); created.push(item); return item; },
+        document: {getElementById: id => nodes[id] || null},
+        navigator: {clipboard: {writeText: async () => {}}}, showToast() {}, t: () => '',
+        hasRealBankingData: () => true,
+        normalizeBankingAccounts: account => account.banking,
+        clearElement: item => { item.children = []; }, setChildren: (item, children) => { item.children = children; }
+    });
+    vm.runInContext(await source('shared/account-banking-view.js'), realm);
+    const iban = 'IT60X0542811101000000123456';
+    realm.renderAccountBanking({banking: [{iban}]});
+    const value = created.find(item => item.className?.includes('field-value-readable'));
+    assert.equal(value?.tag, 'span');
+    assert.equal(value?.textContent, iban);
+    assert.ok(created.some(item => item.className?.includes('glass-field-readable')));
+});
+
 test('canonical detail HTML has one ambient glow and notes precede attachments', async () => {
     for (const type of ['privato', 'azienda']) {
         const html = await readFile(new URL(`../Frontend/public/dettaglio_account_${type}.html`, import.meta.url), 'utf8');

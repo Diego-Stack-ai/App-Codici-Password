@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.129';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.130';
 
 function createReadonlyField(label, value, icon, isPassword = false, isActive = () => true) {
     const id = `bank-field-${crypto.randomUUID()}`;
@@ -50,20 +50,27 @@ function createReadonlyField(label, value, icon, isPassword = false, isActive = 
         })]));
     }
 
+    const valueElement = isPassword
+        ? createElement('input', {
+            id,
+            className: 'field-input w-full no-transform base-shield field-value-password',
+            value: value || '-',
+            readonly: true,
+            autocomplete: 'off'
+        })
+        : createElement('span', {
+            className: 'field-value-readable no-transform',
+            textContent: value || '-'
+        });
+
     return createElement('div', { className: 'glass-field-container' }, [
         createElement('label', { className: 'view-label', textContent: label }),
-        createElement('div', { className: 'glass-field border-glow' }, [
+        createElement('div', { className: `glass-field border-glow ${isPassword ? '' : 'glass-field-readable'}`.trim() }, [
             createElement('span', {
                 className: 'material-symbols-outlined ml-4 opacity-40',
                 textContent: icon
             }),
-            createElement('input', {
-                id,
-                className: `field-input w-full no-transform ${isPassword ? 'base-shield field-value-password' : ''}`,
-                value: value || '-',
-                readonly: true,
-                autocomplete: 'off'
-            }),
+            valueElement,
             actions
         ])
     ]);

@@ -256,6 +256,14 @@ test('scope review reason stays inside encrypted payload and survives reopening'
     assert.deepEqual(await instance.list(),[marked]);
 });
 
+test('invalid mutation review reason is accepted and remains encrypted',async()=>{
+    const {idb,instance}=await replacementFixture();
+    const reason='PRIVATE_ACCOUNT_MUTATION_INVALID';
+    const marked=await instance.markForReview(oldOperation,{reviewReason:reason});
+    assert.equal(marked._reviewReason,reason);
+    assert.equal(JSON.stringify([...idb.data.values()]).includes(reason),false);
+});
+
 function openingFixture() {
     const request = {};
     const database = {version: 1, closed: 0,

@@ -108,9 +108,14 @@ export function createOfflineMutationSynchronizer({
                     if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED');
                     completed += 1;
                 } catch (error) {
-                    if (isActive() && ['failed-precondition', 'functions/failed-precondition'].includes(error?.code) && ['LEGACY_MUTATION_RESULT_UNVERIFIED', 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'].includes(error?.details?.reason)) {
+                    const invalidQueuedMutation = ['invalid-argument', 'functions/invalid-argument'].includes(error?.code);
+                    const reviewReason = invalidQueuedMutation ? 'PRIVATE_ACCOUNT_MUTATION_INVALID' : error?.details?.reason;
+                    const reviewableRejection = invalidQueuedMutation ||
+                        (['failed-precondition', 'functions/failed-precondition'].includes(error?.code) &&
+                            ['LEGACY_MUTATION_RESULT_UNVERIFIED', 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED'].includes(reviewReason));
+                    if (isActive() && reviewableRejection) {
                         let heldOperation;
-                        try { heldOperation = await queue.markForReview(operation, {isActive, lease: lease ?? null, reviewReason: error.details.reason}); }
+                        try { heldOperation = await queue.markForReview(operation, {isActive, lease: lease ?? null, reviewReason}); }
                         catch (storageError) {
                             emit('recoverable-error', {operationId: operation.operationId, pending: operations.length - completed});
                             return {status: 'recoverable-error', error: storageError, completed};

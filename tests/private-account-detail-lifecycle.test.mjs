@@ -111,7 +111,7 @@ test('private mode and widgets receive parent generation and late widget control
     const f = detailFixture(), modeGate = deferred(); let firstMode;
     f.context.initDetailAccountMode = async options => { firstMode = options; await modeGate.promise; return new Map(); };
     const first = f.init(); await tick(); f.lock(); modeGate.resolve(); await first;
-    assert.equal(firstMode.isActive(), false); assert.equal(firstMode.signal.aborted, true);
+    assert.equal(firstMode.compactView, false); assert.equal(firstMode.isActive(), false); assert.equal(firstMode.signal.aborted, true);
     assert.equal(f.calls.filter(([type]) => type === 'attachment-load').length, 0);
     f.context.initDetailAccountMode = async () => new Map();
     const widgetGate = deferred(); let destroyed = 0, widgetContext;
