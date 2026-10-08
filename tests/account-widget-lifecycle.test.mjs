@@ -115,9 +115,9 @@ test('external banking shortcut uses owned editor and refuses reopening after lo
  assert.equal(await controller.openNewWidget(),true);assert.equal(f.dialogs.length,1);
  f.lock();assert.equal(f.dialogs.length,0);assert.equal(await controller.openNewWidget(),false);assert.equal(f.writes.length,0);
 });
-test('external shortcut late reads cannot open an editor after teardown',async()=>{
+test('external shortcut late vault preparation cannot open an editor after teardown',async()=>{
  const f=fixture(2);const controller=await f.sandbox.initAccountEmbeddedWidgets(f.scope);const gate=deferred();
- f.sandbox.listSharedVaultDataConfirmed=()=>gate.promise;const pending=controller.openNewWidget();controller.destroy();gate.resolve([]);
+ f.sandbox.ensureVaultKeyMaterial=()=>gate.promise;const pending=controller.openNewWidget();controller.destroy();gate.resolve('key');
  assert.equal(await pending,false);assert.equal(f.dialogs.length,0);assert.equal(f.writes.length,0);
 });
 

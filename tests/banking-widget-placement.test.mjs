@@ -18,7 +18,7 @@ function fixture(editable = true) {
         Object.defineProperty(n, 'firstElementChild', {get() {return this.children[0];}});
         all.push(n); children.filter(Boolean).forEach(x => n.appendChild(x)); return n;
     }
-    const ids = Object.fromEntries(['account-widgets-section','account-widgets-list','btn-add-account-widget','section-banking','banking-section'].map(id => [id, element('div')]));
+    const ids = Object.fromEntries(['account-widgets-section','account-widgets-list','btn-add-account-widget','account-widget-template-select','btn-attach-account-widget','account-widget-actions','section-banking','banking-section'].map(id => [id, element(id.includes('select') ? 'select' : id.startsWith('btn-') ? 'button' : 'div')]));
     let hosts = ['bank-a','bank-b'].map(bankId => element('div', {dataset: {bankWidgetId: bankId}}));
     const widgets = [
         {id:'a', bankId:'bank-a', title:'A'}, {id:'b', bankId:'bank-b', title:'B'}, {id:'g',title:'Generic'}
@@ -57,6 +57,17 @@ test('bank shortcut preselects the owning bank and sends it to create',async()=>
     f.all.find(n=>n.placeholder==='Nome del campo').value='Code';
     const form=f.all.find(n=>n.tag==='form'); await form.onsubmit({preventDefault(){}});
     assert.equal(f.updates[0][0].bankId,'bank-b');
+});
+
+test('existing widget menu adds generic and banking templates directly in their defined areas',async()=>{
+    const f=fixture();await f.init();
+    const select=f.ids['account-widget-template-select'],attach=f.ids['btn-attach-account-widget'];
+    select.value=[...select.children].find(option=>option.textContent==='Widget: Generic').value;
+    select.onchange();await attach.onclick();
+    assert.equal(f.updates[0][0].title,'Generic');assert.equal(f.updates[0][0].bankId,null);
+    select.value=[...select.children].find(option=>option.textContent==='Widget bancario: A → Conto #2').value;
+    select.onchange();await attach.onclick();
+    assert.equal(f.updates[1][0].title,'A');assert.equal(f.updates[1][0].bankId,'bank-b');
 });
 
 test('widget preparation preserves bank binding, explicit detach and encrypted values',async()=>{

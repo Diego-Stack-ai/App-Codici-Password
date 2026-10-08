@@ -8,20 +8,20 @@
     <title>Dettaglio Account Privato - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.130" />
+    <link rel="manifest" href="manifest.json?v=1.2.131" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.130">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.131">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.130">
-    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.130">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.130">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.130">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.131">
+    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.131">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.131">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.131">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -243,10 +243,19 @@
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span class="material-symbols-outlined detail-section-icon icon-accent-blue">widgets</span>
-                                <h3 class="detail-section-title">Campi personalizzati</h3>
+                                <h3 class="detail-section-title">Widget dell’account</h3>
                             </div>
-                            <button id="btn-add-account-widget" type="button" class="btn-icon-header" aria-label="Aggiungi widget">
-                                <span class="material-symbols-outlined">add</span>
+                        </div>
+                        <div id="account-widget-actions" class="account-widget-actions hidden">
+                            <div class="account-widget-existing-picker">
+                                <label class="view-label" for="account-widget-template-select">Aggiungi un widget già creato</label>
+                                <div class="account-widget-picker-row">
+                                    <select id="account-widget-template-select" class="shared-account-select-control" aria-label="Widget già creato"></select>
+                                    <button id="btn-attach-account-widget" type="button" class="btn-modal btn-secondary" disabled>Aggiungi</button>
+                                </div>
+                            </div>
+                            <button id="btn-add-account-widget" type="button" class="btn-modal btn-primary">
+                                <span class="material-symbols-outlined">add</span> Crea nuovo widget
                             </button>
                         </div>
                         <div id="account-widgets-list" class="shared-account-credentials content-spacing"></div>
