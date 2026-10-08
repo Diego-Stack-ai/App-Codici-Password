@@ -1,5 +1,9 @@
 # Collaudi
 
+## 08/10/2026 — identificazione Account nell’avviso offline
+
+Verificato che il coordinatore globale utilizzi l’operazione in attesa per mostrare il nome dell’Account privato interessato, proponga “Apri Account” e navighi al modulo esatto tramite l’identificativo codificato; “Più tardi” conserva la modifica in coda. La navigazione resta subordinata alla sessione utente corrente. Test mirato 2/2, `test:offline-write-prototype` 209/209, controllo sintattico di 172 moduli, riferimenti statici su 246 file e `git diff --check` superati. Functions, Rules, indici e dati non modificati.
+
 ## 08/10/2026 — quattro palette colore (locale)
 
 Verificate le preferenze indipendenti di modalità e colore, il fallback Blu per valori assenti/non validi, l’applicazione anticipata in `theme-init.js`, le varianti chiare/scure dei token e la persistenza limitata a `blue`, `green`, `red`, `sand`. I colori funzionali `success`, `warning`, `error` non sono ridefiniti dalle palette. `npm run test:ui-foundations`, `test:js-syntax`, `test:css`, `test:static-references`, `test:html-purity`, `test:page-shells`, `test:navigation`, `test:lightweight`, `test:performance-budget` e `test:docs` superati; il test documentale è stato ripetuto fuori sandbox perché Windows impediva rename e `git init` nelle cartelle temporanee isolate. Resta da registrare l’esito del collaudo visivo su browser/dispositivo dopo l’eventuale pubblicazione; nessun deploy eseguito in questo checkpoint.

@@ -41,3 +41,11 @@ test('coordinatore controlla avvio, online e ritorno visibile senza polling', as
   sandbox.stopPrivateAccountOfflineCoordinator();
   assert.equal(closed,1);assert.equal(listeners.get('online').size,0);assert.equal(listeners.get('visibilitychange').size,0);
 });
+
+test('l’avviso globale identifica e apre direttamente l’Account interessato', async () => {
+  const main = await readFile(new URL('../Frontend/public/assets/js/main-v129.js', import.meta.url), 'utf8');
+  assert.match(main, /operation\.record\?\.nomeAccount\?\.trim\(\) \|\| 'Account senza nome'/);
+  assert.match(main, /La modifica in attesa riguarda l’Account/);
+  assert.match(main, /form_account_privato\.html\?id=\$\{encodeURIComponent\(recordId\)\}/);
+  assert.doesNotMatch(main, /Apri l’Account interessato per decidere come procedere/);
+});

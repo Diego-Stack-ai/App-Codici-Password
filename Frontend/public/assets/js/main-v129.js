@@ -27,16 +27,16 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.134';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.135';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast, initLockedUX } from './ui-core-v129.js';
+import { showToast, showConfirmModal, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.134&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.135&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -334,7 +334,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 uid: user.uid,
                                 vaultKeyMaterial,
                                 isActive: () => gate.active(authAttempt) && auth.currentUser?.uid === user.uid,
-                                onAttention: () => showToast('È presente una modifica offline da controllare. Apri l’Account interessato per decidere come procedere.', 'warning')
+                                onAttention: async state => {
+                                    const operation = state?.operation;
+                                    const recordId = operation?.recordId;
+                                    if (!recordId) return;
+                                    const accountName = operation.record?.nomeAccount?.trim() || 'Account senza nome';
+                                    const openAccount = await showConfirmModal(
+                                        'Modifica offline da controllare',
+                                        `La modifica in attesa riguarda l’Account “${accountName}”. Aprilo per recuperare la modifica oppure mantenere i dati del server.`,
+                                        'Apri Account',
+                                        'Più tardi'
+                                    );
+                                    if (openAccount && gate.active(authAttempt) && auth.currentUser?.uid === user.uid) {
+                                        window.location.href = `form_account_privato.html?id=${encodeURIComponent(recordId)}`;
+                                    }
+                                }
                             }))
                             .catch(error => console.warn('[OFFLINE] Coordinatore modifiche Account non disponibile.', error));
                     }
@@ -378,7 +392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.134');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.135');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
