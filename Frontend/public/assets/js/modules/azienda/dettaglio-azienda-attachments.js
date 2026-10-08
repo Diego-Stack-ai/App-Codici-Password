@@ -5,9 +5,9 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.138';
+import { db, storage } from '../../firebase-config.js?v=1.2.139';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
-import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -15,11 +15,14 @@ import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listCompanyAccountAttachments } from '../data/vault-repository.js';
+import {decryptReceivedCompanyAttachment, syncCompanyAttachmentAccess} from '../shared/shared-attachment-access.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _ownerUid = null;
+let _currentUid = null;
 let _currentAziendaId = null;
 let _currentId = null;
+let _account = null;
 let _readOnly = false;
 let _active = () => true, _version = 0, _confirm = showConfirmModal;
 
@@ -27,13 +30,16 @@ let _active = () => true, _version = 0, _confirm = showConfirmModal;
  * Inizializza il modulo con il contesto dell'account corrente.
  * Va chiamato in initDettaglioAccountAzienda dopo aver impostato lo stato.
  */
-export function initAttachmentModule({ ownerUid, currentAziendaId, currentId, readOnly = false, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+export function initAttachmentModule({ ownerUid, currentUid, currentAziendaId, currentId, account,
+    readOnly = false, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
     _confirm = confirmAction;
     const version = ++_version;
     _active = () => version === _version && !signal?.aborted && isActive();
     _ownerUid = ownerUid;
+    _currentUid = currentUid;
     _currentAziendaId = currentAziendaId;
     _currentId = currentId;
+    _account = account;
     _readOnly = readOnly;
 }
 
@@ -104,17 +110,13 @@ export async function handleFileUpload(input) {
         if (!active()) return;
         const encryptedFile = await encryptAttachmentFile(file, vaultKey);
         if (!active()) return;
-        const snap = await uploadBytes(sRef, encryptedFile.blob, {
+        await uploadBytes(sRef, encryptedFile.blob, {
             contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
         });
-        if (!active()) return;
-        const url = await getDownloadURL(snap.ref);
-
         if (!active()) return;
         const colRef = collection(db, "users", owner, "aziende", company, "accounts", account, "attachments");
         await addDoc(colRef, {
             name: file.name,
-            url: url,
             storagePath: storagePath,
             type: file.type || 'application/octet-stream',
             size: file.size,
@@ -141,7 +143,22 @@ export async function loadAttachments() {
     if (!container) return;
 
     try {
-        const attachments = await listCompanyAccountAttachments(_ownerUid, _currentAziendaId, _currentId);
+        const attachments = await listCompanyAccountAttachments(
+            _ownerUid, _currentAziendaId, _currentId, _readOnly ? _currentUid : ''
+        );
+        const hasAcceptedRecipients = Object.values(_account?.sharedWith || {})
+            .some(item => item?.status === 'accepted' && item?.uid);
+        if (!_readOnly && attachments.length && hasAcceptedRecipients) {
+            const vaultKeyMaterial = await ensureVaultKeyMaterial();
+            if (!active()) return;
+            const outcome = await syncCompanyAttachmentAccess({
+                ownerUid: _ownerUid, companyId: _currentAziendaId, accountId: _currentId,
+                account: _account, attachments, vaultKeyMaterial
+            });
+            if (outcome.waiting && active()) {
+                showToast('Alcuni destinatari devono aggiornare l’app prima di ricevere gli allegati.', 'info');
+            }
+        }
         if (!active()) return;
         renderAttachments(attachments, active);
     } catch (e) {
@@ -209,6 +226,7 @@ async function openAttachment(attachment) {
     if (!active()) return;
     try {
         if (!attachment.encryption) {
+            if (_readOnly) throw new Error('SHARED_LEGACY_ATTACHMENT_UNSUPPORTED');
             if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
             return;
         }
@@ -217,13 +235,22 @@ async function openAttachment(attachment) {
         if (!active()) return;
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         if (!active()) return;
-        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        const clear = _readOnly
+            ? await decryptReceivedCompanyAttachment({
+                ownerUid: _ownerUid, companyId: _currentAziendaId, accountId: _currentId,
+                attachment, recipientUid: _currentUid, vaultKeyMaterial: vaultKey, ciphertext: bytes
+            })
+            : await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         if (!active()) { if (clear?.fill) clear.fill(0); return; }
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
         if (!active()) return;
         logError('OpenEncryptedAttachment', error);
-        showToast('Impossibile aprire l’allegato cifrato.', 'error');
+        const pending = ['SHARED_ATTACHMENT_KEY_PENDING', 'SHARING_IDENTITY_NOT_PERSISTED',
+            'SHARING_PUBLIC_IDENTITY_MISSING'].includes(error?.message);
+        showToast(pending
+            ? 'Allegato in preparazione: aggiorna entrambi i dispositivi e fai riaprire l’Account al proprietario.'
+            : 'Impossibile aprire l’allegato cifrato.', pending ? 'warning' : 'error');
     }
 }
 

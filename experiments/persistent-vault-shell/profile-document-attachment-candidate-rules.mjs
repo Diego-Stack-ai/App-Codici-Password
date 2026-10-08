@@ -7,8 +7,8 @@
 //
 // The transform is CRLF aware: it is anchored on the production file as it is
 // checked out, and it refuses to patch anything it does not recognise.
-const GENERIC_LINE = "collection != 'sharedVaultLinks';";
-const PATCHED_GENERIC_LINE = "collection != 'sharedVaultLinks' && collection != 'profileDocumentAttachments';";
+const GENERIC_LINE = "collection != 'cryptoIdentity';";
+const PATCHED_GENERIC_LINE = "collection != 'cryptoIdentity' && collection != 'profileDocumentAttachments';";
 const records = newline => [
     '',
     '    // DS-002B candidate: image records written only by the attested service.',

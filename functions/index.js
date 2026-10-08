@@ -54,6 +54,7 @@ const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./back
 const {createArchivePurgeBinding, verifyArchivePurgeReceipt} = require("./archive-purge-receipt");
 const {createRecoveryBinding, verifyRecoveryReceipt} = require("./recovery-command-receipt");
 const {createVaultAccountCallables} = require('./vault-account-runtime');
+const {createSharedAttachmentService} = require('./shared-attachment-service');
 const {
     accountEventId, accountTransition, auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition,
     invitedEventId, removedEventId, responseEventId
@@ -75,6 +76,13 @@ setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 const vaultAccounts = createVaultAccountCallables({db: getFirestore(),
     hash: value => crypto.createHash('sha256').update(value).digest('hex'),
     timestamp: () => FieldValue.serverTimestamp(), deleteField: () => FieldValue.delete(), HttpsError});
+const sharedAttachments = createSharedAttachmentService({
+    db: getFirestore(), deleteField: () => FieldValue.delete(), HttpsError
+});
+exports.registerSharingIdentity = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => sharedAttachments.register(request));
+exports.publishSharedAttachmentEnvelopes = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => sharedAttachments.publish(request));
 exports.applyAccountNoteMutation = onCall(
     {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.note(request));
 exports.applyAccountStandardMutation = onCall(

@@ -124,3 +124,20 @@ test('cifra e decifra un allegato soltanto con la chiave Vault corretta', async 
     ciphertext, encrypted.metadata, 'vault-key-errata',
   ));
 });
+
+test('la chiave-file estratta consente la decifratura destinatario senza esporre la Vault Key', async () => {
+  const clear = new TextEncoder().encode('allegato condiviso');
+  const encrypted = await security.encryptAttachmentFile(
+    new File('condiviso.txt', 'text/plain', clear.length, clear), 'vault-owner'
+  );
+  const fileKey = await security.unwrapAttachmentFileKey(encrypted.metadata, 'vault-owner');
+  try {
+    const restored = await security.decryptAttachmentBytesWithFileKey(
+      await encrypted.blob.arrayBuffer(), encrypted.metadata, fileKey
+    );
+    assert.deepEqual(new Uint8Array(restored), clear);
+  } finally {
+    fileKey.fill(0);
+  }
+  await assert.rejects(security.unwrapAttachmentFileKey(encrypted.metadata, 'vault-estranea'));
+});

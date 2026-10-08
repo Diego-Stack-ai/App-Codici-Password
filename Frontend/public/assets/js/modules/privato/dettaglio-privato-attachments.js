@@ -3,14 +3,15 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.138';
+import { db, storage } from '../../firebase-config.js?v=1.2.139';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
-import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import {decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess} from '../shared/shared-attachment-access.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 
@@ -22,7 +23,8 @@ export function initPrivateAttachmentModule(context) {
     const cancelButton = document.getElementById('btn-cancel-source');
     let destroyed = false;
     const cleanups = new Set();
-    const mount = {ownerId: context.ownerId, accountId: context.accountId, readOnly: Boolean(context.readOnly),
+    const mount = {ownerId: context.ownerId, currentUid: context.currentUid, accountId: context.accountId,
+        account: context.account, readOnly: Boolean(context.readOnly),
         confirm: context.confirm || showConfirmModal,
         active() {
             if (!destroyed && (mounted !== mount || context.signal?.aborted || (context.isActive && !context.isActive()))) mount.destroy();
@@ -129,17 +131,14 @@ export async function handleFileUpload(input, mount = mounted) {
         if (!mount.active()) return;
         const encryptedFile = await encryptAttachmentFile(file, vaultKey);
         if (!mount.active()) return;
-        const snapshot = await uploadBytes(storageRef, encryptedFile.blob, {
+        await uploadBytes(storageRef, encryptedFile.blob, {
             contentType: 'application/octet-stream',
             customMetadata: { encrypted: 'v1' }
         });
         if (!mount.active()) return;
-        const url = await getDownloadURL(snapshot.ref);
-        if (!mount.active()) return;
 
         await addDoc(collection(db, 'users', ownerId, 'accounts', accountId, 'attachments'), {
             name: file.name,
-            url,
             storagePath,
             type: file.type || 'application/octet-stream',
             size: file.size,
@@ -164,18 +163,22 @@ export async function loadPrivateAttachments(mount = mounted) {
     const container = document.getElementById('attachments-list');
     if (!container) return;
 
-    if (mount.readOnly) {
-        clearElement(container);
-        container.appendChild(createElement('p', {
-            className: 'text-[10px] text-white/40 text-center py-4 leading-relaxed',
-            textContent: t('shared_attachments_unavailable') ||
-                'Gli allegati del proprietario non sono inclusi nella condivisione.'
-        }));
-        return;
-    }
-
     try {
-        const attachments = await listPrivateAccountAttachments(ownerId, accountId);
+        const attachments = await listPrivateAccountAttachments(
+            ownerId, accountId, mount.readOnly ? mount.currentUid : ''
+        );
+        const hasAcceptedRecipients = Object.values(mount.account?.sharedWith || {})
+            .some(item => item?.status === 'accepted' && item?.uid);
+        if (!mount.readOnly && attachments.length && hasAcceptedRecipients) {
+            const vaultKeyMaterial = await ensureVaultKeyMaterial();
+            if (!mount.active()) return;
+            const outcome = await syncPrivateAttachmentAccess({
+                ownerUid: ownerId, accountId, account: mount.account, attachments, vaultKeyMaterial
+            });
+            if (outcome.waiting && mount.active()) {
+                showToast('Alcuni destinatari devono aggiornare l’app prima di ricevere gli allegati.', 'info');
+            }
+        }
         if (mount.active()) renderAttachments(attachments, mount);
     } catch (error) {
         if (!mount.active()) return;
@@ -238,6 +241,7 @@ async function openAttachment(attachment, mount = mounted) {
     attachment = {...attachment, encryption: attachment.encryption ? {...attachment.encryption} : null};
     try {
         if (!attachment.encryption) {
+            if (mount.readOnly) throw new Error('SHARED_LEGACY_ATTACHMENT_UNSUPPORTED');
             if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
             return;
         }
@@ -246,13 +250,26 @@ async function openAttachment(attachment, mount = mounted) {
         if (!mount.active()) return;
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         if (!mount.active()) return;
-        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        const clear = mount.readOnly
+            ? await decryptReceivedPrivateAttachment({
+                ownerUid: mount.ownerId,
+                accountId: mount.accountId,
+                attachment,
+                recipientUid: mount.currentUid,
+                vaultKeyMaterial: vaultKey,
+                ciphertext: bytes
+            })
+            : await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         if (!mount.active()) return;
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
         if (!mount.active()) return;
         logError('OpenEncryptedAttachment', error);
-        showToast('Impossibile aprire l’allegato cifrato.', 'error');
+        const pending = ['SHARED_ATTACHMENT_KEY_PENDING', 'SHARING_IDENTITY_NOT_PERSISTED',
+            'SHARING_PUBLIC_IDENTITY_MISSING'].includes(error?.message);
+        showToast(pending
+            ? 'Allegato in preparazione: aggiorna entrambi i dispositivi e fai riaprire il Memorandum al proprietario.'
+            : 'Impossibile aprire l’allegato cifrato.', pending ? 'warning' : 'error');
     }
 }
 

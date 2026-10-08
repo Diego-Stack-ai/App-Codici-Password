@@ -81,6 +81,49 @@ test('il formato binario è ammesso soltanto se marcato come allegato cifrato v1
   }));
 });
 
+test('un destinatario accettato legge i byte cifrati e la revoca blocca subito il download', async () => {
+  const accountId = 'shared-memo';
+  const objectPath = `users/${OWNER_UID}/accounts/${accountId}/attachments/shared.bin`;
+  await testEnv.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'users', OWNER_UID, 'accounts', accountId), {
+      type: 'memo', visibility: 'shared', isArchived: false, sharedWithUids: [OTHER_UID]
+    });
+  });
+  await assertSucceeds(uploadBytes(
+    ref(testEnv.authenticatedContext(OWNER_UID).storage(), objectPath),
+    new Uint8Array([4, 5, 6]),
+    {contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}}
+  ));
+  await assertSucceeds(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+  await testEnv.withSecurityRulesDisabled(context => setDoc(
+    doc(context.firestore(), 'users', OWNER_UID, 'accounts', accountId),
+    {type: 'memo', visibility: 'private', isArchived: false, sharedWithUids: []}
+  ));
+  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+});
+
+test('un estraneo non usa il percorso allegati aziendale e la revoca vale anche lì', async () => {
+  const companyId = 'company-1', accountId = 'shared-company';
+  const objectPath = `users/${OWNER_UID}/aziende/${companyId}/accounts/${accountId}/attachments/shared.bin`;
+  await testEnv.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'users', OWNER_UID, 'aziende', companyId, 'accounts', accountId), {
+      type: 'memo', visibility: 'shared', isArchived: false, sharedWithUids: [OTHER_UID]
+    });
+  });
+  await assertSucceeds(uploadBytes(
+    ref(testEnv.authenticatedContext(OWNER_UID).storage(), objectPath),
+    new Uint8Array([7, 8, 9]),
+    {contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}}
+  ));
+  await assertSucceeds(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+  await assertFails(getBytes(ref(testEnv.authenticatedContext('stranger').storage(), objectPath)));
+  await testEnv.withSecurityRulesDisabled(context => setDoc(
+    doc(context.firestore(), 'users', OWNER_UID, 'aziende', companyId, 'accounts', accountId),
+    {type: 'memo', visibility: 'private', isArchived: false, sharedWithUids: []}
+  ));
+  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), objectPath)));
+});
+
 test('i contenuti editoriali sono leggibili dagli utenti autenticati ma non modificabili dal client', async () => {
   const mediaPath = 'app-media/presentazione/codici-password-v2.mp4';
   const adminStorage = testEnv.unauthenticatedContext().storage();
