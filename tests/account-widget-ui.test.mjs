@@ -6,6 +6,10 @@ const widgetSource = await readFile(
   new URL('../Frontend/public/assets/js/modules/shared/account-embedded-widgets.js', import.meta.url),
   'utf8'
 );
+const sharedCredentialSource = await readFile(
+  new URL('../Frontend/public/assets/js/modules/shared/account-shared-credentials.js', import.meta.url),
+  'utf8'
+);
 const privateFormSource = await readFile(
   new URL('../Frontend/public/assets/js/modules/privato/form_account_privato.js', import.meta.url),
   'utf8'
@@ -57,4 +61,11 @@ test('widget esistenti, nuovo widget e credenziali comuni hanno comandi separati
     assert.match(html, /Crea nuovo widget/);
     assert.match(html, />Credenziali comuni</);
   }
+});
+
+test('il collegamento di una credenziale comune spiega effetti e rimozione prima di procedere', () => {
+  assert.match(sharedCredentialSource, /Non ne crea una copia/);
+  assert.match(sharedCredentialSource, /tutti gli Account collegati/);
+  assert.match(sharedCredentialSource, /non elimina la Credenziale comune/);
+  assert.match(sharedCredentialSource, /Salva e continua/);
 });
