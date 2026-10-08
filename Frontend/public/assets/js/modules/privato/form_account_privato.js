@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.132';
+import {auth} from '../../firebase-config.js?v=1.2.133';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,8 +17,8 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.132';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.132';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.133';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.133';
 async function savePrivateAccount(...args) {
     let module;
     try { module = await import('./form-privato-save.js'); }
@@ -122,39 +122,6 @@ function showM6ConflictChoice(reconciliation = false, unsupported = false) {
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('active'), 10);
         modal.addEventListener('click', event => { if (event.target === modal) close(null); });
-    });
-}
-
-function showM6ForeignConflictChoice(accountName) {
-    return new Promise(resolve => {
-        document.getElementById('m6-conflict-modal')?.remove();
-        const modal = createElement('div', {id: 'm6-conflict-modal', className: 'modal-overlay'});
-        const close = openAccount => {
-            modal.classList.remove('active');
-            setTimeout(() => { modal.remove(); resolve(openAccount); }, 300);
-        };
-        const later = createElement('button', {
-            className: 'btn-modal btn-secondary',
-            textContent: 'Più tardi',
-            onclick: () => close(false)
-        });
-        const open = createElement('button', {
-            className: 'btn-modal btn-primary',
-            textContent: 'Apri account',
-            onclick: () => close(true)
-        });
-        setChildren(modal, createElement('div', {className: 'modal-box'}, [
-            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Modifica offline da controllare'}),
-            createElement('p', {
-                className: 'modal-text',
-                textContent: `La coda contiene una modifica di “${accountName || 'un altro account'}”. Apri quel record per scegliere se recuperarla o mantenere il server.`
-            }),
-            createElement('div', {className: 'modal-actions'}, [later, open])
-        ]));
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
-        modal.addEventListener('click', event => { if (event.target === modal) close(false); });
     });
 }
 
@@ -374,14 +341,15 @@ export async function initFormAccountPrivato(user) {
     if (navigator.onLine) {
         try {
             const vaultKeyMaterial = await ensureVaultKeyMaterial();
-            const pilot = await import('../data/private-account-offline-pilot.js');
-            let lastState = null;
-            const result = await pilot.flushPrivateAccountPilot({
-                uid: currentUid,
-                vaultKeyMaterial,
-                isActive: active,
-                onState: state => { lastState = state; }
+            const coordinator = await import('../data/private-account-offline-coordinator.js');
+            await coordinator.startPrivateAccountOfflineCoordinator({
+                uid: currentUid, vaultKeyMaterial, isActive: active
             });
+            let lastState = null;
+            const onState = event => { lastState = event.detail; };
+            window.addEventListener('private-account-offline-state', onState);
+            const result = await coordinator.checkPrivateAccountOfflineQueue();
+            window.removeEventListener('private-account-offline-state', onState);
             const outcome = result?.value || result;
             if (!active()) return;
             const reconciliation = lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required';
@@ -389,17 +357,19 @@ export async function initFormAccountPrivato(user) {
                 const operation = outcome?.operation || lastState?.operation;
                 const unsupported = [operation?._reviewReason, outcome?.reason, lastState?.reason].includes('PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
                 const saveButton = document.getElementById('btn-save-footer');
-                if (saveButton) saveButton.disabled = true;
-                showToast(unsupported ? 'Questo Account richiede una modifica completa. La copia offline resta cifrata e non sarà reinviata automaticamente.' : 'Una modifica offline richiede una verifica. La copia cifrata è conservata.', 'warning');
                 if (operation?.operationId && operation.uid === user.uid && operation.recordId === currentDocId) {
+                    if (saveButton) saveButton.disabled = true;
+                    showToast(unsupported ? 'Questo Account richiede una modifica completa. La copia offline resta cifrata e non sarà reinviata automaticamente.' : 'Una modifica offline richiede una verifica. La copia cifrata è conservata.', 'warning');
                     const choice = await showM6ConflictChoice(reconciliation, unsupported);
                     if (!active()) return;
                     if (choice === 'server') {
-                        await pilot.discardPrivateAccountPilotOperation({
-                            uid: user.uid, vaultKeyMaterial, isActive: active, operationId: operation.operationId
+                        const pilot = await import('../data/private-account-offline-pilot.js');
+                        const discarded = await pilot.discardPrivateAccountPilotRecord({
+                            uid: user.uid, vaultKeyMaterial, isActive: active, recordId: operation.recordId
                         });
                         if (!active()) return;
-                        showToast('Versione del server mantenuta.', 'success');
+                        if (discarded.remaining !== 0) throw new Error('OFFLINE_RECORD_DISCARD_INCOMPLETE');
+                        showToast(`Versione del server mantenuta. ${discarded.discarded} ${discarded.discarded === 1 ? 'modifica offline eliminata' : 'modifiche offline eliminate'}.`, 'success');
                         setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 600);
                     } else if (choice === 'local' && !unsupported) {
                         const server = await getPrivateAccountConfirmed(user.uid, operation.recordId);
@@ -413,8 +383,7 @@ export async function initFormAccountPrivato(user) {
                         showToast('Modifica recuperata. La copia offline resta conservata finché premi Salva.', 'warning');
                     }
                 } else if (operation?.recordId) {
-                    const openAccount = await showM6ForeignConflictChoice(operation.record?.nomeAccount);
-                    if (openAccount && active()) window.location.replace(`form_account_privato.html?id=${encodeURIComponent(operation.recordId)}`);
+                    showToast('È presente una modifica offline relativa a un altro Account. Questo Account può essere modificato normalmente.', 'warning');
                 }
             } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
                 showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');

@@ -115,6 +115,23 @@ test('con flag esplicita accoda, notifica e inoltra una sola operazione dello st
   client.close(); assert.equal(deps.closed, 2);
 });
 
+test('mantieni server elimina e verifica tutte le operazioni dello stesso record', async () => {
+  const deps = dependencies();
+  deps.queued.push(
+    {uid:'owner',operationId:'a',recordId:'record-a'},
+    {uid:'owner',operationId:'b',recordId:'record-a'},
+    {uid:'owner',operationId:'c',recordId:'record-b'}
+  );
+  const client = await createOfflineMutationClientCore({
+    ...deps, uid:'owner', vaultKeyMaterial:'fixture', enabled:true
+  });
+  assert.deepEqual(await client.discardRecord('record-a'), {discarded:2,remaining:0});
+  assert.deepEqual(deps.queued.map(operation=>operation.operationId), ['c']);
+  assert.equal(deps.notified,1);
+  await assert.rejects(client.discardRecord(''), /RECORD_ID_REQUIRED/);
+  client.close();
+});
+
 
 test('sostituzione usa lease e CAS, senza eliminazione separata, poi sincronizza',async()=>{
     const events=[];const old={uid:'owner',operationId:'old',recordId:'record'},next={...old,operationId:'new'};
