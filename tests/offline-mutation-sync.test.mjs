@@ -110,6 +110,18 @@ test('scope rejection is held persistently and never retried as a network failur
     assert.equal(reopened.status,'reconciliation-required');assert.equal(calls,1);
 });
 
+test('invalid queued mutation is preserved for review and is not submitted repeatedly',async()=>{
+    let operation={uid:'owner',operationId:'invalid',recordId:'record'},calls=0;
+    const queue={list:async()=>[operation],remove:async()=>assert.fail('remove'),
+        markForReview:async(op,options)=>(operation={...op,_queueState:'reconciliation-required',_reviewReason:options.reviewReason})};
+    const options={uid:'owner',queue,send:async()=>{calls++;throw Object.assign(new Error('invalid'),{code:'functions/invalid-argument'})},withLease:async(_uid,task)=>task(),isOnline:()=>true};
+    const first=await createOfflineMutationSynchronizer(options).flush();
+    assert.equal(first.status,'reconciliation-required');
+    assert.equal(first.operation._reviewReason,'PRIVATE_ACCOUNT_MUTATION_INVALID');
+    const reopened=await createOfflineMutationSynchronizer(options).flush();
+    assert.equal(reopened.status,'reconciliation-required');assert.equal(calls,1);
+});
+
 // ── M6-A-6: indisponibilità dichiarata nel percorso reale di lettura ───────────────────────
 test('lettura non disponibile diventa stato esplicito, mai coda vuota o salvataggio riuscito', async () => {
     const states = []; let sends = 0;

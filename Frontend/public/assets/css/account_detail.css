@@ -98,11 +98,17 @@
     overflow-y: hidden;
     color: var(--text-primary);
     font-family: inherit;
-    font-size: clamp(0.65rem, 2.8vw, var(--fs-xs));
+    font-size: var(--fs-xs);
     line-height: 1.4;
     white-space: nowrap;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 400px) {
+    .field-value-readable {
+        font-size: var(--fs-micro);
+    }
 }
 
 .field-value-readable::-webkit-scrollbar {
