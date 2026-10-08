@@ -120,6 +120,15 @@ export async function discardPrivateAccountPilotOperation(options) {
     }
 }
 
+export async function discardPrivateAccountPilotRecord(options) {
+    const client = await createPrivateAccountPilotClient(options);
+    try {
+        return await client.discardRecord(options.recordId);
+    } finally {
+        client.close();
+    }
+}
+
 export async function replacePrivateAccountPilotOperation(options) {
     const client = await createPrivateAccountPilotClient(options);
     try {

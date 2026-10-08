@@ -27,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.132';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.133';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.132&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.133&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -318,8 +318,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // 🔐 PROTOCOLLO BLINDA (V7.0 MASTER)
                 // Se la pagina è privata, assicuriamoci che il Vault sia sbloccato
                 if (isPrivatePage) {
+                    let vaultKeyMaterial = null;
                     try {
-                        await securityModules[0].ensureVaultKeyMaterial();
+                        vaultKeyMaterial = await securityModules[0].ensureVaultKeyMaterial();
                     } catch (e) {
                         console.error("[BLINDA] Vault lock required.");
                         // Se l'utente annulla lo sblocco su una pagina privata, potremmo volerlo reindirizzare
@@ -327,6 +328,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
 
                     if (!gate.active(authAttempt)) { securityModules[0].clearSession(); return; }
+                    if (vaultKeyMaterial) {
+                        void import('./modules/data/private-account-offline-coordinator.js')
+                            .then(({startPrivateAccountOfflineCoordinator}) => startPrivateAccountOfflineCoordinator({
+                                uid: user.uid,
+                                vaultKeyMaterial,
+                                isActive: () => gate.active(authAttempt) && auth.currentUser?.uid === user.uid,
+                                onAttention: () => showToast('È presente una modifica offline da controllare. Apri l’Account interessato per decidere come procedere.', 'warning')
+                            }))
+                            .catch(error => console.warn('[OFFLINE] Coordinatore modifiche Account non disponibile.', error));
+                    }
                     // Le Push di scadenza devono essere visualizzate anche quando
                     // l'app è aperta su una pagina diversa dalle Impostazioni.
                     const pushScopes = localStorage.getItem('codex_push_active_scopes');
@@ -367,7 +378,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.132');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.133');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -433,6 +444,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error("Global Check Error:", error);
             }
         } else {
+            void import('./modules/data/private-account-offline-coordinator.js')
+                .then(({stopPrivateAccountOfflineCoordinator}) => stopPrivateAccountOfflineCoordinator())
+                .catch(() => {});
             if (inviteUnsubscribe) inviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {

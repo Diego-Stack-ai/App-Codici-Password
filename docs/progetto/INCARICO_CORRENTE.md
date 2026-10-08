@@ -1,5 +1,7 @@
 # Incarico corrente
 
+08/10/2026 — Diego autorizza la pubblicazione della correzione M6 relativa alle modifiche Account offline. Perimetro: Hosting/app principale, versione 1.2.133; nessuna modifica o distribuzione di Functions, Rules, indici o dati. Il controllo deve restare event-driven, il conflitto di un altro Account non deve bloccare il form corrente e “Mantieni server” deve eliminare tutte le operazioni pendenti dello stesso record prima di confermare.
+
 06/10/2026 — Diego conferma: scadenza esistente mantiene impostazioni attuali, non quelle vecchie del backup; scadenza cancellata recuperata visibile solo al proprietario. Supera la domanda pendente sotto. Nessuna riattivazione di destinatari/permessi dal backup.
 
 06/10/2026 — nel raccordo M8 scadenze richiesta scelta indispensabile: mantenere destinatari/permessi attuali e recuperare privatamente le scadenze assenti, senza riattivare destinatari dal backup. Risposta non presunta. Sospeso solo collegamento restore scadenze, preparazione tecnica indipendente consentita; nessuna nuova campagna di ricerca difetti.

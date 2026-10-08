@@ -133,6 +133,26 @@ export async function createOfflineMutationClientCore({
             assertActive();
             channel.notify();
         },
+        async discardRecord(recordId) {
+            assertWritable();
+            if (!recordId) throw new Error('OFFLINE_RECORD_ID_REQUIRED');
+            let discarded = 0, remaining = 0;
+            const result = await withLease(uid, async lease => {
+                assertActive();
+                const matches = (await queue.list()).filter(operation => operation.recordId === recordId);
+                for (const operation of matches) {
+                    assertActive();
+                    await queue.remove(operation, {isActive: active, lease: lease ?? null});
+                    discarded += 1;
+                }
+                assertActive();
+                remaining = (await queue.list()).filter(operation => operation.recordId === recordId).length;
+            });
+            if (result?.acquired === false) throw new Error('OFFLINE_QUEUE_BUSY');
+            assertActive();
+            channel.notify();
+            return {discarded, remaining};
+        },
         close() { closed = true; channel.close(); queue?.close?.(); withLease?.close?.(); }
     };
 }

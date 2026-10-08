@@ -65,13 +65,13 @@ test('recupero salvato usa sostituzione; nuova modifica usa enqueue; sessione sc
 test('scelta locale o più tardi non elimina la coda; solo scelta server la scarta',async()=>{
  const start=formSource.indexOf('            const reconciliation =');
  const end=formSource.indexOf("            } else if (lastState?.state === 'recoverable-error'",start);
- const flow='async function resume(){'+formSource.slice(start,end)+'}}';
+ const flow=('async function resume(){'+formSource.slice(start,end)+'}}').replace("const pilot = await import('../data/private-account-offline-pilot.js');",'');
  for(const choice of ['local','server',null,'expired']){
   let active=true,discarded=0,restored=0;const button={disabled:false};
   const operation={uid:'owner',operationId:'old',recordId:'record',record:{type:'account'}};
   const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',
    active:()=>active,document:{getElementById:()=>button},showToast(){},showM6ConflictChoice:async()=>{if(choice==='expired')active=false;return choice==='expired'?'server':choice},
-   pilot:{discardPrivateAccountPilotOperation:async()=>discarded++},getPrivateAccountConfirmed:async()=>({type:'account',visibility:'private',revision:2}),
+   pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:2,remaining:0}}},getPrivateAccountConfirmed:async()=>({type:'account',visibility:'private',revision:2}),
    canRecoverPrivateAccount,restoreM6ConflictDraft:async()=>restored++,setTimeout(){}};
   vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();
   assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,choice==='local'?1:0);assert.equal(button.disabled,choice!=='local');
@@ -93,18 +93,23 @@ test('scope unsupported explains full edit in immediate result and reopened mark
 });
 test('unsupported review offers no local recovery and only explicit server choice discards encrypted copy',async()=>{
  const start=formSource.indexOf('            const reconciliation =');const end=formSource.indexOf("            } else if (lastState?.state === 'recoverable-error'",start);
- const flow='async function resume(){'+formSource.slice(start,end)+'}}';
+ const flow=('async function resume(){'+formSource.slice(start,end)+'}}').replace("const pilot = await import('../data/private-account-offline-pilot.js');",'');
  for(const choice of ['local','server',null]){
   let discarded=0,restored=0,readServer=0;const operation={uid:'owner',operationId:'old',recordId:'record',_reviewReason:'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED',record:{type:'account'}};
-  const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',active:()=>true,document:{getElementById:()=>({})},showToast(){},showM6ConflictChoice:async(reconcile,unsupported)=>{assert.equal(unsupported,true);return choice},pilot:{discardPrivateAccountPilotOperation:async()=>discarded++},getPrivateAccountConfirmed:async()=>{readServer++;return{}},restoreM6ConflictDraft:async()=>restored++,setTimeout(){}};
+  const sandbox={outcome:{status:'reconciliation-required',operation},lastState:null,currentDocId:'record',user:{uid:'owner'},vaultKeyMaterial:'key',active:()=>true,document:{getElementById:()=>({})},showToast(){},showM6ConflictChoice:async(reconcile,unsupported)=>{assert.equal(unsupported,true);return choice},pilot:{discardPrivateAccountPilotRecord:async()=>{discarded++;return{discarded:3,remaining:0}}},getPrivateAccountConfirmed:async()=>{readServer++;return{}},restoreM6ConflictDraft:async()=>restored++,setTimeout(){}};
   vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,0);assert.equal(readServer,0);
  }
 });
 test('unsupported modal exposes later/server actions and states that server choice removes offline copy',async()=>{
- const source=formSource.slice(formSource.indexOf('function showM6ConflictChoice'),formSource.indexOf('function showM6ForeignConflictChoice'));const nodes=[];
+ const source=formSource.slice(formSource.indexOf('function showM6ConflictChoice'),formSource.indexOf('async function restoreM6ConflictDraft'));const nodes=[];
  const createElement=(tag,props={},children=[])=>{const node={tag,...props,children:children.filter(Boolean),classList:{add(){},remove(){}},remove(){},addEventListener(){}};nodes.push(node);return node};
  const sandbox={createElement,setChildren(){},document:{getElementById:()=>null,body:{appendChild(){}}},setTimeout:fn=>fn()};vm.createContext(sandbox);vm.runInContext(source,sandbox);
  const result=sandbox.showM6ConflictChoice(true,true);assert.equal(nodes.some(n=>n.textContent==='Recupera locale'),false);assert.ok(nodes.some(n=>n.textContent?.includes('elimina questa copia offline')));nodes.find(n=>n.textContent==='Decidi più tardi').onclick();assert.equal(await result,null);
+});
+test('un conflitto di un altro account non apre popup e non disabilita il salvataggio corrente',()=>{
+ assert.doesNotMatch(formSource,/showM6ForeignConflictChoice/);
+ assert.match(formSource,/Questo Account può essere modificato normalmente/);
+ assert.match(formSource,/discardPrivateAccountPilotRecord/);
 });
 test('bootstrap completion timer does not navigate after form context expires',async()=>{
  const start=formSource.indexOf('            const reconciliation =');const end=formSource.indexOf('        } catch (error)',start);

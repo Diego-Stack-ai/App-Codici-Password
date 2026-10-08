@@ -1,5 +1,9 @@
 # Collaudi
 
+## 08/10/2026 — riconciliazione Account offline 1.2.133
+
+Riprodotto il caso in cui una modifica pendente dell’Account A mostrava una decisione bloccante aprendo l’Account B e ricompariva dopo “Mantieni server” in presenza di più operazioni dello stesso record. Il client ora controlla la coda all’avvio del Vault, al ritorno online, al ritorno visibile e tramite il canale della coda, senza intervallo periodico. Solo il form del record coinvolto propone la decisione; gli altri form restano modificabili. Lo scarto per mantenere il server opera sotto lease su tutte le operazioni del record e verifica zero residui. `npm run test:offline-write-prototype`: 208/208; controlli mirati precedenti 128/128, data-access94/94, navigation154/154, riferimenti statici246 file, sintassi172 moduli, HTML/CSS/UI/page-shell verdi. Nessun dato reale letto o modificato; Functions, Rules e indici invariati. Resta distinto il collaudo manuale dopo pubblicazione.
+
 ## 06/10/2026 — avvio manuale anteprima senza seed
 
 BuildEmulator accetta preview:true con artefatti separati dist/manual-preview. Nuovo manual-preview.mjs controlla porte, riusa solo account sintetici a/b@example.invalid già esistenti, non applica Rules e non crea dati; bridge attivo soltanto sul loopback4188 con allowlist UID. node --check sui due file passa. Esecuzione reale si arresta prima della build per servizi8085/9099/9199 mancanti: nessun avvio riuscito attestato, nessun browser aperto. Compilazione completa e funzionamento con banco conservato ancora da verificare; precedente esbuild Access denied non aggirato cambiando permessi.
