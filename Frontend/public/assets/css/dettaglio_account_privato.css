@@ -241,7 +241,7 @@
     /* Lower than global modal-overlay (1000) */
     align-items: center;
     justify-content: center;
-    background: rgba(14, 165, 233, 0.25);
+    background: rgb(var(--accent-rgb) / );
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
@@ -257,8 +257,8 @@
     padding: 1.5rem;
     /* Light mode: sfondo bianco-azzurro, testo scuro */
     background: rgba(240, 249, 255, 0.97);
-    border: 1px solid rgba(14, 165, 233, 0.25);
-    box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.25);
+    border: 1px solid rgb(var(--accent-rgb) / );
+    box-shadow: 0 25px 50px -12px rgb(var(--accent-rgb) / );
     border-radius: 1.5rem;
     overflow: hidden;
 }
@@ -312,7 +312,7 @@
 }
 
 .btn-source-option[data-source="camera"] .material-symbols-outlined {
-    color: #2563eb;
+    color: var(--accent);
 }
 
 .btn-source-option[data-source="gallery"] .material-symbols-outlined {
@@ -369,8 +369,8 @@
 
 /* Color variants for hover */
 .hover-blue:hover {
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(59, 130, 246, 0.05);
+    border-color: rgb(var(--accent-rgb) / );
+    background: rgb(var(--accent-rgb) / );
 }
 
 .hover-purple:hover {

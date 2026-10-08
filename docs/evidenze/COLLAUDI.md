@@ -1,5 +1,9 @@
 # Collaudi
 
+## 08/10/2026 — quattro palette colore (locale)
+
+Verificate le preferenze indipendenti di modalità e colore, il fallback Blu per valori assenti/non validi, l’applicazione anticipata in `theme-init.js`, le varianti chiare/scure dei token e la persistenza limitata a `blue`, `green`, `red`, `sand`. I colori funzionali `success`, `warning`, `error` non sono ridefiniti dalle palette. `npm run test:ui-foundations`, `test:js-syntax`, `test:css`, `test:static-references`, `test:html-purity`, `test:page-shells`, `test:navigation`, `test:lightweight`, `test:performance-budget` e `test:docs` superati; il test documentale è stato ripetuto fuori sandbox perché Windows impediva rename e `git init` nelle cartelle temporanee isolate. Resta da registrare l’esito del collaudo visivo su browser/dispositivo dopo l’eventuale pubblicazione; nessun deploy eseguito in questo checkpoint.
+
 ## 08/10/2026 — riconciliazione Account offline 1.2.133
 
 Riprodotto il caso in cui una modifica pendente dell’Account A mostrava una decisione bloccante aprendo l’Account B e ricompariva dopo “Mantieni server” in presenza di più operazioni dello stesso record. Il client ora controlla la coda all’avvio del Vault, al ritorno online, al ritorno visibile e tramite il canale della coda, senza intervallo periodico. Solo il form del record coinvolto propone la decisione; gli altri form restano modificabili. Lo scarto per mantenere il server opera sotto lease su tutte le operazioni del record e verifica zero residui. `npm run test:offline-write-prototype`: 208/208; controlli mirati precedenti 128/128, data-access94/94, navigation154/154, riferimenti statici246 file, sintassi172 moduli, HTML/CSS/UI/page-shell verdi. Nessun dato reale letto o modificato; Functions, Rules e indici invariati. Resta distinto il collaudo manuale dopo pubblicazione.

@@ -37,7 +37,7 @@
     margin-left: auto;
     margin-right: auto;
     display: inline-block;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
     color: var(--accent);
 }
 
@@ -105,7 +105,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(14, 165, 233, 0);
+    background: rgb(var(--accent-rgb) / );
     backdrop-filter: blur(0px);
     -webkit-backdrop-filter: blur(0px);
     transition: all 0.3s ease;
@@ -117,7 +117,7 @@
 }
 
 .modal-overlay.active {
-    background: rgba(14, 165, 233, 0.25);
+    background: rgb(var(--accent-rgb) / );
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
@@ -130,8 +130,8 @@
     width: 300px;
     padding: 1.5rem;
     background: rgba(240, 249, 255, 0.97);
-    border: 1px solid rgba(14, 165, 233, 0.25);
-    box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.25);
+    border: 1px solid rgb(var(--accent-rgb) / );
+    box-shadow: 0 25px 50px -12px rgb(var(--accent-rgb) / );
     border-radius: 1.5rem;
     overflow: hidden;
     transform: scale(0.9);

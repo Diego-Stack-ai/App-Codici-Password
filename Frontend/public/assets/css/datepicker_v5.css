@@ -134,13 +134,13 @@
 }
 
 .dp-day:not(.empty):hover {
-    background: rgba(59, 130, 246, 0.15);
+    background: rgb(var(--accent-rgb) / );
 }
 
 .dp-day.selected {
     background: var(--accent);
     color: white;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 20px rgb(var(--accent-rgb) / );
     font-weight: var(--font-title-weight);
 }
 
@@ -189,7 +189,7 @@
     font-weight: var(--font-label-weight);
     font-size: var(--fs-xs);
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgb(var(--accent-rgb) / );
 }
 
 /* Animation Trigger */

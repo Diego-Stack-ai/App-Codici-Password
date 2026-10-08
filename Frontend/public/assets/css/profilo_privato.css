@@ -192,7 +192,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     transform: translateX(-50%);
     width: 2px;
     height: 150px;
-    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), white);
+    background: linear-gradient(to bottom, transparent, rgb(var(--accent-rgb) / ), white);
     opacity: 0;
     z-index: 0;
     animation: saettaStrike 3s infinite ease-in-out;
@@ -508,7 +508,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
     /* Light Blue */
     color: var(--accent);
     border: none;
@@ -542,7 +542,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     margin-top: 0.75rem;
     padding: 0.85rem;
     /* Reduced from 1.25rem */
-    background: rgba(59, 130, 246, 0.05);
+    background: rgb(var(--accent-rgb) / );
     border: 1.5px dashed var(--accent);
     /* Darker border */
     border-radius: 14px;
@@ -558,8 +558,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .dark .btn-upload-trigger {
     color: var(--accent);
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(96, 165, 250, 0.4);
+    background: rgb(var(--accent-rgb) / );
+    border-color: rgb(var(--accent-rgb) / );
 }
 
 /* Helper for grouped data items */
@@ -592,13 +592,13 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     margin-left: 1.5rem;
     font-size: var(--fs-lg);
     color: var(--accent);
-    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.3));
+    filter: drop-shadow(0 0 5px rgb(var(--accent-rgb) / ));
 }
 
 .dark .glass-field-icon {
     color: var(--accent);
     /* Brighter blue for visibility */
-    filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.5));
+    filter: drop-shadow(0 0 8px rgb(var(--accent-rgb) / ));
 }
 
 /* Base Data Labels in dark Mode */
@@ -914,7 +914,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(59, 130, 246, 0.08);
+    background: rgb(var(--accent-rgb) / );
     /* Light Azure */
     color: var(--accent);
     border: none;
@@ -961,12 +961,12 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     height: 40px;
     border-radius: 12px;
     flex-shrink: 0;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgb(var(--accent-rgb) / );
 }
 
 .card-icon-box .material-symbols-outlined {
@@ -1067,7 +1067,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .glass-field-box:focus-within {
     background: rgba(255, 255, 255, 0.08);
-    border-color: var(--primary-color, #3b82f6);
+    border-color: var(--primary-color, var(--accent));
 }
 
 /* --- Modal Scroll System --- */

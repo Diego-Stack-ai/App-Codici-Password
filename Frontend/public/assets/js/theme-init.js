@@ -3,6 +3,10 @@
 
 (function () {
     try {
+        const savedColorTheme = localStorage.getItem('color_theme');
+        const colorTheme = ['blue', 'green', 'red', 'sand'].includes(savedColorTheme) ? savedColorTheme : 'blue';
+        document.documentElement.dataset.colorTheme = colorTheme;
+
         // Se la pagina richiede il Dark Forzato (es. Login/Registrazione), non toccare nulla
         if (document.documentElement.classList.contains('protocol-forced-dark')) {
             document.documentElement.classList.add('dark');

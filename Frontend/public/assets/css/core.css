@@ -2,9 +2,7 @@ body[data-private-auth][hidden] {
     display: none !important;
 }
 
-/* =======================
-   ANTI-FLICKER SYSTEM (V3.9)
-   ======================= */
+
 html[data-i18n="loading"] body {
     visibility: hidden;
 }
@@ -13,9 +11,7 @@ html[data-i18n="ready"] body {
     visibility: visible;
 }
 
-/* -----------------------
-   RESET / GLOBAL
-   ----------------------- */
+
 * {
     margin: 0;
     padding: 0;
@@ -24,7 +20,7 @@ html[data-i18n="ready"] body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* --- UTILITIES --- */
+
 .sr-only {
     position: absolute;
     width: 1px;
@@ -56,12 +52,10 @@ body,
     display: none;
 }
 
-/* -----------------------
-   VARIABILI GLOBALI
-   ----------------------- */
+
 :root {
     color-scheme: light;
-    /* Fondazioni condivise per spazi, forme, controlli, livelli e movimento. */
+
     --space-1: 0.25rem;
     --space-2: 0.5rem;
     --space-3: 0.75rem;
@@ -110,16 +104,20 @@ body,
     --card-shadow: rgba(0, 0, 0, 0.5);
 
     --accent: #137fec;
+    --accent-primary: var(--accent);
+    --accent-rgb: 19, 127, 236;
+    --accent-surface: #e3f2fd;
+    --accent-surface-strong: #1e3a8a;
 
     --base-box-gradient: linear-gradient(135deg, #e0f2fe 0%, #60a5fa 100%);
-    --glow-color: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
-    --saetta-color: rgba(14, 165, 233, 0.1);
+    --glow-color: radial-gradient(ellipse at 50% 0%, rgb(var(--accent-rgb) / 45%) 0%, rgb(var(--accent-rgb) / 10%) 50%, transparent 70%);
+    --saetta-color: rgb(var(--accent-rgb) / 10%);
 
     --input-bg: rgba(255, 255, 255, 0.05);
     --input-border: rgba(255, 255, 255, 0.1);
     --input-text: var(--text-primary);
-    --input-bg-focus: rgba(59, 130, 246, 0.08);
-    --input-shadow: rgba(59, 130, 246, 0.08);
+    --input-bg-focus: rgb(var(--accent-rgb) / 8%);
+    --input-shadow: rgb(var(--accent-rgb) / 8%);
 
     --link-color: rgba(255, 255, 255, 0.5);
     --border-color: rgba(0, 0, 0, 0.12);
@@ -127,14 +125,44 @@ body,
     --transition-base: 0.2s ease;
     --qr-bg: #E3F2FD;
 
-    /* STATUS COLORS (Premium Palette) */
+
     --status-success: #10b981;
     --status-warning: #f59e0b;
     --status-error: #ef4444;
 
-    /* BRAND PALETTE EXTENSIONS */
+
     --color-purple: #a855f7;
-    /* violet-500 — badge condivisione, account azienda */
+
+}
+
+:root[data-color-theme="green"] {
+    --bg-primary: #e3f2e8;
+    --viewport-edge-color: #eef8f1;
+    --accent: #177245;
+    --accent-rgb: 23, 114, 69;
+    --accent-surface: #e5f5ea;
+    --accent-surface-strong: #164e35;
+    --base-box-gradient: linear-gradient(135deg, #edf9f0 0%, #a4d9b5 100%);
+}
+
+:root[data-color-theme="red"] {
+    --bg-primary: #f3e5e9;
+    --viewport-edge-color: #faeef1;
+    --accent: #9f2348;
+    --accent-rgb: 159, 35, 72;
+    --accent-surface: #f9e6eb;
+    --accent-surface-strong: #68213a;
+    --base-box-gradient: linear-gradient(135deg, #fff1f4 0%, #dda0af 100%);
+}
+
+:root[data-color-theme="sand"] {
+    --bg-primary: #f1eadc;
+    --viewport-edge-color: #faf5ea;
+    --accent: #875b18;
+    --accent-rgb: 135, 91, 24;
+    --accent-surface: #f7edd8;
+    --accent-surface-strong: #614619;
+    --base-box-gradient: linear-gradient(135deg, #fff8e9 0%, #d8bc82 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -148,9 +176,7 @@ body,
     }
 }
 
-/* -----------------------
-   DARK MODE
-   ----------------------- */
+
 .dark {
     color-scheme: dark;
     --bg-primary: #0a0f1e;
@@ -164,26 +190,48 @@ body,
     --card-shadow: rgba(0, 0, 0, 0.7);
 
     --base-box-gradient: linear-gradient(135deg, #2563eb 0%, #030712 100%);
-    --glow-color: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
-    --saetta-color: rgba(80, 150, 255, 0.08);
+    --glow-color: radial-gradient(ellipse at 50% 0%, rgb(var(--accent-rgb) / 60%) 0%, rgb(var(--accent-rgb) / 20%) 25%, rgb(var(--accent-rgb) / 5%) 50%, transparent 75%);
+    --saetta-color: rgb(var(--accent-rgb) / 8%);
 
     --input-bg: rgba(255, 255, 255, 0.05);
     --input-border: rgba(255, 255, 255, 0.1);
-    --input-bg-focus: rgba(59, 130, 246, 0.08);
-    --input-shadow: rgba(59, 130, 246, 0.08);
+    --input-bg-focus: rgb(var(--accent-rgb) / 8%);
+    --input-shadow: rgb(var(--accent-rgb) / 8%);
 
     --border-color: rgba(255, 255, 255, 0.12);
 
-    /* STATUS COLORS (Dark Overrides if needed) */
+
     --status-success: #34d399;
-    /* Leggermente più luminoso */
+
     --status-error: #f87171;
-    /* Leggermente più desaturato */
+
 }
 
-/* -----------------------
-   BASE LAYER
-   ----------------------- */
+.dark[data-color-theme="green"] {
+    --bg-primary: #0b1b13;
+    --viewport-edge-color: #10261b;
+    --accent: #55c985;
+    --accent-rgb: 85, 201, 133;
+    --base-box-gradient: linear-gradient(135deg, #285e43 0%, #081710 100%);
+}
+
+.dark[data-color-theme="red"] {
+    --bg-primary: #1d0b11;
+    --viewport-edge-color: #291018;
+    --accent: #e47791;
+    --accent-rgb: 228, 119, 145;
+    --base-box-gradient: linear-gradient(135deg, #69253a 0%, #16070c 100%);
+}
+
+.dark[data-color-theme="sand"] {
+    --bg-primary: #1c160c;
+    --viewport-edge-color: #282013;
+    --accent: #e0b968;
+    --accent-rgb: 224, 185, 104;
+    --base-box-gradient: linear-gradient(135deg, #66502a 0%, #151006 100%);
+}
+
+
 .base-bg {
     background: var(--base-box-gradient);
     background-attachment: fixed;
@@ -195,11 +243,7 @@ body,
     font-family: 'Manrope', sans-serif;
 }
 
-/*
- * Fondale viewport indipendente dal documento.
- * Copre anche gli schermi molto alti e le variazioni della viewport di iOS,
- * senza ridimensionare contenuti, header, footer o fasce di nebbia.
- */
+
 .base-bg::before {
     content: "";
     position: fixed;
@@ -251,9 +295,7 @@ textarea::placeholder {
     min-width: 0;
 }
 
-/* -----------------------
-   RESPONSIVE BASE
-   ----------------------- */
+
 @media (min-width: 601px) {
     .base-container {
         padding: max(1.5rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
@@ -280,7 +322,7 @@ textarea::placeholder {
     }
 
     html {
-        /* Colora il canvas iOS esterno alla layout viewport come il bordo della nebbia. */
+
         background-color: var(--viewport-edge-color);
     }
 
@@ -289,7 +331,7 @@ textarea::placeholder {
     }
 
     .base-bg {
-        /* background-attachment: fixed provoca repaint bianchi su Chromium mobile. */
+
         width: 100%;
         height: 100dvh;
         min-height: 100dvh;
@@ -300,7 +342,7 @@ textarea::placeholder {
     }
 
     .base-bg::before {
-        /* La large viewport include stabilmente anche il bordo inferiore iOS. */
+
         height: 100lvh;
         min-height: 100dvh;
     }
@@ -326,7 +368,7 @@ textarea::placeholder {
     }
 
     .base-glow {
-        /* Evita la ricomposizione continua di un layer fixed filtrato durante lo scroll. */
+
         position: absolute;
         animation: none;
         filter: none;
@@ -335,9 +377,7 @@ textarea::placeholder {
     }
 }
 
-/* -----------------------
-   FARO / GLOW (V4.0)
-   ----------------------- */
+
 .base-glow {
     position: fixed;
     top: 0;
@@ -352,7 +392,7 @@ textarea::placeholder {
     z-index: var(--z-ambient);
 }
 
-/* Watermark decorativo condiviso: fuori dal layout e non interattivo. */
+
 .archive-watermark {
     position: fixed;
     top: 50%;
@@ -382,9 +422,7 @@ textarea::placeholder {
     }
 }
 
-/* -----------------------
-   GENERIC UTILITIES
-   ----------------------- */
+
 .hidden {
     display: none !important;
 }
@@ -410,7 +448,7 @@ textarea::placeholder {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* Stato di connettività condiviso tra login e area privata. */
+
 .offline-status-banner {
     position: fixed;
     z-index: var(--z-app-status);

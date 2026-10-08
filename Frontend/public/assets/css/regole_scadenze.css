@@ -64,8 +64,8 @@
 }
 
 .icon-blue {
-    background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background: rgb(var(--accent-rgb) / );
+    color: var(--accent);
 }
 
 .icon-emerald {
@@ -118,7 +118,7 @@
     transform: translateX(-50%);
     width: 2px;
     height: 100px;
-    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), #fff);
+    background: linear-gradient(to bottom, transparent, rgb(var(--accent-rgb) / ), #fff);
     opacity: 0;
     animation: saettaStrike 3s infinite ease-in-out;
 }

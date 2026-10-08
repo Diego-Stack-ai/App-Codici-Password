@@ -115,8 +115,8 @@
 
 .input-wrapper:focus-within {
     background: var(--input-bg-focus);
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / );
 }
 
 .form-row {
@@ -142,7 +142,7 @@
     width: 100%;
     padding: 1rem;
     background: var(--accent);
-    /* Normalizzato da #3b82f6 */
+    /* Normalizzato da var(--accent) */
     color: white;
     border: none;
     border-radius: 16px;
@@ -156,7 +156,7 @@
     gap: 0.5rem;
     transition: all 0.2s;
     margin-top: 1rem;
-    box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 10px 20px -5px rgb(var(--accent-rgb) / );
 }
 
 .btn-primary:active {
@@ -243,8 +243,8 @@
 }
 
 .config-badge-blue {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    background: rgb(var(--accent-rgb) / );
+    color: var(--accent);
 }
 
 .config-badge-amber {
@@ -264,8 +264,8 @@
 
 /* --- 6.1 ICON BOXES (V5.0 Standard) --- */
 .icon-blue {
-    background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background: rgb(var(--accent-rgb) / );
+    color: var(--accent);
 }
 
 .icon-amber {
@@ -330,7 +330,7 @@
     width: 100%;
     padding: 1rem;
     background: var(--accent);
-    /* Normalizzato da #3b82f6 */
+    /* Normalizzato da var(--accent) */
     color: white;
     border: none;
     border-radius: 16px;
@@ -344,7 +344,7 @@
     gap: 0.5rem;
     transition: all 0.2s;
     margin-top: 1rem;
-    box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 10px 20px -5px rgb(var(--accent-rgb) / );
 }
 
 /* --- 8. DROPDOWN SYSTEM (V5.0 Premium) --- */
@@ -390,7 +390,7 @@
     right: 0;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    border: 1px solid rgb(var(--accent-rgb) / );
     border-radius: 20px;
     padding: 0.5rem;
     z-index: var(--z-dropdown);
@@ -445,7 +445,7 @@
 }
 
 .base-dropdown-item:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
     color: var(--accent);
 }
 
@@ -473,7 +473,7 @@
 }
 
 .base-dropdown-menu::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.2);
+    background: rgb(var(--accent-rgb) / );
     border-radius: 10px;
 }
 .account-mode-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.account-mode-option{min-height:44px;display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--border-color);border-radius:12px;background:var(--surface-glass);color:var(--text-secondary);font:var(--font-caption);font-weight:800;cursor:pointer;text-align:left}.account-mode-option.is-active{border-color:rgba(79,124,255,.75);background:rgba(79,124,255,.16);color:var(--text-primary)}.account-mode-option .material-symbols-outlined{font-size:19px}.account-mode-contacts{margin-top:10px;padding:10px;border:1px solid var(--border-color);border-radius:14px;background:rgba(255,255,255,.035)}.account-mode-contact-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font:var(--font-caption)}.account-mode-manage{border:0;background:transparent;color:var(--accent-primary,#6f9cff);font:inherit;font-weight:800;cursor:pointer}.account-mode-contact-list{display:grid;gap:3px;max-height:230px;overflow:auto}.account-mode-contact{display:flex;align-items:center;gap:9px;min-height:44px;padding:5px 7px;border-radius:10px;cursor:pointer}.account-mode-contact:hover{background:rgba(255,255,255,.06)}.account-mode-contact-copy{display:flex;flex-direction:column;min-width:0;line-height:1.2}.account-mode-contact-copy strong,.account-mode-contact-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.account-mode-contact-copy small{margin-top:2px;opacity:.62}.account-mode-empty{margin:8px 4px;font:var(--font-caption);opacity:.65}.account-mode-save{width:100%;margin-top:12px}@media(max-width:390px){.account-mode-options{grid-template-columns:1fr}}

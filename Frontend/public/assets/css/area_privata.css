@@ -139,7 +139,7 @@
 
 /* Color Variants (Gradients) */
 .icon-blue {
-    background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent) 100%);
     color: white;
 }
 
@@ -153,7 +153,7 @@
 }
 
 .card-blue .matrix-icon-box {
-    background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent) 100%);
 }
 
 .card-red .matrix-icon-box {

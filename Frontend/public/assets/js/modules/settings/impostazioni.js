@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.133';
+import { auth, db } from '../../firebase-config.js?v=1.2.134';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -54,7 +54,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.133');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.134');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -168,7 +168,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.133');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.134');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -300,7 +300,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.133');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.134');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -925,7 +925,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.133');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.134');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
@@ -1237,6 +1237,24 @@ function setupThemeSelector() {
         btn.addEventListener('click', () => {
             localStorage.setItem('theme', btn.dataset.theme);
             window.location.reload();
+        });
+    });
+    const savedColorTheme = localStorage.getItem('color_theme');
+    const colorTheme = ['blue', 'green', 'red', 'sand'].includes(savedColorTheme) ? savedColorTheme : 'blue';
+    document.querySelectorAll('.color-theme-btn').forEach(btn => {
+        const isCurrent = btn.dataset.colorTheme === colorTheme;
+        btn.classList.toggle('active', isCurrent);
+        btn.setAttribute('aria-pressed', String(isCurrent));
+        btn.addEventListener('click', () => {
+            const selected = btn.dataset.colorTheme;
+            if (!['blue', 'green', 'red', 'sand'].includes(selected)) return;
+            localStorage.setItem('color_theme', selected);
+            document.documentElement.dataset.colorTheme = selected;
+            document.querySelectorAll('.color-theme-btn').forEach(item => {
+                const isActive = item === btn;
+                item.classList.toggle('active', isActive);
+                item.setAttribute('aria-pressed', String(isActive));
+            });
         });
     });
 }

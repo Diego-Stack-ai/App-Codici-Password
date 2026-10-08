@@ -372,12 +372,12 @@
 #btn-banking-info {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid rgba(14, 165, 233, 0.2);
+    border: 1px solid rgb(var(--accent-rgb) / );
     border-radius: 1rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: rgba(14, 165, 233, 0.06);
+    background: rgb(var(--accent-rgb) / );
     color: #0f172a;
     -webkit-text-fill-color: #0f172a;
     text-align: left;
@@ -393,7 +393,7 @@
 }
 
 #btn-banking-info:hover {
-    background: rgba(14, 165, 233, 0.12);
+    background: rgb(var(--accent-rgb) / );
 }
 
 .dark #btn-banking-info:hover {
@@ -430,14 +430,14 @@
 
 .btn-source-option {
     padding: 0.75rem;
-    border: 1px solid rgba(14, 165, 233, 0.2);
+    border: 1px solid rgb(var(--accent-rgb) / );
     border-radius: 0.75rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: rgba(14, 165, 233, 0.06);
+    background: rgb(var(--accent-rgb) / );
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -448,8 +448,8 @@
 }
 
 .btn-source-option:hover {
-    border-color: rgba(14, 165, 233, 0.5);
-    background: rgba(14, 165, 233, 0.12);
+    border-color: rgb(var(--accent-rgb) / );
+    background: rgb(var(--accent-rgb) / );
 }
 
 .dark .btn-source-label {
@@ -463,7 +463,7 @@
 .modal-footer {
     margin-top: 1rem;
     padding-top: 0.5rem;
-    border-top: 1px solid rgba(14, 165, 233, 0.15);
+    border-top: 1px solid rgb(var(--accent-rgb) / );
     text-align: center;
 }
 
