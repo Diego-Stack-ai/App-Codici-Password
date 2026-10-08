@@ -1,5 +1,7 @@
 # Stato
 
+08/10/2026 — recuperata dalla documentazione della duplicazione la lista canonica dei sei filoni congelati: M7 cancellazione/purge, M8 completamento e collaudi reali, M10 audit/privacy/rilascio, Excel, AI e Lingue. M7 e M8 restano esplicitamente **incompleti**: la confluenza dei loro rami in `master` prova soltanto l'inclusione dei commit, non la chiusura tecnica o dei gate. Dettaglio e regola di conservazione dei rami in DECISIONI.
+
 06/10/2026 — richiesta anteprima aggiornata: preparato manual-preview.mjs senza seed o modifica Rules, build in dist/manual-preview separata dal banco originale. Verifica sintattica passata; avvio rifiutato perché Auth9099/Firestore8085/Storage9199 assenti. Build completa non verificata per precedente Access denied esbuild; nessuna pagina aggiornata dichiarata aperta. Nessuna esportazione del banco individuata nei percorsi di avvio consultati.
 
 06/10/2026 — Aziende ammesse nel reader/commit candidato, con verifica Account collegati a email/telefoni e fence vecchi/nuovi riferimenti. Nuovi piani raggruppano Azienda e Account aziendali selezionati nello stesso chunk, gruppi eccessivi rifiutati. SDK14/14, regressione pura141/141 prima del test aggiuntivo di raggruppamento; source21/21 dopo. Non collaudo completo 3B/cancellazione Azienda, né backup completo/shared/UI; nessun deploy.

@@ -1,5 +1,18 @@
 # Decisioni
 
+## 08/10/2026 — sei filoni congelati dopo la prova con app duplicata
+
+Fonte: decisione registrata durante la duplicazione pilota in `DUPLICAZIONE_APP.md` e confermata successivamente da Diego. I sei filoni da conservare come **aperti e da completare**, senza considerarli chiusi per effetto di merge, deploy o prove parziali, sono:
+
+1. **M7 — cancellazione e purge**;
+2. **M8 — completamento e collaudi reali**;
+3. **M10 — audit, privacy e rilascio**;
+4. **esportazione Excel**;
+5. **integrazione AI**;
+6. **Lingue**.
+
+Il fatto che i commit o i rami sperimentali M7/M8 risultino confluiti in `master` indica soltanto che il relativo codice non è più isolato su quei rami. **Non attesta il completamento di M7 o M8**, non chiude i rispettivi gate e non sostituisce i collaudi ancora richiesti. Il ramo remoto Excel resta una sorgente separata da preservare finché il lavoro non sarà ripreso. Anche le evidenze M10 non confluite devono essere conservate o riconciliate prima della pulizia dei relativi rami. Per AI e Lingue non risulta un'implementazione completa da considerare acquisita.
+
 ## 05/10/2026 — M8-RP-01 e M8-TS-01: conferma esplicita
 
 Fonte: Diego risponde in questa chat «Confermo 30 giorni e blocco con spiegazione» alle due proposte illustrate.
