@@ -64,7 +64,7 @@
     right: -6px;
     width: 32px;
     height: 32px;
-    background: #3b82f6;
+    background: var(--accent);
     border-radius: 50%;
     border: 4px solid var(--bg-primary);
     display: flex;
@@ -261,7 +261,7 @@
 .checkbox-qr {
     width: 16px;
     height: 16px;
-    accent-color: var(--accent, #3b82f6);
+    accent-color: var(--accent, var(--accent));
     cursor: pointer;
 }
 
@@ -474,8 +474,8 @@
 .btn-add-circle {
     width: 100%;
     padding: 1rem;
-    background: rgba(59, 130, 246, 0.05);
-    border: 1px dashed rgba(59, 130, 246, 0.2);
+    background: rgb(var(--accent-rgb) / );
+    border: 1px dashed rgb(var(--accent-rgb) / );
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -487,7 +487,7 @@
 }
 
 .btn-add-circle:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
     transform: scale(1.01);
 }
 
@@ -495,8 +495,8 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgb(var(--accent-rgb) / );
+    border: 1px solid rgb(var(--accent-rgb) / );
     display: flex;
     align-items: center;
     justify-content: center;
@@ -507,7 +507,7 @@
 
 .btn-mini-add:hover {
     transform: scale(1.1);
-    background: rgba(59, 130, 246, 0.2);
+    background: rgb(var(--accent-rgb) / );
 }
 
 .footer-action-btn {

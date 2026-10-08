@@ -1,5 +1,7 @@
 # Stato
 
+08/10/2026 — preparata la versione 1.2.134 con quattro palette d’identità selezionabili in Impostazioni: Blu, Verde, Rosso e Sabbia. La scelta è indipendente da chiaro/automatico/scuro, viene validata e applicata prima del rendering; i principali blu fissi dei componenti condivisi e delle pagine sono stati ricondotti ai token, lasciando invariati colori di stato e categorie. Test dedicati, suite statiche e budget prestazionale verdi; pubblicazione Hosting autorizzata, esito remoto da registrare separatamente. Functions, Rules, indici e dati invariati.
+
 08/10/2026 — preparata la 1.2.133 per correggere la riconciliazione delle modifiche Account offline: coordinatore senza polling su avvio Vault/online/ritorno visibile/eventi coda; conflitti di record diversi non bloccano il form; “Mantieni server” elimina e verifica tutte le operazioni dello stesso record. Suite offline-write 208/208 prima del rilascio. Modifica limitata al client Hosting, senza Functions, Rules, indici o dati; pubblicazione autorizzata, esito remoto da registrare separatamente.
 
 08/10/2026 — recuperata dalla documentazione della duplicazione la lista canonica dei sei filoni congelati: M7 cancellazione/purge, M8 completamento e collaudi reali, M10 audit/privacy/rilascio, Excel, AI e Lingue. M7 e M8 restano esplicitamente **incompleti**: la confluenza dei loro rami in `master` prova soltanto l'inclusione dei commit, non la chiusura tecnica o dei gate. Dettaglio e regola di conservazione dei rami in DECISIONI.

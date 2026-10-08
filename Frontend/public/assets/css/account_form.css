@@ -35,7 +35,7 @@
 }
 
 .detail-avatar:hover {
-    border-color: #3b82f6;
+    border-color: var(--accent);
     background: var(--surface-hover);
 }
 
@@ -51,7 +51,7 @@
     right: -4px;
     width: 24px;
     height: 24px;
-    background: #3b82f6;
+    background: var(--accent);
     border-radius: 50%;
     border: 2px solid var(--bg-primary);
     display: flex;
@@ -144,7 +144,7 @@
 
 .glass-field:focus-within {
     background: var(--surface-hover);
-    border-color: #3b82f6;
+    border-color: var(--accent);
     /* explicit focus color */
 }
 
@@ -232,16 +232,16 @@
 }
 
 .attachment-upload-box:hover {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
+    border-color: var(--accent);
+    background: rgb(var(--accent-rgb) / );
 }
 
 .attachment-icon-badge {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    background: rgb(var(--accent-rgb) / );
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -278,7 +278,7 @@
 }
 
 .icon-accent-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .base-shield {
@@ -356,7 +356,7 @@ input:checked+.base-switch::after {
 .loading-spinner {
     width: 3rem;
     height: 3rem;
-    border: 4px solid #3b82f6;
+    border: 4px solid var(--accent);
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -487,7 +487,7 @@ input:checked+.base-switch::after {
 }
 
 .bg-blue-soft {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
 }
 
 .bg-orange-soft {

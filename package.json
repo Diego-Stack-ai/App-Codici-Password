@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.133",
+  "version": "1.2.134",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -59,7 +59,7 @@
     "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/profile-deadline-link-model.test.mjs tests/account-mode-model.test.mjs tests/banking-model.test.mjs tests/banking-form-roundtrip.test.mjs tests/account-detail-compact.test.mjs tests/account-page-lifecycle.test.mjs tests/company-detail-readonly.test.mjs tests/company-account-detail-lifecycle.test.mjs tests/private-detail-legacy-id.test.mjs tests/private-account-detail-lifecycle.test.mjs tests/deadline-detail-lifecycle.test.mjs",
     "test:auth-browser": "node scripts/test-private-auth-browser.mjs",
     "test:page-shells": "node scripts/audit-page-shells.mjs",
-    "test:ui-foundations": "node scripts/audit-ui-foundations.mjs",
+    "test:ui-foundations": "node scripts/audit-ui-foundations.mjs && node --test tests/theme-palette.test.mjs",
     "test:html-purity": "node scripts/audit-html-purity.mjs",
     "test:static-references": "node scripts/audit-static-references.mjs",
     "test:lightweight": "node scripts/audit-lightweight-features.mjs",

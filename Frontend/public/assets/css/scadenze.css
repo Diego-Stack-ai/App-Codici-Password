@@ -112,11 +112,11 @@
 }
 
 .filter-chip.active {
-    background: rgba(59, 130, 246, 0.15);
+    background: rgb(var(--accent-rgb) / );
     /* Accent tint */
     border-color: var(--accent);
     color: var(--accent);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 12px rgb(var(--accent-rgb) / );
 }
 
 .filter-chip:hover:not(.active) {
@@ -232,7 +232,7 @@ html:not(.dark) .deadline-card-subtitle {
 }
 
 .deadline-card:hover .swipe-content {
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: rgb(var(--accent-rgb) / );
 }
 
 .deadline-card-layout {

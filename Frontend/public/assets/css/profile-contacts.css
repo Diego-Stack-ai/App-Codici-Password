@@ -2,8 +2,8 @@
 .profile-contact-card .profile-contact-label { font: var(--font-label); color: var(--text-secondary); text-transform: none; letter-spacing: normal; }
 .profile-contact-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .profile-contact-fields { display: flex; flex-direction: column; gap: .85rem; }
-.profile-contact-card .profile-contact-connect { width: 100%; min-height: 44px; padding: .85rem; background: rgba(59,130,246,.05); border: 1.5px dashed var(--accent); border-radius: 14px; color: var(--accent); font: var(--font-button); cursor: pointer; }
-.profile-contact-mini { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; padding: 0; border: none; border-radius: 8px; color: var(--accent); background: rgba(59,130,246,.08); cursor: pointer; }
+.profile-contact-card .profile-contact-connect { width: 100%; min-height: 44px; padding: .85rem; background: rgb(var(--accent-rgb) / ); border: 1.5px dashed var(--accent); border-radius: 14px; color: var(--accent); font: var(--font-button); cursor: pointer; }
+.profile-contact-mini { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; padding: 0; border: none; border-radius: 8px; color: var(--accent); background: rgb(var(--accent-rgb) / ); cursor: pointer; }
 .profile-contact-mini .material-symbols-outlined { font-size: var(--icon-sm); }
 .profile-contact-card .company-contact-value { font: var(--font-input); }
 .profile-contact-card .company-contact-actions { display: grid; gap: .75rem; }

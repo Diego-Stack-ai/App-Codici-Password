@@ -89,7 +89,7 @@
 
 .icon-blue {
     color: var(--accent);
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
 }
 
 .icon-red {
@@ -165,7 +165,7 @@ h3.settings-desc {
 
 .settings-toggle:checked {
     background: var(--accent);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 15px rgb(var(--accent-rgb) / );
 }
 
 .settings-toggle::after {
@@ -204,11 +204,31 @@ h3.settings-desc {
 }
 
 .timer-btn.active,
-.theme-btn.active {
+.theme-btn.active,
+.color-theme-btn.active {
     background: var(--accent);
     color: white;
     border-color: transparent;
-    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 20px rgb(var(--accent-rgb) / 30%);
+}
+
+.settings-subsection-label {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    font-weight: 700;
+}
+
+.color-theme-selector { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.color-theme-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
+.theme-swatch { width: .85rem; height: .85rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid rgb(255 255 255 / 55%); box-shadow: 0 0 0 1px rgb(15 23 42 / 20%); }
+.swatch-blue { background: #137fec; }
+.swatch-green { background: #177245; }
+.swatch-red { background: #9f2348; }
+.swatch-sand { background: #a97828; }
+
+@media (max-width: 520px) {
+    .color-theme-selector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* --- 7. HERO CARD (Premium Overhaul) --- */
@@ -255,7 +275,7 @@ h3.settings-desc {
     transform: translateX(-50%);
     width: 2px;
     height: 100px;
-    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), white);
+    background: linear-gradient(to bottom, transparent, rgb(var(--accent-rgb) / ), white);
     opacity: 0;
     animation: saettaStrike 4s infinite ease-in-out;
 }
@@ -443,7 +463,7 @@ h3.settings-desc {
 }
 
 .settings-dropdown-btn:hover {
-    background: rgba(59, 130, 246, 0.15);
+    background: rgb(var(--accent-rgb) / );
     color: var(--accent);
     transform: translateX(4px);
 }
@@ -468,14 +488,14 @@ h3.settings-desc {
     font-weight: var(--font-label-weight);
     font-size: var(--fs-xs);
     padding: 0.5rem 1rem;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(var(--accent-rgb) / );
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.2s;
 }
 
 .btn-link-accent:hover {
-    background: rgba(59, 130, 246, 0.2);
+    background: rgb(var(--accent-rgb) / );
     transform: translateY(-1px);
 }
 
@@ -825,7 +845,7 @@ h3.settings-desc {
     position: absolute;
     left: -19px;
     width: 17px;
-    border-left: 2px solid var(--accent-color, #3b82f6);
+    border-left: 2px solid var(--accent-color, var(--accent));
     content: '';
     pointer-events: none;
 }
@@ -833,14 +853,14 @@ h3.settings-desc {
 .shared-credential-account-list > .linked + .linked::before {
     top: -12px;
     bottom: 50%;
-    border-bottom: 2px solid var(--accent-color, #3b82f6);
+    border-bottom: 2px solid var(--accent-color, var(--accent));
     border-bottom-left-radius: 8px;
 }
 
 .shared-credential-account-list > .linked:has(+ .linked)::after {
     top: 50%;
     bottom: -12px;
-    border-top: 2px solid var(--accent-color, #3b82f6);
+    border-top: 2px solid var(--accent-color, var(--accent));
     border-top-left-radius: 8px;
 }
 

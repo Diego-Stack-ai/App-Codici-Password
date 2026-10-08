@@ -5,6 +5,10 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Integrazione corrente — palette colore
+
+La modalità luminosa (`chiaro`, `automatico`, `scuro`) e la palette cromatica sono preferenze indipendenti. Le palette ammesse sono `blue`, `green`, `red` e `sand`; `blue` è il fallback per valori assenti o non validi. La preferenza locale viene applicata da `theme-init.js` prima del rendering per evitare il cambio colore visibile all’avvio. `core.css` resta l’autorità dei token d’identità; colori funzionali di successo, avviso ed errore e colori di categoria non cambiano significato con la palette. I controlli in Impostazioni devono esporre selezione visiva e stato accessibile `aria-pressed`.
+
 ## Indice delle fonti conservate
 
 - [GUIDA.md](#fonte-frontend-guida-md-l1)
