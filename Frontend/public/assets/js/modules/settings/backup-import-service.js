@@ -1,4 +1,4 @@
-import {auth, functions, storage} from '../../firebase-config.js?v=1.2.144';
+import {auth, functions, storage} from '../../firebase-config.js?v=1.2.145';
 import {httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, restoreRecordKey, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
@@ -242,11 +242,18 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const storagePaths = new Set();
         const attachmentDigests = new Map();
         const recordKeys = new Set();
+        let excludedSecuritySettings = 0;
         session.own(() => recordKeys.clear());
         let recordCharacters = 0, attachmentCharacters = 0;
         session.own(() => attachmentDigests.clear());
         const scan = await scanBackup(file, uid, recoveryKey, (entry, digest) => {
             if (entry.kind === 'record') {
+                // The backup authenticates this entry through its encrypted chain/footer,
+                // but a restore must retain the live Vault verifier and key envelope.
+                if (entry.scope === 'settings' && entry.id === 'security') {
+                    excludedSecuritySettings += 1;
+                    return;
+                }
                 chunkRestoreRecords([entry]);
                 const characters = JSON.stringify(entry).length;
                 if (records.length >= MAX_RESTORE_RECORDS || characters > MAX_RESTORE_RECORD_CHARACTERS - recordCharacters) {
@@ -306,7 +313,8 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         const collisions = comparison.counts.changed + comparison.counts.unchanged;
         const plan = {
             file, uid, recoveryKey, header: scan.header, records, chunks, counts: scan.counts,
-            storagePaths: [...storagePaths], comparison, collisionCount: collisions
+            storagePaths: [...storagePaths], comparison, collisionCount: collisions,
+            excludedSecuritySettings
         };
         session.source = {file, recoveryKey, backupId: scan.header.backupId,
             headerText: JSON.stringify(scan.header), records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),

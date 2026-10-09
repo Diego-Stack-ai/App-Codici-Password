@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.144 — 09/10/2026
+
+Il ciclo di rilascio corrente è chiuso: deploy completo riuscito sul progetto originale e verifica HTTP post-rilascio positiva. I gate esterni non eseguiti restano requisiti per una futura dichiarazione di maturità/certificazione, ma non mantengono aperto questo incarico. Le funzionalità non dimostrate rimangono disabilitate.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

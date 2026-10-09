@@ -1,4 +1,4 @@
-import {functions} from '../../firebase-config.js?v=1.2.144';
+import {functions} from '../../firebase-config.js?v=1.2.145';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {createSharingIdentity, openSharingIdentity} from '../core/sharing-identity.js';
 import {getSharingPrivateIdentity, getSharingPublicIdentity as readPublicIdentity} from '../data/vault-repository.js';

@@ -63,6 +63,25 @@ test('malformed typed data in a later chunk rejects the entire source before any
     assert.equal(f.observers.size, 0);
 });
 
+test('security settings are authenticated by the file but excluded before preview and restore', async () => {
+    const f = fixture();
+    const lines = (await f.file.text()).split('\n').map(JSON.parse);
+    lines.splice(2, 0, {kind: 'record', scope: 'settings', id: 'security', data: {
+        verifier: 'synthetic-verifier', vaultKeyEnvelope: 'synthetic-envelope'
+    }});
+    lines.at(-1).entryCount += 1;
+    lines.at(-1).recordCount += 1;
+    f.setFileContent(lines.map(JSON.stringify).join('\n'));
+    const plan = await f.prepare();
+    assert.equal(plan.counts.records, 2, 'the authenticated footer still counts the excluded entry');
+    assert.equal(plan.excludedSecuritySettings, 1);
+    assert.equal(plan.records.length, 1);
+    assert.equal(f.calls.length, 1);
+    assert.equal(f.calls[0].command.records.length, 1);
+    assert.equal(f.calls[0].command.records.some(record => record.scope === 'settings' && record.id === 'security'), false);
+    f.context.releaseBackupRestore(plan);
+});
+
 test('a prepared plan is immediately cleared on UID change and cannot write under the next identity', async () => {
     const f = fixture(), plan = await f.prepare();
     f.changeUid('B');

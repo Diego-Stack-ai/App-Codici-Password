@@ -1,5 +1,19 @@
 # Audit
 
+## Pre-collaudo e backup preventivo — 09/10/2026
+
+Su richiesta del proprietario il ciclo è stato riaperto esclusivamente per preparare abilitazione e collaudo controllati. La sessione autenticata dell'app pubblicata ha mostrato versione `1.2.144`, home, area privata e impostazioni senza errori console rilevati nelle viste controllate. La home presenta però un'immagine profilo non caricata, da ricontrollare come anomalia visiva distinta dai motori M7/M8/M10.
+
+**Export preventivo riuscito.** È stato creato un bucket dedicato privato in multi-region UE, con accesso uniforme, prevenzione dell'accesso pubblico e soft-delete predefinito. Il ruolo `Storage Admin` è assegnato sul solo bucket al service account gestito di Firestore. L'export di tutte le raccolte verso `appcodici-password-firestore-backup-eu-20261009/pre-test-2026-10-09T15-10-09Z` risulta `Riuscita`: 551 documenti, 422,61 kB, completato il 09/10/2026 alle 17:15:02 Europe/Rome. Questo prova la disponibilità dell'artefatto di backup, non un ripristino effettivo.
+
+Prima delle prove con scritture sono stati tentati due export completi tramite la Console Firestore. Entrambi sono falliti senza creare backup: `403` per assenza di accesso del service account `service-343696844738@gcp-sa-firestore.iam.gserviceaccount.com` al bucket europeo di trasferimento; `400` per incompatibilità geografica del bucket predefinito `us-central1` con il database europeo. Nessun dato è stato modificato. Il collaudo con scritture resta sospeso finché non esiste un export riuscito e verificato.
+
+## Evidenza di chiusura operativa — 09/10/2026
+
+Base rilasciata `7095925b`, versione `1.2.144`, progetto Firebase originale `appcodici-password`. Deploy completo riuscito: Hosting, Functions, regole Storage, regole e indici Firestore. Verifica remota immediata: `index.html` 200, `manifest.json` 200 e riferimento `1.2.144` presente. Prima del deploy: Functions/security 422 totali, 413 pass, 9 skip emulatori dichiarati e zero fail; offline 14/14; audit riferimenti statici e release hardening verdi. Repository originale pulito dopo il rilascio.
+
+Esito: ciclo tecnico M7–M10 chiuso con confine safe-off. Purge automatico e restore riprendibile non sono certificati né attivati; audit indipendente, privacy/legale, GCS reale e dispositivi fisici non sono stati eseguiti. Queste assenze sono limiti dichiarati e non falsi esiti positivi.
+
 09/10/2026 — opzione MFA 1 resa strutturale nel ramo: il full-replace non è più soltanto irraggiungibile, ma è stato rimosso dalla callable insieme agli effetti automatici successivi. Rimangono separati i laboratori selective-withdraw hard-off e le prove storiche skip; nessuno è importato dal runtime. Lo stato online non cambia senza pubblicazione Functions esplicitamente autorizzata.
 
 09/10/2026 — Diego sceglie MFA opzione 1: assistenza manuale quando non esiste una sessione valida. Il ramo locale interrompe la callable prima di codici e mutazioni Auth per ogni account con MFA; il full-replace resta nel sorgente storico a valle ma è irraggiungibile e coperto da skip espliciti, in attesa di successiva rimozione meccanica. La modifica non è distribuita: la produzione conserva il comportamento dell'ultima callable pubblicata fino a un deploy Functions autorizzato.

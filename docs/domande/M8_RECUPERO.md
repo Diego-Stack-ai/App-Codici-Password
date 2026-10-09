@@ -1,5 +1,11 @@
 # M8 recupero
 
+> Esito pubblicato 09/10/2026: versione `1.2.145` verificata con backup cifrato sintetico. Anteprima integra, 0 mancanti, 0 modificati, 1 profilo invariato; `settings/security` escluso prima della callable e sicurezza corrente preservata. Nessuna scrittura applicata. I gate del motore riprendibile hard-off restano separati.
+
+> Aggiornamento 09/10/2026: nella candidata `1.2.145` il runtime corrente autentica e conta `settings/security`, poi lo esclude prima dell'anteprima e della callable, conservando la sicurezza Vault attuale con avviso esplicito. Test backup 110/110; resta il collaudo pubblicato finale con dato sintetico.
+
+> Chiusura operativa 09/10/2026: le domande storiche restano conservate come evidenza, ma il ciclo corrente termina con il motore riprendibile hard-off. Attivazione e prove GCS/dispositivo richiedono un nuovo incarico.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

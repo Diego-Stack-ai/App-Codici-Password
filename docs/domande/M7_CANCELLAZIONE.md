@@ -1,5 +1,9 @@
 # M7 cancellazione
 
+> Rollout controllato 09/10/2026: il percorso pubblicato è stato aperto esclusivamente all'account sintetico di collaudo e provato fino all'archivio vuoto. Gli utenti reali restano bloccati. Il risultato valida il caso nominale, non elimina i rischi concorrenti documentati e non autorizza uno sblocco generale.
+
+> Chiusura operativa 09/10/2026: le domande storiche restano conservate come evidenza, ma non sono più attività del ciclo corrente. Purge automatico disabilitato; eventuale riapertura richiede un nuovo incarico e prove reali.
+
 **Aggiornamento 27/09/2026:** risposte consolidate 1A/1B/2B/3A/3B/3C in DECISIONI precisano conflitti, ultima archiviazione, avviso interno, backup dopo purge, residui, blocco Azienda con Account e scadenze derivate/autonome. Le domande storiche sotto restano come provenienza, non da riproporre dove già coperte. Restano D8, cache/logout e gli altri aspetti non compresi esplicitamente nelle risposte; nessuna scelta implicita o implementazione certificata.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.

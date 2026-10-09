@@ -1,5 +1,23 @@
 # Incarico corrente
 
+**M8 collaudo Hosting concluso — 09/10/2026:** versione `1.2.145` distribuita sul solo Hosting e verificata nella sessione sintetica isolata. Il backup prima respinto ora produce anteprima integra (0 mancanti, 0 modificati, 1 profilo invariato); nessuna selezione disponibile e nessuna scrittura applicata. Confermata l'esclusione client di `settings/security` prima della callable con conservazione della sicurezza corrente. Restano fuori da questo collaudo il motore riprendibile hard-off e i gate esterni già documentati.
+
+**M8 correzione di collaudo pronta — 09/10/2026:** il primo import cifrato sintetico ha raggiunto la callable ma è stato respinto perché `settings/security`, pur destinato all'esclusione, era ancora nel piano client. La candidata `1.2.145` lo autentica e conta, quindi lo esclude prima di anteprima e invio; la conferma conserva esplicitamente la sicurezza corrente. Gate locali verdi (backup 110/110, versione, riferimenti statici, sintassi, hardening). Prossimo passo autorizzato: deploy del solo Hosting e ripetizione del collaudo sintetico; l'applicazione finale richiede conferma distruttiva al momento dell'azione.
+
+**M7 rollout sintetico verificato — 09/10/2026:** deploy mirato della sola `purgeArchivedAccount` con allowlist vincolata all'account sintetico di collaudo; suite Functions/security 424 totali, 415 pass, 9 skip dichiarati, zero fail. Nell'app pubblicata il record sintetico è stato creato, archiviato ed eliminato definitivamente dopo conferma dell'utente; DOM, schermata e messaggio finale attestano archivio vuoto, console pulita. Nessun dato reale coinvolto. Interlock invariato per tutti gli altri utenti; i rischi concorrenti impediscono ancora l'abilitazione generale.
+
+## Stato: RIAPERTO PER COLLAUDO CONTROLLATO — 09/10/2026
+
+Diego richiede di preparare l'abilitazione delle funzioni M7/M8/M10, usare l'app per le prove e produrre un report di analisi. Prima di qualunque prova con scritture va completato e verificato un export gestito dell'intero database Firestore. Le prove distruttive restano limitate a fixture, emulatori o dati sintetici; nessun interlock produttivo viene rimosso prima del backup e dei rispettivi gate.
+
+**Backup preventivo COMPLETATO — 09/10/2026:** creato il bucket privato `appcodici-password-firestore-backup-eu-20261009` in multi-region `eu`, accesso uniforme, prevenzione accesso pubblico e soft-delete predefinito. Al solo service account Firestore `service-343696844738@gcp-sa-firestore.iam.gserviceaccount.com` è stato concesso `Storage Admin` sul bucket. Export completo riuscito nel percorso `pre-test-2026-10-09T15-10-09Z`: 551 documenti, 422,61 kB; avvio 17:14:43 e completamento 17:15:02 (Europe/Rome). Il prerequisito backup è superato; procedere con collaudi per fasi e dati sintetici, non con uno sblocco indistinto in produzione.
+
+**Blocco backup 09/10/2026:** il tentativo verso `appcodici-password-nuova-transfer-20261006` è stato respinto perché il service account Firestore non ha accesso al bucket. Il tentativo verso `appcodici-password.firebasestorage.app` è stato respinto perché il bucket è `us-central1`, incompatibile con il database europeo. Nessun export è stato creato e nessun dato è stato modificato. Prove con scritture sospese finché non viene autorizzato un bucket europeo dedicato oppure il ruolo minimo necessario sul bucket europeo esistente.
+
+## Stato: CHIUSO — 09/10/2026
+
+Il ciclo M7–M10 è concluso come incarico tecnico/documentale corrente con la pubblicazione completa della versione `1.2.144` sul progetto originale. Non restano lavorazioni automatiche autorizzate da eseguire. Motori non dimostrati mantenuti disabilitati; gate esterni non eseguiti trasferiti a un futuro incarico esplicito. Lingue, AI ed Excel non fanno parte di questa chiusura.
+
 **Checkpoint 09/10/2026 — full-replace MFA rimosso localmente.** La callable non contiene più `updateUser(...enrolledFactors:null)`, prenotazione/consumo del codice o revoca sessioni per il recupero automatico. Lint/sintassi e suite recovery verdi; quattro prove storiche sono mantenute skip come traccia del comportamento abbandonato. Prossimo gate distribuibile, solo su autorizzazione separata: commit/push e deploy della sola Function, poi verifica senza recuperi reali.
 
 **Decisione Diego 09/10/2026 — MFA opzione 1.** Per blocco totale usare assistenza manuale; nessun full-replace automatico. Implementazione locale: la callable rifiuta ogni account con fattori MFA prima dell'accesso ai codici e prima di `updateUser`. Test mirato 11 pass/4 skip storici; suite Functions/security 422 totali, 413 pass, 9 skip complessivi, 0 fail. Rimozione selettiva con sessione valida resta laboratorio hard-off. Nessun deploy, commit, push o app di prova impliciti.

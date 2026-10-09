@@ -1,5 +1,23 @@
 # Stato
 
+## M8 pubblicato e verificato su sessione sintetica — 09/10/2026
+
+La correzione `1.2.145` è online sul solo Hosting. Il backup cifrato che prima veniva respinto ora raggiunge l'anteprima valida: zero mancanti, zero modificati, un profilo invariato; nessuna scrittura eseguibile e nessun ripristino applicato. Questo verifica il raccordo di esclusione `settings/security` nel percorso reale pubblicato mantenendo intatte le impostazioni di sicurezza correnti. Functions, Rules e database non sono stati modificati dal deploy. Restano esterni e non attestati i gate GCS end-to-end del motore riprendibile, matrice dispositivi, audit indipendente e privacy/legale.
+
+## Correzione M8 candidata 1.2.145 — 09/10/2026
+
+Individuato nel collaudo pubblicato il raccordo mancante tra reader candidato e importatore corrente: `settings/security` veniva verificato ma non escluso dal piano inviato alla callable. La versione `1.2.145` applica l'esclusione lato client, conserva la sicurezza Vault attuale e rende l'esclusione esplicita nella conferma. Gate locali: backup **110/110**, versione 249 riferimenti coerenti, 250 file statici verificati, sintassi 176 moduli e hardening superati. Stato corrente: candidata al deploy Hosting e alla ripetizione del collaudo sintetico; nessuna attestazione di ripristino riuscito ancora registrata.
+
+## Rollout controllato M7 — 09/10/2026
+
+Il purge M7 è attivo **solo** per l'account sintetico di collaudo esatto; resta bloccato per ogni utente reale. Il ciclo browser pubblicato creazione → archiviazione → eliminazione definitiva è riuscito e l'archivio risulta vuoto, senza errori console. La suite aggiornata conta 424 test, 415 pass, 9 skip dichiarati e zero fallimenti. Questo supera il gate nominale sintetico, ma non i limiti concorrenti già noti; pertanto non equivale a disponibilità generale del motore.
+
+## Chiusura operativa del ciclo M7–M10 — 09/10/2026
+
+Su decisione del proprietario, il ciclo di implementazione, verifica locale e rilascio M7/M8/M10 è **chiuso come incarico tecnico corrente** sulla versione `1.2.144` (`7095925b`). Il deploy completo sul progetto originale `appcodici-password` è terminato con successo per Hosting, Functions, regole Storage, regole e indici Firestore; controllo remoto successivo: `index.html` e `manifest.json` HTTP 200, versione `1.2.144` visibile. Gate pre-deploy: Functions/security 422 totali, 413 pass, 9 skip emulatori dichiarati, zero fail; offline 14/14; riferimenti statici, hardening e versione verdi.
+
+Questa chiusura adotta il principio **safe-off**: il purge automatico M7 e il restore riprendibile M8 restano disabilitati; il recupero MFA segue l'opzione 1 assistita, senza rimozione automatica dei fattori. I residui che richiedono GCS reale, dispositivi/browser fisici, audit indipendente o valutazione privacy/legale sono trasferiti a verifiche esterne future e non mantengono aperto l'incarico tecnico corrente. Non sono dichiarati superati, certificati o equivalenti a prove reali. Lingue, AI ed Excel restano filoni successivi separati.
+
 09/10/2026 — completata la pulizia locale dell'opzione MFA 1: rimosso dalla callable il blocco full-replace, insieme a prenotazione/consumo automatico del codice e revoca automatica delle sessioni. Dopo credenziali valide, un account senza fattori riceve “nessun fattore da recuperare”; con fattori riceve il percorso assistenza, sempre senza consumare codici. Sintassi, lint e test mirati verdi (11 pass, 4 scenari storici skip). Produzione invariata fino a deploy autorizzato.
 
 09/10/2026 — applicata localmente la decisione di prodotto MFA **opzione 1**: se l'account ha qualunque secondo fattore, `recoverMfaWithCode` si arresta dopo la verifica del primo fattore e prima di leggere/prenotare/consumare il codice o chiamare `updateUser`, indicando di contattare l'assistenza. Regressione Functions/security **422 totali, 413 pass, 9 skip dichiarati, zero fail**; quattro skip sono prove storiche del full-replace ora intenzionalmente irraggiungibile. Nessun deploy: la callable online non cambia finché non viene autorizzata una pubblicazione Functions.

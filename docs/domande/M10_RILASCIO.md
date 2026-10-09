@@ -1,5 +1,7 @@
 # M10 rilascio
 
+> Chiusura operativa 09/10/2026: il rilascio tecnico `1.2.144` è completato. Audit indipendente, privacy/legale e matrice fisica restano gate esterni non eseguiti e trasferiti a un futuro ciclo di certificazione; le domande sono conservate come evidenza, non come incarico corrente.
+
 **28/09/2026 — successione del quesito MFA:** risposta esplicita «Autorizzo soltanto progettazione e prove locali» ricevuta e registrata in DECISIONI; non riproporre il consenso come pendente. La prova locale successiva ha dimostrato ricreazione di un account eliminato durante lo scambio custom-token. Percorso non accettato, nessuna attivazione: dettagli e fonte in COLLAUDI. Resta un problema tecnico da risolvere, non richiesta di accettarne il rischio.
 
 **27/09/2026 — nuovo meccanismo tecnico MFA, quesito distinto:** il recupero con codice d'emergenza è obbligatorio. Resta separata l'autorizzazione alla creazione di una sessione Firebase temporanea interna al server, dopo verifica password e codice, per rimuovere un singolo fattore via REST. Alla prima domanda Diego ha chiesto una spiegazione, non dato consenso esplicito. Riproposta in chat la sola autorizzazione a sviluppo e prove locali, senza attivazione: risposta ancora da registrare. La soluzione va comunque verificata contro ricreazione di account eliminati, cambio identità e fattori concorrenti; l'autorizzazione non chiuderebbe tali rischi. Gli altri lavori proseguono.

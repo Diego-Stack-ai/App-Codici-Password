@@ -1,5 +1,29 @@
 # Collaudi
 
+## M8 — collaudo pubblicato 1.2.145 concluso — 09/10/2026
+
+Deploy del solo Firebase Hosting riuscito (263 file); Functions, Rules e dati invariati. Nella sessione sintetica isolata la Vault è stata sbloccata dall'utente, lo stesso backup cifrato è stato caricato e la Recovery Key inserita direttamente dall'utente. Tre evidenze concordano: DOM con `Il backup è integro`, schermata dell'anteprima e contenuto copiabile `Mancanti: 0; modificati: 0; invariati: 1`. Il solo profilo è invariato e non selezionabile; nessun ripristino è stato applicato. L'errore server precedente non ricorre: `settings/security` è stato autenticato/contato ma escluso dal piano prima della callable, conservando la sicurezza corrente.
+
+## M8 — esclusione sicurezza dal ripristino pubblicabile — 09/10/2026
+
+La prova browser con backup cifrato sintetico ha autenticato e decifrato correttamente il file, ma la callable ha respinto il piano perché il client pubblicato inviava ancora `users/{uid}/settings/security`. Corretto il raccordo runtime: il record resta autenticato e contato nel footer, ma viene escluso dal piano prima dell'anteprima e non raggiunge il server; la UI dichiara che le impostazioni di sicurezza correnti vengono conservate. Regressione backup **110/110**, riferimenti statici, sintassi, hardening e coerenza versione `1.2.145` verdi. Il ripristino effettivo resta da confermare nell'app pubblicata e richiede conferma distruttiva separata.
+
+## M7 — collaudo controllato sull'app pubblicata — 09/10/2026
+
+La callable `purgeArchivedAccount` è stata distribuita con un'eccezione di rollout limitata all'account sintetico `codex-collaudo-20261009@example.invalid`; per tutti gli altri utenti l'interlock continua a rispondere come sospeso. Prima del deploy: suite Functions/security **424 totali, 415 superati, 9 skip emulatori dichiarati, 0 falliti** e lint verde. Deploy mirato della sola callable in `europe-west1` riuscito.
+
+Nell'app pubblicata è stato creato un Account sintetico chiaramente identificato, archiviato e quindi eliminato definitivamente dall'utente dopo la conferma distruttiva. Tre riscontri concordano: DOM con stato `Nessun account trovato`, schermata visiva dell'archivio vuoto e messaggio finale copiabile `Eliminato definitivamente`; console senza errori o warning. Nessun dato reale è stato usato o eliminato. Il collaudo dimostra il percorso nominale per questo attore sintetico, non risolve le race già documentate né autorizza l'abilitazione M7 generalizzata.
+
+## Avvio nuovo ciclo di prova — 09/10/2026
+
+Controllo visivo non distruttivo sull'app pubblicata: sessione autenticata valida, versione `1.2.144`, home, area privata e pagina Impostazioni accessibili; nessun errore o warning console nelle viste osservate. Individuata un'immagine profilo apparentemente non caricata nella home. Non sono stati creati, modificati, ripristinati o eliminati record. I test con scritture e la rimozione degli interlock restano sospesi per backup preventivo non ancora disponibile.
+
+Il prerequisito è stato successivamente superato: export Firestore completo `Riuscita`, 551 documenti e 422,61 kB nel bucket UE dedicato. La prossima fase può usare l'app per collaudi funzionali non distruttivi e può usare esclusivamente fixture/emulatori o record sintetici chiaramente identificati per scenari distruttivi. L'export non autorizza da solo la rimozione contemporanea di tutti gli interlock produttivi.
+
+## Chiusura del ciclo di collaudo locale — 09/10/2026
+
+La candidata `1.2.144` ha superato i gate locali usati per il rilascio: Functions/security 413 pass e 9 skip emulatori, offline 14/14, riferimenti statici e hardening. Il deploy completo è terminato con esito positivo e il controllo HTTP successivo ha restituito 200 per pagina iniziale e manifest, con versione corretta. Questo chiude il collaudo locale del ciclo; non sostituisce prove GCS reali, matrice fisica o audit esterno, trasferiti a un futuro incarico.
+
 09/10/2026 — regressione completa ripetuta dopo la rimozione fisica del full-replace MFA: `npm run test:functions-security` **422 totali, 413 pass, 9 skip dichiarati, 0 fail**; lint e sintassi inclusi nel comando.
 
 ## 09/10/2026 — rimozione meccanica full-replace MFA

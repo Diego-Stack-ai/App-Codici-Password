@@ -1,5 +1,9 @@
 # Cancellazione
 
+## Chiusura operativa M7 — 09/10/2026
+
+M7 è chiuso per il ciclo corrente mantenendo il purge automatico hard-off. Archivio, ripristino e protezioni distribuite restano attivi nel perimetro già verificato; il motore distruttivo non viene abilitato senza future prove GCS/CAS reali e un nuovo incarico esplicito. La scelta safe-off è l'esito finale, non una certificazione del purge automatico.
+
 27/09/2026 — mitigazione locale Azienda: anche le Rules negano ora la cancellazione del documento padre, inclusa azienda vuota, oltre alla guardia UI. Preservati i permessi precedenti sui discendenti. Il percorso server sicuro 3B non è ancora operativo; non è una nuova politica definitiva di conservazione. Emulatori e limiti in COLLAUDI; nessuna distribuzione.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.

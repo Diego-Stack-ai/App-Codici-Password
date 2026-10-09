@@ -1,5 +1,13 @@
 # Backup
 
+## Snapshot preventivo prima dei collaudi — 09/10/2026
+
+Creato il bucket privato UE `appcodici-password-firestore-backup-eu-20261009`, con accesso uniforme, prevenzione accesso pubblico e soft-delete predefinito. Il service account Firestore ha `Storage Admin` limitato al bucket. Export gestito completo riuscito nel prefisso `pre-test-2026-10-09T15-10-09Z`: 551 documenti, 422,61 kB, completamento 17:15:02 Europe/Rome. È una copia Firestore verificata dalla Console; non include una prova di importazione/ripristino e non sostituisce il backup cifrato utente degli allegati Storage.
+
+## Chiusura operativa M8 — 09/10/2026
+
+M8 è chiuso per il ciclo corrente con il motore riprendibile mantenuto hard-off. Il backup/ripristino già distribuito resta nel perimetro verificato; staging riprendibile, cleanup remoto e compatibilità GCS non vengono dichiarati produttivi. Le relative prove reali sono trasferite a un eventuale ciclo futuro prima di qualunque attivazione.
+
 ## 05/10/2026 — ripresa e precisione temporale
 
 Secondo le conferme M8-RP-01/M8-TS-01 in [DECISIONI](../progetto/DECISIONI.md), il piano minimo di ripresa si conserva per 30 giorni, con soli identificativi/versioni e senza password, chiavi o contenuti del backup. Alla scadenza serve una nuova anteprima, conservando i dati già ripristinati. Questa durata non modifica le retention delle altre categorie. Se una data del backup non è conservabile esattamente nel database, il ripristino deve essere bloccato con spiegazione, senza arrotondamento implicito. Requisiti approvati, implementazione e prove ancora da completare.

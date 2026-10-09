@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.144';
+import { auth, db } from '../../firebase-config.js?v=1.2.145';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -54,7 +54,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.144');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.145');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -168,7 +168,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.144');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.145');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -300,7 +300,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.144');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.145');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -478,7 +478,7 @@ function setupEncryptedRestore(user) {
                 const changedCount = selectedEntries.filter(entry => entry.status === 'changed').length;
                 const typed = await showBackupRestoreInput(currentAction,
                     'Conferma ripristino selettivo', 'RIPRISTINA',
-                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Il backup può ricreare elementi eliminati definitivamente. Le vecchie condivisioni del backup non vengono riattivate; gli accessi degli Account attivi esistenti restano invariati, quelli degli Account archiviati non vengono riattivati. Scrivi RIPRISTINA per continuare.`
+                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. ${plan.excludedSecuritySettings ? 'Le impostazioni di sicurezza presenti nel backup sono state verificate ma escluse: restano valide quelle attuali. ' : ''}Il backup può ricreare elementi eliminati definitivamente. Le vecchie condivisioni del backup non vengono riattivate; gli accessi degli Account attivi esistenti restano invariati, quelli degli Account archiviati non vengono riattivati. Scrivi RIPRISTINA per continuare.`
                 );
                 currentAction.check();
                 if (typed !== 'RIPRISTINA') return;
@@ -492,7 +492,7 @@ function setupEncryptedRestore(user) {
             }
             const typed = await showBackupRestoreInput(currentAction,
                 'Conferma ripristino', 'RIPRISTINA',
-                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Il backup può ricreare elementi eliminati definitivamente, senza riattivare le vecchie condivisioni. Scrivi RIPRISTINA per applicare i dati.`
+                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. ${plan.excludedSecuritySettings ? 'Le impostazioni di sicurezza presenti nel backup sono state verificate ma escluse: restano valide quelle attuali. ' : ''}Nessuna collisione rilevata. Il backup può ricreare elementi eliminati definitivamente, senza riattivare le vecchie condivisioni. Scrivi RIPRISTINA per applicare i dati.`
             );
             currentAction.check();
             if (typed !== 'RIPRISTINA') return;
@@ -925,7 +925,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.144');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.145');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

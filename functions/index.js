@@ -47,6 +47,7 @@ const {
     accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
     assertNoExternalAccountReferences, isArchivePurgeSuspended
 } = require("./archive-purge-service");
+const {isMaturityTestActor} = require("./maturity-rollout-policy");
 const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
@@ -327,7 +328,7 @@ exports.purgeArchivedAccount = onCall(
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
         requireMutationOwner(request, 'expectedOwnerUid');
-        if (isArchivePurgeSuspended()) {
+        if (isArchivePurgeSuspended() && !isMaturityTestActor(request.auth)) {
             throw new HttpsError('failed-precondition',
                 'Eliminazione definitiva temporaneamente sospesa per sicurezza. Archivio e ripristino restano disponibili.',
                 {reason: 'ARCHIVE_PURGE_TEMPORARILY_SUSPENDED'});

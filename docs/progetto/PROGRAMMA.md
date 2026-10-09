@@ -1,5 +1,9 @@
 # Programma
 
+## Esito finale del ciclo corrente — 09/10/2026
+
+Il proprietario ha disposto la chiusura dell'intero ciclo M7–M10. Il risultato consegnato è la versione `1.2.144` pubblicata integralmente sull'app originale, con suite locali pertinenti verdi e motori non dimostrati mantenuti hard-off. Il programma non conserva ulteriori attività tecniche automatiche obbligatorie per questo ciclo: GCS reale, matrice fisica, audit indipendente e revisione privacy/legale sono gate esterni trasferiti a un futuro ciclo di certificazione e non vengono falsamente marcati come eseguiti. Lingue, AI ed Excel restano fuori perimetro e potranno essere pianificati separatamente.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](STATO.md).
 
