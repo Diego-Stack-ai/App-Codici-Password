@@ -241,10 +241,16 @@ assert.match(cloudFunctions, /deadlineShares[\s\S]*?recipientUids/, 'La revoca d
 
 assert.match(cloudFunctions, /exports\.createMfaRecoveryCodes = onCall/, 'Generazione server dei codici recupero 2FA mancante');
 assert.match(cloudFunctions, /exports\.recoverMfaWithCode = onCall/, 'Recupero 2FA server mancante');
-assert.match(cloudFunctions, /mfaRecoveryAttempts[\s\S]*?nextRecoveryAttemptState/, 'Il recupero MFA non applica un limite server');
-assert.match(cloudFunctions, /runTransaction[\s\S]*?remainingHashes/, 'Il recovery code non viene consumato atomicamente');
-assert.match(cloudFunctions, /updateUser\(user\.uid, \{ multiFactor: \{ enrolledFactors: null \} \}\)/, 'Il recupero non rimuove realmente il fattore Firebase');
-assert.match(cloudFunctions, /revokeRefreshTokens\(user\.uid\)/, 'Il recupero 2FA non revoca le sessioni esistenti');
+const recoverMfaStart = cloudFunctions.indexOf('exports.recoverMfaWithCode = onCall(');
+const recoverMfaEnd = cloudFunctions.indexOf('exports.revokeAllSessions = onCall(', recoverMfaStart);
+assert.ok(recoverMfaStart >= 0 && recoverMfaEnd > recoverMfaStart, 'Il perimetro del recupero MFA non è verificabile');
+const recoverMfaSource = cloudFunctions.slice(recoverMfaStart, recoverMfaEnd);
+assert.match(recoverMfaSource, /mfaRecoveryAttempts[\s\S]*?nextRecoveryAttemptState/, 'Il recupero MFA non applica un limite server');
+assert.match(recoverMfaSource, /enrolledFactors\.length === 0[\s\S]*?Nessun codice è stato consumato/, 'Il recupero MFA senza fattori non termina in sicurezza');
+assert.match(recoverMfaSource, /Contatta l'assistenza: nessun codice è stato consumato/, 'Il recupero MFA con fattori non applica la policy di assistenza manuale');
+assert.doesNotMatch(recoverMfaSource, /collection\(["']mfaRecovery["']\)/, 'Il recupero MFA accede ancora ai codici dopo la verifica del fattore');
+assert.doesNotMatch(recoverMfaSource, /updateUser\(/, 'Il recupero MFA modifica ancora automaticamente i fattori Firebase');
+assert.doesNotMatch(recoverMfaSource, /revokeRefreshTokens\(/, 'Il recupero MFA revoca ancora automaticamente le sessioni');
 assert.match(firestoreRules, /match \/mfaRecovery\/\{userId\}[\s\S]*?allow read, write: if false;/, 'I codici recupero sono accessibili direttamente dal client');
 assert.match(firestoreRules, /match \/mfaRecoveryAttempts\/\{attemptId\}[\s\S]*?allow read, write: if false;/, 'I contatori recupero sono accessibili direttamente dal client');
 assert.equal(firebaseJson.storage?.rules, 'storage.rules', 'Le regole Storage non sono collegate a firebase.json');
