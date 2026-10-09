@@ -50,7 +50,7 @@ function detailFixture() {
         ensureVaultKeyMaterial: async () => 'key', decryptIfPossible: async value => value,
         initPrivateAttachmentModule: data => calls.push(['attachments', data]), loadPrivateAttachments: async () => calls.push(['attachment-load']),
         initPrivateSharingModule: data => calls.push(['sharing', data]), renderPrivateSharingMap() {},
-        initDetailAccountMode: async data => { calls.push(['mode', data]); return new Map(); },
+        loadDetailSharingContactNames: async data => { calls.push(['mode', data]); return new Map(); },
         renderAccountBanking: (_account, data) => calls.push(['banking', data]),
         openSourceSelector: () => calls.push(['picker-open']),
         loadCredentials: async () => ({initAccountSharedCredentials: data => calls.push(['credentials', data])}),
@@ -109,11 +109,11 @@ test('late private key, field or banking decryption cannot publish after same UI
 
 test('private mode and widgets receive parent generation and late widget controller is destroyed', async () => {
     const f = detailFixture(), modeGate = deferred(); let firstMode;
-    f.context.initDetailAccountMode = async options => { firstMode = options; await modeGate.promise; return new Map(); };
+    f.context.loadDetailSharingContactNames = async options => { firstMode = options; await modeGate.promise; return new Map(); };
     const first = f.init(); await tick(); f.lock(); modeGate.resolve(); await first;
-    assert.equal(firstMode.compactView, false); assert.equal(firstMode.isActive(), false); assert.equal(firstMode.signal.aborted, true);
+    assert.equal('compactView' in firstMode, false); assert.equal(firstMode.isActive(), false); assert.equal(firstMode.signal.aborted, true);
     assert.equal(f.calls.filter(([type]) => type === 'attachment-load').length, 0);
-    f.context.initDetailAccountMode = async () => new Map();
+    f.context.loadDetailSharingContactNames = async () => new Map();
     const widgetGate = deferred(); let destroyed = 0, widgetContext;
     f.context.loadWidgets = async () => ({initAccountEmbeddedWidgets: async options => { widgetContext = options; return widgetGate.promise; }});
     await f.init(); await tick(); f.window.location.search = '?id=B';
@@ -123,16 +123,10 @@ test('private mode and widgets receive parent generation and late widget control
     assert.equal(widgetContext.active(), false); assert.equal(destroyed, 1);
 });
 
-test('private confirmation is single and its captured modal is cancelled on lock', async () => {
-    const f = detailFixture(), gate = deferred(); let opens = 0, cancels = 0;
-    const modal = node({querySelector: () => ({click() { cancels++; gate.resolve(false); }})});
-    f.nodes['protocol-confirm-modal'] = modal;
-    f.context.showConfirmModal = () => { opens++; return gate.promise; };
-    await f.init();
-    const {confirm} = f.calls.find(([type]) => type === 'mode')[1];
-    const first = confirm('Synthetic', 'Synthetic');
-    assert.equal(await confirm('Second', 'Second'), false); assert.equal(opens, 1);
-    f.lock(); assert.equal(await first, false); assert.equal(cancels, 1); assert.equal(modal.isConnected, false);
+test('private detail does not expose a sharing confirmation writer', async () => {
+    const f = detailFixture(); await f.init();
+    const options = f.calls.find(([type]) => type === 'mode')[1];
+    assert.equal('confirm' in options, false);
 });
 
 function attachmentFixture() {
@@ -220,18 +214,6 @@ test('shared read-only detail queries the authorized owner attachment collection
     assert.equal(f.nodes['attachments-list'].children[0].textContent, 'Nessun allegato');
 });
 
-test('private sharing confirmation and transaction reads cannot revoke under a new account', async () => {
-    for (const stage of ['confirm', 'read']) {
-        const gate = deferred(), writes = [], reads = [];
-        const realm = vm.createContext({auth: {currentUser: {uid: 'owner'}}, db: {}, t: () => '', showConfirmModal: stage === 'confirm' ? () => gate.promise : async () => true,
-            doc: (_db, ...path) => path.join('/'), collection: (_db, ...path) => path.join('/'), sanitizeEmail: value => value, LOG() {}, showToast() {},
-            runTransaction: async (_db, callback) => callback({get: async path => { reads.push(path); return gate.promise; }, update: (...args) => writes.push(args), delete: (...args) => writes.push(args), set: (...args) => writes.push(args)}), console});
-        vm.runInContext(sharing, realm);
-        realm.initPrivateSharingModule({currentUid: 'owner', ownerId: 'owner', accountId: 'A', readOnly: false});
-        const pending = realm.revokeRecipient('synthetic@example.invalid'); await tick();
-        realm.initPrivateSharingModule({currentUid: 'owner', ownerId: 'owner', accountId: 'B', readOnly: false});
-        gate.resolve(stage === 'confirm' ? true : {exists: () => true, data: () => ({sharedWith: {}})}); await pending;
-        assert.equal(writes.length, 0); assert.ok(reads.every(path => path === 'users/owner/accounts/A'));
-        assert.equal(reads.length, stage === 'read' ? 1 : 0);
-    }
+test('private sharing detail remains read-only', () => {
+    assert.doesNotMatch(sharing, /runTransaction|showConfirmModal|revokeRecipient|updateDoc|deleteDoc/);
 });

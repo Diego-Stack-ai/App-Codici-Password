@@ -7,7 +7,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.141';
+import { auth, db } from '../../firebase-config.js?v=1.2.142';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -21,7 +21,7 @@ import {
     openSourceSelector, closeSourceSelector, handleFileUpload
 } from './dettaglio-azienda-attachments.js';
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
-import { initDetailAccountMode } from '../shared/detail-account-mode.js';
+import { loadDetailSharingContactNames } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
 import {findSuspendedGuestInvite, getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 
@@ -271,14 +271,14 @@ async function loadAccount(mount = mounted) {
                 showToast('Editor note non disponibile.', 'error');
             }
         });
-        const contactNames = await initDetailAccountMode({compactView: false, account: loaded, ownerId: loadOwnerId, accountId, aziendaId: companyId, readOnly: isReadOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        const contactNames = await loadDetailSharingContactNames({ownerId: loadOwnerId, readOnly: isReadOnly, isActive: actionActive, signal});
         if (!active()) return;
         renderSharingMap(loaded, contactNames);
         await loadAttachments();
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.141`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.142`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();

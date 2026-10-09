@@ -55,7 +55,7 @@ function fixture({missing = false, pending = null, directPending = null, search 
         openSourceSelector: () => calls.push(['attachment-open']),
         initPrivateSharingModule: data => calls.push(['sharing-init', data]),
         renderPrivateSharingMap: data => calls.push(['sharing-render', data]),
-        initDetailAccountMode: async data => { calls.push(['mode', data]); return new Map(); },
+        loadDetailSharingContactNames: async data => { calls.push(['mode', data]); return new Map(); },
         renderAccountBanking: (_, data) => calls.push(['banking', data]),
         loadCredentials: async () => ({initAccountSharedCredentials: data => calls.push(['credentials', data])}),
         loadWidgets: async () => ({initAccountEmbeddedWidgets: data => calls.push(['widgets', data])})
@@ -77,9 +77,10 @@ test('legacy resolution binds views, edit, attachments, sharing, mode and widget
     assert.equal(f.calls.find(([type]) => type === 'get')[2], 'legacy-alias');
     assert.equal(f.calls.find(([type]) => type === 'legacy')[2], 'legacy-alias');
     assert.equal(f.calls.find(([type]) => type === 'update')[1], 'users/owner-fixture/accounts/physical-document');
-    for (const type of ['attachments-init', 'sharing-init', 'mode', 'credentials', 'widgets']) {
+    for (const type of ['attachments-init', 'sharing-init', 'credentials', 'widgets']) {
         assert.equal(f.calls.find(([name]) => name === type)[1].accountId, 'physical-document', type);
     }
+    assert.equal(f.calls.find(([name]) => name === 'mode')[1].ownerId, 'owner-fixture');
     const position = type => f.calls.findIndex(([name]) => name === type);
     assert.ok(position('attachments-init') < position('attachments-load'));
     assert.ok(position('sharing-init') < position('sharing-render'));
@@ -188,7 +189,7 @@ test('an already canonical URL does not invoke the legacy lookup', async () => {
 test('server-confirmed refresh still resolves an alias before enabling actions', async () => {
     const f = fixture({search: '?id=legacy-alias&afterWrite=1'}); await f.init(); await tick();
     assert.equal(f.calls.find(([type]) => type === 'confirmed')[2], 'legacy-alias');
-    assert.equal(f.calls.find(([type]) => type === 'mode')[1].accountId, 'physical-document');
+    assert.equal(f.calls.find(([type]) => type === 'mode')[1].ownerId, 'owner-fixture');
     f.findEdit().onclick();
     assert.equal(f.window.location.href, 'form_account_privato.html?id=physical-document');
 });

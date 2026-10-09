@@ -1,27 +1,24 @@
 /**
- * Gestione delle condivisioni nel dettaglio Account privato.
- * Mantiene rendering e revoca fuori dal modulo principale della pagina.
+ * Elenco condivisioni del dettaglio Account privato.
+ * Il dettaglio è di sola lettura: ogni modifica vive nel form Crea/Modifica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.141';
-import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { t } from '../../translations.js';
-import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 
 let mounted = null;
 
 export function initPrivateSharingModule(context) {
     mounted?.destroy();
     let destroyed = false;
-    const mount = {currentUid: context.currentUid, ownerId: context.ownerId, accountId: context.accountId,
-        readOnly: Boolean(context.readOnly), onReload: context.onReload, confirm: context.confirm || showConfirmModal,
+    const mount = {
         active() {
             if (!destroyed && (mounted !== mount || context.signal?.aborted || (context.isActive && !context.isActive()))) mount.destroy();
             return !destroyed;
         },
-        destroy() { destroyed = true; context.signal?.removeEventListener('abort', mount.destroy); }
+        destroy() {
+            destroyed = true;
+            context.signal?.removeEventListener('abort', mount.destroy);
+        }
     };
     mounted = mount;
     context.signal?.addEventListener('abort', mount.destroy, {once: true});
@@ -29,135 +26,24 @@ export function initPrivateSharingModule(context) {
     return mount;
 }
 
-function normalizeEmailForLookup(email) {
-    return String(email || '').trim().toLowerCase();
-}
+const normalizeEmail = email => String(email || '').trim().toLowerCase();
+const activeGuests = account => Object.values(account?.sharedWith || {})
+    .filter(guest => guest?.status === 'pending' || guest?.status === 'accepted');
 
 export function renderPrivateSharingMap(account, contactNames = new Map(), mount = mounted) {
     if (!mount?.active()) return;
-    const listContainer = document.getElementById('guests-list');
-    const managementSection = document.getElementById('shared-management-section');
-    if (!listContainer) return;
+    const list = document.getElementById('guests-list');
+    const section = document.getElementById('shared-management-section');
+    if (!list) return;
 
-    clearElement(listContainer);
-    if (account.visibility !== 'shared' || !account.sharedWith || Object.keys(account.sharedWith).length === 0) {
-        managementSection?.classList.add('hidden');
-        listContainer.appendChild(createElement('p', {
-            className: 'text-[10px] opacity-40 italic',
-            textContent: 'Nessuna condivisione attiva'
-        }));
-        return;
-    }
-
-    managementSection?.classList.remove('hidden');
-    for (const invitation of Object.values(account.sharedWith)) {
-        if (invitation.status === 'rejected') continue;
-
-        const pending = invitation.status === 'pending';
-        const displayStatus = pending ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
-        const statusClass = pending
-            ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse'
-            : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-        const actions = [createElement('span', {
-            className: `sharing-recipient-status text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-            textContent: displayStatus
-        })];
-
-        if (!mount.readOnly) {
-            actions.push(createElement('button', {
-                className: 'sharing-revoke-button',
-                title: 'Revoca accesso',
-                ariaLabel: 'Revoca accesso',
-                onclick: () => revokeRecipient(invitation.email, mount)
-            }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })]));
-        }
-
-        listContainer.appendChild(createElement('div', {
-            className: 'rubrica-list-item flex items-center justify-between'
-        }, [
-            createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', {
-                        className: 'truncate m-0 rubrica-item-name',
-                        textContent: contactNames.get(normalizeEmailForLookup(invitation.email)) || invitation.email.split('@')[0]
-                    }),
-                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: invitation.email })
-                ])
-            ]),
-            createElement('div', { className: 'sharing-recipient-actions' }, actions)
+    clearElement(list);
+    const guests = account?.visibility === 'shared' ? activeGuests(account) : [];
+    section?.classList.toggle('hidden', guests.length === 0);
+    for (const guest of guests) {
+        const email = normalizeEmail(guest.email);
+        const name = contactNames.get(email) || email.split('@')[0] || 'Utente condiviso';
+        list.appendChild(createElement('div', {className: 'rubrica-list-item'}, [
+            createElement('p', {className: 'rubrica-item-name m-0', textContent: name})
         ]));
-    }
-}
-
-async function revokeRecipient(email, mount = mounted) {
-    if (!mount?.active() || !email || mount.readOnly || mount.currentUid !== mount.ownerId) return;
-    const {ownerId, accountId, onReload} = mount;
-    const confirmAction = mount.confirm;
-    const ownerEmail = auth.currentUser?.email || 'Proprietario';
-    const confirmed = await confirmAction(
-        t('confirm_revoke_title') || 'REVOCA ACCESSO',
-        `${t('confirm_revoke_msg') || "Vuoi rimuovere l'accesso per"} ${email}?`,
-        t('revoke') || 'Revoca'
-    );
-    if (!mount.active() || !confirmed) return;
-
-    try {
-        await runTransaction(db, async transaction => {
-            if (!mount.active()) return;
-            const accountRef = doc(db, 'users', ownerId, 'accounts', accountId);
-            const normalizedEmail = sanitizeEmail(email);
-            const snapshot = await transaction.get(accountRef);
-            if (!mount.active() || !snapshot.exists()) return;
-
-            const data = snapshot.data();
-            // M7-R7C-5: l'invito da revocare è quello del ciclo CORRENTE. Con un ID
-            // storico la cancellazione non colpirebbe nulla dopo un ripristino.
-            const cycle = sharingCycleOf(data);
-            if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
-            const inviteRef = doc(db, 'invites', inviteIdForGuest(accountId, normalizedEmail, cycle));
-            const sharedWith = { ...(data.sharedWith || {}) };
-            const revokedInvitation = sharedWith[normalizedEmail];
-            const wasAccepted = revokedInvitation?.status === 'accepted';
-            delete sharedWith[normalizedEmail];
-
-            const hasActiveGuests = Object.values(sharedWith)
-                .some(guest => guest.status === 'pending' || guest.status === 'accepted');
-            const visibility = hasActiveGuests ? 'shared' : 'private';
-            const type = visibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true
-                ? 'account'
-                : data.type;
-
-            transaction.update(accountRef, {
-                sharedWith,
-                sharedWithUids: Object.values(sharedWith)
-                    .filter(guest => guest.status === 'accepted' && guest.uid)
-                    .map(guest => guest.uid),
-                acceptedCount: wasAccepted ? Math.max(0, (data.acceptedCount || 0) - 1) : (data.acceptedCount || 0),
-                visibility,
-                type,
-                updatedAt: new Date().toISOString()
-            });
-            transaction.delete(inviteRef);
-
-            transaction.set(doc(collection(db, 'users', ownerId, 'notifications')), {
-                title: 'Accesso Revocato',
-                message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
-                accountName: data.nomeAccount || 'Account',
-                type: 'share_revoked',
-                accountId,
-                guestEmail: email,
-                timestamp: new Date().toISOString(),
-                read: false
-            });
-
-            // Notifica all'ospite: richiede un backend dedicato, non implementata.
-        });
-        if (!mount.active()) return;
-        showToast('Accesso revocato con successo');
-        if (onReload) await onReload();
-    } catch (error) {
-        if (!mount.active()) return;
-        console.error('RevokeRecipient failed', error);
-        showToast(t('error_generic'), 'error');
     }
 }

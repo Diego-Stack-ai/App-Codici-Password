@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.141';
+import {auth} from '../../firebase-config.js?v=1.2.142';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,8 +17,8 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.141';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.141';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.142';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.142';
 async function savePrivateAccount(...args) {
     let module;
     try { module = await import('./form-privato-save.js'); }
@@ -537,7 +537,9 @@ async function loadData() {
             const mgmt = document.getElementById('shared-management');
             if (mgmt) mgmt.classList.remove('hidden');
             if (data.sharedWith) {
-                invitedEmails = Object.values(data.sharedWith).filter(guest => guest?.status !== 'suspended').map(g => g.email);
+                invitedEmails = Object.values(data.sharedWith)
+                    .filter(guest => guest?.status !== 'suspended' && guest?.status !== 'rejected')
+                    .map(g => g.email);
             } else {
                 const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
                 invitedEmails = [...emails];

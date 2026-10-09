@@ -8,20 +8,20 @@
     <title>Dettaglio Account Privato - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.141" />
+    <link rel="manifest" href="manifest.json?v=1.2.142" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.141">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.142">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.141">
-    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.141">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.141">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.141">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.142">
+    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.142">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=1.2.142">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.142">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -314,27 +314,11 @@
                         </div>
                     </section>
 
-                    <section id="account-mode-section" class="section-spacing hidden">
-                        <div class="detail-section-header">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">tune</span>
-                            <h3 class="detail-section-title">Tipologia e condivisione</h3>
-                        </div>
-                        <div id="account-mode-options" class="account-mode-options content-spacing"></div>
-                        <div id="account-mode-contacts" class="account-mode-contacts hidden">
-                            <div class="account-mode-contact-header"><strong>Destinatari</strong><button id="btn-manage-account-mode-contacts" type="button" class="account-mode-manage">Gestisci destinatari</button></div>
-                            <details id="account-mode-contact-dropdown" class="account-mode-contact-dropdown">
-                                <summary><span>Seleziona utenti</span><span id="account-mode-contact-summary" class="account-mode-contact-summary">Nessun utente selezionato</span></summary>
-                                <div id="account-mode-contact-list" class="account-mode-contact-list"></div>
-                            </details>
-                        </div>
-                        <button id="btn-save-account-mode" type="button" class="btn-primary account-mode-save hidden">Salva modifiche</button>
-                    </section>
-
-                    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+                    <!-- SHARING (sola lettura: la gestione vive nel form Modifica) -->
                     <section id="shared-management-section" class="section-spacing section-bottom hidden">
                         <div class="detail-section-header">
                             <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-                            <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
+                            <h3 class="detail-section-title">Condivisione</h3>
                         </div>
                         <div id="guests-list" class="flex-col-gap content-spacing">
                             <!-- Guest rows injected here -->

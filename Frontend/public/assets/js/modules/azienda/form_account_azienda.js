@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.141';
+import { db } from '../../firebase-config.js?v=1.2.142';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.141';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.142';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 async function saveAccount(...args) {
@@ -44,8 +44,8 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.141';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.141';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.142';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.142';
 import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
@@ -419,7 +419,9 @@ async function loadData() {
         if (isShared) {
             document.getElementById('shared-management')?.classList.remove('hidden');
             if (data.sharedWith) {
-                invitedEmails = Object.values(data.sharedWith).filter(guest => guest?.status !== 'suspended').map(g => g.email);
+                invitedEmails = Object.values(data.sharedWith)
+                    .filter(guest => guest?.status !== 'suspended' && guest?.status !== 'rejected')
+                    .map(g => g.email);
             } else {
                 const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
                 invitedEmails = [...emails];

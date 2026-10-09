@@ -1,267 +1,46 @@
 /**
- * DETTAGLIO ACCOUNT AZIENDA — SHARING MODULE (V1.0)
- * Gestione condivisione, visualizzazione ospiti e revoca accessi per account aziendali.
- * Estratto da dettaglio_account_azienda.js per ridurre la complessità del modulo principale.
- * Init: initSharingModule(ctx)
+ * Elenco condivisioni del dettaglio Account aziendale.
+ * Il dettaglio è di sola lettura: ogni modifica vive nel form Crea/Modifica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.141';
-import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { t } from '../../translations.js';
-import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
-import { getInvite } from '../data/vault-repository.js';
 
-// --- STATE (inizializzato da initSharingModule, immutabile per tutta la vita della pagina) ---
-let _currentUid = null;
-let _currentAziendaId = null;
-let _currentId = null;
-let _isReadOnly = false;
-let _active = () => true, _version = 0, _confirm = showConfirmModal;
-let _onReload = null; // callback per ricaricare i dati dal modulo principale
-let _sharingCycle = 0; // ciclo di condivisione dell'Account (0 = legacy)
+let activeView = () => true;
 
-/**
- * Inizializza il modulo con il contesto dell'account corrente.
- * Va chiamato in initDettaglioAccountAzienda dopo aver impostato lo stato.
- * @param {Object} ctx
- * @param {Function} ctx.onReload - callback asincrono per ricaricare loadAccount()
- */
-export function initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload, isActive = () => true, signal, confirm: confirmAction = showConfirmModal, sharingCycle = 0 }) {
-    _sharingCycle = Number.isSafeInteger(sharingCycle) && sharingCycle >= 0 ? sharingCycle : 0;
-    _confirm = confirmAction;
-    const version = ++_version;
-    _active = () => version === _version && !signal?.aborted && isActive();
-    _currentUid = currentUid;
-    _currentAziendaId = currentAziendaId;
-    _currentId = currentId;
-    _isReadOnly = isReadOnly;
-    _onReload = onReload;
+export function initSharingModule({isActive = () => true, signal} = {}) {
+    activeView = () => !signal?.aborted && isActive();
 }
 
-/**
- * Renderizza la mappa di condivisione dell'account (sezione sharedWith).
- */
+const normalizeEmail = email => String(email || '').trim().toLowerCase();
+const normalizeGuest = guest => typeof guest === 'object' ? guest : {email: guest, status: 'accepted'};
+const activeGuests = guests => (guests || []).map(normalizeGuest)
+    .filter(guest => guest?.status === 'pending' || guest?.status === 'accepted');
+
+function renderGuestList(list, guests, contactNames = new Map()) {
+    clearElement(list);
+    for (const guest of activeGuests(guests)) {
+        const email = normalizeEmail(guest.email);
+        const name = contactNames.get(email) || email.split('@')[0] || 'Utente condiviso';
+        list.appendChild(createElement('div', {className: 'rubrica-list-item'}, [
+            createElement('p', {className: 'rubrica-item-name m-0', textContent: name})
+        ]));
+    }
+}
+
 export function renderSharingMap(account, contactNames = new Map()) {
-    const active = _active, confirmAction = _confirm;
-    if (!active()) return;
-    const listContainer = document.getElementById('guests-list');
-    const mgmtSection = document.getElementById('shared-management-section');
-
-    if (!listContainer) return;
-
-    clearElement(listContainer);
-
-    if (account.visibility !== 'shared' || !account.sharedWith || Object.keys(account.sharedWith).length === 0) {
-        if (mgmtSection) mgmtSection.classList.add('hidden');
-        listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessuna condivisione attiva' }));
-        return;
-    }
-
-    if (mgmtSection) mgmtSection.classList.remove('hidden');
-
-    const guests = Object.values(account.sharedWith);
-
-    for (const inv of guests) {
-        if (inv.status === 'rejected') continue;
-
-        const displayStatus = inv.status === 'pending'
-            ? (t('status_pending') || 'In attesa')
-            : (t('status_accepted') || 'Accettato');
-        const statusClass = inv.status === 'pending'
-            ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse'
-            : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-
-        const items = [
-            createElement('span', {
-                className: `sharing-recipient-status text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                textContent: displayStatus
-            })
-        ];
-
-        if (!_isReadOnly) {
-            items.push(createElement('button', {
-                className: 'sharing-revoke-button',
-                title: 'Revoca accesso',
-                ariaLabel: 'Revoca accesso',
-                onclick: () => active() && revokeRecipientV3(inv.email)
-            }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-            ]));
-        }
-
-        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
-            createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: contactNames.get(String(inv.email || '').trim().toLowerCase()) || inv.email.split('@')[0] }),
-                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
-                ])
-            ]),
-            createElement('div', { className: 'sharing-recipient-actions' }, items)
-        ]);
-        listContainer.appendChild(div);
-    }
+    if (!activeView()) return;
+    const list = document.getElementById('guests-list');
+    const section = document.getElementById('shared-management-section');
+    if (!list) return;
+    const guests = account?.visibility === 'shared' ? activeGuests(Object.values(account?.sharedWith || {})) : [];
+    section?.classList.toggle('hidden', guests.length === 0);
+    renderGuestList(list, guests, contactNames);
 }
 
-/**
- * Renderizza la lista ospiti con verifica live dello stato invito (legacy/alternativo).
- */
-export async function renderGuests(guests) {
-    const active = _active, confirmAction = _confirm;
-    if (!active()) return;
+// Compatibilità per i test/adapter legacy: sempre sola lettura e senza lookup inviti.
+export async function renderGuests(guests, contactNames = new Map()) {
+    if (!activeView()) return;
     const list = document.getElementById('guests-list');
     if (!list) return;
-    clearElement(list);
-
-    if (!guests || guests.length === 0) {
-        list.appendChild(createElement('p', { className: 'text-xs text-white/40 italic ml-1', textContent: t('no_active_access') || 'Nessun accesso attivo' }));
-        return;
-    }
-
-    // Il rendering non persiste snapshot: conserva formato e modifiche concorrenti.
-    for (let i = 0; i < guests.length; i++) {
-        let item = guests[i];
-        if (typeof item !== 'object') item = { email: item, status: 'accepted' };
-
-        if (item.status === 'rejected') continue;
-
-        const displayEmail = item.email;
-        let isPending = item.status === 'pending';
-        let displayStatus = t('status_pending') || 'In attesa';
-        let statusClass = 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse';
-
-        if (isPending) {
-            try {
-                const inviteId = inviteIdForGuest(_currentId, sanitizeEmail(displayEmail), _sharingCycle);
-                const invData = await getInvite(inviteId);
-                if (!active()) return;
-
-                if (invData) {
-                    if (invData.status === 'accepted') {
-                        isPending = false;
-                        displayStatus = t('status_accepted') || 'Accettato';
-                        statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-                    } else if (invData.status === 'rejected') {
-                        continue;
-                    }
-                }
-            } catch (e) { if (!active()) return; console.warn("LiveCheck failed", e); }
-        } else {
-            displayStatus = t('status_accepted') || 'Accettato';
-            statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-        }
-
-        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between mb-2' }, [
-            createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'flex flex-col' }, [
-                    createElement('p', { className: 'text-xs font-bold text-white m-0', textContent: displayEmail.split('@')[0] }),
-                    createElement('p', { className: 'text-[10px] text-white/30 m-0', textContent: displayEmail })
-                ])
-            ]),
-            createElement('div', { className: 'sharing-recipient-actions' }, [
-                createElement('span', {
-                    className: `sharing-recipient-status text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                    textContent: displayStatus
-                }),
-                !_isReadOnly ? createElement('button', {
-                    className: 'sharing-revoke-button',
-                    title: 'Revoca accesso',
-                    ariaLabel: 'Revoca accesso',
-                    onclick: () => revokeRecipientV3(displayEmail)
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-                ]) : null
-            ])
-        ]);
-        list.appendChild(div);
-    }
-
-}
-
-/**
- * Revoca l'accesso di un singolo ospite tramite transazione atomica (V3.1).
- */
-async function revokeRecipientV3(email) {
-    const active = _active, confirmAction = _confirm;
-    if (!active() || _isReadOnly) return;
-    const uid = _currentUid, company = _currentAziendaId, account = _currentId, reload = _onReload;
-    if (!email) return;
-    const ok = await confirmAction(
-        t('confirm_revoke_title') || "REVOCA ACCESSO",
-        `${t('confirm_revoke_msg') || "Vuoi rimuovere l'accesso per"} ${email}?`,
-        t('revoke') || "Revoca"
-    );
-    if (!active() || !ok) return;
-
-    try {
-        await runTransaction(db, async (transaction) => {
-            if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
-            const accRef = doc(db, "users", uid, "aziende", company, "accounts", account);
-            const targetSanitized = sanitizeEmail(email);
-
-            const accSnap = await transaction.get(accRef);
-            if (!active()) throw new Error('DETAIL_VIEW_DISPOSED');
-            if (!accSnap.exists()) return;
-
-            const data = accSnap.data();
-            // M7-R7C-5: l'invito da revocare è quello del ciclo CORRENTE: con un ID
-            // storico la cancellazione non colpirebbe nulla dopo un ripristino.
-            const cycle = sharingCycleOf(data);
-            if (cycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
-            const invRef = doc(db, "invites", inviteIdForGuest(account, targetSanitized, cycle));
-            const sharedWith = { ...data.sharedWith } || {};
-            const wasAccepted = sharedWith[targetSanitized]?.status === 'accepted';
-
-            // 1. Rimuovi ospite dalla mappa
-            delete sharedWith[targetSanitized];
-
-            let newCount = data.acceptedCount || 0;
-            if (wasAccepted) newCount = Math.max(0, newCount - 1);
-
-            const hasActiveGuests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
-            const newVisibility = hasActiveGuests ? "shared" : "private";
-
-            // V5.2 AUTO-HEALING: Se torna privato e non era Memo esplicito, torna ad essere Account
-            let newType = data.type;
-            if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
-                newType = 'account';
-            }
-
-            transaction.update(accRef, {
-                sharedWith: sharedWith,
-                sharedWithUids: Object.values(sharedWith).filter(g => g.status === 'accepted' && g.uid).map(g => g.uid),
-                acceptedCount: newCount,
-                visibility: newVisibility,
-                type: newType,
-                updatedAt: new Date().toISOString()
-            });
-
-            // 2. Elimina l'invito tecnico
-            transaction.delete(invRef);
-
-            // 3. Notifica al proprietario
-            const ownerNotifRef = doc(collection(db, "users", uid, "notifications"));
-            transaction.set(ownerNotifRef, {
-                title: "Accesso Revocato",
-                message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
-                accountName: data.nomeAccount || 'Account',
-                type: "share_revoked",
-                accountId: account,
-                guestEmail: email,
-                timestamp: new Date().toISOString(),
-                read: false
-            });
-
-            // 4. Notifica all'ospite: richiede un backend dedicato, non implementata.
-        });
-
-        if (!active()) return;
-        showToast("Accesso revocato con successo");
-        if (reload) await reload();
-    } catch (e) {
-        if (!active()) return;
-        console.error("RevokeRecipient failed", e);
-        showToast(t('error_generic'), 'error');
-    }
+    renderGuestList(list, guests, contactNames);
 }

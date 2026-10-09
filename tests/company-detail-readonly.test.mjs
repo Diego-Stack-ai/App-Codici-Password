@@ -49,7 +49,7 @@ function fixture({suspended = false, denied = false, networkError = false} = {})
         showToast() {}, t: value => value, logError: (...args) => errors.push(args),
         initAttachmentModule: options => modules.push(['attachments', options]),
         initSharingModule: options => modules.push(['sharing', options]),
-        initDetailAccountMode: async options => { modules.push(['mode', options]); return {}; },
+        loadDetailSharingContactNames: async options => { modules.push(['mode', options]); return new Map(); },
         renderSharingMap() {}, loadAttachments: async () => {}, renderAccountBanking() {},
         loadModule: async () => ({initAccountNoteEditor() {}, initAccountSharedCredentials() {}, initAccountEmbeddedWidgets() {}}),
         setTimeout() {}, history: {back() {}}
