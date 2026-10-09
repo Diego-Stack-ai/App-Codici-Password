@@ -64,7 +64,7 @@
 }
 
 .attachment-name {
-    font: var(--font-label);
+    font: var(--font-badge);
     font-weight: var(--font-label-weight);
     color: var(--text-primary);
     text-transform: uppercase;
