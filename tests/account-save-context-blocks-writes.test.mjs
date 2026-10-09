@@ -10,11 +10,11 @@ const COMPANY_ARGS = {bankAccounts: [], invitedEmails: [], isExplicitMemo: false
 const ZERO = {encrypt: 0, key: 0, tx: 0, replaced: 0, enqueued: 0, handoffs: 0};
 const readyContext = () => { const context = createAccountLoadContext({mode: 'edit'}); context.markLoaded(context.beginLoad()); return context; };
 const at = (text, needle) => { const index = text.indexOf(needle); assert.ok(index >= 0, `manca nel sorgente: ${needle}`); return index; };
-async function privateFixture({eligible = true, pilotEnabled = true, mutateNoteDuringKey = false} = {}) {
+async function privateFixture({eligible = true, pilotEnabled = true, mutateNoteDuringKey = false, executeTransaction = false} = {}) {
     const source = strip(await readFile(new URL('../Frontend/public/assets/js/modules/privato/form-privato-save.js', import.meta.url), 'utf8'))
         .replace("await import('../data/private-account-offline-pilot.js')", 'pilotFixture');
     const counts = {encrypt: 0, key: 0, tx: 0, replaced: 0, enqueued: 0, handoffs: 0};
-    const messages = [], navigations = [], encryptedValues = [];
+    const messages = [], navigations = [], encryptedValues = [], transactionWrites = [];
     const button = {disabled: false, dataset: {}, setAttribute() {}};
     const nodes = {'btn-save-footer': button, 'account-name': {value: 'Fixture'}, 'account-username': {value: 'u'},
         'account-code': {value: 'a'}, 'account-password': {value: 'p'}, 'account-note': {value: 'n'}};
@@ -27,13 +27,24 @@ async function privateFixture({eligible = true, pilotEnabled = true, mutateNoteD
             if (mutateNoteDuringKey) nodes['account-note'].value = 'server-old';
             return 'key';
         },
-        encrypt: async value => { counts.encrypt += 1; encryptedValues.push(value); return value ? 'cipher' : ''; },
-        accountModeFromFlags: () => 'account-private', validateAccountMode: () => ({}),
+        encrypt: async value => { counts.encrypt += 1; encryptedValues.push(value); return value ? `cipher:${value}` : ''; },
+        accountModeFromFlags: () => 'account-private', validateAccountMode: () => ({}), sharingCycleOf: () => 0,
         recordFieldsFromAccountMode: () => ({type: 'account', visibility: 'private'}),
         classifyPrivateAccountOfflineWrite: () => ({eligible}),
         isPrivateAccountPilotEnabled: () => pilotEnabled,
         navigator: {onLine: true}, doc: () => ({id: 'record'}), collection: () => ({id: 'record'}),
-        runTransaction: async () => { counts.tx += 1; throw Object.assign(new Error('STOP_AFTER_WRITE'), {code: 'STOP'}); },
+        runTransaction: async (_db, callback) => {
+            counts.tx += 1;
+            if (!executeTransaction) throw Object.assign(new Error('STOP_AFTER_WRITE'), {code: 'STOP'});
+            const transaction = {
+                get: async () => ({exists: () => true, data: () => ({revision: 1, sharedWith: {}})}),
+                update: (reference, data) => transactionWrites.push({kind: 'update', reference, data}),
+                set: (reference, data) => transactionWrites.push({kind: 'set', reference, data}),
+                delete: reference => transactionWrites.push({kind: 'delete', reference})
+            };
+            return callback(transaction);
+        },
+        deleteField: () => 'DELETE_FIELD', increment: value => ({increment: value}),
         setTimeout: fn => fn(), t: key => key, console: {error() {}}, window: {location: {replace: url => navigations.push(url)}},
         pilotFixture: {
             replacePrivateAccountPilotOperation: async () => { counts.replaced += 1; return {status: 'offline'}; },
@@ -44,7 +55,7 @@ async function privateFixture({eligible = true, pilotEnabled = true, mutateNoteD
     };
     vm.createContext(sandbox);
     vm.runInContext(source, sandbox);
-    return {counts, messages, navigations, encryptedValues, button, sandbox};
+    return {counts, messages, navigations, encryptedValues, transactionWrites, button, nodes, sandbox};
 }
 async function companyFixture() {
     const source = strip(await readFile(new URL('../Frontend/public/assets/js/modules/azienda/form-azienda-save.js', import.meta.url), 'utf8'));
@@ -117,6 +128,18 @@ test('privato: il salvataggio conserva i valori digitati se il DOM cambia durant
     } catch {}
     assert.equal(stable.encryptedValues[3], 'n');
     assert.equal(stable.encryptedValues.includes('server-old'), false);
+});
+test('privato: due salvataggi consecutivi consegnano alla transazione le rispettive note catturate', async () => {
+    const fixture = await privateFixture({eligible: false, pilotEnabled: false, executeTransaction: true});
+    const captured = note => ({'account-name': 'Fixture', 'account-username': 'u', 'account-code': 'a',
+        'account-password': 'p', 'account-url': '', 'account-note': note, 'invite-email': ''});
+    await fixture.sandbox.savePrivateAccount({...PRIVATE_ARGS, capturedFormValues: captured('prima'), loadContext: readyContext()});
+    fixture.nodes['account-note'].value = 'valore-dom-obsoleto';
+    await fixture.sandbox.savePrivateAccount({...PRIVATE_ARGS, capturedFormValues: captured('seconda'), loadContext: readyContext()});
+    const accountUpdates = fixture.transactionWrites.filter(write => write.kind === 'update' && write.reference.id === 'record');
+    assert.equal(accountUpdates.length, 2);
+    assert.equal(accountUpdates[0].data.note, 'cipher:prima');
+    assert.equal(accountUpdates[1].data.note, 'cipher:seconda');
 });
 test('privato: il controller lazy di salvataggio segue la versione dell app', async () => {
     const source = await readFile(new URL('../Frontend/public/assets/js/modules/privato/form_account_privato.js', import.meta.url), 'utf8');

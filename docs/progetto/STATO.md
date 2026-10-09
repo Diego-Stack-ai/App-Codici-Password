@@ -1,5 +1,9 @@
 # Stato
 
+## Account privato 1.2.150 — salvataggi consecutivi verificati — 09/10/2026
+
+La PR #90 è stata unita in `master` (`326b83a3`) e il deploy Firebase Hosting è riuscito. Nell'app pubblicata la pagina ha caricato la versione `1.2.150`; su un Account sintetico già identificato due modifiche consecutive della nota sono state confermate dal server e mostrate nel dettaglio dopo `afterWrite=1`. La regressione locale ora entra davvero nel callback `runTransaction` e conferma che il primo e il secondo salvataggio consegnano ciphertext distinti. Il precedente esito non persistito non si è ripresentato nel ciclo controllato; Functions e Rules non sono state ridistribuite per questa correzione.
+
 ## M8 pubblicato e verificato su sessione sintetica — 09/10/2026
 
 La correzione `1.2.145` è online sul solo Hosting. Il backup cifrato che prima veniva respinto ora raggiunge l'anteprima valida: zero mancanti, zero modificati, un profilo invariato; nessuna scrittura eseguibile e nessun ripristino applicato. Questo verifica il raccordo di esclusione `settings/security` nel percorso reale pubblicato mantenendo intatte le impostazioni di sicurezza correnti. Functions, Rules e database non sono stati modificati dal deploy. Restano esterni e non attestati i gate GCS end-to-end del motore riprendibile, matrice dispositivi, audit indipendente e privacy/legale.
