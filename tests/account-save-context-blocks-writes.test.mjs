@@ -118,6 +118,12 @@ test('privato: il salvataggio conserva i valori digitati se il DOM cambia durant
     assert.equal(stable.encryptedValues[3], 'n');
     assert.equal(stable.encryptedValues.includes('server-old'), false);
 });
+test('privato: il controller lazy di salvataggio segue la versione dell app', async () => {
+    const source = await readFile(new URL('../Frontend/public/assets/js/modules/privato/form_account_privato.js', import.meta.url), 'utf8');
+    const version = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
+    const escapedVersion = version.replaceAll('.', '\\.');
+    assert.match(source, new RegExp(`import\\('./form-privato-save\\.js\\?v=${escapedVersion}'\\)`));
+});
 test('azienda: pendente, fallito, invalidato e assente zero scritture; pronto raggiunge la transazione', async () => {
     const pending = createAccountLoadContext({mode: 'edit'}); pending.beginLoad();
     const failed = createAccountLoadContext({mode: 'edit'}); failed.markFailed(failed.beginLoad(), 'ACCOUNT_DECRYPT_FAILED');
