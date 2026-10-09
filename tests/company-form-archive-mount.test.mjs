@@ -25,6 +25,7 @@ const page = strip(await readFile(new URL('azienda/form_account_azienda.js', mod
 // contesto come modulo reale (stessa tecnica degli altri moduli del banco).
 const utils = strip(await readFile(new URL('../utils.js', modules), 'utf8'));
 const loadGuard = strip(await readFile(new URL('shared/credential-decrypt-guard.js', modules), 'utf8'));
+const accountMode = strip(await readFile(new URL('shared/account-mode-model.js', modules), 'utf8'));
 
 // La pagina e il modulo di salvataggio dichiarano entrambi una `const get` di
 // modulo: nello stesso contesto vm i `const` di primo livello collidono. Ogni
@@ -83,6 +84,9 @@ function fixture() {
     for (const source of [
         wrap(loadGuard, ['createAccountLoadContext', 'isAccountSaveAllowed', 'assertAccountSaveAllowed', 'DECRYPT_FAILURE_MESSAGE']),
         wrap(utils, ['sharingCycleOf', 'nextSharingCycle', 'inviteIdForGuest']),
+        wrap(accountMode, ['accountModeFromFlags', 'accountModeFromRecord', 'filterRecipientContacts',
+            'isOwnerRecipientEmail', 'normalizeRecipientEmail', 'preferenceForRecipient',
+            'recipientPreferencesFromSharedWith', 'serializeRecipientPreferences', 'validateAccountMode']),
         wrap(model, ['createArchiveMetadata', 'archiveRecipients', 'archiveConfirmMessage']),
         wrap(service, ['archiveAccount']),
         wrap(formSave, ['deleteAccount', 'saveAccount']),

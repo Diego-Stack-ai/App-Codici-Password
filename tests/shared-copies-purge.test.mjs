@@ -15,9 +15,9 @@ const rulesSource = await read('../firestore.rules');
 const archiveService = await readFile(new URL('assets/js/modules/settings/archive-account-service.js', root), 'utf8')
     .then(text => text.replace(/\r\n/g, '\n'));
 
-test('T-08: algoritmo sospeso legge widget/link nel preflight, senza cleanup delle copie condivise', () => {
-    // Characterization of retained source, not evidence that purge is enabled or safe.
-    assert.match(purgeSlice, /if \(isArchivePurgeSuspended\(\)\)/);
+test('T-08: algoritmo sospeso salvo actor sintetico legge widget/link nel preflight, senza cleanup delle copie condivise', () => {
+    // Il purge resta bloccato per utenti reali; l'eccezione consente solo il collaudo maturity allowlisted.
+    assert.match(purgeSlice, /if \(isArchivePurgeSuspended\(\) && !isMaturityTestActor\(request\.auth\)\)/);
     assert.match(purgeSlice, /ARCHIVE_PURGE_TEMPORARILY_SUSPENDED/);
     for (const identifier of ['invites', 'sharedVaultData',
         'deadlineShares', 'receivedDeadlines', 'sharingState', 'suspendedAt']) {

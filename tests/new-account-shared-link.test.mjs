@@ -22,12 +22,12 @@ test('new account link action saves first and never links an absent record', () 
     save.disabled=false;sandbox.navigator.onLine=false;add.onclick();assert.equal(clicks,1);
 });
 test('confirmed creation routes to the saved record only when linking was requested', async () => {
-    for (const [name, company] of [['privato/form-privato-save.js',false],['azienda/form-azienda-save.js',true]]) {
+    for (const name of ['privato/form-privato-save.js','azienda/form-azienda-save.js']) {
         const code=await readFile(new URL(`../Frontend/public/assets/js/modules/${name}`,import.meta.url),'utf8');
         const expressions=[...code.matchAll(/const destination = (!isEditing[\s\S]*?);/g)].map(match=>match[1]);
-        assert.equal(expressions.length,company?1:2);
+        assert.equal(expressions.length,1, `${name}: il percorso di creazione collegata deve avere una sola destinazione`);
         for (const expression of expressions) {
-            const context={isEditing:false,btnSave:{dataset:{openSharedCredentials:'true'}},accountRef:{id:'new'},savedAccountId:'new',currentDocId:null,currentAziendaId:'company'};
+            const context={isEditing:false,mode:'standard',btnSave:{dataset:{openSharedCredentials:'true'}},accountRef:{id:'new'},savedAccountId:'new',currentDocId:null,currentAziendaId:'company'};
             assert.match(vm.runInNewContext(expression,context), /id=new.*linkShared=1/);
             context.btnSave.dataset={};assert.doesNotMatch(vm.runInNewContext(expression,context), /linkShared/);
             context.isEditing=true;context.currentDocId='existing';context.btnSave.dataset.openSharedCredentials='true';

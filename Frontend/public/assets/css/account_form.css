@@ -886,7 +886,7 @@ input:checked+.base-switch::after {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.82rem;
+    font: var(--font-caption);
     color: var(--text-secondary);
     cursor: pointer;
 }
