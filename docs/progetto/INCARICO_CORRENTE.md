@@ -771,6 +771,10 @@ Verifica finale DOC-31-CONTENUTI-03: 31 MD, 604 collegamenti locali, 11/11 test 
 
 Solo questa sezione può abilitare un incarico. PRONTO nello storico, nei rapporti o nelle vecchie roadmap non è un comando. Un solo esecutore scrive nello stesso workspace; la fine del lavoro significa DA_VERIFICARE, mai auto-approvazione.
 
+### Esito operativo autorizzato del 09/10/2026
+
+Diego ha autorizzato commit, push e deploy selettivo dopo aver scelto l'opzione 1 per il recupero MFA. Eseguiti commit e push `b18d6c88` sul ramo `codex/complete-m7-m8-m10`; pubblicata esclusivamente `recoverMfaWithCode` sul progetto `appcodici-password`. Verifica remota: `ACTIVE`, `europe-west1`, Node.js 22, hash `44c5590082c851780a3e5b34745f726bbbe233ad`. Nessun deploy di Hosting, Rules, indici o altre funzioni; nessuna modifica all'app di prova o a dati reali. I laboratori M7/M8/M10 rimangono disabilitati finché non saranno superati i gate esterni documentati.
+
 ## Campi obbligatori del prossimo incarico
 
 - ID univoco e stato; assegnante e autorizzazione verificabile.

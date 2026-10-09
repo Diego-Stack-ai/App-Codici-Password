@@ -1633,3 +1633,12 @@ errori nel solo laboratorio. La correzione non costituisce ancora accettazione d
 - `recovery-attempts.emulator.test.js` su Firestore Emulator 8080: **2/2 superati**.
 - Nuova evidenza: fattore TOTP aggiunto fra prima lettura e prenotazione rilevato dalla seconda lettura; update Auth non chiamato e recovery code non consumato.
 - Limite vincolante: resta il gap fra seconda lettura e full-replace Auth; nessun recupero Auth reale, fattore reale o soluzione selettiva certificata.
+
+## 09/10/2026 — rilascio selettivo della policy MFA manuale
+
+- Commit applicativo: `b18d6c88` sul ramo `codex/complete-m7-m8-m10`, pubblicato su `origin`.
+- Verifiche pre-rilascio: suite Functions Security **413 superate, 9 saltate, 0 fallite**; documentazione **31 MD**, **612 collegamenti**, **11/11** test; regressione locale M7/M8/M10 **94 superate, 1 skip hard-off**.
+- Deploy eseguito esclusivamente con target `functions:recoverMfaWithCode` sul progetto `appcodici-password`; Firebase CLI: `Successful update operation` e `Deploy complete`.
+- Verifica remota: funzione `recoverMfaWithCode` **ACTIVE**, regione `europe-west1`, runtime `nodejs22`, hash `44c5590082c851780a3e5b34745f726bbbe233ad`.
+- Comportamento distribuito: se esiste un secondo fattore, il recupero automatico si arresta e richiede assistenza; nessun fattore viene rimosso, nessun recovery code consumato e nessun aggiornamento Auth eseguito.
+- Esclusioni rispettate: nessun deploy Hosting, Rules, indici o altre Functions; nessuna operazione su dati reali e nessuna modifica all'app di prova.

@@ -854,6 +854,10 @@ Nessuna riga chiude un gate: dove il piano non registra una data, la data è ind
 | **M10** Hardening e rilascio maturo | **Attiva**: gate statici e procedura incidenti presenti; restano verifiche reali, matrice fisica e audit indipendente (piano §8) | 22/09/2026 · [M10_REVISIONE_LOCALE.md](../evidenze/AUDIT.md#fonte-docs-m10-revisione-locale-md-l1) (M10-1-REVIEW: 15 controlli automatici rieseguiti, nessuna vulnerabilità dimostrata, 4 voci da assegnare), [M10_GUIDA_UTENTE_BOZZA.md](../utente/GUIDA.md#fonte-docs-m10-guida-utente-bozza-md-l1), [M10_REVISIONE_PRIVACY_PRELIMINARE.md](../evidenze/AUDIT.md#fonte-docs-m10-revisione-privacy-preliminare-md-l1); [M10_HARDENING_RILASCIO.md](../regole/RILASCIO.md#fonte-docs-m10-hardening-rilascio-md-l1) (15/09/2026); gate in `CENSIMENTO_GATE_M6_M10.md` | **M10-1** (revisione OWASP finale firmata e audit indipendente; decisione PBKDF2 dei campi), **M10-2** (verifica in produzione di App Check/Rules/indici/log con approvazione esplicita), **M10-3** (matrice end-to-end fisica), **M10-4** (guida utente, privacy finale, informazioni organizzative) |
 | **Post-M10** Lingue, Impostazioni, campi protetti | Programmata (piano §6) | — | Non avviata: fuori dal perimetro M0–M10 |
 
+### Aggiornamento rilascio selettivo — 09/10/2026
+
+Il pacchetto locale M7/M8/M10 è stato committato e pubblicato sul ramo `codex/complete-m7-m8-m10` (`b18d6c88`). In produzione è stata aggiornata **solo** la Function `recoverMfaWithCode`: stato remoto `ACTIVE`, `europe-west1`, Node.js 22, hash `44c5590082c851780a3e5b34745f726bbbe233ad`. La policy scelta è assistenza manuale per l'utente bloccato con MFA: il percorso automatico non rimuove fattori e non consuma recovery code. I motori candidati M7/M8/M10 restano hard-off; Hosting, Rules, indici e dati reali non sono stati modificati. Restano esterni i gate GCS reale, dispositivi/browser, audit indipendente e privacy finale.
+
 <a id="fonte-docs-stato-corrente-m0-m10-md-4-m6-a-8--tracciabilità-delle-approvazioni"></a>
 
 ### 4. M6-A-8 — tracciabilità delle approvazioni
