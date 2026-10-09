@@ -120,10 +120,13 @@ function renderAziende() {
     clearElement(container);
 
     if (allAziende.length === 0) {
+        const emptyCompaniesMessage = t('no_companies_found');
         setChildren(container, createUiState({
             kind: 'empty',
             icon: 'domain_disabled',
-            message: t('no_companies_found') || 'Nessuna azienda trovata',
+            message: emptyCompaniesMessage && emptyCompaniesMessage !== 'no_companies_found'
+                ? emptyCompaniesMessage
+                : 'Nessuna azienda trovata',
             actionLabel: 'Aggiungi ora',
             onAction: () => { window.location.href = 'modifica_azienda.html'; }
         }));
