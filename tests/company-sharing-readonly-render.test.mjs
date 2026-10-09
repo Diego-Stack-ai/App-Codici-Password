@@ -51,7 +51,12 @@ for (const status of ['accepted', 'rejected']) {
         await f.context.renderGuests(guests);
         noWrites(f); assert.deepEqual(guests, before);
         assert.equal(f.list.children.length, status === 'accepted' ? 1 : 0);
-        if (status === 'accepted') assert.ok(rendered(f).includes('status_accepted'));
+        if (status === 'accepted') {
+            assert.ok(rendered(f).includes('status_accepted'));
+            assert.ok(rendered(f).includes('sharing-recipient-actions'));
+            assert.equal(rendered(f).includes('rubrica-item-avatar'), false,
+                'la gestione accessi non spreca spazio con l\'iniziale del destinatario');
+        }
     });
 }
 test('readOnly: nessun pulsante revoca o scrittura', async () => {

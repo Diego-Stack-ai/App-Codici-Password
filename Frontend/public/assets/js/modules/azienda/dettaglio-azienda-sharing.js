@@ -5,7 +5,7 @@
  * Init: initSharingModule(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.139';
+import { auth, db } from '../../firebase-config.js?v=1.2.140';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -75,14 +75,16 @@ export function renderSharingMap(account, contactNames = new Map()) {
 
         const items = [
             createElement('span', {
-                className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                className: `sharing-recipient-status text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
                 textContent: displayStatus
             })
         ];
 
         if (!_isReadOnly) {
             items.push(createElement('button', {
-                className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
+                className: 'sharing-revoke-button',
+                title: 'Revoca accesso',
+                ariaLabel: 'Revoca accesso',
                 onclick: () => active() && revokeRecipientV3(inv.email)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
@@ -91,13 +93,12 @@ export function renderSharingMap(account, contactNames = new Map()) {
 
         const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
             createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-avatar', textContent: inv.email.charAt(0).toUpperCase() }),
                 createElement('div', { className: 'rubrica-item-info' }, [
                     createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: contactNames.get(String(inv.email || '').trim().toLowerCase()) || inv.email.split('@')[0] }),
                     createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
                 ])
             ]),
-            createElement('div', { className: 'flex items-center gap-2' }, items)
+            createElement('div', { className: 'sharing-recipient-actions' }, items)
         ]);
         listContainer.appendChild(div);
     }
@@ -152,23 +153,21 @@ export async function renderGuests(guests) {
         }
 
         const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between mb-2' }, [
-            createElement('div', { className: 'flex items-center gap-3' }, [
-                createElement('div', {
-                    className: 'w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex-center text-[10px] font-bold text-white/40',
-                    textContent: displayEmail.charAt(0).toUpperCase()
-                }),
+            createElement('div', { className: 'rubrica-item-info-row' }, [
                 createElement('div', { className: 'flex flex-col' }, [
                     createElement('p', { className: 'text-xs font-bold text-white m-0', textContent: displayEmail.split('@')[0] }),
                     createElement('p', { className: 'text-[10px] text-white/30 m-0', textContent: displayEmail })
                 ])
             ]),
-            createElement('div', { className: 'flex items-center gap-2' }, [
+            createElement('div', { className: 'sharing-recipient-actions' }, [
                 createElement('span', {
-                    className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                    className: `sharing-recipient-status text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
                     textContent: displayStatus
                 }),
                 !_isReadOnly ? createElement('button', {
-                    className: 'ml-1 p-2 rounded-lg bg-transparent border-none text-red-600 hover:text-red-500 hover:scale-110 transition-all cursor-pointer flex items-center justify-center sharing-revoke-button',
+                    className: 'sharing-revoke-button',
+                    title: 'Revoca accesso',
+                    ariaLabel: 'Revoca accesso',
                     onclick: () => revokeRecipientV3(displayEmail)
                 }, [
                     createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })

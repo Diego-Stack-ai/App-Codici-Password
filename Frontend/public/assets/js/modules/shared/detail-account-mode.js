@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.139';
+import { auth, db } from '../../firebase-config.js?v=1.2.140';
 import { doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -16,6 +16,8 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     const options = document.getElementById('account-mode-options');
     const contactArea = document.getElementById('account-mode-contacts');
     const contactList = document.getElementById('account-mode-contact-list');
+    const contactDropdown = document.getElementById('account-mode-contact-dropdown');
+    const contactSummary = document.getElementById('account-mode-contact-summary');
     const saveButton = document.getElementById('btn-save-account-mode');
     if (!section || !options || !contactArea || !contactList || !saveButton) return;
 
@@ -34,8 +36,12 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean));
     let contacts = [];
     try {
+            // Alcuni contesti legacy montano questo modulo senza esportare `auth`:
+            // l'identita primaria resta ownerId, l'email e solo una difesa ulteriore.
+            const ownerEmail = normalizeEmail(typeof auth !== 'undefined' ? auth.currentUser?.email : '');
         contacts = (await listContacts(ownerId))
             .filter(item => item.active !== false && normalizeEmail(item.email))
+            .filter(item => item.uid !== ownerId && item.id !== ownerId && normalizeEmail(item.email) !== ownerEmail)
             .sort((a, b) => fullName(a).localeCompare(fullName(b), 'it'));
     } catch (error) {
         if (!active()) return;
@@ -72,6 +78,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                         return;
                     }
                     selectedMode = key;
+                    if (contactDropdown) contactDropdown.open = false;
                     render();
                 }
             }, [
@@ -104,6 +111,11 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                     ]));
                 });
             }
+        }
+        if (contactSummary) {
+            const count = selectedEmails.size;
+            contactSummary.textContent = count === 0 ? 'Nessun utente selezionato' :
+                count === 1 ? '1 utente selezionato' : `${count} utenti selezionati`;
         }
         const emailsChanged = [...selectedEmails].sort().join('|') !== Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean).sort().join('|');
         saveButton.classList.toggle('hidden', selectedMode === initialMode && !emailsChanged);
@@ -193,7 +205,12 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
             });
             if (!active()) return;
             showToast('Tipologia e condivisione aggiornate.');
-            await onReload?.();
+            // The transaction has committed both the canonical mode and any new
+            // invite. A cache-first reload can still return the pre-transaction
+            // Account while the invite trigger has already notified the guest.
+            // Ask the owning detail page for a server-confirmed refresh so the
+            // selected mode cannot visibly disagree with the committed invite.
+            await onReload?.({serverConfirmed: true});
         } catch (error) {
             if (!active()) return;
             console.error('[AccountMode] Salvataggio fallito', error);

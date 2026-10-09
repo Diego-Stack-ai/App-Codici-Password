@@ -1,5 +1,15 @@
 # Incarico corrente
 
+09/10/2026 — Diego autorizza il rilascio delle modifiche Account locali richieste finora. Perimetro: incremento a 1.2.140, commit, push e pubblicazione del solo Hosting dell'app principale; Functions, Rules, indici, migrazioni e dati restano invariati. Prima della pubblicazione va ripetuto il gate pertinente e il risultato remoto va verificato.
+
+09/10/2026 — Diego autorizza l'applicazione del riepilogo delle correzioni alla condivisione: escludere il proprietario dalla lista destinatari, rimuovere l'iniziale ridondante dalla Gestione accessi, distanziare stato e cestino e rendere Accetta/Rifiuta coerenti con lo stile dell'app. Perimetro locale sui flussi privato e aziendale; nessun deploy implicito.
+
+09/10/2026 — Diego richiede che la lista destinatari nella conversione Account/Memorandum condiviso non resti sempre aperta, ma diventi un menu a tendina con selezione multipla degli utenti. Perimetro locale UI condivisa dei dettagli privato e aziendale; nessun deploy implicito.
+
+09/10/2026 — durante la prosecuzione M7/M8/M10 Diego segnala che, convertendo un Memorandum in Memorandum condiviso, l'invito e la notifica arrivano ma il dettaglio del proprietario continua a selezionare Memorandum. Autorizzata la verifica e correzione locale del flusso Account; nessun deploy implicito.
+
+09/10/2026 — Diego richiede di riattivare il controllo di prosecuzione ogni due minuti e di applicare i residui di M7, M8 e M10. Attivata l'automazione sulla sola cartella originale `App-Codici-Password`; la vecchia app prova è esclusa. Perimetro autorizzato: sviluppo e prove locali incrementali sul ramo `codex/complete-m7-m8-m10`, aggiornamento dei 31 documenti canonici con evidenze verificabili. Restano esclusi senza autorizzazione distinta: deploy, merge, modifiche o cancellazioni di dati reali, riattivazione del purge distruttivo privo di prova sicura, recuperi MFA reali e attribuzione artificiale di audit indipendente, parere legale/privacy o collaudi fisici. I gate esterni vanno mantenuti aperti e separati dai residui tecnici.
+
 08/10/2026 — Diego autorizza la pubblicazione delle card collegate al tema e delle tre nuove palette confrontabili Petrolio, Lavanda e Rosa polvere, mantenendo Blu, Verde, Rosso e Sabbia. Perimetro: incremento a 1.2.136, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.
 
 08/10/2026 — Diego autorizza la pubblicazione della correzione dell’avviso globale per le modifiche offline degli Account privati. Il popup deve identificare l’Account interessato e permettere di aprirlo direttamente. Perimetro: incremento a 1.2.135, commit, push e deploy Hosting; Functions, Rules, indici e dati restano invariati.

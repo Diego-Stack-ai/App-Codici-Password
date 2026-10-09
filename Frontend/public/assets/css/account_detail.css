@@ -477,11 +477,36 @@
 }
 
 .sharing-revoke-button {
-    border: none !important;
-    outline: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    margin-left: 10px;
+    border: 1px solid rgb(var(--status-error-rgb, 239 68 68) / 0.22);
+    border-radius: 12px;
+    background: rgb(var(--status-error-rgb, 239 68 68) / 0.08);
+    color: var(--status-error);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
 }
+
+.sharing-revoke-button:hover {
+    background: rgb(var(--status-error-rgb, 239 68 68) / 0.15);
+    border-color: rgb(var(--status-error-rgb, 239 68 68) / 0.38);
+}
+
+.sharing-revoke-button:active { transform: scale(.96); }
+
+.sharing-recipient-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 14px;
+}
+
+.sharing-recipient-status { flex: 0 0 auto; }
 
 .header-left-group {
     display: flex;
