@@ -219,7 +219,10 @@ h3.settings-desc {
     font-weight: 700;
 }
 
-.color-theme-selector { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.color-theme-selector {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
 .color-theme-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
 .theme-swatch { width: .85rem; height: .85rem; flex: 0 0 auto; border-radius: 50%; border: 1px solid rgb(255 255 255 / 55%); box-shadow: 0 0 0 1px rgb(15 23 42 / 20%); }
 .swatch-blue { background: #137fec; }
