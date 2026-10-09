@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.148';
+import { auth, db } from '../../firebase-config.js?v=1.2.149';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -28,6 +28,7 @@ export async function savePrivateAccount({
     recoveryOperation = null,
     isActive = () => auth.currentUser?.uid === currentUid,
     hasLinkedProfileField = false,
+    capturedFormValues = null,
     loadContext = null
 }) {
     if (!isActive()) return;
@@ -35,7 +36,15 @@ export async function savePrivateAccount({
         showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
         return;
     }
-    const get = id => document.getElementById(id)?.value.trim() || '';
+    // Congela i valori del modulo prima della prima attesa asincrona. Durante
+    // sblocco Vault, salvataggio widget o aggiornamenti live il DOM può essere
+    // ripopolato con l'ultima versione server: rileggendolo dopo un `await`
+    // mostreremmo successo pur riscrivendo i valori precedenti.
+    const capturedValues = new Map([
+        'account-name', 'account-username', 'account-code', 'account-password',
+        'account-url', 'account-note', 'invite-email'
+    ].map(id => [id, capturedFormValues?.[id] ?? document.getElementById(id)?.value.trim() ?? '']));
+    const get = id => capturedValues.get(id) || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
     if (recoveryOperation?._reviewReason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED') {

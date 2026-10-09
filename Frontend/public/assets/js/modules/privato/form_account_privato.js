@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.148';
+import {auth} from '../../firebase-config.js?v=1.2.149';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,8 +17,8 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.148';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.148';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.149';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.149';
 async function savePrivateAccount(...args) {
     let module;
     try { module = await import('./form-privato-save.js'); }
@@ -239,6 +239,10 @@ export async function initFormAccountPrivato(user) {
                     saveBtn.disabled = false;
                     return;
                 }
+                const capturedFormValues = Object.fromEntries([
+                    'account-name', 'account-username', 'account-code', 'account-password',
+                    'account-url', 'account-note', 'invite-email'
+                ].map(id => [id, document.getElementById(id)?.value.trim() || '']));
                 try {
                     await accountWidgetController?.savePendingChanges();
                 } catch (error) {
@@ -262,6 +266,7 @@ export async function initFormAccountPrivato(user) {
                     baseRevision: currentRevision,
                     profileContactLinkDraft,
                     hasLinkedProfileField,
+                    capturedFormValues,
                     loadContext: saveContext,
                     recoveryOperation,
                     isActive: sessionLive
