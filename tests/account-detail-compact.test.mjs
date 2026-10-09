@@ -53,32 +53,26 @@ for (const [label, path, renderName] of [
 }
 
 function modeRealm(text, contacts) {
-    const nodes = Object.fromEntries(['account-mode-section','account-mode-options','account-mode-contacts','account-mode-contact-list','btn-save-account-mode'].map(id => [id, node({onclick: () => {throw Error('retained editing');}})]));
     let reads = 0;
-    const realm = vm.createContext({document: {getElementById: id => nodes[id]}, showConfirmModal() {},
-        clearElement: item => {item.children = [];}, listContacts: async owner => {reads++; assert.equal(owner, 'owner'); return contacts();},
-        accountModeFromRecord: () => 'account-private', console: {warn() {}}});
+    const realm = vm.createContext({auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}},
+        listContacts: async owner => {reads++; assert.equal(owner, 'owner'); return contacts();}, console: {warn() {}}});
     vm.runInContext(text, realm);
-    return {realm, nodes, reads: () => reads};
+    return {realm, reads: () => reads};
 }
 test('compact mode keeps address book names without installing editing controls', async () => {
     const f = modeRealm(await source('shared/detail-account-mode.js'), async () => [{email: 'USER@example.invalid', nome: 'Synthetic', cognome: 'Contact'}]);
-    const names = await f.realm.initDetailAccountMode({account: {}, ownerId: 'owner', compactView: true});
+    const names = await f.realm.loadDetailSharingContactNames({ownerId: 'owner'});
     assert.equal(names.get('user@example.invalid'), 'Synthetic Contact');
-    assert.equal(f.nodes['account-mode-section'].classList.contains('hidden'), true);
-    assert.equal(f.nodes['btn-save-account-mode'].onclick, null);
-    assert.equal(f.nodes['account-mode-options'].children.length, 0);
 });
 test('compact mode abandons late contacts after session abort and never reads a received owner address book', async () => {
     let resolve;
     const f = modeRealm(await source('shared/detail-account-mode.js'), () => new Promise(done => {resolve = done;}));
     const abort = new AbortController();
-    const pending = f.realm.initDetailAccountMode({account: {}, ownerId: 'owner', compactView: true, signal: abort.signal});
+    const pending = f.realm.loadDetailSharingContactNames({ownerId: 'owner', signal: abort.signal});
     abort.abort(); resolve([{email: 'late@example.invalid', nome: 'Late'}]);
     assert.equal(await pending, undefined);
-    await f.realm.initDetailAccountMode({account: {}, ownerId: 'foreign-owner', compactView: true, readOnly: true});
+    await f.realm.loadDetailSharingContactNames({ownerId: 'foreign-owner', readOnly: true});
     assert.equal(f.reads(), 1);
-    assert.equal(f.nodes['btn-save-account-mode'].onclick, null);
 });
 test('new banking fields retain copy guards and readonly banking hides add action', async () => {
     const created = [], copies = [], nodes = {'section-banking': node(), 'banking-content': node(), 'add-banking-prompt': node()};

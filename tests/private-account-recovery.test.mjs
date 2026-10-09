@@ -7,6 +7,7 @@ const {DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, createAccountLoadConte
     await import(`data:text/javascript;base64,${Buffer.from(guardSource).toString('base64')}`);
 const path='../Frontend/public/assets/js/modules/privato/';
 const formSource=await readFile(new URL(path+'form_account_privato.js',import.meta.url),'utf8');
+const saveSource=await readFile(new URL(path+'form-privato-save.js',import.meta.url),'utf8');
 const restoreSource=formSource.slice(formSource.indexOf('async function restoreM6ConflictDraft'),formSource.indexOf('// --- INITIALIZATION ---'));
 const policySource=await readFile(new URL(path+'private-account-offline-policy.js',import.meta.url),'utf8');
 const {canRecoverPrivateAccount}=await import('data:text/javascript;base64,'+Buffer.from(policySource).toString('base64'));
@@ -30,22 +31,23 @@ test('decifratura fallita o cambio sessione lasciano modulo e copia recupero int
  }
 });
 
-async function saveFixture(status,{recover=true,active=true,expireBeforeNavigation=false,reviewReason}={}){
- let replaced=0,enqueued=0,handoffs=0;const messages=[],navigations=[];
+async function saveFixture(status,{recover=true,active=true,expireBeforeNavigation=false,reviewReason,isEditing=true,online=true}={}){
+ let replaced=0,enqueued=0,handoffs=0;const messages=[],navigations=[],alerts=[];
  const button={disabled:false,dataset:{},setAttribute(){}};
  const nodes={'btn-save-footer':button,'account-name':{value:'Fixture'}};
  const pilotFixture={replacePrivateAccountPilotOperation:async()=>{replaced++;return status},enqueuePrivateAccountPilot:async()=>{enqueued++;return status},storePrivateAccountHandoff:()=>handoffs++};
  const sandbox={pilotFixture,isAccountSaveAllowed,assertAccountSaveAllowed,DECRYPT_FAILURE_MESSAGE,document:{getElementById:id=>nodes[id],querySelector:()=>null},auth:{currentUser:{uid:'owner'}},db:{},
   showToast:message=>messages.push(message),hasInvalidCardExpiry:()=>false,ensureVaultKeyMaterial:async()=> 'key',encrypt:async v=>v?'cipher':'',
   accountModeFromFlags:()=> 'account-private',validateAccountMode:()=>({}),recordFieldsFromAccountMode:()=>({type:'account',visibility:'private'}),
-  classifyPrivateAccountOfflineWrite:()=>({eligible:true}),navigator:{onLine:true},doc:()=>({id:'record'}),t:x=>x,console:{error(){}},
+  classifyPrivateAccountOfflineWrite:()=>({eligible:true}),navigator:{onLine:online},doc:()=>({id:'record'}),t:x=>x,console:{error(){}},
+  showAlertModal:async(title,message)=>alerts.push({title,message}),
   setTimeout:fn=>{if(expireBeforeNavigation)active=false;fn()},window:{location:{replace:url=>navigations.push(url)}}};
- let source=await readFile(new URL(path+'form-privato-save.js',import.meta.url),'utf8');
+ let source=saveSource;
  source=source.replace(/^import[\s\S]*?;\r?\n/gm,'').replace('export async function','async function').replace("await import('../data/private-account-offline-pilot.js')",'pilotFixture');
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
- await sandbox.savePrivateAccount({bankAccounts:[],invitedEmails:[],currentUid:'owner',currentDocId:'record',isEditing:true,baseRevision:1,
+ await sandbox.savePrivateAccount({bankAccounts:[],invitedEmails:[],currentUid:'owner',currentDocId:isEditing?'record':null,isEditing,baseRevision:isEditing?1:0,
   recoveryOperation:recover?{uid:'owner',operationId:'old',recordId:'record',_reviewReason:reviewReason}:null,loadContext:createAccountLoadContext({mode:'create'}),isActive:()=>active});
- return {replaced,enqueued,handoffs,messages,navigations,button};
+ return {replaced,enqueued,handoffs,messages,navigations,alerts,button};
 }
 
 test('salvataggio non confermato non mostra successo né naviga, anche su lease occupato',async()=>{
@@ -105,6 +107,20 @@ test('unsupported modal exposes later/server actions and states that server choi
  const createElement=(tag,props={},children=[])=>{const node={tag,...props,children:children.filter(Boolean),classList:{add(){},remove(){}},remove(){},addEventListener(){}};nodes.push(node);return node};
  const sandbox={createElement,setChildren(){},document:{getElementById:()=>null,body:{appendChild(){}}},setTimeout:fn=>fn()};vm.createContext(sandbox);vm.runInContext(source,sandbox);
  const result=sandbox.showM6ConflictChoice(true,true);assert.equal(nodes.some(n=>n.textContent==='Recupera locale'),false);assert.ok(nodes.some(n=>n.textContent?.includes('elimina questa copia offline')));nodes.find(n=>n.textContent==='Decidi più tardi').onclick();assert.equal(await result,null);
+});
+
+test('una nuova creazione online non passa dalla coda offline e conserva la lista del tipo creato',()=>{
+ assert.match(saveSource, /if \(pilotEligible && isEditing\)/);
+ assert.match(saveSource, /!isEditing && !navigator\.onLine/);
+ assert.match(saveSource, /mode === 'memo-private' \? 'memo'/);
+ assert.match(saveSource, /&afterWrite=1/);
+});
+
+test('una nuova creazione offline resta nel modulo e non viene accodata come salvata',async()=>{
+ const f=await saveFixture({status:'saved'},{recover:false,isEditing:false,online:false});
+ assert.equal(f.enqueued+f.replaced,0);assert.equal(f.handoffs,0);assert.deepEqual(f.navigations,[]);
+ assert.equal(f.alerts.length,1);assert.match(f.alerts[0].message,/dati non sono stati indicati come salvati/);
+ assert.equal(f.button.disabled,false);
 });
 test('un conflitto di un altro account non apre popup e non disabilita il salvataggio corrente',()=>{
  assert.doesNotMatch(formSource,/showM6ForeignConflictChoice/);

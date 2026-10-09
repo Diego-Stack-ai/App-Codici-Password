@@ -1,5 +1,9 @@
 # Decisioni
 
+## 09/10/2026 — chiusura operativa completa del ciclo M7–M10
+
+Diego ordina «chiudiamo tutto il ciclo». La decisione chiude l'incarico tecnico e documentale corrente dopo il deploy completo della `1.2.144`. Le parti non dimostrate non vengono abilitate per ottenere una chiusura nominale: purge automatico M7 e restore riprendibile M8 restano hard-off; il recupero MFA resta assistito secondo opzione 1. Le prove GCS reali, fisiche, l'audit indipendente e la revisione privacy/legale sono esplicitamente trasferite a un eventuale ciclo futuro di certificazione. La chiusura non equivale a dichiararle superate.
+
 ## 08/10/2026 — sei filoni congelati dopo la prova con app duplicata
 
 Fonte: decisione registrata durante la duplicazione pilota in `DUPLICAZIONE_APP.md` e confermata successivamente da Diego. I sei filoni da conservare come **aperti e da completare**, senza considerarli chiusi per effetto di merge, deploy o prove parziali, sono:

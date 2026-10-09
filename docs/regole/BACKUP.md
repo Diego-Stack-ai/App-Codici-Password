@@ -1,12 +1,20 @@
 # Backup
 
+## Snapshot preventivo prima dei collaudi — 09/10/2026
+
+Creato il bucket privato UE `appcodici-password-firestore-backup-eu-20261009`, con accesso uniforme, prevenzione accesso pubblico e soft-delete predefinito. Il service account Firestore ha `Storage Admin` limitato al bucket. Export gestito completo riuscito nel prefisso `pre-test-2026-10-09T15-10-09Z`: 551 documenti, 422,61 kB, completamento 17:15:02 Europe/Rome. È una copia Firestore verificata dalla Console; non include una prova di importazione/ripristino e non sostituisce il backup cifrato utente degli allegati Storage.
+
+## Chiusura operativa M8 — 09/10/2026
+
+M8 è chiuso per il ciclo corrente con il motore riprendibile mantenuto hard-off. Il backup/ripristino già distribuito resta nel perimetro verificato; staging riprendibile, cleanup remoto e compatibilità GCS non vengono dichiarati produttivi. Le relative prove reali sono trasferite a un eventuale ciclo futuro prima di qualunque attivazione.
+
 ## 05/10/2026 — ripresa e precisione temporale
 
 Secondo le conferme M8-RP-01/M8-TS-01 in [DECISIONI](../progetto/DECISIONI.md), il piano minimo di ripresa si conserva per 30 giorni, con soli identificativi/versioni e senza password, chiavi o contenuti del backup. Alla scadenza serve una nuova anteprima, conservando i dati già ripristinati. Questa durata non modifica le retention delle altre categorie. Se una data del backup non è conservabile esattamente nel database, il ripristino deve essere bloccato con spiegazione, senza arrotondamento implicito. Requisiti approvati, implementazione e prove ancora da completare.
 
 ## 27/09/2026 — confine candidato degli oggetti di ripristino
 
-Il namespace users/{uid}/restoreObjects è riservato a scritture server: le Rules locali negano create/update/delete client, inclusi metadati e sottopercorsi. Non usare un controllo client di assenza come precondizione atomica. Il candidato server crea con ifGenerationMatch:0 e verifica digest e generazione prima di qualunque futura pubblicazione; nessun endpoint o flusso app lo attiva ancora. La precondizione non è verificabile con l'emulatore installato, che nel probe l'ha ignorata: evidenza negativa in COLLAUDI, prova Storage separata ancora necessaria. Restano transazione dei riferimenti, trasporto autenticato, pulizia/purge coordinati e compatibilità lettori. Nessuna modifica al formato backup o attestazione di chiusura M8.
+Il namespace users/{uid}/restoreObjects è riservato a scritture server: le Rules locali negano create/update/delete client, inclusi metadati e sottopercorsi. Non usare un controllo client di assenza come precondizione atomica. Il candidato server crea con ifGenerationMatch:0 e verifica digest e generazione prima di qualunque futura pubblicazione; nessun endpoint o flusso app lo attiva ancora. La precondizione non è verificabile con l'emulatore installato, che nel probe l'ha ignorata: evidenza negativa in COLLAUDI, prova Storage separata ancora necessaria. Il 09/10/2026 il nucleo isolato di staging/ripresa ha superato 146/146 prove sintetiche in due blocchi; una successiva esecuzione ampliata dei gruppi resume/stage/chunk e dello staging backend registra 151 passaggi, 4 skip emulatori e zero errori su 155 casi. Il mapping attestato viene letto nella stessa transazione che pubblica il record, la lettura resta fissata alla generazione verificata, gli esiti incerti non autorizzano un caricamento generico e i trasporti interrompono la consegna azzerando le copie temporanee. Questa è evidenza del candidato, non del runtime distribuito. Restano trasporto e collegamento al flusso app, pulizia/purge coordinati, verifica remota delle precondizioni, scope/UI nell'app finale e compatibilità dei lettori. Nessuna modifica al formato backup o attestazione di chiusura M8.
 
 ## 27/09/2026 — autorità di condivisione nel ripristino Account
 

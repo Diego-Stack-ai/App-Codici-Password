@@ -1,5 +1,7 @@
 # Leggimi
 
+> Stato operativo 09/10/2026: il ciclo tecnico M7–M10 è chiuso sulla versione pubblicata `1.2.144`. Per esito, confini safe-off e verifiche esterne future vedere [STATO](progetto/STATO.md).
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](LEGGIMI.md). Stato verificato e limiti: [STATO](progetto/STATO.md).
 

@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.140';
+import { auth, db } from '../../firebase-config.js?v=1.2.145';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -14,7 +14,7 @@ import { logError } from '../../utils.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
-import { initDetailAccountMode } from '../shared/detail-account-mode.js';
+import { loadDetailSharingContactNames } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
 import {
     findPrivateAccountByLegacyId,
@@ -301,7 +301,7 @@ async function loadAccount(mount = mounted) {
                 showToast('Editor note non disponibile.', 'error');
             }
         });
-        const contactNames = await initDetailAccountMode({compactView: false, account: loaded, ownerId: lookupOwner, accountId: resolvedId, readOnly, onReload: reload, isActive: actionActive, signal, confirm});
+        const contactNames = await loadDetailSharingContactNames({ownerId: lookupOwner, readOnly, isActive: actionActive, signal});
         if (!active()) return;
         renderPrivateSharingMap(loaded, contactNames);
         await loadPrivateAttachments();
@@ -312,9 +312,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.140').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.145').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.140').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.145').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());

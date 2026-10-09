@@ -47,6 +47,7 @@ const {
     accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
     assertNoExternalAccountReferences, isArchivePurgeSuspended
 } = require("./archive-purge-service");
+const {isMaturityTestActor} = require("./maturity-rollout-policy");
 const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
@@ -327,7 +328,7 @@ exports.purgeArchivedAccount = onCall(
     async request => {
         if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
         requireMutationOwner(request, 'expectedOwnerUid');
-        if (isArchivePurgeSuspended()) {
+        if (isArchivePurgeSuspended() && !isMaturityTestActor(request.auth)) {
             throw new HttpsError('failed-precondition',
                 'Eliminazione definitiva temporaneamente sospesa per sicurezza. Archivio e ripristino restano disponibili.',
                 {reason: 'ARCHIVE_PURGE_TEMPORARILY_SUSPENDED'});
@@ -604,7 +605,6 @@ exports.recoverMfaWithCode = onCall(
     async (request) => {
         const email = String(request.data?.email || "").trim().toLowerCase();
         const password = String(request.data?.password || "");
-        const codeHash = recoveryCodeHash(request.data?.recoveryCode);
         if (!email || !password || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
             throw new HttpsError("invalid-argument", "Dati di recupero non validi.");
         }
@@ -654,31 +654,14 @@ exports.recoverMfaWithCode = onCall(
             typeof user.email !== "string" || user.email.trim().toLowerCase() !== email) {
             throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
         }
-        const recoveryRef = db.collection("mfaRecovery").doc(user.uid);
-        await db.runTransaction(async (transaction) => {
-            const recovery = await transaction.get(recoveryRef);
-            const hashes = recovery.exists ? recovery.data().codeHashes || [] : [];
-            if (!hashes.includes(codeHash)) {
-                throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
-            }
-            const remainingHashes = hashes.filter((hash) => hash !== codeHash);
-            transaction.set(recoveryRef, {
-                codeHashes: remainingHashes,
-                remaining: remainingHashes.length,
-                recoveryPendingAt: admin.firestore.FieldValue.serverTimestamp(),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        });
-
-        await admin.auth().updateUser(user.uid, { multiFactor: { enrolledFactors: null } });
-        await admin.auth().revokeRefreshTokens(user.uid);
-        await recoveryRef.set({
-            recoveredAt: admin.firestore.FieldValue.serverTimestamp(),
-            recoveryPendingAt: admin.firestore.FieldValue.delete(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        await attemptRef.delete();
-        return { ok: true };
+        const enrolledFactors = Array.isArray(user.multiFactor?.enrolledFactors)
+            ? user.multiFactor.enrolledFactors : [];
+        if (enrolledFactors.length === 0) {
+            throw new HttpsError("failed-precondition",
+                "Nessun secondo fattore attivo da recuperare. Nessun codice è stato consumato.");
+        }
+        throw new HttpsError("failed-precondition",
+            "Recupero MFA automatico non disponibile. Contatta l'assistenza: nessun codice è stato consumato.");
     }
 );
 

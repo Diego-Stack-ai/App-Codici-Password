@@ -22,7 +22,7 @@ const col = path => ({doc: id => doc(`${path}/${id}`), where: (field, operator, 
 const stamp = value => ({toMillis: () => value});
 function fixture() {
   const docs = new Map(), objects = new Map();
-  let writes = 0, saves = 0, downloads = 0, clock = 1000, failPrefix, afterSave, beforeMetadata;
+  let writes = 0, saves = 0, downloads = 0, deletes = 0, clock = 1000, failPrefix, afterSave, beforeMetadata;
   const store = {collection: col, async runTransaction(fn) {
     const pending = [], reads = new Map();
     const result = await fn({get: async ref => {
@@ -57,13 +57,20 @@ function fixture() {
       downloads++; assert.equal(typeof opts.generation, 'string');
       const value = objects.get(path)?.versions.get(opts.generation);
       if (!value) throw new Error('missing generation'); return [Buffer.from(value)];
+    }, async delete(options) {
+      assert.equal(typeof opts.generation, 'string');
+      assert.equal(options.preconditionOpts.ifGenerationMatch, opts.generation);
+      const entry = objects.get(path);
+      if (!entry?.versions.has(opts.generation)) throw Object.assign(new Error('missing generation'), {code: 404});
+      entry.versions.delete(opts.generation); deletes++;
+      if (!entry.versions.size) objects.delete(path);
     }
   }; }};
   const build = () => createRestoreStageLab({store, bucket, projectId: 'demo-m8', now: () => clock, timestamp: stamp,
     verifyIdToken: async token => { if (token !== 'synthetic') throw new Error('secret-error'); return {uid: 'u1'}; },
     verifyAppCheck: async token => { if (token !== 'synthetic') throw new Error('secret-error'); }});
   return {lab: build(), build, store, docs, objects, seed, get writes() {return writes;}, get saves() {return saves;},
-    get downloads() {return downloads;}, advance: ms => {clock += ms;}, inject: prefix => {failPrefix = prefix;},
+    get downloads() {return downloads;}, get deletes() {return deletes;}, advance: ms => {clock += ms;}, inject: prefix => {failPrefix = prefix;},
     onSave: callback => {afterSave = callback;}, onMetadata: callback => {beforeMetadata = callback;}};
 }
 async function serve(t, lab) {
@@ -113,6 +120,28 @@ test('cleanup preparation is expired unpublished verified-only, idempotent and n
     }
     assert.equal(f.objects.size, 1); assert.equal(f.saves, 1);
   }
+});
+
+test('prepared cleanup deletes only the pinned generation and closes metadata', async t => {
+  const f = fixture(), {id} = await verified(t, f);
+  f.advance(7 * 24 * 60 * 60 * 1000);
+  const prepared = await f.lab.prepareUploadCleanup('u1', {stageId: id});
+  const result = await f.lab.executeUploadCleanup('u1', {stageId: id, cleanupId: prepared.cleanupId});
+  assert.deepEqual(result, {deleted: true, missing: false, generation: '1', cleanupId: prepared.cleanupId, completed: true});
+  assert.equal(f.deletes, 1); assert.equal(f.objects.size, 0);
+  const [planPath, descriptorPath] = paths(id);
+  assert.equal(f.docs.get(planPath).cleanup.status, 'completed');
+  assert.equal(f.docs.get(descriptorPath).status, 'cleaned');
+  await assert.rejects(f.lab.claim('u1', input), /LAB_CLEANUP_BLOCKED/);
+  await assert.rejects(f.lab.executeUploadCleanup('u1', {stageId: id, cleanupId: prepared.cleanupId}), /LAB_CLEANUP_BLOCKED/);
+});
+
+test('cleanup execution rejects wrong authorization without deleting bytes', async t => {
+  const f = fixture(), {id} = await verified(t, f);
+  f.advance(7 * 24 * 60 * 60 * 1000);
+  await f.lab.prepareUploadCleanup('u1', {stageId: id});
+  await assert.rejects(f.lab.executeUploadCleanup('u1', {stageId: id, cleanupId: '00000000-0000-0000-0000-000000000000'}), /LAB_CLEANUP_BLOCKED/);
+  assert.equal(f.deletes, 0); assert.equal(f.objects.size, 1);
 });
 
 test('upload maps unsupported generation to a fixed conflict without exposing adapter details', async t => {

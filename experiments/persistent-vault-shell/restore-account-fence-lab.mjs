@@ -1,10 +1,11 @@
 import {createAccountWriteFenceLab} from './account-write-fence-lab.mjs';
-import {restoreReferenceParents} from './restore-reference-scope.mjs';
+import {restoreReferenceParents, validateRestoreSharedPairs} from './restore-reference-scope.mjs';
 import {createHash} from 'node:crypto';
 import {validateRestoreProfileDeadlinePairs} from './restore-profile-deadline-pair.mjs';
 
-// Account/direct attachments plus embedded widgets: both old and new parents are fenced.
-// Shared references remain excluded until their complete link protocol is connected.
+// Account/direct attachments plus embedded and shared-reference widgets: both old
+// and new parents are fenced. Reciprocal shared triples are revalidated in the
+// same transaction that performs the candidate write.
 export function createRestoreAccountFenceLab(store) {
   const beforeAccountWrite = createAccountWriteFenceLab(store);
   return async (transaction, records, previous = []) => {
@@ -13,6 +14,7 @@ export function createRestoreAccountFenceLab(store) {
     }
     const uid=records[0].path.split('/')[1];
     validateRestoreProfileDeadlinePairs(uid,records);
+    validateRestoreSharedPairs(uid,records);
     validateRestoreProfileDeadlinePairs(uid,records.flatMap((record,index)=>previous[index]==null?[]:[{path:record.path,data:previous[index]}]));
     const parents = records.flatMap((record,index) => restoreReferenceParents(record,previous[index] ?? null));
     for (const record of records.filter(record=>/^users\/[^/]+(?:\/aziende\/[^/]+)?$/.test(record.path))) {
@@ -53,7 +55,7 @@ export function createRestoreAccountFenceLab(store) {
           account.banking.filter(bank => bank?.bankId === record.data.bankId).length !== 1)) throw Error('RESUME_WIDGET_BANK_MISSING');
     }
     const apply = [];
-    for (const path of new Set(parents)) {
+    for (const path of new Set(parents.filter(path=>/^users\/[^/]+\/(?:aziende\/[^/]+\/)?accounts\/[^/]+$/.test(path)))) {
       apply.push(await beforeAccountWrite(transaction, store.doc(path)));
     }
     return () => {for (const commit of apply) commit();};

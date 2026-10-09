@@ -30,6 +30,11 @@ export async function deleteLabPurgeSequenceObject(store, bucket, scope, expecte
   try {
     assertNoRetry();
     const target = plan[index];
+    // The local Storage emulator does not reliably enforce generation delete
+    // preconditions. Refuse an already-replaced object before issuing DELETE;
+    // real GCS must still enforce the precondition for the remaining race.
+    const [latest] = await bucket.file(target.path).getMetadata();
+    if (!latest || latest.generation !== target.generation) throw Error('PURGE_GENERATION_CHANGED');
     // Keep the generation a string: coercing uint64 generations loses precision.
     await bucket.file(target.path, {generation: target.generation}).delete({generation: target.generation, ifGenerationMatch: target.generation});
     outcome = 'applied';

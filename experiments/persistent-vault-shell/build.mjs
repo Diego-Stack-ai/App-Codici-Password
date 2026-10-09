@@ -5,12 +5,18 @@ const directory = fileURLToPath(new URL('./', import.meta.url));
 await mkdir(new URL('./dist/', import.meta.url), {recursive: true});
 const boundaries = {
     'logger.js': 'export const LOG = () => {};',
-    'utils.js': 'export const logError = () => {};',
+    'utils.js': `export const logError = () => {};
+        export const inviteIdForGuest = () => { throw new Error('FIXTURE_READ_ONLY'); };
+        export const nextSharingCycle = () => { throw new Error('FIXTURE_READ_ONLY'); };
+        export const sharingCycleOf = () => { throw new Error('FIXTURE_READ_ONLY'); };`,
     'ui-core-v129.js': 'export const showToast = () => {}; export const showConfirmModal = async () => false;',
     'translations.js': `export const t = key => ({label_user:'Utente', label_account:'Codice', label_password:'Password', no_accounts_found:'Nessun account trovato'})[key] || key;`,
     'card-secret.js': `export function createCardSecretResolver(value, encrypted) { if (encrypted) throw new Error('FIXTURE_ONLY'); return async () => value; }`,
-    'firebase-config.js': 'export const db = null;',
-    'firebase-runtime.js': 'const deny = () => { throw new Error("FIXTURE_READ_ONLY"); }; export {deny as doc, deny as updateDoc, deny as deleteDoc, deny as writeBatch};',
+    'firebase-config.js': `export const db = null; export const functions = null;
+        export const auth = Object.freeze({currentUser: null});`,
+    'firebase-runtime.js': `const deny = () => { throw new Error('FIXTURE_READ_ONLY'); };
+        export {deny as deleteField, deny as doc, deny as httpsCallable, deny as onAuthStateChanged,
+            deny as runTransaction, deny as updateDoc, deny as deleteDoc, deny as writeBatch};`,
     'security-manager.js': 'export const ensureVaultKeyMaterial = async () => null; export const decrypt = () => { throw new Error("FIXTURE_ONLY"); };',
     'vault-repository.js': 'export * from "./fixture-repository.mjs";',
     'private-account-offline-pilot.js': 'export const consumePrivateAccountHandoff = () => { throw new Error("FIXTURE_ONLY"); };'

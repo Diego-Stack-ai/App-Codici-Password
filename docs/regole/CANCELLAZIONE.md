@@ -1,11 +1,17 @@
 # Cancellazione
 
+## Chiusura operativa M7 — 09/10/2026
+
+M7 è chiuso per il ciclo corrente mantenendo il purge automatico hard-off. Archivio, ripristino e protezioni distribuite restano attivi nel perimetro già verificato; il motore distruttivo non viene abilitato senza future prove GCS/CAS reali e un nuovo incarico esplicito. La scelta safe-off è l'esito finale, non una certificazione del purge automatico.
+
 27/09/2026 — mitigazione locale Azienda: anche le Rules negano ora la cancellazione del documento padre, inclusa azienda vuota, oltre alla guardia UI. Preservati i permessi precedenti sui discendenti. Il percorso server sicuro 3B non è ancora operativo; non è una nuova politica definitiva di conservazione. Emulatori e limiti in COLLAUDI; nessuna distribuzione.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 
 ## Riconciliazione M7 vigente
+
+Aggiornamento locale 09/10/2026: un modello isolato codifica la decisione M7-D1 senza eseguire effetti. Usa due anni di calendario dall'ultima archiviazione e richiede almeno dieci giorni dall'avviso interno persistito; un avviso tardivo rinvia il purge. Revisione/data della nuova archiviazione rendono inutilizzabile l'avviso del ciclo precedente. Identità, ambito aziendale o tempi inverificabili non producono mai eleggibilità. Prove history-recovery 25/25 e regressione Archivio 117/117; nessun raccordo a notifiche, scheduler o purge e nessun superamento di PURGE-CAS/D8.
 
 Correzione locale 27/09/2026: prima di avviare i passi distruttivi, la transazione di preparazione verifica anche la pianificabilità dei riferimenti Profilo/Aziende e il budget conservativo. Dati già malformati o piano già eccessivo impediscono il purge senza cancellazioni. La transazione finale rilegge l'Account: se è stato ricreato, non scollega i riferimenti e non scrive esito purged. Queste guardie non sono un blocco comune: modifiche fra preparazione e cancellazione Storage/recursiveDelete rimangono fuori dalla garanzia; nessuna chiusura PURGE-CAS.
 

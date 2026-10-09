@@ -33,8 +33,43 @@ export function chunkNewRestoreRecords(records) {
     for(const account of group.filter(record=>record.scope==='company-account'))
       parents.set(key('company',account.companyId,account.id),group);
   }
+  const sharedId=value=>typeof value==='string'&&/^[A-Za-z0-9._:-]{1,160}$/.test(value);
+  const sharedData=new Map(ordered.filter(record=>record.scope==='shared-vault-data').map(record=>[record.id,record]));
+  const sharedLinks=new Map(ordered.filter(record=>record.scope==='shared-vault-data-link').map(record=>[record.id,record]));
+  const sharedWidgets=new Map(ordered.filter(record=>
+    ['private-account-widget','company-account-widget'].includes(record.scope)&&record.data?.kind==='shared-reference').map(record=>[record.id,record]));
+  const sharedRecords=new Set([...sharedData.values(),...sharedLinks.values(),...sharedWidgets.values()]);
+  const sharedGroups=new Map([...sharedData].map(([id,record])=>[id,[record]]));
+  for(const link of sharedLinks.values()) {
+    const data=link.data,widget=sharedWidgets.get(data?.widgetId),common=sharedData.get(link.sharedDataId);
+    const company=data?.context==='company',accountGroup=parents.get(key(data?.context,data?.companyId,data?.accountId));
+    if(!common||!widget||!accountGroup||!sharedId(link.id)||!sharedId(link.sharedDataId)||link.sharedDataId!==data?.sharedDataId||
+      !sharedId(data?.widgetId)||!sharedId(data?.accountId)||!['private','company'].includes(data?.context)||
+      (company?!sharedId(data?.companyId):data?.companyId!==undefined&&data.companyId!==null&&data.companyId!=='')||
+      widget.scope!==(company?'company-account-widget':'private-account-widget')||widget.accountId!==data.accountId||
+      (company?widget.companyId!==data.companyId:widget.companyId!==undefined&&widget.companyId!==null&&widget.companyId!=='')||
+      widget.data?.context!==data.context||widget.data?.accountId!==data.accountId||widget.data?.sharedDataId!==link.sharedDataId||
+      widget.data?.linkId!==link.id||(company?widget.data?.companyId!==data.companyId:
+        widget.data?.companyId!==undefined&&widget.data.companyId!==null&&widget.data.companyId!==''))
+      throw Error('RESUME_SHARED_DEPENDENCY_INVALID');
+    let group=sharedGroups.get(link.sharedDataId);
+    const containing=[...new Set(sharedGroups.values())].find(candidate=>candidate!==group&&candidate.some(item=>accountGroup.includes(item)));
+    if(containing) {
+      for(const item of group)if(!containing.includes(item))containing.push(item);
+      for(const [id,value] of sharedGroups)if(value===group)sharedGroups.set(id,containing);
+      group=containing;
+    }
+    for(const item of [...accountGroup,link,widget])if(!group.includes(item))group.push(item);
+    if(groups.includes(accountGroup))groups.splice(groups.indexOf(accountGroup),1);
+  }
+  for(const widget of sharedWidgets.values()) {
+    const link=sharedLinks.get(widget.data?.linkId);
+    if(!link||link.data?.widgetId!==widget.id)throw Error('RESUME_SHARED_DEPENDENCY_INVALID');
+  }
+  groups.push(...new Set(sharedGroups.values()));
   for(const record of ordered) {
     if(['company','private-account','company-account'].includes(record.scope))continue;
+    if(sharedRecords.has(record))continue;
     if(profileGroup?.includes(record)) {
       if(record===profile)groups.push(profileGroup);
       continue;
@@ -52,6 +87,61 @@ export function chunkNewRestoreRecords(records) {
   }
   if(current.length)chunks.push(current);
   return chunks;
+}
+
+// Selection is a second trust boundary: preview grouping alone must not allow a
+// caller to submit only one member of a dependent restore group. This operates
+// on the original record objects so it can validate the exact UI selection
+// before records and chunks are rebuilt.
+export function validateRestoreSelection(records, selectedRecords) {
+  if(!Array.isArray(records)||!records.length||!Array.isArray(selectedRecords)||!selectedRecords.length)
+    throw Error('RESUME_SELECTION_INVALID');
+  const selected=new Set(selectedRecords),index=new Map(records.map((record,at)=>[record,at]));
+  if(index.size!==records.length||selected.size!==selectedRecords.length||selectedRecords.some(record=>!index.has(record)))
+    throw Error('RESUME_SELECTION_INVALID');
+  const parent=Array.from({length:records.length},(_,at)=>at);
+  const find=value=>parent[value]===value?value:(parent[value]=find(parent[value]));
+  const join=(left,right)=>{if(left!==undefined&&right!==undefined){left=find(left);right=find(right);if(left!==right)parent[right]=left;}};
+  const id=value=>typeof value==='string'&&/^[A-Za-z0-9._:-]{1,160}$/.test(value);
+  const accountKey=(context,companyId,accountId)=>JSON.stringify([context,context==='company'?companyId:null,accountId]);
+  const accounts=new Map(),companies=new Map(),sharedData=new Map(),links=new Map(),widgets=new Map();
+  records.forEach((record,at)=>{
+    if(record.scope==='private-account')accounts.set(accountKey('private',null,record.id),at);
+    if(record.scope==='company-account')accounts.set(accountKey('company',record.companyId,record.id),at);
+    if(record.scope==='company')companies.set(record.id,at);
+    if(record.scope==='shared-vault-data')sharedData.set(record.id,at);
+    if(record.scope==='shared-vault-data-link')links.set(record.id,at);
+    if(['private-account-widget','company-account-widget'].includes(record.scope))widgets.set(record.id,at);
+  });
+  records.forEach((record,at)=>{
+    if(record.scope==='company-account')join(at,companies.get(record.companyId));
+    if(record.scope==='deadline'&&record.data?.sourceRef?.type==='profileDocument') {
+      const profile=records.findIndex(item=>item.scope==='profile');
+      if(profile>=0)join(at,profile);
+    }
+    if(['private-account-widget','company-account-widget'].includes(record.scope)) {
+      const data=record.data,account=accounts.get(accountKey(data?.context,data?.companyId,data?.accountId));
+      if(data?.kind==='embedded')join(at,account);
+      if(data?.kind==='shared-reference') {
+        if(!id(data.sharedDataId)||!id(data.linkId)||account===undefined||!sharedData.has(data.sharedDataId)||!links.has(data.linkId))
+          throw Error('RESUME_SELECTION_DEPENDENCY');
+        join(at,account);join(at,sharedData.get(data.sharedDataId));join(at,links.get(data.linkId));
+      }
+    }
+    if(record.scope==='shared-vault-data-link') {
+      const data=record.data,account=accounts.get(accountKey(data?.context,data?.companyId,data?.accountId));
+      if(!id(data?.sharedDataId)||!id(data?.widgetId)||account===undefined||!sharedData.has(data.sharedDataId)||!widgets.has(data.widgetId))
+        throw Error('RESUME_SELECTION_DEPENDENCY');
+      join(at,account);join(at,sharedData.get(data.sharedDataId));join(at,widgets.get(data.widgetId));
+    }
+  });
+  const state=new Map();
+  records.forEach((record,at)=>{
+    const root=find(at),included=selected.has(record);
+    if(state.has(root)&&state.get(root)!==included)throw Error('RESUME_SELECTION_DEPENDENCY');
+    state.set(root,included);
+  });
+  return selectedRecords;
 }
 
 // Deliberately bounded candidate reader, not the general 2 GiB production import.
@@ -90,6 +180,8 @@ export async function readResumeBackup(file, recoveryKey, uid, check, allowAttac
     } else {
       const supportedSetting=opened.entry.scope==='settings'&&['profileLabels','deadlineConfig','deadlineConfigDocuments','generalConfig'].includes(opened.entry.id);
       if (opened.entry.kind !== 'record' || (!supportedSetting&&!['profile', 'company', 'contact', 'deadline', 'private-account', 'company-account', 'private-account-attachment', 'company-account-attachment', 'private-account-widget', 'company-account-widget'].includes(opened.entry.scope)))
+        throw Error('RESUME_SCOPE_NOT_CONNECTED');
+      if (['private-account-widget', 'company-account-widget'].includes(opened.entry.scope) && opened.entry.data?.kind !== 'embedded')
         throw Error('RESUME_SCOPE_NOT_CONNECTED');
       chunkRestoreRecords([opened.entry]); records.push(opened.entry);
     }
@@ -191,6 +283,8 @@ export function createRestoreResumeSource({context, getUser, isOnline, submit, a
       const available = new Set(candidate.inputs.flatMap((input, chunk) => input.records.map((_, index) => `${chunk}:${index}`)));
       if (keys.some(key => !available.has(key))) throw Error('RESUME_SELECTION_INVALID');
       const selected = new Set(keys);
+      const allRecords=candidate.inputs.flatMap(input=>input.records);
+      validateRestoreSelection(allRecords,candidate.inputs.flatMap((input,chunk)=>input.records.filter((_,index)=>selected.has(`${chunk}:${index}`))));
       candidate.missingByChunk = candidate.inputs.map((input, chunk) => input.records.flatMap((_,index) => selected.has(`${chunk}:${index}`) ? [index] : []));
       candidate.inputs = candidate.inputs.map((input, chunk) => {
         const overwrite = candidate.missingByChunk[chunk].some(index => input.records[index].expectedVersion.exists);
@@ -206,6 +300,7 @@ export function createRestoreResumeSource({context, getUser, isOnline, submit, a
         const records = candidate.missingByChunk[index].map(at => input.records[at]);
         if (records.length) selected.push({...input, records});
       }
+      validateRestoreSelection(candidate.inputs.flatMap(input=>input.records),selected.flatMap(input=>input.records));
       const paths = value => {
         const found = new Set(), pending = [value];
         while (pending.length) {

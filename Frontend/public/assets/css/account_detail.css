@@ -188,7 +188,7 @@
 .attachment-name {
     overflow: hidden;
     color: var(--text-primary);
-    font: var(--font-label);
+    font: var(--font-badge);
     font-weight: var(--font-label-weight);
     text-overflow: ellipsis;
     text-transform: uppercase;

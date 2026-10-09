@@ -1,5 +1,190 @@
 # Collaudi
 
+## M8 — collaudo pubblicato 1.2.145 concluso — 09/10/2026
+
+Deploy del solo Firebase Hosting riuscito (263 file); Functions, Rules e dati invariati. Nella sessione sintetica isolata la Vault è stata sbloccata dall'utente, lo stesso backup cifrato è stato caricato e la Recovery Key inserita direttamente dall'utente. Tre evidenze concordano: DOM con `Il backup è integro`, schermata dell'anteprima e contenuto copiabile `Mancanti: 0; modificati: 0; invariati: 1`. Il solo profilo è invariato e non selezionabile; nessun ripristino è stato applicato. L'errore server precedente non ricorre: `settings/security` è stato autenticato/contato ma escluso dal piano prima della callable, conservando la sicurezza corrente.
+
+## M8 — esclusione sicurezza dal ripristino pubblicabile — 09/10/2026
+
+La prova browser con backup cifrato sintetico ha autenticato e decifrato correttamente il file, ma la callable ha respinto il piano perché il client pubblicato inviava ancora `users/{uid}/settings/security`. Corretto il raccordo runtime: il record resta autenticato e contato nel footer, ma viene escluso dal piano prima dell'anteprima e non raggiunge il server; la UI dichiara che le impostazioni di sicurezza correnti vengono conservate. Regressione backup **110/110**, riferimenti statici, sintassi, hardening e coerenza versione `1.2.145` verdi. Il ripristino effettivo resta da confermare nell'app pubblicata e richiede conferma distruttiva separata.
+
+## M7 — collaudo controllato sull'app pubblicata — 09/10/2026
+
+La callable `purgeArchivedAccount` è stata distribuita con un'eccezione di rollout limitata all'account sintetico `codex-collaudo-20261009@example.invalid`; per tutti gli altri utenti l'interlock continua a rispondere come sospeso. Prima del deploy: suite Functions/security **424 totali, 415 superati, 9 skip emulatori dichiarati, 0 falliti** e lint verde. Deploy mirato della sola callable in `europe-west1` riuscito.
+
+Nell'app pubblicata è stato creato un Account sintetico chiaramente identificato, archiviato e quindi eliminato definitivamente dall'utente dopo la conferma distruttiva. Tre riscontri concordano: DOM con stato `Nessun account trovato`, schermata visiva dell'archivio vuoto e messaggio finale copiabile `Eliminato definitivamente`; console senza errori o warning. Nessun dato reale è stato usato o eliminato. Il collaudo dimostra il percorso nominale per questo attore sintetico, non risolve le race già documentate né autorizza l'abilitazione M7 generalizzata.
+
+## Avvio nuovo ciclo di prova — 09/10/2026
+
+Controllo visivo non distruttivo sull'app pubblicata: sessione autenticata valida, versione `1.2.144`, home, area privata e pagina Impostazioni accessibili; nessun errore o warning console nelle viste osservate. Individuata un'immagine profilo apparentemente non caricata nella home. Non sono stati creati, modificati, ripristinati o eliminati record. I test con scritture e la rimozione degli interlock restano sospesi per backup preventivo non ancora disponibile.
+
+Il prerequisito è stato successivamente superato: export Firestore completo `Riuscita`, 551 documenti e 422,61 kB nel bucket UE dedicato. La prossima fase può usare l'app per collaudi funzionali non distruttivi e può usare esclusivamente fixture/emulatori o record sintetici chiaramente identificati per scenari distruttivi. L'export non autorizza da solo la rimozione contemporanea di tutti gli interlock produttivi.
+
+## Chiusura del ciclo di collaudo locale — 09/10/2026
+
+La candidata `1.2.144` ha superato i gate locali usati per il rilascio: Functions/security 413 pass e 9 skip emulatori, offline 14/14, riferimenti statici e hardening. Il deploy completo è terminato con esito positivo e il controllo HTTP successivo ha restituito 200 per pagina iniziale e manifest, con versione corretta. Questo chiude il collaudo locale del ciclo; non sostituisce prove GCS reali, matrice fisica o audit esterno, trasferiti a un futuro incarico.
+
+09/10/2026 — regressione completa ripetuta dopo la rimozione fisica del full-replace MFA: `npm run test:functions-security` **422 totali, 413 pass, 9 skip dichiarati, 0 fail**; lint e sintassi inclusi nel comando.
+
+## 09/10/2026 — rimozione meccanica full-replace MFA
+
+- Da `recoverMfaWithCode` rimossi update completo dei fattori, prenotazione/consumo automatico del codice e revoca automatica sessioni.
+- `node --check`, ESLint mirato e `recovery-security.test.js`: **11 pass, 4 skip storici, 0 fail**.
+- Account con fattori: assistenza manuale; account senza fattori: nessun recupero necessario. Entrambi terminano senza accesso a `mfaRecovery` e senza mutazioni Auth.
+- Modifica esclusivamente locale; nessuna Function distribuita e nessun account reale usato.
+
+## 09/10/2026 — applicazione locale MFA opzione 1
+
+- `recoverMfaWithCode` con TOTP o altro fattore restituisce `failed-precondition` con indicazione assistenza prima della raccolta `mfaRecovery` e prima di `updateUser`; codice non consumato.
+- Prova mirata nuova: policy assistenza manuale, zero letture/prenotazioni codice e zero aggiornamenti Auth.
+- `npm run test:functions-security`: **422 totali, 413 superati, 9 skip, 0 falliti**; lint e sintassi verdi.
+- Quattro skip aggiuntivi sono scenari storici del vecchio full-replace, mantenuti visibili ma non più raggiungibili per decisione di prodotto. Nessun recupero o account reale e nessun deploy.
+
+## 09/10/2026 — gate negativo custom-token MFA
+
+- Auth Emulator su `scripts/test-mfa-session-emulator.mjs`: caratterizzazione completata con account sintetico e teardown.
+- Dopo creazione del custom token e cancellazione dell'utente prima dello scambio, `accounts:signInWithCustomToken` restituisce successo e ricrea lo stesso UID come nuovo account senza email.
+- Esito: **gate fallito per il design server-only**; le 12/12 prove fixture attestano soltanto l'orchestrazione nominale e non autorizzano integrazione o attivazione.
+- Corretto nello script un requisito estraneo di `FUNCTIONS_EMULATOR_HOST`; il banco ora richiede esplicitamente soltanto Auth Emulator loopback.
+
+## 09/10/2026 — ponte token server-only per MFA selettivo
+
+- Quattro suite laboratorio MFA: **12/12 superati**.
+- Il bridge genera e scambia il custom token soltanto nel backend, non restituisce token Firebase, invoca il withdraw sul singolo enrollment e revoca i refresh token sia dopo successo sia dopo errore successivo allo scambio.
+- Scambio, withdraw e revoca sono fixture; controllo statico conferma assenza di import nel runtime.
+- Fonti ufficiali riesaminate: custom auth token escluso dai provider soggetti a MFA; Identity Platform non offre recupero del secondo fattore preconfezionato e demanda all'app una verifica d'identità adeguata. Serve ancora prova emulata/staging del protocollo reale.
+
+## 09/10/2026 — composizione end-to-end sintetica MFA selettiva
+
+- Tre suite laboratorio MFA: **9/9 superati**.
+- Verificati rimozione del solo enrollment bersaglio, conservazione del secondo fattore, consumo dopo rilettura, riconciliazione di risposta persa e mancato consumo quando il bersaglio resta presente.
+- Verificatore token, Identity Toolkit e inventario fattori sono fixture; nessun import runtime, token reale, chiamata remota o recupero effettivo.
+- Gate residuo: il flusso reale deve ottenere un ID token dell'utente con un meccanismo di recupero ufficialmente supportato e senza neutralizzare MFA.
+
+## 09/10/2026 — persistenza CAS grant MFA selettivo
+
+- Firestore `emulators:exec` su `mfa-recovery-grant-store-lab.emulator.test.mjs`: **1/1 superato**.
+- Fra due prenotazioni discordanti esiste un solo vincitore; stato `reserved` preservato se l'enrollment bersaglio è ancora presente, passaggio a `consumed` solo dopo assenza e replay duplicato senza nuova mutazione.
+- Progetto demo, dati sintetici e teardown completato; nessun token, Auth remoto, callable, deploy o accesso all'app di prova.
+
+## 09/10/2026 — grant breve per recupero MFA selettivo
+
+- `node --test functions/test/mfa-selective-withdraw-lab.test.js functions/test/mfa-recovery-grant-lab.test.js`: **6/6 superati**.
+- Il grant lega UID, singolo enrollment e hash del codice; UID/fattore discordante e scadenza falliscono chiusi.
+- La finalizzazione rifiuta di consumare il codice finché il fattore bersaglio risulta presente e conserva gli altri enrollment osservati.
+- Moduli non importati da `functions/index.js`; stato solo in memoria, token e requester sintetici, nessuna operazione Auth reale.
+
+## 09/10/2026 — candidato MFA selective-withdraw hard-off
+
+- `node --test functions/test/mfa-selective-withdraw-lab.test.js`: **3/3 superati**.
+- Verificati: hard-off senza I/O, binding di un solo `mfaEnrollmentId`, assenza del campo `enrolledFactors`, rifiuto di binding mancante e risposta incompleta.
+- Controllo statico: nessun import in `functions/index.js`. Requester completamente sintetico; nessuna chiamata Identity Toolkit, token reale, recupero reale o deploy.
+- Limite: l'endpoint ufficiale richiede un ID token utente valido; il modo sicuro per ottenerlo nel caso di perdita dell'Authenticator non è ancora implementato né dimostrato.
+
+## 09/10/2026 — regressione completa Functions/security dopo recheck MFA
+
+- `npm run test:functions-security`: lint e controlli sintattici verdi; **409 test totali, 404 superati, 5 skip emulatori attesi, 0 falliti**.
+- La suite mirata recovery copre anche il fattore aggiunto fra le due letture: nessuna chiamata `updateUser` e codice di recupero preservato; la suite Firestore emulata recovery resta **2/2**.
+- Limite esplicito: il test non crea una primitive CAS/selective-delete assente nell'Admin SDK e non chiude la finestra fra lettura finale e aggiornamento. Nessun recupero MFA reale, deploy o dato di produzione.
+
+## 09/10/2026 — M7 executor documentale composto
+
+- Firestore `emulators:exec` su `purge-bound-effect-document-lab.emulator.test.mjs`: **1/1 superato**.
+- Versione target, transizioni begin/outcome, delete, stato composto e ricevuta vengono confermati atomicamente; replay successivo è `duplicate:true` senza ricreare o rileggere il target cancellato.
+- Solo namespace demo e dato sintetico; interlock live invariato, nessun effetto Storage.
+
+## 09/10/2026 — M7 persistenza CAS emulata
+
+- Firestore `emulators:exec` su `purge-bound-effect-state-lab.emulator.test.mjs`: **1/1 superato**.
+- Due transizioni concorrenti con token identico producono un solo successo; documento persistito con `stateRevision=1`, revisione journal 1 e primo effetto `pending`.
+- Emulatori arrestati al termine; nessun executor, Storage o delete. Il warning metadata dell'Admin SDK non ha causato accessi non emulati.
+
+## 09/10/2026 — M7 stato CAS composto
+
+- `node --test experiments/persistent-vault-shell/purge-bound-effect-state.test.mjs experiments/persistent-vault-shell/purge-effect-sequence.test.mjs`: **4/4 superati**.
+- Fence, stop slot e journal condividono la revisione; l'esito applicato viene storicizzato prima del riuso. Token obsoleto, storageHash cambiato ed effectId estraneo sono rifiutati.
+- Modello puro non ancora persistito; nessun executor o delete live.
+
+## 09/10/2026 — M7 journal della sequenza bound
+
+- `node --test experiments/persistent-vault-shell/purge-bound-effects.test.mjs experiments/persistent-vault-shell/purge-effect-sequence.test.mjs`: **4/4 superati**.
+- Applicazione parziale seguita da stop conserva storico e impedisce il passo successivo; `unknown` resta irrisolto e blocca l'avanzamento. Inversione dell'ordine cambia hash e identità degli effetti.
+- Modello puro non persistito e non esecutivo; interlock e `destructiveAllowed:false` invariati.
+
+## 09/10/2026 — M7 derivazione effetti bound
+
+- `node --test experiments/persistent-vault-shell/purge-bound-effects.test.mjs experiments/persistent-vault-shell/purge-storage-inventory-lab.test.mjs`: **6/6 superati**.
+- La sequenza classifica ogni versione una sola volta, mantiene la generazione a 64 bit, colloca Storage prima del metadato allegato e l'Account per ultimo. Target extra, duplicati o discordanti falliscono chiusi.
+- È soltanto un piano immutabile con `destructiveAllowed:false`; executor e journal globale non sono ancora collegati.
+
+## 09/10/2026 — M7 binding transazionale Firestore/Storage
+
+- `node --test experiments/persistent-vault-shell/purge-storage-inventory-lab.test.mjs`: **4/4 superati**.
+- La nuova prova rilegge nella stessa transazione Account e metadato allegato con versioni esatte, registra una sola volta `planHash`/`storageHash`, accetta replay identico e rifiuta la modifica concorrente di un nanosecondo.
+- Il marker resta `destructiveAllowed:false`; bucket e database sono fixture, nessuna cancellazione.
+
+## 09/10/2026 — M7 inventario Storage generation-bound
+
+- `node --test experiments/persistent-vault-shell/purge-storage-inventory-lab.test.mjs`: **3/3 superati**.
+- Verificati ordinamento canonico, generazione a 64 bit mantenuta come stringa, binding dell'hash Firestore e della generazione, rifiuto di oggetto mancante/path duplicato/generazione numerica o malformata.
+- È una lettura su bucket finto con `destructiveAllowed:false`; nessuna delete e nessuna attestazione dell'emulatore Storage o GCS remoto.
+
+## 09/10/2026 — M7 baseline del candidato sospeso
+
+- Suite pure composta su 14 file di servizio/modello purge: **65/65 superati**, zero skip.
+- Coperti interlock live prima dei dati, binding ricevute, inventario bounded, fence/claim, stop e stati incerti, riconciliazione, target versionati, sequenze documentali e delete Storage generation-pinned senza rete.
+- Limite invariato: manca la composizione globale della proposta; l'emulatore Storage non certifica la precondizione DELETE e il purge live resta sospeso.
+
+## 09/10/2026 — M8 regressione composta del nucleo disabilitato
+
+- Suite composta di otto file (`restore-resume-source`, `restore-reference-scope`, `restore-resume-plan`, `restore-stage-lab`, `restore-chunk-lab`, helper allegati e boundary V2): **105/105 superati**, zero skip.
+- Esecuzione fuori sandbox soltanto per i server HTTP loopback delle fixture. Nessun servizio remoto o dato reale.
+- Il risultato qualifica il nucleo locale mantenuto hard-off; non sostituisce Firestore/Storage end-to-end, browser/bundle, GCS remoto o dispositivi.
+
+## 09/10/2026 — M8 adapter autenticato dietro interlock
+
+- `node --test functions/test/backup-restore-v2-service.test.js functions/test/backup-restore-v2-adapter.test.js`: **4/4 superati**.
+- Mancanza di autenticazione, owner valido/coincidente o App Check viene respinta in ordine; con tutti i segnali presenti l'interlock sospeso termina prima dell'executor e il contatore di accessi rimane zero.
+- L'adapter è candidato isolato: nessun import/export in `functions/index.js`, endpoint o deploy.
+
+## 09/10/2026 — M8 confine Functions hard-off
+
+- `node --test functions/test/backup-restore-v2-service.test.js functions/test/backup-attachment-stage.test.js`: **20/20 superati**.
+- L'interlock V2 resta `true` anche con variabile ambiente o proprietà di bypass sintetiche; il controllo statico rifiuta import o export del candidato in `functions/index.js`. Il runtime distribuito e il precedente `restoreBackupChunk` non sono stati modificati.
+- Limite: questo chiude il confine di sicurezza, non l'adapter autenticato, il collaudo end-to-end o l'attivazione.
+
+## 09/10/2026 — M8 cleanup della generazione Storage
+
+- `node --test experiments/persistent-vault-shell/restore-stage-lab.test.mjs`: **34/34 superati** fuori sandbox perché la suite apre un server HTTP esclusivamente su loopback. Il cleanup richiede stage scaduto, non pubblicato, cronologia completa senza tentativi attivi o incerti e marker `cleanupId`; cancella soltanto la generazione registrata e chiude i metadati. Autorizzazione errata: zero delete.
+- `node --test functions/test/backup-attachment-stage.test.js`: **18/18 superati**. La nuova prova verifica stringa di generazione a 64 bit, selezione puntuale del file e `ifGenerationMatch` sulla delete; il 404 è idempotente e altri errori restano errori.
+- Limite: è ancora un candidato locale non esportato da `functions/index.js`; non prova Storage remoto, runtime distribuito, UI o dispositivi.
+
+## 09/10/2026 — M8 shared, selezione e writer transazionale
+
+- `node --test experiments/persistent-vault-shell/restore-resume-source.test.mjs experiments/persistent-vault-shell/restore-reference-scope.test.mjs experiments/persistent-vault-shell/restore-resume-plan.test.mjs experiments/persistent-vault-shell/restore-chunk-lab.test.mjs`: **49/49 superati**. La nuova prova di selezione rifiuta sottoinsiemi di gruppi condivisi, Account/widget embedded, Azienda/Account e Profilo/Scadenza; restano validi i casi indipendenti già coperti.
+- `firebase emulators:exec --config experiments/persistent-vault-shell/firebase.emulators.json --project demo-vault-shell --only firestore "node --test experiments/persistent-vault-shell/restore-account-fence.emulator.test.mjs"`: **15/15 superati**, dati esclusivamente sintetici. Il gruppo Account–dato comune–link–widget viene scritto interamente con una sola ricevuta; collisione, CAS obsoleto e reciprocità spezzata non producono applicazioni parziali. Il fence purge dell'Account partecipa alla stessa transazione.
+- Regressione estesa `restore-resume-*`, `restore-stage-*` e `restore-chunk-*`: **138 superati, 4 skip emulatori, zero errori** su 142 casi eseguiti con accesso locale. Governance documentale: **11/11**, 31 MD e 612 collegamenti locali; `git diff --check` senza errori.
+- Primo avvio confinato non riuscito perché l'hub locale `127.0.0.1:4455` non diventava raggiungibile; la ripetizione autorizzata con accesso locale ha avviato Firestore e completato la suite. Gli avvisi `MetadataLookupWarning` dell'Admin SDK non hanno causato accessi a servizi non emulati né fallimenti.
+- Limite: il reader cifrato continua a rifiutare gli scope condivisi. Questa evidenza certifica il candidato isolato, non runtime distribuito, Storage remoto, UI, dispositivo o produzione.
+
+## M8 — fence e reciprocità shared nel laboratorio piano, 09/10/2026
+
+`restoreReferenceParents` copre ora `sharedVaultData`, `sharedVaultLinks` e widget `shared-reference`. Per link e widget restituisce Account padre, dato comune e documento reciproco; durante un overwrite include anche i riferimenti precedenti. Il nuovo validatore di chunk rifiuta terne parziali o incrociate. `createResumePlanLab` lo esegue in anteprima e creazione piano, senza affidarsi al solo raggruppamento client.
+
+Esiti: scope + sorgente **30/30**; `restore-resume-plan.test.mjs` **8/8**, incluso piano completo privato e negativi senza scrittura del piano. Sintassi dei moduli modificati valida. Sono fixture/fake transazionali locali: commit Firestore emulato, collisioni shared e writer restano il prossimo gate prima di aprire il reader.
+
+## M8 — raggruppamento atomico degli scope condivisi, 09/10/2026
+
+Il pianificatore dei nuovi ripristini raggruppa ora credenziale comune, link, widget `shared-reference` e Account padre nello stesso chunk; per Account aziendali include anche l'Azienda già selezionata. La fusione è transitiva: due credenziali comuni collegate allo stesso Account producono un solo gruppo e una sola copia del padre. Casi negativi sintetici coprono link senza widget, widget senza link, `sharedDataId` o `linkId` incrociati e gruppo da 403 record, rifiutato con `RESUME_DEPENDENCY_GROUP_TOO_LARGE` prima del piano.
+
+Comando: `node --test experiments/persistent-vault-shell/restore-resume-source.test.mjs`. Esito **23/23**. Reader, fence server e writer non sono stati aperti agli scope shared: il nuovo contratto è un prerequisito isolato, non un'attivazione incompleta. Nessun emulatore, rete, dato reale o deploy.
+
+## M8 — confine fail-closed della terna condivisa, 09/10/2026
+
+Il test cifrato della sorgente candidata copre ora separatamente `shared-vault-data`, `shared-vault-data-link` e il widget Account `shared-reference`, oltre a un backup che contiene Account padre e terna completa. La prima esecuzione ha riprodotto un difetto di confine: il widget condiviso era ammesso dal reader e raggiungeva l'anteprima, mentre dato e link erano rifiutati. Il reader ammette ora per gli scope widget soltanto `kind: embedded`; gli altri tipi terminano con `RESUME_SCOPE_NOT_CONNECTED` prima di `submit` o preparazione allegati.
+
+Comando: `node --test experiments/persistent-vault-shell/restore-resume-source.test.mjs`. Esito finale: **21/21**, zero fallimenti; in tutti i quattro casi shared il contatore di chiamate server/staging resta zero. Dati esclusivamente sintetici. Questa prova non abilita il ripristino condiviso: documenta e verifica il confine sicuro necessario prima di introdurre raggruppamento atomico, reciprocità link/widget e selezione dipendenze.
+
 ## 08/10/2026 — sette palette confrontabili (locale)
 
 Aggiunte Petrolio (`#0f766e`/`#5eead4`), Lavanda (`#6750a4`/`#c4b5fd`) e Rosa polvere (`#855466`/`#d9a7b8`) alle quattro palette esistenti, con coppie accento chiaro/scuro e superfici derivate. Verificati applicazione anticipata, allowlist di sette valori, sette comandi in Impostazioni e contrasto minimo 4,5:1 degli accenti nuovi nei casi automatici. `test:ui-foundations` 5/5, `test:css`, `test:js-syntax` su 172 moduli, `test:static-references` su 246 file, `test:performance-budget` su 30 pagine e `git diff --check` superati. Puliti commenti CSS obsoleti senza cambiare regole. Confronto visivo chiaro/scuro su PC e telefono ancora da eseguire; nessuna pubblicazione.
@@ -1390,3 +1575,94 @@ selettore iOS orientato soltanto alla fotocamera e avvio OCR non riuscito. La se
 Preview introduce quattro maniglie sugli angoli, separa “Scatta foto” da “Scegli dalla
 libreria”, pubblica esplicitamente il worker OCR e mostra il dettaglio tecnico degli
 errori nel solo laboratorio. La correzione non costituisce ancora accettazione del motore.
+## 09/10/2026 — M7, executor revision-touch composto
+
+- Comando: `firebase emulators:exec --config experiments/persistent-vault-shell/firebase.emulators.json --project demo-purge-fence --only firestore "node --test experiments/persistent-vault-shell/purge-bound-effect-revision-lab.emulator.test.mjs"`
+- Esito: **1/1 superato** su Firestore Emulator.
+- Evidenze: revisione condivisa avanzata da 7 a 8 con confronto atomico; ciphertext preservato; begin/outcome, stato composto e ricevuta registrati nella stessa transazione; replay classificato `duplicate` senza una seconda mutazione.
+- Limite: laboratorio sintetico; nessuna cancellazione reale, nessun deploy e motore M7 ancora disabilitato.
+## 09/10/2026 — M7, cleanup riferimenti profilo composto
+
+- Test puro `purge-bound-effects.test.mjs`: **2/2 superati**; ogni effetto profilo incorpora il solo comando normalizzato necessario e distingue profilo utente/azienda.
+- Test `purge-bound-effect-profile-lab.emulator.test.mjs` su Firestore Emulator: **1/1 superato**.
+- Evidenze: confronto su `updateTime`, rimozione del solo collegamento all'account bersaglio, riferimento estraneo preservato, stato composto e ricevuta nella stessa transazione, replay `duplicate` senza nuova mutazione.
+- Nota ambiente: l'avvio in sandbox non esponeva l'hub locale; il medesimo comando autorizzato fuori sandbox ha avviato e arrestato correttamente l'emulatore. Nessun servizio remoto o dato reale coinvolto.
+- Limite: laboratorio sintetico, nessun deploy; il motore M7 resta disabilitato.
+## 09/10/2026 — M7, adapter Storage vincolato alla generation
+
+- Test `purge-bound-effect-storage-lab.test.mjs`: **2/2 superati**.
+- Evidenze: il delete sintetico riceve il percorso pianificato e `ifGenerationMatch: "9007199254740993"` senza conversione numerica; un errore Storage ambiguo viene persistito nello stato composto come `unknown` e non come completamento.
+- Limite aperto: manca ancora la riconciliazione del gap non atomico Storage/Firestore. Il componente è solo laboratorio, dichiara `destructiveAllowed: false` e non è collegato al runtime o al deploy.
+## 09/10/2026 — M7, riconciliazione Storage per generation
+
+- Suite `purge-bound-effect-storage-lab.test.mjs`: **4/4 superati**.
+- Evidenze: la riconciliazione usa `bucket.file(path, {generation})`; 404 sulla generation esatta porta `unknown → applied`, la generation ancora presente porta `unknown → not-applied` e richiede stop, mentre gli errori non conclusivi non diventano successo.
+- Limite: fixture sintetica; manca ancora il retry controllato dopo `not-applied`. Nessuna cancellazione reale, integrazione runtime o abilitazione del motore.
+## 09/10/2026 — M7, retry controllato Storage
+
+- Suite mirata dei modelli stop/binding/sequenza e adapter Storage: **16/16 superati**.
+- Evidenze: `retry` è ammesso solo per lo stesso effetto in stato `unknown`, avanza atomicamente lo stato a `pending` prima dell'I/O e riusa la generation esatta; dopo `applied` un nuovo tentativo fallisce prima di richiamare Storage.
+- Limite: verifica ancora in memoria con bucket sintetico; persistenza Firestore della transizione da collaudare. Motore reale disabilitato e nessun deploy.
+## 09/10/2026 — M7, retry Storage persistito
+
+- Test `purge-bound-effect-storage-lab.emulator.test.mjs` su Firestore Emulator: **1/1 superato**.
+- Evidenze: sequenza durevole `pending → unknown → pending → applied`, revisione composta finale 4; il bucket sintetico legge `pending` da Firestore prima sia del primo tentativo sia del retry.
+- Ambiente: progetto demo, Firestore Emulator locale e bucket in memoria; teardown completato. Nessuna chiamata Storage reale, deploy o abilitazione del motore.
+## 09/10/2026 — M7, ricevuta finale della sequenza
+
+- Test `purge-bound-effect-finalize-lab.emulator.test.mjs` su Firestore Emulator: **1/1 superato**.
+- Evidenze: finalizzazione prima degli effetti respinta; dopo `applied` viene creata una ricevuta `effects-applied` vincolata a operation/claim/sequence; il replay restituisce `duplicate` senza seconda scrittura.
+- Sicurezza: la ricevuta non rilascia il fence, non abilita il motore e conserva `destructiveAllowed: false`; progetto demo e teardown completato.
+## 09/10/2026 — regressione locale composta M7
+
+- Suite pure `purge-*.test.mjs` (esclusi emulator): **56/56 superate**.
+- Suite emulatori, ripartita secondo i profili richiesti dai test (Firestore 8085, Firestore 8080, Firestore+Storage 8080/9199): **24/24 superate**.
+- Il primo run parallelo ha avuto una contesa transitoria nel test CAS, poi superato isolatamente 1/1. Il test Storage ha inoltre dimostrato che l'emulatore poteva cancellare una replacement ignorando la generation; l'executor laboratorio ora verifica prima la generation corrente e conserva comunque `ifGenerationMatch` per il race residuo. Rerun Storage: 1/1, replacement preservata.
+- Limiti: gli emulatori non certificano CAS DELETE su GCS reale; motore live, export/runtime, rollout e dati reali restano esclusi e disabilitati.
+## 09/10/2026 — M10, formato KDF dei campi
+
+- Suite `field-kdf-format-lab.test.mjs`: **3/3 superati**.
+- Evidenze: nuovo envelope prefissato/versionato `CPFE2` con PBKDF2-SHA256 a 600.000; fixture legacy concatenata a 100.000 ancora leggibile; migrazione esplicita e idempotente; password errata e dichiarazione v2 declassata respinte.
+- Limiti: solo laboratorio; nessun dato o ciphertext esistente riscritto, nessun runtime modificato. Mancano CAS persistito, gestione interruzioni, inventario completo dei chiamanti, benchmark dispositivi e decisione finale di rollout.
+## 09/10/2026 — M10, migrazione KDF con CAS
+
+- Test `field-kdf-migration-lab.emulator.test.mjs` su Firestore Emulator: **1/1 superato**.
+- Evidenze: fault prima del commit conserva byte/ciphertext legacy; due proposte concorrenti sulla stessa `updateTime` e ciphertext producono un solo commit; campo estraneo preservato; nuovo ciphertext decifrabile e secondo passaggio `current/duplicate`.
+- Limiti: documento e segreto sintetici, modulo di laboratorio non importato dal runtime. Mancano inventario chiamanti, rollout/rollback, benchmark fisici e migrazione di dati reali.
+## 09/10/2026 — M10, inventario chiamanti KDF
+
+- Test `field-kdf-callers-inventory.test.mjs`: **1/1 superato**.
+- Evidenze: elenco chiuso di 26 moduli che importano `encrypt`/`decrypt` esclusivamente da `security-manager.js`; nessun import diretto delle primitive raw di `crypto-utils.js` al di fuori del boundary centrale.
+- Limiti: inventario statico degli import ES del sorgente corrente; non certifica chiamate dinamiche, bundle distribuiti o compatibilità dispositivo. Runtime e formato di scrittura restano invariati.
+## 09/10/2026 — M10, adapter rollout KDF hard-off
+
+- Suite combinate `field-kdf-format-lab.test.mjs` e `field-kdf-rollout-lab.test.mjs`: **5/5 superate**.
+- Evidenze: new-write resta sul writer legacy anche con variabile ambiente e opzione chiamante favorevoli; dual-read accetta il formato v2 esplicito senza migrazione automatica.
+- Limiti: adapter di laboratorio non importato dal runtime; nessuna attivazione, migrazione o modifica di ciphertext. Benchmark e rollout restano aperti.
+## 09/10/2026 — M10, benchmark campo KDF sintetico
+
+- Comando: `node experiments/persistent-vault-shell/benchmark-field-kdf-lab.mjs`.
+- Ambiente: Windows, Node v24.12.0, 7 campioni dopo warm-up per operazione.
+- Risultati (min/mediana/max): legacy decrypt 100k **10,81/10,92/11,03 ms**; v2 encrypt 600k **62,45/63,20/65,98 ms**; v2 decrypt 600k **62,58/62,85/63,80 ms**.
+- Limiti: singolo host e WebCrypto Node; non è browser, dispositivo fisico, audit indipendente o approvazione dei parametri/rollout.
+## 09/10/2026 — M10, regressione hardening e KDF
+
+- `npm run test:release-hardening`: superato; 5 header, 30 callable con App Check e Rules vincolate all'UID.
+- `npm run test:crypto`: **13/13 superati**.
+- `node --test experiments/persistent-vault-shell/field-kdf-*.test.mjs`: **6 superati, 1 skip atteso** perché richiede Firestore Emulator; il medesimo CAS emulato era già stato eseguito separatamente **1/1**.
+- Limiti: nessun browser/dispositivo fisico, produzione, audit indipendente o modifica runtime.
+## 09/10/2026 — M10, restringimento race MFA
+
+- `node --test functions/test/recovery-security.test.js`: **14/14 superati**.
+- `recovery-attempts.emulator.test.js` su Firestore Emulator 8080: **2/2 superati**.
+- Nuova evidenza: fattore TOTP aggiunto fra prima lettura e prenotazione rilevato dalla seconda lettura; update Auth non chiamato e recovery code non consumato.
+- Limite vincolante: resta il gap fra seconda lettura e full-replace Auth; nessun recupero Auth reale, fattore reale o soluzione selettiva certificata.
+
+## 09/10/2026 — rilascio selettivo della policy MFA manuale
+
+- Commit applicativo: `b18d6c88` sul ramo `codex/complete-m7-m8-m10`, pubblicato su `origin`.
+- Verifiche pre-rilascio: suite Functions Security **413 superate, 9 saltate, 0 fallite**; documentazione **31 MD**, **612 collegamenti**, **11/11** test; regressione locale M7/M8/M10 **94 superate, 1 skip hard-off**.
+- Deploy eseguito esclusivamente con target `functions:recoverMfaWithCode` sul progetto `appcodici-password`; Firebase CLI: `Successful update operation` e `Deploy complete`.
+- Verifica remota: funzione `recoverMfaWithCode` **ACTIVE**, regione `europe-west1`, runtime `nodejs22`, hash `44c5590082c851780a3e5b34745f726bbbe233ad`.
+- Comportamento distribuito: se esiste un secondo fattore, il recupero automatico si arresta e richiede assistenza; nessun fattore viene rimosso, nessun recovery code consumato e nessun aggiornamento Auth eseguito.
+- Esclusioni rispettate: nessun deploy Hosting, Rules, indici o altre Functions; nessuna operazione su dati reali e nessuna modifica all'app di prova.

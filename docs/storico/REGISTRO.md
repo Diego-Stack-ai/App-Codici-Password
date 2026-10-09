@@ -1,5 +1,21 @@
 # Registro
 
+## 09/10/2026 — pubblicazione e verifica M8 1.2.145
+
+Deploy del solo Hosting riuscito. Lo stesso backup cifrato sintetico prima respinto è stato autenticato dall'utente e ha prodotto anteprima integra: 0 mancanti, 0 modificati, 1 profilo invariato. Nessun ripristino applicato; Functions, Rules e dati invariati. Il risultato dimostra nel percorso pubblicato l'esclusione di `settings/security` dal piano server, non l'abilitazione del motore riprendibile M8.
+
+## 09/10/2026 — correzione raccordo M8 candidata 1.2.145
+
+Il collaudo cifrato sintetico ha isolato un difetto client: `settings/security` era autenticato ma ancora incluso nel piano, quindi correttamente respinto dal server. Il runtime ora lo conta nel footer e lo esclude prima di anteprima/callable, preservando la sicurezza corrente con avviso esplicito. Gate pre-deploy: backup 110/110, versione, riferimenti statici, sintassi e hardening verdi. Nessun dato reale usato; ripristino pubblicato non ancora attestato.
+
+## 09/10/2026 — rollout e prova pubblicata M7 su dato sintetico
+
+Distribuita soltanto `purgeArchivedAccount` con policy che ammette l'esatto account sintetico di collaudo e mantiene sospeso ogni altro utente. Gate: Functions/security 424 totali, 415 pass, 9 skip dichiarati, zero fail; lint verde. Nell'app reale il dato sintetico è stato creato, archiviato e rimosso definitivamente dall'utente dopo conferma. DOM `Nessun account trovato`, schermata archivio vuoto, toast `Eliminato definitivamente` e console priva di errori/warning costituiscono l'evidenza. Nessun dato reale eliminato; nessuna abilitazione generale, né chiusura delle race M7 note.
+
+## 09/10/2026 — chiusura operativa del ciclo M7–M10
+
+Il proprietario dispone la chiusura completa del ciclo corrente dopo il deploy integrale della versione `1.2.144` sul progetto originale. Esito remoto positivo; motori non dimostrati conservati hard-off. I gate esterni non eseguiti sono trasferiti a un futuro ciclo e non vengono dichiarati superati. Nessun ulteriore incarico tecnico M7/M8/M10 resta attivo.
+
 ## STABILIZZAZIONE-04 — checkpoint revisione applicativa, 24/09/2026
 
 DeepSeek ha consegnato 2A runtime e 2B test/runner/PDF nel canale browser autorizzato in sola lettura; Astra ha respinto i rapporti come attestazione completa e richiesto rettifiche dei falsi allarmi. Nessuna patch applicativa applicata. Registrate in AUDIT le prove indipendenti: Functions 220/220 con sintassi/lint, accesso dati 95/95, navigazione 146/146, oltre a 129 casi mirati con sovrapposizioni. Le letture residue e l'inventario non riconciliato impediscono l'accettazione; le sessioni DeepSeek hanno terminato. `.git` è in sola lettura nel contesto corrente: commit/merge non tentati, nessun bypass, push o deploy. L'obiettivo resta incompleto; ripresa e gate in INCARICO_CORRENTE/STATO.

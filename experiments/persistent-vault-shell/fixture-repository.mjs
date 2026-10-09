@@ -15,6 +15,9 @@ export async function listCompanyAccounts(uid, companyId) {
     if (companyId !== 'demo-company') throw new Error('FIXTURE_ONLY');
     return rows(uid, true);
 }
+export async function listArchivedPrivateAccounts() { throw new Error('FIXTURE_READ_ONLY'); }
+export async function listCompanies() { throw new Error('FIXTURE_READ_ONLY'); }
+export async function getCompany() { throw new Error('FIXTURE_READ_ONLY'); }
 export async function listAcceptedInvites() { return []; }
 export async function getRecordByPath() { throw new Error('FIXTURE_ONLY'); }
 export async function getUserProfile() { throw new Error('FIXTURE_ONLY'); }

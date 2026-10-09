@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.140';
+import { db } from '../../firebase-config.js?v=1.2.145';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.140';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.145';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 async function saveAccount(...args) {
@@ -43,9 +43,9 @@ async function deleteAccount(...args) {
 import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
-import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.140';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.140';
+import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, validateAccountMode } from '../shared/account-mode-model.js';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.145';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.145';
 import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
@@ -58,6 +58,8 @@ let bankAccounts = [];
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
+let recipientPreferences = new Map();
+let ownerEmail = '';
 let accountWidgetController = null;
 let profileContactLinkDraft = null;
 let baseUpdatedAt = '';
@@ -101,6 +103,9 @@ export async function initFormAccountAzienda(user) {
     if (!user) return;
     const mount = ++mountEpoch;
     currentUid = user.uid;
+    ownerEmail = normalizeRecipientEmail(user.email);
+    invitedEmails = [];
+    recipientPreferences = new Map();
 
     const urlParams = new URLSearchParams(window.location.search);
     currentDocId = urlParams.get('id');
@@ -259,7 +264,7 @@ function initBaseUI() {
                     return;
                 }
                 await saveAccount({
-                    bankAccounts, invitedEmails, isExplicitMemo, currentUid: saveUid,
+                    bankAccounts, invitedEmails, invitePreferences: serializeRecipientPreferences(recipientPreferences, invitedEmails), isExplicitMemo, currentUid: saveUid,
                     currentDocId: saveDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt,
                     loadContext: saveContext
                 });
@@ -419,10 +424,15 @@ async function loadData() {
         if (isShared) {
             document.getElementById('shared-management')?.classList.remove('hidden');
             if (data.sharedWith) {
-                invitedEmails = Object.values(data.sharedWith).filter(guest => guest?.status !== 'suspended').map(g => g.email);
+                const activeGuests = Object.values(data.sharedWith)
+                    .filter(guest => guest?.status !== 'suspended' && guest?.status !== 'rejected')
+                    .filter(guest => !isOwnerRecipientEmail(guest?.email, ownerEmail));
+                invitedEmails = activeGuests.map(g => normalizeRecipientEmail(g.email));
+                recipientPreferences = recipientPreferencesFromSharedWith(activeGuests);
             } else {
                 const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
-                invitedEmails = [...emails];
+                invitedEmails = emails.map(normalizeRecipientEmail).filter(email => email && !isOwnerRecipientEmail(email, ownerEmail));
+                recipientPreferences = new Map(invitedEmails.map(email => [email, preferenceForRecipient(null, email)]));
             }
             renderGuestsList();
         }
@@ -455,7 +465,7 @@ async function loadRubrica() {
     // caricamento parallelo di Account e rubrica).
     const mount = mountEpoch;
     try {
-        const contacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
+        const contacts = filterRecipientContacts(await listContacts(currentUid), {ownerUid: currentUid, ownerEmail});
         if (mount !== mountEpoch) return;
         myContacts = contacts;
     } catch (e) { logError("LoadRubrica", e); }
@@ -525,6 +535,7 @@ function setupUI() {
                     if (inviteInput) inviteInput.value = '';
                     if (suggestions) suggestions.classList.add('hidden');
                     invitedEmails = [];
+                    recipientPreferences.clear();
                     renderGuestsList();
                 }
             }
@@ -572,8 +583,11 @@ function setupUI() {
             if (emails.length > 0) {
                 let added = false;
                 emails.forEach(email => {
-                    if (!invitedEmails.includes(email)) {
-                        invitedEmails.push(email);
+                    const normalized = normalizeRecipientEmail(email);
+                    if (isOwnerRecipientEmail(normalized, ownerEmail)) return;
+                    if (!invitedEmails.includes(normalized)) {
+                        invitedEmails.push(normalized);
+                        recipientPreferences.set(normalized, preferenceForRecipient(null, normalized));
                         added = true;
                     }
                 });
@@ -623,19 +637,32 @@ function renderGuestsList() {
     clearElement(list);
 
     invitedEmails.forEach((email, idx) => {
+        const preference = preferenceForRecipient(recipientPreferences, email);
+        const push = createElement('input', {
+            type: 'checkbox', checked: preference.notifyPush,
+            onchange: event => recipientPreferences.set(email, {...preferenceForRecipient(recipientPreferences, email), notifyPush: event.target.checked})
+        });
+        const notifyEmail = createElement('input', {
+            type: 'checkbox', checked: preference.notifyEmail,
+            onchange: event => recipientPreferences.set(email, {...preferenceForRecipient(recipientPreferences, email), notifyEmail: event.target.checked})
+        });
         const item = createElement('div', {
             className: 'guest-item account-guest-item'
         }, [
-            createElement('span', {
-                className: 'account-guest-email',
-                textContent: email
-            }),
+            createElement('div', {className: 'account-guest-main'}, [
+                createElement('span', {className: 'account-guest-email', textContent: email}),
+                createElement('div', {className: 'account-guest-channels'}, [
+                    createElement('label', {className: 'account-guest-channel'}, [push, createElement('span', {textContent: 'Push'})]),
+                    createElement('label', {className: 'account-guest-channel'}, [notifyEmail, createElement('span', {textContent: 'Email'})])
+                ])
+            ]),
             createElement('button', {
                 type: 'button',
                 className: 'material-symbols-outlined account-guest-remove',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
+                    recipientPreferences.delete(email);
                     renderGuestsList();
                 }
             })
@@ -660,8 +687,9 @@ function renderSuggestions(list) {
             className: 'suggestion-item',
             onclick: () => {
                 const email = c.email.toLowerCase();
-                if (!invitedEmails.includes(email)) {
+                if (!isOwnerRecipientEmail(email, ownerEmail) && !invitedEmails.includes(email)) {
                     invitedEmails.push(email);
+                    recipientPreferences.set(email, preferenceForRecipient(null, email));
                     renderGuestsList();
                 }
                 const input = document.getElementById('invite-email');

@@ -21,6 +21,11 @@ export function beginPurgeEffect(s, id) {
   if (s.stopRequested || s.effect !== null || typeof id !== 'string' || !/^[A-Za-z0-9._:-]{1,160}$/.test(id)) fail();
   return update(s, {effect: {id, outcome: 'pending'}});
 }
+export function retryPurgeEffect(s, id) {
+  validate(s);
+  if (s.stopRequested || !s.effect || s.effect.id !== id || s.effect.outcome !== 'unknown') fail();
+  return update(s, {effect: {id, outcome: 'pending'}});
+}
 // Evidence must come from the executor/reconciliation, never a client assertion.
 export function recordPurgeEffectOutcome(s, id, outcome) {
   validate(s);

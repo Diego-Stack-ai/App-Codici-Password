@@ -90,7 +90,8 @@ export function createRestoreStageLab({store, bucket, verifyIdToken, verifyAppCh
       return {trackedFromCreation: true, attempts: entries.size, counts,
         expired: plan.expiresAtMillis <= time(), cleanupAllowed: false};
   }
-  // Preparation only, internal to the demo. No Storage delete or release.
+  // Preparation is the durable authorization marker. Deletion remains pinned
+  // to the recorded generation and is never inferred from the current object.
   async function prepareUploadCleanup(uid, {stageId: id} = {}) {
     const [p, d, r] = refs(uid, id), cleanupId = randomUUID();
     return store.runTransaction(async tx => {
@@ -113,6 +114,37 @@ export function createRestoreStageLab({store, bucket, verifyIdToken, verifyAppCh
       }
       tx.update(p, {cleanup: {id: cleanupId, status: 'prepared', generation: plan.generation}});
       return {cleanupId, generation: plan.generation, duplicate: false, cleanupAllowed: false};
+    });
+  }
+  async function executeUploadCleanup(uid, {stageId: id, cleanupId} = {}) {
+    const [p, d, r] = refs(uid, id);
+    if (typeof cleanupId !== 'string' || !/^[a-f0-9-]{36}$/.test(cleanupId)) fail('LAB_INPUT');
+    const authorization = await store.runTransaction(async tx => {
+      const report = await inspectActivity(tx, uid, id);
+      const [ps, ds, rs] = await Promise.all([tx.get(p), tx.get(d), tx.get(r)]);
+      if (!report.trackedFromCreation || !report.expired || report.counts.active || report.counts.unknown ||
+          !report.counts.verified || !ps.exists || !ds.exists || rs.exists) fail('LAB_CLEANUP_BLOCKED');
+      const plan = validate(uid, id, ps.data());
+      if (plan.cleanup?.status !== 'prepared') fail('LAB_CLEANUP_BLOCKED');
+      const descriptor = stage.verifyStageDescriptor(ds.data(), plan.identity);
+      if (plan.revision !== 2 || descriptor.status !== 'pending' || plan.cleanup?.id !== cleanupId ||
+          plan.cleanup?.status !== 'prepared' || plan.cleanup?.generation !== plan.generation ||
+          millis(descriptor.createdAt) !== millis(plan.createdAt) || millis(descriptor.expiresAt) !== plan.expiresAtMillis ||
+          plan.expiresAtMillis > time()) fail('LAB_CLEANUP_BLOCKED');
+      return {identity: plan.identity, generation: plan.generation};
+    });
+    const deleted = await stage.deleteStageGeneration(bucket, authorization.identity, authorization.generation);
+    return store.runTransaction(async tx => {
+      const [ps, ds, rs] = await Promise.all([tx.get(p), tx.get(d), tx.get(r)]);
+      if (!ps.exists || !ds.exists || rs.exists) fail('LAB_CLEANUP_BLOCKED');
+      const plan = validate(uid, id, ps.data()), descriptor = stage.verifyStageDescriptor(ds.data(), plan.identity);
+      if (plan.revision !== 2 || descriptor.status !== 'pending' || plan.cleanup?.id !== cleanupId ||
+          plan.cleanup?.status !== 'prepared' || plan.cleanup?.generation !== authorization.generation)
+        fail('LAB_CLEANUP_BLOCKED');
+      const completedAt = time();
+      tx.update(p, {cleanup: {...plan.cleanup, status: 'completed'}, updatedAt: stamp(completedAt)});
+      tx.update(d, {status: 'cleaned', cleanupId, cleanedGeneration: authorization.generation, cleanedAt: stamp(completedAt)});
+      return {...deleted, cleanupId, completed: true};
     });
   }
   async function claim(uid, input) {
@@ -301,7 +333,7 @@ export function createRestoreStageLab({store, bucket, verifyIdToken, verifyAppCh
       send(statuses[error.code] || 400, statuses[error.code] ? error.code : 'LAB_FAILED');
     } finally { bytes?.fill(0); }
   }
-  return Object.freeze({claim, upload, publish, read, inspectUploadActivity, prepareUploadCleanup, resolveMapping, resolveMappingInTransaction, status: async (uid, {stageId} = {}) => view(await load(uid, stageId)), MAX_BYTES: stage.MAX_BYTES});
+  return Object.freeze({claim, upload, publish, read, inspectUploadActivity, prepareUploadCleanup, executeUploadCleanup, resolveMapping, resolveMappingInTransaction, status: async (uid, {stageId} = {}) => view(await load(uid, stageId)), MAX_BYTES: stage.MAX_BYTES});
 }
 
 const draining = new WeakSet();

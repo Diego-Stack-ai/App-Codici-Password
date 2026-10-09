@@ -1,5 +1,7 @@
 # Guida
 
+> Stato del ciclo 09/10/2026: versione tecnica `1.2.144` pubblicata. Purge automatico e restore riprendibile restano disabilitati; le limitazioni e le verifiche esterne ancora necessarie continuano a essere dichiarate nelle sezioni seguenti.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

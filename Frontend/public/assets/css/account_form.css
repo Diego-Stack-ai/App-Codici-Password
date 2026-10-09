@@ -868,6 +868,33 @@ input:checked+.base-switch::after {
     flex-wrap: nowrap;
 }
 
+.account-guest-main {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.account-guest-channels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.account-guest-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: var(--font-caption);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.account-guest-channel input {
+    accent-color: var(--accent);
+}
+
 .bank-toggle-row { flex: 1; cursor: pointer; }
 .bank-expand-icon, .card-entry-icon { transition: transform 0.2s ease; }
 .bank-expand-icon.is-collapsed, .card-entry-icon.is-collapsed { transform: rotate(-90deg); }

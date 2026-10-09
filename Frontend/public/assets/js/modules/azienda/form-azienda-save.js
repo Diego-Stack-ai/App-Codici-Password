@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.140';
+import { auth, db } from '../../firebase-config.js?v=1.2.145';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField
@@ -16,7 +16,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { inviteIdForGuest, logError, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
+import { accountModeFromFlags, isOwnerRecipientEmail, preferenceForRecipient, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
@@ -29,7 +29,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
  * Salva o aggiorna un account aziendale con crittografia e gestione condivisione.
  * @param {Object} ctx - Stato corrente del form
  */
-export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '', loadContext = null }) {
+export async function saveAccount({ bankAccounts, invitedEmails, invitePreferences = {}, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '', loadContext = null }) {
     if (!isAccountSaveAllowed(loadContext)) {
         showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
         return;
@@ -144,6 +144,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 if (!emailsToInvite.includes(e)) emailsToInvite.push(e);
             });
         }
+        emailsToInvite = emailsToInvite.filter(email => !isOwnerRecipientEmail(email, auth.currentUser?.email));
         if (emailsToInvite.length === 0) {
             showToast("Scegli o aggiungi almeno un contatto per condividere.", "warning");
             if (btnSave) btnSave.disabled = false;
@@ -241,7 +242,11 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 // Aggiungi Nuovi
                 for (const email of emailsToInvite) {
                     const sKey = sanitizeEmail(email);
+                    const notificationPreference = preferenceForRecipient(invitePreferences, email);
                     const existingGuest = finalData.sharedWith[sKey];
+                    if (existingGuest) {
+                        finalData.sharedWith[sKey] = {...existingGuest, ...notificationPreference};
+                    }
 
                     // FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito
                     // M7-R7C-1: anche una voce `suspended` (Account archiviato e
@@ -251,7 +256,8 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                         finalData.sharedWith[sKey] = {
                             email: email,
                             status: 'pending',
-                            uid: null
+                            uid: null,
+                            ...notificationPreference
                         };
 
                         // Crea Invito
@@ -270,8 +276,8 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                             recipientEmail: email.toLowerCase().trim(),
                             accountName: data.nomeAccount,
                             type: finalData.type,
-                            notifyPush: document.getElementById('invite-notify-push')?.checked === true,
-                            notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
+                            notifyPush: notificationPreference.notifyPush,
+                            notifyEmail: notificationPreference.notifyEmail,
                             status: 'pending',
                             cycle: sharingCycle,
                             createdAt: new Date().toISOString()

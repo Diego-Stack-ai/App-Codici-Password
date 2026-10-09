@@ -10,9 +10,6 @@ import {readFile} from 'node:fs/promises';
 // poter rimandare il messaggio di successo dopo una revoca già confermata.
 // La notifica all'ospite richiede un backend dedicato, non implementato.
 const files = {
-  'privato/dettaglio-privato-sharing.js': ['ownerId'],
-  'azienda/dettaglio-azienda-sharing.js': ['uid'],
-  'shared/detail-account-mode.js': [],
   'privato/form-privato-save.js': ['currentUid'],
   'azienda/form-azienda-save.js': ['currentUid']
 };
@@ -46,15 +43,22 @@ for (const [file, ownerVariables] of Object.entries(files)) {
   });
 }
 
+for (const file of ['privato/dettaglio-privato-sharing.js', 'azienda/dettaglio-azienda-sharing.js', 'shared/detail-account-mode.js']) {
+  test(`Frontend/public/assets/js/modules/${file}: il dettaglio non modifica condivisioni`, () => {
+    const source = readFileSync(new URL(`../Frontend/public/assets/js/modules/${file}`, import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /runTransaction|updateDoc|setDoc|deleteDoc|inviteIdForGuest|showConfirmModal|revokeRecipient/);
+  });
+}
+
 test('l\'helper rimosso non esiste più e nessun modulo lo importa', () => {
   assert.throws(() => readFileSync(new URL('../Frontend/public/assets/js/modules/shared/share-revocation-notice.js', import.meta.url), 'utf8'),
     /ENOENT/, 'il candidato di consegna non deve restare come codice morto');
 });
 
-// M7-R7C-1 — identità degli inviti per ciclo di condivisione: i tre scrittori
+// M7-R7C-1 — identità degli inviti per ciclo di condivisione: i due form writer
 // devono costruire l'ID con l'helper condiviso e dichiarare il ciclo, così un
 // reinvito dopo l'archiviazione non sovrascrive l'invito storico.
-const writers = ['shared/detail-account-mode.js', 'privato/form-privato-save.js', 'azienda/form-azienda-save.js'];
+const writers = ['privato/form-privato-save.js', 'azienda/form-azienda-save.js'];
 for (const file of writers) {
   test(`Frontend/public/assets/js/modules/${file}: gli inviti usano l'ID per ciclo`, () => {
     const source = readFileSync(new URL(`../Frontend/public/assets/js/modules/${file}`, import.meta.url), 'utf8');

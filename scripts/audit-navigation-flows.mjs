@@ -45,8 +45,14 @@ if (/\bauth\.currentUser\b/.test(privateSharing)) {
     assert.match(privateSharing, /import \{[^}]*\bauth\b[^}]*\} from ['"]\.\.\/\.\.\/firebase-config\.js/,
         'La condivisione privata usa auth senza importarlo');
 }
-assert.match(privateSharing, /delete sharedWith\[normalizedEmail\][\s\S]+sharedWithUids/,
-    'La revoca privata non rimuove l’ospite o non ricalcola gli UID accettati');
+assert.doesNotMatch(privateSharing, /runTransaction|updateDoc|deleteDoc|revokeRecipient/,
+    'Il dettaglio privato contiene ancora un secondo writer della condivisione');
+for (const [name, writer] of [['privato', privateAccountSave], ['aziendale', companyAccount]]) {
+    assert.match(writer, /transaction\.delete\(doc\(db, "invites", inviteIdForGuest\(/,
+        `Il form ${name} non revoca l’invito del destinatario rimosso`);
+    assert.match(writer, /finalData\.sharedWithUids = Object\.values\(finalData\.sharedWith\)/,
+        `Il form ${name} non ricalcola gli UID accettati`);
+}
 // Verify the actual renderer: ten per page AFTER dedup, all later pages reachable.
 // This replaces syntax-specific checks, not the bounded-render/window contracts.
 const reminderChecks = spawnSync(process.execPath, ['--test', ...['deadline-reminders.test.mjs', 'deadline-list-calendar.test.mjs'].map(name => fileURLToPath(new URL(`../tests/${name}`, import.meta.url)))], {encoding: 'utf8'});
