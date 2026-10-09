@@ -10,11 +10,11 @@ const COMPANY_ARGS = {bankAccounts: [], invitedEmails: [], isExplicitMemo: false
 const ZERO = {encrypt: 0, key: 0, tx: 0, replaced: 0, enqueued: 0, handoffs: 0};
 const readyContext = () => { const context = createAccountLoadContext({mode: 'edit'}); context.markLoaded(context.beginLoad()); return context; };
 const at = (text, needle) => { const index = text.indexOf(needle); assert.ok(index >= 0, `manca nel sorgente: ${needle}`); return index; };
-async function privateFixture({eligible = true, pilotEnabled = true} = {}) {
+async function privateFixture({eligible = true, pilotEnabled = true, mutateNoteDuringKey = false} = {}) {
     const source = strip(await readFile(new URL('../Frontend/public/assets/js/modules/privato/form-privato-save.js', import.meta.url), 'utf8'))
         .replace("await import('../data/private-account-offline-pilot.js')", 'pilotFixture');
     const counts = {encrypt: 0, key: 0, tx: 0, replaced: 0, enqueued: 0, handoffs: 0};
-    const messages = [], navigations = [];
+    const messages = [], navigations = [], encryptedValues = [];
     const button = {disabled: false, dataset: {}, setAttribute() {}};
     const nodes = {'btn-save-footer': button, 'account-name': {value: 'Fixture'}, 'account-username': {value: 'u'},
         'account-code': {value: 'a'}, 'account-password': {value: 'p'}, 'account-note': {value: 'n'}};
@@ -22,8 +22,12 @@ async function privateFixture({eligible = true, pilotEnabled = true} = {}) {
         document: {getElementById: id => nodes[id], querySelector: () => null},
         auth: {currentUser: {uid: 'owner'}}, db: {}, LOG: () => {}, logError: () => {},
         showToast: message => messages.push(message), hasInvalidCardExpiry: () => false,
-        ensureVaultKeyMaterial: async () => { counts.key += 1; return 'key'; },
-        encrypt: async value => { counts.encrypt += 1; return value ? 'cipher' : ''; },
+        ensureVaultKeyMaterial: async () => {
+            counts.key += 1;
+            if (mutateNoteDuringKey) nodes['account-note'].value = 'server-old';
+            return 'key';
+        },
+        encrypt: async value => { counts.encrypt += 1; encryptedValues.push(value); return value ? 'cipher' : ''; },
         accountModeFromFlags: () => 'account-private', validateAccountMode: () => ({}),
         recordFieldsFromAccountMode: () => ({type: 'account', visibility: 'private'}),
         classifyPrivateAccountOfflineWrite: () => ({eligible}),
@@ -40,7 +44,7 @@ async function privateFixture({eligible = true, pilotEnabled = true} = {}) {
     };
     vm.createContext(sandbox);
     vm.runInContext(source, sandbox);
-    return {counts, messages, navigations, button, sandbox};
+    return {counts, messages, navigations, encryptedValues, button, sandbox};
 }
 async function companyFixture() {
     const source = strip(await readFile(new URL('../Frontend/public/assets/js/modules/azienda/form-azienda-save.js', import.meta.url), 'utf8'));
@@ -101,6 +105,18 @@ test('privato: online senza opt-in M6 usa la transazione completa e non accoda',
     try { await ordinaryOnline.sandbox.savePrivateAccount({...PRIVATE_ARGS, loadContext: readyContext()}); } catch {}
     assert.equal(ordinaryOnline.counts.tx, 1);
     assert.equal(ordinaryOnline.counts.enqueued + ordinaryOnline.counts.replaced, 0);
+});
+test('privato: il salvataggio conserva i valori digitati se il DOM cambia durante lo sblocco Vault', async () => {
+    const stable = await privateFixture({eligible: false, pilotEnabled: false, mutateNoteDuringKey: true});
+    try {
+        await stable.sandbox.savePrivateAccount({
+            ...PRIVATE_ARGS,
+            capturedFormValues: {'account-name': 'Fixture', 'account-username': 'u', 'account-code': 'a', 'account-password': 'p', 'account-url': '', 'account-note': 'n', 'invite-email': ''},
+            loadContext: readyContext()
+        });
+    } catch {}
+    assert.equal(stable.encryptedValues[3], 'n');
+    assert.equal(stable.encryptedValues.includes('server-old'), false);
 });
 test('azienda: pendente, fallito, invalidato e assente zero scritture; pronto raggiunge la transazione', async () => {
     const pending = createAccountLoadContext({mode: 'edit'}); pending.beginLoad();
