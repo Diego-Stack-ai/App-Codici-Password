@@ -387,8 +387,8 @@ input:checked+.base-switch::after {
     overflow: hidden;
     border-radius: 9999px;
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 88px;
+    height: 88px;
     background: var(--surface-glass);
     border: 1px solid var(--border-color);
     display: flex;
@@ -411,6 +411,8 @@ input:checked+.base-switch::after {
     justify-content: center;
     height: 100%;
     width: 100%;
+    padding: 0.35rem;
+    box-sizing: border-box;
     opacity: 0.5;
 }
 
@@ -422,6 +424,8 @@ input:checked+.base-switch::after {
     font: var(--font-caption);
     text-transform: uppercase;
     font-weight: var(--font-label-weight);
+    line-height: 1.05;
+    text-align: center;
 }
 
 .btn-remove-logo {
