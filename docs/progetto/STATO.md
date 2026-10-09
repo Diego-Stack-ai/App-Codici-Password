@@ -1,5 +1,7 @@
 # Stato
 
+09/10/2026 — versione 1.2.144 pubblicata sul solo Firebase Hosting dal commit `8cd07f24`. Deploy completato su `https://appcodici-password.web.app`; verifica HTTP 200 con versione 1.2.144 nell’HTML e regole online a 12 px confermate per `.attachment-name` e `.attachment-title`. Verifica visiva completata sulla Home autenticata con richiesta corretta di sblocco Vault. Nessuna credenziale inserita; Functions, Rules e dati invariati.
+
 09/10/2026 — preparata la versione 1.2.144: uniformato a 12 px (`--font-badge`/`--fs-micro`) il nome degli allegati nelle viste Account condivise, nel dettaglio Account privato e negli allegati delle Scadenze; i metadati erano già a 12 px. Pubblicazione autorizzata sul solo Hosting; Functions, Rules e dati invariati.
 
 09/10/2026 — versione 1.2.143 pubblicata sul solo Firebase Hosting dal commit `a93066c9` (`codex/complete-m7-m8-m10`). Deploy completato su `https://appcodici-password.web.app`; controllo remoto con HTTP 200 e riferimento 1.2.143 presente sia in `login-v115.html` sia in `sw.js`, con HTML servito `no-store, must-revalidate, no-cache`. Verifica visiva eseguita sulla pagina di accesso e sul percorso `form_account_privato.html?type=memo`: il documento viene caricato e la sessione esistente mostra correttamente lo sblocco protetto del vault. Nessuna credenziale inserita e nessun dato reale modificato; Functions, Rules, indici e migrazioni non distribuiti.
