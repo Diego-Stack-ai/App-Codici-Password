@@ -5,7 +5,7 @@
 import { createElement, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { listDeadlines } from '../data/vault-repository.js';
-import { auth } from '../../firebase-config.js?v=1.2.142';
+import { auth } from '../../firebase-config.js?v=1.2.143';
 import { currentDiffDays, deadlineBucket, deadlinePresentation } from '../scadenze/deadline-model.js';
 
 let dashboardEpoch = 0;

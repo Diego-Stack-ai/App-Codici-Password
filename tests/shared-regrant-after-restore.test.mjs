@@ -20,6 +20,9 @@ const companySource = strip(await readFile(new URL('azienda/form-azienda-save.js
 const utilsSource = await readFile(new URL('../utils.js', modules), 'utf8');
 const {inviteIdForGuest, sanitizeEmail, sharingCycleOf} =
     await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
+const recipientSource = await readFile(new URL('shared/account-mode-model.js', modules), 'utf8');
+const {isOwnerRecipientEmail, preferenceForRecipient} =
+    await import('data:text/javascript;base64,' + Buffer.from(recipientSource).toString('base64'));
 
 const GUEST_KEY = 'guest_example_invalid';
 const OTHER_KEY = 'other_example_invalid';
@@ -60,7 +63,7 @@ async function fixture(accountState = restoredAccount(), company = false) {
         'flag-shared': {checked: true}, 'flag-memo': {checked: false}, 'flag-memo-shared': {checked: false}};
     const context = vm.createContext({
         auth: {currentUser: {uid: 'owner', email: 'owner@example.invalid'}}, db: {},
-        inviteIdForGuest, sanitizeEmail, sharingCycleOf, structuredClone,
+        inviteIdForGuest, sanitizeEmail, sharingCycleOf, isOwnerRecipientEmail, preferenceForRecipient, structuredClone,
         crypto: {randomUUID: newMarker},
         doc: (_db, ...path) => ({path: path.join('/'), id: path.at(-1)}),
         collection: (_db, ...path) => ({path: path.join('/'), id: path.at(-1)}),
@@ -94,12 +97,12 @@ async function fixture(accountState = restoredAccount(), company = false) {
     vm.runInContext(company ? companySource : source, context);
     return {writes,
         createdInvites: () => writes.filter(write => write[0].startsWith('invites/') && write[2] === 'set'),
-        save: invitedEmails => company ? context.saveAccount({
-            bankAccounts: [], invitedEmails, isExplicitMemo: false, currentUid: 'owner',
+        save: (invitedEmails, invitePreferences = {}) => company ? context.saveAccount({
+            bankAccounts: [], invitedEmails, invitePreferences, isExplicitMemo: false, currentUid: 'owner',
             currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: true,
             profileContactLinkDraft: null, baseRevision: 2, loadContext: createAccountLoadContext({mode: 'create'})
         }) : context.savePrivateAccount({
-            bankAccounts: [], invitedEmails, isExplicitMemo: false, currentUid: 'owner',
+            bankAccounts: [], invitedEmails, invitePreferences, isExplicitMemo: false, currentUid: 'owner',
             currentDocId: 'account-1', currentAziendaId: '', isEditing: true,
             profileContactLinkDraft: null, baseRevision: 2, loadContext: createAccountLoadContext({mode: 'create'})
         })};
@@ -132,6 +135,20 @@ test('salvataggio con l\'ospite riselezionato: nuovo invito del ciclo corrente e
     const account = f.writes.find(write => write[0] === ACCOUNT_PATH);
     assert.equal(account[1].sharedWithUids.length, 0, 'l\'accesso non torna prima dell\'accettazione');
     assert.equal(account[1].sharedWith[GUEST_KEY].status, 'pending');
+});
+
+test('le preferenze per destinatario sono salvate nel record e nel nuovo invito', async () => {
+    for (const company of [false, true]) {
+        const f = await fixture(restoredAccount(), company);
+        await f.save([GUEST_EMAIL], {[GUEST_EMAIL]: {notifyPush: false, notifyEmail: true}});
+        const [invite] = f.createdInvites();
+        assert.equal(invite[1].notifyPush, false);
+        assert.equal(invite[1].notifyEmail, true);
+        const accountPath = company ? COMPANY_PATH : ACCOUNT_PATH;
+        const account = f.writes.find(write => write[0] === accountPath);
+        assert.equal(account[1].sharedWith[GUEST_KEY].notifyPush, false);
+        assert.equal(account[1].sharedWith[GUEST_KEY].notifyEmail, true);
+    }
 });
 
 test('controprova dell\'invariante: una voce ancora accettata ricrea il grant al salvataggio', async () => {

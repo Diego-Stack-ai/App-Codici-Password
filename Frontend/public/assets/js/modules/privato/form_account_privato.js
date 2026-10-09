@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.142';
+import {auth} from '../../firebase-config.js?v=1.2.143';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -16,9 +16,9 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
-import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.142';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.142';
+import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, validateAccountMode } from '../shared/account-mode-model.js';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.143';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.143';
 async function savePrivateAccount(...args) {
     let module;
     try { module = await import('./form-privato-save.js'); }
@@ -44,6 +44,8 @@ let profileContactLinkDraft = null;
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
+let recipientPreferences = new Map();
+let ownerEmail = '';
 let currentRevision = 0;
 let loadContext = null;
 globalThis.addEventListener?.('vault-session-locked', () => loadContext?.invalidate());
@@ -168,6 +170,9 @@ export async function initFormAccountPrivato(user) {
     
     if (!user) return;
     currentUid = user.uid;
+    ownerEmail = normalizeRecipientEmail(user.email || auth.currentUser?.email);
+    invitedEmails = [];
+    recipientPreferences = new Map();
     const version = ++formVersion;
     const active = () => version === formVersion && auth.currentUser?.uid === user.uid;
     recoveryOperation = null;
@@ -249,6 +254,7 @@ export async function initFormAccountPrivato(user) {
                 await savePrivateAccount({
                     bankAccounts,
                     invitedEmails,
+                    invitePreferences: serializeRecipientPreferences(recipientPreferences, invitedEmails),
                     isExplicitMemo,
                     currentUid: saveUid,
                     currentDocId: saveDocId,
@@ -537,12 +543,15 @@ async function loadData() {
             const mgmt = document.getElementById('shared-management');
             if (mgmt) mgmt.classList.remove('hidden');
             if (data.sharedWith) {
-                invitedEmails = Object.values(data.sharedWith)
+                const activeGuests = Object.values(data.sharedWith)
                     .filter(guest => guest?.status !== 'suspended' && guest?.status !== 'rejected')
-                    .map(g => g.email);
+                    .filter(guest => !isOwnerRecipientEmail(guest?.email, ownerEmail));
+                invitedEmails = activeGuests.map(g => normalizeRecipientEmail(g.email));
+                recipientPreferences = recipientPreferencesFromSharedWith(activeGuests);
             } else {
                 const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
-                invitedEmails = [...emails];
+                invitedEmails = emails.map(normalizeRecipientEmail).filter(email => email && !isOwnerRecipientEmail(email, ownerEmail));
+                recipientPreferences = new Map(invitedEmails.map(email => [email, preferenceForRecipient(null, email)]));
             }
             renderGuestsList();
         }
@@ -565,7 +574,7 @@ async function loadData() {
 
 async function loadRubrica() {
     try {
-        myContacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
+        myContacts = filterRecipientContacts(await listContacts(currentUid), {ownerUid: currentUid, ownerEmail});
     } catch (e) { logError("LoadRubrica", e); }
 }
 
@@ -643,6 +652,7 @@ function setupUI() {
                     if (inviteInput) inviteInput.value = '';
                     if (suggestions) suggestions.classList.add('hidden');
                     invitedEmails = [];
+                    recipientPreferences.clear();
                     renderGuestsList();
                 }
             }
@@ -726,8 +736,11 @@ function setupUI() {
             if (emails.length > 0) {
                 let added = false;
                 emails.forEach(email => {
-                    if (!invitedEmails.includes(email)) {
-                        invitedEmails.push(email);
+                    const normalized = normalizeRecipientEmail(email);
+                    if (isOwnerRecipientEmail(normalized, ownerEmail)) return;
+                    if (!invitedEmails.includes(normalized)) {
+                        invitedEmails.push(normalized);
+                        recipientPreferences.set(normalized, preferenceForRecipient(null, normalized));
                         added = true;
                     }
                 });
@@ -773,19 +786,32 @@ function renderGuestsList() {
     clearElement(list);
 
     invitedEmails.forEach((email, idx) => {
+        const preference = preferenceForRecipient(recipientPreferences, email);
+        const push = createElement('input', {
+            type: 'checkbox', checked: preference.notifyPush,
+            onchange: event => recipientPreferences.set(email, {...preferenceForRecipient(recipientPreferences, email), notifyPush: event.target.checked})
+        });
+        const notifyEmail = createElement('input', {
+            type: 'checkbox', checked: preference.notifyEmail,
+            onchange: event => recipientPreferences.set(email, {...preferenceForRecipient(recipientPreferences, email), notifyEmail: event.target.checked})
+        });
         const item = createElement('div', {
             className: 'guest-item account-guest-item'
         }, [
-            createElement('span', {
-                className: 'account-guest-email',
-                textContent: email
-            }),
+            createElement('div', {className: 'account-guest-main'}, [
+                createElement('span', {className: 'account-guest-email', textContent: email}),
+                createElement('div', {className: 'account-guest-channels'}, [
+                    createElement('label', {className: 'account-guest-channel'}, [push, createElement('span', {textContent: 'Push'})]),
+                    createElement('label', {className: 'account-guest-channel'}, [notifyEmail, createElement('span', {textContent: 'Email'})])
+                ])
+            ]),
             createElement('button', {
                 type: 'button',
                 className: 'material-symbols-outlined account-guest-remove',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
+                    recipientPreferences.delete(email);
                     renderGuestsList();
                 }
             })
@@ -810,8 +836,9 @@ function renderSuggestions(list) {
             className: 'suggestion-item',
             onclick: () => {
                 const email = c.email.toLowerCase();
-                if (!invitedEmails.includes(email)) {
+                if (!isOwnerRecipientEmail(email, ownerEmail) && !invitedEmails.includes(email)) {
                     invitedEmails.push(email);
+                    recipientPreferences.set(email, preferenceForRecipient(null, email));
                     renderGuestsList();
                 }
                 const input = document.getElementById('invite-email');

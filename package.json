@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.142",
+  "version": "1.2.143",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -78,7 +78,7 @@
     "test:restore-retry-emulators": "node scripts/run-restore-retry-emulators.mjs",
     "test:restore-stale-emulators": "node scripts/run-restore-stale-emulators.mjs",
     "test:restore-collisions-emulators": "node scripts/run-restore-collisions-emulators.mjs",
-    "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/record-sharing-crypto-runtime.test.mjs tests/shared-attachment-access.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs tests/sharing-two-device.test.mjs tests/shared-regrant-after-restore.test.mjs tests/guest-invite-suspension.test.mjs tests/detail-sharing-revocation-cycle.test.mjs tests/detail-account-mode-reinvite.test.mjs",
+    "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/record-sharing-crypto-runtime.test.mjs tests/shared-attachment-access.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs tests/sharing-two-device.test.mjs tests/shared-regrant-after-restore.test.mjs tests/guest-invite-suspension.test.mjs tests/detail-sharing-revocation-cycle.test.mjs tests/detail-account-mode-reinvite.test.mjs tests/account-sharing-recipient-preferences.test.mjs",
     "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs tests/offline-mutation-lease.test.mjs tests/pilot-lease-worker.test.mjs tests/mixed-current.test.mjs tests/private-account-offline-policy.test.mjs tests/private-account-offline-pilot.test.mjs tests/private-account-offline-coordinator.test.mjs tests/private-account-recovery.test.mjs tests/private-form-lazy-banking.test.mjs",
     "test:offline-no-locks": "node experiments/offline-sync/run-emulated-browsers.mjs --no-locks",
     "test:offline-runtime-lease": "node experiments/offline-sync/run-emulated-browsers.mjs --runtime-lease",

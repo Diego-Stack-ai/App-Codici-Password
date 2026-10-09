@@ -37,3 +37,42 @@ export function validateAccountMode(mode, account = {}) {
     if (mode.startsWith('account-') && !hasCredentials) return { valid: false, reason: 'account-without-credentials' };
     return { valid: true, reason: null };
 }
+
+export const normalizeRecipientEmail = email => String(email || '').trim().toLowerCase();
+
+export function normalizeRecipientPreference(value = {}) {
+    return {notifyPush: value?.notifyPush !== false, notifyEmail: value?.notifyEmail === true};
+}
+
+export function recipientPreferencesFromSharedWith(sharedWith = {}) {
+    const guests = Array.isArray(sharedWith) ? sharedWith : Object.values(sharedWith || {});
+    return new Map(guests
+        .filter(guest => guest?.status !== 'suspended' && guest?.status !== 'rejected')
+        .map(guest => [normalizeRecipientEmail(guest?.email), normalizeRecipientPreference(guest)])
+        .filter(([email]) => email));
+}
+
+export function preferenceForRecipient(preferences, email) {
+    const normalized = normalizeRecipientEmail(email);
+    const value = preferences instanceof Map ? preferences.get(normalized) : preferences?.[normalized];
+    return normalizeRecipientPreference(value);
+}
+
+export function serializeRecipientPreferences(preferences, emails = []) {
+    return Object.fromEntries(emails.map(email => {
+        const normalized = normalizeRecipientEmail(email);
+        return [normalized, preferenceForRecipient(preferences, normalized)];
+    }).filter(([email]) => email));
+}
+
+export function filterRecipientContacts(contacts = [], {ownerUid = '', ownerEmail = ''} = {}) {
+    const normalizedOwnerEmail = normalizeRecipientEmail(ownerEmail);
+    return contacts.filter(contact => contact?.active !== false)
+        .filter(contact => contact?.uid !== ownerUid && contact?.id !== ownerUid)
+        .filter(contact => normalizeRecipientEmail(contact?.email) !== normalizedOwnerEmail);
+}
+
+export function isOwnerRecipientEmail(email, ownerEmail = '') {
+    const normalized = normalizeRecipientEmail(email);
+    return Boolean(normalized && normalized === normalizeRecipientEmail(ownerEmail));
+}

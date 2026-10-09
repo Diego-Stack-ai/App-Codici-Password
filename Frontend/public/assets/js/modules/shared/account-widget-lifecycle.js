@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.142';
+import {auth} from '../../firebase-config.js?v=1.2.143';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, clearElement} from '../../dom-utils.js';
 

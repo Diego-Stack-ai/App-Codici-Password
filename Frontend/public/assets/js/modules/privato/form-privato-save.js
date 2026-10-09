@@ -1,13 +1,13 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.142';
+import { auth, db } from '../../firebase-config.js?v=1.2.143';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { inviteIdForGuest, sanitizeEmail, sharingCycleOf } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
+import { accountModeFromFlags, isOwnerRecipientEmail, preferenceForRecipient, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from './profile-model.js';
@@ -17,6 +17,7 @@ import { DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, isAccountSaveAllowed
 export async function savePrivateAccount({
     bankAccounts,
     invitedEmails,
+    invitePreferences = {},
     isExplicitMemo,
     currentUid,
     currentDocId,
@@ -132,6 +133,19 @@ export async function savePrivateAccount({
         hasProfileLink: Boolean(profileContactLinkDraft || hasLinkedProfileField)
     });
 
+    // La coda M6 conserva modifiche di record che possiedono già una revisione
+    // server. Una nuova creazione non ha ancora una base confermata da
+    // riconciliare: presentarla come salvata offline produce un record fantasma
+    // se il callable viene respinto o la risposta si perde.
+    if (!isEditing && !navigator.onLine) {
+        await showAlertModal(
+            'CONNESSIONE NECESSARIA',
+            'Per creare un nuovo Account o Memorandum devi essere online. Il modulo resta aperto e i dati non sono stati indicati come salvati.'
+        );
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
+
     if (!navigator.onLine && !offlinePolicy.eligible) {
         const onlineReasons = {
             'shared-memo': 'Questo memorandum è condiviso con altri utenti.',
@@ -163,6 +177,7 @@ export async function savePrivateAccount({
                 if (!emailsToInvite.includes(e)) emailsToInvite.push(e);
             });
         }
+        emailsToInvite = emailsToInvite.filter(email => !isOwnerRecipientEmail(email, auth.currentUser?.email));
         if (emailsToInvite.length === 0) {
             showToast("Scegli o aggiungi almeno un contatto per condividere.", "warning");
             if (btnSave) btnSave.disabled = false;
@@ -179,7 +194,7 @@ export async function savePrivateAccount({
         if (recoveryOperation && (!pilotEligible || recoveryOperation.uid !== currentUid || recoveryOperation.recordId !== currentDocId)) {
             throw new Error('RECOVERY_ACCOUNT_SCOPE_CHANGED');
         }
-        if (pilotEligible) {
+        if (pilotEligible && isEditing) {
             const pilotModule = await import('../data/private-account-offline-pilot.js');
             const accountRef = isEditing
                 ? doc(db, "users", currentUid, "accounts", currentDocId)
@@ -239,11 +254,7 @@ export async function savePrivateAccount({
             showToast(t('success_save'), "success");
             setTimeout(() => {
                 if (!isActive()) return;
-                const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
-                    ? `form_account_privato.html?id=${accountRef.id}&linkShared=1#shared-credentials-section`
-                    : isEditing
-                    ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`
-                    : 'account_privati.html?afterWrite=1';
+                const destination = `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`;
                 window.location.replace(destination);
             }, 1000);
             return;
@@ -334,8 +345,12 @@ export async function savePrivateAccount({
                 // Aggiungi Nuovi
                 for (const email of emailsToInvite) {
                     const sKey = sanitizeEmail(email);
+                    const notificationPreference = preferenceForRecipient(invitePreferences, email);
 
                     const existingGuest = finalData.sharedWith[sKey];
+                    if (existingGuest) {
+                        finalData.sharedWith[sKey] = {...existingGuest, ...notificationPreference};
+                    }
 
                     // --- FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito ---
                     // M7-R7C-1: anche una voce `suspended` (Account archiviato e
@@ -346,7 +361,8 @@ export async function savePrivateAccount({
                         finalData.sharedWith[sKey] = {
                             email: email,
                             status: 'pending',
-                            uid: null
+                            uid: null,
+                            ...notificationPreference
                         };
 
                         // Crea Invito
@@ -364,8 +380,8 @@ export async function savePrivateAccount({
                             recipientEmail: email.toLowerCase().trim(),
                             accountName: data.nomeAccount,
                             type: data.type,
-                            notifyPush: document.getElementById('invite-notify-push')?.checked === true,
-                            notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
+                            notifyPush: notificationPreference.notifyPush,
+                            notifyEmail: notificationPreference.notifyEmail,
                             status: 'pending',
                             cycle: sharingCycle,
                             createdAt: new Date().toISOString()
@@ -428,7 +444,7 @@ export async function savePrivateAccount({
                 ? `form_account_privato.html?id=${savedAccountId}&linkShared=1#shared-credentials-section`
                 : isEditing
                 ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`
-                : 'account_privati.html';
+                : `account_privati.html?type=${mode === 'memo-private' ? 'memo' : mode === 'memo-shared' ? 'shared_memo' : mode === 'account-shared' ? 'shared' : 'standard'}&afterWrite=1`;
             window.location.replace(destination);
         }, 1000);
 
