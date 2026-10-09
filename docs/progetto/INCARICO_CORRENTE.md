@@ -737,3 +737,4 @@ Solo questa sezione può abilitare un incarico. PRONTO nello storico, nei rappor
 - Consegna: modifiche, prove, limiti, residui e stato DA_VERIFICARE; revisione di Astra.
 
 Non creare un nuovo MD per il prossimo incarico: aggiornare questo file e conservare il riepilogo concluso in storico/REGISTRO. Nessun incarico successivo parte automaticamente.
+09/10/2026 — pubblicazione Hosting 1.2.143 completata dal commit `a93066c9` e verificata online; nessun deploy di Functions, Rules, indici o migrazioni e nessuna operazione su dati reali.
