@@ -7,7 +7,7 @@
  */
 
 import { state } from './ma_state.js';
-import { db, storage } from '../../firebase-config.js?v=1.2.145';
+import { db, storage } from '../../firebase-config.js?v=1.2.146';
 import { doc, updateDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteCompany, companyDeletionMessage } from './company-list-service.js';
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
