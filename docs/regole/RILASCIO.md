@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.150 — 09/10/2026
+
+PR #90 unita in `master` (`326b83a3`) e Firebase Hosting pubblicato con successo. Il gate funzionale aggiuntivo ha eseguito due salvataggi consecutivi sullo stesso Account sintetico e due riletture server-confirmed riuscite. Il rilascio riguarda il caricamento versionato del modulo lazy e la stabilità dei valori catturati; Functions, Rules e migrazioni dati restano invariati.
+
 ## Esito operativo 1.2.144 — 09/10/2026
 
 Il ciclo di rilascio corrente è chiuso: deploy completo riuscito sul progetto originale e verifica HTTP post-rilascio positiva. I gate esterni non eseguiti restano requisiti per una futura dichiarazione di maturità/certificazione, ma non mantengono aperto questo incarico. Le funzionalità non dimostrate rimangono disabilitate.

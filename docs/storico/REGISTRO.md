@@ -1,5 +1,9 @@
 # Registro
 
+## 09/10/2026 — merge PR #90, deploy e verifica salvataggio 1.2.150
+
+Unita la PR #90 in `master` (`326b83a3`) dopo i check GitHub verdi; deploy Firebase Hosting riuscito e versione `1.2.150` osservata. Il rilascio versiona anche l'import lazy del controller di salvataggio privato. Sul record sintetico di collaudo due note diverse sono state salvate consecutivamente e rilette dal server nel dettaglio. Rafforzata la regressione locale: il mock ora esegue la transazione anziché arrestarsi prima del callback e controlla i due payload distinti. Nessuna modifica a Functions, Rules o dati reali.
+
 ## 09/10/2026 — pubblicazione e verifica M8 1.2.145
 
 Deploy del solo Hosting riuscito. Lo stesso backup cifrato sintetico prima respinto è stato autenticato dall'utente e ha prodotto anteprima integra: 0 mancanti, 0 modificati, 1 profilo invariato. Nessun ripristino applicato; Functions, Rules e dati invariati. Il risultato dimostra nel percorso pubblicato l'esclusione di `settings/security` dal piano server, non l'abilitazione del motore riprendibile M8.

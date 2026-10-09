@@ -1,5 +1,9 @@
 # Collaudi
 
+## Account privato — doppio salvataggio pubblicato 1.2.150 — 09/10/2026
+
+Prerequisiti osservati: record sintetico `TEST v147 - Account privato`, URL senza `m6pilot`, Vault già sbloccata e Hosting `1.2.150`. Primo ciclo: nota impostata a `TEST persistenza 1.2.150 - diagnosi B`, salvataggio, navigazione `afterWrite=1` e rilettura confermata nel dettaglio. Secondo ciclo immediato sullo stesso record: nota `diagnosi C`, nuovo salvataggio e nuova rilettura confermata. Il DOM ha mostrato il valore nuovo in entrambi i cicli; nessun recupero offline o conflitto è comparso. Il test `account-save-context-blocks-writes.test.mjs` esegue inoltre il callback transazionale e verifica due aggiornamenti consecutivi con note cifrate differenti.
+
 ## M8 — collaudo pubblicato 1.2.145 concluso — 09/10/2026
 
 Deploy del solo Firebase Hosting riuscito (263 file); Functions, Rules e dati invariati. Nella sessione sintetica isolata la Vault è stata sbloccata dall'utente, lo stesso backup cifrato è stato caricato e la Recovery Key inserita direttamente dall'utente. Tre evidenze concordano: DOM con `Il backup è integro`, schermata dell'anteprima e contenuto copiabile `Mancanti: 0; modificati: 0; invariati: 1`. Il solo profilo è invariato e non selezionabile; nessun ripristino è stato applicato. L'errore server precedente non ricorre: `settings/security` è stato autenticato/contato ma escluso dal piano prima della callable, conservando la sicurezza corrente.
