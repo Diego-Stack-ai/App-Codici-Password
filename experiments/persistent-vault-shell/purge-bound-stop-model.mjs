@@ -1,7 +1,7 @@
 // Internal pure composition only: caller must persist transitions atomically.
 // Tokens identify state; they do not authenticate an executor or cancel I/O.
 import {enterExclusivePurge} from './purge-fence-model.mjs';
-import {beginPurgeEffect, requestPurgeStop, recordPurgeEffectOutcome, purgeStopSummary} from './purge-stop-model.mjs';
+import {beginPurgeEffect, retryPurgeEffect, requestPurgeStop, recordPurgeEffectOutcome, purgeStopSummary} from './purge-stop-model.mjs';
 const fail = () => { throw new Error('PURGE_BOUND_CONFLICT'); };
 export function claimBoundPurge(prepared, expected) {
   const fence = enterExclusivePurge(prepared, expected);
@@ -25,6 +25,7 @@ export function transitionBoundPurge(state, expected, action) {
   switch (action?.type) {
     case 'stop': stop = requestPurgeStop(state.stop); break;
     case 'begin': stop = beginPurgeEffect(state.stop, action.effectId); break;
+    case 'retry': stop = retryPurgeEffect(state.stop, action.effectId); break;
     case 'outcome': stop = recordPurgeEffectOutcome(state.stop, action.effectId, action.outcome); break;
     default: fail();
   }

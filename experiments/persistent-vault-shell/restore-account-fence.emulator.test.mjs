@@ -355,6 +355,58 @@ test('embedded widget restore fences both parents and rejects missing parent or 
   }finally{await store.terminate();await deleteApp(app);}
 });
 
+test('shared restore group commits atomically and rejects collision, stale CAS and broken reciprocity', {
+  skip:process.env.FIRESTORE_EMULATOR_HOST!=='127.0.0.1:8085',timeout:60000
+},async()=>{
+  const projectId='demo-vault-shell',app=initializeApp({projectId},randomUUID()),store=getFirestore(app);
+  try {
+    for(const scenario of ['applied','collision','stale','broken']) {
+      const uid=`synthetic-${randomUUID()}`,accountPath=`users/${uid}/accounts/a`;
+      const records=[
+        {scope:'private-account',id:'a',data:{synthetic:'account'}},
+        {scope:'shared-vault-data',id:'s',data:{title:'Synthetic'}},
+        {scope:'shared-vault-data-link',id:'l',sharedDataId:'s',data:{sharedDataId:'s',widgetId:'w',context:'private',accountId:'a'}},
+        {scope:'private-account-widget',id:'w',accountId:'a',data:{kind:'shared-reference',sharedDataId:'s',linkId:'l',context:'private',accountId:'a'}}
+      ];
+      if(scenario==='broken')records[2].data.widgetId='other';
+      const paths=[accountPath,`users/${uid}/sharedVaultData/s`,`users/${uid}/sharedVaultLinks/l`,`users/${uid}/accountWidgets/w`];
+      if(scenario==='collision')await store.doc(`labCandidateRecords/${uid}/items/${hash(paths[1])}`).create({title:'Current'});
+      const commands=[{expectedOwnerUid:uid,operationId:'shared',backupId:'backup',chunkIndex:0,chunkCount:1,mode:'apply',
+        confirmation:'RESTORE_VALIDATED',records:records.map(record=>({...record,expectedVersion:{exists:false}}))}];
+      const stages=[{restoreOperationId:'restore',stageIds:[]}],options={store,projectId,now:()=>1000};
+      if(scenario==='broken') {
+        await assert.rejects(createResumePlanLab(options).create(uid,commands,stages),/SCOPE_FENCE_NOT_CONNECTED/);
+        assert.equal((await store.collection(`labRestoreResumePlans/${uid}/items`).get()).size,0);
+        continue;
+      }
+      const plan=await createResumePlanLab(options).create(uid,commands,stages).catch(error=>{
+        if(scenario==='collision'&&/NEW_PREVIEW_REQUIRED/.test(error.message))return null;throw error;
+      });
+      if(scenario==='collision') {
+        assert.equal(plan,null);
+        assert.equal((await store.collection(`labRestoreChunkReceipts/${uid}/items`).get()).size,0);
+        continue;
+      }
+      if(scenario==='stale')await store.doc(`labCandidateRecords/${uid}/items/${hash(paths[1])}`).create({title:'Concurrent'});
+      await store.doc(`labPurgeStates/${hash(accountPath)}`).create({fence:{phase:'prepared',revision:2,operationId:'purge'}});
+      const writer=createRestoreChunkLab({...options,beforeChunkWrite:createRestoreAccountFenceLab(store)});
+      const result=await writer.commitPlan(uid,plan.planId,commands,stages);
+      if(scenario==='stale') {
+        assert.equal(result.status,'stopped');assert.equal(result.results[0].status,'stale-preview');
+        assert.equal((await store.collection(`labRestoreChunkReceipts/${uid}/items`).get()).size,0);
+        for(const path of paths.filter(path=>!path.endsWith('/sharedVaultData/s')))
+          assert.equal((await store.doc(`labCandidateRecords/${uid}/items/${hash(path)}`).get()).exists,false);
+      } else {
+        assert.equal(result.status,'completed');
+        for(const path of paths)assert.equal((await store.doc(`labCandidateRecords/${uid}/items/${hash(path)}`).get()).exists,true);
+        assert.equal((await store.collection(`labRestoreChunkReceipts/${uid}/items`).get()).size,1);
+        assert.deepEqual((await store.doc(`labPurgeStates/${hash(accountPath)}`).get()).data(),
+          {fence:{phase:'idle',revision:3,operationId:null}});
+      }
+    }
+  }finally{await store.terminate();await deleteApp(app);}
+});
+
 test('restore Account chunk and purge claim share one atomic boundary', {
   skip: process.env.FIRESTORE_EMULATOR_HOST !== '127.0.0.1:8085', timeout: 60000
 }, async () => {

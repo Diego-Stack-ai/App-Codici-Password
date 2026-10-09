@@ -65,6 +65,31 @@ test('creation rejects missing or ambiguous widget banks for selected and existi
   }
 });
 
+test('plan lab accepts only a complete reciprocal shared group in one chunk',async()=>{
+  const {createResumePlanLab}=await import('./restore-resume-plan-lab.mjs');
+  const previous=process.env.FIRESTORE_EMULATOR_HOST;process.env.FIRESTORE_EMULATOR_HOST='127.0.0.1:8085';
+  try {
+    let writes=0;
+    const store={projectId:'demo-vault-shell',doc:path=>({path}),runTransaction:fn=>fn({
+      get:async()=>({exists:false}),create:()=>{writes++;}})};
+    const records=[
+      {scope:'private-account',id:'a',data:{synthetic:true}},
+      {scope:'shared-vault-data',id:'s',data:{title:'Synthetic'}},
+      {scope:'shared-vault-data-link',id:'l',sharedDataId:'s',data:{sharedDataId:'s',widgetId:'w',context:'private',accountId:'a'}},
+      {scope:'private-account-widget',id:'w',accountId:'a',data:{kind:'shared-reference',sharedDataId:'s',linkId:'l',context:'private',accountId:'a'}}
+    ];
+    const preview=input();preview[0].mode='preview';delete preview[0].confirmation;preview[0].records=structuredClone(records);
+    const lab=createResumePlanLab({store,projectId:store.projectId,now:()=>1000});
+    assert.equal((await lab.preview('synthetic',preview)).chunks[0].entries.length,4);assert.equal(writes,0);
+    const apply=input();apply[0].records=records.map(record=>({...record,expectedVersion:{exists:false}}));
+    await lab.create('synthetic',apply,[{restoreOperationId:'restore',stageIds:[]}]);assert.equal(writes,1);
+    for(const mutate of [items=>items.pop(),items=>{items[2].data.widgetId='other';}]) {
+      const invalid=structuredClone(preview);mutate(invalid[0].records);
+      await assert.rejects(lab.preview('synthetic',invalid),/SCOPE_FENCE_NOT_CONNECTED/);assert.equal(writes,1);
+    }
+  }finally{if(previous===undefined)delete process.env.FIRESTORE_EMULATOR_HOST;else process.env.FIRESTORE_EMULATOR_HOST=previous;}
+});
+
 test('preview rejects unsupported precision before any database access or attachment staging',async()=>{
   const {createResumePlanLab}=await import('./restore-resume-plan-lab.mjs');
   const previous=process.env.FIRESTORE_EMULATOR_HOST;let reads=0;

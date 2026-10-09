@@ -604,7 +604,6 @@ exports.recoverMfaWithCode = onCall(
     async (request) => {
         const email = String(request.data?.email || "").trim().toLowerCase();
         const password = String(request.data?.password || "");
-        const codeHash = recoveryCodeHash(request.data?.recoveryCode);
         if (!email || !password || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
             throw new HttpsError("invalid-argument", "Dati di recupero non validi.");
         }
@@ -656,67 +655,12 @@ exports.recoverMfaWithCode = onCall(
         }
         const enrolledFactors = Array.isArray(user.multiFactor?.enrolledFactors)
             ? user.multiFactor.enrolledFactors : [];
-        const hasTotp = enrolledFactors.some((factor) => factor?.factorId === "totp");
-        const hasUnsupportedFactor = enrolledFactors.some((factor) => factor?.factorId !== "totp");
-        const recoveryRef = db.collection("mfaRecovery").doc(user.uid);
-        const recoveryResumeNow = Date.now();
-        const recoveryResumeExpiresAt = recoveryResumeNow + (15 * 60 * 1000);
-        await db.runTransaction(async (transaction) => {
-            const recovery = await transaction.get(recoveryRef);
-            const recoveryData = recovery.exists ? recovery.data() : null;
-            const hashes = Array.isArray(recoveryData?.codeHashes) ? recoveryData.codeHashes : [];
-            const pendingHash = recoveryData?.recoveryPendingCodeHash || null;
-            const pendingExpiresAt = recoveryData?.recoveryPendingExpiresAt;
-            const pendingForCode = pendingHash === codeHash;
-            const pendingActive = pendingForCode &&
-                Number.isSafeInteger(pendingExpiresAt) &&
-                pendingExpiresAt >= recoveryResumeNow &&
-                pendingExpiresAt <= recoveryResumeExpiresAt;
-            if (hasUnsupportedFactor) {
-                throw new HttpsError("failed-precondition", "Recupero selettivo non disponibile per questa configurazione MFA. Nessun codice consumato.");
-            }
-            if (!hashes.includes(codeHash) || (pendingHash && pendingHash !== codeHash)) {
-                throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
-            }
-            if (pendingForCode && !pendingActive) {
-                throw new HttpsError("failed-precondition", "La finestra di ripresa del recupero MFA è scaduta. Nessun codice consumato.");
-            }
-            if (!hasTotp && !pendingForCode) {
-                throw new HttpsError("failed-precondition", "Recupero MFA non riconciliabile. Nessun codice consumato.");
-            }
-            transaction.set(recoveryRef, {
-                recoveryPendingCodeHash: codeHash,
-                ...(pendingActive ? {} : {recoveryPendingAt: admin.firestore.FieldValue.serverTimestamp()}),
-                recoveryPendingExpiresAt: pendingActive ? pendingExpiresAt : recoveryResumeExpiresAt,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        });
-
-        // Auth e Firestore non condividono una transazione. Il codice resta
-        // disponibile ma prenotato finché Auth non ha concluso, così un errore
-        // o una risposta persa può essere ripreso senza consumarlo due volte.
-        if (hasTotp) await admin.auth().updateUser(user.uid, { multiFactor: { enrolledFactors: null } });
-        await admin.auth().revokeRefreshTokens(user.uid);
-        await db.runTransaction(async (transaction) => {
-            const recovery = await transaction.get(recoveryRef);
-            const data = recovery.exists ? recovery.data() : null;
-            const hashes = Array.isArray(data?.codeHashes) ? data.codeHashes : [];
-            if (data?.recoveryPendingCodeHash !== codeHash || !hashes.includes(codeHash)) {
-                throw new HttpsError("failed-precondition", "Recupero non riconciliabile. Nessun altro codice è stato consumato.");
-            }
-            const remainingHashes = hashes.filter((hash) => hash !== codeHash);
-            transaction.set(recoveryRef, {
-                codeHashes: remainingHashes,
-                remaining: remainingHashes.length,
-                recoveredAt: admin.firestore.FieldValue.serverTimestamp(),
-                recoveryPendingCodeHash: admin.firestore.FieldValue.delete(),
-                recoveryPendingAt: admin.firestore.FieldValue.delete(),
-                recoveryPendingExpiresAt: admin.firestore.FieldValue.delete(),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        });
-        await attemptRef.delete();
-        return { ok: true };
+        if (enrolledFactors.length === 0) {
+            throw new HttpsError("failed-precondition",
+                "Nessun secondo fattore attivo da recuperare. Nessun codice è stato consumato.");
+        }
+        throw new HttpsError("failed-precondition",
+            "Recupero MFA automatico non disponibile. Contatta l'assistenza: nessun codice è stato consumato.");
     }
 );
 

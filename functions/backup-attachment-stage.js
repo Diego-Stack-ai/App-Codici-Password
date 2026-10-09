@@ -132,5 +132,20 @@ function generationFile(bucket, path, generation) {
   return file;
 }
 
+async function deleteStageGeneration(bucket, identity, generation) {
+  if (!identity || typeof identity.storagePath !== 'string' ||
+      typeof generation !== 'string' || !/^[1-9][0-9]*$/.test(generation)) fail('BACKUP_STAGE_UNVERIFIED');
+  const file = bucket.file(identity.storagePath, {generation});
+  if ('generation' in file && String(file.generation) !== generation) fail('BACKUP_STAGE_GENERATION_UNSUPPORTED');
+  if (typeof file.delete !== 'function') fail('BACKUP_STAGE_GENERATION_UNSUPPORTED');
+  try {
+    await file.delete({preconditionOpts: {ifGenerationMatch: generation}});
+    return {deleted: true, missing: false, generation};
+  } catch (error) {
+    if (Number(error?.code) === 404) return {deleted: false, missing: true, generation};
+    throw error;
+  }
+}
+
 module.exports = {MAX_BYTES, STAGE_TTL_MS, stageIdentity, stageRef, verifyStageDescriptor, generationFile,
-  prepareStage, verifyStageBytes, uploadStage};
+  deleteStageGeneration, prepareStage, verifyStageBytes, uploadStage};

@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {createHash} = require('node:crypto');
-const {stageIdentity, prepareStage, verifyStageBytes, uploadStage, STAGE_TTL_MS, MAX_BYTES} = require('../backup-attachment-stage');
+const {stageIdentity, prepareStage, verifyStageBytes, uploadStage, deleteStageGeneration, STAGE_TTL_MS, MAX_BYTES} = require('../backup-attachment-stage');
 const bytes = Buffer.from('synthetic-ciphertext');
 const input = {expectedOwnerUid: 'owner', operationId: 'restore-1', storagePath: 'users/owner/accounts/a/file',
   sha256: createHash('sha256').update(bytes).digest('hex'), size: bytes.length};
@@ -24,6 +24,21 @@ test('installed SDK preserves large generation in media request without network'
   assert.equal(captured.qs.alt, 'media');
   assert.throws(() => generationFile({file: () => ({generation: 9007199254740992})}, 'synthetic', '9007199254740993'), /GENERATION_UNSUPPORTED/);
   assert.equal(generationFile(bucket, 'synthetic', '123').generation, 123);
+});
+
+test('cleanup deletion pins the generation and its precondition', async () => {
+  const identity = stageIdentity('owner', input), calls = [];
+  const bucket = {file(path, options) {
+    calls.push({path, options});
+    return {async delete(config) { calls.push(config); }};
+  }};
+  assert.deepEqual(await deleteStageGeneration(bucket, identity, '90071992547409931234'),
+    {deleted: true, missing: false, generation: '90071992547409931234'});
+  assert.equal(calls[0].path, identity.storagePath);
+  assert.deepEqual(calls[0].options, {generation: '90071992547409931234'});
+  assert.deepEqual(calls[1], {preconditionOpts: {ifGenerationMatch: '90071992547409931234'}});
+  const missing = {file: () => ({async delete() { throw Object.assign(new Error('missing'), {code: 404}); }})};
+  assert.deepEqual(await deleteStageGeneration(missing, identity, '7'), {deleted: false, missing: true, generation: '7'});
 });
 function fixture() {
   let descriptor, metadata = null, downloaded, generation;

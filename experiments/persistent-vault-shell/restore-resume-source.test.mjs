@@ -7,7 +7,7 @@ const modelUrl = asModule(await readFile(new URL('../../Frontend/public/assets/j
 const sourceText = (await readFile(new URL('./restore-resume-source.mjs', import.meta.url), 'utf8'))
   .replace('../../Frontend/public/assets/js/modules/settings/backup-crypto.js', cryptoUrl)
   .replace('../../Frontend/public/assets/js/modules/settings/backup-import-model.js', modelUrl);
-const {readResumeBackup, createRestoreResumeSource, orderNewRestoreRecords, chunkNewRestoreRecords} = await import(asModule(sourceText));
+const {readResumeBackup, createRestoreResumeSource, orderNewRestoreRecords, chunkNewRestoreRecords, validateRestoreSelection} = await import(asModule(sourceText));
 const {createBackupHeader, deriveBackupKey, encryptBackupEntry, generateRecoveryKey} = await import(cryptoUrl);
 const uid = 'synthetic';
 
@@ -38,6 +38,63 @@ test('profile and linked deadlines stay in one chunk even after a full Account c
   const deadline={scope:'deadline',id:'d',data:{sourceRef:{type:'profileDocument',id:'doc'}}};
   const chunks=chunkNewRestoreRecords([deadline,...accounts,profile]);
   assert.equal(chunks.length,2);assert.deepEqual(chunks[1],[profile,deadline]);
+});
+
+test('shared data, reciprocal links, widgets and Account parents form one atomic dependency group',()=>{
+  const common=id=>({scope:'shared-vault-data',id,data:{title:`Synthetic ${id}`}});
+  const account=(id,companyId)=>({scope:companyId?'company-account':'private-account',id,
+    ...(companyId?{companyId}:{}),data:{synthetic:true}});
+  const pair=(sharedDataId,id,companyId)=>{
+    const context=companyId?'company':'private',accountId=`a${id}`,linkId=`l${id}`,widgetId=`w${id}`;
+    return [
+      {scope:'shared-vault-data-link',id:linkId,sharedDataId,data:{sharedDataId,widgetId,context,accountId,...(companyId?{companyId}:{})}},
+      {scope:companyId?'company-account-widget':'private-account-widget',id:widgetId,accountId,...(companyId?{companyId}:{}),
+        data:{kind:'shared-reference',sharedDataId,linkId,context,accountId,...(companyId?{companyId}:{})}}
+    ];
+  };
+  const privateAccount=account('a1'),privatePair=pair('s1','1');
+  assert.deepEqual(chunkNewRestoreRecords([privatePair[1],common('s1'),privateAccount,privatePair[0]]),
+    [[common('s1'),privateAccount,privatePair[0],privatePair[1]]]);
+  const company={scope:'company',id:'c',data:{nome:'Synthetic'}},companyAccount=account('a2','c'),companyPair=pair('s2','2','c');
+  assert.deepEqual(chunkNewRestoreRecords([companyPair[0],company,common('s2'),companyPair[1],companyAccount]),
+    [[common('s2'),company,companyAccount,companyPair[0],companyPair[1]]]);
+  const second=common('s3'),secondPair=pair('s3','3');
+  secondPair[0].data.accountId='a1';secondPair[1].accountId='a1';secondPair[1].data.accountId='a1';
+  const merged=chunkNewRestoreRecords([common('s1'),privateAccount,...privatePair,second,...secondPair]);
+  assert.equal(merged.length,1);assert.equal(new Set(merged[0]).size,7);assert.equal(merged[0].filter(record=>record===privateAccount).length,1);
+});
+
+test('shared dependency groups reject incomplete, crossed and oversized backups before planning',()=>{
+  const account={scope:'private-account',id:'a',data:{}},common={scope:'shared-vault-data',id:'s',data:{}},
+    link={scope:'shared-vault-data-link',id:'l',sharedDataId:'s',data:{sharedDataId:'s',widgetId:'w',context:'private',accountId:'a'}},
+    widget={scope:'private-account-widget',id:'w',accountId:'a',data:{kind:'shared-reference',sharedDataId:'s',linkId:'l',context:'private',accountId:'a'}};
+  for(const records of [[account,common,link],[account,common,widget],[account,common,{...link,sharedDataId:'other'},widget],
+    [account,common,link,{...widget,data:{...widget.data,linkId:'other'}}]])
+    assert.throws(()=>chunkNewRestoreRecords(records),/SHARED_DEPENDENCY_INVALID/);
+  const records=[common];
+  for(let index=0;index<134;index++) {
+    const accountId=`a${index}`,linkId=`l${index}`,widgetId=`w${index}`;
+    records.push({scope:'private-account',id:accountId,data:{}},
+      {scope:'shared-vault-data-link',id:linkId,sharedDataId:'s',data:{sharedDataId:'s',widgetId,context:'private',accountId}},
+      {scope:'private-account-widget',id:widgetId,accountId,data:{kind:'shared-reference',sharedDataId:'s',linkId,context:'private',accountId}});
+  }
+  assert.throws(()=>chunkNewRestoreRecords(records),/DEPENDENCY_GROUP_TOO_LARGE/);
+});
+
+test('selection cannot split shared, embedded, company or profile dependency groups',()=>{
+  const account={scope:'private-account',id:'a',data:{}},common={scope:'shared-vault-data',id:'s',data:{}},
+    link={scope:'shared-vault-data-link',id:'l',sharedDataId:'s',data:{sharedDataId:'s',widgetId:'w',context:'private',accountId:'a'}},
+    widget={scope:'private-account-widget',id:'w',accountId:'a',data:{kind:'shared-reference',sharedDataId:'s',linkId:'l',context:'private',accountId:'a'}};
+  const shared=[account,common,link,widget];
+  assert.deepEqual(validateRestoreSelection(shared,shared),shared);
+  for(const selected of [[account],[common,link,widget],[account,common,link]])
+    assert.throws(()=>validateRestoreSelection(shared,selected),/SELECTION_DEPENDENCY/);
+  const embedded={scope:'private-account-widget',id:'e',accountId:'a',data:{kind:'embedded',context:'private',accountId:'a'}};
+  assert.throws(()=>validateRestoreSelection([account,embedded],[embedded]),/SELECTION_DEPENDENCY/);
+  const company={scope:'company',id:'c',data:{}},companyAccount={scope:'company-account',companyId:'c',id:'ca',data:{}};
+  assert.throws(()=>validateRestoreSelection([company,companyAccount],[companyAccount]),/SELECTION_DEPENDENCY/);
+  const profile={scope:'profile',id:uid,data:{}},deadline={scope:'deadline',id:'d',data:{sourceRef:{type:'profileDocument',id:'doc'}}};
+  assert.throws(()=>validateRestoreSelection([profile,deadline],[deadline]),/SELECTION_DEPENDENCY/);
 });
 
 test('new multi-chunk plans put Account parents before children without modifying backup order',async()=>{
@@ -80,16 +137,26 @@ test('security settings are excluded after authenticated reading and never sent 
   source.dispose();
 });
 
-test('unconnected shared scope blocks candidate preview before any server or staging call', async () => {
-  const original = await backup([{kind: 'record', scope: 'shared-vault-data', id: 'c', data: {synthetic: true}},
-    {kind: 'record', scope: 'private-account', id: 'a', data: {synthetic: true}}]);
-  const abort = new AbortController(); let calls = 0;
-  const source = createRestoreResumeSource({context: {user: {uid}, signal: abort.signal, assertUnlocked() {}},
-    getUser: () => ({uid}), isOnline: () => true, submit: async () => {calls++;},
-    attachmentPreparer: {dispose() {}, async prepare() {calls++;}}});
-  await assert.rejects(source.previewNew(original), /RESUME_SCOPE_NOT_CONNECTED/);
-  assert.equal(calls, 0);
-  source.dispose();
+test('every unconnected shared component blocks preview before any server or staging call', async () => {
+  const shared = [
+    {kind: 'record', scope: 'shared-vault-data', id: 'shared', data: {synthetic: true}},
+    {kind: 'record', scope: 'shared-vault-data-link', id: 'link', sharedDataId: 'shared',
+      data: {sharedDataId: 'shared', widgetId: 'widget', context: 'private', accountId: 'a'}},
+    {kind: 'record', scope: 'private-account-widget', id: 'widget', accountId: 'a',
+      data: {kind: 'shared-reference', sharedDataId: 'shared', linkId: 'link', context: 'private', accountId: 'a'}}
+  ];
+  for (const entries of [...shared.map(record => [record]), [
+    {kind: 'record', scope: 'private-account', id: 'a', data: {synthetic: true}}, ...shared
+  ]]) {
+    const original = await backup(entries);
+    const abort = new AbortController(); let calls = 0;
+    const source = createRestoreResumeSource({context: {user: {uid}, signal: abort.signal, assertUnlocked() {}},
+      getUser: () => ({uid}), isOnline: () => true, submit: async () => {calls++;},
+      attachmentPreparer: {dispose() {}, async prepare() {calls++;}}});
+    await assert.rejects(source.previewNew(original), /RESUME_SCOPE_NOT_CONNECTED/);
+    assert.equal(calls, 0);
+    source.dispose();
+  }
 });
 
 test('attachments require explicit staging before plan creation and never enter metadata requests', async () => {

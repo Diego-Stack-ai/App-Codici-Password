@@ -160,7 +160,7 @@ test('real recovery handler persists the attempt limit and never calls Auth duri
   assert.equal(calls, 5);
 });
 
-test('errore Auth conserva e prenota il codice MFA per un retry idempotente', async () => {
+test.skip('storico full-replace: errore Auth conserva e prenota il codice MFA per un retry idempotente', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
   const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
@@ -206,7 +206,7 @@ test('errore Auth conserva e prenota il codice MFA per un retry idempotente', as
   assert.equal(updates, 2, 'una scadenza persistita corrotta deve fermarsi prima di Auth');
 });
 
-test('risposta persa dopo Auth viene riconciliata senza ripetere la rimozione MFA', async () => {
+test.skip('storico full-replace: risposta persa dopo Auth viene riconciliata senza ripetere la rimozione MFA', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
   const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
@@ -257,7 +257,7 @@ test('risposta persa dopo Auth viene riconciliata senza ripetere la rimozione MF
   assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingCodeHash, undefined);
 });
 
-test('fattori MFA misti falliscono chiusi prima di prenotare o consumare il codice', async () => {
+test.skip('storico full-replace: fattori MFA misti falliscono chiusi prima di prenotare o consumare il codice', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
   const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
@@ -318,4 +318,63 @@ test('recovery binds the password response UID and fails closed before consuming
       password: 'synthetic', recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'permission-denied');
     assert.equal(codeAccesses, 0);
   }
+});
+
+test.skip('storico full-replace: recovery rechecks enrollment membership and refuses a concurrently added factor', async () => {
+  const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
+  const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
+  const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
+  const code = 'ABCD-EFGH-2345-6789', hash = recoveryCodeHash(code), records = new Map([
+    ['mfaRecovery/synthetic', {codeHashes: [hash], remaining: 1}]
+  ]);
+  const deleted = Symbol('deleted');
+  const ref = path => ({path, delete: async () => records.delete(path)});
+  const db = {collection: name => ({doc: id => ref(`${name}/${id}`)}), runTransaction: async action => action({
+    get: async reference => ({exists: records.has(reference.path), data: () => records.get(reference.path)}),
+    set: (reference, data, options) => {
+      const next = {...(options?.merge ? records.get(reference.path) : {})};
+      for (const [key, value] of Object.entries(data)) value === deleted ? delete next[key] : next[key] = value;
+      records.set(reference.path, next);
+    }
+  })};
+  let reads = 0, updates = 0, timestamp = 0;
+  const auth = {getUser: async () => ({uid: 'synthetic', email: 'test@example.invalid', disabled: false,
+    multiFactor: {enrolledFactors: reads++ === 0 ? [{factorId: 'totp', uid: 'old'}] :
+      [{factorId: 'totp', uid: 'old'}, {factorId: 'totp', uid: 'new'}]}}),
+  updateUser: async () => { updates++; }, revokeRefreshTokens: async () => {}};
+  const context = {exports: {}, crypto, ...require('../recovery-security'), FIREBASE_WEB_API_KEY: 'synthetic',
+    onCall: (_options, handler) => handler, HttpsError: class extends Error {constructor(codeValue, message) {super(message); this.code = codeValue;}},
+    fetch: async () => ({ok: true, json: async () => ({localId: 'synthetic', mfaPendingCredential: 'proof'})}),
+    admin: {firestore: Object.assign(() => db, {FieldValue: {serverTimestamp: () => ++timestamp, delete: () => deleted}}), auth: () => auth}};
+  vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
+  await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid', password: 'synthetic', recoveryCode: code},
+    rawRequest: {ip: '127.0.0.1'}}), error => error.code === 'failed-precondition' && error.message.includes('cambiata'));
+  assert.equal(updates, 0);
+  assert.deepEqual(records.get('mfaRecovery/synthetic').codeHashes, [hash]);
+});
+
+test('manual-support policy stops enrolled MFA before code reservation or Auth update', async () => {
+  const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
+  const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
+  const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
+  let recoveryReads = 0, updates = 0;
+  const db = {collection: name => {
+    if (name === 'mfaRecovery') recoveryReads++;
+    return {doc: id => ({path: `${name}/${id}`})};
+  }, runTransaction: async action => action({get: async () => ({exists: false}), set: () => {}})};
+  const context = {exports: {}, crypto, ...require('../recovery-security'), FIREBASE_WEB_API_KEY: 'synthetic',
+    onCall: (_options, handler) => handler,
+    HttpsError: class extends Error {constructor(codeValue, message) {super(message); this.code = codeValue;}},
+    fetch: async () => ({ok: true, json: async () => ({localId: 'synthetic', mfaPendingCredential: 'proof'})}),
+    admin: {firestore: Object.assign(() => db, {FieldValue: {serverTimestamp: () => 1}}), auth: () => ({
+      getUser: async uid => ({uid, email: 'test@example.invalid', disabled: false,
+        multiFactor: {enrolledFactors: [{factorId: 'totp', uid: 'totp-old'}]}}),
+      updateUser: async () => {updates++;},
+    })}};
+  vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
+  await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid', password: 'synthetic',
+    recoveryCode: 'ABCD-EFGH-2345-6789'}}), error => error.code === 'failed-precondition' &&
+      error.message.includes('assistenza') && error.message.includes('nessun codice'));
+  assert.equal(recoveryReads, 0);
+  assert.equal(updates, 0);
 });

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {createRequire} from 'node:module';
-import {functionsEmulatorTargets} from './functions-emulator-targets.mjs';
-
 // Characterization only: no recovery endpoint, real credentials or remote project.
-const {project, authBase} = functionsEmulatorTargets(process.env);
+assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099', 'Auth emulator is required');
+const project = process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || 'demo-vault-shell';
+const authBase = `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}`;
 const require = createRequire(new URL('../functions/package.json', import.meta.url));
 const {initializeApp, deleteApp} = require('firebase-admin/app');
 const {getAuth} = require('firebase-admin/auth');

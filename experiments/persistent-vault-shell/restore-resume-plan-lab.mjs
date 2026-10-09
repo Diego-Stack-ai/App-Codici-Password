@@ -2,7 +2,7 @@ import {createHash, randomUUID} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {prepareResumePlan, verifyResumePlan, reconstructResumeCommands, RESUME_PLAN_DURATION_MS} from './restore-resume-plan.mjs';
 import {verifyStagedChunkReceipt} from './restore-chunk-binding.mjs';
-import {restoreReferenceParents} from './restore-reference-scope.mjs';
+import {restoreReferenceParents,validateRestoreSharedPairs} from './restore-reference-scope.mjs';
 import {validateRestoreProfileDeadlinePairs} from './restore-profile-deadline-pair.mjs';
 const require = createRequire(import.meta.url);
 const {validateRestoreChunk, decodeFirestoreValue} = require('../../functions/backup-restore-service.js');
@@ -83,6 +83,7 @@ export function createResumePlanLab({store, projectId, now = Date.now}) {
             `labCandidateRecords/${uid}/items/${createHash('sha256').update(record.path).digest('hex')}`))));
           command.records.forEach((record,index)=>restoreReferenceParents(record,snapshots[index].exists?snapshots[index].data():null));
           validateRestoreProfileDeadlinePairs(uid,command.records);
+          validateRestoreSharedPairs(uid,command.records);
           validateRestoreProfileDeadlinePairs(uid,command.records.flatMap((record,index)=>snapshots[index].exists?[{path:record.path,data:snapshots[index].data()}]:[]));
           result.push(buildRestorePreview(command.records, snapshots));
         }
@@ -125,7 +126,11 @@ export function createResumePlanLab({store, projectId, now = Date.now}) {
       const time = now(), commands = structuredClone(inputs), planId = randomUUID();
       const candidate = prepareResumePlan(uid, planId, commands, time, structuredClone(stageCommands));
       const records = commands.flatMap(input => validateRestoreChunk(input, uid).records);
-      for(const input of commands)validateRestoreProfileDeadlinePairs(uid,validateRestoreChunk(input,uid).records);
+      for(const input of commands) {
+        const inputRecords=validateRestoreChunk(input,uid).records;
+        validateRestoreProfileDeadlinePairs(uid,inputRecords);
+        validateRestoreSharedPairs(uid,inputRecords);
+      }
       // Validate every typed value before a resumable plan exists. These
       // factories discard the decoded result; commit uses its real factories.
       for(const record of records)decodeFirestoreValue(record.data,{timestamp:()=>null,bytes:()=>null});
