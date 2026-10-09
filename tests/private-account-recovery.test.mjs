@@ -39,7 +39,8 @@ async function saveFixture(status,{recover=true,active=true,expireBeforeNavigati
  const sandbox={pilotFixture,isAccountSaveAllowed,assertAccountSaveAllowed,DECRYPT_FAILURE_MESSAGE,document:{getElementById:id=>nodes[id],querySelector:()=>null},auth:{currentUser:{uid:'owner'}},db:{},
   showToast:message=>messages.push(message),hasInvalidCardExpiry:()=>false,ensureVaultKeyMaterial:async()=> 'key',encrypt:async v=>v?'cipher':'',
   accountModeFromFlags:()=> 'account-private',validateAccountMode:()=>({}),recordFieldsFromAccountMode:()=>({type:'account',visibility:'private'}),
-  classifyPrivateAccountOfflineWrite:()=>({eligible:true}),navigator:{onLine:online},doc:()=>({id:'record'}),t:x=>x,console:{error(){}},
+  classifyPrivateAccountOfflineWrite:()=>({eligible:true}),isPrivateAccountPilotEnabled:()=>true,
+  navigator:{onLine:online},doc:()=>({id:'record'}),t:x=>x,console:{error(){}},
   showAlertModal:async(title,message)=>alerts.push({title,message}),
   setTimeout:fn=>{if(expireBeforeNavigation)active=false;fn()},window:{location:{replace:url=>navigations.push(url)}}};
  let source=saveSource;
