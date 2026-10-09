@@ -1,5 +1,7 @@
 # Incarico corrente
 
+09/10/2026 — Diego autorizza la chiusura del pacchetto locale M7/M8/M10, il commit, il push e il deploy coordinato seguito da controllo visivo. Perimetro di rilascio applicabile alle modifiche effettivamente distribuibili: Hosting dell'app principale alla versione corrente 1.2.141 e sola callable `recoverMfaWithCode`; i modelli M7/M8 restano evidenze/laboratori locali finché non esistono scheduler, adapter e gate produttivi approvati. Purge distruttivo, Rules, indici, migrazioni e dati reali restano invariati. Audit indipendente, parere legale/privacy e prove fisiche non vengono dichiarati completati senza evidenza.
+
 09/10/2026 — Diego autorizza il rilascio delle modifiche Account locali richieste finora. Perimetro: incremento a 1.2.140, commit, push e pubblicazione del solo Hosting dell'app principale; Functions, Rules, indici, migrazioni e dati restano invariati. Prima della pubblicazione va ripetuto il gate pertinente e il risultato remoto va verificato.
 
 09/10/2026 — Diego autorizza l'applicazione del riepilogo delle correzioni alla condivisione: escludere il proprietario dalla lista destinatari, rimuovere l'iniziale ridondante dalla Gestione accessi, distanziare stato e cestino e rendere Accetta/Rifiuta coerenti con lo stile dell'app. Perimetro locale sui flussi privato e aziendale; nessun deploy implicito.

@@ -160,7 +160,7 @@ test('real recovery handler persists the attempt limit and never calls Auth duri
   assert.equal(calls, 5);
 });
 
-test('caratterizzazione: errore Auth dopo consumo MFA lascia codice consumato e recupero pendente', async () => {
+test('errore Auth conserva e prenota il codice MFA per un retry idempotente', async () => {
   const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
   const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
   const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
@@ -175,21 +175,114 @@ test('caratterizzazione: errore Auth dopo consumo MFA lascia codice consumato e 
       set: (ref, data, options) => records.set(ref.path, {...(options?.merge ? records.get(ref.path) : {}), ...data}),
     }),
   };
-  const firestore = Object.assign(() => db, {FieldValue: {serverTimestamp: () => 123}});
+  let timestampSequence = 0;
+  const firestore = Object.assign(() => db, {FieldValue: {serverTimestamp: () => ++timestampSequence}});
   const context = {exports: {}, crypto, recoveryAttemptId, recoveryCodeHash, normalizeRecoveryCode, nextRecoveryAttemptState,
     FIREBASE_WEB_API_KEY: 'synthetic', onCall: (_options, handler) => handler,
     HttpsError: class extends Error {constructor(code, message) {super(message); this.code = code;}},
     fetch: async () => ({ok: true, json: async () => ({localId: 'synthetic', mfaPendingCredential: 'synthetic-proof'})}),
-    admin: {firestore, auth: () => ({getUser: async uid => {assert.equal(uid, 'synthetic'); return {uid, email: 'test@example.invalid'};},
+    admin: {firestore, auth: () => ({getUser: async uid => {assert.equal(uid, 'synthetic'); return {uid, email: 'test@example.invalid',
+      multiFactor: {enrolledFactors: [{factorId: 'totp', uid: 'totp-factor'}]}};},
       updateUser: async () => {updates++; throw new Error('SYNTHETIC_AUTH_FAILURE');}})},
   };
   vm.runInNewContext(source.slice(start, end), context);
   const request = {data: {email: 'test@example.invalid', password: 'synthetic', recoveryCode: code}, rawRequest: {ip: '127.0.0.1'}};
   await assert.rejects(context.exports.recoverMfaWithCode(request), /SYNTHETIC_AUTH_FAILURE/);
+  assert.equal(records.get('mfaRecovery/synthetic').remaining, 1);
+  assert.deepEqual(records.get('mfaRecovery/synthetic').codeHashes, [recoveryCodeHash(code)]);
+  assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingCodeHash, recoveryCodeHash(code));
+  const firstPendingAt = records.get('mfaRecovery/synthetic').recoveryPendingAt;
+  const firstExpiry = records.get('mfaRecovery/synthetic').recoveryPendingExpiresAt;
+  await assert.rejects(context.exports.recoverMfaWithCode(request), /SYNTHETIC_AUTH_FAILURE/);
+  assert.equal(updates, 2, 'il ritentativo deve poter riprendere la stessa operazione Auth');
+  assert.equal(records.get('mfaRecovery/synthetic').remaining, 1);
+  assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingAt, firstPendingAt,
+    'il retry deve conservare anche l’istante iniziale della prenotazione');
+  assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingExpiresAt, firstExpiry,
+    'il retry non deve trasformare la finestra di 15 minuti in una scadenza scorrevole');
+  records.get('mfaRecovery/synthetic').recoveryPendingExpiresAt = NaN;
+  await assert.rejects(context.exports.recoverMfaWithCode(request), error =>
+    error.code === 'failed-precondition' && error.message.includes('finestra di ripresa'));
+  assert.equal(updates, 2, 'una scadenza persistita corrotta deve fermarsi prima di Auth');
+});
+
+test('risposta persa dopo Auth viene riconciliata senza ripetere la rimozione MFA', async () => {
+  const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
+  const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
+  const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
+  const code = 'ABCD-EFGH-2345-6789', hash = recoveryCodeHash(code), deleted = Symbol('deleted');
+  const records = new Map([['mfaRecovery/synthetic', {codeHashes: [hash], remaining: 1}]]);
+  let transactionCalls = 0, updateCalls = 0, factorsRemoved = false;
+  const ref = path => ({path, delete: async () => records.delete(path)});
+  const db = {
+    collection: name => ({doc: id => ref(`${name}/${id}`)}),
+    runTransaction: async action => {
+      transactionCalls++;
+      if (transactionCalls === 3) throw new Error('SYNTHETIC_FINALIZE_RESPONSE_LOST');
+      return action({
+        get: async reference => ({exists: records.has(reference.path), data: () => records.get(reference.path)}),
+        set: (reference, data, options) => {
+          const next = {...(options?.merge ? records.get(reference.path) : {})};
+          for (const [key, value] of Object.entries(data)) value === deleted ? delete next[key] : next[key] = value;
+          records.set(reference.path, next);
+        },
+      });
+    },
+  };
+  const firestore = Object.assign(() => db, {FieldValue: {serverTimestamp: () => 123, delete: () => deleted}});
+  const auth = {getUser: async uid => ({uid, email: 'test@example.invalid', multiFactor: {enrolledFactors:
+      factorsRemoved ? [] : [{factorId: 'totp', uid: 'totp-factor'}]}}),
+    updateUser: async () => {updateCalls++; factorsRemoved = true;}, revokeRefreshTokens: async () => {}};
+  const context = {exports: {}, crypto, recoveryAttemptId, recoveryCodeHash, normalizeRecoveryCode, nextRecoveryAttemptState,
+    FIREBASE_WEB_API_KEY: 'synthetic', onCall: (_options, handler) => handler,
+    HttpsError: class extends Error {constructor(codeValue, message) {super(message); this.code = codeValue;}},
+    fetch: async () => ({ok: true, json: async () => ({localId: 'synthetic', mfaPendingCredential: 'proof'})}),
+    admin: {firestore, auth: () => auth},
+  };
+  vm.runInNewContext(source.slice(start, end), context);
+  const request = {data: {email: 'test@example.invalid', password: 'synthetic', recoveryCode: code}, rawRequest: {ip: '127.0.0.1'}};
+  await assert.rejects(context.exports.recoverMfaWithCode(request), /SYNTHETIC_FINALIZE_RESPONSE_LOST/);
+  assert.equal(records.get('mfaRecovery/synthetic').remaining, 1);
+  assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingCodeHash, hash);
+  const activeExpiry = records.get('mfaRecovery/synthetic').recoveryPendingExpiresAt;
+  assert.ok(Number.isSafeInteger(activeExpiry) && activeExpiry > Date.now());
+  records.get('mfaRecovery/synthetic').recoveryPendingExpiresAt = Date.now() - 1;
+  await assert.rejects(context.exports.recoverMfaWithCode(request), error =>
+    error.code === 'failed-precondition' && error.message.includes('finestra di ripresa'));
+  assert.equal(updateCalls, 1, 'una ripresa scaduta non deve ripetere la rimozione MFA');
+  records.get('mfaRecovery/synthetic').recoveryPendingExpiresAt = activeExpiry;
+  assert.equal((await context.exports.recoverMfaWithCode(request)).ok, true);
+  assert.equal(updateCalls, 1);
   assert.equal(records.get('mfaRecovery/synthetic').remaining, 0);
-  assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingAt, 123);
-  await assert.rejects(context.exports.recoverMfaWithCode(request), error => error.code === 'permission-denied');
-  assert.equal(updates, 1, 'il ritentativo non raggiunge Auth: limite riprodotto, non risolto');
+  assert.equal(records.get('mfaRecovery/synthetic').recoveryPendingCodeHash, undefined);
+});
+
+test('fattori MFA misti falliscono chiusi prima di prenotare o consumare il codice', async () => {
+  const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
+  const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
+  const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
+  const code = 'ABCD-EFGH-2345-6789', original = {codeHashes: [recoveryCodeHash(code)], remaining: 1};
+  const records = new Map([['mfaRecovery/synthetic', structuredClone(original)]]);
+  let updates = 0;
+  const db = {collection: name => ({doc: id => ({path: `${name}/${id}`})}), runTransaction: async action => action({
+    get: async ref => ({exists: records.has(ref.path), data: () => records.get(ref.path)}),
+    set: (ref, data, options) => records.set(ref.path, {...(options?.merge ? records.get(ref.path) : {}), ...data}),
+  })};
+  const context = {exports: {}, crypto, recoveryAttemptId, recoveryCodeHash, normalizeRecoveryCode, nextRecoveryAttemptState,
+    FIREBASE_WEB_API_KEY: 'synthetic', onCall: (_options, handler) => handler,
+    HttpsError: class extends Error {constructor(codeValue, message) {super(message); this.code = codeValue;}},
+    fetch: async () => ({ok: true, json: async () => ({localId: 'synthetic', mfaPendingCredential: 'proof'})}),
+    admin: {firestore: Object.assign(() => db, {FieldValue: {serverTimestamp: () => 123}}), auth: () => ({
+      getUser: async uid => ({uid, email: 'test@example.invalid', multiFactor: {enrolledFactors: [
+        {factorId: 'totp', uid: 'totp-factor'}, {factorId: 'phone', uid: 'phone-factor'}]}}),
+      updateUser: async () => {updates++;},
+    })},
+  };
+  vm.runInNewContext(source.slice(start, end), context);
+  await assert.rejects(context.exports.recoverMfaWithCode({data: {email: 'test@example.invalid', password: 'synthetic',
+    recoveryCode: code}}), error => error.code === 'failed-precondition' && error.message.includes('Nessun codice consumato'));
+  assert.deepEqual(records.get('mfaRecovery/synthetic'), original);
+  assert.equal(updates, 0);
 });
 
 test('recovery binds the password response UID and fails closed before consuming any code', async () => {

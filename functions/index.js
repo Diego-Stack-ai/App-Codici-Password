@@ -654,29 +654,67 @@ exports.recoverMfaWithCode = onCall(
             typeof user.email !== "string" || user.email.trim().toLowerCase() !== email) {
             throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
         }
+        const enrolledFactors = Array.isArray(user.multiFactor?.enrolledFactors)
+            ? user.multiFactor.enrolledFactors : [];
+        const hasTotp = enrolledFactors.some((factor) => factor?.factorId === "totp");
+        const hasUnsupportedFactor = enrolledFactors.some((factor) => factor?.factorId !== "totp");
         const recoveryRef = db.collection("mfaRecovery").doc(user.uid);
+        const recoveryResumeNow = Date.now();
+        const recoveryResumeExpiresAt = recoveryResumeNow + (15 * 60 * 1000);
         await db.runTransaction(async (transaction) => {
             const recovery = await transaction.get(recoveryRef);
-            const hashes = recovery.exists ? recovery.data().codeHashes || [] : [];
-            if (!hashes.includes(codeHash)) {
+            const recoveryData = recovery.exists ? recovery.data() : null;
+            const hashes = Array.isArray(recoveryData?.codeHashes) ? recoveryData.codeHashes : [];
+            const pendingHash = recoveryData?.recoveryPendingCodeHash || null;
+            const pendingExpiresAt = recoveryData?.recoveryPendingExpiresAt;
+            const pendingForCode = pendingHash === codeHash;
+            const pendingActive = pendingForCode &&
+                Number.isSafeInteger(pendingExpiresAt) &&
+                pendingExpiresAt >= recoveryResumeNow &&
+                pendingExpiresAt <= recoveryResumeExpiresAt;
+            if (hasUnsupportedFactor) {
+                throw new HttpsError("failed-precondition", "Recupero selettivo non disponibile per questa configurazione MFA. Nessun codice consumato.");
+            }
+            if (!hashes.includes(codeHash) || (pendingHash && pendingHash !== codeHash)) {
                 throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
+            }
+            if (pendingForCode && !pendingActive) {
+                throw new HttpsError("failed-precondition", "La finestra di ripresa del recupero MFA è scaduta. Nessun codice consumato.");
+            }
+            if (!hasTotp && !pendingForCode) {
+                throw new HttpsError("failed-precondition", "Recupero MFA non riconciliabile. Nessun codice consumato.");
+            }
+            transaction.set(recoveryRef, {
+                recoveryPendingCodeHash: codeHash,
+                ...(pendingActive ? {} : {recoveryPendingAt: admin.firestore.FieldValue.serverTimestamp()}),
+                recoveryPendingExpiresAt: pendingActive ? pendingExpiresAt : recoveryResumeExpiresAt,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        });
+
+        // Auth e Firestore non condividono una transazione. Il codice resta
+        // disponibile ma prenotato finché Auth non ha concluso, così un errore
+        // o una risposta persa può essere ripreso senza consumarlo due volte.
+        if (hasTotp) await admin.auth().updateUser(user.uid, { multiFactor: { enrolledFactors: null } });
+        await admin.auth().revokeRefreshTokens(user.uid);
+        await db.runTransaction(async (transaction) => {
+            const recovery = await transaction.get(recoveryRef);
+            const data = recovery.exists ? recovery.data() : null;
+            const hashes = Array.isArray(data?.codeHashes) ? data.codeHashes : [];
+            if (data?.recoveryPendingCodeHash !== codeHash || !hashes.includes(codeHash)) {
+                throw new HttpsError("failed-precondition", "Recupero non riconciliabile. Nessun altro codice è stato consumato.");
             }
             const remainingHashes = hashes.filter((hash) => hash !== codeHash);
             transaction.set(recoveryRef, {
                 codeHashes: remainingHashes,
                 remaining: remainingHashes.length,
-                recoveryPendingAt: admin.firestore.FieldValue.serverTimestamp(),
+                recoveredAt: admin.firestore.FieldValue.serverTimestamp(),
+                recoveryPendingCodeHash: admin.firestore.FieldValue.delete(),
+                recoveryPendingAt: admin.firestore.FieldValue.delete(),
+                recoveryPendingExpiresAt: admin.firestore.FieldValue.delete(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
         });
-
-        await admin.auth().updateUser(user.uid, { multiFactor: { enrolledFactors: null } });
-        await admin.auth().revokeRefreshTokens(user.uid);
-        await recoveryRef.set({
-            recoveredAt: admin.firestore.FieldValue.serverTimestamp(),
-            recoveryPendingAt: admin.firestore.FieldValue.delete(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
         await attemptRef.delete();
         return { ok: true };
     }

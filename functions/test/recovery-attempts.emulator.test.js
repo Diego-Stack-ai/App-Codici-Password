@@ -55,3 +55,49 @@ test('concurrent recovery requests share a persisted limit and corrupt state has
       await deleteApp(app);
     }
   });
+
+test('concurrent use of one recovery code consumes it once and leaves no pending marker',
+  {skip: !allowed, timeout: 60000}, async () => {
+    const app = initializeApp({projectId: 'demo-purge-fence'}, `recovery-code-${crypto.randomUUID()}`);
+    const db = getFirestore(app);
+    try {
+      const source = fs.readFileSync(require.resolve('../index.js'), 'utf8');
+      const start = source.indexOf('exports.recoverMfaWithCode = onCall(');
+      const end = source.indexOf('exports.revokeAllSessions = onCall(', start);
+      const code = 'ABCD-EFGH-2345-6789', uid = `synthetic-${crypto.randomUUID()}`;
+      const email = `${crypto.randomUUID()}@example.invalid`, ip = '127.0.0.2';
+      const recoveryRef = db.collection('mfaRecovery').doc(uid);
+      await recoveryRef.set({codeHashes: [security.recoveryCodeHash(code)], remaining: 1});
+      let factorsRemoved = false, updates = 0;
+      const auth = {
+        getUser: async requested => ({uid: requested, email, multiFactor: {enrolledFactors:
+          factorsRemoved ? [] : [{factorId: 'totp', uid: 'totp-factor'}]}}),
+        updateUser: async () => {updates++; factorsRemoved = true;},
+        revokeRefreshTokens: async () => {},
+      };
+      const context = {exports: {}, crypto, ...security,
+        FIREBASE_WEB_API_KEY: 'synthetic', onCall: (_options, handler) => handler,
+        HttpsError: class extends Error {constructor(codeValue, message) {super(message); this.code = codeValue;}},
+        fetch: async () => ({ok: true, json: async () => ({localId: uid, mfaPendingCredential: 'proof'})}),
+        admin: {firestore: Object.assign(() => db, {FieldValue}), auth: () => auth},
+      };
+      vm.compileFunction(source.slice(start, end), Object.keys(context))(...Object.values(context));
+      const request = {data: {email, password: 'synthetic', recoveryCode: code}, rawRequest: {ip}};
+      const results = await Promise.allSettled([
+        context.exports.recoverMfaWithCode(request), context.exports.recoverMfaWithCode(request),
+      ]);
+      assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
+      assert.equal(results.filter(result => result.status === 'rejected').length, 1);
+      assert.ok(['permission-denied', 'failed-precondition'].includes(results.find(result => result.status === 'rejected').reason.code));
+      const final = (await recoveryRef.get()).data();
+      assert.deepEqual(final.codeHashes, []);
+      assert.equal(final.remaining, 0);
+      assert.equal(final.recoveryPendingCodeHash, undefined);
+      assert.equal(final.recoveryPendingAt, undefined);
+      assert.equal(final.recoveryPendingExpiresAt, undefined);
+      assert.ok(updates >= 1 && updates <= 2);
+    } finally {
+      await db.terminate();
+      await deleteApp(app);
+    }
+  });
