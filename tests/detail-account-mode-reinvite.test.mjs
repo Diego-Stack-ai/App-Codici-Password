@@ -47,10 +47,11 @@ class Node {
     descendants() { return this.children.flatMap(child => [child, ...(child.descendants ? child.descendants() : [])]); }
 }
 
-function fixture({sharingCycle = 1, status = 'suspended'} = {}) {
-    const writes = [], toasts = [];
+function fixture({sharingCycle = 1, status = 'suspended', hasCredentials = true} = {}) {
+    const writes = [], toasts = [], reloads = [];
     const nodes = Object.fromEntries(['account-mode-section', 'account-mode-options', 'account-mode-contacts',
-        'account-mode-contact-list', 'btn-save-account-mode'].map(id => [id, new Node('div', {id})]));
+        'account-mode-contact-dropdown', 'account-mode-contact-summary', 'account-mode-contact-list',
+        'btn-save-account-mode'].map(id => [id, new Node('div', {id})]));
     const account = {id: ACCOUNT_ID, nomeAccount: 'Sintetico', visibility: 'shared', type: 'account',
         acceptedCount: 0, sharingCycle, sharedWithUids: [],
         sharedWith: {[KEY]: {email: EMAIL, status, uid: null}}};
@@ -71,17 +72,21 @@ function fixture({sharingCycle = 1, status = 'suspended'} = {}) {
             });
             writes.push(...staged);
         },
-        listContacts: async () => [{id: 'contact-1', nome: 'Ospite', cognome: 'Sintetico', email: EMAIL, active: true}],
+        listContacts: async () => [
+            {id: 'owner', uid: 'owner', nome: 'Proprietario', cognome: 'Sintetico',
+                email: 'owner@example.invalid', active: true},
+            {id: 'contact-1', nome: 'Ospite', cognome: 'Sintetico', email: EMAIL, active: true}
+        ],
         accountModeFromRecord: () => 'account-shared', accountModeFromFlags: () => 'account-shared',
-        validateAccountMode: () => ({}), hasAccountCredentials: () => true,
+        validateAccountMode: () => ({}), hasAccountCredentials: () => hasCredentials,
         showToast: (...args) => toasts.push(args), showConfirmModal: async () => true, t: key => key,
         createElement: (tag, props, children) => new Node(tag, props, children), clearElement: node => { node.children = []; },
         document: {getElementById: id => nodes[id] || null, querySelector: () => null}
     });
     vm.runInContext(source, context);
-    return {writes, toasts, nodes, account,
+    return {writes, toasts, reloads, nodes, account,
         init: () => context.initDetailAccountMode({account, ownerId: 'owner', accountId: ACCOUNT_ID,
-            aziendaId: null, readOnly: false, compactView: false, onReload: async () => {},
+            aziendaId: null, readOnly: false, compactView: false, onReload: async options => reloads.push(options),
             isActive: () => true, confirm: async () => true}),
         checkbox: () => nodes['account-mode-contact-list'].descendants().find(node => node.tag === 'input'),
         save: () => nodes['btn-save-account-mode'].onclick()};
@@ -93,6 +98,29 @@ test('editor dettaglio: una voce sospesa non è preselezionata', async () => {
     const checkbox = f.checkbox();
     assert.ok(checkbox, 'il contatto è elencato fra i destinatari');
     assert.equal(checkbox.checked, false, 'nessuna preselezione per un accesso sospeso');
+    assert.equal(f.nodes['account-mode-contact-summary'].textContent, 'Nessun utente selezionato');
+});
+
+test('editor dettaglio: il proprietario non compare fra i destinatari', async () => {
+    const f = fixture();
+    await f.init();
+    const inputs = f.nodes['account-mode-contact-list'].descendants().filter(node => node.tag === 'input');
+    assert.equal(inputs.length, 1, 'resta selezionabile soltanto il contatto esterno');
+    const renderedText = f.nodes['account-mode-contact-list'].descendants()
+        .map(node => node.textContent || '').join(' ');
+    assert.match(renderedText, /Ospite Sintetico/);
+    assert.doesNotMatch(renderedText, /Proprietario Sintetico/);
+});
+
+test('editor dettaglio: il menu destinatari resta richiudibile e riepiloga la selezione', async () => {
+    const f = fixture({status: 'pending'});
+    await f.init();
+    assert.equal(f.nodes['account-mode-contact-dropdown'].open, undefined, 'menu inizialmente chiuso');
+    assert.equal(f.nodes['account-mode-contact-summary'].textContent, '1 utente selezionato');
+    const checkbox = f.checkbox();
+    checkbox.checked = false;
+    checkbox.dispatch('change');
+    assert.equal(f.nodes['account-mode-contact-summary'].textContent, 'Nessun utente selezionato');
 });
 
 test('editor dettaglio: salvare senza selezionare non crea inviti né grant', async () => {
@@ -125,6 +153,27 @@ test('editor dettaglio: la selezione espressa crea l\'invito del ciclo corrente 
     assert.equal(account[1].sharedWith[KEY].status, 'pending');
     assert.equal(account[1].sharedWithUids.length, 0, 'l\'accesso non torna prima dell\'accettazione');
     assert.equal(account[1].acceptedCount, 0);
+    assert.equal(f.reloads.length, 1);
+    assert.equal(f.reloads[0].serverConfirmed, true,
+        'dopo il commit il dettaglio richiede il record confermato dal server');
+});
+
+test('editor dettaglio: Memorandum condiviso persiste il modo canonico prima del reload confermato', async () => {
+    const f = fixture({sharingCycle: 1, status: 'suspended', hasCredentials: false});
+    await f.init();
+    const memoShared = f.nodes['account-mode-options'].children.find(node => node.dataset.mode === 'memo-shared');
+    assert.ok(memoShared, 'opzione Memorandum condiviso presente');
+    memoShared.onclick();
+    const checkbox = f.checkbox();
+    checkbox.checked = true;
+    checkbox.dispatch('change');
+    await f.save();
+    const account = f.writes.find(write => write[0] === 'users/owner/accounts/account-1');
+    assert.equal(account[1].type, 'memo');
+    assert.equal(account[1].visibility, 'shared');
+    assert.equal(account[1].isExplicitMemo, true);
+    assert.equal(f.reloads.length, 1);
+    assert.equal(f.reloads[0].serverConfirmed, true);
 });
 
 test('editor dettaglio: ciclo malformato non produce scritture', async () => {

@@ -3,7 +3,7 @@
  * Mantiene rendering e revoca fuori dal modulo principale della pagina.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.139';
+import { auth, db } from '../../firebase-config.js?v=1.2.140';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -59,13 +59,15 @@ export function renderPrivateSharingMap(account, contactNames = new Map(), mount
             ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse'
             : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
         const actions = [createElement('span', {
-            className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+            className: `sharing-recipient-status text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
             textContent: displayStatus
         })];
 
         if (!mount.readOnly) {
             actions.push(createElement('button', {
-                className: 'ml-2 p-2 rounded-lg bg-transparent border-none text-red-600 hover:text-red-500 hover:scale-110 transition-all cursor-pointer flex items-center justify-center sharing-revoke-button',
+                className: 'sharing-revoke-button',
+                title: 'Revoca accesso',
+                ariaLabel: 'Revoca accesso',
                 onclick: () => revokeRecipient(invitation.email, mount)
             }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })]));
         }
@@ -74,7 +76,6 @@ export function renderPrivateSharingMap(account, contactNames = new Map(), mount
             className: 'rubrica-list-item flex items-center justify-between'
         }, [
             createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-avatar', textContent: invitation.email.charAt(0).toUpperCase() }),
                 createElement('div', { className: 'rubrica-item-info' }, [
                     createElement('p', {
                         className: 'truncate m-0 rubrica-item-name',
@@ -83,7 +84,7 @@ export function renderPrivateSharingMap(account, contactNames = new Map(), mount
                     createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: invitation.email })
                 ])
             ]),
-            createElement('div', { className: 'flex items-center gap-2' }, actions)
+            createElement('div', { className: 'sharing-recipient-actions' }, actions)
         ]));
     }
 }

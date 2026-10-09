@@ -27,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.139';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.140';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.139&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.140&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.139');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.140');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -503,13 +503,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 createElement('div', { className: 'modal-actions grid grid-cols-2 gap-4 mt-2' }, [
                     createElement('button', {
                         id: 'btn-invite-reject',
-                        className: 'p-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95',
+                        className: 'btn-modal btn-secondary',
                         textContent: t('invite_reject') || 'Rifiuta',
                         onclick: () => handleInviteResponse(inviteId, data, 'rejected')
                     }),
                     createElement('button', {
                         id: 'btn-invite-accept',
-                        className: 'p-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-purple-500/25 hover:scale-105 hover:shadow-purple-500/40 transition-all active:scale-95',
+                        className: 'btn-modal btn-primary',
                         textContent: t('invite_accept') || 'Accetta',
                         onclick: () => handleInviteResponse(inviteId, data, 'accepted')
                     })
