@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.147';
+import {auth} from '../../firebase-config.js?v=1.2.148';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,8 +17,8 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.147';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.147';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.148';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.148';
 async function savePrivateAccount(...args) {
     let module;
     try { module = await import('./form-privato-save.js'); }

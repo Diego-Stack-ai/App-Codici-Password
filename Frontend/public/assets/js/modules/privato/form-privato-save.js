@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.147';
+import { auth, db } from '../../firebase-config.js?v=1.2.148';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -13,6 +13,7 @@ import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.
 import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { DECRYPT_FAILURE_MESSAGE, assertAccountSaveAllowed, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
+import { isPrivateAccountPilotEnabled } from '../data/private-account-offline-pilot.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -190,7 +191,14 @@ export async function savePrivateAccount({
 
     try {
         if (!isActive()) throw new Error('RECOVERY_SESSION_CHANGED');
-        const pilotEligible = offlinePolicy.eligible;
+        // Il pilota M6 non deve intercettare ogni normale modifica online.
+        // In produzione resta attivo quando serve davvero la coda (offline) o
+        // quando il collaudo viene richiesto esplicitamente con `?m6pilot=1`.
+        // In caso contrario il salvataggio online usa la transazione completa
+        // sottostante, evitando falsi recuperi causati da record/profili legacy
+        // che sono intenzionalmente fuori dallo scope ridotto del pilota.
+        const pilotEligible = offlinePolicy.eligible &&
+            (!navigator.onLine || isPrivateAccountPilotEnabled());
         if (recoveryOperation && (!pilotEligible || recoveryOperation.uid !== currentUid || recoveryOperation.recordId !== currentDocId)) {
             throw new Error('RECOVERY_ACCOUNT_SCOPE_CHANGED');
         }

@@ -10,7 +10,7 @@ const COMPANY_ARGS = {bankAccounts: [], invitedEmails: [], isExplicitMemo: false
 const ZERO = {encrypt: 0, key: 0, tx: 0, replaced: 0, enqueued: 0, handoffs: 0};
 const readyContext = () => { const context = createAccountLoadContext({mode: 'edit'}); context.markLoaded(context.beginLoad()); return context; };
 const at = (text, needle) => { const index = text.indexOf(needle); assert.ok(index >= 0, `manca nel sorgente: ${needle}`); return index; };
-async function privateFixture({eligible = true} = {}) {
+async function privateFixture({eligible = true, pilotEnabled = true} = {}) {
     const source = strip(await readFile(new URL('../Frontend/public/assets/js/modules/privato/form-privato-save.js', import.meta.url), 'utf8'))
         .replace("await import('../data/private-account-offline-pilot.js')", 'pilotFixture');
     const counts = {encrypt: 0, key: 0, tx: 0, replaced: 0, enqueued: 0, handoffs: 0};
@@ -27,6 +27,7 @@ async function privateFixture({eligible = true} = {}) {
         accountModeFromFlags: () => 'account-private', validateAccountMode: () => ({}),
         recordFieldsFromAccountMode: () => ({type: 'account', visibility: 'private'}),
         classifyPrivateAccountOfflineWrite: () => ({eligible}),
+        isPrivateAccountPilotEnabled: () => pilotEnabled,
         navigator: {onLine: true}, doc: () => ({id: 'record'}), collection: () => ({id: 'record'}),
         runTransaction: async () => { counts.tx += 1; throw Object.assign(new Error('STOP_AFTER_WRITE'), {code: 'STOP'}); },
         setTimeout: fn => fn(), t: key => key, console: {error() {}}, window: {location: {replace: url => navigations.push(url)}},
@@ -86,13 +87,20 @@ test('privato: caricamento riuscito scrive, creazione scrive, sessione scaduta n
     assert.equal(ready.counts.enqueued, 1); assert.equal(ready.counts.replaced, 0); assert.equal(ready.counts.key, 1);
     const creation = await privateFixture();
     await creation.sandbox.savePrivateAccount({...PRIVATE_ARGS, currentDocId: null, isEditing: false, loadContext: createAccountLoadContext({mode: 'create'})});
-    assert.ok(creation.counts.enqueued + creation.counts.replaced >= 1);
+    assert.equal(creation.counts.tx, 1);
+    assert.equal(creation.counts.enqueued + creation.counts.replaced, 0);
     const locked = await privateFixture();
     await locked.sandbox.savePrivateAccount({...PRIVATE_ARGS, loadContext: readyContext(), isActive: () => false});
     assert.deepEqual(locked.counts, ZERO);
     const transactional = await privateFixture({eligible: false});
     try { await transactional.sandbox.savePrivateAccount({...PRIVATE_ARGS, loadContext: readyContext()}); } catch {}
     assert.equal(transactional.counts.tx, 1);
+});
+test('privato: online senza opt-in M6 usa la transazione completa e non accoda', async () => {
+    const ordinaryOnline = await privateFixture({eligible: true, pilotEnabled: false});
+    try { await ordinaryOnline.sandbox.savePrivateAccount({...PRIVATE_ARGS, loadContext: readyContext()}); } catch {}
+    assert.equal(ordinaryOnline.counts.tx, 1);
+    assert.equal(ordinaryOnline.counts.enqueued + ordinaryOnline.counts.replaced, 0);
 });
 test('azienda: pendente, fallito, invalidato e assente zero scritture; pronto raggiunge la transazione', async () => {
     const pending = createAccountLoadContext({mode: 'edit'}); pending.beginLoad();
