@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.140';
+import { auth, db } from '../../firebase-config.js?v=1.2.141';
 import { doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -34,6 +34,10 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     const initialMode = accountModeFromRecord(account);
     let selectedMode = initialMode;
     let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected' && g?.status !== 'suspended').map(g => normalizeEmail(g.email)).filter(Boolean));
+    const notificationChoices = new Map(Object.values(account.sharedWith || {}).map(guest => {
+        const email = normalizeEmail(guest?.email);
+        return [email, { notifyPush: guest?.notifyPush !== false, notifyEmail: guest?.notifyEmail === true }];
+    }).filter(([email]) => email));
     let contacts = [];
     try {
             // Alcuni contesti legacy montano questo modulo senza esportare `auth`:
@@ -97,16 +101,34 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 contacts.forEach(contact => {
                     const email = normalizeEmail(contact.email);
                     const checked = selectedEmails.has(email);
+                    const choice = notificationChoices.get(email) || { notifyPush: true, notifyEmail: false };
                     const checkbox = createElement('input', { type: 'checkbox', checked });
                     checkbox.addEventListener('change', () => {
-                        if (checkbox.checked) selectedEmails.add(email); else selectedEmails.delete(email);
+                        if (checkbox.checked) {
+                            selectedEmails.add(email);
+                            if (!notificationChoices.has(email)) notificationChoices.set(email, { ...choice });
+                        } else selectedEmails.delete(email);
                         render();
                     });
-                    contactList.appendChild(createElement('label', { className: 'account-mode-contact' }, [
-                        checkbox,
-                        createElement('span', { className: 'account-mode-contact-copy' }, [
-                            createElement('strong', { textContent: fullName(contact) }),
-                            createElement('small', { textContent: email })
+                    const channelToggle = (channel, label) => {
+                        const input = createElement('input', { type: 'checkbox', checked: choice[channel], disabled: !checked, dataset: { channel, recipientEmail: email } });
+                        input.addEventListener('change', () => {
+                            notificationChoices.set(email, { ...choice, [channel]: input.checked });
+                            render();
+                        });
+                        return createElement('label', { className: 'account-mode-channel' }, [input, document.createTextNode(label)]);
+                    };
+                    contactList.appendChild(createElement('div', { className: 'account-mode-contact' }, [
+                        createElement('label', { className: 'account-mode-contact-select' }, [
+                            checkbox,
+                            createElement('span', { className: 'account-mode-contact-copy' }, [
+                                createElement('strong', { textContent: fullName(contact) }),
+                                createElement('small', { textContent: email })
+                            ])
+                        ]),
+                        createElement('span', { className: 'account-mode-contact-channels' }, [
+                            channelToggle('notifyPush', 'Push'),
+                            channelToggle('notifyEmail', 'Email')
                         ])
                     ]));
                 });
@@ -170,10 +192,11 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 if (isShared) {
                     for (const email of selectedEmails) {
                         const key = sanitizeEmail(email);
+                        const choice = notificationChoices.get(email) || { notifyPush: true, notifyEmail: false };
                         // `suspended` è reinvitabile solo perché l'utente lo ha
                         // riselezionato: gli ospiti sospesi non sono preselezionati.
                         if (!sharedWith[key] || sharedWith[key].status === 'rejected' || sharedWith[key].status === 'suspended') {
-                            sharedWith[key] = { email, status: 'pending', uid: null };
+                            sharedWith[key] = { email, status: 'pending', uid: null, ...choice };
                             const invite = {
                                 inviteId: inviteIdForGuest(accountId, key, cycle),
                                 // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
@@ -184,12 +207,14 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                                 accountId, ownerId, senderId: ownerId,
                                 senderEmail: auth.currentUser?.email || '', recipientEmail: email,
                                 accountName: stored.nomeAccount || '', type: isMemo ? 'memo' : 'account',
-                                notifyPush: document.getElementById('account-mode-notify-push')?.checked === true,
-                                notifyEmail: document.getElementById('account-mode-notify-email')?.checked === true,
+                                notifyPush: choice.notifyPush,
+                                notifyEmail: choice.notifyEmail,
                                 status: 'pending', cycle, createdAt: new Date().toISOString()
                             };
                             if (aziendaId) invite.aziendaId = aziendaId;
                             transaction.set(doc(db, 'invites', invite.inviteId), invite);
+                        } else {
+                            sharedWith[key] = { ...sharedWith[key], ...choice };
                         }
                     }
                 }

@@ -81,7 +81,8 @@ function fixture({sharingCycle = 1, status = 'suspended', hasCredentials = true}
         validateAccountMode: () => ({}), hasAccountCredentials: () => hasCredentials,
         showToast: (...args) => toasts.push(args), showConfirmModal: async () => true, t: key => key,
         createElement: (tag, props, children) => new Node(tag, props, children), clearElement: node => { node.children = []; },
-        document: {getElementById: id => nodes[id] || null, querySelector: () => null}
+        document: {getElementById: id => nodes[id] || null, querySelector: () => null,
+            createTextNode: textContent => new Node('#text', {textContent})}
     });
     vm.runInContext(source, context);
     return {writes, toasts, reloads, nodes, account,
@@ -104,7 +105,8 @@ test('editor dettaglio: una voce sospesa non è preselezionata', async () => {
 test('editor dettaglio: il proprietario non compare fra i destinatari', async () => {
     const f = fixture();
     await f.init();
-    const inputs = f.nodes['account-mode-contact-list'].descendants().filter(node => node.tag === 'input');
+    const inputs = f.nodes['account-mode-contact-list'].descendants()
+        .filter(node => node.tag === 'input' && !node.dataset.channel);
     assert.equal(inputs.length, 1, 'resta selezionabile soltanto il contatto esterno');
     const renderedText = f.nodes['account-mode-contact-list'].descendants()
         .map(node => node.textContent || '').join(' ');
@@ -142,6 +144,8 @@ test('editor dettaglio: la selezione espressa crea l\'invito del ciclo corrente 
     assert.deepEqual(created.map(write => write[0]), ['invites/account-1_guest_example_invalid_c1']);
     assert.equal(created[0][1].cycle, 1, 'l\'invito dichiara il ciclo corrente');
     assert.equal(created[0][1].status, 'pending');
+    assert.equal(created[0][1].notifyPush, true);
+    assert.equal(created[0][1].notifyEmail, false);
     // M7-AUDIT-5C: base opaca dell'istanza e payload dentro l'allowlist delle
     // Rules di creazione (altrimenti la creazione verrebbe negata).
     assert.match(created[0][1].auditRef, AUDIT_REF, 'l\'invito dichiara una base opaca valida');
@@ -156,6 +160,30 @@ test('editor dettaglio: la selezione espressa crea l\'invito del ciclo corrente 
     assert.equal(f.reloads.length, 1);
     assert.equal(f.reloads[0].serverConfirmed, true,
         'dopo il commit il dettaglio richiede il record confermato dal server');
+});
+
+test('editor dettaglio: Push ed Email sono configurabili per singolo destinatario', async () => {
+    const f = fixture({sharingCycle: 1});
+    await f.init();
+    let inputs = f.nodes['account-mode-contact-list'].descendants().filter(node => node.tag === 'input');
+    const recipient = inputs.find(input => !input.dataset.channel);
+    recipient.checked = true;
+    recipient.dispatch('change');
+    inputs = f.nodes['account-mode-contact-list'].descendants().filter(node => node.tag === 'input');
+    const push = inputs.find(input => input.dataset.channel === 'notifyPush');
+    let email = inputs.find(input => input.dataset.channel === 'notifyEmail');
+    assert.equal(push.disabled, false);
+    assert.equal(email.disabled, false);
+    push.checked = false;
+    push.dispatch('change');
+    email = f.nodes['account-mode-contact-list'].descendants()
+        .find(input => input.tag === 'input' && input.dataset.channel === 'notifyEmail');
+    email.checked = true;
+    email.dispatch('change');
+    await f.save();
+    const invite = f.writes.find(write => write[0].startsWith('invites/') && write[2] === 'set')[1];
+    assert.equal(invite.notifyPush, false);
+    assert.equal(invite.notifyEmail, true);
 });
 
 test('editor dettaglio: Memorandum condiviso persiste il modo canonico prima del reload confermato', async () => {
