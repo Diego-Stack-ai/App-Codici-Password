@@ -1,5 +1,15 @@
 # Stato
 
+## Nuovo ciclo sicurezza — CPFE2 dual-read candidato — 10/10/2026
+
+Dopo la chiusura M7-M10, Diego ha aperto un ciclo separato per i residui reali. Il primo incremento porta nel runtime esclusivamente il lettore CPFE2 a PBKDF2-SHA256/600.000; `encrypt()` continua a produrre il formato storico a 100.000 iterazioni. Non esiste migrazione automatica, attivazione da ambiente/richiesta o modifica dei dati. Regressioni: crittografia 16/16, caricamento Account privato/azienda 20/20, sintassi 176 moduli e documentazione 11/11; verificati lettura CPFE2 valida, riconoscimento nel guardiano applicativo, scrittura ancora legacy e rifiuto fail-closed di downgrade, Base64 non canonico, formato alterato e password errata. Il namespace `CPFE2.` è riservato: anche una busta corta o malformata viene respinta dal confine strict e non può ricadere a testo in chiaro. Il benchmark sintetico nel browser reale Chrome 155/Windows ha inoltre letto CPFE2 in **72,9 ms** di mediana su 7 campioni (72,4–74,1 ms), confermando che il writer resta legacy. Resta aperta la matrice dispositivi fisici prima di valutare nuove scritture CPFE2.
+
+Il primo controllo successivo M8 è stato ripetuto dopo l'integrazione CPFE2: la suite backup/ripristino candidata passa **110/110** usando soltanto fixture sintetiche. Questo esclude regressioni locali sul formato backup, preflight, collisioni, retry e gestione della memoria; non abilita il motore riprendibile e non sostituisce GCS reale o prove dispositivo.
+
+Il nucleo puro M7 è stato rieseguito **56/56**. Il primo passaggio ha individuato una fixture Storage rimasta indietro rispetto alla guardia `getMetadata()` già presente nell'executor: la fixture ora simula esplicitamente la generation corrente prima del delete vincolato. Non è stata indebolita alcuna precondizione; purge live e retry degli esiti incerti restano hard-off.
+
+Il controllo MFA e Functions conclude i residui locali del ciclo: recovery mirato **11 pass, 4 skip storici** e suite Functions/security **415 pass, 9 skip dichiarati, 0 fail** su 424 casi. La policy assistita arresta gli account con fattori prima di codice e update Auth; full-replace e withdraw selettivo restano disabilitati. Non restano incrementi locali autorizzati che possano sostituire i gate esterni: matrice dispositivi fisici CPFE2, GCS reale per M7/M8, audit indipendente e privacy/legale.
+
 ## Stato conclusivo autorevole — 10/10/2026
 
 Il ciclo tecnico e documentale M7-M10 è chiuso sulla versione `1.2.150`, pubblicata su Firebase Hosting e verificata nella pagina reale. `master` è al commit `86b969cc`; le PR #90 e #91 risultano integrate. La documentazione canonica conta 31 MD e 615 collegamenti locali validi; il controllo di governance passa 11/11. Le regressioni mirate finali confermano 46 test superati e 4 scenari storici intenzionalmente esclusi per M7/M8/M10, oltre a 8/8 test sul salvataggio Account.

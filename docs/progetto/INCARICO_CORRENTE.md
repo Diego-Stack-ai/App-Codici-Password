@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## CICLO-SICUREZZA-01 — attivo dal 10/10/2026
+
+Diego richiede di sistemare e chiudere i residui reali emersi dalla revisione successiva a M7-M10. Il pacchetto locale è ora completato: CPFE2 dual-read fail-closed, raccordo Crea/Modifica Account, benchmark Chrome/Windows, M8 110/110, M7 puro 56/56 e Functions/security 415 pass su 424 con 9 skip dichiarati. Le scritture CPFE2, il restore riprendibile, il purge generale, il full-replace MFA e il withdraw selettivo restano hard-off. Non restano incrementi locali autorizzati che possano chiudere i gate esterni: matrice dispositivi fisici, GCS reale, audit indipendente e privacy/legale. Commit, push, merge, deploy e accessi produttivi restano permessi distinti.
+
 ## Nessun incarico M7-M10 attivo — chiusura 10/10/2026
 
 Il ciclo M7-M10 è concluso e verificato sulla versione pubblicata `1.2.150`, `master` commit `86b969cc`. Non è autorizzata né richiesta un'ulteriore attivazione automatica: i motori safe-off restano disabilitati e i gate esterni non eseguiti richiedono un nuovo incarico completo di obiettivo, ambiente, dati sintetici, criteri di accettazione e permessi distinti per modifica, commit, push, merge e deploy.

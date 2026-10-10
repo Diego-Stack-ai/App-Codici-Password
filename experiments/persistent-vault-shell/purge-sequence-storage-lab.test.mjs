@@ -89,8 +89,8 @@ test('Storage lab pins generation, retains stop and never retries uncertain effe
       }};
       const bucket = {name: scope.bucket, storage: {apiEndpoint: 'http://127.0.0.1:9199', baseUrl: 'http://127.0.0.1:9199', retryOptions: {autoRetry: false}}, file: (path, options) => {
         assert.equal(path, targets[0].path);
-        assert.equal(options.generation, targets[0].generation);
-        return {delete: async options => {
+        if (options) assert.equal(options.generation, targets[0].generation);
+        return {getMetadata: async () => [{generation: targets[0].generation}], delete: async options => {
           calls++;
           assert.equal(state.sequence.outcomes[0], 'pending');
           assert.equal(options.ifGenerationMatch, targets[0].generation);

@@ -39,6 +39,46 @@ test('legacy 100000-iteration format remains interoperable with independent WebC
   try{assert.equal(new TextDecoder().decode(decoded),plain);}finally{new Uint8Array(decoded).fill(0);}
 });
 
+test('runtime dual-read apre CPFE2 a 600000 iterazioni ma continua a scrivere legacy',async()=>{
+  const password='Synthetic-CPFE2-password',plain='SYNTHETIC CPFE2 payload';
+  const salt=new Uint8Array(16).fill(31),iv=new Uint8Array(12).fill(47);
+  const encoded=new TextEncoder().encode(password);
+  let material;
+  try{material=await crypto.subtle.importKey('raw',encoded,'PBKDF2',false,['deriveKey']);}
+  finally{encoded.fill(0);}
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:600000},material,
+    {name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  const ciphertext=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(plain)));
+  const envelope={version:2,kdf:'PBKDF2-SHA256',iterations:600000,cipher:'AES-GCM-256',
+    salt:Buffer.from(salt).toString('base64'),iv:Buffer.from(iv).toString('base64'),
+    ciphertext:Buffer.from(ciphertext).toString('base64')};
+  const cpfe2=`CPFE2.${Buffer.from(JSON.stringify(envelope)).toString('base64')}`;
+  assert.equal(await decrypt(cpfe2,password),plain);
+  assert.equal((await encrypt(plain,password)).startsWith('CPFE2.'),false);
+});
+
+test('runtime CPFE2 fallisce chiuso su downgrade, formato alterato e password errata',async()=>{
+  const malformed=value=>`CPFE2.${Buffer.from(JSON.stringify(value)).toString('base64')}`;
+  const base={version:2,kdf:'PBKDF2-SHA256',iterations:600000,cipher:'AES-GCM-256',
+    salt:Buffer.alloc(16).toString('base64'),iv:Buffer.alloc(12).toString('base64'),
+    ciphertext:Buffer.alloc(17).toString('base64')};
+  for(const patch of [{iterations:100000},{iterations:600001},{kdf:'PBKDF2-SHA1'},{cipher:'AES-CBC-256'},
+    {salt:Buffer.alloc(15).toString('base64')},{iv:Buffer.alloc(11).toString('base64')},
+    {salt:`${base.salt}\n`},{ciphertext:base.ciphertext.replace(/=$/,'')}])
+    assert.equal(await decrypt(malformed({...base,...patch}),'Synthetic-password'),'--ERRORE--');
+  assert.equal(await decrypt(`${malformed(base).replace(/=$/,'')}`,'Synthetic-password'),'--ERRORE--');
+  assert.equal(await decrypt(malformed(base),'Wrong-password'),'--ERRORE--');
+});
+
+test('il confine strict non riclassifica CPFE2 malformato come testo in chiaro',async()=>{
+  const {decryptRequiredValue,isEncryptedValue}=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}#strict-cpfe2`);
+  const malformed=`CPFE2.${'A'.repeat(32)}!`;
+  assert.equal(isEncryptedValue(malformed),true);
+  await assert.rejects(decryptRequiredValue(malformed,'Synthetic-password'),/Dato non leggibile/);
+  assert.equal(isEncryptedValue('CPFE2.bad'),true);
+  await assert.rejects(decryptRequiredValue('CPFE2.bad','Synthetic-password'),/Dato non leggibile/);
+});
+
 for(const operation of ['wrap','verifier','legacy'])for(const failure of [false,true])
 test(`${operation} clears imported credential bytes on ${failure?'failure':'success'}`,async t=>{
   const original=crypto.subtle.importKey.bind(crypto.subtle);let retained;

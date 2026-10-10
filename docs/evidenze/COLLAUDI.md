@@ -1,5 +1,36 @@
 # Collaudi
 
+## M10 — CPFE2 dual-read nel browser reale — 10/10/2026
+
+- Runner locale dedicato: `experiments/persistent-vault-shell/benchmark-vault-kdf-server.mjs`; pagina isolata su loopback, senza account, Firebase o dati reali.
+- Ambiente: Chrome 155 su Windows 10, sorgente runtime `crypto-utils.js` SHA-256 `65a4db4e1ba4f35167ff3aa33883156652ef4d8e7cbb16e3fa386dbccd7bfb40`.
+- Esito: fixture CPFE2 generata indipendentemente e letta dal runtime; password errata respinta; `encrypt()` verificato ancora legacy, quindi nuove scritture CPFE2 disabilitate.
+- Misura `fieldV2Read`, 7 campioni dopo warm-up: **72,4 / 72,9 / 74,1 ms** min/mediana/max con PBKDF2-SHA256 a 600.000 iterazioni.
+- Raccordo applicativo: `account-loaddata-full-context.test.mjs` **20/20**; i moduli Crea/Modifica Account privato e aziendale riconoscono e decifrano campi CPFE2 sintetici attraverso il guardiano di caricamento, senza rendere salvabile un errore.
+- Confine strict: suite crittografia **16/16**; qualsiasi valore nel namespace riservato `CPFE2.`, anche corto, non canonico o malformato, viene trattato come ciphertext e fallisce chiuso invece di ricadere a testo in chiaro.
+- Limiti: singolo browser desktop; non è integrazione applicativa, matrice dispositivi, audit indipendente, approvazione dei parametri o autorizzazione alla migrazione.
+
+## M8 — regressione locale dopo CPFE2 — 10/10/2026
+
+- Comando: `npm run test:backup-prototype`.
+- Esito: **110/110** superati su export/import cifrato, intestazione, preflight, collisioni, selezione, retry, interruzioni, buffer e UI di ripristino.
+- Perimetro: fixture e dati sintetici; nessun servizio remoto, dato reale, migrazione o attivazione del motore riprendibile.
+- Limiti invariati: GCS reale, integrazione distribuita e dispositivi fisici restano gate esterni.
+
+## M7 — regressione pura del purge vincolato — 10/10/2026
+
+- Suite `purge-*.test.mjs` senza emulatori: primo passaggio **55/56**, perché la fixture Storage non esponeva ancora `getMetadata()` richiesto dall'executor già protetto.
+- Correzione limitata al doppio sintetico: `getMetadata()` restituisce la generation prevista e il file generation-pinned continua a verificare `generation` e `ifGenerationMatch` come stringhe esatte.
+- Rerun: **56/56** superati; fence, stop, journal, inventario, sequenza, riconciliazione e assenza di retry incerto restano verdi.
+- Nessuna modifica al motore live, nessuna delete remota e nessuna abilitazione del purge.
+
+## MFA e Functions — regressione conclusiva locale — 10/10/2026
+
+- `node --test functions/test/recovery-security.test.js`: **11 pass, 4 skip storici**, 0 fail.
+- `npm run test:functions-security`: **424 totali, 415 pass, 9 skip dichiarati, 0 fail**, inclusi lint e controlli sintattici Functions.
+- Verificato che la policy assistita arresti il recupero con fattori iscritti prima di prenotare/consumare codici o aggiornare Auth.
+- Full-replace e withdraw selettivo restano hard-off; nessun recupero reale, deploy o modifica dati eseguiti.
+
 ## Account privato — doppio salvataggio pubblicato 1.2.150 — 09/10/2026
 
 Prerequisiti osservati: record sintetico `TEST v147 - Account privato`, URL senza `m6pilot`, Vault già sbloccata e Hosting `1.2.150`. Primo ciclo: nota impostata a `TEST persistenza 1.2.150 - diagnosi B`, salvataggio, navigazione `afterWrite=1` e rilettura confermata nel dettaglio. Secondo ciclo immediato sullo stesso record: nota `diagnosi C`, nuovo salvataggio e nuova rilettura confermata. Il DOM ha mostrato il valore nuovo in entrambi i cicli; nessun recupero offline o conflitto è comparso. Il test `account-save-context-blocks-writes.test.mjs` esegue inoltre il callback transazionale e verifica due aggiornamenti consecutivi con note cifrate differenti.
