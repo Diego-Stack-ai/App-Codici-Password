@@ -1,5 +1,13 @@
 # Stato
 
+## Stato conclusivo autorevole — 10/10/2026
+
+Il ciclo tecnico e documentale M7-M10 è chiuso sulla versione `1.2.150`, pubblicata su Firebase Hosting e verificata nella pagina reale. `master` è al commit `86b969cc`; le PR #90 e #91 risultano integrate. La documentazione canonica conta 31 MD e 615 collegamenti locali validi; il controllo di governance passa 11/11. Le regressioni mirate finali confermano 46 test superati e 4 scenari storici intenzionalmente esclusi per M7/M8/M10, oltre a 8/8 test sul salvataggio Account.
+
+La chiusura non abilita i candidati non certificati: purge automatico M7, restore riprendibile M8, recupero automatico MFA e nuove scritture CPFE2 restano hard-off. Il formato corrente dei campi rimane compatibile AES-256-GCM con derivazione PBKDF2-SHA256 storica; il verificatore e l'envelope della chiave Vault usano 600.000 iterazioni. GCS reale, dispositivi/browser fisici, audit indipendente e privacy/legale restano controlli esterni non eseguiti, non difetti locali ancora assegnati.
+
+Le sezioni datate precedenti sono una cronologia delle prove. Qualsiasi frase precedente che definisca una candidata «pronta», un «prossimo incremento» o un incarico «attivo» è superata da questo stato conclusivo.
+
 ## Account privato 1.2.150 — salvataggi consecutivi verificati — 09/10/2026
 
 La PR #90 è stata unita in `master` (`326b83a3`) e il deploy Firebase Hosting è riuscito. Nell'app pubblicata la pagina ha caricato la versione `1.2.150`; su un Account sintetico già identificato due modifiche consecutive della nota sono state confermate dal server e mostrate nel dettaglio dopo `afterWrite=1`. La regressione locale ora entra davvero nel callback `runTransaction` e conferma che il primo e il secondo salvataggio consegnano ciphertext distinti. Il precedente esito non persistito non si è ripresentato nel ciclo controllato; Functions e Rules non sono state ridistribuite per questa correzione.

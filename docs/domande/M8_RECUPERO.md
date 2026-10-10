@@ -1,5 +1,7 @@
 # M8 recupero
 
+> Stato definitivo 10/10/2026: nessuna domanda M8 è assegnata nel ciclo corrente. La parte pubblicata e verificata resta l'anteprima sicura della `1.2.145`, inclusa nella versione corrente `1.2.150`; il restore riprendibile rimane hard-off. GCS reale, dispositivi e attivazione costituiscono un eventuale nuovo ciclo, non residui automatici di questo incarico. Le formulazioni «riaperta», «restano implementazione» e «gate aperto» sotto sono fonti storiche e non prevalgono su questa intestazione.
+
 > Esito pubblicato 09/10/2026: versione `1.2.145` verificata con backup cifrato sintetico. Anteprima integra, 0 mancanti, 0 modificati, 1 profilo invariato; `settings/security` escluso prima della callable e sicurezza corrente preservata. Nessuna scrittura applicata. I gate del motore riprendibile hard-off restano separati.
 
 > Aggiornamento 09/10/2026: nella candidata `1.2.145` il runtime corrente autentica e conta `settings/security`, poi lo esclude prima dell'anteprima e della callable, conservando la sicurezza Vault attuale con avviso esplicito. Test backup 110/110; resta il collaudo pubblicato finale con dato sintetico.
