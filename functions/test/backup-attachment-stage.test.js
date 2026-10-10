@@ -36,7 +36,8 @@ test('cleanup deletion pins the generation and its precondition', async () => {
     {deleted: true, missing: false, generation: '90071992547409931234'});
   assert.equal(calls[0].path, identity.storagePath);
   assert.deepEqual(calls[0].options, {generation: '90071992547409931234'});
-  assert.deepEqual(calls[1], {preconditionOpts: {ifGenerationMatch: '90071992547409931234'}});
+  assert.deepEqual(calls[1], {generation: '90071992547409931234',
+    ifGenerationMatch: '90071992547409931234'});
   const missing = {file: () => ({async delete() { throw Object.assign(new Error('missing'), {code: 404}); }})};
   assert.deepEqual(await deleteStageGeneration(missing, identity, '7'), {deleted: false, missing: true, generation: '7'});
 });

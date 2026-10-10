@@ -8,6 +8,7 @@ const policy = require('../archive-purge-service');
 // This override exists only in the isolated VM fixture, never in the endpoint.
 const legacyPolicy = {...policy, isArchivePurgeSuspended: () => false};
 const receipts = require('../archive-purge-receipt');
+const lockApi = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
@@ -32,7 +33,7 @@ function fixture() {
       set: (reference, value) => { writes.push(reference.path); states.set(reference.path, {...states.get(reference.path), ...value}); },
       update: reference => writes.push(reference.path),
     })};
-  const context = vm.createContext({...legacyPolicy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...legacyPolicy, ...receipts, ...lockApi, exports: {}, HttpsError, onCall: (_options, run) => run,
     validatePurgeCommand: data => { accesses.validation++; return policy.validatePurgeCommand(data); },
     getFirestore: () => { accesses.firestore++; return store; },
     getStorage: () => { accesses.storage++; return {bucket: () => ({})}; },
@@ -71,5 +72,6 @@ test('matching owner preserves purge and constrains all paths to that owner', as
   assert.equal((await f.run()).status, 'purged');
   assert.deepEqual(f.accesses, {validation: 1, firestore: 1, storage: 1, recursiveDelete: 1});
   assert.ok(f.reads.length > 0); assert.ok(f.writes.length > 0);
-  assert.ok([...f.reads, ...f.writes].every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path)));
+  assert.ok([...f.reads, ...f.writes].every(path =>
+    /^(users|mutationResults)\/A(?:\/|$)/.test(path) || path === 'archivePurgeLocks/A'));
 });

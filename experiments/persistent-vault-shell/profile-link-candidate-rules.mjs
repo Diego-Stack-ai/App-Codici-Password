@@ -6,23 +6,24 @@ export function withProfileLinkCandidateRules(original) {
     const oldPrivate = JSON.stringify([...PROFILE_TEXT_FIELDS.private, ...PROFILE_TEXT_METADATA]);
     const oldCompany = JSON.stringify(['qrConfig', ...PROFILE_TEXT_FIELDS.company, ...PROFILE_TEXT_METADATA]);
     if (rules.split(oldPrivate).length !== 3 || rules.split(oldCompany).length !== 3 ||
-        rules.split("collection != 'contacts' &&").length !== 2 ||
-        rules.split("      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read, update, delete: if isOwner(userId);\n        allow create: if isOwner(userId) && (childCollection != 'accounts' ||\n          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));\n      }").length !== 2) throw Error('RULES_BASE_CHANGED');
+        rules.split("collection != 'contacts' &&").length !== 3 ||
+        rules.split("      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read: if isOwner(userId);\n        allow update, delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId);\n        allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && (childCollection != 'accounts' ||\n          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));\n      }").length !== 2) throw Error('RULES_BASE_CHANGED');
     rules = rules.replaceAll(oldPrivate, JSON.stringify([...PROFILE_TEXT_FIELDS.private, ...PROFILE_TEXT_METADATA, ...PROFILE_LINK_METADATA,
         'contactEmails', 'contactPhones', 'documenti', 'userAddresses']))
         .replaceAll(oldCompany, JSON.stringify(['qrConfig', ...PROFILE_TEXT_FIELDS.company, ...PROFILE_TEXT_METADATA, ...PROFILE_LINK_METADATA, 'emails', 'phoneAccountLinks']))
-        .replace("collection != 'contacts' &&", "collection != 'accounts' && collection != 'contacts' &&")
-        .replace("      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read, update, delete: if isOwner(userId);\n        allow create: if isOwner(userId) && (childCollection != 'accounts' ||\n          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));\n      }",
-            "      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read, update, delete: if isOwner(userId) && childCollection != 'accounts';\n        allow create: if isOwner(userId) && childCollection != 'accounts';\n      }");
+        .replaceAll("collection != 'contacts' &&", "collection != 'accounts' && collection != 'contacts' &&")
+        .replace("      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read: if isOwner(userId);\n        allow update, delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId);\n        allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && (childCollection != 'accounts' ||\n          existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));\n      }",
+            "      match /{childCollection}/{childDocument}/{rest=**} {\n        allow read: if isOwner(userId);\n        allow update, delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && childCollection != 'accounts';\n        allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && childCollection != 'accounts';\n      }");
     const protectedFields = JSON.stringify([...PROFILE_LINK_METADATA, 'linkedProfileField', 'linkedProfileFields', 'linkedCompanyProfileField', 'linkedCompanyProfileFields']);
     const accountRule = path => `    match ${path} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && !request.resource.data.keys().hasAny(${protectedFields});
-      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(${protectedFields});
+      allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && !request.resource.data.keys().hasAny(${protectedFields});
+      allow update: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(${protectedFields});
       allow delete: if false;
     }
     match ${path}/{collection}/{document=**} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
     }
 `;
     return rules.replace('    match /users/{userId} {', accountRule('/users/{userId}/accounts/{accountId}') +

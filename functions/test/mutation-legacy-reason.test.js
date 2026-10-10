@@ -6,6 +6,7 @@ const {HttpsError} = require('firebase-functions/v2/https');
 const bindingService = require('../mutation-result-binding');
 const privateService = require('../private-account-mutation-service');
 const offlineService = require('../offline-sync-service');
+const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 
 // Run the actual mutation handlers with only callable registration and Firestore
 // transaction boundaries replaced. This does not test HTTP/Auth/App Check.
@@ -33,6 +34,7 @@ function harness({domain, input, trusted, legacy, revision = 2}) {
   });
   const store = {
     collection: name => reference(name),
+    doc: path => reference(path),
     runTransaction: callback => callback({
       get: async ref => {
         reads.push(ref.path);
@@ -43,6 +45,7 @@ function harness({domain, input, trusted, legacy, revision = 2}) {
   };
   const context = vm.createContext({
     exports: {}, HttpsError, ...bindingService, ...privateService, ...offlineService,
+    assertTransactionGlobalPurgeUnlocked,
     onCall: (_options, handler) => handler,
     getFirestore: () => store,
     FieldValue: {serverTimestamp: () => 'synthetic-timestamp'},

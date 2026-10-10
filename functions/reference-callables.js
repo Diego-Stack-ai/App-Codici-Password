@@ -3,6 +3,7 @@ const {revisionDecision, sharedVaultPaths, validateSharedVaultCommand, sharedVau
 const {accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData} = require('./account-widget-service');
 const {createSharedVaultBinding, verifySharedVaultReceipt} = require('./shared-vault-receipt');
 const {createAccountWidgetBinding, verifyAccountWidgetReceipt} = require('./account-widget-receipt');
+const {assertTransactionGlobalPurgeUnlocked} = require('./archive-purge-global-lock');
 
 // Registration and infrastructure are injected; importing this module starts no services.
 function createReferenceCallables({onCall, getFirestore, FieldValue, HttpsError, requireMutationOwner}) {
@@ -26,6 +27,7 @@ exports.manageSharedVaultData = onCall(
         const legacyRef = store.doc(paths.operation);
         const operationRef = store.doc(`mutationResults/${request.auth.uid}/operations/${command.operationId}`);
         return store.runTransaction(async transaction => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
             const reads = [transaction.get(dataRef), transaction.get(operationRef)];
             let linkRef = null;
             let widgetRef = null;
@@ -163,6 +165,7 @@ exports.manageAccountWidget = onCall(
         const legacyRef = store.doc(paths.operation);
         const operationRef = store.doc(`mutationResults/${request.auth.uid}/operations/${command.operationId}`);
         return store.runTransaction(async transaction => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
             const [accountSnapshot, widgetSnapshot, operationSnapshot, legacySnapshot] = await Promise.all([
                 transaction.get(accountRef), transaction.get(widgetRef), transaction.get(operationRef), transaction.get(legacyRef)
             ]);

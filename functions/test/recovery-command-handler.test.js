@@ -6,6 +6,7 @@ const {HttpsError} = require('firebase-functions/v2/https');
 const service = require('../history-recovery-service');
 const receipts = require('../recovery-command-receipt');
 const {currentMutationRevision} = require('../mutation-result-binding');
+const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const helpers = source.slice(source.indexOf('function verifiedCurrentRevision('), source.indexOf('exports.applyOfflineMutation ='));
 const handler = source.slice(source.indexOf('async function runRecoveryCommand('), source.indexOf('exports.purgeArchivedAccount ='));
@@ -17,7 +18,7 @@ function fixture(mode, extra = {}) {
     {revision: 3, encryptedPayload: 'SYNTHETIC-CIPHERTEXT', deletedAt: 123, purgeAfterMs: 456}], ...Object.entries(extra)]);
   const writes = [];
   const reference = path => ({path, doc: id => reference(`${path}/${id}`), collection: id => reference(`${path}/${id}`)});
-  const store = {collection: reference, runTransaction: async callback => {
+  const store = {collection: reference, doc: reference, runTransaction: async callback => {
     const pending = [];
     const value = await callback({get: async ref => ({exists: docs.has(ref.path), data: () => docs.get(ref.path)}),
       set: (ref, data) => pending.push(['set', ref.path, data]), delete: ref => pending.push(['delete', ref.path])});
@@ -27,6 +28,7 @@ function fixture(mode, extra = {}) {
     return value;
   }};
   const context = vm.createContext({exports: {}, ...service, ...receipts, currentMutationRevision, HttpsError,
+    assertTransactionGlobalPurgeUnlocked,
     getFirestore: () => store, onCall: (_opts, callback) => callback, FieldValue: {serverTimestamp: () => 'synthetic-time'}});
   vm.runInContext(helpers + handler, context);
   return {docs, writes, run: (data = command, action = mode) => context.exports[action === 'trash' ? 'trashSyncRecord' : 'restoreSyncRecord']({auth: {uid: 'A'}, data})};

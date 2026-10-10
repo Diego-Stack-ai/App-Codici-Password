@@ -5,7 +5,7 @@ import {withCompanyQrSelectionCandidateRules} from './company-qr-selection-candi
 // currently edits these fields. Unrelated legacy permissions are not certified.
 export function withProfileTextCandidateRules(original) {
     let rules = withCompanyQrSelectionCandidateRules(original);
-    const root = '    match /users/{userId} {\n      allow read, write: if isOwner(userId);\n    }';
+    const root = '    match /users/{userId} {\n      allow read: if isOwner(userId);\n      allow write: if isOwner(userId) && isGlobalPurgeUnlocked(userId);\n    }';
     rules = rules.replaceAll('\r\n', '\n');
     if (rules.split(root).length !== 2 || rules.split("hasAny(['qrConfig'])").length !== 3) throw Error('RULES_BASE_CHANGED');
     const companyProtected = JSON.stringify(['qrConfig', ...PROFILE_TEXT_FIELDS.company, ...PROFILE_TEXT_METADATA]);
@@ -15,8 +15,8 @@ export function withProfileTextCandidateRules(original) {
     return rules.replaceAll("hasAny(['qrConfig'])", `hasAny(${companyProtected})`).replace(root,
         `    match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && !request.resource.data.keys().hasAny(${privateProtected});
-      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(${privateProtected});
+      allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && !request.resource.data.keys().hasAny(${privateProtected});
+      allow update: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(${privateProtected});
       allow delete: if false;
     }`);
 }

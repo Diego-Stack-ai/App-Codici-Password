@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const {assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope} = require('../private-account-write-scope');
 const {validatePrivateAccountMutation, privateAccountMutationDecision} = require('../private-account-mutation-service');
 const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require('../mutation-result-binding');
+const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 
 const cipher = 'QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB';
 const operation = () => ({schemaVersion: 1, uid: 'owner', recordId: 'record', operationId: 'device:scope', deviceId: 'device', expectedRevision: 1,
@@ -54,10 +55,11 @@ const handlerSource = index.slice(index.indexOf('exports.applyPrivateAccountMuta
 function handlerFixture({record = basic(), receipt = null, legacy = null, profile = {}, companies = []} = {}) {
   const writes = [], refs = [];
   const reference = path => ({path, collection: name => reference(`${path}/${name}`), doc: id => reference(`${path}/${id}`)});
-  const store = {collection: name => reference(name), runTransaction: async run => {
+  const store = {collection: name => reference(name), doc: path => reference(path), runTransaction: async run => {
     const staged = [];
     const result = await run({get: async ref => {
       refs.push(ref.path);
+      if (ref.path === 'archivePurgeLocks/owner') return {exists: false, data: () => undefined};
       if (ref.path === 'users/owner') return {exists: true, data: () => profile};
       if (ref.path === 'users/owner/aziende') return {docs: companies.map(value => ({data: () => value}))};
       const value = ref.path.startsWith('mutationResults/') ? receipt : ref.path.includes('/operationResults/') ? legacy : record;
@@ -69,7 +71,8 @@ function handlerFixture({record = basic(), receipt = null, legacy = null, profil
   const context = vm.createContext({exports: {}, onCall: (_options, handler) => handler,
     HttpsError, getFirestore: () => store, FieldValue: {serverTimestamp: () => 'synthetic-time'},
     validatePrivateAccountMutation, privateAccountMutationDecision, createMutationBinding, verifyMutationResult,
-    currentMutationRevision, assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope});
+    currentMutationRevision, assertPrivateAccountWriteScope, assertPrivateAccountReferenceScope,
+    assertTransactionGlobalPurgeUnlocked});
   vm.runInContext(retrySource + handlerSource, context);
   return {writes, refs, run: (data = operation()) => context.exports.applyPrivateAccountMutation({auth: {uid: 'owner'}, data})};
 }

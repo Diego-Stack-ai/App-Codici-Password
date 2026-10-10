@@ -7,6 +7,7 @@ const policy = require('../archive-purge-service');
 // This override exists only in the isolated VM fixture, never in the endpoint.
 const legacyPolicy = {...policy, isArchivePurgeSuspended: () => false};
 const receipts = require('../archive-purge-receipt');
+const lockApi = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index.js'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
@@ -46,7 +47,7 @@ function fixture({previous = null, companies = 1, malformed = false, attachments
       return result;
     }};
   class HttpsError extends Error { constructor(code, message) { super(message); this.code = code; } }
-  const context = vm.createContext({...legacyPolicy, ...receipts, exports: {}, onCall: (_config, run) => run, HttpsError,
+  const context = vm.createContext({...legacyPolicy, ...receipts, ...lockApi, exports: {}, onCall: (_config, run) => run, HttpsError,
     getFirestore: () => store, getStorage: () => ({bucket: () => ({})}), FieldValue: {serverTimestamp: () => 'time'}});
   vm.runInContext(ownerGuard + handler, context);
   return {states, counters: () => ({deletions, transactions}), run: () => context.exports.purgeArchivedAccount({auth: {uid: 'owner'}, data: command})};
@@ -85,7 +86,7 @@ test('external references reject fresh and resumed purge without state changes o
   }
 });
 
-test('KNOWN LIMIT: a newer restored record between preparation and recursiveDelete is deleted without a second revision check', async () => {
+test('adversarial direct-state injection bypassing every fenced writer: a newer restored record is deleted', async () => {
   let restored = false;
   const f = fixture({beforeDelete(states, path) {
     assert.equal(states.get('mutationResults/owner/operations/operation').status, 'processing');
@@ -111,7 +112,7 @@ test('recreated Account prevents final unlink and a false purged receipt', async
   assert.equal(f.states.has('users/owner/auditEvents/operation'), false);
 });
 
-test('KNOWN LIMIT: references added after preflight survive a purge reported as complete', async () => {
+test('adversarial direct-state injection bypassing every fenced writer: a late reference survives', async () => {
   for (const collection of ['accountWidgets', 'sharedVaultLinks']) {
     const latePath = `users/owner/${collection}/late-reference`;
     const lateReference = {context: 'private', accountId: 'account', synthetic: true};

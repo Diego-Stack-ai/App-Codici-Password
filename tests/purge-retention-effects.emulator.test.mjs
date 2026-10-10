@@ -28,6 +28,7 @@ const {getStorage} = requireFunctions('firebase-admin/storage');
 const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const receipts = requireFunctions('./archive-purge-receipt.js');
+const purgeLock = requireFunctions('./archive-purge-global-lock.js');
 const service = requireFunctions('./audit-retention-service.js');
 
 const source = readFileSync(new URL('../functions/index.js', import.meta.url), 'utf8');
@@ -48,13 +49,17 @@ const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'Timest
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
+    'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, Timestamp, {log() {}, warn() {}, error() {}},
     () => false,
     policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
     policy.validatePurgeCommand, policy.assertNoExternalAccountReferences,
     receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
-    (_options, run) => run, () => db, () => ({bucket: () => bucket}));
+    (_options, run) => run, () => db, () => ({bucket: () => bucket}),
+    purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
 
 const silentConsole = {log() {}, warn() {}, error() {}};
 const jobFactory = new Function('Timestamp', 'FieldPath', 'FieldValue', 'console', 'auditEventPath', 'classifyAuditEvent',
@@ -141,6 +146,7 @@ const UNLISTED_OBJECTS = [
 async function clear() {
     await db.recursiveDelete(db.collection('users'));
     await db.recursiveDelete(db.collection('mutationResults'));
+    await db.recursiveDelete(db.collection('archivePurgeLocks'));
     await db.recursiveDelete(db.collection('auditRetentionState'));
     for (const path of [LISTED_OBJECT, ORPHAN_OBJECT, ...UNLISTED_OBJECTS]) {
         await bucket.file(path).delete({ignoreNotFound: true});

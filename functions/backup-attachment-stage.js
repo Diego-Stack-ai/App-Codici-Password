@@ -139,7 +139,10 @@ async function deleteStageGeneration(bucket, identity, generation) {
   if ('generation' in file && String(file.generation) !== generation) fail('BACKUP_STAGE_GENERATION_UNSUPPORTED');
   if (typeof file.delete !== 'function') fail('BACKUP_STAGE_GENERATION_UNSUPPORTED');
   try {
-    await file.delete({preconditionOpts: {ifGenerationMatch: generation}});
+    // File#delete does not consume write-style `preconditionOpts` from its
+    // options object. Keep both exact query fields explicit; the file instance
+    // also pins the generation and rejects SDK rounding above.
+    await file.delete({generation, ifGenerationMatch: generation});
     return {deleted: true, missing: false, generation};
   } catch (error) {
     if (Number(error?.code) === 404) return {deleted: false, missing: true, generation};

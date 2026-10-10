@@ -8,6 +8,7 @@ const policy = require('../archive-purge-service');
 // This override exists only in the isolated VM fixture, never in the endpoint.
 const legacyPolicy = {...policy, isArchivePurgeSuspended: () => false};
 const receipts = require('../archive-purge-receipt');
+const lockApi = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const ownerGuard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
@@ -60,7 +61,7 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false, attachm
       writes.push(...staged);
       return result;
     }};
-  const context = vm.createContext({...legacyPolicy, ...receipts, exports: {}, HttpsError, onCall: (_options, run) => run,
+  const context = vm.createContext({...legacyPolicy, ...receipts, ...lockApi, exports: {}, HttpsError, onCall: (_options, run) => run,
     getFirestore: () => store,
     getStorage: () => { counts.storage++; return {bucket: () => ({file: path => ({
       delete: async options => {
@@ -125,7 +126,7 @@ test('receipt changed or removed before final transaction prevents cleanup and s
     const f = fixture({beforeFinal});
     await assert.rejects(f.run(), error => error.details?.reason === 'ARCHIVE_RESULT_UNVERIFIED');
     assert.equal(f.counts.recursiveDelete, 1);
-    assert.equal(f.writes.length, 1, 'only initial processing receipt was written');
+    assert.equal(f.writes.length, 2, 'only initial processing receipt and global lock were written');
     assert.equal(f.states.get('users/owner').contactEmails[0].linkedAccountId, 'account');
     assert.equal(f.states.has(auditPath), false);
   }
@@ -148,7 +149,7 @@ test('final transaction observes another completed attempt without repeating cle
   const f = fixture({beforeFinal: states => states.set(receiptPath, bound('purged'))});
   const result = await f.run();
   assert.equal(JSON.stringify(result), JSON.stringify({status: 'purged', duplicate: true}));
-  assert.equal(f.writes.length, 1, 'only initial processing receipt was written by this attempt');
+  assert.equal(f.writes.length, 2, 'only initial processing receipt and global lock were written by this attempt');
   assert.equal(f.states.get('users/owner').contactEmails[0].linkedAccountId, 'account');
   assert.equal(f.states.has(auditPath), false);
 });

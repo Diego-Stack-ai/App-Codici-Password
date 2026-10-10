@@ -59,7 +59,7 @@ function fixture() {
       if (!value) throw new Error('missing generation'); return [Buffer.from(value)];
     }, async delete(options) {
       assert.equal(typeof opts.generation, 'string');
-      assert.equal(options.preconditionOpts.ifGenerationMatch, opts.generation);
+      assert.equal(options.ifGenerationMatch, opts.generation);
       const entry = objects.get(path);
       if (!entry?.versions.has(opts.generation)) throw Object.assign(new Error('missing generation'), {code: 404});
       entry.versions.delete(opts.generation); deletes++;

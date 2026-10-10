@@ -45,6 +45,7 @@ const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const restoreService = requireFunctions('./backup-restore-service.js');
 const restoreReceipts = requireFunctions('./backup-restore-receipt.js');
 const restorePreview = requireFunctions('./backup-restore-preview.js');
+const purgeLock = requireFunctions('./archive-purge-global-lock.js');
 
 const indexSource = await read('../functions/index.js');
 const restoreSlice = indexSource.slice(indexSource.indexOf('exports.restoreBackupChunk'),
@@ -54,12 +55,12 @@ const adminDb = getFirestore(adminApp);
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',
     'buildRestorePreview', 'staleRestoreIndexes', 'decodeFirestoreValue', 'restoreChunkDecision',
     'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt', 'preserveRestoreAuthority',
-    'onCall', 'getFirestore', `${restoreSlice}\nreturn exports.restoreBackupChunk;`)({}, HttpsError, Timestamp,
+    'assertTransactionGlobalPurgeUnlocked', 'onCall', 'getFirestore', `${restoreSlice}\nreturn exports.restoreBackupChunk;`)({}, HttpsError, Timestamp,
     FieldValue, {log() {}, warn() {}, error() {}}, restorePreview.buildRestorePreview, restorePreview.staleRestoreIndexes,
     restoreService.decodeFirestoreValue, restoreService.restoreChunkDecision, restoreService.safeRestoreAudit,
     restoreService.validateRestoreChunk, restoreReceipts.createBackupRestoreBinding,
     restoreReceipts.verifyBackupRestoreReceipt, requireFunctions('./backup-restore-authority.js').preserveRestoreAuthority,
-    (_options, run) => run, () => adminDb);
+    purgeLock.assertTransactionGlobalPurgeUnlocked, (_options, run) => run, () => adminDb);
 
 // ── Export sintetico: profilo + N Account + un allegato ─────────────────────
 function buildBackup(accountCount = 1) {

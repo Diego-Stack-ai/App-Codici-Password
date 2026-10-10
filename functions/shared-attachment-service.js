@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const {assertTransactionGlobalPurgeUnlocked} = require('./archive-purge-global-lock');
 
 const SAFE_ID = /^[A-Za-z0-9_-]{1,180}$/;
 const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -74,6 +75,7 @@ function createSharedAttachmentService({db, deleteField, HttpsError}) {
     const publicRef = db.collection('cryptoPublicKeys').doc(uid);
     const privateRef = db.collection('users').doc(uid).collection('cryptoIdentity').doc('current');
     return db.runTransaction(async transaction => {
+      await assertTransactionGlobalPurgeUnlocked(transaction, db, uid);
       const [currentPublic, currentPrivate] = await Promise.all([
         transaction.get(publicRef), transaction.get(privateRef)
       ]);
@@ -111,6 +113,7 @@ function createSharedAttachmentService({db, deleteField, HttpsError}) {
       : ownerRoot.collection('aziende').doc(companyId).collection('accounts').doc(accountId);
     const attachmentRef = accountRef.collection('attachments').doc(attachmentId);
     return db.runTransaction(async transaction => {
+      await assertTransactionGlobalPurgeUnlocked(transaction, db, request.auth.uid);
       const [accountSnapshot, attachmentSnapshot] = await Promise.all([
         transaction.get(accountRef), transaction.get(attachmentRef)
       ]);
