@@ -68,7 +68,7 @@ function buildBackup(accountCount = 1) {
     const sink = {write: async value => { writes.push(value); }, close: async () => {}};
     const repositories = {};
     for (const name of ['listBackupCompanies', 'listBackupCompanyAccounts', 'listBackupCompanyAttachments',
-        'listBackupAccountWidgets', 'listBackupContacts', 'listBackupDeadlines', 'listBackupProfileWidgets',
+        'listBackupAccountWidgetProfiles', 'listBackupAccountWidgets', 'listBackupContacts', 'listBackupDeadlines', 'listBackupProfileWidgets',
         'listBackupSettings', 'listBackupSharedVaultData', 'listBackupSharedVaultLinks']) {
         repositories[name] = async () => [];
     }

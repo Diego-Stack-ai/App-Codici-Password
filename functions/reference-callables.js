@@ -1,6 +1,7 @@
 "use strict";
 const {revisionDecision, sharedVaultPaths, validateSharedVaultCommand, sharedVaultUnlinkMatches} = require('./shared-vault-service');
 const {accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand, resolveAccountWidgetBankData} = require('./account-widget-service');
+const {revisionDecision: profileRevisionDecision, sameWidgetTarget, validateWidgetProfileCommand, widgetProfilePaths} = require('./widget-profile-service');
 const {createSharedVaultBinding, verifySharedVaultReceipt} = require('./shared-vault-receipt');
 const {createAccountWidgetBinding, verifyAccountWidgetReceipt} = require('./account-widget-receipt');
 const {assertTransactionGlobalPurgeUnlocked} = require('./archive-purge-global-lock');
@@ -166,8 +167,12 @@ exports.manageAccountWidget = onCall(
         const operationRef = store.doc(`mutationResults/${request.auth.uid}/operations/${command.operationId}`);
         return store.runTransaction(async transaction => {
             await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
-            const [accountSnapshot, widgetSnapshot, operationSnapshot, legacySnapshot] = await Promise.all([
-                transaction.get(accountRef), transaction.get(widgetRef), transaction.get(operationRef), transaction.get(legacyRef)
+            const widgetsRef = store.collection(`users/${request.auth.uid}/accountWidgets`);
+            const profileRef = command.data?.profileId
+                ? store.doc(`users/${request.auth.uid}/accountWidgetProfiles/${command.data.profileId}`) : null;
+            const [accountSnapshot, widgetSnapshot, operationSnapshot, legacySnapshot, widgetsSnapshot, profileSnapshot] = await Promise.all([
+                transaction.get(accountRef), transaction.get(widgetRef), transaction.get(operationRef), transaction.get(legacyRef),
+                transaction.get(widgetsRef), profileRef ? transaction.get(profileRef) : Promise.resolve(null)
             ]);
             if (!accountSnapshot.exists) throw new HttpsError("not-found", "Account non trovato.");
             if (widgetSnapshot.exists && !widgetBelongsToCommand(widgetSnapshot.data(), command)) {
@@ -190,6 +195,15 @@ exports.manageAccountWidget = onCall(
                 action: command.action
             });
             if (decision.duplicate || decision.status !== "applied") return decision;
+            if (command.data?.profileId) {
+                if (!profileSnapshot?.exists || profileSnapshot.data()?.category !== command.data.profileCategory) {
+                    throw new HttpsError('failed-precondition', 'Il profilo Widget non è disponibile nella categoria richiesta.');
+                }
+                const duplicate = widgetsSnapshot.docs.some(snapshot => snapshot.id !== command.widgetId &&
+                    snapshot.data()?.kind === 'embedded' && sameWidgetTarget(snapshot.data(), command));
+                if (duplicate) throw new HttpsError('already-exists',
+                    'Widget già inserito. Crea un nuovo profilo widget.', {reason: 'WIDGET_PROFILE_ALREADY_ATTACHED'});
+            }
             let widgetData;
             try {
                 widgetData = resolveAccountWidgetBankData(command, accountSnapshot.data(), widgetSnapshot.data());
@@ -217,6 +231,64 @@ exports.manageAccountWidget = onCall(
                 operationId: command.operationId,
                 revision: decision.revision,
                 createdAt: now
+            });
+            return decision;
+        });
+    }
+);
+
+exports.manageWidgetProfile = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    async request => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        requireMutationOwner(request, 'expectedOwnerUid');
+        let command;
+        try { command = validateWidgetProfileCommand(request.data); }
+        catch (error) {
+            throw new HttpsError("invalid-argument", `Profilo Widget non valido (${error.message || 'WIDGET_PROFILE_INVALID'}).`);
+        }
+        const store = getFirestore();
+        const paths = widgetProfilePaths(request.auth.uid, command);
+        const profileRef = store.doc(paths.profile);
+        const operationRef = store.doc(`mutationResults/${request.auth.uid}/operations/${command.operationId}`);
+        const widgetsRef = store.collection(`users/${request.auth.uid}/accountWidgets`);
+        return store.runTransaction(async transaction => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
+            const [profileSnapshot, operationSnapshot, widgetsSnapshot] = await Promise.all([
+                transaction.get(profileRef), transaction.get(operationRef), transaction.get(widgetsRef)
+            ]);
+            if (operationSnapshot.exists) {
+                const previous = operationSnapshot.data();
+                if (previous.domain !== 'widget-profile' || previous.profileId !== command.profileId || previous.action !== command.action) {
+                    throw new HttpsError('failed-precondition', 'Esito precedente non verificabile.');
+                }
+                return {...previous.result, duplicate: true};
+            }
+            const decision = profileRevisionDecision({
+                exists: profileSnapshot.exists,
+                currentRevision: Number(profileSnapshot.data()?.revision || 0),
+                expectedRevision: command.expectedRevision,
+                action: command.action
+            });
+            if (decision.status !== 'applied') return decision;
+            if (command.action === 'delete' && widgetsSnapshot.docs.some(snapshot => snapshot.data()?.profileId === command.profileId)) {
+                throw new HttpsError('failed-precondition', 'Il profilo è ancora utilizzato da uno o più Widget.');
+            }
+            const now = FieldValue.serverTimestamp();
+            if (command.action === 'delete') transaction.delete(profileRef);
+            else transaction.set(profileRef, {
+                ...command.data,
+                revision: decision.revision,
+                createdAt: command.action === 'create' ? now : profileSnapshot.data().createdAt,
+                updatedAt: now
+            });
+            transaction.set(operationRef, {
+                domain: 'widget-profile', profileId: command.profileId, action: command.action,
+                result: decision, createdAt: now
+            });
+            transaction.set(store.collection('users').doc(request.auth.uid).collection('auditEvents').doc(command.operationId), {
+                action: `widget-profile-${command.action}`, profileId: command.profileId,
+                operationId: command.operationId, revision: decision.revision, createdAt: now
             });
             return decision;
         });

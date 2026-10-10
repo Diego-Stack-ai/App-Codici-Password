@@ -10,6 +10,7 @@ const sharedService = require('../shared-vault-service');
 const sharedReceipt = require('../shared-vault-receipt');
 const widgetReceipt = require('../account-widget-receipt');
 const widgetService = require('../account-widget-service');
+const widgetProfileService = require('../widget-profile-service');
 const scopeService = require('../private-account-write-scope');
 const recoveryService = require('../history-recovery-service');
 const recoveryReceipt = require('../recovery-command-receipt');
@@ -25,6 +26,7 @@ const cases = [
     username: cipher, account: cipher, password: cipher, note: cipher}}],
   ['applyOfflineMutation', 'uid', {...base, encryptedPayload: cipher}],
   ['manageAccountWidget', 'expectedOwnerUid', {expectedOwnerUid: 'A', action: 'create', operationId: 'widget-op', widgetId: 'widget', context: 'private', accountId: 'record', data: {title: 'Synthetic', fields: [field]}}],
+  ['manageWidgetProfile', 'expectedOwnerUid', {expectedOwnerUid: 'A', action: 'create', operationId: 'profile-op', profileId: 'profile', data: {category: 'account', title: 'Synthetic', fields: [field]}}],
   ['manageSharedVaultData', 'expectedOwnerUid', {expectedOwnerUid: 'A', action: 'create', operationId: 'shared-op', sharedDataId: 'shared', data: {title: 'Synthetic', fields: [field]}}],
   ['trashSyncRecord', 'expectedOwnerUid', {expectedOwnerUid: 'A', recordId: 'record', operationId: 'trash-op', expectedRevision: 0}],
   ['restoreSyncRecord', 'expectedOwnerUid', {expectedOwnerUid: 'A', recordId: 'record', operationId: 'restore-op', expectedRevision: 0}],
@@ -48,7 +50,7 @@ function fixture(name, {lockActive = false} = {}) {
     set: (...args) => writes.push(args), delete: (...args) => writes.push(args),
   })};
   const context = vm.createContext({
-    exports: {}, HttpsError, ...binding, ...privateService, ...offlineService, ...sharedService, ...sharedReceipt, ...widgetReceipt, ...widgetService, ...scopeService, ...recoveryService, ...recoveryReceipt,
+    exports: {}, HttpsError, ...binding, ...privateService, ...offlineService, ...sharedService, ...sharedReceipt, ...widgetReceipt, ...widgetService, ...widgetProfileService, ...scopeService, ...recoveryService, ...recoveryReceipt,
     assertTransactionGlobalPurgeUnlocked,
     require: () => require('../reference-callables'), onCall: (_options, handler) => handler,
     getFirestore: () => { accesses += 1; return store; }, FieldValue: {serverTimestamp: () => 'synthetic-time'},
@@ -58,7 +60,7 @@ function fixture(name, {lockActive = false} = {}) {
 }
 
 for (const [name, , command] of cases.filter(([candidate]) =>
-  ['applyPrivateAccountMutation', 'applyOfflineMutation', 'manageAccountWidget', 'manageSharedVaultData'].includes(candidate))) {
+  ['applyPrivateAccountMutation', 'applyOfflineMutation', 'manageAccountWidget', 'manageWidgetProfile', 'manageSharedVaultData'].includes(candidate))) {
   test(`${name}: active global purge lock blocks the writer before domain reads`, async () => {
     const f = fixture(name, {lockActive: true});
     await assert.rejects(f.run(command), error => error.code === 'PURGE_LOCK_ACTIVE');

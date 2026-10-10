@@ -85,7 +85,7 @@ export function restoreRecordKey(record = {}) {
     const recordId = id(record.id);
     switch (record.scope) {
         case 'settings': case 'private-account': case 'company': case 'deadline':
-        case 'contact': case 'profile-widget': case 'shared-vault-data':
+        case 'contact': case 'profile-widget': case 'account-widget-profile': case 'shared-vault-data':
             return key(record.scope, recordId);
         case 'company-account': return key(record.scope, id(record.companyId), recordId);
         case 'private-account-attachment': return key(record.scope, id(record.accountId), recordId);
@@ -119,6 +119,7 @@ function recordName(record, fallback) {
         deadline: ['titolo', 'nome', 'tipoScadenza', 'tipo'],
         contact: ['nomeCompleto', 'nome', 'email'],
         'profile-widget': ['title', 'titolo', 'label'],
+        'account-widget-profile': ['title', 'titolo', 'label'],
         'private-account-attachment': ['originalName', 'fileName', 'nomeFile', 'name'],
         'company-account-attachment': ['originalName', 'fileName', 'nomeFile', 'name'],
         'private-account-widget': ['title', 'titolo', 'label'],

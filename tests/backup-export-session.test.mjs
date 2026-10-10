@@ -27,7 +27,7 @@ function fixture(stopAt) {
         getBytes: async () => { stop('attachment'); return new Uint8Array([1]); },
         btoa: value => Buffer.from(value, 'binary').toString('base64'),
     };
-    for (const name of ['listBackupCompanies', 'listBackupCompanyAccounts', 'listBackupCompanyAttachments', 'listBackupAccountWidgets', 'listBackupContacts', 'listBackupDeadlines', 'listBackupPrivateAccounts', 'listBackupPrivateAttachments', 'listBackupProfileWidgets', 'listBackupSettings', 'listBackupSharedVaultData', 'listBackupSharedVaultLinks']) context[name] = async () => [];
+    for (const name of ['listBackupCompanies', 'listBackupCompanyAccounts', 'listBackupCompanyAttachments', 'listBackupAccountWidgets', 'listBackupAccountWidgetProfiles', 'listBackupContacts', 'listBackupDeadlines', 'listBackupPrivateAccounts', 'listBackupPrivateAttachments', 'listBackupProfileWidgets', 'listBackupSettings', 'listBackupSharedVaultData', 'listBackupSharedVaultLinks']) context[name] = async () => [];
     vm.createContext(context); vm.runInContext(source, context);
     return {context, observers, writes, stats: () => ({aborted, closed, encrypted})};
 }

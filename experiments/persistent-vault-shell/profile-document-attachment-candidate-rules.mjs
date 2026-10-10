@@ -20,7 +20,8 @@ const records = newline => [
 ].join(newline);
 export function withDocumentAttachmentCandidateRules(original) {
     if (typeof original !== 'string') throw Error('RULES_BASE_CHANGED');
-    if (original.includes(PATCHED_GENERIC_LINE)) throw Error('RULES_ALREADY_PATCHED');
+    if (original.includes("collection != 'profileDocumentAttachments';") &&
+        original.includes('match /users/{userId}/profileDocumentAttachments/{attachmentId} {')) return original;
     const newline = original.includes('\r\n') ? '\r\n' : '\n';
     // The receipts namespace must already deny direct writes, and the generic owner
     // collection rule must be the one this candidate narrows: without both, the

@@ -161,6 +161,10 @@ export const listAccountWidgets = uid => readRecords(`account-widgets:${uid}`,
     collection(db, 'users', uid, 'accountWidgets'));
 export const listAccountWidgetsConfirmed = uid => readConfirmedRecords(
     collection(db, 'users', uid, 'accountWidgets'));
+export const listAccountWidgetProfiles = uid => readRecords(`account-widget-profiles:${uid}`,
+    collection(db, 'users', uid, 'accountWidgetProfiles'));
+export const listAccountWidgetProfilesConfirmed = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'accountWidgetProfiles'));
 export const listEmbeddedAccountWidgets = async (uid, account) => (await listAccountWidgets(uid))
     .filter(widget => widget.kind === 'embedded' && widget.context === account.context &&
         widget.accountId === account.accountId &&
@@ -193,6 +197,8 @@ export const listBackupCompanyAttachments = (uid, companyId, accountId) => readC
     collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'));
 export const listBackupAccountWidgets = uid => readConfirmedRecords(
     collection(db, 'users', uid, 'accountWidgets'));
+export const listBackupAccountWidgetProfiles = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'accountWidgetProfiles'));
 export const listBackupSharedVaultData = uid => readConfirmedRecords(
     collection(db, 'users', uid, 'sharedVaultData'));
 export const listBackupSharedVaultLinks = uid => readConfirmedRecords(

@@ -86,6 +86,17 @@ const editAddress = (...args) => runProfileEdit('editAddress', args);
 const editUserDocument = (...args) => runProfileEdit('editUserDocument', args);
 const addUtility = (...args) => runProfileEdit('addUtility', args);
 const editUtility = (...args) => runProfileEdit('editUtility', args);
+const manageDocumentAttachments = async documentItem => {
+    const uid = currentUserUid;
+    const vaultKey = await ensureVaultKeyMaterial();
+    if (!uid || !vaultKey || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per gestire gli allegati.');
+    const module = await import('./profile-document-attachments.js?v=1.2.154');
+    return module.openProfileDocumentAttachments({
+        uid, documentItem, vaultKey,
+        encryptName: value => encrypt(value, vaultKey),
+        decryptName: value => decryptIfPossible(value, vaultKey)
+    });
+};
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
@@ -402,6 +413,12 @@ function setupDelegation(ctx) {
             case 'add-utility':   addUtility(idx, ctx); break;
             case 'edit-utility':  editUtility(idx, uIdx, ctx); break;
             case 'edit-doc':      editUserDocument(idx, ctx); break;
+            case 'document-attachments':
+                manageDocumentAttachments(userDocuments[idx]).catch(error => {
+                    logError('ProfileDocumentAttachments', error);
+                    showToast(readErrorMessage(error, 'Allegati non disponibili.'), 'error');
+                });
+                break;
             case 'manage-fiscal-document': openFiscalDocument(); break;
             // profilo-phones-emails.js
             case 'edit-phone':    editPhone(idx); break;

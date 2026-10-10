@@ -52,12 +52,19 @@ service firebase.storage {
       allow read: if isOwner(userId) || isAcceptedCompanyAccountGuest(userId, companyId, accountId);
     }
 
+    // Namespace server-only per gli allegati cifrati dei documenti personali.
+    // Il client proprietario può scaricare i byte opachi, mai crearli o rimuoverli.
+    match /users/{userId}/profile-documents/{documentId}/attachments/{attachmentId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
     // Tutti gli oggetti applicativi sono confinati nello spazio dell'UID.
     // La lettura resta limitata al proprietario: la condivisione degli allegati
     // richiederà un protocollo crittografico dedicato nella fase P3.
     match /users/{userId}/{namespace}/{allPaths=**} {
-      allow read, delete: if isOwner(userId) && namespace != 'restoreObjects';
-      allow create, update: if isOwner(userId) && namespace != 'restoreObjects' && isAllowedUpload();
+      allow read, delete: if isOwner(userId) && namespace != 'restoreObjects' && namespace != 'profile-documents';
+      allow create, update: if isOwner(userId) && namespace != 'restoreObjects' && namespace != 'profile-documents' && isAllowedUpload();
     }
 
     // Reserved M8 namespace. Creation must use the server's Storage generation

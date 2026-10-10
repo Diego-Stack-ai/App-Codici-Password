@@ -3,7 +3,7 @@ import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-expor
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
-    listBackupAccountWidgets,
+    listBackupAccountWidgetProfiles, listBackupAccountWidgets,
     listBackupContacts, listBackupDeadlines, listBackupPrivateAccounts, listBackupPrivateAttachments,
     listBackupProfileWidgets, listBackupSettings, listBackupSharedVaultData, listBackupSharedVaultLinks
 } from '../data/vault-repository.js';
@@ -81,8 +81,9 @@ async function collectRecords(uid, check) {
             await accountRecords(uid, accounts, company.id, check, append);
         }
         check();
-        const [accountWidgets, sharedVaultData, sharedVaultLinks] = await Promise.all([
-            listBackupAccountWidgets(uid), listBackupSharedVaultData(uid), listBackupSharedVaultLinks(uid)
+        const [accountWidgets, accountWidgetProfiles, sharedVaultData, sharedVaultLinks] = await Promise.all([
+            listBackupAccountWidgets(uid), listBackupAccountWidgetProfiles(uid),
+            listBackupSharedVaultData(uid), listBackupSharedVaultLinks(uid)
         ]);
         check();
         for (const widget of accountWidgets) {
@@ -91,6 +92,9 @@ async function collectRecords(uid, check) {
             append(createRecordDescriptorFromData(scope, widget, {
                 companyId, accountId: widget.accountId
             }));
+        }
+        for (const profile of accountWidgetProfiles) {
+            append(createRecordDescriptorFromData('account-widget-profile', profile));
         }
         for (const sharedData of sharedVaultData) {
             append(createRecordDescriptorFromData('shared-vault-data', sharedData));

@@ -101,12 +101,13 @@ test('descrive widget e credenziali comuni senza esporre valori protetti', async
     {scope: 'company', id: 'c1', data: {ragioneSociale: 'Azienda Alfa'}},
     {scope: 'company-account', companyId: 'c1', id: 'a2', data: {nomeAccount: 'PEC'}},
     {scope: 'company-account-widget', companyId: 'c1', accountId: 'a2', id: 'w2', data: {title: 'Referente'}},
+    {scope: 'account-widget-profile', id: 'p1', data: {title: 'Accessi', fields: [{label: 'Utente'}]}},
     {scope: 'shared-vault-data', id: 's1', data: {title: 'Codice app', fields: [{valueEnc: 'vietato'}]}},
     {scope: 'shared-vault-data-link', sharedDataId: 's1', id: 'l1', data: {label: 'Collegamento Legal Mail'}}
   ]);
   assert.deepEqual(descriptions, [
     'Portale', 'Domande — Portale', 'Azienda Alfa', 'PEC — Azienda Alfa',
-    'Referente — PEC', 'Codice app', 'Collegamento Legal Mail'
+    'Referente — PEC', 'Accessi', 'Codice app', 'Collegamento Legal Mail'
   ]);
   assert.equal(descriptions.join(' ').includes('segreto'), false);
   assert.equal(descriptions.join(' ').includes('vietato'), false);
@@ -117,7 +118,7 @@ test('record identity matches backend destination equality across all scopes and
   const {restorePath} = await import('../functions/backup-restore-service.js');
   const scopes = ['profile', 'settings', 'private-account', 'company', 'company-account',
     'private-account-attachment', 'company-account-attachment', 'private-account-widget',
-    'company-account-widget', 'shared-vault-data', 'shared-vault-data-link', 'deadline', 'contact', 'profile-widget'];
+    'company-account-widget', 'account-widget-profile', 'shared-vault-data', 'shared-vault-data-link', 'deadline', 'contact', 'profile-widget'];
   const records = scopes.flatMap(scope => [
     {scope, id: 'x', companyId: 'a:b', accountId: 'c', sharedDataId: 's'},
     {scope, id: 'x', companyId: 'a', accountId: 'b:c', sharedDataId: 't'},

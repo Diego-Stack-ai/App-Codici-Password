@@ -60,6 +60,7 @@ const {
 const {createRecoveryBinding, verifyRecoveryReceipt} = require("./recovery-command-receipt");
 const {createVaultAccountCallables} = require('./vault-account-runtime');
 const {createSharedAttachmentService} = require('./shared-attachment-service');
+const {createProfileDocumentAttachmentService} = require('./profile-document-attachment-service');
 const {
     accountEventId, accountTransition, auditWriteDecision, buildAuditEvent, inviteRefOf, inviteTransition,
     invitedEventId, removedEventId, responseEventId
@@ -84,10 +85,19 @@ const vaultAccounts = createVaultAccountCallables({db: getFirestore(),
 const sharedAttachments = createSharedAttachmentService({
     db: getFirestore(), deleteField: () => FieldValue.delete(), HttpsError
 });
+const profileDocumentAttachments = createProfileDocumentAttachmentService({
+    db: getFirestore(), bucket: getStorage().bucket(), timestamp: () => FieldValue.serverTimestamp(),
+    assertUnlocked: assertTransactionGlobalPurgeUnlocked, HttpsError
+});
 exports.registerSharingIdentity = onCall(
     {region: 'europe-west1', enforceAppCheck: true}, request => sharedAttachments.register(request));
 exports.publishSharedAttachmentEnvelopes = onCall(
     {region: 'europe-west1', enforceAppCheck: true}, request => sharedAttachments.publish(request));
+exports.uploadProfileDocumentAttachment = onCall(
+    {region: 'europe-west1', enforceAppCheck: true, timeoutSeconds: 120, memory: '512MiB'},
+    request => profileDocumentAttachments.upload(request));
+exports.removeProfileDocumentAttachment = onCall(
+    {region: 'europe-west1', enforceAppCheck: true}, request => profileDocumentAttachments.remove(request));
 exports.applyAccountNoteMutation = onCall(
     {region: 'europe-west1', enforceAppCheck: true}, request => vaultAccounts.note(request));
 exports.applyAccountStandardMutation = onCall(
@@ -265,6 +275,12 @@ exports.manageAccountWidget = onCall(
     request => require('./reference-callables').createReferenceCallables({
         onCall: (_options, handler) => handler, getFirestore, FieldValue, HttpsError, requireMutationOwner
     }).manageAccountWidget(request)
+);
+exports.manageWidgetProfile = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    request => require('./reference-callables').createReferenceCallables({
+        onCall: (_options, handler) => handler, getFirestore, FieldValue, HttpsError, requireMutationOwner
+    }).manageWidgetProfile(request)
 );
 
 async function runRecoveryCommand(request, mode) {
