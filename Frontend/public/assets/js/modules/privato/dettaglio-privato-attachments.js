@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.156';
+import { db, storage } from '../../firebase-config.js?v=1.2.157';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -14,6 +14,7 @@ import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile,
 import {decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess} from '../shared/shared-attachment-access.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
+import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 
 let mounted = null;
 
@@ -100,7 +101,7 @@ export async function handleFileUpload(input, mount = mounted) {
         return;
     }
 
-    const file = input.files[0];
+    let file = input.files[0];
     if (!file) return;
     try {
         validateAttachmentFile(file);
@@ -108,6 +109,10 @@ export async function handleFileUpload(input, mount = mounted) {
         showToast(error.message, 'error');
         input.value = '';
         return;
+    }
+    if (file.type.startsWith('image/')) {
+        file = await editImageBeforeUpload(file);
+        if (!file || !mount.active()) {input.value = ''; return;}
     }
 
     showToast(`File selezionato: ${file.name}`, 'info');

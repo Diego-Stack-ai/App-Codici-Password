@@ -44,11 +44,11 @@ test('offline produce un avviso senza richieste remote', async () => {
     assert.equal(requests, 0);
 });
 
-test('stato motori distingue attivi, limitati e disabilitati', () => {
+test('stato motori distingue motori attivi e disabilitati', () => {
     const engines = getEnginePolicyReport();
-    assert.equal(engines.find(item => item.id === 'm7-purge').state, 'limited');
+    assert.equal(engines.find(item => item.id === 'm7-purge').state, 'active');
     assert.equal(engines.find(item => item.id === 'm8-restore').state, 'active');
     assert.equal(engines.find(item => item.id === 'm8-resumable').state, 'off');
-    assert.equal(engines.find(item => item.id === 'cpfe2-write').state, 'off');
+    assert.equal(engines.find(item => item.id === 'cpfe2-write').state, 'active');
     assert.equal(engines.find(item => item.id === 'mfa-recovery').state, 'off');
 });

@@ -28,7 +28,8 @@ const UID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 export const privateAddressUid = value => typeof value === 'string' && UID_PATTERN.test(value);
 export const privateAddressHash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const privateAddressCipher = value => typeof value === 'string' && (value === '' ||
-    (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)));
+    (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)) ||
+    (value.length >= 80 && value.length <= 100000 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)));
 // `createProfileItemId('address')` produces `address-<uuid>`; the read-only model
 // synthesizes `address-legacy-<hash>` from the row content **and its index**
 // (`profile-model.js`), so such an id is never an identity and is never targeted.

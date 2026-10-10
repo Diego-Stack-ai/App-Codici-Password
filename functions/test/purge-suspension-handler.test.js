@@ -8,7 +8,7 @@ const source = readFileSync(require.resolve('../index'), 'utf8');
 const guard = source.slice(source.indexOf('function requireMutationOwner('), source.indexOf('exports.applyOfflineMutation'));
 const handler = source.slice(source.indexOf('exports.purgeArchivedAccount'), source.indexOf('exports.restoreBackupChunk'));
 
-test('live purge interlock blocks all authenticated attempts before any data access', async () => {
+test('global purge policy is enabled without accepting request-side bypasses', async () => {
   let accesses = 0;
   const forbidden = () => { accesses++; throw new Error('UNEXPECTED_DATA_ACCESS'); };
   class HttpsError extends Error {
@@ -17,14 +17,9 @@ test('live purge interlock blocks all authenticated attempts before any data acc
   const context = {exports: {}, ...policy, ...rollout, HttpsError, onCall: (_options, callback) => callback,
     getFirestore: forbidden, getStorage: forbidden, createArchivePurgeBinding: forbidden};
   runInNewContext(guard + handler, context);
-  for (const data of [
-    {expectedOwnerUid: 'synthetic'},
-    {expectedOwnerUid: 'synthetic', context: 'private', accountId: 'a', operationId: 'retry', expectedRevision: 1, confirmation: 'DELETE_FOREVER'},
-    {expectedOwnerUid: 'synthetic', context: 'company', companyId: 'c', accountId: 'a', operationId: 'retry', expectedRevision: 1, confirmation: 'DELETE_FOREVER', bypass: true, isArchivePurgeSuspended: false}
-  ]) {
-    await assert.rejects(context.exports.purgeArchivedAccount({auth: {uid: 'synthetic'}, data}),
-      error => error.code === 'failed-precondition' && error.details.reason === 'ARCHIVE_PURGE_TEMPORARILY_SUSPENDED');
-  }
+  assert.equal(policy.isArchivePurgeSuspended(), false);
+  await assert.rejects(context.exports.purgeArchivedAccount({auth: {uid: 'synthetic'}, data: {expectedOwnerUid: 'synthetic'}}),
+    error => error.code === 'invalid-argument');
   await assert.rejects(context.exports.purgeArchivedAccount({data: {}}), error => error.code === 'unauthenticated');
   await assert.rejects(context.exports.purgeArchivedAccount({auth: {uid: 'other'}, data: {expectedOwnerUid: 'synthetic'}}),
     error => error.details.reason === 'MUTATION_OWNER_MISMATCH');

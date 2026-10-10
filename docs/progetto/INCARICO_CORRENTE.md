@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Candidata 1.2.157: PDF azienda e preparazione immagini — 10/10/2026
+
+Prima della pubblicazione richiesta, la scheda PDF aziendale è stata riprogettata con intestazione coordinata, schede a due colonne per i dati brevi e righe a larghezza piena/paginazione sicura per testi lunghi. Il rendering sintetico è stato verificato visivamente su tre pagine senza sovrapposizioni o testo troncato. Le immagini JPEG, PNG e WebP scelte da fotocamera o galleria passano ora da un editor condiviso con rotazione a 90°, ritaglio tattile a quattro angoli e ridimensionamento massimo a 2048 px; il collegamento copre Documenti del Profilo, allegati Account privati/aziendali e Scadenze. OCR e parser restano esclusi. Test mirati: PDF **33/33**, allegati/editor **56/56**, Vault shell **829/829**, Vault Emulator **21/21**, sintassi **182 moduli**, CSS, riferimenti statici e budget prestazionale verdi.
+
+## Rollout M7 e CPFE2 — 10/10/2026
+
+Su autorizzazione esplicita del proprietario, il blocco globale M7 e il writer CPFE2 sono stati rimossi nel codice candidato. M7 conserva conferma esplicita, ownership, revisione, fence globale, ricevuta idempotente, audit e controlli App Check; CPFE2 conserva dual-read legacy/CPFE2 e usa per le nuove cifrature PBKDF2-SHA256 a 600.000 iterazioni con AES-GCM-256. Il controllo end-to-end ha individuato e corretto i validatori Account ancora limitati al Base64 storico; Vault shell **829/829** e Vault Emulator **21/21** confermano ora la scrittura CPFE2 anche nel percorso di modifica Account. M8 V2 riprendibile e MFA selettivo non sono dichiarati attivi: il primo non dispone ancora di un executor runtime collegato, il secondo richiede un ID token valido di una sessione MFA già autenticata e non può sbloccare in sicurezza un utente rimasto fuori dall'app. Questi due percorsi non devono essere presentati come semplici flag.
+
 ## Pubblicazione 1.2.154 conclusa — 10/10/2026
 
 PR #97 unita in `master` al commit `eb1380c0`; pipeline completa e documentazione verdi. Deploy Firebase riuscito per Hosting, Firestore Rules, Storage Rules e quattro callable Widget/allegati documenti. Controllo remoto HTTP 200 e asset `1.2.154` confermati. L'incarico di pubblicazione è concluso.

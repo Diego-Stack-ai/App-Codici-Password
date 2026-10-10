@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.156';
+import { db, storage } from '../../firebase-config.js?v=1.2.157';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -16,6 +16,7 @@ import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile,
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listCompanyAccountAttachments } from '../data/vault-repository.js';
 import {decryptReceivedCompanyAttachment, syncCompanyAttachmentAccess} from '../shared/shared-attachment-access.js';
+import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _ownerUid = null;
@@ -79,12 +80,16 @@ export async function handleFileUpload(input) {
         return;
     }
 
-    const file = input.files[0];
+    let file = input.files[0];
     if (!file) return;
     try { validateAttachmentFile(file); } catch (error) {
         showToast(error.message, 'error');
         input.value = '';
         return;
+    }
+    if (file.type.startsWith('image/')) {
+        file = await editImageBeforeUpload(file);
+        if (!file || !active()) {input.value = ''; return;}
     }
 
     // Feedback immediato per mobile

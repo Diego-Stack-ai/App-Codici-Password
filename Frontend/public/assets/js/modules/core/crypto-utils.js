@@ -1,10 +1,3 @@
-/**
- * CRYPTO UTILS (V1.1 - Safari/WebKit Optimized)
- * Protocollo di crittografia client-side per dati sensibili.
- * Ottimizzato per compatibilità cross-platform (Chrome/Safari iOS).
- */
-
-// Ultimo errore cripto (letto via getLastCryptoError())
 let _lastCryptoError = null;
 export const getLastCryptoError = () => _lastCryptoError;
 
@@ -16,10 +9,8 @@ const FIELD_V2_ITERATIONS = 600000;
 const FIELD_V2_PREFIX = 'CPFE2.';
 export const VERIFIER_ITERATIONS = 600000;
 
-// Helper: Uint8Array -> Hex
 const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-// Helper: Uint8Array -> Base64 (Safe per Safari)
 const bufferToBase64 = (buffer) => {
     let binary = '';
     const bytes = new Uint8Array(buffer);
@@ -29,7 +20,6 @@ const bufferToBase64 = (buffer) => {
     return btoa(binary);
 };
 
-// Helper: Base64 -> Uint8Array (Safe per Safari)
 const base64ToBuffer = (base64) => {
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
@@ -167,17 +157,12 @@ export async function unwrapVaultKey(envelope, masterPassword) {
     finally { new Uint8Array(plaintext).fill(0); }
 }
 
-/**
- * Deriva una chiave CryptoKey da una password testuale.
- * Include normalizzazione Unicode NFC per compatibilità Safari.
- */
 async function deriveKey(password, salt, iterations = ITERATIONS) {
     if (!password) throw new Error("Password mancante per derivazione");
     if (iterations !== ITERATIONS && iterations !== FIELD_V2_ITERATIONS) {
         throw new Error("Unsupported field KDF");
     }
 
-    // Same NFC + trim normalization, with bounded lifetime of encoded bytes.
     const passwordKey = await importPasswordMaterial(password);
 
     const key = await crypto.subtle.deriveKey(
@@ -189,23 +174,16 @@ async function deriveKey(password, salt, iterations = ITERATIONS) {
         },
         passwordKey,
         { name: "AES-GCM", length: 256 },
-        false, // extractable: false (was true)
+        false,
         ["encrypt", "decrypt"]
     );
-
-    /* [DIAGNOSTIC LOG REMOVED FOR PRODUCTION] */
 
     return key;
 }
 
-/**
- * Cifra una stringa usando una password.
- */
 export async function encrypt(text, password) {
-    // Se non c'è testo da cifrare (null, undefined, ''), restituiamo il valore vuoto.
     if (!text) return text;
 
-    // Se c'è testo ma manca la password, falliamo (fail-closed).
     if (!password || !String(password).normalize('NFC').trim()) {
         throw new Error("Encryption key missing or invalid");
     }
@@ -216,7 +194,7 @@ export async function encrypt(text, password) {
         const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
         const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
 
-        const key = await deriveKey(encryptionKeyCandidates(password)[0], salt);
+        const key = await deriveKey(encryptionKeyCandidates(password)[0], salt, FIELD_V2_ITERATIONS);
 
         const ciphertext = await crypto.subtle.encrypt(
             { name: "AES-GCM", iv: iv },
@@ -224,21 +202,22 @@ export async function encrypt(text, password) {
             data
         );
 
-        const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
-        combined.set(salt, 0);
-        combined.set(iv, salt.length);
-        combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
-
-        return bufferToBase64(combined);
+        const envelope = {
+            version: 2,
+            kdf: 'PBKDF2-SHA256',
+            iterations: FIELD_V2_ITERATIONS,
+            cipher: 'AES-GCM-256',
+            salt: bufferToBase64(salt),
+            iv: bufferToBase64(iv),
+            ciphertext: bufferToBase64(ciphertext)
+        };
+        return FIELD_V2_PREFIX + bufferToBase64(new TextEncoder().encode(JSON.stringify(envelope)));
     } catch (e) {
         console.error(`[CRYPTO-AUDIT] Encryption failed: ${e.name || 'Error'}`);
         throw new Error("Encryption failed");
     }
 }
 
-/**
- * Decifra una stringa cifrata.
- */
 export async function decrypt(base64Data, password) {
     if (!base64Data || !password) return base64Data;
 
@@ -277,10 +256,8 @@ export async function decrypt(base64Data, password) {
             throw lastError || new Error('Decryption failed');
         }
 
-        // Normalizzazione stringa Base64 del formato storico.
         let normalized = serialized.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
 
-        // Check regex base64
         const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
         if (!base64Regex.test(normalized)) {
             console.warn("[CRYPTO-AUDIT] Not a valid encrypted value");
@@ -297,10 +274,6 @@ export async function decrypt(base64Data, password) {
         const iv = combined.slice(SALT_SIZE, SALT_SIZE + IV_SIZE);
         const ciphertext = combined.slice(SALT_SIZE + IV_SIZE);
 
-        /* [SAFARI-AUDIT V7.12] Diagnostica WebKit silenziata */
-
-        // [PROCEDURA SAFARI-SAFE V7.15] WebKit richiede buffer allineati per TUTTO
-        // Creiamo copie fisiche indipendenti per Salt, IV e Ciphertext.
         const saltClean = new Uint8Array(salt.length);
         saltClean.set(salt);
 
@@ -327,7 +300,6 @@ export async function decrypt(base64Data, password) {
         const errorDetail = e?.name || 'DecryptionError';
         console.error("[CRYPTO-AUDIT] Decryption failed");
 
-        // Esponiamo l'errore globalmente per il banner di debug
         _lastCryptoError = errorDetail;
 
         return "--ERRORE--";

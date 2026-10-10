@@ -54,8 +54,11 @@ export async function preparePrivateAccountPatch({context, source, changes, hasP
             throw new Error('PRIVATE_ACCOUNT_ENCRYPT_FAILED');
         }
         assertActive();
-        if (typeof ciphertext !== 'string' || ciphertext.length < 30 || ciphertext === value ||
-            !/^[A-Za-z0-9+/]+={0,2}$/u.test(ciphertext)) throw new Error('PRIVATE_ACCOUNT_ENCRYPT_FAILED');
+        const validCiphertext = typeof ciphertext === 'string' && (
+            (ciphertext.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/u.test(ciphertext)) ||
+            (ciphertext.length >= 80 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(ciphertext))
+        );
+        if (!validCiphertext || ciphertext === value) throw new Error('PRIVATE_ACCOUNT_ENCRYPT_FAILED');
         patch[field] = ciphertext;
     }
     return Object.freeze(patch);

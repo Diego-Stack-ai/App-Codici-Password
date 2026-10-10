@@ -158,7 +158,8 @@ async function renderHeaderUser(user) {
                 if (isAutoUnlockActive()) {
                     const mk = await ensureVaultKeyMaterial();
                     // [FIX V7.15] Regex più tollerante per Safari (include URL-safe e padding flessibile)
-                    const isEnc = (v) => v && typeof v === 'string' && v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim());
+                    const isEnc = v => typeof v === 'string' && (v.startsWith('CPFE2.') ||
+                        (v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim())));
 
                     let nameDecrypted = false;
                     if (isEnc(nome)) {

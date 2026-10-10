@@ -198,6 +198,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/shared/credential-decrypt-guard.js",
   "assets/js/modules/shared/detail-account-mode.js",
   "assets/js/modules/shared/gestione-destinatari.js",
+  "assets/js/modules/shared/image-crop-editor.js",
   "assets/js/modules/shared/profile-account-management.js",
   "assets/js/modules/shared/push-manager.js",
   "assets/js/modules/shared/qr_code_utils-v2.js",

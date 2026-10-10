@@ -9,7 +9,10 @@ const ALLOWED_FIELDS = new Set([
 ]);
 
 function isCiphertext(value) {
-  return typeof value === "string" && value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value);
+  return typeof value === "string" && (
+    (value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)) ||
+    (value.length >= 80 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value))
+  );
 }
 
 function isCiphertextOrEmpty(value) {

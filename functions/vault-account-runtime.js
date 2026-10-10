@@ -40,7 +40,7 @@ var require_archive_purge_service = __commonJS({
   "functions/archive-purge-service.js"(exports2, module2) {
     var IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,160}$/;
     function isArchivePurgeSuspended() {
-      return true;
+      return false;
     }
     function requireIdentifier(value) {
       if (typeof value !== "string") throw new Error("INVALID_IDENTIFIER");
@@ -420,7 +420,7 @@ function profileTextBasis(record, field) {
   return JSON.stringify([exists, value]);
 }
 function profileTextCipher(value) {
-  return typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value));
+  return typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length >= 80 && value.length <= 1e5 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value));
 }
 function validateProfileTextRequest(data) {
   const allowed = ["target", "changes", "expected", "expectedRevision", "operationId", "expectedOwnerUid"];
@@ -761,7 +761,7 @@ var fail5 = () => {
 };
 var object4 = (value) => value && typeof value === "object" && !Array.isArray(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 var id3 = (value) => typeof value === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(value);
-var cipher = (value) => typeof value === "string" && value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value);
+var cipher = (value) => typeof value === "string" && (value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length >= 80 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value));
 var exact3 = (value, keys) => object4(value) && Object.keys(value).length === keys.length && Object.keys(value).every((key) => keys.includes(key));
 function validateProfileAccountCreateRequest(value) {
   const keys = [
@@ -1149,7 +1149,7 @@ var privateDocumentUid = (v) => typeof v === "string" && uid.test(v);
 var privateDocumentId = (v) => typeof v === "string" && v.length > 0 && v.length <= 256 && !/[\u0000-\u001f/]/.test(v) && !v.includes("-legacy-") ? v : null;
 var privateDocumentCreatedId = (v) => typeof v === "string" && /^document-[A-Za-z0-9-]{1,110}$/.test(v) && !v.includes("-legacy-");
 var privateDocumentHash = (v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v);
-var privateDocumentCipher = (v) => typeof v === "string" && (v === "" || v.length >= 60 && v.length <= 1e5 && v.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(v));
+var privateDocumentCipher = (v) => typeof v === "string" && (v === "" || v.length >= 60 && v.length <= 1e5 && v.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(v) || v.length >= 80 && v.length <= 1e5 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(v));
 function privateDocumentFields(fields) {
   if (!object7(fields)) fail7();
   const keys = Object.keys(fields);
@@ -1298,7 +1298,7 @@ var object8 = (value) => Boolean(value) && typeof value === "object" && !Array.i
 var UID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 var privateUtilityUid = (value) => typeof value === "string" && UID_PATTERN.test(value);
 var privateUtilityHash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
-var privateUtilityCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value));
+var privateUtilityCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length >= 80 && value.length <= 1e5 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value));
 var privateUtilityCreatedId = (value) => typeof value === "string" && /^utility-[A-Za-z0-9-]{1,110}$/.test(value) && !value.includes("-legacy-");
 var privateUtilityLegacyId = (value) => typeof value === "string" && value.includes("-legacy-");
 var privateUtilityId = (value) => {
@@ -1520,7 +1520,7 @@ var profileContactsObject = (value) => value && typeof value === "object" && !Ar
 var profileContactsId = (value) => typeof value === "string" && value.length > 0 && value.length <= 256 && !/[\u0000-\u001f/]/.test(value);
 var profileContactsUid = (value) => typeof value === "string" && UID_PATTERN2.test(value);
 var profileContactsHash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
-var profileContactsCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value));
+var profileContactsCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length >= 80 && value.length <= 1e5 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value));
 var contactFieldSpec = (collection, key) => {
   if (!Object.hasOwn(CONTACT_FIELDS, collection)) profileContactsInvalid();
   const spec = CONTACT_FIELDS[collection].find((item) => item.key === key);
@@ -1751,7 +1751,7 @@ var object9 = (value) => Boolean(value) && typeof value === "object" && !Array.i
 var UID_PATTERN3 = /^[A-Za-z0-9_-]{1,128}$/;
 var privateAddressUid = (value) => typeof value === "string" && UID_PATTERN3.test(value);
 var privateAddressHash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
-var privateAddressCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value));
+var privateAddressCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length >= 80 && value.length <= 1e5 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value));
 var privateAddressCreatedId = (value) => typeof value === "string" && /^address-[A-Za-z0-9-]{1,110}$/.test(value) && !value.includes("-legacy-");
 var privateAddressLegacyId = (value) => typeof value === "string" && value.includes("-legacy-");
 var privateAddressId = (value) => {
@@ -2297,7 +2297,7 @@ var COMPANY_CONTACT_MUTATION_REFUSALS = /* @__PURE__ */ Object.freeze({
   INVALID: "COMPANY_CONTACTS_INVALID",
   UNCHANGED: "COMPANY_CONTACTS_UNCHANGED"
 });
-var companyContactCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value));
+var companyContactCipher = (value) => typeof value === "string" && (value === "" || value.length >= 60 && value.length <= 1e5 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value) || value.length >= 80 && value.length <= 1e5 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value));
 var COMPANY_CONTACT_MUTATION_FIELDS = /* @__PURE__ */ Object.freeze({
   "email-slot": /* @__PURE__ */ Object.freeze([
     /* @__PURE__ */ Object.freeze({ key: "tipo", maxLength: 120, format: "plain" }),

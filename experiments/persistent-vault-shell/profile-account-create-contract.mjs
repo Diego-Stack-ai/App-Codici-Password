@@ -3,7 +3,9 @@ import {profileLinkSource} from './profile-link-contract.mjs';
 const fail = () => { throw Error('PROFILE_ACCOUNT_CREATE_INVALID'); };
 const object = value => value && typeof value === 'object' && !Array.isArray(value) && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
-const cipher = value => typeof value === 'string' && value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value);
+const cipher = value => typeof value === 'string' && (
+    (value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)) ||
+    (value.length >= 80 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)));
 const exact = (value, keys) => object(value) && Object.keys(value).length === keys.length && Object.keys(value).every(key => keys.includes(key));
 
 export function validateProfileAccountCreateRequest(value) {
