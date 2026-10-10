@@ -25,7 +25,7 @@ function fixture(which=1){
  roots['btn-link-shared-credential']=createElement('button');roots['btn-add-account-widget']=createElement('button');
  const body=createElement('body');Object.values(roots).forEach(n=>body.appendChild(n));
  const auth={currentUser:{uid:'A'}};
- const sandbox={WeakMap,URLSearchParams,URL,AbortController,crypto:{randomUUID:()=> 'fixture'},auth,onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)},createElement,clearElement,setChildren:(n,children)=>{clearElement(n);(Array.isArray(children)?children:[children]).filter(Boolean).forEach(c=>n.appendChild(c))},document:{body,getElementById:id=>roots[id],querySelectorAll:()=>[]},navigator:{onLine:true},showToast:(...x)=>toasts.push(x),ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=> 'secret',listAccountWidgets:async()=>[],listAccountWidgetsConfirmed:async()=>[],listSharedVaultData:async()=>[],listSharedVaultDataConfirmed:async()=>[],updateSharedCredential:async(...x)=>writes.push(x),linkSharedCredential:async(...x)=>writes.push(x),unlinkSharedCredential:async(...x)=>writes.push(x),createAccountWidget:async(...x)=>writes.push(x),updateAccountWidget:async(...x)=>writes.push(x),deleteAccountWidget:async(...x)=>writes.push(x)};
+ const sandbox={WeakMap,URLSearchParams,URL,AbortController,crypto:{randomUUID:()=> 'fixture'},auth,onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)},createElement,clearElement,setChildren:(n,children)=>{clearElement(n);(Array.isArray(children)?children:[children]).filter(Boolean).forEach(c=>n.appendChild(c))},document:{body,getElementById:id=>roots[id],querySelectorAll:()=>[]},navigator:{onLine:true},showToast:(...x)=>toasts.push(x),ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=> 'secret',listAccountWidgets:async()=>[],listAccountWidgetsConfirmed:async()=>[],listAccountWidgetProfiles:async()=>[],listAccountWidgetProfilesConfirmed:async()=>[],profilesForCategory:(profiles,category)=>profiles.filter(profile=>profile.category===category),profileFieldSummary:profile=>(profile.fields||[]).map(field=>field.label).join(', '),isProfileAlreadyInserted:()=>false,listSharedVaultData:async()=>[],listSharedVaultDataConfirmed:async()=>[],updateSharedCredential:async(...x)=>writes.push(x),linkSharedCredential:async(...x)=>writes.push(x),unlinkSharedCredential:async(...x)=>writes.push(x),createWidgetProfile:async()=>({profileId:'profile'}),createAccountWidget:async(...x)=>writes.push(x),updateAccountWidget:async(...x)=>writes.push(x),deleteAccountWidget:async(...x)=>writes.push(x)};
  sandbox.addEventListener=(name,callback)=>{if(!globalListeners.has(name))globalListeners.set(name,new Set());globalListeners.get(name).add(callback)};
  sandbox.removeEventListener=(name,callback)=>globalListeners.get(name)?.delete(callback);
  sandbox.dispatchEvent=event=>{for(const callback of [...(globalListeners.get(event.type)||[])])callback(event)};
@@ -115,10 +115,10 @@ test('external banking shortcut uses owned editor and refuses reopening after lo
  assert.equal(await controller.openNewWidget(),true);assert.equal(f.dialogs.length,1);
  f.lock();assert.equal(f.dialogs.length,0);assert.equal(await controller.openNewWidget(),false);assert.equal(f.writes.length,0);
 });
-test('external shortcut late vault preparation cannot open an editor after teardown',async()=>{
- const f=fixture(2);const controller=await f.sandbox.initAccountEmbeddedWidgets(f.scope);const gate=deferred();
- f.sandbox.ensureVaultKeyMaterial=()=>gate.promise;const pending=controller.openNewWidget();controller.destroy();gate.resolve('key');
- assert.equal(await pending,false);assert.equal(f.dialogs.length,0);assert.equal(f.writes.length,0);
+test('external shortcut catalog is removed during teardown and cannot reopen',async()=>{
+ const f=fixture(2);const controller=await f.sandbox.initAccountEmbeddedWidgets(f.scope);
+ assert.equal(await controller.openNewWidget(),true);assert.equal(f.dialogs.length,1);controller.destroy();
+ assert.equal(f.dialogs.length,0);assert.equal(await controller.openNewWidget(),false);assert.equal(f.writes.length,0);
 });
 
 for (const company of [false, true]) {

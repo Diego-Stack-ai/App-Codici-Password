@@ -5,6 +5,16 @@
 
 Dossier dei candidati Profilo/Account: decisioni architetturali e schede A1b–A6. Le parti implementate nel laboratorio non sono automaticamente distribuite. L’ultima fotografia operativa è STATO; qui restano schema, limiti e criteri del dominio. La cronologia della roadmap è nello storico.
 
+## Decisione corrente: profilo e istanza Widget
+
+- **Profilo Widget:** modello riutilizzabile con categoria `account` oppure `bank`, titolo, descrizione, aspetto e definizione ordinata dei campi. Non contiene valori.
+- **Widget inserito:** istanza collegata a uno specifico Account o conto bancario; conserva `profileId` e i valori di quella sola destinazione.
+- I cataloghi Account e Banca sono indipendenti. Un profilo bancario non appare nel catalogo Account e viceversa.
+- Un nuovo profilo non riceve campi predefiniti: l'utente aggiunge liberamente almeno un campo.
+- Lo stesso profilo può essere riutilizzato in destinazioni diverse, ma non due volte nello stesso Account o nello stesso conto.
+- I widget legacy senza profilo restano compatibili; non vengono convertiti automaticamente.
+- Modificare i valori di un'istanza non modifica il profilo né le altre istanze. La gestione strutturale del profilo resta un'operazione separata.
+
 ## Indice delle fonti conservate
 
 - [A1B_CENSIMENTO_CONTATTI_AZIENDALI.md](#fonte-docs-a1b-censimento-contatti-aziendali-md-l1)
@@ -511,3 +521,8 @@ Offline l'editor è di sola lettura. Lock, logout, cambio UID, navigazione, camb
 Le prove coprono Account personali e aziendali con lo stesso ID, più origini collegate, retry, concorrenza, relazioni malformate, svuotamento dei campi, preservazione dei dati incorporati ed esterni e rifiuto delle scritture dirette. Chrome desktop e mobile esercitano modifica, rilettura, ripristino, offline e pulizia. Edge resta soggetto al gate ambientale già censito se termina prima dell'endpoint DevTools.
 
 Restano fuori da A6 gli editor Widget, il riordino, i template, banking/carte, migrazioni legacy, Rules/Functions produttive e collaudi fisici.
+## Regola testi e conversione Widget legacy
+
+Titolo del profilo, titolo dell'istanza e intestazioni dei campi sono testi strutturali: ogni parola viene salvata con iniziale maiuscola e resto minuscolo. La regola non si applica mai ai valori dei campi.
+
+La conversione legacy raggruppa esclusivamente strutture equivalenti nella stessa categoria (`account` o `bank`). Il profilo risultante contiene definizioni e nessun valore; ciascuna istanza conserva i propri valori e riceve il collegamento al profilo. Gli identificativi del piano derivano dall'impronta della struttura, rendendo la pianificazione ripetibile. L'esecuzione sui dati reali resta un'operazione esplicita, separata dal deploy del codice.

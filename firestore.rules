@@ -157,6 +157,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Allegati cifrati dei documenti personali: il proprietario legge soltanto
+    // i metadati; prenotazione, conferma ed eliminazione sono coordinate dal backend.
+    match /users/{userId}/profileDocumentAttachments/{attachmentId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
     match /users/{userId}/{collection}/{document=**} {
       allow read: if isOwner(userId) &&
         collection != 'aziende' &&
@@ -169,9 +176,11 @@ service cloud.firestore {
         collection != 'operationResults' &&
         collection != 'profileWidgets' &&
         collection != 'accountWidgets' &&
+        collection != 'accountWidgetProfiles' &&
         collection != 'sharedVaultData' &&
         collection != 'sharedVaultLinks' &&
-        collection != 'cryptoIdentity';
+        collection != 'cryptoIdentity' &&
+        collection != 'profileDocumentAttachments';
       allow write: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
         collection != 'aziende' &&
         collection != 'auditEvents' &&
@@ -183,9 +192,11 @@ service cloud.firestore {
         collection != 'operationResults' &&
         collection != 'profileWidgets' &&
         collection != 'accountWidgets' &&
+        collection != 'accountWidgetProfiles' &&
         collection != 'sharedVaultData' &&
         collection != 'sharedVaultLinks' &&
-        collection != 'cryptoIdentity';
+        collection != 'cryptoIdentity' &&
+        collection != 'profileDocumentAttachments';
     }
 
     // Identità ECDH M5: soltanto la chiave pubblica è leggibile dagli utenti
@@ -251,6 +262,11 @@ service cloud.firestore {
     // Le letture appartengono al proprietario; finché le funzioni atomiche non
     // sono implementate, nessun client può creare collegamenti parziali.
     match /users/{userId}/accountWidgets/{widgetId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    match /users/{userId}/accountWidgetProfiles/{profileId} {
       allow read: if isOwner(userId);
       allow write: if false;
     }

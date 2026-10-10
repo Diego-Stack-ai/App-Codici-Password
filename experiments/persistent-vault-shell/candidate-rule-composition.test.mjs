@@ -78,7 +78,7 @@ test('Storage composition retains the restore reservation and rejects unexpected
     assert.match(candidate, /allow read: if isOwner\(userId\) && namespace != 'restoreObjects';/);
     assert.match(candidate, /allow delete: if isOwner\(userId\) && namespace != 'restoreObjects' && namespace != 'profile-documents';/);
     assert.match(candidate, /allow create, update: if isOwner\(userId\) && namespace != 'restoreObjects' && namespace != 'profile-documents' && isAllowedUpload\(\);/);
-    assert.throws(() => storage(candidate), /RULES_ALREADY_PATCHED/);
+    assert.equal(storage(candidate), candidate);
     assert.throws(() => storage(storageBase.replaceAll(" && namespace != 'restoreObjects'", '')), /RULES_BASE_CHANGED/);
     assert.equal(storage(storageBase.replaceAll('\r\n', '\n')), candidate);
 });

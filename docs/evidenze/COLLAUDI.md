@@ -1,5 +1,15 @@
 # Collaudi
 
+## Profili Widget separati dalle istanze — 10/10/2026
+
+- Contratto: profili `account|bank` privi di valori; istanze con `profileId`, destinazione e valori propri.
+- UI: cataloghi distinti Account/Banca con titolo, descrizione e lista campi; creazione vuota e libera; duplicato bloccato nella stessa destinazione.
+- Compatibilità: istanze storiche prive di profilo conservate senza riscrittura automatica.
+- Sicurezza/backend: validazione profilo, owner binding, App Check, revisione, audit, global purge fence e scritture client negate dalle Rules.
+- Backup: nuovo scope `account-widget-profile`, identità e percorso proprietario verificati.
+- Esiti: UI/lifecycle **41/41**, backup **110/110**, Functions/security **440 pass, 9 skip, 0 fail**, sintassi/riferimenti/CSS verdi.
+- Limite: suite Firestore Rules non eseguita per timeout di avvio dell'Emulator Hub sulla porta 4400; test dedicato presente ma non dichiarato superato. Nessun dato reale, commit o deploy.
+
 ## M10 — CPFE2 dual-read nel browser reale — 10/10/2026
 
 - Runner locale dedicato: `experiments/persistent-vault-shell/benchmark-vault-kdf-server.mjs`; pagina isolata su loopback, senza account, Firebase o dati reali.
@@ -1701,3 +1711,11 @@ errori nel solo laboratorio. La correzione non costituisce ancora accettazione d
 - Verifica remota: funzione `recoverMfaWithCode` **ACTIVE**, regione `europe-west1`, runtime `nodejs22`, hash `44c5590082c851780a3e5b34745f726bbbe233ad`.
 - Comportamento distribuito: se esiste un secondo fattore, il recupero automatico si arresta e richiede assistenza; nessun fattore viene rimosso, nessun recovery code consumato e nessun aggiornamento Auth eseguito.
 - Esclusioni rispettate: nessun deploy Hosting, Rules, indici o altre Functions; nessuna operazione su dati reali e nessuna modifica all'app di prova.
+## 10/10/2026 — Profili Widget e testi strutturali
+
+- Verifica mirata modello/servizi: **20/20** test superati.
+- Regressione accesso dati: **94/94** test superati dopo l'aggiornamento della fixture browser.
+- Regressione Functions/security: **453 totali, 444 superati, 9 saltati, 0 fallimenti**.
+- Audit sintassi JavaScript: **180 moduli verificati**.
+- Il planner sintetico dimostra 6 istanze legacy → 5 profili/6 collegamenti, deduplicazione strutturale, identificativi deterministici e assenza dei valori nei profili.
+- Limite: nessun dato produttivo è stato trasformato; nessun commit, push o deploy eseguito in questo passaggio.

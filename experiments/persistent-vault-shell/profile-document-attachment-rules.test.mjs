@@ -97,5 +97,5 @@ test('candidate Storage rules seal the attachment objects to their owner', async
     }
     await assertFails(owner.storage().ref(`users/${uid}/invalid.bin`).put(bytes(10), {contentType: 'application/octet-stream'}));
     await assertFails(owner.storage().ref(`users/${uid}/empty.pdf`).put(bytes(0), {contentType: 'application/pdf'}));
-    assert.throws(() => withDocumentAttachmentStorageRules(storage), /RULES_ALREADY_PATCHED/);
+    assert.equal(withDocumentAttachmentStorageRules(storage), storage);
 });

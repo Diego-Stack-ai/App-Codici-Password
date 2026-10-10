@@ -98,3 +98,25 @@ test("bankId rifiuta valori invalidi e destinazioni non canoniche o ambigue", ()
   }
   assert.equal(resolveAccountWidgetBankData({...command, action: "delete"}, {}, {bankId: "orphan"}), null);
 });
+
+test("normalizza solo testi strutturali e conserva il valore del campo", () => {
+  const command = validateAccountWidgetCommand({
+    action: "create", operationId: "op-title", widgetId: "w-title", context: "private", accountId: "a-title",
+    data: {title: "  REFERENTE banca 2", fields: [{id: "name", label: "NOMINATIVO referente",
+      type: "text", encrypted: false, value: "mARIO ROSSI"}]}
+  });
+  assert.equal(command.data.title, "Referente Banca 2");
+  assert.equal(command.data.fields[0].label, "Nominativo Referente");
+  assert.equal(command.data.fields[0].value, "mARIO ROSSI");
+});
+
+test("profilo Account e profilo Banca rispettano la destinazione", () => {
+  const base = {action: "create", operationId: "op-profile", widgetId: "widget-profile",
+    context: "private", accountId: "account", data: {title: "Libero", fields: [field], profileId: "profile-1"}};
+  const account = validateAccountWidgetCommand({...base, data: {...base.data, profileCategory: "account"}});
+  assert.equal(account.data.profileId, "profile-1");
+  assert.throws(() => validateAccountWidgetCommand({...base, data: {...base.data, profileCategory: "account", bankId: "bank"}}), /PLACEMENT/);
+  const bank = validateAccountWidgetCommand({...base, data: {...base.data, profileCategory: "bank", bankId: "bank"}});
+  assert.equal(bank.data.profileCategory, "bank");
+  assert.throws(() => validateAccountWidgetCommand({...base, data: {...base.data, profileCategory: "bank"}}), /PLACEMENT/);
+});

@@ -39,7 +39,7 @@ function fixture(uid = 'A') {
     // come parametri della funzione, non assegnate all'oggetto restituito.
     const repositories = {};
     for (const name of ['listBackupCompanies', 'listBackupCompanyAccounts', 'listBackupCompanyAttachments',
-        'listBackupAccountWidgets', 'listBackupContacts', 'listBackupDeadlines', 'listBackupProfileWidgets',
+        'listBackupAccountWidgets', 'listBackupAccountWidgetProfiles', 'listBackupContacts', 'listBackupDeadlines', 'listBackupProfileWidgets',
         'listBackupSettings', 'listBackupSharedVaultData', 'listBackupSharedVaultLinks']) {
         repositories[name] = async () => [];
     }

@@ -23,13 +23,24 @@ function fixture(editable = true) {
     const widgets = [
         {id:'a', bankId:'bank-a', title:'A'}, {id:'b', bankId:'bank-b', title:'B'}, {id:'g',title:'Generic'}
     ].map(w => ({...w, kind:'embedded', context:'private',accountId:'account',revision:1,fields:[{id:'field',label:'Code',value:'initial',type:'text'}]}));
+    const profiles = [
+        {id:'profile-account',kind:'widget-profile',category:'account',title:'Accessi',fields:[{id:'name',label:'Utente',type:'text'}]},
+        {id:'profile-bank',kind:'widget-profile',category:'bank',title:'Coordinate',fields:[{id:'iban',label:'IBAN',type:'text'}]}
+    ];
     const sandbox = {document: {getElementById: id => ids[id], querySelectorAll: () => hosts, body: element('body')},
         createElement: element, clearElement(n) {for(const x of [...n.children]) x.remove();},
         setChildren(n, children) {for(const x of [...n.children]) x.remove(); children.filter(Boolean).forEach(x=>n.appendChild(x));},
         onAuthStateChanged:()=>()=>{}, auth:{currentUser:{uid:'owner'}}, navigator:{onLine:true}, crypto:{randomUUID:()=> 'uuid'},
         ensureVaultKeyMaterial:async()=> 'key', decrypt:async x => x,
         listAccountWidgets:async()=>widgets, listAccountWidgetsConfirmed:async()=>widgets,
+        listAccountWidgetProfiles:async()=>profiles, listAccountWidgetProfilesConfirmed:async()=>profiles,
+        profilesForCategory:(items,category)=>items.filter(item=>item.category===category),
+        structuralTitleCase:value=>String(value??'').trim().replace(/\s+/gu,' ').toLocaleLowerCase('it-IT')
+            .replace(/\p{L}[\p{L}\p{M}]*/gu,word=>word.charAt(0).toLocaleUpperCase('it-IT')+word.slice(1)),
+        profileFieldSummary:profile=>profile.fields.map(field=>field.label).join(', '),
+        isProfileAlreadyInserted:(items,profileId,bankId=null)=>items.some(item=>item.profileId===profileId&&(item.bankId||null)===(bankId||null)),
         listSharedVaultDataConfirmed:async()=>[], showToast(){},
+        createWidgetProfile:async()=>({profileId:'created-profile'}),
         updateAccountWidget:async (...args)=>updates.push(args), createAccountWidget:async(...args)=>updates.push(args)};
     vm.createContext(sandbox); vm.runInContext(lifecycleSource,sandbox); vm.runInContext(source,sandbox);
     return {all, ids, widgets, updates, sandbox, get hosts(){return hosts;},
@@ -52,22 +63,24 @@ test('consultation nests banking widgets and keeps legacy generic widgets visibl
 });
 test('bank shortcut preselects the owning bank and sends it to create',async()=>{
     const f=fixture(); const controller=await f.init(); await controller.openNewWidget('bank-b');
+    await f.all.find(n=>n.textContent==='Crea nuovo profilo Widget bancario').onclick();
     const select=f.all.find(n=>n['aria-label']==='Posizione del Widget'); assert.equal(select.value,'bank-b');
     const title=f.all.find(n=>n.placeholder==='Titolo del widget'); title.value='New';
+    f.all.find(n=>n.textContent==='Aggiungi campo').onclick();
     f.all.find(n=>n.placeholder==='Nome del campo').value='Code';
     const form=f.all.find(n=>n.tag==='form'); await form.onsubmit({preventDefault(){}});
     assert.equal(f.updates[0][0].bankId,'bank-b');
 });
 
-test('existing widget menu adds generic and banking templates directly in their defined areas',async()=>{
+test('Account catalog lists only Account profiles; Bank profiles stay in the bank catalog',async()=>{
     const f=fixture();await f.init();
     const select=f.ids['account-widget-template-select'],attach=f.ids['btn-attach-account-widget'];
-    select.value=[...select.children].find(option=>option.textContent==='Widget: Generic').value;
+    assert.equal(select.children.some(option=>option.textContent.includes('Coordinate')),false);
+    select.value=[...select.children].find(option=>option.textContent.includes('Accessi')).value;
     select.onchange();await attach.onclick();
-    assert.equal(f.updates[0][0].title,'Generic');assert.equal(f.updates[0][0].bankId,null);
-    select.value=[...select.children].find(option=>option.textContent==='Widget bancario: A → Conto #2').value;
-    select.onchange();await attach.onclick();
-    assert.equal(f.updates[1][0].title,'A');assert.equal(f.updates[1][0].bankId,'bank-b');
+    assert.equal(f.updates[0][0].title,'Accessi');assert.equal(f.updates[0][0].bankId,null);
+    await (await f.init()).openNewWidget('bank-b');
+    assert.ok(f.all.find(n=>n.textContent==='Coordinate'));
 });
 
 test('widget preparation preserves bank binding, explicit detach and encrypted values',async()=>{
@@ -91,6 +104,7 @@ test('new or legacy unsaved bank never opens the editor or sends a request',asyn
 test('moving an existing widget to an unsaved bank preserves editor and avoids the failed write',async()=>{
     const f=fixture(); const controller=await f.init({isBankSaved:()=>false});
     await controller.openNewWidget();
+    await f.all.find(n=>n.textContent==='Crea nuovo profilo Widget Account').onclick();
     f.all.find(n=>n['aria-label']==='Posizione del Widget').value='bank-b';
     const title=f.all.find(n=>n.placeholder==='Titolo del widget');title.value='Draft preserved';
     await f.all.find(n=>n.tag==='form').onsubmit({preventDefault(){}});

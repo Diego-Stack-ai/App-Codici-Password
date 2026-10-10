@@ -4,7 +4,8 @@
 // Other namespaces retain the original MIME and size policy unchanged.
 export function withDocumentAttachmentStorageRules(original) {
     if (typeof original !== 'string') throw Error('RULES_BASE_CHANGED');
-    if (original.includes('R12_SERVER_ONLY_ATTACHMENTS')) throw Error('RULES_ALREADY_PATCHED');
+    if (original.includes("namespace != 'profile-documents'") &&
+        original.includes('match /users/{userId}/profile-documents/{documentId}/attachments/{attachmentId} {')) return original;
     original = original.replaceAll('\r\n', '\n');
     const newline = '\n';
     const ownerBlock = [

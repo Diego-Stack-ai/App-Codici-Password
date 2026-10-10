@@ -52,13 +52,13 @@ test('entrambi i form montano anche i widget comuni in modalita modifica', async
 
 test('widget esistenti, nuovo widget e credenziali comuni hanno comandi separati', async () => {
   assert.doesNotMatch(widgetSource, /Collega credenziale comune|listSharedVaultDataConfirmed|linkSharedCredential/);
-  assert.match(widgetSource, /Widget bancario:/);
+  assert.match(widgetSource, /Profili Widget bancari/);
   for (const page of ['form_account_privato.html', 'form_account_azienda.html']) {
     const html = await readFile(new URL(`../Frontend/public/${page}`, import.meta.url), 'utf8');
     for (const id of ['account-widget-template-select', 'btn-attach-account-widget', 'btn-add-account-widget', 'btn-link-shared-credential']) {
       assert.equal(html.split(`id="${id}"`).length - 1, 1, `${page}: comando ${id} presente una sola volta`);
     }
-    assert.match(html, /Crea nuovo widget/);
+    assert.match(html, /Crea nuovo profilo Widget Account/);
     assert.match(html, />Credenziali comuni</);
   }
 });

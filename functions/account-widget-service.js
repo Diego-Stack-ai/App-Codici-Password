@@ -1,6 +1,7 @@
 "use strict";
 
 const {accountPath, revisionDecision, validateFields} = require("./shared-vault-service");
+const {normalizeStructuralFields, structuralTitleCase} = require("./widget-text-policy");
 
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,160}$/;
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
@@ -34,17 +35,29 @@ function widgetData(input = {}) {
     if (input.bankId !== null && typeof input.bankId !== "string") throw new Error("ACCOUNT_WIDGET_BANK_INVALID");
     bankId = input.bankId === null ? null : identifier(input.bankId, "ACCOUNT_WIDGET_BANK_INVALID");
   }
+  const profileId = Object.hasOwn(input, "profileId")
+    ? identifier(input.profileId, "ACCOUNT_WIDGET_PROFILE_INVALID") : undefined;
+  const profileCategory = input.profileCategory === "account" || input.profileCategory === "bank"
+    ? input.profileCategory : profileId ? null : undefined;
+  if (profileId && !profileCategory) throw new Error("ACCOUNT_WIDGET_PROFILE_CATEGORY_INVALID");
+  if (profileCategory === "bank" && (bankId === undefined || bankId === null)) {
+    throw new Error("ACCOUNT_WIDGET_PROFILE_PLACEMENT_INVALID");
+  }
+  if (profileCategory === "account" && typeof bankId === "string") {
+    throw new Error("ACCOUNT_WIDGET_PROFILE_PLACEMENT_INVALID");
+  }
   return {
     kind: "embedded",
-    title: text(input.title, 120, "ACCOUNT_WIDGET_TITLE_INVALID", true),
+    title: structuralTitleCase(text(input.title, 120, "ACCOUNT_WIDGET_TITLE_INVALID", true)),
     description: text(input.description ?? "", 500, "ACCOUNT_WIDGET_DESCRIPTION_INVALID"),
     icon: text(input.icon ?? "widgets", 80, "ACCOUNT_WIDGET_ICON_INVALID") || "widgets",
     color: HEX_COLOR_PATTERN.test(input.color || "") ? input.color : "#3b82f6",
     order: Number.isInteger(input.order) && input.order >= 0 ? input.order : 0,
     collapsed: input.collapsed === true,
-    fields: validateFields(input.fields),
+    fields: normalizeStructuralFields(validateFields(input.fields)),
     schemaVersion: 1,
-    ...(bankId === undefined ? {} : {bankId})
+    ...(bankId === undefined ? {} : {bankId}),
+    ...(profileId === undefined ? {} : {profileId, profileCategory})
   };
 }
 

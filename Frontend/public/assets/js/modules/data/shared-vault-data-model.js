@@ -75,6 +75,11 @@ export async function prepareEmbeddedAccountWidget(input = {}, account = {}, enc
         else if (typeof input.bankId === 'string' && /^[A-Za-z0-9._:-]{1,160}$/.test(input.bankId)) widget.bankId = input.bankId;
         else throw new Error('Conto bancario del Widget non valido.');
     }
+    if (Object.prototype.hasOwnProperty.call(input, 'profileId')) {
+        widget.profileId = requiredText(input.profileId, 'Profilo Widget', 160);
+        if (!['account', 'bank'].includes(input.profileCategory)) throw new Error('Categoria profilo Widget non valida.');
+        widget.profileCategory = input.profileCategory;
+    }
     if (context === 'company') {
         widget.companyId = requiredText(account.companyId, 'Identificativo Azienda', 160);
     }

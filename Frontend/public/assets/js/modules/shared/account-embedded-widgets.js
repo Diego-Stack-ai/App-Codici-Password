@@ -4,16 +4,21 @@ import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
     createAccountWidget, deleteAccountWidget, updateAccountWidget
 } from '../data/account-widget-client.js';
+import {createWidgetProfile} from '../data/widget-profile-client.js';
 import {
+    listAccountWidgetProfiles, listAccountWidgetProfilesConfirmed,
     listAccountWidgets, listAccountWidgetsConfirmed
 } from '../data/vault-repository.js';
 import {createAccountWidgetLifecycle, clearWidgetValues} from './account-widget-lifecycle.js';
+import {
+    isProfileAlreadyInserted, profileFieldSummary, profilesForCategory, structuralTitleCase
+} from './widget-profile-model.js';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
 
 
 async function editableFields(widget) {
-    if (!widget) return [{id: newId('field'), label: '', value: '', encrypted: false}];
+    if (!widget) return [];
     const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
     return Promise.all((widget.fields || []).map(async field => ({
         ...field,
@@ -23,12 +28,13 @@ async function editableFields(widget) {
     })));
 }
 
-function fieldRow(field = {}) {
+function fieldRow(field = {}, structureLocked = false) {
     const row = createElement('div', {className: 'account-widget-editor-field'});
     const label = createElement('input', {
         className: 'shared-account-select-control', type: 'text', maxlength: 120,
-        placeholder: 'Nome del campo', value: field.label || '', 'aria-label': 'Nome del campo'
+        placeholder: 'Nome del campo', value: field.label || '', 'aria-label': 'Nome del campo', disabled: structureLocked
     });
+    label.addEventListener('blur', () => { label.value = structuralTitleCase(label.value); });
     const value = createElement('input', {
         className: 'shared-account-select-control', type: 'text', maxlength: 10000,
         placeholder: 'Valore', value: field.value ?? '', 'aria-label': 'Valore del campo'
@@ -47,7 +53,7 @@ function fieldRow(field = {}) {
         }
     }, [visibilityIcon]);
     const sensitive = createElement('label', {className: 'account-widget-sensitive'}, [
-        createElement('input', {type: 'checkbox', checked: field.encrypted === true}),
+        createElement('input', {type: 'checkbox', checked: field.encrypted === true, disabled: structureLocked}),
         createElement('span', {textContent: 'Dato sensibile cifrato'})
     ]);
     sensitive.firstElementChild.addEventListener('change', event => {
@@ -59,11 +65,11 @@ function fieldRow(field = {}) {
     });
     const remove = createElement('button', {
         type: 'button', className: 'account-widget-remove', 'aria-label': 'Rimuovi campo',
-        onclick: () => row.remove()
+        onclick: () => row.remove(), hidden: structureLocked
     }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
     setChildren(row, [label, createElement('div', {className: 'account-widget-inline-control'}, [value, visibility]), sensitive, remove]);
     row.getValue = () => ({
-        id: field.id || newId('field'), label: label.value, value: value.value,
+        id: field.id || newId('field'), label: structuralTitleCase(label.value), value: value.value,
         type: sensitive.firstElementChild.checked
             ? 'sensitive'
             : (field.type && field.type !== 'sensitive' ? field.type : 'text'),
@@ -81,6 +87,7 @@ function widgetData(widget, fields, collapsed = widget?.collapsed === true) {
         color: widget.color || '#3b82f6',
         order: Number(widget.order || 0),
         collapsed,
+        ...(widget?.profileId ? {profileId: widget.profileId, profileCategory: widget.profileCategory} : {}),
         fields
     };
 }
@@ -105,12 +112,13 @@ async function openEditor(widget, context, refresh) {
     unregister = context.registerCleanup(close);
     const title = createElement('input', {
         className: 'shared-account-select-control', type: 'text', maxlength: 120,
-        placeholder: 'Titolo del widget', value: widget?.title || '', required: true
+        placeholder: 'Titolo del widget', value: widget?.title || '', required: true, disabled: Boolean(widget?.profileId)
     });
+    title.addEventListener('blur', () => { title.value = structuralTitleCase(title.value); });
     const bankHosts = [...document.querySelectorAll('[data-bank-widget-id]')];
     const selectedBankId = widget?.bankId || context.bankId || '';
     const placement = createElement('select', {
-        className: 'shared-account-select-control', 'aria-label': 'Posizione del Widget'
+        className: 'shared-account-select-control', 'aria-label': 'Posizione del Widget', disabled: Boolean(widget?.profileId)
     }, [
         createElement('option', {value: '', textContent: 'Account: Widget generico'}),
         ...bankHosts.map((host, index) => createElement('option', {
@@ -122,10 +130,10 @@ async function openEditor(widget, context, refresh) {
     }
     placement.value = selectedBankId;
     const fieldList = createElement('div', {className: 'account-widget-editor-fields'});
-    fields.forEach(field => fieldList.appendChild(fieldRow(field)));
+    fields.forEach(field => fieldList.appendChild(fieldRow(field, Boolean(widget?.profileId))));
     const addField = createElement('button', {
         type: 'button', className: 'btn-modal btn-secondary', textContent: 'Aggiungi campo',
-        onclick: () => fieldList.appendChild(fieldRow())
+        onclick: () => fieldList.appendChild(fieldRow()), hidden: Boolean(widget?.profileId)
     });
     const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Salva'});
     const form = createElement('form', {className: 'account-widget-editor', autocomplete: 'off', 'data-form-type': 'other'});
@@ -143,15 +151,35 @@ async function openEditor(widget, context, refresh) {
         }
         save.disabled = true;
         try {
+            const category = placement.value ? 'bank' : 'account';
+            if (widget?.profileCategory && widget.profileCategory !== category) {
+                showToast('Un Widget Account non può diventare bancario e viceversa. Crea un nuovo profilo Widget.', 'warning');
+                return;
+            }
+            const draftFields = rows.map((row, order) => ({...row.getValue(), order}));
+            let profileId = widget?.profileId;
+            if (!widget) {
+                const profile = await createWidgetProfile({
+                    category,
+                    title: structuralTitleCase(title.value),
+                    description: widget?.description || '',
+                    icon: widget?.icon || 'widgets',
+                    color: widget?.color || '#3b82f6',
+                    fields: draftFields
+                });
+                profileId = profile.profileId;
+            }
             const data = widgetData({
                 bankId: placement.value || null,
-                title: title.value,
+                profileId,
+                profileCategory: widget?.profileCategory || category,
+                title: structuralTitleCase(title.value),
                 description: widget?.description || '',
                 icon: widget?.icon || 'widgets',
                 color: widget?.color || '#3b82f6',
                 order: widget?.order || 0,
                 collapsed: widget?.collapsed === true
-            }, rows.map((row, order) => ({...row.getValue(), order})));
+            }, draftFields);
             if (widget) await updateAccountWidget(widget.id, Number(widget.revision || 0), data, context);
             else await createAccountWidget(data, context);
             close();
@@ -168,7 +196,9 @@ async function openEditor(widget, context, refresh) {
     });
     setChildren(form, [
         createElement('h2', {className: 'modal-title', textContent: widget ? 'Modifica widget' : 'Nuovo widget'}),
-        createElement('p', {className: 'modal-text', textContent: 'Definisci un nuovo tipo di Widget e i campi da usare in questo Account.'}),
+        createElement('p', {className: 'modal-text', textContent: widget
+            ? 'Modifica i valori di questo Widget.'
+            : 'Crea liberamente un nuovo profilo: aggiungi soltanto i campi che ti servono. Il profilo sarà riutilizzabile.'}),
         placement, title, fieldList, addField,
         createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
             createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
@@ -388,10 +418,12 @@ export async function initAccountEmbeddedWidgets(context) {
     if (context.readOnly) { section.classList.add('hidden'); return {...emptyController, destroy: lifecycle.destroy}; }
     let readVersion = 0;
     let availableTemplates = [];
+    let insertedWidgets = [];
     let templateChoices = new Map();
     const cards = new Map();
     context.registerCleanup(() => {
         availableTemplates = [];
+        insertedWidgets = [];
         templateChoices.clear();
         if (templateSelect) { templateSelect.value = ''; clearElement(templateSelect); }
         if (attachTemplate) { attachTemplate.onclick = null; attachTemplate.disabled = true; }
@@ -412,6 +444,66 @@ export async function initAccountEmbeddedWidgets(context) {
         }
         section.classList.toggle('hidden', !context.editable && list.children.length === 0);
     };
+    const openProfileCatalog = (category, bankId = null) => {
+        const overlay = createElement('div', {className: 'modal-overlay active'});
+        let unregister = () => {};
+        const close = () => { overlay.remove(); unregister(); };
+        unregister = context.registerCleanup(close);
+        const bankCatalog = category === 'bank';
+        const profiles = profilesForCategory(availableTemplates, category);
+        const cards = profiles.map(profile => {
+            const duplicate = isProfileAlreadyInserted(insertedWidgets, profile.id, bankId);
+            const fieldNames = profileFieldSummary(profile);
+            return createElement('article', {className: 'account-widget-block'}, [
+                createElement('strong', {textContent: profile.title}),
+                profile.description ? createElement('p', {className: 'modal-text', textContent: profile.description}) : null,
+                createElement('p', {className: 'modal-text', textContent: `Campi presenti: ${fieldNames}`}),
+                createElement('button', {
+                    type: 'button', className: 'btn-modal btn-secondary',
+                    textContent: duplicate ? 'Widget già inserito' : bankCatalog ? 'Aggiungi al conto' : 'Aggiungi all’Account',
+                    onclick: async () => {
+                        if (duplicate) return showToast('Widget già inserito. Crea un nuovo profilo widget.', 'warning');
+                        const fields = profile.fields.map((field, order) => ({
+                            id: newId('field'), label: field.label, type: field.type,
+                            encrypted: field.encrypted === true, value: '', order
+                        }));
+                        try {
+                            await createAccountWidget(widgetData({...profile, profileId: profile.id,
+                                profileCategory: category, bankId, order: insertedWidgets.length}, fields, false), context);
+                            close();
+                            await refresh(true);
+                            if (context.active()) showToast(bankCatalog
+                                ? 'Widget aggiunto al conto bancario.' : 'Widget aggiunto all’Account.', 'success');
+                        } catch (error) {
+                            if (context.active()) showToast(error.message || 'Aggiunta del Widget non riuscita.', 'error');
+                        }
+                    }
+                })
+            ]);
+        });
+        const body = createElement('div', {className: 'account-widget-editor-fields'}, cards.length ? cards : [
+            createElement('p', {className: 'modal-text', textContent: bankCatalog
+                ? 'Non hai ancora creato profili Widget bancari.' : 'Non hai ancora creato profili Widget Account.'})
+        ]);
+        const createNew = createElement('button', {
+            type: 'button', className: 'btn-modal btn-primary',
+            textContent: bankCatalog ? 'Crea nuovo profilo Widget bancario' : 'Crea nuovo profilo Widget Account',
+            onclick: async () => { close(); await openEditor(null, {...context, bankId}, refresh); }
+        });
+        overlay.appendChild(createElement('section', {className: 'modal-box account-widget-editor-modal', role: 'dialog', 'aria-modal': 'true'}, [
+            createElement('h2', {className: 'modal-title', textContent: bankCatalog
+                ? 'Profili Widget bancari' : 'Profili Widget Account'}),
+            createElement('p', {className: 'modal-text', textContent: bankCatalog
+                ? 'Scegli un profilo riutilizzabile. I valori saranno salvati soltanto in questo conto.'
+                : 'Scegli un profilo riutilizzabile. I valori saranno salvati soltanto in questo Account.'}),
+            body,
+            createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
+                createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Chiudi', onclick: close}),
+                createNew
+            ])
+        ]));
+        document.body.appendChild(overlay);
+    };
     const openNewWidget = async (bankId = null) => {
         if (!context.editable || !context.active()) return false;
         if (typeof bankId === 'string' && context.isBankSaved && !context.isBankSaved(bankId)) {
@@ -423,7 +515,12 @@ export async function initAccountEmbeddedWidgets(context) {
             return false;
         }
         try {
-            return await openEditor(null, {...context, bankId: typeof bankId === 'string' ? bankId : null}, refresh);
+            if (typeof bankId === 'string') {
+                openProfileCatalog('bank', bankId);
+                return true;
+            }
+            openProfileCatalog('account');
+            return true;
         } catch {
             if (context.active()) showToast('Impossibile caricare i Widget disponibili. Riprova.', 'error');
             return false;
@@ -433,22 +530,12 @@ export async function initAccountEmbeddedWidgets(context) {
         if (!templateSelect || !attachTemplate) return;
         templateChoices = new Map();
         const choices = [];
-        const bankHosts = [...document.querySelectorAll('[data-bank-widget-id]')];
         availableTemplates.forEach((template, templateIndex) => {
-            if (template.bankId) {
-                bankHosts.forEach((host, bankIndex) => {
-                    const value = `${templateIndex}:bank:${bankIndex}`;
-                    templateChoices.set(value, {template, bankId: host.dataset.bankWidgetId});
-                    choices.push(createElement('option', {
-                        value,
-                        textContent: `Widget bancario: ${template.title} → Conto #${bankIndex + 1}`
-                    }));
-                });
-                return;
-            }
+            if (template.category !== 'account') return;
             const value = `${templateIndex}:account`;
             templateChoices.set(value, {template, bankId: null});
-            choices.push(createElement('option', {value, textContent: `Widget: ${template.title}`}));
+            const fields = template.fields.map(field => field.label).join(', ');
+            choices.push(createElement('option', {value, textContent: `Account: ${template.title} — Campi: ${fields}`}));
         });
         setChildren(templateSelect, [
             createElement('option', {
@@ -471,12 +558,16 @@ export async function initAccountEmbeddedWidgets(context) {
         }
         attachTemplate.disabled = true;
         try {
+            const alreadyInserted = isProfileAlreadyInserted(insertedWidgets, choice.template.id, choice.bankId);
+            if (alreadyInserted) throw new Error('Widget già inserito. Crea un nuovo profilo widget.');
             const fields = (choice.template.fields || []).map((field, order) => ({
                 id: newId('field'), label: field.label, type: field.type,
                 encrypted: field.encrypted === true, value: '', order
             }));
             await createAccountWidget(widgetData({
                 ...choice.template,
+                profileId: choice.template.id,
+                profileCategory: choice.template.category,
                 bankId: choice.bankId,
                 order: cards.size,
                 collapsed: false
@@ -495,21 +586,14 @@ export async function initAccountEmbeddedWidgets(context) {
     const refresh = async confirmed => {
         if (!context.active()) return;
         const reading = ++readVersion;
-        const read = confirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
-        const allWidgets = await read(context.uid);
+        const readWidgets = confirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
+        const readProfiles = confirmed ? listAccountWidgetProfilesConfirmed : listAccountWidgetProfiles;
+        const [allWidgets, profiles] = await Promise.all([readWidgets(context.uid), readProfiles(context.uid)]);
         if (!context.active() || reading !== readVersion) return;
         const widgets = allWidgets.filter(widget => widget.kind === 'embedded' &&
             widget.context === context.context && widget.accountId === context.accountId &&
             (context.context !== 'company' || widget.companyId === context.companyId))
             .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
-        const seenTemplates = new Set();
-        const templates = allWidgets.filter(widget => {
-            if (widget.kind !== 'embedded' || !Array.isArray(widget.fields) || !widget.fields.length) return false;
-            const signature = `${widget.bankId ? 'bank' : 'account'}|${widget.title}|${widget.fields.map(field => `${field.label}:${field.type}`).join('|')}`;
-            if (seenTemplates.has(signature)) return false;
-            seenTemplates.add(signature);
-            return true;
-        });
         const editableWidgets = context.editable
             ? await Promise.all(widgets.map(editableFields))
             : widgets.map(widget => widget.fields || []);
@@ -517,7 +601,11 @@ export async function initAccountEmbeddedWidgets(context) {
             if (context.editable) editableWidgets.flat().forEach(field => { field.value = ''; });
             return;
         }
-        availableTemplates = templates;
+        insertedWidgets = widgets;
+        availableTemplates = [
+            ...profilesForCategory(profiles, 'account'),
+            ...profilesForCategory(profiles, 'bank')
+        ];
         updateTemplateMenu();
         for (const {card} of cards.values()) { card.destroy?.(); card.remove(); }
         cards.clear();

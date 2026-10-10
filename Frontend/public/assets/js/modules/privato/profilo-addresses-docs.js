@@ -185,6 +185,9 @@ export function renderDocumentiView() {
                     createElement('span', { className: 'card-title-accent', textContent: docItem.type })
                 ]),
                 createElement('div', { className: 'card-actions-row' }, [
+                    createElement('button', { className: 'btn-edit-section', title: 'Allegati', dataset: { action: 'document-attachments', idx } }, [
+                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'attach_file' })
+                    ]),
                     createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-doc', idx } }, [
                         createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
                     ]),
