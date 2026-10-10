@@ -32,7 +32,8 @@ export const profileContactsId = value => typeof value === 'string' && value.len
 export const profileContactsUid = value => typeof value === 'string' && UID_PATTERN.test(value);
 export const profileContactsHash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const profileContactsCipher = value => typeof value === 'string' && (value === '' ||
-    (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)));
+    (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)) ||
+    (value.length >= 80 && value.length <= 100000 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)));
 export const contactFieldSpec = (collection, key) => {
     if (!Object.hasOwn(CONTACT_FIELDS, collection)) profileContactsInvalid();
     const spec = CONTACT_FIELDS[collection].find(item => item.key === key);

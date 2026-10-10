@@ -1,11 +1,11 @@
 import { APP_VERSION } from './env-v126.js';
 
 const ENGINE_POLICY = Object.freeze([
-    { id: 'm7-purge', label: 'M7 · Cancellazione definitiva', state: 'limited', detail: 'Disponibile solo per il collaudo autorizzato; blocco globale attivo.' },
+    { id: 'm7-purge', label: 'M7 · Cancellazione definitiva', state: 'active', detail: 'Disponibile con conferma esplicita, fence globale, ricevuta e audit.' },
     { id: 'm8-restore', label: 'M8 · Ripristino corrente', state: 'active', detail: 'Ripristino corrente disponibile con anteprima e controlli di sicurezza.' },
     { id: 'm8-resumable', label: 'M8 · Ripristino riprendibile', state: 'off', detail: 'Motore V2 mantenuto disabilitato.' },
     { id: 'cpfe2-read', label: 'CPFE2 · Lettura', state: 'active', detail: 'Lettura compatibile del nuovo formato disponibile.' },
-    { id: 'cpfe2-write', label: 'CPFE2 · Nuove scritture', state: 'off', detail: 'Nuove scritture nel formato CPFE2 mantenute disabilitate.' },
+    { id: 'cpfe2-write', label: 'CPFE2 · Nuove scritture', state: 'active', detail: 'Le nuove cifrature usano PBKDF2-SHA256 a 600.000 iterazioni e AES-GCM-256.' },
     { id: 'mfa-recovery', label: 'MFA · Recupero selettivo', state: 'off', detail: 'Rimozione automatica selettiva del fattore mantenuta disabilitata.' }
 ]);
 

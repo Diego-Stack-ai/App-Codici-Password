@@ -1,7 +1,8 @@
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,160}$/;
 
-// Temporary safety interlock approved by the owner. No request/env override.
-function isArchivePurgeSuspended() { return true; }
+// Global purge is enabled only through reviewed code and deployment. Request
+// payloads and environment variables cannot override this release policy.
+function isArchivePurgeSuspended() { return false; }
 
 function requireIdentifier(value) {
   if (typeof value !== 'string') throw new Error('INVALID_IDENTIFIER');

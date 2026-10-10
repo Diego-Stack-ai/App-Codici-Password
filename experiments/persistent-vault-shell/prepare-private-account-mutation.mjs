@@ -10,7 +10,8 @@ const changesAllowed = new Set(['username', 'account', 'password', 'note']);
 const plain = value => value && typeof value === 'object' &&
     [Object.prototype, null].includes(Object.getPrototypeOf(value));
 const cipherOrEmpty = value => typeof value === 'string' && (value === '' ||
-    (value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/u.test(value)));
+    (value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/u.test(value)) ||
+    (value.length >= 80 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(value)));
 const operationIdPattern = /^[A-Za-z0-9:_-]{1,180}$/u;
 const recordIdPattern = /^[A-Za-z0-9_-]{1,180}$/u;
 const fail = () => { throw new Error('PRIVATE_ACCOUNT_MUTATION_PREPARATION_INVALID'); };

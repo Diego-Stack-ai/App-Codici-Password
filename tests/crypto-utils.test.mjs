@@ -19,7 +19,7 @@ const {
 
 const MARKER = 'APP_CODICI_PASSWORD_VAULT_VERIFIER_V1';
 
-test('legacy 100000-iteration format remains interoperable with independent WebCrypto and CPVK2 fallback',async()=>{
+test('legacy 100000-iteration format remains readable with CPVK2 fallback',async()=>{
   const password='  Synthetic-e\u0301-password  ',normalized='Synthetic-é-password',plain='SYNTHETIC legacy payload';
   const derive=async salt=>{
     const encoded=new TextEncoder().encode(normalized);
@@ -33,13 +33,9 @@ test('legacy 100000-iteration format remains interoperable with independent WebC
   const fixture=Buffer.concat([salt,iv,cipher]).toString('base64');
   assert.equal(await decrypt(fixture,password),plain);
   assert.equal(await decrypt(fixture,createVaultKeyring('synthetic-new-key',password)),plain);
-  const generated=Buffer.from(await encrypt(plain,password),'base64');
-  const decoded=await crypto.subtle.decrypt({name:'AES-GCM',iv:generated.subarray(16,28)},
-    await derive(generated.subarray(0,16)),generated.subarray(28));
-  try{assert.equal(new TextDecoder().decode(decoded),plain);}finally{new Uint8Array(decoded).fill(0);}
 });
 
-test('runtime dual-read apre CPFE2 a 600000 iterazioni ma continua a scrivere legacy',async()=>{
+test('runtime CPFE2 legge il formato corrente e scrive nuove cifrature CPFE2',async()=>{
   const password='Synthetic-CPFE2-password',plain='SYNTHETIC CPFE2 payload';
   const salt=new Uint8Array(16).fill(31),iv=new Uint8Array(12).fill(47);
   const encoded=new TextEncoder().encode(password);
@@ -54,7 +50,9 @@ test('runtime dual-read apre CPFE2 a 600000 iterazioni ma continua a scrivere le
     ciphertext:Buffer.from(ciphertext).toString('base64')};
   const cpfe2=`CPFE2.${Buffer.from(JSON.stringify(envelope)).toString('base64')}`;
   assert.equal(await decrypt(cpfe2,password),plain);
-  assert.equal((await encrypt(plain,password)).startsWith('CPFE2.'),false);
+  const generated = await encrypt(plain,password);
+  assert.equal(generated.startsWith('CPFE2.'),true);
+  assert.equal(await decrypt(generated,password),plain);
 });
 
 test('runtime CPFE2 fallisce chiuso su downgrade, formato alterato e password errata',async()=>{

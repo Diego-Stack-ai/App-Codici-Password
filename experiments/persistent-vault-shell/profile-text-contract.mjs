@@ -34,8 +34,9 @@ export function profileTextBasis(record, field) {
     return JSON.stringify([exists, value]);
 }
 export function profileTextCipher(value) {
-    return typeof value === 'string' && (value === '' || (value.length >= 60 && value.length <= 100000 &&
-        value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)));
+    return typeof value === 'string' && (value === '' ||
+        (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)) ||
+        (value.length >= 80 && value.length <= 100000 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)));
 }
 
 // Snapshot the entire request before any asynchronous hashing/transaction.

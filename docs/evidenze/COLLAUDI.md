@@ -1,5 +1,20 @@
 # Collaudi
 
+## 10/10/2026 — PDF azienda e preparazione immagini candidata 1.2.157
+
+- PDF azienda: layout a schede, due colonne per campi brevi, larghezza piena e segmentazione multipagina per testi lunghi. Suite **33/33**; fixture sintetica renderizzata e ispezionata su tre pagine, senza sovrapposizioni o troncamenti.
+- Immagini: editor condiviso collegato a Documenti Profilo, Account privati/aziendali e Scadenze; rotazione 90°, ritaglio tattile e lato massimo 2048 px. OCR e parser assenti. Suite allegati/editor **56/56**.
+- CPFE2: corretti i validatori Account emersi dal primo full run; Vault shell **829/829** e Vault Emulator **21/21**.
+- Gate statici: sintassi **182 moduli**, CSS, riferimenti statici, runtime offline **264 risorse** e budget prestazionale verdi.
+- Verifica integrale: `npm test` completato con codice di uscita **0**, incluse tutte le suite locali e con emulatori previste dal progetto.
+
+## 10/10/2026 — attivazione candidata M7 globale e writer CPFE2
+
+- M7: interlock statico portato a policy attiva; nessun override da richiesta o ambiente. Restano obbligatori conferma `DELETE_FOREVER`, owner binding, revisione, global lock, ricevuta e audit. Prove mirate purge **26/26**.
+- CPFE2: `encrypt()` produce ora l'envelope versionato `CPFE2` con PBKDF2-SHA256 a 600.000 iterazioni e AES-GCM-256; la lettura legacy a 100.000 resta compatibile. Prove crypto e diagnostica **19/19**.
+- Controlli statici iniziali: sintassi **181 moduli**, CSS e diff whitespace verdi.
+- Limite esplicito: questo incremento non rende attivi M8 V2 o MFA selettivo, che non dispongono ancora di un percorso runtime completo e sicuro.
+
 ## Rilascio completo 1.2.154 — 10/10/2026
 
 - Integrazione: PR #97, merge commit `eb1380c0` su `master`.

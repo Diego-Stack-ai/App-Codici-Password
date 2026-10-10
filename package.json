@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.156",
+  "version": "1.2.157",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -66,7 +66,7 @@
     "test:performance-budget": "node scripts/audit-page-performance.mjs --check && node --test tests/app-diagnostics.test.mjs",
     "test:js-syntax": "node scripts/audit-js-syntax.mjs",
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
-    "test:attachments": "node --test tests/attachment-security.test.mjs tests/account-attachment-delete.test.mjs tests/legacy-attachment-opening.test.mjs tests/device-cache-residues.test.mjs tests/attachment-removal-residues.test.mjs tests/company-hard-delete-residues.test.mjs tests/shared-copies-purge.test.mjs",
+    "test:attachments": "node --test tests/attachment-security.test.mjs tests/account-attachment-delete.test.mjs tests/legacy-attachment-opening.test.mjs tests/device-cache-residues.test.mjs tests/attachment-removal-residues.test.mjs tests/company-hard-delete-residues.test.mjs tests/shared-copies-purge.test.mjs tests/image-crop-editor.test.mjs",
     "test:account-attachment-delete-emulators": "node scripts/run-account-attachment-delete-emulators.mjs",
     "test:purge-retention-emulators": "node scripts/run-purge-retention-emulators.mjs",
     "test:avatar-residues-emulators": "node scripts/run-avatar-residues-emulators.mjs",

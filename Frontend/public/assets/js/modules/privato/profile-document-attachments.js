@@ -3,6 +3,7 @@ import {collection, getDocsFromServer, query, where, getBytes, ref, httpsCallabl
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showToast, showConfirmModal} from '../../ui-core-v129.js';
 import {encryptAttachmentFile, decryptAttachmentBytes, openDecryptedAttachment, validateAttachmentFile} from '../shared/attachment-security.js';
+import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_PER_DOCUMENT = 10;
@@ -132,9 +133,15 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         if (busy || !files.length) return;
         setBusy(true);
         try {
-            for (const file of files) {
+            for (const selectedFile of files) {
+                let file = selectedFile;
                 validateAttachmentFile(file, {maxBytes: MAX_BYTES});
                 if (!(file.type.startsWith('image/') || file.type === 'application/pdf')) throw new Error('Sono ammesse solo immagini e PDF.');
+                if (file.type.startsWith('image/')) {
+                    file = await editImageBeforeUpload(file);
+                    if (!file) continue;
+                    validateAttachmentFile(file, {maxBytes: MAX_BYTES});
+                }
                 status.textContent = `Cifratura di ${file.name || 'allegato'}…`;
                 const id = attachmentId();
                 const encrypted = await encryptAttachmentFile(file, vaultKey);

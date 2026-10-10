@@ -17,7 +17,7 @@ export const privateDocumentUid=v=>typeof v==='string'&&uid.test(v);
 export const privateDocumentId=v=>typeof v==='string'&&v.length>0&&v.length<=256&&!/[\u0000-\u001f/]/.test(v)&&!v.includes('-legacy-')?v:null;
 export const privateDocumentCreatedId=v=>typeof v==='string'&&/^document-[A-Za-z0-9-]{1,110}$/.test(v)&&!v.includes('-legacy-');
 export const privateDocumentHash=v=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
-export const privateDocumentCipher=v=>typeof v==='string'&&(v===''||(v.length>=60&&v.length<=100000&&v.length%4===0&&/^[A-Za-z0-9+/]+={0,2}$/.test(v)));
+export const privateDocumentCipher=v=>typeof v==='string'&&(v===''||(v.length>=60&&v.length<=100000&&v.length%4===0&&/^[A-Za-z0-9+/]+={0,2}$/.test(v))||(v.length>=80&&v.length<=100000&&/^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(v)));
 export function privateDocumentFields(fields){
   if(!object(fields)) fail(); const keys=Object.keys(fields); if(!keys.length||keys.length>PRIVATE_DOCUMENT_FIELDS.length) fail(); const out={};
   for(const key of keys){const spec=PRIVATE_DOCUMENT_FIELDS.find(x=>x.key===key),value=fields[key]; if(!spec) fail();

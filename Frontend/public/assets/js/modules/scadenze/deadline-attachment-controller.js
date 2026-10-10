@@ -1,5 +1,6 @@
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
+import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 
 export function createDeadlineAttachmentController() {
     let selectedFiles = [];
@@ -68,8 +69,11 @@ export function createDeadlineAttachmentController() {
             };
         });
         ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
-            document.getElementById(id)?.addEventListener('change', event => {
-                selectedFiles.push(...Array.from(event.target.files || []));
+            document.getElementById(id)?.addEventListener('change', async event => {
+                for (const selected of Array.from(event.target.files || [])) {
+                    const file = selected.type.startsWith('image/') ? await editImageBeforeUpload(selected) : selected;
+                    if (file) selectedFiles.push(file);
+                }
                 event.target.value = '';
                 render();
             });

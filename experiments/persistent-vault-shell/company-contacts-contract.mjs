@@ -114,7 +114,8 @@ export const COMPANY_CONTACT_MUTATION_REFUSALS = Object.freeze({
 // Same cipher alphabet the private contract accepts: a stored ciphertext is
 // recognised by shape, never re-encrypted and never rewritten by accident.
 export const companyContactCipher = value => typeof value === 'string' && (value === '' ||
-    (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)));
+    (value.length >= 60 && value.length <= 100000 && value.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(value)) ||
+    (value.length >= 80 && value.length <= 100000 && /^CPFE2\.(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)));
 export const COMPANY_CONTACT_MUTATION_FIELDS = Object.freeze({
     'email-slot': Object.freeze([
         Object.freeze({key: 'tipo', maxLength: 120, format: 'plain'}),
