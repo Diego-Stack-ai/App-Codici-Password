@@ -14,6 +14,14 @@ const OWNER_UID = 'owner-user';
 const OTHER_UID = 'other-user';
 let testEnv;
 
+async function seedPurgeLock(status, fields = {}) {
+  await testEnv.withSecurityRulesDisabled(context => setDoc(
+    doc(context.firestore(), 'archivePurgeLocks', OWNER_UID),
+    {schemaVersion: 1, ownerUid: OWNER_UID, operationId: 'storage-test',
+      targetPath: `users/${OWNER_UID}/accounts/a1`, digest: 'a'.repeat(64), status, ...fields}
+  ));
+}
+
 before(async () => {
   testEnv = await initializeTestEnvironment({
     projectId: PROJECT_ID,
@@ -39,6 +47,34 @@ test('il proprietario può caricare, leggere ed eliminare un file consentito', a
   const downloaded = await assertSucceeds(getBytes(objectRef));
   assert.deepEqual(new Uint8Array(downloaded), content);
   await assertSucceeds(deleteObject(objectRef));
+});
+
+test('M7: il lock globale attivo blocca creazione, modifica e cancellazione Storage ma non la lettura', async () => {
+  const storage = testEnv.authenticatedContext(OWNER_UID).storage();
+  const existing = ref(storage, `users/${OWNER_UID}/accounts/m7/attachments/existing.pdf`);
+  const incoming = ref(storage, `users/${OWNER_UID}/accounts/m7/attachments/incoming.pdf`);
+  await testEnv.withSecurityRulesDisabled(context => uploadBytes(
+    ref(context.storage(), existing.fullPath), new Uint8Array([1]), {contentType: 'application/pdf'}
+  ));
+  await seedPurgeLock('active');
+  await assertSucceeds(getBytes(existing));
+  await assertFails(uploadBytes(incoming, new Uint8Array([2]), {contentType: 'application/pdf'}));
+  await assertFails(updateMetadata(existing, {customMetadata: {changed: 'yes'}}));
+  await assertFails(deleteObject(existing));
+});
+
+test('M7: lock rilasciato valido riapre Storage e lock malformato fallisce chiuso', async () => {
+  const storage = testEnv.authenticatedContext(OWNER_UID).storage();
+  const released = ref(storage, `users/${OWNER_UID}/accounts/m7/attachments/released.pdf`);
+  await seedPurgeLock('released');
+  await assertSucceeds(uploadBytes(released, new Uint8Array([3]), {contentType: 'application/pdf'}));
+  await assertSucceeds(deleteObject(released));
+
+  await seedPurgeLock('released', {ownerUid: OTHER_UID});
+  const malformed = ref(storage, `users/${OWNER_UID}/accounts/m7/attachments/malformed.pdf`);
+  await assertFails(uploadBytes(malformed, new Uint8Array([4]), {contentType: 'application/pdf'}));
+  await testEnv.withSecurityRulesDisabled(context =>
+    deleteDoc(doc(context.firestore(), 'archivePurgeLocks', OWNER_UID)));
 });
 
 test('un altro utente e un client anonimo non accedono allo spazio del proprietario', async () => {

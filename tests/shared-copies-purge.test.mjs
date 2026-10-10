@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 
 // M7-T08 — Asserzioni di sorgente che completano la misura su Emulator
 // (`tests/shared-copies-purge.emulator.test.mjs`): chi scrive lo stato sospeso,
-// che cosa il purge non tocca, e perché la condivisione delle Scadenze è un
+// che cosa il purge rimuove, e perché la condivisione delle Scadenze è un
 // percorso separato.
 const root = new URL('../Frontend/public/', import.meta.url);
 const read = async path => (await readFile(new URL(path, import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
@@ -15,23 +15,22 @@ const rulesSource = await read('../firestore.rules');
 const archiveService = await readFile(new URL('assets/js/modules/settings/archive-account-service.js', root), 'utf8')
     .then(text => text.replace(/\r\n/g, '\n'));
 
-test('T-08: algoritmo sospeso salvo actor sintetico legge widget/link nel preflight, senza cleanup delle copie condivise', () => {
+test('T-08: algoritmo sospeso salvo actor sintetico pianifica e applica la cascata delle copie condivise', () => {
     // Il purge resta bloccato per utenti reali; l'eccezione consente solo il collaudo maturity allowlisted.
     assert.match(purgeSlice, /if \(isArchivePurgeSuspended\(\) && !isMaturityTestActor\(request\.auth\)\)/);
     assert.match(purgeSlice, /ARCHIVE_PURGE_TEMPORARILY_SUSPENDED/);
-    for (const identifier of ['invites', 'sharedVaultData',
-        'deadlineShares', 'receivedDeadlines', 'sharingState', 'suspendedAt']) {
+    for (const identifier of ['deadlineShares', 'receivedDeadlines', 'sharingState', 'suspendedAt']) {
         assert.equal(purgeSlice.includes(identifier), false,
             `il purge non deve nominare ${identifier}`);
     }
-    for (const identifier of ['accountWidgets', 'sharedVaultLinks']) {
-        const reads = [...purgeSlice.matchAll(new RegExp(`transaction\\.get\\(userRef\\.collection\\('${identifier}'\\)\\)`, 'g'))];
-        assert.equal(reads.length, 1, `${identifier}: una lettura preventiva esplicita`);
-        assert.equal(purgeSlice.split(identifier).length - 1, 1,
-            `${identifier}: nessun altro uso diretto nel corpo storico`);
+    for (const identifier of ['accountWidgets', 'sharedVaultData', 'sharedVaultLinks']) {
+        assert.match(purgeSlice, new RegExp(`transaction\\.get\\(userRef\\.collection\\('${identifier}'\\)\\)`),
+            `${identifier}: lettura transazionale della cascata`);
     }
-    assert.match(purgeSlice, /assertNoExternalAccountReferences\(command,/);
-    // Le uniche scritture finali sono: pulizia dei riferimenti, ricevuta e registro.
+    assert.match(purgeSlice, /transaction\.get\(store\.collection\('invites'\)\.where\('ownerId', '==', ownerUid\)\)/);
+    assert.match(purgeSlice, /const cascade = planCascadeCleanup\(cascadeSnapshots\)/);
+    assert.match(purgeSlice, /for \(const reference of cascade\) transaction\.delete\(reference\)/);
+    assert.match(purgeSlice, /ARCHIVE_PURGE_CASCADE_LIMIT/);
     assert.match(purgeSlice, /transaction\.set\(operationRef, \{status: "purged"/);
     assert.match(purgeSlice, /action: "account-purged"/);
 });
@@ -72,8 +71,9 @@ test('T-08: la condivisione delle Scadenze è un altro percorso', () => {
     assert.match(indexSource, /function receivedDeadlineShareRef\(db, ownerUid, deadlineId\) \{\s*\n\s*return db\.collection\("deadlineShares"\)/);
 });
 
-test('T-08: nessun job o percorso di pulizia per copie condivise e inviti', () => {
-    // N1 aggiunge solo la retention dei marcatori, non delle copie o degli inviti.
+test('T-08: la cascata è atomica nel purge e non dipende da un job successivo', () => {
+    // N1 aggiunge solo la retention dei marcatori; le copie e gli inviti sono
+    // eliminati nella transazione finale del purge.
     const schedules = [...indexSource.matchAll(/exports\.(\w+) = onSchedule\(/g)]
         .map(match => match[1]).sort();
     assert.deepEqual(schedules, ['checkDeadlines', 'cleanupInviteRevocationMarkers',
@@ -85,6 +85,7 @@ test('T-08: nessun job o percorso di pulizia per copie condivise e inviti', () =
     for (const collection of ['invites', 'accountWidgets', 'sharedVaultData', 'sharedVaultLinks']) {
         assert.equal(markerCleanup.includes(`"${collection}"`), false);
     }
+    assert.match(purgeSlice, /for \(const reference of cascade\) transaction\.delete\(reference\)/);
     assert.match(indexSource, /exports\.checkDeadlines = onSchedule\(/);
     assert.match(indexSource, /exports\.purgeExpiredAuditEvents = onSchedule\(/);
     // La retention del registro scansiona solo `auditEvents`.

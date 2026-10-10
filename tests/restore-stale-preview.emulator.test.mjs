@@ -104,7 +104,7 @@ function clientFixture() {
     const storage = client.storage(), db = client.firestore();
     const uploads = [];
     const factory = new Function('auth', 'functions', 'storage', 'httpsCallable', 'onAuthStateChanged', 'ref',
-        'uploadBytes', 'decryptBackupEntry', 'deriveBackupKey', 'parseBackupLine', 'chunkRestoreRecords',
+        'getBytes', 'uploadBytes', 'decryptBackupEntry', 'deriveBackupKey', 'parseBackupLine', 'chunkRestoreRecords',
         'describeRestoreRecords', 'restoreRecordKey', 'validateBackupFooter', 'validateRestoreStoragePath',
         'collectStoragePaths', 'crypto', 'TextDecoder', 'TextEncoder', 'console', 'File', 'Blob',
         `${importServiceSource}\nreturn {prepareBackupRestore, executeBackupRestore, releaseBackupRestore};`);
@@ -113,7 +113,7 @@ function clientFixture() {
             assert.equal(name, 'restoreBackupChunk');
             return {data: await restoreChunk({auth: {uid: OWNER}, data})};
         },
-        () => () => {}, storageRef,
+        () => () => {}, storageRef, getBytes,
         async (reference, bytes, options) => {
             uploads.push(reference.fullPath ?? String(reference));
             return storageUpload(reference, bytes, options);

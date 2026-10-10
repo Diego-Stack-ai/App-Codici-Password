@@ -45,7 +45,7 @@ const {
 } = require("./history-recovery-service");
 const {
     accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
-    assertNoExternalAccountReferences, isArchivePurgeSuspended
+    isArchivePurgeSuspended
 } = require("./archive-purge-service");
 const {isMaturityTestActor} = require("./maturity-rollout-policy");
 const {
@@ -379,6 +379,35 @@ exports.purgeArchivedAccount = onCall(
         const operationRef = store.collection("mutationResults").doc(ownerUid).collection("operations").doc(command.operationId);
         const legacyRef = userRef.collection("archiveOperations").doc(command.operationId);
         const lockRef = globalPurgeLockRef(store, ownerUid);
+        const planCascadeCleanup = ({widgetsSnapshot, sharedDataSnapshot, linksSnapshot, invitesSnapshot}) => {
+            const matchesAccount = value => value && typeof value === 'object' && !Array.isArray(value) &&
+                value.accountId === command.accountId &&
+                (command.context === 'private' ? !value.companyId : value.companyId === command.companyId);
+            const widgets = widgetsSnapshot.docs.filter(snapshot => matchesAccount(snapshot.data()));
+            const sharedData = sharedDataSnapshot.docs.filter(snapshot => matchesAccount(snapshot.data()));
+            const sharedDataIds = new Set(sharedData.map(snapshot => snapshot.id));
+            const links = linksSnapshot.docs.filter(snapshot => {
+                const value = snapshot.data();
+                return matchesAccount(value) || (typeof value?.sharedDataId === 'string' && sharedDataIds.has(value.sharedDataId));
+            });
+            const invites = invitesSnapshot.docs.filter(snapshot => {
+                const value = snapshot.data();
+                return value?.ownerId === ownerUid && matchesAccount(value);
+            });
+            const references = [...widgets, ...sharedData, ...links, ...invites].map(snapshot => snapshot.ref);
+            if (references.length > 440) {
+                throw new HttpsError('failed-precondition', 'Pulizia delle condivisioni troppo estesa.',
+                    {reason: 'ARCHIVE_PURGE_CASCADE_LIMIT'});
+            }
+            return references;
+        };
+        const readCascadeSnapshots = transaction => Promise.all([
+            transaction.get(userRef.collection('accountWidgets')),
+            transaction.get(userRef.collection('sharedVaultData')),
+            transaction.get(userRef.collection('sharedVaultLinks')),
+            transaction.get(store.collection('invites').where('ownerId', '==', ownerUid))
+        ]).then(([widgetsSnapshot, sharedDataSnapshot, linksSnapshot, invitesSnapshot]) =>
+            ({widgetsSnapshot, sharedDataSnapshot, linksSnapshot, invitesSnapshot}));
         const planReferenceCleanup = (profileSnapshot, companiesSnapshot) => {
             const cleanup = [];
             const plan = (snapshot, reference, company) => {
@@ -417,18 +446,7 @@ exports.purgeArchivedAccount = onCall(
                 transaction.get(userRef), transaction.get(userRef.collection('aziende'))
             ]);
             planReferenceCleanup(profileSnapshot, companiesSnapshot);
-            const [widgetsSnapshot, linksSnapshot] = await Promise.all([
-                transaction.get(userRef.collection('accountWidgets')),
-                transaction.get(userRef.collection('sharedVaultLinks'))
-            ]);
-            try {
-                assertNoExternalAccountReferences(command,
-                    widgetsSnapshot.docs.map(snapshot => snapshot.data()),
-                    linksSnapshot.docs.map(snapshot => snapshot.data()));
-            } catch {
-                throw new HttpsError('failed-precondition', 'Riferimenti esterni non verificabili: eliminazione interrotta.',
-                    {reason: 'ARCHIVE_PURGE_EXTERNAL_REFERENCES_UNVERIFIED'});
-            }
+            planCascadeCleanup(await readCascadeSnapshots(transaction));
             const lock = acquireGlobalPurgeLock(lockSnapshot.exists ? lockSnapshot.data() : null, lockBinding);
             if (!lock.duplicate) transaction.set(lockRef, {
                 ...lock.record, createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
@@ -458,9 +476,9 @@ exports.purgeArchivedAccount = onCall(
         return store.runTransaction(async transaction => {
             // Full query: never silently truncate the set of referring companies.
             // Reads and all planning precede writes; retries re-read current data.
-            const [profileSnapshot, companiesSnapshot, receiptSnapshot, currentRecordSnapshot, lockSnapshot] = await Promise.all([
+            const [profileSnapshot, companiesSnapshot, receiptSnapshot, currentRecordSnapshot, lockSnapshot, cascadeSnapshots] = await Promise.all([
                 transaction.get(userRef), transaction.get(userRef.collection('aziende')), transaction.get(operationRef),
-                transaction.get(recordRef), transaction.get(lockRef)
+                transaction.get(recordRef), transaction.get(lockRef), readCascadeSnapshots(transaction)
             ]);
             const receipt = verifyReceipt(receiptSnapshot);
             if (receipt.status === 'purged') {
@@ -473,9 +491,15 @@ exports.purgeArchivedAccount = onCall(
                     {reason: 'ARCHIVE_PURGE_ACCOUNT_RECREATED'});
             }
             const cleanup = planReferenceCleanup(profileSnapshot, companiesSnapshot);
+            const cascade = planCascadeCleanup(cascadeSnapshots);
             // Conservative write budget including receipt/audit. An oversized or
             // malformed plan leaves processing resumable, never falsely purged.
+            if (cleanup.length + cascade.length > 445) {
+                throw new HttpsError('failed-precondition', 'Pulizia complessiva troppo estesa.',
+                    {reason: 'ARCHIVE_PURGE_CASCADE_LIMIT'});
+            }
             for (const {reference, patch} of cleanup) transaction.update(reference, patch);
+            for (const reference of cascade) transaction.delete(reference);
             transaction.set(operationRef, {status: "purged", updatedAt: FieldValue.serverTimestamp()}, {merge: true});
             transaction.set(lockRef, {
                 ...releaseGlobalPurgeLock(lockSnapshot.data(), lockBinding).record,

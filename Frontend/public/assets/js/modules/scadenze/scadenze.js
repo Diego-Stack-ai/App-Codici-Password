@@ -4,15 +4,16 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.154';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.155';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { updateDoc, deleteDoc, doc, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
+import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.154';
+import { initComponents } from '../../components-v129.js?v=1.2.155';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -399,8 +400,16 @@ async function deleteScadenza(id) {
         // Qui potresti mettere un confirm, ma lo swipe � un'azione veloce.
         // Se preferisci conferma, scommenta:
 
-        const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
+        const ownerUid = currentUser.uid;
+        const deadline = allScadenze.find(item => item.id === id);
+        const attachmentPaths = (Array.isArray(deadline?.attachments) ? deadline.attachments : [])
+            .map(item => String(item?.storagePath || ''))
+            .filter(path => path.startsWith(`users/${ownerUid}/scadenze/${id}/`));
+        const docRef = doc(db, "users", ownerUid, "scadenze", id);
         await deleteDoc(docRef);
+        const results = await Promise.allSettled(attachmentPaths.map(path => deleteObject(ref(storage, path))));
+        const failure = results.find(result => result.status === 'rejected' && result.reason?.code !== 'storage/object-not-found');
+        if (failure) throw failure.reason;
 
         allScadenze = allScadenze.filter(s => s.id !== id);
         showToast("Scadenza eliminata", "error");

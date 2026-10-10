@@ -1729,3 +1729,47 @@ errori nel solo laboratorio. La correzione non costituisce ancora accettazione d
 - Audit sintassi JavaScript: **180 moduli verificati**.
 - Il planner sintetico dimostra 6 istanze legacy → 5 profili/6 collegamenti, deduplicazione strutturale, identificativi deterministici e assenza dei valori nei profili.
 - Limite: nessun dato produttivo è stato trasformato; nessun commit, push o deploy eseguito in questo passaggio.
+
+## 10/10/2026 — M7 cascata copie e compensazione allegati
+
+- `npm run test:shared-copies-purge-emulators`: **2/2**. Il purge rimuove Account, widget, dati/link condivisi e inviti del medesimo Account; il destinatario non può più leggere l'invito eliminato. Scadenze e copie autonome restano preservate.
+- `node --test tests/shared-copies-purge.test.mjs`: **5/5**. Il controllo di sorgente attesta lettura transazionale, limite conservativo e cancellazione della cascata nella transazione finale.
+- `npm run test:functions-security`: **453 totali, 444 superati, 9 skip dichiarati, 0 fallimenti**.
+- Allegati Scadenza: test locali **5/5** ed Emulator **3/3**. Avatar: test locali **10/10** ed Emulator **2/2**.
+- `npm run test:attachments`: **54/54**; `npm run test:js-syntax`: **180 moduli**.
+- Limite: M7 generale resta hard-off. Le prove non chiudono la race fra preparazione ed effetti distruttivi quando un writer non raccordato al lock modifica o ricrea il bersaglio; nessun deploy o dato reale in questo incremento.
+
+## 10/10/2026 — batteria conclusiva motori
+
+- Backup/ripristino corrente: **110/110** test locali.
+- M7/M8 Emulator: cascata **2/2**, restore dopo purge **5/5**, interruzione **2/2**, nuova sessione/retry **3/3**, anteprima obsoleta **3/3**, collisioni multiple **4/4**.
+- Le prove di interruzione sono caratterizzazioni verdi del difetto: upload fallito dopo il commit lascia il riferimento senza byte; la nuova sessione classifica il record invariato e non recupera il file. Non vanno interpretate come approvazione del motore corrente.
+- Candidato M8 riprendibile completo: **168 totali, 164 pass, 4 skip esterni dichiarati, 0 fail**. Il primo tentativo nel sandbox era stato impedito dalle porte loopback; il rerun autorizzato fuori sandbox è verde.
+- Suite Functions/security: **453 totali, 444 pass, 9 skip dichiarati, 0 fail**. CPFE2 e policy MFA manuale sono comprese nelle regressioni mirate.
+- Decisione tecnica: mantenere hard-off M7 globale e M8 corrente; integrare il candidato M8 e completare il fence di tutti i writer M7 prima dell'abilitazione. Nessun flag o deploy modificato da questa verifica.
+
+## 10/10/2026 — M8 retry Storage nella stessa sessione
+
+- `npm run test:backup-prototype`: **110/110**.
+- `npm run test:interrupted-restore-emulators`: **2/2**.
+- `npm run test:restore-retry-emulators`: **4/4**, con nuovo caso positivo di ripresa dell'upload senza seconda applicazione Firestore.
+- Contratto: un errore Storage non conclusivo restituisce `BACKUP_STORAGE_UNCERTAIN` e richiede conferma esplicita; il piano conserva l'elenco degli oggetti già caricati e li salta nel retry.
+- Il precedente limite fra sessioni è stato chiuso nell'incremento successivo; nessuna attivazione M8 o deploy in questo incremento.
+
+## 10/10/2026 — M8 recupero Storage dopo riavvio
+
+- Il preflight controlla i percorsi Storage dei soli record che Firestore classifica come invariati usando una lettura massima di un byte.
+- Un oggetto assente riclassifica il relativo record come `changed`, senza alterare gli altri record; errori diversi da `storage/object-not-found` bloccano il piano con `BACKUP_STORAGE_PREFLIGHT_FAILED`.
+- `npm run test:backup-prototype`: **110/110**.
+- `npm run test:restore-retry-emulators`: **4/4**. Coperti recupero in nuova sessione, retry nella stessa sessione, record mancante e combinazione record modificato/allegato senza byte.
+- Regressioni Emulator sequenziali dopo la rimozione del solo processo Firestore orfano: interruzione **2/2**, anteprima stale **3/3**, collisioni multiple **4/4**.
+- Le prime esecuzioni parallele avevano incontrato esclusivamente un conflitto locale sulle porte 8080/9199 e non sono conteggiate come esito funzionale. Nessun commit, push, deploy o attivazione motore eseguiti.
+
+## 10/10/2026 — M7 fence globale esteso a Storage
+
+- `storage.rules` consulta ora `archivePurgeLocks/{uid}` per ogni creazione, modifica o cancellazione client nello spazio applicativo dell'utente. La lettura resta disponibile; i namespace server-only conservano il precedente diniego.
+- Lock attivo: upload, modifica metadati e cancellazione negati. Lock rilasciato con schema e proprietario validi: operazioni riaperte. Lock malformato: diniego fail-closed.
+- `npm run test:storage-rules`: dispatcher **3/3**, regole Storage principali **14/14**, condivisione Storage **5/5**.
+- `npm run test:firestore-rules`: verde, compresi lock attivo/rilasciato/malformato su root, discendenti, aziende e inviti.
+- `npm run test:functions-security`: **453 totali, 444 pass, 9 skip dichiarati, 0 fail**; le callable applicative censite leggono il fence prima delle letture di dominio.
+- Il test di iniezione Admin che salta intenzionalmente ogni writer supportato continua a documentare il confine di fiducia. Il motore resta hard-off fino al canary distribuito; nessun commit, push, deploy o attivazione eseguiti.

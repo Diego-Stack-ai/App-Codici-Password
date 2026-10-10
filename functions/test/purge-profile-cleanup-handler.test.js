@@ -24,6 +24,7 @@ function fixture({previous = null, companies = 1, malformed = false, attachments
   if (malformed) states.set(`${root}/aziende/c0`, {emails: []});
   let deletions = 0, transactions = 0;
   const ref = path => ({path, collection: key => ref(`${path}/${key}`), doc: key => ref(`${path}/${key}`),
+    where: () => ref(path),
     get: async () => ({docs: attachments.map(data => ({data: () => data}))})});
   const snapshot = path => ({exists: states.has(path), data: () => states.get(path), ref: ref(path)});
   const store = {collection: key => ref(key), doc: ref,
@@ -37,13 +38,18 @@ function fixture({previous = null, companies = 1, malformed = false, attachments
       const result = await callback({get: async reference => {
         assert.equal(wrote, false, 'all reads must precede writes');
         if (reference.path === `${root}/aziende`) return {docs: [...states.keys()].filter(path => path.startsWith(`${root}/aziende/`)).map(snapshot)};
-        if (['accountWidgets', 'sharedVaultLinks'].some(name => reference.path === `${root}/${name}`)) {
+        if (['accountWidgets', 'sharedVaultData', 'sharedVaultLinks'].some(name => reference.path === `${root}/${name}`) ||
+          reference.path === 'invites') {
           return {docs: [...states.keys()].filter(path => path.startsWith(`${reference.path}/`)).map(snapshot)};
         }
         return snapshot(reference.path);
-      }, update: (reference, patch) => { wrote = true; writes.push([reference.path, patch]); },
-      set: (reference, patch) => { wrote = true; writes.push([reference.path, patch]); }});
-      for (const [path, patch] of writes) states.set(path, {...states.get(path), ...patch});
+      }, update: (reference, patch) => { wrote = true; writes.push([reference.path, patch, false]); },
+      set: (reference, patch) => { wrote = true; writes.push([reference.path, patch, false]); },
+      delete: reference => { wrote = true; writes.push([reference.path, null, true]); }});
+      for (const [path, patch, remove] of writes) {
+        if (remove) states.delete(path);
+        else states.set(path, {...states.get(path), ...patch});
+      }
       return result;
     }};
   class HttpsError extends Error { constructor(code, message) { super(message); this.code = code; } }
@@ -71,17 +77,18 @@ test('processing operation without Account resumes cleanup instead of leaving da
   assert.equal(f.states.get('users/owner').contactPhones[0].linkedAccountId, '');
 });
 
-test('external references reject fresh and resumed purge without state changes or destructive work (synthetic dependencies)', async () => {
+test('matching references are removed while unrelated references are preserved', async () => {
   for (const previous of [null, {status: 'processing'}]) {
-    for (const collection of ['accountWidgets', 'sharedVaultLinks']) {
-      for (const record of [{context: 'private', accountId: 'account'}, {accountId: 'unknown'}]) {
-        const f = fixture({previous});
-        f.states.set(`users/owner/${collection}/external`, record);
-        const before = structuredClone([...f.states]);
-        await assert.rejects(f.run(), error => error.code === 'failed-precondition');
-        assert.deepEqual([...f.states], before);
-        assert.equal(f.counters().deletions, 0);
-      }
+    for (const collection of ['accountWidgets', 'sharedVaultData', 'sharedVaultLinks']) {
+      const f = fixture({previous});
+      const matchingPath = `users/owner/${collection}/matching`;
+      const unrelatedPath = `users/owner/${collection}/unrelated`;
+      f.states.set(matchingPath, {context: 'private', accountId: 'account'});
+      f.states.set(unrelatedPath, {context: 'private', accountId: 'unknown'});
+      assert.equal((await f.run()).status, 'purged');
+      assert.equal(f.states.has(matchingPath), false);
+      assert.equal(f.states.has(unrelatedPath), true);
+      assert.equal(f.counters().deletions, 1);
     }
   }
 });
@@ -112,8 +119,8 @@ test('recreated Account prevents final unlink and a false purged receipt', async
   assert.equal(f.states.has('users/owner/auditEvents/operation'), false);
 });
 
-test('adversarial direct-state injection bypassing every fenced writer: a late reference survives', async () => {
-  for (const collection of ['accountWidgets', 'sharedVaultLinks']) {
+test('adversarial direct-state injection is removed by the final cascade re-read', async () => {
+  for (const collection of ['accountWidgets', 'sharedVaultData', 'sharedVaultLinks']) {
     const latePath = `users/owner/${collection}/late-reference`;
     const lateReference = {context: 'private', accountId: 'account', synthetic: true};
     const f = fixture({beforeDelete(states, path) {
@@ -125,7 +132,7 @@ test('adversarial direct-state injection bypassing every fenced writer: a late r
     }});
     assert.equal((await f.run()).status, 'purged');
     assert.equal(f.states.has('users/owner/accounts/account'), false);
-    assert.deepEqual(f.states.get(latePath), lateReference);
+    assert.equal(f.states.has(latePath), false);
     assert.equal(f.states.get('mutationResults/owner/operations/operation').status, 'purged');
   }
 });

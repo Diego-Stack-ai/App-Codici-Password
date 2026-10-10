@@ -1,5 +1,7 @@
 # M7 cancellazione
 
+> Aggiornamento locale 10/10/2026: T-08 non descrive più il comportamento candidato corrente. La cascata del purge rimuove ora widget, dati/link condivisi e inviti riferiti esattamente all'Account; Scadenze e copie autonome restano fuori perimetro. Emulatori 2/2, sorgente T-08 5/5 e Functions/security 444 pass, 9 skip dichiarati, zero fail. Il fence copre anche gli upload e le cancellazioni client Storage: suite Storage principali 14/14 e condivisione 5/5. Il testo storico sotto resta come provenienza. Il motore generale rimane hard-off per il canary distribuito e i gate esterni non ancora conclusi.
+
 > Rollout controllato 09/10/2026: il percorso pubblicato è stato aperto esclusivamente all'account sintetico di collaudo e provato fino all'archivio vuoto. Gli utenti reali restano bloccati. Il risultato valida il caso nominale, non elimina i rischi concorrenti documentati e non autorizza uno sblocco generale.
 
 > Chiusura operativa 09/10/2026: le domande storiche restano conservate come evidenza, ma non sono più attività del ciclo corrente. Purge automatico disabilitato; eventuale riapertura richiede un nuovo incarico e prove reali.

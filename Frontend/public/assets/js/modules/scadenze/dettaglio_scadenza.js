@@ -4,9 +4,9 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.154';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.155';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -24,34 +24,40 @@ import { deadlineDate, deadlineDateInputFields, deadlinePresentation } from './d
 
 let mountedDeadline = null;
 
-async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
+async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active) {
     if (!active()) return;
-    if (sourceRef?.type !== 'profileDocument') {
-        await deleteDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
-        return;
-    }
-    const profileRef = doc(db, 'users', userId);
     const deadlineRef = doc(db, 'users', userId, 'scadenze', scadenzaId);
-    const documentId = sourceRef.id;
-    await runTransaction(db, async transaction => {
-        if (!active()) return;
-        const snapshot = await transaction.get(profileRef);
-        if (!active()) return;
-        let changed = false, documents = [];
-        if (snapshot.exists()) {
-            documents = snapshot.data()?.documenti ?? [];
-            if (!Array.isArray(documents)) throw new Error('PROFILE_DOCUMENTS_INVALID');
-            documents = documents.map(item => {
-                if (typeof documentId === 'string' && documentId && item?.id === documentId && item.expiryReference?.deadlineId === scadenzaId) {
-                    changed = true;
-                    return {...item, expiryReference: null};
-                }
-                return item;
-            });
-        }
-        transaction.delete(deadlineRef);
-        if (changed) transaction.update(profileRef, {documenti: documents});
-    });
+    const attachmentPaths = (Array.isArray(attachments) ? attachments : [])
+        .map(item => String(item?.storagePath || ''))
+        .filter(path => path.startsWith(`users/${userId}/scadenze/${scadenzaId}/`));
+    if (sourceRef?.type !== 'profileDocument') {
+        await deleteDoc(deadlineRef);
+    } else {
+        const profileRef = doc(db, 'users', userId);
+        const documentId = sourceRef.id;
+        await runTransaction(db, async transaction => {
+            if (!active()) return;
+            const snapshot = await transaction.get(profileRef);
+            if (!active()) return;
+            let changed = false, documents = [];
+            if (snapshot.exists()) {
+                documents = snapshot.data()?.documenti ?? [];
+                if (!Array.isArray(documents)) throw new Error('PROFILE_DOCUMENTS_INVALID');
+                documents = documents.map(item => {
+                    if (typeof documentId === 'string' && documentId && item?.id === documentId && item.expiryReference?.deadlineId === scadenzaId) {
+                        changed = true;
+                        return {...item, expiryReference: null};
+                    }
+                    return item;
+                });
+            }
+            transaction.delete(deadlineRef);
+            if (changed) transaction.update(profileRef, {documenti: documents});
+        });
+    }
+    const results = await Promise.allSettled(attachmentPaths.map(path => deleteObject(ref(storage, path))));
+    const failure = results.find(result => result.status === 'rejected' && result.reason?.code !== 'storage/object-not-found');
+    if (failure) throw failure.reason;
 }
 
 function clearDeadline(view = document) {
@@ -222,10 +228,11 @@ async function handleDelete(mount) {
     mount.actionPending = true;
     const {uid, id} = mount.scope;
     const sourceRef = mount.record.sourceRef ? {...mount.record.sourceRef} : null;
+    const attachments = Array.isArray(mount.record.attachments) ? [...mount.record.attachments] : [];
     try {
         const ok = await mount.confirmAction('ELIMINA SCADENZA', 'Sei sicuro?', 'Elimina', t('cancel') || 'Annulla');
         if (mount.active() && ok) {
-            await deleteScadenza(uid, id, sourceRef, () => mount.active());
+            await deleteScadenza(uid, id, sourceRef, attachments, () => mount.active());
             if (mount.active()) window.location.href = 'scadenze.html';
         }
     } catch (error) { if (mount.active()) showToast('Eliminazione della scadenza non riuscita.', 'error'); }

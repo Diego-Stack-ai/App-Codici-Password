@@ -1,5 +1,5 @@
-import {auth, functions, storage} from '../../firebase-config.js?v=1.2.154';
-import {httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
+import {auth, functions, storage} from '../../firebase-config.js?v=1.2.155';
+import {getBytes, httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, restoreRecordKey, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
 import {collectStoragePaths} from './backup-export-model.js';
@@ -310,6 +310,31 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
             }
             offset += chunks[index].length;
         }
+        const checkedStoragePaths = new Map();
+        for (const entry of comparison.entries) {
+            if (entry.status !== 'unchanged') continue;
+            const referencedPaths = collectStoragePaths([records[entry.index]], uid);
+            let missingStorage = false;
+            for (const path of referencedPaths) {
+                if (!storagePaths.has(path)) throw new Error('BACKUP_ATTACHMENT_MISSING');
+                if (!checkedStoragePaths.has(path)) {
+                    try {
+                        await getBytes(ref(storage, path), 1);
+                        checkedStoragePaths.set(path, true);
+                    } catch (error) {
+                        if (error?.code !== 'storage/object-not-found') throw new Error('BACKUP_STORAGE_PREFLIGHT_FAILED', {cause: error});
+                        checkedStoragePaths.set(path, false);
+                    }
+                    check();
+                }
+                if (!checkedStoragePaths.get(path)) missingStorage = true;
+            }
+            if (missingStorage) {
+                entry.status = 'changed';
+                comparison.counts.unchanged -= 1;
+                comparison.counts.changed += 1;
+            }
+        }
         const collisions = comparison.counts.changed + comparison.counts.unchanged;
         const plan = {
             file, uid, recoveryKey, header: scan.header, records, chunks, counts: scan.counts,
@@ -388,7 +413,7 @@ function prepareRestoreExecution(session, selection) {
     })));
     return {executionId, selection: freezeRestoreValue(selection), selective, records, commands, storagePaths,
         attemptedChunks: 0, confirmedChunks: 0, uploaded: 0, uncertain: false, possiblyApplied: false, storageStarted: false,
-        inFlight: false, blocked: false, result: null};
+        uploadedStoragePaths: new Set(), inFlight: false, blocked: false, result: null};
 }
 
 async function verifyRestoreSource(session) {
@@ -481,6 +506,7 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
                 throw new Error('BACKUP_ATTACHMENT_SOURCE_CHANGED');
             }
             visitedStoragePaths.add(storagePath);
+            if (execution.uploadedStoragePaths.has(storagePath)) return;
             const bytes = attachmentBytes(entry.content);
             try {
                 check();
@@ -489,7 +515,8 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
                     contentType: 'application/octet-stream', customMetadata: {encrypted: 'v1'}
                 });
                 check();
-                execution.uploaded += 1;
+                execution.uploadedStoragePaths.add(storagePath);
+                execution.uploaded = execution.uploadedStoragePaths.size;
             } finally {
                 bytes.fill(0);
             }
@@ -509,6 +536,11 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
             .includes(String(cause?.code || '').replace(/^functions\//, ''));
         if (stage === 'firestore' && execution.uncertain && !definitiveRejection) {
             throw restoreError('BACKUP_FIRESTORE_UNCERTAIN', execution, true);
+        }
+        if (stage === 'storage' && !definitiveRejection) {
+            execution.uncertain = true;
+            execution.blocked = false;
+            throw restoreError('BACKUP_STORAGE_UNCERTAIN', execution, true);
         }
         if (definitiveRejection) {
             execution.uncertain = false;
