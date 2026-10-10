@@ -1071,6 +1071,79 @@ h3.settings-desc {
     padding: 0.75rem;
 }
 
+.diagnostics-actions-primary {
+    grid-template-columns: 1fr;
+}
+
+.diagnostics-overall,
+.diagnostics-check,
+.diagnostics-engine {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.diagnostics-overall {
+    justify-content: space-between;
+    margin: 0.75rem 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid currentColor;
+    border-radius: 12px;
+}
+
+.diagnostics-check-list,
+.diagnostics-engine-list {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.diagnostics-check,
+.diagnostics-engine {
+    padding: 0.65rem 0.75rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.diagnostics-check div,
+.diagnostics-engine div {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.diagnostics-check small,
+.diagnostics-engine small,
+.diagnostics-limit {
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.diagnostics-engine {
+    justify-content: space-between;
+}
+
+.diagnostics-section-title {
+    margin: 1rem 0 0.55rem;
+    color: var(--text-primary);
+    font: var(--font-label);
+}
+
+.diagnostics-badge {
+    flex: 0 0 auto;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    font: var(--font-caption);
+    font-weight: 700;
+}
+
+.diagnostics-status-pass,
+.diagnostics-engine-active { color: var(--success-color, #22c55e); }
+.diagnostics-status-warn,
+.diagnostics-engine-limited { color: var(--warning-color, #f59e0b); }
+.diagnostics-status-fail { color: var(--error-color, #ef4444); }
+.diagnostics-engine-off { color: var(--text-secondary); }
+.diagnostics-limit { margin: 0.75rem 0 0; font: var(--font-caption); }
+
 .recovery-code-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

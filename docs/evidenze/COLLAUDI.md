@@ -1773,3 +1773,10 @@ errori nel solo laboratorio. La correzione non costituisce ancora accettazione d
 - `npm run test:firestore-rules`: verde, compresi lock attivo/rilasciato/malformato su root, discendenti, aziende e inviti.
 - `npm run test:functions-security`: **453 totali, 444 pass, 9 skip dichiarati, 0 fail**; le callable applicative censite leggono il fence prima delle letture di dominio.
 - Il test di iniezione Admin che salta intenzionalmente ogni writer supportato continua a documentare il confine di fiducia. Il motore resta hard-off fino al canary distribuito; nessun commit, push, deploy o attivazione eseguiti.
+## 10/10/2026 — Diagnostica App E Motori locale
+
+- Estesa la diagnostica volontaria nelle Impostazioni: tempi e contesto restano locali; la nuova sonda verifica soltanto capacità del browser/sessione e un file applicazione same-origin.
+- Il report separa gli esiti osservati dallo stato di policy della release: M7 limitato, ripristino M8 corrente attivo, M8 riprendibile hard-off, CPFE2 dual-read attivo/new-write hard-off e recupero MFA selettivo hard-off.
+- Nessun contenuto Vault, email, password o ciphertext entra nel report; la prova rimuove la chiave temporanea da localStorage e non invoca callable distruttive.
+- Evidenze: `node --test tests/app-diagnostics.test.mjs` 3/3; `test:performance-budget` 30 pagine; `test:page-shells` 5 accesso + 24 interne; `test:js-syntax` 181 moduli; `test:static-references` 256 file; `test:css` e `git diff --check` verdi.
+- Canary esterno: i primi tentativi hanno confermato la necessità di attendere la propagazione di `roles/iam.serviceAccountTokenCreator`; ogni concessione non riuscita è stata revocata. Nel ciclo definitivo, dopo 90 secondi, firma diretta IAM riuscita e runner sintetico completato con `m7: pass`, `m8: pass`, `appCheck: pass`: purge M7 con ricevuta/lock/audit, restore M8 Firestore + oggetto Storage e replay idempotente. Il runner ha rimosso record e oggetto sintetici; il ruolo temporaneo a livello progetto è stato revocato nel `finally`. Nessun dato reale usato o modificato.
