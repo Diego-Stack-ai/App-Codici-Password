@@ -51,6 +51,7 @@ self.__OFFLINE_ASSETS = [
   "assets/images/apple-touch-icon-180.png",
   "assets/images/google-avatar.png",
   "assets/images/user-avatar-5.png",
+  "assets/js/app-diagnostics.js",
   "assets/js/auth.js",
   "assets/js/cleanup.js",
   "assets/js/components-v129.js",

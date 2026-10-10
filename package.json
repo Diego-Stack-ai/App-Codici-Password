@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.155",
+  "version": "1.2.156",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -63,7 +63,7 @@
     "test:html-purity": "node scripts/audit-html-purity.mjs",
     "test:static-references": "node scripts/audit-static-references.mjs",
     "test:lightweight": "node scripts/audit-lightweight-features.mjs",
-    "test:performance-budget": "node scripts/audit-page-performance.mjs --check",
+    "test:performance-budget": "node scripts/audit-page-performance.mjs --check && node --test tests/app-diagnostics.test.mjs",
     "test:js-syntax": "node scripts/audit-js-syntax.mjs",
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
     "test:attachments": "node --test tests/attachment-security.test.mjs tests/account-attachment-delete.test.mjs tests/legacy-attachment-opening.test.mjs tests/device-cache-residues.test.mjs tests/attachment-removal-residues.test.mjs tests/company-hard-delete-residues.test.mjs tests/shared-copies-purge.test.mjs",

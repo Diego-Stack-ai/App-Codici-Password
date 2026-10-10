@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.155';
+import { auth, db } from '../../firebase-config.js?v=1.2.156';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -14,6 +14,7 @@ import { decrypt, ensureVaultKeyMaterial, clearSession, resetVault, isBiometricU
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
+import { runAppDiagnostics } from '../../app-diagnostics.js';
 import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vault-repository.js';
 import { setupPushSettings } from './push-settings-controller.js?push=20260908b';
 
@@ -54,7 +55,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.155');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.156');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -168,7 +169,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.155');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.156');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -300,7 +301,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.155');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.156');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -835,6 +836,7 @@ function setupPerformanceDiagnostics() {
     const toggle = document.getElementById('performance-diagnostics-toggle');
     const panel = document.getElementById('performance-diagnostics-panel');
     const summary = document.getElementById('performance-diagnostics-summary');
+    const appSummary = document.getElementById('app-diagnostics-summary');
     if (!toggle || !panel || !summary) return;
 
     const render = () => {
@@ -873,6 +875,40 @@ function setupPerformanceDiagnostics() {
         showToast(toggle.checked ? 'Diagnostica locale attivata' : 'Diagnostica disattivata e misure cancellate', 'success');
     });
     document.getElementById('btn-refresh-performance-diagnostics')?.addEventListener('click', render);
+    document.getElementById('btn-run-app-diagnostics')?.addEventListener('click', async event => {
+        const button = event.currentTarget;
+        if (!appSummary || button.disabled) return;
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        setChildren(appSummary, createElement('p', { className: 'settings-desc', textContent: 'Controlli in corso…' }));
+        try {
+            const report = await runAppDiagnostics({ authenticated: Boolean(auth.currentUser) });
+            const heading = createElement('div', { className: `diagnostics-overall diagnostics-status-${report.overall}` }, [
+                createElement('strong', { textContent: report.overall === 'pass' ? 'Controlli superati' : report.overall === 'warn' ? 'Controlli con avvisi' : 'Controlli da verificare' }),
+                createElement('span', { textContent: `Versione ${report.appVersion}` })
+            ]);
+            const checks = createElement('div', { className: 'diagnostics-check-list' });
+            report.checks.forEach(check => checks.appendChild(createElement('div', { className: `diagnostics-check diagnostics-status-${check.status}` }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: check.status === 'pass' ? 'check_circle' : check.status === 'warn' ? 'warning' : 'error' }),
+                createElement('div', {}, [createElement('strong', { textContent: check.label }), createElement('small', { textContent: check.detail })])
+            ])));
+            const enginesTitle = createElement('h4', { className: 'diagnostics-section-title', textContent: 'Stato Motori Della Release' });
+            const engines = createElement('div', { className: 'diagnostics-engine-list' });
+            const labels = { active: 'Attivo', limited: 'Limitato', off: 'Disabilitato' };
+            report.engines.forEach(engine => engines.appendChild(createElement('div', { className: `diagnostics-engine diagnostics-engine-${engine.state}` }, [
+                createElement('div', {}, [createElement('strong', { textContent: engine.label }), createElement('small', { textContent: engine.detail })]),
+                createElement('span', { className: 'diagnostics-badge', textContent: labels[engine.state] })
+            ])));
+            const limit = createElement('p', { className: 'diagnostics-limit', textContent: report.limits.join(' ') });
+            setChildren(appSummary, heading, checks, enginesTitle, engines, limit);
+            appSummary.dataset.report = JSON.stringify(report);
+        } catch {
+            setChildren(appSummary, createElement('p', { className: 'diagnostics-status-fail', textContent: 'Impossibile completare i controlli in questa scheda.' }));
+        } finally {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+        }
+    });
     document.getElementById('btn-clear-performance-diagnostics')?.addEventListener('click', () => {
         clearPerformanceSamples();
         render();
@@ -880,7 +916,9 @@ function setupPerformanceDiagnostics() {
     });
     document.getElementById('btn-copy-performance-diagnostics')?.addEventListener('click', async () => {
         try {
-            await navigator.clipboard.writeText(JSON.stringify(getPerformanceDiagnosticReport(), null, 2));
+            const report = { performance: getPerformanceDiagnosticReport() };
+            if (appSummary?.dataset.report) report.application = JSON.parse(appSummary.dataset.report);
+            await navigator.clipboard.writeText(JSON.stringify(report, null, 2));
             showToast('Report tecnico copiato', 'success');
         } catch {
             showToast('Copia non disponibile su questo dispositivo', 'error');
@@ -925,7 +963,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.155');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.156');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
