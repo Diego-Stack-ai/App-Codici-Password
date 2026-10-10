@@ -20,7 +20,7 @@ const requireFunctions = createRequire(new URL('../../functions/package.json', i
 const {initializeApp: initializeAdminApp, deleteApp: deleteAdminApp} = requireFunctions('firebase-admin/app');
 const {getFirestore: getAdminFirestore} = requireFunctions('firebase-admin/firestore');
 const source = await readFile(new URL('../../Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js', import.meta.url), 'utf8');
-const marker = 'async function deleteScadenza(userId, scadenzaId, sourceRef, active) {';
+const marker = 'async function deleteScadenza(userId, scadenzaId, sourceRef, attachments, active) {';
 const start = source.indexOf(marker);
 assert.ok(start >= 0, 'Canonical deadline deletion function is missing');
 assert.equal(source.indexOf(marker, start + marker.length), -1, 'Canonical deletion function must be unique');
@@ -75,7 +75,7 @@ test('canonical deadline deletion uses real SDK optimistic retries in the demo e
                 });
             })
         );
-        return {stats, run: (active = () => true) => deleteCanonical(client.uid, 'deadline', {type: 'profileDocument', id: 'document'}, active)};
+        return {stats, run: (active = () => true) => deleteCanonical(client.uid, 'deadline', {type: 'profileDocument', id: 'document'}, [], active)};
     }
 
     await t.test('a real conflict retries and preserves concurrent profile edits with atomic unlink and deletion', async () => {

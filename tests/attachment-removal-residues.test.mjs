@@ -122,58 +122,57 @@ function deleteFixture({linked = false} = {}) {
             delete: path => { calls.push(['transaction.delete', path]); states.delete(path); },
             update: (path, patch) => { calls.push(['transaction.update', path]); writes.push([path, patch]); }
         }),
-        // Se il percorso chiamasse Storage, il banco fallirebbe invece di fingere.
-        ref: () => { throw new Error('il percorso non deve toccare Storage'); },
-        deleteObject: () => { throw new Error('il percorso non deve cancellare byte'); }
+        storage: {}, ref: (_storage, path) => path,
+        deleteObject: async path => { calls.push(['deleteObject', path]); }
     });
     const source = sliceFunction(deadlineDetail, 'deleteScadenza');
     vm.runInContext(`${source}\nglobalThis.deleteScadenza = deleteScadenza;`, context);
     return {context, calls, writes, states,
         run: () => context.deleteScadenza('owner', 'deadline-1',
-            linked ? {type: 'profileDocument', id: 'doc-1'} : null, () => true)};
+            linked ? {type: 'profileDocument', id: 'doc-1'} : null,
+            states.get('users/owner/scadenze/deadline-1')?.attachments || [], () => true)};
 }
 
-test('T-26: cancellare una Scadenza elimina il documento e non i byte allegati', async () => {
+test('T-26: cancellare una Scadenza elimina il documento e i byte allegati', async () => {
     const f = deleteFixture();
     const attachment = f.states.get('users/owner/scadenze/deadline-1').attachments[0];
     await f.run();
-    assert.deepEqual(f.calls, [['deleteDoc', 'users/owner/scadenze/deadline-1']],
-        'solo il documento: nessuna chiamata a Storage');
+    assert.deepEqual(f.calls, [['deleteDoc', 'users/owner/scadenze/deadline-1'],
+        ['deleteObject', 'users/owner/scadenze/deadline-1/a.pdf']]);
     assert.equal(f.states.has('users/owner/scadenze/deadline-1'), false, 'la Scadenza è eliminata');
     assert.equal(f.states.get('users/owner').documenti[0].expiryReference.deadlineId, 'deadline-1',
         'senza collegamento al documento del profilo il profilo non viene toccato');
     assert.ok(attachment.storagePath, 'il percorso dell’oggetto resta nei dati osservati');
 });
 
-test('T-26: la Scadenza collegata a un documento del profilo è transazionale e lascia i byte', async () => {
+test('T-26: la Scadenza collegata aggiorna il profilo ed elimina i byte', async () => {
     const f = deleteFixture({linked: true});
     await f.run();
-    assert.deepEqual(f.calls.map(([name]) => name), ['transaction.delete', 'transaction.update'],
-        'documento eliminato e riferimento del profilo aggiornato nella stessa transazione');
+    assert.deepEqual(f.calls.map(([name]) => name), ['transaction.delete', 'transaction.update', 'deleteObject'],
+        'documento eliminato, profilo aggiornato e oggetto rimosso');
     assert.equal(f.states.has('users/owner/scadenze/deadline-1'), false);
     assert.equal(f.writes[0][0], 'users/owner');
     assert.equal(f.writes[0][1].documenti[0].expiryReference, null,
         'il riferimento di scadenza nel profilo viene azzerato');
-    assert.equal(JSON.stringify(f.calls).includes('Storage'), false, 'nessun byte viene toccato');
+    assert.equal(f.calls.at(-1)[1], 'users/owner/scadenze/deadline-1/a.pdf');
 });
 
 // ── 4. Errore parziale: prima l'upload, poi la scrittura ───────────────────
 
-test('T-26: se la scrittura del documento fallisce, l’oggetto caricato resta senza riferimento', async () => {
+test('T-26: se la scrittura del documento fallisce, l’upload viene compensato', async () => {
     // Ordine reale in `saveDeadline`: upload (riga 138) prima della persistenza (riga 162),
     // senza alcuna compensazione nel percorso di errore.
     const uploadIndex = deadlineSave.indexOf('const uploadedAttachments = await uploadDeadlineAttachments(');
-    const persistIndex = deadlineSave.indexOf('const finalDeadlineId = await persistDeadlineDocument(');
+    const persistIndex = deadlineSave.indexOf('finalDeadlineId = await persistDeadlineDocument(');
     assert.ok(uploadIndex > 0 && persistIndex > uploadIndex, 'l’upload precede la scrittura del documento');
-    assert.equal(/catch\s*\([^)]*\)\s*\{[^}]*deleteObject/s.test(deadlineSave), false,
-        'non esiste compensazione che cancelli l’oggetto caricato');
-    assert.equal(deadlineSave.includes('deleteObject'), false,
-        'il servizio delle Scadenze non importa né usa primitive di cancellazione');
+    assert.match(deadlineSave, /removeDeadlineAttachmentObjects\(user\.uid, uploadedAttachments\)/,
+        'la scrittura fallita compensa gli upload nuovi');
+    assert.equal(deadlineSave.includes('deleteObject'), true);
 
     // Modello dell'esito: l'oggetto esiste, il documento no, nessun riferimento.
-    const bucket = new Set(['users/owner/scadenze/new_1700000000000/a.pdf']);
+    const bucket = new Set();
     const deadlineDocument = null;
-    assert.equal(bucket.size, 1, 'i byte caricati restano nello Storage');
+    assert.equal(bucket.size, 0, 'i byte caricati vengono rimossi dallo Storage');
     assert.equal(deadlineDocument, null, 'il documento non è stato scritto');
     assert.equal(deadlineDocument?.attachments?.some(row => bucket.has(row.storagePath)) ?? false, false,
         'nessun riferimento punta più all’oggetto: è un orfano');

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment, assertFails} from '@firebase/rules-unit-testing';
 import {doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
-import {getBytes, getDownloadURL, listAll, ref, uploadBytes} from 'firebase/storage';
+import {deleteObject, getBytes, getDownloadURL, listAll, ref, uploadBytes} from 'firebase/storage';
 
 // M7-T28 — Prova sull'**emulatore reale** del cambio avatar: il vecchio oggetto
 // resta davvero in Storage dopo che il riferimento è stato aggiornato?
@@ -38,17 +38,21 @@ function mount({uid = OWNER} = {}) {
     // SDK: un oggetto creato in un realm `vm` verrebbe rifiutato da `updateDoc`
     // («custom Object»), che è un artefatto del banco e non del percorso reale.
     const factory = new Function('document', 'localStorage', 'db', 'storage', 'ref', 'uploadBytes', 'getDownloadURL',
-        'doc', 'updateDoc', 'showToast', 'showConfirmModal', 'showInputModal', 't', 'logError', 'createElement',
-        'clearElement', 'File', 'crypto', 'TextEncoder', 'console', 'auth',
+        'deleteObject', 'doc', 'getUserProfile', 'updateDoc', 'showToast', 'showConfirmModal', 'showInputModal', 't', 'logError', 'createElement',
+        'clearElement', 'File', 'crypto', 'TextEncoder', 'console', 'auth', 'URL', 'decodeURIComponent',
         `${securityModule}\n${avatarModule}\nreturn {initUIModule, setupAvatarEdit};`);
     const module = factory(
         {getElementById: id => nodes[id] || null},
         {setItem: (key, value) => cache.set(key, value), getItem: key => cache.get(key) ?? null,
             removeItem: key => cache.delete(key)},
-        db, storage, ref, uploadBytes, getDownloadURL, doc, updateDoc,
+        db, storage, ref, uploadBytes, getDownloadURL, deleteObject, doc,
+        async targetUid => {
+            const snapshot = await getDoc(doc(db, 'users', targetUid));
+            return snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null;
+        }, updateDoc,
         (...args) => toasts.push(args), async () => true, async () => null, value => value,
         (...args) => errors.push(args), (tag, props = {}, children = []) => ({tag, ...props, children}),
-        node => { node.children = []; }, File, crypto, TextEncoder, {warn() {}}, {currentUser: {uid}});
+        node => { node.children = []; }, File, crypto, TextEncoder, {warn() {}}, {currentUser: {uid}}, URL, decodeURIComponent);
     module.initUIModule(() => ({currentUserUid: uid, profileLabels: []}));
     module.setupAvatarEdit();
     return {db, storage, cache, toasts, errors, nodes,
@@ -98,7 +102,7 @@ test('T-28 su emulatore: il primo avatar è caricato e referenziato', async () =
     assert.equal(f.errors.length, 0);
 });
 
-test('T-28 su emulatore: cambiando avatar il vecchio oggetto resta in Storage, non più referenziato', async () => {
+test('T-28 su emulatore: cambiando avatar il vecchio oggetto viene eliminato', async () => {
     const uid = 'avatar-owner-change';
     await setDoc(doc(testEnv.authenticatedContext(uid).firestore(), 'users', uid), {nome: 'Synthetic'});
     const f = mount({uid});
@@ -110,11 +114,9 @@ test('T-28 su emulatore: cambiando avatar il vecchio oggetto resta in Storage, n
     const secondURL = await photoURL(f.db, uid);
 
     assert.notEqual(secondURL, firstURL, 'il riferimento è stato aggiornato');
-    assert.deepEqual(await objectNames(f.storage, uid), [nameOf(firstURL), nameOf(secondURL)].sort(),
-        'i due oggetti convivono nello Storage');
-    // La prova del residuo: il vecchio oggetto è ancora leggibile con i suoi byte.
-    assert.deepEqual(new Uint8Array(await getBytes(ref(f.storage, firstPath))), BYTES,
-        'il vecchio avatar è ancora presente e leggibile sull’emulatore');
+    assert.deepEqual(await objectNames(f.storage, uid), [nameOf(secondURL)],
+        'rimane solo il nuovo oggetto referenziato');
+    await assert.rejects(getBytes(ref(f.storage, firstPath)), /object-not-found|storage\/object-not-found/);
     // E il profilo non lo nomina più: è un orfano, non un riferimento conservato.
     const document = JSON.stringify((await getDoc(doc(f.db, 'users', uid))).data());
     assert.equal(document.includes(nameOf(firstURL)), false,

@@ -21,6 +21,7 @@ function fixture() {
   const states = new Map();
   states.set('users/A/accounts/account', {isArchived: true, revision: 1});
   const ref = path => ({path, collection: key => ref(`${path}/${key}`), doc: key => ref(`${path}/${key}`),
+    where: () => ref(path),
     get: async () => { reads.push(path); return {docs: []}; }});
   const store = {collection: ref, doc: ref,
     recursiveDelete: async reference => { accesses.recursiveDelete++; writes.push(reference.path); states.delete(reference.path); },
@@ -73,5 +74,5 @@ test('matching owner preserves purge and constrains all paths to that owner', as
   assert.deepEqual(f.accesses, {validation: 1, firestore: 1, storage: 1, recursiveDelete: 1});
   assert.ok(f.reads.length > 0); assert.ok(f.writes.length > 0);
   assert.ok([...f.reads, ...f.writes].every(path =>
-    /^(users|mutationResults)\/A(?:\/|$)/.test(path) || path === 'archivePurgeLocks/A'));
+    /^(users|mutationResults)\/A(?:\/|$)/.test(path) || path === 'archivePurgeLocks/A' || path === 'invites'));
 });

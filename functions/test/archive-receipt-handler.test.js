@@ -31,6 +31,7 @@ function fixture({missing = false, beforeFinal, failAfterDelete = false, attachm
   if (!missing) states.set(recordPath, {isArchived: true, revision: 1});
   let failNextDelete = failAfterDelete, failingStoragePath = storageFailure;
   const ref = path => ({path, collection: key => ref(`${path}/${key}`), doc: key => ref(`${path}/${key}`),
+    where: () => ref(path),
     get: async () => {
       reads.push(path);
       if (path.endsWith('/attachments')) {

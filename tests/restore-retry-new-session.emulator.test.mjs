@@ -9,8 +9,8 @@ import {getBytes, ref as storageRef, uploadBytes as storageUpload} from 'firebas
 // **interrotto** (record applicati, primo upload fallito, piano bloccato), l'utente
 // riapre lo **stesso** file in una **nuova** sessione di ripristino.
 //
-// Diagnosi del comportamento attuale, non una scelta di politica: nessun retry
-// automatico, staging o compensazione. Percorso reale: `prepareBackupRestore` +
+// Diagnosi del comportamento attuale fra sessioni; il retry esplicito nella
+// stessa sessione viene ora verificato separatamente. Percorso reale: `prepareBackupRestore` +
 // `executeBackupRestore` (client di produzione) e callable reale
 // `restoreBackupChunk`, su emulatori Firestore + Storage con dati sintetici.
 const PROJECT_ID = 'codici-password-m8-retry';
@@ -103,8 +103,9 @@ function clientFixture({failUpload = false} = {}) {
     const client = testEnv.authenticatedContext(OWNER);
     const storage = client.storage(), db = client.firestore();
     const uploads = [];
+    let shouldFailUpload = failUpload;
     const factory = new Function('auth', 'functions', 'storage', 'httpsCallable', 'onAuthStateChanged', 'ref',
-        'uploadBytes', 'decryptBackupEntry', 'deriveBackupKey', 'parseBackupLine', 'chunkRestoreRecords',
+        'getBytes', 'uploadBytes', 'decryptBackupEntry', 'deriveBackupKey', 'parseBackupLine', 'chunkRestoreRecords',
         'describeRestoreRecords', 'restoreRecordKey', 'validateBackupFooter', 'validateRestoreStoragePath',
         'collectStoragePaths', 'crypto', 'TextDecoder', 'TextEncoder', 'console', 'File', 'Blob',
         `${importServiceSource}\nreturn {prepareBackupRestore, executeBackupRestore, releaseBackupRestore};`);
@@ -113,17 +114,17 @@ function clientFixture({failUpload = false} = {}) {
             assert.equal(name, 'restoreBackupChunk');
             return {data: await restoreChunk({auth: {uid: OWNER}, data})};
         },
-        () => () => {}, storageRef,
+        () => () => {}, storageRef, getBytes,
         async (reference, bytes, options) => {
             uploads.push(reference.fullPath ?? String(reference));
-            if (failUpload) throw new Error('SIMULATED_STORAGE_FAILURE');
+            if (shouldFailUpload) throw new Error('SIMULATED_STORAGE_FAILURE');
             return storageUpload(reference, bytes, options);
         },
         cryptoApi.decryptBackupEntry, cryptoApi.deriveBackupKey, cryptoApi.parseBackupLine,
         importModel.chunkRestoreRecords, importModel.describeRestoreRecords, importModel.restoreRecordKey,
         importModel.validateBackupFooter, importModel.validateRestoreStoragePath, exportModel.collectStoragePaths,
         crypto, TextDecoder, TextEncoder, {warn() {}, log() {}, error() {}}, File, Blob);
-    return {module, db, storage, uploads};
+    return {module, db, storage, uploads, allowUploads() { shouldFailUpload = false; }};
 }
 
 const exists = async path => (await adminDb.doc(path).get()).exists;
@@ -167,14 +168,14 @@ async function interruptedSession(file, recoveryKey) {
     const fixture = clientFixture({failUpload: true});
     const plan = await fixture.module.prepareBackupRestore(file, OWNER, recoveryKey);
     await assert.rejects(fixture.module.executeBackupRestore(plan),
-        /BACKUP_STORAGE_RETRY_BLOCKED|BACKUP_RESTORE_INTERRUPTED/);
+        /BACKUP_STORAGE_UNCERTAIN/);
     assert.equal(await exists(ACCOUNT_PATH), true, 'l’Account è stato applicato prima dell’upload');
     assert.equal((await data(ATTACHMENT_PATH)).storagePath, OBJECT_PATH, 'il metadato dell’allegato cita il percorso');
     assert.equal((await readBytes(fixture, OBJECT_PATH)).present, false, 'i byte non esistono: riferimento senza byte');
     return {fixture, plan};
 }
 
-test('M8-bis: una nuova sessione classifica tutto «invariato» e non riprova nulla (difetto osservato)', async () => {
+test('M8-bis: una nuova sessione rileva il byte mancante e recupera l’allegato', async () => {
     useOwner('owner-m8b-retry-1');
     const {file, recoveryKey} = await backupFile();
     const {fixture: sessionA, plan: planA} = await interruptedSession(file, recoveryKey);
@@ -184,27 +185,39 @@ test('M8-bis: una nuova sessione classifica tutto «invariato» e non riprova nu
     assert.equal(appliedReceipts[0].status, 'applied');
     assert.equal(appliedReceipts[0].duplicate, false);
 
-    // Nella stessa sessione il piano bloccato non è riprovabile, nemmeno con `retry`.
-    await assert.rejects(sessionA.module.executeBackupRestore(planA, null, {retry: true}), /BACKUP_STORAGE_RETRY_BLOCKED/);
+    // Senza conferma esplicita il retry resta bloccato.
+    await assert.rejects(sessionA.module.executeBackupRestore(planA), /BACKUP_RETRY_REQUIRED/);
     assert.equal(sessionA.uploads.length, 1, 'nessun nuovo caricamento nella sessione bloccata');
 
     // Nuova sessione di ripristino, stesso file, stesso stato del Vault.
     const sessionB = clientFixture();
     const planB = await sessionB.module.prepareBackupRestore(file, OWNER, recoveryKey);
-    assert.deepEqual(counts(planB), {missing: 0, unchanged: 3, changed: 0});
+    assert.deepEqual(counts(planB), {missing: 0, unchanged: 2, changed: 1});
     assert.equal(planB.collisionCount, 3, 'tutti i record sono classificati come collisioni');
-    assert.equal(statusOf(planB, 'private-account-attachment').status, 'unchanged',
-        'anche l’allegato senza byte è classificato «invariato»');
+    assert.equal(statusOf(planB, 'private-account-attachment').status, 'changed',
+        'il riferimento senza byte viene reso selezionabile per il recupero');
 
-    // Che cosa può essere selezionato o confermato: nulla.
-    await assert.rejects(sessionB.module.executeBackupRestore(planB), /BACKUP_RESTORE_NOTHING_SELECTED/);
-    await assert.rejects(sessionB.module.executeBackupRestore(planB, [0, 1, 2]), /BACKUP_RESTORE_NOTHING_SELECTED/);
-    assert.equal(sessionB.uploads.length, 0, 'la nuova sessione non tenta alcun caricamento');
+    const result = await sessionB.module.executeBackupRestore(planB, [indexOf(planB, 'private-account-attachment')]);
+    assert.deepEqual({...result}, {recordCount: 1, attachmentCount: 1});
+    assert.equal(sessionB.uploads.length, 1, 'la nuova sessione recupera il byte mancante');
 
-    // Stato finale: il riferimento resta senza byte e non nasce una nuova ricevuta.
+    // Stato finale: riferimento e byte tornano coerenti con una nuova ricevuta.
     assert.equal((await data(ATTACHMENT_PATH)).storagePath, OBJECT_PATH);
-    assert.deepEqual(await readBytes(sessionB, OBJECT_PATH), {present: false, code: 'storage/object-not-found'});
-    assert.deepEqual(await receipts(), appliedReceipts, 'l’anteprima non persiste ricevute e non ne nascono altre');
+    assert.deepEqual((await readBytes(sessionB, OBJECT_PATH)).bytes, BYTES);
+    assert.equal((await receipts()).length, appliedReceipts.length + 1);
+});
+
+test('M8-bis: la stessa sessione riprende l’upload senza riscrivere i record', async () => {
+    useOwner('owner-m8b-retry-resume');
+    const {file, recoveryKey} = await backupFile();
+    const {fixture, plan} = await interruptedSession(file, recoveryKey);
+    const before = await receipts();
+    fixture.allowUploads();
+    const result = await fixture.module.executeBackupRestore(plan, null, {retry: true});
+    assert.deepEqual({...result}, {recordCount: 3, attachmentCount: 1});
+    assert.equal(fixture.uploads.length, 2, 'un tentativo fallito e un retry esplicito');
+    assert.deepEqual((await readBytes(fixture, OBJECT_PATH)).bytes, BYTES);
+    assert.deepEqual(await receipts(), before, 'il retry Storage non riscrive i record Firestore');
 });
 
 test('M8-bis: controllo positivo — se un record è «mancante» la nuova sessione ripristina riferimento e byte', async () => {
@@ -233,7 +246,7 @@ test('M8-bis: controllo positivo — se un record è «mancante» la nuova sessi
     assert.notEqual(applied[0].id, applied[1].id, 'ogni esecuzione usa un proprio identificativo di operazione');
 });
 
-test('M8-bis: una nuova sessione che applica un record «modificato» non recupera i byte mancanti', async () => {
+test('M8-bis: una nuova sessione recupera insieme record modificato e byte mancante', async () => {
     useOwner('owner-m8b-retry-3');
     const {file, recoveryKey} = await backupFile();
     await interruptedSession(file, recoveryKey);
@@ -241,17 +254,19 @@ test('M8-bis: una nuova sessione che applica un record «modificato» non recupe
 
     const sessionB = clientFixture();
     const planB = await sessionB.module.prepareBackupRestore(file, OWNER, recoveryKey);
-    assert.deepEqual(counts(planB), {missing: 0, unchanged: 2, changed: 1});
+    assert.deepEqual(counts(planB), {missing: 0, unchanged: 1, changed: 2});
     assert.equal(statusOf(planB, 'private-account').status, 'changed');
-    assert.equal(statusOf(planB, 'private-account-attachment').status, 'unchanged');
+    assert.equal(statusOf(planB, 'private-account-attachment').status, 'changed');
 
-    const result = await sessionB.module.executeBackupRestore(planB, [indexOf(planB, 'private-account')]);
-    assert.deepEqual({...result}, {recordCount: 1, attachmentCount: 0});
-    assert.equal(sessionB.uploads.length, 0, 'il percorso dell’allegato non è fra i record applicati');
+    const result = await sessionB.module.executeBackupRestore(planB, [
+        indexOf(planB, 'private-account'), indexOf(planB, 'private-account-attachment')
+    ]);
+    assert.deepEqual({...result}, {recordCount: 2, attachmentCount: 1});
+    assert.equal(sessionB.uploads.length, 1, 'il byte mancante viene ripristinato');
     assert.equal((await data(ACCOUNT_PATH)).nomeAccount, 'Account M8-bis',
         'il record modificato è tornato alla versione del backup');
 
-    // L’allegato resta un riferimento senza byte anche dopo un ripristino riuscito.
+    // Anche l’allegato torna coerente dopo il ripristino.
     assert.equal((await data(ATTACHMENT_PATH)).storagePath, OBJECT_PATH);
-    assert.deepEqual(await readBytes(sessionB, OBJECT_PATH), {present: false, code: 'storage/object-not-found'});
+    assert.deepEqual((await readBytes(sessionB, OBJECT_PATH)).bytes, BYTES);
 });

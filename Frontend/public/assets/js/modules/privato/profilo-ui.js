@@ -1,25 +1,14 @@
-/**
- * PROFILO PRIVATO — UI MODULE (V1.0)
- * Avatar, label management, collapsible sections, custom dropdowns engine.
- * Estratto da profilo_privato.js.
- *
- * Init: initUIModule(getState)
- * Import graph (no circular deps):
- *   profilo_privato.js → profilo-ui.js → firebase, ui-core, dom-utils
- */
-
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.154';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.155';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { getUserProfile } from '../data/vault-repository.js';
 
 let _getState = null;
 let avatarOperation = 0;
-// Una sola coppia di listener per modulo: invalida le attese senza
-// fingere di annullare richieste già inviate al backend.
 const invalidateAvatarOperation = () => { avatarOperation++; };
 globalThis.addEventListener?.('vault-session-locked', invalidateAvatarOperation);
 globalThis.addEventListener?.('pagehide', invalidateAvatarOperation);
@@ -59,13 +48,33 @@ export function setupAvatarEdit() {
         catch (error) { if (active()) { showToast(error.message, 'error'); input.value = ''; } return; }
 
         showToast(t('uploading_avatar') || 'Caricamento avatar...', 'info');
+        let newStorageRef = null;
+        let newObjectUploaded = false;
         try {
+            const profileRef = doc(db, 'users', currentUserUid);
+            const previous = await getUserProfile(currentUserUid);
+            if (!active()) return;
+            const previousURL = String(previous?.photoURL || '');
+            const previousPath = (() => {
+                try {
+                    const parsed = new URL(previousURL);
+                    const encoded = parsed.pathname.split('/o/')[1];
+                    const path = encoded ? decodeURIComponent(encoded) : '';
+                    return path.startsWith(`users/${currentUserUid}/avatar_`) ? path : null;
+                } catch { return null; }
+            })();
             const sRef = ref(storage, `users/${currentUserUid}/avatar_${attachmentSecurity.createStorageObjectName(file)}`);
+            newStorageRef = sRef;
             await uploadBytes(sRef, file);
-            if (!active()) return;
+            newObjectUploaded = true;
+            if (!active()) { await deleteObject(sRef).catch(() => {}); return; }
             const url = await getDownloadURL(sRef);
-            if (!active()) return;
-            await updateDoc(doc(db, 'users', currentUserUid), { photoURL: url });
+            if (!active()) { await deleteObject(sRef).catch(() => {}); return; }
+            await updateDoc(profileRef, { photoURL: url });
+            if (previousPath && previousPath !== sRef.fullPath) {
+                await deleteObject(ref(storage, previousPath)).catch(error =>
+                    console.warn('[Avatar] Pulizia precedente non completata:', error));
+            }
             if (!active()) return;
             localStorage.setItem(`codex_profile_avatar_${currentUserUid}`, url);
             if (avatarImg) {
@@ -74,6 +83,7 @@ export function setupAvatarEdit() {
             }
             showToast(t('avatar_updated') || 'Avatar aggiornato!');
         } catch (error) {
+            if (newStorageRef && newObjectUploaded) await deleteObject(newStorageRef).catch(() => {});
             if (!active()) return;
             logError('AvatarUpload', error);
             showToast(t('error_upload'), 'error');

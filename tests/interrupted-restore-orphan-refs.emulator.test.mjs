@@ -97,7 +97,7 @@ function clientFixture({failUpload = false} = {}) {
     const storage = client.storage(), db = client.firestore();
     const uploads = [];
     const factory = new Function('auth', 'functions', 'storage', 'httpsCallable', 'onAuthStateChanged', 'ref',
-        'uploadBytes', 'decryptBackupEntry', 'deriveBackupKey', 'parseBackupLine', 'chunkRestoreRecords',
+        'getBytes', 'uploadBytes', 'decryptBackupEntry', 'deriveBackupKey', 'parseBackupLine', 'chunkRestoreRecords',
         'describeRestoreRecords', 'restoreRecordKey', 'validateBackupFooter', 'validateRestoreStoragePath',
         'collectStoragePaths', 'crypto', 'TextDecoder', 'TextEncoder', 'console', 'File', 'Blob',
         `${importServiceSource}\nreturn {prepareBackupRestore, executeBackupRestore, releaseBackupRestore};`);
@@ -106,7 +106,7 @@ function clientFixture({failUpload = false} = {}) {
             assert.equal(name, 'restoreBackupChunk');
             return {data: await restoreChunk({auth: {uid: OWNER}, data})};
         },
-        () => () => {}, storageRef,
+        () => () => {}, storageRef, getBytes,
         async (reference, bytes, options) => {
             uploads.push(reference.fullPath ?? String(reference));
             if (failUpload) throw new Error('SIMULATED_STORAGE_FAILURE');
@@ -143,7 +143,7 @@ test('M8 su emulatore: upload fallito dopo i record lascia il riferimento senza 
     const {file, recoveryKey} = await backupFile();
     const f = clientFixture({failUpload: true});
     const plan = await f.module.prepareBackupRestore(file, OWNER, recoveryKey);
-    await assert.rejects(f.module.executeBackupRestore(plan), /BACKUP_STORAGE_RETRY_BLOCKED|BACKUP_RESTORE_INTERRUPTED/);
+    await assert.rejects(f.module.executeBackupRestore(plan), /BACKUP_STORAGE_UNCERTAIN/);
 
     // I record sono stati applicati: il metadato dell'allegato **cita** un percorso…
     assert.equal(await exists(`users/${OWNER}/accounts/account-1`), true, 'l’Account è stato scritto');

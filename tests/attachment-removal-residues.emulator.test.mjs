@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {initializeTestEnvironment} from '@firebase/rules-unit-testing';
 import {Timestamp, addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, runTransaction, setDoc,
     updateDoc, writeBatch} from 'firebase/firestore';
-import {getBytes, getDownloadURL, listAll, ref, uploadBytes} from 'firebase/storage';
+import {deleteObject, getBytes, getDownloadURL, listAll, ref, uploadBytes} from 'firebase/storage';
 
 // M7-T26 — Prove su **Emulator reali** (Firestore + Storage, Rules di produzione)
 // dei percorsi di rimozione: cancellazione di una Scadenza con allegato e
@@ -38,11 +38,13 @@ const client = () => testEnv.authenticatedContext(OWNER);
 
 // `deleteScadenza` reale, montata nello stesso realm degli SDK. La transazione
 // usata è quella vera del client: il modulo chiama `get`/`delete`/`update`.
-function deleteScadenza(userId, scadenzaId, sourceRef, active) {
-    const db = client().firestore();
-    const factory = new Function('db', 'deleteDoc', 'doc', 'runTransaction', 'console',
+async function deleteScadenza(userId, scadenzaId, sourceRef, active) {
+    const db = client().firestore(), storage = client().storage();
+    const snapshot = await getDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
+    const attachments = snapshot.exists() ? snapshot.data().attachments || [] : [];
+    const factory = new Function('db', 'storage', 'deleteDoc', 'deleteObject', 'doc', 'ref', 'runTransaction', 'console',
         `${sliceFunction(detailSource, 'deleteScadenza')}\nreturn deleteScadenza;`);
-    return factory(db, deleteDoc, doc, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, active);
+    return factory(db, storage, deleteDoc, deleteObject, doc, ref, runTransaction, {warn() {}})(userId, scadenzaId, sourceRef, attachments, active);
 }
 
 // `saveDeadline` reale: compone `attachments: [...existingAttachments, ...nuovi]`
@@ -52,11 +54,15 @@ function deleteScadenza(userId, scadenzaId, sourceRef, active) {
 function saveDeadlineFixture() {
     const db = client().firestore(), storage = client().storage();
     const factory = new Function('db', 'storage', 'addDoc', 'arrayUnion', 'collection', 'doc',
-        'getDownloadURL', 'ref', 'setDoc', 'Timestamp', 'updateDoc', 'uploadBytes', 'writeBatch',
-        'LOG', 'ensureVaultKeyMaterial', 'getUserProfile', 'deadlineRecipientFields', 'console',
+        'deleteObject', 'getDownloadURL', 'ref', 'setDoc', 'Timestamp', 'updateDoc', 'uploadBytes', 'writeBatch',
+        'LOG', 'ensureVaultKeyMaterial', 'getDeadline', 'getUserProfile', 'deadlineRecipientFields', 'console',
         `${configSource}\n${securitySource}\n${saveSource}\nreturn {saveDeadline};`);
-    const module = factory(db, storage, addDoc, arrayUnion, collection, doc, getDownloadURL, ref, setDoc,
+    const module = factory(db, storage, addDoc, arrayUnion, collection, doc, deleteObject, getDownloadURL, ref, setDoc,
         Timestamp, updateDoc, uploadBytes, writeBatch, () => {}, async () => 'synthetic-vault-key',
+        async (_uid, deadlineId) => {
+            const snapshot = await getDoc(doc(db, 'users', OWNER, 'scadenze', deadlineId));
+            return snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null;
+        },
         async () => ({documenti: []}), () => ({recipients: []}), {warn() {}});
     return {db, storage, saveDeadline: module.saveDeadline};
 }
@@ -82,7 +88,7 @@ async function seedDeadline(storage, deadlineId, objectPath) {
     });
 }
 
-test('T-26 su emulatore: cancellare la Scadenza elimina il documento e lascia i byte', async () => {
+test('T-26 su emulatore: cancellare la Scadenza elimina documento e byte', async () => {
     const storage = client().storage(), db = client().firestore();
     const deadlineId = 'deadline-cancellata';
     const objectPath = `users/${OWNER}/scadenze/${deadlineId}/allegato.pdf`;
@@ -94,13 +100,11 @@ test('T-26 su emulatore: cancellare la Scadenza elimina il documento e lascia i 
 
     assert.equal((await getDoc(doc(db, 'users', OWNER, 'scadenze', deadlineId))).exists(), false,
         'la Scadenza è eliminata');
-    assert.deepEqual((await listAll(ref(storage, `users/${OWNER}/scadenze/${deadlineId}`))).items.map(item => item.name),
-        ['allegato.pdf'], 'l’oggetto resta nello Storage');
-    assert.deepEqual(new Uint8Array(await getBytes(ref(storage, objectPath))), BYTES,
-        'i byte restano leggibili dopo la cancellazione della Scadenza');
+    assert.deepEqual((await listAll(ref(storage, `users/${OWNER}/scadenze/${deadlineId}`))).items, [],
+        'nessun oggetto resta nello Storage');
 });
 
-test('T-26 su emulatore: rimuovere la riga dall’array e salvare lascia l’oggetto orfano', async () => {
+test('T-26 su emulatore: rimuovere la riga dall’array elimina l’oggetto', async () => {
     const {db, storage, saveDeadline} = saveDeadlineFixture();
     const deadlineId = 'deadline-modificata';
     const objectPath = `users/${OWNER}/scadenze/${deadlineId}/allegato.pdf`;
@@ -116,27 +120,26 @@ test('T-26 su emulatore: rimuovere la riga dall’array e salvare lascia l’ogg
 
     const after = (await getDoc(doc(db, 'users', OWNER, 'scadenze', deadlineId))).data();
     assert.deepEqual(after.attachments, [], 'il riferimento all’allegato è sparito dall’array');
-    assert.deepEqual((await listAll(ref(storage, `users/${OWNER}/scadenze/${deadlineId}`))).items.map(item => item.name),
-        ['allegato.pdf'], 'l’oggetto resta nello Storage senza alcun riferimento');
-    assert.deepEqual(new Uint8Array(await getBytes(ref(storage, objectPath))), BYTES, 'i byte restano leggibili');
+    assert.deepEqual((await listAll(ref(storage, `users/${OWNER}/scadenze/${deadlineId}`))).items, [],
+        'l’oggetto rimosso non resta nello Storage');
 });
 
-test('T-26 su emulatore: errore parziale, l’upload precede la scrittura e resta orfano', async () => {
+test('T-26 su emulatore: errore parziale compensa l’upload', async () => {
     const {db, storage, saveDeadline} = saveDeadlineFixture();
-    // Scrittura destinata a fallire: il documento della Scadenza non esiste e il
-    // percorso collegato al documento del profilo usa un batch che non può
-    // aggiornare un documento assente.
+    // Scrittura destinata a fallire dopo l'upload: la Scadenza esiste, mentre il
+    // profilo collegato manca e il batch non può aggiornarlo.
     const deadlineId = 'scadenza-assente';
+    await setDoc(doc(db, 'users', OWNER, 'scadenze', deadlineId), {
+        uid: OWNER, name: 'Preesistente', attachments: []
+    });
     const file = new File([BYTES], 'nuovo.pdf', {type: 'application/pdf'});
     await assert.rejects(saveDeadline({user: {uid: OWNER}, editingDeadlineId: deadlineId,
         linkedSourceRef: {type: 'profileDocument', id: 'doc-1'}, mode: 'documenti',
         data: {name: 'Sintetica', dueDate: '2026-10-01'}, recipients: [],
         selectedFiles: [file], existingAttachments: []}));
 
-    assert.equal((await getDoc(doc(db, 'users', OWNER, 'scadenze', deadlineId))).exists(), false,
-        'nessun documento è stato scritto');
+    assert.equal((await getDoc(doc(db, 'users', OWNER, 'scadenze', deadlineId))).data().name, 'Preesistente',
+        'il documento preesistente non viene modificato dal batch fallito');
     const uploaded = await listAll(ref(storage, `users/${OWNER}/scadenze/${deadlineId}`));
-    assert.equal(uploaded.items.length, 1, 'l’oggetto caricato prima della scrittura fallita resta nello Storage');
-    const bytes = new Uint8Array(await getBytes(uploaded.items[0]));
-    assert.ok(bytes.length > BYTES.length, 'l’oggetto conserva il payload cifrato');
+    assert.equal(uploaded.items.length, 0, 'l’oggetto caricato viene rimosso dopo la scrittura fallita');
 });

@@ -40,7 +40,7 @@ function fixture({previous = null, uid = 'A'} = {}) {
     };
     const context = vm.createContext({
         addEventListener: events.addEventListener.bind(events),
-        File, crypto, TextEncoder, TextDecoder, console: {warn() {}}, Date, localStorage: {
+        File, crypto, TextEncoder, TextDecoder, URL, decodeURIComponent, console: {warn() {}}, Date, localStorage: {
             setItem: (key, value) => cache.set(key, value),
             getItem: key => cache.get(key) ?? null,
             removeItem: key => cache.delete(key)
@@ -58,6 +58,11 @@ function fixture({previous = null, uid = 'A'} = {}) {
         getDownloadURL: async path => {
             if (hooks.getDownloadURL) return hooks.getDownloadURL(path);
             return urlOf(path);
+        },
+        getUserProfile: async targetUid => structuredClone(users.get(targetUid) || null),
+        deleteObject: async path => {
+            operations.push(['delete', path]);
+            if (!bucket.delete(path)) throw Object.assign(new Error('missing'), {code: 'storage/object-not-found'});
         },
         updateDoc: async (reference, patch) => {
             if (hooks.updateDoc) return hooks.updateDoc(reference, patch);
@@ -93,15 +98,14 @@ function fixture({previous = null, uid = 'A'} = {}) {
             .some(user => user.photoURL && pathOf(user.photoURL) === path))};
 }
 
-test('T-28: il modulo del cambio avatar non ha alcun percorso di cancellazione', () => {
-    assert.doesNotMatch(avatarModule, /deleteObject|deleteAll|removeObject/,
-        'il cambio avatar non importa né invoca primitive di cancellazione');
+test('T-28: il modulo del cambio avatar include compensazione e pulizia', () => {
+    assert.match(avatarModule, /deleteObject/);
 });
 
 test('T-28: primo caricamento, il riferimento segue il nuovo oggetto senza cancellare nulla', async () => {
     const f = fixture();
     await f.upload();
-    assert.deepEqual(f.operations.map(([operation]) => operation), ['put'], 'nessuna operazione di cancellazione');
+    assert.deepEqual(f.operations.map(([operation]) => operation), ['put']);
     const [, path] = f.operations[0];
     assert.match(path, /^users\/A\/avatar_\d+_[0-9a-f-]+\.jpg$/, 'nome oggetto casuale sotto il prefisso del proprietario');
     assert.equal(f.photoURL(), urlOf(path), 'il documento punta al nuovo oggetto');
@@ -112,32 +116,30 @@ test('T-28: primo caricamento, il riferimento segue il nuovo oggetto senza cance
     assert.ok(f.toasts.some(([message]) => message === 'avatar_updated'));
 });
 
-test('T-28: al cambio avatar il precedente resta orfano e si accumula', async () => {
+test('T-28: al cambio avatar il precedente viene eliminato', async () => {
     const previous = 'users/A/avatar_1700000000000_old.jpg';
     const f = fixture({previous});
     await f.upload();
     const [, first] = f.operations[0];
-    assert.equal(f.bucket.has(previous), true, 'il vecchio oggetto non viene eliminato');
-    assert.equal(f.operations.filter(([operation]) => operation !== 'put').length, 0,
-        'nessuna cancellazione viene nemmeno tentata');
-    assert.deepEqual(f.orphans(), [previous], 'il vecchio avatar resta non referenziato');
+    assert.equal(f.bucket.has(previous), false, 'il vecchio oggetto viene eliminato');
+    assert.equal(f.operations.filter(([operation]) => operation === 'delete').length, 1);
+    assert.deepEqual(f.orphans(), []);
     assert.equal(JSON.stringify([...f.users.values()]).includes(previous), false,
         'il vecchio percorso non è più nel documento del profilo');
     assert.equal([...f.cache.values()].some(value => String(value).includes('old.jpg')), false,
         'la cache locale non conserva il vecchio percorso');
 
-    // Un secondo cambio lascia **due** oggetti non referenziati: il residuo cresce
-    // a ogni cambio e nessuna riga lo recupera.
+    // Un secondo cambio conserva un solo oggetto referenziato.
     f.operations.length = 0;
     await f.upload('second.jpg');
     const [, second] = f.operations[0];
     assert.notEqual(second, first);
-    assert.deepEqual(f.orphans().sort(), [previous, first].sort());
-    assert.equal(f.bucket.size, 3, 'tre oggetti caricati, uno solo referenziato');
+    assert.deepEqual(f.orphans(), []);
+    assert.equal(f.bucket.size, 1);
     assert.equal(f.referencedPaths().size, 1);
 });
 
-test('T-28: un errore parziale lascia il riferimento vecchio e può creare un orfano in più', async () => {
+test('T-28: un errore parziale mantiene il riferimento vecchio e compensa il nuovo upload', async () => {
     const previous = 'users/A/avatar_1700000000000_old.jpg';
     for (const stage of ['upload', 'url', 'reference']) {
         const f = fixture({previous});
@@ -154,8 +156,7 @@ test('T-28: un errore parziale lascia il riferimento vecchio e può creare un or
             assert.deepEqual(f.operations, [], 'nessun byte scritto');
             assert.deepEqual(f.orphans(), [], 'nessun orfano nuovo');
         } else {
-            assert.deepEqual(f.orphans(), [f.operations[0][1]],
-                `${stage}: l'oggetto nuovo resta senza riferimento`);
+            assert.deepEqual(f.orphans(), [], `${stage}: nessun oggetto nuovo resta orfano`);
         }
     }
 });
@@ -186,7 +187,7 @@ test('avatar: cambio di sessione durante upload impedisce riferimento, cache e U
     assert.equal(f.toasts.some(([message]) => message === 'avatar_updated'), false);
     assert.equal([...f.bucket.keys()].some(key => key.startsWith('users/B/')), false,
         'nessun oggetto creato sotto il proprietario nuovo');
-    assert.deepEqual(f.orphans(), [path], 'upload già completato: pulizia non introdotta implicitamente');
+    assert.deepEqual(f.orphans(), [], 'upload già completato: il nuovo oggetto viene compensato');
 });
 
 for (const stage of ['getDownloadURL', 'updateDoc']) {

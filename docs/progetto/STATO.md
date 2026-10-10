@@ -1,5 +1,31 @@
 # Stato
 
+## Verifica conclusiva dei motori — 10/10/2026
+
+| Motore | Evidenza corrente | Esito di attivazione |
+|---|---|---|
+| M7 purge | Cascata Emulator 2/2; backend 444 pass; Firestore Rules verdi; Storage Rules 14/14 e condivisione Storage 5/5. Writer client Firestore/Storage e callable Admin censite partecipano ora al lock globale | **Gate tecnici locali del fence chiusi**; resta hard-off fino al canary distribuito e ai gate esterni |
+| M8 restore corrente | Backup 110/110; Emulator interruzione 2/2, retry 4/4, stale 3/3, collisioni 4/4. La nuova sessione verifica ora l'esistenza dei byte Storage prima di accettare un allegato invariato e recupera i riferimenti orfani | **Gate tecnici locali corrente chiusi**; restano gate esterni prima dell'attivazione |
+| M8 candidato riprendibile | 168 test: **164 pass, 4 skip esterni, 0 fail**; staging, generazioni, ripresa e cleanup verificati localmente | **Candidato valido**, ma non è esportato né integrato nel runtime produttivo |
+| CPFE2 | Dual-read e rifiuto fail-closed verificati; writer continua nel formato legacy | **Lettura attiva e compatibile**; nuove scritture CPFE2 richiedono matrice dispositivi |
+| Recupero MFA | Policy manuale verificata: con fattori presenti nessuna rimozione, nessun consumo codice, nessun update Auth | **Attivo soltanto in modalità assistita sicura**; recupero automatico selettivo resta indisponibile |
+
+Conclusione: gli interlock M7/M8 non sono ritardi documentali ma impediscono due difetti riprodotti. La via più breve alla chiusura è integrare il candidato M8 già verde e completare il lock globale M7; non è sicuro limitarsi a cambiare i flag.
+
+### M8 — ripresa Storage nella sessione corrente
+
+Il runtime corrente non blocca più definitivamente il piano quando un upload Storage fallisce dopo che i record Firestore sono già stati confermati. L'errore diventa `BACKUP_STORAGE_UNCERTAIN`, richiede una conferma esplicita e il retry salta i chunk Firestore già applicati e gli allegati già confermati, ritentando soltanto quelli incompleti. Regressione backup **110/110**; Emulator interruzione **2/2** e retry **4/4**, incluso il controllo che la ricevuta Firestore non venga riscritta.
+
+Il caso di chiusura o perdita della sessione prima del retry è ora coperto: durante la nuova anteprima ogni percorso Storage referenziato da un record apparentemente invariato viene verificato con una lettura limitata a un byte. `storage/object-not-found` riclassifica soltanto quel record come modificato e lo rende selezionabile; errori di rete o autorizzazione falliscono chiusi con `BACKUP_STORAGE_PREFLIGHT_FAILED`. Emulator: nuova-sessione **4/4**, interruzione **2/2**, stale **3/3**, collisioni **4/4**. M8 resta hard-off soltanto fino ai gate esterni previsti, non per il precedente riferimento orfano.
+
+## Incremento locale M7 — cascata Account e residui allegati — 10/10/2026
+
+Il purge candidato elimina ora, nella transazione conclusiva, i `accountWidgets`, `sharedVaultData`, `sharedVaultLinks` e gli inviti che appartengono esattamente all'Account eliminato; i record autonomi delle Scadenze restano separati. La pianificazione viene ripetuta dopo la cancellazione del documento Account, ha un limite conservativo di scritture e fallisce chiusa se il piano è troppo esteso. Prova Firestore/Storage Emulator: **2/2**; test statici T-08: **5/5**; suite Functions/security: **444 pass, 9 skip dichiarati, 0 fail**.
+
+Sono inoltre coperti i residui locali degli allegati Scadenza e dell'avatar: rimozione dei byte quando il riferimento viene eliminato, compensazione dell'upload se il salvataggio fallisce e sostituzione dell'avatar senza lasciare il precedente oggetto. Test locali ed emulatori mirati: allegati **8/8**, avatar **12/12**.
+
+Questo incremento non abilita ancora M7 per utenti reali. Il fence globale copre ora i writer client Firestore, gli inviti, le callable Admin censite e anche creazione, modifica e cancellazione dirette in Storage. Lock attivo o malformato fallisce chiuso; un lock rilasciato valido riapre le operazioni. L'interlock `ARCHIVE_PURGE_TEMPORARILY_SUSPENDED` resta corretto fino al canary distribuito e ai gate esterni: la prova avversaria che modifica direttamente lo stato Admin saltando deliberatamente ogni writer supportato resta una caratterizzazione del confine di fiducia, non un percorso applicativo abilitato.
+
 ## Riconciliazione pubblicata 1.2.154 — 10/10/2026
 
 La versione autorevole in produzione è `1.2.154`, merge PR #97, commit `eb1380c0`. Il deploy sul progetto `appcodici-password` ha pubblicato Firebase Hosting, Firestore Rules, Storage Rules e le callable `manageAccountWidget`, `manageWidgetProfile`, `uploadProfileDocumentAttachment` e `removeProfileDocumentAttachment`. Verifica successiva: `home_page.html` e `profilo_privato.html` HTTP 200, riferimenti asset `1.2.154` presenti.

@@ -1,9 +1,10 @@
-import { db, storage } from '../../firebase-config.js?v=1.2.154';
+import { db, storage } from '../../firebase-config.js?v=1.2.155';
 import {
     addDoc,
     arrayUnion,
     collection,
     doc,
+    deleteObject,
     getDownloadURL,
     ref,
     setDoc,
@@ -14,7 +15,7 @@ import {
 } from '/assets/js/vendor/firebase-runtime.js';
 import { LOG } from '../../logger.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { getUserProfile } from '../data/vault-repository.js';
+import { getDeadline, getUserProfile } from '../data/vault-repository.js';
 import {
     createStorageObjectName,
     encryptAttachmentFile,
@@ -60,6 +61,18 @@ async function uploadDeadlineAttachments({ userId, deadlineId, files, onProgress
         LOG(`[FRONTEND-TRACE] File ${index + 1} caricato con successo.`);
     }
     return uploaded;
+}
+
+function deadlineAttachmentPath(userId, attachment) {
+    const path = String(attachment?.storagePath || '');
+    return path.startsWith(`users/${userId}/scadenze/`) ? path : null;
+}
+
+async function removeDeadlineAttachmentObjects(userId, attachments) {
+    const paths = [...new Set(attachments.map(item => deadlineAttachmentPath(userId, item)).filter(Boolean))];
+    const results = await Promise.allSettled(paths.map(path => deleteObject(ref(storage, path))));
+    const failure = results.find(result => result.status === 'rejected' && result.reason?.code !== 'storage/object-not-found');
+    if (failure) throw failure.reason;
 }
 
 async function persistDeadlineDocument({
@@ -137,6 +150,13 @@ export async function saveDeadline({
     if (!user?.uid) throw new Error('Utente non autenticato');
     const frequency = validateDeadlineFrequency(data?.notif_frequency);
 
+    let previousAttachments = [];
+    if (editingDeadlineId) {
+        const previous = await getDeadline(user.uid, editingDeadlineId);
+        if (!previous) throw new Error('Scadenza non disponibile');
+        previousAttachments = Array.isArray(previous.attachments) ? previous.attachments : [];
+    }
+
     const uploadedAttachments = await uploadDeadlineAttachments({
         userId: user.uid,
         deadlineId: editingDeadlineId,
@@ -162,13 +182,28 @@ export async function saveDeadline({
     }
     if (!editingDeadlineId) deadlineData.createdAt = Timestamp.now();
 
-    const finalDeadlineId = await persistDeadlineDocument({
-        userId: user.uid,
-        editingDeadlineId,
-        profileDocumentLinkDraft,
-        linkedSourceRef,
-        deadlineData
+    let finalDeadlineId;
+    try {
+        finalDeadlineId = await persistDeadlineDocument({
+            userId: user.uid,
+            editingDeadlineId,
+            profileDocumentLinkDraft,
+            linkedSourceRef,
+            deadlineData
+        });
+    } catch (error) {
+        await removeDeadlineAttachmentObjects(user.uid, uploadedAttachments).catch(cleanupError =>
+            console.warn('[TRACE] cleanup upload scadenza fallito:', cleanupError));
+        throw error;
+    }
+
+    const retainedPaths = new Set(existingAttachments
+        .map(item => deadlineAttachmentPath(user.uid, item)).filter(Boolean));
+    const removedAttachments = previousAttachments.filter(item => {
+        const path = deadlineAttachmentPath(user.uid, item);
+        return path && !retainedPaths.has(path);
     });
+    await removeDeadlineAttachmentObjects(user.uid, removedAttachments);
     LOG(`[FRONTEND-TRACE] Documento ${finalDeadlineId} salvato. Trigger backend atteso.`);
 
     if (!editingDeadlineId && data.name) {

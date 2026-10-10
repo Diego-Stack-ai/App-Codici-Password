@@ -6,6 +6,16 @@ service firebase.storage {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    function isGlobalPurgeUnlocked(userId) {
+      let path = /databases/(default)/documents/archivePurgeLocks/$(userId);
+      let lock = firestore.get(path);
+      return !firestore.exists(path) || (
+        lock.data.get('schemaVersion', 0) == 1 &&
+        lock.data.get('ownerUid', '') == userId &&
+        lock.data.get('status', '') == 'released'
+      );
+    }
+
     function isAllowedUpload() {
       return request.resource != null &&
         request.resource.size > 0 &&
@@ -63,8 +73,11 @@ service firebase.storage {
     // La lettura resta limitata al proprietario: la condivisione degli allegati
     // richiederà un protocollo crittografico dedicato nella fase P3.
     match /users/{userId}/{namespace}/{allPaths=**} {
-      allow read, delete: if isOwner(userId) && namespace != 'restoreObjects' && namespace != 'profile-documents';
-      allow create, update: if isOwner(userId) && namespace != 'restoreObjects' && namespace != 'profile-documents' && isAllowedUpload();
+      allow read: if isOwner(userId) && namespace != 'restoreObjects' && namespace != 'profile-documents';
+      allow delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
+        namespace != 'restoreObjects' && namespace != 'profile-documents';
+      allow create, update: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
+        namespace != 'restoreObjects' && namespace != 'profile-documents' && isAllowedUpload();
     }
 
     // Reserved M8 namespace. Creation must use the server's Storage generation

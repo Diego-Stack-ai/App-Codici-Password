@@ -115,7 +115,7 @@ before(async () => {
 beforeEach(async () => { await testEnv.clearFirestore(); await testEnv.clearStorage(); });
 after(async () => { await testEnv.clearStorage(); await deleteApp(adminApp); testEnv?.cleanup(); });
 
-test('T-08 su emulatore: il purge lascia copie e inviti invariati e rimuove solo l’Account', async () => {
+test('T-08 su emulatore: il purge rimuove Account, copie applicative e inviti', async () => {
     await seed();
     const watched = [WIDGET_PATH, SHARED_DATA_PATH, SHARED_LINK_PATH, INVITE_PATH, DEADLINE_PATH,
         RECEIVED_PATH, SHARE_INDEX_PATH];
@@ -126,19 +126,17 @@ test('T-08 su emulatore: il purge lascia copie e inviti invariati e rimuove solo
     // Rimosso: documento Account e sottocollezione (con i byte elencati).
     assert.equal(await has(ACCOUNT_PATH), false, 'l’Account è eliminato');
     assert.equal((await bucket.file(LISTED_OBJECT).exists())[0], false, 'i byte elencati sono eliminati');
-    // Rimasti e **invariati**: copie lato proprietario, invito, Scadenza e copia del destinatario.
-    for (const path of watched) {
-        assert.equal(await has(path), true, `${path} doveva restare`);
-        assert.equal(await raw(path), before[path], `${path} non doveva essere modificato dal purge`);
+    for (const path of [WIDGET_PATH, SHARED_DATA_PATH, SHARED_LINK_PATH, INVITE_PATH]) {
+        assert.equal(await has(path), false, `${path} doveva essere rimosso`);
     }
-    // Lo stato deciso all'archiviazione resta quello che il destinatario vede.
-    const invite = (await adminDb.doc(INVITE_PATH).get()).data();
-    assert.equal(invite.sharingState, 'suspended', 'l’invito resta nello stato sospeso deciso all’archiviazione');
-    assert.equal(invite.status, 'accepted', 'lo stato di risposta non viene riscritto dal purge');
+    for (const path of [DEADLINE_PATH, RECEIVED_PATH, SHARE_INDEX_PATH]) {
+        assert.equal(await has(path), true, `${path} è autonomo dall’Account e deve restare`);
+        assert.equal(await raw(path), before[path]);
+    }
     assert.equal((await adminDb.doc(`mutationResults/${OWNER}/operations/operation-1`).get()).data().status, 'purged');
 });
 
-test('T-08 su emulatore: al destinatario resta leggibile solo l’invito, non le copie del proprietario', async () => {
+test('T-08 su emulatore: al destinatario non resta leggibile l’invito dell’Account purgato', async () => {
     await seed();
     const recipient = testEnv.authenticatedContext(RECIPIENT, {email: RECIPIENT_EMAIL}).firestore();
     const stranger = testEnv.authenticatedContext('stranger-uid', {email: 'stranger@example.invalid'}).firestore();
@@ -155,19 +153,13 @@ test('T-08 su emulatore: al destinatario resta leggibile solo l’invito, non le
 
     assert.equal((await purge({auth: {uid: OWNER}, data: command})).status, 'purged');
 
-    // Copie lato proprietario: leggibili **solo** dal proprietario.
+    // Copie applicative e invito sono stati eliminati.
     for (const path of [WIDGET_PATH, SHARED_DATA_PATH, SHARED_LINK_PATH]) {
-        await assertSucceeds(getDoc(doc(owner, path)));
-        await assertFails(getDoc(doc(recipient, path)));
-        await assertFails(getDoc(doc(stranger, path)));
+        const missing = await assertSucceeds(getDoc(doc(owner, path)));
+        assert.equal(missing.exists(), false);
     }
-    // Invito: il destinatario continua a leggerlo (per email), l'estraneo no.
-    await assertSucceeds(getDoc(doc(recipient, INVITE_PATH)));
+    await assertFails(getDoc(doc(recipient, INVITE_PATH)));
     await assertFails(getDoc(doc(stranger, INVITE_PATH)));
-    const invite = (await getDoc(doc(recipient, INVITE_PATH))).data();
-    assert.equal(invite.accountName, 'Account condiviso',
-        'il destinatario legge ancora il nome dell’Account purgato dall’invito');
-    assert.equal(invite.sharingState, 'suspended');
     // L'Account purgato non esiste più: il proprietario può leggerne l'assenza
     // (la lettura è consentita, il documento no), il destinatario no.
     const missing = await assertSucceeds(getDoc(doc(owner, ACCOUNT_PATH)));

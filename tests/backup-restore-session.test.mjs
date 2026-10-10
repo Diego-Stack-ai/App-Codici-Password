@@ -33,6 +33,7 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
             entries: command.records.map((_record, index) => ({index, status: 'missing', expectedVersion: {exists: false}}))
         } : {status: 'applied'}}),
         httpsCallable: () => async command => { calls.push({uid: auth.currentUser?.uid, command}); return context.respond(command); },
+        getBytes: async () => new Uint8Array([1]),
         uploadBytes: async (path, bytes, metadata) => uploads.push([path, bytes.slice(), metadata]),
     });
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,restoreRecordKey,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
@@ -317,12 +318,14 @@ test('completed execution returns its saved result without repeating Firestore o
     f.context.releaseBackupRestore(plan);
 });
 
-test('Storage uncertainty blocks generic retry and cannot upload or send records a second time', async () => {
+test('Storage uncertainty requires explicit retry and resumes uploads without resending records', async () => {
     const f = fixture(1, true), plan = await f.prepare(); let uploadAttempts = 0;
-    f.context.uploadBytes = async () => { uploadAttempts++; throw new Error('upload response lost'); };
-    await assert.rejects(f.context.executeBackupRestore(plan), error => error.code === 'BACKUP_STORAGE_RETRY_BLOCKED' && !error.retryable && error.progress.mayHaveApplied);
-    await assert.rejects(f.context.executeBackupRestore(plan, null, {retry: true}), error => error.code === 'BACKUP_STORAGE_RETRY_BLOCKED' && !error.retryable);
-    assert.equal(uploadAttempts, 1); assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
+    f.context.uploadBytes = async () => { if (++uploadAttempts === 1) throw new Error('upload response lost'); };
+    await assert.rejects(f.context.executeBackupRestore(plan), error => error.code === 'BACKUP_STORAGE_UNCERTAIN' && error.retryable && error.progress.mayHaveApplied);
+    await assert.rejects(f.context.executeBackupRestore(plan), error => error.code === 'BACKUP_RETRY_REQUIRED' && error.retryable);
+    const result = await f.context.executeBackupRestore(plan, null, {retry: true});
+    assert.equal(result.attachmentCount, 1);
+    assert.equal(uploadAttempts, 2); assert.equal(f.calls.filter(call => call.command.mode === 'apply').length, 1);
     f.context.releaseBackupRestore(plan);
 });
 
