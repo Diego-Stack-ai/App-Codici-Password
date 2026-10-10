@@ -1,4 +1,4 @@
-import {functions} from '../../firebase-config.js?v=1.2.150';
+import {functions} from '../../firebase-config.js?v=1.2.151';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {
     decryptAttachmentBytesWithFileKey,

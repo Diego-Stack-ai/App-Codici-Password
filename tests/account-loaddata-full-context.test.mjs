@@ -8,6 +8,19 @@ const {DECRYPT_FAILURE_MESSAGE, accountSaveBlockedReason, createAccountLoadConte
 const cryptoSource = await readFile(new URL('../Frontend/public/assets/js/modules/core/crypto-utils.js', import.meta.url), 'utf8');
 const {createVaultKeyring, decrypt: realDecrypt, decryptRequiredValue: realStrict, encrypt: realEncrypt, generateVaultKey} =
     await import(`data:text/javascript;base64,${Buffer.from(cryptoSource).toString('base64')}`);
+const createCpfe2Fixture = async (plain, password) => {
+    const encoder = new TextEncoder(), salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = encoder.encode(password);
+    let material;
+    try { material = await crypto.subtle.importKey('raw', encoded, 'PBKDF2', false, ['deriveKey']); }
+    finally { encoded.fill(0); }
+    const key = await crypto.subtle.deriveKey({name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 600000}, material,
+        {name: 'AES-GCM', length: 256}, false, ['encrypt']);
+    const ciphertext = new Uint8Array(await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, encoder.encode(plain)));
+    const envelope = {version: 2, kdf: 'PBKDF2-SHA256', iterations: 600000, cipher: 'AES-GCM-256',
+        salt: Buffer.from(salt).toString('base64'), iv: Buffer.from(iv).toString('base64'), ciphertext: Buffer.from(ciphertext).toString('base64')};
+    return `CPFE2.${Buffer.from(JSON.stringify(envelope)).toString('base64')}`;
+};
 const deferred = () => { let resolve, reject; const promise = new Promise((res, rej) => { resolve = res; reject = rej; }); return {promise, resolve, reject}; };
 const node = () => ({value: '', checked: false, src: '', dataset: {},
     classList: {add() {}, remove() {}, toggle() {}, contains: () => false},
@@ -128,6 +141,20 @@ const realFields = {'account-username': ['username', 'utente-sintetico'], 'accou
     'account-password': ['password', 'password-sintetica'], 'account-note': ['note', 'nota-sintetica'],
     'account-numero-iscrizione': ['numeroIscrizione', 'iscrizione-sintetica'], 'account-codice-societa': ['codiceSocieta', 'societa-sintetica']};
 for (const domain of ['privato', 'azienda']) {
+    test(`${domain}: loadData applicativa legge campi CPFE2 sintetici`, async () => {
+        const primaryKey = generateVaultKey(), keyMaterial = createVaultKeyring(primaryKey);
+        const data = {_encrypted: true, nomeAccount: 'Fixture CPFE2', revision: 1, updatedAt: ''};
+        for (const [field, plain] of Object.values(realFields)) data[field] = await createCpfe2Fixture(plain, primaryKey);
+        const f = await fixture(domain, {keyMaterial, decrypt: realDecrypt, strictDecrypt: realStrict});
+        const pending = f.run(); f.fetches[0].resolve(data); await pending;
+        assert.equal(f.context.isReady(), true);
+        assert.equal(isAccountSaveAllowed(f.context), true);
+        for (const [id, [, plain]] of Object.entries(realFields)) {
+            if (domain === 'privato' && ['account-numero-iscrizione', 'account-codice-societa'].includes(id)) continue;
+            assert.equal(f.getNode(id).value, plain);
+        }
+        assert.deepEqual(f.messages, []);
+    });
     test(`${domain}: sentinella restituita blocca senza popolare i campi`, async () => {
         const f = await fixture(domain, {decrypt: async () => '--ERRORE--'});
         const pending = f.run(); f.fetches[0].resolve(goodData); await pending;

@@ -12,6 +12,8 @@ const ITERATIONS = 100000;
 const SALT_SIZE = 16;
 const IV_SIZE = 12;
 const KEK_ITERATIONS = 600000;
+const FIELD_V2_ITERATIONS = 600000;
+const FIELD_V2_PREFIX = 'CPFE2.';
 export const VERIFIER_ITERATIONS = 600000;
 
 // Helper: Uint8Array -> Hex
@@ -34,6 +36,16 @@ const base64ToBuffer = (base64) => {
     for (let i = 0; i < binary.length; i++) {
         bytes[i] = binary.charCodeAt(i);
     }
+    return bytes;
+};
+
+const canonicalBase64ToBuffer = (value) => {
+    if (typeof value !== 'string' || !value ||
+        !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) {
+        throw new Error('BASE64_INVALID');
+    }
+    const bytes = base64ToBuffer(value);
+    if (bufferToBase64(bytes) !== value) throw new Error('BASE64_INVALID');
     return bytes;
 };
 
@@ -159,8 +171,11 @@ export async function unwrapVaultKey(envelope, masterPassword) {
  * Deriva una chiave CryptoKey da una password testuale.
  * Include normalizzazione Unicode NFC per compatibilità Safari.
  */
-async function deriveKey(password, salt) {
+async function deriveKey(password, salt, iterations = ITERATIONS) {
     if (!password) throw new Error("Password mancante per derivazione");
+    if (iterations !== ITERATIONS && iterations !== FIELD_V2_ITERATIONS) {
+        throw new Error("Unsupported field KDF");
+    }
 
     // Same NFC + trim normalization, with bounded lifetime of encoded bytes.
     const passwordKey = await importPasswordMaterial(password);
@@ -169,7 +184,7 @@ async function deriveKey(password, salt) {
         {
             name: "PBKDF2",
             salt: salt,
-            iterations: ITERATIONS,
+            iterations,
             hash: "SHA-256"
         },
         passwordKey,
@@ -228,8 +243,42 @@ export async function decrypt(base64Data, password) {
     if (!base64Data || !password) return base64Data;
 
     try {
-        // Normalizzazione stringa Base64
-        let normalized = String(base64Data).replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+        const serialized = String(base64Data);
+        if (serialized.startsWith(FIELD_V2_PREFIX)) {
+            let envelope;
+            try {
+                const envelopeBytes = canonicalBase64ToBuffer(serialized.slice(FIELD_V2_PREFIX.length));
+                envelope = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(envelopeBytes));
+            } catch (error) {
+                throw new Error('FIELD_ENVELOPE_INVALID');
+            }
+            if (envelope?.version !== 2 || envelope.kdf !== 'PBKDF2-SHA256' ||
+                envelope.iterations !== FIELD_V2_ITERATIONS || envelope.cipher !== 'AES-GCM-256') {
+                throw new Error('FIELD_ENVELOPE_INVALID');
+            }
+            const salt = canonicalBase64ToBuffer(envelope.salt);
+            const iv = canonicalBase64ToBuffer(envelope.iv);
+            const ciphertext = canonicalBase64ToBuffer(envelope.ciphertext);
+            if (salt.length !== SALT_SIZE || iv.length !== IV_SIZE || ciphertext.length < 17) {
+                throw new Error('FIELD_ENVELOPE_INVALID');
+            }
+            let lastError = null;
+            for (const candidate of encryptionKeyCandidates(password)) {
+                try {
+                    const key = await deriveKey(candidate, salt, FIELD_V2_ITERATIONS);
+                    const decoded = await crypto.subtle.decrypt(
+                        { name: 'AES-GCM', iv, tagLength: 128 }, key, ciphertext
+                    );
+                    return new TextDecoder().decode(decoded);
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+            throw lastError || new Error('Decryption failed');
+        }
+
+        // Normalizzazione stringa Base64 del formato storico.
+        let normalized = serialized.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
 
         // Check regex base64
         const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
@@ -293,7 +342,11 @@ export async function decrypt(base64Data, password) {
  * Determina se un valore sembra cifrato (base64 valido, lunghezza minima).
  */
 export function isEncryptedValue(val) {
-    if (!val || typeof val !== 'string' || val.length < 30) return false;
+    if (!val || typeof val !== 'string') return false;
+    // CPFE2 e un namespace riservato: anche una busta malformata deve entrare
+    // nel decoder e fallire chiusa, mai essere trattata come testo in chiaro.
+    if (val.startsWith(FIELD_V2_PREFIX)) return true;
+    if (val.length < 30) return false;
     return /^[A-Za-z0-9+/]+={0,2}$/.test(val);
 }
 
