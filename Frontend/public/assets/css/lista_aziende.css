@@ -189,10 +189,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font: var(--font-caption);
+    font: var(--font-badge);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--card-border);
     color: var(--text-primary);

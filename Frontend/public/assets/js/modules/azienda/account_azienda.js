@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.153';
+import { db } from '../../firebase-config.js?v=1.2.154';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -15,6 +15,7 @@ import {listCompanyAccounts} from '../data/vault-repository.js';
 import { createAccountListView } from '../shared/account-list-view.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
+import {accountSortMode, compareAccounts, nextAccountSortMode} from '../shared/account-list-sort.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -56,7 +57,7 @@ export function mountAccountAziendaList(user, options = {}) {
     // --- STATE ---
     let allAccounts = [];
     let currentUser = null;
-    let sortOrder = 'asc';
+    let sortMode = 'name-asc';
     let currentAziendaId = null;
 
     const THEMES = {
@@ -120,11 +121,17 @@ export function mountAccountAziendaList(user, options = {}) {
         const sortBtn = document.getElementById('sort-btn');
         const sortLabel = document.getElementById('sort-label');
         if (sortBtn && sortLabel) {
-            sortLabel.textContent = 'A-Z';
+            const updateSortUi = () => {
+                const mode = accountSortMode(sortMode);
+                sortLabel.textContent = mode.label;
+                sortBtn.title = mode.title;
+                sortBtn.setAttribute('aria-label', mode.title);
+            };
+            updateSortUi();
             sortBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
-                sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
+                sortMode = nextAccountSortMode(sortMode).id;
+                updateSortUi();
                 filterAndRender();
             }, {signal});
         }
@@ -213,13 +220,7 @@ export function mountAccountAziendaList(user, options = {}) {
             return n.includes(term) || u.includes(term) || a.includes(term);
         });
 
-        filtered.sort((a, b) => {
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
-            const nA = (a.nomeAccount || "").toLowerCase();
-            const nB = (b.nomeAccount || "").toLowerCase();
-            return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
-        });
+        filtered.sort((a, b) => compareAccounts(a, b, sortMode));
 
         accountListView.render(filtered);
     }
