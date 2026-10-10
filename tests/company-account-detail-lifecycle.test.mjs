@@ -84,6 +84,17 @@ test('real attachment reader rejects late list and retained actions after parent
  const realm=vm.createContext({showConfirmModal(){},document:{getElementById:()=>({})},listCompanyAccountAttachments:()=>gate.promise,setChildren:()=>rendered++,logError(){},showToast(){}});vm.runInContext(text,realm);
  realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'company',currentId:'one',isActive:()=>active});const reading=realm.loadAttachments();active=false;gate.resolve([{id:'old'}]);await reading;assert.equal(rendered,0);
 });
+test('company attachment rows retain the active lifecycle guard when opened',async()=>{
+ const text=await moduleText('azienda/dettaglio-azienda-attachments.js');const opened=[];let active=true;
+ const container={children:[]};const realm=vm.createContext({showConfirmModal(){},document:{getElementById:()=>container},
+  createElement:(tag,props={},children=[])=>({tag,...props,children}),clearElement:node=>{node.children=[]},
+  setChildren:(node,children)=>{node.children=children},openExternalUrl:url=>{opened.push(url);return true}});
+ vm.runInContext(`${text}\nglobalThis.renderAttachments = renderAttachments;`,realm);
+ realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'company',currentId:'one',isActive:()=>active});
+ realm.renderAttachments([{id:'legacy',name:'Fixture.pdf',type:'application/pdf',size:1024,url:'https://example.invalid/file.pdf'}],()=>active);
+ const openRow=container.children[0].children[0];await openRow.onclick();assert.deepEqual(opened,['https://example.invalid/file.pdf']);
+ active=false;await openRow.onclick();assert.equal(opened.length,1);
+});
 test('real detail sharing name lookup respects parent teardown',async()=>{
  const text=await moduleText('shared/detail-account-mode.js');
  let active=true;const gate=deferred();
