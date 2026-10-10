@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Nessun incarico M7-M10 attivo — chiusura 10/10/2026
+
+Il ciclo M7-M10 è concluso e verificato sulla versione pubblicata `1.2.150`, `master` commit `86b969cc`. Non è autorizzata né richiesta un'ulteriore attivazione automatica: i motori safe-off restano disabilitati e i gate esterni non eseguiti richiedono un nuovo incarico completo di obiettivo, ambiente, dati sintetici, criteri di accettazione e permessi distinti per modifica, commit, push, merge e deploy.
+
+Tutte le sezioni successive sono incarichi e checkpoint storici conclusi o superati. Le espressioni «ripresa prioritaria», «prossimo incremento», «attiva» e «da verificare» contenute sotto non autorizzano nuova esecuzione e non descrivono lo stato corrente.
+
 **Stabilizzazione salvataggio Account verificata — 09/10/2026:** PR #90 unita in `master` (`326b83a3`) e Firebase Hosting pubblicato in versione `1.2.150`. Il modulo lazy di salvataggio è versionato e i valori del form vengono congelati prima delle attese asincrone. Sul record sintetico di collaudo sono riusciti due salvataggi consecutivi distinti (`diagnosi B`, poi `diagnosi C`), entrambi riletti tramite conferma server dopo la navigazione `afterWrite=1`. Aggiunta anche una regressione locale che esegue realmente il callback della transazione e verifica due payload note distinti. Nessuna nuova modifica Functions, Rules o dati non sintetici.
 
 **M8 collaudo Hosting concluso — 09/10/2026:** versione `1.2.145` distribuita sul solo Hosting e verificata nella sessione sintetica isolata. Il backup prima respinto ora produce anteprima integra (0 mancanti, 0 modificati, 1 profilo invariato); nessuna selezione disponibile e nessuna scrittura applicata. Confermata l'esclusione client di `settings/security` prima della callable con conservazione della sicurezza corrente. Restano fuori da questo collaudo il motore riprendibile hard-off e i gate esterni già documentati.

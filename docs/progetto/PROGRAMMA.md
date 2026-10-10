@@ -1,5 +1,11 @@
 # Programma
 
+## Programma M7-M10 chiuso — 10/10/2026
+
+Il programma tecnico corrente M7-M10 è concluso sulla versione pubblicata `1.2.150`, ramo `master`, commit `86b969cc`. Non esistono ulteriori incrementi locali obbligatori assegnati da questo programma. La chiusura adotta la configurazione sicura verificata: purge automatico M7, restore riprendibile M8, recupero MFA automatico e nuove scritture crittografiche CPFE2 restano disabilitati. Le verifiche GCS reali, la matrice su dispositivi/browser fisici, l'audit indipendente e la revisione privacy/legale non sono state eseguite e appartengono a un eventuale nuovo ciclo di certificazione, da autorizzare separatamente.
+
+Tutto il testo seguente è conservato come programma ed evidenza storica. Espressioni quali «attiva», «prossimo gate», «aperta» o «da completare» nelle fonti migrate non costituiscono un incarico corrente e non prevalgono su questa chiusura, su [STATO](STATO.md) e su [INCARICO_CORRENTE](INCARICO_CORRENTE.md).
+
 ## Esito finale del ciclo corrente — 09/10/2026
 
 Il proprietario ha disposto la chiusura dell'intero ciclo M7–M10. Il risultato consegnato è la versione `1.2.144` pubblicata integralmente sull'app originale, con suite locali pertinenti verdi e motori non dimostrati mantenuti hard-off. Il programma non conserva ulteriori attività tecniche automatiche obbligatorie per questo ciclo: GCS reale, matrice fisica, audit indipendente e revisione privacy/legale sono gate esterni trasferiti a un futuro ciclo di certificazione e non vengono falsamente marcati come eseguiti. Lingue, AI ed Excel restano fuori perimetro e potranno essere pianificati separatamente.

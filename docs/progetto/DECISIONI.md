@@ -1,5 +1,11 @@
 # Decisioni
 
+## 10/10/2026 — criterio definitivo di chiusura M7-M10
+
+La chiusura del ciclo è confermata sulla versione pubblicata `1.2.150`. La decisione del 09/10 resta valida nel suo significato safe-off ed è aggiornata soltanto nel riferimento di versione: nessun motore non dimostrato viene acceso per ottenere una chiusura nominale. Purge M7, restore riprendibile M8, recupero MFA automatico e nuove scritture CPFE2 rimangono disabilitati. GCS reale, matrice fisica, audit indipendente e privacy/legale sono fuori dal ciclo concluso e richiedono un nuovo incarico esplicito.
+
+Questa decisione prevale sulle formulazioni storiche che descrivono i sei filoni come «aperti e da completare»: M7, M8 e M10 non sono incarichi correnti; lingue, AI ed Excel restano lavori futuri separati e non fanno parte della chiusura M7-M10.
+
 ## 09/10/2026 — chiusura operativa completa del ciclo M7–M10
 
 Diego ordina «chiudiamo tutto il ciclo». La decisione chiude l'incarico tecnico e documentale corrente dopo il deploy completo della `1.2.144`. Le parti non dimostrate non vengono abilitate per ottenere una chiusura nominale: purge automatico M7 e restore riprendibile M8 restano hard-off; il recupero MFA resta assistito secondo opzione 1. Le prove GCS reali, fisiche, l'audit indipendente e la revisione privacy/legale sono esplicitamente trasferite a un eventuale ciclo futuro di certificazione. La chiusura non equivale a dichiararle superate.

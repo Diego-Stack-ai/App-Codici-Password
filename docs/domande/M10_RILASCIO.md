@@ -1,5 +1,7 @@
 # M10 rilascio
 
+> Stato definitivo 10/10/2026: il ciclo tecnico M10 è chiuso sulla versione pubblicata `1.2.150` con recupero MFA assistito e candidati non certificati hard-off. Non esiste una domanda tecnica corrente. Audit indipendente, privacy/legale e matrice fisica non sono stati eseguiti: sono requisiti di un eventuale nuovo ciclo di certificazione e non vengono dichiarati superati. I quesiti successivi sono conservati come storia decisionale e non vanno riproposti automaticamente.
+
 > Chiusura operativa 09/10/2026: il rilascio tecnico `1.2.144` è completato. Audit indipendente, privacy/legale e matrice fisica restano gate esterni non eseguiti e trasferiti a un futuro ciclo di certificazione; le domande sono conservate come evidenza, non come incarico corrente.
 
 **28/09/2026 — successione del quesito MFA:** risposta esplicita «Autorizzo soltanto progettazione e prove locali» ricevuta e registrata in DECISIONI; non riproporre il consenso come pendente. La prova locale successiva ha dimostrato ricreazione di un account eliminato durante lo scambio custom-token. Percorso non accettato, nessuna attivazione: dettagli e fonte in COLLAUDI. Resta un problema tecnico da risolvere, non richiesta di accettarne il rischio.
