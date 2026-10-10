@@ -9,6 +9,8 @@ const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.
 // nel contesto perché gli `import` vengono rimossi dai sorgenti sotto prova.
 const archiveModelSource = await readFile(new URL('../Frontend/public/assets/js/modules/settings/archive-account-model.js', import.meta.url), 'utf8');
 const {archiveRecipients, archiveConfirmMessage} = await import('data:text/javascript;base64,' + Buffer.from(archiveModelSource).toString('base64'));
+const sortSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-list-sort.js', import.meta.url), 'utf8');
+const {accountSortMode, compareAccounts, nextAccountSortMode} = await import('data:text/javascript;base64,' + Buffer.from(sortSource).toString('base64'));
 
 
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
@@ -19,11 +21,16 @@ const records = () => [{id: 'b', nomeAccount: 'Beta', revision: 1, updatedAt: MA
     {id: 'a', nomeAccount: 'Alfa', revision: 1, updatedAt: MARKER}];
 async function fixture(company, overrides = {}) {
     const elements = Object.fromEntries(['account-search', 'sort-btn', 'sort-label', 'accounts-container'].map(id => {
-        const node = new EventTarget(); node.value = ''; return [id, node];
+        const node = new EventTarget();
+        node.value = '';
+        node.attributes = {};
+        node.setAttribute = (name, value) => { node.attributes[name] = String(value); };
+        return [id, node];
     }));
     const views = [], writes = [], toasts = [], navigations = [], confirmations = [];
     const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
     const context = vm.createContext({readErrorMessage, archiveRecipients, archiveConfirmMessage,
+        accountSortMode, compareAccounts, nextAccountSortMode,
         window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError() {}, t: value => value,
         clearElement: node => { node.children = []; }, setChildren: (node, children) => { node.children = children; },

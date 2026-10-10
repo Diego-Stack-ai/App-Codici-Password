@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.153';
+import { db } from '../../firebase-config.js?v=1.2.154';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -22,6 +22,7 @@ import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
+import {accountSortMode, compareAccounts, nextAccountSortMode} from '../shared/account-list-sort.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -63,7 +64,7 @@ export function mountAccountPrivati(user, options = {}) {
     // --- STATE ---
     let allAccounts = [];
     let currentUser = null;
-    let sortOrder = 'asc';
+    let sortMode = 'name-asc';
 
     const THEMES = {
         standard: { accent: 'bg-blue-500', text: 'text-blue-400' },
@@ -134,14 +135,17 @@ export function mountAccountPrivati(user, options = {}) {
         const sortLabel = document.getElementById('sort-label');
 
         if (sortBtn && sortLabel) {
-            sortLabel.textContent = 'A-Z';
+            const updateSortUi = () => {
+                const mode = accountSortMode(sortMode);
+                sortLabel.textContent = mode.label;
+                sortBtn.title = mode.title;
+                sortBtn.setAttribute('aria-label', mode.title);
+            };
+            updateSortUi();
             sortBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                // Toggle Sort Order
-                sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
-
-                // Update UI
-                sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
+                sortMode = nextAccountSortMode(sortMode).id;
+                updateSortUi();
 
                 // Re-render
                 filterAndRender();
@@ -363,13 +367,7 @@ export function mountAccountPrivati(user, options = {}) {
         }
 
         // Sort
-        filtered.sort((a, b) => {
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
-            const nA = (a.nomeAccount || '').toLowerCase();
-            const nB = (b.nomeAccount || '').toLowerCase();
-            return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
-        });
+        filtered.sort((a, b) => compareAccounts(a, b, sortMode));
 
         accountListView.render(filtered);
     }
