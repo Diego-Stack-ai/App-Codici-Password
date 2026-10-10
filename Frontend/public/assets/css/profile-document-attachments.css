@@ -6,4 +6,4 @@
 .profile-document-attachments-list{display:flex;flex-direction:column;gap:10px}
 .profile-document-attachment-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:12px;border:1px solid rgba(127,127,127,.25);border-radius:12px}
 @media (min-width:700px){.profile-document-attachments-overlay{align-items:center}.profile-document-attachments-dialog{border-radius:18px}}
-@media (max-width:480px){.profile-document-attachment-row{grid-template-columns:1fr 1fr}.profile-document-attachment-row .attachment-meta{grid-column:1/-1}}
+@media (max-width:30rem){.profile-document-attachment-row{grid-template-columns:1fr 1fr}.profile-document-attachment-row .attachment-meta{grid-column:1/-1}}
