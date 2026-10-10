@@ -25,11 +25,11 @@ export function withDocumentAttachmentCandidateRules(original) {
     // The receipts namespace must already deny direct writes, and the generic owner
     // collection rule must be the one this candidate narrows: without both, the
     // service could not be made the only writer.
-    const anchor = ['match /mutationResults/{userId}/operations/{operationId} {', '      allow read: if isOwner(userId);',
-        '      allow write: if false;', '    }', ''].join(newline);
-    if (!original.includes(GENERIC_LINE) || !original.includes(anchor)) throw Error('RULES_BASE_CHANGED');
-    const patched = original.replace(GENERIC_LINE, PATCHED_GENERIC_LINE).replace(anchor, anchor + records(newline));
-    if (!patched.includes(PATCHED_GENERIC_LINE) ||
+    const fenceAnchor = '    // Fence globale M7:';
+    if (original.split(GENERIC_LINE).length !== 3 || !original.includes(fenceAnchor)) throw Error('RULES_BASE_CHANGED');
+    const patched = original.replaceAll(GENERIC_LINE, PATCHED_GENERIC_LINE)
+        .replace(fenceAnchor, records(newline) + fenceAnchor);
+    if (patched.split(PATCHED_GENERIC_LINE).length !== 3 ||
         !patched.includes('match /users/{userId}/profileDocumentAttachments/{attachmentId} {')) throw Error('RULES_BASE_CHANGED');
     return patched;
 }

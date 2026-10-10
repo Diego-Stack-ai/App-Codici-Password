@@ -35,6 +35,23 @@ test('client extra fields cannot supply a replacement trusted context', async ()
     error => error.details.reason === 'ACCOUNT_NOTE_INVALID');
 });
 
+test('global purge lock blocks the Admin writer before domain reads', async () => {
+  const accesses = [];
+  const active = {schemaVersion: 1, ownerUid: 'owner', operationId: 'purge',
+    targetPath: 'users/owner/accounts/a', digest: 'a'.repeat(64), status: 'active'};
+  const db = {
+    doc: path => ({path}),
+    runTransaction: callback => callback({get: async reference => {
+      accesses.push(reference.path);
+      if (reference.path !== 'archivePurgeLocks/owner') throw Error('DOMAIN_READ_BEFORE_FENCE');
+      return {exists: true, data: () => active};
+    }})
+  };
+  await assert.rejects(boundary(db).note({...trusted, data: request}), error =>
+    error.code === 'failed-precondition' && error.details.reason === 'PURGE_LOCK_ACTIVE');
+  assert.deepEqual(accesses, ['archivePurgeLocks/owner']);
+});
+
 test('real exports enforce App Check and bundle excludes the synthetic emulator bridge', () => {
   const root = resolve(require.resolve('../index.js'), '..');
   const source = readFileSync(resolve(root, 'index.js'), 'utf8');

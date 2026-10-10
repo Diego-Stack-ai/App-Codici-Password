@@ -4,6 +4,15 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAuth() { return request.auth != null; }
     function isOwner(userId) { return isAuth() && request.auth.uid == userId; }
+    function isGlobalPurgeUnlocked(userId) {
+      let path = /databases/$(database)/documents/archivePurgeLocks/$(userId);
+      let lock = get(path);
+      return !exists(path) || (
+        lock.data.get('schemaVersion', 0) == 1 &&
+        lock.data.get('ownerUid', '') == userId &&
+        lock.data.get('status', '') == 'released'
+      );
+    }
     function myEmail() {
       return request.auth.token.email is string ? request.auth.token.email.lower() : "";
     }
@@ -58,13 +67,22 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Fence globale M7: soltanto il backend può acquisire/rilasciare il lock.
+    // Ogni writer client del proprietario deve leggere lo stesso documento;
+    // lock attivo o malformato significa fail-closed.
+    match /archivePurgeLocks/{userId} {
+      allow read, write: if false;
+    }
+
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
     }
 
     match /users/{userId}/pushDevices/{deviceId} {
-      allow read, delete: if isOwner(userId);
-      allow create: if isOwner(userId) &&
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
+      allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
         deviceId.matches('^[a-fA-F0-9-]{36}$') &&
         request.resource.data.keys().hasOnly([
           'token', 'platform', 'browser', 'enabled', 'notificationScope', 'notificationScopes',
@@ -82,7 +100,7 @@ service cloud.firestore {
         request.resource.data.notificationScopes.hasOnly(['deadlines', 'sharing']) &&
         request.resource.data.privacyMode in ['detailed', 'discreet'] &&
         request.resource.data.schemaVersion == 1;
-      allow update: if isOwner(userId) &&
+      allow update: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'token', 'platform', 'browser', 'enabled', 'notificationScope', 'notificationScopes',
           'privacyMode', 'schemaVersion', 'updatedAt', 'lastSeenAt', 'createdAt'
@@ -109,7 +127,7 @@ service cloud.firestore {
     match /users/{userId}/deadlineNotifications/{notificationId} {
       allow read: if isOwner(userId);
       allow create, delete: if false;
-      allow update: if isOwner(userId) &&
+      allow update: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
         resource.data.status == 'unread' &&
         request.resource.data.status == 'viewed' &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'readAt']);
@@ -140,7 +158,21 @@ service cloud.firestore {
     }
 
     match /users/{userId}/{collection}/{document=**} {
-      allow read, write: if isOwner(userId) &&
+      allow read: if isOwner(userId) &&
+        collection != 'aziende' &&
+        collection != 'auditEvents' &&
+        collection != 'contacts' &&
+        collection != 'pushDevices' &&
+        collection != 'notificationDeliveries' &&
+        collection != 'deadlineNotifications' &&
+        collection != 'receivedDeadlines' &&
+        collection != 'operationResults' &&
+        collection != 'profileWidgets' &&
+        collection != 'accountWidgets' &&
+        collection != 'sharedVaultData' &&
+        collection != 'sharedVaultLinks' &&
+        collection != 'cryptoIdentity';
+      allow write: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
         collection != 'aziende' &&
         collection != 'auditEvents' &&
         collection != 'contacts' &&
@@ -172,27 +204,31 @@ service cloud.firestore {
     // Company deletion must use the coordinated server protocol. A stale or
     // custom client must not bypass the UI guard and orphan its Accounts.
     match /users/{userId}/aziende/{companyId} {
-      allow read, create, update: if isOwner(userId);
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
       allow delete: if false;
       // Preserve existing descendant permissions, not a recursive grant on the
       // company document itself (recursive wildcards also match zero segments).
       match /{childCollection}/{childDocument}/{rest=**} {
-        allow read, update, delete: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow update, delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
         // Require the Company in the resulting atomic state. This also permits
         // a legitimate batch that creates Company and Account together.
-        allow create: if isOwner(userId) && (childCollection != 'accounts' ||
+        allow create: if isOwner(userId) && isGlobalPurgeUnlocked(userId) && (childCollection != 'accounts' ||
           existsAfter(/databases/$(database)/documents/users/$(userId)/aziende/$(companyId)));
       }
     }
 
     match /users/{userId}/contacts/{contactId} {
-      allow read, create, update: if isOwner(userId);
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
       allow delete: if false;
     }
 
     match /users/{userId}/profileWidgets/{widgetId} {
-      allow read, delete: if isOwner(userId);
-      allow create, update: if isOwner(userId) &&
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId) && isGlobalPurgeUnlocked(userId);
+      allow create, update: if isOwner(userId) && isGlobalPurgeUnlocked(userId) &&
         request.resource.data.keys().hasOnly([
           'title', 'description', 'icon', 'color', 'tab', 'order', 'size',
           'collapsed', 'fields', 'updatedAt', 'schemaVersion'
@@ -289,7 +325,7 @@ service cloud.firestore {
       }
 
       allow get, list: if isInviteOwner() || isRecipient();
-      allow create: if isAuth() &&
+      allow create: if isAuth() && isGlobalPurgeUnlocked(request.resource.data.get('ownerId', '')) &&
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
@@ -326,7 +362,7 @@ service cloud.firestore {
       // valore 0. Restano fuori `ownerId`, `senderId`, `senderEmail`,
       // `recipientEmail`, `inviteId`, `accountId`, `aziendaId`: invariati in tutti
       // i flussi censiti, quindi una loro modifica è negata.
-      allow update: if isInviteOwner() &&
+      allow update: if isInviteOwner() && isGlobalPurgeUnlocked(resource.data.get('ownerId', '')) &&
         keepsResponseAuditRef() &&
         keepsAcceptanceReceipt() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -339,7 +375,7 @@ service cloud.firestore {
 
       // La revoca resta al proprietario, senza vincoli di campo: `delete` non
       // scrive nulla e non ha campi da limitare.
-      allow delete: if isInviteOwner();
+      allow delete: if isInviteOwner() && isGlobalPurgeUnlocked(resource.data.get('ownerId', ''));
     }
   }
 }

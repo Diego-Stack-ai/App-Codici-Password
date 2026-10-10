@@ -25,6 +25,7 @@ function fakeDb(initial = {}) {
   const values = new Map(Object.entries(initial).map(([key, value]) => [key, structuredClone(value)]));
   const db = {
     values,
+    doc: path => new Ref(db, path),
     collection: name => new Collection(db, name),
     runTransaction: async callback => callback({
       get: async ref => new Snapshot(values.get(ref.path)),
@@ -122,4 +123,14 @@ test("unauthenticated, malformed and incomplete identities fail closed", async (
   await assert.rejects(service.register({auth: {uid: "owner-1"}, data: {
     publicIdentity: {...publicIdentity, publicJwk: {...publicJwk, x: "!"}}, privateEnvelope,
   }}), error => error.code === "invalid-argument");
+});
+
+test("global purge lock blocks identity and attachment writers before domain reads", async () => {
+  const active = {schemaVersion: 1, ownerUid: "owner-1", operationId: "purge",
+    targetPath: "users/owner-1/accounts/account-1", digest: "a".repeat(64), status: "active"};
+  const {db, deleteField} = fakeDb({"archivePurgeLocks/owner-1": active});
+  const service = createSharedAttachmentService({db, deleteField, HttpsError: TestHttpsError});
+  await assert.rejects(service.register({auth: {uid: "owner-1"}, data: {publicIdentity, privateEnvelope}}),
+    /PURGE_LOCK_ACTIVE/);
+  assert.equal(db.values.has("cryptoPublicKeys/owner-1"), false);
 });

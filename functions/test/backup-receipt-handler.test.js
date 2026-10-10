@@ -6,6 +6,7 @@ const service = require('../backup-restore-service');
 const receipts = require('../backup-restore-receipt');
 const previewApi = require('../backup-restore-preview');
 const authorityApi = require('../backup-restore-authority');
+const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const handler = source.slice(source.indexOf('exports.restoreBackupChunk ='), source.indexOf('exports.getAppPresentation ='));
 const original = {expectedOwnerUid: 'owner', operationId: 'restore:fixture:0', backupId: 'fixture', chunkIndex: 0,
@@ -27,6 +28,7 @@ function fixture() {
   }};
   class HttpsError extends Error { constructor(code, message, details) { super(message); this.code = code; this.details = details; } }
   const context = vm.createContext({...service, ...receipts, ...previewApi, ...authorityApi, Buffer, exports: {}, HttpsError,
+    assertTransactionGlobalPurgeUnlocked,
     onCall: (_options, run) => run, getFirestore: () => store, FieldValue: {serverTimestamp: () => 'time'}});
   vm.runInContext(handler, context);
   return {data, writes, versions, run: (command = original) => context.exports.restoreBackupChunk({auth: {uid: 'owner'}, data: command})};

@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const {randomUUID} = require('node:crypto');
 const {HttpsError} = require('firebase-functions/v2/https');
 const {inviteRefOf, responseEventId, buildAuditEvent, auditWriteDecision} = require('../audit-event-service');
+const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 
 // M7-R7B3 — risposta a un invito quando l'Account del proprietario è
 // nell'Archivio.
@@ -109,6 +110,7 @@ function fixture({archived = false, status = 'accepted', hook = null, accountCyc
         }
     };
     const context = vm.createContext({exports: {}, HttpsError, onCall: (_options, run) => run,
+        assertTransactionGlobalPurgeUnlocked,
         admin: {firestore: () => store}, structuredClone, crypto: {randomUUID},
         FieldValue: {serverTimestamp: () => SERVER_TIMESTAMP, delete: () => DELETE_FIELD},
         buildAcceptanceReceipt: input => {
@@ -428,7 +430,7 @@ test('ordine letture/scritture: invito, Account ed evento si leggono prima di og
     const f = fixture();
     await f.respond('accepted');
     assert.deepEqual(f.journal.filter(entry => entry[0] === 'read').map(entry => entry[1]),
-        [INVITE_PATH, ACCOUNT_PATH, EVENT_PATH]);
+        [INVITE_PATH, 'archivePurgeLocks/A', ACCOUNT_PATH, EVENT_PATH]);
     assertReadsBeforeWrites(f);
 });
 

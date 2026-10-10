@@ -29,6 +29,7 @@ const {getStorage} = requireFunctions('firebase-admin/storage');
 const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const purgeReceipts = requireFunctions('./archive-purge-receipt.js');
+const purgeLock = requireFunctions('./archive-purge-global-lock.js');
 const restoreService = requireFunctions('./backup-restore-service.js');
 const restoreReceipts = requireFunctions('./backup-restore-receipt.js');
 const restorePreview = requireFunctions('./backup-restore-preview.js');
@@ -69,24 +70,28 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'is
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
+    'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
     {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision,
     policy.planProfileReferenceCleanup, policy.validatePurgeCommand,
     // Historical purge/restore characterization: live purge safety interlocks
     // are verified separately and intentionally bypassed in this laboratory.
     () => {}, purgeReceipts.createArchivePurgeBinding,
-    purgeReceipts.verifyArchivePurgeReceipt, (_options, run) => run, () => purgeStore, () => ({bucket: () => bucket}));
+    purgeReceipts.verifyArchivePurgeReceipt, (_options, run) => run, () => purgeStore, () => ({bucket: () => bucket}),
+    purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
 
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',
     'buildRestorePreview', 'staleRestoreIndexes', 'decodeFirestoreValue', 'restoreChunkDecision',
     'safeRestoreAudit', 'validateRestoreChunk', 'createBackupRestoreBinding', 'verifyBackupRestoreReceipt', 'preserveRestoreAuthority',
-    'onCall', 'getFirestore',
+    'assertTransactionGlobalPurgeUnlocked', 'onCall', 'getFirestore',
     `${restoreSlice}\nreturn exports.restoreBackupChunk;`)({}, HttpsError, Timestamp, FieldValue,
     {log() {}, warn() {}, error() {}}, restorePreview.buildRestorePreview, restorePreview.staleRestoreIndexes,
     restoreService.decodeFirestoreValue, restoreService.restoreChunkDecision, restoreService.safeRestoreAudit,
     restoreService.validateRestoreChunk, restoreReceipts.createBackupRestoreBinding,
     restoreReceipts.verifyBackupRestoreReceipt, requireFunctions('./backup-restore-authority.js').preserveRestoreAuthority,
-    (_options, run) => run, () => adminDb);
+    purgeLock.assertTransactionGlobalPurgeUnlocked, (_options, run) => run, () => adminDb);
 
 // ── Seed sintetico: profilo, Account archiviato con allegato, Azienda collegata ──
 async function seed() {

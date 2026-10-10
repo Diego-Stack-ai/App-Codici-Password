@@ -53,6 +53,10 @@ const {
 } = require("./backup-restore-service");
 const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./backup-restore-receipt");
 const {createArchivePurgeBinding, verifyArchivePurgeReceipt} = require("./archive-purge-receipt");
+const {
+    acquireGlobalPurgeLock, assertGlobalPurgeLockHeld, assertTransactionGlobalPurgeUnlocked,
+    createGlobalPurgeLockBinding, globalPurgeLockRef, releaseGlobalPurgeLock
+} = require("./archive-purge-global-lock");
 const {createRecoveryBinding, verifyRecoveryReceipt} = require("./recovery-command-receipt");
 const {createVaultAccountCallables} = require('./vault-account-runtime');
 const {createSharedAttachmentService} = require('./shared-attachment-service');
@@ -161,6 +165,7 @@ exports.applyOfflineMutation = onCall(
         const legacyRef = userRef.collection("operationResults").doc(operation.operationId);
         const binding = createMutationBinding({uid: request.auth.uid, domain: 'offline-sync', operation});
         return store.runTransaction(async (transaction) => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
             const [recordSnapshot, resultSnapshot, legacySnapshot] = await Promise.all([
                 transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
@@ -205,6 +210,7 @@ exports.applyPrivateAccountMutation = onCall(
         const legacyRef = userRef.collection("operationResults").doc(operation.operationId);
         const binding = createMutationBinding({uid: request.auth.uid, domain: 'private-account', operation});
         return store.runTransaction(async transaction => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
             const [recordSnapshot, resultSnapshot, legacySnapshot] = await Promise.all([
                 transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
@@ -276,6 +282,7 @@ async function runRecoveryCommand(request, mode) {
     const legacyRef = userRef.collection("operationResults").doc(command.operationId);
     const binding = createRecoveryBinding(request.auth.uid, mode, command);
     return store.runTransaction(async transaction => {
+        await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
         const [record, trash, previous, legacy] = await Promise.all([
             transaction.get(recordRef), transaction.get(trashRef), transaction.get(resultRef), transaction.get(legacyRef)
         ]);
@@ -342,6 +349,9 @@ exports.purgeArchivedAccount = onCall(
         let binding;
         try { binding = createArchivePurgeBinding({uid: ownerUid, command}); }
         catch { throw new HttpsError("invalid-argument", "Comando di eliminazione non verificabile."); }
+        let lockBinding;
+        try { lockBinding = createGlobalPurgeLockBinding({uid: ownerUid, command}); }
+        catch { throw new HttpsError("invalid-argument", "Blocco globale della cancellazione non verificabile."); }
         const verifyReceipt = snapshot => {
             try { return verifyArchivePurgeReceipt(snapshot.exists ? snapshot.data() : null, binding); }
             catch { throw new HttpsError("failed-precondition", "Esito della cancellazione non verificabile.",
@@ -352,6 +362,7 @@ exports.purgeArchivedAccount = onCall(
         const recordRef = store.doc(accountPath(ownerUid, command));
         const operationRef = store.collection("mutationResults").doc(ownerUid).collection("operations").doc(command.operationId);
         const legacyRef = userRef.collection("archiveOperations").doc(command.operationId);
+        const lockRef = globalPurgeLockRef(store, ownerUid);
         const planReferenceCleanup = (profileSnapshot, companiesSnapshot) => {
             const cleanup = [];
             const plan = (snapshot, reference, company) => {
@@ -369,8 +380,8 @@ exports.purgeArchivedAccount = onCall(
             return cleanup;
         };
         const preparation = await store.runTransaction(async transaction => {
-            const [recordSnapshot, operationSnapshot, legacySnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(operationRef), transaction.get(legacyRef)
+            const [recordSnapshot, operationSnapshot, legacySnapshot, lockSnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(operationRef), transaction.get(legacyRef), transaction.get(lockRef)
             ]);
             const previous = operationSnapshot.exists ? verifyReceipt(operationSnapshot) : null;
             if (!previous && legacySnapshot.exists) {
@@ -402,6 +413,10 @@ exports.purgeArchivedAccount = onCall(
                 throw new HttpsError('failed-precondition', 'Riferimenti esterni non verificabili: eliminazione interrotta.',
                     {reason: 'ARCHIVE_PURGE_EXTERNAL_REFERENCES_UNVERIFIED'});
             }
+            const lock = acquireGlobalPurgeLock(lockSnapshot.exists ? lockSnapshot.data() : null, lockBinding);
+            if (!lock.duplicate) transaction.set(lockRef, {
+                ...lock.record, createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+            });
             if (decision.status === "resume") return decision;
             transaction.set(operationRef, {
                 ...binding, status: "processing",
@@ -427,12 +442,16 @@ exports.purgeArchivedAccount = onCall(
         return store.runTransaction(async transaction => {
             // Full query: never silently truncate the set of referring companies.
             // Reads and all planning precede writes; retries re-read current data.
-            const [profileSnapshot, companiesSnapshot, receiptSnapshot, currentRecordSnapshot] = await Promise.all([
+            const [profileSnapshot, companiesSnapshot, receiptSnapshot, currentRecordSnapshot, lockSnapshot] = await Promise.all([
                 transaction.get(userRef), transaction.get(userRef.collection('aziende')), transaction.get(operationRef),
-                transaction.get(recordRef)
+                transaction.get(recordRef), transaction.get(lockRef)
             ]);
             const receipt = verifyReceipt(receiptSnapshot);
-            if (receipt.status === 'purged') return receipt;
+            if (receipt.status === 'purged') {
+                releaseGlobalPurgeLock(lockSnapshot.exists ? lockSnapshot.data() : null, lockBinding);
+                return receipt;
+            }
+            assertGlobalPurgeLockHeld(lockSnapshot.exists ? lockSnapshot.data() : null, lockBinding);
             if (currentRecordSnapshot.exists) {
                 throw new HttpsError('failed-precondition', 'Account ricreato: pulizia riferimenti interrotta.',
                     {reason: 'ARCHIVE_PURGE_ACCOUNT_RECREATED'});
@@ -442,6 +461,10 @@ exports.purgeArchivedAccount = onCall(
             // malformed plan leaves processing resumable, never falsely purged.
             for (const {reference, patch} of cleanup) transaction.update(reference, patch);
             transaction.set(operationRef, {status: "purged", updatedAt: FieldValue.serverTimestamp()}, {merge: true});
+            transaction.set(lockRef, {
+                ...releaseGlobalPurgeLock(lockSnapshot.data(), lockBinding).record,
+                releasedAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+            }, {merge: true});
             transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
                 action: "account-purged", actorUid: ownerUid, accountId: command.accountId,
                 context: command.context, at: FieldValue.serverTimestamp()
@@ -475,6 +498,7 @@ exports.restoreBackupChunk = onCall(
         const legacyRef = userRef.collection("backupRestoreOperations").doc(command.operationId);
         const binding = command.mode === "apply" ? createBackupRestoreBinding({uid: request.auth.uid, command}) : null;
         return store.runTransaction(async transaction => {
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, request.auth.uid);
             const references = command.records.map(record => store.doc(record.path));
             const [previous, legacy, ...snapshots] = await Promise.all([
                 transaction.get(operationRef), transaction.get(legacyRef),
@@ -1154,6 +1178,8 @@ exports.respondToInvitation = onCall(
                 throw new HttpsError("permission-denied", "Non sei il destinatario dell'invito.");
             }
 
+            await assertTransactionGlobalPurgeUnlocked(transaction, firestore, invite.ownerId);
+
             const accountPath = invite.aziendaId
                 ? `users/${invite.ownerId}/aziende/${invite.aziendaId}/accounts/${invite.accountId}`
                 : `users/${invite.ownerId}/accounts/${invite.accountId}`;
@@ -1376,8 +1402,17 @@ exports.deleteContactIfUnused = onCall(
         });
 
         if (usage.deadlines || usage.shares || usage.invites) return { deleted: false, usage };
-        await contactRef.delete();
-        return { deleted: true, usage };
+        return store.runTransaction(async transaction => {
+            // Il controllo d'uso sopra e' soltanto una preflight. La cancellazione
+            // effettiva deve partecipare al fence M7: se una purge acquisisce il
+            // lock nel frattempo, Firestore ritenta questa transazione e il writer
+            // fallisce chiuso senza toccare il profilo.
+            await assertTransactionGlobalPurgeUnlocked(transaction, store, uid);
+            const current = await transaction.get(contactRef);
+            if (!current.exists) return { deleted: true, usage };
+            transaction.delete(contactRef);
+            return { deleted: true, usage };
+        });
     }
 );
 

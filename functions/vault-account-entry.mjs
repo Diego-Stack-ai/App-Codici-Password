@@ -13,6 +13,8 @@ import {createCompanyAddressesHandler} from '../experiments/persistent-vault-she
 import {createCompanyContactsHandler} from '../experiments/persistent-vault-shell/company-contacts-handler.mjs';
 import {profileAccountItems, findProfileAccountItem, patchProfileAccountItem, profileAccountReferences} from '../Frontend/public/assets/js/modules/privato/profile-model.js';
 import {companyProfileContacts, findCompanyProfileContact, companyContactLinkPatch, companyAccountReferences} from '../Frontend/public/assets/js/modules/azienda/company-profile-model.js';
+import {AsyncLocalStorage} from 'node:async_hooks';
+import purgeLock from './archive-purge-global-lock.js';
 
 // Build-time source only. The deployable bundle contains its complete dependency
 // closure; it never imports the emulator bridge or accepts its synthetic header.
@@ -42,16 +44,31 @@ const reasons = new Set(['OWNER_MISMATCH', 'OPERATION_CONFLICT', 'ACCOUNT_UNAVAI
     'COMPANY_CONTACTS_UNAVAILABLE', 'COMPANY_CONTACTS_SHAPE_INVALID', 'COMPANY_CONTACTS_QR_UNVERIFIABLE',
     'COMPANY_CONTACTS_CONFLICT', 'COMPANY_CONTACTS_EXISTS', 'COMPANY_CONTACTS_AMBIGUOUS',
     'COMPANY_CONTACTS_MISSING', 'COMPANY_CONTACTS_LINKED', 'COMPANY_CONTACTS_QR_SELECTED',
-    'COMPANY_CONTACTS_LEGACY_FALLBACK', 'COMPANY_CONTACT_ID_MISSING', 'COMPANY_CONTACT_ID_DERIVED']);
+    'COMPANY_CONTACTS_LEGACY_FALLBACK', 'COMPANY_CONTACT_ID_MISSING', 'COMPANY_CONTACT_ID_DERIVED',
+    'PURGE_LOCK_ACTIVE', 'PURGE_LOCK_CORRUPT']);
 
 export function createVaultAccountCallables({db, hash, timestamp, deleteField, HttpsError}) {
+    const owners = new AsyncLocalStorage();
+    const fencedDb = new Proxy(db, {get(target, property, receiver) {
+        if (property !== 'runTransaction') {
+            const value = Reflect.get(target, property, receiver);
+            return typeof value === 'function' ? value.bind(target) : value;
+        }
+        return (callback, ...options) => target.runTransaction(async transaction => {
+            const uid = owners.getStore();
+            if (typeof uid !== 'string') throw Error('PURGE_LOCK_CORRUPT');
+            await purgeLock.assertTransactionGlobalPurgeUnlocked(transaction, target, uid);
+            return callback(transaction);
+        }, ...options);
+    }});
     const wrap = handler => async request => {
         if (!request.auth?.uid) throw new HttpsError('unauthenticated', 'Accesso richiesto.');
         if (typeof request.app?.appId !== 'string' || !request.app.appId) {
             throw new HttpsError('failed-precondition', 'Verifica applicazione richiesta.', {reason: 'APP_CHECK_REQUIRED'});
         }
         // Identity and attestation are from the callable middleware, never data.
-        try { return await handler(request.data, {auth: request.auth, app: request.app}); }
+        try { return await owners.run(request.auth.uid,
+            () => handler(request.data, {auth: request.auth, app: request.app})); }
         catch (error) {
             if (reasons.has(error.message)) {
                 throw new HttpsError('failed-precondition', 'Modifica non applicata. Riapri il record e verifica i dati.',
@@ -62,7 +79,7 @@ export function createVaultAccountCallables({db, hash, timestamp, deleteField, H
             throw new HttpsError('internal', 'Esito non verificato. Riprova la stessa operazione.');
         }
     };
-    const dependencies = {db, hash, timestamp};
+    const dependencies = {db: fencedDb, hash, timestamp};
     const profileDependencies = {...dependencies, deleteField, models: {
         profileAccountItems, findProfileAccountItem, patchProfileAccountItem, profileAccountReferences,
         companyProfileContacts, findCompanyProfileContact, companyContactLinkPatch, companyAccountReferences

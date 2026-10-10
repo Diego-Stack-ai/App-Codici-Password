@@ -29,6 +29,7 @@ const {getStorage} = requireFunctions('firebase-admin/storage');
 const {HttpsError} = requireFunctions('firebase-functions/v2/https');
 const policy = requireFunctions('./archive-purge-service.js');
 const receipts = requireFunctions('./archive-purge-receipt.js');
+const purgeLock = requireFunctions('./archive-purge-global-lock.js');
 
 process.env.STORAGE_EMULATOR_HOST ??= `http://${process.env.FIREBASE_STORAGE_EMULATOR_HOST}`;
 
@@ -46,13 +47,17 @@ const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'is
     'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
+    'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
+    'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
     {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision,
     policy.planProfileReferenceCleanup, policy.validatePurgeCommand,
     // Historical characterization only: the live endpoint is suspended and its
     // external-reference interlock is covered by dedicated security tests.
     () => {}, receipts.createArchivePurgeBinding,
-    receipts.verifyArchivePurgeReceipt, (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}));
+    receipts.verifyArchivePurgeReceipt, (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}),
+    purgeLock.createGlobalPurgeLockBinding, purgeLock.globalPurgeLockRef, purgeLock.acquireGlobalPurgeLock,
+    purgeLock.assertGlobalPurgeLockHeld, purgeLock.releaseGlobalPurgeLock);
 
 const ACCOUNT_PATH = `users/${OWNER}/accounts/acc-1`;
 const WIDGET_PATH = `users/${OWNER}/accountWidgets/widget-1`;

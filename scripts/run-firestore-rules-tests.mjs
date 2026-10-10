@@ -14,7 +14,8 @@ const testFiles = [
   resolve(projectRoot, 'tests', 'audit-events.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'sharing-revocation.rules.test.mjs'),
   resolve(projectRoot, 'tests', 'archive-guest-suspension.rules.test.mjs'),
-  resolve(projectRoot, 'tests', 'invite-audit-ref.rules.test.mjs')
+  resolve(projectRoot, 'tests', 'invite-audit-ref.rules.test.mjs'),
+  resolve(projectRoot, 'tests', 'archive-purge-global-lock.rules.test.mjs')
 ];
 mkdirSync(configRoot, {recursive: true});
 

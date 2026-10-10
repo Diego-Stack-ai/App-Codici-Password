@@ -13,6 +13,7 @@ const widgetService = require('../account-widget-service');
 const scopeService = require('../private-account-write-scope');
 const recoveryService = require('../history-recovery-service');
 const recoveryReceipt = require('../recovery-command-receipt');
+const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const start = source.indexOf('function verifiedMutationRetry('), end = source.indexOf('exports.purgeArchivedAccount =', start);
 assert.ok(start >= 0 && end > start);
@@ -29,27 +30,41 @@ const cases = [
   ['restoreSyncRecord', 'expectedOwnerUid', {expectedOwnerUid: 'A', recordId: 'record', operationId: 'restore-op', expectedRevision: 0}],
 ];
 
-function fixture(name) {
+function fixture(name, {lockActive = false} = {}) {
   let accesses = 0;
   const reads = [], writes = [];
   const reference = path => ({path, collection: segment => reference(`${path}/${segment}`), doc: segment => reference(`${path}/${segment}`)});
   const store = {collection: path => reference(path), doc: path => reference(path), runTransaction: callback => callback({
     get: async ref => {
       reads.push(ref.path);
-      const exists = (name === 'manageAccountWidget' && ref.path === 'users/A/accounts/record') ||
+      const isLock = ref.path === 'archivePurgeLocks/A' && lockActive;
+      const exists = isLock || (name === 'manageAccountWidget' && ref.path === 'users/A/accounts/record') ||
         (name === 'trashSyncRecord' && ref.path === 'users/A/syncRecords/record') ||
         (name === 'restoreSyncRecord' && ref.path === 'users/A/trash/record');
-      return {exists, data: () => exists ? {type: 'account', visibility: 'private'} : undefined, docs: []};
+      return {exists, data: () => isLock ? {schemaVersion: 1, ownerUid: 'A', operationId: 'purge-op',
+        targetPath: 'users/A/accounts/record', digest: 'a'.repeat(64), status: 'active'}
+        : (exists ? {type: 'account', visibility: 'private'} : undefined), docs: []};
     },
     set: (...args) => writes.push(args), delete: (...args) => writes.push(args),
   })};
   const context = vm.createContext({
     exports: {}, HttpsError, ...binding, ...privateService, ...offlineService, ...sharedService, ...sharedReceipt, ...widgetReceipt, ...widgetService, ...scopeService, ...recoveryService, ...recoveryReceipt,
+    assertTransactionGlobalPurgeUnlocked,
     require: () => require('../reference-callables'), onCall: (_options, handler) => handler,
     getFirestore: () => { accesses += 1; return store; }, FieldValue: {serverTimestamp: () => 'synthetic-time'},
   });
   vm.runInContext(source.slice(start, end), context, {filename: 'index.js:owner-bound-mutations'});
   return {reads, writes, accesses: () => accesses, run: (data, uid = 'A') => context.exports[name]({auth: {uid}, data})};
+}
+
+for (const [name, , command] of cases.filter(([candidate]) =>
+  ['applyPrivateAccountMutation', 'applyOfflineMutation', 'manageAccountWidget', 'manageSharedVaultData'].includes(candidate))) {
+  test(`${name}: active global purge lock blocks the writer before domain reads`, async () => {
+    const f = fixture(name, {lockActive: true});
+    await assert.rejects(f.run(command), error => error.code === 'PURGE_LOCK_ACTIVE');
+    assert.deepEqual(f.reads, ['archivePurgeLocks/A']);
+    assert.equal(f.writes.length, 0);
+  });
 }
 
 for (const [name, ownerField, command] of cases) {
@@ -68,7 +83,7 @@ for (const [name, ownerField, command] of cases) {
     const f = fixture(name), result = await f.run(command);
     const expected = {trashSyncRecord: 'trashed', restoreSyncRecord: 'restored'}[name] || 'applied';
     assert.equal(result.status, expected); assert.ok(f.writes.length >= 2);
-    assert.ok(f.reads.every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path)));
+    assert.ok(f.reads.every(path => /^(users|mutationResults)\/A(?:\/|$)/.test(path) || path === 'archivePurgeLocks/A'));
     assert.ok(f.writes.every(([ref]) => /^(users|mutationResults)\/A(?:\/|$)/.test(ref.path)));
   });
 }

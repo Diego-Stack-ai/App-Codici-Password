@@ -193,7 +193,11 @@ assert.doesNotMatch(firestoreRules, /request\.query\.filters\.size/, 'Gli inviti
 // M7-AUDIT-5P-R1); il destinatario non può né modificare né cancellare. Il
 // controllo resta intenzionalmente più forte di prima.
 assert.match(firestoreRules, /allow update: if isInviteOwner\(\) &&/, 'Il destinatario può modificare direttamente un invito');
-assert.match(firestoreRules, /allow delete: if isInviteOwner\(\);/, 'Il destinatario può cancellare direttamente un invito');
+assert.match(
+    firestoreRules,
+    /allow delete: if isInviteOwner\(\) && isGlobalPurgeUnlocked\(resource\.data\.get\('ownerId', ''\)\);/,
+    'La cancellazione invito non è limitata al proprietario o non partecipa al blocco globale'
+);
 assert.match(cloudFunctions, /exports\.respondToInvitation = onCall/, 'La risposta sicura agli inviti non è gestita dal server');
 assert.match(cloudFunctions, /invite\.recipientEmail[\s\S]*!== email/, 'La funzione non verifica l’identità del destinatario');
 assert.match(cloudFunctions, /sharedWithUids/, 'La funzione non registra gli UID autorizzati alla lettura');
