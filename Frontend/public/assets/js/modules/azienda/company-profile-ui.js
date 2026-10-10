@@ -1,5 +1,5 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.152';
+import { auth, db } from '../../firebase-config.js?v=1.2.153';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
