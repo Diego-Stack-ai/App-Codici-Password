@@ -1,5 +1,11 @@
 # Allegati documenti
 
+## Stato runtime pubblicato — 10/10/2026
+
+La versione `1.2.154` pubblica nel profilo privato gli allegati cifrati per i documenti persistiti: selezione da fotocamera/galleria o PDF, caricamento tramite callable autenticata e protetta da App Check, metadati separati e apertura locale dopo decifratura. Firestore Rules, Storage Rules e callable di upload/rimozione sono state distribuite. Il contratto storico conservato sotto descrive la fase candidata e non prevale su questo stato.
+
+Restano fuori perimetro OCR, estrazione automatica dei campi, correzione prospettica/linea di selezione e certificazione su dispositivi fisici. Nessun dato reale è stato migrato o modificato dal rilascio.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

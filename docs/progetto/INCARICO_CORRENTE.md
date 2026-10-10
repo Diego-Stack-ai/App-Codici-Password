@@ -1,8 +1,14 @@
 # Incarico corrente
 
+## Pubblicazione 1.2.154 conclusa — 10/10/2026
+
+PR #97 unita in `master` al commit `eb1380c0`; pipeline completa e documentazione verdi. Deploy Firebase riuscito per Hosting, Firestore Rules, Storage Rules e quattro callable Widget/allegati documenti. Controllo remoto HTTP 200 e asset `1.2.154` confermati. L'incarico di pubblicazione è concluso.
+
+La configurazione di sicurezza resta invariata: M7 generale, M8 riprendibile, MFA automatico e writer CPFE2 non sono stati attivati. I prossimi passi non automatici sono canary M7/M8 su sole fixture, matrice dispositivi fisici, audit indipendente e privacy/legale. La migrazione dei widget legacy è una futura operazione dati separata e non è stata eseguita.
+
 ## Rollout controllato motori e gate Google Cloud — 10/10/2026
 
-Diego richiede di procedere con l'attivazione dei motori e di mantenere un controllo automatico ogni due minuti. L'automazione può riprendere implementazione, test locali ed emulatori, ma non può reiterare autonomamente deploy o operazioni cloud. La produzione corrente resta `1.2.151`, PR #93, commit `db5d85d1`.
+Diego richiede di procedere con l'attivazione controllata dei motori. La produzione corrente è `1.2.154`, PR #97, commit `eb1380c0`; l'automazione non può trasformare autonomamente i gate esterni in autorizzazioni di attivazione o operazioni cloud distruttive.
 
 Il primo gate puntuale GCS reale per M7/M8 è superato: Google Cloud SDK 588.0.0, progetto originale, bucket applicativo e solo prefisso sintetico. Replacement concorrente preservata, generazione obsoleta respinta, generazione corrente eliminata e cleanup finale verificato. Il run ha anche corretto l'uso inefficace di `preconditionOpts` in `deleteStageGeneration`; test locali combinati 23/23. Purge M7 generale e restore M8 riprendibile restano hard-off fino al raccordo end-to-end e al canary applicativo. CPFE2 resta dual-read con writer legacy; MFA resta assistito/manuale.
 
@@ -20,7 +26,7 @@ Diego richiede di sistemare e chiudere i residui reali emersi dalla revisione su
 
 ## Nessun incarico M7-M10 attivo — chiusura 10/10/2026
 
-Il ciclo M7-M10 originario è concluso; il ciclo sicurezza successivo ha pubblicato `1.2.151`, `master` commit `db5d85d1`. Il nuovo incarico di rollout non autorizza uno sblocco indistinto: i motori safe-off restano disabilitati finché i gate elencati sopra non producono evidenze verificabili.
+Il ciclo M7-M10 originario è concluso; la pubblicazione applicativa successiva è `1.2.154`, `master` commit `eb1380c0`. Il rollout non autorizza uno sblocco indistinto: i motori safe-off restano disabilitati finché i gate elencati sopra non producono evidenze verificabili.
 
 Tutte le sezioni successive sono incarichi e checkpoint storici conclusi o superati. Le espressioni «ripresa prioritaria», «prossimo incremento», «attiva» e «da verificare» contenute sotto non autorizzano nuova esecuzione e non descrivono lo stato corrente.
 

@@ -1,5 +1,9 @@
 # Decisioni
 
+## 10/10/2026 — pubblicazione 1.2.154 senza sblocco generale dei motori
+
+Diego ha autorizzato pubblicazione e completamento del lavoro su profili Widget e allegati dei documenti personali. PR #97 è stata unita e sono stati distribuiti Hosting, Rules e le quattro callable pertinenti. La pubblicazione non costituisce autorizzazione a migrare automaticamente i widget legacy né ad attivare M7 generale, M8 riprendibile, recupero MFA automatico o writer CPFE2. OCR e riconoscimento automatico dei documenti restano un filone successivo.
+
 ## 10/10/2026 — criterio definitivo di chiusura M7-M10
 
 La chiusura del ciclo è confermata sulla versione pubblicata `1.2.150`. La decisione del 09/10 resta valida nel suo significato safe-off ed è aggiornata soltanto nel riferimento di versione: nessun motore non dimostrato viene acceso per ottenere una chiusura nominale. Purge M7, restore riprendibile M8, recupero MFA automatico e nuove scritture CPFE2 rimangono disabilitati. GCS reale, matrice fisica, audit indipendente e privacy/legale sono fuori dal ciclo concluso e richiedono un nuovo incarico esplicito.

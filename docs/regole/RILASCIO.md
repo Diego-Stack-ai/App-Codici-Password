@@ -1,5 +1,11 @@
 # Rilascio
 
+## Esito operativo 1.2.154 — 10/10/2026
+
+PR #97 unita in `master` (`eb1380c0`). Pipeline completa verde sulla PR e nuovamente su `master`. Deploy riuscito sul progetto originale per Hosting, Firestore Rules, Storage Rules e le quattro callable necessarie ai profili Widget e agli allegati dei documenti personali. Verifica HTTP post-rilascio positiva con asset `1.2.154`.
+
+Il rilascio non abilita i motori ancora safe-off: purge M7 generale, restore M8 riprendibile, recupero MFA automatico e writer CPFE2. Le prove fisiche, l'audit indipendente e la verifica privacy/legale restano gate esterni e non sono dichiarati superati.
+
 ## Esito operativo 1.2.150 — 09/10/2026
 
 PR #90 unita in `master` (`326b83a3`) e Firebase Hosting pubblicato con successo. Il gate funzionale aggiuntivo ha eseguito due salvataggi consecutivi sullo stesso Account sintetico e due riletture server-confirmed riuscite. Il rilascio riguarda il caricamento versionato del modulo lazy e la stabilità dei valori catturati; Functions, Rules e migrazioni dati restano invariati.

@@ -1,5 +1,15 @@
 # Collaudi
 
+## Rilascio completo 1.2.154 — 10/10/2026
+
+- Integrazione: PR #97, merge commit `eb1380c0` su `master`.
+- CI finale su PR: documentazione verde; validazione completa verde in 5m59s, inclusi emulatori di backup/ripristino aggiornati per lo scope `account-widget-profile`.
+- CI successiva su `master`: validazione completa verde in 5m43s.
+- Deploy Firebase: Hosting, Firestore Rules, Storage Rules, `manageAccountWidget`, `manageWidgetProfile`, `uploadProfileDocumentAttachment` e `removeProfileDocumentAttachment`; tutte le operazioni concluse con successo.
+- Verifica remota: `home_page.html?v=1.2.154` HTTP 200 e riferimenti versione presenti; `profilo_privato.html?v=1.2.154` HTTP 200 e foglio `profile-document-attachments.css?v=1.2.154` presente.
+- Perimetro pubblicato: cataloghi profili Widget separati Account/Banca, istanze con valori locali alla destinazione, titoli strutturali uniformati, allegati cifrati immagine/PDF sui documenti personali.
+- Esclusioni: nessuna migrazione automatica dei widget legacy, nessun OCR, nessuna attivazione di M7 generale, M8 riprendibile, MFA automatico o writer CPFE2.
+
 ## Profili Widget separati dalle istanze — 10/10/2026
 
 - Contratto: profili `account|bank` privi di valori; istanze con `profileId`, destinazione e valori propri.
