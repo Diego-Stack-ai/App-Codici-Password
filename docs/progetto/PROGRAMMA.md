@@ -1,5 +1,11 @@
 # Programma
 
+## Stato corrente dopo 1.2.154 — 10/10/2026
+
+Il lavoro applicativo autorizzato su profili Widget e allegati cifrati dei documenti personali è integrato e pubblicato tramite PR #97 (`eb1380c0`). Hosting, Rules e callable pertinenti sono distribuiti e verificati. Non resta un incremento locale obbligatorio per questa pubblicazione.
+
+Il percorso successivo è un ciclo di certificazione, non una prosecuzione automatica del programma concluso: canary sintetico distribuito M7/M8, dispositivi fisici, audit indipendente e revisione privacy/legale. M7 generale, M8 riprendibile, MFA automatico e nuove scritture CPFE2 restano disabilitati fino a evidenza e autorizzazione specifiche.
+
 ## Programma M7-M10 chiuso — 10/10/2026
 
 Il programma tecnico corrente M7-M10 è concluso sulla versione pubblicata `1.2.150`, ramo `master`, commit `86b969cc`. Non esistono ulteriori incrementi locali obbligatori assegnati da questo programma. La chiusura adotta la configurazione sicura verificata: purge automatico M7, restore riprendibile M8, recupero MFA automatico e nuove scritture crittografiche CPFE2 restano disabilitati. Le verifiche GCS reali, la matrice su dispositivi/browser fisici, l'audit indipendente e la revisione privacy/legale non sono state eseguite e appartengono a un eventuale nuovo ciclo di certificazione, da autorizzare separatamente.

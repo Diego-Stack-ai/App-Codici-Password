@@ -1,5 +1,9 @@
 # Profilo e account
 
+## Profili Widget pubblicati — 10/10/2026
+
+Il modello profilo/istanza descritto sotto è attivo nella versione `1.2.154`. I cataloghi Account e Banca restano separati; i valori appartengono esclusivamente all'istanza inserita. La callable di gestione profili, l'aggiornamento di `manageAccountWidget` e le Rules sono distribuiti. I widget legacy senza `profileId` restano compatibili e non sono stati convertiti automaticamente né copiati con valori nel catalogo.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

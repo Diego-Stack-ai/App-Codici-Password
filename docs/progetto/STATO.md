@@ -1,14 +1,22 @@
 # Stato
 
+## Riconciliazione pubblicata 1.2.154 — 10/10/2026
+
+La versione autorevole in produzione è `1.2.154`, merge PR #97, commit `eb1380c0`. Il deploy sul progetto `appcodici-password` ha pubblicato Firebase Hosting, Firestore Rules, Storage Rules e le callable `manageAccountWidget`, `manageWidgetProfile`, `uploadProfileDocumentAttachment` e `removeProfileDocumentAttachment`. Verifica successiva: `home_page.html` e `profilo_privato.html` HTTP 200, riferimenti asset `1.2.154` presenti.
+
+Sono attivi i profili Widget riutilizzabili separati `account`/`bank`, le istanze con valori per singola destinazione e gli allegati cifrati immagine/PDF dei documenti personali. I widget legacy restano leggibili ma non sono stati migrati automaticamente; OCR e riconoscimento dei dati dei documenti non sono inclusi.
+
+Gate di rilascio: documentazione verde; pipeline completa su `master` verde; Rules Firestore **80/80**, Rules Storage **17/17**, suite Functions/security **444 pass, 9 skip dichiarati, 0 fail** prima del rilascio. Il deploy delle quattro callable e delle Rules è riuscito. Purge M7 generale, restore M8 riprendibile, recupero MFA automatico e writer CPFE2 restano hard-off: questa pubblicazione non li abilita. Restano esterni canary distribuito M7/M8, matrice su dispositivi fisici, audit indipendente e privacy/legale.
+
 ## Profili Widget Account e Banca — incremento locale 10/10/2026
 
 Il modello Widget distingue ora il **profilo riutilizzabile** dall'**istanza inserita**. I profili conservano esclusivamente titolo, metadati e definizione dei campi; i valori appartengono soltanto all'istanza collegata a uno specifico Account o conto bancario. I cataloghi Account e Banca sono separati, mostrano preventivamente i campi e rifiutano lo stesso profilo due volte nella medesima destinazione con il messaggio «Widget già inserito. Crea un nuovo profilo widget.». La creazione è libera e parte senza campi preimpostati.
 
-I widget storici senza `profileId` restano leggibili e modificabili senza migrazione automatica. La nuova callable è vincolata al proprietario, App Check, revisione e blocco purge; le Rules consentono al proprietario la sola lettura diretta. Profili e istanze sono inclusi separatamente nel backup/ripristino. Verifiche locali: UI/lifecycle **41/41**, backup **110/110**, suite Functions/security **449 totali, 440 pass, 9 skip dichiarati, 0 fail**, sintassi 180 moduli, riferimenti statici 255 file e CSS verdi. Il test Rules dedicato è stato aggiunto, ma l'esecuzione complessiva dell'emulatore non è attestata in questo turno perché Firebase Emulator Hub non ha aperto la porta 4400 entro il timeout. Nessun commit o deploy eseguito per questo incremento.
+I widget storici senza `profileId` restano leggibili e modificabili senza migrazione automatica. La nuova callable è vincolata al proprietario, App Check, revisione e blocco purge; le Rules consentono al proprietario la sola lettura diretta. Profili e istanze sono inclusi separatamente nel backup/ripristino. Le evidenze definitive e il deploy sono registrati nella sezione `1.2.154` sopra; questo paragrafo conserva la fotografia locale precedente al rilascio.
 
 ## Rollout controllato e strumenti Google Cloud — 10/10/2026
 
-La versione pubblicata corrente è `1.2.151`, integrata tramite PR #93 nel commit `db5d85d1` e verificata su Firebase Hosting con HTTP 200. Il nuovo incarico autorizza la preparazione del rollout controllato dei motori, ma non trasforma i gate mancanti in esiti positivi: M7 generale, M8 riprendibile, recupero MFA automatico e nuove scritture CPFE2 restano fail-closed finché non superano le rispettive prove.
+La fotografia di avvio di questo rollout era `1.2.151`; la versione pubblicata corrente è ora `1.2.154` come registrato sopra. Il rollout controllato non trasforma i gate mancanti in esiti positivi: M7 generale, M8 riprendibile, recupero MFA automatico e nuove scritture CPFE2 restano fail-closed finché non superano le rispettive prove.
 
 Per M7 e M8 il gate esterno usa **Google Cloud CLI (`gcloud`)** e credenziali limitate al progetto `appcodici-password`. Google Cloud SDK 588.0.0 è ora installato e il banco puntuale su Cloud Storage reale è verde: due generazioni sintetiche, rifiuto della generazione obsoleta, replacement preservata, cancellazione della generazione corrente e prefisso finale vuoto. Il primo tentativo ha scoperto e corretto un'opzione SDK inefficace in `deleteStageGeneration`; test locali combinati 23/23 e runner 2/2. Nessun percorso o dato utente è stato coinvolto. Restano da provare i flussi distribuiti completi di staging/retry/ripristino e il canary applicativo prima di aprire M7/M8 globalmente.
 

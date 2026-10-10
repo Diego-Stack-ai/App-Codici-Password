@@ -1,6 +1,6 @@
 # Guida
 
-> Stato conclusivo 10/10/2026: versione `1.2.150` pubblicata e verificata. Purge automatico, restore riprendibile, recupero MFA automatico e nuove scritture CPFE2 restano disabilitati per sicurezza. Il recupero MFA disponibile è quello assistito; i controlli GCS reali, sui dispositivi, di audit indipendente e privacy/legale non sono certificati. Le sezioni successive conservano la bozza e le fonti storiche e non riaprono il ciclo concluso.
+> Stato conclusivo 10/10/2026: versione `1.2.154` pubblicata e verificata. Sono disponibili profili Widget separati Account/Banca e allegati cifrati immagine/PDF nei documenti personali. Purge automatico, restore riprendibile, recupero MFA automatico e nuove scritture CPFE2 restano disabilitati per sicurezza. Il recupero MFA disponibile è quello assistito; canary M7/M8, dispositivi fisici, audit indipendente e privacy/legale non sono certificati. Le sezioni successive conservano la bozza e le fonti storiche e non riaprono il ciclo concluso.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
