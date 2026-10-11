@@ -182,14 +182,12 @@ export async function editImageBeforeUpload(file) {
         }
         function setMode(nextMode) {
             mode = nextMode; freeMode.classList.toggle('image-editor-mode-active', mode === 'free'); cardMode.classList.toggle('image-editor-mode-active', mode === 'card');
-            if (mode === 'card') selection = detectCardBoundary(working) || cardFrame(working.width, working.height);
+            const detected = mode === 'card' ? detectCardBoundary(working) : null;
+            if (mode === 'card') selection = detected || cardFrame(working.width, working.height);
             help.textContent = mode === 'card' ? 'I bordi della tessera vengono cercati automaticamente. Correggi gli angoli se necessario: il risultato sarà ID-1.' : 'Sposta liberamente i quattro angoli. La prospettiva verrà raddrizzata al salvataggio.'; paint();
-        }
-        function autoDetect() {
-            const detected = detectCardBoundary(working);
-            selection = detected || cardFrame(working.width, working.height);
-            paint();
-            warning.textContent = detected ? 'Bordi rilevati. Controlla i quattro angoli.' : 'Bordi non riconosciuti: usa il riquadro tessera e correggi gli angoli.';
+            if (mode === 'card') warning.textContent = detected
+                ? 'Bordi rilevati automaticamente. Controlla i quattro angoli.'
+                : 'Bordi non riconosciuti: usa il riquadro ID-1 e correggi gli angoli.';
         }
         function paint() {
             preview.width = working.width; preview.height = working.height;
@@ -216,7 +214,7 @@ export async function editImageBeforeUpload(file) {
         const stop = () => {dragging = null; magnifier.classList.remove('image-editor-magnifier-visible');}; preview.addEventListener('pointerup', stop); preview.addEventListener('pointercancel', stop);
         function rotate() {const canvas = document.createElement('canvas'); canvas.width = working.height; canvas.height = working.width; const context = canvas.getContext('2d'); context.translate(canvas.width, 0); context.rotate(Math.PI / 2); context.drawImage(working, 0, 0); working = canvas; resetSelection(); paint();}
         async function saveImage() {try {save.disabled = true; close(await canvasFile(perspectiveCanvas(working, selection, mode), file));} catch (error) {save.disabled = false; warning.textContent = 'Impossibile elaborare questa selezione. Controlla i quattro angoli.'; if (error.message !== 'INVALID_SELECTION') {overlay.remove(); document.body.classList.remove('image-editor-open'); reject(error);}}}
-        modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), button('Ruota 90°', rotate), button('Rileva tessera', () => {mode = 'card'; setMode('card'); autoDetect();}), save);
+        modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), button('Ruota 90°', rotate), save);
         stage.append(preview, magnifier); dialog.append(title, help, modes, stage, warning, controls); overlay.append(dialog); document.body.append(overlay);
         document.body.classList.add('image-editor-open'); resetSelection(); setMode('free');
     });

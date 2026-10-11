@@ -16,8 +16,8 @@ test('editor immagini offre quattro angoli liberi, prospettiva e formato tessera
     assert.match(source, /Tessera \/ carta/);
     assert.match(source, /perspectiveCanvas/);
     assert.match(source, /image-editor-magnifier/);
-    assert.match(source, /Rileva tessera/);
     assert.match(source, /detectCardBoundary/);
+    assert.doesNotMatch(source, /Rileva tessera/);
     assert.doesNotMatch(source, /tesseract|ocr|card-parser/i);
 });
 
