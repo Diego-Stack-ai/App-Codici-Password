@@ -1,4 +1,4 @@
-import {auth} from '../../../firebase-config.js?v=1.2.158';
+import {auth} from '../../../firebase-config.js?v=1.2.159';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {ensureVaultKeyMaterial, isVaultUnlocked} from '../../core/security-manager.js';
 import {getVaultSessionExpiry} from '../../core/vault-session.js';
