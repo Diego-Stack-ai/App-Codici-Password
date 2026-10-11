@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## AUDIT-SKILL-01 — incarico documentale aperto 11/10/2026
+
+Perimetro autorizzato: integrare nei Markdown esistenti il progetto di audit mediante skill per sicurezza, threat modeling, QA browser, controllo visivo, accessibilità e prestazioni. Questo passo non autorizza installazione o esecuzione delle skill, modifica del runtime, uso di account reali, scansioni produttive, correzioni automatiche, commit, push, merge o deploy.
+
+Sequenza prevista: baseline e staging sintetico; verifica/installazione globale delle quattro skill ufficiali `security-best-practices`, `security-threat-model`, `playwright` e `screenshot`; audit statico read-only; threat model; test browser/visuali; Lighthouse, Core Web Vitals e WCAG; eventuale seconda opinione Codex Security. Browser Use e le skill di terze parti restano opzionali e subordinate a un audit specifico.
+
+Prossimo gate: verificare che non vi siano lavori concorrenti aperti sullo stesso perimetro, fissare la baseline Git e approvare separatamente l'installazione delle sole quattro skill ufficiali. Nessun risultato tecnico può essere registrato prima della relativa esecuzione ed evidenza.
+
+## PORTABILITA-ASSISTENTE-LINGUE-01 — pianificazione aperta 11/10/2026
+
+Perimetro autorizzato in questo passo: riepilogare e formalizzare nei 31 MD esistenti i tre filoni futuri definiti da Diego. Il programma comprende Archivio portabile completo, Assistente specifico dell'app con base senza AI e AI locale facoltativa, quindi revisione multilingue finale. Restano esclusi implementazione runtime, download di modelli, AI cloud, modifiche dei dati, wrapper per store, bump, commit, push e deploy.
+
+Consegna di questo passo: decisione, programma, stato e contratti specialistici coerenti; test documentali verdi. Il prossimo incarico tecnico dovrà scegliere un primo incremento limitato e i relativi criteri di prova senza assumere che l'intero programma sia già autorizzato all'implementazione.
+
 ## Release 1.2.158 pubblicata — M8 V2 attivo — 11/10/2026
 
 La PR #102 è stata unita in `master` al commit `1712e4ff` dopo gate GitHub verdi (documentazione e validazione completa in 7m40s). Firebase Hosting ha pubblicato la versione `1.2.158`; verifica remota HTTP 200 con riferimento versione presente. La callable `manageBackupRestoreV2` è stata creata in `europe-west1`, runtime Node.js 22, stato `ACTIVE`, hash `419ec3ce5cd21e3581c665af9e98a3d1adc7588f`.

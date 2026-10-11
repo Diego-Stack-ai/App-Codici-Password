@@ -1,5 +1,11 @@
 # Stato
 
+## Nuovo progetto pianificato — Portabilità, Assistente e Lingue — 11/10/2026
+
+Diego ha definito i tre filoni futuri: **Archivio portabile completo**, **Assistente specifico dell'app** e **Multilingua finale**. Il vecchio nome «Excel» è superato come obiettivo: ODS/CSV/XLSX sono possibili proiezioni, mentre il risultato richiesto comprende tutti i dati, gli allegati e una consultazione locale navigabile distinta dal backup. L'Assistente mantiene una base completa senza AI e prevede soltanto come opzione un piccolo modello locale attivato consapevolmente dopo verifica del dispositivo. Le lingue arrivano per ultime, ma i nuovi contratti usano fin da subito azioni indipendenti dalla lingua e chiavi i18n.
+
+Stato effettivo: **pianificazione documentale**. Nessun codice applicativo, schema dati, modello, cache, allegato, impostazione, versione o ambiente distribuito è stato modificato. L'app resta PWA e sarà valutata per alcuni mesi prima di qualsiasi decisione su App Store, Play Store o contenitore ibrido. Requisiti e sequenza sono in [PROGRAMMA](PROGRAMMA.md) e le scelte in [DECISIONI](DECISIONI.md).
+
 ## Produzione 1.2.158 — 11/10/2026
 
 Release pubblicata tramite PR #102 (`1712e4ff`). Hosting verificato HTTP 200 con versione `1.2.158`. `manageBackupRestoreV2` è `ACTIVE` in `europe-west1` su Node.js 22. M7, CPFE2, M8 corrente e M8 V2 sono attivi. La policy MFA per l'utente completamente bloccato resta assistenza manuale: il percorso automatico selettivo non viene promosso perché richiede un ID token che l'utente in lockout non può ottenere senza indebolire MFA.

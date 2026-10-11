@@ -1,5 +1,91 @@
 # Programma
 
+## AUDIT-SKILL-01 — sicurezza, qualità visiva e prestazioni — pianificazione 11/10/2026
+
+**Obiettivo:** introdurre un ciclo di verifica indipendente e ripetibile dell'app, senza attribuire alle skill autorità di rilascio e senza eseguire test distruttivi sulla produzione.
+
+### Ordine di esecuzione
+
+1. **Baseline:** attendere la chiusura di ogni lavoro concorrente, identificare commit/branch da esaminare, conservare le modifiche locali e predisporre emulatori o staging con dati e utenti sintetici.
+2. **Skill ufficiali iniziali:** verificare provenienza e permessi, quindi installare globalmente `security-best-practices`, `security-threat-model`, `playwright` e `screenshot`; nessuna skill viene incorporata nel repository.
+3. **Audit statico read-only:** controllare autenticazione, autorizzazioni, Rules, Functions, Vault, crittografia, MFA, backup/ripristino, Storage, offline, Service Worker, input, dipendenze e configurazioni esposte.
+4. **Threat model:** censire asset, ruoli, confini di fiducia, superfici esposte, attori e percorsi d'abuso; tradurre soltanto i rischi dimostrabili in casi di prova.
+5. **QA browser e visuale:** con `playwright` e `screenshot` provare registrazione, login, sessione, MFA, Account, condivisioni, backup, offline/online, aggiornamento PWA, responsive, tastiera, ARIA, overflow, errori JavaScript e rete.
+6. **Prestazioni e accessibilità:** misurare Lighthouse/Core Web Vitals, caricamento, peso asset, cache, rete lenta e WCAG prima di valutare skill esterne.
+7. **Seconda opinione:** valutare il plugin ufficiale Codex Security, iniziando con scansione in sola lettura e senza patch automatiche; confrontare i risultati ed eliminare falsi positivi.
+8. **Estensioni opzionali:** prendere in considerazione `security-ownership-map`, `playwright-interactive`, `product-design/audit`, Performance Audit, Frontend Visual QA e Browser Use soltanto se resta un bisogno non coperto e dopo audit di codice, permessi e dipendenze.
+
+### Regole non negoziabili
+
+- Nessuna Master Password, recovery key, password, PIN, PUK, CVV, codice MFA, cookie o sessione reale nei test.
+- Test dinamici esclusivamente su emulatori/staging, profilo browser isolato e fixture chiaramente sintetiche.
+- Prima esecuzione di ogni strumento in sola lettura; correzioni, scritture, installazioni aggiuntive, commit, push, merge e deploy richiedono autorizzazione separata.
+- Ogni rilievo deve riportare evidenza, gravità, affidabilità, percorso di riproduzione, impatto, correzione proposta e prova di chiusura; una segnalazione automatica non è un difetto confermato.
+- Browser Use, se ammesso, resta privo di cloud, stealth, proxy e CAPTCHA, con whitelist stretta dei domini e nessun accesso alla produzione.
+
+### Criteri di uscita
+
+- inventario delle aree controllate e di quelle non verificabili;
+- threat model collegato a prove riproducibili;
+- matrice desktop/tablet/telefono e online/offline con screenshot ed errori associati;
+- misure prestazionali e di accessibilità confrontabili con una baseline;
+- rilievi deduplicati e classificati in `AUDIT.md`;
+- evidenze e regressioni registrate in `COLLAUDI.md`;
+- nessuna dichiarazione di sicurezza assoluta o idoneità produttiva dedotta dal solo numero di test verdi.
+
+## Progetto Portabilità, Assistente e Lingue — pianificazione 11/10/2026
+
+Il nuovo programma sostituisce le etichette generiche «Excel, AI e Lingue» con tre risultati di prodotto coordinati. Non modifica ancora il runtime, non autorizza download di modelli e non riapre i cicli M7–M10.
+
+### P1 — Archivio portabile completo
+
+**Obiettivo:** consegnare all'utente che lascia l'app una copia completa, autonoma e comprensibile dei propri dati e allegati, distinta dal backup ripristinabile.
+
+Prima fase:
+
+- definire manifest e schema versionati, identificativi stabili e relazioni fra utenti, aziende, Account, scadenze e allegati;
+- produrre un pacchetto cifrato o una cartella protetta con dati, allegati originali, indice di integrità e istruzioni;
+- offrire una UI locale HTML/CSS/JavaScript in sola lettura, con Home e maschere navigabili in stile Access;
+- produrre ODS come foglio aperto principale e CSV come formato semplice; XLSX resta una compatibilità facoltativa, non il motore del progetto;
+- consentire ricerca, filtri e apertura degli allegati senza macro e senza dipendere da Excel;
+- progettare la separazione dati/interfaccia in modo che una futura seconda fase CRUD non richieda di rifare il formato.
+
+**Uscita P1:** pacchetto completo verificato su almeno due programmi compatibili ODS e nei browser destinatari, inventario allegati riconciliato, nessun segreto in chiaro senza scelta e protezione esplicite, distinzione visibile da backup/ripristino.
+
+### P2 — Assistente specifico dell'app
+
+**Obiettivo:** trovare, spiegare e guidare; non offrire una chat generalista.
+
+Ordine:
+
+1. consolidare il motore base senza AI: intenti chiusi, ricerca fuzzy, date, domini, risultati in card e domande di chiarimento;
+2. completare il manifest di conoscenza delle pagine per onboarding, Vault, funzioni e Impostazioni;
+3. aggiungere «Prepara per l'uso offline», distinguendo shell, dati verificati e allegati opzionali;
+4. introdurre nelle Impostazioni una verifica locale e consensuale della compatibilità AI;
+5. soltanto dopo benchmark fisici, valutare un piccolo modello locale scaricabile e rimovibile, con fallback immediato al motore base.
+
+Il modello può produrre esclusivamente intenti e parametri tipizzati; il codice dell'app interroga i repository e costruisce le card. Scritture e operazioni sensibili restano fuori dall'esecuzione automatica e richiedono validazione e conferma. Nessuna Master Password, password, PIN, PUK, CVV o chiave entra in prompt, embeddings, log o modello.
+
+**Uscita P2:** tutte le funzioni essenziali operano senza AI e senza token; il livello locale opzionale dimostra compatibilità, annullamento, limiti di risorse, privacy e fallback su dispositivi reali prima di ogni attivazione generale.
+
+### P3 — Multilingua finale
+
+**Obiettivo:** rendere interfaccia e Assistente coerenti nelle lingue supportate dopo la stabilizzazione funzionale.
+
+- mantenere da P1/P2 identificatori di azione indipendenti dalla lingua e ogni nuovo testo in chiavi i18n;
+- definire per ciascuna lingua sinonimi, esempi, formati data, domande di chiarimento e terminologia di sicurezza;
+- verificare che l'eventuale modello locale comprenda realmente ogni lingua dichiarata, senza dedurlo dalla sola scheda del modello;
+- collaudare navigazione, guida, risultati, errori, ARIA e Impostazioni in ogni lingua supportata.
+
+**Uscita P3:** nessuna stringa utente hard-coded nei nuovi moduli, parità funzionale verificata e revisione umana dei testi sensibili.
+
+### Confini del ciclo
+
+- Per alcuni mesi resta in valutazione la PWA esistente: nessun wrapper App Store/Play Store o riprogettazione nativa.
+- La preparazione offline non è un backup e deve rilevare cache vuota, incompleta o espulsa.
+- Gli allegati offline sono opt-in, cifrati, misurati e rimovibili; non entrano nella precache obbligatoria.
+- Il presente passo approva il piano documentale, non implementazione, modello, provider, deploy o trattamento di dati reali.
+
 ## Stato corrente dopo 1.2.154 — 10/10/2026
 
 Il lavoro applicativo autorizzato su profili Widget e allegati cifrati dei documenti personali è integrato e pubblicato tramite PR #97 (`eb1380c0`). Hosting, Rules e callable pertinenti sono distribuiti e verificati. Non resta un incremento locale obbligatorio per questa pubblicazione.

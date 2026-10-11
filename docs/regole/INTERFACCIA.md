@@ -5,6 +5,12 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Predisposizione per Assistente e Multilingua — 11/10/2026
+
+La revisione completa delle lingue resta l'ultima fase del nuovo programma, dopo la stabilizzazione dell'Assistente. Da subito, però, ogni nuovo testo visibile, placeholder, ARIA, errore, domanda di chiarimento e guida deve usare chiavi i18n; intenti e azioni mantengono identificatori interni stabili e indipendenti dalla lingua. Nomi e contenuti creati dall'utente non vengono tradotti automaticamente.
+
+L'Assistente base e l'eventuale AI locale presentano gli stessi componenti accessibili: card, filtri, domande di chiarimento e collegamenti alle pagine. L'assenza o disattivazione dell'AI non rimuove ricerca, guida o navigazione. La UI delle Impostazioni mantiene separati Assistente base, preparazione offline, allegati offline e AI locale, mostrando per ciascuno stato, spazio, compatibilità e azioni reversibili.
+
 ## Integrazione corrente — palette colore
 
 La modalità luminosa (`chiaro`, `automatico`, `scuro`) e la palette cromatica sono preferenze indipendenti. Le palette ammesse sono `blue`, `green`, `red` e `sand`; `blue` è il fallback per valori assenti o non validi. La preferenza locale viene applicata da `theme-init.js` prima del rendering per evitare il cambio colore visibile all’avvio. `core.css` resta l’autorità dei token d’identità; colori funzionali di successo, avviso ed errore e colori di categoria non cambiano significato con la palette. I controlli in Impostazioni devono esporre selezione visiva e stato accessibile `aria-pressed`.

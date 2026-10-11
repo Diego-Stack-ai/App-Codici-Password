@@ -1,5 +1,22 @@
 # Audit
 
+## AUDIT-SKILL-01 — registro preventivo di metodo e rischio — 11/10/2026
+
+Stato: **pianificato, non eseguito**. Non risultano ancora installate o utilizzate nel progetto le skill `security-best-practices`, `security-threat-model`, `playwright`, `screenshot` o il plugin Codex Security. Le sole skill operative documentate in precedenza restano `astra-flash-orchestrator` e `computer-use`, installate fuori dal repository.
+
+| ID | Ambito | Rischio preventivo | Trattamento obbligatorio | Stato |
+|---|---|---|---|---|
+| SKILL-SUPPLY-01 | Provenienza e dipendenze | Skill o aggiornamento omonimo/manomesso | Origine ufficiale, revisione di `SKILL.md`, dipendenze e permessi; versione fissata; installazione globale | Da verificare |
+| SKILL-STATIC-01 | Audit statico | Falsi positivi o conclusioni senza prova | Sola lettura; evidenza di file/riga; classificazione affidabilità; revisione umana | Pianificato |
+| SKILL-DYNAMIC-01 | Playwright/browser | Scritture, cancellazioni o trasmissione di dati reali | Emulatori/staging, account sintetici, profilo isolato, conferme separate per azioni impattanti | Pianificato |
+| SKILL-SECRET-01 | Segreti e sessioni | Esposizione di password, recovery key, MFA, cookie o dati Vault | Divieto di dati reali; fixture sintetiche; nessun segreto in prompt, screenshot, log o report | Pianificato |
+| SKILL-VISUAL-01 | Screenshot e report | Presenza accidentale di dati personali nelle immagini | Dataset sintetico, revisione e oscuramento prima della conservazione | Pianificato |
+| SKILL-PERF-01 | Lighthouse/Core Web Vitals | Misure non confrontabili o influenzate dall'ambiente | Baseline ripetibile, dispositivo/rete dichiarati, più campioni e separazione locale/staging | Pianificato |
+| SKILL-CODEXSEC-01 | Codex Security | Plugin con capacità di modifica e scansione profonda | Prima scansione read-only; nessuna patch automatica; autorizzazione per ogni modifica | Da valutare |
+| SKILL-BROWSERUSE-01 | Browser Use | Accesso autonomo a cookie, sessioni, file o siti esterni | Ultima opzione; profilo vuoto, whitelist, staging, cloud/stealth/proxy/CAPTCHA disattivati | Sospeso |
+
+I rilievi futuri devono essere aggiunti come difetti distinti e non possono essere chiusi sulla sola base dell'output di una skill. La chiusura richiede riproduzione, correzione autorizzata e regressione pertinente.
+
 10/10/2026 — release `1.2.157` pubblicata dopo merge PR #101 (`a3c436d7`) e tre gate verdi (PR, `master`, workflow manuale). Hosting verificato HTTP 200; aggiornate con successo 15 callable CPFE2/M7. La pubblicazione rende effettivi writer CPFE2 e M7 protetto. Non dichiara attivo M8 V2. Il recupero MFA automatico selettivo resta escluso per lockout totale: la decisione di prodotto è assistenza manuale, senza full-replace dei fattori.
 
 11/10/2026 — M8 V2 pubblicato con release `1.2.158`, PR #102 e merge `1712e4ff`. Hosting HTTP 200 con versione verificata; `manageBackupRestoreV2` `ACTIVE` in `europe-west1`, Node.js 22, hash `419ec3ce5cd21e3581c665af9e98a3d1adc7588f`. Il piano Firestore conserva solo manifest, versioni e hash; il backup originale deve essere ripresentato per ricostruire i comandi. Firestore Emulator V2 **1/1**, backup **112/112**, Functions/security **453 pass + 9 skip dichiarati**; pipeline locale e GitHub verdi. Nessun dato reale usato o cancellato.
