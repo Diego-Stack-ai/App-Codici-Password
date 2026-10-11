@@ -2,7 +2,7 @@
 
 10/10/2026 — release `1.2.157` pubblicata dopo merge PR #101 (`a3c436d7`) e tre gate verdi (PR, `master`, workflow manuale). Hosting verificato HTTP 200; aggiornate con successo 15 callable CPFE2/M7. La pubblicazione rende effettivi writer CPFE2 e M7 protetto. Non dichiara attivo M8 V2. Il recupero MFA automatico selettivo resta escluso per lockout totale: la decisione di prodotto è assistenza manuale, senza full-replace dei fattori.
 
-11/10/2026 — M8 V2 raccordato e attivato localmente da piano persistente a callable e UI di riselezione/ripresa. Il piano Firestore conserva solo manifest, versioni e hash; il backup originale deve essere ripresentato per ricostruire i comandi. La UI conserva un locator minimo, verifica ricevute attestate, evita il replay dopo risposta persa o nuova sessione e rimuove il locator al completamento. Firestore Emulator V2 **1/1**, backup **112/112**, Functions/security **453 pass + 9 skip dichiarati**. L'apertura dell'interlock è soltanto nel working tree: `manageBackupRestoreV2` non è distribuita; nessun deploy, dato reale, commit o push.
+11/10/2026 — M8 V2 pubblicato con release `1.2.158`, PR #102 e merge `1712e4ff`. Hosting HTTP 200 con versione verificata; `manageBackupRestoreV2` `ACTIVE` in `europe-west1`, Node.js 22, hash `419ec3ce5cd21e3581c665af9e98a3d1adc7588f`. Il piano Firestore conserva solo manifest, versioni e hash; il backup originale deve essere ripresentato per ricostruire i comandi. Firestore Emulator V2 **1/1**, backup **112/112**, Functions/security **453 pass + 9 skip dichiarati**; pipeline locale e GitHub verdi. Nessun dato reale usato o cancellato.
 
 ## Pre-collaudo e backup preventivo — 09/10/2026
 
