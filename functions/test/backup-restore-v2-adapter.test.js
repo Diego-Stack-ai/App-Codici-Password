@@ -15,10 +15,9 @@ test('candidate boundary rejects missing trust signals before the interlock', as
     error => error.code === 'BACKUP_RESTORE_V2_APP_CHECK_REQUIRED');
 });
 
-test('hard-off boundary prevents all service and data access', async () => {
-  let accesses = 0;
-  const forbidden = () => { accesses++; throw new Error('UNEXPECTED_ACCESS'); };
-  await assert.rejects(runBackupRestoreV2(valid, {execute: forbidden, store: forbidden, bucket: forbidden}),
-    error => error.code === 'BACKUP_RESTORE_V2_SUSPENDED');
-  assert.equal(accesses, 0);
+test('active boundary delegates only the authenticated owner and closed payload', async () => {
+  let received;
+  const result = await runBackupRestoreV2(valid, {execute: value => { received = value; return {status: 'ok'}; }});
+  assert.deepEqual(result, {status: 'ok'});
+  assert.deepEqual(received, {uid: valid.auth.uid, data: valid.data});
 });

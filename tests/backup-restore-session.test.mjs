@@ -8,10 +8,13 @@ const strip = source => source.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^
 const service = strip(await readFile(new URL('backup-import-service.js', root), 'utf8'));
 const model = strip(await readFile(new URL('backup-import-model.js', root), 'utf8'));
 const exportModel = strip(await readFile(new URL('backup-export-model.js', root), 'utf8'));
+const v2Client = strip(await readFile(new URL('backup-restore-v2-client.js', root), 'utf8'));
 const deferred = () => { let resolve; return {promise: new Promise(done => { resolve = done; }), resolve}; };
 
-function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLimits = {}} = {}) {
+function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLimits = {}, v2 = false,
+    sharedLocalValues = null} = {}) {
     const observers = new Set(), events = new EventTarget(), calls = [], uploads = [];
+    const localValues = sharedLocalValues || new Map();
     const auth = {currentUser: {uid: 'A'}};
     const records = Array.from({length: count}, (_, index) => ({kind: 'record', scope: 'private-account', id: `r${index}`, data: {nomeAccount: 'Synthetic', password: 'cipher'}}));
     if (attachment) records.push({kind: 'record', scope: 'private-account-attachment', id: 'file', accountId: 'r0', data: {storagePath: 'users/A/accounts/r0/attachments/file'}});
@@ -23,6 +26,8 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
     const context = vm.createContext({
         auth, AbortController, TextEncoder, TextDecoder, Uint8Array, crypto: {randomUUID: () => 'execution'},
         functions: {}, storage: {}, ref: (_storage, path) => path,
+        localStorage: {setItem: (key, value) => localValues.set(key, value), getItem: key => localValues.get(key),
+            removeItem: key => localValues.delete(key)},
         atob: value => Buffer.from(value, 'base64').toString('binary'),
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
@@ -32,12 +37,19 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
         respond: async command => ({data: command.mode === 'preview' ? {previewVersion: 1,
             entries: command.records.map((_record, index) => ({index, status: 'missing', expectedVersion: {exists: false}}))
         } : {status: 'applied'}}),
-        httpsCallable: () => async command => { calls.push({uid: auth.currentUser?.uid, command}); return context.respond(command); },
+        httpsCallable: (_functions, name) => async command => {
+            calls.push({uid: auth.currentUser?.uid, name, command}); return context.respond(command, name);
+        },
         getBytes: async () => new Uint8Array([1]),
         uploadBytes: async (path, bytes, metadata) => uploads.push([path, bytes.slice(), metadata]),
     });
     vm.runInContext(`(() => { ${model}\nObject.assign(globalThis,{chunkRestoreRecords,describeRestoreRecords,restoreRecordKey,validateBackupFooter,validateRestoreStoragePath}); })()`, context);
     vm.runInContext(`(() => { ${exportModel}\nObject.assign(globalThis,{collectStoragePaths}); })()`, context);
+    vm.runInContext(`(() => { ${v2Client}\nObject.assign(globalThis,{clearBackupRestoreV2Locator,
+        confirmedBackupRestoreV2Prefix,createBackupRestoreV2PlanRequest,inspectBackupRestoreV2PlanRequest,
+        loadBackupRestoreV2Locator,reconstructBackupRestoreV2PlanRequest,reconstructedBackupRestoreV2Commands,
+        retainBackupRestoreV2Locator}); })()`, context);
+    context.isBackupRestoreV2Enabled = () => v2;
     let testedService = service;
     for (const [name, value] of Object.entries(previewLimits)) {
         assert.match(name, /^MAX_RESTORE_(RECORDS|RECORD_CHARACTERS|ATTACHMENTS|ATTACHMENT_CHARACTERS)$/);
@@ -46,12 +58,81 @@ function fixture(count = 1, attachment = false, {lineLimit, readBytes, previewLi
     if (lineLimit !== undefined) testedService = testedService.replace(/const MAX_BACKUP_LINE_CHARACTERS =[\s\S]*?;/, `const MAX_BACKUP_LINE_CHARACTERS = ${lineLimit};`);
     if (readBytes !== undefined) testedService = testedService.replace('const BACKUP_READ_BYTES = 64 * 1024;', `const BACKUP_READ_BYTES = ${readBytes};`);
     vm.runInContext(testedService, context);
-    return {context, file, calls, uploads, observers, setFileContent: value => { backupBlob = new Blob([value]); },
+    return {context, file, calls, uploads, observers, localValues, setFileContent: value => { backupBlob = new Blob([value]); },
         prepare: () => context.prepareBackupRestore(file, 'A', 'synthetic-recovery'),
         changeUid: uid => { auth.currentUser = {uid}; for (const callback of [...observers]) callback(auth.currentUser); },
         lock: () => events.dispatchEvent(new Event('vault-session-locked')),
     };
 }
+
+test('M8 V2 active fixture persists, inspects a lost response and clears its locator without replay', async () => {
+    const f = fixture(1, false, {v2: true});
+    const plan = await f.prepare();
+    let applied = false;
+    f.context.respond = async (command, name) => {
+        if (name === 'manageBackupRestoreV2' && command.action === 'create') {
+            return {data: {planId: 'plan-one', expiresAtMs: Date.now() + 60000}};
+        }
+        if (name === 'manageBackupRestoreV2' && command.action === 'inspect') {
+            return {data: {chunks: command.inputs.map(input => ({operationId: input.operationId,
+                status: applied ? 'confirmed' : 'unconfirmed'}))}};
+        }
+        if (name === 'restoreBackupChunk') {
+            applied = true;
+            throw Object.assign(new Error('lost response'), {code: 'unavailable'});
+        }
+        throw new Error('UNEXPECTED_CALL');
+    };
+    await assert.rejects(f.context.executeBackupRestore(plan), error => error.code === 'BACKUP_FIRESTORE_UNCERTAIN');
+    assert.equal(f.localValues.size, 1);
+    const result = await f.context.executeBackupRestore(plan, null, {retry: true});
+    assert.deepEqual({...result}, {recordCount: 1, attachmentCount: 0});
+    assert.equal(f.calls.filter(call => call.name === 'restoreBackupChunk' && call.command.mode === 'apply').length, 1);
+    assert.equal(f.localValues.size, 0);
+    f.context.releaseBackupRestore(plan);
+});
+
+test('M8 V2 active fixture resumes after backup re-selection in a new client session', async () => {
+    const localValues = new Map();
+    let commands, applied = false;
+    const respond = async (command, name) => {
+        if (name === 'restoreBackupChunk' && command.mode === 'preview') return {data: {previewVersion: 1,
+            entries: command.records.map((_record, index) => ({index, status: 'missing', expectedVersion: {exists: false}}))}};
+        if (name === 'manageBackupRestoreV2' && command.action === 'create') {
+            commands = command.inputs;
+            return {data: {planId: 'plan-reselect', expiresAtMs: Date.now() + 60000}};
+        }
+        if (name === 'manageBackupRestoreV2' && command.action === 'reconstruct') {
+            return {data: {inputs: commands, expiresAtMs: Date.now() + 60000}};
+        }
+        if (name === 'manageBackupRestoreV2' && command.action === 'inspect') {
+            return {data: {chunks: commands.map(input => ({operationId: input.operationId,
+                status: applied ? 'confirmed' : 'unconfirmed'}))}};
+        }
+        if (name === 'restoreBackupChunk' && command.mode === 'apply') {
+            applied = true;
+            throw Object.assign(new Error('lost response'), {code: 'unavailable'});
+        }
+        throw new Error('UNEXPECTED_CALL');
+    };
+    const first = fixture(1, false, {v2: true, sharedLocalValues: localValues});
+    first.context.respond = respond;
+    const firstPlan = await first.prepare();
+    await assert.rejects(first.context.executeBackupRestore(firstPlan),
+        error => error.code === 'BACKUP_FIRESTORE_UNCERTAIN');
+    first.context.releaseBackupRestore(firstPlan);
+    assert.equal(localValues.size, 1);
+
+    const second = fixture(1, false, {v2: true, sharedLocalValues: localValues});
+    second.context.respond = respond;
+    const resumedPlan = await second.prepare();
+    assert.equal(resumedPlan.resumeAvailable, true);
+    const result = await second.context.resumeBackupRestore(resumedPlan);
+    assert.deepEqual({...result}, {recordCount: 1, attachmentCount: 0});
+    assert.equal(second.calls.filter(call => call.name === 'restoreBackupChunk' && call.command.mode === 'apply').length, 0);
+    assert.equal(localValues.size, 0);
+    second.context.releaseBackupRestore(resumedPlan);
+});
 
 test('malformed typed data in a later chunk rejects the entire source before any callable or upload', async () => {
     const f = fixture(401);

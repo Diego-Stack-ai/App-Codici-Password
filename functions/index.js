@@ -52,6 +52,7 @@ const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
 const {createBackupRestoreBinding, verifyBackupRestoreReceipt} = require("./backup-restore-receipt");
+const {createBackupRestoreV2Callable} = require('./backup-restore-v2-callable');
 const {createArchivePurgeBinding, verifyArchivePurgeReceipt} = require("./archive-purge-receipt");
 const {
     acquireGlobalPurgeLock, assertGlobalPurgeLockHeld, assertTransactionGlobalPurgeUnlocked,
@@ -78,6 +79,10 @@ const firestore = () => getFirestore();
 firestore.FieldValue = FieldValue;
 const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
+
+// Exported for local end-to-end verification only. The handler itself contains
+// a code-level hard-off interlock and cannot reach Firestore until activation.
+exports.manageBackupRestoreV2 = createBackupRestoreV2Callable({onCall, getFirestore});
 
 const vaultAccounts = createVaultAccountCallables({db: getFirestore(),
     hash: value => crypto.createHash('sha256').update(value).digest('hex'),

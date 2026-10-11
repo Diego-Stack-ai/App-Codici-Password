@@ -1,5 +1,18 @@
 # Collaudi
 
+## 10/10/2026 — pubblicazione 1.2.157 e allineamento Functions
+
+- PR #101 unita in `master` (`a3c436d7`); CI PR verde in **7m30s**, validazione `master` verde in **6m07s**, gate del workflow manuale verde in **5m58s**.
+- Firebase Hosting: deploy riuscito; home `1.2.157` HTTP **200**, riferimento versione presente; `image-crop-editor.js` HTTP **200** e contenuto di ritaglio presente.
+- Functions: aggiornamento mirato riuscito per **15/15** callable CPFE2/M7; Firebase CLI ha concluso con `Deploy complete`.
+- Test integrale locale precedente al rilascio: `npm test` exit **0**. Nessun dato reale modificato durante i collaudi.
+
+## 10/10/2026 — promozione M8 V2, contratto piano persistente
+
+- Nuovo contratto Functions per manifest riprendibile: nessun corpo record persistito; binding di owner, backup, chunk, path, versione attesa e hash operazione.
+- Ricostruzione consentita soltanto ripresentando il backup originale; manomissione di corpo, identità, versione, ordine o conferma non ricrea l'hash iniziale.
+- Test piano, repository/dispatcher e interlock/adapter iniziali **10/10**. Evidenza successiva dell'11/10: callable e client collegati a create/inspect/reconstruct, locator minimo, risposta persa e ripresa dopo riselezione. Dopo la verifica completa l'interlock è stato aperto solo localmente. Gate finale: Functions/security **462 totali: 453 pass, 9 skip dichiarati, 0 fail**; backup **112/112**; session client **47/47** più contratto client **1/1**; Firestore Emulator V2 **1/1**; sintassi **183 moduli**. Nessun deploy e nessun dato reale.
+
 ## 10/10/2026 — PDF azienda e preparazione immagini candidata 1.2.157
 
 - PDF azienda: layout a schede, due colonne per campi brevi, larghezza piena e segmentazione multipagina per testi lunghi. Suite **33/33**; fixture sintetica renderizzata e ispezionata su tre pagine, senza sovrapposizioni o troncamenti.
