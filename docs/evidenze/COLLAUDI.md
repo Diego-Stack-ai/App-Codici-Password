@@ -1,5 +1,14 @@
 # Collaudi
 
+## 11/10/2026 — pubblicazione M8 V2, release 1.2.158
+
+- PR #102 unita in `master` al commit `1712e4ff`; documentazione e validazione GitHub verdi.
+- Pipeline locale completa verde, inclusi Functions/security **453 pass + 9 skip dichiarati**, backup **112/112** e Firestore Emulator V2 **1/1**.
+- Deploy mirato riuscito: Hosting e `manageBackupRestoreV2`.
+- Verifica remota Hosting: HTTP **200**, versione `1.2.158` presente.
+- Verifica callable: `ACTIVE`, `europe-west1`, Node.js 22, hash `419ec3ce5cd21e3581c665af9e98a3d1adc7588f`.
+- Nessun dato reale usato o cancellato.
+
 ## 10/10/2026 — pubblicazione 1.2.157 e allineamento Functions
 
 - PR #101 unita in `master` (`a3c436d7`); CI PR verde in **7m30s**, validazione `master` verde in **6m07s**, gate del workflow manuale verde in **5m58s**.
