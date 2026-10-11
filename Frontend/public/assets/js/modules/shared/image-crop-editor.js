@@ -75,20 +75,43 @@ export function detectCardBoundaryFromImageData(data, width, height) {
     }
     red /= count; green /= count; blue /= count;
     const stride = Math.max(1, Math.floor(Math.max(width, height) / 700));
-    let topLeft = null, topRight = null, bottomRight = null, bottomLeft = null, foreground = 0;
-    for (let y = sample; y < height - sample; y += stride) for (let x = sample; x < width - sample; x += stride) {
+    const columns = Math.ceil((width - sample * 2) / stride);
+    const rows = Math.ceil((height - sample * 2) / stride);
+    const mask = new Uint8Array(columns * rows);
+    let foreground = 0;
+    for (let row = 0, y = sample; row < rows; row++, y += stride) for (let column = 0, x = sample; column < columns; column++, x += stride) {
         const offset = (y * width + x) * 4;
         const delta = Math.hypot(data[offset] - red, data[offset + 1] - green, data[offset + 2] - blue);
         if (delta < 48) continue;
-        foreground++;
-        const point = {x, y}, sum = x + y, difference = x - y;
+        mask[row * columns + column] = 1; foreground++;
+    }
+    const sampled = columns * rows;
+    if (foreground < sampled * .06 || foreground > sampled * .88) return null;
+    let largest = [];
+    for (let start = 0; start < mask.length; start++) {
+        if (mask[start] !== 1) continue;
+        const component = [], queue = [start]; mask[start] = 2;
+        for (let cursor = 0; cursor < queue.length; cursor++) {
+            const index = queue[cursor], row = Math.floor(index / columns), column = index % columns;
+            component.push({x: sample + column * stride, y: sample + row * stride});
+            for (const neighbor of [index - 1, index + 1, index - columns, index + columns]) {
+                if (neighbor < 0 || neighbor >= mask.length || mask[neighbor] !== 1) continue;
+                const neighborRow = Math.floor(neighbor / columns), neighborColumn = neighbor % columns;
+                if (Math.abs(neighborRow - row) + Math.abs(neighborColumn - column) !== 1) continue;
+                mask[neighbor] = 2; queue.push(neighbor);
+            }
+        }
+        if (component.length > largest.length) largest = component;
+    }
+    if (largest.length < sampled * .05 || largest.length < foreground * .45) return null;
+    let topLeft = null, topRight = null, bottomRight = null, bottomLeft = null;
+    for (const point of largest) {
+        const {x, y} = point, sum = x + y, difference = x - y;
         if (!topLeft || sum < topLeft.score) topLeft = {...point, score: sum};
         if (!bottomRight || sum > bottomRight.score) bottomRight = {...point, score: sum};
         if (!topRight || difference > topRight.score) topRight = {...point, score: difference};
         if (!bottomLeft || difference < bottomLeft.score) bottomLeft = {...point, score: difference};
     }
-    const sampled = Math.ceil((width - sample * 2) / stride) * Math.ceil((height - sample * 2) / stride);
-    if (foreground < sampled * .06 || foreground > sampled * .92 || !topLeft || !topRight || !bottomRight || !bottomLeft) return null;
     const points = [topLeft, topRight, bottomRight, bottomLeft].map(({x, y}) => ({x, y}));
     if (!isValidQuadrilateral(points)) return null;
     const area = Math.abs(points.reduce((total, point, index) => {

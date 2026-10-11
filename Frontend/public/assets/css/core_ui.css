@@ -46,6 +46,11 @@
     pointer-events: auto;
 }
 
+/* Le conferme possono essere aperte da gallerie/editor già modali. */
+#protocol-confirm-modal {
+    z-index: 13000;
+}
+
 .modal-box {
     background: var(--accent-surface);
     backdrop-filter: none;
