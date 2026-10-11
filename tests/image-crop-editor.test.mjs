@@ -15,7 +15,32 @@ test('editor immagini offre quattro angoli liberi, prospettiva e formato tessera
     assert.match(source, /MAX_SIDE = 2048/);
     assert.match(source, /Tessera \/ carta/);
     assert.match(source, /perspectiveCanvas/);
+    assert.match(source, /image-editor-magnifier/);
+    assert.match(source, /Rileva tessera/);
+    assert.match(source, /detectCardBoundary/);
     assert.doesNotMatch(source, /tesseract|ocr|card-parser/i);
+});
+
+test('riquadro tessera preimpostato conserva il rapporto ID-1', async () => {
+    const {cardFrame} = await loadEditor();
+    const points = cardFrame(1000, 800);
+    const width = points[1].x - points[0].x, height = points[3].y - points[0].y;
+    assert.ok(Math.abs(width / height - 1012 / 638) < 1e-9);
+    assert.ok(points.every(point => point.x >= 0 && point.x <= 1000 && point.y >= 0 && point.y <= 800));
+});
+
+test('motore locale rileva una tessera chiara su sfondo scuro senza OCR', async () => {
+    const {detectCardBoundaryFromImageData} = await loadEditor();
+    const width = 240, height = 180, data = new Uint8ClampedArray(width * height * 4);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        const inside = x >= 35 && x <= 210 && y >= 36 && y <= 146;
+        const offset = (y * width + x) * 4, value = inside ? 230 : 18;
+        data[offset] = value; data[offset + 1] = value; data[offset + 2] = value; data[offset + 3] = 255;
+    }
+    const points = detectCardBoundaryFromImageData(data, width, height);
+    assert.ok(points);
+    assert.ok(Math.abs(points[0].x - 35) < 5 && Math.abs(points[0].y - 36) < 5);
+    assert.ok(Math.abs(points[2].x - 210) < 5 && Math.abs(points[2].y - 146) < 5);
 });
 
 test('contratto geometrico rifiuta angoli incrociati e conserva quadrilateri convessi', async () => {

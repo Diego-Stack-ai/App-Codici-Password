@@ -1,4 +1,4 @@
-import {auth, functions} from '../../firebase-config.js?v=1.2.159';
+import {auth, functions} from '../../firebase-config.js?v=1.2.160';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 
 const manageWidgetProfile = httpsCallable(functions, 'manageWidgetProfile');

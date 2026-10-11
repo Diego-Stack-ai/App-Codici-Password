@@ -3,7 +3,7 @@ const changeProfileAccount = (...args) => import('../shared/profile-account-mana
 const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /** Profilo privato: stato condiviso, inizializzazione dei moduli e caricamento progressivo. */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.159';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.160';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -22,7 +22,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.159';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.160';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -90,13 +90,32 @@ const manageDocumentAttachments = async documentItem => {
     const uid = currentUserUid;
     const vaultKey = await ensureVaultKeyMaterial();
     if (!uid || !vaultKey || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per gestire gli allegati.');
-    const module = await import('./profile-document-attachments.js?v=1.2.159');
+    const module = await import('./profile-document-attachments.js?v=1.2.160');
     return module.openProfileDocumentAttachments({
         uid, documentItem, vaultKey,
         encryptName: value => encrypt(value, vaultKey),
-        decryptName: value => decryptIfPossible(value, vaultKey)
+        decryptName: value => decryptIfPossible(value, vaultKey),
+        onChanged: refreshDocumentAttachmentPreviews
     });
 };
+
+async function refreshDocumentAttachmentPreviews() {
+    const uid = currentUserUid;
+    if (!uid || auth.currentUser?.uid !== uid) return;
+    try {
+        const vaultKey = await ensureVaultKeyMaterial();
+        const module = await import('./profile-document-attachments.js?v=1.2.160');
+        if (uid !== currentUserUid || auth.currentUser?.uid !== uid) return;
+        await module.renderProfileDocumentAttachmentPreviews({
+            uid,
+            documentItems: userDocuments,
+            vaultKey,
+            decryptName: value => decryptIfPossible(value, vaultKey)
+        });
+    } catch (error) {
+        logError('ProfileDocumentAttachmentPreviews', error);
+    }
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
@@ -340,6 +359,7 @@ function renderAllSections() {
     renderPhonesView();
     renderEmailsView();
     renderDocumentiView();
+    refreshDocumentAttachmentPreviews();
     renderProfileOverview();
     focusAssistantDocument();
 }
