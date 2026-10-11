@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.158';
+import { db, storage } from '../../firebase-config.js?v=1.2.159';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -26,6 +26,12 @@ let _currentId = null;
 let _account = null;
 let _readOnly = false;
 let _active = () => true, _version = 0, _confirm = showConfirmModal;
+let _previewUrls = [];
+
+function clearPreviewUrls() {
+    _previewUrls.forEach(url => URL.revokeObjectURL(url));
+    _previewUrls = [];
+}
 
 /**
  * Inizializza il modulo con il contesto dell'account corrente.
@@ -33,6 +39,7 @@ let _active = () => true, _version = 0, _confirm = showConfirmModal;
  */
 export function initAttachmentModule({ ownerUid, currentUid, currentAziendaId, currentId, account,
     readOnly = false, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+    clearPreviewUrls();
     _confirm = confirmAction;
     const version = ++_version;
     _active = () => version === _version && !signal?.aborted && isActive();
@@ -176,6 +183,7 @@ function renderAttachments(list, active = _active) {
     const container = document.getElementById('attachments-list');
     if (!container) return;
 
+    clearPreviewUrls();
     clearElement(container);
 
     if (list.length === 0) {
@@ -186,6 +194,7 @@ function renderAttachments(list, active = _active) {
         return;
     }
 
+    const imagePreviews = [];
     const items = list.map(a => {
         const type = (a.type || "").toLowerCase();
         let icon = 'description';
@@ -200,8 +209,13 @@ function renderAttachments(list, active = _active) {
             : '---';
         const size = (a.size / (1024 * 1024)).toFixed(2);
 
+        const preview = type.includes('image') ? createElement('div', {
+            className: 'attachment-preview attachment-preview-loading',
+            textContent: 'Caricamento anteprima…'
+        }) : null;
+        if (preview) imagePreviews.push({attachment: a, preview});
         return createElement('div', {
-            className: 'attachment-item animate-in slide-in-from-left-2'
+            className: 'attachment-item attachment-item-visible animate-in slide-in-from-left-2'
         }, [
             createElement('div', {
                 className: 'attachment-info cursor-pointer',
@@ -213,6 +227,7 @@ function renderAttachments(list, active = _active) {
                     createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
                 ])
             ]),
+            preview,
             !_readOnly ? createElement('button', {
                 type: 'button',
                 className: 'btn-delete-attachment',
@@ -224,6 +239,38 @@ function renderAttachments(list, active = _active) {
     });
 
     setChildren(container, items);
+    imagePreviews.forEach(item => loadVisibleImagePreview(item.attachment, item.preview, active));
+}
+
+async function loadVisibleImagePreview(attachment, preview, active = _active) {
+    if (!active() || !attachment.storagePath || !attachment.encryption) return;
+    try {
+        const vaultKey = await ensureVaultKeyMaterial();
+        if (!active()) return;
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        if (!active()) return;
+        const clear = _readOnly
+            ? await decryptReceivedCompanyAttachment({ownerUid: _ownerUid, companyId: _currentAziendaId,
+                accountId: _currentId, attachment, recipientUid: _currentUid,
+                vaultKeyMaterial: vaultKey, ciphertext: bytes})
+            : await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        if (!active()) {clear?.fill?.(0); return;}
+        const type = attachment.encryption?.originalType || attachment.type || 'image/jpeg';
+        const objectUrl = URL.createObjectURL(new Blob([clear], {type}));
+        clear?.fill?.(0);
+        _previewUrls.push(objectUrl);
+        const image = createElement('img', {className: 'attachment-preview-image', src: objectUrl,
+            alt: `Anteprima ${attachment.name || 'allegato'}`});
+        image.onclick = () => openAttachment(attachment);
+        setChildren(preview, [image]);
+        preview.classList.remove('attachment-preview-loading');
+    } catch (error) {
+        if (!active()) return;
+        preview.textContent = 'Anteprima non disponibile';
+        preview.classList.remove('attachment-preview-loading');
+        preview.classList.add('attachment-preview-unavailable');
+        logError('LoadAttachmentPreview', error);
+    }
 }
 
 async function openAttachment(attachment) {
