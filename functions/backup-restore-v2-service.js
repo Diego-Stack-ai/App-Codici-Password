@@ -1,7 +1,6 @@
-// Hard-off boundary for the resumable restore candidate. Deliberately ignores
-// request data and environment variables: activation requires a reviewed code
-// change, tests and an explicit deploy.
-function isBackupRestoreV2Suspended() { return true; }
+// Code-owned activation boundary. Request data and environment variables remain
+// unable to alter it; deployment is still a separate explicitly authorized step.
+function isBackupRestoreV2Suspended() { return false; }
 
 function requireBackupRestoreV2Disabled() {
   if (isBackupRestoreV2Suspended()) {

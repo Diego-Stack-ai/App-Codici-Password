@@ -1,8 +1,11 @@
-import {auth, functions, storage} from '../../firebase-config.js?v=1.2.157';
+import {auth, functions, storage} from '../../firebase-config.js?v=1.2.158';
 import {getBytes, httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, restoreRecordKey, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
 import {collectStoragePaths} from './backup-export-model.js';
+import {clearBackupRestoreV2Locator, confirmedBackupRestoreV2Prefix, createBackupRestoreV2PlanRequest, inspectBackupRestoreV2PlanRequest,
+    isBackupRestoreV2Enabled, loadBackupRestoreV2Locator, reconstructBackupRestoreV2PlanRequest,
+    reconstructedBackupRestoreV2Commands, retainBackupRestoreV2Locator} from './backup-restore-v2-client.js';
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
@@ -345,6 +348,25 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
             headerText: JSON.stringify(scan.header), records: freezeRestoreValue(records), comparison: freezeRestoreValue(comparison),
             counts: freezeRestoreValue(scan.counts), collisionCount: collisions,
             storagePaths: freezeRestoreValue([...storagePaths]), attachmentDigests};
+        if (typeof isBackupRestoreV2Enabled === 'function' && isBackupRestoreV2Enabled()) {
+            const locator = loadBackupRestoreV2Locator(globalThis.localStorage, uid);
+            if (locator?.backupId === scan.header.backupId) {
+                const managePlan = httpsCallable(functions, 'manageBackupRestoreV2');
+                const rebuilt = await managePlan(reconstructBackupRestoreV2PlanRequest(uid, locator.planId,
+                    locator.backupId, records));
+                check();
+                const commands = reconstructedBackupRestoreV2Commands(rebuilt.data);
+                const inspection = await managePlan(inspectBackupRestoreV2PlanRequest(uid, locator.planId, commands));
+                check();
+                const confirmedChunks = confirmedBackupRestoreV2Prefix(inspection.data, commands);
+                const resumedRecords = freezeRestoreValue(commands.flatMap(command => command.records));
+                const resumedStoragePaths = freezeRestoreValue(collectStoragePaths(resumedRecords, uid));
+                if (resumedStoragePaths.some(path => !storagePaths.has(path))) throw new Error('BACKUP_ATTACHMENT_MISSING');
+                session.resume = {commands, records: resumedRecords, storagePaths: resumedStoragePaths,
+                    confirmedChunks, persistentPlanId: locator.planId};
+                plan.resumeAvailable = true;
+            }
+        }
         session.own(() => {
             session.source = null;
             if (session.execution) {
@@ -363,6 +385,18 @@ export async function prepareBackupRestore(file, uid, recoveryKey, options = {})
         session.dispose();
         throw error;
     }
+}
+
+export async function resumeBackupRestore(plan) {
+    const session = sessions.get(plan);
+    if (!session?.resume || plan.uid !== session.uid || session.execution) throw new Error('BACKUP_RESUME_INVALID');
+    const resume = session.resume;
+    session.execution = {executionId: resume.persistentPlanId, selection: null, selective: false,
+        records: resume.records, commands: resume.commands, storagePaths: resume.storagePaths,
+        attemptedChunks: 0, confirmedChunks: resume.confirmedChunks, uploaded: 0, uncertain: false,
+        possiblyApplied: false, storageStarted: false, uploadedStoragePaths: new Set(), inFlight: false,
+        blocked: false, result: null, persistentPlanId: resume.persistentPlanId};
+    return executeBackupRestore(plan, null, {retry: true});
 }
 
 function restoreProgress(execution) {
@@ -456,6 +490,16 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
     if (!execution) {
         execution = prepareRestoreExecution(session, selection);
         session.execution = execution;
+        if (typeof isBackupRestoreV2Enabled === 'function' && isBackupRestoreV2Enabled()) {
+            const persistPlan = httpsCallable(functions, 'manageBackupRestoreV2');
+            const persisted = await persistPlan(createBackupRestoreV2PlanRequest(session.uid, execution.commands));
+            check();
+            if (typeof persisted.data?.planId !== 'string' || !persisted.data.planId) {
+                throw restoreError('BACKUP_RESTORE_V2_PLAN_INVALID', execution);
+            }
+            execution.persistentPlanId = persisted.data.planId;
+            retainBackupRestoreV2Locator(globalThis.localStorage, session.uid, session.source.backupId, persisted.data);
+        }
     }
     execution.inFlight = true;
     const source = session.source;
@@ -467,6 +511,16 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
         await verifyRestoreSource(session);
         check();
         stage = 'firestore';
+        if (retry && typeof isBackupRestoreV2Enabled === 'function' && isBackupRestoreV2Enabled() &&
+            execution.persistentPlanId) {
+            const inspectPlan = httpsCallable(functions, 'manageBackupRestoreV2');
+            const inspection = await inspectPlan(inspectBackupRestoreV2PlanRequest(session.uid,
+                execution.persistentPlanId, execution.commands));
+            check();
+            execution.confirmedChunks = confirmedBackupRestoreV2Prefix(inspection.data, execution.commands);
+            execution.uncertain = false;
+            execution.possiblyApplied = false;
+        }
         const restoreChunk = httpsCallable(functions, 'restoreBackupChunk');
         for (let index = execution.confirmedChunks; index < execution.commands.length; index += 1) {
             check();
@@ -525,6 +579,9 @@ export async function executeBackupRestore(plan, selectedIndexes = null, {retry 
         const expectedAttachments = selectedStoragePaths.size;
         if (execution.uploaded !== expectedAttachments) throw new Error('BACKUP_ATTACHMENT_COUNT_INVALID');
         execution.result = freezeRestoreValue({recordCount: execution.records.length, attachmentCount: execution.uploaded});
+        if (execution.persistentPlanId) {
+            clearBackupRestoreV2Locator(globalThis.localStorage, session.uid, execution.persistentPlanId);
+        }
         return {...execution.result};
     } catch (cause) {
         if (cause?.code === 'BACKUP_SESSION_INVALIDATED' || cause?.code === 'BACKUP_PREVIEW_STALE') {

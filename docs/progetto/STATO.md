@@ -1,16 +1,24 @@
 # Stato
 
+## Produzione 1.2.157 — 10/10/2026
+
+Release pubblicata tramite PR #101 (`a3c436d7`). Hosting verificato HTTP 200 con versione `1.2.157` e nuovo editor immagini disponibile. Deploy mirato completato con successo per 15 Functions CPFE2/M7. M7, dual-read e writer CPFE2 sono pertanto attivi; M8 corrente resta attivo. La policy MFA definitiva per l'utente completamente bloccato è assistenza manuale: il percorso automatico selettivo non viene promosso perché richiede un ID token che l'utente in lockout non può ottenere senza indebolire MFA. M8 V2 riprendibile è ora collegato e verificato nel solo working tree locale; non è incluso nella produzione `1.2.157`.
+
 ## Verifica conclusiva dei motori — 10/10/2026
 
 | Motore | Evidenza corrente | Esito di attivazione |
 |---|---|---|
 | M7 purge | Cascata Emulator 2/2; backend 444 pass; Firestore Rules verdi; Storage Rules 14/14 e condivisione Storage 5/5. Writer client Firestore/Storage e callable Admin censite partecipano ora al lock globale | **Gate tecnici locali del fence chiusi**; resta hard-off fino al canary distribuito e ai gate esterni |
 | M8 restore corrente | Backup 110/110; Emulator interruzione 2/2, retry 4/4, stale 3/3, collisioni 4/4. La nuova sessione verifica ora l'esistenza dei byte Storage prima di accettare un allegato invariato e recupera i riferimenti orfani | **Gate tecnici locali corrente chiusi**; restano gate esterni prima dell'attivazione |
-| M8 candidato riprendibile | 168 test: **164 pass, 4 skip esterni, 0 fail**; staging, generazioni, ripresa e cleanup verificati localmente | **Candidato valido**, ma non è esportato né integrato nel runtime produttivo |
+| M8 candidato riprendibile | Piano persistente senza corpi, callable locale, locator UI, riselezione e riconciliazione ricevute collegati; Functions **453 pass**, backup **112/112**, Firestore Emulator V2 **1/1** | **Percorso locale attivo e verificato**; callable non distribuita, produzione ancora `1.2.157` |
 | CPFE2 | Dual-read e rifiuto fail-closed verificati; writer continua nel formato legacy | **Lettura attiva e compatibile**; nuove scritture CPFE2 richiedono matrice dispositivi |
 | Recupero MFA | Policy manuale verificata: con fattori presenti nessuna rimozione, nessun consumo codice, nessun update Auth | **Attivo soltanto in modalità assistita sicura**; recupero automatico selettivo resta indisponibile |
 
-Conclusione: gli interlock M7/M8 non sono ritardi documentali ma impediscono due difetti riprodotti. La via più breve alla chiusura è integrare il candidato M8 già verde e completare il lock globale M7; non è sicuro limitarsi a cambiare i flag.
+Conclusione: M7 e M8 corrente sono già operativi nella release pubblicata. Il percorso M8 V2 è completo e attivo soltanto nel codice locale dopo i gate sintetici; promozione Git e deploy restano operazioni distinte soggette ad autorizzazione esplicita.
+
+### M8 V2 — raccordo locale dell'11/10/2026
+
+Il candidato V2 dispone ora di percorso locale completo dal contratto del piano a repository/callable, locator browser, riselezione del backup originale, ricostruzione esatta dei comandi e riconciliazione delle sole ricevute server attestate. Il manifest Firestore non contiene corpi record; il locator locale non contiene comandi o contenuti e viene rimosso dopo il completamento verificato. La fixture Firestore Emulator prova persistenza minima, ricostruzione, ricevuta valida e scadenza **1/1**; le fixture client con V2 attivo provano risposta persa e ripresa dopo riselezione senza replay. Dopo questi gate l'interlock è aperto nel codice locale, senza override esterni. La callable è presente in `functions/index.js` ma non è stata distribuita: produzione e release `1.2.157` restano invariate fino a un'autorizzazione esplicita di commit/push/deploy.
 
 ### M8 — ripresa Storage nella sessione corrente
 
