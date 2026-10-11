@@ -5,6 +5,10 @@
 
 ## Decisioni e limiti aggiornati
 
+Per il nuovo Assistente, «aperta una volta» non equivale a «completa offline». È richiesto un percorso esplicito **Prepara per l'uso offline** eseguito con rete: deve enumerare il perimetro, sincronizzare i dati autorizzati, verificare la completezza, mostrare avanzamento/ultimo aggiornamento e distinguere cache vuota, incompleta o espulsa. La shell resta separata dai dati e la cache non diventa un backup.
+
+I byte degli allegati non sono automaticamente offline. Il download è opt-in per tutti, per tipo o per selezione, con stima dello spazio, preferenza solo Wi-Fi, stato per allegato, cifratura locale e comando di rimozione. Modelli AI e allegati non entrano nella precache obbligatoria. Preparazione dati, allegati offline e modello AI sono tre consensi e cicli di vita distinti.
+
 M6-F1/F2 sono decisioni registrate; M6-F3 ha la comunicazione decisa ma conserva i gate di compatibilità, copie installate e rilascio. M6-C1/C2 sono decise nei perimetri documentati; C3 resta aperta. Vedere [DECISIONI](../progetto/DECISIONI.md) e [domande M6](../domande/M6_OFFLINE.md). Il laboratorio M6-A-8 non equivale a distribuzione né a collaudo su iPhone/PWA.
 
 Le sezioni di prova incrementale sono consultabili in [AUDIT](../evidenze/AUDIT.md); i requisiti e il perimetro del cutover restano qui. Le indicazioni di stato iniziale conservano la loro data e non sostituiscono STATO.

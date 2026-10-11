@@ -5,6 +5,19 @@
 
 Questa roadmap riguarda l’assistente integrato nell’app, non Astra/DeepSeek che sviluppano il progetto. Resta una fase futura con attivazioni separate; provider, prezzi e compatibilità citati nelle fonti sono riferimenti datati.
 
+## Direzione aggiornata — 11/10/2026
+
+L'Assistente è una funzione specifica di Codici & Password, non una chat generica. Deve riconoscere richieste relative all'app, cercare nomi completi o parziali, aziende, Account, utenti e scadenze anche da ricordi incompleti, mostrare subito card attendibili quando il risultato è chiaro e porre una domanda discriminante quando i risultati sono numerosi. Deve inoltre spiegare cosa fa l'app, guidare il primo accesso, il Vault e la Master Password senza conoscerla, e accompagnare l'utente nel pannello Impostazioni.
+
+Il prodotto conserva due livelli separati:
+
+- **Assistente base**, disponibile senza AI: regole, sinonimi, fuzzy search, filtri, conoscenza delle pagine, guida, navigazione e risultati verificabili;
+- **AI locale avanzata**, facoltativa nelle Impostazioni: interpreta formulazioni vaghe e restituisce soltanto azioni/parametri tipizzati. Non interroga direttamente i dati, non esegue scritture e non sostituisce il livello base.
+
+Prima dell'attivazione AI l'app chiede il consenso a una verifica locale del dispositivo e comunica supporto WebGPU/WASM, spazio stimato, dimensione del download, memoria/batteria, possibile riscaldamento, funzionamento offline, assenza di token API e possibilità di eliminare il modello. La compatibilità deriva da feature detection e breve benchmark locale, non dal solo modello del telefono. Il controllo e i risultati non vengono inviati fuori dal dispositivo.
+
+L'app resta PWA durante il periodo di valutazione deciso da Diego. Nessun wrapper nativo o provider cloud fa parte di questa fase. La preparazione offline di shell e dati è distinta dall'installazione del modello e dal download volontario degli allegati. Tutti i nuovi intenti usano identificatori indipendenti dalla lingua; testi e chiarimenti usano chiavi i18n per consentire la fase multilingue finale.
+
 ## Indice delle fonti conservate
 
 - [AGENTE_CODEX_EVOLUZIONE.md](#fonte-docs-agente-codex-evoluzione-md-l1)

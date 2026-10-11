@@ -1,5 +1,17 @@
 # Decisioni
 
+## 11/10/2026 — apertura del progetto Portabilità, Assistente e Lingue
+
+Diego apre un nuovo ciclo di progettazione articolato in tre filoni, successivi alla stabilizzazione corrente e distinti dal backup tecnico:
+
+1. **Archivio portabile completo**, denominazione che sostituisce «esportazione Excel»: deve consentire a chi non vuole più usare l'app di conservare sul proprio PC tutti i dati e gli allegati in formati aperti. La prima fase è consultabile e in sola lettura, con navigazione locale in stile maschere Access fra Home, utenti, aziende, Account e scadenze; ODS/CSV sono copie interoperabili, mentre HTML/CSS/JavaScript costituiscono l'interfaccia locale. Dati, allegati e interfaccia restano separati e versionati per predisporre, senza implementarla ora, una seconda fase con aggiunta, modifica ed eliminazione. Non è un backup e non promette reimportazione nell'app.
+2. **Assistente intelligente dell'app**: non è una chat generica. Il livello base senza AI deve rimanere disponibile e offrire ricerca per nomi parziali, date, categorie e domini, card dei risultati, guida contestuale, onboarding del Vault e guida alle Impostazioni. Un piccolo modello locale è soltanto un'estensione facoltativa attivabile dalle Impostazioni sui dispositivi compatibili; prima del download l'app deve comunicare dimensione, spazio, memoria/batteria, limiti e funzionamento locale senza token API. La verifica di compatibilità richiede consenso, resta sul dispositivo e deve preferire una prova tecnica alle sole informazioni dichiarate dal telefono. Master Password e segreti D4 non entrano nel modello.
+3. **Lingue**, ultimo filone: app, guida e assistente dovranno essere multilingue. Intenzioni e azioni interne usano identificatori stabili indipendenti dalla lingua; testi, chiarimenti, ARIA ed errori usano chiavi i18n. La revisione editoriale e il collaudo di ogni lingua avvengono dopo la stabilizzazione dell'Assistente, ma nessun nuovo testo deve essere scritto in modo da impedirne la traduzione futura.
+
+Per l'offline è necessaria una preparazione esplicita eseguita almeno una volta online, con avanzamento, verifica di completezza, ultimo aggiornamento e avviso che cache o dati possono essere espulsi dal sistema. Gli allegati non sono inclusi automaticamente: l'utente sceglie quali scaricare, vede spazio e stato, può limitare il download al Wi-Fi e rimuove le copie locali; i byte locali restano cifrati.
+
+Il prodotto resta per ora una **PWA**. Non sono autorizzati Capacitor, wrapper per store, riprogettazione nativa, AI cloud, download di modelli o modifiche runtime da questa decisione. Diego valuterà per alcuni mesi il comportamento dell'app prima di decidere un eventuale confezionamento per gli store. L'incarico corrente è documentale e di pianificazione; implementazione, prove fisiche e rilascio richiedono passi successivi espliciti.
+
 ## 10/10/2026 — pubblicazione 1.2.154 senza sblocco generale dei motori
 
 Diego ha autorizzato pubblicazione e completamento del lavoro su profili Widget e allegati dei documenti personali. PR #97 è stata unita e sono stati distribuiti Hosting, Rules e le quattro callable pertinenti. La pubblicazione non costituisce autorizzazione a migrare automaticamente i widget legacy né ad attivare M7 generale, M8 riprendibile, recupero MFA automatico o writer CPFE2. OCR e riconoscimento automatico dei documenti restano un filone successivo.

@@ -1,5 +1,30 @@
 # Collaudi
 
+## AUDIT-SKILL-01 — piano di collaudo, non ancora eseguito — 11/10/2026
+
+Baseline da registrare prima dell'avvio: commit e branch esaminati, stato del working tree, versioni delle skill e dei browser, configurazione emulatori/staging, viewport, rete simulata e identificativi delle sole fixture sintetiche.
+
+### Matrice minima
+
+- **Statico:** autenticazione/autorizzazioni, Firestore e Storage Rules, Functions, Vault e crittografia, MFA, backup/ripristino, allegati, offline/Service Worker, dipendenze e segreti.
+- **Flussi browser:** registrazione, login, logout, scadenza sessione, MFA, creazione/modifica/condivisione/archiviazione/cancellazione di record sintetici, backup interrotto e ripreso, aggiornamento PWA.
+- **Rete:** online, offline, riconnessione, richieste fallite, conflitti e riapertura della pagina; nessuna simulazione deve interessare dati produttivi.
+- **Viewport:** telefono, tablet e desktop; orientamento e zoom pertinenti; verifica di tastiera, focus, ARIA, overflow, clipping, modali e messaggi d'errore.
+- **Prestazioni:** Lighthouse e Core Web Vitals, avvio freddo/caldo, peso degli asset, cache, rete lenta e comportamento del Service Worker.
+- **Sicurezza offensiva controllata:** soltanto percorsi derivati dal threat model, contro staging/emulatori e senza tecniche distruttive, evasive o rivolte a servizi terzi.
+
+### Evidenza richiesta per ogni caso
+
+1. identificativo e prerequisiti;
+2. dati sintetici impiegati;
+3. passi riproducibili e risultato atteso/osservato;
+4. screenshot o log minimizzato, privo di segreti;
+5. browser, viewport, rete e versione esaminata;
+6. classificazione: superato, fallito, bloccato o non eseguito;
+7. collegamento all'eventuale rilievo in `AUDIT.md` e alla regressione di chiusura.
+
+Nessuna prova è dichiarata superata in questa sezione iniziale. L'installazione delle skill e l'avvio dei collaudi costituiscono gate successivi da autorizzare.
+
 ## 11/10/2026 — pubblicazione M8 V2, release 1.2.158
 
 - PR #102 unita in `master` al commit `1712e4ff`; documentazione e validazione GitHub verdi.

@@ -1,5 +1,13 @@
 # Backup
 
+## Archivio portabile distinto dal backup — decisione 11/10/2026
+
+La precedente etichetta «esportazione Excel» diventa **Archivio portabile completo**. Non serve a ripristinare l'app: consente all'utente che smette di usarla di conservare e consultare sul proprio PC tutti i dati e gli allegati. Il backup `.cpbackup` resta cifrato, autenticato e orientato al ripristino; l'archivio portabile ha manifest e schema propri, documentati e versionati, e non deve essere presentato come reimportabile.
+
+La prima fase usa una UI locale HTML/CSS/JavaScript in sola lettura, dati strutturati aperti, ODS principale, CSV semplice ed eventuale XLSX di compatibilità. Gli allegati restano nei formati originali e sono collegati alle schede mediante identificativi stabili. Macro e formule non sono il motore dell'archivio; eventuali formule nei fogli sono accessorie e devono essere sicure contro formula injection. La struttura separa dati, allegati e interfaccia per una futura fase modificabile, non ancora autorizzata.
+
+Un'esportazione contenente segreti o allegati sensibili richiede scelta esplicita, riautenticazione, protezione crittografica adeguata, inventario completo e verifica di integrità. Una normale cartella o ZIP non cifrata non è un contenitore accettabile per segreti. Restano da progettare portabilità della cifratura, recupero della password dell'archivio, compatibilità dei visualizzatori e gestione sicura dell'estrazione temporanea.
+
 ## Snapshot preventivo prima dei collaudi — 09/10/2026
 
 Creato il bucket privato UE `appcodici-password-firestore-backup-eu-20261009`, con accesso uniforme, prevenzione accesso pubblico e soft-delete predefinito. Il service account Firestore ha `Storage Admin` limitato al bucket. Export gestito completo riuscito nel prefisso `pre-test-2026-10-09T15-10-09Z`: 551 documenti, 422,61 kB, completamento 17:15:02 Europe/Rome. È una copia Firestore verificata dalla Console; non include una prova di importazione/ripristino e non sostituisce il backup cifrato utente degli allegati Storage.
