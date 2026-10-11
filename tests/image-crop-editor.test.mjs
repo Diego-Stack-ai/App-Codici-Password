@@ -43,6 +43,26 @@ test('motore locale rileva una tessera chiara su sfondo scuro senza OCR', async 
     assert.ok(Math.abs(points[2].x - 210) < 5 && Math.abs(points[2].y - 146) < 5);
 });
 
+test('motore locale ignora rumore separato e usa il contorno continuo della tessera', async () => {
+    const {detectCardBoundaryFromImageData} = await loadEditor();
+    const width = 260, height = 200, data = new Uint8ClampedArray(width * height * 4);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        const card = x >= 46 && x <= 222 && y >= 42 && y <= 153;
+        const noise = (x < 18 && y > 65 && y < 72) || (x > 242 && y > 175 && y < 181);
+        const offset = (y * width + x) * 4, value = card || noise ? 232 : 16;
+        data[offset] = value; data[offset + 1] = value; data[offset + 2] = value; data[offset + 3] = 255;
+    }
+    const points = detectCardBoundaryFromImageData(data, width, height);
+    assert.ok(points);
+    assert.ok(points[0].x > 40 && points[0].y > 36);
+    assert.ok(points[2].x < 228 && points[2].y < 160);
+});
+
+test('la conferma di eliminazione resta sopra galleria allegati ed editor immagine', async () => {
+    const css = await read('Frontend/public/assets/css/core_ui.css');
+    assert.match(css, /#protocol-confirm-modal\s*\{\s*z-index:\s*13000/);
+});
+
 test('contratto geometrico rifiuta angoli incrociati e conserva quadrilateri convessi', async () => {
     const {isValidQuadrilateral} = await loadEditor();
     assert.equal(isValidQuadrilateral([{x: 0, y: 0}, {x: 200, y: 10}, {x: 190, y: 110}, {x: 5, y: 100}]), true);
