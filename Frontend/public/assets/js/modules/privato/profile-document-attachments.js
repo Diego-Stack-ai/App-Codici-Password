@@ -8,6 +8,7 @@ import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_PER_DOCUMENT = 10;
 let activeDialog = null;
+let inlineObjectUrls = [];
 
 function bytesToBase64(value) {
     let binary = '';
@@ -36,7 +37,86 @@ function closeActiveDialog() {
     activeDialog = null;
 }
 
-export async function openProfileDocumentAttachments({uid, documentItem, vaultKey, encryptName, decryptName}) {
+function clearInlineObjectUrls() {
+    inlineObjectUrls.forEach(url => URL.revokeObjectURL(url));
+    inlineObjectUrls = [];
+}
+
+async function openStoredAttachment(attachment, name, vaultKey) {
+    const ciphertext = await getBytes(ref(storage, attachment.storagePath), MAX_BYTES + 1024);
+    const clear = await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKey);
+    openDecryptedAttachment(clear, {name, type: attachment.mimeType, encryption: attachment.encryption});
+}
+
+export async function renderProfileDocumentAttachmentPreviews({uid, documentItems, vaultKey, decryptName}) {
+    clearInlineObjectUrls();
+    const documents = new Map((documentItems || []).filter(item => item?.id).map(item => [item.id, item]));
+    for (const container of document.querySelectorAll('[data-profile-document-attachments-inline]')) {
+        clearElement(container);
+        container.classList.add('profile-document-inline-loading');
+        container.textContent = 'Caricamento allegati…';
+    }
+    if (!uid || !vaultKey || !documents.size) return;
+
+    const snapshot = await getDocsFromServer(collection(db, 'users', uid, 'profileDocumentAttachments'));
+    const grouped = new Map();
+    for (const entry of snapshot.docs) {
+        const attachment = {id: entry.id, ...entry.data()};
+        if (attachment.status !== 'ready' || !documents.has(attachment.documentId)) continue;
+        if (!grouped.has(attachment.documentId)) grouped.set(attachment.documentId, []);
+        grouped.get(attachment.documentId).push(attachment);
+    }
+
+    for (const [documentId] of documents) {
+        const container = document.querySelector(`[data-profile-document-attachments-inline="${CSS.escape(documentId)}"]`);
+        if (!container) continue;
+        container.classList.remove('profile-document-inline-loading');
+        clearElement(container);
+        const attachments = grouped.get(documentId) || [];
+        if (!attachments.length) continue;
+        container.append(createElement('div', {className: 'profile-document-inline-heading'}, [
+            createElement('span', {className: 'material-symbols-outlined', textContent: 'attach_file'}),
+            createElement('span', {textContent: attachments.length === 1 ? '1 allegato' : `${attachments.length} allegati`})
+        ]));
+        const gallery = createElement('div', {className: 'profile-document-inline-gallery'});
+        container.append(gallery);
+        for (const attachment of attachments) {
+            let name = friendlyType(attachment.mimeType);
+            try { name = await decryptName(attachment.encryptedName); } catch {}
+            const isImage = String(attachment.mimeType || '').startsWith('image/');
+            const item = createElement('button', {
+                type: 'button',
+                className: `profile-document-inline-item ${isImage ? 'is-image' : 'is-file'}`,
+                title: `Apri ${name}`
+            });
+            item.onclick = async () => {
+                item.disabled = true;
+                try { await openStoredAttachment(attachment, name, vaultKey); }
+                catch (error) { showToast(error.message || 'Apertura allegato non riuscita.', 'error'); }
+                finally { item.disabled = false; }
+            };
+            if (isImage) {
+                try {
+                    const ciphertext = await getBytes(ref(storage, attachment.storagePath), MAX_BYTES + 1024);
+                    const clear = await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKey);
+                    const url = URL.createObjectURL(new Blob([clear], {type: attachment.mimeType || 'image/jpeg'}));
+                    inlineObjectUrls.push(url);
+                    item.append(createElement('img', {src: url, alt: name, className: 'profile-document-inline-image'}));
+                } catch {
+                    item.append(createElement('span', {className: 'material-symbols-outlined', textContent: 'broken_image'}));
+                }
+            } else {
+                item.append(
+                    createElement('span', {className: 'material-symbols-outlined', textContent: 'picture_as_pdf'}),
+                    createElement('span', {className: 'profile-document-inline-name', textContent: name})
+                );
+            }
+            gallery.append(item);
+        }
+    }
+}
+
+export async function openProfileDocumentAttachments({uid, documentItem, vaultKey, encryptName, decryptName, onChanged}) {
     if (!uid || !documentItem?.id || !vaultKey) throw new Error('Allegati non disponibili: documento o Vault non valido.');
     closeActiveDialog();
     const overlay = createElement('div', {className: 'profile-document-attachments-overlay'});
@@ -117,6 +197,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
                     await httpsCallable(functions, 'removeProfileDocumentAttachment')({attachmentId: attachment.id});
                     status.textContent = 'Allegato eliminato.';
                     await load();
+                    await onChanged?.();
                 } catch (error) {
                     showToast(error.message || 'Eliminazione non riuscita.', 'error');
                 } finally { setBusy(false); }
@@ -159,6 +240,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
             }
             showToast('Allegato salvato.', 'success');
             await load();
+            await onChanged?.();
         } catch (error) {
             status.textContent = 'Caricamento non riuscito.';
             showToast(error.message || 'Caricamento non riuscito.', 'error');

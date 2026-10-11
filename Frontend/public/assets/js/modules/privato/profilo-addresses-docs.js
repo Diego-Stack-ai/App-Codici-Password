@@ -286,7 +286,12 @@ export function renderDocumentiView() {
                         onclick: () => _callbacks.createDeadlineFromDocument(docItem)
                     })
                 ])
-            ])
+            ]),
+            createElement('div', {
+                className: 'profile-document-inline-attachments',
+                dataset: { profileDocumentAttachmentsInline: docItem.id },
+                ariaLive: 'polite'
+            })
         ]);
     });
     setChildren(container, [btnAdd, ...items]);

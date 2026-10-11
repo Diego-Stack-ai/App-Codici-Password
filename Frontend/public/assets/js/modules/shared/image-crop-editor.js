@@ -2,6 +2,7 @@ const EDITABLE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_SIDE = 2048;
 const CARD_SIZE = {width: 1012, height: 638};
 const MIN_EDGE = 24;
+const CARD_RATIO = CARD_SIZE.width / CARD_SIZE.height;
 
 function button(label, action, primary = false) {
     const node = document.createElement('button');
@@ -50,6 +51,55 @@ export function outputSize(points, mode = 'free') {
     const height = Math.max(distance(points[0], points[3]), distance(points[1], points[2]));
     const scale = Math.min(1, MAX_SIDE / Math.max(width, height));
     return {width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale))};
+}
+
+export function cardFrame(width, height, margin = .08) {
+    const availableWidth = width * (1 - margin * 2), availableHeight = height * (1 - margin * 2);
+    const frameWidth = Math.min(availableWidth, availableHeight * CARD_RATIO);
+    const frameHeight = frameWidth / CARD_RATIO;
+    const left = (width - frameWidth) / 2, top = (height - frameHeight) / 2;
+    return [{x: left, y: top}, {x: left + frameWidth, y: top},
+        {x: left + frameWidth, y: top + frameHeight}, {x: left, y: top + frameHeight}];
+}
+
+export function detectCardBoundaryFromImageData(data, width, height) {
+    if (!data || width < 40 || height < 40) return null;
+    const sample = Math.max(2, Math.round(Math.min(width, height) * .025));
+    const corners = [[0, 0], [width - sample, 0], [0, height - sample], [width - sample, height - sample]];
+    let red = 0, green = 0, blue = 0, count = 0;
+    for (const [startX, startY] of corners) for (let y = startY; y < Math.min(height, startY + sample); y++) {
+        for (let x = startX; x < Math.min(width, startX + sample); x++) {
+            const offset = (y * width + x) * 4;
+            red += data[offset]; green += data[offset + 1]; blue += data[offset + 2]; count++;
+        }
+    }
+    red /= count; green /= count; blue /= count;
+    const stride = Math.max(1, Math.floor(Math.max(width, height) / 700));
+    let topLeft = null, topRight = null, bottomRight = null, bottomLeft = null, foreground = 0;
+    for (let y = sample; y < height - sample; y += stride) for (let x = sample; x < width - sample; x += stride) {
+        const offset = (y * width + x) * 4;
+        const delta = Math.hypot(data[offset] - red, data[offset + 1] - green, data[offset + 2] - blue);
+        if (delta < 48) continue;
+        foreground++;
+        const point = {x, y}, sum = x + y, difference = x - y;
+        if (!topLeft || sum < topLeft.score) topLeft = {...point, score: sum};
+        if (!bottomRight || sum > bottomRight.score) bottomRight = {...point, score: sum};
+        if (!topRight || difference > topRight.score) topRight = {...point, score: difference};
+        if (!bottomLeft || difference < bottomLeft.score) bottomLeft = {...point, score: difference};
+    }
+    const sampled = Math.ceil((width - sample * 2) / stride) * Math.ceil((height - sample * 2) / stride);
+    if (foreground < sampled * .06 || foreground > sampled * .92 || !topLeft || !topRight || !bottomRight || !bottomLeft) return null;
+    const points = [topLeft, topRight, bottomRight, bottomLeft].map(({x, y}) => ({x, y}));
+    if (!isValidQuadrilateral(points)) return null;
+    const area = Math.abs(points.reduce((total, point, index) => {
+        const next = points[(index + 1) % points.length]; return total + point.x * next.y - next.x * point.y;
+    }, 0) / 2);
+    return area >= width * height * .12 ? points : null;
+}
+
+export function detectCardBoundary(canvas) {
+    const context = canvas.getContext('2d', {willReadFrequently: true});
+    return detectCardBoundaryFromImageData(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
 }
 
 function solveLinear(matrix, values) {
@@ -119,7 +169,9 @@ export async function editImageBeforeUpload(file) {
         const help = document.createElement('p'); help.className = 'image-editor-help';
         const modes = document.createElement('div'); modes.className = 'image-editor-modes'; modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Formato immagine');
         const freeMode = button('Foto libera', () => setMode('free')), cardMode = button('Tessera / carta', () => setMode('card'));
+        const stage = document.createElement('div'); stage.className = 'image-editor-stage';
         const preview = document.createElement('canvas'); preview.className = 'image-editor-preview'; preview.setAttribute('aria-label', 'Anteprima con quattro angoli di ritaglio');
+        const magnifier = document.createElement('canvas'); magnifier.className = 'image-editor-magnifier'; magnifier.width = 240; magnifier.height = 240; magnifier.setAttribute('aria-hidden', 'true');
         const warning = document.createElement('p'); warning.className = 'image-editor-warning'; warning.setAttribute('aria-live', 'polite');
         const controls = document.createElement('div'); controls.className = 'image-editor-controls';
         const save = button('Salva immagine', saveImage, true);
@@ -130,7 +182,14 @@ export async function editImageBeforeUpload(file) {
         }
         function setMode(nextMode) {
             mode = nextMode; freeMode.classList.toggle('image-editor-mode-active', mode === 'free'); cardMode.classList.toggle('image-editor-mode-active', mode === 'card');
-            help.textContent = mode === 'card' ? 'Allinea i quattro angoli della tessera: il risultato sarà raddrizzato nel formato standard ID-1.' : 'Sposta liberamente i quattro angoli. La prospettiva verrà raddrizzata al salvataggio.'; paint();
+            if (mode === 'card') selection = detectCardBoundary(working) || cardFrame(working.width, working.height);
+            help.textContent = mode === 'card' ? 'I bordi della tessera vengono cercati automaticamente. Correggi gli angoli se necessario: il risultato sarà ID-1.' : 'Sposta liberamente i quattro angoli. La prospettiva verrà raddrizzata al salvataggio.'; paint();
+        }
+        function autoDetect() {
+            const detected = detectCardBoundary(working);
+            selection = detected || cardFrame(working.width, working.height);
+            paint();
+            warning.textContent = detected ? 'Bordi rilevati. Controlla i quattro angoli.' : 'Bordi non riconosciuti: usa il riquadro tessera e correggi gli angoli.';
         }
         function paint() {
             preview.width = working.width; preview.height = working.height;
@@ -142,13 +201,23 @@ export async function editImageBeforeUpload(file) {
             const valid = isValidQuadrilateral(selection); warning.textContent = valid ? '' : 'Gli angoli non possono incrociarsi o sovrapporsi.'; save.disabled = !valid;
         }
         const eventPoint = event => {const box = preview.getBoundingClientRect(); return {x: Math.max(0, Math.min(preview.width, (event.clientX - box.left) * preview.width / box.width)), y: Math.max(0, Math.min(preview.height, (event.clientY - box.top) * preview.height / box.height))};};
-        preview.addEventListener('pointerdown', event => {const at = eventPoint(event), radius = Math.max(30, preview.width / 18); const index = selection.findIndex(point => Math.hypot(point.x - at.x, point.y - at.y) <= radius); if (index < 0) return; event.preventDefault(); dragging = index; preview.setPointerCapture(event.pointerId);});
-        preview.addEventListener('pointermove', event => {if (dragging === null) return; event.preventDefault(); selection[dragging] = eventPoint(event); paint();});
-        const stop = () => {dragging = null;}; preview.addEventListener('pointerup', stop); preview.addEventListener('pointercancel', stop);
+        function showMagnifier(point, event) {
+            magnifier.classList.add('image-editor-magnifier-visible');
+            magnifier.classList.toggle('image-editor-magnifier-left', event.clientX > window.innerWidth / 2);
+            const context = magnifier.getContext('2d'), sourceSize = Math.max(50, Math.min(working.width, working.height) / 5);
+            context.clearRect(0, 0, magnifier.width, magnifier.height);
+            context.drawImage(working, point.x - sourceSize / 2, point.y - sourceSize / 2, sourceSize, sourceSize, 0, 0, magnifier.width, magnifier.height);
+            context.strokeStyle = '#4da3ff'; context.lineWidth = 4;
+            context.beginPath(); context.moveTo(120, 72); context.lineTo(120, 168); context.moveTo(72, 120); context.lineTo(168, 120); context.stroke();
+            context.beginPath(); context.arc(120, 120, 14, 0, Math.PI * 2); context.stroke();
+        }
+        preview.addEventListener('pointerdown', event => {const at = eventPoint(event), radius = Math.max(30, preview.width / 18); const index = selection.findIndex(point => Math.hypot(point.x - at.x, point.y - at.y) <= radius); if (index < 0) return; event.preventDefault(); dragging = index; preview.setPointerCapture(event.pointerId); showMagnifier(selection[index], event);});
+        preview.addEventListener('pointermove', event => {if (dragging === null) return; event.preventDefault(); selection[dragging] = eventPoint(event); paint(); showMagnifier(selection[dragging], event);});
+        const stop = () => {dragging = null; magnifier.classList.remove('image-editor-magnifier-visible');}; preview.addEventListener('pointerup', stop); preview.addEventListener('pointercancel', stop);
         function rotate() {const canvas = document.createElement('canvas'); canvas.width = working.height; canvas.height = working.width; const context = canvas.getContext('2d'); context.translate(canvas.width, 0); context.rotate(Math.PI / 2); context.drawImage(working, 0, 0); working = canvas; resetSelection(); paint();}
         async function saveImage() {try {save.disabled = true; close(await canvasFile(perspectiveCanvas(working, selection, mode), file));} catch (error) {save.disabled = false; warning.textContent = 'Impossibile elaborare questa selezione. Controlla i quattro angoli.'; if (error.message !== 'INVALID_SELECTION') {overlay.remove(); document.body.classList.remove('image-editor-open'); reject(error);}}}
-        modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), button('Ruota 90°', rotate), save);
-        dialog.append(title, help, modes, preview, warning, controls); overlay.append(dialog); document.body.append(overlay);
+        modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), button('Ruota 90°', rotate), button('Rileva tessera', () => {mode = 'card'; setMode('card'); autoDetect();}), save);
+        stage.append(preview, magnifier); dialog.append(title, help, modes, stage, warning, controls); overlay.append(dialog); document.body.append(overlay);
         document.body.classList.add('image-editor-open'); resetSelection(); setMode('free');
     });
 }

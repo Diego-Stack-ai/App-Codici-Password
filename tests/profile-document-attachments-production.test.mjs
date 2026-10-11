@@ -16,6 +16,9 @@ test('Profilo Documenti espone allegati, fotocamera e selettore PDF', async () =
     assert.match(controller, /uploadProfileDocumentAttachment/);
     assert.match(controller, /removeProfileDocumentAttachment/);
     assert.match(page, /profile-document-attachments\.css/);
+    assert.match(cards, /profile-document-inline-attachments/);
+    assert.match(controller, /renderProfileDocumentAttachmentPreviews/);
+    assert.match(controller, /profile-document-inline-image/);
 });
 
 test('regole integrate rendono metadati e oggetti server-only', async () => {
