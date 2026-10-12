@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.162';
+import {db} from '../../firebase-config.js?v=1.2.163';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -34,6 +34,10 @@ export const listTopPrivateAccounts = (uid, maximum = 10) => readRecords(`top-ac
     query(
         collection(db, 'users', uid, 'accounts'), orderBy('views', 'desc'), limit(maximum)
     ));
+
+export const listTopPrivateAccountsConfirmed = (uid, maximum = 10) => readConfirmedRecords(query(
+    collection(db, 'users', uid, 'accounts'), orderBy('views', 'desc'), limit(maximum)
+));
 
 const acceptedInvitesQuery = email => query(
     collection(db, 'invites'),

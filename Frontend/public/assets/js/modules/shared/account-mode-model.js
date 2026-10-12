@@ -34,8 +34,11 @@ export function recordFieldsFromAccountMode(mode) {
 export function validateAccountMode(mode, account = {}) {
     const hasCredentials = hasAccountCredentials(account);
     if (mode.startsWith('memo-') && hasCredentials) return { valid: false, reason: 'memo-has-credentials' };
-    if (mode.startsWith('account-') && !hasCredentials) return { valid: false, reason: 'account-without-credentials' };
     return { valid: true, reason: null };
+}
+
+export function sharedModeTransitionRevokesRecipients(previousMode, nextMode) {
+    return previousMode?.endsWith('-shared') === true && previousMode !== nextMode;
 }
 
 export const normalizeRecipientEmail = email => String(email || '').trim().toLowerCase();

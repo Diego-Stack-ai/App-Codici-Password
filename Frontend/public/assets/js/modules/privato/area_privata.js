@@ -9,7 +9,7 @@
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.162';
+import { db, functions } from '../../firebase-config.js?v=1.2.163';
 import { LOG } from '../../logger.js';
 import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -17,7 +17,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import {listAcceptedInvites, listContacts, listPrivateAccounts, listTopPrivateAccounts} from '../data/vault-repository.js';
+import {listAcceptedInvites, listContacts, listPrivateAccounts, listPrivateAccountsConfirmed, listTopPrivateAccounts, listTopPrivateAccountsConfirmed} from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
 import { createAccountAvatar } from '../shared/account-avatar.js';
@@ -69,7 +69,7 @@ async function loadCounters(uid, email) {
     try {
         LOG('[Counters] Fetching own accounts');
         const [accounts, invites] = await Promise.all([
-            listPrivateAccounts(uid),
+            navigator.onLine ? listPrivateAccountsConfirmed(uid).catch(() => listPrivateAccounts(uid)) : listPrivateAccounts(uid),
             listAcceptedInvites(email)
         ]);
         LOG(`[Counters] Own accounts fetched: ${accounts.length}`);
@@ -120,16 +120,19 @@ async function loadCounters(uid, email) {
  * Mostra gli account più utilizzati.
  * ------------------------------------------------------------------
  */
-async function loadTopAccounts(uid) {
+async function loadTopAccounts(uid, {confirmed = false} = {}) {
     const list = document.getElementById('top-accounts-list');
     if (!list) return;
 
     try {
-        const accounts = await listTopPrivateAccounts(uid, 10);
+        const accounts = confirmed && navigator.onLine
+            ? await listTopPrivateAccountsConfirmed(uid, 10)
+            : await listTopPrivateAccounts(uid, 10);
+        const activeAccounts = accounts.filter(account => !account.isArchived && Number(account.views || 0) > 0);
 
         clearElement(list);
 
-        if (accounts.length === 0) {
+        if (activeAccounts.length === 0) {
             list.appendChild(createElement('p', {
                 className: 'card-no-data',
                 textContent: t('no_active_data') || 'Nessun dato attivo'
@@ -140,7 +143,7 @@ async function loadTopAccounts(uid) {
         // 🔐 PRE-SBLOCCO SILENZIOSO (Auto-Unlock Ready)
         const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
 
-        const items = await Promise.all(accounts.map(async data => {
+        const items = await Promise.all(activeAccounts.map(async data => {
 
             // Decrittazione preventiva prima della creazione card
             if (data._encrypted && vaultKeyMaterial) {
@@ -355,9 +358,15 @@ async function resetAccountViews(uid) {
     if (!await showConfirmModal(t('confirm_reset_views_title') || "Reset Visti", t('confirm_reset_views_msg') || "Vuoi davvero azzerare tutti i contatori delle visualizzazioni?")) return;
 
     try {
-        const accounts = await listPrivateAccounts(uid);
+        const accounts = navigator.onLine
+            ? await listPrivateAccountsConfirmed(uid).catch(() => listPrivateAccounts(uid))
+            : await listPrivateAccounts(uid);
 
-        if (accounts.length === 0) return;
+        if (accounts.length === 0) {
+            showToast(t('views_reset_success') || "Contatori azzerati!");
+            await loadTopAccounts(uid, {confirmed: navigator.onLine});
+            return;
+        }
 
         const batch = writeBatch(db);
         accounts.forEach(account => {
@@ -366,7 +375,7 @@ async function resetAccountViews(uid) {
 
         await batch.commit();
         showToast(t('views_reset_success') || "Contatori azzerati!");
-        loadTopAccounts(uid); // Refresh Top 10
+        await loadTopAccounts(uid, {confirmed: navigator.onLine}); // Refresh Top 10
     } catch (e) { logError("ResetViews", e); }
 }
 

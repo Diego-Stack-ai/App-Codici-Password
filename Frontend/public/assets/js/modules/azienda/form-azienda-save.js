@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.162';
+import { auth, db } from '../../firebase-config.js?v=1.2.163';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField
@@ -29,7 +29,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
  * Salva o aggiorna un account aziendale con crittografia e gestione condivisione.
  * @param {Object} ctx - Stato corrente del form
  */
-export async function saveAccount({ bankAccounts, invitedEmails, invitePreferences = {}, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '', loadContext = null }) {
+export async function saveAccount({ bankAccounts, invitedEmails, invitePreferences = {}, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '', loadContext = null, resetExistingSharing = false }) {
     if (!isAccountSaveAllowed(loadContext)) {
         showToast(DECRYPT_FAILURE_MESSAGE, 'warning');
         return;
@@ -123,12 +123,6 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
         if (btnSave) btnSave.disabled = false;
         return;
     }
-    if (modeValidation.reason === 'account-without-credentials') {
-        showToast('Un Account deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
-        if (btnSave) btnSave.disabled = false;
-        return;
-    }
-
     Object.assign(data, recordFieldsFromAccountMode(mode));
     if (profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId) data.linkedProfileField = { type: profileContactLinkDraft.contactType, id: profileContactLinkDraft.profileContactId };
 
@@ -195,6 +189,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
             // malformato chiude il salvataggio invece di scrivere su un ID incerto.
             const sharingCycle = sharingCycleOf(oldData);
             if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
+            const nextSharingCycle = resetExistingSharing ? sharingCycle + 1 : sharingCycle;
 
             // 2. NOW EXECUTE ALL WRITES
             assertAccountSaveAllowed(loadContext);
@@ -202,6 +197,13 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
                 throw Object.assign(new Error('ACCOUNT_SAVE_SESSION_CHANGED'), {code: 'ACCOUNT_SAVE_SESSION_CHANGED'});
             }
             const finalData = { ...data };
+            if (resetExistingSharing) {
+                for (const sKey of Object.keys(currentSharedWith)) {
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
+                }
+                currentSharedWith = {};
+                finalData.sharingCycle = nextSharingCycle;
+            }
             if (linkedContact) {
                 const updatedProfile = {...profileSnap.data(), ...patchProfileAccountItem(profileSnap.data(), profileContactLinkDraft, linkedContact)};
                 finalData.linkedProfileFields = profileAccountReferences(updatedProfile, targetId, currentAziendaId);
@@ -215,7 +217,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, nextSharingCycle)));
 
                     // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
@@ -233,7 +235,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, sharingCycle)));
+                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, nextSharingCycle)));
 
                         // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
@@ -261,8 +263,8 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
                         };
 
                         // Crea Invito
-                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
-                            inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
+                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, nextSharingCycle)), {
+                            inviteId: inviteIdForGuest(targetId, sKey, nextSharingCycle),
                             // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
                             // ogni creazione e a ogni reinvito. L'id dell'evento di
                             // registro si deriva solo da qui, mai dall'email, dalla
@@ -279,7 +281,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, invitePreferenc
                             notifyPush: notificationPreference.notifyPush,
                             notifyEmail: notificationPreference.notifyEmail,
                             status: 'pending',
-                            cycle: sharingCycle,
+                            cycle: nextSharingCycle,
                             createdAt: new Date().toISOString()
                         });
 

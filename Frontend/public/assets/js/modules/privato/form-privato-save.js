@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.162';
+import { auth, db } from '../../firebase-config.js?v=1.2.163';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -26,6 +26,7 @@ export async function savePrivateAccount({
     baseRevision = 0,
     profileContactLinkDraft,
     recoveryOperation = null,
+    resetExistingSharing = false,
     isActive = () => auth.currentUser?.uid === currentUid,
     hasLinkedProfileField = false,
     capturedFormValues = null,
@@ -92,12 +93,6 @@ export async function savePrivateAccount({
         if (btnSave) btnSave.disabled = false;
         return;
     }
-    if (modeValidation.reason === 'account-without-credentials') {
-        showToast('Un Account deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
-        if (btnSave) btnSave.disabled = false;
-        return;
-    }
-
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro
         username: await encrypt(credentialValues.username, vaultKeyMaterial),
@@ -312,6 +307,7 @@ export async function savePrivateAccount({
             // malformato chiude il salvataggio invece di scrivere su un ID incerto.
             const sharingCycle = sharingCycleOf(oldData);
             if (sharingCycle === null) throw new Error('CICLO_DI_CONDIVISIONE_NON_VALIDO');
+            const nextSharingCycle = resetExistingSharing ? sharingCycle + 1 : sharingCycle;
 
             // 2. NOW EXECUTE ALL WRITES
             assertAccountSaveAllowed(loadContext);
@@ -319,6 +315,13 @@ export async function savePrivateAccount({
                 throw Object.assign(new Error('ACCOUNT_SAVE_SESSION_CHANGED'), {code: 'ACCOUNT_SAVE_SESSION_CHANGED'});
             }
             let finalData = { ...data };
+            if (resetExistingSharing) {
+                for (const sKey of Object.keys(currentSharedWith)) {
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
+                }
+                currentSharedWith = {};
+                finalData.sharingCycle = nextSharingCycle;
+            }
             if (linkedContact) {
                 const updatedProfile = {...profileUserSnap.data(), ...patchProfileAccountItem(profileUserSnap.data(), profileContactLinkDraft, linkedContact)};
                 finalData.linkedProfileFields = profileAccountReferences(updatedProfile, targetId, '');
@@ -335,7 +338,7 @@ export async function savePrivateAccount({
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
-                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)));
+                    transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, sKey, nextSharingCycle)));
 
                     // Notifica all'ospite: richiede un backend dedicato, non implementata.
                 }
@@ -353,7 +356,7 @@ export async function savePrivateAccount({
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
                         delete finalData.sharedWith[oldKey];
-                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, sharingCycle)));
+                        transaction.delete(doc(db, "invites", inviteIdForGuest(targetId, oldKey, nextSharingCycle)));
 
                         // Notifica all'ospite: richiede un backend dedicato, non implementata.
                     }
@@ -383,8 +386,8 @@ export async function savePrivateAccount({
                         };
 
                         // Crea Invito
-                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, sharingCycle)), {
-                            inviteId: inviteIdForGuest(targetId, sKey, sharingCycle),
+                        transaction.set(doc(db, "invites", inviteIdForGuest(targetId, sKey, nextSharingCycle)), {
+                            inviteId: inviteIdForGuest(targetId, sKey, nextSharingCycle),
                             // M7-AUDIT-5C: base opaca dell'istanza di invito, nuova a
                             // ogni creazione e a ogni reinvito. L'id dell'evento di
                             // registro si deriva solo da qui, mai dall'email, dalla
@@ -400,7 +403,7 @@ export async function savePrivateAccount({
                             notifyPush: notificationPreference.notifyPush,
                             notifyEmail: notificationPreference.notifyEmail,
                             status: 'pending',
-                            cycle: sharingCycle,
+                            cycle: nextSharingCycle,
                             createdAt: new Date().toISOString()
                         });
 
