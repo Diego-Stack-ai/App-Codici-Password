@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Candidata — acquisizione guidata Tessera/Carta — 12/10/2026
+
+Diego ha autorizzato l'implementazione locale di un'acquisizione dedicata agli allegati formato tessera/carta. Il selettore degli allegati aggiunge **Scansiona tessera/carta**: la fotocamera posteriore viene mostrata dentro l'app con guida ID-1, lo scatto usa esattamente l'area della guida e apre l'editor direttamente in modalità Carta. Il rilevatore sulle immagini esistenti usa una soglia adattiva al rumore dello sfondo; restano disponibili correzione manuale degli angoli e allegato originale. Nessun OCR, dato reale, commit, push o deploy è incluso nell'incarico.
+
 ## Candidata 1.2.167 — video nella galleria allegati e censimento Scadenze — 12/10/2026
 
 Diego ha richiesto e autorizzato la pubblicazione del filtro Galleria per immagini e video negli allegati degli Account privati e aziendali, allineandolo ai flussi Scadenze e Azienda già compatibili. Nel prossimo controllo degli allegati reali, ogni oggetto collegato a una Scadenza dovrà riportare anche il **nome leggibile della Scadenza**, oltre all'identificativo, così da rendere riconoscibile per esempio una scadenza assicurativa. Questo rilascio non autorizza né esegue ora letture, cancellazioni o migrazioni di dati reali.
