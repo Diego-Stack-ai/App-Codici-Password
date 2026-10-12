@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.164';
+import { db, functions } from '../../firebase-config.js?v=1.2.165';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -220,6 +220,27 @@ export function mountAccountPrivati(user, options = {}) {
                             _inviteId: inviteId,
                             _isGuest: true,
                             _suspended: true,
+                            _aziendaId: inv.aziendaId || '',
+                            cycle: inv.cycle
+                        };
+                    }
+
+                    // Un Memorandum condiviso non contiene credenziali da mostrare
+                    // nella lista: nome, natura e collegamento di uscita sono già
+                    // nell'invito accettato. Evitiamo quindi di rileggere il documento
+                    // del proprietario. Oltre a ridurre i dati richiesti, questo
+                    // mantiene disponibile «Abbandona» quando un record legacy ha
+                    // già perso l'ACL `sharedWithUids` e Firestore nega il get.
+                    if (['memo', 'memorandum'].includes(String(inv.type || '').toLowerCase())) {
+                        return {
+                            id: inv.accountId,
+                            nomeAccount: inv.accountName || '',
+                            type: 'memorandum',
+                            visibility: 'shared',
+                            isOwner: false,
+                            ownerId: senderId,
+                            _inviteId: inviteId,
+                            _isGuest: true,
                             _aziendaId: inv.aziendaId || '',
                             cycle: inv.cycle
                         };
