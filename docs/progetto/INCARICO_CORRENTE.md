@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Candidata 1.2.177 — acquisizione Tessera/Carta ad alta risoluzione — 12/10/2026
+
+Diego richiede che carte, patenti e documenti acquisiti come Tessera/Carta conservino i dettagli necessari alla lettura. Il riquadro `1012:638` resta soltanto l'anteprima e la guida geometrica: il file finale viene ora generato dai pixel della sorgente alla risoluzione del ritaglio, con richiesta ideale `4096×2160` alla fotocamera e qualità JPEG `0,98`. Anche l'editor Carta non forza più l'uscita `1012×638`: mantiene la risoluzione utile del ritaglio, con limite tecnico di 4096 px sul lato lungo per evitare esaurimenti di memoria sui dispositivi mobili. **Allega originale** continua a conservare i byte sorgente senza ricampionamento o compressione.
+
+Perimetro autorizzato: modifica, commit, push, merge e deploy del solo Hosting della release `1.2.177`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché cifratura, persistenza e limiti di upload non cambiano.
+
 ## Candidata 1.2.176 — fallback Tessera/Carta realmente condiviso — 12/10/2026
 
 Diego autorizza correzione e pubblicazione del percorso Tessera/Carta. Account privati, Account aziendali e Documenti del Profilo usano ora lo stesso orchestratore: prima tenta la fotocamera integrata con guida ID-1, trascinamento e zoom limitato; se il browser o il dispositivo la rifiuta, descrive la causa e propone esplicitamente la fotocamera nativa. La foto ottenuta dal fallback non viene più caricata direttamente: passa nell’editor già impostato su **Carta**, così restano disponibili rettangolo ID-1, rilevamento/correzione degli angoli e regolazione manuale.

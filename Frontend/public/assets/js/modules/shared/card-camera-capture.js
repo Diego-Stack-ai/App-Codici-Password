@@ -1,4 +1,6 @@
 const CARD_RATIO = 1012 / 638;
+const PREVIEW_SIZE = {width: 1012, height: 638};
+const CAMERA_IDEAL_SIZE = {width: 4096, height: 2160};
 const OVERSCAN = 1.08;
 const MIN_ZOOM = .93;
 const MAX_ZOOM = 1.15;
@@ -39,20 +41,39 @@ function renderAdjusted(source, target, adjustment) {
     const sx = (source.width - state.cropWidth) / 2 + state.x;
     const sy = (source.height - state.cropHeight) / 2 + state.y;
     const context = target.getContext('2d');
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
     context.clearRect(0, 0, target.width, target.height);
     context.drawImage(source, sx, sy, state.cropWidth, state.cropHeight, 0, 0, target.width, target.height);
     return state;
 }
 
+export function cardOutputSize(adjustment, sourceWidth, sourceHeight) {
+    const state = clampCardAdjustment(adjustment, sourceWidth, sourceHeight);
+    return {width: Math.max(1, Math.round(state.cropWidth)), height: Math.max(1, Math.round(state.cropHeight))};
+}
+
+function renderFullResolution(source, adjustment) {
+    const target = document.createElement('canvas');
+    const size = cardOutputSize(adjustment, source.width, source.height);
+    target.width = size.width; target.height = size.height;
+    renderAdjusted(source, target, adjustment);
+    return target;
+}
+
 export async function captureCardPhoto() {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('CAMERA_NOT_SUPPORTED');
     await ensureCardCameraStyles();
-    const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: false});
+    const stream = await navigator.mediaDevices.getUserMedia({video: {
+        facingMode: {ideal: 'environment'},
+        width: {ideal: CAMERA_IDEAL_SIZE.width},
+        height: {ideal: CAMERA_IDEAL_SIZE.height}
+    }, audio: false});
     return new Promise(resolve => {
         const overlay = document.createElement('div'); overlay.className = 'card-camera-overlay';
         const video = document.createElement('video'); video.className = 'card-camera-video'; video.autoplay = true; video.muted = true; video.playsInline = true; video.srcObject = stream;
         const frame = document.createElement('div'); frame.className = 'card-camera-frame';
-        const preview = document.createElement('canvas'); preview.className = 'card-camera-preview'; preview.width = 1012; preview.height = 638;
+        const preview = document.createElement('canvas'); preview.className = 'card-camera-preview'; preview.width = PREVIEW_SIZE.width; preview.height = PREVIEW_SIZE.height;
         const help = document.createElement('p'); help.className = 'card-camera-help'; help.textContent = 'Centra la tessera nel rettangolo e mantieni il telefono fermo';
         const controls = document.createElement('div'); controls.className = 'card-camera-controls';
         const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Annulla';
@@ -107,7 +128,13 @@ export async function captureCardPhoto() {
         preview.addEventListener('pointerup', endPointer); preview.addEventListener('pointercancel', endPointer);
         zoom.addEventListener('input', () => {adjustment.zoom = Number(zoom.value); refresh();});
         window.addEventListener('pagehide', cancelCapture, {once: true}); cancel.addEventListener('click', () => finish(null)); shoot.addEventListener('click', showPreview); retake.addEventListener('click', showLive);
-        use.addEventListener('click', () => preview.toBlob(blob => finish(blob ? new File([blob], `tessera-${Date.now()}.jpg`, {type: 'image/jpeg'}) : null), 'image/jpeg', .94));
+        use.addEventListener('click', () => {
+            const output = renderFullResolution(source, adjustment);
+            output.toBlob(blob => {
+                output.width = output.height = 0;
+                finish(blob ? new File([blob], `tessera-${Date.now()}.jpg`, {type: 'image/jpeg'}) : null);
+            }, 'image/jpeg', .98);
+        });
         controls.append(cancel, shoot, retake, use); frame.append(preview); overlay.append(video, frame, help, zoom, controls); document.body.append(overlay); document.body.classList.add('card-camera-open');
         video.play().catch(() => finish(null));
     });

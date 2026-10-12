@@ -1,5 +1,13 @@
 # Collaudi
 
+## 12/10/2026 — candidata 1.2.177, qualità Tessera/Carta
+
+- Diagnosi sul sorgente e sulla cronologia: il percorso guidato e l'editor Carta producevano sempre una JPEG `1012×638`, indipendentemente dalla risoluzione disponibile; Camera/Galleria con allegato originale non subivano quel ricampionamento.
+- La guida resta `1012×638`, mentre l'output guidato usa le dimensioni del ritaglio sorgente e l'editor Carta conserva la selezione fino a 4096 px sul lato lungo. Richiesta camera ideale `4096×2160`, interpolazione di qualità e JPEG `0,98`.
+- Test mirati: editor/geometria **12/12** e allegati complessivi **69/69**, inclusi rapporto ID-1, output oltre 3000 px da sorgente 3840 px, limite 4096 px, zoom/pan vincolati e collegamenti a Documenti/Account/Scadenze. Profilo **164/164** e navigazione/lifecycle **157/157**.
+- Sintassi JavaScript **187 moduli**, CSS, dipendenze circolari, riferimenti statici e coerenza versione verdi. Il CSS dell'editor è caricato soltanto all'apertura; budget statico verde su **30 pagine**, senza innalzare la soglia.
+- Restano i gate GitHub, il deploy Hosting e la verifica remota. La resa ottica effettiva richiede inoltre un controllo su telefono fisico: `ideal` è una preferenza e il browser può scegliere una risoluzione inferiore.
+
 ## 12/10/2026 — candidata 1.2.176, fallback Tessera/Carta condiviso
 
 - Regressione iniziale riprodotta staticamente: Documenti usava un fallback nativo che saltava l’editor, mentre gli Account terminavano con un messaggio generico.
