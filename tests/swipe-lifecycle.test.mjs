@@ -116,6 +116,21 @@ test('read-only renderer has no pin button and installs no swipe listeners', () 
     view.destroy();
 });
 
+test('la card ricevuta mostra un comando esplicito per abbandonare la condivisione', () => {
+    const f = fixture(); let submitted = null;
+    f.context.leave = item => { submitted = item; };
+    const view = f.run("createAccountListView({onDelete: leave, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+    view.render([{id: 'shared-fixture', nomeAccount: 'Condiviso', isOwner: false}]);
+    const tree = f.document.getElementById('accounts-container').children;
+    const button = findButton(tree, 'link_off');
+    assert.ok(button, 'il pulsante Abbandona deve essere visibile senza swipe');
+    assert.match(JSON.stringify(button), /shared_leave_action/);
+    const item = {dataset: {id: 'shared-fixture', owner: 'false'}};
+    button.props.onclick({stopPropagation() {}, currentTarget: {closest: () => item}});
+    assert.equal(submitted, item);
+    view.destroy();
+});
+
 function findButton(nodes, icon) {
     for (const node of Array.isArray(nodes) ? nodes : [nodes]) {
         if (node?.tag === 'button' && node.children?.[0]?.props.textContent === icon) return node;

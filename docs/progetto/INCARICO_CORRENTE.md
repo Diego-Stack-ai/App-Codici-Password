@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Pubblicazione 1.2.164 autorizzata — 12/10/2026
+
+Diego ha autorizzato la pubblicazione del comando visibile **Abbandona** sulle card degli Account condivisi ricevuti. Il comando richiama lo stesso flusso confermato di uscita già disponibile tramite gesto laterale e non elimina né modifica l'Account del proprietario. Perimetro del deploy: solo Firebase Hosting; Functions, Rules e dati restano invariati.
+
 ## Pubblicazione 1.2.163 conclusa — 12/10/2026
 
 Le quattro correzioni Account richieste da Diego sono pubblicate. PR #109 unita in `master` (`4aef788b`), gate GitHub verdi, Hosting `1.2.163` verificato HTTP 200 e callable `respondToInvitation` aggiornata con successo. Firestore Rules, Storage Rules e dati reali sono rimasti fuori perimetro e non sono stati modificati. L'incarico di pubblicazione è concluso.

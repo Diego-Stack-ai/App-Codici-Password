@@ -1,5 +1,9 @@
 # Rilascio
 
+## Candidata 1.2.164 — 12/10/2026
+
+Rende visibile sulla card ricevuta il comando **Abbandona**, collegato al flusso di uscita già autorizzato e confermato. Il rilascio previsto riguarda soltanto Hosting; nessuna modifica a Functions, Rules o dati.
+
 ## Esito operativo 1.2.163 — 12/10/2026
 
 PR #109 unita in `master` (`4aef788b`) con gate GitHub verdi. Pubblicate quattro correzioni Account: conteggio confermato dopo rinomina, uscita del destinatario da un Account condiviso, azzeramento effettivo delle statistiche e conversione reversibile fra Account/memorandum privati o condivisi con revoca esplicita dei destinatari precedenti. Gate locali: sintassi **183 moduli**, navigazione **156/156**, condivisione **43/43**, Functions/security **454 pass, 9 skip, 0 fail**. Deploy riuscito per Hosting e `respondToInvitation`; controllo remoto HTTP 200 e versione `1.2.163`. Nessuna modifica a Rules o dati.
