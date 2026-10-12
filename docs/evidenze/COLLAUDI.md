@@ -1,10 +1,12 @@
 # Collaudi
 
-## 12/10/2026 — candidata 1.2.166, allegati originali e limite 32 MiB
+## 12/10/2026 — pubblicazione 1.2.166, allegati originali e limite 32 MiB
 
 - L'editor immagini distingue il salvataggio del ritaglio dall'allegato originale e restituisce il `File` iniziale nel secondo caso.
 - I controlli di dimensione sono allineati a 32 MiB in upload, download, condivisione, backup/ripristino, Functions e Storage Rules; l'oggetto cifrato ammette 1 KiB di overhead.
-- Prove locali pertinenti richieste prima del rilascio: allegati/editor, Storage Rules, condivisione Storage, backup/ripristino, sintassi, audit sicurezza e documentazione.
+- Prove locali: allegati/editor **64/64**; Storage Rules **14/14** e condivisione Storage **5/5**; backup/ripristino **112/112**; Functions mirate **20/20**; sintassi **183 moduli**; audit sicurezza e documentazione verdi.
+- PR #114 unita in `master` (`db5e4e1d`) dopo validazione GitHub verde in 7m43s. Deploy riuscito per Hosting, Storage Rules e `manageBackupRestoreV2`.
+- Verifica remota: home HTTP **200** con versione `1.2.166`; modulo editor HTTP **200** con entrambe le azioni; callable elencata in `europe-west1`, runtime Node.js 22.
 - Nessun dato reale impiegato.
 
 ## AUDIT-SKILL-01 — piano di collaudo, non ancora eseguito — 11/10/2026

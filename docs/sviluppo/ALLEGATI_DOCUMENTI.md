@@ -1,8 +1,8 @@
 # Allegati documenti
 
-## Contratto corrente candidato 1.2.166 — 12/10/2026
+## Contratto runtime pubblicato 1.2.166 — 12/10/2026
 
-Per JPEG, PNG e WebP l'editor condiviso deve proporre **Salva ritaglio** e **Allega originale**. La seconda scelta restituisce gli stessi byte del file selezionato: non applica ritaglio, ridimensionamento o compressione. PDF e gli altri allegati ammessi conservano il normale percorso diretto. La dimensione massima è **32 MiB** per il file in chiaro e **32 MiB + 1 KiB** per l'oggetto cifrato, in modo da includere l'overhead dell'envelope. I limiti devono rimanere uguali in client, condivisione, backup/ripristino, Functions e Storage Rules.
+Per JPEG, PNG e WebP l'editor condiviso propone **Salva ritaglio** e **Allega originale**. La seconda scelta restituisce gli stessi byte del file selezionato: non applica ritaglio, ridimensionamento o compressione. PDF e gli altri allegati ammessi conservano il normale percorso diretto. La dimensione massima è **32 MiB** per il file in chiaro e **32 MiB + 1 KiB** per l'oggetto cifrato, in modo da includere l'overhead dell'envelope. I limiti sono allineati in client, condivisione, backup/ripristino, Functions e Storage Rules.
 
 ## Stato runtime pubblicato — 10/10/2026
 

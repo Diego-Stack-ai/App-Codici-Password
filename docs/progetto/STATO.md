@@ -1,8 +1,8 @@
 # Stato
 
-## Candidata 1.2.166 — allegati senza compressione opzionale e limite 32 MiB — 12/10/2026
+## Produzione 1.2.166 — allegati senza compressione opzionale e limite 32 MiB — 12/10/2026
 
-Le immagini possono essere allegate mantenendo il file originale oppure salvando il ritaglio elaborato. La soglia massima per un singolo allegato cifrato è 32 MiB ed è coerente nei controlli di upload/download, condivisione, backup/ripristino, callable e Storage Rules. La candidata resta distinta dalla produzione finché merge e deploy non sono verificati.
+Le immagini possono essere allegate mantenendo il file originale oppure salvando il ritaglio elaborato. La soglia massima per un singolo allegato cifrato è 32 MiB ed è coerente nei controlli di upload/download, condivisione, backup/ripristino, callable e Storage Rules. PR #114 unita in `master` (`db5e4e1d`); gate GitHub verdi. Hosting, Storage Rules e `manageBackupRestoreV2` sono stati distribuiti con successo; verifica remota HTTP 200 e callable attiva in `europe-west1` su Node.js 22. Firestore Rules e dati reali non sono stati modificati.
 
 ## Produzione 1.2.164 — comando visibile per abbandonare una condivisione — 12/10/2026
 
