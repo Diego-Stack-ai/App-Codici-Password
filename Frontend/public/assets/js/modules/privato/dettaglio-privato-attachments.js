@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.168';
+import { db, storage } from '../../firebase-config.js?v=1.2.169';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -72,7 +72,7 @@ export function initPrivateAttachmentModule(context) {
         try {
             const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
             const file = await captureCardPhoto();
-            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {initialMode: 'card'});
+            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
         } catch (error) {
             if (mount.active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
         }
@@ -105,7 +105,7 @@ export async function handleFileUpload(input, mount = mounted, options = {}) {
     return processFileUpload(input, mount, options);
 }
 
-async function processFileUpload(input, mount = mounted, {initialMode = 'free'} = {}) {
+async function processFileUpload(input, mount = mounted, {initialMode = 'free', skipImageEditor = false} = {}) {
     if (!mount?.active() || mount.readOnly) return;
     const {ownerId, accountId} = mount;
     const confirmAction = mount.confirm;
@@ -129,7 +129,7 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free'} 
         input.value = '';
         return;
     }
-    if (file.type.startsWith('image/')) {
+    if (file.type.startsWith('image/') && !skipImageEditor) {
         file = await editImageBeforeUpload(file, {initialMode});
         if (!file || !mount.active()) {input.value = ''; return;}
     }

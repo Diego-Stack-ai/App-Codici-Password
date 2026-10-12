@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Release 1.2.169 in pubblicazione — conferma Tessera/Carta regolabile — 12/10/2026
+
+Diego ha autorizzato implementazione e pubblicazione del secondo passaggio dedicato alla scansione Tessera/Carta. Dopo lo scatto non viene più aperto l'editor generale Foto libera/Carta: la stessa schermata mostra una conferma ID-1 con trascinamento, pinch e cursore, zoom limitato `0,93×–1,15×`, comandi **Ripeti foto** e **Usa foto**, quindi passa direttamente all'upload cifrato. Il ritaglio conserva un margine di acquisizione dell'8% e impedisce aree vuote. Nessuna modifica a cifratura, schema dati, Functions o Rules; pubblicazione prevista sul solo Hosting.
+
 ## Pubblicazione 1.2.168 conclusa — acquisizione guidata Tessera/Carta — 12/10/2026
 
 PR #118 unita in `master` al commit `00297d21` dopo gate GitHub verdi. Il selettore degli allegati aggiunge **Scansiona tessera/carta**: la fotocamera posteriore viene mostrata dentro l'app con guida ID-1, lo scatto usa esattamente l'area della guida e apre l'editor direttamente in modalità Carta. Il rilevatore sulle immagini esistenti usa una soglia adattiva al rumore dello sfondo; restano disponibili correzione manuale degli angoli e allegato originale. Deploy del solo Hosting riuscito; home e dettagli Account privato/azienda verificati HTTP 200 con versione `1.2.168` e comando scanner presenti. Nessun OCR o dato reale; Functions e Rules non sono state modificate.

@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.168';
+import { db, storage } from '../../firebase-config.js?v=1.2.169';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -75,7 +75,7 @@ export function closeSourceSelector() {
     }
 }
 
-export async function handleFileUpload(input, {initialMode = 'free'} = {}) {
+export async function handleFileUpload(input, {initialMode = 'free', skipImageEditor = false} = {}) {
     const active = _active, confirmAction = _confirm;
     if (!active()) return;
     const owner = _ownerUid, company = _currentAziendaId, account = _currentId;
@@ -94,7 +94,7 @@ export async function handleFileUpload(input, {initialMode = 'free'} = {}) {
         input.value = '';
         return;
     }
-    if (file.type.startsWith('image/')) {
+    if (file.type.startsWith('image/') && !skipImageEditor) {
         file = await editImageBeforeUpload(file, {initialMode});
         if (!file || !active()) {input.value = ''; return;}
     }
@@ -153,7 +153,7 @@ export async function captureCardAttachment() {
     try {
         const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
         const file = await captureCardPhoto();
-        if (file && _active()) await handleFileUpload({files: [file], value: ''}, {initialMode: 'card'});
+        if (file && _active()) await handleFileUpload({files: [file], value: ''}, {skipImageEditor: true});
     } catch (error) {
         if (_active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
     }
