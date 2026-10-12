@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Hotfix candidata 1.2.171 — policy fotocamera same-origin — 12/10/2026
+
+Il collaudo reale della 1.2.170 ha rilevato che l'header Hosting `Permissions-Policy: camera=()` bloccava `getUserMedia` prima della richiesta di consenso. Su autorizzazione esplicita di Diego, la candidata limita l'abilitazione a `camera=(self)`: le sole pagine della stessa origine possono chiedere il permesso, mentre iframe/origini esterne, microfono e geolocalizzazione restano vietati. Nessun cambiamento a cifratura, Functions, Rules o dati.
+
 ## Pubblicazione 1.2.170 conclusa — scanner tessera nei Documenti del Profilo — 12/10/2026
 
 Lo stesso flusso **Scansiona tessera/carta** già disponibile negli allegati Account è collegato agli allegati di Profilo utente → Documenti. La guida ID-1, la conferma con trascinamento e zoom limitato e l'uscita JPEG `1012×638` precedono il normale upload cifrato del documento; Scatta foto, Galleria/PDF, limiti, cifratura, callable e schema dati restano invariati. PR #122 unita in `master` (`219f9dc7`) dopo gate verdi; deploy del solo Hosting e verifiche HTTP 200 riusciti. Functions, Rules e dati reali sono rimasti invariati.
