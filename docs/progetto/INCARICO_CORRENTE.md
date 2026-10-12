@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Candidata 1.2.170 — scanner tessera nei Documenti del Profilo — 12/10/2026
+## Pubblicazione 1.2.170 conclusa — scanner tessera nei Documenti del Profilo — 12/10/2026
 
-Lo stesso flusso **Scansiona tessera/carta** già disponibile negli allegati Account è collegato agli allegati di Profilo utente → Documenti. La guida ID-1, la conferma con trascinamento e zoom limitato e l'uscita JPEG `1012×638` precedono il normale upload cifrato del documento; Scatta foto, Galleria/PDF, limiti, cifratura, callable e schema dati restano invariati. La pubblicazione autorizzata riguarda solo Hosting; Functions, Rules e dati reali sono fuori perimetro.
+Lo stesso flusso **Scansiona tessera/carta** già disponibile negli allegati Account è collegato agli allegati di Profilo utente → Documenti. La guida ID-1, la conferma con trascinamento e zoom limitato e l'uscita JPEG `1012×638` precedono il normale upload cifrato del documento; Scatta foto, Galleria/PDF, limiti, cifratura, callable e schema dati restano invariati. PR #122 unita in `master` (`219f9dc7`) dopo gate verdi; deploy del solo Hosting e verifiche HTTP 200 riusciti. Functions, Rules e dati reali sono rimasti invariati.
 
 ## Pubblicazione 1.2.169 conclusa — conferma Tessera/Carta regolabile — 12/10/2026
 
