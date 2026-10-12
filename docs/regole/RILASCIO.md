@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.171 — 12/10/2026
+
+PR #124 unita in `master` (`9d60b5f0`) con gate GitHub verdi. Pubblicata sul solo Hosting la policy `camera=(self)`, che consente la richiesta fotocamera soltanto alla stessa origine e mantiene microfono, geolocalizzazione e origini esterne bloccati. Verifica remota HTTP 200 con versione e header attesi. Functions, Firestore Rules, Storage Rules e dati reali sono rimasti invariati.
+
 ## Esito operativo 1.2.170 — 12/10/2026
 
 PR #122 unita in `master` (`219f9dc7`) con gate GitHub verdi. Pubblicato sul solo Hosting lo scanner Tessera/Carta negli allegati dei Documenti del Profilo, riusando guida ID-1, conferma regolabile e upload cifrato esistenti. Verifica remota HTTP 200 su home, Profilo, modulo e stile camera. Functions, Firestore Rules, Storage Rules e dati reali sono rimasti invariati.

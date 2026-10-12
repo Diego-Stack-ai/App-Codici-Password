@@ -1,5 +1,9 @@
 # Stato
 
+## Produzione 1.2.171 — hotfix policy fotocamera same-origin — 12/10/2026
+
+La `Permissions-Policy` di Hosting consente ora la richiesta della fotocamera soltanto alle pagine della stessa origine (`camera=(self)`), mantenendo microfono e geolocalizzazione vietati. PR #124 unita in `master` (`9d60b5f0`) dopo pipeline GitHub verde in 7m32s; deploy del solo Hosting riuscito. Profilo HTTP 200, versione `1.2.171` e header remoto verificati. Functions, Rules e dati reali non sono stati modificati.
+
 ## Produzione 1.2.170 — scanner Tessera/Carta nei Documenti del Profilo — 12/10/2026
 
 Gli allegati di Profilo utente → Documenti espongono lo stesso comando **Scansiona tessera/carta** degli Account: guida ID-1, conferma nel riquadro, trascinamento e zoom limitato, quindi upload cifrato diretto. PR #122 unita in `master` (`219f9dc7`) dopo pipeline GitHub verde in 8m02s; deploy del solo Hosting riuscito. Home, Profilo, modulo allegati e stile camera verificati HTTP 200 con versione `1.2.170`. Functions, Rules e dati reali non sono stati modificati; resta consigliato il collaudo ergonomico su telefono fisico.

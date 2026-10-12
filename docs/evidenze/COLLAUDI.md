@@ -1,5 +1,13 @@
 # Collaudi
 
+## 12/10/2026 — pubblicazione hotfix 1.2.171, policy fotocamera
+
+- Prove mirate allegati/editor/policy **15/15**; documentazione **11/11**; versione e diff verdi.
+- Pipeline GitHub completa verde in **7m32s**, oltre ai due gate documentali.
+- PR #124 unita in `master` (`9d60b5f0`); deploy del solo Hosting riuscito con 273 file.
+- Profilo HTTP **200**, versione `1.2.171` e header remoto `camera=(self), microphone=(), geolocation=()` verificati.
+- Nessun dato reale letto o modificato; il consenso browser resta obbligatorio.
+
 ## 12/10/2026 — pubblicazione 1.2.170, scanner Tessera/Carta nei Documenti del Profilo
 
 - Prove mirate allegati/editor **14/14**; documentazione **11/11**; navigazione, riferimenti statici, versione e diff verdi.

@@ -1,6 +1,6 @@
 # Allegati documenti
 
-## Hotfix policy fotocamera — candidata 1.2.171
+## Hotfix policy fotocamera — pubblicata 1.2.171
 
 L'uso di `getUserMedia` richiede che Firebase Hosting consenta esplicitamente la fotocamera alle pagine dell'app. La policy candidata è `camera=(self), microphone=(), geolocation=()`: la richiesta resta subordinata al consenso del browser e viene ammessa soltanto sulla stessa origine; microfono, geolocalizzazione e delega a origini esterne restano bloccati.
 
