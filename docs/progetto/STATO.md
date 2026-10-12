@@ -1,10 +1,10 @@
 # Stato
 
-## Candidata 1.2.163 — Account, condivisioni e statistiche — 12/10/2026
+## Produzione 1.2.163 — Account, condivisioni e statistiche — 12/10/2026
 
-La candidata comprende quattro correzioni: conteggio degli Account privati riallineato dopo la modifica del titolo; uscita autonoma del destinatario da una condivisione accettata; azzeramento delle statistiche con rilettura confermata e rimozione delle righe a zero; conversione sempre disponibile fra Account, Account condiviso, memorandum e memorandum condiviso nei form privati e aziendali. I memorandum vietano Utente, Account/Codice e Password; gli Account possono invece avere tali campi senza renderli obbligatori. Il cambio di tipo da una modalità condivisa avvisa l'utente, revoca i destinatari precedenti e apre un nuovo ciclo di condivisione quando necessario.
+La release comprende quattro correzioni: conteggio degli Account privati riallineato dopo la modifica del titolo; uscita autonoma del destinatario da una condivisione accettata; azzeramento delle statistiche con rilettura confermata e rimozione delle righe a zero; conversione sempre disponibile fra Account, Account condiviso, memorandum e memorandum condiviso nei form privati e aziendali. I memorandum vietano Utente, Account/Codice e Password; gli Account possono invece avere tali campi senza renderli obbligatori. Il cambio di tipo da una modalità condivisa avvisa l'utente, revoca i destinatari precedenti e apre un nuovo ciclo di condivisione quando necessario.
 
-Verifica locale: sintassi JavaScript **183 moduli**; navigazione **156/156**; condivisione **43/43**; Functions/security **454 pass, 9 skip dichiarati, 0 fail**. La pubblicazione richiede Hosting e la sola callable `respondToInvitation`; Rules e dati non cambiano.
+PR #109 unita in `master` al commit `4aef788b`. Gate GitHub verdi; verifica locale: sintassi JavaScript **183 moduli**; navigazione **156/156**; condivisione **43/43**; Functions/security **454 pass, 9 skip dichiarati, 0 fail**. Deploy riuscito per Hosting e la sola callable `respondToInvitation`; verifica remota HTTP 200 con versione `1.2.163` e Function v2 attiva in `europe-west1` su Node.js 22. Rules e dati non sono stati modificati.
 
 ## Nuovo progetto pianificato — Portabilità, Assistente e Lingue — 11/10/2026
 

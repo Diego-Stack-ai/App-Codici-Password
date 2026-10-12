@@ -1,8 +1,8 @@
 # Rilascio
 
-## Candidata 1.2.163 — 12/10/2026
+## Esito operativo 1.2.163 — 12/10/2026
 
-Quattro correzioni Account sono pronte per il rilascio: conteggio confermato dopo rinomina, uscita del destinatario da un Account condiviso, azzeramento effettivo delle statistiche e conversione reversibile fra Account/memorandum privati o condivisi con revoca esplicita dei destinatari precedenti. Gate locali: sintassi **183 moduli**, navigazione **156/156**, condivisione **43/43**, Functions/security **454 pass, 9 skip, 0 fail**. Componenti previsti: Hosting e `respondToInvitation`; nessuna modifica a Rules o dati.
+PR #109 unita in `master` (`4aef788b`) con gate GitHub verdi. Pubblicate quattro correzioni Account: conteggio confermato dopo rinomina, uscita del destinatario da un Account condiviso, azzeramento effettivo delle statistiche e conversione reversibile fra Account/memorandum privati o condivisi con revoca esplicita dei destinatari precedenti. Gate locali: sintassi **183 moduli**, navigazione **156/156**, condivisione **43/43**, Functions/security **454 pass, 9 skip, 0 fail**. Deploy riuscito per Hosting e `respondToInvitation`; controllo remoto HTTP 200 e versione `1.2.163`. Nessuna modifica a Rules o dati.
 
 ## Esito operativo 1.2.154 — 10/10/2026
 
