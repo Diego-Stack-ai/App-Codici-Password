@@ -1,5 +1,9 @@
 # Stato
 
+## Produzione 1.2.168 — acquisizione guidata Tessera/Carta — 12/10/2026
+
+Gli allegati degli Account privati e aziendali offrono **Scansiona tessera/carta**, con fotocamera posteriore, guida ID-1 e ritaglio esatto dell'area inquadrata prima dell'editor Carta. Il rilevatore locale delle immagini esistenti usa una soglia adattiva e conserva la regolazione manuale dei quattro angoli. PR #118 unita in `master` (`00297d21`) dopo gate GitHub verdi; deploy del solo Hosting riuscito. Home e due dettagli Account rispondono HTTP 200 con versione `1.2.168`; il modulo camera pubblico risponde HTTP 200. Functions, Rules e dati reali non sono stati modificati. Resta necessario il collaudo ergonomico su telefoni fisici e condizioni di luce reali.
+
 ## Produzione 1.2.167 — video nella galleria allegati — 12/10/2026
 
 I selettori Galleria degli allegati Account privati e aziendali mostrano ora immagini e video; la Fotocamera resta specializzata sulle immagini. PR #116 unita in `master` (`ba9cb84a`), gate GitHub verdi e deploy del solo Hosting riuscito. Verifica remota HTTP 200 con versione `1.2.167` e filtro `image/*,video/*` presente in entrambi i dettagli Account. Functions, Rules e dati reali non sono stati modificati.

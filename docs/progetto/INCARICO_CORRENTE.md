@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Release 1.2.168 in pubblicazione — acquisizione guidata Tessera/Carta — 12/10/2026
+## Pubblicazione 1.2.168 conclusa — acquisizione guidata Tessera/Carta — 12/10/2026
 
-Diego ha autorizzato implementazione e pubblicazione di un'acquisizione dedicata agli allegati formato tessera/carta. Il selettore degli allegati aggiunge **Scansiona tessera/carta**: la fotocamera posteriore viene mostrata dentro l'app con guida ID-1, lo scatto usa esattamente l'area della guida e apre l'editor direttamente in modalità Carta. Il rilevatore sulle immagini esistenti usa una soglia adattiva al rumore dello sfondo; restano disponibili correzione manuale degli angoli e allegato originale. Nessun OCR o dato reale; il deploy previsto riguarda soltanto Hosting.
+PR #118 unita in `master` al commit `00297d21` dopo gate GitHub verdi. Il selettore degli allegati aggiunge **Scansiona tessera/carta**: la fotocamera posteriore viene mostrata dentro l'app con guida ID-1, lo scatto usa esattamente l'area della guida e apre l'editor direttamente in modalità Carta. Il rilevatore sulle immagini esistenti usa una soglia adattiva al rumore dello sfondo; restano disponibili correzione manuale degli angoli e allegato originale. Deploy del solo Hosting riuscito; home e dettagli Account privato/azienda verificati HTTP 200 con versione `1.2.168` e comando scanner presenti. Nessun OCR o dato reale; Functions e Rules non sono state modificate.
 
 ## Pubblicazione 1.2.167 conclusa — video nella galleria allegati e censimento Scadenze — 12/10/2026
 
