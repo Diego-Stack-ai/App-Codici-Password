@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Candidata 1.2.167 — video nella galleria allegati e censimento Scadenze — 12/10/2026
+## Pubblicazione 1.2.167 conclusa — video nella galleria allegati e censimento Scadenze — 12/10/2026
 
-Diego ha richiesto e autorizzato la pubblicazione del filtro Galleria per immagini e video negli allegati degli Account privati e aziendali, allineandolo ai flussi Scadenze e Azienda già compatibili. Nel prossimo controllo degli allegati reali, ogni oggetto collegato a una Scadenza dovrà riportare anche il **nome leggibile della Scadenza**, oltre all'identificativo, così da rendere riconoscibile per esempio una scadenza assicurativa. Questo rilascio non autorizza né esegue ora letture, cancellazioni o migrazioni di dati reali.
+PR #116 unita in `master` al commit `ba9cb84a` dopo gate GitHub verdi. Il filtro Galleria degli allegati Account privati e aziendali mostra immagini e video, allineato ai flussi Scadenze e Azienda già compatibili; la Fotocamera resta limitata alle immagini. Hosting `1.2.167` distribuito e verificato HTTP 200 sui due dettagli. Nel prossimo controllo degli allegati reali, ogni oggetto collegato a una Scadenza dovrà riportare anche il **nome leggibile della Scadenza**, oltre all'identificativo, così da rendere riconoscibile per esempio una scadenza assicurativa. Nessun dato reale è stato letto o modificato in questo rilascio.
 
 ## Pubblicazione 1.2.166 conclusa — allegati originali e limite 32 MiB — 12/10/2026
 

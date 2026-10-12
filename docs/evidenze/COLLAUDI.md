@@ -1,5 +1,12 @@
 # Collaudi
 
+## 12/10/2026 — pubblicazione 1.2.167, video nella galleria allegati
+
+- Test mirati selettori e sicurezza allegati **22/22**; documentazione **11/11**; sintassi **183 moduli**; 254 riferimenti versione coerenti.
+- PR #116 unita in `master` (`ba9cb84a`) dopo validazione GitHub verde in 7m35s.
+- Deploy del solo Hosting riuscito. Home, dettaglio Account privato e dettaglio Account aziendale HTTP **200**; versione `1.2.167` e filtro `image/*,video/*` verificati da remoto.
+- Nessun dato reale letto o modificato.
+
 ## 12/10/2026 — pubblicazione 1.2.166, allegati originali e limite 32 MiB
 
 - L'editor immagini distingue il salvataggio del ritaglio dall'allegato originale e restituisce il `File` iniziale nel secondo caso.
