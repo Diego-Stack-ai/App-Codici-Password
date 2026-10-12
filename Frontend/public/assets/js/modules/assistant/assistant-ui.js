@@ -5,7 +5,7 @@ function element(tag, className, text = '') {
     return node;
 }
 
-export function createAssistantUI({ onAsk, onClose, resolveCredential, offlineNotice = '' }) {
+export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential, offlineNotice = '' }) {
     const pageScrollY = window.scrollY;
     document.documentElement.classList.add('vault-assistant-open');
     document.body.classList.add('vault-assistant-open');
@@ -84,13 +84,30 @@ export function createAssistantUI({ onAsk, onClose, resolveCredential, offlineNo
             card.tabIndex = 0; card.setAttribute('role', 'link');
             const navigate = () => { window.location.href = item.href; };
             card.addEventListener('click', navigate);
-            card.addEventListener('keydown', event => { if (event.key === 'Enter') navigate(); });
+            card.addEventListener('keydown', event => { if (event.target === card && event.key === 'Enter') navigate(); });
             const body = element('div', 'vault-assistant-result-body');
-            body.append(element('strong', '', `${index + 1}. ${item.title}`), element('small', '', item.subtitle || item.kind));
+            const heading = element('div', 'vault-assistant-result-heading');
+            const icon = item.iconSource ? element('img', 'vault-assistant-result-icon') : element('span', 'vault-assistant-result-icon material-symbols-outlined', 'shield_lock');
+            if (item.iconSource) { icon.src = item.iconSource; icon.alt = ''; icon.addEventListener('error', () => icon.remove(), {once: true}); }
+            heading.append(icon, element('strong', '', `${index + 1}. ${item.title}`));
+            body.append(heading, element('small', '', item.subtitle || item.kind));
             if (item.credentials) {
                 await addCredentialRow(body, 'Username', item.credentials.username);
                 await addCredentialRow(body, 'Account', item.credentials.account);
                 await addCredentialRow(body, 'Password', item.credentials.password, { secret: true });
+            }
+            if (item.archiveAction && onArchive) {
+                const actions = element('div', 'vault-assistant-result-actions');
+                const archive = element('button', 'vault-assistant-result-action');
+                archive.type = 'button'; archive.title = 'Sposta nell’Archivio (cestino)';
+                archive.append(element('span', 'material-symbols-outlined', 'archive'), element('span', '', 'Archivia'));
+                archive.addEventListener('click', async event => {
+                    event.stopPropagation(); archive.disabled = true;
+                    try {
+                        if (await onArchive(item)) { card.remove(); if (!group.children.length) group.remove(); }
+                    } finally { archive.disabled = false; }
+                });
+                actions.append(archive); body.append(actions);
             }
             card.append(body); group.append(card);
         }

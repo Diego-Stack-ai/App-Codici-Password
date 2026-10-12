@@ -3,9 +3,11 @@ import { getUserProfile, listCompanies, listCompanyAccounts, listDeadlines, list
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];
 const NESTED_ACCOUNT_CONCURRENCY = 3;
-const make = ({ id, kind, title, subtitle = '', keywords = [], href, scope = 'privato', companyName = '', credentials = null }) => ({
+const make = ({ id, kind, title, subtitle = '', keywords = [], href, scope = 'privato', companyName = '', credentials = null,
+    iconSource = '', archiveAction = null }) => ({
     id: `${kind}:${id}`, kind, title: text(title) || 'Senza nome', subtitle: text(subtitle),
-    keywords: keywords.map(text).filter(Boolean), href, scope, companyName: text(companyName), credentials
+    keywords: keywords.map(text).filter(Boolean), href, scope, companyName: text(companyName), credentials,
+    iconSource: text(iconSource), archiveAction
 });
 
 function profileRecords(uid, data) {
@@ -24,6 +26,9 @@ function accountRecord(id, data, companyId = '', companyName = '') {
         subtitle: companyId ? (companyName || 'Azienda non specificata') : 'Privato',
         keywords: [companyName, data.type, data.tipo, data.categoria, data.url, data.sitoWeb, data.referenteNome],
         scope: companyId ? 'azienda' : 'privato', companyName,
+        iconSource: data.logo || data.avatar,
+        archiveAction: {id, context: companyId || 'privato', revision: data.revision, updatedAt: data.updatedAt,
+            sharedWith: data.sharedWith, sharedWithEmails: data.sharedWithEmails, recipientEmail: data.recipientEmail},
         credentials: { username: data.username, account: data.account || data.codice, password: data.password },
         href: companyId ? `/dettaglio_account_azienda.html?aziendaId=${encodeURIComponent(companyId)}&id=${encodeURIComponent(id)}` : `/dettaglio_account_privato.html?id=${encodeURIComponent(id)}` });
 }
@@ -54,7 +59,7 @@ export async function loadVaultSearchRecords(user, { includeCompanies = true } =
     const companies = value(2, []);
     const deadlines = value(3, []);
     const records = profile ? profileRecords(uid, profile) : [];
-    accounts.forEach(item => records.push(accountRecord(item.id, item)));
+    accounts.filter(item => item.isArchived !== true).forEach(item => records.push(accountRecord(item.id, item)));
     deadlines.forEach(item => records.push(deadlineRecord(item.id, item)));
     const companyItems = [];
     companies.forEach(companyData => {
@@ -67,7 +72,8 @@ export async function loadVaultSearchRecords(user, { includeCompanies = true } =
         while (cursor < companyItems.length) {
             const company = companyItems[cursor++];
             const accounts = await listCompanyAccounts(uid, company.id).catch(() => []);
-            accounts.forEach(account => records.push(accountRecord(account.id, account, company.id, company.companyName)));
+            accounts.filter(account => account.isArchived !== true)
+                .forEach(account => records.push(accountRecord(account.id, account, company.id, company.companyName)));
         }
     }));
     return records;

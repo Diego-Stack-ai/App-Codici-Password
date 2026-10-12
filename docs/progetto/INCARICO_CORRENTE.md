@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Candidata 1.2.173 — azioni Account nell'Assistente Codex — 12/10/2026
+
+I risultati Account dell'Assistente mostrano il logo/avatar quando presente, altrimenti un'icona neutra, e offrono **Archivia** direttamente nella scheda. L'azione usa il protocollo canonico dell'Archivio (il contenitore sicuro che funge da cestino), richiede conferma, applica i controlli di concorrenza e revoca delle condivisioni e rimuove il risultato dalla conversazione dopo il successo. La cancellazione definitiva resta disponibile soltanto dall'Archivio con la conferma già prevista.
+
 ## Hotfix candidata 1.2.172 — fallback fotocamera nativa — 12/10/2026
 
 Dopo la correzione della policy, alcuni contesti dispositivo/PWA possono ancora rifiutare la camera integrata `getUserMedia`. Il comando Tessera/Carta dei Documenti del Profilo propone quindi, solo in caso di errore, un passaggio esplicito alla fotocamera nativa del telefono; il file risultante entra direttamente nel normale upload cifrato senza l'editor generale. Nessun cambiamento a cifratura, Functions, Rules o dati.
