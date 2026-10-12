@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.175';
+import { db, storage } from '../../firebase-config.js?v=1.2.176';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -18,6 +18,7 @@ import { listCompanyAccountAttachments } from '../data/vault-repository.js';
 import {decryptReceivedCompanyAttachment, syncCompanyAttachmentAccess} from '../shared/shared-attachment-access.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/attachment-source-picker.js';
+import {captureCardAttachment as captureGuidedCard} from '../shared/card-attachment-capture.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _ownerUid = null;
@@ -150,13 +151,12 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
 
 export async function captureCardAttachment() {
     closeSourceSelector();
-    try {
-        const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
-        const file = await captureCardPhoto();
-        if (file && _active()) await handleFileUpload({files: [file], value: ''}, {skipImageEditor: true});
-    } catch (error) {
-        if (_active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
-    }
+    const askFallback = _confirm;
+    const file = await captureGuidedCard({
+        fallbackInput: document.getElementById('input-camera'),
+        confirmFallback: (...args) => askFallback(...args)
+    });
+    if (file && _active()) await handleFileUpload({files: [file], value: ''}, {skipImageEditor: true});
 }
 
 export async function loadAttachments() {

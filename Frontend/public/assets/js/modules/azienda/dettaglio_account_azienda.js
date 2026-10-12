@@ -7,7 +7,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.175';
+import { auth, db } from '../../firebase-config.js?v=1.2.176';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -20,6 +20,7 @@ import {
     initAttachmentModule, loadAttachments,
     openSourceSelector, closeSourceSelector, handleFileUpload, captureCardAttachment
 } from './dettaglio-azienda-attachments.js';
+import {consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { loadDetailSharingContactNames } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
@@ -278,7 +279,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.175`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.176`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();
@@ -521,7 +522,11 @@ function setupActions(active, fileInputs = new Set()) {
             input.parentNode.replaceChild(fresh, input); input = fresh;
         }
         if (input) fileInputs.add(input);
-        if (input) input.onchange = e => { if (active() && !isReadOnly) handleFileUpload(e.target); };
+        if (input) input.onchange = e => {
+            if (active() && !isReadOnly) {
+                handleFileUpload(e.target, {initialMode: consumeAttachmentInitialMode(e.target)});
+            }
+        };
     });
     const cardCamera = document.getElementById('btn-card-camera');
     if (cardCamera) cardCamera.onclick = () => {if (active() && !isReadOnly) captureCardAttachment();};

@@ -42,10 +42,13 @@ test('acquisizione tessera usa guida ID-1 e conferma dedicata con pan e zoom lim
     }
     const privateModule = await read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js');
     const companyModule = await read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js');
-    assert.match(privateModule, /captureCardPhoto/);
+    const orchestration = await read('Frontend/public/assets/js/modules/shared/card-attachment-capture.js');
+    assert.match(orchestration, /captureCardPhoto/);
+    assert.match(privateModule, /captureCardAttachment/);
     assert.match(privateModule, /skipImageEditor: true/);
-    assert.match(companyModule, /captureCardPhoto/);
+    assert.match(companyModule, /captureGuidedCard/);
     assert.match(companyModule, /skipImageEditor: true/);
+    assert.match(orchestration, /attachmentInitialMode = CARD_MODE/);
 });
 
 test('regolazione tessera limita zoom e spostamento senza creare aree vuote', async () => {

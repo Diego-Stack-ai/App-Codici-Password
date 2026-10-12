@@ -1,5 +1,13 @@
 # Collaudi
 
+## 12/10/2026 — candidata 1.2.176, fallback Tessera/Carta condiviso
+
+- Regressione iniziale riprodotta staticamente: Documenti usava un fallback nativo che saltava l’editor, mentre gli Account terminavano con un messaggio generico.
+- Il nuovo orchestratore classifica gli errori della fotocamera, propone lo stesso fallback nei tre contesti e marca la selezione nativa per aprire l’editor in modalità Carta una sola volta.
+- Test mirati iniziali: **7/7** su classificazione errori, consumo della modalità, attivazione del fallback e collegamenti nei tre contesti.
+- Suite locali pertinenti verdi: allegati **69/69**, Profilo **164/164**, navigazione/lifecycle **157/157**, governance documentale **11/11**; verdi anche sintassi JavaScript, CSS, dipendenze circolari, riferimenti statici e coerenza versione.
+- Restano gate GitHub, deploy Hosting e verifica remota prima di dichiarare la versione pubblicata. Il gesto fisico su telefono resta un collaudo distinto.
+
 ## 12/10/2026 — pubblicazione 1.2.175, selettore allegati condiviso
 
 - Test mirati su Profilo Documenti e lifecycle Account privato/azienda: **28/28**.

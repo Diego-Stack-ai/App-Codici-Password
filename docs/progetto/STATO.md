@@ -1,5 +1,9 @@
 # Stato
 
+## Candidata 1.2.176 — scansione Tessera/Carta coerente — 12/10/2026
+
+Il percorso guidato e il fallback nativo sono condivisi fra Documenti del Profilo e dettagli Account privati/aziendali. Se `getUserMedia` funziona restano guida ID-1, trascinamento e zoom `0,93×–1,15×`; se fallisce, il messaggio distingue permesso, camera assente, camera occupata e browser incompatibile. La fotografia nativa entra nell’editor in modalità Carta invece di essere caricata come foto libera. Nessun cambiamento a cifratura, persistenza, Functions o Rules; i gate locali pertinenti sono verdi, mentre prima della pubblicazione restano gate GitHub e verifica remota.
+
 ## Produzione 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
 
 Un solo componente sorgente è collegato ai Documenti del Profilo e ai dettagli Account privati e aziendali. Presentazione e azioni non divergono più: **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scansione usa lo stesso motore guidato ID-1 già pubblicato; upload, cifratura, limiti e persistenza restano quelli specifici della scheda origine. PR #130 unita in `master` (`83f70213`); validazione di produzione verde in 5m24s e deploy Hosting in 30s. Verifica remota HTTP 200 su home, modulo e stile con versione `1.2.175`. Functions, Rules e dati non sono stati modificati.
