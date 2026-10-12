@@ -1,10 +1,12 @@
 # Incarico corrente
 
-## Candidata 1.2.177 — acquisizione Tessera/Carta ad alta risoluzione — 12/10/2026
+## Pubblicazione 1.2.177 conclusa — acquisizione Tessera/Carta ad alta risoluzione — 13/10/2026
 
 Diego richiede che carte, patenti e documenti acquisiti come Tessera/Carta conservino i dettagli necessari alla lettura. Il riquadro `1012:638` resta soltanto l'anteprima e la guida geometrica: il file finale viene ora generato dai pixel della sorgente alla risoluzione del ritaglio, con richiesta ideale `4096×2160` alla fotocamera e qualità JPEG `0,98`. Anche l'editor Carta non forza più l'uscita `1012×638`: mantiene la risoluzione utile del ritaglio, con limite tecnico di 4096 px sul lato lungo per evitare esaurimenti di memoria sui dispositivi mobili. **Allega originale** continua a conservare i byte sorgente senza ricampionamento o compressione.
 
 Perimetro autorizzato: modifica, commit, push, merge e deploy del solo Hosting della release `1.2.177`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché cifratura, persistenza e limiti di upload non cambiano.
+
+PR #134 unita in `master` (`260d03ba`) dopo documentazione e validazione completa verdi. Workflow di produzione `38315264096`: validazione verde in 7m14s e deploy del solo Hosting verde in 26s. Verifica remota HTTP `200` su home, scanner, editor e stile differito; versione `1.2.177`, richiesta camera 4096 e output a risoluzione sorgente presenti. Functions, Rules e dati non sono stati distribuiti o modificati.
 
 ## Pubblicazione 1.2.176 conclusa — fallback Tessera/Carta realmente condiviso — 12/10/2026
 
