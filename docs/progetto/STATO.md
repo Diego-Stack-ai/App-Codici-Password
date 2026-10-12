@@ -4,9 +4,9 @@
 
 La regressione qualitativa è stata ricondotta al ricampionamento fisso `1012×638` introdotto dal percorso guidato. Nella candidata quella misura resta soltanto la guida ID-1 a schermo: **Usa foto** esporta il ritaglio dai pixel della sorgente, richiede alla camera fino a `4096×2160` come valore ideale e usa JPEG qualità `0,98`. L'editor Carta conserva analogamente la risoluzione del ritaglio fino a 4096 px sul lato lungo; **Allega originale** resta invariato e non ricomprime. Nessun cambiamento a cifratura, persistenza, Functions, Rules o dati; prima della pubblicazione restano i gate GitHub e la verifica remota.
 
-## Candidata 1.2.176 — scansione Tessera/Carta coerente — 12/10/2026
+## Produzione 1.2.176 — scansione Tessera/Carta coerente — 12/10/2026
 
-Il percorso guidato e il fallback nativo sono condivisi fra Documenti del Profilo e dettagli Account privati/aziendali. Se `getUserMedia` funziona restano guida ID-1, trascinamento e zoom `0,93×–1,15×`; se fallisce, il messaggio distingue permesso, camera assente, camera occupata e browser incompatibile. La fotografia nativa entra nell’editor in modalità Carta invece di essere caricata come foto libera. Nessun cambiamento a cifratura, persistenza, Functions o Rules; i gate locali pertinenti sono verdi, mentre prima della pubblicazione restano gate GitHub e verifica remota.
+Il percorso guidato e il fallback nativo sono condivisi fra Documenti del Profilo e dettagli Account privati/aziendali. Se `getUserMedia` funziona restano guida ID-1, trascinamento e zoom `0,93×–1,15×`; se fallisce, il messaggio distingue permesso, camera assente, camera occupata e browser incompatibile. La fotografia nativa entra nell’editor in modalità Carta invece di essere caricata come foto libera. PR #132 unita in `master` (`8b727fb7`); workflow di produzione `38294794975` verde e deploy Hosting concluso in 24s. Verifica remota HTTP `200`, versione `1.2.176`, nuovo orchestratore presente e policy `camera=(self)`. Cifratura, persistenza, Functions, Rules e dati non sono cambiati.
 
 ## Produzione 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
 

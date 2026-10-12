@@ -6,11 +6,13 @@ Diego richiede che carte, patenti e documenti acquisiti come Tessera/Carta conse
 
 Perimetro autorizzato: modifica, commit, push, merge e deploy del solo Hosting della release `1.2.177`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché cifratura, persistenza e limiti di upload non cambiano.
 
-## Candidata 1.2.176 — fallback Tessera/Carta realmente condiviso — 12/10/2026
+## Pubblicazione 1.2.176 conclusa — fallback Tessera/Carta realmente condiviso — 12/10/2026
 
 Diego autorizza correzione e pubblicazione del percorso Tessera/Carta. Account privati, Account aziendali e Documenti del Profilo usano ora lo stesso orchestratore: prima tenta la fotocamera integrata con guida ID-1, trascinamento e zoom limitato; se il browser o il dispositivo la rifiuta, descrive la causa e propone esplicitamente la fotocamera nativa. La foto ottenuta dal fallback non viene più caricata direttamente: passa nell’editor già impostato su **Carta**, così restano disponibili rettangolo ID-1, rilevamento/correzione degli angoli e regolazione manuale.
 
 Perimetro autorizzato: commit, push, merge e deploy del solo Hosting della release `1.2.176`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché persistenza e cifratura non cambiano.
+
+PR #132 unita in `master` (`8b727fb7`). Workflow di produzione `38294794975` verde: validazione completa in 7m33s e deploy Hosting in 24s. Verifica HTTP positiva su home e nuovo orchestratore, entrambi `200`, versione `1.2.176` presente e policy `camera=(self)`. Functions, Rules e dati non sono stati distribuiti o modificati.
 
 ## Pubblicazione 1.2.175 conclusa — selettore allegati realmente condiviso — 12/10/2026
 
