@@ -1,6 +1,6 @@
 # Allegati documenti
 
-## Selezione Galleria e inventario — candidata 1.2.167
+## Selezione Galleria pubblicata e inventario — 1.2.167
 
 I selettori **Galleria** degli allegati Account privati, Account aziendali, Azienda e Scadenze espongono sia immagini sia video (`image/*,video/*`); la Fotocamera resta specializzata sulle immagini. Nei censimenti operativi, un allegato sotto `users/{uid}/scadenze/{deadlineId}/...` deve essere presentato con `deadlineId` e con il nome leggibile ricavato dal documento della Scadenza. Il nome serve solo alla leggibilità del rapporto e non sostituisce l'identificativo canonico.
 

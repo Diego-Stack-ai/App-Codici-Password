@@ -1,5 +1,9 @@
 # Stato
 
+## Produzione 1.2.167 — video nella galleria allegati — 12/10/2026
+
+I selettori Galleria degli allegati Account privati e aziendali mostrano ora immagini e video; la Fotocamera resta specializzata sulle immagini. PR #116 unita in `master` (`ba9cb84a`), gate GitHub verdi e deploy del solo Hosting riuscito. Verifica remota HTTP 200 con versione `1.2.167` e filtro `image/*,video/*` presente in entrambi i dettagli Account. Functions, Rules e dati reali non sono stati modificati.
+
 ## Produzione 1.2.166 — allegati senza compressione opzionale e limite 32 MiB — 12/10/2026
 
 Le immagini possono essere allegate mantenendo il file originale oppure salvando il ritaglio elaborato. La soglia massima per un singolo allegato cifrato è 32 MiB ed è coerente nei controlli di upload/download, condivisione, backup/ripristino, callable e Storage Rules. PR #114 unita in `master` (`db5e4e1d`); gate GitHub verdi. Hosting, Storage Rules e `manageBackupRestoreV2` sono stati distribuiti con successo; verifica remota HTTP 200 e callable attiva in `europe-west1` su Node.js 22. Firestore Rules e dati reali non sono stati modificati.

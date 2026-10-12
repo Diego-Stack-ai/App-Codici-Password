@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.167 — 12/10/2026
+
+PR #116 unita in `master` (`ba9cb84a`) con gate GitHub verdi. Pubblicato sul solo Hosting il filtro Galleria immagini+video nei dettagli Account privati e aziendali; verifica remota HTTP 200 con versione e attributi `accept` attesi. Functions, Firestore Rules, Storage Rules e dati reali sono rimasti invariati.
+
 ## Esito operativo 1.2.166 — 12/10/2026
 
 PR #114 unita in `master` (`db5e4e1d`) con gate GitHub verdi. Pubblicate l'opzione **Allega originale**, la dicitura **Salva ritaglio** e la soglia coerente di 32 MiB. Deploy coordinato riuscito per Hosting, Storage Rules e `manageBackupRestoreV2`; controllo remoto HTTP 200 e callable attiva. Firestore Rules, migrazioni e dati reali sono rimasti esclusi.
