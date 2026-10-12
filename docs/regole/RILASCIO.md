@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.175 — 12/10/2026
+
+PR #130 unita in `master` (`83f70213`) dopo gate GitHub verdi. Pubblicato sul solo Hosting il componente **Seleziona sorgente** condiviso da Documenti del Profilo e Account privati/aziendali, mantenendo lo scanner guidato ID-1. Workflow di produzione `38285339424` verde; verifica remota HTTP 200 con versione `1.2.175` e nuovi asset presenti. Functions, Firestore Rules, Storage Rules e dati reali non sono stati modificati.
+
 ## Esito operativo 1.2.174 — 12/10/2026
 
 Il rilascio unifica le sorgenti allegato dei Documenti del Profilo con quelle degli Account e collega alle nuove Scadenze gli allegati cifrati già presenti su Account o Documento, senza duplicazione Storage. Introduce inoltre il tipo Data e il flag Scadenza nei Widget Account. PR #128 unita in `master` (`7705aa04`); gate GitHub verdi, deploy Hosting e della sola callable `uploadProfileDocumentAttachment` riusciti. Verifica remota HTTP 200 con versione `1.2.174`. Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
