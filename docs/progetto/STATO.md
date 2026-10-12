@@ -1,5 +1,9 @@
 # Stato
 
+## Produzione 1.2.170 — scanner Tessera/Carta nei Documenti del Profilo — 12/10/2026
+
+Gli allegati di Profilo utente → Documenti espongono lo stesso comando **Scansiona tessera/carta** degli Account: guida ID-1, conferma nel riquadro, trascinamento e zoom limitato, quindi upload cifrato diretto. PR #122 unita in `master` (`219f9dc7`) dopo pipeline GitHub verde in 8m02s; deploy del solo Hosting riuscito. Home, Profilo, modulo allegati e stile camera verificati HTTP 200 con versione `1.2.170`. Functions, Rules e dati reali non sono stati modificati; resta consigliato il collaudo ergonomico su telefono fisico.
+
 ## Produzione 1.2.169 — conferma Tessera/Carta regolabile — 12/10/2026
 
 Lo scatto Tessera/Carta resta nello stesso flusso e apre una conferma ID-1 dedicata, senza passare dall'editor generale. La foto può essere centrata con trascinamento e pinch o cursore, entro `0,93×–1,15×`; il margine sorgente dell'8% e i vincoli geometrici impediscono aree vuote. PR #120 unita in `master` (`ad06df59`) dopo pipeline GitHub verde in 7m37s; deploy del solo Hosting riuscito. Verifica HTTP 200 su home, dettagli Account privato/azienda e modulo camera. Functions, Rules e dati reali non sono stati modificati; resta consigliato il collaudo ergonomico su telefono fisico.

@@ -1,5 +1,13 @@
 # Collaudi
 
+## 12/10/2026 — pubblicazione 1.2.170, scanner Tessera/Carta nei Documenti del Profilo
+
+- Prove mirate allegati/editor **14/14**; documentazione **11/11**; navigazione, riferimenti statici, versione e diff verdi.
+- Pipeline GitHub completa verde in **8m02s**, oltre ai due gate documentali.
+- PR #122 unita in `master` (`219f9dc7`); deploy del solo Hosting riuscito con 273 file.
+- Verifica remota HTTP **200** su home, Profilo, modulo allegati documenti e foglio stile camera; versione `1.2.170` e comando scanner presenti.
+- Nessun dato reale letto o modificato. Il gesto fisico su telefono resta da collaudare direttamente.
+
 ## 12/10/2026 — pubblicazione 1.2.169, conferma Tessera/Carta regolabile
 
 - Prove editor, geometria e integrazione **15/15**; documentazione **11/11**; navigazione, riferimenti statici, versione e diff verdi.
