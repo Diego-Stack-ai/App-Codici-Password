@@ -1,8 +1,8 @@
 # Rilascio
 
-## Candidata 1.2.166 — 12/10/2026
+## Esito operativo 1.2.166 — 12/10/2026
 
-Perimetro autorizzato: pubblicare l'opzione **Allega originale**, la dicitura **Salva ritaglio** e il limite coerente di 32 MiB. Poiché cambiano sia il frontend sia l'enforcement del bucket e il limite del ripristino M8 V2, il rilascio coordinato comprende Hosting, Storage Rules e la callable `manageBackupRestoreV2`. Sono esclusi Firestore Rules, migrazioni e accessi ai dati reali.
+PR #114 unita in `master` (`db5e4e1d`) con gate GitHub verdi. Pubblicate l'opzione **Allega originale**, la dicitura **Salva ritaglio** e la soglia coerente di 32 MiB. Deploy coordinato riuscito per Hosting, Storage Rules e `manageBackupRestoreV2`; controllo remoto HTTP 200 e callable attiva. Firestore Rules, migrazioni e dati reali sono rimasti esclusi.
 
 ## Esito operativo 1.2.164 — 12/10/2026
 

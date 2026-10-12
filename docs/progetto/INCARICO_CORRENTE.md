@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Candidata 1.2.166 — allegati originali e limite 32 MiB — 12/10/2026
+## Pubblicazione 1.2.166 conclusa — allegati originali e limite 32 MiB — 12/10/2026
 
-Diego ha autorizzato la pubblicazione dell'aggiornamento allegati. L'editor immagini offre ora due uscite esplicite: **Salva ritaglio** applica l'elaborazione scelta, mentre **Allega originale** conserva il file selezionato senza ricampionamento o compressione. Il limite generale per ogni allegato cifrato sale da 25 a **32 MiB** ed è allineato fra client, letture, condivisione, backup/ripristino, Functions e Storage Rules. La pubblicazione richiede quindi Hosting, Storage Rules e la callable M8 V2 interessata; nessun dato reale deve essere letto o modificato.
+PR #114 unita in `master` al commit `db5e4e1d` dopo gate GitHub verdi. L'editor immagini offre due uscite esplicite: **Salva ritaglio** applica l'elaborazione scelta, mentre **Allega originale** conserva il file selezionato senza ricampionamento o compressione. Il limite generale per ogni allegato cifrato è **32 MiB** ed è allineato fra client, letture, condivisione, backup/ripristino, Functions e Storage Rules. Deploy riuscito per Hosting, Storage Rules e `manageBackupRestoreV2`; verifica HTTP 200 con versione e azioni presenti. Nessun dato reale è stato letto o modificato.
 
 ## Pubblicazione 1.2.164 conclusa — 12/10/2026
 
