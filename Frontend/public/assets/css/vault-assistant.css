@@ -128,3 +128,5 @@ body.vault-assistant-open {
 html.dark .vault-assistant-credential-label {
     color: #a9b8cf;
 }
+
+.vault-assistant-result-heading{display:flex;align-items:center;gap:8px}.vault-assistant-result-icon{width:28px;height:28px;flex:0 0 28px;border-radius:7px;object-fit:cover}.vault-assistant-result-heading .material-symbols-outlined{display:grid;place-items:center;background:rgba(72,108,166,.1);color:#275da9;font-size:18px}.vault-assistant-result-actions{display:flex;justify-content:flex-end;margin-top:7px}.vault-assistant-result-action{display:flex;align-items:center;gap:5px;min-height:36px;padding:6px 10px;border:1px solid rgba(72,108,166,.24);border-radius:9px;background:rgba(72,108,166,.08);color:inherit;font-weight:700;cursor:pointer}.vault-assistant-result-action:disabled{opacity:.5;cursor:wait}.vault-assistant-result-action .material-symbols-outlined{font-size:17px}html.dark .vault-assistant-result-heading .material-symbols-outlined,html.dark .vault-assistant-result-action{background:rgba(103,144,210,.14)}

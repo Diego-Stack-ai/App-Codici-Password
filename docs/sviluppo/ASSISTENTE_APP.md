@@ -1,5 +1,9 @@
 # Assistente app
 
+## Azioni Account dai risultati — candidata 1.2.173
+
+Le schede risultato di tipo Account possono mostrare il logo/avatar già associato al record e un comando **Archivia**. Nell'app Archivio e cestino sono lo stesso stato sicuro: l'Assistente richiama lo stesso servizio transazionale delle liste Account, con conferma, CAS su revisione/aggiornamento e sospensione atomica degli accessi condivisi. Non espone la cancellazione definitiva, che resta confinata alla pagina Archivio.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

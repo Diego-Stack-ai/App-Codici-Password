@@ -115,5 +115,10 @@ export class VaultConversationEngine {
         return { message: describe(items), items };
     }
 
+    removeRecord(id) {
+        this.#records = this.#records.filter(record => record.id !== id);
+        this.#lastResults = this.#lastResults.filter(record => record.id !== id);
+    }
+
     clear() { this.#records = []; this.#lastResults = []; }
 }

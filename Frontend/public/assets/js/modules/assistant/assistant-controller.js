@@ -1,16 +1,20 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.172';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.172';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.173';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.173';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
+import { archiveAccount } from '../settings/archive-account-service.js';
+import { archiveConfirmMessage } from '../settings/archive-account-model.js';
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
+import { t } from '../../translations.js';
 
 let activeController = null;
 
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.172'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.173'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -54,6 +58,20 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             onAsk: query => conversation.ask(query),
             onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
+                onArchive: async item => {
+                    const target = item.archiveAction;
+                    if (!target || !await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(target, t))) return false;
+                    try {
+                        const result = await archiveAccount(user.uid, target);
+                        conversation.removeRecord(item.id);
+                        showToast(result.status === 'already-archived' ? t('success_already_archived') : t('success_moved_to_archive'), 'success');
+                        return true;
+                    } catch (error) {
+                        const conflict = ['ARCHIVE_CONFLICT', 'ARCHIVE_UPDATED_AT_CONFLICT', 'ARCHIVE_MARKER_MISSING'].includes(error?.code);
+                        showToast(conflict ? t('archive_conflict_refresh') : (error?.code === 'ARCHIVE_ACCOUNT_MISSING' ? t('archive_missing_refresh') : 'Archiviazione non riuscita.'), 'error');
+                        return false;
+                    }
+                },
                 offlineNotice
             });
         } catch (error) {
