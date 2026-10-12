@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Pubblicazione 1.2.163 — 12/10/2026
+## Pubblicazione 1.2.163 conclusa — 12/10/2026
 
-Obiettivo autorizzato: pubblicare insieme le quattro correzioni Account richieste da Diego. Perimetro: contatori e top Account privati, abbandono di una condivisione accettata, conversione fra le quattro modalità Account/memorandum nei form privati e aziendali, versione e documentazione canonica. Criteri di chiusura: test pertinenti verdi, commit e integrazione sul repository remoto, deploy Firebase Hosting e della sola callable `respondToInvitation`, verifica remota. Firestore Rules, Storage Rules e dati reali sono fuori perimetro.
+Le quattro correzioni Account richieste da Diego sono pubblicate. PR #109 unita in `master` (`4aef788b`), gate GitHub verdi, Hosting `1.2.163` verificato HTTP 200 e callable `respondToInvitation` aggiornata con successo. Firestore Rules, Storage Rules e dati reali sono rimasti fuori perimetro e non sono stati modificati. L'incarico di pubblicazione è concluso.
 
 ## AUDIT-SKILL-01 — incarico documentale aperto 11/10/2026
 
