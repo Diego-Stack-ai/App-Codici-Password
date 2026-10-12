@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Hotfix candidata 1.2.171 — policy fotocamera same-origin — 12/10/2026
+## Hotfix 1.2.171 pubblicata — policy fotocamera same-origin — 12/10/2026
 
-Il collaudo reale della 1.2.170 ha rilevato che l'header Hosting `Permissions-Policy: camera=()` bloccava `getUserMedia` prima della richiesta di consenso. Su autorizzazione esplicita di Diego, la candidata limita l'abilitazione a `camera=(self)`: le sole pagine della stessa origine possono chiedere il permesso, mentre iframe/origini esterne, microfono e geolocalizzazione restano vietati. Nessun cambiamento a cifratura, Functions, Rules o dati.
+Il collaudo reale della 1.2.170 ha rilevato che l'header Hosting `Permissions-Policy: camera=()` bloccava `getUserMedia` prima della richiesta di consenso. Su autorizzazione esplicita di Diego, la 1.2.171 limita l'abilitazione a `camera=(self)`: le sole pagine della stessa origine possono chiedere il permesso, mentre iframe/origini esterne, microfono e geolocalizzazione restano vietati. PR #124 unita in `master` (`9d60b5f0`), Hosting distribuito e header remoto verificato. Nessun cambiamento a cifratura, Functions, Rules o dati.
 
 ## Pubblicazione 1.2.170 conclusa — scanner tessera nei Documenti del Profilo — 12/10/2026
 
