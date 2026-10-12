@@ -122,6 +122,7 @@ const _it = {
         error_only_owner_archive: "Solo il proprietario può archiviare.",
         error_only_owner_delete: "Impossibile eliminare account condivisi.",
         shared_leave_title: "Abbandona condivisione",
+        shared_leave_action: "Abbandona",
         shared_leave_message: "L'Account verrà rimosso dal tuo elenco. Il proprietario e gli altri destinatari non perderanno i propri dati.",
         shared_leave_success: "Condivisione abbandonata",
         shared_leave_error: "Impossibile abbandonare la condivisione. Riprova.",

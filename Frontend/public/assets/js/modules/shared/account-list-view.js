@@ -124,7 +124,22 @@ function createAccountCard(account, options) {
                     ])
                 ]),
                 options.readOnly || suspended ? null : createElement('div', { className: 'account-card-right' }, [
-                    createElement('button', {
+                    account.isOwner === false ? createElement('button', {
+                        className: 'account-leave-button',
+                        title: t('shared_leave_action'),
+                        ariaLabel: t('shared_leave_action'),
+                        onclick: event => {
+                            event.stopPropagation();
+                            const item = event.currentTarget.closest('.swipe-row');
+                            if (item) options.onDelete(item);
+                        }
+                    }, [
+                        createElement('span', {
+                            className: 'material-symbols-outlined',
+                            textContent: 'link_off'
+                        }),
+                        createElement('span', { textContent: t('shared_leave_action') })
+                    ]) : createElement('button', {
                         className: `btn-mini-action ${isPinned ? 'active' : ''}`,
                         onclick: event => {
                             event.stopPropagation();

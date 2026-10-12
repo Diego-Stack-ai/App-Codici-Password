@@ -313,6 +313,33 @@ html:not(.dark) .account-card-subtitle {
     border-color: rgb(var(--accent-rgb) / );
 }
 
+.account-leave-button {
+    min-height: var(--touch-target-min, 44px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--status-error) 45%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--status-error) 10%, transparent);
+    color: var(--status-error);
+    font: inherit;
+    font-size: var(--fs-xs);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.account-leave-button:hover,
+.account-leave-button:focus-visible {
+    background: color-mix(in srgb, var(--status-error) 18%, transparent);
+    outline: none;
+}
+
+.account-leave-button .material-symbols-outlined {
+    font-size: var(--fs-lg);
+}
+
 /* --- 4. DATA DISPLAY (Sub-rows for User/Pass) --- */
 .account-data-display {
     padding-top: 0.75rem;

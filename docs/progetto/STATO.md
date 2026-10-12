@@ -1,5 +1,9 @@
 # Stato
 
+## Candidata 1.2.164 — comando visibile per abbandonare una condivisione — 12/10/2026
+
+La card di un Account condiviso ricevuto espone ora il pulsante **Abbandona** senza richiedere la scoperta del gesto laterale. L'azione conserva la conferma esplicita e rimuove soltanto l'accesso del destinatario; l'Account del proprietario e gli altri destinatari non vengono modificati. La candidata interessa il solo frontend e non cambia Functions, Rules o dati.
+
 ## Produzione 1.2.163 — Account, condivisioni e statistiche — 12/10/2026
 
 La release comprende quattro correzioni: conteggio degli Account privati riallineato dopo la modifica del titolo; uscita autonoma del destinatario da una condivisione accettata; azzeramento delle statistiche con rilettura confermata e rimozione delle righe a zero; conversione sempre disponibile fra Account, Account condiviso, memorandum e memorandum condiviso nei form privati e aziendali. I memorandum vietano Utente, Account/Codice e Password; gli Account possono invece avere tali campi senza renderli obbligatori. Il cambio di tipo da una modalità condivisa avvisa l'utente, revoca i destinatari precedenti e apre un nuovo ciclo di condivisione quando necessario.
