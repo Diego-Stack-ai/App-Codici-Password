@@ -1,8 +1,8 @@
 # Stato
 
-## Candidata 1.2.174 — allegati unificati e Scadenze collegate — 12/10/2026
+## Produzione 1.2.174 — allegati unificati e Scadenze collegate — 12/10/2026
 
-Il gestore allegati dei Documenti del Profilo è allineato a quello degli Account con quattro ingressi distinti: scanner Tessera/Carta, fotocamera, galleria immagini/video e selettore documenti. Il limite client/backend è 32 MiB. I campi Data dei Widget Account possono preparare una Scadenza; gli allegati di Account e Documenti vengono referenziati dalla Scadenza senza duplicazione fisica e restano di proprietà della scheda origine. Verifiche locali e distribuzione sono rendicontate in [COLLAUDI](../evidenze/COLLAUDI.md); finché merge e deploy non sono verificati questa sezione non descrive produzione.
+Il gestore allegati dei Documenti del Profilo è allineato a quello degli Account con quattro ingressi distinti: scanner Tessera/Carta, fotocamera, galleria immagini/video e selettore documenti. Il limite client/backend è 32 MiB. I campi Data dei Widget Account possono preparare una Scadenza; gli allegati di Account e Documenti vengono referenziati dalla Scadenza senza duplicazione fisica e restano di proprietà della scheda origine. PR #128 unita in `master` (`7705aa04`); pipeline della PR e pipeline di produzione verdi. Hosting e la sola callable `uploadProfileDocumentAttachment` sono stati distribuiti; verifica remota HTTP 200 con versione `1.2.174`. Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati.
 
 ## Produzione 1.2.170 — scanner Tessera/Carta nei Documenti del Profilo — 12/10/2026
 
