@@ -26,3 +26,9 @@ test('dettaglio condivisione: solo nomi e nessun controllo mutante', () => {
         assert.doesNotMatch(html, /account-mode-section|btn-save-account-mode/);
     }
 });
+
+test('la galleria degli allegati Account mostra immagini e video', () => {
+    for (const html of [privateHtml, companyHtml]) {
+        assert.match(html, /id="input-gallery"[^>]*accept="image\/\*,video\/\*"/);
+    }
+});

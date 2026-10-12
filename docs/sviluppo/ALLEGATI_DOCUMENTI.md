@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Selezione Galleria e inventario — candidata 1.2.167
+
+I selettori **Galleria** degli allegati Account privati, Account aziendali, Azienda e Scadenze espongono sia immagini sia video (`image/*,video/*`); la Fotocamera resta specializzata sulle immagini. Nei censimenti operativi, un allegato sotto `users/{uid}/scadenze/{deadlineId}/...` deve essere presentato con `deadlineId` e con il nome leggibile ricavato dal documento della Scadenza. Il nome serve solo alla leggibilità del rapporto e non sostituisce l'identificativo canonico.
+
 ## Contratto runtime pubblicato 1.2.166 — 12/10/2026
 
 Per JPEG, PNG e WebP l'editor condiviso propone **Salva ritaglio** e **Allega originale**. La seconda scelta restituisce gli stessi byte del file selezionato: non applica ritaglio, ridimensionamento o compressione. PDF e gli altri allegati ammessi conservano il normale percorso diretto. La dimensione massima è **32 MiB** per il file in chiaro e **32 MiB + 1 KiB** per l'oggetto cifrato, in modo da includere l'overhead dell'envelope. I limiti sono allineati in client, condivisione, backup/ripristino, Functions e Storage Rules.
