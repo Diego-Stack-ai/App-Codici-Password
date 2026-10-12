@@ -24,6 +24,25 @@ test('editor immagini offre quattro angoli liberi, prospettiva e formato tessera
     assert.doesNotMatch(source, /tesseract|ocr|card-parser/i);
 });
 
+test('acquisizione tessera usa fotocamera live, guida ID-1 e apre direttamente la modalità carta', async () => {
+    const camera = await read('Frontend/public/assets/js/modules/shared/card-camera-capture.js');
+    assert.match(camera, /getUserMedia/);
+    assert.match(camera, /facingMode/);
+    assert.match(camera, /CARD_RATIO = 1012 \/ 638/);
+    assert.match(camera, /card-camera-frame/);
+    for (const path of ['Frontend/public/dettaglio_account_privato.html', 'Frontend/public/dettaglio_account_azienda.html']) {
+        const html = await read(path);
+        assert.match(html, /id="btn-card-camera"/);
+        assert.match(html, /Scansiona tessera\/carta/);
+    }
+    const privateModule = await read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js');
+    const companyModule = await read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js');
+    assert.match(privateModule, /captureCardPhoto/);
+    assert.match(privateModule, /initialMode: 'card'/);
+    assert.match(companyModule, /captureCardPhoto/);
+    assert.match(companyModule, /initialMode: 'card'/);
+});
+
 test('riquadro tessera preimpostato conserva il rapporto ID-1', async () => {
     const {cardFrame} = await loadEditor();
     const points = cardFrame(1000, 800);

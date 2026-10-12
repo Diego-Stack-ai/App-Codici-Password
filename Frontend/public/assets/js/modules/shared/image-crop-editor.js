@@ -66,14 +66,17 @@ export function detectCardBoundaryFromImageData(data, width, height) {
     if (!data || width < 40 || height < 40) return null;
     const sample = Math.max(2, Math.round(Math.min(width, height) * .025));
     const corners = [[0, 0], [width - sample, 0], [0, height - sample], [width - sample, height - sample]];
-    let red = 0, green = 0, blue = 0, count = 0;
+    let red = 0, green = 0, blue = 0, redSq = 0, greenSq = 0, blueSq = 0, count = 0;
     for (const [startX, startY] of corners) for (let y = startY; y < Math.min(height, startY + sample); y++) {
         for (let x = startX; x < Math.min(width, startX + sample); x++) {
             const offset = (y * width + x) * 4;
-            red += data[offset]; green += data[offset + 1]; blue += data[offset + 2]; count++;
+            const r = data[offset], g = data[offset + 1], b = data[offset + 2];
+            red += r; green += g; blue += b; redSq += r * r; greenSq += g * g; blueSq += b * b; count++;
         }
     }
     red /= count; green /= count; blue /= count;
+    const backgroundNoise = Math.sqrt(Math.max(0, redSq / count - red * red) + Math.max(0, greenSq / count - green * green) + Math.max(0, blueSq / count - blue * blue));
+    const contrastThreshold = Math.max(26, Math.min(82, 30 + backgroundNoise * 1.35));
     const stride = Math.max(1, Math.floor(Math.max(width, height) / 700));
     const columns = Math.ceil((width - sample * 2) / stride);
     const rows = Math.ceil((height - sample * 2) / stride);
@@ -82,7 +85,7 @@ export function detectCardBoundaryFromImageData(data, width, height) {
     for (let row = 0, y = sample; row < rows; row++, y += stride) for (let column = 0, x = sample; column < columns; column++, x += stride) {
         const offset = (y * width + x) * 4;
         const delta = Math.hypot(data[offset] - red, data[offset + 1] - green, data[offset + 2] - blue);
-        if (delta < 48) continue;
+        if (delta < contrastThreshold) continue;
         mask[row * columns + column] = 1; foreground++;
     }
     const sampled = columns * rows;
@@ -181,7 +184,7 @@ function perspectiveCanvas(source, points, mode) {
 
 export function canEditImage(file) {return file instanceof Blob && EDITABLE_TYPES.has(file.type);}
 
-export async function editImageBeforeUpload(file) {
+export async function editImageBeforeUpload(file, {initialMode = 'free'} = {}) {
     if (!canEditImage(file)) return file;
     const source = await loadImage(file);
     let working = scaledCanvas(source), selection, dragging = null, mode = 'free';
@@ -240,6 +243,6 @@ export async function editImageBeforeUpload(file) {
         async function saveImage() {try {save.disabled = true; close(await canvasFile(perspectiveCanvas(working, selection, mode), file));} catch (error) {save.disabled = false; warning.textContent = 'Impossibile elaborare questa selezione. Controlla i quattro angoli.'; if (error.message !== 'INVALID_SELECTION') {overlay.remove(); document.body.classList.remove('image-editor-open'); reject(error);}}}
         modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), keepOriginal, button('Ruota 90°', rotate), save);
         stage.append(preview, magnifier); dialog.append(title, help, modes, stage, warning, controls); overlay.append(dialog); document.body.append(overlay);
-        document.body.classList.add('image-editor-open'); resetSelection(); setMode('free');
+        document.body.classList.add('image-editor-open'); resetSelection(); setMode(initialMode === 'card' ? 'card' : 'free');
     });
 }

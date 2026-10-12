@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Release 1.2.168 in pubblicazione — acquisizione guidata Tessera/Carta — 12/10/2026
+
+Diego ha autorizzato implementazione e pubblicazione di un'acquisizione dedicata agli allegati formato tessera/carta. Il selettore degli allegati aggiunge **Scansiona tessera/carta**: la fotocamera posteriore viene mostrata dentro l'app con guida ID-1, lo scatto usa esattamente l'area della guida e apre l'editor direttamente in modalità Carta. Il rilevatore sulle immagini esistenti usa una soglia adattiva al rumore dello sfondo; restano disponibili correzione manuale degli angoli e allegato originale. Nessun OCR o dato reale; il deploy previsto riguarda soltanto Hosting.
+
 ## Pubblicazione 1.2.167 conclusa — video nella galleria allegati e censimento Scadenze — 12/10/2026
 
 PR #116 unita in `master` al commit `ba9cb84a` dopo gate GitHub verdi. Il filtro Galleria degli allegati Account privati e aziendali mostra immagini e video, allineato ai flussi Scadenze e Azienda già compatibili; la Fotocamera resta limitata alle immagini. Hosting `1.2.167` distribuito e verificato HTTP 200 sui due dettagli. Nel prossimo controllo degli allegati reali, ogni oggetto collegato a una Scadenza dovrà riportare anche il **nome leggibile della Scadenza**, oltre all'identificativo, così da rendere riconoscibile per esempio una scadenza assicurativa. Nessun dato reale è stato letto o modificato in questo rilascio.

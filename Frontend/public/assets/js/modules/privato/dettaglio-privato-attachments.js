@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.167';
+import { db, storage } from '../../firebase-config.js?v=1.2.168';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -66,6 +66,18 @@ export function initPrivateAttachmentModule(context) {
         input.onchange = () => handleFileUpload(input, mount);
         cleanups.add(() => { input.value = ''; input.onchange = null; });
     });
+    const cardCamera = document.getElementById('btn-card-camera');
+    if (cardCamera) cardCamera.onclick = async () => {
+        closeSourceSelector(mount);
+        try {
+            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
+            const file = await captureCardPhoto();
+            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {initialMode: 'card'});
+        } catch (error) {
+            if (mount.active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
+        }
+    };
+    cleanups.add(() => {if (cardCamera) cardCamera.onclick = null;});
     return mount;
 }
 
@@ -89,7 +101,11 @@ export function closeSourceSelector(mount = mounted) {
     }, 300);
 }
 
-export async function handleFileUpload(input, mount = mounted) {
+export async function handleFileUpload(input, mount = mounted, options = {}) {
+    return processFileUpload(input, mount, options);
+}
+
+async function processFileUpload(input, mount = mounted, {initialMode = 'free'} = {}) {
     if (!mount?.active() || mount.readOnly) return;
     const {ownerId, accountId} = mount;
     const confirmAction = mount.confirm;
@@ -114,7 +130,7 @@ export async function handleFileUpload(input, mount = mounted) {
         return;
     }
     if (file.type.startsWith('image/')) {
-        file = await editImageBeforeUpload(file);
+        file = await editImageBeforeUpload(file, {initialMode});
         if (!file || !mount.active()) {input.value = ''; return;}
     }
 
