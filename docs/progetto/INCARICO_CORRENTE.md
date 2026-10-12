@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Candidata 1.2.174 — allegati unificati e Scadenze collegate — 12/10/2026
+
+Diego autorizza l’unificazione del selettore allegati sul modello Account e la pubblicazione. Profilo utente → Documenti espone le stesse quattro sorgenti: **Scansiona tessera/carta**, **Scatta foto**, **Galleria** (immagini e video) e **Scegli documento**. Il limite è 32 MiB e il backend accetta la stessa famiglia di immagini, video e documenti prevista dagli Account.
+
+Un campo Widget Account può essere di tipo **Data** e conservare il flag **Usa questa data come Scadenza**. Il comando prepara la Scadenza con riferimento all’Account. Quando la Scadenza nasce da un Account o da un Documento del Profilo, gli allegati già presenti sono collegati tramite il loro percorso cifrato, senza duplicare o ricomprimere i byte; l’eliminazione della Scadenza non elimina il file appartenente alla scheda origine.
+
+Perimetro di pubblicazione autorizzato: commit, push, merge, Hosting e la sola callable `uploadProfileDocumentAttachment`, necessaria per l’allowlist e il limite aggiornati. Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.173 — azioni Account nell'Assistente Codex — 12/10/2026
 
 I risultati Account dell'Assistente mostrano il logo/avatar quando presente, altrimenti un'icona neutra, e offrono **Archivia** direttamente nella scheda. L'azione usa il protocollo canonico dell'Archivio (il contenitore sicuro che funge da cestino), richiede conferma, applica i controlli di concorrenza e revoca delle condivisioni e rimuove il risultato dalla conversazione dopo il successo. La cancellazione definitiva resta disponibile soltanto dall'Archivio con la conferma già prevista.

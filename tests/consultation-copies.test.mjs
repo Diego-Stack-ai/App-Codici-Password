@@ -202,12 +202,17 @@ test('T-24: indicatori storici XLSX/stampa assenti nei moduli locali e proiezion
         for (const entry of await readdir(directory, {withFileTypes: true})) {
             const url = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directory);
             if (entry.isDirectory()) { if (entry.name !== 'vendor') await walk(url); }
-            else if (entry.name.endsWith('.js')) files.push({path: url.pathname.split('/public/')[1], text: await readFile(url, 'utf8')});
+            else if (entry.name.endsWith('.js')) {
+                const text = await readFile(url, 'utf8');
+                // Le estensioni dichiarate nei selettori allegati non sono motori di export.
+                const executableText = text.replace(/accept:\s*['"][^'"]*['"]/g, '');
+                files.push({path: url.pathname.split('/public/')[1], text, executableText});
+            }
         }
     };
     await walk(root);
     for (const needle of ['xlsx', 'SheetJS', 'jspdf', 'window.print', 'html2pdf']) {
-        const hits = files.filter(file => file.text.includes(needle)).map(file => file.path);
+        const hits = files.filter(file => file.executableText.includes(needle)).map(file => file.path);
         assert.deepEqual(hits, [], `${needle}: indicatore assente nel checkout esaminato, non verifica remota`);
     }
     // Questo controllo non esclude altre librerie PDF, altri rami o release distribuite.

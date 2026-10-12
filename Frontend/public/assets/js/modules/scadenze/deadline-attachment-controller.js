@@ -30,7 +30,7 @@ export function createDeadlineAttachmentController() {
                     createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                     createElement('div', { className: 'attachment-meta' }, [
                         createElement('span', { className: 'attachment-name', textContent: file.name }),
-                        createElement('span', { className: 'attachment-status', textContent: file.existing ? 'Caricato' : 'Nuovo' })
+                        createElement('span', { className: 'attachment-status', textContent: file.linkedSource ? 'Collegato dalla scheda origine' : file.existing ? 'Caricato' : 'Nuovo' })
                     ])
                 ]),
                 createElement('button', {

@@ -65,3 +65,14 @@ test("decisione revisione è idempotente e rileva conflitti", () => {
   assert.deepEqual(revisionDecision({previous: {status: "applied", revision: 3}, action: "link"}),
     {status: "applied", duplicate: true, revision: 3});
 });
+
+test("conserva il flag Scadenza soltanto sui campi data non cifrati", () => {
+  const command = validateSharedVaultCommand({
+    operationId: "op-date", action: "create", sharedDataId: "shared-date",
+    data: {title: "Rinnovo", fields: [{
+      id: "field-date", label: "Scadenza", type: "date", order: 0,
+      encrypted: false, value: "2030-04-14", deadlineEnabled: true
+    }]}
+  });
+  assert.equal(command.data.fields[0].deadlineEnabled, true);
+});

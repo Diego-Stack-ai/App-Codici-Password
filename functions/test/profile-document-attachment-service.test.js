@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {createProfileDocumentAttachmentService, expectedStoragePath} = require('../profile-document-attachment-service');
+const {createProfileDocumentAttachmentService, expectedStoragePath, MAX_CLEAR_BYTES} = require('../profile-document-attachment-service');
 
 class HttpsError extends Error { constructor(code, message, details) { super(message); this.code = code; this.details = details; } }
 const encryption = (type = 'image/jpeg', size = 3) => ({version: 1, cipher: 'AES-GCM-256', keyWrap: 'HKDF-SHA256+A256GCM',
@@ -70,4 +70,18 @@ test('documento inesistente e percorso forgiato falliscono senza oggetti', async
   await assert.rejects(f.service.upload({...base, data: {...base.data, storagePath: 'users/other/file'}}),
     error => error.details?.reason === 'ATTACHMENT_INVALID');
   assert.equal(f.objects.size, 0);
+});
+
+test('il contratto unificato accetta video e documenti fino a 32 MiB', async () => {
+  assert.equal(MAX_CLEAR_BYTES, 32 * 1024 * 1024);
+  for (const [index, mimeType] of ['video/mp4', 'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].entries()) {
+    const f = fixture();
+    const attachmentId = `att_${index}`;
+    const storagePath = expectedStoragePath('owner', 'doc_1', attachmentId);
+    const request = {auth: {uid: 'owner'}, data: {documentId: 'doc_1', attachmentId, storagePath,
+      mimeType, size: 3, encryptedName: 'CPFE1.synthetic', encryption: encryption(mimeType),
+      payloadBase64: Buffer.alloc(19, 7).toString('base64')}};
+    assert.equal((await f.service.upload(request)).status, 'confirmed');
+  }
 });

@@ -1,4 +1,4 @@
-import { db, storage } from '../../firebase-config.js?v=1.2.173';
+import { db, storage } from '../../firebase-config.js?v=1.2.174';
 import {
     addDoc,
     arrayUnion,
@@ -177,7 +177,7 @@ export async function saveDeadline({
     };
     if (profileDocumentLinkDraft?.profileDocumentId) {
         deadlineData.sourceRef = { type: 'profileDocument', id: profileDocumentLinkDraft.profileDocumentId };
-    } else if (linkedSourceRef?.type === 'profileDocument') {
+    } else if (linkedSourceRef?.type) {
         deadlineData.sourceRef = linkedSourceRef;
     }
     if (!editingDeadlineId) deadlineData.createdAt = Timestamp.now();

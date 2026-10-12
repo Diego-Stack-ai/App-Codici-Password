@@ -1,10 +1,18 @@
 const crypto = require('crypto');
 
-const MAX_CLEAR_BYTES = 10 * 1024 * 1024;
+const MAX_CLEAR_BYTES = 32 * 1024 * 1024;
 const MAX_CIPHER_BYTES = MAX_CLEAR_BYTES + 64;
 const MAX_PER_DOCUMENT = 10;
 const ID = /^[A-Za-z0-9_-]{1,256}$/;
-const MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'application/pdf']);
+const MIME = new Set([
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif',
+  'video/mp4', 'video/quicktime', 'video/webm',
+  'application/pdf', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain'
+]);
 const B64 = /^[A-Za-z0-9+/]+={0,2}$/;
 const ENCRYPTION_FIELDS = ['version', 'cipher', 'keyWrap', 'contentIv', 'wrapSalt', 'wrapIv', 'wrappedFileKey', 'originalType', 'originalSize'];
 

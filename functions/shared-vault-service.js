@@ -70,6 +70,7 @@ function validateField(input, index) {
     preview: encrypted ? false : field.preview !== false,
     copyable: encrypted ? false : field.copyable !== false,
     includeInQr: encrypted ? false : field.includeInQr === true,
+    deadlineEnabled: !encrypted && (type === "date" || type === "expiry") && field.deadlineEnabled === true,
     qrLabel: optionalText(field.qrLabel, 120, "SHARED_VAULT_FIELD_QR_LABEL_INVALID"),
     qrOrder: Number.isInteger(field.qrOrder) && field.qrOrder >= 0 ? field.qrOrder : index,
     ...fieldValue(field)
