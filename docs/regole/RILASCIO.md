@@ -1,8 +1,8 @@
 # Rilascio
 
-## Candidata operativa 1.2.174 — 12/10/2026
+## Esito operativo 1.2.174 — 12/10/2026
 
-Il rilascio unifica le sorgenti allegato dei Documenti del Profilo con quelle degli Account e collega alle nuove Scadenze gli allegati cifrati già presenti su Account o Documento, senza duplicazione Storage. Introduce inoltre il tipo Data e il flag Scadenza nei Widget Account. Il deploy previsto comprende Hosting e la sola callable `uploadProfileDocumentAttachment`; Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano invariati.
+Il rilascio unifica le sorgenti allegato dei Documenti del Profilo con quelle degli Account e collega alle nuove Scadenze gli allegati cifrati già presenti su Account o Documento, senza duplicazione Storage. Introduce inoltre il tipo Data e il flag Scadenza nei Widget Account. PR #128 unita in `master` (`7705aa04`); gate GitHub verdi, deploy Hosting e della sola callable `uploadProfileDocumentAttachment` riusciti. Verifica remota HTTP 200 con versione `1.2.174`. Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Esito operativo 1.2.170 — 12/10/2026
 

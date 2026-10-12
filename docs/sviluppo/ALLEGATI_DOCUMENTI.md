@@ -1,6 +1,6 @@
 # Allegati documenti
 
-## Contratto unificato candidato — 1.2.174
+## Contratto unificato pubblicato — 1.2.174
 
 Profilo utente → Documenti usa le stesse sorgenti visibili degli Account: **Scansiona tessera/carta**, **Scatta foto**, **Galleria** per immagini/video e **Scegli documento** per PDF, Word, Excel e testo. Tutti i file attraversano la validazione, la cifratura locale e la callable server-only; il massimo è 32 MiB.
 

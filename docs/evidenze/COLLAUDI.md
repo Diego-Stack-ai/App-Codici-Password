@@ -1,12 +1,14 @@
 # Collaudi
 
-## 12/10/2026 — candidata 1.2.174, allegati e Scadenze collegate
+## 12/10/2026 — pubblicazione 1.2.174, allegati e Scadenze collegate
 
 - Test mirati iniziali: **29/29** su UI Widget, collegamento Documento→Scadenza, profilo documento e validatori backend.
 - Suite allegati **66/66**, accesso dati **95/95**, navigazione **157/157**.
 - Functions/security **465 totali, 456 pass, 9 skip dichiarati, 0 fail**; sintassi JavaScript **184 moduli**.
 - La callable copre immagini, `video/mp4`, PDF e DOCX; soglia dichiarata **32 MiB**.
-- Da completare prima della pubblicazione: pipeline GitHub, merge e verifica dei deploy Hosting/callable.
+- Gate PR verdi: due controlli documentali e validazione completa **5m26s**. PR #128 unita in `master` (`7705aa04`).
+- Pipeline manuale di produzione verde: validazione **7m08s** e deploy Hosting **31s**. Aggiornamento della sola callable `uploadProfileDocumentAttachment` riuscito in `europe-west1`.
+- Verifica remota: Profilo HTTP **200**, versione `1.2.174` presente. Nessuna modifica a Firestore Rules, Storage Rules, indici, migrazioni o dati reali.
 
 ## 12/10/2026 — pubblicazione 1.2.170, scanner Tessera/Carta nei Documenti del Profilo
 

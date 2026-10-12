@@ -1,6 +1,6 @@
 # Profilo e account
 
-## Date Account e Scadenze — candidata 1.2.174
+## Date Account e Scadenze — pubblicato 1.2.174
 
 Nell’editor dei Widget Account un campo può essere definito come **Data** e abilitato con **Usa questa data come Scadenza**. Nella scheda Account il comando calendario prepara nome, tipo, dettaglio, data e riferimento sorgente della nuova Scadenza. Gli allegati dell’Account sono collegati per riferimento ai file cifrati esistenti, senza copia o compressione. Il contratto backend conserva `deadlineEnabled` soltanto per campi Data/Scadenza non sensibili; i campi cifrati non possono abilitarlo.
 
