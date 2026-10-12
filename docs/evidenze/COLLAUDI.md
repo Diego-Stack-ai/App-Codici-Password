@@ -1,5 +1,13 @@
 # Collaudi
 
+## 12/10/2026 — pubblicazione 1.2.169, conferma Tessera/Carta regolabile
+
+- Prove editor, geometria e integrazione **15/15**; documentazione **11/11**; navigazione, riferimenti statici, versione e diff verdi.
+- Pipeline GitHub completa verde in **7m37s**, oltre ai due gate documentali.
+- PR #120 unita in `master` (`ad06df59`); deploy del solo Hosting riuscito con 272 file.
+- Verifica remota HTTP **200** su home, dettagli Account privato/azienda e modulo camera; versione `1.2.169`, zoom minimo e comando **Ripeti foto** presenti.
+- Nessun dato reale letto o modificato. Il gesto fisico su telefono resta da collaudare direttamente.
+
 ## 12/10/2026 — pubblicazione 1.2.168, acquisizione guidata Tessera/Carta
 
 - Prove editor/allegati e UI mirata **14/14**; documentazione **11/11**; audit navigazione, riferimenti statici, versione e diff verdi.

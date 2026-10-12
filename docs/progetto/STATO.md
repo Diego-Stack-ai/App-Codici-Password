@@ -1,5 +1,9 @@
 # Stato
 
+## Produzione 1.2.169 — conferma Tessera/Carta regolabile — 12/10/2026
+
+Lo scatto Tessera/Carta resta nello stesso flusso e apre una conferma ID-1 dedicata, senza passare dall'editor generale. La foto può essere centrata con trascinamento e pinch o cursore, entro `0,93×–1,15×`; il margine sorgente dell'8% e i vincoli geometrici impediscono aree vuote. PR #120 unita in `master` (`ad06df59`) dopo pipeline GitHub verde in 7m37s; deploy del solo Hosting riuscito. Verifica HTTP 200 su home, dettagli Account privato/azienda e modulo camera. Functions, Rules e dati reali non sono stati modificati; resta consigliato il collaudo ergonomico su telefono fisico.
+
 ## Produzione 1.2.168 — acquisizione guidata Tessera/Carta — 12/10/2026
 
 Gli allegati degli Account privati e aziendali offrono **Scansiona tessera/carta**, con fotocamera posteriore, guida ID-1 e ritaglio esatto dell'area inquadrata prima dell'editor Carta. Il rilevatore locale delle immagini esistenti usa una soglia adattiva e conserva la regolazione manuale dei quattro angoli. PR #118 unita in `master` (`00297d21`) dopo gate GitHub verdi; deploy del solo Hosting riuscito. Home e due dettagli Account rispondono HTTP 200 con versione `1.2.168`; il modulo camera pubblico risponde HTTP 200. Functions, Rules e dati reali non sono stati modificati. Resta necessario il collaudo ergonomico su telefoni fisici e condizioni di luce reali.

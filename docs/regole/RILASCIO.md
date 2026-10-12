@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.169 — 12/10/2026
+
+PR #120 unita in `master` (`ad06df59`) con gate GitHub verdi. Pubblicata sul solo Hosting la conferma Tessera/Carta dedicata con trascinamento, pinch/cursore, zoom limitato e upload diretto senza editor generale. Verifica remota HTTP 200 su home, dettagli e modulo camera. Functions, Firestore Rules, Storage Rules e dati reali sono rimasti invariati.
+
 ## Esito operativo 1.2.168 — 12/10/2026
 
 PR #118 unita in `master` (`00297d21`) con gate GitHub verdi. Pubblicata sul solo Hosting l'acquisizione guidata Tessera/Carta per i dettagli Account privati e aziendali, con guida ID-1, ritaglio dell'area inquadrata e apertura diretta dell'editor Carta. Verifica remota HTTP 200 su home, dettagli e modulo camera. Functions, Firestore Rules, Storage Rules e dati reali sono rimasti invariati.

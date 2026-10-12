@@ -1,6 +1,6 @@
 # Allegati documenti
 
-## Conferma dedicata Tessera/Carta candidata — 1.2.169
+## Conferma dedicata Tessera/Carta pubblicata — 1.2.169
 
 Lo scatto guidato non attraversa più l'editor immagini generale. Conserva un margine sorgente dell'8% e presenta nel riquadro ID-1 una sola conferma regolabile: trascinamento a un dito, pinch a due dita e cursore accessibile, con zoom limitato da `0,93×` a `1,15×`. Il movimento è vincolato ai pixel disponibili e non può creare aree vuote; **Ripeti foto** torna alla camera e **Usa foto** produce una sola JPEG `1012×638` destinata al normale upload cifrato. Galleria, Foto libera e Allega originale mantengono il percorso esistente.
 
