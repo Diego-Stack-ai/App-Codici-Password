@@ -16,6 +16,9 @@ test('Profilo Documenti espone allegati, fotocamera e selettore PDF', async () =
     assert.match(controller, /import\('\.\.\/shared\/card-camera-capture\.js'\)/);
     assert.match(controller, /captureCardPhoto/);
     assert.match(controller, /skipImageEditor: true/);
+    assert.match(controller, /Usa fotocamera nativa/);
+    assert.match(controller, /cardFallbackInput\.click\(\)/);
+    assert.match(controller, /cardFallbackInput\.files[\s\S]+skipImageEditor: true/);
     assert.match(controller, /application\/pdf/);
     assert.match(controller, /uploadProfileDocumentAttachment/);
     assert.match(controller, /removeProfileDocumentAttachment/);

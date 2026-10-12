@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Hotfix candidata 1.2.172 — fallback fotocamera nativa — 12/10/2026
+
+Dopo la correzione della policy, alcuni contesti dispositivo/PWA possono ancora rifiutare la camera integrata `getUserMedia`. Il comando Tessera/Carta dei Documenti del Profilo propone quindi, solo in caso di errore, un passaggio esplicito alla fotocamera nativa del telefono; il file risultante entra direttamente nel normale upload cifrato senza l'editor generale. Nessun cambiamento a cifratura, Functions, Rules o dati.
+
 ## Hotfix candidata 1.2.171 — policy fotocamera same-origin — 12/10/2026
 
 Il collaudo reale della 1.2.170 ha rilevato che l'header Hosting `Permissions-Policy: camera=()` bloccava `getUserMedia` prima della richiesta di consenso. Su autorizzazione esplicita di Diego, la candidata limita l'abilitazione a `camera=(self)`: le sole pagine della stessa origine possono chiedere il permesso, mentre iframe/origini esterne, microfono e geolocalizzazione restano vietati. Nessun cambiamento a cifratura, Functions, Rules o dati.
