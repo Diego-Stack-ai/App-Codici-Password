@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Selettore sorgente unico — candidata 1.2.175
+
+La scelta iniziale della sorgente è un componente condiviso da Documenti del Profilo, Account privati e Account aziendali. Le quattro azioni sono **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. Il componente decide soltanto la sorgente: ciascun contesto conserva il proprio repository e il proprio contratto di cifratura/persistenza. Tessera/Carta apre sempre il motore camera guidato ID-1 quando `getUserMedia` è disponibile; l'eventuale camera nativa è un fallback esplicito e, per limite della UI di sistema, non può mostrare il riquadro HTML dell'app.
+
 ## Contratto unificato pubblicato — 1.2.174
 
 Profilo utente → Documenti usa le stesse sorgenti visibili degli Account: **Scansiona tessera/carta**, **Scatta foto**, **Galleria** per immagini/video e **Scegli documento** per PDF, Word, Excel e testo. Tutti i file attraversano la validazione, la cifratura locale e la callable server-only; il massimo è 32 MiB.

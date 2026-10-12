@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Candidata 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
+
+Diego autorizza implementazione e pubblicazione del selettore sorgente unico. Documenti del Profilo, Account privati e Account aziendali richiamano ora lo stesso componente **Seleziona sorgente**, con **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scelta Tessera/Carta continua nel motore camera guidato con riquadro ID-1 e conferma regolabile; il fallback alla camera nativa resta disponibile quando `getUserMedia` non può avviarsi, ma in quel fallback il browser non può sovrapporre la guida.
+
+Perimetro autorizzato: commit, push, merge e deploy del solo Hosting della release `1.2.175`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché il contratto di persistenza non cambia.
+
 ## Pubblicazione 1.2.174 conclusa — allegati unificati e Scadenze collegate — 12/10/2026
 
 Diego autorizza l’unificazione del selettore allegati sul modello Account e la pubblicazione. Profilo utente → Documenti espone le stesse quattro sorgenti: **Scansiona tessera/carta**, **Scatta foto**, **Galleria** (immagini e video) e **Scegli documento**. Il limite è 32 MiB e il backend accetta la stessa famiglia di immagini, video e documenti prevista dagli Account.

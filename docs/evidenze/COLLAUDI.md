@@ -1,5 +1,12 @@
 # Collaudi
 
+## 12/10/2026 — candidata 1.2.175, selettore allegati condiviso
+
+- Test mirati su Profilo Documenti e lifecycle Account privato/azienda: **28/28**.
+- Verificato staticamente che i tre contesti importino lo stesso `attachment-source-picker.js` e che Tessera/Carta mantenga `card-camera-capture.js`.
+- Persistenza, cifratura, callable e Rules non cambiano; il rilascio previsto riguarda soltanto Hosting.
+- Restano da completare suite di rilascio, gate GitHub e verifica remota prima di dichiarare la versione pubblicata.
+
 ## 12/10/2026 — pubblicazione 1.2.174, allegati e Scadenze collegate
 
 - Test mirati iniziali: **29/29** su UI Widget, collegamento Documento→Scadenza, profilo documento e validatori backend.

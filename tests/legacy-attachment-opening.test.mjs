@@ -97,6 +97,7 @@ function realm(kind) {
         collection: (_db, ...path) => path.join('/'),
         getBytes: async (path, cap) => { reads.push({path, cap}); return state.ciphertext; },
         ensureVaultKeyMaterial: async () => { state.keyRequests++; return VAULT_KEY; },
+        closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         showToast: (...args) => toasts.push(args), showConfirmModal: async () => true,
         logError: (...args) => errors.push(args), t: value => value,
         createElement: (tag, props = {}, children = []) => ({tag, ...props, children}),

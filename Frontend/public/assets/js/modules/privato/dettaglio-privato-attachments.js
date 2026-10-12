@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.174';
+import { db, storage } from '../../firebase-config.js?v=1.2.175';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -15,6 +15,7 @@ import {decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess} from '../
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
+import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/attachment-source-picker.js';
 
 let mounted = null;
 
@@ -34,6 +35,7 @@ export function initPrivateAttachmentModule(context) {
         destroy() {
             if (destroyed) return;
             destroyed = true;
+            closeAttachmentSourcePicker();
             context.signal?.removeEventListener('abort', mount.destroy);
             for (const cleanup of cleanups) cleanup();
             cleanups.clear();
@@ -81,17 +83,26 @@ export function initPrivateAttachmentModule(context) {
     return mount;
 }
 
-export function openSourceSelector(mount = mounted) {
+export async function openSourceSelector(mount = mounted) {
     if (!mount?.active() || mount.readOnly) return;
-    const modal = document.getElementById('source-selector-modal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    mount.later(() => modal.classList.add('active'), 10);
-    document.body.style.overflow = 'hidden';
+    const source = await selectAttachmentSource();
+    if (!mount.active() || !source) return;
+    if (source === 'card') {
+        try {
+            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
+            const file = await captureCardPhoto();
+            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
+        } catch (error) {
+            if (mount.active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
+        }
+        return;
+    }
+    document.getElementById({camera:'input-camera',gallery:'input-gallery',document:'input-file'}[source])?.click();
 }
 
 export function closeSourceSelector(mount = mounted) {
     if (!mount?.active()) return;
+    closeAttachmentSourcePicker();
     const modal = document.getElementById('source-selector-modal');
     if (!modal) return;
     modal.classList.remove('active');

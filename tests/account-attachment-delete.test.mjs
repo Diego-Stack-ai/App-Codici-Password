@@ -45,6 +45,7 @@ function fixture(kind, {objects = [], documents = [], confirm = true} = {}) {
         .map(([, record]) => record);
     const context = vm.createContext({
         db: {}, storage: {}, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
+        closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         navigator: {onLine: true}, setTimeout: () => 0, clearTimeout() {},
         document: {body: {style: {}}, getElementById: id => (id === 'attachments-list' ? container : null)},
         doc: (_db, ...path) => path.join('/'), collection: (_db, ...path) => path.join('/'),

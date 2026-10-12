@@ -1,0 +1,17 @@
+.attachment-source-picker{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgb(20 25 45 / 22%);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.attachment-source-picker-card{width:min(300px,calc(100vw - 40px));padding:24px;background:rgb(240 249 255 / 97%);border:1px solid rgb(var(--accent-rgb,23 104 213)/18%);border-radius:24px;box-shadow:0 25px 50px -12px rgb(15 23 42 / 28%);text-align:center}
+.attachment-source-picker-card h3{margin:0 0 20px;color:#0369a1;font:var(--font-caption);font-weight:var(--font-title-weight,700);letter-spacing:.1em;text-transform:uppercase}
+.attachment-source-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.attachment-source-picker-grid button{min-height:82px;padding:10px 6px;border:1px solid transparent;border-radius:16px;background:transparent;color:#0c4a6e;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-transform:uppercase}
+.attachment-source-picker-grid button:hover,.attachment-source-picker-grid button:focus-visible{border-color:rgb(var(--accent-rgb,23 104 213)/35%);background:rgb(var(--accent-rgb,23 104 213)/7%);outline:none}
+.attachment-source-picker-grid .is-wide{grid-column:1/-1}
+.attachment-source-picker-grid .material-symbols-outlined{font-size:var(--fs-xl,24px)}
+.attachment-source-picker-grid strong{font:var(--font-caption);font-weight:var(--font-label-weight,700);letter-spacing:.04em}
+.attachment-source-picker-grid [data-source="camera"] .material-symbols-outlined{color:var(--accent,#1768d5)}
+.attachment-source-picker-grid [data-source="gallery"] .material-symbols-outlined{color:#7c3aed}
+.attachment-source-picker-grid [data-source="document"] .material-symbols-outlined{color:#d97706}
+.attachment-source-picker-cancel{min-height:44px;margin-top:16px;border:0;background:transparent;color:rgb(3 105 161 / 60%);font:var(--font-label);font-weight:var(--font-label-weight,700);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.dark .attachment-source-picker-card{background:rgb(14 42 80 / 96%);border-color:rgb(56 189 248 / 25%)}
+.dark .attachment-source-picker-card h3,.dark .attachment-source-picker-grid button{color:#bae6fd}
+.dark .attachment-source-picker-cancel{color:rgb(186 230 253 / 55%)}
+

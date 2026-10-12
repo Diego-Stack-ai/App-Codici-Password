@@ -58,6 +58,7 @@ function mount(kind, {accountId, companyId}) {
     const toasts = [], errors = [];
     const context = vm.createContext({
         db, storage, t: () => '', console: {warn() {}}, logError: (...args) => errors.push(args),
+        closeAttachmentSourcePicker() {}, selectAttachmentSource: async () => null,
         navigator: {onLine: true}, setChildren: (node, children) => { node.children = children; },
         clearElement: node => { node.children = []; node.textContent = ''; },
         createElement: (tag, props = {}, children = []) => ({tag, ...props, children}),
