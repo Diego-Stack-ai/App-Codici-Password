@@ -1,5 +1,13 @@
 # Collaudi
 
+## 12/10/2026 — pubblicazione 1.2.168, acquisizione guidata Tessera/Carta
+
+- Prove editor/allegati e UI mirata **14/14**; documentazione **11/11**; audit navigazione, riferimenti statici, versione e diff verdi.
+- Pipeline GitHub completa verde: validazione **7m38s** e due gate documentali superati.
+- PR #118 unita in `master` (`00297d21`); deploy del solo Hosting riuscito con 272 file.
+- Verifica remota HTTP **200** su home, dettagli Account privato/azienda e modulo camera; versione `1.2.168` e comando scanner presenti.
+- Nessun dato reale letto o modificato. Il comportamento ergonomico della fotocamera richiede ancora prova su telefono fisico.
+
 ## 12/10/2026 — pubblicazione 1.2.167, video nella galleria allegati
 
 - Test mirati selettori e sicurezza allegati **22/22**; documentazione **11/11**; sintassi **183 moduli**; 254 riferimenti versione coerenti.

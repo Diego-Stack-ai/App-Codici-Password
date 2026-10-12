@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Acquisizione guidata Tessera/Carta pubblicata — 1.2.168
+
+Nei dettagli Account privato e azienda, **Scansiona tessera/carta** apre una fotocamera controllata dall'app con guida nel rapporto ID-1 `1012:638`. Lo scatto conserva l'area visibile dentro la guida e passa direttamente all'editor Carta; l'utente può ancora correggere liberamente i quattro angoli o allegare l'originale. Il caricamento del modulo camera avviene soltanto quando richiesto. Il rilevamento dei bordi resta locale, senza OCR, ed è un'assistenza: non sostituisce il controllo visivo dell'utente. Pubblicazione Hosting `1.2.168`; nessuna modifica a cifratura, schema dati, Functions o Rules.
+
 ## Selezione Galleria pubblicata e inventario — 1.2.167
 
 I selettori **Galleria** degli allegati Account privati, Account aziendali, Azienda e Scadenze espongono sia immagini sia video (`image/*,video/*`); la Fotocamera resta specializzata sulle immagini. Nei censimenti operativi, un allegato sotto `users/{uid}/scadenze/{deadlineId}/...` deve essere presentato con `deadlineId` e con il nome leggibile ricavato dal documento della Scadenza. Il nome serve solo alla leggibilità del rapporto e non sostituisce l'identificativo canonico.
