@@ -1,5 +1,9 @@
 # Stato
 
+## Candidata 1.2.166 — allegati senza compressione opzionale e limite 32 MiB — 12/10/2026
+
+Le immagini possono essere allegate mantenendo il file originale oppure salvando il ritaglio elaborato. La soglia massima per un singolo allegato cifrato è 32 MiB ed è coerente nei controlli di upload/download, condivisione, backup/ripristino, callable e Storage Rules. La candidata resta distinta dalla produzione finché merge e deploy non sono verificati.
+
 ## Produzione 1.2.164 — comando visibile per abbandonare una condivisione — 12/10/2026
 
 La card di un Account condiviso ricevuto espone ora il pulsante **Abbandona** senza richiedere la scoperta del gesto laterale. L'azione conserva la conferma esplicita e rimuove soltanto l'accesso del destinatario; l'Account del proprietario e gli altri destinatari non vengono modificati. PR #111 unita in `master` al commit `d929601a`; pipeline completa verde in 7m26s. Deploy del solo Hosting riuscito e verificato HTTP 200 con versione `1.2.164`, modulo e stile aggiornati. Functions, Rules e dati non sono stati modificati.

@@ -2,7 +2,7 @@
  * Rendering e apertura sicura degli allegati incorporati nell'anagrafica azienda.
  */
 
-import { auth, storage } from '../../firebase-config.js?v=1.2.165';
+import { auth, storage } from '../../firebase-config.js?v=1.2.166';
 import { getBytes, ref, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -54,7 +54,7 @@ async function openCompanyAttachment(attachment, isActive = () => true) {
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
         if (!active()) return;
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!active()) return;
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         if (!active()) return;

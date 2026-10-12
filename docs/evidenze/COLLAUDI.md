@@ -1,5 +1,12 @@
 # Collaudi
 
+## 12/10/2026 — candidata 1.2.166, allegati originali e limite 32 MiB
+
+- L'editor immagini distingue il salvataggio del ritaglio dall'allegato originale e restituisce il `File` iniziale nel secondo caso.
+- I controlli di dimensione sono allineati a 32 MiB in upload, download, condivisione, backup/ripristino, Functions e Storage Rules; l'oggetto cifrato ammette 1 KiB di overhead.
+- Prove locali pertinenti richieste prima del rilascio: allegati/editor, Storage Rules, condivisione Storage, backup/ripristino, sintassi, audit sicurezza e documentazione.
+- Nessun dato reale impiegato.
+
 ## AUDIT-SKILL-01 — piano di collaudo, non ancora eseguito — 11/10/2026
 
 Baseline da registrare prima dell'avvio: commit e branch esaminati, stato del working tree, versioni delle skill e dei browser, configurazione emulatori/staging, viewport, rete simulata e identificativi delle sole fixture sintetiche.

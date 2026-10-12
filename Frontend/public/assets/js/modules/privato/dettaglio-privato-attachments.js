@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.165';
+import { db, storage } from '../../firebase-config.js?v=1.2.166';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -257,7 +257,7 @@ async function loadVisibleImagePreview(attachment, preview, mount) {
     try {
         const vaultKey = await ensureVaultKeyMaterial();
         if (!mount.active()) return;
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!mount.active()) return;
         const clear = mount.readOnly
             ? await decryptReceivedPrivateAttachment({ownerUid: mount.ownerId, accountId: mount.accountId,
@@ -294,7 +294,7 @@ async function openAttachment(attachment, mount = mounted) {
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
         if (!mount.active()) return;
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!mount.active()) return;
         const clear = mount.readOnly
             ? await decryptReceivedPrivateAttachment({

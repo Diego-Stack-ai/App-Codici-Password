@@ -1,4 +1,4 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.165';
+import {auth, storage} from '../../firebase-config.js?v=1.2.166';
 import {createBackupExportBuffer, createBackupRecordBuffer} from './backup-export-buffer.js';
 import {getBytes, ref, onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {
@@ -14,7 +14,7 @@ import {
     attachmentRecordScope, collectStoragePaths, createProfileDescriptorFromData, createRecordDescriptorFromData
 } from './backup-export-model.js';
 
-const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
+const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024 + 1024;
 
 function createExportSession(uid, {signal, isActive = () => true} = {}) {
     let invalidated = false, unsubscribe = () => {};

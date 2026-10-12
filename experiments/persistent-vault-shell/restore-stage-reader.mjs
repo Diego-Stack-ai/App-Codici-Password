@@ -18,7 +18,7 @@ export function createRestoreStageReader({readPublished, isActive}) {
         result = await readPublished({stageId});
         check();
         if (!(result?.bytes instanceof Uint8Array) || result.bytes.length < 1 ||
-            result.bytes.length > 25 * 1024 * 1024 + 1024 || result.size !== result.bytes.length ||
+            result.bytes.length > 32 * 1024 * 1024 + 1024 || result.size !== result.bytes.length ||
             typeof result.generation !== 'string' || !/^[1-9][0-9]*$/.test(result.generation) ||
             typeof result.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(result.sha256)) throw new Error('RESTORE_READER_RESULT');
         // Server verifies digest/size against the published descriptor. Caller

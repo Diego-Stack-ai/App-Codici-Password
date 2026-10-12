@@ -24,7 +24,7 @@ export async function consumeAttachmentExport(records, uid, {collectStoragePaths
     const bytes = result?.bytes;
     try {
       check();
-      if (!(bytes instanceof Uint8Array) || bytes.length < 1 || bytes.length > 25 * 1024 * 1024 + 1024) {
+      if (!(bytes instanceof Uint8Array) || bytes.length < 1 || bytes.length > 32 * 1024 * 1024 + 1024) {
         throw new Error('EXPORT_BYTES_INVALID');
       }
       await appendBytes(storagePath, bytes);

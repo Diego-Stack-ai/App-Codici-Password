@@ -24,7 +24,7 @@ export function createRestoreStageClient({endpoint, origin, fetchImpl, getCreden
       const length = response.headers.get('content-length'), generation = response.headers.get('x-storage-generation'), sha256 = response.headers.get('x-content-sha256');
       const size = Number(length);
       if (response.status !== 200 || response.redirected || response.headers.get('content-type') !== 'application/octet-stream' ||
-          typeof length !== 'string' || !/^[1-9][0-9]*$/.test(length) || !Number.isSafeInteger(size) || size > 25 * 1024 * 1024 + 1024 ||
+          typeof length !== 'string' || !/^[1-9][0-9]*$/.test(length) || !Number.isSafeInteger(size) || size > 32 * 1024 * 1024 + 1024 ||
           !/^[1-9][0-9]*$/.test(generation || '') || !/^[a-f0-9]{64}$/.test(sha256 || '')) throw Error('STAGE_CLIENT_RESPONSE');
       reader = response.body.getReader();
       let total = 0;

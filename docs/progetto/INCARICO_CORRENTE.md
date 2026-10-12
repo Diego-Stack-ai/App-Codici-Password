@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Candidata 1.2.166 — allegati originali e limite 32 MiB — 12/10/2026
+
+Diego ha autorizzato la pubblicazione dell'aggiornamento allegati. L'editor immagini offre ora due uscite esplicite: **Salva ritaglio** applica l'elaborazione scelta, mentre **Allega originale** conserva il file selezionato senza ricampionamento o compressione. Il limite generale per ogni allegato cifrato sale da 25 a **32 MiB** ed è allineato fra client, letture, condivisione, backup/ripristino, Functions e Storage Rules. La pubblicazione richiede quindi Hosting, Storage Rules e la callable M8 V2 interessata; nessun dato reale deve essere letto o modificato.
+
 ## Pubblicazione 1.2.164 conclusa — 12/10/2026
 
 Il comando visibile **Abbandona** sulle card degli Account condivisi ricevuti è pubblicato. PR #111 unita in `master` (`d929601a`), gate GitHub verdi e Hosting `1.2.164` verificato HTTP 200 con modulo e stile aggiornati. Il comando richiama lo stesso flusso confermato già disponibile tramite gesto laterale e non elimina né modifica l'Account del proprietario. Functions, Rules e dati sono rimasti invariati.

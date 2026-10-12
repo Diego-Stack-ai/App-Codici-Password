@@ -5,7 +5,7 @@ const {createHash} = require('node:crypto');
 // coordinated purge/cleanup and compatible readers. Metadata is not a digest
 // proof: prepareStage must never be interpreted as publication authorization.
 
-const MAX_BYTES = 25 * 1024 * 1024 + 1024;
+const MAX_BYTES = 32 * 1024 * 1024 + 1024;
 const STAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const hash = value => createHash('sha256').update(value).digest('hex');
 const fail = code => { throw Object.assign(new Error(code), {code}); };

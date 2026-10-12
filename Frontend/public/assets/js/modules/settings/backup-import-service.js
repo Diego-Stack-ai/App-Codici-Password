@@ -1,4 +1,4 @@
-import {auth, functions, storage} from '../../firebase-config.js?v=1.2.165';
+import {auth, functions, storage} from '../../firebase-config.js?v=1.2.166';
 import {getBytes, httpsCallable, onAuthStateChanged, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, describeRestoreRecords, restoreRecordKey, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
@@ -8,7 +8,7 @@ import {clearBackupRestoreV2Locator, confirmedBackupRestoreV2Prefix, createBacku
     reconstructedBackupRestoreV2Commands, retainBackupRestoreV2Locator} from './backup-restore-v2-client.js';
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
-const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
+const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024 + 1024;
 const BACKUP_READ_BYTES = 64 * 1024;
 // Admission bounds for retained preview data, not an exact browser heap quota.
 const MAX_RESTORE_RECORDS = 10000;

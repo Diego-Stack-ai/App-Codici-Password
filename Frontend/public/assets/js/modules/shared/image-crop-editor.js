@@ -197,7 +197,8 @@ export async function editImageBeforeUpload(file) {
         const magnifier = document.createElement('canvas'); magnifier.className = 'image-editor-magnifier'; magnifier.width = 240; magnifier.height = 240; magnifier.setAttribute('aria-hidden', 'true');
         const warning = document.createElement('p'); warning.className = 'image-editor-warning'; warning.setAttribute('aria-live', 'polite');
         const controls = document.createElement('div'); controls.className = 'image-editor-controls';
-        const save = button('Salva immagine', saveImage, true);
+        const save = button('Salva ritaglio', saveImage, true);
+        const keepOriginal = button('Allega originale', () => close(file));
         const close = value => {overlay.remove(); document.body.classList.remove('image-editor-open'); resolve(value);};
         function resetSelection() {
             const inset = Math.max(12, Math.round(Math.min(working.width, working.height) * .05));
@@ -237,7 +238,7 @@ export async function editImageBeforeUpload(file) {
         const stop = () => {dragging = null; magnifier.classList.remove('image-editor-magnifier-visible');}; preview.addEventListener('pointerup', stop); preview.addEventListener('pointercancel', stop);
         function rotate() {const canvas = document.createElement('canvas'); canvas.width = working.height; canvas.height = working.width; const context = canvas.getContext('2d'); context.translate(canvas.width, 0); context.rotate(Math.PI / 2); context.drawImage(working, 0, 0); working = canvas; resetSelection(); paint();}
         async function saveImage() {try {save.disabled = true; close(await canvasFile(perspectiveCanvas(working, selection, mode), file));} catch (error) {save.disabled = false; warning.textContent = 'Impossibile elaborare questa selezione. Controlla i quattro angoli.'; if (error.message !== 'INVALID_SELECTION') {overlay.remove(); document.body.classList.remove('image-editor-open'); reject(error);}}}
-        modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), button('Ruota 90°', rotate), save);
+        modes.append(freeMode, cardMode); controls.append(button('Annulla', () => close(null)), keepOriginal, button('Ruota 90°', rotate), save);
         stage.append(preview, magnifier); dialog.append(title, help, modes, stage, warning, controls); overlay.append(dialog); document.body.append(overlay);
         document.body.classList.add('image-editor-open'); resetSelection(); setMode('free');
     });

@@ -931,7 +931,7 @@ Il purge di un Account elimina gli oggetti Storage **solo** per i percorsi letti
 
 <a id="evidenza-a3ca84e33e6c1373a0cd"></a>
 
-`storage.rules:33-36` concede al proprietario `read, delete` e `create, update` sotto `users/{userId}/**`; l'upload è vincolato da `isAllowedUpload()` (dimensione > 0, ≤ 25 MiB + 1 KiB, MIME in allowlist, e `metadata.encrypted == 'v1'` obbligatorio per `application/octet-stream`, `storage.rules:9-21`). Il proprietario può quindi **cancellare** i propri oggetti senza passare dal backend, e può creare oggetti sotto qualunque prefisso del proprio spazio: l'inventario dei prefissi ricavato dal codice non prova che il bucket non ne contenga altri. Nessuna regola Firestore dedicata esiste per i metadati degli allegati: ricadono nella wildcard proprietario (`firestore.rules:106-118`).
+`storage.rules:33-36` concede al proprietario `read, delete` e `create, update` sotto `users/{userId}/**`; l'upload è vincolato da `isAllowedUpload()` (dimensione > 0, ≤ 32 MiB + 1 KiB, MIME in allowlist, e `metadata.encrypted == 'v1'` obbligatorio per `application/octet-stream`, `storage.rules:9-21`). Il proprietario può quindi **cancellare** i propri oggetti senza passare dal backend, e può creare oggetti sotto qualunque prefisso del proprio spazio: l'inventario dei prefissi ricavato dal codice non prova che il bucket non ne contenga altri. Nessuna regola Firestore dedicata esiste per i metadati degli allegati: ricadono nella wildcard proprietario (`firestore.rules:106-118`).
 
 <a id="fonte-docs-m7-retention-censimento-md-55-crittografia-legacy-e-ciò-che-non-è-autenticato"></a>
 
@@ -955,7 +955,7 @@ Il purge di un Account elimina gli oggetti Storage **solo** per i percorsi letti
 | Quale URL viene aperto? | quello del metadato, normalizzato: schema mancante → `https://`; apertura in `_blank` con `noopener,noreferrer` e `opener` azzerato sulla finestra restituita |
 | La Vault Key viene richiesta? | **no**: `ensureVaultKeyMaterial` non viene mai invocata, nessun byte viene letto da Storage, nessuna decifratura |
 | Quali controlli restano applicati? | solo la policy di protocollo/schema di `normalizeExternalUrl` (`http`/`https`): `javascript:`, `data:`, `file:`, `blob:`, `ftp:`, URL malformati e URL vuoti vengono rifiutati e mostrati all'utente. **Nessuna allowlist di host**: un URL legacy può puntare a un sito qualsiasi |
-| Differenza dal ramo cifrato | il ramo cifrato chiede la Vault Key, legge i byte con il tetto di 25 MB, decifra e apre un URL `blob:`; senza `storagePath` si ferma **prima** della chiave, e con un involucro non valido fallisce senza aprire |
+| Differenza dal ramo cifrato | il ramo cifrato chiede la Vault Key, legge i byte con il tetto di 32 MB, decifra e apre un URL `blob:`; senza `storagePath` si ferma **prima** della chiave, e con un involucro non valido fallisce senza aprire |
 | Popup bloccato | `openExternalUrl` restituisce **`true`** anche quando `window.open` restituisce `null`: il blocco **non** è distinguibile dal successo e non produce errore né avviso. Un'eccezione di `window.open` è invece registrata e mostrata |
 | Sessione invalidata | privato, aziendale e Scadenza non aprono nulla; gli allegati **incorporati** nell'anagrafica aziendale **non** hanno alcun controllo di sessione e aprono comunque (comportamento attuale, dichiarato) |
 

@@ -19,7 +19,7 @@ service firebase.storage {
     function isAllowedUpload() {
       return request.resource != null &&
         request.resource.size > 0 &&
-        request.resource.size <= 25 * 1024 * 1024 +
+        request.resource.size <= 32 * 1024 * 1024 +
           (request.resource.contentType == 'application/octet-stream' ? 1024 : 0) &&
         request.resource.contentType is string &&
         request.resource.contentType.matches(

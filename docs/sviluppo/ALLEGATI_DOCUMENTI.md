@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Contratto corrente candidato 1.2.166 — 12/10/2026
+
+Per JPEG, PNG e WebP l'editor condiviso deve proporre **Salva ritaglio** e **Allega originale**. La seconda scelta restituisce gli stessi byte del file selezionato: non applica ritaglio, ridimensionamento o compressione. PDF e gli altri allegati ammessi conservano il normale percorso diretto. La dimensione massima è **32 MiB** per il file in chiaro e **32 MiB + 1 KiB** per l'oggetto cifrato, in modo da includere l'overhead dell'envelope. I limiti devono rimanere uguali in client, condivisione, backup/ripristino, Functions e Storage Rules.
+
 ## Stato runtime pubblicato — 10/10/2026
 
 La versione `1.2.154` pubblica nel profilo privato gli allegati cifrati per i documenti persistiti: selezione da fotocamera/galleria o PDF, caricamento tramite callable autenticata e protetta da App Check, metadati separati e apertura locale dopo decifratura. Firestore Rules, Storage Rules e callable di upload/rimozione sono state distribuite. Il contratto storico conservato sotto descrive la fase candidata e non prevale su questo stato.

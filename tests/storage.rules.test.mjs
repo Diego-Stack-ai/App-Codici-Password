@@ -88,7 +88,7 @@ test('un altro utente e un client anonimo non accedono allo spazio del proprieta
   await assertFails(getBytes(ref(testEnv.unauthenticatedContext().storage(), objectPath)));
 });
 
-test('upload fuori dallo spazio UID, MIME non consentito e file oltre 25 MB sono respinti', async () => {
+test('upload fuori dallo spazio UID, MIME non consentito e file oltre 32 MB sono respinti', async () => {
   const storage = testEnv.authenticatedContext(OWNER_UID).storage();
 
   await assertFails(uploadBytes(ref(storage, 'public/file.pdf'), new Uint8Array([1]), {
@@ -101,7 +101,7 @@ test('upload fuori dallo spazio UID, MIME non consentito e file oltre 25 MB sono
   ));
   await assertFails(uploadBytes(
     ref(storage, `users/${OWNER_UID}/accounts/a1/attachments/too-large.pdf`),
-    new Uint8Array(25 * 1024 * 1024 + 1),
+    new Uint8Array(32 * 1024 * 1024 + 1),
     {contentType: 'application/pdf'},
   ));
 });

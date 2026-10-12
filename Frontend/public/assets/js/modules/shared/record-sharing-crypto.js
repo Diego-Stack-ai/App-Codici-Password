@@ -85,7 +85,7 @@ export async function decryptRecordPayload(encrypted, recordKey, recordId) {
 
 export async function encryptAttachmentForRecord(bytes, recordKey, recordId, attachmentId) {
     const clear = new Uint8Array(bytes);
-    if (!clear.byteLength || clear.byteLength > 25 * 1024 * 1024) throw new Error('ATTACHMENT_SIZE_INVALID');
+    if (!clear.byteLength || clear.byteLength > 32 * 1024 * 1024) throw new Error('ATTACHMENT_SIZE_INVALID');
     const aad = attachmentContext(recordId, attachmentId);
     const fileKeyBytes = randomBytes(32);
     const contentIv = randomBytes(12);
