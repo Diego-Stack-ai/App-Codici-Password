@@ -1,8 +1,8 @@
 # Rilascio
 
-## Candidata 1.2.164 — 12/10/2026
+## Esito operativo 1.2.164 — 12/10/2026
 
-Rende visibile sulla card ricevuta il comando **Abbandona**, collegato al flusso di uscita già autorizzato e confermato. Il rilascio previsto riguarda soltanto Hosting; nessuna modifica a Functions, Rules o dati.
+PR #111 unita in `master` (`d929601a`) con gate GitHub verdi. Il comando **Abbandona** è visibile sulla card ricevuta ed è collegato al flusso di uscita già autorizzato e confermato. Deploy del solo Hosting riuscito; controllo remoto HTTP 200, versione `1.2.164`, modulo e stile aggiornati. Nessuna modifica a Functions, Rules o dati.
 
 ## Esito operativo 1.2.163 — 12/10/2026
 
