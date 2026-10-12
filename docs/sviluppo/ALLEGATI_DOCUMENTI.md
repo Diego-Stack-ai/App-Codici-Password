@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Hotfix policy fotocamera — candidata 1.2.171
+
+L'uso di `getUserMedia` richiede che Firebase Hosting consenta esplicitamente la fotocamera alle pagine dell'app. La policy candidata è `camera=(self), microphone=(), geolocation=()`: la richiesta resta subordinata al consenso del browser e viene ammessa soltanto sulla stessa origine; microfono, geolocalizzazione e delega a origini esterne restano bloccati.
+
 ## Scanner Tessera/Carta nei Documenti del Profilo — pubblicato 1.2.170
 
 Il comando **Scansiona tessera/carta** è ora disponibile anche nel gestore allegati di ciascun documento del Profilo utente. Riusa il motore condiviso con gli Account: camera posteriore con guida ID-1, conferma nello stesso riquadro, trascinamento, pinch/cursore con zoom `0,93×–1,15×`, **Ripeti foto** e **Usa foto**. Il risultato JPEG `1012×638` entra direttamente nell'upload cifrato già esistente; Foto libera e selezione di immagini/PDF continuano a usare il percorso precedente. Nessun OCR, nuova callable, modifica di Rules o accesso a dati reali.
