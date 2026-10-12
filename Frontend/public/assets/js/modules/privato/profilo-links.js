@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.173';
+import { auth, db } from '../../firebase-config.js?v=1.2.174';
 import { collection, doc, updateDoc, runTransaction, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -7,7 +7,6 @@ import { showProfileAccountPicker } from './profilo-modal.js';
 import {listDeadlines, listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 import {
     buildProfileAccountLinkDraft, profileAccountUrl, profileAccountReferences,
-    buildProfileDocumentDeadlineDraft,
     findCompatibleDocumentDeadlines
 } from './profile-model.js';
 
@@ -120,8 +119,9 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
     const confirmed = await showConfirmModal('Crea scadenza collegata', `Preparare una scheda per “${documentItem.type || 'Documento'}” con scadenza ${documentItem.expiry_date}?`);
     if (!confirmed) return;
     await syncData();
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.174');
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify(
-        buildProfileDocumentDeadlineDraft(documentItem, profile)
+        await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile)
     ));
     window.location.href = `aggiungi_scadenza.html?profileDocumentId=${encodeURIComponent(documentItem.id)}`;
 }

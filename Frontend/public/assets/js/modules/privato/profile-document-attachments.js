@@ -5,7 +5,7 @@ import {showToast, showConfirmModal} from '../../ui-core-v129.js';
 import {encryptAttachmentFile, decryptAttachmentBytes, openDecryptedAttachment, validateAttachmentFile} from '../shared/attachment-security.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 32 * 1024 * 1024;
 const MAX_PER_DOCUMENT = 10;
 let activeDialog = null;
 let inlineObjectUrls = [];
@@ -130,22 +130,24 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     const header = createElement('div', {className: 'card-header-row'}, [title, close]);
     const photoInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});
     const cardFallbackInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});
-    const fileInput = createElement('input', {type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf', multiple: true, className: 'hidden'});
-    const photoButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: 'photo_camera'}),
-        createElement('span', {textContent: 'Scatta foto'})
+    const galleryInput = createElement('input', {type: 'file', accept: 'image/*,video/*', multiple: true, className: 'hidden'});
+    const documentInput = createElement('input', {type: 'file', accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt', multiple: true, className: 'hidden'});
+    const uploadButton = (icon, label) => createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
+        createElement('span', {className: 'material-symbols-outlined', textContent: icon}),
+        createElement('span', {textContent: label})
     ]);
-    const fileButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: 'attach_file'}),
-        createElement('span', {textContent: 'Scegli foto o PDF'})
-    ]);
-    const cardButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: 'crop_landscape'}),
-        createElement('span', {textContent: 'Scansiona tessera/carta'})
-    ]);
+    const photoButton = uploadButton('photo_camera', 'Scatta foto');
+    const galleryButton = uploadButton('photo_library', 'Galleria');
+    const documentButton = uploadButton('description', 'Scegli documento');
+    const cardButton = uploadButton('crop_landscape', 'Scansiona tessera/carta');
+    const uploadButtons = [photoButton, galleryButton, documentButton, cardButton];
     photoButton.onclick = () => photoInput.click();
-    fileButton.onclick = () => fileInput.click();
-    const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [cardButton, photoButton, fileButton, photoInput, cardFallbackInput, fileInput]);
+    galleryButton.onclick = () => galleryInput.click();
+    documentButton.onclick = () => documentInput.click();
+    const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [
+        cardButton, photoButton, galleryButton, documentButton,
+        photoInput, cardFallbackInput, galleryInput, documentInput
+    ]);
     setChildren(dialog, [header, actions, status, list]);
     overlay.append(dialog);
     overlay.addEventListener('click', event => { if (event.target === overlay) closeActiveDialog(); });
@@ -156,9 +158,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     let atLimit = false;
     const setBusy = value => {
         busy = value;
-        photoButton.disabled = value || atLimit;
-        fileButton.disabled = value || atLimit;
-        cardButton.disabled = value || atLimit;
+        uploadButtons.forEach(button => { button.disabled = value || atLimit; });
         close.disabled = value;
     };
 
@@ -212,9 +212,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         }
         status.textContent = `${attachments.length}/${MAX_PER_DOCUMENT} allegati.`;
         atLimit = attachments.length >= MAX_PER_DOCUMENT;
-        photoButton.disabled = busy || atLimit;
-        fileButton.disabled = busy || atLimit;
-        cardButton.disabled = busy || atLimit;
+        uploadButtons.forEach(button => { button.disabled = busy || atLimit; });
     }
 
     async function uploadFiles(files, {skipImageEditor = false} = {}) {
@@ -224,7 +222,6 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
             for (const selectedFile of files) {
                 let file = selectedFile;
                 validateAttachmentFile(file, {maxBytes: MAX_BYTES});
-                if (!(file.type.startsWith('image/') || file.type === 'application/pdf')) throw new Error('Sono ammesse solo immagini e PDF.');
                 if (file.type.startsWith('image/') && !skipImageEditor) {
                     file = await editImageBeforeUpload(file);
                     if (!file) continue;
@@ -254,13 +251,15 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         } finally {
             photoInput.value = '';
             cardFallbackInput.value = '';
-            fileInput.value = '';
+            galleryInput.value = '';
+            documentInput.value = '';
             setBusy(false);
         }
     }
     photoInput.onchange = () => uploadFiles([...photoInput.files]);
     cardFallbackInput.onchange = () => uploadFiles([...cardFallbackInput.files], {skipImageEditor: true});
-    fileInput.onchange = () => uploadFiles([...fileInput.files]);
+    galleryInput.onchange = () => uploadFiles([...galleryInput.files]);
+    documentInput.onchange = () => uploadFiles([...documentInput.files]);
     cardButton.onclick = async () => {
         if (busy || atLimit) return;
         try {

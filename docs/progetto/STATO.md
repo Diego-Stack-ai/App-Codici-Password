@@ -1,5 +1,9 @@
 # Stato
 
+## Candidata 1.2.174 — allegati unificati e Scadenze collegate — 12/10/2026
+
+Il gestore allegati dei Documenti del Profilo è allineato a quello degli Account con quattro ingressi distinti: scanner Tessera/Carta, fotocamera, galleria immagini/video e selettore documenti. Il limite client/backend è 32 MiB. I campi Data dei Widget Account possono preparare una Scadenza; gli allegati di Account e Documenti vengono referenziati dalla Scadenza senza duplicazione fisica e restano di proprietà della scheda origine. Verifiche locali e distribuzione sono rendicontate in [COLLAUDI](../evidenze/COLLAUDI.md); finché merge e deploy non sono verificati questa sezione non descrive produzione.
+
 ## Produzione 1.2.170 — scanner Tessera/Carta nei Documenti del Profilo — 12/10/2026
 
 Gli allegati di Profilo utente → Documenti espongono lo stesso comando **Scansiona tessera/carta** degli Account: guida ID-1, conferma nel riquadro, trascinamento e zoom limitato, quindi upload cifrato diretto. PR #122 unita in `master` (`219f9dc7`) dopo pipeline GitHub verde in 8m02s; deploy del solo Hosting riuscito. Home, Profilo, modulo allegati e stile camera verificati HTTP 200 con versione `1.2.170`. Functions, Rules e dati reali non sono stati modificati; resta consigliato il collaudo ergonomico su telefono fisico.

@@ -1,5 +1,11 @@
 # Allegati documenti
 
+## Contratto unificato candidato — 1.2.174
+
+Profilo utente → Documenti usa le stesse sorgenti visibili degli Account: **Scansiona tessera/carta**, **Scatta foto**, **Galleria** per immagini/video e **Scegli documento** per PDF, Word, Excel e testo. Tutti i file attraversano la validazione, la cifratura locale e la callable server-only; il massimo è 32 MiB.
+
+Quando un Documento genera una Scadenza, la bozza riceve i metadati degli allegati pronti e i medesimi `storagePath` cifrati. Non viene creato un secondo oggetto Storage. Il marcatore `linkedSource` identifica l’origine; il cleanup delle Scadenze può eliminare soltanto percorsi sotto `users/{uid}/scadenze/`, quindi non elimina gli oggetti del Documento.
+
 ## Fallback fotocamera nativa — candidata 1.2.172
 
 Se il browser rifiuta l'avvio della camera integrata, il flusso Tessera/Carta dei Documenti del Profilo spiega il motivo e chiede conferma per usare la fotocamera nativa del telefono. La scelta richiede un secondo gesto esplicito e il file ottenuto segue direttamente cifratura e upload esistenti, senza passare dall'editor Foto libera/Carta.

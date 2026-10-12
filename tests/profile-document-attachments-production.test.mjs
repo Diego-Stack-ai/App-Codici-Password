@@ -13,6 +13,10 @@ test('Profilo Documenti espone allegati, fotocamera e selettore PDF', async () =
     assert.match(cards, /data-action[^\n]+document-attachments|action: 'document-attachments'/);
     assert.match(controller, /capture: 'environment'/);
     assert.match(controller, /Scansiona tessera\/carta/);
+    assert.match(controller, /'Galleria'/);
+    assert.match(controller, /'Scegli documento'/);
+    assert.match(controller, /accept: 'image\/\*,video\/\*'/);
+    assert.match(controller, /accept: '\.pdf,\.doc,\.docx,\.xls,\.xlsx,\.txt'/);
     assert.match(controller, /import\('\.\.\/shared\/card-camera-capture\.js'\)/);
     assert.match(controller, /captureCardPhoto/);
     assert.match(controller, /skipImageEditor: true/);
@@ -26,6 +30,19 @@ test('Profilo Documenti espone allegati, fotocamera e selettore PDF', async () =
     assert.match(cards, /profile-document-inline-attachments/);
     assert.match(controller, /renderProfileDocumentAttachmentPreviews/);
     assert.match(controller, /profile-document-inline-image/);
+});
+
+test('gli allegati del documento sono collegati alla bozza Scadenza senza duplicare il file', async () => {
+    const [links, linkage, deadline] = await Promise.all([
+        read('Frontend/public/assets/js/modules/privato/profilo-links.js'),
+        read('Frontend/public/assets/js/modules/privato/profile-document-deadline-link.js'),
+        read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js')
+    ]);
+    assert.match(links, /profile-document-deadline-link\.js/);
+    assert.match(linkage, /listProfileDocumentAttachments/);
+    assert.match(linkage, /linkedSource: \{type: 'profileDocumentAttachment', id: item\.id\}/);
+    assert.match(linkage, /storagePath: item\.storagePath/);
+    assert.match(deadline, /setExistingAttachments\(linkedDraftAttachments\)/);
 });
 
 test('regole integrate rendono metadati e oggetti server-only', async () => {

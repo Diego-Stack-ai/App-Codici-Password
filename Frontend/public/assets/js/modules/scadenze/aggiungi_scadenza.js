@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.173';
+import { auth } from '../../firebase-config.js?v=1.2.174';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,6 +36,7 @@ const configController = createDeadlineConfigController({
     onRender: () => syncCustomDropdowns()
 });
 let profileDocumentLinkDraft = null;
+let accountDeadlineLinkDraft = null;
 let linkedSourceRef = null;
 
 /**
@@ -57,6 +58,15 @@ export async function initAggiungiScadenza(user) {
             if (draft?.profileDocumentId === profileDocumentId) profileDocumentLinkDraft = draft;
         } catch { profileDocumentLinkDraft = null; }
     }
+    if (!editingScadenzaId && new URLSearchParams(window.location.search).get('accountSource') === '1') {
+        try {
+            const draft = JSON.parse(sessionStorage.getItem('account-deadline-link-draft') || 'null');
+            if (draft?.sourceRef?.type === 'account' && draft.sourceRef.id) {
+                accountDeadlineLinkDraft = draft;
+                linkedSourceRef = draft.sourceRef;
+            }
+        } catch { accountDeadlineLinkDraft = null; linkedSourceRef = null; }
+    }
 
     // Mode Switching Listeners
     ['automezzi', 'documenti', 'generali'].forEach(mode => {
@@ -71,6 +81,10 @@ export async function initAggiungiScadenza(user) {
 
     initProxyDropdowns();
     attachmentController.init();
+    const linkedDraftAttachments = profileDocumentLinkDraft?.attachments || accountDeadlineLinkDraft?.attachments;
+    if (linkedDraftAttachments) {
+        attachmentController.setExistingAttachments(linkedDraftAttachments);
+    }
 
     recipientController.init();
 
@@ -163,19 +177,20 @@ export async function initAggiungiScadenza(user) {
     } else {
         // Forza l'aggiornamento UI per la modalità di default ('automezzi') in "Aggiungi"
         setMode(currentMode);
-        if (profileDocumentLinkDraft) {
-            setMode('documenti');
+        const sourceDraft = profileDocumentLinkDraft || accountDeadlineLinkDraft;
+        if (sourceDraft) {
+            setMode(profileDocumentLinkDraft ? 'documenti' : 'generali');
             const nameInput = document.getElementById('nome_cognome');
             const dateInput = document.getElementById('dueDate');
-            if (nameInput) nameInput.value = profileDocumentLinkDraft.name || 'Documento';
+            if (nameInput) nameInput.value = sourceDraft.name || 'Account';
             if (dateInput) {
-                dateInput.value = profileDocumentLinkDraft.dueDate || '';
-                dateInput.dataset.isoValue = profileDocumentLinkDraft.dueDate || '';
+                dateInput.value = sourceDraft.dueDate || '';
+                dateInput.dataset.isoValue = sourceDraft.dueDate || '';
             }
-            if (typeSelect && profileDocumentLinkDraft.name && [...typeSelect.options].some(option => option.value === profileDocumentLinkDraft.name)) {
-                typeSelect.value = profileDocumentLinkDraft.name;
+            if (typeSelect && sourceDraft.documentType && [...typeSelect.options].some(option => option.value === sourceDraft.documentType)) {
+                typeSelect.value = sourceDraft.documentType;
             }
-            if (typeSelect && profileDocumentLinkDraft.profileDocumentId) {
+            if (typeSelect && profileDocumentLinkDraft?.profileDocumentId) {
                 const documentType = profileDocumentLinkDraft.documentType || '';
                 if ([...typeSelect.options].some(option => option.value === documentType)) typeSelect.value = documentType;
                 const template = configController.getSuggestedTemplate(typeSelect.value);
@@ -185,11 +200,11 @@ export async function initAggiungiScadenza(user) {
                 }
             }
             const detailsSelect = document.getElementById('modello_veicolo');
-            if (detailsSelect && profileDocumentLinkDraft.detail) {
-                if (![...detailsSelect.options].some(option => option.value === profileDocumentLinkDraft.detail)) {
-                    detailsSelect.appendChild(new Option(profileDocumentLinkDraft.detail, profileDocumentLinkDraft.detail));
+            if (detailsSelect && sourceDraft.detail) {
+                if (![...detailsSelect.options].some(option => option.value === sourceDraft.detail)) {
+                    detailsSelect.appendChild(new Option(sourceDraft.detail, sourceDraft.detail));
                 }
-                detailsSelect.value = profileDocumentLinkDraft.detail;
+                detailsSelect.value = sourceDraft.detail;
             }
             syncCustomDropdowns();
         }
@@ -334,6 +349,10 @@ function setupSaveLogic() {
             if (result.consumedProfileDocumentDraft) {
                 sessionStorage.removeItem('profile-deadline-link-draft');
                 profileDocumentLinkDraft = null;
+            }
+            if (!editingScadenzaId && accountDeadlineLinkDraft) {
+                sessionStorage.removeItem('account-deadline-link-draft');
+                accountDeadlineLinkDraft = null;
             }
 
             if (btnText) btnText.textContent = "Completato!";

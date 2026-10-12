@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.173';
+import {db} from '../../firebase-config.js?v=1.2.174';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -129,6 +129,10 @@ export const listPrivateAccountAttachments = (uid, accountId, recipientUid = '')
             where('sharedReadyRecipientUids', 'array-contains', recipientUid))
         : query(collection(db, 'users', uid, 'accounts', accountId, 'attachments'),
             orderBy('createdAt', 'desc')));
+
+export const listProfileDocumentAttachments = uid =>
+    readRecords(`profile-document-attachments:${uid}`,
+        collection(db, 'users', uid, 'profileDocumentAttachments'));
 
 export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
 // M7-R7C-4: quando l'Account è sospeso il get è negato dalle Rules; l'invito del

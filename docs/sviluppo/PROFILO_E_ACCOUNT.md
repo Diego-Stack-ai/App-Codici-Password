@@ -1,5 +1,9 @@
 # Profilo e account
 
+## Date Account e Scadenze — candidata 1.2.174
+
+Nell’editor dei Widget Account un campo può essere definito come **Data** e abilitato con **Usa questa data come Scadenza**. Nella scheda Account il comando calendario prepara nome, tipo, dettaglio, data e riferimento sorgente della nuova Scadenza. Gli allegati dell’Account sono collegati per riferimento ai file cifrati esistenti, senza copia o compressione. Il contratto backend conserva `deadlineEnabled` soltanto per campi Data/Scadenza non sensibili; i campi cifrati non possono abilitarlo.
+
 ## Profili Widget pubblicati — 10/10/2026
 
 Il modello profilo/istanza descritto sotto è attivo nella versione `1.2.154`. I cataloghi Account e Banca restano separati; i valori appartengono esclusivamente all'istanza inserita. La callable di gestione profili, l'aggiornamento di `manageAccountWidget` e le Rules sono distribuiti. I widget legacy senza `profileId` restano compatibili e non sono stati convertiti automaticamente né copiati con valori nel catalogo.

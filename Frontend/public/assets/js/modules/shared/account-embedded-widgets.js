@@ -6,7 +6,7 @@ import {
 } from '../data/account-widget-client.js';
 import {createWidgetProfile} from '../data/widget-profile-client.js';
 import {
-    listAccountWidgetProfiles, listAccountWidgetProfilesConfirmed,
+    listAccountWidgetProfiles, listAccountWidgetProfilesConfirmed, listPrivateAccountAttachments, listCompanyAccountAttachments,
     listAccountWidgets, listAccountWidgetsConfirmed
 } from '../data/vault-repository.js';
 import {createAccountWidgetLifecycle, clearWidgetValues} from './account-widget-lifecycle.js';
@@ -35,8 +35,15 @@ function fieldRow(field = {}, structureLocked = false) {
         placeholder: 'Nome del campo', value: field.label || '', 'aria-label': 'Nome del campo', disabled: structureLocked
     });
     label.addEventListener('blur', () => { label.value = structuralTitleCase(label.value); });
+    const type = createElement('select', {
+        className: 'shared-account-select-control', 'aria-label': 'Tipo del campo', disabled: structureLocked
+    }, [
+        createElement('option', {value: 'text', textContent: 'Testo'}),
+        createElement('option', {value: 'date', textContent: 'Data'})
+    ]);
+    type.value = field.type === 'date' || field.type === 'expiry' ? 'date' : 'text';
     const value = createElement('input', {
-        className: 'shared-account-select-control', type: 'text', maxlength: 10000,
+        className: 'shared-account-select-control', type: type.value === 'date' ? 'date' : 'text', maxlength: 10000,
         placeholder: 'Valore', value: field.value ?? '', 'aria-label': 'Valore del campo'
     });
     value.spellcheck = false;
@@ -56,6 +63,15 @@ function fieldRow(field = {}, structureLocked = false) {
         createElement('input', {type: 'checkbox', checked: field.encrypted === true, disabled: structureLocked}),
         createElement('span', {textContent: 'Dato sensibile cifrato'})
     ]);
+    const deadline = createElement('label', {className: 'account-widget-sensitive'}, [
+        createElement('input', {type: 'checkbox', checked: field.deadlineEnabled === true, disabled: structureLocked || type.value !== 'date'}),
+        createElement('span', {textContent: 'Usa questa data come Scadenza'})
+    ]);
+    type.addEventListener('change', () => {
+        value.type = type.value === 'date' ? 'date' : 'text';
+        deadline.firstElementChild.disabled = type.value !== 'date';
+        if (type.value !== 'date') deadline.firstElementChild.checked = false;
+    });
     sensitive.firstElementChild.addEventListener('change', event => {
         value.classList.toggle('local-data-masked', event.target.checked);
         visibility.hidden = !event.target.checked;
@@ -67,13 +83,13 @@ function fieldRow(field = {}, structureLocked = false) {
         type: 'button', className: 'account-widget-remove', 'aria-label': 'Rimuovi campo',
         onclick: () => row.remove(), hidden: structureLocked
     }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
-    setChildren(row, [label, createElement('div', {className: 'account-widget-inline-control'}, [value, visibility]), sensitive, remove]);
+    setChildren(row, [label, type, createElement('div', {className: 'account-widget-inline-control'}, [value, visibility]), sensitive, deadline, remove]);
     row.getValue = () => ({
         id: field.id || newId('field'), label: structuralTitleCase(label.value), value: value.value,
-        type: sensitive.firstElementChild.checked
-            ? 'sensitive'
-            : (field.type && field.type !== 'sensitive' ? field.type : 'text'),
-        encrypted: sensitive.firstElementChild.checked, order: 0
+        type: sensitive.firstElementChild.checked ? 'sensitive' : type.value,
+        encrypted: sensitive.firstElementChild.checked,
+        deadlineEnabled: !sensitive.firstElementChild.checked && type.value === 'date' && deadline.firstElementChild.checked,
+        order: 0
     });
     return row;
 }
@@ -256,6 +272,33 @@ async function copyField(field, context) {
     }
 }
 
+async function prepareAccountDeadline(field, value, widget, context) {
+    if (!value) return showToast('Inserisci prima la data.', 'warning');
+    const attachments = context.context === 'company'
+        ? await listCompanyAccountAttachments(context.uid, context.companyId, context.accountId)
+        : await listPrivateAccountAttachments(context.uid, context.accountId);
+    const linkedAttachments = attachments.map(item => ({
+        name: item.name || 'Allegato', storagePath: item.storagePath,
+        type: item.type || 'application/octet-stream', size: Number(item.size || 0),
+        encryption: item.encryption || null,
+        linkedSource: {type: 'accountAttachment', id: item.id}
+    }));
+    const accountName = document.getElementById('account-name')?.value.trim() || 'Account';
+    sessionStorage.setItem('account-deadline-link-draft', JSON.stringify({
+        sourceRef: {
+            type: 'account', id: context.accountId, context: context.context,
+            ...(context.companyId ? {companyId: context.companyId} : {}),
+            widgetId: widget.id, fieldId: field.id
+        },
+        name: accountName,
+        documentType: field.label || 'Scadenza Account',
+        detail: `${widget.title} - ${field.label}`,
+        dueDate: value,
+        attachments: linkedAttachments
+    }));
+    window.location.href = 'aggiungi_scadenza.html?accountSource=1';
+}
+
 function widgetCard(widget, context, refresh) {
     let collapsed = widget.collapsed === true;
     let dirty = false;
@@ -267,7 +310,7 @@ function widgetCard(widget, context, refresh) {
         if (context.editable) {
             const input = createElement('input', {
                 className: 'account-widget-inline-input',
-                type: 'text',
+                type: field.type === 'date' || field.type === 'expiry' ? 'date' : 'text',
                 spellcheck: false,
                 autocapitalize: 'off',
                 maxlength: 10000,
@@ -290,6 +333,13 @@ function widgetCard(widget, context, refresh) {
                         if (icon) icon.textContent = revealed ? 'visibility' : 'visibility_off';
                     }
                 }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+            }
+            if (field.deadlineEnabled === true && (field.type === 'date' || field.type === 'expiry')) {
+                controls.push(createElement('button', {
+                    type: 'button', className: 'shared-account-reveal',
+                    'aria-label': `Crea Scadenza da ${field.label}`,
+                    onclick: () => prepareAccountDeadline(field, input.value, widget, context)
+                }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'event_upcoming'})]));
             }
             fields.appendChild(createElement('div', {
                 className: 'account-widget-inline-field'

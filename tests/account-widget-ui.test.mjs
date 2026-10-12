@@ -30,7 +30,7 @@ test('in modifica account i valori sono campi inline e mantengono il tipo origin
   assert.match(widgetSource, /className: 'account-widget-inline-input'/);
   assert.match(widgetSource, /className: 'account-widget-inline-control'/);
   assert.match(widgetSource, /fieldReaders\.push\(\(\) => \(\{\.\.\.field, value: input\.value\}\)\)/);
-  assert.match(widgetSource, /field\.type && field\.type !== 'sensitive' \? field\.type : 'text'/);
+  assert.match(widgetSource, /field\.type === 'date' \|\| field\.type === 'expiry' \? 'date' : 'text'/);
 });
 
 test('il salvataggio principale attende i widget sia nel form privato sia aziendale', () => {
@@ -68,4 +68,12 @@ test('il collegamento di una credenziale comune spiega effetti e rimozione prima
   assert.match(sharedCredentialSource, /tutti gli Account collegati/);
   assert.match(sharedCredentialSource, /non elimina la Credenziale comune/);
   assert.match(sharedCredentialSource, /Salva e continua/);
+});
+
+test('un campo Data puo preparare una Scadenza collegando gli allegati dell Account', () => {
+  assert.match(widgetSource, /Usa questa data come Scadenza/);
+  assert.match(widgetSource, /deadlineEnabled/);
+  assert.match(widgetSource, /account-deadline-link-draft/);
+  assert.match(widgetSource, /linkedSource: \{type: 'accountAttachment', id: item\.id\}/);
+  assert.match(widgetSource, /aggiungi_scadenza\.html\?accountSource=1/);
 });
