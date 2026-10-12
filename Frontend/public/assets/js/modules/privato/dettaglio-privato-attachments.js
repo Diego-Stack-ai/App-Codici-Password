@@ -15,7 +15,6 @@ import {decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess} from '../
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
-import {captureCardPhoto} from '../shared/card-camera-capture.js';
 
 let mounted = null;
 
@@ -71,6 +70,7 @@ export function initPrivateAttachmentModule(context) {
     if (cardCamera) cardCamera.onclick = async () => {
         closeSourceSelector(mount);
         try {
+            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
             const file = await captureCardPhoto();
             if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {initialMode: 'card'});
         } catch (error) {

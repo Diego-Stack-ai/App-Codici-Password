@@ -17,7 +17,6 @@ import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listCompanyAccountAttachments } from '../data/vault-repository.js';
 import {decryptReceivedCompanyAttachment, syncCompanyAttachmentAccess} from '../shared/shared-attachment-access.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
-import {captureCardPhoto} from '../shared/card-camera-capture.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _ownerUid = null;
@@ -152,6 +151,7 @@ export async function handleFileUpload(input, {initialMode = 'free'} = {}) {
 export async function captureCardAttachment() {
     closeSourceSelector();
     try {
+        const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
         const file = await captureCardPhoto();
         if (file && _active()) await handleFileUpload({files: [file], value: ''}, {initialMode: 'card'});
     } catch (error) {
