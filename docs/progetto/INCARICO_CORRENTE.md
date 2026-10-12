@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Candidata 1.2.167 — video nella galleria allegati e censimento Scadenze — 12/10/2026
+
+Diego ha richiesto e autorizzato la pubblicazione del filtro Galleria per immagini e video negli allegati degli Account privati e aziendali, allineandolo ai flussi Scadenze e Azienda già compatibili. Nel prossimo controllo degli allegati reali, ogni oggetto collegato a una Scadenza dovrà riportare anche il **nome leggibile della Scadenza**, oltre all'identificativo, così da rendere riconoscibile per esempio una scadenza assicurativa. Questo rilascio non autorizza né esegue ora letture, cancellazioni o migrazioni di dati reali.
+
 ## Pubblicazione 1.2.166 conclusa — allegati originali e limite 32 MiB — 12/10/2026
 
 PR #114 unita in `master` al commit `db5e4e1d` dopo gate GitHub verdi. L'editor immagini offre due uscite esplicite: **Salva ritaglio** applica l'elaborazione scelta, mentre **Allega originale** conserva il file selezionato senza ricampionamento o compressione. Il limite generale per ogni allegato cifrato è **32 MiB** ed è allineato fra client, letture, condivisione, backup/ripristino, Functions e Storage Rules. Deploy riuscito per Hosting, Storage Rules e `manageBackupRestoreV2`; verifica HTTP 200 con versione e azioni presenti. Nessun dato reale è stato letto o modificato.
