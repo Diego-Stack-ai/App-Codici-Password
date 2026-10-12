@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.175';
+import { db, storage } from '../../firebase-config.js?v=1.2.176';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -16,6 +16,7 @@ import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/attachment-source-picker.js';
+import {captureCardAttachment, consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 
 let mounted = null;
 
@@ -65,19 +66,18 @@ export function initPrivateAttachmentModule(context) {
         if (!input) return;
         if (input !== previous) previous.parentNode?.replaceChild(input, previous);
         input.value = '';
-        input.onchange = () => handleFileUpload(input, mount);
+        input.onchange = () => handleFileUpload(input, mount, {initialMode: consumeAttachmentInitialMode(input)});
         cleanups.add(() => { input.value = ''; input.onchange = null; });
     });
     const cardCamera = document.getElementById('btn-card-camera');
     if (cardCamera) cardCamera.onclick = async () => {
         closeSourceSelector(mount);
-        try {
-            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
-            const file = await captureCardPhoto();
-            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
-        } catch (error) {
-            if (mount.active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
-        }
+        const askFallback = mount.confirm;
+        const file = await captureCardAttachment({
+            fallbackInput: document.getElementById('input-camera'),
+            confirmFallback: (...args) => askFallback(...args)
+        });
+        if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
     };
     cleanups.add(() => {if (cardCamera) cardCamera.onclick = null;});
     return mount;
@@ -88,13 +88,12 @@ export async function openSourceSelector(mount = mounted) {
     const source = await selectAttachmentSource();
     if (!mount.active() || !source) return;
     if (source === 'card') {
-        try {
-            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
-            const file = await captureCardPhoto();
-            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
-        } catch (error) {
-            if (mount.active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
-        }
+        const askFallback = mount.confirm;
+        const file = await captureCardAttachment({
+            fallbackInput: document.getElementById('input-camera'),
+            confirmFallback: (...args) => askFallback(...args)
+        });
+        if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
         return;
     }
     document.getElementById({camera:'input-camera',gallery:'input-gallery',document:'input-file'}[source])?.click();

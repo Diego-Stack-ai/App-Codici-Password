@@ -4,13 +4,15 @@ import {readFile} from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('Profilo Documenti usa il selettore sorgente condiviso con gli account', async () => {
-    const [cards, controller, picker, privateAccount, companyAccount, page] = await Promise.all([
+test('Profilo Documenti usa selettore e fallback Carta condivisi con gli account', async () => {
+    const [cards, controller, picker, capture, privateAccount, companyAccount, companyDetail, page] = await Promise.all([
         read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js'),
         read('Frontend/public/assets/js/modules/privato/profile-document-attachments.js'),
         read('Frontend/public/assets/js/modules/shared/attachment-source-picker.js'),
+        read('Frontend/public/assets/js/modules/shared/card-attachment-capture.js'),
         read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js'),
         read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js'),
+        read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js'),
         read('Frontend/public/profilo_privato.html')
     ]);
     assert.match(cards, /data-action[^\n]+document-attachments|action: 'document-attachments'/);
@@ -25,12 +27,17 @@ test('Profilo Documenti usa il selettore sorgente condiviso con gli account', as
     assert.match(picker, />Documento</);
     assert.match(controller, /accept: 'image\/\*,video\/\*'/);
     assert.match(controller, /accept: '\.pdf,\.doc,\.docx,\.xls,\.xlsx,\.txt'/);
-    assert.match(controller, /import\('\.\.\/shared\/card-camera-capture\.js'\)/);
-    assert.match(controller, /captureCardPhoto/);
+    assert.match(capture, /import\('\.\/card-camera-capture\.js'\)/);
+    assert.match(controller, /captureCardAttachment/);
+    assert.match(privateAccount, /captureCardAttachment/);
+    assert.match(companyAccount, /captureGuidedCard/);
     assert.match(controller, /skipImageEditor: true/);
-    assert.match(controller, /Usa fotocamera nativa/);
-    assert.match(controller, /cardFallbackInput\.click\(\)/);
-    assert.match(controller, /cardFallbackInput\.files[\s\S]+skipImageEditor: true/);
+    assert.match(capture, /Usa fotocamera nativa/);
+    assert.match(capture, /formato carta/);
+    assert.match(capture, /fallbackInput\.click\(\)/);
+    assert.match(controller, /cardFallbackInput\.files[\s\S]+consumeAttachmentInitialMode/);
+    assert.match(privateAccount, /consumeAttachmentInitialMode/);
+    assert.match(companyDetail, /consumeAttachmentInitialMode/);
     assert.match(controller, /application\/pdf/);
     assert.match(controller, /uploadProfileDocumentAttachment/);
     assert.match(controller, /removeProfileDocumentAttachment/);

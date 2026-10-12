@@ -53,6 +53,7 @@ function detailFixture() {
         loadDetailSharingContactNames: async data => { calls.push(['mode', data]); return new Map(); },
         renderAccountBanking: (_account, data) => calls.push(['banking', data]),
         openSourceSelector: () => calls.push(['picker-open']),
+        consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
         loadCredentials: async () => ({initAccountSharedCredentials: data => calls.push(['credentials', data])}),
         loadWidgets: async () => ({initAccountEmbeddedWidgets: data => calls.push(['widgets', data])})
     });
@@ -140,6 +141,7 @@ function attachmentFixture() {
         setTimeout: callback => { timers.set(++timerId, callback); return timerId; }, clearTimeout: id => timers.delete(id),
         closeAttachmentSourcePicker() {},
         selectAttachmentSource: async () => null,
+        consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
         showConfirmModal: async () => true, showToast() {}, showAlertModal: async () => {}, logError() {}, t: () => '',
         storage: {}, db: {}, ref: (_storage, path) => path, doc: (_db, ...path) => path.join('/'), collection: (_db, ...path) => path.join('/'),
         deleteObject: async path => operations.push(['storage-delete', path]), deleteDoc: async path => operations.push(['document-delete', path]),

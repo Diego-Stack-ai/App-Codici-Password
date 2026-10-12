@@ -29,6 +29,7 @@ function fixture() {
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
     const context = vm.createContext({readErrorMessage, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
         inviteIdForGuest, sanitizeEmail, sharingCycleOf,
+        consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
         document: {getElementById: id => id === 'footer-center-actions' ? footer : nodes[id] || find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),

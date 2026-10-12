@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Candidata 1.2.176 — fallback Tessera/Carta realmente condiviso — 12/10/2026
+
+Diego autorizza correzione e pubblicazione del percorso Tessera/Carta. Account privati, Account aziendali e Documenti del Profilo usano ora lo stesso orchestratore: prima tenta la fotocamera integrata con guida ID-1, trascinamento e zoom limitato; se il browser o il dispositivo la rifiuta, descrive la causa e propone esplicitamente la fotocamera nativa. La foto ottenuta dal fallback non viene più caricata direttamente: passa nell’editor già impostato su **Carta**, così restano disponibili rettangolo ID-1, rilevamento/correzione degli angoli e regolazione manuale.
+
+Perimetro autorizzato: commit, push, merge e deploy del solo Hosting della release `1.2.176`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché persistenza e cifratura non cambiano.
+
 ## Pubblicazione 1.2.175 conclusa — selettore allegati realmente condiviso — 12/10/2026
 
 Diego autorizza implementazione e pubblicazione del selettore sorgente unico. Documenti del Profilo, Account privati e Account aziendali richiamano ora lo stesso componente **Seleziona sorgente**, con **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scelta Tessera/Carta continua nel motore camera guidato con riquadro ID-1 e conferma regolabile; il fallback alla camera nativa resta disponibile quando `getUserMedia` non può avviarsi, ma in quel fallback il browser non può sovrapporre la guida.

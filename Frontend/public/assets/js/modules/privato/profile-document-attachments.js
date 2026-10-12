@@ -5,6 +5,7 @@ import {showToast, showConfirmModal} from '../../ui-core-v129.js';
 import {encryptAttachmentFile, decryptAttachmentBytes, openDecryptedAttachment, validateAttachmentFile} from '../shared/attachment-security.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 import {selectAttachmentSource} from '../shared/attachment-source-picker.js';
+import {captureCardAttachment, consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 
 const MAX_BYTES = 32 * 1024 * 1024;
 const MAX_PER_DOCUMENT = 10;
@@ -209,7 +210,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         uploadButtons.forEach(button => { button.disabled = busy || atLimit; });
     }
 
-    async function uploadFiles(files, {skipImageEditor = false} = {}) {
+    async function uploadFiles(files, {initialMode = 'free', skipImageEditor = false} = {}) {
         if (busy || !files.length) return;
         setBusy(true);
         try {
@@ -217,7 +218,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
                 let file = selectedFile;
                 validateAttachmentFile(file, {maxBytes: MAX_BYTES});
                 if (file.type.startsWith('image/') && !skipImageEditor) {
-                    file = await editImageBeforeUpload(file);
+                    file = await editImageBeforeUpload(file, {initialMode});
                     if (!file) continue;
                     validateAttachmentFile(file, {maxBytes: MAX_BYTES});
                 }
@@ -251,23 +252,15 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         }
     }
     photoInput.onchange = () => uploadFiles([...photoInput.files]);
-    cardFallbackInput.onchange = () => uploadFiles([...cardFallbackInput.files], {skipImageEditor: true});
+    cardFallbackInput.onchange = () => uploadFiles([...cardFallbackInput.files], {
+        initialMode: consumeAttachmentInitialMode(cardFallbackInput)
+    });
     galleryInput.onchange = () => uploadFiles([...galleryInput.files]);
     documentInput.onchange = () => uploadFiles([...documentInput.files]);
     const captureCard = async () => {
         if (busy || atLimit) return;
-        try {
-            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
-            const file = await captureCardPhoto();
-            if (file && activeDialog === overlay) await uploadFiles([file], {skipImageEditor: true});
-        } catch (error) {
-            const reason = error?.name === 'NotAllowedError'
-                ? 'Il browser non ha concesso l’accesso alla fotocamera integrata.'
-                : 'La fotocamera integrata non è disponibile in questa modalità.';
-            if (await showConfirmModal('Usa fotocamera nativa', `${reason} Vuoi scattare la tessera con la fotocamera del telefono?`)) {
-                cardFallbackInput.click();
-            }
-        }
+        const file = await captureCardAttachment({fallbackInput: cardFallbackInput, confirmFallback: showConfirmModal});
+        if (file && activeDialog === overlay) await uploadFiles([file], {skipImageEditor: true});
     };
     addButton.onclick = async () => {
         if (busy || atLimit) return;
