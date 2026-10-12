@@ -12,7 +12,7 @@ test('editor immagini offre quattro angoli liberi, prospettiva e formato tessera
     const source = await read('Frontend/public/assets/js/modules/shared/image-crop-editor.js');
     assert.match(source, /pointerdown/);
     assert.match(source, /Ruota 90°/);
-    assert.match(source, /MAX_SIDE = 2048/);
+    assert.match(source, /MAX_SIDE = 4096/);
     assert.match(source, /Tessera \/ carta/);
     assert.match(source, /Allega originale/);
     assert.match(source, /close\(file\)/);
@@ -28,6 +28,7 @@ test('acquisizione tessera usa guida ID-1 e conferma dedicata con pan e zoom lim
     const camera = await read('Frontend/public/assets/js/modules/shared/card-camera-capture.js');
     assert.match(camera, /getUserMedia/);
     assert.match(camera, /facingMode/);
+    assert.match(camera, /CAMERA_IDEAL_SIZE = \{width: 4096, height: 2160\}/);
     assert.match(camera, /CARD_RATIO = 1012 \/ 638/);
     assert.match(camera, /card-camera-frame/);
     assert.match(camera, /MIN_ZOOM = \.93/);
@@ -35,6 +36,8 @@ test('acquisizione tessera usa guida ID-1 e conferma dedicata con pan e zoom lim
     assert.match(camera, /pointermove/);
     assert.match(camera, /Ripeti foto/);
     assert.match(camera, /Usa foto/);
+    assert.match(camera, /renderFullResolution/);
+    assert.match(camera, /'image\/jpeg', \.98/);
     for (const path of ['Frontend/public/dettaglio_account_privato.html', 'Frontend/public/dettaglio_account_azienda.html']) {
         const html = await read(path);
         assert.match(html, /id="btn-card-camera"/);
@@ -61,6 +64,10 @@ test('regolazione tessera limita zoom e spostamento senza creare aree vuote', as
     assert.equal(maximum.zoom, 1.15);
     assert.ok(Math.abs(minimum.x) <= (1080 - minimum.cropWidth) / 2);
     assert.ok(Math.abs(maximum.y) <= (681 - maximum.cropHeight) / 2);
+    const output = module.cardOutputSize({zoom: 1, x: 0, y: 0}, 3840, 2420);
+    assert.ok(output.width > 3000);
+    assert.ok(output.height > 1900);
+    assert.ok(Math.abs(output.width / output.height - 1012 / 638) < .001);
 });
 
 test('riquadro tessera preimpostato conserva il rapporto ID-1', async () => {
@@ -111,11 +118,13 @@ test('contratto geometrico rifiuta angoli incrociati e conserva quadrilateri con
     assert.equal(isValidQuadrilateral([{x: 0, y: 0}, {x: 200, y: 100}, {x: 0, y: 100}, {x: 200, y: 0}]), false);
 });
 
-test('formato tessera usa ID-1 1012x638 e foto libera segue i lati', async () => {
+test('formato tessera conserva ID-1 alla risoluzione sorgente e limita solo oltre 4096 px', async () => {
     const {outputSize} = await loadEditor();
     const points = [{x: 0, y: 0}, {x: 400, y: 0}, {x: 400, y: 200}, {x: 0, y: 200}];
-    assert.deepEqual(outputSize(points, 'card'), {width: 1012, height: 638});
+    assert.deepEqual(outputSize(points, 'card'), {width: 400, height: 252});
     assert.deepEqual(outputSize(points, 'free'), {width: 400, height: 200});
+    const large = [{x: 0, y: 0}, {x: 5000, y: 0}, {x: 5000, y: 3000}, {x: 0, y: 3000}];
+    assert.deepEqual(outputSize(large, 'card'), {width: 4096, height: 2582});
 });
 
 test('omografia porta i quattro angoli di destinazione sui punti sorgente', async () => {

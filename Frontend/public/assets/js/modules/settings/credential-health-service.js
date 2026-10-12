@@ -5,7 +5,7 @@ import {
 } from '../data/vault-repository.js';
 import {accountModeFromRecord, ACCOUNT_MODES} from '../shared/account-mode-model.js';
 import {analyzeCredentialHealth} from './credential-health-model.js';
-import {auth} from '../../firebase-config.js?v=1.2.176';
+import {auth} from '../../firebase-config.js?v=1.2.177';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 
 const CONFIRMED_READ_TIMEOUT_MS = 8_000;

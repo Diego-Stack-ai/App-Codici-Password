@@ -3,7 +3,6 @@ import {collection, getDocsFromServer, query, where, getBytes, ref, httpsCallabl
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showToast, showConfirmModal} from '../../ui-core-v129.js';
 import {encryptAttachmentFile, decryptAttachmentBytes, openDecryptedAttachment, validateAttachmentFile} from '../shared/attachment-security.js';
-import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
 import {selectAttachmentSource} from '../shared/attachment-source-picker.js';
 import {captureCardAttachment, consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 
@@ -218,6 +217,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
                 let file = selectedFile;
                 validateAttachmentFile(file, {maxBytes: MAX_BYTES});
                 if (file.type.startsWith('image/') && !skipImageEditor) {
+                    const {editImageBeforeUpload} = await import('../shared/image-crop-editor.js');
                     file = await editImageBeforeUpload(file, {initialMode});
                     if (!file) continue;
                     validateAttachmentFile(file, {maxBytes: MAX_BYTES});

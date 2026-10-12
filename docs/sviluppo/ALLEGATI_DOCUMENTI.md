@@ -1,5 +1,11 @@
 # Allegati documenti
 
+## Qualità acquisizione Tessera/Carta — candidata 1.2.177
+
+Il formato `1012:638` definisce il rapporto ID-1 e la sola anteprima interattiva, non la risoluzione del file. Il motore guidato richiede alla camera posteriore una risoluzione ideale fino a `4096×2160`, applica pan e zoom ai pixel sorgente ed esporta il ritaglio alla sua risoluzione effettiva con JPEG qualità `0,98`. L'editor Carta calcola l'uscita dalla selezione reale e limita il lato lungo a 4096 px per contenere il consumo di memoria sui telefoni. L'eventuale sorgente più piccola non viene ingrandita artificialmente. **Allega originale** continua a restituire esattamente il file scelto, senza ritaglio, ridimensionamento o ricompressione.
+
+Questa modifica riguarda soltanto la preparazione locale dell'immagine. Il file risultante attraversa gli stessi limiti, cifratura e repository già pubblicati; non introduce OCR, modifiche a Functions o Rules, migrazioni o accessi a dati reali.
+
 ## Selettore sorgente unico — pubblicato 1.2.175
 
 La scelta iniziale della sorgente è un componente condiviso da Documenti del Profilo, Account privati e Account aziendali. Le quattro azioni sono **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. Il componente decide soltanto la sorgente: ciascun contesto conserva il proprio repository e il proprio contratto di cifratura/persistenza. Tessera/Carta apre sempre il motore camera guidato ID-1 quando `getUserMedia` è disponibile; l'eventuale camera nativa è un fallback esplicito e, per limite della UI di sistema, non può mostrare il riquadro HTML dell'app.

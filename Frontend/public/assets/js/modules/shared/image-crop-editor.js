@@ -1,8 +1,17 @@
 const EDITABLE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_SIDE = 2048;
+const MAX_SIDE = 4096;
 const CARD_SIZE = {width: 1012, height: 638};
 const MIN_EDGE = 24;
 const CARD_RATIO = CARD_SIZE.width / CARD_SIZE.height;
+const STYLE_ID = 'image-crop-editor-styles';
+
+function ensureEditorStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const link = document.createElement('link');
+    link.id = STYLE_ID; link.rel = 'stylesheet';
+    link.href = new URL('../../../css/image-crop-editor.css', import.meta.url).href;
+    document.head.append(link);
+}
 
 function button(label, action, primary = false) {
     const node = document.createElement('button');
@@ -46,9 +55,12 @@ export function isValidQuadrilateral(points) {
 }
 
 export function outputSize(points, mode = 'free') {
-    if (mode === 'card') return {...CARD_SIZE};
     const width = Math.max(distance(points[0], points[1]), distance(points[3], points[2]));
     const height = Math.max(distance(points[0], points[3]), distance(points[1], points[2]));
+    if (mode === 'card') {
+        const longEdge = Math.min(MAX_SIDE, Math.max(width, height * CARD_RATIO));
+        return {width: Math.max(1, Math.round(longEdge)), height: Math.max(1, Math.round(longEdge / CARD_RATIO))};
+    }
     const scale = Math.min(1, MAX_SIDE / Math.max(width, height));
     return {width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale))};
 }
@@ -185,6 +197,7 @@ function perspectiveCanvas(source, points, mode) {
 export function canEditImage(file) {return file instanceof Blob && EDITABLE_TYPES.has(file.type);}
 
 export async function editImageBeforeUpload(file, {initialMode = 'free'} = {}) {
+    ensureEditorStyles();
     if (!canEditImage(file)) return file;
     const source = await loadImage(file);
     let working = scaledCanvas(source), selection, dragging = null, mode = 'free';
