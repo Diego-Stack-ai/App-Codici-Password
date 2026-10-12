@@ -2,6 +2,26 @@ const CARD_RATIO = 1012 / 638;
 const OVERSCAN = 1.08;
 const MIN_ZOOM = .93;
 const MAX_ZOOM = 1.15;
+const STYLESHEET_ID = 'card-camera-capture-stylesheet';
+
+function ensureCardCameraStyles() {
+    const existing = document.getElementById(STYLESHEET_ID);
+    if (existing) return existing.dataset.loaded === 'true'
+        ? Promise.resolve()
+        : new Promise((resolve, reject) => {
+            existing.addEventListener('load', resolve, {once: true});
+            existing.addEventListener('error', reject, {once: true});
+        });
+    return new Promise((resolve, reject) => {
+        const stylesheet = document.createElement('link');
+        stylesheet.id = STYLESHEET_ID;
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = new URL('../../../css/card-camera-capture.css', import.meta.url).href;
+        stylesheet.addEventListener('load', () => { stylesheet.dataset.loaded = 'true'; resolve(); }, {once: true});
+        stylesheet.addEventListener('error', reject, {once: true});
+        document.head.append(stylesheet);
+    });
+}
 
 export function clampCardAdjustment({zoom = 1, x = 0, y = 0}, sourceWidth, sourceHeight) {
     const numericZoom = Number(zoom);
@@ -26,6 +46,7 @@ function renderAdjusted(source, target, adjustment) {
 
 export async function captureCardPhoto() {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('CAMERA_NOT_SUPPORTED');
+    await ensureCardCameraStyles();
     const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: {ideal: 'environment'}}, audio: false});
     return new Promise(resolve => {
         const overlay = document.createElement('div'); overlay.className = 'card-camera-overlay';
