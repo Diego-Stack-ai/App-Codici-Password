@@ -72,7 +72,7 @@ export function initPrivateAttachmentModule(context) {
         closeSourceSelector(mount);
         try {
             const file = await captureCardPhoto();
-            if (file && mount.active()) await handleFileUpload({files: [file], value: ''}, mount, {initialMode: 'card'});
+            if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {initialMode: 'card'});
         } catch (error) {
             if (mount.active()) showToast(error.name === 'NotAllowedError' ? 'Permesso fotocamera non concesso.' : 'Fotocamera non disponibile.', 'error');
         }
@@ -101,7 +101,11 @@ export function closeSourceSelector(mount = mounted) {
     }, 300);
 }
 
-export async function handleFileUpload(input, mount = mounted, {initialMode = 'free'} = {}) {
+export async function handleFileUpload(input, mount = mounted, options = {}) {
+    return processFileUpload(input, mount, options);
+}
+
+async function processFileUpload(input, mount = mounted, {initialMode = 'free'} = {}) {
     if (!mount?.active() || mount.readOnly) return;
     const {ownerId, accountId} = mount;
     const confirmAction = mount.confirm;
