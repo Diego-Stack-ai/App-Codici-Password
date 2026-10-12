@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Release 1.2.169 in pubblicazione — conferma Tessera/Carta regolabile — 12/10/2026
+## Pubblicazione 1.2.169 conclusa — conferma Tessera/Carta regolabile — 12/10/2026
 
-Diego ha autorizzato implementazione e pubblicazione del secondo passaggio dedicato alla scansione Tessera/Carta. Dopo lo scatto non viene più aperto l'editor generale Foto libera/Carta: la stessa schermata mostra una conferma ID-1 con trascinamento, pinch e cursore, zoom limitato `0,93×–1,15×`, comandi **Ripeti foto** e **Usa foto**, quindi passa direttamente all'upload cifrato. Il ritaglio conserva un margine di acquisizione dell'8% e impedisce aree vuote. Nessuna modifica a cifratura, schema dati, Functions o Rules; pubblicazione prevista sul solo Hosting.
+PR #120 unita in `master` al commit `ad06df59` dopo gate GitHub verdi. Dopo lo scatto non viene più aperto l'editor generale Foto libera/Carta: la stessa schermata mostra una conferma ID-1 con trascinamento, pinch e cursore, zoom limitato `0,93×–1,15×`, comandi **Ripeti foto** e **Usa foto**, quindi passa direttamente all'upload cifrato. Il ritaglio conserva un margine di acquisizione dell'8% e impedisce aree vuote. Deploy del solo Hosting riuscito; home, dettagli Account e modulo camera verificati HTTP 200 con versione `1.2.169`. Nessuna modifica a cifratura, schema dati, Functions, Rules o dati reali.
 
 ## Pubblicazione 1.2.168 conclusa — acquisizione guidata Tessera/Carta — 12/10/2026
 
