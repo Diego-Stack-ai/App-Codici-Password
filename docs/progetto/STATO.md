@@ -1,8 +1,8 @@
 # Stato
 
-## Candidata 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
+## Produzione 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
 
-Un solo componente sorgente è collegato ai Documenti del Profilo e ai dettagli Account privati e aziendali. Presentazione e azioni non divergono più: **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scansione usa lo stesso motore guidato ID-1 già pubblicato; upload, cifratura, limiti e persistenza restano quelli specifici della scheda origine. La candidata richiede soltanto Hosting e non modifica Functions, Rules o dati.
+Un solo componente sorgente è collegato ai Documenti del Profilo e ai dettagli Account privati e aziendali. Presentazione e azioni non divergono più: **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scansione usa lo stesso motore guidato ID-1 già pubblicato; upload, cifratura, limiti e persistenza restano quelli specifici della scheda origine. PR #130 unita in `master` (`83f70213`); validazione di produzione verde in 5m24s e deploy Hosting in 30s. Verifica remota HTTP 200 su home, modulo e stile con versione `1.2.175`. Functions, Rules e dati non sono stati modificati.
 
 ## Produzione 1.2.174 — allegati unificati e Scadenze collegate — 12/10/2026
 

@@ -1,10 +1,10 @@
 # Incarico corrente
 
-## Candidata 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
+## Pubblicazione 1.2.175 conclusa — selettore allegati realmente condiviso — 12/10/2026
 
 Diego autorizza implementazione e pubblicazione del selettore sorgente unico. Documenti del Profilo, Account privati e Account aziendali richiamano ora lo stesso componente **Seleziona sorgente**, con **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scelta Tessera/Carta continua nel motore camera guidato con riquadro ID-1 e conferma regolabile; il fallback alla camera nativa resta disponibile quando `getUserMedia` non può avviarsi, ma in quel fallback il browser non può sovrapporre la guida.
 
-Perimetro autorizzato: commit, push, merge e deploy del solo Hosting della release `1.2.175`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi perché il contratto di persistenza non cambia.
+PR #130 unita in `master` (`83f70213`) dopo gate GitHub verdi; workflow di produzione `38285339424` verde e deploy del solo Hosting riuscito. Home, modulo condiviso e stile rispondono HTTP 200; la home contiene `1.2.175`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati.
 
 ## Pubblicazione 1.2.174 conclusa — allegati unificati e Scadenze collegate — 12/10/2026
 

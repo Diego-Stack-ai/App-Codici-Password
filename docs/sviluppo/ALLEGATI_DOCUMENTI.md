@@ -1,6 +1,6 @@
 # Allegati documenti
 
-## Selettore sorgente unico — candidata 1.2.175
+## Selettore sorgente unico — pubblicato 1.2.175
 
 La scelta iniziale della sorgente è un componente condiviso da Documenti del Profilo, Account privati e Account aziendali. Le quattro azioni sono **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. Il componente decide soltanto la sorgente: ciascun contesto conserva il proprio repository e il proprio contratto di cifratura/persistenza. Tessera/Carta apre sempre il motore camera guidato ID-1 quando `getUserMedia` è disponibile; l'eventuale camera nativa è un fallback esplicito e, per limite della UI di sistema, non può mostrare il riquadro HTML dell'app.
 
