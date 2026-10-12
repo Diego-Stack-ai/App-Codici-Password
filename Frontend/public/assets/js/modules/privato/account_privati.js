@@ -4,9 +4,9 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.162';
+import { db, functions } from '../../firebase-config.js?v=1.2.163';
 import { LOG } from '../../logger.js';
-import { updateDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, doc, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -217,6 +217,7 @@ export function mountAccountPrivati(user, options = {}) {
                             nomeAccount: inv.accountName || '',
                             isOwner: false,
                             ownerId: senderId,
+                            _inviteId: inviteId,
                             _isGuest: true,
                             _suspended: true,
                             _aziendaId: inv.aziendaId || '',
@@ -235,7 +236,7 @@ export function mountAccountPrivati(user, options = {}) {
 
                     if (sharedAccount) {
                         LOG('[ACCOUNTS] Shared account loaded');
-                        return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
+                        return { ...sharedAccount, isOwner: false, ownerId: senderId, _inviteId: inviteId, _isGuest: true, _aziendaId: inv.aziendaId };
                     } else {
                         console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
                     }
@@ -427,8 +428,31 @@ export function mountAccountPrivati(user, options = {}) {
     async function handleDelete(item) {
         if (signal.aborted || options.readOnly) return;
         const id = item.dataset.id;
-        if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
-        const account = allAccounts.find(candidate => candidate.id === id);
+        const owner = item.dataset.owner === 'true';
+        const account = allAccounts.find(candidate => candidate.id === id && Boolean(candidate.isOwner) === owner);
+        if (!owner) {
+            if (!account?._inviteId || account._suspended) {
+                showToast(t('shared_leave_unavailable'), "error");
+                filterAndRender();
+                return;
+            }
+            const confirmed = await showConfirmModal(t('shared_leave_title'), t('shared_leave_message'));
+            if (signal.aborted) return;
+            if (!confirmed) { filterAndRender(); return; }
+            try {
+                const respondToInvitation = httpsCallable(functions, 'respondToInvitation');
+                await respondToInvitation({inviteId: account._inviteId, status: 'rejected'});
+                if (signal.aborted) return;
+                showToast(t('shared_leave_success'), 'success');
+                allAccounts = allAccounts.filter(candidate => candidate !== account);
+                filterAndRender();
+            } catch (error) {
+                if (signal.aborted) return;
+                logError('LeaveSharedAccount', error);
+                showToast(readErrorMessage(error, t('shared_leave_error')), 'error');
+            }
+            return;
+        }
         // M7-R7B4: avviso informativo sui destinatari che perderanno l'accesso.
         const confirmed = await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(account, t));
         if (signal.aborted) return;

@@ -1,5 +1,9 @@
 # Rilascio
 
+## Candidata 1.2.163 — 12/10/2026
+
+Quattro correzioni Account sono pronte per il rilascio: conteggio confermato dopo rinomina, uscita del destinatario da un Account condiviso, azzeramento effettivo delle statistiche e conversione reversibile fra Account/memorandum privati o condivisi con revoca esplicita dei destinatari precedenti. Gate locali: sintassi **183 moduli**, navigazione **156/156**, condivisione **43/43**, Functions/security **454 pass, 9 skip, 0 fail**. Componenti previsti: Hosting e `respondToInvitation`; nessuna modifica a Rules o dati.
+
 ## Esito operativo 1.2.154 — 10/10/2026
 
 PR #97 unita in `master` (`eb1380c0`). Pipeline completa verde sulla PR e nuovamente su `master`. Deploy riuscito sul progetto originale per Hosting, Firestore Rules, Storage Rules e le quattro callable necessarie ai profili Widget e agli allegati dei documenti personali. Verifica HTTP post-rilascio positiva con asset `1.2.154`.

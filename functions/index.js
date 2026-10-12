@@ -1218,7 +1218,11 @@ exports.respondToInvitation = onCall(
             const inviteSnap = await transaction.get(inviteRef);
             if (!inviteSnap.exists) throw new HttpsError("not-found", "Invito non trovato.");
             const invite = inviteSnap.data();
-            if (invite.status !== "pending") throw new HttpsError("failed-precondition", "Invito già elaborato.");
+            const leavingAcceptedShare = status === "rejected" && invite.status === "accepted"
+                && invite.guestUid === uid;
+            if (invite.status !== "pending" && !leavingAcceptedShare) {
+                throw new HttpsError("failed-precondition", "Invito già elaborato.");
+            }
             if (String(invite.recipientEmail || "").toLowerCase().trim() !== email) {
                 throw new HttpsError("permission-denied", "Non sei il destinatario dell'invito.");
             }

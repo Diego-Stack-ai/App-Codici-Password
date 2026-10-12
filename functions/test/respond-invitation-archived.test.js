@@ -206,6 +206,27 @@ test('invito su Account attivo: comportamento invariato per accettazione e rifiu
     assert.equal(rejected.documents.get(INVITE_PATH).guestUid, null);
 });
 
+test('un destinatario puo abbandonare una condivisione gia accettata', async () => {
+    const f = fixture();
+    f.documents.set(INVITE_PATH, {
+        ...f.documents.get(INVITE_PATH),
+        status: 'accepted',
+        guestUid: UID
+    });
+    f.documents.set(ACCOUNT_PATH, {
+        ...f.documents.get(ACCOUNT_PATH),
+        visibility: 'shared',
+        acceptedCount: 1,
+        sharedWithUids: [UID],
+        sharedWith: {[KEY]: {email: EMAIL, status: 'accepted', uid: UID}}
+    });
+    assert.deepEqual({...await f.respond('rejected')}, {ok: true, status: 'rejected'});
+    assert.deepEqual([...f.documents.get(ACCOUNT_PATH).sharedWithUids], []);
+    assert.equal(f.documents.get(ACCOUNT_PATH).visibility, 'private');
+    assert.equal(f.documents.get(INVITE_PATH).status, 'rejected');
+    assert.equal(f.documents.get(INVITE_PATH).guestUid, null);
+});
+
 test('archiviazione concorrente fra lettura e commit: la transazione ritenta e non scrive', async () => {
     // L'archiviazione avviene subito dopo la lettura dell'Account da parte del
     // gestore: il commit rileva la versione cambiata e ritenta, come Firestore.

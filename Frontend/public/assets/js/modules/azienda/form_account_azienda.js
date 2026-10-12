@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.162';
+import { db } from '../../firebase-config.js?v=1.2.163';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.162';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.163';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 async function saveAccount(...args) {
@@ -43,9 +43,9 @@ async function deleteAccount(...args) {
 import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
-import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.162';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.162';
+import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, validateAccountMode } from '../shared/account-mode-model.js';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.163';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.163';
 import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
@@ -75,6 +75,8 @@ let markerConfirmed = false;
 // Campi di condivisione osservati all'apertura: servono solo a comporre
 // l'avviso dei destinatari prima di archiviare. Non contengono credenziali.
 let observedSharing = null;
+let loadedAccountMode = 'account-private';
+let resetExistingSharing = false;
 // Epoch del montaggio: ogni `initFormAccountAzienda` ne apre uno nuovo. Un
 // caricamento che termina dopo l'avvio di un altro montaggio appartiene a
 // un'epoch superata e va scartato: senza questo controllo il completamento
@@ -115,6 +117,8 @@ export async function initFormAccountAzienda(user) {
     observedRevision = undefined;
     markerConfirmed = false;
     observedSharing = null;
+    loadedAccountMode = 'account-private';
+    resetExistingSharing = false;
     try {
         const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
         if (draft?.profileContactId === urlParams.get('profileContactId') && draft.ownerUid === user.uid &&
@@ -131,8 +135,8 @@ export async function initFormAccountAzienda(user) {
         pagehideContext?.invalidate();
     }, {once:true});
     document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
+    ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.remove('hidden'));
     if (isEditing) {
-        ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.add('hidden'));
         document.getElementById('shared-management')?.classList.add('hidden');
     }
     document.querySelectorAll('.manage-recipients-link').forEach(link => {
@@ -266,7 +270,7 @@ function initBaseUI() {
                 await saveAccount({
                     bankAccounts, invitedEmails, invitePreferences: serializeRecipientPreferences(recipientPreferences, invitedEmails), isExplicitMemo, currentUid: saveUid,
                     currentDocId: saveDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt,
-                    loadContext: saveContext
+                    loadContext: saveContext, resetExistingSharing
                 });
             }
         }, [
@@ -413,6 +417,7 @@ async function loadData() {
 
         // Flags & Sharing UI (V5.1 Master - Strict Mode)
         const loadedMode = accountModeFromRecord(data);
+        loadedAccountMode = loadedMode;
         const isMemo = loadedMode.startsWith('memo-');
         const isShared = loadedMode.endsWith('-shared');
         const isMemoShared = loadedMode === 'memo-shared';
@@ -475,7 +480,7 @@ function setupUI() {
     // Flag Rules (Mutual Exclusion)
     const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'].map(id => document.getElementById(id)).filter(Boolean);
     flags.forEach(f => {
-        f.onchange = () => {
+        f.onchange = async () => {
             const namePopulated = !!get('account-name');
             const credentialValues = { username: get('account-username'), account: get('account-code'), password: get('account-password') };
             if (f.checked) {
@@ -490,22 +495,55 @@ function setupUI() {
                     memoShared: f.id === 'flag-memo-shared'
                 });
                 const validation = validateAccountMode(candidateMode, credentialValues);
-                if (validation.reason === 'account-without-credentials') {
-                    f.checked = false;
-                    showToast("Per un Account devi compilare almeno uno tra Username, Codice o Password.", "warning");
-                    return;
-                }
                 if (validation.reason === 'memo-has-credentials') {
                     f.checked = false;
                     const msg = f.id === 'flag-memo-shared' ? "Per il Memorandum Condiviso NON devono essere compilati Username, Codice o Password." : "Per usare Memorandum devi svuotare Username, Codice e Password.";
                     showToast(msg, "warning");
                     return;
                 }
+                if (!resetExistingSharing && sharedModeTransitionRevokesRecipients(loadedAccountMode, candidateMode)) {
+                    const confirmed = await showConfirmModal(
+                        'CAMBIO TIPO DI ACCOUNT',
+                        'Stai trasformando un Account o Memorandum condiviso. Il salvataggio revocherà i permessi di tutti i destinatari attuali. Se scegli ancora una modalità condivisa, dovrai selezionare nuovamente i destinatari.',
+                        'Continua', 'Annulla'
+                    );
+                    if (!confirmed) {
+                        f.checked = false;
+                        const originalFlag = loadedAccountMode === 'account-shared' ? 'flag-shared'
+                            : loadedAccountMode === 'memo-shared' ? 'flag-memo-shared'
+                            : loadedAccountMode === 'memo-private' ? 'flag-memo' : '';
+                        if (originalFlag) document.getElementById(originalFlag).checked = true;
+                        return;
+                    }
+                    resetExistingSharing = true;
+                    invitedEmails = [];
+                    recipientPreferences.clear();
+                    renderGuestsList();
+                }
                 if (f.id === 'flag-memo') isExplicitMemo = true;
                 if (f.id === 'flag-shared') isExplicitMemo = false;
                 // Se è flag-memo-shared (Verde), NON tocchiamo isExplicitMemo per preservare la natura originale
 
                 flags.forEach(other => { if (other !== f) other.checked = false; });
+            }
+            if (!f.checked && !resetExistingSharing) {
+                const candidateMode = accountModeFromFlags({
+                    shared: document.getElementById('flag-shared').checked,
+                    memo: document.getElementById('flag-memo').checked,
+                    memoShared: document.getElementById('flag-memo-shared').checked
+                });
+                if (sharedModeTransitionRevokesRecipients(loadedAccountMode, candidateMode)) {
+                    const confirmed = await showConfirmModal(
+                        'RIMOZIONE CONDIVISIONE',
+                        'Il salvataggio renderà questo elemento privato e revocherà i permessi di tutti i destinatari attuali.',
+                        'Continua', 'Annulla'
+                    );
+                    if (!confirmed) { f.checked = true; return; }
+                    resetExistingSharing = true;
+                    invitedEmails = [];
+                    recipientPreferences.clear();
+                    renderGuestsList();
+                }
             }
             const mgmt = document.getElementById('shared-management');
             const isSharing = document.getElementById('flag-shared').checked || document.getElementById('flag-memo-shared').checked;

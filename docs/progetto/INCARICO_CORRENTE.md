@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Pubblicazione 1.2.163 — 12/10/2026
+
+Obiettivo autorizzato: pubblicare insieme le quattro correzioni Account richieste da Diego. Perimetro: contatori e top Account privati, abbandono di una condivisione accettata, conversione fra le quattro modalità Account/memorandum nei form privati e aziendali, versione e documentazione canonica. Criteri di chiusura: test pertinenti verdi, commit e integrazione sul repository remoto, deploy Firebase Hosting e della sola callable `respondToInvitation`, verifica remota. Firestore Rules, Storage Rules e dati reali sono fuori perimetro.
+
 ## AUDIT-SKILL-01 — incarico documentale aperto 11/10/2026
 
 Perimetro autorizzato: integrare nei Markdown esistenti il progetto di audit mediante skill per sicurezza, threat modeling, QA browser, controllo visivo, accessibilità e prestazioni. Questo passo non autorizza installazione o esecuzione delle skill, modifica del runtime, uso di account reali, scansioni produttive, correzioni automatiche, commit, push, merge o deploy.

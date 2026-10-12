@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.163 — Account, condivisioni e statistiche — 12/10/2026
+
+La candidata comprende quattro correzioni: conteggio degli Account privati riallineato dopo la modifica del titolo; uscita autonoma del destinatario da una condivisione accettata; azzeramento delle statistiche con rilettura confermata e rimozione delle righe a zero; conversione sempre disponibile fra Account, Account condiviso, memorandum e memorandum condiviso nei form privati e aziendali. I memorandum vietano Utente, Account/Codice e Password; gli Account possono invece avere tali campi senza renderli obbligatori. Il cambio di tipo da una modalità condivisa avvisa l'utente, revoca i destinatari precedenti e apre un nuovo ciclo di condivisione quando necessario.
+
+Verifica locale: sintassi JavaScript **183 moduli**; navigazione **156/156**; condivisione **43/43**; Functions/security **454 pass, 9 skip dichiarati, 0 fail**. La pubblicazione richiede Hosting e la sola callable `respondToInvitation`; Rules e dati non cambiano.
+
 ## Nuovo progetto pianificato — Portabilità, Assistente e Lingue — 11/10/2026
 
 Diego ha definito i tre filoni futuri: **Archivio portabile completo**, **Assistente specifico dell'app** e **Multilingua finale**. Il vecchio nome «Excel» è superato come obiettivo: ODS/CSV/XLSX sono possibili proiezioni, mentre il risultato richiesto comprende tutti i dati, gli allegati e una consultazione locale navigabile distinta dal backup. L'Assistente mantiene una base completa senza AI e prevede soltanto come opzione un piccolo modello locale attivato consapevolmente dopo verifica del dispositivo. Le lingue arrivano per ultime, ma i nuovi contratti usano fin da subito azioni indipendenti dalla lingua e chiavi i18n.
