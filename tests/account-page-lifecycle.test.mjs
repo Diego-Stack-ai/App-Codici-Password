@@ -27,7 +27,7 @@ async function fixture(company, overrides = {}) {
         node.setAttribute = (name, value) => { node.attributes[name] = String(value); };
         return [id, node];
     }));
-    const views = [], writes = [], toasts = [], navigations = [], confirmations = [];
+    const views = [], writes = [], callables = [], toasts = [], navigations = [], confirmations = [];
     const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
     const context = vm.createContext({readErrorMessage, archiveRecipients, archiveConfirmMessage,
         accountSortMode, compareAccounts, nextAccountSortMode,
@@ -43,7 +43,8 @@ async function fixture(company, overrides = {}) {
         // M7-R6: le liste non scrivono più direttamente, delegano al servizio di
         // Archivio. Qui se ne riproduce il contratto osservabile: percorso per
         // contesto, metadati canonici e fallimento chiuso senza marker osservato.
-        auth: {currentUser: {uid: user.uid}},
+        auth: {currentUser: {uid: user.uid}}, functions: {},
+        httpsCallable: (_functions, name) => async payload => { callables.push({name, payload}); return {data: {ok: true}}; },
         archiveAccount: async (uid, account) => {
             if (account.revision === undefined && !account.updatedAt) {
                 throw Object.assign(new Error('ARCHIVE_MARKER_MISSING'), {code: 'ARCHIVE_MARKER_MISSING'});
@@ -70,7 +71,7 @@ async function fixture(company, overrides = {}) {
     vm.runInContext(source.replace(/^import[\s\S]*?;\r?$/gm, '').replace(/^export /gm, ''), context);
     const mountName = company ? 'mountAccountAziendaList' : 'mountAccountPrivati';
     const initName = company ? 'initAccountAziendaList' : 'initAccountPrivati';
-    return {elements, views, writes, toasts, navigations, confirmations,
+    return {elements, views, writes, callables, toasts, navigations, confirmations,
         mount: options => context[mountName](user, {navigate: url => navigations.push(url), ...options}),
         init: () => context[initName](user),
     };
@@ -285,6 +286,31 @@ test('private: un invito sospeso produce una card senza leggere l\'Account', asy
     assert.equal(rows[0].username, undefined, 'nessun contenuto dell\'Account');
     assert.equal(rows[0].password, undefined);
     assert.deepEqual(reads, [], 'nessuna lettura dell\'Account negato dalle Rules');
+    mounted.destroy();
+});
+
+test('private: un memorandum condiviso si può abbandonare senza una lettura Account negabile', async () => {
+    const invite = guestInvite({type: 'memorandum'});
+    const reads = [];
+    const f = await fixture(false, {
+        accountModeFromRecord: row => row.type === 'memorandum' && row.visibility === 'shared'
+            ? 'memo-shared' : 'account-private',
+        listAcceptedInvites: async () => [invite],
+        getRecordByPath: async path => {
+            reads.push(path);
+            throw Object.assign(new Error('Missing or insufficient permissions.'), {code: 'permission-denied'});
+        }
+    });
+    const mounted = f.mount({search: '?type=shared_memo'}); await mounted.ready;
+    const row = f.views[0].renders.at(-1).find(record => record._isGuest === true);
+    assert.ok(row, 'il memorandum resta nella lista Note condivise');
+    assert.deepEqual(reads, [], 'nessun batchGet del documento protetto del proprietario');
+    await f.views[0].options.onDelete({dataset: {id: row.id, owner: 'false'}});
+    assert.equal(f.callables.length, 1);
+    assert.equal(f.callables[0].name, 'respondToInvitation');
+    assert.equal(f.callables[0].payload.inviteId, invite.id);
+    assert.equal(f.callables[0].payload.status, 'rejected');
+    assert.equal(f.views[0].renders.at(-1).some(record => record._isGuest === true), false);
     mounted.destroy();
 });
 
