@@ -21,7 +21,7 @@ export function createRestoreStageSource({uid, submit, upload, isActive, signal}
     check(); if (busy) throw Error('STAGE_SOURCE_BUSY');
     if (!/^[A-Za-z0-9._:-]{1,160}$/.test(operationId || '') || typeof storagePath !== 'string' ||
         !storagePath.startsWith(`users/${uid}/`) || storagePath.includes('..') ||
-        !(bytes instanceof Uint8Array) || !bytes.length || bytes.length > 25 * 1024 * 1024 + 1024) throw Error('STAGE_SOURCE_INPUT');
+        !(bytes instanceof Uint8Array) || !bytes.length || bytes.length > 32 * 1024 * 1024 + 1024) throw Error('STAGE_SOURCE_INPUT');
     const copy = new Uint8Array(bytes); ownedCopy = copy; busy = true;
     try {
       const sha256 = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', copy)), byte => byte.toString(16).padStart(2, '0')).join('');

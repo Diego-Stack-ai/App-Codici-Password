@@ -262,9 +262,9 @@ assert.match(storageRules, /function isGlobalPurgeUnlocked\(userId\)[\s\S]*?arch
 assert.match(storageRules, /match \/users\/\{userId\}\/\{namespace\}\/\{allPaths=\*\*\} \{[\s\S]*?allow read: if isOwner\(userId\) && namespace != 'restoreObjects' && namespace != 'profile-documents';[\s\S]*?allow delete: if isOwner\(userId\) && isGlobalPurgeUnlocked\(userId\)[\s\S]*?allow create, update: if isOwner\(userId\) && isGlobalPurgeUnlocked\(userId\)[\s\S]*?isAllowedUpload\(\);[\s\S]*?\}/, 'Storage deve confinare gli oggetti nello spazio UID, preservare i namespace server-only e bloccare le mutazioni durante il purge');
 assert.match(storageRules, /match \/users\/\{userId\}\/restoreObjects\/\{objectId\} \{\s*allow read: if isOwner\(userId\);\s*allow write: if false;\s*\}/, 'Gli oggetti di ripristino devono restare non modificabili dal client');
 assert.match(storageRules, /request\.auth\.uid == userId/, 'Storage non verifica la proprietà tramite UID');
-assert.match(storageRules, /request\.resource\.size <= 25 \* 1024 \* 1024/, 'Storage non impone il limite di 25 MB');
+assert.match(storageRules, /request\.resource\.size <= 32 \* 1024 \* 1024/, 'Storage non impone il limite di 32 MB');
 assert.match(storageRules, /request\.resource\.contentType\.matches/, 'Storage non applica una allowlist dei MIME type');
-assert.match(attachmentSecurity, /MAX_ATTACHMENT_BYTES = 25 \* 1024 \* 1024/, 'Il client non applica lo stesso limite Storage');
+assert.match(attachmentSecurity, /MAX_ATTACHMENT_BYTES = 32 \* 1024 \* 1024/, 'Il client non applica lo stesso limite Storage');
 assert.match(attachmentSecurity, /\['https:', 'http:'\]/, 'Gli URL esterni non usano una allowlist di protocolli');
 assert.match(attachmentSecurity, /noopener,noreferrer/, 'Le nuove schede possono controllare la pagina di origine');
 assert.match(attachmentSecurity, /export async function encryptAttachmentFile/, 'Gli allegati nuovi non dispongono di cifratura client');
@@ -272,7 +272,7 @@ assert.match(attachmentSecurity, /additionalData: ATTACHMENT_AAD/, 'La cifratura
 assert.match(attachmentSecurity, /crypto\.getRandomValues\(new Uint8Array\(32\)\)/, 'La chiave casuale per-file degli allegati non è presente');
 assert.match(attachmentSecurity, /HKDF[\s\S]*?SHA-256/, 'La chiave per-file non è protetta con derivazione HKDF');
 assert.match(companyEmbeddedAttachments, /if \(!attachment\.storagePath\) throw new Error/, 'Gli allegati azienda cifrati non verificano il percorso Storage');
-assert.match(companyEmbeddedAttachments, /getBytes\(ref\(storage, attachment\.storagePath\), 25 \* 1024 \* 1024 \+ 1024\)/, 'L’apertura allegati azienda non applica il limite di lettura');
+assert.match(companyEmbeddedAttachments, /getBytes\(ref\(storage, attachment\.storagePath\), 32 \* 1024 \* 1024 \+ 1024\)/, 'L’apertura allegati azienda non applica il limite di lettura');
 assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il formato cifrato degli allegati');
 assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora HTML dinamico');
 assert.doesNotMatch(privateAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il salvataggio privato registra il payload del Vault');

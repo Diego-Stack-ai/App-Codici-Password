@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.165';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.166';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -500,7 +500,7 @@ async function openDeadlineAttachment(attachment, active) {
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
         if (!active()) return;
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!active()) return;
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         if (!active()) return;

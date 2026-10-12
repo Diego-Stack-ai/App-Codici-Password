@@ -176,7 +176,7 @@ export async function readResumeBackup(file, recoveryKey, uid, check, allowAttac
         throw Error('RESUME_ATTACHMENT_INVALID');
       const bytes = Uint8Array.from(atob(content), character => character.charCodeAt(0));
       attachments.push({storagePath, bytes});
-      if (!bytes.length || bytes.length > 25 * 1024 * 1024 + 1024) throw Error('RESUME_ATTACHMENT_INVALID');
+      if (!bytes.length || bytes.length > 32 * 1024 * 1024 + 1024) throw Error('RESUME_ATTACHMENT_INVALID');
     } else {
       const supportedSetting=opened.entry.scope==='settings'&&['profileLabels','deadlineConfig','deadlineConfigDocuments','generalConfig'].includes(opened.entry.id);
       if (opened.entry.kind !== 'record' || (!supportedSetting&&!['profile', 'company', 'contact', 'deadline', 'private-account', 'company-account', 'private-account-attachment', 'company-account-attachment', 'private-account-widget', 'company-account-widget'].includes(opened.entry.scope)))

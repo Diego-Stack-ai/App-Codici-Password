@@ -92,8 +92,9 @@ for (const fault of [null, 'importKey:1', 'deriveKey:1', 'decrypt:1', 'importKey
 
 test('accetta file previsti e rifiuta dimensioni o MIME pericolosi', () => {
   assert.doesNotThrow(() => security.validateAttachmentFile(new File('doc.pdf', 'application/pdf', 1024)));
+  assert.doesNotThrow(() => security.validateAttachmentFile(new File('video.mp4', 'video/mp4', 32 * 1024 * 1024)));
   assert.throws(() => security.validateAttachmentFile(new File('attack.html', 'text/html', 1024)));
-  assert.throws(() => security.validateAttachmentFile(new File('large.pdf', 'application/pdf', 25 * 1024 * 1024 + 1)));
+  assert.throws(() => security.validateAttachmentFile(new File('large.pdf', 'application/pdf', 32 * 1024 * 1024 + 1)));
   assert.throws(() => security.validateAttachmentFile(new File('avatar.pdf', 'application/pdf', 1024), {imageOnly: true}));
 });
 

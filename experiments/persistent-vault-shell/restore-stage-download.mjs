@@ -27,7 +27,7 @@ export function createRestoreStageDownload({read, verifyIdToken, verifyAppCheck}
       bytes = result?.bytes;
       if (!(bytes instanceof Uint8Array)) {bytes = undefined; fail(500);}
       if (ended || res.destroyed) {cleanup(); return;}
-      if (bytes.length < 1 || bytes.length > 25 * 1024 * 1024 + 1024 || result.size !== bytes.length ||
+      if (bytes.length < 1 || bytes.length > 32 * 1024 * 1024 + 1024 || result.size !== bytes.length ||
           typeof result.generation !== 'string' || !/^[1-9][0-9]*$/.test(result.generation) ||
           typeof result.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(result.sha256)) fail(500);
       res.writeHead(200, {'content-type': 'application/octet-stream', 'cache-control': 'no-store',

@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.165';
+import { db, storage } from '../../firebase-config.js?v=1.2.166';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -247,7 +247,7 @@ async function loadVisibleImagePreview(attachment, preview, active = _active) {
     try {
         const vaultKey = await ensureVaultKeyMaterial();
         if (!active()) return;
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!active()) return;
         const clear = _readOnly
             ? await decryptReceivedCompanyAttachment({ownerUid: _ownerUid, companyId: _currentAziendaId,
@@ -285,7 +285,7 @@ async function openAttachment(attachment) {
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
         if (!active()) return;
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!active()) return;
         const clear = _readOnly
             ? await decryptReceivedCompanyAttachment({

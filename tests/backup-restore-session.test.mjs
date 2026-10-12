@@ -496,7 +496,7 @@ test('duplicate attachment paths or invalid contents fail the initial scan with 
 test('oversized base64 is rejected before decoding and upload count follows referenced manifest', async () => {
     const oversized = fixture(); let decoded = 0;
     oversized.context.atob = () => { decoded++; throw new Error('must not decode oversized content'); };
-    oversized.context.parseBackupLine = value => { const parsed = JSON.parse(value); if (parsed.kind === 'attachment') parsed.content = 'A'.repeat(Math.ceil((25 * 1024 * 1024 + 1024) / 3) * 4 + 4); return parsed; };
+    oversized.context.parseBackupLine = value => { const parsed = JSON.parse(value); if (parsed.kind === 'attachment') parsed.content = 'A'.repeat(Math.ceil((32 * 1024 * 1024 + 1024) / 3) * 4 + 4); return parsed; };
     replaceBackupEntries(oversized, [{kind: 'record', scope: 'company', id: 'company', data: {storagePath: 'users/A/file'}}], [blob('users/A/file')]);
     await assert.rejects(oversized.prepare(), /BACKUP_ATTACHMENT_SIZE_INVALID/);
     assert.equal(decoded, 0); assert.equal(oversized.calls.length, 0);

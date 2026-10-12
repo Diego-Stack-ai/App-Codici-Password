@@ -294,7 +294,7 @@ test('T-29: il ramo cifrato è diverso — Vault Key, byte con tetto, decifratur
     assert.equal(f.state.keyRequests, 1, 'la Vault Key viene richiesta una volta');
     assert.equal(f.reads.length, 1, 'i byte vengono letti da Storage');
     assert.equal(f.reads[0].path, CIPHERTEXT_PATH);
-    assert.equal(f.reads[0].cap, 25 * 1024 * 1024 + 1024, 'la lettura porta il tetto di 25 MB');
+    assert.equal(f.reads[0].cap, 32 * 1024 * 1024 + 1024, 'la lettura porta il tetto di 32 MB');
     assert.equal(f.decrypts.length, 1, 'il payload viene decifrato');
     assert.equal(f.decrypts[0].vaultKey, VAULT_KEY, 'la decifratura usa la chiave del Vault');
     assert.equal(f.decrypts[0].size, sealed.ciphertext.length, 'la decifratura riceve il ciphertext letto');

@@ -8,7 +8,7 @@ export function createRestoreStageUploadClient({endpoint, origin, fetchImpl, get
   return async ({stageId, bytes}) => {
     check();
     if (!/^[a-f0-9]{64}$/.test(stageId || '') || !(bytes instanceof Uint8Array) || bytes.length < 1 ||
-        bytes.length > 25 * 1024 * 1024 + 1024) throw Error('STAGE_UPLOAD_INPUT');
+        bytes.length > 32 * 1024 * 1024 + 1024) throw Error('STAGE_UPLOAD_INPUT');
     // Caller retains ownership; clear only our detached transport copy.
     const body = new Uint8Array(bytes);
     const clearBody = () => body.fill(0);

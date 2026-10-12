@@ -1,4 +1,4 @@
-export const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+export const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024;
 export const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 const ALLOWED_MIME_TYPES = new Set([
