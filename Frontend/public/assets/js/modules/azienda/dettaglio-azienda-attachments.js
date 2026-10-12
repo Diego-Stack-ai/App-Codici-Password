@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.174';
+import { db, storage } from '../../firebase-config.js?v=1.2.175';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -17,6 +17,7 @@ import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listCompanyAccountAttachments } from '../data/vault-repository.js';
 import {decryptReceivedCompanyAttachment, syncCompanyAttachmentAccess} from '../shared/shared-attachment-access.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
+import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/attachment-source-picker.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _ownerUid = null;
@@ -39,6 +40,7 @@ function clearPreviewUrls() {
  */
 export function initAttachmentModule({ ownerUid, currentUid, currentAziendaId, currentId, account,
     readOnly = false, isActive = () => true, signal, confirm: confirmAction = showConfirmModal }) {
+    closeAttachmentSourcePicker();
     clearPreviewUrls();
     _confirm = confirmAction;
     const version = ++_version;
@@ -51,19 +53,17 @@ export function initAttachmentModule({ ownerUid, currentUid, currentAziendaId, c
     _readOnly = readOnly;
 }
 
-export function openSourceSelector() {
+export async function openSourceSelector() {
     if (!_active() || _readOnly) return;
-    const modal = document.getElementById('source-selector-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        const active = _active;
-        setTimeout(() => { if (active()) modal.classList.add('active'); }, 10);
-        document.body.style.overflow = 'hidden';
-    }
+    const source = await selectAttachmentSource();
+    if (!_active() || !source) return;
+    if (source === 'card') return captureCardAttachment();
+    document.getElementById({camera:'input-camera',gallery:'input-gallery',document:'input-file'}[source])?.click();
 }
 
 export function closeSourceSelector() {
     const active = _active;
+    closeAttachmentSourcePicker();
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('active');

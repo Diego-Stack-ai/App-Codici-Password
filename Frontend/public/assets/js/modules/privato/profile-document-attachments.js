@@ -4,6 +4,7 @@ import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showToast, showConfirmModal} from '../../ui-core-v129.js';
 import {encryptAttachmentFile, decryptAttachmentBytes, openDecryptedAttachment, validateAttachmentFile} from '../shared/attachment-security.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
+import {selectAttachmentSource} from '../shared/attachment-source-picker.js';
 
 const MAX_BYTES = 32 * 1024 * 1024;
 const MAX_PER_DOCUMENT = 10;
@@ -132,20 +133,13 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     const cardFallbackInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});
     const galleryInput = createElement('input', {type: 'file', accept: 'image/*,video/*', multiple: true, className: 'hidden'});
     const documentInput = createElement('input', {type: 'file', accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt', multiple: true, className: 'hidden'});
-    const uploadButton = (icon, label) => createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: icon}),
-        createElement('span', {textContent: label})
+    const addButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
+        createElement('span', {className: 'material-symbols-outlined', textContent: 'attach_file'}),
+        createElement('span', {textContent: 'Aggiungi allegato'})
     ]);
-    const photoButton = uploadButton('photo_camera', 'Scatta foto');
-    const galleryButton = uploadButton('photo_library', 'Galleria');
-    const documentButton = uploadButton('description', 'Scegli documento');
-    const cardButton = uploadButton('crop_landscape', 'Scansiona tessera/carta');
-    const uploadButtons = [photoButton, galleryButton, documentButton, cardButton];
-    photoButton.onclick = () => photoInput.click();
-    galleryButton.onclick = () => galleryInput.click();
-    documentButton.onclick = () => documentInput.click();
+    const uploadButtons = [addButton];
     const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [
-        cardButton, photoButton, galleryButton, documentButton,
+        addButton,
         photoInput, cardFallbackInput, galleryInput, documentInput
     ]);
     setChildren(dialog, [header, actions, status, list]);
@@ -260,7 +254,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     cardFallbackInput.onchange = () => uploadFiles([...cardFallbackInput.files], {skipImageEditor: true});
     galleryInput.onchange = () => uploadFiles([...galleryInput.files]);
     documentInput.onchange = () => uploadFiles([...documentInput.files]);
-    cardButton.onclick = async () => {
+    const captureCard = async () => {
         if (busy || atLimit) return;
         try {
             const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
@@ -274,6 +268,15 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
                 cardFallbackInput.click();
             }
         }
+    };
+    addButton.onclick = async () => {
+        if (busy || atLimit) return;
+        const source = await selectAttachmentSource();
+        if (activeDialog !== overlay) return;
+        if (source === 'card') await captureCard();
+        else if (source === 'camera') photoInput.click();
+        else if (source === 'gallery') galleryInput.click();
+        else if (source === 'document') documentInput.click();
     };
     await load();
 }

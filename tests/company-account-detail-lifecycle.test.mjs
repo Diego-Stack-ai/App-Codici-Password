@@ -81,12 +81,12 @@ test('repeated mount replaces phone handler and abort during contacts blocks sha
 const moduleText=async path=>(await readFile(new URL('../Frontend/public/assets/js/modules/'+path,import.meta.url),'utf8')).replace(/^import[\s\S]*?;\s*$/gm,'').replace(/^export /gm,'');
 test('real attachment reader rejects late list and retained actions after parent context expires',async()=>{
  const text=await moduleText('azienda/dettaglio-azienda-attachments.js');const gate=deferred();let active=true,rendered=0;
- const realm=vm.createContext({showConfirmModal(){},document:{getElementById:()=>({})},listCompanyAccountAttachments:()=>gate.promise,setChildren:()=>rendered++,logError(){},showToast(){}});vm.runInContext(text,realm);
+ const realm=vm.createContext({showConfirmModal(){},closeAttachmentSourcePicker(){},document:{getElementById:()=>({})},listCompanyAccountAttachments:()=>gate.promise,setChildren:()=>rendered++,logError(){},showToast(){}});vm.runInContext(text,realm);
  realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'company',currentId:'one',isActive:()=>active});const reading=realm.loadAttachments();active=false;gate.resolve([{id:'old'}]);await reading;assert.equal(rendered,0);
 });
 test('company attachment rows retain the active lifecycle guard when opened',async()=>{
  const text=await moduleText('azienda/dettaglio-azienda-attachments.js');const opened=[];let active=true;
- const container={children:[]};const realm=vm.createContext({showConfirmModal(){},document:{getElementById:()=>container},
+ const container={children:[]};const realm=vm.createContext({showConfirmModal(){},closeAttachmentSourcePicker(){},document:{getElementById:()=>container},
   createElement:(tag,props={},children=[])=>({tag,...props,children}),clearElement:node=>{node.children=[]},
   setChildren:(node,children)=>{node.children=children},openExternalUrl:url=>{opened.push(url);return true}});
  vm.runInContext(`${text}\nglobalThis.renderAttachments = renderAttachments;`,realm);
@@ -109,10 +109,10 @@ test('banking renderer rejects retained copy callback after teardown and keeps l
  nodes.length=0;realm.createReadonlyField('legacy','fixture','bank');await nodes.find(n=>n.className?.includes('copy-btn')).onclick({stopPropagation(){}});assert.equal(copies,1);
 });
 
-test('closing old source selector cannot hide the next account selector from its timer',async()=>{
- const text=await moduleText('azienda/dettaglio-azienda-attachments.js');const timers=[],classes=new Set();const modal={classList:{remove:x=>classes.delete(x),add:x=>classes.add(x)}};
- const realm=vm.createContext({showConfirmModal(){},document:{getElementById:()=>modal,body:{style:{}}},setTimeout:fn=>timers.push(fn)});vm.runInContext(text,realm);
- realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'one',currentId:'a'});realm.closeSourceSelector();realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'two',currentId:'b'});realm.openSourceSelector();timers.forEach(fn=>fn());assert.equal(classes.has('hidden'),false);assert.equal(classes.has('active'),true);
+test('company account opens the shared source picker without activating the legacy modal',async()=>{
+ const text=await moduleText('azienda/dettaglio-azienda-attachments.js');let pickerCalls=0;const classes=new Set(['hidden']);const modal={classList:{remove:x=>classes.delete(x),add:x=>classes.add(x)}};
+ const realm=vm.createContext({showConfirmModal(){},closeAttachmentSourcePicker(){},selectAttachmentSource:async()=>{pickerCalls++;return null;},document:{getElementById:()=>modal,body:{style:{}}},setTimeout(){}});vm.runInContext(text,realm);
+ realm.initAttachmentModule({ownerUid:'A',currentAziendaId:'one',currentId:'a'});await realm.openSourceSelector();assert.equal(pickerCalls,1);assert.equal(classes.has('hidden'),true);assert.equal(classes.has('active'),false);
 });
 test('file picker node belongs to opening generation and late old change cannot upload into next account',async()=>{
  const f=fixture();let uploads=0;f.context.handleFileUpload=()=>uploads++;

@@ -1,5 +1,9 @@
 # Stato
 
+## Candidata 1.2.175 — selettore allegati realmente condiviso — 12/10/2026
+
+Un solo componente sorgente è collegato ai Documenti del Profilo e ai dettagli Account privati e aziendali. Presentazione e azioni non divergono più: **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento**. La scansione usa lo stesso motore guidato ID-1 già pubblicato; upload, cifratura, limiti e persistenza restano quelli specifici della scheda origine. La candidata richiede soltanto Hosting e non modifica Functions, Rules o dati.
+
 ## Produzione 1.2.174 — allegati unificati e Scadenze collegate — 12/10/2026
 
 Il gestore allegati dei Documenti del Profilo è allineato a quello degli Account con quattro ingressi distinti: scanner Tessera/Carta, fotocamera, galleria immagini/video e selettore documenti. Il limite client/backend è 32 MiB. I campi Data dei Widget Account possono preparare una Scadenza; gli allegati di Account e Documenti vengono referenziati dalla Scadenza senza duplicazione fisica e restano di proprietà della scheda origine. PR #128 unita in `master` (`7705aa04`); pipeline della PR e pipeline di produzione verdi. Hosting e la sola callable `uploadProfileDocumentAttachment` sono stati distribuiti; verifica remota HTTP 200 con versione `1.2.174`. Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati.

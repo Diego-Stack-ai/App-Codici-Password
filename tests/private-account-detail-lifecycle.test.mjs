@@ -138,6 +138,8 @@ function attachmentFixture() {
     nodes['source-selector-modal'] = node(); nodes['btn-cancel-source'] = node(); nodes['attachments-list'] = node();
     const context = vm.createContext({document: {body: {style: {}}, getElementById: id => nodes[id] || null}, navigator: {onLine: true},
         setTimeout: callback => { timers.set(++timerId, callback); return timerId; }, clearTimeout: id => timers.delete(id),
+        closeAttachmentSourcePicker() {},
+        selectAttachmentSource: async () => null,
         showConfirmModal: async () => true, showToast() {}, showAlertModal: async () => {}, logError() {}, t: () => '',
         storage: {}, db: {}, ref: (_storage, path) => path, doc: (_db, ...path) => path.join('/'), collection: (_db, ...path) => path.join('/'),
         deleteObject: async path => operations.push(['storage-delete', path]), deleteDoc: async path => operations.push(['document-delete', path]),
@@ -184,7 +186,7 @@ test('private upload stops after late encryption or upload and never writes meta
 
 test('private file inputs and selector timers belong to their original account', async () => {
     const f = attachmentFixture(); f.init(); const oldInput = f.nodes['input-file'], oldChange = oldInput.onchange;
-    f.context.openSourceSelector(); f.context.closeSourceSelector(); f.init('B');
+    await f.context.openSourceSelector(); f.context.closeSourceSelector(); f.init('B');
     assert.notEqual(f.nodes['input-file'], oldInput); assert.equal(oldInput.onchange, null); assert.equal(oldInput.value, '');
     await oldChange(); assert.equal(f.operations.length, 0); assert.equal(f.timers.size, 0);
     await f.nodes['input-file'].onchange();

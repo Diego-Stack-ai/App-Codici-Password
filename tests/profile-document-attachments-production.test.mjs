@@ -4,17 +4,25 @@ import {readFile} from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('Profilo Documenti espone allegati, fotocamera e selettore PDF', async () => {
-    const [cards, controller, page] = await Promise.all([
+test('Profilo Documenti usa il selettore sorgente condiviso con gli account', async () => {
+    const [cards, controller, picker, privateAccount, companyAccount, page] = await Promise.all([
         read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js'),
         read('Frontend/public/assets/js/modules/privato/profile-document-attachments.js'),
+        read('Frontend/public/assets/js/modules/shared/attachment-source-picker.js'),
+        read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js'),
+        read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js'),
         read('Frontend/public/profilo_privato.html')
     ]);
     assert.match(cards, /data-action[^\n]+document-attachments|action: 'document-attachments'/);
     assert.match(controller, /capture: 'environment'/);
-    assert.match(controller, /Scansiona tessera\/carta/);
-    assert.match(controller, /'Galleria'/);
-    assert.match(controller, /'Scegli documento'/);
+    assert.match(controller, /import \{selectAttachmentSource\} from '\.\.\/shared\/attachment-source-picker\.js'/);
+    assert.match(privateAccount, /import \{[^}]*selectAttachmentSource[^}]*\} from '\.\.\/shared\/attachment-source-picker\.js'/);
+    assert.match(companyAccount, /import \{[^}]*selectAttachmentSource[^}]*\} from '\.\.\/shared\/attachment-source-picker\.js'/);
+    assert.match(picker, /Seleziona sorgente/);
+    assert.match(picker, /Scansiona tessera\/carta/);
+    assert.match(picker, />Camera</);
+    assert.match(picker, />Galleria</);
+    assert.match(picker, />Documento</);
     assert.match(controller, /accept: 'image\/\*,video\/\*'/);
     assert.match(controller, /accept: '\.pdf,\.doc,\.docx,\.xls,\.xlsx,\.txt'/);
     assert.match(controller, /import\('\.\.\/shared\/card-camera-capture\.js'\)/);
