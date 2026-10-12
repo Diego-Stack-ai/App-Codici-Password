@@ -24,12 +24,17 @@ test('editor immagini offre quattro angoli liberi, prospettiva e formato tessera
     assert.doesNotMatch(source, /tesseract|ocr|card-parser/i);
 });
 
-test('acquisizione tessera usa fotocamera live, guida ID-1 e apre direttamente la modalità carta', async () => {
+test('acquisizione tessera usa guida ID-1 e conferma dedicata con pan e zoom limitato', async () => {
     const camera = await read('Frontend/public/assets/js/modules/shared/card-camera-capture.js');
     assert.match(camera, /getUserMedia/);
     assert.match(camera, /facingMode/);
     assert.match(camera, /CARD_RATIO = 1012 \/ 638/);
     assert.match(camera, /card-camera-frame/);
+    assert.match(camera, /MIN_ZOOM = \.93/);
+    assert.match(camera, /MAX_ZOOM = 1\.15/);
+    assert.match(camera, /pointermove/);
+    assert.match(camera, /Ripeti foto/);
+    assert.match(camera, /Usa foto/);
     for (const path of ['Frontend/public/dettaglio_account_privato.html', 'Frontend/public/dettaglio_account_azienda.html']) {
         const html = await read(path);
         assert.match(html, /id="btn-card-camera"/);
@@ -38,9 +43,21 @@ test('acquisizione tessera usa fotocamera live, guida ID-1 e apre direttamente l
     const privateModule = await read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js');
     const companyModule = await read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js');
     assert.match(privateModule, /captureCardPhoto/);
-    assert.match(privateModule, /initialMode: 'card'/);
+    assert.match(privateModule, /skipImageEditor: true/);
     assert.match(companyModule, /captureCardPhoto/);
-    assert.match(companyModule, /initialMode: 'card'/);
+    assert.match(companyModule, /skipImageEditor: true/);
+});
+
+test('regolazione tessera limita zoom e spostamento senza creare aree vuote', async () => {
+    const source = await read('Frontend/public/assets/js/modules/shared/card-camera-capture.js');
+    const pureSource = source.slice(0, source.indexOf('export async function captureCardPhoto'));
+    const module = await import(`data:text/javascript;base64,${Buffer.from(pureSource).toString('base64')}`);
+    const minimum = module.clampCardAdjustment({zoom: 0, x: -9999, y: 9999}, 1080, 681);
+    const maximum = module.clampCardAdjustment({zoom: 4, x: 9999, y: -9999}, 1080, 681);
+    assert.equal(minimum.zoom, .93);
+    assert.equal(maximum.zoom, 1.15);
+    assert.ok(Math.abs(minimum.x) <= (1080 - minimum.cropWidth) / 2);
+    assert.ok(Math.abs(maximum.y) <= (681 - maximum.cropHeight) / 2);
 });
 
 test('riquadro tessera preimpostato conserva il rapporto ID-1', async () => {

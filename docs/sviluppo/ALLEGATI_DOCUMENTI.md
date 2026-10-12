@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Conferma dedicata Tessera/Carta candidata — 1.2.169
+
+Lo scatto guidato non attraversa più l'editor immagini generale. Conserva un margine sorgente dell'8% e presenta nel riquadro ID-1 una sola conferma regolabile: trascinamento a un dito, pinch a due dita e cursore accessibile, con zoom limitato da `0,93×` a `1,15×`. Il movimento è vincolato ai pixel disponibili e non può creare aree vuote; **Ripeti foto** torna alla camera e **Usa foto** produce una sola JPEG `1012×638` destinata al normale upload cifrato. Galleria, Foto libera e Allega originale mantengono il percorso esistente.
+
 ## Acquisizione guidata Tessera/Carta pubblicata — 1.2.168
 
 Nei dettagli Account privato e azienda, **Scansiona tessera/carta** apre una fotocamera controllata dall'app con guida nel rapporto ID-1 `1012:638`. Lo scatto conserva l'area visibile dentro la guida e passa direttamente all'editor Carta; l'utente può ancora correggere liberamente i quattro angoli o allegare l'originale. Il caricamento del modulo camera avviene soltanto quando richiesto. Il rilevamento dei bordi resta locale, senza OCR, ed è un'assistenza: non sostituisce il controllo visivo dell'utente. Pubblicazione Hosting `1.2.168`; nessuna modifica a cifratura, schema dati, Functions o Rules.
