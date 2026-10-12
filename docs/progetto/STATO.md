@@ -1,8 +1,8 @@
 # Stato
 
-## Candidata 1.2.177 — Tessera/Carta ad alta risoluzione — 12/10/2026
+## Produzione 1.2.177 — Tessera/Carta ad alta risoluzione — 13/10/2026
 
-La regressione qualitativa è stata ricondotta al ricampionamento fisso `1012×638` introdotto dal percorso guidato. Nella candidata quella misura resta soltanto la guida ID-1 a schermo: **Usa foto** esporta il ritaglio dai pixel della sorgente, richiede alla camera fino a `4096×2160` come valore ideale e usa JPEG qualità `0,98`. L'editor Carta conserva analogamente la risoluzione del ritaglio fino a 4096 px sul lato lungo; **Allega originale** resta invariato e non ricomprime. Nessun cambiamento a cifratura, persistenza, Functions, Rules o dati; prima della pubblicazione restano i gate GitHub e la verifica remota.
+La regressione qualitativa è stata ricondotta al ricampionamento fisso `1012×638` introdotto dal percorso guidato. Quella misura resta ora soltanto la guida ID-1 a schermo: **Usa foto** esporta il ritaglio dai pixel della sorgente, richiede alla camera fino a `4096×2160` come valore ideale e usa JPEG qualità `0,98`. L'editor Carta conserva analogamente la risoluzione del ritaglio fino a 4096 px sul lato lungo; **Allega originale** resta invariato e non ricomprime. PR #134 unita in `master` (`260d03ba`); workflow `38315264096` verde e Hosting verificato HTTP `200` con versione e moduli aggiornati. Nessun cambiamento a cifratura, persistenza, Functions, Rules o dati.
 
 ## Produzione 1.2.176 — scansione Tessera/Carta coerente — 12/10/2026
 
