@@ -12,6 +12,10 @@ test('Profilo Documenti espone allegati, fotocamera e selettore PDF', async () =
     ]);
     assert.match(cards, /data-action[^\n]+document-attachments|action: 'document-attachments'/);
     assert.match(controller, /capture: 'environment'/);
+    assert.match(controller, /Scansiona tessera\/carta/);
+    assert.match(controller, /import\('\.\.\/shared\/card-camera-capture\.js'\)/);
+    assert.match(controller, /captureCardPhoto/);
+    assert.match(controller, /skipImageEditor: true/);
     assert.match(controller, /application\/pdf/);
     assert.match(controller, /uploadProfileDocumentAttachment/);
     assert.match(controller, /removeProfileDocumentAttachment/);

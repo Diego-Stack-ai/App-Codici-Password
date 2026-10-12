@@ -138,9 +138,13 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         createElement('span', {className: 'material-symbols-outlined', textContent: 'attach_file'}),
         createElement('span', {textContent: 'Scegli foto o PDF'})
     ]);
+    const cardButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
+        createElement('span', {className: 'material-symbols-outlined', textContent: 'crop_landscape'}),
+        createElement('span', {textContent: 'Scansiona tessera/carta'})
+    ]);
     photoButton.onclick = () => photoInput.click();
     fileButton.onclick = () => fileInput.click();
-    const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [photoButton, fileButton, photoInput, fileInput]);
+    const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [cardButton, photoButton, fileButton, photoInput, fileInput]);
     setChildren(dialog, [header, actions, status, list]);
     overlay.append(dialog);
     overlay.addEventListener('click', event => { if (event.target === overlay) closeActiveDialog(); });
@@ -153,6 +157,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         busy = value;
         photoButton.disabled = value || atLimit;
         fileButton.disabled = value || atLimit;
+        cardButton.disabled = value || atLimit;
         close.disabled = value;
     };
 
@@ -208,9 +213,10 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         atLimit = attachments.length >= MAX_PER_DOCUMENT;
         photoButton.disabled = busy || atLimit;
         fileButton.disabled = busy || atLimit;
+        cardButton.disabled = busy || atLimit;
     }
 
-    async function uploadFiles(files) {
+    async function uploadFiles(files, {skipImageEditor = false} = {}) {
         if (busy || !files.length) return;
         setBusy(true);
         try {
@@ -218,7 +224,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
                 let file = selectedFile;
                 validateAttachmentFile(file, {maxBytes: MAX_BYTES});
                 if (!(file.type.startsWith('image/') || file.type === 'application/pdf')) throw new Error('Sono ammesse solo immagini e PDF.');
-                if (file.type.startsWith('image/')) {
+                if (file.type.startsWith('image/') && !skipImageEditor) {
                     file = await editImageBeforeUpload(file);
                     if (!file) continue;
                     validateAttachmentFile(file, {maxBytes: MAX_BYTES});
@@ -252,6 +258,16 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     }
     photoInput.onchange = () => uploadFiles([...photoInput.files]);
     fileInput.onchange = () => uploadFiles([...fileInput.files]);
+    cardButton.onclick = async () => {
+        if (busy || atLimit) return;
+        try {
+            const {captureCardPhoto} = await import('../shared/card-camera-capture.js');
+            const file = await captureCardPhoto();
+            if (file && activeDialog === overlay) await uploadFiles([file], {skipImageEditor: true});
+        } catch (error) {
+            showToast(error.message === 'CAMERA_NOT_SUPPORTED' ? 'Fotocamera non disponibile su questo dispositivo.' : 'Impossibile avviare la scansione della tessera.', 'error');
+        }
+    };
     await load();
 }
 

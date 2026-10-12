@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Candidata 1.2.170 — scanner tessera nei Documenti del Profilo — 12/10/2026
+
+Lo stesso flusso **Scansiona tessera/carta** già disponibile negli allegati Account è collegato agli allegati di Profilo utente → Documenti. La guida ID-1, la conferma con trascinamento e zoom limitato e l'uscita JPEG `1012×638` precedono il normale upload cifrato del documento; Scatta foto, Galleria/PDF, limiti, cifratura, callable e schema dati restano invariati. La pubblicazione autorizzata riguarda solo Hosting; Functions, Rules e dati reali sono fuori perimetro.
+
 ## Pubblicazione 1.2.169 conclusa — conferma Tessera/Carta regolabile — 12/10/2026
 
 PR #120 unita in `master` al commit `ad06df59` dopo gate GitHub verdi. Dopo lo scatto non viene più aperto l'editor generale Foto libera/Carta: la stessa schermata mostra una conferma ID-1 con trascinamento, pinch e cursore, zoom limitato `0,93×–1,15×`, comandi **Ripeti foto** e **Usa foto**, quindi passa direttamente all'upload cifrato. Il ritaglio conserva un margine di acquisizione dell'8% e impedisce aree vuote. Deploy del solo Hosting riuscito; home, dettagli Account e modulo camera verificati HTTP 200 con versione `1.2.169`. Nessuna modifica a cifratura, schema dati, Functions, Rules o dati reali.
