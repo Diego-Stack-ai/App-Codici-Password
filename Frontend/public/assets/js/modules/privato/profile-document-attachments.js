@@ -129,6 +129,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     ]);
     const header = createElement('div', {className: 'card-header-row'}, [title, close]);
     const photoInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});
+    const cardFallbackInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});
     const fileInput = createElement('input', {type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf', multiple: true, className: 'hidden'});
     const photoButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
         createElement('span', {className: 'material-symbols-outlined', textContent: 'photo_camera'}),
@@ -144,7 +145,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     ]);
     photoButton.onclick = () => photoInput.click();
     fileButton.onclick = () => fileInput.click();
-    const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [cardButton, photoButton, fileButton, photoInput, fileInput]);
+    const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [cardButton, photoButton, fileButton, photoInput, cardFallbackInput, fileInput]);
     setChildren(dialog, [header, actions, status, list]);
     overlay.append(dialog);
     overlay.addEventListener('click', event => { if (event.target === overlay) closeActiveDialog(); });
@@ -252,11 +253,13 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
             showToast(error.message || 'Caricamento non riuscito.', 'error');
         } finally {
             photoInput.value = '';
+            cardFallbackInput.value = '';
             fileInput.value = '';
             setBusy(false);
         }
     }
     photoInput.onchange = () => uploadFiles([...photoInput.files]);
+    cardFallbackInput.onchange = () => uploadFiles([...cardFallbackInput.files], {skipImageEditor: true});
     fileInput.onchange = () => uploadFiles([...fileInput.files]);
     cardButton.onclick = async () => {
         if (busy || atLimit) return;
@@ -265,7 +268,12 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
             const file = await captureCardPhoto();
             if (file && activeDialog === overlay) await uploadFiles([file], {skipImageEditor: true});
         } catch (error) {
-            showToast(error.message === 'CAMERA_NOT_SUPPORTED' ? 'Fotocamera non disponibile su questo dispositivo.' : 'Impossibile avviare la scansione della tessera.', 'error');
+            const reason = error?.name === 'NotAllowedError'
+                ? 'Il browser non ha concesso l’accesso alla fotocamera integrata.'
+                : 'La fotocamera integrata non è disponibile in questa modalità.';
+            if (await showConfirmModal('Usa fotocamera nativa', `${reason} Vuoi scattare la tessera con la fotocamera del telefono?`)) {
+                cardFallbackInput.click();
+            }
         }
     };
     await load();

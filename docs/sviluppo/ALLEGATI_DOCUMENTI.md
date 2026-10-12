@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Fallback fotocamera nativa — candidata 1.2.172
+
+Se il browser rifiuta l'avvio della camera integrata, il flusso Tessera/Carta dei Documenti del Profilo spiega il motivo e chiede conferma per usare la fotocamera nativa del telefono. La scelta richiede un secondo gesto esplicito e il file ottenuto segue direttamente cifratura e upload esistenti, senza passare dall'editor Foto libera/Carta.
+
 ## Hotfix policy fotocamera — candidata 1.2.171
 
 L'uso di `getUserMedia` richiede che Firebase Hosting consenta esplicitamente la fotocamera alle pagine dell'app. La policy candidata è `camera=(self), microphone=(), geolocation=()`: la richiesta resta subordinata al consenso del browser e viene ammessa soltanto sulla stessa origine; microfono, geolocalizzazione e delega a origini esterne restano bloccati.
