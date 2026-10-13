@@ -24,6 +24,8 @@ const privateModule = strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js', import.meta.url), 'utf8'));
 const companyModule = strip(await readFile(
     new URL('../Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js', import.meta.url), 'utf8'));
+const companyDetailCss = await readFile(
+    new URL('../Frontend/public/assets/css/dettaglio_account_azienda.css', import.meta.url), 'utf8');
 
 const OWNER = 'owner';
 const textsOf = node => {
@@ -107,6 +109,11 @@ const companySetup = () => ({
     ]
 });
 const cases = [['privato', privateSetup], ['aziendale', companySetup]];
+
+test('il dettaglio aziendale non nasconde globalmente la conferma del cestino', () => {
+    assert.doesNotMatch(companyDetailCss, /\.modal-overlay\s*\{[^}]*visibility\s*:\s*hidden/,
+        'gli stili della pagina non devono rendere invisibile protocol-confirm-modal');
+});
 
 test('T-15: il percorso positivo rimuove l\'oggetto Storage e il metadato, senza residui', async () => {
     for (const [kind, setup] of cases) {

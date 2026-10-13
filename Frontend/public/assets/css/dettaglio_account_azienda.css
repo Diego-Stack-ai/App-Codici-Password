@@ -96,22 +96,6 @@
     gap: 1rem;
 }
 
-/* --- 5. ATTACHMENTS (V5.0 Premium) --- */
-/* --- 5. SOURCE SELECTOR MODAL (V5.0 Standard) --- */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgb(var(--accent-rgb) / );
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-    transition: all 0.3s ease;
-    visibility: hidden;
-}
-
 .info-text {
     font-size: 13px;
     font-weight: var(--font-weight-medium);

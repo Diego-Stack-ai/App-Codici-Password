@@ -2,6 +2,10 @@
 
 <a id="stato-corrente"></a>
 
+## Candidata 1.2.180 — conferma cestino allegati Account aziendale — 13/10/2026
+
+Il cestino degli allegati nell'Account aziendale creava correttamente la conferma, ma una regola CSS legacy globale della pagina imponeva `visibility: hidden` a ogni `.modal-overlay`: il dialogo restava invisibile e l'eliminazione in attesa. La regola, residuo del vecchio selettore sorgente già sostituito dal componente condiviso, è stata rimossa. Il percorso di eliminazione e le Rules non cambiano. Verifica locale: allegati **70/70**, lifecycle dettaglio Account privato/azienda **24/24**, fondazioni UI **6/6**, documentazione **11/11**. Diego ha autorizzato commit, push, merge e deploy del solo Hosting della release `1.2.180`; fino all'esito del rilascio la produzione resta `1.2.179`.
+
 ## Candidata 1.2.179 — gestione inline degli allegati nei Documenti del Profilo — 13/10/2026
 
 La candidata `1.2.179` conserva le anteprime compatte nelle schede Profilo utente → Documenti e aggiunge direttamente nome, peso, data e cestino. La cancellazione richiede conferma, usa la callable server-only già distribuita e aggiorna subito la galleria; il selettore sorgente resta dedicato all'aggiunta. Non cambiano cifratura, schema, Functions, Rules o dati. Diego ha autorizzato commit, push, merge e deploy del solo Hosting; fino all'esito del rilascio la produzione resta `1.2.178`.
