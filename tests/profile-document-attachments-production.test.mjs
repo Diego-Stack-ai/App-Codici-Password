@@ -17,14 +17,14 @@ test('Profilo Documenti usa selettore e fallback Carta condivisi con gli account
     ]);
     assert.match(cards, /data-action[^\n]+document-attachments|action: 'document-attachments'/);
     assert.match(controller, /capture: 'environment'/);
-    assert.match(controller, /import \{selectAttachmentSource\} from '\.\.\/shared\/attachment-source-picker\.js'/);
+    assert.match(controller, /import \{createAttachmentSourceGrid\} from '\.\.\/shared\/attachment-source-picker\.js'/);
     assert.match(privateAccount, /import \{[^}]*selectAttachmentSource[^}]*\} from '\.\.\/shared\/attachment-source-picker\.js'/);
     assert.match(companyAccount, /import \{[^}]*selectAttachmentSource[^}]*\} from '\.\.\/shared\/attachment-source-picker\.js'/);
     assert.match(picker, /Seleziona sorgente/);
     assert.match(picker, /Scansiona tessera\/carta/);
-    assert.match(picker, />Camera</);
-    assert.match(picker, />Galleria</);
-    assert.match(picker, />Documento</);
+    assert.match(picker, /label: 'Camera'/);
+    assert.match(picker, /label: 'Galleria'/);
+    assert.match(picker, /label: 'Documento'/);
     assert.match(controller, /accept: 'image\/\*,video\/\*'/);
     assert.match(controller, /accept: '\.pdf,\.doc,\.docx,\.xls,\.xlsx,\.txt'/);
     assert.match(capture, /import\('\.\/card-camera-capture\.js'\)/);
@@ -45,6 +45,30 @@ test('Profilo Documenti usa selettore e fallback Carta condivisi con gli account
     assert.match(cards, /profile-document-inline-attachments/);
     assert.match(controller, /renderProfileDocumentAttachmentPreviews/);
     assert.match(controller, /profile-document-inline-image/);
+    assert.match(controller, /btn-delete-attachment/);
+    assert.match(controller, /attachment\.readyAt \|\| attachment\.createdAt/);
+    assert.doesNotMatch(controller, /Aggiungi allegato/);
+    assert.match(picker, /export function createAttachmentSourceGrid/);
+    for (const html of [
+        await read('Frontend/public/dettaglio_account_privato.html'),
+        await read('Frontend/public/dettaglio_account_azienda.html')
+    ]) {
+        assert.doesNotMatch(html, /source-selector-modal|btn-card-camera/);
+    }
+});
+
+test('ogni documento mostra dati, allegati e azioni nello stesso blocco e in questo ordine', async () => {
+    const cards = await read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js');
+    const documentRenderer = cards.slice(cards.indexOf('function renderDocumentiView'));
+    const dataPosition = documentRenderer.indexOf('document-date-list');
+    const attachmentsPosition = documentRenderer.indexOf("className: 'profile-document-inline-attachments'");
+    const actionsPosition = documentRenderer.indexOf("className: 'profile-document-actions'");
+
+    assert.ok(dataPosition >= 0, 'il blocco dati del documento deve esistere');
+    assert.ok(attachmentsPosition > dataPosition, 'gli allegati devono seguire i dati del documento');
+    assert.ok(actionsPosition > attachmentsPosition, 'le azioni devono seguire gli allegati');
+    assert.match(documentRenderer.slice(actionsPosition), /Collega o crea Account/);
+    assert.match(documentRenderer.slice(actionsPosition), /Apri scadenza collegata/);
 });
 
 test('gli allegati del documento sono collegati alla bozza Scadenza senza duplicare il file', async () => {

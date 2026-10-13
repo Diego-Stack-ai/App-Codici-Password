@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.177';
+import { auth, db } from '../../firebase-config.js?v=1.2.178';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -53,8 +53,6 @@ function clearPrivateDetail(view = document) {
     for (const node of view.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle')) node.onclick = null;
     const add = view.getElementById('btn-add-attachment');
     if (add) { add.onclick = null; add.classList.add('hidden'); }
-    const modal = view.getElementById('source-selector-modal');
-    if (modal) { modal.classList.remove('active'); modal.classList.add('hidden'); }
     for (const banner of view.querySelectorAll('.read-only-banner')) banner.remove();
     if (view.body) view.body.style.overflow = '';
 }
@@ -312,9 +310,9 @@ async function loadAccount(mount = mounted) {
             const controller = await module[name](widgetContext);
             if (!active()) controller?.destroy();
         };
-        import('../shared/account-shared-credentials.js?v=1.2.177').then(module => initWidget(module, 'initAccountSharedCredentials'))
+        import('../shared/account-shared-credentials.js?v=1.2.178').then(module => initWidget(module, 'initAccountSharedCredentials'))
             .catch(error => { if (active()) logError('SharedCredentials', error); });
-        import('../shared/account-embedded-widgets.js?v=1.2.177').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
+        import('../shared/account-embedded-widgets.js?v=1.2.178').then(module => initWidget(module, 'initAccountEmbeddedWidgets'))
             .catch(error => { if (active()) logError('AccountWidgets', error); });
         setupActions(actionActive);
         if (readOnly) mount.banners.add(setupReadOnlyUI());

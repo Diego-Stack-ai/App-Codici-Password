@@ -7,7 +7,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.177';
+import { auth, db } from '../../firebase-config.js?v=1.2.178';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -18,7 +18,7 @@ import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
 import {
     initAttachmentModule, loadAttachments,
-    openSourceSelector, closeSourceSelector, handleFileUpload, captureCardAttachment
+    openSourceSelector, handleFileUpload
 } from './dettaglio-azienda-attachments.js';
 import {consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
@@ -43,9 +43,7 @@ function clearDetail(document = globalThis.document) {
     for (const id of ['hero-title','detail-note','attachments-list','guests-list','banking-content','footer-center-actions']) {
         const node = document.getElementById(id); if (node) { for (const input of node.querySelectorAll?.('input') || []) input.value = ''; clearElement(node); }
     }
-    for (const node of document.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle, #btn-call-ref-phone, #btn-call-ref-mobile, #btn-cancel-source, #source-selector-modal')) node.onclick = null;
-    const modal = document.getElementById('source-selector-modal');
-    if (modal) { modal.classList.remove('active'); modal.classList.add('hidden'); }
+    for (const node of document.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle, #btn-call-ref-phone, #btn-call-ref-mobile')) node.onclick = null;
     if (document.body) document.body.style.overflow = '';
 }
 
@@ -66,7 +64,7 @@ export async function initDettaglioAccountAzienda(user, options = {}) {
     const owned = new Map();
     const ownedDocument = {getElementById(id) { if (!owned.has(id)) owned.set(id, document.getElementById(id)); return owned.get(id); }, querySelectorAll: selector => document.querySelectorAll(selector), body: document.body};
     clearDetail(ownedDocument);
-    const handlers = [...document.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle, #btn-call-ref-phone, #btn-call-ref-mobile, #btn-cancel-source, #source-selector-modal')];
+    const handlers = [...document.querySelectorAll('.copy-btn, #btn-add-attachment, #toggle-password, #open-website, #copy-note, #banking-toggle, #btn-call-ref-phone, #btn-call-ref-mobile')];
     ownedDocument.querySelectorAll = () => handlers;
     let disposed = false, unsubscribe = () => {};
     const mount = {scope, fileInputs: new Set(), version: 0, loaded: false, loadAbort: new AbortController(),
@@ -279,7 +277,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.177`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.178`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();
@@ -496,24 +494,6 @@ function setupActions(active, fileInputs = new Set()) {
         };
     }
 
-    // Modal Events
-    const btnCancel = document.getElementById('btn-cancel-source');
-    if (btnCancel) {
-        btnCancel.onclick = (e) => {
-            if (!active()) return;
-            e.preventDefault();
-            closeSourceSelector();
-        };
-    }
-
-    const modal = document.getElementById('source-selector-modal');
-    if (modal) {
-        modal.onclick = (e) => {
-            if (!active()) return;
-            if (e.target === modal) closeSourceSelector();
-        };
-    }
-
     // Hidden inputs listeners
     ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
         let input = document.getElementById(id);
@@ -528,8 +508,6 @@ function setupActions(active, fileInputs = new Set()) {
             }
         };
     });
-    const cardCamera = document.getElementById('btn-card-camera');
-    if (cardCamera) cardCamera.onclick = () => {if (active() && !isReadOnly) captureCardAttachment();};
 }
 
 function getAccentColors(acc) {

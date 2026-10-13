@@ -8,7 +8,9 @@ const module = await import(`data:text/javascript;base64,${Buffer.from(source).t
 const {captureCardAttachment, consumeAttachmentInitialMode, describeCardCameraError} = module;
 
 test('gli errori camera mostrano una causa utile senza esporre dettagli tecnici', () => {
-    assert.match(describeCardCameraError({name: 'NotAllowedError'}), /non ha concesso/);
+    assert.match(describeCardCameraError({name: 'NotAllowedError'}), /non ha autorizzato/);
+    assert.match(describeCardCameraError({name: 'NotAllowedError'}, {permissionState: 'denied'}), /bloccato nelle impostazioni/);
+    assert.match(describeCardCameraError({name: 'NotAllowedError'}, {secureContext: false}), /HTTPS sicura/);
     assert.match(describeCardCameraError({name: 'NotFoundError'}), /Non è stata trovata/);
     assert.match(describeCardCameraError({name: 'NotReadableError'}), /occupata/);
     assert.match(describeCardCameraError({message: 'CAMERA_NOT_SUPPORTED'}), /non supporta/);

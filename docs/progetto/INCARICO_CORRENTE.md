@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Pubblicazione candidata 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
+
+Diego richiede che ciascun documento del Profilo sia un blocco completo: dati e note, allegati visibili, azioni Account e Scadenza; solo dopo inizia il documento successivo. Il gestore deve usare direttamente lo stesso componente sorgente degli Account, mostrare nome, peso, data e cestino per i file presenti ed eliminare il doppio popup. L'audit comprende la rimozione dei selettori Account legacy non più usati, la trasparenza sulla risoluzione finale Tessera/Carta e messaggi diagnostici più precisi per i permessi camera. Diego autorizza ora commit, push, merge e pubblicazione della release `1.2.178`. Il deploy è limitato all'Hosting: persistenza, cifratura, Functions, Rules, indici, migrazioni e dati reali non cambiano.
+
 ## Pubblicazione 1.2.177 conclusa — acquisizione Tessera/Carta ad alta risoluzione — 13/10/2026
 
 Diego richiede che carte, patenti e documenti acquisiti come Tessera/Carta conservino i dettagli necessari alla lettura. Il riquadro `1012:638` resta soltanto l'anteprima e la guida geometrica: il file finale viene ora generato dai pixel della sorgente alla risoluzione del ritaglio, con richiesta ideale `4096×2160` alla fotocamera e qualità JPEG `0,98`. Anche l'editor Carta non forza più l'uscita `1012×638`: mantiene la risoluzione utile del ritaglio, con limite tecnico di 4096 px sul lato lungo per evitare esaurimenti di memoria sui dispositivi mobili. **Allega originale** continua a conservare i byte sorgente senza ricampionamento o compressione.

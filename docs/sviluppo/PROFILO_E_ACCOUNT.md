@@ -1,5 +1,11 @@
 # Profilo e account
 
+## Ordine della scheda Documento
+
+Ogni documento del Profilo è presentato come un blocco autosufficiente. La scheda mostra prima i dati e le note del documento, subito dopo gli allegati già presenti e infine le azioni per collegare o aprire l’Account e per creare, collegare o aprire la Scadenza. Il documento successivo ripete lo stesso ordine. Il contratto riguarda soltanto il rendering: identità, persistenza, cifratura e collegamenti degli allegati restano invariati. Per lo stato dell'implementazione vale [STATO](../progetto/STATO.md#stato-corrente).
+
+Il gestore allegati del Documento incorpora il componente sorgente comune agli Account: **Scansiona tessera/carta**, **Camera**, **Galleria** e **Documento** sono disponibili nel primo popup insieme all'elenco dei file. Ogni riga espone nome decifrato, dimensione, data di inserimento, apertura e cancellazione; non esiste un secondo comando «Aggiungi allegato». Il motore comune definisce solo scelta sorgente e acquisizione: repository, callable, cifratura e proprietà del file restano quelli del Documento.
+
 ## Date Account e Scadenze — pubblicato 1.2.174
 
 Nell’editor dei Widget Account un campo può essere definito come **Data** e abilitato con **Usa questa data come Scadenza**. Nella scheda Account il comando calendario prepara nome, tipo, dettaglio, data e riferimento sorgente della nuova Scadenza. Gli allegati dell’Account sono collegati per riferimento ai file cifrati esistenti, senza copia o compressione. Il contratto backend conserva `deadlineEnabled` soltanto per campi Data/Scadenza non sensibili; i campi cifrati non possono abilitarlo.
