@@ -3,7 +3,7 @@ import {collection, getDocsFromServer, query, where, getBytes, ref, httpsCallabl
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showToast, showConfirmModal} from '../../ui-core-v129.js';
 import {encryptAttachmentFile, decryptAttachmentBytes, openDecryptedAttachment, validateAttachmentFile} from '../shared/attachment-security.js';
-import {selectAttachmentSource} from '../shared/attachment-source-picker.js';
+import {createAttachmentSourceGrid} from '../shared/attachment-source-picker.js';
 import {captureCardAttachment, consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 
 const MAX_BYTES = 32 * 1024 * 1024;
@@ -30,6 +30,11 @@ function friendlyType(type) {
     if (type === 'application/pdf') return 'PDF';
     if (String(type).startsWith('image/')) return 'Immagine';
     return 'Allegato';
+}
+
+function attachmentDate(value) {
+    const date = value?.toDate?.() || (value?.seconds ? new Date(value.seconds * 1000) : value ? new Date(value) : null);
+    return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('it-IT') : '---';
 }
 
 function closeActiveDialog() {
@@ -133,13 +138,17 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     const cardFallbackInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});
     const galleryInput = createElement('input', {type: 'file', accept: 'image/*,video/*', multiple: true, className: 'hidden'});
     const documentInput = createElement('input', {type: 'file', accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt', multiple: true, className: 'hidden'});
-    const addButton = createElement('button', {type: 'button', className: 'btn-upload-trigger'}, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: 'attach_file'}),
-        createElement('span', {textContent: 'Aggiungi allegato'})
-    ]);
-    const uploadButtons = [addButton];
+    const sourceGrid = createAttachmentSourceGrid(async source => {
+        if (busy || atLimit || activeDialog !== overlay) return;
+        if (source === 'card') await captureCard();
+        else if (source === 'camera') photoInput.click();
+        else if (source === 'gallery') galleryInput.click();
+        else if (source === 'document') documentInput.click();
+    });
+    const uploadButtons = [...sourceGrid.querySelectorAll('button')];
     const actions = createElement('div', {className: 'profile-document-attachments-actions'}, [
-        addButton,
+        createElement('h3', {textContent: 'Seleziona sorgente'}),
+        sourceGrid,
         photoInput, cardFallbackInput, galleryInput, documentInput
     ]);
     setChildren(dialog, [header, actions, status, list]);
@@ -168,13 +177,18 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         for (const attachment of attachments) {
             let name = friendlyType(attachment.mimeType);
             try { name = await decryptName(attachment.encryptedName); } catch {}
-            const open = createElement('button', {type: 'button', className: 'btn-upload-trigger', textContent: 'Apri'});
-            const remove = createElement('button', {type: 'button', className: 'btn-upload-trigger btn-delete', textContent: 'Elimina'});
-            const row = createElement('div', {className: 'profile-document-attachment-row'}, [
+            const open = createElement('button', {type: 'button', className: 'profile-document-attachment-open', title: `Apri ${name}`}, [
+                createElement('span', {className: 'material-symbols-outlined', textContent: String(attachment.mimeType || '').startsWith('image/') ? 'image' : 'description'}),
                 createElement('div', {className: 'attachment-meta'}, [
                     createElement('span', {className: 'attachment-name', textContent: name}),
-                    createElement('span', {className: 'attachment-status', textContent: `${friendlyType(attachment.mimeType)} · ${(attachment.size / 1024 / 1024).toFixed(2)} MB`})
-                ]), open, remove
+                    createElement('span', {className: 'attachment-status', textContent: `${(attachment.size / 1024 / 1024).toFixed(2)} MB · ${attachmentDate(attachment.readyAt || attachment.createdAt)}`})
+                ])
+            ]);
+            const remove = createElement('button', {type: 'button', className: 'btn-delete-attachment', title: `Elimina ${name}`, ariaLabel: `Elimina ${name}`}, [
+                createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})
+            ]);
+            const row = createElement('div', {className: 'attachment-item profile-document-attachment-row'}, [
+                open, remove
             ]);
             open.onclick = async () => {
                 if (busy) return;
@@ -261,15 +275,6 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         if (busy || atLimit) return;
         const file = await captureCardAttachment({fallbackInput: cardFallbackInput, confirmFallback: showConfirmModal});
         if (file && activeDialog === overlay) await uploadFiles([file], {skipImageEditor: true});
-    };
-    addButton.onclick = async () => {
-        if (busy || atLimit) return;
-        const source = await selectAttachmentSource();
-        if (activeDialog !== overlay) return;
-        if (source === 'card') await captureCard();
-        else if (source === 'camera') photoInput.click();
-        else if (source === 'gallery') galleryInput.click();
-        else if (source === 'document') documentInput.click();
     };
     await load();
 }

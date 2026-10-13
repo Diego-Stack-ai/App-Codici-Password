@@ -268,30 +268,34 @@ export function renderDocumentiView() {
                         })
                     ]) : null,
 
-                    createElement('div', {className: docItem.linkedAccountId ? 'profile-account-actions' : ''}, [
-                        createElement('button',{className:'btn-upload-trigger',textContent:docItem.linkedAccountId?'Apri Account collegato':'Collega o crea Account',onclick:()=>docItem.linkedAccountId?_callbacks.openLinkedAccount(docItem.linkedAccountId,docItem.linkedAccountCompanyId):_callbacks.connectDocumentAccount(docItem,_callbacks.syncData)}),
-                        ...accountManagementButtons(docItem,'document')
-                    ]),
                     docItem.note ? createElement('p', {
                         className: 'note-text document-note',
                         textContent: docItem.note
                     }) : null,
-                    createElement('button', {
-                        className: 'btn-upload-trigger',
-                        textContent: docItem.expiryReference?.deadlineId
-                            ? 'Apri scadenza collegata'
-                            : docItem.compatibleDeadlineId
-                                ? 'Collega scadenza esistente'
-                                : 'Crea scadenza collegata',
-                        onclick: () => _callbacks.createDeadlineFromDocument(docItem)
-                    })
+
+                    createElement('div', {
+                        className: 'profile-document-inline-attachments',
+                        dataset: { profileDocumentAttachmentsInline: docItem.id },
+                        ariaLive: 'polite'
+                    }),
+
+                    createElement('div', {className: 'profile-document-actions'}, [
+                        createElement('div', {className: docItem.linkedAccountId ? 'profile-account-actions' : ''}, [
+                            createElement('button',{className:'btn-upload-trigger',textContent:docItem.linkedAccountId?'Apri Account collegato':'Collega o crea Account',onclick:()=>docItem.linkedAccountId?_callbacks.openLinkedAccount(docItem.linkedAccountId,docItem.linkedAccountCompanyId):_callbacks.connectDocumentAccount(docItem,_callbacks.syncData)}),
+                            ...accountManagementButtons(docItem,'document')
+                        ]),
+                        createElement('button', {
+                            className: 'btn-upload-trigger',
+                            textContent: docItem.expiryReference?.deadlineId
+                                ? 'Apri scadenza collegata'
+                                : docItem.compatibleDeadlineId
+                                    ? 'Collega scadenza esistente'
+                                    : 'Crea scadenza collegata',
+                            onclick: () => _callbacks.createDeadlineFromDocument(docItem)
+                        })
+                    ])
                 ])
-            ]),
-            createElement('div', {
-                className: 'profile-document-inline-attachments',
-                dataset: { profileDocumentAttachmentsInline: docItem.id },
-                ariaLive: 'polite'
-            })
+            ])
         ]);
     });
     setChildren(container, [btnAdd, ...items]);

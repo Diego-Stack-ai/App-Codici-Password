@@ -1,10 +1,12 @@
 const CARD_MODE = 'card';
 
-export function describeCardCameraError(error) {
+export function describeCardCameraError(error, {permissionState, secureContext = globalThis.isSecureContext} = {}) {
     const name = String(error?.name || '');
     const message = String(error?.message || '');
     if (name === 'NotAllowedError' || name === 'SecurityError') {
-        return 'Il browser o il dispositivo non ha concesso l’accesso alla fotocamera integrata.';
+        if (secureContext === false) return 'La fotocamera integrata richiede una pagina HTTPS sicura.';
+        if (permissionState === 'denied') return 'Il permesso fotocamera è bloccato nelle impostazioni del sito o del browser.';
+        return 'Il browser non ha autorizzato la fotocamera integrata in questa pagina.';
     }
     if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
         return 'Non è stata trovata una fotocamera utilizzabile.';
@@ -21,6 +23,15 @@ export function describeCardCameraError(error) {
     return 'La fotocamera integrata non è disponibile in questa modalità.';
 }
 
+async function cameraContext() {
+    let permissionState = 'unknown';
+    try {
+        const permission = await navigator.permissions?.query?.({name: 'camera'});
+        permissionState = permission?.state || permissionState;
+    } catch {}
+    return {permissionState, secureContext: globalThis.isSecureContext};
+}
+
 export function consumeAttachmentInitialMode(input) {
     const mode = input?.dataset?.attachmentInitialMode === CARD_MODE ? CARD_MODE : 'free';
     if (input?.dataset) delete input.dataset.attachmentInitialMode;
@@ -32,7 +43,7 @@ export async function captureCardAttachment({fallbackInput, confirmFallback}) {
         const {captureCardPhoto} = await import('./card-camera-capture.js');
         return await captureCardPhoto();
     } catch (error) {
-        const reason = describeCardCameraError(error);
+        const reason = describeCardCameraError(error, await cameraContext());
         const useNative = await confirmFallback(
             'Usa fotocamera nativa',
             `${reason} Vuoi scattare la tessera con la fotocamera del telefono e regolarla nel formato carta?`

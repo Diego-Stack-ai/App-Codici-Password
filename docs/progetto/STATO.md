@@ -1,5 +1,11 @@
 # Stato
 
+<a id="stato-corrente"></a>
+
+## Candidata 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
+
+Nella candidata `1.2.178` ogni documento è renderizzato nell'ordine dati e note → allegati esistenti → azioni Account e Scadenza. Il gestore allegati del Documento mostra direttamente le quattro sorgenti condivise con gli Account, senza il passaggio intermedio «Aggiungi allegato», e presenta ogni file con nome, dimensione, data, apertura e cestino rosso. Dai dettagli Account privato/azienda sono stati rimossi markup, handler e stili del vecchio selettore, ormai sostituiti dal componente condiviso. La conferma Tessera/Carta mostra inoltre la risoluzione finale ricavata dalla sorgente e il fallback distingue pagina non sicura, permesso bloccato e rifiuto generico del browser. Cifratura, persistenza, limiti, Functions, Rules e dati non cambiano. Diego ha autorizzato la pubblicazione; fino all'esito del rilascio la produzione resta `1.2.177`.
+
 ## Candidata 1.2.177 — Tessera/Carta ad alta risoluzione — 12/10/2026
 
 La regressione qualitativa è stata ricondotta al ricampionamento fisso `1012×638` introdotto dal percorso guidato. Nella candidata quella misura resta soltanto la guida ID-1 a schermo: **Usa foto** esporta il ritaglio dai pixel della sorgente, richiede alla camera fino a `4096×2160` come valore ideale e usa JPEG qualità `0,98`. L'editor Carta conserva analogamente la risoluzione del ritaglio fino a 4096 px sul lato lungo; **Allega originale** resta invariato e non ricomprime. Nessun cambiamento a cifratura, persistenza, Functions, Rules o dati; prima della pubblicazione restano i gate GitHub e la verifica remota.

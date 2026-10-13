@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.177';
+import { db, storage } from '../../firebase-config.js?v=1.2.178';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -22,8 +22,6 @@ let mounted = null;
 
 export function initPrivateAttachmentModule(context) {
     mounted?.destroy();
-    const modal = document.getElementById('source-selector-modal');
-    const cancelButton = document.getElementById('btn-cancel-source');
     let destroyed = false;
     const cleanups = new Set();
     const mount = {ownerId: context.ownerId, currentUid: context.currentUid, accountId: context.accountId,
@@ -41,8 +39,6 @@ export function initPrivateAttachmentModule(context) {
             for (const cleanup of cleanups) cleanup();
             cleanups.clear();
             if (mounted === mount) {
-                if (modal) { modal.onclick = null; modal.classList.remove('active'); modal.classList.add('hidden'); }
-                if (cancelButton) cancelButton.onclick = null;
                 if (document.body) document.body.style.overflow = '';
             }
         },
@@ -58,8 +54,6 @@ export function initPrivateAttachmentModule(context) {
     mounted = mount;
     context.signal?.addEventListener('abort', mount.destroy, {once: true});
     if (!mount.active()) return mount;
-    if (cancelButton) cancelButton.onclick = () => closeSourceSelector(mount);
-    if (modal) modal.onclick = event => { if (event.target === modal) closeSourceSelector(mount); };
     ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
         const previous = document.getElementById(id);
         const input = previous?.cloneNode ? previous.cloneNode(true) : previous;
@@ -69,17 +63,6 @@ export function initPrivateAttachmentModule(context) {
         input.onchange = () => handleFileUpload(input, mount, {initialMode: consumeAttachmentInitialMode(input)});
         cleanups.add(() => { input.value = ''; input.onchange = null; });
     });
-    const cardCamera = document.getElementById('btn-card-camera');
-    if (cardCamera) cardCamera.onclick = async () => {
-        closeSourceSelector(mount);
-        const askFallback = mount.confirm;
-        const file = await captureCardAttachment({
-            fallbackInput: document.getElementById('input-camera'),
-            confirmFallback: (...args) => askFallback(...args)
-        });
-        if (file && mount.active()) await processFileUpload({files: [file], value: ''}, mount, {skipImageEditor: true});
-    };
-    cleanups.add(() => {if (cardCamera) cardCamera.onclick = null;});
     return mount;
 }
 
@@ -102,13 +85,7 @@ export async function openSourceSelector(mount = mounted) {
 export function closeSourceSelector(mount = mounted) {
     if (!mount?.active()) return;
     closeAttachmentSourcePicker();
-    const modal = document.getElementById('source-selector-modal');
-    if (!modal) return;
-    modal.classList.remove('active');
-    mount.later(() => {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }, 300);
+    document.body.style.overflow = '';
 }
 
 export async function handleFileUpload(input, mount = mounted, options = {}) {

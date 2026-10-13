@@ -14,6 +14,34 @@ function ensureStyles() {
     document.head.append(link);
 }
 
+const SOURCE_OPTIONS = Object.freeze([
+    {source: 'card', icon: 'crop_free', label: 'Scansiona tessera/carta', wide: true},
+    {source: 'camera', icon: 'photo_camera', label: 'Camera'},
+    {source: 'gallery', icon: 'collections', label: 'Galleria'},
+    {source: 'document', icon: 'description', label: 'Documento', wide: true}
+]);
+
+export function createAttachmentSourceGrid(onSelect) {
+    ensureStyles();
+    const grid = document.createElement('div');
+    grid.className = 'attachment-source-picker-grid';
+    for (const option of SOURCE_OPTIONS) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.source = option.source;
+        if (option.wide) button.className = 'is-wide';
+        const icon = document.createElement('span');
+        icon.className = 'material-symbols-outlined';
+        icon.textContent = option.icon;
+        const label = document.createElement('strong');
+        label.textContent = option.label;
+        button.append(icon, label);
+        button.addEventListener('click', () => onSelect?.(option.source));
+        grid.append(button);
+    }
+    return grid;
+}
+
 export function selectAttachmentSource() {
     ensureStyles();
     closeAttachmentSourcePicker();
@@ -24,17 +52,19 @@ export function selectAttachmentSource() {
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
         overlay.setAttribute('aria-label', 'Seleziona sorgente allegato');
-        overlay.innerHTML = `<section class="attachment-source-picker-card">
-            <h3>Seleziona sorgente</h3>
-            <div class="attachment-source-picker-grid">
-                <button type="button" data-source="card" class="is-wide"><span class="material-symbols-outlined">crop_free</span><strong>Scansiona tessera/carta</strong></button>
-                <button type="button" data-source="camera"><span class="material-symbols-outlined">photo_camera</span><strong>Camera</strong></button>
-                <button type="button" data-source="gallery"><span class="material-symbols-outlined">collections</span><strong>Galleria</strong></button>
-                <button type="button" data-source="document" class="is-wide"><span class="material-symbols-outlined">description</span><strong>Documento</strong></button>
-            </div>
-            <button type="button" class="attachment-source-picker-cancel">Annulla</button>
-        </section>`;
-        const finish = value => {
+        const card = document.createElement('section');
+        card.className = 'attachment-source-picker-card';
+        const heading = document.createElement('h3');
+        heading.textContent = 'Seleziona sorgente';
+        let finish;
+        const grid = createAttachmentSourceGrid(value => finish(value));
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'attachment-source-picker-cancel';
+        cancel.textContent = 'Annulla';
+        card.append(heading, grid, cancel);
+        overlay.append(card);
+        finish = value => {
             if (!overlay.isConnected) return;
             activePicker = null;
             document.removeEventListener('keydown', onKeydown);
@@ -45,9 +75,7 @@ export function selectAttachmentSource() {
         const onKeydown = event => { if (event.key === 'Escape') finish(null); };
         activePicker = finish;
         overlay.addEventListener('click', event => {
-            const source = event.target.closest('[data-source]')?.dataset.source;
-            if (source) finish(source);
-            else if (event.target === overlay || event.target.closest('.attachment-source-picker-cancel')) finish(null);
+            if (event.target === overlay || event.target.closest('.attachment-source-picker-cancel')) finish(null);
         });
         document.addEventListener('keydown', onKeydown);
         document.body.append(overlay);

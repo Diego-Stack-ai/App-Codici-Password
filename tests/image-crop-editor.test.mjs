@@ -37,11 +37,11 @@ test('acquisizione tessera usa guida ID-1 e conferma dedicata con pan e zoom lim
     assert.match(camera, /Ripeti foto/);
     assert.match(camera, /Usa foto/);
     assert.match(camera, /renderFullResolution/);
+    assert.match(camera, /Risoluzione finale/);
     assert.match(camera, /'image\/jpeg', \.98/);
     for (const path of ['Frontend/public/dettaglio_account_privato.html', 'Frontend/public/dettaglio_account_azienda.html']) {
         const html = await read(path);
-        assert.match(html, /id="btn-card-camera"/);
-        assert.match(html, /Scansiona tessera\/carta/);
+        assert.doesNotMatch(html, /id="btn-card-camera"|id="source-selector-modal"/);
     }
     const privateModule = await read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js');
     const companyModule = await read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js');

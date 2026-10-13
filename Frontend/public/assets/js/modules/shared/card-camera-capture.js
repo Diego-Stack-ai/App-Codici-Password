@@ -88,7 +88,12 @@ export async function captureCardPhoto() {
         let previousCenter = null, previousDistance = 0;
         const finish = value => {window.removeEventListener('pagehide', cancelCapture); stream.getTracks().forEach(track => track.stop()); overlay.remove(); document.body.classList.remove('card-camera-open'); resolve(value);};
         const cancelCapture = () => finish(null);
-        const refresh = () => {adjustment = renderAdjusted(source, preview, adjustment); zoom.value = String(adjustment.zoom);};
+        const refresh = () => {
+            adjustment = renderAdjusted(source, preview, adjustment);
+            zoom.value = String(adjustment.zoom);
+            const output = cardOutputSize(adjustment, source.width, source.height);
+            help.textContent = `Trascina per centrare · Risoluzione finale ${output.width}×${output.height} px`;
+        };
         const showLive = () => {previewing = false; adjustment = {zoom: 1, x: 0, y: 0}; pointers.clear(); overlay.classList.remove('card-camera-adjusting'); help.textContent = 'Centra la tessera nel rettangolo e mantieni il telefono fermo';};
         const showPreview = () => {
             if (!video.videoWidth || !video.videoHeight) return;
@@ -105,7 +110,7 @@ export async function captureCardPhoto() {
             const y = Math.min(video.videoHeight - height, Math.max(0, frameY - (height - frameHeight) / 2));
             source.width = Math.round(width); source.height = Math.round(height);
             source.getContext('2d').drawImage(video, x, y, width, height, 0, 0, source.width, source.height);
-            previewing = true; overlay.classList.add('card-camera-adjusting'); help.textContent = 'Trascina per centrare e usa due dita per un piccolo zoom'; refresh();
+            previewing = true; overlay.classList.add('card-camera-adjusting'); refresh();
         };
         const pointerSnapshot = () => [...pointers.values()];
         const resetGesture = () => {

@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.177';
+import { db, storage } from '../../firebase-config.js?v=1.2.178';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -63,17 +63,8 @@ export async function openSourceSelector() {
 }
 
 export function closeSourceSelector() {
-    const active = _active;
     closeAttachmentSourcePicker();
-    const modal = document.getElementById('source-selector-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            if (!active()) return;
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }, 300);
-    }
+    document.body.style.overflow = '';
 }
 
 export async function handleFileUpload(input, {initialMode = 'free', skipImageEditor = false} = {}) {

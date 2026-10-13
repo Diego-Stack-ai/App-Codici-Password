@@ -1,12 +1,18 @@
 .profile-document-attachments-overlay{position:fixed;inset:0;z-index:10000;background:rgba(5,10,20,.72);display:flex;align-items:flex-end;justify-content:center;padding:16px}
 .profile-document-attachments-dialog{width:min(720px,100%);max-height:88vh;overflow:auto;background:var(--card-bg,#fff);color:var(--text-primary,#111827);border-radius:18px 18px 8px 8px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.35)}
 .profile-document-attachments-title{font-size:var(--fs-md);margin:0}
-.profile-document-attachments-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.profile-document-attachments-actions{margin:16px 0;padding:14px;border:1px solid rgba(127,127,127,.2);border-radius:16px;background:rgba(127,127,127,.04)}
+.profile-document-attachments-actions h3{margin:0 0 10px;text-align:center;font-size:var(--fs-sm);letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#1768d5)}
 .profile-document-attachments-status{min-height:1.4em;font-size:var(--fs-sm);opacity:.78}
 .profile-document-attachments-list{display:flex;flex-direction:column;gap:10px}
-.profile-document-attachment-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:12px;border:1px solid rgba(127,127,127,.25);border-radius:12px}
+.profile-document-attachment-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(127,127,127,.25);border-radius:12px}
+.profile-document-attachment-open{min-width:0;display:flex;align-items:center;gap:10px;padding:4px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.profile-document-attachment-open .attachment-meta{min-width:0;display:flex;flex-direction:column;gap:3px}
+.profile-document-attachment-open .attachment-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.profile-document-attachment-open .attachment-status{font-size:var(--fs-xs);opacity:.7}
+.profile-document-attachment-row .btn-delete-attachment{width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(220,38,38,.1);color:#dc2626;cursor:pointer}
+.profile-document-attachment-row .btn-delete-attachment:hover,.profile-document-attachment-row .btn-delete-attachment:focus-visible{background:rgba(220,38,38,.18);outline:2px solid rgba(220,38,38,.28)}
 @media (min-width:700px){.profile-document-attachments-overlay{align-items:center}.profile-document-attachments-dialog{border-radius:18px}}
-@media (max-width:30rem){.profile-document-attachment-row{grid-template-columns:1fr 1fr}.profile-document-attachment-row .attachment-meta{grid-column:1/-1}}
 .profile-document-inline-attachments:empty{display:none}
 .profile-document-inline-attachments{margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(127,127,127,.22)}
 .profile-document-inline-loading{font-size:var(--fs-sm);opacity:.65}
@@ -18,3 +24,4 @@
 .profile-document-inline-image{display:block;width:100%;height:100%;object-fit:contain}
 .profile-document-inline-item.is-file{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px}
 .profile-document-inline-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-document-actions{display:grid;gap:10px;margin-top:12px}
