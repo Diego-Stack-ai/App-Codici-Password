@@ -2,9 +2,13 @@
 
 <a id="stato-corrente"></a>
 
-## Candidata 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
+## Candidata 1.2.179 — gestione inline degli allegati nei Documenti del Profilo — 13/10/2026
 
-Nella candidata `1.2.178` ogni documento è renderizzato nell'ordine dati e note → allegati esistenti → azioni Account e Scadenza. Il gestore allegati del Documento mostra direttamente le quattro sorgenti condivise con gli Account, senza il passaggio intermedio «Aggiungi allegato», e presenta ogni file con nome, dimensione, data, apertura e cestino rosso. Dai dettagli Account privato/azienda sono stati rimossi markup, handler e stili del vecchio selettore, ormai sostituiti dal componente condiviso. La conferma Tessera/Carta mostra inoltre la risoluzione finale ricavata dalla sorgente e il fallback distingue pagina non sicura, permesso bloccato e rifiuto generico del browser. Cifratura, persistenza, limiti, Functions, Rules e dati non cambiano. Diego ha autorizzato la pubblicazione; fino all'esito del rilascio la produzione resta `1.2.177`.
+La candidata `1.2.179` conserva le anteprime compatte nelle schede Profilo utente → Documenti e aggiunge direttamente nome, peso, data e cestino. La cancellazione richiede conferma, usa la callable server-only già distribuita e aggiorna subito la galleria; il selettore sorgente resta dedicato all'aggiunta. Non cambiano cifratura, schema, Functions, Rules o dati. Diego ha autorizzato commit, push, merge e deploy del solo Hosting; fino all'esito del rilascio la produzione resta `1.2.178`.
+
+## Produzione 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
+
+Nella `1.2.178` ogni documento è renderizzato nell'ordine dati e note → allegati esistenti → azioni Account e Scadenza. Il gestore allegati del Documento mostra direttamente le quattro sorgenti condivise con gli Account, senza il passaggio intermedio «Aggiungi allegato». Dai dettagli Account privato/azienda sono stati rimossi markup, handler e stili del vecchio selettore, ormai sostituiti dal componente condiviso. La conferma Tessera/Carta mostra inoltre la risoluzione finale ricavata dalla sorgente e il fallback distingue pagina non sicura, permesso bloccato e rifiuto generico del browser. PR #136 unita in `master` (`d0ab51df`); workflow di produzione `38361688736` verde e deploy Hosting riuscito. Cifratura, persistenza, limiti, Functions, Rules e dati non sono cambiati.
 
 ## Produzione 1.2.177 — Tessera/Carta ad alta risoluzione — 13/10/2026
 

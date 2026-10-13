@@ -46,6 +46,10 @@ test('Profilo Documenti usa selettore e fallback Carta condivisi con gli account
     assert.match(controller, /renderProfileDocumentAttachmentPreviews/);
     assert.match(controller, /profile-document-inline-image/);
     assert.match(controller, /btn-delete-attachment/);
+    assert.match(controller, /profile-document-inline-delete/);
+    assert.match(controller, /removeProfileDocumentAttachment/);
+    assert.match(controller, /renderProfileDocumentAttachmentPreviews\(renderOptions\)/);
+    assert.doesNotMatch(controller, /profile-document-attachments-list/);
     assert.match(controller, /attachment\.readyAt \|\| attachment\.createdAt/);
     assert.doesNotMatch(controller, /Aggiungi allegato/);
     assert.match(picker, /export function createAttachmentSourceGrid/);

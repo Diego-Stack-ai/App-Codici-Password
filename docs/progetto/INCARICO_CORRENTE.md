@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Pubblicazione candidata 1.2.179 — gestione allegati nelle schede Documenti — 13/10/2026
+
+Diego richiede che gli allegati già visibili nelle schede Profilo utente → Documenti possano essere gestiti senza duplicarli nel selettore sorgente. Le anteprime restano compatte e ricevono nome, peso, data e cestino; la cancellazione usa conferma e aggiorna la scheda. Il selettore **Scansiona tessera/carta / Camera / Galleria / Documento** resta dedicato all'aggiunta. Diego autorizza commit, push, merge e pubblicazione della release `1.2.179`; il deploy è limitato al solo Hosting. Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Pubblicazione candidata 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
 
 Diego richiede che ciascun documento del Profilo sia un blocco completo: dati e note, allegati visibili, azioni Account e Scadenza; solo dopo inizia il documento successivo. Il gestore deve usare direttamente lo stesso componente sorgente degli Account, mostrare nome, peso, data e cestino per i file presenti ed eliminare il doppio popup. L'audit comprende la rimozione dei selettori Account legacy non più usati, la trasparenza sulla risoluzione finale Tessera/Carta e messaggi diagnostici più precisi per i permessi camera. Diego autorizza ora commit, push, merge e pubblicazione della release `1.2.178`. Il deploy è limitato all'Hosting: persistenza, cifratura, Functions, Rules, indici, migrazioni e dati reali non cambiano.
