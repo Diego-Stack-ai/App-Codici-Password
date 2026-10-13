@@ -1,8 +1,8 @@
 # Incarico corrente
 
-## Pubblicazione candidata 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
+## Pubblicazione 1.2.178 conclusa — gestione allegati e schede Documenti del Profilo — 13/10/2026
 
-Diego richiede che ciascun documento del Profilo sia un blocco completo: dati e note, allegati visibili, azioni Account e Scadenza; solo dopo inizia il documento successivo. Il gestore deve usare direttamente lo stesso componente sorgente degli Account, mostrare nome, peso, data e cestino per i file presenti ed eliminare il doppio popup. L'audit comprende la rimozione dei selettori Account legacy non più usati, la trasparenza sulla risoluzione finale Tessera/Carta e messaggi diagnostici più precisi per i permessi camera. Diego autorizza ora commit, push, merge e pubblicazione della release `1.2.178`. Il deploy è limitato all'Hosting: persistenza, cifratura, Functions, Rules, indici, migrazioni e dati reali non cambiano.
+Diego richiede che ciascun documento del Profilo sia un blocco completo: dati e note, allegati visibili, azioni Account e Scadenza; solo dopo inizia il documento successivo. Il gestore usa direttamente lo stesso componente sorgente degli Account, mostra nome, peso, data e cestino per i file presenti ed elimina il doppio popup. L'audit ha rimosso i selettori Account legacy non più usati, reso visibile la risoluzione finale Tessera/Carta e precisato i messaggi sui permessi camera. PR #136 unita in `master` (`d0ab51df`); workflow `38361688736` verde e deploy del solo Hosting concluso. Persistenza, cifratura, Functions, Rules, indici, migrazioni e dati reali non sono cambiati.
 
 ## Pubblicazione 1.2.177 conclusa — acquisizione Tessera/Carta ad alta risoluzione — 13/10/2026
 
