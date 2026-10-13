@@ -2,9 +2,9 @@
 
 <a id="stato-corrente"></a>
 
-## Candidata 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
+## Produzione 1.2.178 — gestione allegati e schede Documenti del Profilo — 13/10/2026
 
-Nella candidata `1.2.178` ogni documento è renderizzato nell'ordine dati e note → allegati esistenti → azioni Account e Scadenza. Il gestore allegati del Documento mostra direttamente le quattro sorgenti condivise con gli Account, senza il passaggio intermedio «Aggiungi allegato», e presenta ogni file con nome, dimensione, data, apertura e cestino rosso. Dai dettagli Account privato/azienda sono stati rimossi markup, handler e stili del vecchio selettore, ormai sostituiti dal componente condiviso. La conferma Tessera/Carta mostra inoltre la risoluzione finale ricavata dalla sorgente e il fallback distingue pagina non sicura, permesso bloccato e rifiuto generico del browser. Cifratura, persistenza, limiti, Functions, Rules e dati non cambiano. Diego ha autorizzato la pubblicazione; fino all'esito del rilascio la produzione resta `1.2.177`.
+In `1.2.178` ogni documento è renderizzato nell'ordine dati e note → allegati esistenti → azioni Account e Scadenza. Il gestore allegati del Documento mostra direttamente le quattro sorgenti condivise con gli Account, senza il passaggio intermedio «Aggiungi allegato», e presenta ogni file con nome, dimensione, data, apertura e cestino rosso. Dai dettagli Account privato/azienda sono stati rimossi markup, handler e stili del vecchio selettore, ormai sostituiti dal componente condiviso. La conferma Tessera/Carta mostra inoltre la risoluzione finale ricavata dalla sorgente e il fallback distingue pagina non sicura, permesso bloccato e rifiuto generico del browser. PR #136 unita in `master` (`d0ab51df`); workflow di produzione `38361688736` verde con deploy Hosting in 23s. Verifica remota HTTP `200` su home e moduli aggiornati, con versione `1.2.178`. Cifratura, persistenza, limiti, Functions, Rules e dati non sono cambiati.
 
 ## Produzione 1.2.177 — Tessera/Carta ad alta risoluzione — 13/10/2026
 
