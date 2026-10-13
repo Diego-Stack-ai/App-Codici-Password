@@ -4,14 +4,6 @@
 .profile-document-attachments-actions{margin:16px 0;padding:14px;border:1px solid rgba(127,127,127,.2);border-radius:16px;background:rgba(127,127,127,.04)}
 .profile-document-attachments-actions h3{margin:0 0 10px;text-align:center;font-size:var(--fs-sm);letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#1768d5)}
 .profile-document-attachments-status{min-height:1.4em;font-size:var(--fs-sm);opacity:.78}
-.profile-document-attachments-list{display:flex;flex-direction:column;gap:10px}
-.profile-document-attachment-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(127,127,127,.25);border-radius:12px}
-.profile-document-attachment-open{min-width:0;display:flex;align-items:center;gap:10px;padding:4px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
-.profile-document-attachment-open .attachment-meta{min-width:0;display:flex;flex-direction:column;gap:3px}
-.profile-document-attachment-open .attachment-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
-.profile-document-attachment-open .attachment-status{font-size:var(--fs-xs);opacity:.7}
-.profile-document-attachment-row .btn-delete-attachment{width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(220,38,38,.1);color:#dc2626;cursor:pointer}
-.profile-document-attachment-row .btn-delete-attachment:hover,.profile-document-attachment-row .btn-delete-attachment:focus-visible{background:rgba(220,38,38,.18);outline:2px solid rgba(220,38,38,.28)}
 @media (min-width:700px){.profile-document-attachments-overlay{align-items:center}.profile-document-attachments-dialog{border-radius:18px}}
 .profile-document-inline-attachments:empty{display:none}
 .profile-document-inline-attachments{margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(127,127,127,.22)}
@@ -19,9 +11,19 @@
 .profile-document-inline-heading{display:flex;align-items:center;gap:6px;margin-bottom:9px;font-size:var(--fs-sm);font-weight:700}
 .profile-document-inline-heading .material-symbols-outlined{font-size:var(--fs-md)}
 .profile-document-inline-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.profile-document-inline-card{min-width:0;border:1px solid rgba(127,127,127,.25);border-radius:12px;background:rgba(127,127,127,.04);overflow:hidden}
 .profile-document-inline-item{min-width:0;min-height:82px;border:1px solid rgba(127,127,127,.25);border-radius:12px;background:rgba(127,127,127,.06);padding:0;overflow:hidden;color:inherit;cursor:pointer}
+.profile-document-inline-card .profile-document-inline-item{display:block;width:100%;border:0;border-radius:0}
 .profile-document-inline-item.is-image{aspect-ratio:1.586/1;background:#111827}
 .profile-document-inline-image{display:block;width:100%;height:100%;object-fit:contain}
 .profile-document-inline-item.is-file{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px}
 .profile-document-inline-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-document-inline-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;padding:7px 8px}
+.profile-document-inline-meta{min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}
+.profile-document-inline-meta .profile-document-inline-name{font-size:var(--fs-xs);font-weight:700}
+.profile-document-inline-status{font-size:var(--fs-xs);opacity:.68;white-space:nowrap}
+.profile-document-inline-delete{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(220,38,38,.1);color:#dc2626;cursor:pointer}
+.profile-document-inline-delete .material-symbols-outlined{font-size:var(--fs-md)}
+.profile-document-inline-delete:hover,.profile-document-inline-delete:focus-visible{background:rgba(220,38,38,.18);outline:2px solid rgba(220,38,38,.28)}
+.profile-document-inline-delete:disabled{opacity:.45;cursor:wait}
 .profile-document-actions{display:grid;gap:10px;margin-top:12px}

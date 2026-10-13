@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Gestione inline nei Documenti del Profilo — candidata 1.2.179
+
+Le anteprime compatte di ciascun Documento mostrano anche nome, peso e data dell'allegato, con un cestino dedicato. La cancellazione richiede conferma, usa la callable server-only già esistente e aggiorna immediatamente la galleria del documento; il documento e gli altri allegati restano invariati. Il selettore sorgente conserva il solo compito di aggiungere un file. La candidata non modifica cifratura, schema, Functions, Rules o dati reali; il rilascio autorizzato è limitato al solo Hosting.
+
 ## Qualità acquisizione Tessera/Carta — pubblicata 1.2.177
 
 Il formato `1012:638` definisce il rapporto ID-1 e la sola anteprima interattiva, non la risoluzione del file. Il motore guidato richiede alla camera posteriore una risoluzione ideale fino a `4096×2160`, applica pan e zoom ai pixel sorgente ed esporta il ritaglio alla sua risoluzione effettiva con JPEG qualità `0,98`. L'editor Carta calcola l'uscita dalla selezione reale e limita il lato lungo a 4096 px per contenere il consumo di memoria sui telefoni. L'eventuale sorgente più piccola non viene ingrandita artificialmente. **Allega originale** continua a restituire esattamente il file scelto, senza ritaglio, ridimensionamento o ricompressione.

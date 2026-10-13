@@ -55,6 +55,7 @@ async function openStoredAttachment(attachment, name, vaultKey) {
 }
 
 export async function renderProfileDocumentAttachmentPreviews({uid, documentItems, vaultKey, decryptName}) {
+    const renderOptions = {uid, documentItems, vaultKey, decryptName};
     clearInlineObjectUrls();
     const documents = new Map((documentItems || []).filter(item => item?.id).map(item => [item.id, item]));
     for (const container of document.querySelectorAll('[data-profile-document-attachments-inline]')) {
@@ -117,19 +118,47 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
                     createElement('span', {className: 'profile-document-inline-name', textContent: name})
                 );
             }
-            gallery.append(item);
+            const details = createElement('div', {className: 'profile-document-inline-meta'}, [
+                createElement('span', {className: 'profile-document-inline-name', textContent: name}),
+                createElement('span', {
+                    className: 'profile-document-inline-status',
+                    textContent: `${(Number(attachment.size || 0) / 1024 / 1024).toFixed(2)} MB · ${attachmentDate(attachment.readyAt || attachment.createdAt)}`
+                })
+            ]);
+            const remove = createElement('button', {
+                type: 'button',
+                className: 'btn-delete-attachment profile-document-inline-delete',
+                title: `Elimina ${name}`,
+                ariaLabel: `Elimina ${name}`
+            }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
+            remove.onclick = async event => {
+                event.stopPropagation();
+                if (!await showConfirmModal('Elimina allegato', `Eliminare “${name}”? Il documento rimarrà disponibile.`)) return;
+                remove.disabled = true;
+                try {
+                    await httpsCallable(functions, 'removeProfileDocumentAttachment')({attachmentId: attachment.id});
+                    showToast('Allegato eliminato.', 'success');
+                    await renderProfileDocumentAttachmentPreviews(renderOptions);
+                } catch (error) {
+                    remove.disabled = false;
+                    showToast(error.message || 'Eliminazione non riuscita.', 'error');
+                }
+            };
+            gallery.append(createElement('article', {className: 'profile-document-inline-card'}, [
+                item,
+                createElement('div', {className: 'profile-document-inline-footer'}, [details, remove])
+            ]));
         }
     }
 }
 
-export async function openProfileDocumentAttachments({uid, documentItem, vaultKey, encryptName, decryptName, onChanged}) {
+export async function openProfileDocumentAttachments({uid, documentItem, vaultKey, encryptName, onChanged}) {
     if (!uid || !documentItem?.id || !vaultKey) throw new Error('Allegati non disponibili: documento o Vault non valido.');
     closeActiveDialog();
     const overlay = createElement('div', {className: 'profile-document-attachments-overlay'});
     const dialog = createElement('section', {className: 'profile-document-attachments-dialog', role: 'dialog', ariaModal: 'true'});
     const title = createElement('h2', {className: 'profile-document-attachments-title', textContent: `Allegati · ${documentItem.type || 'Documento'}`});
     const status = createElement('p', {className: 'profile-document-attachments-status', ariaLive: 'polite'});
-    const list = createElement('div', {className: 'profile-document-attachments-list'});
     const close = createElement('button', {type: 'button', className: 'btn-edit-section', title: 'Chiudi', onclick: closeActiveDialog}, [
         createElement('span', {className: 'material-symbols-outlined', textContent: 'close'})
     ]);
@@ -151,7 +180,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
         sourceGrid,
         photoInput, cardFallbackInput, galleryInput, documentInput
     ]);
-    setChildren(dialog, [header, actions, status, list]);
+    setChildren(dialog, [header, actions, status]);
     overlay.append(dialog);
     overlay.addEventListener('click', event => { if (event.target === overlay) closeActiveDialog(); });
     document.body.append(overlay);
@@ -166,58 +195,9 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     };
 
     async function load() {
-        status.textContent = 'Caricamento allegati…';
         const snapshot = await getDocsFromServer(query(collection(db, 'users', uid, 'profileDocumentAttachments'), where('documentId', '==', documentItem.id)));
         const attachments = snapshot.docs.map(entry => ({id: entry.id, ...entry.data()}))
             .filter(entry => entry.status === 'ready');
-        clearElement(list);
-        if (!attachments.length) {
-            list.append(createElement('p', {className: 'card-no-data', textContent: 'Nessun allegato per questo documento.'}));
-        }
-        for (const attachment of attachments) {
-            let name = friendlyType(attachment.mimeType);
-            try { name = await decryptName(attachment.encryptedName); } catch {}
-            const open = createElement('button', {type: 'button', className: 'profile-document-attachment-open', title: `Apri ${name}`}, [
-                createElement('span', {className: 'material-symbols-outlined', textContent: String(attachment.mimeType || '').startsWith('image/') ? 'image' : 'description'}),
-                createElement('div', {className: 'attachment-meta'}, [
-                    createElement('span', {className: 'attachment-name', textContent: name}),
-                    createElement('span', {className: 'attachment-status', textContent: `${(attachment.size / 1024 / 1024).toFixed(2)} MB · ${attachmentDate(attachment.readyAt || attachment.createdAt)}`})
-                ])
-            ]);
-            const remove = createElement('button', {type: 'button', className: 'btn-delete-attachment', title: `Elimina ${name}`, ariaLabel: `Elimina ${name}`}, [
-                createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})
-            ]);
-            const row = createElement('div', {className: 'attachment-item profile-document-attachment-row'}, [
-                open, remove
-            ]);
-            open.onclick = async () => {
-                if (busy) return;
-                setBusy(true);
-                status.textContent = 'Apertura allegato…';
-                try {
-                    const ciphertext = await getBytes(ref(storage, attachment.storagePath), MAX_BYTES + 1024);
-                    const clear = await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKey);
-                    openDecryptedAttachment(clear, {name, type: attachment.mimeType, encryption: attachment.encryption});
-                    status.textContent = 'Allegato aperto.';
-                } catch (error) {
-                    status.textContent = 'Impossibile aprire l’allegato.';
-                    showToast(error.message || 'Apertura allegato non riuscita.', 'error');
-                } finally { setBusy(false); }
-            };
-            remove.onclick = async () => {
-                if (busy || !await showConfirmModal('Elimina allegato', `Eliminare “${name}”? Il documento rimarrà disponibile.`)) return;
-                setBusy(true);
-                try {
-                    await httpsCallable(functions, 'removeProfileDocumentAttachment')({attachmentId: attachment.id});
-                    status.textContent = 'Allegato eliminato.';
-                    await load();
-                    await onChanged?.();
-                } catch (error) {
-                    showToast(error.message || 'Eliminazione non riuscita.', 'error');
-                } finally { setBusy(false); }
-            };
-            list.append(row);
-        }
         status.textContent = `${attachments.length}/${MAX_PER_DOCUMENT} allegati.`;
         atLimit = attachments.length >= MAX_PER_DOCUMENT;
         uploadButtons.forEach(button => { button.disabled = busy || atLimit; });
