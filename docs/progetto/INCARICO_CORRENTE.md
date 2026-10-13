@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Pubblicazione candidata 1.2.180 — cestino allegati Account — 13/10/2026
+
+Diego segnala che il pulsante cestino negli allegati degli Account non funziona. La diagnosi locale individua nell'Account aziendale una regola CSS legacy globale che nasconde il dialogo canonico di conferma. L'intervento autorizzato rimuove soltanto quel residuo e aggiunge una regressione dedicata; Account privato, persistenza, cifratura, Functions, Rules e dati restano invariati. Diego autorizza commit, push, merge e pubblicazione della release `1.2.180`; il deploy è limitato al solo Hosting.
+
 ## Pubblicazione candidata 1.2.179 — gestione allegati nelle schede Documenti — 13/10/2026
 
 Diego richiede che gli allegati già visibili nelle schede Profilo utente → Documenti possano essere gestiti senza duplicarli nel selettore sorgente. Le anteprime restano compatte e ricevono nome, peso, data e cestino; la cancellazione usa conferma e aggiorna la scheda. Il selettore **Scansiona tessera/carta / Camera / Galleria / Documento** resta dedicato all'aggiunta. Diego autorizza commit, push, merge e pubblicazione della release `1.2.179`; il deploy è limitato al solo Hosting. Functions, Rules, indici, migrazioni e dati reali restano esclusi.

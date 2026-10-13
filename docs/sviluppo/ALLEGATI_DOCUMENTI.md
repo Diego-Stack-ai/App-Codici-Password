@@ -1,5 +1,9 @@
 # Allegati documenti
 
+## Conferma cestino Account aziendale — candidata 1.2.180
+
+Il dettaglio Account aziendale non definisce più uno stile globale `.modal-overlay` per il selettore sorgente legacy. Quel residuo rendeva invisibile anche `protocol-confirm-modal`, lasciando sospesa la cancellazione richiesta dal cestino. La conferma torna quindi a usare lo strato canonico di `core_ui.css`, già condiviso con gli altri flussi; repository, ordine di cancellazione Storage/metadati e Rules restano invariati.
+
 ## Gestione inline nei Documenti del Profilo — candidata 1.2.179
 
 Le anteprime compatte di ciascun Documento mostrano anche nome, peso e data dell'allegato, con un cestino dedicato. La cancellazione richiede conferma, usa la callable server-only già esistente e aggiorna immediatamente la galleria del documento; il documento e gli altri allegati restano invariati. Il selettore sorgente conserva il solo compito di aggiungere un file. La candidata non modifica cifratura, schema, Functions, Rules o dati reali; il rilascio autorizzato è limitato al solo Hosting.
