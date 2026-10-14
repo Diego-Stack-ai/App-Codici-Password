@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Hotfix locale Assistente base — microfono PWA — 14/10/2026
+
+Diego segnala su Chrome/PWA che **Parla con Codex** risponde subito «Permesso microfono non concesso» anche quando il sito risulta autorizzato. L'intervento autorizzato è limitato al microfono dell'Assistente base sulla base tecnica `1.2.181` (`04ab0a6392b4e29b8d7bd2526780e8824012eb8d`): correggere la `Permissions-Policy` same-origin, verificare il permesso con le API del browser, aprire `getUserMedia` soltanto dal gesto dell'utente e rilasciare immediatamente le tracce, distinguere dispositivo negato/assente/occupato dal blocco del motore vocale o dal pacchetto lingua locale e mantenere informato il fallback al servizio del browser.
+
+Non sono autorizzati in questo lotto AI avanzata, Archivio portabile, Guida, Lingue, Functions, Rules, accessi a dati reali, commit, push, merge o deploy. Criteri di chiusura locale: nessuna registrazione o nuova conservazione/trasmissione audio; messaggi italiani verificati; test voce, policy Hosting, sintassi, hardening e documentazione pertinenti verdi; consegna del diff all'orchestratore.
+
 ## Pubblicazione candidata 1.2.180 — cestino allegati Account — 13/10/2026
 
 Diego segnala che il pulsante cestino negli allegati degli Account non funziona. La diagnosi locale individua nell'Account aziendale una regola CSS legacy globale che nasconde il dialogo canonico di conferma. L'intervento autorizzato rimuove soltanto quel residuo e aggiunge una regressione dedicata; Account privato, persistenza, cifratura, Functions, Rules e dati restano invariati. Diego autorizza commit, push, merge e pubblicazione della release `1.2.180`; il deploy è limitato al solo Hosting.

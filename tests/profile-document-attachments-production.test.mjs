@@ -98,9 +98,9 @@ test('regole integrate rendono metadati e oggetti server-only', async () => {
     assert.match(functions, /exports\.removeProfileDocumentAttachment = onCall/);
 });
 
-test('Hosting consente la fotocamera solo alle pagine della stessa origine', async () => {
+test('Hosting consente fotocamera e microfono solo alle pagine della stessa origine', async () => {
     const hosting = JSON.parse(await read('firebase.json'));
     const globalHeaders = hosting.hosting.headers.find(entry => entry.source === '**')?.headers || [];
     const permissionsPolicy = globalHeaders.find(header => header.key === 'Permissions-Policy')?.value;
-    assert.equal(permissionsPolicy, 'camera=(self), microphone=(), geolocation=()');
+    assert.equal(permissionsPolicy, 'camera=(self), microphone=(self), geolocation=()');
 });
