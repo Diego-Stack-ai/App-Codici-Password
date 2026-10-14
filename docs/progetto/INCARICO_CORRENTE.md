@@ -2,9 +2,9 @@
 
 ## Correzione e pubblicazione ricerca Scadenze dell'Assistente — 14/10/2026
 
-Diego segnala che una ricerca per targa, per esempio `FL790`, trova correttamente più Scadenze ma presenta card indistinguibili con il titolo generico «Scadenza». L'intervento autorizzato riallinea il risultato dell'Assistente al modello canonico delle card: tipo/categoria come titolo e, nel sottotitolo, intestatario, veicolo/targa e data quando disponibili. I campi storici italiani e quelli canonici inglesi restano entrambi ricercabili.
+Diego segnala che una ricerca per targa, per esempio `FL790`, trova correttamente più Scadenze ma presenta card indistinguibili con il titolo generico «Scadenza». L'intervento autorizzato riallinea il risultato dell'Assistente al modello canonico delle card: tipo/categoria come titolo e, nel sottotitolo, intestatario, veicolo/targa e data quando disponibili. I campi storici italiani e quelli canonici inglesi restano entrambi ricercabili. Sul telefono una domanda riconosciuta mostra inoltre i risultati senza pronunciare la risposta: il flusso deve chiudere la sessione audio del riconoscimento prima di avviare la sintesi vocale.
 
-Diego autorizza modifica, commit, push, merge e deploy del solo Firebase Hosting della release successiva alla `1.2.182`. Restano esclusi AI avanzata, Archivio portabile, Guida, Lingue, Functions, Rules e dati reali. Criteri di chiusura: prova di regressione su titolo, intestatario, targa e data; test Assistente, Scadenze, documentazione, versione e controlli di rilascio verdi; verifica HTTP della versione pubblicata.
+Diego autorizza modifica, commit, push, merge e deploy del solo Firebase Hosting della release successiva alla `1.2.182`. Restano esclusi AI avanzata, Archivio portabile, Guida, Lingue, Functions, Rules e dati reali. Criteri di chiusura: prova di regressione su titolo, intestatario, targa e data; prova che la sintesi segua l'evento `end` del riconoscimento; test Assistente, Scadenze, documentazione, versione e controlli di rilascio verdi; verifica HTTP della versione pubblicata.
 
 ## Pubblicazione candidata 1.2.180 — cestino allegati Account — 13/10/2026
 

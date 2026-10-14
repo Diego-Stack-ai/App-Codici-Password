@@ -4,7 +4,7 @@
 
 ## Candidata 1.2.183 — card Scadenze nella ricerca dell'Assistente — 14/10/2026
 
-La ricerca deterministica trovava già targa, veicolo e altri metadati, ma costruiva il titolo delle Scadenze con un insieme incompleto di campi: i record canonici con `title`, `type`, `category` e `name` potevano quindi apparire tutti come «Scadenza». La candidata usa lo stesso modello di presentazione delle card applicative: tipo/categoria nel titolo e intestatario, veicolo/targa e data nel sottotitolo. Campi canonici e storici partecipano entrambi alla ricerca; nessuna credenziale o dato nuovo entra nell'indice.
+La ricerca deterministica trovava già targa, veicolo e altri metadati, ma costruiva il titolo delle Scadenze con un insieme incompleto di campi: i record canonici con `title`, `type`, `category` e `name` potevano quindi apparire tutti come «Scadenza». La candidata usa lo stesso modello di presentazione delle card applicative: tipo/categoria nel titolo e intestatario, veicolo/targa e data nel sottotitolo. Campi canonici e storici partecipano entrambi alla ricerca; nessuna credenziale o dato nuovo entra nell'indice. La risposta a una ricerca vocale viene inoltre pronunciata soltanto dopo la chiusura della sessione `SpeechRecognition`, evitando che sui telefoni la cattura del microfono silenzi la sintesi vocale.
 
 Verifiche mirate verdi: Assistente **12/12**, modello Scadenze **7/7**, documentazione **11/11**. Diego autorizza commit, push, merge e deploy del solo Hosting. Functions, Rules, indici e dati reali restano esclusi.
 
