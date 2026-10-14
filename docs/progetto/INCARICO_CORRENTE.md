@@ -2,7 +2,9 @@
 
 ## Hotfix 1.2.185 — lettura locale della risposta su iPhone — 14/10/2026
 
-Diego segnala che nella `1.2.184` l'Assistente riconosce la domanda e mostra i risultati su iPhone, ma non pronuncia la risposta. L'intervento autorizzato corregge esclusivamente l'orchestrazione Web Speech su Safari/WebKit: la sintesi viene attivata nel gesto che avvia il microfono, la risposta attende il rilascio della sessione audio e non viene più preceduta da un `cancel()` capace di eliminare la frase appena accodata. La voce italiana del dispositivo viene preferita quando disponibile; l'assenza della sintesi degrada al testo visibile.
+Diego segnala che nella `1.2.184` l'Assistente riconosce la domanda e mostra i risultati su iPhone, ma non pronuncia la risposta. L'intervento autorizzato corregge l'orchestrazione Web Speech su Safari/WebKit: la sintesi viene attivata nel gesto che avvia il microfono, la risposta attende il rilascio della sessione audio e non viene più preceduta da un `cancel()` capace di eliminare la frase appena accodata. La voce italiana del dispositivo viene preferita quando disponibile; l'assenza della sintesi degrada al testo visibile.
+
+Prima della pubblicazione Diego autorizza inoltre l'aggiornamento dell'Assistente base deterministico: una richiesta successiva deve riusare l'ultimo elenco, comprendere numeri pronunciati da uno a dodici, aprire un risultato per posizione e distinguere l'apertura per nome esatto della scheda Azienda dal filtro dei suoi Account. Quando tutti i risultati appartengono già alla stessa Azienda il messaggio non deve proporre nuovamente di scegliere l'Azienda. L'AI locale avanzata resta esclusa.
 
 Diego autorizza modifica, commit, push, merge e deploy del solo Firebase Hosting della `1.2.185`. Sono esclusi Functions, Rules, indici, dati reali, AI avanzata, Archivio portabile, Lingue e revisione sicurezza. Criteri: regressioni automatiche sulla sequenza iOS, test Assistente/Guida/offline/documentazione/versione/hardening verdi, controllo dell'assenza di dati personali o segreti e verifica HTTP della release. La prova automatica non sostituisce il collaudo finale su iPhone fisico.
 
