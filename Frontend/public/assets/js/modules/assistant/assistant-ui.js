@@ -138,6 +138,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         const answer = onAsk(value); addBubble('assistant', answer.message); void addResults(answer.items || []);
         if (answerByVoice) speak(answer.message);
         if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
+        return answer;
     };
     addBubble('assistant', 'Ciao. Dimmi cosa stai cercando: posso trovare documenti, account, aziende e scadenze.');
     searchRow.addEventListener('submit', event => { event.preventDefault(); ask(input.value); });
@@ -150,6 +151,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         recognition.lang = 'it-IT'; recognition.interimResults = true; recognition.continuous = false; recognition.maxAlternatives = 3;
         let installConfirmed = false; let remoteConsentPending = false; let usingLocalRecognition = false;
         let recognitionTimeout = null; let recognitionActive = false; let recognitionStarting = false; let submittedFinal = false;
+        let pendingSpokenAnswer = '';
         let transcriptState = createSpeechTranscriptState();
         const microphoneIcon = microphone.querySelector('.material-symbols-outlined');
         const clearRecognitionTimeout = () => { if (recognitionTimeout) clearTimeout(recognitionTimeout); recognitionTimeout = null; };
@@ -243,11 +245,16 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                 ? `Ho sentito: “${transcriptState.visible}”`
                 : (transcriptState.final ? 'Trascrizione completata.' : 'Ti ascolto…');
             if (transcriptState.final && !transcriptState.interim && !submittedFinal) {
-                submittedFinal = true; clearRecognitionTimeout(); ask(transcriptState.final, true);
+                submittedFinal = true; clearRecognitionTimeout();
+                pendingSpokenAnswer = ask(transcriptState.final)?.message || '';
+                // Su mobile la sintesi può essere silenziata mentre SpeechRecognition detiene ancora
+                // la sessione audio. La risposta viene letta soltanto dopo l'evento `end`.
+                try { recognition.stop(); } catch { /* il browser ha già concluso */ }
             }
         });
         recognition.addEventListener('error', event => {
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false;
+            pendingSpokenAnswer = '';
             const code = classifySpeechRecognitionError(event, { microphoneVerified: true, local: usingLocalRecognition });
             if (usingLocalRecognition && ['local-recognition-blocked', 'local-language-unavailable'].includes(code)) {
                 requestRemoteConsent(voiceRecognitionErrorMessage(code, { local: true }));
@@ -258,6 +265,10 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         });
         recognition.addEventListener('end', () => {
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false; setListening(false);
+            if (pendingSpokenAnswer) {
+                const message = pendingSpokenAnswer; pendingSpokenAnswer = '';
+                speak(message);
+            }
             if (!remoteConsentPending && !submittedFinal && input.value.trim()) status.textContent = 'Ascolto terminato. Controlla il testo e premi invia.';
         });
     } else {

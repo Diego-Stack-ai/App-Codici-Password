@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import vm from 'node:vm';
 import { normalizeSearchText } from '../Frontend/public/assets/js/modules/assistant/search-normalizer.js';
 import { VaultConversationEngine } from '../Frontend/public/assets/js/modules/assistant/conversation-engine.js';
 
@@ -27,11 +28,30 @@ const [loaderSource, uiSource, controllerSource] = await Promise.all([
 ]);
 assert.match(loaderSource, /iconSource: data\.logo \|\| data\.avatar/);
 assert.match(loaderSource, /archiveAction:/);
+assert.match(loaderSource, /deadlinePresentation\(data\)/);
+assert.match(loaderSource, /deadlineDateInputFields\(data\)\.displayValue/);
+const loaderContext = vm.createContext({ deadlinePresentation: data => ({
+    category: data.type || data.category || data.title || 'Scadenza Generale',
+    owner: data.name || 'Intestatario non specificato'
+}), deadlineDateInputFields: data => ({ displayValue: data.dueDate === '2027-02-14' ? '14\/02\/2027' : '' }) });
+const loaderPreamble = loaderSource.slice(loaderSource.indexOf('const text ='), loaderSource.indexOf('\nfunction profileRecords'));
+const deadlineFunction = loaderSource.slice(loaderSource.indexOf('function deadlineRecord'), loaderSource.indexOf('\nexport async function'));
+const loaderFunctions = `${loaderPreamble}\n${deadlineFunction}`;
+vm.runInContext(`${loaderFunctions}\nglobalThis.deadlineRecord = deadlineRecord;`, loaderContext);
+const deadlineResult = loaderContext.deadlineRecord('deadline-fl790', {
+    type: 'Revisione', name: 'Diego', veicolo_modello: 'Moto Guzzi', targa: 'FL790', dueDate: '2027-02-14'
+});
+assert.equal(deadlineResult.title, 'Revisione');
+assert.equal(deadlineResult.subtitle, 'Diego · Moto Guzzi FL790 · Scadenza 14/02/2027');
+assert.ok(deadlineResult.keywords.includes('FL790'));
 assert.match(uiSource, /new SwipeList\(selector/);
 assert.match(uiSource, /onSwipeLeft: card => \{ void run\(card, true\); \}/);
 assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
 assert.match(uiSource, /probeMicrophoneAccess\(/);
 assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
+assert.match(uiSource, /pendingSpokenAnswer = ask\(transcriptState\.final\)\?\.message \|\| ''/);
+assert.match(uiSource, /recognition\.addEventListener\('end',[\s\S]*speak\(message\)/);
+assert.doesNotMatch(uiSource, /ask\(transcriptState\.final, true\)/);
 assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /archiveRecipients\(target\)\.length > 0/);
 console.log('Vault assistant search tests: OK');
