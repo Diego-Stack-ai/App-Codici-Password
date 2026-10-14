@@ -30,6 +30,8 @@ assert.match(loaderSource, /archiveAction:/);
 assert.match(uiSource, /new SwipeList\(selector/);
 assert.match(uiSource, /onSwipeLeft: card => \{ void run\(card, true\); \}/);
 assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
+assert.match(uiSource, /probeMicrophoneAccess\(/);
+assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
 assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /archiveRecipients\(target\)\.length > 0/);
 console.log('Vault assistant search tests: OK');

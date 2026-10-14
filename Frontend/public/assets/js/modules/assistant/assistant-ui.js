@@ -1,6 +1,8 @@
 import { SwipeList } from '../../swipe-list-v6.js';
 import {
+    classifySpeechRecognitionError,
     createSpeechTranscriptState,
+    probeMicrophoneAccess,
     updateSpeechTranscriptState,
     voiceRecognitionErrorMessage
 } from './voice-recognition-model.js';
@@ -163,7 +165,20 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
             transcriptState = createSpeechTranscriptState();
             if ('processLocally' in recognition) recognition.processLocally = locally;
             status.textContent = locally ? 'Avvio ascolto sul dispositivo…' : 'Avvio il servizio vocale del browser…';
-            setListening(true); recognition.start(); clearRecognitionTimeout();
+            setListening(true);
+            try {
+                recognition.start();
+            } catch (error) {
+                recognitionStarting = false; setListening(false);
+                const code = classifySpeechRecognitionError(error, { microphoneVerified: true, local: locally });
+                if (locally && ['local-recognition-blocked', 'local-language-unavailable'].includes(code)) {
+                    requestRemoteConsent(voiceRecognitionErrorMessage(code, { local: true }));
+                    return;
+                }
+                status.textContent = voiceRecognitionErrorMessage(code, { local: locally });
+                return;
+            }
+            clearRecognitionTimeout();
             recognitionTimeout = setTimeout(() => {
                 if (recognitionActive || recognitionStarting) recognition.stop();
                 status.textContent = input.value.trim()
@@ -171,9 +186,10 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                     : 'Nessuna trascrizione ricevuta. Premi il microfono e riprova.';
             }, 12000);
         };
-        const requestRemoteConsent = () => {
+        const requestRemoteConsent = reason => {
             remoteConsentPending = true;
-            status.textContent = 'La voce locale non è disponibile. Se premi ancora, soltanto ciò che pronunci sarà elaborato dal servizio vocale del browser per questa sessione.';
+            const prefix = reason || 'La voce locale non è disponibile.';
+            status.textContent = `${prefix} Se premi ancora, soltanto ciò che pronunci sarà elaborato dal servizio vocale del browser per questa sessione.`;
         };
         microphone.addEventListener('click', async () => {
             if (recognitionActive || recognitionStarting) {
@@ -181,6 +197,14 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
             }
             microphone.disabled = true;
             try {
+                const microphoneAccess = await probeMicrophoneAccess({
+                    permissions: navigator.permissions,
+                    mediaDevices: navigator.mediaDevices
+                });
+                if (!microphoneAccess.ok) {
+                    status.textContent = voiceRecognitionErrorMessage(microphoneAccess.code);
+                    return;
+                }
                 if (remoteConsentPending) { remoteConsentPending = false; beginRecognition(false); return; }
                 if (!supportsLocalRecognition) { requestRemoteConsent(); return; }
                 const availability = await SpeechRecognition.available({ langs: ['it-IT'], processLocally: true });
@@ -195,10 +219,14 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                     installConfirmed = false; if (microphoneIcon) microphoneIcon.textContent = 'mic';
                     status.textContent = installed ? 'Lingua installata. Premi il microfono e parla.' : 'Installazione non riuscita. Usa la tastiera.'; return;
                 }
-                requestRemoteConsent();
+                requestRemoteConsent(voiceRecognitionErrorMessage('local-language-unavailable', { local: true }));
             } catch (error) {
-                const code = error?.name === 'NotAllowedError' ? 'not-allowed' : error?.error;
-                status.textContent = voiceRecognitionErrorMessage(code, { local: usingLocalRecognition });
+                const code = classifySpeechRecognitionError(error, { microphoneVerified: true, local: true });
+                if (['local-recognition-blocked', 'local-language-unavailable'].includes(code)) {
+                    requestRemoteConsent(voiceRecognitionErrorMessage(code, { local: true }));
+                } else {
+                    status.textContent = voiceRecognitionErrorMessage(code, { local: true });
+                }
                 recognitionStarting = false; setListening(false);
             } finally { microphone.disabled = false; }
         });
@@ -220,11 +248,17 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         });
         recognition.addEventListener('error', event => {
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false;
-            status.textContent = voiceRecognitionErrorMessage(event.error, { local: usingLocalRecognition }); setListening(false);
+            const code = classifySpeechRecognitionError(event, { microphoneVerified: true, local: usingLocalRecognition });
+            if (usingLocalRecognition && ['local-recognition-blocked', 'local-language-unavailable'].includes(code)) {
+                requestRemoteConsent(voiceRecognitionErrorMessage(code, { local: true }));
+            } else {
+                status.textContent = voiceRecognitionErrorMessage(code, { local: usingLocalRecognition });
+            }
+            setListening(false);
         });
         recognition.addEventListener('end', () => {
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false; setListening(false);
-            if (!submittedFinal && input.value.trim()) status.textContent = 'Ascolto terminato. Controlla il testo e premi invia.';
+            if (!remoteConsentPending && !submittedFinal && input.value.trim()) status.textContent = 'Ascolto terminato. Controlla il testo e premi invia.';
         });
     } else {
         microphone.setAttribute('aria-disabled', 'true'); microphone.title = 'Riconoscimento vocale non disponibile';
