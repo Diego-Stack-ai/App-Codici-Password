@@ -1,9 +1,92 @@
 # Guida
 
-> Stato corrente: gli allegati cifrati immagine/PDF sono disponibili nei documenti personali e nei flussi Account, Azienda e Scadenze. Per un'immagine puoi scegliere **Salva ritaglio** oppure **Allega originale**, che non comprime né ridimensiona il file. Il limite per singolo allegato è 32 MiB. Le sezioni successive conservano anche fonti storiche e non prevalgono su questo riepilogo.
+> Stato di implementazione, verifiche e distribuzione: [STATO](../progetto/STATO.md). Le fonti storiche conservate sotto hanno la propria data; per nuovi aiuti valgono i contratti e il riesame delle schede della guida.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
+
+## Guida pagina per pagina e aiuto contestuale
+
+La guida descrive come orientarsi e quali comandi usare; lo stato di implementazione, delle verifiche e della distribuzione è soltanto in [STATO](../progetto/STATO.md). La matrice seguente è l’inventario della superficie canonica, derivato dal [registro delle pagine](../regole/INTERFACCIA.md#fonte-docs-canonical-page-registry-md-l1), dagli HTML e dai moduli, riesaminato sulla base `14c61754` (`1.2.183`) e integrato nella candidata `1.2.184`. Non certifica dispositivi, recapito di notifiche o ambienti distribuiti. I walkthrough e i video indicano il formato progettato; non implicano pulsanti di aiuto già disponibili nell’app.
+
+| pageId | Obiettivo dell’utente | Aiuto per funzioni e controlli | Formato previsto |
+|---|---|---|---|
+| `index` | Ingresso: Raggiungi la pagina di accesso all’app. | Collegamento all’accesso | Testo |
+| `login-v115` | Accesso: Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto. | Distinzione password/Vault, MFA e recupero | Testo + walkthrough breve |
+| `registrati` | Registrazione: Crea l’account di accesso e segui la verifica dell’email. | Requisiti, conferma e verifica email | Checklist + walkthrough |
+| `reset_password` | Recupero dell’accesso: Richiedi l’email per cambiare la password di accesso. | Email di recupero e collegamento riservato | Testo |
+| `imposta_nuova_password` | Nuova password di accesso: Scegli la nuova password di accesso dal percorso autorizzato. | Requisiti e conferma password accesso | Checklist |
+| `home_page` | Home: Scegli l’area in cui lavorare e controlla i riepiloghi delle scadenze. | Aree, riepiloghi e presentazione facoltativa | Testo + walkthrough |
+| `area_privata` | Area privata: Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi. | Quattro categorie, più usati, statistiche | Testo + walkthrough |
+| `account_privati` | Account privati: Cerca e consulta gli Account della categoria scelta. | Ricerca, ordinamento, azioni e permessi | Testo + walkthrough |
+| `form_account_privato` | Crea o modifica Account privato: Prepara un Account o memorandum e controlla i dati prima di salvarli. | Tipi, banking, Widget, comuni, destinatari, Salva | Checklist + walkthrough |
+| `dettaglio_account_privato` | Dettaglio Account privato: Consulta credenziali, note, Widget e allegati dell’Account selezionato. | Mostra/copia, banking, note, allegati e condivisione | Testo + walkthrough; video allegati opzionale |
+| `profilo_privato` | Profilo utente: Organizza identità, contatti, indirizzi, documenti e tessera digitale. | Tab, foto, contatti, indirizzi, documenti, collegamenti, QR | Checklist + walkthrough; video QR/allegati opzionale |
+| `lista_aziende` | Aziende: Scegli l’azienda e accedi ai suoi dati e Account. | Elenco, creazione e scelta contesto | Testo + walkthrough |
+| `dati_azienda` | Dati azienda: Consulta il profilo aziendale, i contatti e le proiezioni condivisibili. | Riepilogo, tessera/QR, PDF e sedi | Testo + walkthrough; video PDF/QR opzionale |
+| `modifica_azienda` | Crea o modifica azienda: Aggiorna anagrafica, referente, sedi, contatti e note aziendali. | Anagrafica, fiscale, referente, sedi, email, note/allegati | Checklist + walkthrough |
+| `account_azienda` | Account azienda: Cerca gli Account nel contesto dell’azienda scelta. | Ricerca e categoria nel contesto aziendale | Testo + walkthrough |
+| `form_account_azienda` | Crea o modifica Account aziendale: Prepara un Account o memorandum dell’azienda selezionata. | Tipi, banking, Widget, comuni, destinatari, Salva | Checklist + walkthrough |
+| `dettaglio_account_azienda` | Dettaglio Account aziendale: Consulta le informazioni dell’Account nell’azienda corrente. | Mostra/copia, note, Widget, allegati e permessi | Testo + walkthrough; video allegati condiviso |
+| `scadenze` | Scadenze: Cerca le date da seguire e distingui scadenze proprie e ricevute. | Filtro, ricerca, ordinamento, proprie/ricevute | Testo + walkthrough |
+| `aggiungi_scadenza` | Crea o modifica scadenza: Imposta data, categoria, preavviso, destinatari e contenuti della scadenza. | Categoria, data, preavviso, frequenza, destinatari e allegati | Checklist + walkthrough |
+| `dettaglio_scadenza` | Dettaglio scadenza: Controlla data, pianificazione, contenuti e azioni della scadenza scelta. | Pianificazione, fonte, allegati e azioni autorizzate | Testo + walkthrough |
+| `regole_scadenze` | Regole delle scadenze: Apri la configurazione della categoria da gestire. | Scelta fra tre configurazioni | Testo |
+| `configurazione_automezzi` | Configurazione Automezzi: Gestisci tipi, modelli e testi per le scadenze dei veicoli. | Tipi, modelli, testi e assenza di riscrittura retroattiva | Checklist + walkthrough |
+| `configurazione_documenti` | Configurazione Documenti: Gestisci tipi, modelli e testi per le scadenze dei documenti. | Tipi, modelli e testi | Checklist + walkthrough |
+| `configurazione_generali` | Configurazione Generali: Gestisci tipi e testi delle scadenze generali. | Tipi e testi separati dagli altri domini | Checklist + walkthrough |
+| `impostazioni` | Impostazioni: Configura aspetto, servizi, sicurezza e gestione dei dati dal centro di controllo. | Lingua/tema, Assistente, Azienda, Archivio, comuni, backup, salute, campi, regole, sicurezza, push, diagnostica e logout | Indice ricercabile + walkthrough per gruppo; video backup opzionale |
+| `gestione_destinatari` | Gestione destinatari: Prepara i contatti da selezionare nei flussi di condivisione. | Rubrica, email, ritorno e distinzione da inviti/permessi | Checklist + walkthrough |
+| `archivio_account` | Archivio Account: Trova gli Account archiviati e scegli fra ripristino ed eliminazione definitiva. | Contesto, ricerca, ripristino e cancellazione definitiva | Testo + conferme applicative; walkthrough solo descrittivo |
+| `contatto_condiviso` | Contatto condiviso: Consulta soltanto il contatto reso disponibile tramite il QR. | Contatto ricevuto, vCard e recupero errore | Testo; nessun contesto Vault |
+| `privacy` | Privacy: Leggi l’informativa privacy dell’app. | Accesso all’informativa senza parafrasi legali autonome | Testo |
+| `termini` | Termini: Leggi le condizioni d’uso del servizio. | Accesso alle condizioni pubblicate | Testo |
+
+### Primi passi e percorsi completi
+
+L’onboarding proposto è facoltativo, interrompibile e riapribile: accesso → distinzione fra password di accesso e Master Password → Home → Profilo essenziale → primo Account → Impostazioni. Spiega subito che la guida non richiede né riceve password, PIN, codici o Recovery Key. Non impone di compilare il Profilo completo, attivare l’Assistente, installare un modello, concedere notifiche o creare dati per terminare il percorso.
+
+Il catalogo collega anche cinque percorsi: primo Account privato; prima azienda con Account; prima Scadenza; condivisione consapevole; sicurezza e recupero. Sono sequenze di schede leggibili: il passaggio fra schede della guida non naviga, salva o invia alcunché. Aprire un record reale richiederà il router dell’app e i suoi normali permessi, mai un URL generato dal testo della guida.
+
+### Impostazioni come centro dell’aiuto
+
+Il progetto aggiunge un ingresso esplicito «Guida e primi passi» alle Impostazioni e un comando «Aiuto su questa pagina» alla shell; sulle pagine di accesso e sul ricevitore pubblico serve un ingresso dedicato, senza caricare la shell privata. L’aiuto D0 deve rimanere disponibile anche quando il Vault è bloccato o la ricerca dell’Assistente è disattivata. L’Assistente potrà rispondere a richieste come «a cosa serve questa pagina?» usando le stesse schede statiche; la ricerca nei propri dati resta un percorso separato dopo sblocco.
+
+Le Impostazioni richiedono schede brevi distinte per: lingua; luminosità e palette; Assistente base; area Azienda; Archivio; Credenziali comuni; backup e ripristino; salute credenziali; uso dei campi; regole Scadenze; password accesso; MFA e codici recupero; Master Password e biometria; timer blocco; reset Vault; revoca sessioni; push Scadenze/Condivisioni; diagnostica; informative e logout. Preparazione offline, allegati offline e AI locale facoltativa hanno spiegazioni separate quando i rispettivi incrementi sono integrati. La presenza della guida non certifica l’integrazione di queste funzioni future.
+
+### Come consultare la prima guida testuale
+
+Il comando è «Aiuto su questa pagina»; nelle Impostazioni è «Guida e primi passi». Il dialogo apre la scheda della pagina corrente. «Pagina da conoscere» permette di leggere una qualsiasi delle 30 schede; «Primi passi» mostra il percorso introduttivo; «Questa pagina» ritorna al contesto iniziale. Le schede correlate aprono altre istruzioni dentro il dialogo: non navigano l'app e non creano, aprono o modificano record.
+
+Chiudi con il pulsante, Escape o il fondale. Il focus ritorna al comando di apertura quando ancora disponibile; Tab e Shift-Tab restano dentro il dialogo. Le istruzioni sono leggibili anche quando il Vault è bloccato o l'Assistente è disattivato; sulle pagine private resta necessario superare il normale gate di identità, e un eventuale altro dialogo dell'app deve essere chiuso prima dell'apertura. Se un dialogo dell'app compare mentre consulti la guida, la guida si chiude e può essere riaperta dopo averlo gestito. Non inserire segreti per usare la guida. Per la consultazione senza rete prepara prima la shell PWA mentre sei online; la disponibilità delle istruzioni non implica quella dei dati personali.
+
+Questa prima vista usa testo e selezione delle schede. Evidenziazione dei comandi, avanzamento dei walkthrough, video e traduzioni aggiuntive mantengono i gate sotto riportati. Per implementazione/verifica/distribuzione vedere soltanto [STATO](../progetto/STATO.md).
+
+### Regole per l’uso degli aiuti
+
+Ogni scheda mostra scopo, istruzioni numerate, limiti e pagine correlate. I nomi di Account, aziende, note, Widget e documenti creati dall’utente restano invariati; vengono tradotti soltanto titolo, spiegazioni, comandi della guida, ARIA ed errori statici. Una traduzione mancante usa l’italiano e deve dichiarare il fallback; non usare un modello per tradurre i contenuti personali.
+
+Il walkthrough mostra un’istruzione alla volta con Avanti, Indietro, Esci e contatore dei passi. Un controllo può essere evidenziato soltanto se univoco, visibile, abilitato e appartenente alla vista corrente. Altrimenti resta l’istruzione testuale completa. Il tour non preme pulsanti, non apre lucchetti, non legge valori dei campi, non concede permessi e non accetta conferme. Foto, allegati, inviti, condivisioni, copie negli appunti, reset, backup e cancellazioni restano azioni dell’utente nei flussi dell’app.
+
+Aiuto e video devono avere equivalenti testuali; la lettura e l’uscita funzionano da tastiera e screen reader. Evidenziazione e animazione non sono l’unico modo di spiegare un passo; rispettare movimento ridotto, zoom e safe area. Un cambio pagina, logout o smontaggio termina il tour; dopo chiusura il focus ritorna al comando che lo ha aperto, se ancora presente.
+
+### Video: selezione e manutenzione
+
+Non occorre un video per ogni HTML. I primi candidati sono i flussi visuali riutilizzabili: acquisizione Tessera/Carta e ritaglio/originale; Profilo e QR; Account con Widget e Credenziali comuni; Scadenza con destinatari; backup e ripristino. Le pagine di sola lettura, accesso, informative e configurazioni semplici beneficiano soprattutto di testo e walkthrough. Un video condiviso fra Account privati e aziendali evita due registrazioni quasi uguali.
+
+Ogni clip deve usare soltanto fixture sintetiche, mostrare versione e data di revisione, avere durata, peso, sottotitoli, trascrizione e capitoli. Non registrare schermate di dati reali, campi rivelati, chiavi o notifiche personali; per illustrare un segreto usare un segnaposto dichiarato. Riproduzione e download restano volontari, senza autoplay, analytics esterni o precache obbligatoria. Il video Home mantiene il proprio trasporto protetto; la guida non ne copia token o URL.
+
+Budget proposto da validare: 30–60 secondi e 2–5 MiB per clip, con stop della produzione editoriale se un compito risulta più chiaro in testo. A titolo di calcolo, una clip da 4 MiB riprodotta 1.000 volte trasferisce circa 3,9 GiB; cinque clip simili riprodotte 1.000 volte ciascuna trasferiscono circa 19,5 GiB. Sono esempi aritmetici, non una stima di traffico o una tariffa corrente. I costi reali dipendono dal trasporto scelto e dalle tariffe da verificare prima di pubblicare.
+
+La manutenzione include registrazione, montaggio, sottotitoli/traduzioni, verifica visiva e sostituzione dopo cambi di UI. Preferire sovrimpressioni traducibili e audio facoltativo a una registrazione distinta per lingua. Una clip non riesaminata per la release corrente va segnalata come da aggiornare o rimossa dalla scheda, mantenendo testo e walkthrough.
+
+### Aggiornamento per release e gate d’integrazione
+
+Ogni cambiamento a pagina, controllo o flusso deve aggiornare la relativa scheda e la matrice nello stesso lavoro. Il catalogo ha versione del contenuto indipendente dalla versione dell’app e indica la base applicativa riesaminata. I controlli automatici verificano copertura delle 30 route, chiavi, link interni e target statici; non dimostrano che le istruzioni siano corrette o che un controllo sia effettivamente disponibile su ogni dispositivo.
+
+Prima di integrare la UI: riesame editoriale funzione per funzione; identificatori stabili per i controlli dinamici; owner di apertura/smontaggio e focus; prove sintetiche con Vault bloccato, AI disattivata, pagina vuota, permessi diversi, offline dopo preparazione, target mancante e cambio pagina durante tour; prova tastiera/screen reader/zoom/movimento ridotto; budget e CSP; traduzioni dei controlli della guida e fallback esplicito; policy di progresso locale minimale senza dati personali. Verificare separatamente mobile fisico e PWA.
+
+La fonte tecnica e le API del primo nucleo sono in [ASSISTENTE_APP](../sviluppo/ASSISTENTE_APP.md#catalogo-d0-e-risolutore-della-guida). Stato, test eseguiti e limiti restano in [STATO](../progetto/STATO.md); i testi storici sotto conservano la loro data e non prevalgono sui contratti o sulle schede riesaminate.
 
 ## Indice delle fonti conservate
 

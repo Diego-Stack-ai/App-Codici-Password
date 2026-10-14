@@ -1,5 +1,23 @@
 # Incarico corrente
 
+## GUIDA-UTENTE-CONTESTUALE-01 — perimetro isolato — 14/10/2026
+
+La delega esplicita del coordinatore della conversazione assegna al terzo agente la progettazione della documentazione per il nuovo utente, pagina per pagina e funzione per funzione: onboarding, aiuto in Impostazioni, guida contestuale, evidenziazione/walkthrough, utilità e costo dei video, multilingua, accessibilità, privacy e manutenzione per release. Il coordinatore ha confermato il primo nucleo D0 disaccoppiato: catalogo statico delle 30 schede, resolver puro senza Firebase/Vault, audit di route/target/chiavi e matrice nella GUIDA. Base del worktree isolato `guida-utente-contestuale`, HEAD detached: `b0a6b27dbb377a2fa0ebf8fec6eb4fc81a535cd8` (`1.2.180`); modifiche preesistenti assenti al controllo iniziale.
+
+File previsti: catalogo/risolutore nuovi nel modulo Assistente, audit e test dedicati; soli Markdown canonici GUIDA, ASSISTENTE_APP, INCARICO_CORRENTE e STATO. Criteri: tutte le 30 route coperte una volta, testi statici con chiavi i18n, target verificati nel sorgente, fallback testuale e linguistico, percorsi senza azioni o dati personali, documentazione della successiva integrazione UI, test documentali e controlli pertinenti. Legacy censito come evidenza senza rimozioni.
+
+Il seguito esplicito del coordinatore autorizza il primo gate di integrazione: rendere la guida raggiungibile senza Vault, collegare bootstrap/contesto canonico e shell offline, integrare i controlli nel package ed eseguire prove browser/tastiera/accessibilità pertinenti, sempre sulla base isolata 1.2.180. L'entry UI, la vista, le chiavi linguistiche, il CSS, i tre bootstrap, l'elenco offline generato e il banco browser rientrano in questo incremento. Preparare una patch revisionabile; non sovrapporsi a lingue o AI avanzata. Una scelta UX indispensabile richiede alternative concrete prima di procedere.
+
+Il successivo ordine del coordinatore autorizza la riconciliazione del medesimo lotto con origin/master dopo 1.2.182, commit `3fd7c7e5aba0bd8870131cd0d0826c8bf779211f`, nel worktree isolato detached. La patch precedente resta recuperabile; si adattano soltanto i punti sovrapposti e si riesaminano le schede. I controlli includono regressioni, assenza di segreti/dati reali, test pertinenti e documentali. Per Graphify il coordinatore prescrive un indice secondario esterno isolato: il principale sarà aggiornato da lui dopo integrazione definitiva. I risultati correnti sono soltanto in STATO; non sono autorizzati commit, push, merge o deploy autonomi.
+
+Un ulteriore ordine del coordinatore richiede il riallineamento del solo lotto su base pulita 1.2.183, `14c61754cc6fdee754b850e50ad27132f15afae7`, preservando entrambe le correzioni AI: presentazione delle card Scadenze e sintesi vocale dopo end del riconoscimento. Ripetere almeno guida, Assistente, budget Profilo, hardening e test documentali; restituire patch, base esatta, conflitti, risultati e lista dei file. La consegna non autorizza pubblicazione o operazioni Git autonome.
+
+Diego ha autorizzato l'Orchestratore a verificare e pubblicare separatamente i lotti conclusi dagli agenti. Per la Guida l'Orchestratore applica la patch verificata a una base pulita `1.2.183`, esegue il bump `1.2.184`, aggiorna il grafo principale dopo l'integrazione e coordina commit, push, merge e deploy del solo Firebase Hosting se tutti i gate restano verdi. Functions, Rules, dati reali, Lingue, Archivio portabile e sicurezza restano esclusi da questo rilascio.
+
+Restano esclusi: modifica dei testi legacy estranei alla Guida, dati reali, nuovo Markdown, installazione skill o modelli e qualsiasi backend. Stato ed evidenze della consegna sono in [STATO](STATO.md); architettura in [ASSISTENTE_APP](../sviluppo/ASSISTENTE_APP.md#catalogo-d0-e-risolutore-della-guida), matrice e gate nella [GUIDA](../utente/GUIDA.md#guida-pagina-per-pagina-e-aiuto-contestuale). Questo incarico non riattiva i lavori storici successivi.
+
+
+
 ## Correzione e pubblicazione ricerca Scadenze dell'Assistente — 14/10/2026
 
 Diego segnala che una ricerca per targa, per esempio `FL790`, trova correttamente più Scadenze ma presenta card indistinguibili con il titolo generico «Scadenza». L'intervento autorizzato riallinea il risultato dell'Assistente al modello canonico delle card: tipo/categoria come titolo e, nel sottotitolo, intestatario, veicolo/targa e data quando disponibili. I campi storici italiani e quelli canonici inglesi restano entrambi ricercabili. Sul telefono una domanda riconosciuta mostra inoltre i risultati senza pronunciare la risposta: il flusso deve chiudere la sessione audio del riconoscimento prima di avviare la sintesi vocale.
