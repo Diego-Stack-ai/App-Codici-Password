@@ -44,6 +44,10 @@ Il prodotto conserva due livelli separati:
 
 ### Incremento Assistente base 14/10/2026
 
+L'interfaccia mantiene un solo **Agente Codex** con due modalità esplicite. **Cerca** usa esclusivamente indice e regole locali; **Chiedi** riserva lo spazio all'AI locale avanzata e, finché il relativo pacchetto non è implementato e autorizzato, resta disabilitata con una spiegazione trasparente. Il pulsante `?` interno documenta comandi ed esempi senza accedere ai record. L'aiuto pagina per pagina è invece un controllo distinto del footer.
+
+Le varianti di apertura includono anche trascrizioni vocali come `apre undicesimo`. Se una richiesta di apertura resta ambigua, il motore chiede di indicare posizione o nome e conserva l'ultimo elenco: un errore di riconoscimento non può interrompere il comando successivo. Il saluto iniziale non viene inserito nella cronologia.
+
 I risultati Account riusano il gesto laterale canonico delle liste. Il trascinamento verso sinistra espone il cestino e richiede conferma; quello verso destra espone Archivio e richiede comunque avviso quando l'Account ha destinatari. Entrambe le azioni chiamano il servizio transazionale di archiviazione: la cancellazione definitiva resta esclusa dall'Assistente e confinata alla pagina Archivio.
 
 Il contesto del livello base conserva l'ultimo elenco di risultati. I comandi di apertura accettano ordinali, cifre e cardinali italiani da uno a dodici; un nome Azienda viene aperto soltanto per corrispondenza esatta e univoca con il record Azienda, mentre un titolo esatto e univoco può selezionare una card dell'ultimo elenco. Queste sono regole deterministiche: non costituiscono comprensione generativa e non attivano l'AI locale avanzata.

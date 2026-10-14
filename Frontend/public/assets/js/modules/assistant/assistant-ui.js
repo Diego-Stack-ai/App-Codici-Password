@@ -25,8 +25,29 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
     heading.append(element('h2', '', 'Agente Codex'), element('p', '', 'Conversazione locale, protetta e in sola lettura'));
+    const headerActions = element('div', 'vault-assistant-header-actions');
+    const help = element('button', 'vault-assistant-help', '?');
+    help.type = 'button'; help.setAttribute('aria-label', 'Istruzioni Agente Codex'); help.setAttribute('aria-expanded', 'false');
     const close = element('button', 'vault-assistant-close', '×');
-    close.type = 'button'; close.setAttribute('aria-label', 'Chiudi'); close.addEventListener('click', onClose); header.append(heading, close);
+    close.type = 'button'; close.setAttribute('aria-label', 'Chiudi'); close.addEventListener('click', onClose);
+    headerActions.append(help, close); header.append(heading, headerActions);
+
+    const modes = element('div', 'vault-assistant-modes');
+    modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Modalità Agente Codex');
+    const searchMode = element('button', 'vault-assistant-mode active', 'Cerca');
+    const askMode = element('button', 'vault-assistant-mode', 'Chiedi');
+    searchMode.type = 'button'; askMode.type = 'button';
+    searchMode.setAttribute('aria-pressed', 'true'); askMode.setAttribute('aria-pressed', 'false');
+    modes.append(searchMode, askMode);
+    const instructions = element('section', 'vault-assistant-instructions');
+    instructions.hidden = true;
+    instructions.append(
+        element('strong', '', 'Come usare Agente Codex'),
+        element('p', '', 'In Cerca puoi dire: “cerca BM Service”, poi “apri il secondo”, “apri il due” oppure “apri BM Service”.'),
+        element('p', '', 'Chiedi è riservata alla futura AI locale avanzata e non è ancora attiva.')
+    );
+    const modeNotice = element('p', 'vault-assistant-mode-notice', 'La modalità Chiedi richiederà il pacchetto AI locale avanzato. In questa versione usa Cerca.');
+    modeNotice.hidden = true;
 
     const conversation = element('div', 'vault-assistant-conversation'); conversation.setAttribute('aria-live', 'polite');
     const searchRow = element('form', 'vault-assistant-search-row');
@@ -42,15 +63,31 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     const swipeLists = new Set();
     if (offlineNotice) status.textContent = offlineNotice;
 
-    let speechSynthesis; let uiDestroyed = false;
+    let speechSynthesis; let uiDestroyed = false; let activeMode = 'search';
     microphone.disabled = true;
     import('./speech-synthesis-controller.js').then(module => {
         speechSynthesis = module.createSpeechSynthesisController({
             synthesis: window.speechSynthesis,
             Utterance: window.SpeechSynthesisUtterance
         });
-        if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = false;
-    }).catch(() => { if (!uiDestroyed) microphone.disabled = false; });
+        if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = activeMode !== 'search';
+    }).catch(() => { if (!uiDestroyed) microphone.disabled = activeMode !== 'search'; });
+    const setMode = mode => {
+        activeMode = mode;
+        const searching = mode === 'search';
+        searchMode.classList.toggle('active', searching); askMode.classList.toggle('active', !searching);
+        searchMode.setAttribute('aria-pressed', String(searching)); askMode.setAttribute('aria-pressed', String(!searching));
+        input.disabled = !searching; send.disabled = !searching; microphone.disabled = !searching || !speechSynthesis;
+        modeNotice.hidden = searching;
+        input.placeholder = searching ? 'Cosa vuoi cercare?' : 'AI locale avanzata non ancora disponibile';
+        if (searching) input.focus();
+    };
+    searchMode.addEventListener('click', () => setMode('search'));
+    askMode.addEventListener('click', () => setMode('ask'));
+    help.addEventListener('click', () => {
+        instructions.hidden = !instructions.hidden;
+        help.setAttribute('aria-expanded', String(!instructions.hidden));
+    });
     const addBubble = (role, message) => {
         const bubble = element('div', `vault-assistant-bubble ${role}`, message);
         conversation.append(bubble); conversation.scrollTop = conversation.scrollHeight;
@@ -143,7 +180,6 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
         return answer;
     };
-    addBubble('assistant', 'Ciao. Dimmi cosa stai cercando: posso trovare documenti, account, aziende e scadenze.');
     searchRow.addEventListener('submit', event => { event.preventDefault(); ask(input.value); });
 
     let activeRecognition = null;
@@ -278,7 +314,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         microphone.addEventListener('click', () => { status.textContent = 'Usa la dettatura della tastiera del telefono.'; });
     }
     backdrop.addEventListener('click', event => { if (event.target === backdrop) onClose(); });
-    panel.append(header, conversation, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
+    panel.append(header, modes, instructions, modeNotice, conversation, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
     return { destroy: () => {
         swipeLists.forEach(instance => instance.destroy()); swipeLists.clear();
