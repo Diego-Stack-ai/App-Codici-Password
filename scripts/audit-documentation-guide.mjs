@@ -43,7 +43,10 @@ export async function auditDocumentationGuide() {
         assert.doesNotMatch(source, /innerHTML|\.click\(|window\.location\s*=|location\.href\s*=/, `Azioni o HTML interpretato nella guida: ${file}`);
     }
     const mount = 'mountDocumentationHelp(getDocumentationPageContext(window.location.pathname))';
-    for (const file of ['main-v129.js', 'login-entry.js', 'contact-card-receiver.js']) {
+    const privateBootstrap = await readFile(new URL('assets/js/main-v129.js', publicRoot), 'utf8');
+    assert.ok(!privateBootstrap.includes("import('./guide.js')"),
+        'La guida privata non deve montare un secondo ? transitorio prima del modulo pagina');
+    for (const file of ['login-entry.js', 'contact-card-receiver.js']) {
         const source = await readFile(new URL(`assets/js/${file}`, publicRoot), 'utf8');
         const guideImport = source.match(/import\('\.\/guide\.js'\)\.then\(\(\{\s*init\s*\}\)\s*=>\s*init\(\),\s*LOG\)/);
         const mountedAt = source.includes(mount) ? source.indexOf(mount) : (guideImport?.index ?? -1);

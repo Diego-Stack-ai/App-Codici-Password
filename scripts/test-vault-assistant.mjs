@@ -6,39 +6,39 @@ import { VaultConversationEngine } from '../Frontend/public/assets/js/modules/as
 
 assert.equal(normalizeSearchText(' Moto Guzzi — Califòrnia '), 'moto guzzi california');
 const conversation = new VaultConversationEngine([
-    { id: 'account:company-1', kind: 'account aziendale', title: 'Banca Impresa', subtitle: 'Azienda: PaxTibi', scope: 'azienda', companyName: 'PaxTibi', keywords: ['banca'], href: '/company-bank' },
+    { id: 'account:company-1', kind: 'account aziendale', title: 'Banca Impresa', subtitle: 'Azienda: Demo Nord', scope: 'azienda', companyName: 'Demo Nord', keywords: ['banca'], href: '/company-bank' },
     { id: 'account:private-1', kind: 'account', title: 'Banca personale', subtitle: 'Account privato', scope: 'privato', keywords: ['banca'], href: '/private-bank' }
 ]);
-const bankAnswer = conversation.ask("Sto cercando una banca dell'azienda PaxTibi");
+const bankAnswer = conversation.ask("Sto cercando una banca dell'azienda Demo Nord");
 assert.equal(bankAnswer.items.length, 1);
 assert.equal(bankAnswer.items[0].href, '/company-bank');
-assert.match(bankAnswer.message, /PaxTibi/);
-const spokenBankAnswer = conversation.ask('Sto cercando una banca di Pack Tibi');
+assert.match(bankAnswer.message, /Demo Nord/);
+const spokenBankAnswer = conversation.ask('Sto cercando una banca di Deno Nord');
 assert.equal(spokenBankAnswer.items.length, 1);
 assert.equal(spokenBankAnswer.items[0].href, '/company-bank');
 const openAnswer = conversation.ask('aprimi il primo');
 assert.equal(openAnswer.navigateTo, '/company-bank');
 const companyRecords = [
-    { id: 'company:bm-service', kind: 'azienda', title: 'BM Service', subtitle: 'Azienda', scope: 'azienda', companyName: 'BM Service', href: '/company-bm' },
+    { id: 'company:demo-nord', kind: 'azienda', title: 'Demo Nord', subtitle: 'Azienda', scope: 'azienda', companyName: 'Demo Nord', href: '/company-demo' },
     ...Array.from({ length: 11 }, (_, index) => ({
         id: `account:bm-${index + 1}`, kind: 'account aziendale', title: `Servizio ${index + 1}`,
-        subtitle: 'Azienda: BM Service', scope: 'azienda', companyName: 'BM Service', keywords: ['BM Service'], href: `/bm-${index + 1}`
+        subtitle: 'Azienda: Demo Nord', scope: 'azienda', companyName: 'Demo Nord', keywords: ['Demo Nord'], href: `/demo-${index + 1}`
     }))
 ];
 const contextual = new VaultConversationEngine(companyRecords);
-const bmResults = contextual.ask('cerca BM Service');
-assert.equal(bmResults.items.length, 12);
-assert.doesNotMatch(bmResults.message, /indicare l’azienda/);
-assert.match(bmResults.message, /apri il due/);
-assert.equal(contextual.ask('apri il due').navigateTo, bmResults.items[1].href);
-assert.equal(contextual.ask('apre undicesimo').navigateTo, bmResults.items[10].href);
+const companyResults = contextual.ask('cerca Demo Nord');
+assert.equal(companyResults.items.length, 12);
+assert.doesNotMatch(companyResults.message, /indicare l’azienda/);
+assert.match(companyResults.message, /apri il due/);
+assert.equal(contextual.ask('apri il due').navigateTo, companyResults.items[1].href);
+assert.equal(contextual.ask('apre undicesimo').navigateTo, companyResults.items[10].href);
 const misunderstood = contextual.ask('apri quello giusto');
 assert.match(misunderstood.message, /Non ho riconosciuto/);
-assert.equal(contextual.ask('apri il secondo').navigateTo, bmResults.items[1].href);
-assert.equal(contextual.ask('apri BM Service').navigateTo, '/company-bm');
-assert.equal(contextual.ask("apri l'azienda BM Service").navigateTo, '/company-bm');
+assert.equal(contextual.ask('apri il secondo').navigateTo, companyResults.items[1].href);
+assert.equal(contextual.ask('apri Demo Nord').navigateTo, '/company-demo');
+assert.equal(contextual.ask("apri l'azienda Demo Nord").navigateTo, '/company-demo');
 conversation.removeRecord('account:company-1');
-assert.equal(conversation.ask('banca PaxTibi').items.length, 0);
+assert.equal(conversation.ask('banca Demo Nord').items.length, 0);
 conversation.clear();
 const [loaderSource, uiSource, controllerSource, guideSource] = await Promise.all([
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/vault-data-loader.js', import.meta.url), 'utf8'),
@@ -58,12 +58,12 @@ const loaderPreamble = loaderSource.slice(loaderSource.indexOf('const text ='), 
 const deadlineFunction = loaderSource.slice(loaderSource.indexOf('function deadlineRecord'), loaderSource.indexOf('\nexport async function'));
 const loaderFunctions = `${loaderPreamble}\n${deadlineFunction}`;
 vm.runInContext(`${loaderFunctions}\nglobalThis.deadlineRecord = deadlineRecord;`, loaderContext);
-const deadlineResult = loaderContext.deadlineRecord('deadline-fl790', {
-    type: 'Revisione', name: 'Diego', veicolo_modello: 'Moto Guzzi', targa: 'FL790', dueDate: '2027-02-14'
+const deadlineResult = loaderContext.deadlineRecord('deadline-zz000zz', {
+    type: 'Revisione', name: 'Utente Demo', veicolo_modello: 'Veicolo demo', targa: 'ZZ000ZZ', dueDate: '2027-02-14'
 });
 assert.equal(deadlineResult.title, 'Revisione');
-assert.equal(deadlineResult.subtitle, 'Diego · Moto Guzzi FL790 · Scadenza 14/02/2027');
-assert.ok(deadlineResult.keywords.includes('FL790'));
+assert.equal(deadlineResult.subtitle, 'Utente Demo · Veicolo demo ZZ000ZZ · Scadenza 14/02/2027');
+assert.ok(deadlineResult.keywords.includes('ZZ000ZZ'));
 assert.match(uiSource, /new SwipeList\(selector/);
 assert.match(uiSource, /onSwipeLeft: card => \{ void run\(card, true\); \}/);
 assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
@@ -73,6 +73,8 @@ assert.match(uiSource, /pendingSpokenAnswer = ask\(transcriptState\.final\)\?\.m
 assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
 assert.match(uiSource, /vault-assistant-mode[^\n]*Cerca/);
 assert.match(uiSource, /vault-assistant-help/);
+assert.match(uiSource, /nome completo o parziale di un Account/);
+assert.match(uiSource, /if \(!supportsLocalRecognition\) \{ beginRecognition\(false\); return; \}/);
 assert.match(uiSource, /microphone\.addEventListener\('click', async \(\) => \{[\s\S]*speechSynthesis\?\.prime\(\);[\s\S]*await probeMicrophoneAccess/);
 assert.match(uiSource, /recognition\.addEventListener\('end',[\s\S]*speechSynthesis\?\.speakAfterAudioRelease\(message\)/);
 assert.doesNotMatch(uiSource, /speechSynthesis\.cancel\(\);[\s\S]{0,200}speechSynthesis\.speak\(/);

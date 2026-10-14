@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Hotfix Agente Codex base proposto 1.2.187 — 14/10/2026
+
+Diego richiede un lotto solo client sulla base pubblicata `1.2.186`: eliminare il comando `?` transitorio montato nel footer durante il bootstrap delle pagine private, conservando un solo aiuto dentro il dialogo Agente Codex; sostituire esempi riconducibili a dati personali con esempi generici; dopo la concessione del microfono proseguire nello stesso gesto fino all'avvio del riconoscimento disponibile. Restano invariati primer e sintesi iPhone, ricerca deterministica, contesto dei risultati e separazione fra **Cerca** e la futura modalità **Chiedi**.
+
+Il lavoro è delegato in worktree isolato su `8f7029f8`; non autorizza commit, push, merge o deploy. Functions, Rules, dati reali, Archivio portabile, Lingue e AI avanzata sono esclusi. Consegna richiesta: diff revisionabile, test Assistente e documentazione, diagnosi della causa e versione proposta.
+
 ## Agente Codex unico: Cerca/Chiedi e continuità dei comandi — 14/10/2026
 
 Diego autorizza la release successiva alla `1.2.185` come lotto solo client. L'Agente resta un unico dialogo e presenta due modalità: **Cerca**, che usa il motore deterministico locale esistente, e **Chiedi**, visibile ma dichiarata non ancora disponibile finché non verrà integrato e autorizzato il pacchetto AI locale avanzato. Il comando `?` nel titolo espone istruzioni ed esempi senza leggere il Vault. Il saluto iniziale viene rimosso.
