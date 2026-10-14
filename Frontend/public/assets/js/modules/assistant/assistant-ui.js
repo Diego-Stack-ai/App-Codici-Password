@@ -1,3 +1,10 @@
+import { SwipeList } from '../../swipe-list-v6.js';
+import {
+    createSpeechTranscriptState,
+    updateSpeechTranscriptState,
+    voiceRecognitionErrorMessage
+} from './voice-recognition-model.js';
+
 function element(tag, className, text = '') {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -30,6 +37,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     microphone.type = 'button'; microphone.setAttribute('aria-label', 'Parla con Codex'); microphone.append(element('span', 'material-symbols-outlined', 'mic'));
     searchRow.append(input, send, microphone);
     const status = element('p', 'vault-assistant-status', 'I dati segreti non vengono mostrati nella conversazione.');
+    const swipeLists = new Set();
     if (offlineNotice) status.textContent = offlineNotice;
 
     const speak = message => {
@@ -80,11 +88,17 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         if (!items.length) return;
         const group = element('div', 'vault-assistant-results');
         for (const [index, item] of items.entries()) {
-            const card = element('div', 'vault-assistant-result');
+            const card = element('div', 'vault-assistant-result swipe-row');
+            card.assistantItem = item;
             card.tabIndex = 0; card.setAttribute('role', 'link');
             const navigate = () => { window.location.href = item.href; };
             card.addEventListener('click', navigate);
             card.addEventListener('keydown', event => { if (event.target === card && event.key === 'Enter') navigate(); });
+            const archiveBackground = element('div', 'swipe-action-bg swipe-bg-left bg-archive');
+            archiveBackground.append(element('span', 'material-symbols-outlined', 'archive'));
+            const deleteBackground = element('div', 'swipe-action-bg swipe-bg-right bg-delete');
+            deleteBackground.append(element('span', 'material-symbols-outlined', 'delete'));
+            const content = element('div', 'swipe-content vault-assistant-result-content');
             const body = element('div', 'vault-assistant-result-body');
             const heading = element('div', 'vault-assistant-result-heading');
             const icon = item.iconSource ? element('img', 'vault-assistant-result-icon') : element('span', 'vault-assistant-result-icon material-symbols-outlined', 'shield_lock');
@@ -96,22 +110,25 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                 await addCredentialRow(body, 'Account', item.credentials.account);
                 await addCredentialRow(body, 'Password', item.credentials.password, { secret: true });
             }
-            if (item.archiveAction && onArchive) {
-                const actions = element('div', 'vault-assistant-result-actions');
-                const archive = element('button', 'vault-assistant-result-action');
-                archive.type = 'button'; archive.title = 'Sposta nell’Archivio (cestino)';
-                archive.append(element('span', 'material-symbols-outlined', 'archive'), element('span', '', 'Archivia'));
-                archive.addEventListener('click', async event => {
-                    event.stopPropagation(); archive.disabled = true;
-                    try {
-                        if (await onArchive(item)) { card.remove(); if (!group.children.length) group.remove(); }
-                    } finally { archive.disabled = false; }
-                });
-                actions.append(archive); body.append(actions);
-            }
-            card.append(body); group.append(card);
+            content.append(body); card.append(archiveBackground, deleteBackground, content); group.append(card);
         }
         conversation.append(group); conversation.scrollTop = conversation.scrollHeight;
+        if (items.some(item => item.archiveAction) && onArchive) {
+            const selector = `.vault-assistant-result.swipe-row`;
+            const run = async (card, requireConfirmation) => {
+                const item = card.assistantItem;
+                if (!item?.archiveAction) return;
+                const completed = await onArchive(item, { requireConfirmation });
+                if (!completed) window.setTimeout(() => { void addResults([item]); }, 500);
+            };
+            const swipeList = new SwipeList(selector, {
+                threshold: 0.15,
+                onSwipeLeft: card => { void run(card, true); },
+                onSwipeRight: card => { void run(card, false); }
+            });
+            swipeLists.forEach(instance => instance.destroy());
+            swipeLists.clear(); swipeLists.add(swipeList);
+        }
     };
     const ask = (query, answerByVoice = false) => {
         const value = query.trim(); if (!value) return;
@@ -123,27 +140,45 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     addBubble('assistant', 'Ciao. Dimmi cosa stai cercando: posso trovare documenti, account, aziende e scadenze.');
     searchRow.addEventListener('submit', event => { event.preventDefault(); ask(input.value); });
 
+    let activeRecognition = null;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const supportsLocalRecognition = SpeechRecognition && 'processLocally' in SpeechRecognition.prototype && typeof SpeechRecognition.available === 'function';
     if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'it-IT'; recognition.interimResults = false; recognition.maxAlternatives = 1;
-        let installConfirmed = false; let remoteConsentPending = false; let usingLocalRecognition = false; let recognitionTimeout = null;
+        const recognition = new SpeechRecognition(); activeRecognition = recognition;
+        recognition.lang = 'it-IT'; recognition.interimResults = true; recognition.continuous = false; recognition.maxAlternatives = 3;
+        let installConfirmed = false; let remoteConsentPending = false; let usingLocalRecognition = false;
+        let recognitionTimeout = null; let recognitionActive = false; let recognitionStarting = false; let submittedFinal = false;
+        let transcriptState = createSpeechTranscriptState();
+        const microphoneIcon = microphone.querySelector('.material-symbols-outlined');
         const clearRecognitionTimeout = () => { if (recognitionTimeout) clearTimeout(recognitionTimeout); recognitionTimeout = null; };
+        const setListening = active => {
+            microphone.classList.toggle('listening', active);
+            microphone.setAttribute('aria-pressed', String(active));
+            microphone.setAttribute('aria-label', active ? 'Termina ascolto' : 'Parla con Codex');
+            microphone.title = active ? 'Termina ascolto' : 'Avvia riconoscimento vocale';
+            if (microphoneIcon) microphoneIcon.textContent = active ? 'stop_circle' : 'mic';
+        };
         const beginRecognition = locally => {
-            usingLocalRecognition = locally;
+            usingLocalRecognition = locally; recognitionStarting = true; submittedFinal = false;
+            transcriptState = createSpeechTranscriptState();
             if ('processLocally' in recognition) recognition.processLocally = locally;
-            status.textContent = locally ? 'Ti ascolto sul dispositivo…' : 'Ti ascolto tramite il servizio vocale del browser…';
-            microphone.classList.add('listening'); recognition.start(); clearRecognitionTimeout();
+            status.textContent = locally ? 'Avvio ascolto sul dispositivo…' : 'Avvio il servizio vocale del browser…';
+            setListening(true); recognition.start(); clearRecognitionTimeout();
             recognitionTimeout = setTimeout(() => {
-                recognition.abort(); microphone.classList.remove('listening'); status.textContent = 'Nessuna trascrizione ricevuta. Premi il microfono e riprova.';
-            }, 8000);
+                if (recognitionActive || recognitionStarting) recognition.stop();
+                status.textContent = input.value.trim()
+                    ? 'Tempo di ascolto terminato. Controlla il testo e invialo.'
+                    : 'Nessuna trascrizione ricevuta. Premi il microfono e riprova.';
+            }, 12000);
         };
         const requestRemoteConsent = () => {
             remoteConsentPending = true;
             status.textContent = 'La voce locale non è disponibile. Se premi ancora, soltanto ciò che pronunci sarà elaborato dal servizio vocale del browser per questa sessione.';
         };
         microphone.addEventListener('click', async () => {
+            if (recognitionActive || recognitionStarting) {
+                status.textContent = 'Termino l’ascolto…'; recognition.stop(); return;
+            }
             microphone.disabled = true;
             try {
                 if (remoteConsentPending) { remoteConsentPending = false; beginRecognition(false); return; }
@@ -151,32 +186,46 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                 const availability = await SpeechRecognition.available({ langs: ['it-IT'], processLocally: true });
                 if (availability === 'available') { beginRecognition(true); return; }
                 if (availability === 'downloadable' && !installConfirmed) {
-                    installConfirmed = true; microphone.querySelector('.material-symbols-outlined').textContent = 'download';
+                    installConfirmed = true; if (microphoneIcon) microphoneIcon.textContent = 'download';
                     status.textContent = 'Manca la lingua italiana locale. Premi ancora per scaricarla.'; return;
                 }
                 if ((availability === 'downloadable' || availability === 'downloading') && typeof SpeechRecognition.install === 'function') {
                     status.textContent = 'Installazione della lingua italiana sul dispositivo…';
                     const installed = await SpeechRecognition.install({ langs: ['it-IT'], processLocally: true });
-                    installConfirmed = false; microphone.querySelector('.material-symbols-outlined').textContent = 'mic';
+                    installConfirmed = false; if (microphoneIcon) microphoneIcon.textContent = 'mic';
                     status.textContent = installed ? 'Lingua installata. Premi il microfono e parla.' : 'Installazione non riuscita. Usa la tastiera.'; return;
                 }
                 requestRemoteConsent();
             } catch (error) {
-                const denied = ['not-allowed', 'service-not-allowed'].includes(error?.error) || error?.name === 'NotAllowedError';
-                status.textContent = denied ? 'Il browser non ha autorizzato il microfono.' : 'Riconoscimento vocale non disponibile. Usa la tastiera.';
+                const code = error?.name === 'NotAllowedError' ? 'not-allowed' : error?.error;
+                status.textContent = voiceRecognitionErrorMessage(code, { local: usingLocalRecognition });
+                recognitionStarting = false; setListening(false);
             } finally { microphone.disabled = false; }
         });
+        recognition.addEventListener('start', () => {
+            recognitionStarting = false; recognitionActive = true;
+            status.textContent = usingLocalRecognition
+                ? 'Ti ascolto sul dispositivo. Premi stop quando hai finito.'
+                : 'Ti ascolto tramite il browser. Premi stop quando hai finito.';
+        });
         recognition.addEventListener('result', event => {
-            clearRecognitionTimeout(); const query = event.results[0][0].transcript.trim(); ask(query, true);
+            transcriptState = updateSpeechTranscriptState(transcriptState, event);
+            if (transcriptState.visible) input.value = transcriptState.visible;
+            status.textContent = transcriptState.interim
+                ? `Ho sentito: “${transcriptState.visible}”`
+                : (transcriptState.final ? 'Trascrizione completata.' : 'Ti ascolto…');
+            if (transcriptState.final && !transcriptState.interim && !submittedFinal) {
+                submittedFinal = true; clearRecognitionTimeout(); ask(transcriptState.final, true);
+            }
         });
         recognition.addEventListener('error', event => {
-            clearRecognitionTimeout();
-            const messages = { 'no-speech': 'Non ho sentito parole. Riprova.', 'audio-capture': 'Il microfono non è disponibile.',
-                'not-allowed': 'Permesso microfono non concesso.', 'service-not-allowed': 'Servizio vocale non autorizzato.',
-                'language-not-supported': 'La lingua italiana locale non è installata.' };
-            status.textContent = messages[event.error] || `${usingLocalRecognition ? 'Riconoscimento locale' : 'Riconoscimento vocale'} non riuscito.`;
+            clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false;
+            status.textContent = voiceRecognitionErrorMessage(event.error, { local: usingLocalRecognition }); setListening(false);
         });
-        recognition.addEventListener('end', () => { clearRecognitionTimeout(); microphone.classList.remove('listening'); });
+        recognition.addEventListener('end', () => {
+            clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false; setListening(false);
+            if (!submittedFinal && input.value.trim()) status.textContent = 'Ascolto terminato. Controlla il testo e premi invia.';
+        });
     } else {
         microphone.setAttribute('aria-disabled', 'true'); microphone.title = 'Riconoscimento vocale non disponibile';
         microphone.addEventListener('click', () => { status.textContent = 'Usa la dettatura della tastiera del telefono.'; });
@@ -185,6 +234,9 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     panel.append(header, conversation, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
     return { destroy: () => {
+        swipeLists.forEach(instance => instance.destroy()); swipeLists.clear();
+        try { activeRecognition?.abort(); } catch { /* già terminato */ }
+        activeRecognition = null;
         window.speechSynthesis?.cancel();
         backdrop.remove();
         document.documentElement.classList.remove('vault-assistant-open');

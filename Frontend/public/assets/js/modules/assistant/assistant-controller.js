@@ -1,11 +1,11 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.180';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.180';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.181';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.181';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
-import { archiveConfirmMessage } from '../settings/archive-account-model.js';
+import { archiveConfirmMessage, archiveRecipients } from '../settings/archive-account-model.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 
@@ -14,7 +14,7 @@ let activeController = null;
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.180'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.181'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -58,9 +58,11 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             onAsk: query => conversation.ask(query),
             onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
-                onArchive: async item => {
+                onArchive: async (item, { requireConfirmation = true } = {}) => {
                     const target = item.archiveAction;
-                    if (!target || !await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(target, t))) return false;
+                    if (!target) return false;
+                    const mustConfirm = requireConfirmation || archiveRecipients(target).length > 0;
+                    if (mustConfirm && !await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(target, t))) return false;
                     try {
                         const result = await archiveAccount(user.uid, target);
                         conversation.removeRecord(item.id);

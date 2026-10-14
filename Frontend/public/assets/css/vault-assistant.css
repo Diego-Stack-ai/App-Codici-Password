@@ -9,6 +9,44 @@
     min-height: var(--touch-target-min, 44px);
 }
 
+.vault-assistant-result.swipe-row {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding: 0;
+}
+
+.vault-assistant-result .swipe-action-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.vault-assistant-result .swipe-bg-left {
+    justify-content: flex-start;
+    color: var(--status-error);
+}
+
+.vault-assistant-result .swipe-bg-right {
+    justify-content: flex-end;
+    color: var(--status-warning);
+}
+
+.vault-assistant-result-content {
+    position: relative;
+    z-index: 2;
+    padding: 11px 12px;
+    background: rgba(255,255,255,.4);
+}
+
+html.dark .vault-assistant-result-content {
+    background: rgba(20,38,67,.92);
+}
+
 .vault-assistant-close {
     display: grid;
     place-items: center;

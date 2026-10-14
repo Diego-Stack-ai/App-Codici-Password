@@ -18,6 +18,12 @@ Il prodotto conserva due livelli separati:
 - **Assistente base**, disponibile senza AI: regole, sinonimi, fuzzy search, filtri, conoscenza delle pagine, guida, navigazione e risultati verificabili;
 - **AI locale avanzata**, facoltativa nelle Impostazioni: interpreta formulazioni vaghe e restituisce soltanto azioni/parametri tipizzati. Non interroga direttamente i dati, non esegue scritture e non sostituisce il livello base.
 
+### Incremento Assistente base 14/10/2026
+
+I risultati Account riusano il gesto laterale canonico delle liste. Il trascinamento verso sinistra espone il cestino e richiede conferma; quello verso destra espone Archivio e richiede comunque avviso quando l'Account ha destinatari. Entrambe le azioni chiamano il servizio transazionale di archiviazione: la cancellazione definitiva resta esclusa dall'Assistente e confinata alla pagina Archivio.
+
+Il microfono espone uno stato di ascolto interrompibile, mostra la trascrizione parziale nel campo, conserva senza duplicarli i segmenti finali fra eventi incrementali e lascia modificabile il testo incompleto. Distingue permesso negato, microfono assente o occupato, lingua mancante e servizio non raggiungibile. La chiusura dell'Assistente interrompe sempre riconoscimento e sintesi vocale; il servizio vocale remoto del browser richiede un secondo gesto informato.
+
 Prima dell'attivazione AI l'app chiede il consenso a una verifica locale del dispositivo e comunica supporto WebGPU/WASM, spazio stimato, dimensione del download, memoria/batteria, possibile riscaldamento, funzionamento offline, assenza di token API e possibilità di eliminare il modello. La compatibilità deriva da feature detection e breve benchmark locale, non dal solo modello del telefono. Il controllo e i risultati non vengono inviati fuori dal dispositivo.
 
 L'app resta PWA durante il periodo di valutazione deciso da Diego. Nessun wrapper nativo o provider cloud fa parte di questa fase. La preparazione offline di shell e dati è distinta dall'installazione del modello e dal download volontario degli allegati. Tutti i nuovi intenti usano identificatori indipendenti dalla lingua; testi e chiarimenti usano chiavi i18n per consentire la fase multilingue finale.
