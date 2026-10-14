@@ -2,7 +2,17 @@
 
 <a id="stato-corrente"></a>
 
-## Candidata 1.2.184 — Guida utente contestuale — 14/10/2026
+## Candidata 1.2.185 — lettura locale della risposta su iPhone — 14/10/2026
+
+Il difetto residuo della `1.2.184` non riguarda il permesso del microfono: iPhone trascrive la domanda e l'Assistente produce i risultati, ma Safari/WebKit può scartare una frase accodata subito dopo `speechSynthesis.cancel()` e richiede che l'abilitazione della sintesi nasca da un gesto dell'utente. Il nuovo controller esegue un primer quasi silenzioso nello stesso tocco che avvia l'ascolto, conserva un riferimento forte all'utterance, aspetta 350 ms dopo l'evento `end` del riconoscimento e quindi pronuncia la risposta senza un nuovo `cancel()`. Preferisce una voce `it-IT` o italiana del dispositivo e mantiene sempre il testo a schermo come fallback.
+
+La regressione automatica verifica ordine `cancel/resume/primer`, attesa del rilascio audio, assenza di cancellazione prima della risposta, scelta della voce italiana, stati start/end/error, fallback senza API e teardown. La shell offline include il nuovo controller. Nessun audio, dato personale o contenuto della Vault viene registrato, persistito o aggiunto a log e fixture. Il perimetro resta frontend e documentazione; backend, Rules e dati reali sono esclusi. Il collaudo su iPhone fisico resta necessario dopo la pubblicazione perché l'ambiente locale non emula il motore audio WebKit del dispositivo.
+
+Gate locali verdi: Assistente/voce/parser **17/17**, Guida **6/6**, offline **14/14** con 280 risorse, diagnostica e budget pagina **3/3**, sintassi **193 moduli**, riferimenti statici **273 file**, documentazione **31 MD / 631 link / 11 test**, CSS, HTML puro, app leggera, hardening e versione. Il grafo principale esterno è stato rigenerato dal worktree della candidata dopo la modifica strutturale; i due warning su alias Scadenze già noti non coinvolgono il flusso vocale.
+
+Stato di pubblicazione: implementazione locale completata; test e rilascio in corso. La produzione resta `1.2.184` fino a merge, deploy del solo Hosting e verifica HTTP.
+
+## Produzione 1.2.184 — Guida utente contestuale — 14/10/2026
 
 Il worktree isolato `guida-utente-contestuale` è detached su `14c61754cc6fdee754b850e50ad27132f15afae7` (`1.2.183`). I soli delta dell'agente sono stati conservati nella patch precedente, rimossi con patch inversa verificata e riapplicati/adattati senza merge. La base senza delta è stata verificata prima di riapplicare il lotto. I conflitti nel bootstrap login e negli inserimenti INCARICO/STATO sono stati ricomposti; la shell compatibile è preservata. assistant-ui.js, vault-data-loader.js e test-vault-assistant.mjs coincidono integralmente con HEAD 1.2.183: card Scadenze canoniche e sintesi dopo end del riconoscimento sono entrambe conservate. Le 30 schede, 125 istruzioni e 110 target statici sono state riesaminate e integrate nella candidata: `reviewedAppVersion` è `1.2.184`, corpus italiano di **57.916 byte** sul checkout corrente, chiavi i18n e fallback esplicito. Matrice e progetto di estensioni nella [GUIDA](../utente/GUIDA.md#guida-pagina-per-pagina-e-aiuto-contestuale), contratto tecnico in [ASSISTENTE_APP](../sviluppo/ASSISTENTE_APP.md#catalogo-d0-e-risolutore-della-guida).
 

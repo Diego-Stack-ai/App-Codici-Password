@@ -42,11 +42,15 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     const swipeLists = new Set();
     if (offlineNotice) status.textContent = offlineNotice;
 
-    const speak = message => {
-        if (!('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(message); utterance.lang = 'it-IT'; window.speechSynthesis.speak(utterance);
-    };
+    let speechSynthesis; let uiDestroyed = false;
+    microphone.disabled = true;
+    import('./speech-synthesis-controller.js').then(module => {
+        speechSynthesis = module.createSpeechSynthesisController({
+            synthesis: window.speechSynthesis,
+            Utterance: window.SpeechSynthesisUtterance
+        });
+        if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = false;
+    }).catch(() => { if (!uiDestroyed) microphone.disabled = false; });
     const addBubble = (role, message) => {
         const bubble = element('div', `vault-assistant-bubble ${role}`, message);
         conversation.append(bubble); conversation.scrollTop = conversation.scrollHeight;
@@ -132,11 +136,10 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
             swipeLists.clear(); swipeLists.add(swipeList);
         }
     };
-    const ask = (query, answerByVoice = false) => {
+    const ask = query => {
         const value = query.trim(); if (!value) return;
         addBubble('user', value); input.value = '';
         const answer = onAsk(value); addBubble('assistant', answer.message); void addResults(answer.items || []);
-        if (answerByVoice) speak(answer.message);
         if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
         return answer;
     };
@@ -197,6 +200,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
             if (recognitionActive || recognitionStarting) {
                 status.textContent = 'Termino l’ascolto…'; recognition.stop(); return;
             }
+            speechSynthesis?.prime();
             microphone.disabled = true;
             try {
                 const microphoneAccess = await probeMicrophoneAccess({
@@ -247,9 +251,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
             if (transcriptState.final && !transcriptState.interim && !submittedFinal) {
                 submittedFinal = true; clearRecognitionTimeout();
                 pendingSpokenAnswer = ask(transcriptState.final)?.message || '';
-                // Su mobile la sintesi può essere silenziata mentre SpeechRecognition detiene ancora
-                // la sessione audio. La risposta viene letta soltanto dopo l'evento `end`.
-                try { recognition.stop(); } catch { /* il browser ha già concluso */ }
+                try { recognition.stop(); } catch {}
             }
         });
         recognition.addEventListener('error', event => {
@@ -267,7 +269,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false; setListening(false);
             if (pendingSpokenAnswer) {
                 const message = pendingSpokenAnswer; pendingSpokenAnswer = '';
-                speak(message);
+                speechSynthesis?.speakAfterAudioRelease(message);
             }
             if (!remoteConsentPending && !submittedFinal && input.value.trim()) status.textContent = 'Ascolto terminato. Controlla il testo e premi invia.';
         });
@@ -280,9 +282,10 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     queueMicrotask(() => input.focus());
     return { destroy: () => {
         swipeLists.forEach(instance => instance.destroy()); swipeLists.clear();
-        try { activeRecognition?.abort(); } catch { /* già terminato */ }
+        try { activeRecognition?.abort(); } catch {}
         activeRecognition = null;
-        window.speechSynthesis?.cancel();
+        uiDestroyed = true;
+        speechSynthesis?.destroy();
         backdrop.remove();
         document.documentElement.classList.remove('vault-assistant-open');
         document.body.classList.remove('vault-assistant-open');

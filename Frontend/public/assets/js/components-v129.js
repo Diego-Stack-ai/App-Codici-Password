@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.184';
+import { auth } from './firebase-config.js?v=1.2.185';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -59,10 +59,7 @@ export async function initComponents() {
         const path = window.location.pathname;
         const pageTitle = document.title.split(' - ')[0] || 'App Codici Password';
 
-        // Versione unica disponibile su tutte le pagine e mostrata dove previsto.
         document.documentElement.dataset.appVersion = APP_VERSION;
-        // L'attributo sull'elemento <html> serve solo come metadato. Non deve
-        // ricevere textContent, altrimenti verrebbe cancellata l'intera pagina.
         document.querySelectorAll('[data-app-version]:not(html)').forEach(element => {
             element.textContent = APP_VERSION;
         });
