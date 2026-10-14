@@ -43,7 +43,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     instructions.hidden = true;
     instructions.append(
         element('strong', '', 'Come usare Agente Codex'),
-        element('p', '', 'In Cerca puoi dire: “cerca BM Service”, poi “apri il secondo”, “apri il due” oppure “apri BM Service”.'),
+        element('p', '', 'In Cerca puoi cercare il nome completo o parziale di un Account, poi dire “apri il secondo”, “apri il due” oppure indicare il nome esatto.'),
         element('p', '', 'Chiedi è riservata alla futura AI locale avanzata e non è ancora attiva.')
     );
     const modeNotice = element('p', 'vault-assistant-mode-notice', 'La modalità Chiedi richiederà il pacchetto AI locale avanzato. In questa versione usa Cerca.');
@@ -248,7 +248,10 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                     return;
                 }
                 if (remoteConsentPending) { remoteConsentPending = false; beginRecognition(false); return; }
-                if (!supportsLocalRecognition) { requestRemoteConsent(); return; }
+                // Su browser privi del motore locale (incluso WebKit), il consenso
+                // a getUserMedia appartiene gia allo stesso gesto dell'utente:
+                // dopo la concessione si avvia subito il servizio vocale disponibile.
+                if (!supportsLocalRecognition) { beginRecognition(false); return; }
                 const availability = await SpeechRecognition.available({ langs: ['it-IT'], processLocally: true });
                 if (availability === 'available') { beginRecognition(true); return; }
                 if (availability === 'downloadable' && !installConfirmed) {

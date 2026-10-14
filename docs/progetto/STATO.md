@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+## Hotfix locale proposto 1.2.187 — continuità microfono e unico aiuto privato — 14/10/2026
+
+La causa del `?` che compariva brevemente durante i cambi pagina era un doppio proprietario del comando: `main-v129.js` montava la guida nel footer all'inizio di `DOMContentLoaded`, prima della lingua e dei moduli pagina; i successivi owner del footer lo ricostruivano e rimuovevano. La candidata elimina quel montaggio privato transitorio invece di nasconderlo via CSS. Nelle pagine private rimane il solo `?` interno all'Agente Codex; gli ingressi pubblici indipendenti da Auth conservano l'adattatore della guida.
+
+Le istruzioni dell'Agente usano ora esempi generici e le fixture mirate non contengono più nomi, targhe o aziende riconducibili alle segnalazioni reali. Nei browser senza riconoscimento locale, dopo l'eventuale richiesta e concessione di `getUserMedia`, lo stesso primo tocco avvia immediatamente `SpeechRecognition` nel modo disponibile: non serve un secondo tocco. Permesso negato, microfono assente/occupato, browser incompatibile e servizio vocale bloccato restano esiti distinti. Primer e sintesi iPhone, rilascio delle tracce, risposta dopo `end`, contesto e ricerca della `1.2.186` sono preservati.
+
+Implementazione locale allineata alla candidata `1.2.187` nel worktree isolato `assistant-base-hotfix`: package, lockfile, `APP_VERSION`, cache del service worker, versione mostrata, revisione del catalogo e **257** riferimenti asset risultano coerenti. Gate verdi: Assistente e voce **17/17** oltre alla ricerca sintetica, Guida **6/6**, offline **14/14** con 280 risorse, sintassi **193 moduli**, riferimenti statici **273 file**, documentazione **31 MD / 631 link / 11 test** e controllo whitespace della patch. Il banco browser della Guida non ha raggiunto le asserzioni perché nell'ambiente isolato non era disponibile la porta DevTools. Nessun commit, merge o deploy; produzione invariata alla `1.2.186`.
+
 ## Candidata 1.2.186 — Agente unico Cerca/Chiedi e contesto robusto — 14/10/2026
 
 Il dialogo dell'Agente espone **Cerca** e **Chiedi** come due modalità dello stesso prodotto. Cerca resta il motore locale deterministico; Chiedi è predisposta e chiaramente indicata come futura AI locale avanzata, senza modello, download o risposta simulata. Il `?` interno mostra esempi d'uso e il saluto automatico non occupa più la conversazione. L'aiuto contestuale generale viene montato nel footer quando disponibile.
