@@ -7,8 +7,13 @@ const STOP_WORDS = new Set([
 ]);
 const OPEN_WORDS = new Set(['apri', 'aprimi', 'vai', 'visualizza']);
 const ORDINALS = new Map([
-    ['primo', 0], ['prima', 0], ['1', 0], ['secondo', 1], ['seconda', 1], ['2', 1],
-    ['terzo', 2], ['terza', 2], ['3', 2], ['quarto', 3], ['quarta', 3], ['4', 3],
+    ['primo', 0], ['prima', 0], ['uno', 0], ['1', 0], ['secondo', 1], ['seconda', 1], ['due', 1], ['2', 1],
+    ['terzo', 2], ['terza', 2], ['tre', 2], ['3', 2], ['quarto', 3], ['quarta', 3], ['quattro', 3], ['4', 3],
+    ['quinto', 4], ['quinta', 4], ['cinque', 4], ['5', 4], ['sesto', 5], ['sesta', 5], ['sei', 5], ['6', 5],
+    ['settimo', 6], ['settima', 6], ['sette', 6], ['7', 6], ['ottavo', 7], ['ottava', 7], ['otto', 7], ['8', 7],
+    ['nono', 8], ['nona', 8], ['nove', 8], ['9', 8], ['decimo', 9], ['decima', 9], ['dieci', 9], ['10', 9],
+    ['undicesimo', 10], ['undicesima', 10], ['undici', 10], ['11', 10],
+    ['dodicesimo', 11], ['dodicesima', 11], ['dodici', 11], ['12', 11],
     ['ultimo', -1], ['ultima', -1]
 ]);
 const SYNONYMS = new Map([
@@ -78,7 +83,10 @@ function describe(items) {
     const groups = new Map();
     items.forEach(item => groups.set(groupLabel(item), (groups.get(groupLabel(item)) || 0) + 1));
     const summary = [...groups].map(([name, count]) => `${count} per ${name}`).join(', ');
-    return `Ho trovato ${items.length} risultati: ${summary}. Puoi dirmi “apri il secondo” oppure indicare l’azienda.`;
+    const hint = groups.size === 1
+        ? 'Puoi dirmi “apri il secondo” oppure “apri il due”.'
+        : 'Puoi dirmi “apri il secondo” oppure indicare l’azienda.';
+    return `Ho trovato ${items.length} risultati: ${summary}. ${hint}`;
 }
 
 function requestedIndex(query, length) {
@@ -89,6 +97,20 @@ function requestedIndex(query, length) {
         return index < 0 ? length - 1 : index;
     }
     return length === 1 ? 0 : null;
+}
+
+function exactNamedTarget(records, query, { companyOnly = false } = {}) {
+    const target = meaningfulTokens(query)
+        .filter(token => !['azienda', 'societa', 'impresa'].includes(token))
+        .join(' ');
+    if (!target) return null;
+    const matches = records.filter(record => {
+        if (companyOnly && record.kind !== 'azienda') return false;
+        return [record.title, record.companyName]
+            .map(normalizeSearchText)
+            .some(value => value === target);
+    });
+    return matches.length === 1 ? matches[0] : null;
 }
 
 export class VaultConversationEngine {
@@ -107,6 +129,12 @@ export class VaultConversationEngine {
                 const item = this.#lastResults[index];
                 return { message: `Apro ${item.title}.`, items: [item], navigateTo: item.href };
             }
+            const company = exactNamedTarget(this.#records, normalized, { companyOnly: true });
+            if (company) {
+                return { message: `Apro l’azienda ${company.title}.`, items: [company], navigateTo: company.href };
+            }
+            const item = exactNamedTarget(this.#lastResults, normalized);
+            if (item) return { message: `Apro ${item.title}.`, items: [item], navigateTo: item.href };
         }
 
         let items = searchRecords(this.#records, query);

@@ -81,6 +81,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/assistant/documentation-view.js",
   "assets/js/modules/assistant/package.json",
   "assets/js/modules/assistant/search-normalizer.js",
+  "assets/js/modules/assistant/speech-synthesis-controller.js",
   "assets/js/modules/assistant/vault-data-loader.js",
   "assets/js/modules/assistant/voice-recognition-model.js",
   "assets/js/modules/auth/imposta_nuova_password.js",

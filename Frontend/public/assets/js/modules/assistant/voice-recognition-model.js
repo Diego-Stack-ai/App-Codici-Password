@@ -58,7 +58,7 @@ export async function probeMicrophoneAccess({ permissions, mediaDevices } = {}) 
         try {
             const result = await permissions.query({ name: 'microphone' });
             if (['granted', 'prompt', 'denied'].includes(result?.state)) permission = result.state;
-        } catch { /* API non supportata: getUserMedia resta la verifica autorevole. */ }
+        } catch {}
     }
 
     if (permission === 'denied') {
@@ -77,9 +77,9 @@ export async function probeMicrophoneAccess({ permissions, mediaDevices } = {}) 
     } finally {
         try {
             for (const track of stream?.getTracks?.() || []) {
-                try { track.stop(); } catch { /* traccia già terminata */ }
+                try { track.stop(); } catch {}
             }
-        } catch { /* stream non più disponibile */ }
+        } catch {}
     }
 }
 

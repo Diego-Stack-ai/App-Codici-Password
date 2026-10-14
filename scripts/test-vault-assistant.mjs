@@ -18,6 +18,21 @@ assert.equal(spokenBankAnswer.items.length, 1);
 assert.equal(spokenBankAnswer.items[0].href, '/company-bank');
 const openAnswer = conversation.ask('aprimi il primo');
 assert.equal(openAnswer.navigateTo, '/company-bank');
+const companyRecords = [
+    { id: 'company:bm-service', kind: 'azienda', title: 'BM Service', subtitle: 'Azienda', scope: 'azienda', companyName: 'BM Service', href: '/company-bm' },
+    ...Array.from({ length: 11 }, (_, index) => ({
+        id: `account:bm-${index + 1}`, kind: 'account aziendale', title: `Servizio ${index + 1}`,
+        subtitle: 'Azienda: BM Service', scope: 'azienda', companyName: 'BM Service', keywords: ['BM Service'], href: `/bm-${index + 1}`
+    }))
+];
+const contextual = new VaultConversationEngine(companyRecords);
+const bmResults = contextual.ask('cerca BM Service');
+assert.equal(bmResults.items.length, 12);
+assert.doesNotMatch(bmResults.message, /indicare l’azienda/);
+assert.match(bmResults.message, /apri il due/);
+assert.equal(contextual.ask('apri il due').navigateTo, bmResults.items[1].href);
+assert.equal(contextual.ask('apri BM Service').navigateTo, '/company-bm');
+assert.equal(contextual.ask("apri l'azienda BM Service").navigateTo, '/company-bm');
 conversation.removeRecord('account:company-1');
 assert.equal(conversation.ask('banca PaxTibi').items.length, 0);
 conversation.clear();
@@ -50,7 +65,9 @@ assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
 assert.match(uiSource, /probeMicrophoneAccess\(/);
 assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
 assert.match(uiSource, /pendingSpokenAnswer = ask\(transcriptState\.final\)\?\.message \|\| ''/);
-assert.match(uiSource, /recognition\.addEventListener\('end',[\s\S]*speak\(message\)/);
+assert.match(uiSource, /microphone\.addEventListener\('click', async \(\) => \{[\s\S]*speechSynthesis\?\.prime\(\);[\s\S]*await probeMicrophoneAccess/);
+assert.match(uiSource, /recognition\.addEventListener\('end',[\s\S]*speechSynthesis\?\.speakAfterAudioRelease\(message\)/);
+assert.doesNotMatch(uiSource, /speechSynthesis\.cancel\(\);[\s\S]{0,200}speechSynthesis\.speak\(/);
 assert.doesNotMatch(uiSource, /ask\(transcriptState\.final, true\)/);
 assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /archiveRecipients\(target\)\.length > 0/);
