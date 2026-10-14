@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Agente Codex unico: Cerca/Chiedi e continuità dei comandi — 14/10/2026
+
+Diego autorizza la release successiva alla `1.2.185` come lotto solo client. L'Agente resta un unico dialogo e presenta due modalità: **Cerca**, che usa il motore deterministico locale esistente, e **Chiedi**, visibile ma dichiarata non ancora disponibile finché non verrà integrato e autorizzato il pacchetto AI locale avanzato. Il comando `?` nel titolo espone istruzioni ed esempi senza leggere il Vault. Il saluto iniziale viene rimosso.
+
+Il riconoscimento deterministico accetta anche varianti vocali come `apre`, `aprire` e `portami`; una frase di apertura non compresa non deve cancellare l'ultimo elenco, così il comando successivo `apri il secondo` resta valido. Il comando generale **Aiuto su questa pagina** viene collocato nel footer delle pagine interne, con fallback nel contenuto per le pagine senza footer.
+
+Diego autorizza modifica, commit, push, merge e deploy del solo Firebase Hosting. Sono esclusi AI avanzata reale, download di modelli, Functions, Rules, indici, dati reali, Archivio portabile, Lingue e revisione sicurezza. Criteri: test conversazione, guida, offline, accessibilità/statica, documentazione, versione e hardening verdi; grafo principale aggiornato; verifica HTTP della release. La UI non deve presentare **Chiedi** come funzionante prima della relativa implementazione.
+
 ## Hotfix 1.2.185 — lettura locale della risposta su iPhone — 14/10/2026
 
 Diego segnala che nella `1.2.184` l'Assistente riconosce la domanda e mostra i risultati su iPhone, ma non pronuncia la risposta. L'intervento autorizzato corregge l'orchestrazione Web Speech su Safari/WebKit: la sintesi viene attivata nel gesto che avvia il microfono, la risposta attende il rilascio della sessione audio e non viene più preceduta da un `cancel()` capace di eliminare la frase appena accodata. La voce italiana del dispositivo viene preferita quando disponibile; l'assenza della sintesi degrada al testo visibile.

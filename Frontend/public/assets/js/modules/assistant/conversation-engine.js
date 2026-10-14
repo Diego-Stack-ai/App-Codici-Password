@@ -5,7 +5,7 @@ const STOP_WORDS = new Set([
     'fammi', 'gli', 'ho', 'il', 'in', 'la', 'le', 'mi', 'mostra', 'mostrami', 'nell', 'per', 'puoi',
     'quale', 'quali', 'solo', 'sto', 'su', 'trovami', 'trova', 'un', 'una', 'uno', 'vorrei'
 ]);
-const OPEN_WORDS = new Set(['apri', 'aprimi', 'vai', 'visualizza']);
+const OPEN_WORDS = new Set(['apre', 'apri', 'aprimi', 'aprire', 'portami', 'vai', 'visualizza']);
 const ORDINALS = new Map([
     ['primo', 0], ['prima', 0], ['uno', 0], ['1', 0], ['secondo', 1], ['seconda', 1], ['due', 1], ['2', 1],
     ['terzo', 2], ['terza', 2], ['tre', 2], ['3', 2], ['quarto', 3], ['quarta', 3], ['quattro', 3], ['4', 3],
@@ -135,11 +135,15 @@ export class VaultConversationEngine {
             }
             const item = exactNamedTarget(this.#lastResults, normalized);
             if (item) return { message: `Apro ${item.title}.`, items: [item], navigateTo: item.href };
+            return {
+                message: 'Non ho riconosciuto quale risultato vuoi aprire. Puoi dire, per esempio, “apri il secondo” oppure “apri il due”.',
+                items: []
+            };
         }
 
         let items = searchRecords(this.#records, query);
         if (!items.length && this.#lastResults.length) items = searchRecords(this.#lastResults, query);
-        this.#lastResults = items;
+        if (items.length) this.#lastResults = items;
         return { message: describe(items), items };
     }
 

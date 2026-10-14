@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## Candidata 1.2.186 — Agente unico Cerca/Chiedi e contesto robusto — 14/10/2026
+
+Il dialogo dell'Agente espone **Cerca** e **Chiedi** come due modalità dello stesso prodotto. Cerca resta il motore locale deterministico; Chiedi è predisposta e chiaramente indicata come futura AI locale avanzata, senza modello, download o risposta simulata. Il `?` interno mostra esempi d'uso e il saluto automatico non occupa più la conversazione. L'aiuto contestuale generale viene montato nel footer quando disponibile.
+
+La continuità conversazionale riconosce `apre`, `aprire` e `portami` oltre alle forme già previste. Un comando ambiguo non azzera più l'ultimo elenco: dopo una trascrizione imperfetta l'utente può ancora dire `apri il secondo`. Implementazione e prove locali non equivalgono ancora a merge o distribuzione; Functions, Rules, dati e AI avanzata restano invariati.
+
 ## Candidata 1.2.185 — lettura locale della risposta su iPhone — 14/10/2026
 
 Il difetto residuo della `1.2.184` non riguarda il permesso del microfono: iPhone trascrive la domanda e l'Assistente produce i risultati, ma Safari/WebKit può scartare una frase accodata subito dopo `speechSynthesis.cancel()` e richiede che l'abilitazione della sintesi nasca da un gesto dell'utente. Il nuovo controller esegue un primer quasi silenzioso nello stesso tocco che avvia l'ascolto, conserva un riferimento forte all'utterance, aspetta 350 ms dopo l'evento `end` del riconoscimento e quindi pronuncia la risposta senza un nuovo `cancel()`. Preferisce una voce `it-IT` o italiana del dispositivo e mantiene sempre il testo a schermo come fallback.

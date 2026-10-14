@@ -1,7 +1,7 @@
 // D0 help bootstrap: independent of authentication and the Vault.
 import { documentationLabel } from './modules/assistant/documentation-ui-labels.js';
 
-const CONTROLLER_URL = './modules/assistant/documentation-view.js?v=1.2.185';
+const CONTROLLER_URL = './modules/assistant/documentation-view.js?v=1.2.186';
 let activeHelp = null;
 
 export function initDocumentationHelp(pathname = window.location.pathname) {
@@ -22,8 +22,10 @@ export function mountDocumentationHelp({ pageId } = {}) {
     if (!pageId || pageId === 'prova' || pageId === 'index') return null;
     if (activeHelp?.pageId === pageId && activeHelp.live()) return activeHelp;
     activeHelp?.destroy();
-    const host = document.querySelector('.page-container') || document.querySelector('.vault')
+    const pageHost = document.querySelector('.page-container') || document.querySelector('.vault')
         || document.querySelector('main.shared-contact-card');
+    const footerHost = document.getElementById('footer-center-actions');
+    const host = footerHost || pageHost;
     if (!host) return null;
     let live = true;
     let loading = false;
@@ -32,7 +34,7 @@ export function mountDocumentationHelp({ pageId } = {}) {
     if (!document.querySelector('link[data-documentation-style]')) {
         const stylesheet = document.createElement('link');
         stylesheet.rel = 'stylesheet';
-        stylesheet.href = '/assets/css/documentation-guide.css?v=1.2.185';
+        stylesheet.href = '/assets/css/documentation-guide.css?v=1.2.186';
         stylesheet.dataset.documentationStyle = 'true';
         document.head.append(stylesheet);
     }
@@ -50,7 +52,16 @@ export function mountDocumentationHelp({ pageId } = {}) {
     notice.className = 'documentation-entry-notice';
     notice.setAttribute('role', 'status');
     entry.append(trigger, notice);
-    host.prepend(entry);
+    if (footerHost) {
+        entry.classList.add('documentation-entry-footer');
+        trigger.classList.add('documentation-button-footer');
+        trigger.title = trigger.textContent;
+        trigger.setAttribute('aria-label', trigger.textContent);
+        trigger.textContent = '?';
+        host.append(entry);
+    } else {
+        host.prepend(entry);
+    }
     const open = async () => {
         if (!live || loading || view) return;
         const modalOpen = [...document.querySelectorAll('[aria-modal="true"], .modal-overlay.active')]

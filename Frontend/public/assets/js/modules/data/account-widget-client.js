@@ -1,4 +1,4 @@
-import {auth, functions} from '../../firebase-config.js?v=1.2.185';
+import {auth, functions} from '../../firebase-config.js?v=1.2.186';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {encrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {

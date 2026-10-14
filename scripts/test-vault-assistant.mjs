@@ -31,15 +31,20 @@ assert.equal(bmResults.items.length, 12);
 assert.doesNotMatch(bmResults.message, /indicare l’azienda/);
 assert.match(bmResults.message, /apri il due/);
 assert.equal(contextual.ask('apri il due').navigateTo, bmResults.items[1].href);
+assert.equal(contextual.ask('apre undicesimo').navigateTo, bmResults.items[10].href);
+const misunderstood = contextual.ask('apri quello giusto');
+assert.match(misunderstood.message, /Non ho riconosciuto/);
+assert.equal(contextual.ask('apri il secondo').navigateTo, bmResults.items[1].href);
 assert.equal(contextual.ask('apri BM Service').navigateTo, '/company-bm');
 assert.equal(contextual.ask("apri l'azienda BM Service").navigateTo, '/company-bm');
 conversation.removeRecord('account:company-1');
 assert.equal(conversation.ask('banca PaxTibi').items.length, 0);
 conversation.clear();
-const [loaderSource, uiSource, controllerSource] = await Promise.all([
+const [loaderSource, uiSource, controllerSource, guideSource] = await Promise.all([
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/vault-data-loader.js', import.meta.url), 'utf8'),
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8'),
-    readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8')
+    readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8'),
+    readFile(new URL('../Frontend/public/assets/js/guide.js', import.meta.url), 'utf8')
 ]);
 assert.match(loaderSource, /iconSource: data\.logo \|\| data\.avatar/);
 assert.match(loaderSource, /archiveAction:/);
@@ -65,10 +70,15 @@ assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
 assert.match(uiSource, /probeMicrophoneAccess\(/);
 assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
 assert.match(uiSource, /pendingSpokenAnswer = ask\(transcriptState\.final\)\?\.message \|\| ''/);
+assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
+assert.match(uiSource, /vault-assistant-mode[^\n]*Cerca/);
+assert.match(uiSource, /vault-assistant-help/);
 assert.match(uiSource, /microphone\.addEventListener\('click', async \(\) => \{[\s\S]*speechSynthesis\?\.prime\(\);[\s\S]*await probeMicrophoneAccess/);
 assert.match(uiSource, /recognition\.addEventListener\('end',[\s\S]*speechSynthesis\?\.speakAfterAudioRelease\(message\)/);
 assert.doesNotMatch(uiSource, /speechSynthesis\.cancel\(\);[\s\S]{0,200}speechSynthesis\.speak\(/);
 assert.doesNotMatch(uiSource, /ask\(transcriptState\.final, true\)/);
 assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /archiveRecipients\(target\)\.length > 0/);
+assert.match(guideSource, /getElementById\('footer-center-actions'\)/);
+assert.match(guideSource, /documentation-button-footer/);
 console.log('Vault assistant search tests: OK');
