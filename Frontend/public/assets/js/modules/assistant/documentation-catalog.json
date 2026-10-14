@@ -1,0 +1,1331 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "reviewedAppVersion": "1.2.184",
+  "fallbackLocale": "it",
+  "pages": [
+    {
+      "pageId": "index",
+      "route": "/index.html",
+      "family": "access",
+      "titleKey": "guide.pages.index.title",
+      "purposeKey": "guide.pages.index.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.index.step-1",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "login-v115"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "login-v115",
+      "route": "/login-v115.html",
+      "family": "access",
+      "titleKey": "guide.pages.login-v115.title",
+      "purposeKey": "guide.pages.login-v115.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.login-v115.step-1",
+          "target": "#login-form"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.login-v115.step-2",
+          "target": "#totp-help"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.login-v115.step-3",
+          "target": "#link-forgot-password"
+        }
+      ],
+      "relatedPageIds": [
+        "reset_password",
+        "registrati"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "registrati",
+      "route": "/registrati.html",
+      "family": "access",
+      "titleKey": "guide.pages.registrati.title",
+      "purposeKey": "guide.pages.registrati.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.registrati.step-1",
+          "target": "#register-form"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.registrati.step-2",
+          "target": "#account-password-requirements"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.registrati.step-3",
+          "target": "#register-submit-btn"
+        }
+      ],
+      "relatedPageIds": [
+        "login-v115",
+        "privacy",
+        "termini"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "reset_password",
+      "route": "/reset_password.html",
+      "family": "access",
+      "titleKey": "guide.pages.reset_password.title",
+      "purposeKey": "guide.pages.reset_password.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.reset_password.step-1",
+          "target": "#reset-form"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.reset_password.step-2",
+          "target": "#reset-submit-btn"
+        }
+      ],
+      "relatedPageIds": [
+        "login-v115",
+        "imposta_nuova_password"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "imposta_nuova_password",
+      "route": "/imposta_nuova_password.html",
+      "family": "access",
+      "titleKey": "guide.pages.imposta_nuova_password.title",
+      "purposeKey": "guide.pages.imposta_nuova_password.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.imposta_nuova_password.step-1",
+          "target": "#account-password-requirements"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.imposta_nuova_password.step-2",
+          "target": "#new-pass-submit-btn"
+        }
+      ],
+      "relatedPageIds": [
+        "login-v115"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "home_page",
+      "route": "/home_page.html",
+      "family": "internal",
+      "titleKey": "guide.pages.home_page.title",
+      "purposeKey": "guide.pages.home_page.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.home_page.step-1",
+          "target": null
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.home_page.step-2",
+          "target": "#upcoming-count"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.home_page.step-3",
+          "target": "#app-presentation-open"
+        }
+      ],
+      "relatedPageIds": [
+        "area_privata",
+        "lista_aziende",
+        "scadenze",
+        "impostazioni"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "area_privata",
+      "route": "/area_privata.html",
+      "family": "internal",
+      "titleKey": "guide.pages.area_privata.title",
+      "purposeKey": "guide.pages.area_privata.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.area_privata.step-1",
+          "target": null
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.area_privata.step-2",
+          "target": "#top-accounts-list"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.area_privata.step-3",
+          "target": "#btn-reset-views"
+        }
+      ],
+      "relatedPageIds": [
+        "account_privati",
+        "profilo_privato"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "account_privati",
+      "route": "/account_privati.html",
+      "family": "internal",
+      "titleKey": "guide.pages.account_privati.title",
+      "purposeKey": "guide.pages.account_privati.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.account_privati.step-1",
+          "target": "#account-search"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.account_privati.step-2",
+          "target": "#sort-btn"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.account_privati.step-3",
+          "target": "#accounts-container"
+        }
+      ],
+      "relatedPageIds": [
+        "form_account_privato",
+        "dettaglio_account_privato",
+        "archivio_account"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "form_account_privato",
+      "route": "/form_account_privato.html",
+      "family": "internal",
+      "titleKey": "guide.pages.form_account_privato.title",
+      "purposeKey": "guide.pages.form_account_privato.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.form_account_privato.step-1",
+          "target": "#account-name"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.form_account_privato.step-2",
+          "target": "#account-mode-edit-controls"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.form_account_privato.step-3",
+          "target": "#flag-banking"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.form_account_privato.step-4",
+          "target": "#account-widgets-section"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.form_account_privato.step-5",
+          "target": "#shared-credentials-section"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.form_account_privato.step-6",
+          "target": "#shared-management"
+        },
+        {
+          "stepId": "step-7",
+          "bodyKey": "guide.pages.form_account_privato.step-7",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "account_privati",
+        "dettaglio_account_privato",
+        "gestione_destinatari"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "dettaglio_account_privato",
+      "route": "/dettaglio_account_privato.html",
+      "family": "internal",
+      "titleKey": "guide.pages.dettaglio_account_privato.title",
+      "purposeKey": "guide.pages.dettaglio_account_privato.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.dettaglio_account_privato.step-1",
+          "target": "#toggle-password"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.dettaglio_account_privato.step-2",
+          "target": "#banking-toggle"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.dettaglio_account_privato.step-3",
+          "target": "#account-widgets-section"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.dettaglio_account_privato.step-4",
+          "target": "#btn-edit-account-note"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.dettaglio_account_privato.step-5",
+          "target": "#btn-add-attachment"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.dettaglio_account_privato.step-6",
+          "target": "#shared-management-section"
+        }
+      ],
+      "relatedPageIds": [
+        "form_account_privato",
+        "archivio_account"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "profilo_privato",
+      "route": "/profilo_privato.html",
+      "family": "internal",
+      "titleKey": "guide.pages.profilo_privato.title",
+      "purposeKey": "guide.pages.profilo_privato.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.profilo_privato.step-1",
+          "target": "#profile-tabs"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.profilo_privato.step-2",
+          "target": "#avatar-trigger"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.profilo_privato.step-3",
+          "target": "#telefoni-view-container"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.profilo_privato.step-4",
+          "target": "#indirizzi-view-container"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.profilo_privato.step-5",
+          "target": "#documenti-view-container"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.profilo_privato.step-6",
+          "target": "#profile-digital-card"
+        }
+      ],
+      "relatedPageIds": [
+        "area_privata",
+        "form_account_privato",
+        "aggiungi_scadenza",
+        "contatto_condiviso"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "lista_aziende",
+      "route": "/lista_aziende.html",
+      "family": "internal",
+      "titleKey": "guide.pages.lista_aziende.title",
+      "purposeKey": "guide.pages.lista_aziende.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.lista_aziende.step-1",
+          "target": "#aziende-list-container"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.lista_aziende.step-2",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "dati_azienda",
+        "modifica_azienda",
+        "account_azienda"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "dati_azienda",
+      "route": "/dati_azienda.html",
+      "family": "internal",
+      "titleKey": "guide.pages.dati_azienda.title",
+      "purposeKey": "guide.pages.dati_azienda.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.dati_azienda.step-1",
+          "target": "#company-overview"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.dati_azienda.step-2",
+          "target": "#company-digital-card"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.dati_azienda.step-3",
+          "target": "#company-pdf-summary"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.dati_azienda.step-4",
+          "target": "#company-locations-list"
+        }
+      ],
+      "relatedPageIds": [
+        "modifica_azienda",
+        "account_azienda",
+        "contatto_condiviso"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "modifica_azienda",
+      "route": "/modifica_azienda.html",
+      "family": "internal",
+      "titleKey": "guide.pages.modifica_azienda.title",
+      "purposeKey": "guide.pages.modifica_azienda.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.modifica_azienda.step-1",
+          "target": "#ragione-sociale"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.modifica_azienda.step-2",
+          "target": "#btn-toggle-fiscal"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.modifica_azienda.step-3",
+          "target": "#btn-toggle-locations"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.modifica_azienda.step-4",
+          "target": "#btn-toggle-emails"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.modifica_azienda.step-5",
+          "target": "#btn-trigger-upload"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.modifica_azienda.step-6",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "dati_azienda",
+        "account_azienda"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "account_azienda",
+      "route": "/account_azienda.html",
+      "family": "internal",
+      "titleKey": "guide.pages.account_azienda.title",
+      "purposeKey": "guide.pages.account_azienda.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.account_azienda.step-1",
+          "target": "#account-search"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.account_azienda.step-2",
+          "target": "#sort-btn"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.account_azienda.step-3",
+          "target": "#accounts-container"
+        }
+      ],
+      "relatedPageIds": [
+        "form_account_azienda",
+        "dettaglio_account_azienda",
+        "archivio_account"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "form_account_azienda",
+      "route": "/form_account_azienda.html",
+      "family": "internal",
+      "titleKey": "guide.pages.form_account_azienda.title",
+      "purposeKey": "guide.pages.form_account_azienda.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.form_account_azienda.step-1",
+          "target": "#account-name"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.form_account_azienda.step-2",
+          "target": "#account-mode-edit-controls"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.form_account_azienda.step-3",
+          "target": "#flag-banking"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.form_account_azienda.step-4",
+          "target": "#account-widgets-section"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.form_account_azienda.step-5",
+          "target": "#shared-credentials-section"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.form_account_azienda.step-6",
+          "target": "#shared-management"
+        },
+        {
+          "stepId": "step-7",
+          "bodyKey": "guide.pages.form_account_azienda.step-7",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "account_azienda",
+        "dettaglio_account_azienda",
+        "gestione_destinatari"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "dettaglio_account_azienda",
+      "route": "/dettaglio_account_azienda.html",
+      "family": "internal",
+      "titleKey": "guide.pages.dettaglio_account_azienda.title",
+      "purposeKey": "guide.pages.dettaglio_account_azienda.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.dettaglio_account_azienda.step-1",
+          "target": "#toggle-password"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.dettaglio_account_azienda.step-2",
+          "target": "#banking-toggle"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.dettaglio_account_azienda.step-3",
+          "target": "#account-widgets-section"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.dettaglio_account_azienda.step-4",
+          "target": "#btn-edit-account-note"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.dettaglio_account_azienda.step-5",
+          "target": "#btn-add-attachment"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.dettaglio_account_azienda.step-6",
+          "target": "#shared-management-section"
+        }
+      ],
+      "relatedPageIds": [
+        "form_account_azienda",
+        "account_azienda",
+        "archivio_account"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "scadenze",
+      "route": "/scadenze.html",
+      "family": "internal",
+      "titleKey": "guide.pages.scadenze.title",
+      "purposeKey": "guide.pages.scadenze.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.scadenze.step-1",
+          "target": "#deadline-search"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.scadenze.step-2",
+          "target": "#sort-btn"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.scadenze.step-3",
+          "target": "#scadenze-list"
+        }
+      ],
+      "relatedPageIds": [
+        "aggiungi_scadenza",
+        "dettaglio_scadenza",
+        "regole_scadenze"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "aggiungi_scadenza",
+      "route": "/aggiungi_scadenza.html",
+      "family": "internal",
+      "titleKey": "guide.pages.aggiungi_scadenza.title",
+      "purposeKey": "guide.pages.aggiungi_scadenza.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.aggiungi_scadenza.step-1",
+          "target": "#mode-automezzi"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.aggiungi_scadenza.step-2",
+          "target": "#dueDate"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.aggiungi_scadenza.step-3",
+          "target": "#display_notif_days"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.aggiungi_scadenza.step-4",
+          "target": "#btn-manage-deadline-contacts"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.aggiungi_scadenza.step-5",
+          "target": "#attachments-section"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.aggiungi_scadenza.step-6",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "scadenze",
+        "gestione_destinatari",
+        "regole_scadenze"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "dettaglio_scadenza",
+      "route": "/dettaglio_scadenza.html",
+      "family": "internal",
+      "titleKey": "guide.pages.dettaglio_scadenza.title",
+      "purposeKey": "guide.pages.dettaglio_scadenza.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.dettaglio_scadenza.step-1",
+          "target": "#detail-date-day"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.dettaglio_scadenza.step-2",
+          "target": "#section-planning"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.dettaglio_scadenza.step-3",
+          "target": "#section-attachments"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.dettaglio_scadenza.step-4",
+          "target": "#detail-page-actions"
+        }
+      ],
+      "relatedPageIds": [
+        "aggiungi_scadenza",
+        "scadenze"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "regole_scadenze",
+      "route": "/regole_scadenze.html",
+      "family": "internal",
+      "titleKey": "guide.pages.regole_scadenze.title",
+      "purposeKey": "guide.pages.regole_scadenze.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.regole_scadenze.step-1",
+          "target": null
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.regole_scadenze.step-2",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "configurazione_automezzi",
+        "configurazione_documenti",
+        "configurazione_generali",
+        "scadenze"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "configurazione_automezzi",
+      "route": "/configurazione_automezzi.html",
+      "family": "internal",
+      "titleKey": "guide.pages.configurazione_automezzi.title",
+      "purposeKey": "guide.pages.configurazione_automezzi.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.configurazione_automezzi.step-1",
+          "target": "#btn-add-type"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.configurazione_automezzi.step-2",
+          "target": "#btn-add-model"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.configurazione_automezzi.step-3",
+          "target": "#btn-add-template"
+        }
+      ],
+      "relatedPageIds": [
+        "regole_scadenze",
+        "aggiungi_scadenza"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "configurazione_documenti",
+      "route": "/configurazione_documenti.html",
+      "family": "internal",
+      "titleKey": "guide.pages.configurazione_documenti.title",
+      "purposeKey": "guide.pages.configurazione_documenti.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.configurazione_documenti.step-1",
+          "target": "#btn-add-type"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.configurazione_documenti.step-2",
+          "target": "#btn-add-model"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.configurazione_documenti.step-3",
+          "target": "#btn-add-template"
+        }
+      ],
+      "relatedPageIds": [
+        "regole_scadenze",
+        "aggiungi_scadenza"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "configurazione_generali",
+      "route": "/configurazione_generali.html",
+      "family": "internal",
+      "titleKey": "guide.pages.configurazione_generali.title",
+      "purposeKey": "guide.pages.configurazione_generali.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.configurazione_generali.step-1",
+          "target": "#btn-add-type"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.configurazione_generali.step-2",
+          "target": "#btn-add-template"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.configurazione_generali.step-3",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "regole_scadenze",
+        "aggiungi_scadenza"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "impostazioni",
+      "route": "/impostazioni.html",
+      "family": "internal",
+      "titleKey": "guide.pages.impostazioni.title",
+      "purposeKey": "guide.pages.impostazioni.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.impostazioni.step-1",
+          "target": "#btn-toggle-lang"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.impostazioni.step-2",
+          "target": "#theme-selector"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.impostazioni.step-3",
+          "target": "#ai-assistant-toggle"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.impostazioni.step-4",
+          "target": "#company-area-toggle"
+        },
+        {
+          "stepId": "step-5",
+          "bodyKey": "guide.pages.impostazioni.step-5",
+          "target": "#btn-account-archive"
+        },
+        {
+          "stepId": "step-6",
+          "bodyKey": "guide.pages.impostazioni.step-6",
+          "target": "#btn-shared-credentials"
+        },
+        {
+          "stepId": "step-7",
+          "bodyKey": "guide.pages.impostazioni.step-7",
+          "target": "#btn-export-encrypted-backup"
+        },
+        {
+          "stepId": "step-8",
+          "bodyKey": "guide.pages.impostazioni.step-8",
+          "target": "#btn-restore-encrypted-backup"
+        },
+        {
+          "stepId": "step-9",
+          "bodyKey": "guide.pages.impostazioni.step-9",
+          "target": "#btn-credential-health"
+        },
+        {
+          "stepId": "step-10",
+          "bodyKey": "guide.pages.impostazioni.step-10",
+          "target": "#btn-account-field-usage"
+        },
+        {
+          "stepId": "step-11",
+          "bodyKey": "guide.pages.impostazioni.step-11",
+          "target": "#btn-expiry-rules"
+        },
+        {
+          "stepId": "step-12",
+          "bodyKey": "guide.pages.impostazioni.step-12",
+          "target": "#btn-change-password"
+        },
+        {
+          "stepId": "step-13",
+          "bodyKey": "guide.pages.impostazioni.step-13",
+          "target": "#btn-regenerate-recovery-codes"
+        },
+        {
+          "stepId": "step-14",
+          "bodyKey": "guide.pages.impostazioni.step-14",
+          "target": "#btn-change-master-password"
+        },
+        {
+          "stepId": "step-15",
+          "bodyKey": "guide.pages.impostazioni.step-15",
+          "target": "#face-id-toggle"
+        },
+        {
+          "stepId": "step-16",
+          "bodyKey": "guide.pages.impostazioni.step-16",
+          "target": "#lock-timer-selector"
+        },
+        {
+          "stepId": "step-17",
+          "bodyKey": "guide.pages.impostazioni.step-17",
+          "target": "#btn-reset-vault"
+        },
+        {
+          "stepId": "step-18",
+          "bodyKey": "guide.pages.impostazioni.step-18",
+          "target": "#btn-revoke-all-sessions"
+        },
+        {
+          "stepId": "step-19",
+          "bodyKey": "guide.pages.impostazioni.step-19",
+          "target": "#deadline-push-toggle"
+        },
+        {
+          "stepId": "step-20",
+          "bodyKey": "guide.pages.impostazioni.step-20",
+          "target": "#btn-run-app-diagnostics"
+        },
+        {
+          "stepId": "step-21",
+          "bodyKey": "guide.pages.impostazioni.step-21",
+          "target": "#logout-btn-settings"
+        }
+      ],
+      "relatedPageIds": [
+        "profilo_privato",
+        "archivio_account",
+        "regole_scadenze",
+        "privacy",
+        "termini"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "gestione_destinatari",
+      "route": "/gestione_destinatari.html",
+      "family": "internal",
+      "titleKey": "guide.pages.gestione_destinatari.title",
+      "purposeKey": "guide.pages.gestione_destinatari.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.gestione_destinatari.step-1",
+          "target": "#recipient-first-name"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.gestione_destinatari.step-2",
+          "target": "#recipient-email"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.gestione_destinatari.step-3",
+          "target": "#recipient-list"
+        }
+      ],
+      "relatedPageIds": [
+        "aggiungi_scadenza",
+        "form_account_privato",
+        "form_account_azienda"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "archivio_account",
+      "route": "/archivio_account.html",
+      "family": "internal",
+      "titleKey": "guide.pages.archivio_account.title",
+      "purposeKey": "guide.pages.archivio_account.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.archivio_account.step-1",
+          "target": "#archive-filter-btn"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.archivio_account.step-2",
+          "target": "#archive-search"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.archivio_account.step-3",
+          "target": "#btn-empty-trash"
+        }
+      ],
+      "relatedPageIds": [
+        "account_privati",
+        "account_azienda",
+        "impostazioni"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "contatto_condiviso",
+      "route": "/contatto_condiviso.html",
+      "family": "public-contact",
+      "titleKey": "guide.pages.contatto_condiviso.title",
+      "purposeKey": "guide.pages.contatto_condiviso.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.contatto_condiviso.step-1",
+          "target": "#contact-details"
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.contatto_condiviso.step-2",
+          "target": "#save-contact"
+        },
+        {
+          "stepId": "step-3",
+          "bodyKey": "guide.pages.contatto_condiviso.step-3",
+          "target": "#retry-contact"
+        }
+      ],
+      "relatedPageIds": [
+        "privacy",
+        "termini"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "privacy",
+      "route": "/privacy.html",
+      "family": "internal",
+      "titleKey": "guide.pages.privacy.title",
+      "purposeKey": "guide.pages.privacy.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.privacy.step-1",
+          "target": null
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.privacy.step-2",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "termini",
+        "impostazioni"
+      ],
+      "tutorialId": null
+    },
+    {
+      "pageId": "termini",
+      "route": "/termini.html",
+      "family": "internal",
+      "titleKey": "guide.pages.termini.title",
+      "purposeKey": "guide.pages.termini.purpose",
+      "steps": [
+        {
+          "stepId": "step-1",
+          "bodyKey": "guide.pages.termini.step-1",
+          "target": null
+        },
+        {
+          "stepId": "step-2",
+          "bodyKey": "guide.pages.termini.step-2",
+          "target": null
+        }
+      ],
+      "relatedPageIds": [
+        "privacy",
+        "impostazioni"
+      ],
+      "tutorialId": null
+    }
+  ],
+  "journeys": [
+    {
+      "journeyId": "first-use",
+      "titleKey": "guide.journeys.first-use.title",
+      "pageIds": [
+        "login-v115",
+        "home_page",
+        "profilo_privato",
+        "form_account_privato",
+        "impostazioni"
+      ]
+    },
+    {
+      "journeyId": "private-account",
+      "titleKey": "guide.journeys.private-account.title",
+      "pageIds": [
+        "area_privata",
+        "account_privati",
+        "form_account_privato",
+        "dettaglio_account_privato"
+      ]
+    },
+    {
+      "journeyId": "company-account",
+      "titleKey": "guide.journeys.company-account.title",
+      "pageIds": [
+        "lista_aziende",
+        "modifica_azienda",
+        "dati_azienda",
+        "account_azienda",
+        "form_account_azienda"
+      ]
+    },
+    {
+      "journeyId": "deadline",
+      "titleKey": "guide.journeys.deadline.title",
+      "pageIds": [
+        "regole_scadenze",
+        "aggiungi_scadenza",
+        "gestione_destinatari",
+        "dettaglio_scadenza"
+      ]
+    },
+    {
+      "journeyId": "sharing",
+      "titleKey": "guide.journeys.sharing.title",
+      "pageIds": [
+        "gestione_destinatari",
+        "form_account_privato",
+        "dettaglio_account_privato",
+        "archivio_account"
+      ]
+    },
+    {
+      "journeyId": "security-and-recovery",
+      "titleKey": "guide.journeys.security-and-recovery.title",
+      "pageIds": [
+        "impostazioni",
+        "login-v115",
+        "reset_password",
+        "archivio_account"
+      ]
+    }
+  ],
+  "messages": {
+    "it": {
+      "guide.pages.index.title": "Ingresso",
+      "guide.pages.index.purpose": "Raggiungi la pagina di accesso all’app.",
+      "guide.pages.index.step-1": "L’ingresso apre automaticamente la pagina di accesso. Se il passaggio non avviene, usa il collegamento presente nella pagina.",
+      "guide.pages.login-v115.title": "Accesso",
+      "guide.pages.login-v115.purpose": "Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto.",
+      "guide.pages.login-v115.step-1": "Inserisci email e password di accesso. Non inserire qui la Master Password del Vault.",
+      "guide.pages.login-v115.step-2": "Se hai attivato un Authenticator, segui la richiesta del secondo fattore. Non comunicare codici o password all’assistente.",
+      "guide.pages.login-v115.step-3": "Se hai dimenticato la password di accesso, apri il recupero. Il recupero della password di accesso non ricostruisce il segreto del Vault.",
+      "guide.pages.registrati.title": "Registrazione",
+      "guide.pages.registrati.purpose": "Crea l’account di accesso e segui la verifica dell’email.",
+      "guide.pages.registrati.step-1": "Compila i dati richiesti e scegli una password di accesso conforme ai requisiti mostrati.",
+      "guide.pages.registrati.step-2": "Controlla i requisiti e ripeti la password nel campo di conferma; conserva separatamente il materiale di recupero del Vault.",
+      "guide.pages.registrati.step-3": "Invia la registrazione e segui le indicazioni sulla verifica dell’email. L’aiuto non completa o invia il modulo al tuo posto.",
+      "guide.pages.reset_password.title": "Recupero dell’accesso",
+      "guide.pages.reset_password.purpose": "Richiedi l’email per cambiare la password di accesso.",
+      "guide.pages.reset_password.step-1": "Inserisci l’email usata per l’account e invia la richiesta dal pulsante del modulo.",
+      "guide.pages.reset_password.step-2": "Segui il collegamento ricevuto. Non condividere il collegamento o il suo codice nella guida o nella chat.",
+      "guide.pages.imposta_nuova_password.title": "Nuova password di accesso",
+      "guide.pages.imposta_nuova_password.purpose": "Scegli la nuova password di accesso dal percorso autorizzato.",
+      "guide.pages.imposta_nuova_password.step-1": "Scegli una password che rispetta i requisiti indicati e ripetila nel campo di conferma.",
+      "guide.pages.imposta_nuova_password.step-2": "Conferma il cambio e segui il ritorno all’accesso. Questa operazione non cambia la Master Password del Vault.",
+      "guide.pages.home_page.title": "Home",
+      "guide.pages.home_page.purpose": "Scegli l’area in cui lavorare e controlla i riepiloghi delle scadenze.",
+      "guide.pages.home_page.step-1": "Apri Privato per Account e dati personali, Azienda per i dati aziendali, Scadenze per l’elenco delle date.",
+      "guide.pages.home_page.step-2": "Una scadenza di oggi resta nelle Scadenze; passa alle Urgenze dal giorno successivo. Il riepilogo non sostituisce l’elenco completo.",
+      "guide.pages.home_page.step-3": "La presentazione è facoltativa. Il video viene richiesto soltanto quando scegli di riprodurlo.",
+      "guide.pages.area_privata.title": "Area privata",
+      "guide.pages.area_privata.purpose": "Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi.",
+      "guide.pages.area_privata.step-1": "Apri la categoria adatta: un memorandum conserva informazioni senza i campi Utente, Account/Codice e Password.",
+      "guide.pages.area_privata.step-2": "Gli elementi più usati sono scorciatoie verso gli Account; non sono una seconda copia dei dati.",
+      "guide.pages.area_privata.step-3": "Il comando di azzeramento riguarda le statistiche di visualizzazione. Leggi la conferma prima di eseguirlo.",
+      "guide.pages.account_privati.title": "Account privati",
+      "guide.pages.account_privati.purpose": "Cerca e consulta gli Account della categoria scelta.",
+      "guide.pages.account_privati.step-1": "Usa la ricerca per restringere l’elenco. Se non trovi un elemento, verifica anche la categoria e l’Archivio.",
+      "guide.pages.account_privati.step-2": "Scegli l’ordinamento e apri la scheda desiderata. Gli Account condivisi ricevuti conservano i permessi del proprietario.",
+      "guide.pages.account_privati.step-3": "Creazione, modifica, archiviazione e uscita da una condivisione sono azioni distinte. L’aiuto spiega i comandi senza eseguirli.",
+      "guide.pages.form_account_privato.title": "Crea o modifica Account privato",
+      "guide.pages.form_account_privato.purpose": "Prepara un Account o memorandum e controlla i dati prima di salvarli.",
+      "guide.pages.form_account_privato.step-1": "Dai un nome riconoscibile all’elemento. I nomi che crei restano nella tua lingua e non vengono tradotti dalla guida.",
+      "guide.pages.form_account_privato.step-2": "Scegli Account, condiviso, memorandum o memorandum condiviso. Il cambio da una modalità condivisa può revocare i destinatari precedenti: leggi l’avviso.",
+      "guide.pages.form_account_privato.step-3": "Aggiungi conti e carte quando necessari; PIN e altri segreti restano campi protetti.",
+      "guide.pages.form_account_privato.step-4": "I Widget aggiungono campi personalizzati. Un profilo Widget riutilizzabile contiene la struttura; l’istanza nell’Account contiene i valori.",
+      "guide.pages.form_account_privato.step-5": "Le Credenziali comuni possono essere collegate a più Account senza duplicare i valori.",
+      "guide.pages.form_account_privato.step-6": "Gestisci destinatari e canali nel modulo. Condivisione e invio richiedono la tua azione e le conferme dell’app.",
+      "guide.pages.form_account_privato.step-7": "Salva dal comando dell’app e attendi lo stato indicato. Una bozza o una modifica offline in attesa non equivale a una scrittura confermata.",
+      "guide.pages.dettaglio_account_privato.title": "Dettaglio Account privato",
+      "guide.pages.dettaglio_account_privato.purpose": "Consulta credenziali, note, Widget e allegati dell’Account selezionato.",
+      "guide.pages.dettaglio_account_privato.step-1": "Mostra o copia un valore protetto soltanto quando ti serve. Non inserirlo nelle domande della guida.",
+      "guide.pages.dettaglio_account_privato.step-2": "Apri i dati bancari se presenti. I valori protetti mantengono i loro comandi dedicati.",
+      "guide.pages.dettaglio_account_privato.step-3": "Consulta i Widget e i loro campi; i controlli disponibili dipendono dai permessi dell’elemento.",
+      "guide.pages.dettaglio_account_privato.step-4": "Le note hanno il loro comando di modifica. Controlla l’esito del salvataggio prima di uscire.",
+      "guide.pages.dettaglio_account_privato.step-5": "Scegli Tessera/Carta, Camera, Galleria o Documento. Per le immagini distingui il ritaglio dall’originale; il limite per allegato è 32 MiB.",
+      "guide.pages.dettaglio_account_privato.step-6": "La sezione Condivisione del dettaglio è di consultazione; tipologia, destinatari e canali si gestiscono in Crea/Modifica Account.",
+      "guide.pages.profilo_privato.title": "Profilo utente",
+      "guide.pages.profilo_privato.purpose": "Organizza identità, contatti, indirizzi, documenti e tessera digitale.",
+      "guide.pages.profilo_privato.step-1": "Scegli la sezione del Profilo. Il riepilogo e la tessera digitale mostrano proiezioni diverse degli stessi dati.",
+      "guide.pages.profilo_privato.step-2": "Gestisci la foto dal relativo comando. L’aiuto non legge l’immagine o i dati del Profilo.",
+      "guide.pages.profilo_privato.step-3": "Telefoni ed email possono essere autonomi o collegati a un Account; il collegamento non è una nuova copia delle credenziali.",
+      "guide.pages.profilo_privato.step-4": "Organizza indirizzi e utenze dalle sezioni dedicate e controlla il risultato delle modifiche.",
+      "guide.pages.profilo_privato.step-5": "Ogni documento raccoglie dati, note, allegati e collegamenti ad Account o Scadenza. Per rimuovere un allegato usa il cestino e la conferma.",
+      "guide.pages.profilo_privato.step-6": "Scegli esplicitamente i dati da includere nella tessera e nel QR. Controlla cosa rendi condivisibile prima di inviarlo.",
+      "guide.pages.lista_aziende.title": "Aziende",
+      "guide.pages.lista_aziende.purpose": "Scegli l’azienda e accedi ai suoi dati e Account.",
+      "guide.pages.lista_aziende.step-1": "Apri l’azienda desiderata oppure usa il comando di creazione dell’app. I dati aziendali restano separati dagli Account privati.",
+      "guide.pages.lista_aziende.step-2": "Per aggiornare un’azienda passa al suo modulo di modifica; la guida non cambia o cancella dati.",
+      "guide.pages.dati_azienda.title": "Dati azienda",
+      "guide.pages.dati_azienda.purpose": "Consulta il profilo aziendale, i contatti e le proiezioni condivisibili.",
+      "guide.pages.dati_azienda.step-1": "Consulta il riepilogo e le sezioni dell’azienda scelta.",
+      "guide.pages.dati_azienda.step-2": "Seleziona i dati ammessi nella tessera digitale e nel QR; non includere segreti.",
+      "guide.pages.dati_azienda.step-3": "Prepara il riepilogo PDF e controllane il contenuto prima di salvarlo o condividerlo.",
+      "guide.pages.dati_azienda.step-4": "Contatti e sedi possono richiamare Account collegati. Modifica i dati nel percorso previsto dall’app.",
+      "guide.pages.modifica_azienda.title": "Crea o modifica azienda",
+      "guide.pages.modifica_azienda.purpose": "Aggiorna anagrafica, referente, sedi, contatti e note aziendali.",
+      "guide.pages.modifica_azienda.step-1": "Indica una ragione sociale riconoscibile e completa i dati richiesti.",
+      "guide.pages.modifica_azienda.step-2": "Apri le sezioni fiscali e del referente quando necessarie; le scelte QR sono separate dal salvataggio del dato.",
+      "guide.pages.modifica_azienda.step-3": "Organizza sede e altre sedi senza sostituire automaticamente i dati degli Account collegati.",
+      "guide.pages.modifica_azienda.step-4": "Gestisci email e relativi collegamenti. Non comunicare password o codici all’assistente.",
+      "guide.pages.modifica_azienda.step-5": "Aggiungi allegati dai comandi disponibili e controlla limiti e conferma.",
+      "guide.pages.modifica_azienda.step-6": "Salva con il comando dell’app e verifica l’esito; le modifiche non si applicano premendo Avanti nella guida.",
+      "guide.pages.account_azienda.title": "Account azienda",
+      "guide.pages.account_azienda.purpose": "Cerca gli Account nel contesto dell’azienda scelta.",
+      "guide.pages.account_azienda.step-1": "Cerca nell’elenco dell’azienda corrente. Prima di creare un elemento verifica di essere nel contesto giusto.",
+      "guide.pages.account_azienda.step-2": "Scegli l’ordinamento e apri il dettaglio. Categoria e permessi determinano le azioni disponibili.",
+      "guide.pages.account_azienda.step-3": "Gli Account aziendali supportano anche memorandum e condivisioni; l’archiviazione si gestisce separatamente.",
+      "guide.pages.form_account_azienda.title": "Crea o modifica Account aziendale",
+      "guide.pages.form_account_azienda.purpose": "Prepara un Account o memorandum dell’azienda selezionata.",
+      "guide.pages.form_account_azienda.step-1": "Controlla l’azienda corrente e assegna un nome all’elemento.",
+      "guide.pages.form_account_azienda.step-2": "Scegli tipo e modalità di condivisione. Leggi l’avviso quando cambi un elemento già condiviso.",
+      "guide.pages.form_account_azienda.step-3": "Aggiungi dati bancari soltanto se pertinenti e usa i controlli protetti per i segreti.",
+      "guide.pages.form_account_azienda.step-4": "Aggiungi Widget e campi personalizzati; i valori non vengono tradotti dalla guida.",
+      "guide.pages.form_account_azienda.step-5": "Collega le Credenziali comuni dal comando dedicato, senza ricopiarle nei campi.",
+      "guide.pages.form_account_azienda.step-6": "Configura destinatari e canali dal modulo; ogni invio resta un’azione esplicita.",
+      "guide.pages.form_account_azienda.step-7": "Salva dal comando dell’app e attendi l’esito. Le istruzioni non inviano il modulo.",
+      "guide.pages.dettaglio_account_azienda.title": "Dettaglio Account aziendale",
+      "guide.pages.dettaglio_account_azienda.purpose": "Consulta le informazioni dell’Account nell’azienda corrente.",
+      "guide.pages.dettaglio_account_azienda.step-1": "Mostra o copia i valori protetti soltanto quando necessari, senza riportarli nella guida.",
+      "guide.pages.dettaglio_account_azienda.step-2": "Consulta conti e carte se presenti, preservando la protezione dei singoli valori.",
+      "guide.pages.dettaglio_account_azienda.step-3": "Apri Widget e dati collegati secondo i permessi dell’Account.",
+      "guide.pages.dettaglio_account_azienda.step-4": "Gestisci le note dal loro comando e verifica l’esito della modifica.",
+      "guide.pages.dettaglio_account_azienda.step-5": "Aggiungi allegati con il selettore sorgente. Il cestino degli allegati richiede conferma; il limite per file è 32 MiB.",
+      "guide.pages.dettaglio_account_azienda.step-6": "Leggi i nomi dei destinatari; per modificarli torna al modulo Account.",
+      "guide.pages.scadenze.title": "Scadenze",
+      "guide.pages.scadenze.purpose": "Cerca le date da seguire e distingui scadenze proprie e ricevute.",
+      "guide.pages.scadenze.step-1": "Cerca nell’elenco e verifica il filtro attivo. Scadenze diverse possono avere lo stesso nome.",
+      "guide.pages.scadenze.step-2": "Scegli l’ordinamento. Una scadenza di oggi diventa urgente dal giorno successivo.",
+      "guide.pages.scadenze.step-3": "Apri il dettaglio per stato, destinatari, note e allegati; i permessi delle scadenze ricevute dipendono dal proprietario.",
+      "guide.pages.aggiungi_scadenza.title": "Crea o modifica scadenza",
+      "guide.pages.aggiungi_scadenza.purpose": "Imposta data, categoria, preavviso, destinatari e contenuti della scadenza.",
+      "guide.pages.aggiungi_scadenza.step-1": "Scegli Automezzi, Documenti o Generali e poi il tipo configurato per quella categoria.",
+      "guide.pages.aggiungi_scadenza.step-2": "Controlla data e intestatario. Una data proveniente da un Documento o Widget può preparare una Scadenza collegata.",
+      "guide.pages.aggiungi_scadenza.step-3": "Scegli preavviso e frequenza fra i valori ammessi. Le notifiche richiedono canali e permessi configurati.",
+      "guide.pages.aggiungi_scadenza.step-4": "Scegli i destinatari e verifica i permessi assegnati. La rubrica da sola non invia o concede accessi.",
+      "guide.pages.aggiungi_scadenza.step-5": "Gli allegati collegati possono appartenere all’Account o Documento origine; il collegamento non duplica il file.",
+      "guide.pages.aggiungi_scadenza.step-6": "Usa il comando Salva dell’app e controlla la conferma. La guida non rinnova, invia o cancella scadenze.",
+      "guide.pages.dettaglio_scadenza.title": "Dettaglio scadenza",
+      "guide.pages.dettaglio_scadenza.purpose": "Controlla data, pianificazione, contenuti e azioni della scadenza scelta.",
+      "guide.pages.dettaglio_scadenza.step-1": "Controlla data e intestatario prima di decidere il prossimo passo.",
+      "guide.pages.dettaglio_scadenza.step-2": "Consulta preavviso e frequenza; lo stato mostrato non garantisce il recapito di un’email o push.",
+      "guide.pages.dettaglio_scadenza.step-3": "Apri gli allegati disponibili. Quelli referenziati da Account o Documenti restano di proprietà della scheda origine.",
+      "guide.pages.dettaglio_scadenza.step-4": "Rinnovo, completamento e altre azioni dipendono dai permessi; leggi le conferme dell’app prima di eseguirle.",
+      "guide.pages.regole_scadenze.title": "Regole delle scadenze",
+      "guide.pages.regole_scadenze.purpose": "Apri la configurazione della categoria da gestire.",
+      "guide.pages.regole_scadenze.step-1": "Scegli Automezzi, Documenti o Generali. Le tre configurazioni sono separate.",
+      "guide.pages.regole_scadenze.step-2": "Modificare una configurazione non aggiorna automaticamente le scadenze già esistenti.",
+      "guide.pages.configurazione_automezzi.title": "Configurazione Automezzi",
+      "guide.pages.configurazione_automezzi.purpose": "Gestisci tipi, modelli e testi per le scadenze dei veicoli.",
+      "guide.pages.configurazione_automezzi.step-1": "Aggiungi o modifica il tipo di scadenza necessario.",
+      "guide.pages.configurazione_automezzi.step-2": "Gestisci i modelli dei veicoli separatamente dai tipi di scadenza.",
+      "guide.pages.configurazione_automezzi.step-3": "Gestisci i testi disponibili nei nuovi moduli. Le scadenze esistenti conservano le proprie impostazioni.",
+      "guide.pages.configurazione_documenti.title": "Configurazione Documenti",
+      "guide.pages.configurazione_documenti.purpose": "Gestisci tipi, modelli e testi per le scadenze dei documenti.",
+      "guide.pages.configurazione_documenti.step-1": "Gestisci il tipo di documento o di scadenza necessario.",
+      "guide.pages.configurazione_documenti.step-2": "Gestisci i modelli disponibili nel modulo della categoria Documenti.",
+      "guide.pages.configurazione_documenti.step-3": "Prepara i testi riutilizzabili e verifica il risultato. Le scadenze già salvate non cambiano automaticamente.",
+      "guide.pages.configurazione_generali.title": "Configurazione Generali",
+      "guide.pages.configurazione_generali.purpose": "Gestisci tipi e testi delle scadenze generali.",
+      "guide.pages.configurazione_generali.step-1": "Gestisci i tipi della categoria Generali.",
+      "guide.pages.configurazione_generali.step-2": "Prepara i testi disponibili nel modulo e controlla le modifiche prima di salvarle.",
+      "guide.pages.configurazione_generali.step-3": "Questa configurazione resta separata da Automezzi e Documenti e non riscrive scadenze esistenti.",
+      "guide.pages.impostazioni.title": "Impostazioni",
+      "guide.pages.impostazioni.purpose": "Configura aspetto, servizi, sicurezza e gestione dei dati dal centro di controllo.",
+      "guide.pages.impostazioni.step-1": "Scegli la lingua dell’app. I nomi, le note e i valori che hai creato non vengono tradotti automaticamente.",
+      "guide.pages.impostazioni.step-2": "Tema luminoso e colore sono preferenze separate. Scegli la combinazione che rende leggibili i controlli.",
+      "guide.pages.impostazioni.step-3": "L’interruttore corrente abilita la ricerca locale dell’Assistente. La conoscenza statica della guida non richiede contenuti personali o un modello AI.",
+      "guide.pages.impostazioni.step-4": "Mostra o nascondi l’area Azienda senza eliminare i suoi dati.",
+      "guide.pages.impostazioni.step-5": "Apri l’Archivio per ripristino e cancellazione definitiva degli Account, con le conferme previste.",
+      "guide.pages.impostazioni.step-6": "Gestisci le Credenziali comuni richiamabili da più Account.",
+      "guide.pages.impostazioni.step-7": "Esporta un backup cifrato e conserva la Recovery Key separatamente. Non inserire la chiave nella guida, in chat o screenshot.",
+      "guide.pages.impostazioni.step-8": "Ripristina dal backup originale dopo l’anteprima e la tua conferma. Le impostazioni di sicurezza correnti non vengono sostituite dal backup.",
+      "guide.pages.impostazioni.step-9": "Controlla la salute delle credenziali con l’analisi locale; un controllo locale non promette l’assenza di violazioni.",
+      "guide.pages.impostazioni.step-10": "Consulta l’uso dei campi per organizzare i tuoi Account.",
+      "guide.pages.impostazioni.step-11": "Apri le configurazioni delle scadenze per tipi e testi riutilizzabili.",
+      "guide.pages.impostazioni.step-12": "Password di accesso e Master Password sono segreti diversi. Usa il relativo comando per ciascun cambio.",
+      "guide.pages.impostazioni.step-13": "Configura la sicurezza e il materiale di recupero dai comandi dell’app. Un codice di recupero non è una password ordinaria.",
+      "guide.pages.impostazioni.step-14": "Gestisci la Master Password dal percorso dedicato senza comunicarla all’Assistente.",
+      "guide.pages.impostazioni.step-15": "La disponibilità biometrica dipende dalle capacità effettive del browser e dispositivo; segui l’esito dell’app.",
+      "guide.pages.impostazioni.step-16": "Scegli il timer di blocco del Vault. Blocco del Vault e logout dell’account sono operazioni distinte.",
+      "guide.pages.impostazioni.step-17": "Leggi attentamente il percorso di reset e le conferme. La guida non preme comandi distruttivi.",
+      "guide.pages.impostazioni.step-18": "La revoca delle sessioni richiede la tua decisione nel flusso di sicurezza dell’app.",
+      "guide.pages.impostazioni.step-19": "Abilita le notifiche dal comando dedicato e verifica i permessi del browser. Le notifiche di Scadenze e Condivisioni hanno controlli distinti.",
+      "guide.pages.impostazioni.step-20": "Esegui la Diagnostica app quando necessario; il rapporto tecnico non deve contenere i dati del Vault.",
+      "guide.pages.impostazioni.step-21": "Esci quando hai terminato. I dati memorizzati offline non equivalgono a un backup e richiedono le procedure di gestione previste.",
+      "guide.pages.gestione_destinatari.title": "Gestione destinatari",
+      "guide.pages.gestione_destinatari.purpose": "Prepara i contatti da selezionare nei flussi di condivisione.",
+      "guide.pages.gestione_destinatari.step-1": "Inserisci nome e dati di contatto necessari senza includere password o altri segreti.",
+      "guide.pages.gestione_destinatari.step-2": "Verifica l’indirizzo prima di salvare. Salvare in rubrica non invia da solo un invito.",
+      "guide.pages.gestione_destinatari.step-3": "Gestisci le voci della rubrica e torna al flusso origine; permessi e canali si configurano nel modulo di condivisione.",
+      "guide.pages.archivio_account.title": "Archivio Account",
+      "guide.pages.archivio_account.purpose": "Trova gli Account archiviati e scegli fra ripristino ed eliminazione definitiva.",
+      "guide.pages.archivio_account.step-1": "Verifica il contesto Privato o Azienda prima di selezionare gli elementi.",
+      "guide.pages.archivio_account.step-2": "Cerca gli elementi archiviati. Il ripristino e l’eliminazione hanno effetti diversi.",
+      "guide.pages.archivio_account.step-3": "La cancellazione definitiva e lo svuotamento richiedono le conferme dell’app. L’aiuto non le avvia e non garantisce la cancellazione di copie già esportate o viste da altri.",
+      "guide.pages.contatto_condiviso.title": "Contatto condiviso",
+      "guide.pages.contatto_condiviso.purpose": "Consulta soltanto il contatto reso disponibile tramite il QR.",
+      "guide.pages.contatto_condiviso.step-1": "Controlla i dati presenti nel contatto ricevuto. Questa pagina non apre il Vault o l’account del mittente.",
+      "guide.pages.contatto_condiviso.step-2": "Se desideri conservarlo, usa Salva contatto per il file vCard. Il download dipende dalla tua scelta.",
+      "guide.pages.contatto_condiviso.step-3": "Se il contatto non si carica, verifica il collegamento e usa Riprova quando disponibile.",
+      "guide.pages.privacy.title": "Privacy",
+      "guide.pages.privacy.purpose": "Leggi l’informativa privacy dell’app.",
+      "guide.pages.privacy.step-1": "Consulta le sezioni dell’informativa per dati trattati, finalità e diritti.",
+      "guide.pages.privacy.step-2": "La guida aiuta a trovare l’informativa; non la sostituisce e non aggiunge impegni o contatti non pubblicati.",
+      "guide.pages.termini.title": "Termini",
+      "guide.pages.termini.purpose": "Leggi le condizioni d’uso del servizio.",
+      "guide.pages.termini.step-1": "Consulta le condizioni pubblicate prima di usare le funzioni interessate.",
+      "guide.pages.termini.step-2": "Per i contatti e gli impegni del servizio fanno fede i testi pubblicati; la guida non inventa canali di assistenza.",
+      "guide.journeys.first-use.title": "Primi passi",
+      "guide.journeys.private-account.title": "Primo Account privato",
+      "guide.journeys.company-account.title": "Prima azienda e Account",
+      "guide.journeys.deadline.title": "Prima Scadenza",
+      "guide.journeys.sharing.title": "Condividere consapevolmente",
+      "guide.journeys.security-and-recovery.title": "Sicurezza e recupero"
+    }
+  }
+}

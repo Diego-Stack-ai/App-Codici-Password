@@ -1,9 +1,11 @@
 /** Bootstrap minimale della pagina di accesso. */
-import { initLogin } from './modules/auth/login.js?v=1.2.183';
+import { initLogin } from './modules/auth/login.js?v=1.2.184';
+import { mountDocumentationHelp, getDocumentationPageContext } from './guide.js';
 import { loadLanguage, getCurrentLanguage, applyGlobalTranslations } from './translations.js';
 import { initOfflineStatus } from './offline-status.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    mountDocumentationHelp(getDocumentationPageContext(window.location.pathname));
     initOfflineStatus();
     if ('serviceWorker' in navigator && navigator.onLine) {
         navigator.serviceWorker.register('./sw.js').catch((error) => {

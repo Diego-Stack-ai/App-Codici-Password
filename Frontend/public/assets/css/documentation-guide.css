@@ -1,0 +1,108 @@
+.documentation-entry {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-block: var(--space-2);
+}
+
+.documentation-button,
+.documentation-select {
+    min-height: var(--touch-target-min, 44px);
+    min-width: var(--touch-target-min, 44px);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid currentColor;
+    border-radius: var(--radius-sm);
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    font-size: var(--fs-base);
+    cursor: pointer;
+}
+
+.documentation-button:focus-visible,
+.documentation-select:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+}
+
+.documentation-entry-notice {
+    font-size: var(--fs-base);
+}
+
+.documentation-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: grid;
+    place-items: center;
+    padding: max(var(--space-4), env(safe-area-inset-top)) max(var(--space-4), env(safe-area-inset-right)) max(var(--space-4), env(safe-area-inset-bottom)) max(var(--space-4), env(safe-area-inset-left));
+    background: rgb(0 0 0 / 65%);
+}
+
+.documentation-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: min(100%, 46rem);
+    min-width: 0;
+    max-height: 90vh;
+    max-height: 90dvh;
+    padding: var(--space-4);
+    border: 1px solid currentColor;
+    border-radius: var(--radius-lg);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
+}
+
+.documentation-heading,
+.documentation-controls,
+.documentation-related,
+.documentation-journey {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.documentation-heading {
+    justify-content: space-between;
+}
+
+.documentation-select {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+}
+
+.documentation-panel [hidden] {
+    display: none;
+}
+
+.documentation-article {
+    display: grid;
+    gap: var(--space-3);
+    line-height: 1.6;
+}
+
+.documentation-article ol {
+    padding-inline-start: var(--space-6);
+}
+
+.documentation-article li + li {
+    margin-block-start: var(--space-2);
+}
+
+.documentation-related h4 {
+    flex-basis: 100%;
+}
+
+.documentation-version,
+.documentation-fallback {
+    font-size: var(--fs-base);
+}

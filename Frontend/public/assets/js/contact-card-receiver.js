@@ -1,5 +1,8 @@
 import {readContactCard, contactDetails} from './modules/shared/contact-card-model.js';
 import {prepareContactVCard} from './modules/shared/contact-card-photo.js';
+import { mountDocumentationHelp, getDocumentationPageContext } from './guide.js';
+
+mountDocumentationHelp(getDocumentationPageContext(window.location.pathname));
 
 const status = document.getElementById('contact-status');
 const save = document.getElementById('save-contact');
