@@ -2,13 +2,17 @@
 
 <a id="stato-corrente"></a>
 
-## Candidata Assistente base — microfono e azioni Account — 14/10/2026
+## Candidata 1.2.183 — card Scadenze nella ricerca dell'Assistente — 14/10/2026
 
-### Hotfix microfono PWA — verifica locale sulla base 1.2.181
+La ricerca deterministica trovava già targa, veicolo e altri metadati, ma costruiva il titolo delle Scadenze con un insieme incompleto di campi: i record canonici con `title`, `type`, `category` e `name` potevano quindi apparire tutti come «Scadenza». La candidata usa lo stesso modello di presentazione delle card applicative: tipo/categoria nel titolo e intestatario, veicolo/targa e data nel sottotitolo. Campi canonici e storici partecipano entrambi alla ricerca; nessuna credenziale o dato nuovo entra nell'indice.
 
-Il collaudo Chrome/PWA ha isolato due livelli che prima venivano confusi: l'header Hosting vietava il microfono con `microphone=()` e ogni `NotAllowedError` del motore `SpeechRecognition` veniva presentato come diniego del dispositivo. La candidata locale abilita la richiesta soltanto alla stessa origine con `microphone=(self)`, consulta la Permissions API quando disponibile e verifica `getUserMedia({ audio: true })` nel gesto dell'utente, chiudendo immediatamente tutte le tracce. Non registra, conserva o invia il flusso usato per la verifica.
+Verifiche mirate verdi: Assistente **12/12**, modello Scadenze **7/7**, documentazione **11/11**. Diego autorizza commit, push, merge e deploy del solo Hosting. Functions, Rules, indici e dati reali restano esclusi.
 
-I messaggi distinguono permesso negato, microfono assente, microfono occupato, browser incompatibile, servizio vocale bloccato e pacchetto italiano locale indisponibile. Se il microfono funziona ma il riconoscimento locale non è utilizzabile, il servizio vocale del browser resta un fallback informato attivabile solo con un secondo gesto. Verifiche locali finora verdi: voce **8/8**, Assistente **12/12**, policy Hosting/allegati **5/5**, sintassi mirata e release hardening. Il lotto non include AI avanzata, Archivio, Guida, Lingue, Functions, Rules o dati reali e non è stato committato, inviato, unito o distribuito.
+## Produzione 1.2.182 — microfono Assistente base — 14/10/2026
+
+Il collaudo Chrome/PWA ha isolato due livelli che prima venivano confusi: l'header Hosting vietava il microfono con `microphone=()` e ogni `NotAllowedError` del motore `SpeechRecognition` veniva presentato come diniego del dispositivo. La release abilita la richiesta soltanto alla stessa origine con `microphone=(self)`, consulta la Permissions API quando disponibile e verifica `getUserMedia({ audio: true })` nel gesto dell'utente, chiudendo immediatamente tutte le tracce. Non registra, conserva o invia il flusso usato per la verifica.
+
+I messaggi distinguono permesso negato, microfono assente, microfono occupato, browser incompatibile, servizio vocale bloccato e pacchetto italiano locale indisponibile. Se il microfono funziona ma il riconoscimento locale non è utilizzabile, il servizio vocale del browser resta un fallback informato attivabile solo con un secondo gesto. PR #141 unita in `master` (`3fd7c7e5`) dopo pipeline locale e GitHub verdi; deploy del solo Hosting riuscito. Verifica pubblica HTTP `200`, versione `1.2.182` e policy `microphone=(self)` confermate. Functions, Rules e dati reali non sono stati distribuiti o modificati.
 
 Su una copia pulita della `1.2.180` l'Assistente base conserva la ricerca deterministica locale e aggiunge alle card Account le azioni laterali canoniche. Il gesto verso sinistra richiede conferma e sposta nel medesimo Archivio sicuro; quello verso destra archivia direttamente salvo avviso obbligatorio quando esistono destinatari. Non viene eseguita cancellazione definitiva. Il microfono è interrompibile, conserva trascrizioni finali e parziali fra eventi incrementali, lascia correggere un testo incompleto e distingue gli errori principali. Il riconoscimento locale resta prioritario e quello remoto richiede un secondo gesto informato.
 

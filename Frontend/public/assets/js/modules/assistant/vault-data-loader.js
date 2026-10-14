@@ -1,4 +1,5 @@
 import { getUserProfile, listCompanies, listCompanyAccounts, listDeadlines, listPrivateAccounts } from '../data/vault-repository.js';
+import { deadlineDateInputFields, deadlinePresentation } from '../scadenze/deadline-model.js';
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];
@@ -40,9 +41,16 @@ function companyRecord(id, data) {
 }
 
 function deadlineRecord(id, data) {
-    const vehicle = text(data.veicolo_modello) || [data.marca, data.modello, data.targa].map(text).filter(Boolean).join(' ');
-    return make({ id, kind: 'scadenza', title: data.titolo || data.nome || data.tipoScadenza || data.tipo || 'Scadenza', subtitle: vehicle || data.categoria || 'Scadenza',
-        keywords: [data.mode, data.categoria, data.type, data.tipo, data.tipoScadenza, data.name, data.intestatario, vehicle, data.riferimento], href: `/dettaglio_scadenza.html?id=${encodeURIComponent(id)}` });
+    const presentation = deadlinePresentation(data);
+    const vehicleParts = [data.veicolo_modello, data.marca, data.modello, data.targa].map(text).filter(Boolean);
+    const vehicle = [...new Set(vehicleParts)].join(' ');
+    const owner = text(data.intestatario) || (presentation.owner === 'Intestatario non specificato' ? '' : presentation.owner);
+    const dueDate = deadlineDateInputFields(data).displayValue;
+    const subtitle = [...new Set([owner, vehicle, dueDate ? `Scadenza ${dueDate}` : ''].filter(Boolean))].join(' · ');
+    return make({ id, kind: 'scadenza', title: presentation.category, subtitle: subtitle || 'Scadenza',
+        keywords: [data.mode, data.categoria, data.category, data.title, data.titolo, data.type, data.tipo,
+            data.tipoScadenza, data.name, data.nome, data.intestatario, data.targa, vehicle, dueDate, data.riferimento],
+        href: `/dettaglio_scadenza.html?id=${encodeURIComponent(id)}` });
 }
 
 export async function loadVaultSearchRecords(user, { includeCompanies = true } = {}) {

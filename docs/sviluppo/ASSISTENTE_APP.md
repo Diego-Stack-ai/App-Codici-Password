@@ -101,7 +101,7 @@ Non esistono chiamate LLM, embeddings o invio automatico di contenuti a servizi 
 
 ### Dati inclusi ed esclusi
 
-Attualmente entrano nell'indice testuale: nomi di profilo, tipi di documento, nomi Account, aziende, Scadenze, categorie, URL, referente e alcuni metadati aziendali. I metadati cifrati dei documenti non entrano nell'indice. Le credenziali non partecipano alla ricerca testuale: restano associate al risultato in forma memorizzata e vengono decifrate dalla UI quando necessario.
+Attualmente entrano nell'indice testuale: nomi di profilo, tipi di documento, nomi Account, aziende, Scadenze, categorie, URL, referente e alcuni metadati aziendali. Per le Scadenze vengono indicizzati sia i campi canonici (`title`, `type`, `category`, `name`) sia gli equivalenti storici, oltre a intestatario, veicolo, targa, riferimento e data. La card usa tipo/categoria come titolo e riunisce intestatario, veicolo/targa e data nel sottotitolo, in coerenza con il modello delle Scadenze applicative. I metadati cifrati dei documenti non entrano nell'indice. Le credenziali non partecipano alla ricerca testuale: restano associate al risultato in forma memorizzata e vengono decifrate dalla UI quando necessario.
 
 L'audit ha rilevato questi limiti:
 
