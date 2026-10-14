@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## Candidata Assistente base — microfono e azioni Account — 14/10/2026
+
+Su una copia pulita della `1.2.180` l'Assistente base conserva la ricerca deterministica locale e aggiunge alle card Account le azioni laterali canoniche. Il gesto verso sinistra richiede conferma e sposta nel medesimo Archivio sicuro; quello verso destra archivia direttamente salvo avviso obbligatorio quando esistono destinatari. Non viene eseguita cancellazione definitiva. Il microfono è interrompibile, conserva trascrizioni finali e parziali fra eventi incrementali, lascia correggere un testo incompleto e distingue gli errori principali. Il riconoscimento locale resta prioritario e quello remoto richiede un secondo gesto informato.
+
+La candidata esclude interamente scheda, runtime, catalogo e download dell'AI locale avanzata. Verifiche sintetiche isolate: Assistente **8/8**, voce **4/4**, lifecycle swipe **14/14**, documentazione **11/11**, sintassi JavaScript, riferimenti statici, CSS, HTML puro, shell offline, sicurezza e app leggera verdi. Nessun dato reale, commit, push, merge o deploy.
+
 ## Candidata 1.2.180 — conferma cestino allegati Account aziendale — 13/10/2026
 
 Il cestino degli allegati nell'Account aziendale creava correttamente la conferma, ma una regola CSS legacy globale della pagina imponeva `visibility: hidden` a ogni `.modal-overlay`: il dialogo restava invisibile e l'eliminazione in attesa. La regola, residuo del vecchio selettore sorgente già sostituito dal componente condiviso, è stata rimossa. Il percorso di eliminazione e le Rules non cambiano. Verifica locale: allegati **70/70**, lifecycle dettaglio Account privato/azienda **24/24**, fondazioni UI **6/6**, documentazione **11/11**. Diego ha autorizzato commit, push, merge e deploy del solo Hosting della release `1.2.180`; fino all'esito del rilascio la produzione resta `1.2.179`.
