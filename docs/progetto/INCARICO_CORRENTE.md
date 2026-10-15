@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Gate i18n incrementale dopo la 1.2.189 — 15/10/2026
+
+Diego autorizza il nuovo lotto Lingue a consolidare prima di tutto inventario, contratto e controlli automatici, senza correggere ancora in massa i contenuti editoriali. Il lavoro parte dall'audit della `1.2.189`, resta nel worktree Lingue e non deve sovrapporsi alla release Archivio `1.2.190` in corso. Riallineamento a `master`, bump, commit, push, merge e deploy attendono l'integrazione dell'Archivio e un successivo ordine dell'Orchestratore.
+
+Il perimetro corrente comprende: inventario canonico dei testi UI statici e dinamici; parità delle chiavi per ogni lingua dichiarata completa; rilevazione di fallback, letterali, onboarding e componenti montati dopo il bootstrap; allowlist esplicita per dati utente, marchi e token non traducibili; matrice pagina per pagina; specifica delle prove round-trip, persistenza, auto-translate e resa CJK/Devanagari. Il primo gate usa una baseline esplicita del debito `1.2.189`: i valori possono diminuire ma non aumentare e non costituiscono una certificazione di completezza.
+
+Le pratiche ECC `browser-qa`, `e2e-testing` e `verification-loop` possono essere considerate come riferimento metodologico selettivo, ma non autorizzano installazione di ECC, esecuzione di codice remoto o sostituzione dei test locali verificabili. Functions, Rules, dati reali, contenuti utente, AI avanzata e pubblicazione restano esclusi.
+
 ## Hotfix icone Material Symbols — candidata 1.2.189 — 15/10/2026
 
 Diego autorizza un hotfix client successivo alla `1.2.188`: la traduzione automatica di Chrome interpreta le ligature tecniche delle icone Material Symbols come testo e trasforma, per esempio, `manage_accounts`, `translate` ed `expand_more` in parole visibili sovrapposte. La correzione deve proteggere esclusivamente le icone tramite `notranslate` e `translate="no"`, compresi markup statico, template JavaScript ed elementi creati dal costruttore DOM condiviso. Il resto dell'interfaccia mantiene la normale i18n e non viene escluso dalla traduzione.
