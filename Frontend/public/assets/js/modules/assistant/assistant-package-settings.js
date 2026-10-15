@@ -25,7 +25,10 @@ export async function initAssistantPackageSettings(container = document.getEleme
         container.append(heading);
         for (const level of ['A1', 'A2', 'A3']) {
             const candidate = LOCAL_AI_PACKAGE_CATALOG[level];
-            const status = level === 'A1' ? { installed:true } : await manager.status(level);
+            const status = level === 'A1' ? { installed:true } : await manager.status(level, {
+                manifest: candidate.manifest,
+                baseUrl: candidate.baseUrl
+            });
             const capability = capabilities[level];
             const compatible = level === 'A1' || capability.status === 'candidate';
             const card = document.createElement('section');
@@ -34,6 +37,12 @@ export async function initAssistantPackageSettings(container = document.getEleme
             const desc = level === 'A1' ? label('baseDesc') : label(`${level.toLowerCase()}Desc`);
             const meta = candidate ? `${mib(candidate.manifest.approxDownloadBytes)} · ${label('memory')} ${mib(candidate.manifest.maxResidentBytes)}` : label('fallback');
             card.innerHTML = `<div><strong>${title}</strong><small>${desc}</small><small>${meta}</small></div>`;
+            if (level !== 'A1' && status.installed) {
+                const installed = document.createElement('small');
+                installed.className = 'assistant-package-installed';
+                installed.textContent = selected === level ? label('active') : label('installed');
+                card.firstElementChild.append(installed);
+            }
             const actions = document.createElement('div'); actions.className = 'assistant-package-actions';
             if (status.installed && compatible) {
                 const activate = document.createElement('button'); activate.type = 'button';

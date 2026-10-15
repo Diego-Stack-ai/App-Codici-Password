@@ -127,6 +127,19 @@ test('il visualizzatore v2 è autonomo, offline e privo di dati incorporati', ()
     assert.doesNotMatch(html, /utente-sintetico/);
 });
 
+test('il visualizzatore presenta un catalogo umano e relega le esportazioni tecniche', () => {
+    const html = buildPortableViewerHtml();
+    assert.match(html, /Esportazioni tecniche/);
+    assert.match(html, /JSON contiene tutti i dati/);
+    assert.match(html, /Account privati/);
+    assert.match(html, /Account aziendali/);
+    assert.match(html, /Tutte le aziende/);
+    assert.match(html, /nomeAccount/);
+    assert.match(html, /Identificativo archivio/);
+    assert.match(html, /Scarica allegato/);
+    assert.doesNotMatch(html, /record\.title\|\|record\.id\|\|record\.scope/);
+});
+
 test('le proiezioni preservano campi futuri e neutralizzano le formule', async () => {
     const records = [{
         key: 'private-account:::a1', scope: 'private-account', id: 'a1', title: 'Conto',

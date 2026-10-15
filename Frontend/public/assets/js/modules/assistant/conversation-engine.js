@@ -3,7 +3,8 @@ import { normalizeSearchText } from './search-normalizer.js';
 const STOP_WORDS = new Set([
     'a', 'al', 'alla', 'alle', 'che', 'cerca', 'cercando', 'cerco', 'codex', 'dei', 'del', 'dell', 'della', 'di',
     'fammi', 'gli', 'ho', 'il', 'in', 'la', 'le', 'mi', 'mostra', 'mostrami', 'nell', 'per', 'puoi',
-    'quale', 'quali', 'solo', 'sto', 'su', 'trovami', 'trova', 'un', 'una', 'uno', 'vorrei'
+    'avevo', 'cera', 'cosa', 'ero', 'ma', 'non', 'quale', 'quali', 'ricordo', 'ricordavo', 'sicuro', 'solo', 'stavo', 'sto', 'su',
+    'trovami', 'trova', 'trovare', 'trovo', 'un', 'una', 'uno', 'vorrei'
 ]);
 const OPEN_WORDS = new Set(['apre', 'apri', 'aprimi', 'aprire', 'portami', 'vai', 'visualizza']);
 const ORDINALS = new Map([
@@ -20,7 +21,7 @@ const SYNONYMS = new Map([
     ['banca', ['banca', 'bancario', 'conto']], ['conto', ['conto', 'banca', 'bancario']],
     ['documento', ['documento', 'identita', 'patente', 'passaporto']],
     ['identita', ['identita', 'documento']], ['societa', ['societa', 'azienda', 'impresa']],
-    ['azienda', ['azienda', 'societa', 'impresa']], ['scadenze', ['scadenza']], ['account', ['account']]
+    ['azienda', ['azienda', 'societa', 'impresa']], ['scadenza', ['scadenza']], ['scadenze', ['scadenza']], ['account', ['account']]
 ]);
 const CATEGORY_WORDS = new Set(['account', 'azienda', 'banca', 'conto', 'documento', 'identita', 'scadenza', 'scadenze', 'societa']);
 

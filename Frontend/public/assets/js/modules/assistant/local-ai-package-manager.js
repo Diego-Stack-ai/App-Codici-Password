@@ -113,8 +113,37 @@ export function createLocalAiPackageManager({
         }
     }
 
-    async function status(level) {
-        const selected = readActive(storage)[level] || null;
+    async function status(level, { manifest: manifestInput, baseUrl } = {}) {
+        const active = readActive(storage);
+        let selected = active[level] || null;
+        if (manifestInput && baseUrl) {
+            const manifest = validateLocalAiPackageManifest(manifestInput);
+            const cacheName = packageCacheName(manifest);
+            const names = await cacheStorage.keys();
+            let complete = names.includes(cacheName);
+            if (complete) {
+                const cache = await cacheStorage.open(cacheName);
+                for (const file of manifest.files) {
+                    if (!await cache.match(new Request(safeUrl(baseUrl, file.path, origin)))) {
+                        complete = false;
+                        break;
+                    }
+                }
+            }
+            if (complete) {
+                const expected = { packageId: manifest.packageId, version: manifest.version, cacheName };
+                if (!selected || selected.packageId !== expected.packageId || selected.version !== expected.version
+                    || selected.cacheName !== expected.cacheName) {
+                    active[level] = expected;
+                    writeActive(storage, active);
+                }
+                selected = expected;
+            } else if (selected) {
+                delete active[level];
+                writeActive(storage, active);
+                selected = null;
+            }
+        }
         return Object.freeze({ level, downloading: Boolean(activeDownload), installed: Boolean(selected), active: selected });
     }
 

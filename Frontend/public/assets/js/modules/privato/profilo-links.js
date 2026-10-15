@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.193';
+import { auth, db } from '../../firebase-config.js?v=1.2.194';
 import { collection, doc, updateDoc, runTransaction, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -119,7 +119,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
     const confirmed = await showConfirmModal('Crea scadenza collegata', `Preparare una scheda per “${documentItem.type || 'Documento'}” con scadenza ${documentItem.expiry_date}?`);
     if (!confirmed) return;
     await syncData();
-    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.193');
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.194');
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify(
         await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile)
     ));

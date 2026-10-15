@@ -19,7 +19,11 @@ class MemoryCaches {
 
 function memoryStorage() {
     const values = new Map();
-    return { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
+    return {
+        getItem: key => values.get(key) ?? null,
+        setItem: (key, value) => values.set(key, value),
+        removeItem: key => values.delete(key)
+    };
 }
 
 async function digest(text) {
@@ -100,4 +104,24 @@ test('abort interrompe un download e non lascia pacchetti parziali', async () =>
     await assert.rejects(pending, /abort/i);
     assert.equal((await state.instance.status('A2')).installed, false);
     assert.deepEqual(await state.cacheStorage.keys(), []);
+});
+
+test('riconosce dalla cache verificata un pacchetto installato anche se il marcatore locale manca', async () => {
+    const { body, manifest } = await fixture();
+    const state = manager(async () => new Response(body));
+    await state.instance.install(manifest, { baseUrl: '/ai/a2/0.0.1/' });
+    state.storage.removeItem('codex.local-ai.active.v1');
+    const status = await state.instance.status('A2', { manifest, baseUrl: '/ai/a2/0.0.1/' });
+    assert.equal(status.installed, true);
+    assert.equal(JSON.parse(state.storage.getItem('codex.local-ai.active.v1')).A2.version, manifest.version);
+});
+
+test('non dichiara installato un pacchetto il cui marcatore punta a una cache assente', async () => {
+    const { body, manifest } = await fixture();
+    const state = manager(async () => new Response(body));
+    await state.instance.install(manifest, { baseUrl: '/ai/a2/0.0.1/' });
+    for (const name of await state.cacheStorage.keys()) await state.cacheStorage.delete(name);
+    const status = await state.instance.status('A2', { manifest, baseUrl: '/ai/a2/0.0.1/' });
+    assert.equal(status.installed, false);
+    assert.equal(JSON.parse(state.storage.getItem('codex.local-ai.active.v1')).A2, undefined);
 });

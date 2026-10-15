@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Release 1.2.194 — pacchetti AI, ricerca scadenze e catalogo Archivio — 15/10/2026
+
+Diego autorizza la correzione client dei difetti osservati dopo l'installazione locale di AI.2/AI.3: lo stato installato deve essere ricostruito dalla cache verificata anche quando il marcatore locale non sopravvive al refresh; una domanda naturale che identifica una scadenza per anno deve essere trattata come ricerca dei dati Vault e non richiedere la presenza delle parole colloquiali; il microfono deve poter inviare anche una domanda in modalità **Chiedi** e pronunciare la risposta asincrona dopo il rilascio della sessione audio.
+
+Il perimetro comprende gestore pacchetti, UI Impostazioni/Assistente, motore deterministico, catalogo umano del visualizzatore Archivio portabile, test e documentazione. Sono esclusi Rules, Functions, dati reali e accesso diretto dei modelli al Vault. Il successivo ordine «Quando hai finito il ciclo di verifiche, pubblica tutto» autorizza commit, push e deploy del solo Hosting dopo i gate finali verdi.
+
 ## Hotfix Archivio portatile mobile — candidata 1.2.193 — 15/10/2026
 
 Diego autorizza la correzione del dialogo iniziale dell'Archivio portatile segnalato sulla `1.2.192`: su iPhone devono essere sempre raggiungibili un comando **Annulla** e il comando **Avvia esportazione**, senza dover chiudere l'app. Il perimetro comprende esclusivamente UI client, accessibilità, versione, test e documentazione; non modifica formato dell'archivio, cifratura, Rules, Functions o dati reali.

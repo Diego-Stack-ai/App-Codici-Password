@@ -2,5 +2,9 @@ Frontend/public/assets/local-ai/**/*.bin binary
 Frontend/public/assets/local-ai/**/*.onnx binary
 Frontend/public/assets/local-ai/**/*.wasm binary
 Frontend/public/assets/local-ai/**/runtime/transformers.bundle.js -diff
-Frontend/public/assets/local-ai/**/runtime/web-llm.js -diff
+Frontend/public/assets/local-ai/**/runtime/web-llm.js binary
 Frontend/public/assets/local-ai/**/runtime/ort-*.mjs -diff
+Frontend/public/assets/local-ai/**/*.json text eol=lf
+Frontend/public/assets/local-ai/**/*.txt text eol=lf
+Frontend/public/assets/local-ai/**/*.js text eol=lf
+Frontend/public/assets/local-ai/**/*.mjs text eol=lf
