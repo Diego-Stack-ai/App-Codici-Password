@@ -760,6 +760,42 @@ h3.settings-desc {
 
 .portable-archive-modal {
     width: min(92vw, 34rem);
+    max-height: calc(100dvh - (2 * max(var(--space-4, 1rem), env(safe-area-inset-top))));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.portable-archive-close {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin: calc(-1 * var(--space-3, 0.75rem)) calc(-1 * var(--space-3, 0.75rem)) 0 auto;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent-surface-strong);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.portable-archive-modal > .modal-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: var(--space-3, 0.75rem);
+    padding-top: var(--space-3, 0.75rem);
+    padding-bottom: max(var(--space-1, 0.25rem), env(safe-area-inset-bottom));
+    background: var(--accent-surface);
+}
+
+.dark .portable-archive-modal > .modal-actions {
+    background: var(--accent-surface-strong);
 }
 
 .portable-archive-warning {

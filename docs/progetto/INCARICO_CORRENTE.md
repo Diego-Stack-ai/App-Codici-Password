@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Hotfix Archivio portatile mobile — candidata 1.2.193 — 15/10/2026
+
+Diego autorizza la correzione del dialogo iniziale dell'Archivio portatile segnalato sulla `1.2.192`: su iPhone devono essere sempre raggiungibili un comando **Annulla** e il comando **Avvia esportazione**, senza dover chiudere l'app. Il perimetro comprende esclusivamente UI client, accessibilità, versione, test e documentazione; non modifica formato dell'archivio, cifratura, Rules, Functions o dati reali.
+
+La correzione deve preservare i vincoli esistenti per l'abilitazione di **Avvia esportazione**, permettere la chiusura prima della password e non lasciare listener o output parziali. La pubblicazione Hosting è coordinata dall'Orchestratore soltanto dopo test mirati, controlli di versione, documentazione e diff finale verdi.
+
 ## AI-LOCALE-A2-A3-01 — candidata 1.2.192 autorizzata al rilascio — 15/10/2026
 
 Diego autorizza download, verifica, hosting e distribuzione Firebase degli artefatti AI.2/AI.3, accettando il relativo consumo di storage e banda. Il lotto viene riallineato sulla baseline `1.2.191` (`d5bb2beea85a14ec446bd6139ed0ec749045dcfa`). **A1** resta il motore deterministico e fallback universale; **A2** aggiunge ricerca semantica locale installabile/rimovibile; **A3** aggiunge generazione locale soltanto sui dispositivi che superano capability probe e benchmark.

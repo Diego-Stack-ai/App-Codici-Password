@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.192';
+import { auth, db } from '../../firebase-config.js?v=1.2.193';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -40,7 +40,7 @@ export async function initImpostazioni(user) {
     initSettingsEvents(user);
     setupSecurityToggles(currentUserData);
     setupAIAssistantToggle(user, currentUserData);
-    import('../assistant/assistant-package-settings.js?v=1.2.192')
+    import('../assistant/assistant-package-settings.js?v=1.2.193')
         .then(module => module.initAssistantPackageSettings())
         .catch(error => console.error('[LOCAL AI] Impostazioni pacchetto non disponibili.', error));
     setupCompanyAreaToggle(user, currentUserData);
@@ -63,7 +63,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.192');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.193');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -177,7 +177,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.192');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.193');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -309,7 +309,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.192');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.193');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -865,6 +865,11 @@ function setupPortableArchive(user) {
         const includeAttachments = createElement('input', {type: 'checkbox', checked: true, id: 'portable-include-attachments'});
         const acknowledged = createElement('input', {type: 'checkbox', id: 'portable-risk-ack'});
         const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('cancel')});
+        const closeButton = createElement('button', {
+            type: 'button', className: 'portable-archive-close', 'aria-label': t('cancel'), title: t('cancel')
+        }, [createElement('span', {
+            className: 'material-symbols-outlined notranslate', translate: 'no', 'aria-hidden': 'true', textContent: 'close'
+        })]);
         const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: t('portable_create'), disabled: true});
         const status = createElement('p', {className: 'portable-archive-status', role: 'alert'});
         const validate = () => {
@@ -882,6 +887,19 @@ function setupPortableArchive(user) {
         const close = () => { password.value = ''; confirmation.value = ''; modal.remove(); };
         action.own(() => { close(); if (currentAction === action) button.disabled = false; });
         cancelButton.addEventListener('click', () => action.dispose());
+        closeButton.addEventListener('click', () => action.dispose());
+        const dismissOnEscape = event => {
+            if (event.key === 'Escape' && action.active()) action.dispose();
+        };
+        const dismissOnBackdrop = event => {
+            if (event.target === modal && action.active()) action.dispose();
+        };
+        document.addEventListener('keydown', dismissOnEscape);
+        modal.addEventListener('click', dismissOnBackdrop);
+        action.own(() => {
+            document.removeEventListener('keydown', dismissOnEscape);
+            modal.removeEventListener('click', dismissOnBackdrop);
+        });
         startButton.addEventListener('click', async () => {
             if (!action.active() || startButton.disabled) return;
             startButton.disabled = true;
@@ -935,6 +953,7 @@ function setupPortableArchive(user) {
             }
         });
         modal.appendChild(createElement('div', {className: 'modal-box portable-archive-modal'}, [
+            closeButton,
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'folder_zip'}),
             createElement('h3', {className: 'modal-title', textContent: t('portable_title')}),
             createElement('p', {className: 'modal-text', textContent: t('portable_intro')}),
@@ -1113,7 +1132,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.192');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.193');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
