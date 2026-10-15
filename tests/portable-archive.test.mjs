@@ -268,6 +268,7 @@ test('il runtime emette le proiezioni una alla volta come byte, senza Base64 cum
 test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     const html = await readFile(resolve(root, 'Frontend/public/impostazioni.html'), 'utf8');
     const settings = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/impostazioni.js'), 'utf8');
+    const settingsCss = await readFile(resolve(root, 'Frontend/public/assets/css/impostazioni.css'), 'utf8');
     const settingsTranslations = await readFile(resolve(root, 'Frontend/public/assets/js/translations/settings.js'), 'utf8');
     const service = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-service.js'), 'utf8');
     const stream = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-stream.js'), 'utf8');
@@ -275,6 +276,12 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     assert.match(html, /id="btn-export-portable-archive"/);
     assert.match(html, /id="btn-export-encrypted-backup"/);
     assert.match(settings, /t\('portable_acknowledge'\)/);
+    assert.match(settings, /className: 'portable-archive-close'/);
+    assert.match(settings, /cancelButton\.addEventListener\('click', \(\) => action\.dispose\(\)\)/);
+    assert.match(settings, /event\.key === 'Escape'/);
+    assert.match(settings, /event\.target === modal/);
+    assert.match(settingsCss, /\.portable-archive-modal\s*\{[^}]*overflow-y:\s*auto;/s);
+    assert.match(settingsCss, /\.portable-archive-modal > \.modal-actions\s*\{[^}]*position:\s*sticky;[^}]*bottom:\s*0;/s);
     assert.match(settingsTranslations, /non è un backup reimportabile/);
     assert.match(settings, /forceReload: true, promptImmediately: true/);
     assert.match(settings, /PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED/);

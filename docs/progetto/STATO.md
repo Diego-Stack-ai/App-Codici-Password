@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+## Candidata 1.2.193 — comandi Archivio portatile raggiungibili su mobile — 15/10/2026
+
+Il difetto osservato su iPhone nella finestra iniziale di **Esporta archivio portatile** è stato ricondotto al contenitore modale: la regola comune impostava prima lo scorrimento verticale e poi lo annullava con `overflow: hidden`, lasciando **Annulla** e **Avvia esportazione** fuori dall'area visibile quando la tastiera riduceva il viewport. Il formato dell'archivio, la cifratura e il flusso dati non sono modificati.
+
+La candidata `1.2.193` rende scorrevole la modale dedicata, mantiene le azioni ancorate in basso con safe area, aggiunge una chiusura accessibile sempre visibile e permette di uscire anche con `Escape` o tocco sullo sfondo. **Avvia esportazione** resta intenzionalmente disabilitato finché password robusta, conferma identica e presa visione del limite di non reimportabilità non sono validi. I test mirati verificano presenza dei comandi, chiusure e contratto CSS mobile; la prova automatica non sostituisce il collaudo conclusivo su iPhone fisico.
+
+Implementazione e verifiche locali non equivalgono ancora a merge o Hosting distribuito. Rules, Functions, dati reali e formato `.cpportable` restano invariati.
+
 ## Candidata 1.2.191 — contratto e gate i18n incrementale — 15/10/2026
 
 Il lotto Lingue è riallineato non distruttivamente al merge Archivio `cee3929925a2bd4f30255906f3f358316ff049bf` (`1.2.190`) e conserva l'hotfix icone `1.2.189`. La candidata introduce un inventario ripetibile dei testi UI statici e dinamici, una baseline del debito che può solo diminuire e un contratto di completezza per dizionari, onboarding, componenti montati dopo il bootstrap, persistenza e cambio lingua.
