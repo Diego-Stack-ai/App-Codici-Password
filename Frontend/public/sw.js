@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.191';
+const CACHE_NAME = 'codex-shell-v1.2.192';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./offline-assets.js');
@@ -24,7 +24,9 @@ self.addEventListener('activate', (event) => {
     event.waitUntil((async () => {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames
-            .filter(name => name.startsWith(APP_CACHE_PREFIX) && name !== CACHE_NAME)
+            .filter(name => name.startsWith(APP_CACHE_PREFIX)
+                && !name.startsWith('codex-local-ai-')
+                && name !== CACHE_NAME)
             .map(name => caches.delete(name)));
         await self.clients.claim();
     })());
@@ -60,6 +62,17 @@ self.addEventListener('fetch', (event) => {
     // nella cache della PWA. La richiesta mantiene così Authorization e
     // raggiunge sempre l'endpoint, che restituisce Cache-Control: no-store.
     if (url.pathname === '/protected-media/presentation') return;
+
+    // I pacchetti AI locali vengono inseriti nelle cache dedicate soltanto
+    // dopo verifica di dimensione e SHA-256. Il service worker li serve
+    // offline senza copiarli nella shell e senza accettare file non verificati.
+    if (url.pathname.startsWith('/assets/local-ai/')) {
+        event.respondWith((async () => {
+            const cached = await caches.match(request);
+            return cached || fetch(request, { cache: 'no-store', credentials: 'omit' });
+        })());
+        return;
+    }
 
     // Solo le risorse dichiarate nella shell possono entrare nella Cache API.
     // Evita di conservare accidentalmente future risposte private same-origin.

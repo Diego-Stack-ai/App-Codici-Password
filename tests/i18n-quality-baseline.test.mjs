@@ -1,6 +1,17 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildI18nInventory, evaluateI18nBaseline } from '../scripts/audit-i18n-quality.mjs';
+import { readFile } from 'node:fs/promises';
+
+const assistantSource = await readFile(new URL('../Frontend/public/assets/js/translations/assistant.js', import.meta.url), 'utf8');
+const { assistantCatalogs } = await import(`data:text/javascript;base64,${Buffer.from(assistantSource).toString('base64')}`);
+
+test('catalogo Assistant mantiene parità completa nelle otto lingue', () => {
+  const languages = ['it','en','es','fr','de','zh','hi','pt'];
+  assert.deepEqual(Object.keys(assistantCatalogs).sort(), [...languages].sort());
+  const expected = Object.keys(assistantCatalogs.it).sort();
+  for (const language of languages) assert.deepEqual(Object.keys(assistantCatalogs[language]).sort(), expected, language);
+});
 
 test('l’inventario i18n non peggiora rispetto alla baseline integrata 1.2.190', () => {
   const inventory = buildI18nInventory();

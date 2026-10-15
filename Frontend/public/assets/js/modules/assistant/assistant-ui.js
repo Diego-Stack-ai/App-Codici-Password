@@ -23,7 +23,7 @@ export function speechLocaleForLanguage(language) {
     return SPEECH_LOCALES[language] || SPEECH_LOCALES.it;
 }
 
-export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential, offlineNotice = '', language = 'it' }) {
+export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive, resolveCredential, offlineNotice = '', language = 'it' }) {
     const speechLocale = speechLocaleForLanguage(language);
     const pageScrollY = window.scrollY;
     document.documentElement.classList.add('vault-assistant-open');
@@ -54,9 +54,13 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     instructions.append(
         element('strong', '', 'Come usare Agente Codex'),
         element('p', '', 'In Cerca puoi cercare il nome completo o parziale di un Account, poi dire “apri il secondo”, “apri il due” oppure indicare il nome esatto.'),
-        element('p', '', 'Chiedi è riservata alla futura AI locale avanzata e non è ancora attiva.')
+        element('p', '', onExplain
+            ? 'In Chiedi il pacchetto locale spiega questa pagina senza inviare dati a servizi esterni.'
+            : 'Per usare Chiedi installa e attiva AI.2 o AI.3 nelle Impostazioni.')
     );
-    const modeNotice = element('p', 'vault-assistant-mode-notice', 'La modalità Chiedi richiederà il pacchetto AI locale avanzato. In questa versione usa Cerca.');
+    const modeNotice = element('p', 'vault-assistant-mode-notice', onExplain
+        ? 'Chiedi usa il pacchetto AI locale installato e non invia contenuti a servizi esterni.'
+        : 'Installa e attiva AI.2 o AI.3 nelle Impostazioni. Cerca resta sempre disponibile.');
     modeNotice.hidden = true;
 
     const conversation = element('div', 'vault-assistant-conversation'); conversation.setAttribute('aria-live', 'polite');
@@ -88,9 +92,10 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
         const searching = mode === 'search';
         searchMode.classList.toggle('active', searching); askMode.classList.toggle('active', !searching);
         searchMode.setAttribute('aria-pressed', String(searching)); askMode.setAttribute('aria-pressed', String(!searching));
-        input.disabled = !searching; send.disabled = !searching; microphone.disabled = !searching || !speechSynthesis;
+        const usable = searching || Boolean(onExplain);
+        input.disabled = !usable; send.disabled = !usable; microphone.disabled = !searching || !speechSynthesis;
         modeNotice.hidden = searching;
-        input.placeholder = searching ? 'Cosa vuoi cercare?' : 'AI locale avanzata non ancora disponibile';
+        input.placeholder = searching ? 'Cosa vuoi cercare?' : (onExplain ? 'Cosa vuoi sapere su questa pagina?' : 'AI locale avanzata non disponibile');
         if (searching) input.focus();
     };
     searchMode.addEventListener('click', () => setMode('search'));
@@ -187,11 +192,20 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     const ask = query => {
         const value = query.trim(); if (!value) return;
         addBubble('user', value); input.value = '';
-        const answer = onAsk(value); addBubble('assistant', answer.message); void addResults(answer.items || []);
-        if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
-        return answer;
+        if (!onExplain || activeMode === 'search') {
+            const answer = onAsk(value); addBubble('assistant', answer.message); void addResults(answer.items || []);
+            if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
+            return answer;
+        }
+        status.textContent = 'Elaborazione locale…';
+        return onExplain(value).then(message => {
+            addBubble('assistant', message); return { message, items:[] };
+        }).catch(error => {
+            const message = `AI locale non disponibile: ${error.message}. Puoi continuare con Cerca.`;
+            addBubble('assistant', message); return { message, items:[] };
+        }).finally(() => { status.textContent = 'I dati segreti non vengono mostrati nella conversazione.'; });
     };
-    searchRow.addEventListener('submit', event => { event.preventDefault(); ask(input.value); });
+    searchRow.addEventListener('submit', event => { event.preventDefault(); void ask(input.value); });
 
     let activeRecognition = null;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;

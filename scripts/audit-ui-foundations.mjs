@@ -14,9 +14,14 @@ function walk(directory) {
   });
 }
 
+const opaqueLocalAiRuntimeFiles = new Set([
+  'transformers.bundle.js',
+  'web-llm.js'
+]);
 const files = walk(publicRoot).filter(file =>
   !file.includes('ui-preview') &&
-  !file.includes(`${path.sep}vendor${path.sep}`)
+  !file.includes(`${path.sep}vendor${path.sep}`) &&
+  !(file.includes(`${path.sep}assets${path.sep}local-ai${path.sep}`) && opaqueLocalAiRuntimeFiles.has(path.basename(file)))
 );
 const cssFiles = files.filter(file => file.endsWith('.css'));
 const markupFiles = files.filter(file => /\.(?:html|js)$/.test(file));

@@ -42,6 +42,59 @@ Il prodotto conserva due livelli separati:
 - **Assistente base**, disponibile senza AI: regole, sinonimi, fuzzy search, filtri, conoscenza delle pagine, guida, navigazione e risultati verificabili;
 - **AI locale avanzata**, facoltativa nelle Impostazioni: interpreta formulazioni vaghe e restituisce soltanto azioni/parametri tipizzati. Non interroga direttamente i dati, non esegue scritture e non sostituisce il livello base.
 
+### Architettura sperimentale A1/A2/A3 — 15/10/2026
+
+L'autorizzazione `AI-LOCALE-A2-A3-01` rende espliciti tre livelli dello stesso Agente, senza creare tre chat:
+
+| Livello | Funzione | Runtime | Disponibilità obiettivo |
+|---|---|---|---|
+| A1 | ricerca, apertura e guida deterministiche | JavaScript esistente | sempre, anche senza pacchetti |
+| A2 | similarità semantica e parafrasi sulle istruzioni statiche | Transformers.js + ONNX Runtime Web, WebAssembly con accelerazione solo se provata | PC e cellulari compatibili, compreso iPhone dopo banco fisico |
+| A3 | interpretazione conversazionale locale più flessibile | WebLLM in Worker dedicato e WebGPU | laboratorio mobile; produzione inizialmente PC/portatili se i gate mobili falliscono |
+
+A2 non è un LLM generativo e non sostituisce A1. Gli embeddings della documentazione D0 vengono prodotti in build o nel pacchetto; sul dispositivo si calcola la rappresentazione della domanda e si restituiscono riferimenti a schede versionate. Un eventuale shortlist D2 viene prima ottenuto da A1 e può entrare nell'envelope soltanto con riferimento opaco, tipo, titolo e sottotitolo necessari. Credenziali, note libere e D3/D4 non entrano nell'indice semantico.
+
+A3 non possiede strumenti applicativi. Riceve lo stesso envelope minimo, una cronologia effimera limitata e istruzioni statiche; restituisce soltanto uno di questi intenti: `explain_page`, `semantic_search`, `select_result`, `clarify`. Il validatore rifiuta proprietà aggiuntive, ordinali fuori intervallo, URL, HTML, intenti sconosciuti e richieste di operazioni. L'esecutore deterministico risolve l'intento; ogni futura estensione con effetti dovrà produrre un'anteprima e richiedere conferma, senza attribuire al modello autorizzazioni.
+
+La memoria conversazionale vive esclusivamente nell'istanza del dialogo, conserva al massimo otto coppie domanda/intento e viene azzerata su chiusura, blocco Vault, logout, cambio UID e `pagehide`. Non entra in `localStorage`, IndexedDB, log, diagnostica o telemetria. Il modello non riceve errori contenenti payload o stack con dati. Testi provenienti dal Vault sono delimitati e trattati come dati non affidabili: una frase contenuta in un Account non può cambiare istruzioni, strumenti o politica.
+
+#### Pacchetti e ciclo di vita
+
+Modello e runtime non fanno parte della shell, del service worker ordinario o del primo download. Un catalogo applicativo firmato/versionato descrive livello, modello, runtime, revisione immutabile, licenza, lingue dichiarate, dimensione, memoria massima e file con SHA-256. Il flusso previsto è:
+
+1. feature detection e stima quota senza dati Vault;
+2. informativa su dimensione, spazio, RAM, batteria, calore, offline e rimozione;
+3. consenso esplicito e download annullabile;
+4. scrittura in area temporanea, verifica di ogni hash e del totale;
+5. attivazione atomica del nuovo manifest, conservando il precedente fino al test di avvio;
+6. benchmark locale sintetico e scelta A2/A3/A1;
+7. rimozione completa di file, cache, indici derivati e memoria.
+
+Interruzione, quota insufficiente, hash errato, runtime incompatibile, memoria insufficiente o background prolungato non lasciano un pacchetto attivo parziale. L'aggiornamento fallito conserva la versione precedente; A1 resta immediatamente disponibile. La preferenza di installazione può persistere, ma non la conversazione né plaintext del Vault.
+
+#### Candidati iniziali e budget da verificare
+
+Per A2 è distribuita la conversione INT8 `yuiseki/granite-embedding-97m-multilingual-r2-ONNX`, fissata a revisione immutabile. Modello, tokenizer, Transformers.js/ONNX Runtime Web e licenze totalizzano 145.871.600 byte. Il pacchetto è disponibile soltanto dopo consenso e verifica locale completa.
+
+Per A3 è distribuito `mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC` con WebLLM 0.2.86 e libreria WebGPU fissata: 301.982.152 byte di download e circa 944,62 MiB di VRAM dichiarata. A3 resta hard-off su iPhone e sui dispositivi senza WebGPU, quota o memoria sufficiente.
+
+Il gestore `local-ai-package-manager.js` non è importato dalla shell: accetta soltanto URL same-origin sotto il percorso del pacchetto, verifica quota, byte e SHA-256 in una cache di staging, promuove il lotto soltanto dopo verifica completa, espone progresso streaming/abort e rimuove tutte le cache del livello. Le cache usano il prefisso `codex-local-ai-`, distinto da `codex-shell-`; il Service Worker le preserva agli aggiornamenti e serve offline soltanto le risposte già verificate, senza inserirle nella shell. `incremental-sha256.js` legge un chunk per volta mentre una copia dello stream alimenta Cache Storage: nessun `arrayBuffer()` dell'intero shard. La quota preventiva include 2,15 volte il download perché staging e cache pronta coesistono durante la promozione atomica.
+
+I manifest fissati misurano 145.871.600 byte per A2 e 301.982.152 byte per A3. Il loader rifiuta pacchetto assente, capacità insufficiente, runtime esterno o factory errata prima di importare codice ML. Il catalogo è `available` perché gli artefatti same-origin e le licenze sono presenti e verificati; disponibilità del catalogo non equivale a compatibilità del dispositivo.
+
+#### Matrice e gate fisici
+
+| Piattaforma | A2 | A3 | Gate minimo |
+|---|---|---|---|
+| Windows Chrome/Edge | candidato | candidato laboratorio | WebGPU reale, cold/warm start, RAM/VRAM, 20 turni, annullamento e ripresa |
+| Android Chromium | candidato | laboratorio | due fasce RAM, batteria/temperatura, background/foreground, quota ed espulsione |
+| iPhone Safari/PWA | candidato WASM | laboratorio, mai promesso | installazione/rimozione, tempo domanda, pressione memoria, blocco schermo e riapertura |
+| browser senza WebGPU | candidato WASM | non disponibile | fallback A1, nessun loop di download o messaggio ingannevole |
+
+A2 deve rispettare un tempo interattivo deciso dopo misura e non bloccare il main thread. A3 misura almeno: tempo di caricamento, tempo al primo token, token/s, picco memoria, energia/temperatura osservabile, cancellazione entro un tempo finito e assenza di crash della PWA. I test di qualità includono le otto lingue dell'app, domande ambigue, round-trip di lingua, output JSON alterato, prompt injection nei titoli e nei dati sintetici, assenza di rete dopo installazione e cancellazione delle risorse. Nessun banco automatico sostituisce i dispositivi fisici.
+
+Lo scaffold locale `advanced-local-ai-contract.js` è deliberatamente non importato dal runtime pubblico. Serve a rendere eseguibili i contratti di manifest, capacità, envelope, intenti e memoria prima di scegliere artefatti o implementare download. Non effettua rete, storage, inferenza o accesso al Vault.
+
 ### Incremento Assistente base 14/10/2026
 
 L'interfaccia mantiene un solo **Agente Codex** con due modalità esplicite. **Cerca** usa esclusivamente indice e regole locali; **Chiedi** riserva lo spazio all'AI locale avanzata e, finché il relativo pacchetto non è implementato e autorizzato, resta disabilitata con una spiegazione trasparente. Il pulsante `?` interno è l'unico aiuto delle pagine private e documenta comandi ed esempi senza accedere ai record. Il catalogo pagina per pagina resta disponibile al prodotto, ma non monta un secondo comando nel footer.
