@@ -10,19 +10,19 @@
     <title data-t="title_settings">Impostazioni - PROTOCOLLO BASE V5.0</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.190" />
+    <link rel="manifest" href="manifest.json?v=1.2.191" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.190">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.191">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.190">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.191">
 
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.190">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.191">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="configuration">
@@ -56,7 +56,7 @@
                                 <div id="user-avatar-settings" class="hero-avatar"></div>
                             </div>
 
-                            <a id="digital-card-settings-link" class="qr-preview-box" href="profilo_privato.html?profileTab=digital-card" aria-label="Gestisci Tessera digitale">
+                            <a id="digital-card-settings-link" class="qr-preview-box" href="profilo_privato.html?profileTab=digital-card" aria-label="Gestisci Tessera digitale" data-t-aria="settings_digital_card_manage">
                                 <div id="settings-profile-qrcode" class="settings-profile-qrcode" aria-hidden="true"></div>
                                 <div class="qr-lens-icon">
                                     <span class="material-symbols-outlined notranslate" translate="no">qr_code_2</span>
@@ -88,34 +88,34 @@
                             </div>
                             <div class="settings-item-info">
                                 <span class="settings-label" data-t="language_title">Lingua App</span>
-                                <span id="current-lang-label" class="settings-desc">Italiano</span>
+                                <span id="current-lang-label" class="settings-desc notranslate" translate="no">Italiano</span>
                             </div>
                             <span id="lang-chevron" class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
                         </div>
                     </div>
                     <div id="lang-dropdown" class="settings-dropdown-panel hidden">
-                        <button class="settings-dropdown-btn lang-option" data-code="it">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="it">
                             <span>🇮🇹</span> Italiano
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="en">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="en">
                             <span>🇺🇸</span> English
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="es">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="es">
                             <span>🇪🇸</span> Español
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="fr">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="fr">
                             <span>🇫🇷</span> Français
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="de">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="de">
                             <span>🇩🇪</span> Deutsch
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="zh">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="zh">
                             <span>🇨🇳</span> 中文
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="hi">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="hi">
                             <span>🇮🇳</span> हिन्दी
                         </button>
-                        <button class="settings-dropdown-btn lang-option" data-code="pt">
+                        <button class="settings-dropdown-btn lang-option notranslate" translate="no" data-code="pt">
                             <span>🇵🇹</span> Português
                         </button>
                     </div>
@@ -156,7 +156,7 @@
                                 data-t="theme_dark">Scuro</button>
                         </div>
                         <div class="settings-subsection-label" data-t="theme_color_title">Colore dell’app</div>
-                        <div class="settings-controls-row color-theme-selector" id="color-theme-selector" aria-label="Colore dell’app">
+                        <div class="settings-controls-row color-theme-selector" id="color-theme-selector" aria-label="Colore dell’app" data-t-aria="theme_color_title">
                             <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="blue" aria-pressed="false"><span class="theme-swatch swatch-blue" aria-hidden="true"></span><span data-t="theme_color_blue">Blu</span></button>
                             <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="green" aria-pressed="false"><span class="theme-swatch swatch-green" aria-hidden="true"></span><span data-t="theme_color_green">Verde</span></button>
                             <button class="timer-btn timer-btn-flex color-theme-btn" data-color-theme="red" aria-pressed="false"><span class="theme-swatch swatch-red" aria-hidden="true"></span><span data-t="theme_color_red">Rosso</span></button>
@@ -174,12 +174,12 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">smart_toy</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Attiva Agente AI</span>
-                                <span class="settings-desc">Ricerca locale e protetta nella tua Vault</span>
+                                <span class="settings-label" data-t="settings_ai_title">Attiva Agente AI</span>
+                                <span class="settings-desc" data-t="settings_ai_desc">Ricerca locale e protetta nella tua Vault</span>
                             </div>
                         </div>
                         <input type="checkbox" id="ai-assistant-toggle" class="settings-toggle"
-                            aria-label="Attiva Agente AI">
+                            aria-label="Attiva Agente AI" data-t-aria="settings_ai_title">
                     </div>
 
                     <div class="settings-item">
@@ -188,12 +188,12 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">apartment</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Mostra area Azienda</span>
-                                <span class="settings-desc">Nasconde o mostra l’area aziendale senza eliminare i dati</span>
+                                <span class="settings-label" data-t="settings_company_area_title">Mostra area Azienda</span>
+                                <span class="settings-desc" data-t="settings_company_area_desc">Nasconde o mostra l’area aziendale senza eliminare i dati</span>
                             </div>
                         </div>
                         <input type="checkbox" id="company-area-toggle" class="settings-toggle"
-                            aria-label="Mostra area Azienda">
+                            aria-label="Mostra area Azienda" data-t-aria="settings_company_area_title">
                     </div>
 
                     <!-- Archivio -->
@@ -217,8 +217,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">key</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Credenziali comuni</span>
-                                <span class="settings-desc">Dati protetti richiamabili da più Account</span>
+                                <span class="settings-label" data-t="settings_shared_credentials_title">Credenziali comuni</span>
+                                <span class="settings-desc" data-t="settings_shared_credentials_desc">Dati protetti richiamabili da più Account</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -230,8 +230,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">cloud_download</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Backup cifrato</span>
-                                <span class="settings-desc">Esporta Vault e allegati con una Recovery Key separata</span>
+                                <span class="settings-label" data-t="settings_backup_export_title">Backup cifrato</span>
+                                <span class="settings-desc" data-t="settings_backup_export_desc">Esporta Vault e allegati con una Recovery Key separata</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -243,8 +243,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">folder_zip</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Esporta archivio portabile</span>
-                                <span class="settings-desc">Crea una copia consultabile fuori dall’app, protetta da una password dedicata</span>
+                                <span class="settings-label" data-t="settings_portable_export_title">Esporta archivio portabile</span>
+                                <span class="settings-desc" data-t="settings_portable_export_desc">Crea una copia consultabile fuori dall’app, protetta da una password dedicata</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -256,8 +256,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">settings_backup_restore</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Ripristina backup</span>
-                                <span class="settings-desc">Verifica prima il file e blocca qualsiasi collisione</span>
+                                <span class="settings-label" data-t="settings_backup_restore_title">Ripristina backup</span>
+                                <span class="settings-desc" data-t="settings_backup_restore_desc">Verifica prima il file e blocca qualsiasi collisione</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -269,8 +269,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">health_and_safety</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Salute credenziali</span>
-                                <span class="settings-desc">Controlla localmente password deboli, duplicate o datate</span>
+                                <span class="settings-label" data-t="settings_credential_health_title">Salute credenziali</span>
+                                <span class="settings-desc" data-t="settings_credential_health_desc">Controlla localmente password deboli, duplicate o datate</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -282,8 +282,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">table_view</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Utilizzo campi Account</span>
-                                <span class="settings-desc">Conta localmente soltanto i campi realmente compilati</span>
+                                <span class="settings-label" data-t="settings_field_usage_title">Utilizzo campi Account</span>
+                                <span class="settings-desc" data-t="settings_field_usage_desc">Conta localmente soltanto i campi realmente compilati</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -297,7 +297,7 @@
                             </div>
                             <div class="settings-item-info">
                                 <span class="settings-label" data-t="expiry_rules">Categorie Scadenze</span>
-                                <span class="settings-desc">Gestisci liste e tipologie</span>
+                                <span class="settings-desc" data-t="settings_manage_lists_desc">Gestisci liste e tipologie</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -331,7 +331,7 @@
                             </div>
                             <div class="settings-item-info">
                                 <span class="settings-label" data-t="two_factor_auth">2FA</span>
-                                <span class="settings-desc">Codice tramite app Authenticator (TOTP)</span>
+                                <span class="settings-desc" data-t="settings_totp_desc">Codice tramite app Authenticator (TOTP)</span>
                             </div>
                         </div>
                         <input type="checkbox" id="2fa-toggle" class="settings-toggle">
@@ -343,8 +343,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">key</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Codici di recupero 2FA</span>
-                                <span class="settings-desc">Genera 10 nuovi codici monouso; i precedenti saranno annullati</span>
+                                <span class="settings-label" data-t="settings_recovery_codes_title">Codici di recupero 2FA</span>
+                                <span class="settings-desc" data-t="settings_recovery_codes_desc">Genera 10 nuovi codici monouso; i precedenti saranno annullati</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -356,8 +356,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">encrypted</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Master Password della Vault</span>
-                                <span class="settings-desc">Cambia la Master Password senza modificare la password di login</span>
+                                <span class="settings-label" data-t="settings_master_password_title">Master Password della Vault</span>
+                                <span class="settings-desc" data-t="settings_master_password_desc">Cambia la Master Password senza modificare la password di login</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -382,14 +382,14 @@
                             </div>
                             <div class="settings-item-info">
                                 <span class="settings-label" data-t="lock_inactivity">Sicurezza e Inattività</span>
-                                <span class="settings-desc">Blocca la Vault dopo il periodo scelto</span>
+                                <span class="settings-desc" data-t="settings_inactivity_desc">Blocca la Vault dopo il periodo scelto</span>
                             </div>
                         </div>
                         <div class="settings-controls-row" id="lock-timer-selector">
                             <button class="timer-btn timer-btn-flex" data-val="1">1'</button>
                             <button class="timer-btn timer-btn-flex" data-val="3">3'</button>
                             <button class="timer-btn timer-btn-flex" data-val="5">5'</button>
-                            <button class="timer-btn timer-btn-flex" data-val="720">12h</button>
+                            <button class="timer-btn timer-btn-flex notranslate" translate="no" data-val="720">12h</button>
                         </div>
                     </div>
 
@@ -413,8 +413,8 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">devices_off</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Disconnetti tutte le postazioni</span>
-                                <span class="settings-desc">Revoca le sessioni Firebase su PC, tablet e telefono, inclusa questa</span>
+                                <span class="settings-label" data-t="settings_revoke_sessions_title">Disconnetti tutte le postazioni</span>
+                                <span class="settings-desc" data-t="settings_revoke_sessions_desc">Revoca le sessioni Firebase su PC, tablet e telefono, inclusa questa</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon notranslate" translate="no">chevron_right</span>
@@ -427,14 +427,14 @@
                                 <span class="material-symbols-outlined notranslate" translate="no">notifications_active</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Notifiche scadenze</span>
-                                <span id="deadline-push-status" class="settings-desc">Verifica disponibilità…</span>
+                                <span class="settings-label" data-t="settings_deadline_notifications_title">Notifiche scadenze</span>
+                                <span id="deadline-push-status" class="settings-desc" data-t="settings_check_availability">Verifica disponibilità…</span>
                             </div>
-                            <input type="checkbox" id="deadline-push-toggle" class="settings-toggle" aria-label="Notifiche Push per le scadenze">
+                            <input type="checkbox" id="deadline-push-toggle" class="settings-toggle" aria-label="Notifiche Push per le scadenze" data-t-aria="settings_deadline_notifications_aria">
                         </div>
                         <button type="button" id="btn-test-deadline-push" class="btn-maintenance-accent hidden">
                             <span class="material-symbols-outlined notranslate" translate="no">send</span>
-                            Invia notifica di prova su questo dispositivo
+                            <span data-t="settings_test_notification">Invia notifica di prova su questo dispositivo</span>
                         </button>
                     </div>
 
@@ -442,10 +442,10 @@
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-blue"><span class="material-symbols-outlined notranslate" translate="no">share</span></div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Notifiche inviti condivisi</span>
-                                <span id="sharing-push-status" class="settings-desc">Verifica disponibilità…</span>
+                                <span class="settings-label" data-t="settings_shared_notifications_title">Notifiche inviti condivisi</span>
+                                <span id="sharing-push-status" class="settings-desc" data-t="settings_check_availability">Verifica disponibilità…</span>
                             </div>
-                            <input type="checkbox" id="sharing-push-toggle" class="settings-toggle" aria-label="Notifiche Push per gli inviti condivisi">
+                            <input type="checkbox" id="sharing-push-toggle" class="settings-toggle" aria-label="Notifiche Push per gli inviti condivisi" data-t-aria="settings_shared_notifications_aria">
                         </div>
                     </div>
 
@@ -453,35 +453,35 @@
 
                 <!-- Diagnostica prestazioni: locale, volontaria e priva di contenuti utente -->
                 <div class="settings-container mt-section">
-                    <h3 class="settings-desc">Diagnostica</h3>
+                    <h3 class="settings-desc" data-t="settings_diagnostics_heading">Diagnostica</h3>
                     <div class="settings-item settings-item-stack">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-blue">
                                 <span class="material-symbols-outlined notranslate" translate="no">speed</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label">Diagnostica App E Motori</span>
-                                <span class="settings-desc">Misura velocità e controlla servizi essenziali e stato dei motori. Nessun dato della Vault.</span>
+                                <span class="settings-label" data-t="settings_diagnostics_title">Diagnostica App e motori</span>
+                                <span class="settings-desc" data-t="settings_diagnostics_desc">Misura velocità e controlla servizi essenziali e stato dei motori. Nessun dato della Vault.</span>
                             </div>
-                            <input type="checkbox" id="performance-diagnostics-toggle" class="settings-toggle" aria-label="Misura velocità app">
+                            <input type="checkbox" id="performance-diagnostics-toggle" class="settings-toggle" aria-label="Misura velocità app" data-t-aria="settings_diagnostics_aria">
                         </div>
                         <div id="performance-diagnostics-panel" class="diagnostics-panel hidden">
                             <div id="performance-diagnostics-summary" aria-live="polite"></div>
                             <div class="diagnostics-actions diagnostics-actions-primary">
                                 <button type="button" id="btn-run-app-diagnostics" class="btn-maintenance-accent">
-                                    <span class="material-symbols-outlined notranslate" translate="no">health_and_safety</span>Esegui Controlli App
+                                    <span class="material-symbols-outlined notranslate" translate="no">health_and_safety</span><span data-t="settings_run_diagnostics">Esegui controlli app</span>
                                 </button>
                             </div>
                             <div id="app-diagnostics-summary" aria-live="polite"></div>
                             <div class="diagnostics-actions">
                                 <button type="button" id="btn-refresh-performance-diagnostics" class="btn-maintenance-accent">
-                                    <span class="material-symbols-outlined notranslate" translate="no">refresh</span>Aggiorna
+                                    <span class="material-symbols-outlined notranslate" translate="no">refresh</span><span data-t="settings_refresh">Aggiorna</span>
                                 </button>
                                 <button type="button" id="btn-copy-performance-diagnostics" class="btn-maintenance-accent">
-                                    <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>Copia report
+                                    <span class="material-symbols-outlined notranslate" translate="no">content_copy</span><span data-t="settings_copy_report">Copia report</span>
                                 </button>
                                 <button type="button" id="btn-clear-performance-diagnostics" class="btn-maintenance-danger">
-                                    <span class="material-symbols-outlined notranslate" translate="no">delete_sweep</span>Cancella misure
+                                    <span class="material-symbols-outlined notranslate" translate="no">delete_sweep</span><span data-t="settings_clear_measurements">Cancella misure</span>
                                 </button>
                             </div>
                         </div>

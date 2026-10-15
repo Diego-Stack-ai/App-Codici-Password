@@ -9,6 +9,34 @@ Questa raccolta mantiene distinti i contratti specialistici (pagine, registro ca
 
 La revisione completa delle lingue resta l'ultima fase del nuovo programma, dopo la stabilizzazione dell'Assistente. Da subito, però, ogni nuovo testo visibile, placeholder, ARIA, errore, domanda di chiarimento e guida deve usare chiavi i18n; intenti e azioni mantengono identificatori interni stabili e indipendenti dalla lingua. Nomi e contenuti creati dall'utente non vengono tradotti automaticamente.
 
+### Contratto verificabile i18n — baseline incrementale 1.2.189
+
+L'inventario canonico viene ricavato dai sorgenti e comprende, senza limitarsi a essi:
+
+- testo visibile nei file HTML e nei template;
+- `data-t`, `data-t-placeholder`, `data-t-title`, `data-t-aria` e gli equivalenti accessibili;
+- chiamate `t()` e ogni helper di formattazione localizzata;
+- `textContent`, placeholder, titoli, ARIA, toast, errori, conferme, modali e template generati in JavaScript;
+- onboarding, guida contestuale, Assistente e contenuti montati dopo il bootstrap.
+
+I dati creati dall'utente non vengono tradotti. Marchi, acronimi, token tecnici e altri testi intenzionalmente invarianti devono comparire in un'allowlist esatta, revisionabile e priva di dati personali; un'esclusione per percorso o espressione generica non può nascondere testo UI traducibile. Il codice vendor e gli stessi cataloghi linguistici sono esclusi soltanto dall'analisi dei letterali, non dai controlli di integrità dei dizionari.
+
+Una lingua può essere dichiarata **completa** soltanto se possiede tutte le chiavi canoniche, inclusi onboarding, accessibilità, guida e componenti dinamici, e supera revisione editoriale e gate visivo. In test e sviluppo una chiave assente deve essere osservabile: il fallback silenzioso non è una prova valida. In produzione è ammesso un fallback deterministico e dichiarato per continuità d'uso, senza presentare la lingua come completa. Chiavi duplicate, scambiate o non raggiungibili sono errori di contratto.
+
+Il controllo iniziale usa `scripts/i18n-quality-baseline.json` per censire il debito sulla base integrata `1.2.190`. Il file conserva anche la precedente fotografia `1.2.189` e il delta esplicito introdotto dall'Archivio portabile, in modo che il riallineamento non nasconda il nuovo debito. `scripts/audit-i18n-quality.mjs` genera la matrice per lingua e pagina; da questa nuova base ogni valore di debito può diminuire ma non aumentare. L'assenza di regressioni rispetto alla baseline non equivale a completezza: gli obiettivi di chiusura restano separati e richiedono zero chiavi mancanti per le lingue complete, zero letterali traducibili fuori catalogo e onboarding nativo.
+
+Prima di dichiarare completa una lingua sono obbligatorie almeno le seguenti prove:
+
+1. round-trip `IT → EN → ZH → IT → PT`, verificando che ogni passaggio ricostruisca testo e attributi dalla chiave e non dal DOM già tradotto;
+2. persistenza separata per visitatore, nuovo utente e utente esistente, inclusa la precedenza della preferenza remota dopo l'identificazione;
+3. montaggio dopo bootstrap di card, toast, modali, errori e guida, seguito da cambio lingua o ricarica prevista dal contratto;
+4. simulazione della traduzione automatica del browser per accertare che icone e token tecnici restino invariati e che la UI applicativa possa ripristinare i testi canonici;
+5. matrice pagina per pagina su contenuto, placeholder, titoli e ARIA;
+6. gate visivo e accessibile per inglese e lingue più lunghe, cinese e Devanagari, includendo overflow, interlinea, font, zoom e viewport mobili;
+7. prova che nomi, note, credenziali e altri contenuti dell'utente non vengano tradotti.
+
+Le pratiche denominate ECC `browser-qa`, `e2e-testing` e `verification-loop` sono ammesse come riferimento metodologico per organizzare scenari, ripetizioni e raccolta delle evidenze. Non sono una dipendenza normativa: nessun pacchetto ECC o codice remoto viene installato o eseguito per questo contratto, e i risultati devono essere riproducibili dai test locali del repository e dai gate fisici documentati.
+
 L'Assistente base e l'eventuale AI locale presentano gli stessi componenti accessibili: card, filtri, domande di chiarimento e collegamenti alle pagine. L'assenza o disattivazione dell'AI non rimuove ricerca, guida o navigazione. La UI delle Impostazioni mantiene separati Assistente base, preparazione offline, allegati offline e AI locale, mostrando per ciascuno stato, spazio, compatibilità e azioni reversibili.
 
 ## Integrazione corrente — palette colore

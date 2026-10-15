@@ -16,7 +16,7 @@ export async function initRegistrati() {
     
 
     try {
-        openInitialLanguageDialog({
+        await openInitialLanguageDialog({
             required: true,
             onConfirm: async code => {
                 setLanguagePreference(code, { explicit: true });
@@ -77,8 +77,8 @@ function setupRegisterForm() {
         e.preventDefault();
 
         if (!hasExplicitLanguageChoice()) {
-            openInitialLanguageDialog({ required: true });
-            showToast(configurationText('initial_language_registration_warning'), 'warning');
+            await openInitialLanguageDialog({ required: true });
+            showToast(await configurationText('initial_language_registration_warning'), 'warning');
             return;
         }
 

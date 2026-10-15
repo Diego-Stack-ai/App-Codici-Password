@@ -1,5 +1,4 @@
 import { getCurrentLanguage } from '../../translations.js';
-import { onboardingText } from '../../translations/onboarding.js';
 
 const LANGUAGE_KEY = 'app_language';
 const EXPLICIT_KEY = 'app_language_explicit_v1';
@@ -17,8 +16,18 @@ export const FIRST_CONFIGURATION_VERSION = 1;
 export const FIRST_CONFIGURATION_OPTIONAL = Object.freeze(['theme', 'companyArea', 'assistantBase', 'notifications', 'mfa', 'biometricUnlock', 'backup']);
 const RESTRICTED = new Set(['form_account_privato', 'form_account_azienda', 'aggiungi_scadenza', 'modifica_azienda', 'automezzi', 'documenti', 'regole_generali']);
 const LANGUAGES = [['it','🇮🇹 Italiano'],['en','🇺🇸 English'],['es','🇪🇸 Español'],['fr','🇫🇷 Français'],['de','🇩🇪 Deutsch'],['zh','🇨🇳 简体中文'],['hi','🇮🇳 हिन्दी'],['pt','🇵🇹 Português']];
-const text = key => onboardingText(getCurrentLanguage(), key);
-export const configurationText = text;
+let onboardingTextResolver = null;
+async function loadOnboardingText() {
+    if (!onboardingTextResolver) {
+        const onboardingUrl = '/assets/js/translations/onboarding.js';
+        ({ onboardingText: onboardingTextResolver } = await import(onboardingUrl));
+    }
+    return onboardingTextResolver;
+}
+export async function configurationText(key) {
+    const resolveText = await loadOnboardingText();
+    return resolveText(getCurrentLanguage(), key);
+}
 function ensureStyles() {
     if (document.getElementById('first-configuration-styles')) return;
     const link = document.createElement('link');
@@ -45,7 +54,7 @@ function el(tag, props = {}) {
     for (const [key, value] of Object.entries(props)) key === 'className' || key === 'textContent' || key === 'id' ? node[key] = value : node.setAttribute(key, value);
     return node;
 }
-export function openInitialLanguageDialog({ required = false, onConfirm = null } = {}) {
+export async function openInitialLanguageDialog({ required = false, onConfirm = null } = {}) {
     ensureStyles();
     if (hasExplicitLanguageChoice()) return null;
     document.getElementById('initial-language-dialog')?.remove();
@@ -61,6 +70,8 @@ export function openInitialLanguageDialog({ required = false, onConfirm = null }
         return button;
     });
     const actions = el('div', { className: 'first-configuration-actions' });
+    const text = key => onboardingTextResolver(getCurrentLanguage(), key);
+    await loadOnboardingText();
     const confirm = el('button', { type: 'button', className: 'first-configuration-primary', textContent: text('initial_language_confirm') });
     confirm.onclick = async () => { const code = setLanguagePreference(selected); overlay.remove(); if (onConfirm) await onConfirm(code); else location.reload(); };
     actions.append(confirm);
@@ -69,8 +80,10 @@ export function openInitialLanguageDialog({ required = false, onConfirm = null }
     overlay.append(dialog); document.body.append(overlay); buttons.find(button => button.dataset.code === selected)?.focus();
     return overlay;
 }
-export function openFirstConfigurationDialog({ blocking = false, onSettings = null } = {}) {
+export async function openFirstConfigurationDialog({ blocking = false, onSettings = null } = {}) {
     ensureStyles();
+    const text = key => onboardingTextResolver(getCurrentLanguage(), key);
+    await loadOnboardingText();
     document.getElementById('first-configuration-dialog')?.remove();
     const overlay = el('div', { className: 'first-configuration-overlay', id: 'first-configuration-dialog' });
     const dialog = el('section', { className: 'first-configuration-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'first-configuration-title' });

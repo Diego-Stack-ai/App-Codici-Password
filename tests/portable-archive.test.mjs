@@ -268,12 +268,14 @@ test('il runtime emette le proiezioni una alla volta come byte, senza Base64 cum
 test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     const html = await readFile(resolve(root, 'Frontend/public/impostazioni.html'), 'utf8');
     const settings = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/impostazioni.js'), 'utf8');
+    const settingsTranslations = await readFile(resolve(root, 'Frontend/public/assets/js/translations/settings.js'), 'utf8');
     const service = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-service.js'), 'utf8');
     const stream = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-stream.js'), 'utf8');
     const offline = await readFile(resolve(root, 'Frontend/public/offline-assets.js'), 'utf8');
     assert.match(html, /id="btn-export-portable-archive"/);
     assert.match(html, /id="btn-export-encrypted-backup"/);
-    assert.match(settings, /non è un backup reimportabile/);
+    assert.match(settings, /t\('portable_acknowledge'\)/);
+    assert.match(settingsTranslations, /non è un backup reimportabile/);
     assert.match(settings, /forceReload: true, promptImmediately: true/);
     assert.match(settings, /PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED/);
     assert.match(settings, /PORTABLE_ATTACHMENT_METADATA_CONFLICT/);

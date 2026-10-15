@@ -6,23 +6,16 @@ const normalizeAppLanguage = (value, fallback = 'it') => {
     return APP_LANGUAGE_CODES.includes(code) ? code : fallback;
 };
 
-/**
- * TRANSLATIONS LAZY LOADER (V2.0 — Auto-generato il 2026-06-06)
- * Italiano caricato inline (fallback universale, ~9.5 KB).
- * Altre 7 lingue caricate on-demand via import() dinamico da ./translations/{lang}.js
- *
- * API pubblica:
- *   loadLanguage(lang) — async, chiama all'avvio PRIMA di qualsiasi render
- *   t(key)            — sincrona, traduce la chiave nella lingua attiva
- *   applyGlobalTranslations() — applica data-t, data-t-placeholder, data-t-aria al DOM
- *
- * Rigenera le lingue con: node scripts/split-translations.mjs
- */
-
-// ─── Dizionario runtime (lingua attiva) ──────────────────────────────────────
 let _dict = {};
+const needsSettingsCatalog = () => /(?:^|\/)impostazioni(?:\.html)?$/i.test(location.pathname);
+async function loadPageCatalog(language) {
+    if (!needsSettingsCatalog()) return {};
+    const { settingsCatalogs } = await import('./translations/settings.js');
+    return settingsCatalogs[language] || {};
+}
+let _activeLanguage = 'it';
+const _missingKeys = new Set();
 
-// ─── Italiano inline (fallback universale) ────────────────────────────────────
 const _it = {
         account_archive: "Archivio Account",
         account_archive_desc: "Gestisci gli account archiviati",
@@ -412,66 +405,76 @@ export function getCurrentLanguage() {
     try { return normalizeAppLanguage(localStorage.getItem('app_language')); } catch { return 'it'; }
 }
 
-/**
- * Carica la lingua attiva. Da chiamare ALL'AVVIO prima di qualsiasi render.
- * Italiano è disponibile immediatamente senza alcuna fetch (inline).
- * @param {string} lang - Codice lingua (es. 'it', 'en')
- */
 export async function loadLanguage(lang = 'it') {
     lang = normalizeAppLanguage(lang || 'it');
+    _activeLanguage = lang;
+    _missingKeys.clear();
     document.documentElement.lang = lang;
     document.documentElement.dir = 'ltr';
     if (lang === 'it') {
-        _dict = _it;
+        _dict = { ..._it, ...(await loadPageCatalog('it')) };
         LOG('[i18n] Lingua attiva: it (inline)');
         return;
     }
     try {
-        // Risolve il percorso relativo a questo modulo
         const baseUrl = import.meta.url.replace(/[^/]+$/, '');
         const module = await import(`${baseUrl}translations/${lang}.js`);
-        _dict = module.default;
+        _dict = { ...module.default, ...(await loadPageCatalog(lang)) };
         LOG(`[i18n] Lingua attiva: ${lang} (${Object.keys(_dict).length} chiavi)`);
     } catch (e) {
         console.warn(`[i18n] Lingua '${lang}' non disponibile — fallback a 'it'`);
-        _dict = _it;
+        _dict = { ..._it, ...(await loadPageCatalog('it')) };
     }
 }
 
-/**
- * Traduce una chiave nella lingua attiva.
- * Fallback: chiave italiana → chiave grezza se non trovata.
- * SINCRONA — funziona solo dopo che loadLanguage() è stato chiamato.
- */
 export function t(key) {
-    return _dict[key] || _it[key] || key;
+    if (_dict[key]) return _dict[key];
+    if (_activeLanguage !== 'it') {
+        _missingKeys.add(key);
+        document.documentElement.dataset.i18nFallback = 'true';
+        console.warn(`[i18n] Chiave mancante per ${_activeLanguage}: ${key}`);
+    }
+    return _it[key] || key;
 }
 
-/**
- * Applica le traduzioni agli elementi DOM con data-t, data-t-placeholder, data-t-aria.
- * Da richiamare dopo loadLanguage() e dopo ogni cambio lingua.
- */
+export function getMissingTranslationKeys() {
+    return [..._missingKeys].sort();
+}
+
+const TRANSLATED_ATTRIBUTES = [
+    ['placeholder', 'tPlaceholder'], ['aria-label', 'tAria'],
+    ['title', 'tTitle'], ['alt', 'tAlt']
+];
+
+export function setTranslatedText(element, key) {
+    if (element && key) Object.assign(element, { textContent: t(key) }).dataset.t = key;
+    return element;
+}
+
+function translateElement(element) {
+    if (element.dataset.t) element.textContent = t(element.dataset.t);
+    for (const [attribute, datasetKey] of TRANSLATED_ATTRIBUTES) {
+        const key = element.dataset[datasetKey];
+        if (key) element.setAttribute(attribute, t(key));
+    }
+}
+
 export function applyGlobalTranslations(root = document) {
-    root.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.dataset.t;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.textContent = val;
-    });
-    root.querySelectorAll('[data-t-placeholder]').forEach(el => {
-        const key = el.dataset.tPlaceholder;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.placeholder = val;
-    });
-    root.querySelectorAll('[data-t-aria]').forEach(el => {
-        const key = el.dataset.tAria;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.setAttribute('aria-label', val);
-    });
-    document.documentElement.setAttribute('data-i18n', 'ready');
-    document.dispatchEvent(new CustomEvent('app-language-applied', { detail: { language: document.documentElement.lang } }));
+    const selector = '[data-t],[data-t-placeholder],[data-t-aria],[data-t-title],[data-t-alt]';
+    if (root instanceof Element && root.matches(selector)) translateElement(root);
+    root.querySelectorAll(selector).forEach(translateElement);
+    if (root === document) {
+        document.documentElement.setAttribute('data-i18n', 'ready');
+        if (!_missingKeys.size) delete document.documentElement.dataset.i18nFallback;
+        document.dispatchEvent(new CustomEvent('app-language-applied', {
+            detail: { language: document.documentElement.lang, missingKeys: getMissingTranslationKeys() }
+        }));
+    }
+}
+
+export function observeTranslatedSubtrees(root = document.body) {
+    const moduleUrl = new URL('./translations/', import.meta.url);
+    import(`${moduleUrl.href}observer.js`).then(module => module.observeTranslatedSubtrees(root));
 }
 
 // Compatibilità con vecchi moduli

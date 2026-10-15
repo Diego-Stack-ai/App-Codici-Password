@@ -7,11 +7,11 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.190';
-import { initComponents } from '../../components-v129.js?v=1.2.190';
+} from '../../auth.js?v=1.2.191';
+import { initComponents } from '../../components-v129.js?v=1.2.191';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.190';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.191';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 import { openInitialLanguageDialog, rememberUserLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 
@@ -25,7 +25,7 @@ export async function initLogin() {
     
 
     try {
-        openInitialLanguageDialog({ required: false });
+        await openInitialLanguageDialog({ required: false });
         // 1. AppState di base (Local Scope o Global se necessario per compatibilità)
         let savedLang = 'it';
         try { savedLang = localStorage.getItem('app_language') || 'it'; } catch (e) { }
