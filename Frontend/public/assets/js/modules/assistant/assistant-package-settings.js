@@ -3,6 +3,7 @@ import { assistantText } from '../../translations/assistant.js';
 import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
 import { LOCAL_AI_PACKAGE_CATALOG } from './local-ai-package-catalog.js';
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
+import { showConfirmModal } from '../../ui-core-v129.js';
 
 const SELECTED_KEY = 'codex.local-ai.selected.v1';
 const mib = bytes => `${Math.ceil(bytes / 1024 / 1024)} MiB`;
@@ -45,7 +46,13 @@ export async function initAssistantPackageSettings(container = document.getEleme
                 const install = document.createElement('button'); install.type = 'button';
                 install.textContent = compatible ? label('install') : label('unavailable'); install.disabled = !compatible || Boolean(downloading);
                 install.onclick = async () => {
-                    if (!confirm(`${label('consent')}\n${mib(candidate.manifest.approxDownloadBytes)} · ${label('storage')} ${mib(Math.ceil(candidate.manifest.approxDownloadBytes * 2.15))}`)) return;
+                    const confirmed = await showConfirmModal(
+                        label('title'),
+                        `${label('consent')}\n${mib(candidate.manifest.approxDownloadBytes)} · ${label('storage')} ${mib(Math.ceil(candidate.manifest.approxDownloadBytes * 2.15))}`,
+                        label('install'),
+                        label('cancel')
+                    );
+                    if (!confirmed) return;
                     downloading = level; install.textContent = label('downloading');
                     const progress = document.createElement('progress'); progress.max = candidate.manifest.approxDownloadBytes; progress.value = 0; card.append(progress);
                     try {
