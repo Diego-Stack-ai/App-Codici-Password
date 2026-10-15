@@ -1483,4 +1483,4 @@ h3.settings-desc {
 .assistant-package-actions button { min-height:2.5rem; padding:.55rem .85rem; border-radius:.75rem; }
 .assistant-package-card progress { width:100%; grid-column:1/-1; }
 .assistant-package-card[data-error]::after { content:attr(data-error); color:#c43d55; display:block; }
-@media (max-width:640px) { .assistant-package-card { align-items:stretch; flex-direction:column; } .assistant-package-actions { justify-content:stretch; } .assistant-package-actions button { flex:1; } }
+@media (max-width:600px) { .assistant-package-card { align-items:stretch; flex-direction:column; } .assistant-package-actions { justify-content:stretch; } .assistant-package-actions button { flex:1; } }
