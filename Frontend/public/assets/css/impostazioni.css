@@ -1474,3 +1474,13 @@ h3.settings-desc {
     .credential-health-result { align-items: flex-start; flex-direction: column; }
     .credential-health-tags { justify-content: flex-start; }
 }
+.assistant-package-settings { display:grid; gap:.75rem; margin:.75rem 0 1rem; }
+.assistant-package-heading { display:flex; flex-direction:column; gap:.2rem; padding:0 .25rem; }
+.assistant-package-heading small,.assistant-package-card small { display:block; opacity:.72; margin-top:.2rem; }
+.assistant-package-card { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1rem; border:1px solid rgba(127,127,127,.25); border-radius:1rem; background:rgba(255,255,255,.04); }
+.assistant-package-card.active { border-color:var(--color-primary,#7857c5); box-shadow:0 0 0 1px rgba(120,87,197,.22); }
+.assistant-package-actions { display:flex; gap:.5rem; flex-wrap:wrap; justify-content:flex-end; }
+.assistant-package-actions button { min-height:2.5rem; padding:.55rem .85rem; border-radius:.75rem; }
+.assistant-package-card progress { width:100%; grid-column:1/-1; }
+.assistant-package-card[data-error]::after { content:attr(data-error); color:#c43d55; display:block; }
+@media (max-width:640px) { .assistant-package-card { align-items:stretch; flex-direction:column; } .assistant-package-actions { justify-content:stretch; } .assistant-package-actions button { flex:1; } }

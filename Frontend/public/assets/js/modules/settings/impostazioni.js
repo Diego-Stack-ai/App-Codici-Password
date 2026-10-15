@@ -40,6 +40,9 @@ export async function initImpostazioni(user) {
     initSettingsEvents(user);
     setupSecurityToggles(currentUserData);
     setupAIAssistantToggle(user, currentUserData);
+    import('../assistant/assistant-package-settings.js?v=1.2.191')
+        .then(module => module.initAssistantPackageSettings())
+        .catch(error => console.error('[LOCAL AI] Impostazioni pacchetto non disponibili.', error));
     setupCompanyAreaToggle(user, currentUserData);
     setupAppInfo();
     setupPrivacyShort();

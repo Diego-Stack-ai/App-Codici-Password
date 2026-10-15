@@ -1,0 +1,26 @@
+const it = {
+    title:'Livello Agente Codex', device:'Installazione solo su questo dispositivo', base:'Base',
+    baseDesc:'Ricerca deterministica sempre disponibile', a2:'AI.2 Semantica', a2Desc:'Ricerca e interpretazione locale',
+    a3:'AI.3 Avanzata', a3Desc:'Chiedi e spiega con modello locale', install:'Installa', remove:'Rimuovi',
+    activate:'Attiva', active:'Attivo', installed:'Installato', unavailable:'Non compatibile', cancel:'Annulla',
+    consent:'Il pacchetto verrà scaricato e conservato solo su questo dispositivo. Continuare?',
+    downloading:'Download in corso', removed:'Pacchetto rimosso', failed:'Operazione non riuscita',
+    fallback:'Agente Base resta disponibile', storage:'Spazio temporaneo richiesto', memory:'Memoria stimata'
+};
+const translations = {
+    it,
+    en:{...it,title:'Codex Agent level',device:'Installed only on this device',baseDesc:'Deterministic search always available',a2Desc:'Local semantic search and interpretation',a3Desc:'Ask and explain with a local model',install:'Install',remove:'Remove',activate:'Activate',active:'Active',installed:'Installed',unavailable:'Not compatible',cancel:'Cancel',consent:'The package will be downloaded and stored only on this device. Continue?',downloading:'Downloading',removed:'Package removed',failed:'Operation failed',fallback:'Base Agent remains available',storage:'Temporary space required',memory:'Estimated memory'},
+    es:{...it,title:'Nivel del Agente Codex',device:'Instalación solo en este dispositivo',baseDesc:'Búsqueda determinista siempre disponible',a2Desc:'Búsqueda e interpretación semántica local',a3Desc:'Pregunta y explica con un modelo local',install:'Instalar',remove:'Eliminar',activate:'Activar',active:'Activo',installed:'Instalado',unavailable:'No compatible',cancel:'Cancelar',consent:'El paquete se descargará y guardará solo en este dispositivo. ¿Continuar?',downloading:'Descarga en curso',removed:'Paquete eliminado',failed:'Operación fallida',fallback:'El Agente Base sigue disponible',storage:'Espacio temporal necesario',memory:'Memoria estimada'},
+    fr:{...it,title:'Niveau de l’Agent Codex',device:'Installation uniquement sur cet appareil',baseDesc:'Recherche déterministe toujours disponible',a2Desc:'Recherche et interprétation sémantique locale',a3Desc:'Demander et expliquer avec un modèle local',install:'Installer',remove:'Supprimer',activate:'Activer',active:'Actif',installed:'Installé',unavailable:'Non compatible',cancel:'Annuler',consent:'Le paquet sera téléchargé et conservé uniquement sur cet appareil. Continuer ?',downloading:'Téléchargement en cours',removed:'Paquet supprimé',failed:'Échec de l’opération',fallback:'L’Agent Base reste disponible',storage:'Espace temporaire requis',memory:'Mémoire estimée'},
+    de:{...it,title:'Codex-Agent-Stufe',device:'Installation nur auf diesem Gerät',baseDesc:'Deterministische Suche immer verfügbar',a2Desc:'Lokale semantische Suche und Interpretation',a3Desc:'Fragen und Erklären mit lokalem Modell',install:'Installieren',remove:'Entfernen',activate:'Aktivieren',active:'Aktiv',installed:'Installiert',unavailable:'Nicht kompatibel',cancel:'Abbrechen',consent:'Das Paket wird nur auf diesem Gerät heruntergeladen und gespeichert. Fortfahren?',downloading:'Download läuft',removed:'Paket entfernt',failed:'Vorgang fehlgeschlagen',fallback:'Der Basis-Agent bleibt verfügbar',storage:'Temporärer Speicher erforderlich',memory:'Geschätzter Speicher'},
+    zh:{...it,title:'Codex 助手级别',device:'仅安装在此设备上',baseDesc:'始终可用的确定性搜索',a2Desc:'本地语义搜索与解释',a3Desc:'使用本地模型提问和解释',install:'安装',remove:'删除',activate:'启用',active:'已启用',installed:'已安装',unavailable:'不兼容',cancel:'取消',consent:'软件包只会下载并保存在此设备上。继续吗？',downloading:'正在下载',removed:'软件包已删除',failed:'操作失败',fallback:'基础助手仍然可用',storage:'所需临时空间',memory:'预计内存'},
+    hi:{...it,title:'Codex एजेंट स्तर',device:'केवल इस डिवाइस पर इंस्टॉल',baseDesc:'निर्धारित खोज हमेशा उपलब्ध',a2Desc:'स्थानीय अर्थगत खोज और व्याख्या',a3Desc:'स्थानीय मॉडल से पूछें और समझें',install:'इंस्टॉल करें',remove:'हटाएँ',activate:'सक्रिय करें',active:'सक्रिय',installed:'इंस्टॉल है',unavailable:'संगत नहीं',cancel:'रद्द करें',consent:'पैकेज केवल इस डिवाइस पर डाउनलोड और संग्रहीत होगा। जारी रखें?',downloading:'डाउनलोड जारी',removed:'पैकेज हटाया गया',failed:'कार्य विफल',fallback:'बेस एजेंट उपलब्ध रहेगा',storage:'अस्थायी स्थान आवश्यक',memory:'अनुमानित मेमोरी'},
+    pt:{...it,title:'Nível do Agente Codex',device:'Instalação apenas neste dispositivo',baseDesc:'Pesquisa determinística sempre disponível',a2Desc:'Pesquisa e interpretação semântica local',a3Desc:'Perguntar e explicar com modelo local',install:'Instalar',remove:'Remover',activate:'Ativar',active:'Ativo',installed:'Instalado',unavailable:'Não compatível',cancel:'Cancelar',consent:'O pacote será transferido e guardado apenas neste dispositivo. Continuar?',downloading:'Transferência em curso',removed:'Pacote removido',failed:'Operação falhou',fallback:'O Agente Base continua disponível',storage:'Espaço temporário necessário',memory:'Memória estimada'}
+};
+
+export function assistantText(language, key) {
+    const code = String(language || 'it').toLowerCase().split('-')[0];
+    return translations[code]?.[key] || it[key] || key;
+}
+
+export const assistantCatalogs = Object.freeze(translations);

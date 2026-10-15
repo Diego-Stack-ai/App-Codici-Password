@@ -8,6 +8,7 @@ import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveConfirmMessage, archiveRecipients } from '../settings/archive-account-model.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t, getCurrentLanguage } from '../../translations.js';
+import { createLocalAiAssistantService } from './local-ai-assistant-service.js';
 
 let activeController = null;
 
@@ -25,7 +26,8 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
     let conversation = null;
     let preparation = null;
     let dialog = null;
-    const close = () => { dialog?.destroy(); dialog = null; };
+    let advanced = null;
+    const close = () => { dialog?.destroy(); dialog = null; void advanced?.close(); advanced = null; };
     const trigger = document.getElementById('ai-assistant-status');
     if (!trigger) throw new Error('Comando Agente AI non disponibile');
     const prepare = () => {
@@ -54,8 +56,10 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             const offlineNotice = !navigator.onLine && !readiness?.complete
                 ? 'Ricerca sui dati disponibili offline: alcuni risultati potrebbero mancare.'
                 : '';
+            advanced = createLocalAiAssistantService({ language:getCurrentLanguage() });
             dialog = createAssistantUI({
             onAsk: query => conversation.ask(query),
+            onExplain: advanced ? query => advanced.ask(query) : null,
             onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
                 onArchive: async (item, { requireConfirmation = true } = {}) => {

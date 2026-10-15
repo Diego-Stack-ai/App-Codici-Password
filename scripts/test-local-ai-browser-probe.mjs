@@ -54,7 +54,7 @@ try {
     }
     assert.equal(value.probe.A1.status,'available');
     assert.equal(value.probe.A2.status,'candidate');
-    assert.deepEqual(value.catalog,{A2:'blocked',A3:'blocked'});
+    assert.deepEqual(value.catalog,{A2:'available',A3:'available'});
     assert.deepEqual(value.caches,[]);
     console.log('Local AI browser probe: OK');
 } finally {

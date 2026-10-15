@@ -71,7 +71,14 @@ export function createLocalAiPackageManager({
                 if (!response.ok) throw new Error(`LOCAL_AI_FETCH_${response.status}`);
                 if (!response.body) throw new Error('LOCAL_AI_STREAM_UNAVAILABLE');
                 const cacheWrite = staging.put(new Request(sourceUrl), response.clone());
-                const verified = await hashReadableStream(response.body, { signal: controller.signal });
+                const verified = await hashReadableStream(response.body, {
+                    signal: controller.signal,
+                    onChunk: fileBytes => onProgress(Object.freeze({
+                        completedBytes: completedBytes + fileBytes,
+                        totalBytes: manifest.approxDownloadBytes,
+                        path: file.path
+                    }))
+                });
                 await cacheWrite;
                 if (verified.bytes !== file.bytes) throw new Error('LOCAL_AI_FILE_SIZE_MISMATCH');
                 if (verified.sha256 !== file.sha256) throw new Error('LOCAL_AI_FILE_HASH_MISMATCH');
