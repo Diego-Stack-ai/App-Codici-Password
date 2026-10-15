@@ -48,6 +48,7 @@ function fixture({health = false, exporting = false} = {}) {
     };
     const context = vm.createContext({
         auth, AbortController, createElement,
+        t: key => key === 'cancel' ? 'Annulla' : key,
         document: {body, getElementById: id => nodes.find(node => node.id === id && node.isConnected), get activeElement() { return activeElement; }},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
