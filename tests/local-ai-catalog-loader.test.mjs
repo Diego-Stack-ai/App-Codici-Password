@@ -15,7 +15,7 @@ test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile'
         assert.match(LOCAL_AI_RUNTIME_PROVENANCE[level].npmIntegrity, /^sha512-/);
     }
     assert.equal(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes, 145871600);
-    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A3.manifest.approxDownloadBytes, 301982152);
+    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A3.manifest.approxDownloadBytes, 301981904);
 });
 
 test('il loader non importa runtime quando il pacchetto non è installato', async () => {

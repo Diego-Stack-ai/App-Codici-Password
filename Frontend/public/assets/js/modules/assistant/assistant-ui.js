@@ -77,6 +77,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     const swipeLists = new Set();
     if (offlineNotice) status.textContent = offlineNotice;
 
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let speechSynthesis; let uiDestroyed = false; let activeMode = 'search';
     microphone.disabled = true;
     import('./speech-synthesis-controller.js').then(module => {
@@ -85,15 +86,15 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             Utterance: window.SpeechSynthesisUtterance,
             language: speechLocale
         });
-        if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = activeMode !== 'search';
-    }).catch(() => { if (!uiDestroyed) microphone.disabled = activeMode !== 'search'; });
+        if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = !SpeechRecognition;
+    }).catch(() => { if (!uiDestroyed) microphone.disabled = !SpeechRecognition; });
     const setMode = mode => {
         activeMode = mode;
         const searching = mode === 'search';
         searchMode.classList.toggle('active', searching); askMode.classList.toggle('active', !searching);
         searchMode.setAttribute('aria-pressed', String(searching)); askMode.setAttribute('aria-pressed', String(!searching));
         const usable = searching || Boolean(onExplain);
-        input.disabled = !usable; send.disabled = !usable; microphone.disabled = !searching || !speechSynthesis;
+        input.disabled = !usable; send.disabled = !usable; microphone.disabled = !usable || !SpeechRecognition;
         modeNotice.hidden = searching;
         input.placeholder = searching ? 'Cosa vuoi cercare?' : (onExplain ? 'Cosa vuoi sapere su questa pagina?' : 'AI locale avanzata non disponibile');
         if (searching) input.focus();
@@ -197,6 +198,12 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
             return answer;
         }
+        const vaultAnswer = onAsk(value);
+        if (vaultAnswer?.items?.length || vaultAnswer?.navigateTo) {
+            addBubble('assistant', vaultAnswer.message); void addResults(vaultAnswer.items || []);
+            if (vaultAnswer.navigateTo) window.setTimeout(() => { window.location.href = vaultAnswer.navigateTo; }, 450);
+            return Promise.resolve(vaultAnswer);
+        }
         status.textContent = 'Elaborazione locale…';
         return onExplain(value).then(message => {
             addBubble('assistant', message); return { message, items:[] };
@@ -208,14 +215,13 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     searchRow.addEventListener('submit', event => { event.preventDefault(); void ask(input.value); });
 
     let activeRecognition = null;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const supportsLocalRecognition = SpeechRecognition && 'processLocally' in SpeechRecognition.prototype && typeof SpeechRecognition.available === 'function';
     if (SpeechRecognition) {
         const recognition = new SpeechRecognition(); activeRecognition = recognition;
         recognition.lang = speechLocale; recognition.interimResults = true; recognition.continuous = false; recognition.maxAlternatives = 3;
         let installConfirmed = false; let remoteConsentPending = false; let usingLocalRecognition = false;
         let recognitionTimeout = null; let recognitionActive = false; let recognitionStarting = false; let submittedFinal = false;
-        let pendingSpokenAnswer = '';
+        let pendingSpokenAnswer = null;
         let transcriptState = createSpeechTranscriptState();
         const microphoneIcon = microphone.querySelector('.material-symbols-outlined');
         const clearRecognitionTimeout = () => { if (recognitionTimeout) clearTimeout(recognitionTimeout); recognitionTimeout = null; };
@@ -314,13 +320,15 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
                 : (transcriptState.final ? 'Trascrizione completata.' : 'Ti ascolto…');
             if (transcriptState.final && !transcriptState.interim && !submittedFinal) {
                 submittedFinal = true; clearRecognitionTimeout();
-                pendingSpokenAnswer = ask(transcriptState.final)?.message || '';
+                pendingSpokenAnswer = Promise.resolve(ask(transcriptState.final))
+                    .then(answer => answer?.message || '')
+                    .catch(() => '');
                 try { recognition.stop(); } catch {}
             }
         });
         recognition.addEventListener('error', event => {
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false;
-            pendingSpokenAnswer = '';
+            pendingSpokenAnswer = null;
             const code = classifySpeechRecognitionError(event, { microphoneVerified: true, local: usingLocalRecognition });
             if (usingLocalRecognition && ['local-recognition-blocked', 'local-language-unavailable'].includes(code)) {
                 requestRemoteConsent(voiceRecognitionErrorMessage(code, { local: true }));
@@ -329,10 +337,10 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             }
             setListening(false);
         });
-        recognition.addEventListener('end', () => {
+        recognition.addEventListener('end', async () => {
             clearRecognitionTimeout(); recognitionStarting = false; recognitionActive = false; setListening(false);
             if (pendingSpokenAnswer) {
-                const message = pendingSpokenAnswer; pendingSpokenAnswer = '';
+                const message = await pendingSpokenAnswer; pendingSpokenAnswer = null;
                 speechSynthesis?.speakAfterAudioRelease(message);
             }
             if (!remoteConsentPending && !submittedFinal && input.value.trim()) status.textContent = 'Ascolto terminato. Controlla il testo e premi invia.';

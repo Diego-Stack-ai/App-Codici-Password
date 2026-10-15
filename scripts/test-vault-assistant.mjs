@@ -64,12 +64,15 @@ const deadlineResult = loaderContext.deadlineRecord('deadline-zz000zz', {
 assert.equal(deadlineResult.title, 'Revisione');
 assert.equal(deadlineResult.subtitle, 'Utente Demo · Veicolo demo ZZ000ZZ · Scadenza 14/02/2027');
 assert.ok(deadlineResult.keywords.includes('ZZ000ZZ'));
+assert.ok(deadlineResult.keywords.includes('14/02/2027'));
 assert.match(uiSource, /new SwipeList\(selector/);
 assert.match(uiSource, /onSwipeLeft: card => \{ void run\(card, true\); \}/);
 assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
 assert.match(uiSource, /probeMicrophoneAccess\(/);
 assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
-assert.match(uiSource, /pendingSpokenAnswer = ask\(transcriptState\.final\)\?\.message \|\| ''/);
+assert.match(uiSource, /pendingSpokenAnswer = Promise\.resolve\(ask\(transcriptState\.final\)\)/);
+assert.match(uiSource, /microphone\.disabled = !usable \|\| !SpeechRecognition/);
+assert.match(uiSource, /const vaultAnswer = onAsk\(value\);[\s\S]*vaultAnswer\?\.items\?\.length/);
 assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
 assert.match(uiSource, /vault-assistant-mode[^\n]*Cerca/);
 assert.match(uiSource, /vault-assistant-help/);
