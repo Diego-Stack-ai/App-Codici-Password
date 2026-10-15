@@ -1,6 +1,6 @@
 # Stato
 
-## Candidata 1.2.194 — ricerca per anno, pacchetti AI e catalogo Archivio — 15/10/2026
+## Release 1.2.194 pubblicata — ricerca per anno, pacchetti AI e catalogo Archivio — 15/10/2026
 
 Il difetto riprodotto con le frasi «Sto cercando una scadenza del 2035 ma non la trovo» e «stavo cercando una scadenza del 2029 ma non mi ricordo cosa» appartiene al percorso **Cerca** mostrato negli screenshot: le parole colloquiali venivano considerate termini obbligatori insieme a `scadenza` e all'anno. Il motore locale ora elimina tali termini senza significato documentale e conserva categoria e anno; le schede Scadenza indicizzano già la data normalizzata mostrata nell'interfaccia. Due regressioni sintetiche verificano entrambe le frasi complete, compreso il passaggio da una ricerca precedente, senza utilizzare dati reali.
 
@@ -8,7 +8,7 @@ Il gestore AI non considera più il solo marcatore `localStorage` come prova d'i
 
 Il visualizzatore dell'Archivio portabile presenta ora un catalogo navigabile per **Profilo**, **Account privati**, **Aziende**, **Account aziendali**, **Scadenze** e **Allegati**. Le etichette tecniche e i download JSON/CSV/ODS restano disponibili in una sezione avanzata, senza dominare la consultazione ordinaria; ricerca, conteggi, relazioni e integrità crittografica restano invariati.
 
-Gate locali verdi sulla candidata: versione e 259 riferimenti coerenti; Assistente/voce 17/17; ricerca e riconciliazione cache 9/9; Archivio 15/15; offline 14/14; sintassi 210 moduli; riferimenti statici 303 file; documentazione 11/11; hardening statico verde. Gli artefatti AI richiedono un checkout con line ending LF imposto da `.gitattributes` prima del deploy, perché una worktree Windows con conversione CRLF altera byte e hash dei file testuali immutabili. Nessun dato reale, Rule o Function è modificato.
+La release è stata integrata con PR `#153` e distribuita sul solo Firebase Hosting il 15/10/2026. Gate verdi: suite GitHub `validate`; versione e 259 riferimenti coerenti; pacchetti AI 20/20 con dimensioni e SHA-256 verificati in checkout pulito; Assistente/voce 17/17; Archivio 15/15; documentazione 11/11. Il runtime AI.3 è trattato come artefatto binario per mantenere byte e hash identici fra Windows e Linux. La verifica HTTP successiva al deploy ha confermato pagina 1.2.194, catalogo AI.2/AI.3 e relativi artefatti con risposta `200`. Nessun dato reale, Rule o Function è stato modificato o distribuito.
 
 <a id="stato-corrente"></a>
 

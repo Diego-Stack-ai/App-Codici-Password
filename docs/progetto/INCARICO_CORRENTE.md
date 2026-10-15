@@ -6,6 +6,8 @@ Diego autorizza la correzione client dei difetti osservati dopo l'installazione 
 
 Il perimetro comprende gestore pacchetti, UI Impostazioni/Assistente, motore deterministico, catalogo umano del visualizzatore Archivio portabile, test e documentazione. Sono esclusi Rules, Functions, dati reali e accesso diretto dei modelli al Vault. Il successivo ordine «Quando hai finito il ciclo di verifiche, pubblica tutto» autorizza commit, push e deploy del solo Hosting dopo i gate finali verdi.
 
+Esito: implementazione integrata con PR `#153` e release `1.2.194` pubblicata sul solo Firebase Hosting il 15/10/2026 dopo suite GitHub `validate` verde e verifica HTTP post-deploy. Rules, Functions e dati reali non sono stati distribuiti.
+
 ## Hotfix Archivio portatile mobile — candidata 1.2.193 — 15/10/2026
 
 Diego autorizza la correzione del dialogo iniziale dell'Archivio portatile segnalato sulla `1.2.192`: su iPhone devono essere sempre raggiungibili un comando **Annulla** e il comando **Avvia esportazione**, senza dover chiudere l'app. Il perimetro comprende esclusivamente UI client, accessibilità, versione, test e documentazione; non modifica formato dell'archivio, cifratura, Rules, Functions o dati reali.
