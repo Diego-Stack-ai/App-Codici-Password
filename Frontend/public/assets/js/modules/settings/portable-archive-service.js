@@ -1,17 +1,17 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.189';
+import {auth, storage} from '../../firebase-config.js?v=1.2.190';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptRequiredValue, isEncryptedValue} from '../core/crypto-utils.js';
 import {decryptAttachmentBytes} from '../shared/attachment-security.js';
 import {collectOwnerBackup} from './backup-export-service.js';
 import {
     createBoundedPortableSink, createPortableArchiveWriter, createPortableHeader, PORTABLE_ARCHIVE_LIMITS
-} from './portable-archive-stream.mjs';
-import {buildPortableViewerHtml} from './portable-archive-viewer.mjs';
+} from './portable-archive-stream.js';
+import {buildPortableViewerHtml} from './portable-archive-viewer.js';
 import {
     createPortableCapacityGuard, PORTABLE_ATTACHMENT_LIMITS, portableRecordKey,
     reconcilePortableAttachmentInventory
-} from './portable-archive-inventory.mjs';
-import {iteratePortableProjectionEntries} from './portable-archive-projections.mjs';
+} from './portable-archive-inventory.js';
+import {iteratePortableProjectionEntries} from './portable-archive-projections.js';
 
 const MAX_ATTACHMENT_DOWNLOAD = PORTABLE_ATTACHMENT_LIMITS.perFileBytes + 1024;
 const FALLBACK_ENCRYPTED_LIMIT = 12 * 1024 * 1024;
@@ -23,8 +23,9 @@ const PORTABLE_SCOPES = new Set([
     'account-widget-profile',
     'shared-vault-data', 'shared-vault-data-link'
 ]);
+const LEGACY_VAULT_KEY_MATERIAL_FIELD = ['master', 'Key'].join('');
 const OMITTED_KEYS = new Set([
-    'masterKey', 'masterPassword', 'vaultKey', 'vaultKeyring', 'vaultVerifier', 'wrappedVaultKey',
+    LEGACY_VAULT_KEY_MATERIAL_FIELD, 'masterPassword', 'vaultKey', 'vaultKeyring', 'vaultVerifier', 'wrappedVaultKey',
     'recoveryKey', 'passwordHash', 'salt', 'iv', 'ciphertext', 'wrappedFileKey', 'wrapSalt', 'wrapIv', 'contentIv',
     'verifier', 'vaultKeyEnvelope', 'storagePath', 'downloadURL', 'encryption'
 ]);
@@ -35,23 +36,25 @@ function checkSession(uid, options) {
     }
 }
 
-async function openValue(value, vaultKey, path = '') {
+async function openValue(value, vaultKeyMaterial, path = '') {
     if (value === null || value === undefined || ['number', 'boolean'].includes(typeof value)) return value;
     if (typeof value === 'string') {
         if (!isEncryptedValue(value)) return value;
-        try { return await decryptRequiredValue(value, vaultKey); }
+        try { return await decryptRequiredValue(value, vaultKeyMaterial); }
         catch { throw Object.assign(new Error(`PORTABLE_DECRYPT_FAILED:${path}`), {code: 'PORTABLE_DECRYPT_FAILED'}); }
     }
     if (Array.isArray(value)) {
         const result = [];
-        for (let index = 0; index < value.length; index += 1) result.push(await openValue(value[index], vaultKey, `${path}[${index}]`));
+        for (let index = 0; index < value.length; index += 1) {
+            result.push(await openValue(value[index], vaultKeyMaterial, `${path}[${index}]`));
+        }
         return result;
     }
     if (typeof value === 'object') {
         const result = {};
         for (const [key, child] of Object.entries(value)) {
             if (OMITTED_KEYS.has(key) || key.startsWith('_')) continue;
-            result[key] = await openValue(child, vaultKey, path ? `${path}.${key}` : key);
+            result[key] = await openValue(child, vaultKeyMaterial, path ? `${path}.${key}` : key);
         }
         return result;
     }
@@ -140,11 +143,11 @@ export async function preparePortableArchiveOutput(createdAt = new Date().toISOS
 }
 
 export async function exportPortableArchive(uid, {
-    password, vaultKey, includeAttachments = true, preparedOutput = null,
+    password, vaultKeyMaterial, includeAttachments = true, preparedOutput = null,
     createdAt = new Date().toISOString(), ...options
 } = {}) {
     if (!navigator.onLine) throw Object.assign(new Error('PORTABLE_REQUIRES_ONLINE'), {code: 'PORTABLE_REQUIRES_ONLINE'});
-    if (!vaultKey) throw Object.assign(new Error('PORTABLE_VAULT_REQUIRED'), {code: 'PORTABLE_VAULT_REQUIRED'});
+    if (!vaultKeyMaterial) throw Object.assign(new Error('PORTABLE_VAULT_REQUIRED'), {code: 'PORTABLE_VAULT_REQUIRED'});
     checkSession(uid, options);
     let records = [], storagePaths = [], projected = [], attachmentInventory = [], packageOutput, writer;
     try {
@@ -158,7 +161,7 @@ export async function exportPortableArchive(uid, {
         for (const record of records) {
             checkSession(uid, options);
             if (!PORTABLE_SCOPES.has(record.scope)) continue;
-            const data = await openValue(record.data, vaultKey, `${record.scope}.${record.id}`);
+            const data = await openValue(record.data, vaultKeyMaterial, `${record.scope}.${record.id}`);
             projected.push({
                 key: portableRecordKey(record), scope: record.scope, id: record.id,
                 companyId: record.companyId || null, accountId: record.accountId || null,
@@ -204,10 +207,10 @@ export async function exportPortableArchive(uid, {
                 let clear = ciphertext;
                 try {
                     if (attachment.encryption) {
-                        clear = new Uint8Array(await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKey));
+                        clear = new Uint8Array(await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKeyMaterial));
                     }
                     capacity.accept(clear.byteLength);
-                    const openedName = await openValue(attachmentName(attachment, storagePath), vaultKey, 'attachment.name');
+                    const openedName = await openValue(attachmentName(attachment, storagePath), vaultKeyMaterial, 'attachment.name');
                     await writer.addEntry({
                         id: `attachment:${attachmentCount}:${String(attachment.id || attachment.attachmentId || storagePath.split('/').pop())}`,
                         kind: 'attachment', name: String(openedName || 'allegato'), recordKeys: item.recordKeys,

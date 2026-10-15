@@ -5,10 +5,10 @@ import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {webcrypto} from 'node:crypto';
 import {createRequire} from 'node:module';
-import {buildPortableViewerHtml} from '../Frontend/public/assets/js/modules/settings/portable-archive-viewer.mjs';
+import {buildPortableViewerHtml} from '../Frontend/public/assets/js/modules/settings/portable-archive-viewer.js';
 import {
     createPortableArchiveWriter, createPortableHeader, PORTABLE_ARCHIVE_LIMITS
-} from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.mjs';
+} from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.js';
 
 const require = createRequire(import.meta.url);
 const {chromium} = require('playwright');

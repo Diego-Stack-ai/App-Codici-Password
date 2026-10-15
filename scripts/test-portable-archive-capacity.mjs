@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {webcrypto} from 'node:crypto';
 import {
     createPortableArchiveWriter, createPortableHeader
-} from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.mjs';
+} from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.js';
 
 const MIB = 1024 * 1024;
 const attachmentMiB = 32;

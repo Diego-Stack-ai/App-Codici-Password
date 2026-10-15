@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.189';
+import { auth, db } from '../../firebase-config.js?v=1.2.190';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -18,7 +18,7 @@ import { runAppDiagnostics } from '../../app-diagnostics.js';
 import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vault-repository.js';
 import { setupPushSettings } from './push-settings-controller.js?push=20260908b';
 import { configurationText, firstConfigurationPatch, readFirstConfiguration, setLanguagePreference } from './first-configuration.js';
-import {evaluatePortableArchivePassword} from './portable-archive-stream.mjs';
+import {evaluatePortableArchivePassword} from './portable-archive-stream.js';
 
 const portableArchiveModulePromise = import('./portable-archive-service.js');
 
@@ -60,7 +60,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.189');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.190');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -174,7 +174,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.189');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.190');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -306,7 +306,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.189');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.190');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -883,10 +883,10 @@ function setupPortableArchive(user) {
                     'Creazione archivio portabile…',
                     'I dati vengono decifrati soltanto in memoria, cifrati a blocchi e scritti progressivamente.', action
                 );
-                const vaultKey = await ensureVaultKeyMaterial({forceReload: true, promptImmediately: true});
+                const vaultKeyMaterial = await ensureVaultKeyMaterial({forceReload: true, promptImmediately: true});
                 action.check();
                 const result = await archiveModule.exportPortableArchive(user.uid, {
-                    password: archivePassword, vaultKey, includeAttachments: includeAttachments.checked,
+                    password: archivePassword, vaultKeyMaterial, includeAttachments: includeAttachments.checked,
                     signal: action.signal, isActive: action.active, preparedOutput, createdAt
                 });
                 preparedOutput = null;
@@ -920,7 +920,7 @@ function setupPortableArchive(user) {
             }
         });
         modal.appendChild(createElement('div', {className: 'modal-box portable-archive-modal'}, [
-            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'folder_zip'}),
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'folder_zip'}),
             createElement('h3', {className: 'modal-title', textContent: 'Esporta archivio portabile'}),
             createElement('p', {className: 'modal-text', textContent: 'Stai creando una copia leggibile dei tuoi dati, utilizzabile anche al di fuori di questa app.'}),
             createElement('p', {className: 'portable-archive-warning', textContent: 'La copia può contenere dati personali, credenziali e allegati sensibili. Conservala in un luogo sicuro e non condividerla con persone non autorizzate.'}),
@@ -1098,7 +1098,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.189');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.190');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

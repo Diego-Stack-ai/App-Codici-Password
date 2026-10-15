@@ -2,11 +2,17 @@
 
 <a id="stato-corrente"></a>
 
-## Candidata 1.2.189 — icone escluse dalla traduzione automatica — 15/10/2026
+## Candidata 1.2.190 — Archivio portabile — 15/10/2026
+
+Il lotto Archivio è riallineato al merge pubblicato `09b1a2abb5a8e8b098c1e706493a143f1d1cdb0a` (`1.2.189`) e conserva la protezione delle icone dalla traduzione automatica. La candidata `1.2.190` aggiunge nelle Impostazioni un'esportazione esplicita e distinta dal backup: dati e allegati vengono decifrati soltanto nella sessione Vault e ricifrati in un contenitore locale a chunk, accompagnato da visualizzatore autonomo offline, JSON completo, CSV e ODS schema-evolutivi.
+
+Il formato autentica ordine, catena, manifest, `entryCount` ed EOF; parser e visualizzatore falliscono chiusi su tamper, troncamento, dati successivi al terminatore e limiti di risorse. La creazione richiede una password dedicata robusta, usa scrittura progressiva quando disponibile e limita esplicitamente il fallback in memoria. Fixture sintetiche coprono inventario allegati, relazioni, 10.000 record, capacità fino a 8×32 MiB, annullamento e spazio insufficiente. Implementazione e prove locali non equivalgono ancora a merge o Hosting distribuito; restano i gate esterni dichiarati per secondo programma ODS e dispositivi fisici.
+
+## Pubblicata 1.2.189 — icone escluse dalla traduzione automatica — 15/10/2026
 
 Le ligature testuali delle icone Material Symbols sono ora marcate `notranslate` e `translate="no"` nel markup statico e nei template HTML; le classi generate in JavaScript includono `notranslate` e il costruttore DOM condiviso applica automaticamente entrambi i segnali alle icone create a runtime. La protezione è limitata agli elementi Material Symbols/Icons: testi, etichette e contenuti dell'interfaccia continuano a seguire la lingua scelta dall'utente.
 
-Un audit dedicato esamina HTML e JavaScript e blocca nuove icone statiche o generate prive della protezione. Implementazione e test locali non equivalgono ancora a merge o Hosting distribuito; la verifica finale deve includere Chrome con traduzione automatica attiva nella pagina Impostazioni.
+Un audit dedicato esamina HTML e JavaScript e blocca nuove icone statiche o generate prive della protezione. Il lotto è stato unito su `master` nel commit `09b1a2abb5a8e8b098c1e706493a143f1d1cdb0a`; la candidata Archivio lo conserva integralmente.
 
 ## Candidata 1.2.188 — Lingue e prima configurazione — 15/10/2026
 

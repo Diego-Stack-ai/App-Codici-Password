@@ -7,15 +7,15 @@ import {dirname, resolve} from 'node:path';
 import {
     buildPortableProjections, buildProjectionTables, iteratePortableProjectionEntries,
     PORTABLE_PROJECTION_FORMAT, sha256Base64
-} from '../Frontend/public/assets/js/modules/settings/portable-archive-projections.mjs';
+} from '../Frontend/public/assets/js/modules/settings/portable-archive-projections.js';
 import {
     createPortableCapacityGuard, portableRecordKey, reconcilePortableAttachmentInventory
-} from '../Frontend/public/assets/js/modules/settings/portable-archive-inventory.mjs';
+} from '../Frontend/public/assets/js/modules/settings/portable-archive-inventory.js';
 import {
     createBoundedPortableSink, createPortableArchiveWriter, createPortableHeader,
     evaluatePortableArchivePassword, linesFromByteChunks, PORTABLE_ARCHIVE_LIMITS, verifyPortableArchiveLines
-} from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.mjs';
-import {buildPortableViewerHtml} from '../Frontend/public/assets/js/modules/settings/portable-archive-viewer.mjs';
+} from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.js';
+import {buildPortableViewerHtml} from '../Frontend/public/assets/js/modules/settings/portable-archive-viewer.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const STRONG_PASSWORD = 'Fiume!Quarzo-83#Luna';
@@ -269,7 +269,7 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     const html = await readFile(resolve(root, 'Frontend/public/impostazioni.html'), 'utf8');
     const settings = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/impostazioni.js'), 'utf8');
     const service = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-service.js'), 'utf8');
-    const stream = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-stream.mjs'), 'utf8');
+    const stream = await readFile(resolve(root, 'Frontend/public/assets/js/modules/settings/portable-archive-stream.js'), 'utf8');
     const offline = await readFile(resolve(root, 'Frontend/public/offline-assets.js'), 'utf8');
     assert.match(html, /id="btn-export-portable-archive"/);
     assert.match(html, /id="btn-export-encrypted-backup"/);
@@ -278,15 +278,18 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     assert.match(settings, /PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED/);
     assert.match(settings, /PORTABLE_ATTACHMENT_METADATA_CONFLICT/);
     assert.match(offline, /portable-archive-service\.js/);
-    assert.match(offline, /portable-archive-inventory\.mjs/);
-    assert.match(offline, /portable-archive-projections\.mjs/);
-    assert.match(offline, /portable-archive-stream\.mjs/);
-    assert.match(offline, /portable-archive-viewer\.mjs/);
+    assert.match(offline, /portable-archive-inventory\.js/);
+    assert.match(offline, /portable-archive-projections\.js/);
+    assert.match(offline, /portable-archive-stream\.js/);
+    assert.match(offline, /portable-archive-viewer\.js/);
     assert.match(service, /'account-widget-profile'/);
     assert.match(service, /reconcilePortableAttachmentInventory/);
     assert.match(service, /createPortableCapacityGuard/);
     assert.match(service, /createPortableArchiveWriter/);
     assert.match(service, /preparePortableArchiveOutput/);
+    assert.match(service, /LEGACY_VAULT_KEY_MATERIAL_FIELD = \['master', 'Key'\]\.join\(''\)/);
+    assert.doesNotMatch(service, /\bmasterKey\b/);
+    assert.match(settings, /vaultKeyMaterial = await ensureVaultKeyMaterial/);
     assert.match(stream, /PORTABLE_STREAMING_REQUIRED/);
 });
 
