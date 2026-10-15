@@ -110,6 +110,8 @@
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",
     "test:audit-retention-emulators": "node scripts/run-audit-retention-emulators.mjs",
     "test:assistant": "node scripts/test-vault-assistant.mjs && node --test tests/voice-recognition-model.test.mjs tests/speech-synthesis-controller.test.mjs experiments/card-importer/card-parser.test.mjs",
+    "test:assistant-local-ai": "node --test tests/advanced-local-ai-contract.test.mjs tests/incremental-sha256.test.mjs tests/local-ai-catalog-loader.test.mjs tests/local-ai-package-manager.test.mjs",
+    "test:assistant-local-ai-browser": "node scripts/test-local-ai-browser-probe.mjs",
     "test:profile": "node --test tests/avatar-change-residues.test.mjs tests/consultation-copies.test.mjs tests/profile-model.test.mjs tests/profile-lazy-editor.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs tests/profile-contact-link.test.mjs tests/company-profile.test.mjs tests/company-form-freshness.test.mjs tests/company-detail-freshness.test.mjs tests/profile-account-management.test.mjs tests/contact-card-photo.test.mjs tests/profile-document-attachments-production.test.mjs",
     "test:maturity-fixture": "node --test tests/maturity-dataset.test.mjs",
     "test:css": "node node_modules/stylelint/bin/stylelint.mjs \"Frontend/public/assets/css/**/*.css\"",

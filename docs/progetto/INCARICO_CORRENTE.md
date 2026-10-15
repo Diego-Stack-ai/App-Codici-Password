@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## AI-LOCALE-A2-A3-01 — integrazione autorizzata su base 1.2.191 — 15/10/2026
+
+Diego autorizza download, verifica, hosting e distribuzione Firebase degli artefatti AI.2/AI.3, accettando il relativo consumo di storage e banda. Il lotto viene riallineato sulla baseline `1.2.191` (`d5bb2beea85a14ec446bd6139ed0ec749045dcfa`). **A1** resta il motore deterministico e fallback universale; **A2** aggiunge ricerca semantica locale installabile/rimovibile; **A3** aggiunge generazione locale soltanto sui dispositivi che superano capability probe e benchmark.
+
+Modelli, tokenizer e runtime devono provenire dalle revisioni immutabili censite, con licenza/NOTICE, dimensione e SHA-256 verificati. I pacchetti sono ospitati same-origin ma esclusi da shell, precache e download ordinario; installazione e rimozione richiedono consenso, mostrano peso/progresso, supportano annullamento e non lasciano staging parziali. Il modello non accede direttamente al Vault e non riceve D4: opera su envelope D0–D2 minimo e restituisce soltanto intenti JSON chiusi validati dal codice deterministico. Memoria solo in RAM e cancellata sui confini di sessione.
+
+Il perimetro comprende lifecycle pacchetti, loader, capability/benchmark, UI in Impostazioni e Agente Codex, chiavi i18n compatibili con il lazy loading `1.2.191`, test negativi e documentazione. Sono esclusi Rules, Functions e dati reali. Commit locale autorizzato; push, PR, merge e deploy sono eseguiti soltanto dall'Orchestratore dopo revisione. La consegna è DA_VERIFICARE e non equivale a pubblicazione.
+
 ## Gate i18n incrementale — candidata 1.2.191 su base 1.2.190 — 15/10/2026
 
 Diego autorizza il nuovo lotto Lingue a consolidare prima di tutto inventario, contratto e controlli automatici, senza correggere ancora in massa i contenuti editoriali. Dopo il merge dell'Archivio `1.2.190` (`cee3929925a2bd4f30255906f3f358316ff049bf`), il lavoro viene riallineato non distruttivamente su quella base e prepara la candidata `1.2.191`, preservando Archivio e hotfix icone.
@@ -8,7 +16,7 @@ Il perimetro corrente comprende: inventario canonico dei testi UI statici e dina
 
 L'estensione esplicita del 15/10/2026 richiede la lettura completa, non a campione, di ogni HTML e di ogni JavaScript/CSS di `Frontend/public` che possa produrre o alterare testi UI. Il gate ripetibile `node scripts/audit-i18n-corpus.mjs` deve produrre fuori dai documenti normativi una matrice tracciabile con impronta del corpus, pagina, route/import, testo e attributo, chiave e copertura per lingua, sink dinamico, handler, mount successivo al bootstrap, selector, CSS `content`, rischio auto-translate e classificazione `confirmed`/`inferred`. La fotografia corrente comprende 278 file e non autorizza correzioni runtime, dichiarazioni di completezza, push o pubblicazione. Le piste statiche devono essere confermate nel sorgente e poi nel browser prima di diventare difetti chiusi; i file vendor e gli entry point autonomi (service worker/cataloghi caricati dinamicamente) non possono essere dichiarati codice morto soltanto perché non risultano raggiunti da import letterali.
 
-Le pratiche ECC `browser-qa`, `e2e-testing` e `verification-loop` possono essere considerate come riferimento metodologico selettivo, ma non autorizzano installazione di ECC, esecuzione di codice remoto o sostituzione dei test locali verificabili. Functions, Rules, dati reali, contenuti utente e AI avanzata restano esclusi. È autorizzato il commit locale; push, PR, merge e deploy richiedono un nuovo ordine.
+Le pratiche ECC `browser-qa`, `e2e-testing` e `verification-loop` possono essere considerate come riferimento metodologico selettivo, ma non autorizzano installazione di ECC, esecuzione di codice remoto o sostituzione dei test locali verificabili. Functions, Rules e dati reali restano esclusi. Questo incarico i18n è ora storico: la candidata `1.2.191` è stata integrata nella baseline usata dal lotto AI.
 
 **Difetto aperto Archivio 1.2.190:** nella schermata iniziale di **Esporta archivio portabile** il comando **Annulla** non è sufficientemente evidente. La correzione runtime non appartiene al presente incremento: il requisito verificabile impone in futuro due azioni distinte, **Avvia esportazione** e **Annulla**, con Annulla sempre disponibile prima dell'inserimento della password dedicata e durante preparazione/esportazione. L'annullamento deve chiudere la UI, interrompere il lavoro e non lasciare alcun file utilizzabile o parziale; il test UI deve coprire entrambe le fasi e la pulizia del sink.
 
