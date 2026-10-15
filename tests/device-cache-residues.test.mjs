@@ -131,11 +131,12 @@ test('T-23: nel runtime del client non esiste alcuna cancellazione degli archivi
         assert.deepEqual(hits, [], `${needle} non deve comparire nel runtime (trovato in ${hits.join(', ')})`);
     }
     // `caches.delete` esiste solo nel service worker, e solo per le proprie cache
-    // di shell (`codex-*`) diverse da quella corrente.
+    // di shell (`codex-*`) diverse da quella corrente; i pacchetti AI locali
+    // verificati hanno un namespace distinto e sopravvivono agli upgrade shell.
     const cacheDeleters = sources.filter(file => file.text.includes('caches.delete')).map(file => file.path);
     assert.deepEqual(cacheDeleters, ['sw.js'], 'solo il service worker cancella cache');
-    assert.match(swSource, /filter\(name => name\.startsWith\(APP_CACHE_PREFIX\) && name !== CACHE_NAME\)/,
-        'la cancellazione è limitata alle cache di shell proprie e non correnti');
+    assert.match(swSource, /name\.startsWith\(APP_CACHE_PREFIX\)[\s\S]*!name\.startsWith\('codex-local-ai-'\)[\s\S]*name !== CACHE_NAME/,
+        'la cancellazione è limitata alle cache di shell proprie, non correnti e non ai pacchetti AI verificati');
     assert.match(swSource, /const APP_CACHE_PREFIX = 'codex-'/);
 });
 
@@ -144,7 +145,7 @@ test('T-23: nel runtime del client non esiste alcuna cancellazione degli archivi
 function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/privato/profilo-ui.js']) {
     const put = [], deleted = [], opened = [];
     const caches = {
-        keys: async () => ['codex-shell-v1.2.126', 'codex-shell-v1.2.127', 'workbox-precache-v2'],
+        keys: async () => ['codex-shell-v1.2.126', 'codex-shell-v1.2.127', 'codex-local-ai-a2-0.1.0', 'workbox-precache-v2'],
         delete: async name => { deleted.push(name); return true; },
         open: async name => {
             opened.push(name);
