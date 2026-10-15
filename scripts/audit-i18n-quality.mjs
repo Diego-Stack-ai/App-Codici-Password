@@ -213,6 +213,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     result.regressions.forEach(item => console.error(`Regressione: ${item}`));
     process.exitCode = 1;
   } else {
-    console.log('Il debito i18n non supera la baseline 1.2.189. La baseline non certifica completezza editoriale.');
+    console.log(`Il debito i18n non supera la baseline ${baseline.sourceVersion}. La baseline non certifica completezza editoriale.`);
   }
 }

@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
-  "description": "Baseline transitoria del debito i18n rilevato sulla 1.2.189. I valori possono diminuire ma non aumentare.",
+  "description": "Baseline transitoria del debito i18n rilevato sulla 1.2.190 dopo il merge Archivio. I valori possono diminuire ma non aumentare.",
+  "sourceVersion": "1.2.190",
+  "sourceCommit": "cee3929925a2bd4f30255906f3f358316ff049bf",
   "completeLanguages": [],
   "declaredLanguages": ["it", "en", "es", "fr", "de", "zh", "hi", "pt"],
   "nonTranslatableExact": [
@@ -39,8 +41,18 @@
       "pt": 344
     },
     "onboardingMissingLanguages": 6,
-    "htmlLiteralSegments": 1014,
+    "htmlLiteralSegments": 1018,
     "htmlLiteralAttributes": 85,
+    "jsLiteralSinks": 792
+  },
+  "previousBaseline": {
+    "sourceVersion": "1.2.189",
+    "htmlLiteralSegments": 1014,
     "jsLiteralSinks": 779
+  },
+  "acceptedBaseDelta": {
+    "reason": "Nuova UI Archivio portabile già integrata in master prima del riallineamento del lotto Lingue.",
+    "htmlLiteralSegments": 4,
+    "jsLiteralSinks": 13
   }
 }
