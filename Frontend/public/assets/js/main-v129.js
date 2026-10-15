@@ -7,7 +7,6 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
 
-// APP_ENV è centralizzato nel modulo di ambiente; window.__APP_ENV è stato rimosso.
 
 console.log      = (...args) => { try { LOG(...args);       } catch (e) {} };
 console.info     = (...args) => { try { LOG(...args);       } catch (e) {} };
@@ -27,7 +26,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.187';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.188';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.187&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.188&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -44,7 +43,6 @@ import { startMetric, endMetric, captureNavigationMetric } from './performance-m
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
 
-// Inizializza il controllo inattività globalmente
 initInactivityTimer();
 
 function getCurrentPage() {
@@ -56,29 +54,24 @@ function getCurrentPage() {
     if (path === '/home' || path.includes('home_page') || path.includes('home-v')) return 'home';
     if (path.includes('area_privata')) return 'area';
 
-    // Account Privati
     if (path.includes('account_privati')) return 'account_privati';
     if (path.includes('form_account_privato')) return 'form_account_privato';
     if (path.includes('dettaglio_account_privato')) return 'dettaglio_account_privato';
 
-    // Settings & Profile
     if (path.includes('archivio_account')) return 'archivio';
     if (path.includes('profilo_privato')) return 'profilo';
     if (path.includes('impostazioni')) return 'impostazioni';
     if (path.includes('gestione_destinatari')) return 'gestione_destinatari';
 
-    // Scadenze
     if (path.includes('scadenze')) return 'scadenze';
     if (path.includes('aggiungi_scadenza')) return 'aggiungi_scadenza';
     if (path.includes('dettaglio_scadenza')) return 'dettaglio_scadenza';
 
-    // Configs
     if (path.includes('regole_scadenze')) return 'regole';
     if (path.includes('configurazione_automezzi')) return 'automezzi';
     if (path.includes('configurazione_documenti')) return 'documenti';
     if (path.includes('configurazione_generali')) return 'regole_generali';
 
-    // Azienda & Allegati
     if (path.includes('lista_aziende')) return 'lista_aziende';
     if (path.includes('modifica_azienda')) return 'modifica_azienda';
     if (path.includes('dati_azienda')) return 'dati_azienda';
@@ -96,33 +89,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     startMetric('private-page-bootstrap');
     captureNavigationMetric(getCurrentPage());
     initOfflineStatus();
-    // 🔐 BLOCCO SENTINELLA V7.0 - Previene il doppio bootstrap
     if (_v7Bootstrapped) {
         console.warn("⚠️ Rilevato tentativo di doppio bootstrap. Blocco sentinella attivo.");
         return;
     }
     _v7Bootstrapped = true;
 
-    // 🌍 I18N — Carica la lingua PRIMA di qualsiasi render
     await loadLanguage(getCurrentLanguage());
 
-    // Shell offline ricostruita: registrata solo dopo l'accesso all'app privata.
     const serviceWorkerEnabled = true;
     if (serviceWorkerEnabled && 'serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
-                // Mantiene il worker principale della PWA. Il worker convenzionale
-                // /firebase-messaging-sw.js è un entry point compatibile usato da FCM
-                // e non deve essere rimosso durante il bootstrap.
                 const registration = await navigator.serviceWorker.register('./sw.js');
                 LOG('[PWA] Service Worker registrato con successo:', registration.scope);
 
-                // Gestione Aggiornamenti
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // C'è un nuovo worker e uno vecchio è già attivo
                             LOG('[PWA] Nuovo aggiornamento disponibile.');
                             showToast("Nuovo aggiornamento disponibile. Verrà applicato alla prossima apertura.", "info");
                         }
@@ -133,21 +118,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Nessun reload automatico su controllerchange: evita cicli di ricaricamento.
     }
 
-    // 1. Policy UX (Lockdown menu/selezione)
     initLockedUX();
     initCleanup();
 
-    // 2. Componenti Universali (Toggles, Copy, Call)
     const path = window.location.pathname.toLowerCase();
 
-    // Router Logic - Step 1: Identifica Pagina
     const currentPage = getCurrentPage();
     LOG(`[Router] Current Page: ${currentPage}`);
 
-    // Gestione Pagine Pubbliche (No Auth Required)
     if (currentPage === 'index') Pages.initIndex();
     else if (currentPage === 'registrati') Pages.initRegistrati();
     else if (currentPage === 'reset') Pages.initResetPassword();
@@ -155,12 +135,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (currentPage === 'privacy') Pages.initPrivacy();
     else if (currentPage === 'termini') Pages.initTermini();
 
-    // Setup UI components base (salta su Auth pages se necessario, o gestito dentro initPagina)
     if (!['index', 'registrati', 'reset', 'imposta'].includes(currentPage)) {
         setupPasswordToggles();
         setupCopyButtons();
         setupCallButtons();
-        // setupAccountCards(); // Delegato ai moduli pagina se serve
     }
 
     let inviteUnsubscribe = null;
@@ -283,7 +261,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isPrivatePage && !gate?.acceptIdentity(authAttempt, auth.currentUser)) return;
                 if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck?.();
 
-                // Avvia in parallelo il codice Vault, senza appesantire login e pagine pubbliche.
                 const securityModulesPromise = isPrivatePage
                     ? Promise.all([
                         import('./modules/core/security-manager.js'),
@@ -291,9 +268,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ])
                     : null;
 
-                // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (gate && !gate.active(authAttempt)) return;
+                const userData = userDoc.exists() ? userDoc.data() : {};
+                const firstConfiguration = await import('./modules/settings/first-configuration.js');
+                const profileLanguage = firstConfiguration.rememberUserLanguage(user.uid, userData);
+                if (profileLanguage && profileLanguage !== document.documentElement.lang) {
+                    await loadLanguage(profileLanguage);
+                    applyGlobalTranslations();
+                }
+                const firstConfigurationComplete = firstConfiguration.isFirstConfigurationComplete(userData);
                 const companyPages = new Set(['lista_aziende', 'modifica_azienda', 'dati_azienda', 'account_azienda', 'dettaglio_account_azienda', 'form_account_azienda']);
                 if (companyPages.has(currentPage) && userDoc.exists() && !getSyncedCompanyAreaPreference(userDoc.data(), user.uid)) {
                     showToast('L’area Azienda è disattivata. Puoi riattivarla dalle Impostazioni.', 'info');
@@ -306,6 +290,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.warn("[AUTH-DEBUG] User document NOT found in Firestore.");
                 }
 
+                if (isPrivatePage && !firstConfigurationComplete && firstConfiguration.pageRequiresFirstConfiguration(currentPage)) {
+                    firstConfiguration.openFirstConfigurationDialog({ blocking: true });
+                    return;
+                }
+
                 const securityModules = securityModulesPromise ? await securityModulesPromise : null;
                 const passwordPolicyVersion = securityModules?.[1].ACCOUNT_PASSWORD_POLICY_VERSION;
                 if (isPrivatePage &&
@@ -315,16 +304,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                // 🔐 PROTOCOLLO BLINDA (V7.0 MASTER)
-                // Se la pagina è privata, assicuriamoci che il Vault sia sbloccato
                 if (isPrivatePage) {
                     let vaultKeyMaterial = null;
                     try {
                         vaultKeyMaterial = await securityModules[0].ensureVaultKeyMaterial();
                     } catch (e) {
                         console.error("[BLINDA] Vault lock required.");
-                        // Se l'utente annulla lo sblocco su una pagina privata, potremmo volerlo reindirizzare
-                        // o lasciare i dati cifrati (che verrebbero visti come "---").
                     }
 
                     if (!gate.active(authAttempt)) { securityModules[0].clearSession(); return; }
@@ -399,7 +384,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.187');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.188');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -408,7 +393,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 if (gate && !gate.active(authAttempt)) return;
-                // ROUTER - Step 2: Inizializza Pagina Privata
                 switch (currentPage) {
                     case 'home': await Pages.initHomePage(user); break;
                     case 'area': await Pages.initAreaPrivata(user); break;
@@ -438,9 +422,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     case 'dettaglio_account_azienda': await Pages.initDettaglioAccountAzienda(user); break;
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
                 }
+                if (currentPage === 'home' && !firstConfigurationComplete) {
+                    firstConfiguration.openFirstConfigurationDialog({ blocking: false });
+                }
                 if (isPrivatePage) endMetric('private-page-bootstrap', { page: currentPage });
 
-                // GLOBAL REALTIME INVITE LISTENER (HARDENING V2)
                 if (inviteUnsubscribe) inviteUnsubscribe();
                 const q = query(
                     collection(db, "invites"),
@@ -469,7 +455,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .then(({stopPrivateAccountOfflineCoordinator}) => stopPrivateAccountOfflineCoordinator())
                 .catch(() => {});
             if (inviteUnsubscribe) inviteUnsubscribe();
-            // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
                 const deadlineParams = new URLSearchParams(window.location.search);
                 if (currentPage === 'dettaglio_scadenza'

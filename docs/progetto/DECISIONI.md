@@ -1,5 +1,11 @@
 # Decisioni
 
+## 14/10/2026 — lingua iniziale e prima configurazione
+
+Il selettore lingua appare prima che l'app conosca l'identità. Un utente già registrato può chiuderlo e autenticarsi; dopo il login l'app recupera la preferenza valida associata al profilo. La registrazione di un nuovo utente richiede invece una scelta esplicita. La lingua resta modificabile nelle Impostazioni e interessa esclusivamente testi statici, guida, ARIA, errori, comandi e voce dell'Assistente: i contenuti creati dall'utente restano invariati.
+
+Dopo il primo login la Home propone le Impostazioni o l'esplorazione. Per questa iterazione l'unica configurazione obbligatoria è la conferma della lingua. Tema, area Azienda, Assistente base, notifiche, MFA, biometria e backup sono facoltativi. Finché il requisito minimo non è completato le pagine di creazione/modifica censite mostrano lo stesso invito bloccante; la consultazione resta disponibile. Questa classificazione non riduce i gate autonomi di sicurezza del Vault e non rende facoltative password, autenticazione o verifiche richieste dai rispettivi contratti.
+
 ## 11/10/2026 — apertura del progetto Portabilità, Assistente e Lingue
 
 Diego apre un nuovo ciclo di progettazione articolato in tre filoni, successivi alla stabilizzazione corrente e distinti dal backup tecnico:

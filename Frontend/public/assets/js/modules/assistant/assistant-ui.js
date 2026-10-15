@@ -14,7 +14,17 @@ function element(tag, className, text = '') {
     return node;
 }
 
-export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential, offlineNotice = '' }) {
+const SPEECH_LOCALES = Object.freeze({
+    it: 'it-IT', en: 'en-US', es: 'es-ES', fr: 'fr-FR', de: 'de-DE',
+    zh: 'zh-CN', hi: 'hi-IN', pt: 'pt-PT'
+});
+
+export function speechLocaleForLanguage(language) {
+    return SPEECH_LOCALES[language] || SPEECH_LOCALES.it;
+}
+
+export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential, offlineNotice = '', language = 'it' }) {
+    const speechLocale = speechLocaleForLanguage(language);
     const pageScrollY = window.scrollY;
     document.documentElement.classList.add('vault-assistant-open');
     document.body.classList.add('vault-assistant-open');
@@ -68,7 +78,8 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     import('./speech-synthesis-controller.js').then(module => {
         speechSynthesis = module.createSpeechSynthesisController({
             synthesis: window.speechSynthesis,
-            Utterance: window.SpeechSynthesisUtterance
+            Utterance: window.SpeechSynthesisUtterance,
+            language: speechLocale
         });
         if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = activeMode !== 'search';
     }).catch(() => { if (!uiDestroyed) microphone.disabled = activeMode !== 'search'; });
@@ -187,7 +198,7 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
     const supportsLocalRecognition = SpeechRecognition && 'processLocally' in SpeechRecognition.prototype && typeof SpeechRecognition.available === 'function';
     if (SpeechRecognition) {
         const recognition = new SpeechRecognition(); activeRecognition = recognition;
-        recognition.lang = 'it-IT'; recognition.interimResults = true; recognition.continuous = false; recognition.maxAlternatives = 3;
+        recognition.lang = speechLocale; recognition.interimResults = true; recognition.continuous = false; recognition.maxAlternatives = 3;
         let installConfirmed = false; let remoteConsentPending = false; let usingLocalRecognition = false;
         let recognitionTimeout = null; let recognitionActive = false; let recognitionStarting = false; let submittedFinal = false;
         let pendingSpokenAnswer = '';
@@ -252,15 +263,15 @@ export function createAssistantUI({ onAsk, onClose, onArchive, resolveCredential
                 // a getUserMedia appartiene gia allo stesso gesto dell'utente:
                 // dopo la concessione si avvia subito il servizio vocale disponibile.
                 if (!supportsLocalRecognition) { beginRecognition(false); return; }
-                const availability = await SpeechRecognition.available({ langs: ['it-IT'], processLocally: true });
+                const availability = await SpeechRecognition.available({ langs: [speechLocale], processLocally: true });
                 if (availability === 'available') { beginRecognition(true); return; }
                 if (availability === 'downloadable' && !installConfirmed) {
                     installConfirmed = true; if (microphoneIcon) microphoneIcon.textContent = 'download';
-                    status.textContent = 'Manca la lingua italiana locale. Premi ancora per scaricarla.'; return;
+                    status.textContent = 'Manca il pacchetto vocale locale per la lingua scelta. Premi ancora per scaricarlo.'; return;
                 }
                 if ((availability === 'downloadable' || availability === 'downloading') && typeof SpeechRecognition.install === 'function') {
-                    status.textContent = 'Installazione della lingua italiana sul dispositivo…';
-                    const installed = await SpeechRecognition.install({ langs: ['it-IT'], processLocally: true });
+                    status.textContent = 'Installazione del pacchetto vocale sul dispositivo…';
+                    const installed = await SpeechRecognition.install({ langs: [speechLocale], processLocally: true });
                     installConfirmed = false; if (microphoneIcon) microphoneIcon.textContent = 'mic';
                     status.textContent = installed ? 'Lingua installata. Premi il microfono e parla.' : 'Installazione non riuscita. Usa la tastiera.'; return;
                 }

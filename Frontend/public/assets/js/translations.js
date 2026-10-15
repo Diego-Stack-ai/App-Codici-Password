@@ -1,5 +1,11 @@
 import { LOG } from './logger.js';
 
+const APP_LANGUAGE_CODES = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
+const normalizeAppLanguage = (value, fallback = 'it') => {
+    const code = String(value || '').trim().toLowerCase().split('-')[0];
+    return APP_LANGUAGE_CODES.includes(code) ? code : fallback;
+};
+
 /**
  * TRANSLATIONS LAZY LOADER (V2.0 — Auto-generato il 2026-06-06)
  * Italiano caricato inline (fallback universale, ~9.5 KB).
@@ -403,7 +409,7 @@ export const supportedLanguages = [
 ];
 
 export function getCurrentLanguage() {
-    return localStorage.getItem('app_language') || 'it';
+    try { return normalizeAppLanguage(localStorage.getItem('app_language')); } catch { return 'it'; }
 }
 
 /**
@@ -412,7 +418,9 @@ export function getCurrentLanguage() {
  * @param {string} lang - Codice lingua (es. 'it', 'en')
  */
 export async function loadLanguage(lang = 'it') {
-    lang = lang || 'it';
+    lang = normalizeAppLanguage(lang || 'it');
+    document.documentElement.lang = lang;
+    document.documentElement.dir = 'ltr';
     if (lang === 'it') {
         _dict = _it;
         LOG('[i18n] Lingua attiva: it (inline)');
@@ -443,26 +451,27 @@ export function t(key) {
  * Applica le traduzioni agli elementi DOM con data-t, data-t-placeholder, data-t-aria.
  * Da richiamare dopo loadLanguage() e dopo ogni cambio lingua.
  */
-export function applyGlobalTranslations() {
-    document.querySelectorAll('[data-t]').forEach(el => {
+export function applyGlobalTranslations(root = document) {
+    root.querySelectorAll('[data-t]').forEach(el => {
         const key = el.dataset.t;
         if (!key) return;
         const val = t(key);
         if (val && val !== key) el.textContent = val;
     });
-    document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    root.querySelectorAll('[data-t-placeholder]').forEach(el => {
         const key = el.dataset.tPlaceholder;
         if (!key) return;
         const val = t(key);
         if (val && val !== key) el.placeholder = val;
     });
-    document.querySelectorAll('[data-t-aria]').forEach(el => {
+    root.querySelectorAll('[data-t-aria]').forEach(el => {
         const key = el.dataset.tAria;
         if (!key) return;
         const val = t(key);
         if (val && val !== key) el.setAttribute('aria-label', val);
     });
     document.documentElement.setAttribute('data-i18n', 'ready');
+    document.dispatchEvent(new CustomEvent('app-language-applied', { detail: { language: document.documentElement.lang } }));
 }
 
 // Compatibilità con vecchi moduli

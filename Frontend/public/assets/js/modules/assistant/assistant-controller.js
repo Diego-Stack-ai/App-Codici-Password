@@ -1,20 +1,20 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.187';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.187';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.188';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.188';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveConfirmMessage, archiveRecipients } from '../settings/archive-account-model.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
-import { t } from '../../translations.js';
+import { t, getCurrentLanguage } from '../../translations.js';
 
 let activeController = null;
 
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.187'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.188'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -74,7 +74,8 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
                         return false;
                     }
                 },
-                offlineNotice
+                offlineNotice,
+                language: getCurrentLanguage()
             });
         } catch (error) {
             console.warn('[ASSISTANT] Preparazione non riuscita.', error);
