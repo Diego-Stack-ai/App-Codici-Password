@@ -2,7 +2,7 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.188';
+import { hasRealBankingData, normalizeBankingAccounts } from './banking-model.js?v=1.2.189';
 
 function createReadonlyField(label, value, icon, isPassword = false, isActive = () => true) {
     const id = `bank-field-${crypto.randomUUID()}`;
@@ -23,7 +23,7 @@ function createReadonlyField(label, value, icon, isPassword = false, isActive = 
             }
         }
     }, [createElement('span', {
-        className: 'material-symbols-outlined text-[14px]',
+        className: 'material-symbols-outlined text-[14px] notranslate',
         textContent: 'content_copy'
     })]);
     const actions = createElement('div', {
@@ -45,7 +45,7 @@ function createReadonlyField(label, value, icon, isPassword = false, isActive = 
                 if (toggleIcon) toggleIcon.textContent = hidden ? 'visibility_off' : 'visibility';
             }
         }, [createElement('span', {
-            className: 'material-symbols-outlined text-[14px]',
+            className: 'material-symbols-outlined text-[14px] notranslate',
             textContent: 'visibility'
         })]));
     }
@@ -67,7 +67,7 @@ function createReadonlyField(label, value, icon, isPassword = false, isActive = 
         createElement('label', { className: 'view-label', textContent: label }),
         createElement('div', { className: `glass-field border-glow ${isPassword ? '' : 'glass-field-readable'}`.trim() }, [
             createElement('span', {
-                className: 'material-symbols-outlined ml-4 opacity-40',
+                className: 'material-symbols-outlined ml-4 opacity-40 notranslate',
                 textContent: icon
             }),
             valueElement,
@@ -82,7 +82,7 @@ function createBankCard(card, index, isActive) {
         createElement('div', { className: 'card-entry-header cursor-default' }, [
             createElement('div', { className: 'card-entry-title-row' }, [
                 createElement('span', {
-                    className: 'material-symbols-outlined card-entry-icon',
+                    className: 'material-symbols-outlined card-entry-icon notranslate',
                     textContent: 'credit_card'
                 }),
                 createElement('span', {
@@ -127,7 +127,7 @@ function createBankAccount(bank, index, isActive) {
         createElement('div', { className: 'bank-header cursor-default' }, [
             createElement('div', { className: 'bank-header-left' }, [
                 createElement('span', {
-                    className: 'material-symbols-outlined bank-expand-icon',
+                    className: 'material-symbols-outlined bank-expand-icon notranslate',
                     textContent: 'account_balance'
                 }),
                 createElement('span', {

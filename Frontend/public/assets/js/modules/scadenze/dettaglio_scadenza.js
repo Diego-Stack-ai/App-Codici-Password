@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.188';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.189';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -183,7 +183,7 @@ function setupFooterActions(mount) {
                 href: 'impostazioni.html',
                 className: 'btn-icon-header footer-settings-link'
             }, [
-                createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
+                createElement('span', { className: 'material-symbols-outlined footer-settings-icon notranslate', textContent: 'tune' })
             ])
         );
         clearElement(footerRight);
@@ -196,12 +196,12 @@ function setupFooterActions(mount) {
 
         const deleteBtn = createElement('button', {
             className: 'btn-fab-action btn-fab-danger', onclick: () => handleDelete(mount)
-        }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })]);
+        }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })]);
 
         const editBtn = createElement('button', {
             className: 'btn-fab-action btn-fab-scadenza',
             onclick: () => { if (mount.active()) window.location.href = `aggiungi_scadenza.html?id=${encodeURIComponent(mount.scope.id)}`; }
-        }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]);
+        }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })]);
 
         const fabWrapper = createElement('div', { className: 'fab-group' }, [deleteBtn, editBtn]);
         clearElement(footerCenter);
@@ -284,7 +284,7 @@ function renderReceivedDeadlineActions(scadenza, mount, active) {
     const ownerLabel = scadenza.ownerLabel || 'il proprietario';
     const children = [
         createElement('div', { className: 'received-deadline-heading' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: canManage ? 'handshake' : 'visibility' }),
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: canManage ? 'handshake' : 'visibility' }),
             createElement('div', {}, [
                 createElement('strong', { textContent: canManage ? 'Puoi gestire questa scadenza' : 'Scadenza in sola lettura' }),
                 createElement('p', { textContent: `Ricevuta da ${ownerLabel}` })
@@ -403,7 +403,7 @@ function renderDeadlineContents(scadenza, mount) {
                     ]),
                     createElement('span', { className: 'detail-list-item-title', textContent: a.name })
                 ]),
-                createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow', textContent: 'open_in_new' })
+                createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow notranslate', textContent: 'open_in_new' })
             ]);
         });
         setChildren(attCont, items);
@@ -421,11 +421,11 @@ function renderDeadlineContents(scadenza, mount) {
         }, [
             createElement('div', { className: 'detail-list-item-left' }, [
                 createElement('div', { className: 'detail-list-icon-box' }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'language' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'language' })
                 ]),
                 createElement('span', { className: 'detail-list-item-title', textContent: referenceUrl })
             ]),
-            createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow', textContent: 'open_in_new' })
+            createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow notranslate', textContent: 'open_in_new' })
         ]);
         setChildren(referenceUrlContainer, [linkButton]);
     }

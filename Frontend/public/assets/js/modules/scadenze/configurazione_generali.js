@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.188';
+import { db } from '../../firebase-config.js?v=1.2.189';
 import { LOG } from '../../logger.js';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -206,10 +206,10 @@ function renderTypes() {
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
                     createElement('button', { className: 'btn-save-inline btn-icon-save' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'check' })
                     ]),
                     createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })
                     ])
                 ])
             ]);
@@ -236,13 +236,13 @@ function renderTypes() {
                     className: 'btn-edit-item btn-icon-edit',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
                 ]),
                 createElement('button', {
                     className: 'btn-delete-item btn-icon-delete',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                 ])
             ])
         ]);
@@ -278,10 +278,10 @@ function renderSimpleList(containerId, data, listKey) {
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
                     createElement('button', { className: 'btn-save-inline btn-icon-save' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'check' })
                     ]),
                     createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })
                     ])
                 ])
             ]);
@@ -296,13 +296,13 @@ function renderSimpleList(containerId, data, listKey) {
                     className: 'btn-edit-item btn-icon-edit',
                     dataset: { list: listKey, index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
                 ]),
                 createElement('button', {
                     className: 'btn-delete-item btn-icon-delete',
                     dataset: { list: listKey, index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                 ])
             ])
         ]);

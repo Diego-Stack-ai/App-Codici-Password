@@ -49,7 +49,7 @@ function fieldRow(field = {}, structureLocked = false) {
     value.spellcheck = false;
     value.setAttribute('autocapitalize', 'off');
     value.classList.toggle('local-data-masked', field.encrypted === true);
-    const visibilityIcon = createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'});
+    const visibilityIcon = createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'visibility'});
     const visibility = createElement('button', {
         type: 'button', className: `shared-account-reveal${field.encrypted === true ? '' : ' hidden'}`,
         'aria-label': 'Mostra valore', hidden: field.encrypted !== true,
@@ -82,7 +82,7 @@ function fieldRow(field = {}, structureLocked = false) {
     const remove = createElement('button', {
         type: 'button', className: 'account-widget-remove', 'aria-label': 'Rimuovi campo',
         onclick: () => row.remove(), hidden: structureLocked
-    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
+    }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'delete'})]);
     setChildren(row, [label, type, createElement('div', {className: 'account-widget-inline-control'}, [value, visibility]), sensitive, deadline, remove]);
     row.getValue = () => ({
         id: field.id || newId('field'), label: structuralTitleCase(label.value), value: value.value,
@@ -332,14 +332,14 @@ function widgetCard(widget, context, refresh) {
                         const icon = event.currentTarget.querySelector('.material-symbols-outlined');
                         if (icon) icon.textContent = revealed ? 'visibility' : 'visibility_off';
                     }
-                }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+                }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'visibility'})]));
             }
             if (field.deadlineEnabled === true && (field.type === 'date' || field.type === 'expiry')) {
                 controls.push(createElement('button', {
                     type: 'button', className: 'shared-account-reveal',
                     'aria-label': `Crea Scadenza da ${field.label}`,
                     onclick: () => prepareAccountDeadline(field, input.value, widget, context)
-                }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'event_upcoming'})]));
+                }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'event_upcoming'})]));
             }
             fields.appendChild(createElement('div', {
                 className: 'account-widget-inline-field'
@@ -358,11 +358,11 @@ function widgetCard(widget, context, refresh) {
         if (field.encrypted) children.push(createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Mostra ${field.label}`,
             onclick: event => reveal(event.currentTarget, field, context)
-        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+        }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'visibility'})]));
         children.push(createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Copia ${field.label}`,
             onclick: () => copyField(field, context)
-        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'content_copy'})]));
+        }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'content_copy'})]));
         fields.appendChild(createElement('div', {className: 'shared-account-field glass-field border-glow account-widget-display-field'}, children));
     }
     const applyCollapsedState = () => {
@@ -382,14 +382,14 @@ function widgetCard(widget, context, refresh) {
             event.currentTarget.setAttribute('aria-label', `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`);
             if (context.editable) markDirty();
         }
-    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'expand_more'})]);
+    }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'expand_more'})]);
     const currentFields = () => fieldReaders.map((read, order) => ({...read(), order}));
     const draftWidget = () => ({...widget, collapsed, fields: currentFields()});
     const actions = context.editable ? createElement('span', {className: 'account-widget-card-actions'}, [
         createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': 'Modifica struttura widget',
             onclick: () => openEditor(draftWidget(), context, refresh)
-        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'edit'})]),
+        }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'edit'})]),
         createElement('button', {
             type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Elimina widget',
             onclick: async () => {
@@ -410,12 +410,12 @@ function widgetCard(widget, context, refresh) {
                 }
                 catch (error) { if (context.active()) showToast(error.message || 'Eliminazione non riuscita.', 'error'); }
             }
-        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})])
+        }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'delete'})])
     ]) : null;
     const card = createElement('article', {className: 'account-widget-block'}, [
         createElement('div', {className: 'shared-account-card-heading account-widget-heading'}, [
             toggle,
-            createElement('span', {className: 'material-symbols-outlined account-widget-kind-icon', textContent: widget.icon || 'widgets'}),
+            createElement('span', {className: 'material-symbols-outlined account-widget-kind-icon notranslate', textContent: widget.icon || 'widgets'}),
             createElement('strong', {textContent: widget.title}),
             actions
         ]),

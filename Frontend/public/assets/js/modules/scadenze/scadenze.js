@@ -4,7 +4,7 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.188';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.189';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -13,7 +13,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged } from "/assets/js/vendor
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.188';
+import { initComponents } from '../../components-v129.js?v=1.2.189';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -264,7 +264,7 @@ function renderFilteredScadenze() {
     clearElement(scadenzeContainer);
     if (filtered.length === 0) {
         const empty = createElement('div', { className: 'archive-empty-state' }, [
-            createElement('span', { className: 'material-symbols-outlined archive-empty-icon', textContent: 'event_busy' }),
+            createElement('span', { className: 'material-symbols-outlined archive-empty-icon notranslate', textContent: 'event_busy' }),
             createElement('p', {
                 className: 'archive-empty-text',
                 dataset: { t: 'no_deadlines_found' },
@@ -298,11 +298,11 @@ function createScadenzaCard(scadenza) {
 
     // 1. BACKGROUND AZIONI (Sotto la card)
     const bgArchive = createElement('div', { className: 'swipe-action-bg bg-restore' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'archive' })
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'archive' })
     ]);
 
     const bgDelete = createElement('div', { className: 'swipe-action-bg bg-delete' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
     ]);
 
     const presentation = deadlinePresentation(scadenza);
@@ -320,7 +320,7 @@ function createScadenzaCard(scadenza) {
         createElement('div', { className: 'deadline-card-layout' }, [
             createElement('div', { className: 'deadline-card-left' }, [
                 createElement('div', { className: 'deadline-icon-box' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled', textContent: scadenza.icon || 'event_note' })
+                    createElement('span', { className: 'material-symbols-outlined filled notranslate', textContent: scadenza.icon || 'event_note' })
                 ]),
                 createElement('div', { className: 'deadline-card-info-group' }, [
                     createElement('span', { className: 'deadline-card-category', textContent: cardOwner.toUpperCase() }),
@@ -435,7 +435,7 @@ function setupFAB() {
             dataset: { label: t('add_short') || 'Aggiungi' },
             onclick: () => window.location.href = 'aggiungi_scadenza.html'
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })
         ]);
 
         const fabGroup = createElement('div', { className: 'fab-group' }, [addBtn]);

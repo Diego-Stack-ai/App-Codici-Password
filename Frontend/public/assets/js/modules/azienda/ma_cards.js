@@ -157,11 +157,11 @@ export function addExtraEmail(data = null) {
                 'data-stop-propagation': true,
                 onclick: () => wrapper.remove()
             }, [
-                createElement('span', { className: 'material-symbols-outlined action-icon-compact', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined action-icon-compact notranslate', textContent: 'delete' })
             ]),
             createElement('span', {
                 id: arrowId,
-                className: 'material-symbols-outlined icon-chevron transition-transform',
+                className: 'material-symbols-outlined icon-chevron transition-transform notranslate',
                 textContent: 'expand_more'
             })
         ])
@@ -201,7 +201,7 @@ export function addExtraEmail(data = null) {
                         className: 'btn-toggle-pass btn-icon-header',
                         'data-target': `pass_${uniqueId}`
                     }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'visibility' })
                     ])
                 ])
             ])
@@ -239,7 +239,7 @@ export function addExtraSede(data = null) {
         'data-target': bodyId
     }, [
         createElement('div', { className: 'location-primary-fields' }, [
-            createElement('span', { className: 'material-symbols-outlined icon-accent-blue', textContent: 'location_on' }),
+            createElement('span', { className: 'material-symbols-outlined icon-accent-blue notranslate', textContent: 'location_on' }),
             createElement('input', {
                 id: `tipo_${uniqueId}`,
                 type: 'text',
@@ -268,11 +268,11 @@ export function addExtraSede(data = null) {
                 'data-stop-propagation': true,
                 onclick: () => wrapper.remove()
             }, [
-                createElement('span', { className: 'material-symbols-outlined action-icon-compact', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined action-icon-compact notranslate', textContent: 'delete' })
             ]),
             createElement('span', {
                 id: arrowId,
-                className: 'material-symbols-outlined icon-chevron transition-transform',
+                className: 'material-symbols-outlined icon-chevron transition-transform notranslate',
                 textContent: 'expand_more'
             })
         ])

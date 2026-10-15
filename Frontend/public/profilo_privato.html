@@ -13,21 +13,21 @@
     <title data-t="page_title_profile">Profilo Utente - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- CSS Modular System V5.0 -->
     <!-- 1. Modulo specifico Base -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
     <!-- 2. Estensioni Core -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
     <!-- 3. Stile di Pagina -->
-    <link rel="stylesheet" href="assets/css/profilo_privato.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/profile-document-attachments.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/profilo_privato.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/profile-document-attachments.css?v=1.2.189">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="detail">
@@ -56,7 +56,7 @@
                                 data-action="trigger-click" data-target="avatar-input">
                                 <img id="profile-avatar" class="profile-avatar-pending" alt="Profile">
                                 <div class="profile-avatar-overlay">
-                                    <span class="material-symbols-outlined">photo_camera</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">photo_camera</span>
                                 </div>
                             </div>
                             <input type="file" id="avatar-input" class="hidden" accept="image/*">
@@ -68,7 +68,7 @@
                                 data-t-title="click_to_enlarge"></div>
                             <!-- Zoom Icon -->
                             <div id="qr-zoom-icon" class="qr-zoom-btn">
-                                <span class="material-symbols-outlined">search</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">search</span>
                             </div>
                         </div>
                     </div>
@@ -91,12 +91,12 @@
                         <div class="form-section-header">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">person</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">person</span>
                                 </div>
                                 <h3 class="form-section-title" data-t="profile_personal">Anagrafica Principale</h3>
                             </div>
                             <button class="btn-edit-section" data-action="edit-section" data-target="dati-personali">
-                                <span class="material-symbols-outlined icon-edit">edit</span>
+                                <span class="material-symbols-outlined icon-edit notranslate" translate="no">edit</span>
                             </button>
                         </div>
 
@@ -112,7 +112,7 @@
                                 <div class="field-value-row">
                                     <span id="nome-view" class="data-value">-</span>
                                     <button id="copy-nome" class="btn-action-mini">
-                                        <span class="material-symbols-outlined">content_copy</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                     </button>
                                 </div>
                             </div>
@@ -129,10 +129,10 @@
                                     <button type="button" class="profile-document-value-button" data-action="manage-fiscal-document"
                                         aria-label="Gestisci il codice fiscale nei Documenti">
                                         <span id="cf-view" class="data-value">-</span>
-                                        <span class="material-symbols-outlined" aria-hidden="true">edit_document</span>
+                                        <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">edit_document</span>
                                     </button>
                                     <button id="copy-cf" class="btn-action-mini">
-                                        <span class="material-symbols-outlined">content_copy</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                     </button>
                                 </div>
                                 <span class="profile-document-value-hint">Gestisci nei Documenti</span>
@@ -152,7 +152,7 @@
                                         <span id="birth_place-view" class="data-value">-</span>
                                     </div>
                                     <button id="copy-nascita" class="btn-action-mini">
-                                        <span class="material-symbols-outlined">content_copy</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                     </button>
                                 </div>
                             </div>
@@ -164,12 +164,12 @@
                         <div class="form-section-header collapsible-header collapsed" data-section="indirizzi">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-amber">
-                                    <span class="material-symbols-outlined">home</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">home</span>
                                 </div>
                                 <h3 class="form-section-title" data-t="profile_addresses_utilities">Indirizzi & Utenze
                                 </h3>
                             </div>
-                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                            <span class="material-symbols-outlined expand-icon notranslate" translate="no">expand_more</span>
                         </div>
                         <div id="indirizzi-view-container" class="guide-content-wrapper collapsed">
                             <!-- Injected via JS -->
@@ -181,11 +181,11 @@
                         <div class="form-section-header collapsible-header collapsed" data-section="telefoni">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-emerald">
-                                    <span class="material-symbols-outlined">call</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">call</span>
                                 </div>
                                 <h3 class="form-section-title" data-t="profile_phones">Contatti Telefonici</h3>
                             </div>
-                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                            <span class="material-symbols-outlined expand-icon notranslate" translate="no">expand_more</span>
                         </div>
                         <div id="telefoni-view-container" class="guide-content-wrapper collapsed">
                             <!-- Injected via JS -->
@@ -197,11 +197,11 @@
                         <div class="form-section-header collapsible-header collapsed" data-section="email">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">mail</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">mail</span>
                                 </div>
                                 <h3 class="form-section-title" data-t="profile_emails">Account Email</h3>
                             </div>
-                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                            <span class="material-symbols-outlined expand-icon notranslate" translate="no">expand_more</span>
                         </div>
                         <div id="email-view-container" class="guide-content-wrapper collapsed">
                             <!-- Injected via JS -->
@@ -213,11 +213,11 @@
                         <div class="form-section-header collapsible-header collapsed" data-section="documenti">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-purple">
-                                    <span class="material-symbols-outlined">description</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">description</span>
                                 </div>
                                 <h3 class="form-section-title" data-t="profile_docs_digital">Documenti Digitali</h3>
                             </div>
-                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                            <span class="material-symbols-outlined expand-icon notranslate" translate="no">expand_more</span>
                         </div>
                         <div id="documenti-view-container" class="guide-content-wrapper collapsed">
                             <!-- Injected via JS -->
@@ -230,12 +230,12 @@
                         <div class="form-section-header">
                             <div class="section-title-wrapper">
                                 <div class="settings-icon-box icon-red">
-                                    <span class="material-symbols-outlined">notes</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">notes</span>
                                 </div>
                                 <h3 class="form-section-title" data-t="profile_notes">Note Anagrafica</h3>
                             </div>
                             <button class="btn-edit-section" data-action="edit-section" data-target="note">
-                                <span class="material-symbols-outlined icon-edit">edit</span>
+                                <span class="material-symbols-outlined icon-edit notranslate" translate="no">edit</span>
                             </button>
                         </div>
                         <div class="form-card">

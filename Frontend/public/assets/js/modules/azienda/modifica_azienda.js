@@ -14,7 +14,7 @@
  * modifica_azienda.html carica solo main.js → INVARIATO
  */
 
-import { db } from '../../firebase-config.js?v=1.2.188';
+import { db } from '../../firebase-config.js?v=1.2.189';
 import { doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -60,7 +60,7 @@ function initProtocolUI() {
                 className: 'footer-action-btn btn-danger',
                 onclick: deleteAzienda
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete_forever' })
             ]));
         }
     }
@@ -75,7 +75,7 @@ function initProtocolUI() {
             disabled: Boolean(state.currentAziendaId),
             onclick: saveAzienda
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' })
         ]));
     }
 }

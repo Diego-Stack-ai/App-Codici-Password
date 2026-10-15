@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.188';
+import {auth} from '../../firebase-config.js?v=1.2.189';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -17,15 +17,15 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.188';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.188';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.189';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.189';
 async function savePrivateAccount(...args) {
     let module;
     // Il modulo di salvataggio e' caricato solo al primo click. Deve quindi
     // partecipare esplicitamente al versionamento della release: senza query
     // il service worker/browser puo' riusare il controller della release
     // precedente e perdere una modifica successiva pur mostrando successo.
-    try { module = await import('./form-privato-save.js?v=1.2.188'); }
+    try { module = await import('./form-privato-save.js?v=1.2.189'); }
     catch {
         if (args[0]?.isActive?.()) {
             showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
@@ -119,7 +119,7 @@ function showM6ConflictChoice(reconciliation = false, unsupported = false) {
             onclick: () => close(null)
         });
         setChildren(modal, createElement('div', {className: 'modal-box'}, [
-            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'sync_problem'}),
             createElement('h3', {className: 'modal-title', textContent: unsupported ? 'Account da modificare nel modulo completo' : reconciliation ? 'Salvataggio precedente da verificare' : 'Conflitto di sincronizzazione'}),
             createElement('p', {
                 className: 'modal-text',
@@ -227,7 +227,7 @@ export async function initFormAccountPrivato(user) {
                 else history.back();
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })
         ]);
 
         const saveBtn = createElement('button', {
@@ -282,7 +282,7 @@ export async function initFormAccountPrivato(user) {
                 });
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' })
         ]);
 
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [cancelBtn, saveBtn]));
@@ -304,7 +304,7 @@ export async function initFormAccountPrivato(user) {
                 className: 'btn-icon-header',
                 onclick: () => window.location.href = `dettaglio_account_privato.html?id=${currentDocId}`
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'arrow_back' })
             ]));
         }
     }
@@ -856,7 +856,7 @@ function renderGuestsList() {
             ]),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined account-guest-remove',
+                className: 'material-symbols-outlined account-guest-remove notranslate',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);

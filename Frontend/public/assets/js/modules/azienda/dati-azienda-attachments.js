@@ -2,7 +2,7 @@
  * Rendering e apertura sicura degli allegati incorporati nell'anagrafica azienda.
  */
 
-import { auth, storage } from '../../firebase-config.js?v=1.2.188';
+import { auth, storage } from '../../firebase-config.js?v=1.2.189';
 import { getBytes, ref, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -29,10 +29,10 @@ export function renderCompanyEmbeddedAttachments(attachments) {
         className: 'attachment-item group'
     }, [
         createElement('div', { className: 'attachment-info' }, [
-            createElement('span', { className: 'material-symbols-outlined icon-accent-blue', textContent: 'description' }),
+            createElement('span', { className: 'material-symbols-outlined icon-accent-blue notranslate', textContent: 'description' }),
             createElement('span', { className: 'attachment-name', textContent: attachment.name || attachment.nome })
         ]),
-        createElement('span', { className: 'material-symbols-outlined attachment-icon-open', textContent: 'open_in_new' })
+        createElement('span', { className: 'material-symbols-outlined attachment-icon-open notranslate', textContent: 'open_in_new' })
     ])));
 }
 

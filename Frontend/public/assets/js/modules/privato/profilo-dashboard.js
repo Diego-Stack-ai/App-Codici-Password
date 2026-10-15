@@ -68,7 +68,7 @@ export function renderProfileOverview() {
         type: onActivate ? 'button' : undefined,
         onclick: onActivate
     }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: icon }),
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: icon }),
         createElement('div', {}, [
             createElement('span', { className: 'data-label', textContent: label }),
             createElement('p', { className: 'data-value', textContent: value })

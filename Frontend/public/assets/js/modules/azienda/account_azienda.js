@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.188';
+import { db } from '../../firebase-config.js?v=1.2.189';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -149,7 +149,7 @@ export function mountAccountAziendaList(user, options = {}) {
                     title: t('add_account') || 'Nuovo Account',
                     dataset: { label: t('add_short') || 'Aggiungi' }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })
                 ])
             ]));
         }

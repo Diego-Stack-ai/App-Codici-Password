@@ -290,7 +290,7 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
             dataset: { label: 'Privato' },
             onclick: () => window.location.href = 'form_account_privato.html'
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'person_add' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'person_add' })
         ]);
 
         // 2. Scadenza (Centro - Principale)
@@ -300,7 +300,7 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
             dataset: { label: 'Scadenza' },
             onclick: () => window.location.href = 'aggiungi_scadenza.html'
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'event' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'event' })
         ]);
 
         // 3. Azienda (Dynamic Redirect)
@@ -318,7 +318,7 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
                 }
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'domain_add' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'domain_add' })
         ]);
 
         // Assemblaggio

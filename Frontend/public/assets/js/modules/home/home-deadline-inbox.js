@@ -4,7 +4,7 @@
 
 import { createElement, setChildren } from '../../dom-utils.js';
 import { listDeadlines, listDeadlineNotifications } from '../data/vault-repository.js';
-import { auth } from '../../firebase-config.js?v=1.2.188';
+import { auth } from '../../firebase-config.js?v=1.2.189';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { deadlinePresentation, projectDeadlineReminders } from '../scadenze/deadline-model.js';
 import { renderHomeDeadlineDashboard, clearHomeDeadlineDashboard } from './home-deadline-dashboard.js';
@@ -54,12 +54,12 @@ export async function renderHomeDeadlineInbox(user, isCurrent = () => true) {
                 window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(notification.deadlineId)}&notification=${encodeURIComponent(notification.id)}`;
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'notification_important' }),
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'notification_important' }),
             createElement('span', { className: 'deadline-inbox-copy' }, [
                 createElement('strong', { textContent: label }),
                 createElement('small', { textContent: `${when} · ${dueDate.split('-').reverse().join('/')}${notification.status === 'viewed' ? ' · Già visto' : ''}` })
             ]),
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'chevron_right' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'chevron_right' })
         ]);
     };
     const list = createElement('div', { className: 'deadline-inbox-list' });
@@ -87,7 +87,7 @@ export async function renderHomeDeadlineInbox(user, isCurrent = () => true) {
     }, [
         createElement('div', { className: 'modal-box deadline-inbox-box' }, [
             createElement('div', { className: 'deadline-inbox-heading' }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'notifications_active' }),
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'notifications_active' }),
                 createElement('div', {}, [
                     createElement('h2', { className: 'modal-title', textContent: 'Promemoria scadenze' }),
                     createElement('p', { textContent: `${projected.length} avvis${projected.length === 1 ? 'o' : 'i'} da controllare` })

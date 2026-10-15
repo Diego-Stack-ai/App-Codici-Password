@@ -6,7 +6,7 @@
 
 import { SwipeList } from '../../swipe-list-v6.js';
 import { showToast } from '../../ui-core-v129.js';
-import { auth } from '../../firebase-config.js?v=1.2.188';
+import { auth } from '../../firebase-config.js?v=1.2.189';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { t } from '../../translations.js';
@@ -327,18 +327,18 @@ function filterAndRender() {
     const items = filtered.map(acc => {
         // 1. BACKGROUND AZIONI (Sotto la card)
         const bgRestore = createElement('div', { className: 'swipe-action-bg bg-restore' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'restore_from_trash' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'restore_from_trash' })
         ]);
 
         const bgDelete = createElement('div', { className: 'swipe-action-bg bg-delete' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete_forever' })
         ]);
 
         // 2. CONTENUTO VISIBILE (Sopra)
         // Icona differenziata per contesto
         const iconBox = createElement('div', { className: 'archive-icon-box' }, [
             createElement('span', {
-                className: 'material-symbols-outlined',
+                className: 'material-symbols-outlined notranslate',
                 textContent: acc.context === 'privato' ? 'person' : 'account_balance'
             })
         ]);

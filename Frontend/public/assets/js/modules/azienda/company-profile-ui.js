@@ -1,5 +1,5 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.188';
+import { auth, db } from '../../firebase-config.js?v=1.2.189';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -16,7 +16,7 @@ const button = (label, onclick) => createElement('button', { type: 'button', cla
 const text = (value, className = 'company-contact-value') => createElement('span', {className, textContent: value});
 const editUrl = id => `modifica_azienda.html?id=${encodeURIComponent(id)}`;
 function miniButton(label, icon, onclick) {
-    return createElement('button',{type:'button',className:'profile-contact-mini',title:label,'aria-label':label,onclick},[createElement('span',{className:'material-symbols-outlined',textContent:icon})]);
+    return createElement('button',{type:'button',className:'profile-contact-mini',title:label,'aria-label':label,onclick},[createElement('span',{className:'material-symbols-outlined notranslate',textContent:icon})]);
 }
 function copyButton(getValue) {
     return miniButton('Copia', 'content_copy', async () => { try { const value = await getValue(); if (!value) return; await navigator.clipboard.writeText(value); showToast('Copiato!', 'success'); } catch { showToast('Impossibile copiare. Sblocca il Vault e riprova.', 'error'); } });
@@ -191,7 +191,7 @@ function styleCompanySections(companyId) {
         title?.classList.add('form-section-title');
         const icon=header.querySelector('.detail-section-icon');
         if(icon) {
-            icon.className='material-symbols-outlined detail-section-icon';
+            icon.className='material-symbols-outlined detail-section-icon notranslate';
             const wrapper=createElement('div',{className:'section-title-wrapper'});
             const box=createElement('div',{className:'settings-icon-box '+({personal:'icon-blue',contacts:'icon-emerald',addresses:'icon-amber',documents:'icon-purple'}[type]||'icon-blue')},[icon]);
             wrapper.append(box);

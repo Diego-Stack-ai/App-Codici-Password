@@ -8,22 +8,22 @@
     <title>Profilo aziendale</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.189">
 
-    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/profile-contacts.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/profile-layout.css?v=1.2.189">
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
 </head>
@@ -48,10 +48,10 @@
                             <div id="azienda-logo-container" class="detail-avatar border-glow">
                                 <img loading="lazy" id="azienda-logo" class="detail-avatar-img hidden" src="" alt="Logo Azienda" />
                                 <span id="azienda-logo-placeholder"
-                                    class="material-symbols-outlined detail-avatar-placeholder">domain</span>
+                                    class="material-symbols-outlined detail-avatar-placeholder notranslate" translate="no">domain</span>
                             </div>
                             <div class="hero-status-dot">
-                                <span class="material-symbols-outlined icon-small">business</span>
+                                <span class="material-symbols-outlined icon-small notranslate" translate="no">business</span>
                             </div>
                         </div>
 
@@ -61,7 +61,7 @@
                                 <!-- Injected via JS -->
                             </div>
                             <div class="qr-zoom-indicator">
-                                <span class="material-symbols-outlined icon-tiny">zoom_in</span>
+                                <span class="material-symbols-outlined icon-tiny notranslate" translate="no">zoom_in</span>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
 
 
                     <section data-company-panel="personal" class="detail-section hidden">
-                        <div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon">domain</span><h3 class="detail-section-title">Anagrafica Principale</h3></div>
+                        <div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon notranslate" translate="no">domain</span><h3 class="detail-section-title">Anagrafica Principale</h3></div>
                         <div class="form-card">
                             <div class="data-display-group"><span class="view-label">Ragione sociale</span><span id="company-name-view" class="data-value">-</span></div>
                             <div class="data-display-group"><span class="view-label">Forma giuridica</span><span id="company-type-view" class="data-value">-</span></div>
@@ -102,11 +102,11 @@
                         <button class="accordion-trigger-premium group" id="toggle-referente-btn">
                             <div class="detail-section-actions">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald">person</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald notranslate" translate="no">person</span>
                                 <h3 class="detail-section-title" data-t="referent_details">Dettagli Referente</h3>
                             </div>
                             <span id="referente-chevron"
-                                class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
+                                class="material-symbols-outlined icon-chevron transition-transform notranslate" translate="no">expand_more</span>
                         </button>
 
                         <div id="referente-container" class="mt-content">
@@ -116,7 +116,7 @@
                                         <img loading="lazy" id="referente-photo" class="referent-avatar-img hidden" src=""
                                             alt="Foto" />
                                         <span id="referente-photo-placeholder"
-                                            class="material-symbols-outlined referent-avatar-placeholder">person</span>
+                                            class="material-symbols-outlined referent-avatar-placeholder notranslate" translate="no">person</span>
                                     </div>
                                     <div class="referent-info">
                                         <div>
@@ -126,7 +126,7 @@
                                         <p id="referente-ruolo" class="referent-role">-</p>
                                     </div>
                                     <a id="btn-call-referente" href="tel:" class="referent-call-btn">
-                                        <span class="material-symbols-outlined">call</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">call</span>
                                     </a>
                                 </div>
 
@@ -135,13 +135,13 @@
                                         data-t="whatsapp_number">Cellulare / WhatsApp</label>
                                     <div class="detail-field-box border-glow">
                                         <span
-                                            class="material-symbols-outlined icon-field-left opacity-low">smartphone</span>
+                                            class="material-symbols-outlined icon-field-left opacity-low notranslate" translate="no">smartphone</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="referente-cellulare" readonly class="detail-field-input no-transform"
                                             value="-">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="referente-cellulare" data-field="referente-cellulare">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -154,28 +154,28 @@
                     <section data-company-panel="addresses" class="detail-section hidden">
                         <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-blue">location_on</span>
+                                class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">location_on</span>
                             <h3 class="detail-section-title" data-t="company_locations">Sedi Aziendali</h3>
                         </div>
 
                         <div id="company-locations-list"></div>
                     </section>
 
-                    <section data-company-panel="contacts" class="detail-section hidden"><div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon">call</span><h3 class="detail-section-title">Contatti Telefonici</h3></div><div id="company-phone-list"></div></section>
+                    <section data-company-panel="contacts" class="detail-section hidden"><div class="detail-section-header"><span class="material-symbols-outlined detail-section-icon notranslate" translate="no">call</span><h3 class="detail-section-title">Contatti Telefonici</h3></div><div id="company-phone-list"></div></section>
 <!-- Section: Email Categorizzate -->
                     <section data-company-panel="contacts" id="wrapper-email-section" class="detail-section hidden">
                         <button class="accordion-trigger-premium group" id="toggle-email-btn">
                             <div class="detail-section-actions">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-purple">mail</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-purple notranslate" translate="no">mail</span>
                                 <h3 class="detail-section-title" data-t="email_categories">Email Aziendali</h3>
                             </div>
                             <div class="detail-section-actions">
                                 <div id="btn-add-email" class="btn-mini-section-action action-purple">
-                                    <span class="material-symbols-outlined icon-tiny">add</span>
+                                    <span class="material-symbols-outlined icon-tiny notranslate" translate="no">add</span>
                                 </div>
                                 <span id="email-chevron"
-                                    class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
+                                    class="material-symbols-outlined icon-chevron transition-transform notranslate" translate="no">expand_more</span>
                             </div>
                         </button>
                         <div id="email-list-container" class="mt-content">
@@ -188,15 +188,15 @@
                         <button class="accordion-trigger-premium group" id="toggle-fiscal-btn">
                             <div class="detail-section-actions">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-amber">payments</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-amber notranslate" translate="no">payments</span>
                                 <h3 class="detail-section-title" data-t="fiscal_data">Dati Fiscali</h3>
                             </div>
                             <div class="detail-section-actions">
                                 <div id="btn-edit-fiscal" class="btn-mini-section-action action-amber">
-                                    <span class="material-symbols-outlined icon-tiny">edit</span>
+                                    <span class="material-symbols-outlined icon-tiny notranslate" translate="no">edit</span>
                                 </div>
                                 <span id="fiscal-chevron"
-                                    class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
+                                    class="material-symbols-outlined icon-chevron transition-transform notranslate" translate="no">expand_more</span>
                             </div>
                         </button>
 
@@ -209,7 +209,7 @@
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="piva" data-field="piva">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -222,7 +222,7 @@
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="codice-sdi" data-field="codice-sdi">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -236,7 +236,7 @@
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-copy-target="cciaa" data-field="cciaa">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -259,13 +259,13 @@
                         <div class="detail-section-header">
                             <div class="detail-section-actions">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-amber">edit_note</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-amber notranslate" translate="no">edit_note</span>
                                 <h3 class="detail-section-title" data-t="notes">Note Aziendali</h3>
                             </div>
                             <div class="detail-section-actions">
                                 <button id="btn-cancel-note" class="hidden btn-cancel-text">Annulla</button>
                                 <button id="btn-edit-note" class="btn-mini-section-action action-blue">
-                                    <span class="material-symbols-outlined icon-tiny">edit</span>
+                                    <span class="material-symbols-outlined icon-tiny notranslate" translate="no">edit</span>
                                 </button>
                             </div>
                         </div>
@@ -281,11 +281,11 @@
                         <button class="accordion-trigger-premium group" id="toggle-allegati-btn">
                             <div class="detail-section-actions">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">attach_file</span>
                                 <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
                             </div>
                             <span id="allegati-chevron"
-                                class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
+                                class="material-symbols-outlined icon-chevron transition-transform notranslate" translate="no">expand_more</span>
                         </button>
 
                         <div id="allegati-container" class="mt-content">
@@ -304,7 +304,7 @@
                 <div id="qrcode-zoom-container" class="qr-zoom-container"></div>
                 <p class="qr-scan-text" data-t="scan_to_import">Scansiona per importare in rubrica</p>
                 <button id="btn-close-qr" class="btn-modal-close">
-                    <span class="material-symbols-outlined modal-confirm-icon">check_circle</span>
+                    <span class="material-symbols-outlined modal-confirm-icon notranslate" translate="no">check_circle</span>
                     <span data-t="close">CHIUDI</span>
                 </button>
             </div>

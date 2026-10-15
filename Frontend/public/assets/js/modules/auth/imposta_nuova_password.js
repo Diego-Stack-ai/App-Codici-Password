@@ -4,12 +4,12 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.188';
+import { auth } from '../../firebase-config.js?v=1.2.189';
 import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "/assets/js/vendor/firebase-runtime.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
-import { db } from '../../firebase-config.js?v=1.2.188';
+import { db } from '../../firebase-config.js?v=1.2.189';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 
@@ -74,7 +74,7 @@ function setupNewPasswordForm() {
         submitBtn.disabled = true;
         clearElement(submitBtn);
         setChildren(submitBtn, [
-            createElement('span', { className: 'animate-spin material-symbols-outlined', textContent: 'sync' })
+            createElement('span', { className: 'animate-spin material-symbols-outlined notranslate', textContent: 'sync' })
         ]);
         document.body.classList.add('is-auth-progress');
 

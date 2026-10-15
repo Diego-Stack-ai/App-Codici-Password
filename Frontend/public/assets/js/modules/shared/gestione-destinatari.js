@@ -1,4 +1,4 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.188';
+import { db, functions } from '../../firebase-config.js?v=1.2.189';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -86,13 +86,13 @@ function renderContacts() {
         ]),
         createElement('div', { className: 'recipient-card-actions' }, [
             createElement('button', { type: 'button', className: 'recipient-icon-button', title: 'Modifica', onclick: () => editContact(contact) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
             ]),
             createElement('button', { type: 'button', className: 'recipient-icon-button', title: contact.active === false ? 'Riattiva' : 'Disattiva', onclick: () => toggleActive(contact) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: contact.active === false ? 'person_check' : 'person_off' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: contact.active === false ? 'person_check' : 'person_off' })
             ]),
             createElement('button', { type: 'button', className: 'recipient-icon-button action-delete', title: 'Elimina', onclick: () => deleteContact(contact) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
             ])
         ])
     ]));

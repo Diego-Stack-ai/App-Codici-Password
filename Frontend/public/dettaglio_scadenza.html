@@ -13,16 +13,16 @@
     <title data-t="deadline_detail">Dettaglio Scadenza - PROTOCOLLO V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/dettaglio_scadenza.css?v=1.2.188&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/dettaglio_scadenza.css?v=1.2.189&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -51,7 +51,7 @@
                     <!-- Data Scadenza -->
                     <div class="detail-info-item">
                         <div class="detail-info-header">
-                            <span class="material-symbols-outlined icon-red">calendar_month</span>
+                            <span class="material-symbols-outlined icon-red notranslate" translate="no">calendar_month</span>
                             <span class="detail-info-label" data-t="expiry_date">Scadenza</span>
                         </div>
                         <div class="detail-info-value-group">
@@ -63,7 +63,7 @@
                     <!-- Intestatario / Ref -->
                     <div class="detail-info-item">
                         <div class="detail-info-header">
-                            <span class="material-symbols-outlined icon-purple">person</span>
+                            <span class="material-symbols-outlined icon-purple notranslate" translate="no">person</span>
                             <span class="detail-info-label" data-t="holder">Intestatario</span>
                         </div>
                         <span id="detail-intestatario" class="detail-info-value">-</span>
@@ -72,7 +72,7 @@
                     <!-- Categoria -->
                     <div class="detail-info-item">
                         <div class="detail-info-header">
-                            <span class="material-symbols-outlined icon-emerald">category</span>
+                            <span class="material-symbols-outlined icon-emerald notranslate" translate="no">category</span>
                             <span class="detail-info-label" data-t="category">Categoria</span>
                         </div>
                         <span id="detail-category" class="detail-info-value">-</span>
@@ -81,7 +81,7 @@
                     <!-- Veicolo (Se presente) -->
                     <div id="section-vehicle" class="detail-info-item hidden">
                         <div class="detail-info-header">
-                            <span class="material-symbols-outlined icon-blue">directions_car</span>
+                            <span class="material-symbols-outlined icon-blue notranslate" translate="no">directions_car</span>
                             <span class="detail-info-label" data-t="vehicle">Veicolo</span>
                         </div>
                         <span id="display-veicolo" class="detail-info-value">-</span>
@@ -91,7 +91,7 @@
                 <!-- Notifiche: Email -->
                 <div id="section-emails" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-amber">mail</span>
+                        <span class="material-symbols-outlined icon-amber notranslate" translate="no">mail</span>
                         <h3 class="detail-section-title" data-t="emails_dest">Destinatari Email</h3>
                     </div>
                     <div class="detail-notes-box flex-col-gap-1">
@@ -103,7 +103,7 @@
                 <!-- Pianificazione (Preavviso e Frequenza) -->
                 <div id="section-planning" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-emerald">timer</span>
+                        <span class="material-symbols-outlined icon-emerald notranslate" translate="no">timer</span>
                         <h3 class="detail-section-title" data-t="planning">Pianificazione Notifiche</h3>
                     </div>
                     <div class="detail-notes-box detail-planning-badges">
@@ -121,7 +121,7 @@
                 <!-- Template Testo Email -->
                 <div id="section-template" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-purple">description</span>
+                        <span class="material-symbols-outlined icon-purple notranslate" translate="no">description</span>
                         <h3 class="detail-section-title" data-t="email_template">Testo Email</h3>
                     </div>
                     <div class="detail-notes-box">
@@ -132,7 +132,7 @@
                 <!-- Allegati Section -->
                 <div id="section-attachments" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-amber">attach_file</span>
+                        <span class="material-symbols-outlined icon-amber notranslate" translate="no">attach_file</span>
                         <h3 class="detail-section-title" data-t="attachments">Allegati Documenti</h3>
                     </div>
                     <div id="display-attachments" class="detail-list-group"></div>
@@ -141,7 +141,7 @@
                 <!-- Collegamento Section -->
                 <div id="section-reference-url" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-amber">link</span>
+                        <span class="material-symbols-outlined icon-amber notranslate" translate="no">link</span>
                         <h3 class="detail-section-title">Collegamento</h3>
                     </div>
                     <div id="display-reference-url" class="detail-list-group"></div>
@@ -150,7 +150,7 @@
                 <!-- Note Section -->
                 <div class="detail-section">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-dim">edit_note</span>
+                        <span class="material-symbols-outlined icon-dim notranslate" translate="no">edit_note</span>
                         <h3 class="detail-section-title" data-t="notes">Note Aggiuntive</h3>
                     </div>
                     <div class="detail-notes-box">

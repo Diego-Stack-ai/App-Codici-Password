@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.188';
+import { db, storage } from '../../firebase-config.js?v=1.2.189';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -249,7 +249,7 @@ function renderAttachments(list, mount) {
                     event.stopPropagation();
                     deleteAttachment(attachment, mount);
                 }
-            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })]) : null
+            }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })]) : null
         ]);
     }));
     imagePreviews.forEach(item => loadVisibleImagePreview(item.attachment, item.preview, mount));

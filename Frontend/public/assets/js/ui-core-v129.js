@@ -109,7 +109,7 @@ export async function showLogoutModal() {
         const btnConfirm = createElement('button', { id: 'btn-confirm-logout', className: 'btn-modal btn-danger', textContent: t('logout') || 'Esci' });
 
         const content = createElement('div', { className: 'modal-box' }, [
-            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-orange', textContent: 'logout' }),
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-orange notranslate', textContent: 'logout' }),
             createElement('h3', { className: 'modal-title', textContent: t('logout_confirm_title') || 'Vuoi uscire?' }),
             createElement('p', { className: 'modal-text', textContent: t('logout_confirm_msg') || 'Dovrai effettuare nuovamente il login per accedere.' }),
             createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
@@ -130,7 +130,7 @@ export async function showLogoutModal() {
 
         btnCancel.addEventListener('click', () => closeModal(false));
         btnConfirm.addEventListener('click', () => {
-            setChildren(btnConfirm, createElement('span', { className: 'material-symbols-outlined animate-spin toast-icon', textContent: 'progress_activity' }));
+            setChildren(btnConfirm, createElement('span', { className: 'material-symbols-outlined animate-spin toast-icon notranslate', textContent: 'progress_activity' }));
             closeModal(true);
         });
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
@@ -152,7 +152,7 @@ export async function showConfirmModal(title, message, confirmText = t('confirm'
         const btnConfirm = createElement('button', { id: 'confirm-ok-btn', className: 'btn-modal btn-primary', textContent: confirmText });
 
         const content = createElement('div', { className: 'modal-box' }, [
-            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'help_outline' }),
             createElement('h3', { className: 'modal-title', textContent: title }),
             createElement('p', { className: 'modal-text', textContent: message }),
             createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
@@ -193,7 +193,7 @@ export function showAlertModal(title, message, buttonText = 'Ho capito') {
             textContent: buttonText
         });
         const content = createElement('div', { className: 'modal-box' }, [
-            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'wifi_off' }),
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'wifi_off' }),
             createElement('h3', { className: 'modal-title', textContent: title }),
             createElement('p', { className: 'modal-text', textContent: message }),
             createElement('div', { className: 'modal-actions' }, [btnClose])

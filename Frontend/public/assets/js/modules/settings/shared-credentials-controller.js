@@ -24,7 +24,7 @@ function modalShell(title, close) {
             createElement('button', {
                 type: 'button', className: 'shared-credentials-icon-button',
                 'aria-label': 'Chiudi', onclick: close
-            }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'close'})])
+            }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'close'})])
         ]),
         body
     ]);
@@ -49,7 +49,7 @@ function fieldEditor(field = {}) {
     const remove = createElement('button', {
         type: 'button', className: 'shared-credentials-remove', 'aria-label': 'Rimuovi campo',
         onclick: () => row.remove()
-    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
+    }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'delete'})]);
     setChildren(row, [label, value, sensitive, remove]);
     row.getValue = () => ({
         id: field.id || crypto.randomUUID(),
@@ -145,7 +145,7 @@ async function openLinkManager(record, user, refreshParent) {
             const button = createElement('button', {
                 type: 'button', className: `shared-credential-account${existing ? ' linked' : ''}`
             }, [
-                createElement('span', {className: 'material-symbols-outlined', textContent: existing ? 'link' : 'add_link'}),
+                createElement('span', {className: 'material-symbols-outlined notranslate', textContent: existing ? 'link' : 'add_link'}),
                 createElement('span', {className: 'shared-credential-account-copy'}, [
                     createElement('strong', {textContent: account.label}),
                     createElement('small', {textContent: account.group})
@@ -209,7 +209,7 @@ async function openEditor(record, refresh) {
     const addField = createElement('button', {
         type: 'button', className: 'btn-modal shared-credentials-add',
         onclick: () => fieldList.appendChild(fieldEditor())
-    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'add'}), 'Aggiungi campo']);
+    }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'add'}), 'Aggiungi campo']);
     const save = createElement('button', {type: 'submit', className: 'btn-modal btn-primary', textContent: 'Salva'});
     const actions = [createElement('button', {type: 'button', className: 'btn-modal', textContent: 'Annulla', onclick: close})];
     if (record) actions.unshift(createElement('button', {
@@ -288,7 +288,7 @@ export async function openSharedCredentialsSettings(user) {
         for (const record of records) {
             const linkCount = links.filter(link => link.sharedDataId === record.id).length;
             list.appendChild(createElement('article', {className: 'shared-credentials-card'}, [
-                createElement('span', {className: 'material-symbols-outlined', textContent: record.icon || 'key'}),
+                createElement('span', {className: 'material-symbols-outlined notranslate', textContent: record.icon || 'key'}),
                 createElement('span', {className: 'shared-credentials-card-copy'}, [
                     createElement('strong', {textContent: record.title || 'Credenziale comune'}),
                     createElement('small', {textContent: `${record.fields?.length || 0} campi · ${linkCount} Account collegati`})
@@ -297,11 +297,11 @@ export async function openSharedCredentialsSettings(user) {
                     createElement('button', {
                         type: 'button', className: 'shared-credentials-action', disabled: !navigator.onLine,
                         'aria-label': 'Gestisci collegamenti', onclick: () => openLinkManager(record, user, render)
-                    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'account_tree'})]),
+                    }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'account_tree'})]),
                     createElement('button', {
                         type: 'button', className: 'shared-credentials-action', disabled: !navigator.onLine,
                         'aria-label': 'Modifica credenziale', onclick: () => openEditor(record, render)
-                    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'edit'})])
+                    }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'edit'})])
                 ])
             ]));
         }

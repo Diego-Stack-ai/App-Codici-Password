@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.188';
+import { auth } from '../../firebase-config.js?v=1.2.189';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -101,7 +101,7 @@ export async function initAggiungiScadenza(user) {
                 className: 'btn-icon-header footer-settings-link',
                 title: 'Impostazioni'
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'tune' })
             ])
         );
         clearElement(footerRight);
@@ -119,7 +119,7 @@ export async function initAggiungiScadenza(user) {
                 else window.location.href = 'scadenze.html';
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })
         ]);
 
         const saveBtn = createElement('button', {
@@ -128,7 +128,7 @@ export async function initAggiungiScadenza(user) {
             title: t('save') || 'Salva Scadenza',
             dataset: { label: t('save_short') || 'Salva' }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' })
         ]);
 
         const fabWrapper = createElement('div', {
@@ -310,7 +310,7 @@ function setupSaveLogic() {
             btnSave.disabled = true;
             clearElement(btnSave);
             setChildren(btnSave, [
-                createElement('span', { className: 'material-symbols-outlined animate-spin mr-2', textContent: 'progress_activity' }),
+                createElement('span', { className: 'material-symbols-outlined animate-spin mr-2 notranslate', textContent: 'progress_activity' }),
                 createElement('span', { id: 'save-btn-text', textContent: 'Inizio...' })
             ]);
             const btnText = document.getElementById('save-btn-text');
@@ -368,7 +368,7 @@ function setupSaveLogic() {
             btnSave.disabled = false;
             clearElement(btnSave);
             setChildren(btnSave, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' })
             ]);
         }
     });
@@ -558,7 +558,7 @@ function syncCustomDropdowns() {
                         configController.editItem(sel.id, opt.value);
                     }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
                 ]);
 
                 const delBtn = createElement('button', {
@@ -570,7 +570,7 @@ function syncCustomDropdowns() {
                         configController.deleteItem(sel.id, opt.value);
                     }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                 ]);
 
                 actions.appendChild(editBtn);

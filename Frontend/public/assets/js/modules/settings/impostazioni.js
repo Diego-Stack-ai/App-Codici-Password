@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.188';
+import { auth, db } from '../../firebase-config.js?v=1.2.189';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -56,7 +56,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.188');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.189');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -137,7 +137,7 @@ function showCredentialHealthResults(report, action) {
         ? ` · ${report.unavailable} non leggibili`
         : '';
     modal.appendChild(createElement('div', {className: 'modal-box credential-health-modal'}, [
-        createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'health_and_safety'}),
+        createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'health_and_safety'}),
         createElement('h3', {id: 'credential-health-title', className: 'modal-title', textContent: 'Salute credenziali'}),
         createElement('p', {
             className: 'modal-text',
@@ -170,7 +170,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.188');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.189');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -270,7 +270,7 @@ function showAccountFieldUsage(report) {
     modal.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
     const summary = report.totals;
     const content = [
-        createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'table_view'}),
+        createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'table_view'}),
         createElement('h3', {id: 'account-field-usage-title', className: 'modal-title', textContent: 'Utilizzo campi Account'}),
         createElement('p', {
             className: 'modal-text',
@@ -302,7 +302,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.188');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.189');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -575,7 +575,7 @@ function showBackupWorking(title, message, action) {
     });
     modal.appendChild(createElement('div', {className: 'modal-box backup-working-modal'}, [
         createElement('span', {
-            className: 'material-symbols-outlined modal-icon animate-spin icon-accent-blue',
+            className: 'material-symbols-outlined modal-icon animate-spin icon-accent-blue notranslate',
             textContent: 'progress_activity', 'aria-hidden': 'true'
         }),
         createElement('h3', {className: 'modal-title', textContent: title}),
@@ -615,7 +615,7 @@ function showBackupRestorePreview(plan, action) {
         }, [
             createElement('span', {textContent: 'Riduci riepilogo'}),
             createElement('span', {
-                className: 'material-symbols-outlined', textContent: 'expand_less', 'aria-hidden': 'true'
+                className: 'material-symbols-outlined notranslate', textContent: 'expand_less', 'aria-hidden': 'true'
             })
         ]);
         const labels = {missing: 'Mancante', unchanged: 'Invariato', changed: 'Modificato'};
@@ -671,7 +671,7 @@ function showBackupRestorePreview(plan, action) {
             .map(item => item.entry.index)); });
         updateRestoreButton();
         const summaryContent = createElement('div', {className: 'backup-preview-summary-content'}, [
-            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'preview'}),
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'preview'}),
             createElement('h3', {className: 'modal-title', textContent: 'Anteprima Vault di ripristino'}),
             createElement('p', {
                 className: 'modal-text',
@@ -739,7 +739,7 @@ function showRecoveryKeyOnce(recoveryKey, summary, action) {
             createElement('span', {textContent: 'Confermo di aver salvato la Recovery Key in un luogo sicuro.'})
         ]);
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
-            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'key'}),
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'key'}),
             createElement('h3', {className: 'modal-title', textContent: 'Recovery Key — unica visualizzazione'}),
             createElement('p', {
                 className: 'modal-text',
@@ -807,7 +807,7 @@ function setupEncryptedBackup(user) {
             }
         });
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
-            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'encrypted'}),
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'encrypted'}),
             createElement('h3', {className: 'modal-title', textContent: 'Crea backup cifrato'}),
             createElement('p', {
                 className: 'modal-text',
@@ -844,7 +844,7 @@ async function setupSettingsProfileQr(user) {
         renderQRCode(container, vcard, { width: 104, height: 104, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 2 });
     } catch (error) {
         console.warn('[IMPOSTAZIONI] Anteprima QR non disponibile.', error);
-        setChildren(container, createElement('span', { className: 'material-symbols-outlined settings-qr-fallback', textContent: 'qr_code_2' }));
+        setChildren(container, createElement('span', { className: 'material-symbols-outlined settings-qr-fallback notranslate', textContent: 'qr_code_2' }));
     }
 }
 
@@ -905,7 +905,7 @@ function setupPerformanceDiagnostics() {
             ]);
             const checks = createElement('div', { className: 'diagnostics-check-list' });
             report.checks.forEach(check => checks.appendChild(createElement('div', { className: `diagnostics-check diagnostics-status-${check.status}` }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: check.status === 'pass' ? 'check_circle' : check.status === 'warn' ? 'warning' : 'error' }),
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: check.status === 'pass' ? 'check_circle' : check.status === 'warn' ? 'warning' : 'error' }),
                 createElement('div', {}, [createElement('strong', { textContent: check.label }), createElement('small', { textContent: check.detail })])
             ])));
             const enginesTitle = createElement('h4', { className: 'diagnostics-section-title', textContent: 'Stato Motori Della Release' });
@@ -979,7 +979,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.188');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.189');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.188';
+import { auth, db } from '../../firebase-config.js?v=1.2.189';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -243,14 +243,14 @@ function renderWidgets() {
                     title: 'Aggiungi widget',
                     'aria-label': 'Aggiungi widget',
                     onclick: () => addWidget(tab)
-                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })])
+                }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })])
             ]),
             createElement('div', { className: 'profile-widget-grid' }, widgets.filter(widget => widget.tab === tab).map(widget => createElement('article', {
                 className: `form-card profile-widget profile-widget-${widget.size || 'medium'}`,
                 style: { borderTopColor: widget.color || 'var(--accent)' }
             }, [
                 createElement('header', { className: 'profile-widget-header' }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: widget.icon || 'widgets' }),
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: widget.icon || 'widgets' }),
                     createElement('div', { className: 'profile-widget-title' }, [
                         createElement('strong', { textContent: widget.title }),
                         widget.description ? createElement('small', { textContent: widget.description }) : null

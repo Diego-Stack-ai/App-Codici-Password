@@ -31,7 +31,7 @@ export function createAttachmentSourceGrid(onSelect) {
         button.dataset.source = option.source;
         if (option.wide) button.className = 'is-wide';
         const icon = document.createElement('span');
-        icon.className = 'material-symbols-outlined';
+        icon.className = 'material-symbols-outlined notranslate';
         icon.textContent = option.icon;
         const label = document.createElement('strong');
         label.textContent = option.label;

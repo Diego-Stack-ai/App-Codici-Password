@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.188';
+import { db } from '../../firebase-config.js?v=1.2.189';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.188';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.189';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 async function saveAccount(...args) {
@@ -44,8 +44,8 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.188';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.188';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.189';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.189';
 import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
@@ -235,7 +235,7 @@ function initBaseUI() {
                 else history.back();
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })
         ]);
 
         const saveBtn = createElement('button', {
@@ -274,7 +274,7 @@ function initBaseUI() {
                 });
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' })
         ]);
 
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [cancelBtn, saveBtn]));
@@ -289,7 +289,7 @@ function initBaseUI() {
                 className: 'btn-icon-header',
                 onclick: () => window.location.href = `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}`
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'arrow_back' })
             ]));
         }
     }
@@ -696,7 +696,7 @@ function renderGuestsList() {
             ]),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined account-guest-remove',
+                className: 'material-symbols-outlined account-guest-remove notranslate',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);

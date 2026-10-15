@@ -27,7 +27,7 @@ export function createDeadlineRecipientController() {
                     createElement('label', { className: 'deadline-channel-label' }, [pushToggle, document.createTextNode('Push')]),
                     createElement('label', { className: 'deadline-channel-label' }, [manageToggle, document.createTextNode('Può gestire')]),
                     createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: 'Rimuovi destinatario' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                     ])
                 ])
             ]));

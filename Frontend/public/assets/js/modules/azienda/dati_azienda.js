@@ -8,7 +8,7 @@ import { decryptRequiredValue } from '../core/crypto-utils.js';
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.188';
+import { auth, db } from '../../firebase-config.js?v=1.2.189';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -73,7 +73,7 @@ async function initProtocolUI() {
             dataset: { label: t('edit_short') || 'Edita' },
             onclick: () => window.location.href = `modifica_azienda.html?id=${currentAziendaId}`
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
         ]);
 
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [editBtn]));
@@ -300,7 +300,7 @@ function setupLocations(data) {
         return createElement('article',{className:'form-card'},[
             createElement('div',{className:'profile-contact-header'},[
                 createElement('span',{className:'profile-contact-label',textContent:'Sede '+location.tipo}),
-                createElement('button',{type:'button',className:'profile-contact-mini',title:'Modifica sede','aria-label':'Modifica sede',onclick:()=>{window.location.href=`modifica_azienda.html?id=${encodeURIComponent(currentAziendaId)}`;}},[createElement('span',{className:'material-symbols-outlined',textContent:'edit'})])
+                createElement('button',{type:'button',className:'profile-contact-mini',title:'Modifica sede','aria-label':'Modifica sede',onclick:()=>{window.location.href=`modifica_azienda.html?id=${encodeURIComponent(currentAziendaId)}`;}},[createElement('span',{className:'material-symbols-outlined notranslate',textContent:'edit'})])
             ]),
             createElement('div',{className:'data-display-group'},[
                 createElement('span',{className:'view-label',textContent:'Indirizzo'}),

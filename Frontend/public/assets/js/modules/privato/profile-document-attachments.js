@@ -82,7 +82,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
         const attachments = grouped.get(documentId) || [];
         if (!attachments.length) continue;
         container.append(createElement('div', {className: 'profile-document-inline-heading'}, [
-            createElement('span', {className: 'material-symbols-outlined', textContent: 'attach_file'}),
+            createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'attach_file'}),
             createElement('span', {textContent: attachments.length === 1 ? '1 allegato' : `${attachments.length} allegati`})
         ]));
         const gallery = createElement('div', {className: 'profile-document-inline-gallery'});
@@ -110,11 +110,11 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
                     inlineObjectUrls.push(url);
                     item.append(createElement('img', {src: url, alt: name, className: 'profile-document-inline-image'}));
                 } catch {
-                    item.append(createElement('span', {className: 'material-symbols-outlined', textContent: 'broken_image'}));
+                    item.append(createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'broken_image'}));
                 }
             } else {
                 item.append(
-                    createElement('span', {className: 'material-symbols-outlined', textContent: 'picture_as_pdf'}),
+                    createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'picture_as_pdf'}),
                     createElement('span', {className: 'profile-document-inline-name', textContent: name})
                 );
             }
@@ -130,7 +130,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
                 className: 'btn-delete-attachment profile-document-inline-delete',
                 title: `Elimina ${name}`,
                 ariaLabel: `Elimina ${name}`
-            }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})]);
+            }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'delete'})]);
             remove.onclick = async event => {
                 event.stopPropagation();
                 if (!await showConfirmModal('Elimina allegato', `Eliminare “${name}”? Il documento rimarrà disponibile.`)) return;
@@ -160,7 +160,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     const title = createElement('h2', {className: 'profile-document-attachments-title', textContent: `Allegati · ${documentItem.type || 'Documento'}`});
     const status = createElement('p', {className: 'profile-document-attachments-status', ariaLive: 'polite'});
     const close = createElement('button', {type: 'button', className: 'btn-edit-section', title: 'Chiudi', onclick: closeActiveDialog}, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: 'close'})
+        createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'close'})
     ]);
     const header = createElement('div', {className: 'card-header-row'}, [title, close]);
     const photoInput = createElement('input', {type: 'file', accept: 'image/*', capture: 'environment', className: 'hidden'});

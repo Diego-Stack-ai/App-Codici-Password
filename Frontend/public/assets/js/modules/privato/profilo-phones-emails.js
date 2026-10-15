@@ -39,7 +39,7 @@ function createCopyBtn(text) {
             showToast(t('copied') || 'Copiato!', 'success');
         }
     }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'content_copy' })
     ]);
 }
 
@@ -47,7 +47,7 @@ function createLinkedAccountPassword(email) {
     const masked = '••••••••';
     const value = createElement('span', { className: 'data-value no-transform profile-linked-password-value', textContent: masked });
     const status = createElement('span', { className: 'data-value-sub', role: 'status', 'aria-live': 'polite' });
-    const icon = createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' });
+    const icon = createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'visibility' });
     let revealed = false;
     let busy = false;
     const hide = () => {
@@ -97,7 +97,7 @@ function createLinkedAccountPassword(email) {
         className: 'btn-action-mini', type: 'button', title: 'Copia password Account',
         'aria-label': 'Copia password Account',
         onclick: event => { event.stopPropagation(); return run(true); }
-    }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })]);
+    }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'content_copy' })]);
     const row = createElement('div', { className: 'card-field-group' }, [
         createElement('span', { className: 'data-label', textContent: 'Password Account collegato' }),
         createElement('div', { className: 'field-value-row' }, [value, toggle, copy]), status
@@ -112,7 +112,7 @@ function createLegacyPasswordRecovery(password) {
         textContent: maskedValue
     });
     const icon = createElement('span', {
-        className: 'material-symbols-outlined',
+        className: 'material-symbols-outlined notranslate',
         textContent: 'visibility_off'
     });
     let revealed = false;
@@ -155,7 +155,7 @@ export function renderPhonesView() {
     clearElement(container);
 
     const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_call' }),
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_call' }),
         createElement('span', { textContent: t('add_phone') || 'Aggiungi Telefono' })
     ]);
     btnAdd.onclick = () => _addPhone();
@@ -172,16 +172,16 @@ function _createPhoneCard(phone, idx) {
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
                 createElement('div', { className: 'card-icon-box' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled', textContent: 'call' })
+                    createElement('span', { className: 'material-symbols-outlined filled notranslate', textContent: 'call' })
                 ]),
                 createElement('span', { className: 'card-title-accent profile-contact-label', textContent: phone.label || 'Telefono' })
             ]),
             createElement('div', { className: 'card-actions-row' }, [
                 createElement('button', { className: 'btn-edit-section', onclick: () => editPhone(idx) }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'edit' })
                 ]),
                 createElement('button', { className: 'btn-edit-section btn-delete', onclick: () => _callbacks.deletePhone(idx) }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'delete' })
                 ])
             ])
         ]),
@@ -275,7 +275,7 @@ export function renderEmailsView() {
     clearElement(container);
 
     const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'alternate_email' }),
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'alternate_email' }),
         createElement('span', { textContent: t('add_email') })
     ]);
     btnAdd.onclick = () => editEmail(-1);
@@ -296,10 +296,10 @@ export function renderEmailsView() {
             ]),
             createElement('div', { className: 'card-actions-row' }, [
                 createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-email', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'edit' })
                 ]),
                 createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-email', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'delete' })
                 ])
             ])
         ]),

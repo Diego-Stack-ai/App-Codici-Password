@@ -11,7 +11,7 @@ export function createAccountAvatar(account = {}) {
     }
 
     return createElement('span', {
-        className: 'account-default-logo material-symbols-outlined',
+        className: 'account-default-logo material-symbols-outlined notranslate',
         textContent: 'shield_lock',
         'aria-hidden': 'true'
     });

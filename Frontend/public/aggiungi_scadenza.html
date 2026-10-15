@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.188&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.189&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -45,15 +45,15 @@
                     <!-- Mode Selector Tab Style -->
                     <div class="mode-selector-tabs">
                         <button type="button" id="mode-automezzi" class="mode-tab active" data-mode="automezzi">
-                            <span class="material-symbols-outlined">directions_car</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">directions_car</span>
                             <span data-t="vehicles">Automezzi</span>
                         </button>
                         <button type="button" id="mode-documenti" class="mode-tab" data-mode="documenti">
-                            <span class="material-symbols-outlined">badge</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">badge</span>
                             <span data-t="documents">Documenti</span>
                         </button>
                         <button type="button" id="mode-generali" class="mode-tab" data-mode="generali">
-                            <span class="material-symbols-outlined">event_note</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">event_note</span>
                             <span data-t="general">Generali</span>
                         </button>
                     </div>
@@ -69,18 +69,18 @@
                         <!-- Intestatario / Nominativo -->
                         <div class="form-group">
                             <label class="label-sm">
-                                <span class="material-symbols-outlined icon-blue label-icon">edit_calendar</span>
+                                <span class="material-symbols-outlined icon-blue label-icon notranslate" translate="no">edit_calendar</span>
                                 <span data-t="holder">Intestatario / Nominativo</span>
                             </label>
                             <div class="input-wrapper">
-                                <span class="material-symbols-outlined">person</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">person</span>
                                 <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="nome_cognome" list="names-list" type="text" class="input"
                                     placeholder="Mario Rossi">
                                 <datalist id="names-list"></datalist>
                                 <button type="button" id="btn-remove-saved-name" class="btn-icon-header"
                                     title="Elimina il nominativo selezionato dalla lista salvata"
                                     aria-label="Elimina nominativo salvato">
-                                    <span class="material-symbols-outlined">delete</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">delete</span>
                                 </button>
                             </div>
                         </div>
@@ -92,7 +92,7 @@
                                 <div class="base-btn-secondary dropdown-trigger" role="button" tabindex="0">
                                     <div class="dropdown-trigger-content">
                                         <div class="dropdown-icon-box icon-blue">
-                                            <span class="material-symbols-outlined">category</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">category</span>
                                         </div>
                                         <span class="dropdown-label truncate" data-t="select_category">Seleziona
                                             categoria...</span>
@@ -100,9 +100,9 @@
                                     <div class="dropdown-actions">
                                         <button type="button" class="btn-manage-config-inline"
                                             data-config-id="tipo_scadenza" title="Aggiungi nuovo">
-                                            <span class="material-symbols-outlined">add</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">add</span>
                                         </button>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                        <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
                                     </div>
                                 </div>
                                 <div class="base-dropdown-menu scrollable role-menu"></div>
@@ -118,8 +118,8 @@
                                 <div class="base-btn-secondary dropdown-trigger" role="button" tabindex="0">
                                     <div class="dropdown-trigger-content">
                                         <div class="dropdown-icon-box icon-amber">
-                                            <span class="material-symbols-outlined"
-                                                id="vehicle-icon">directions_car</span>
+                                            <span class="material-symbols-outlined notranslate"
+                                                id="vehicle-icon" translate="no">directions_car</span>
                                         </div>
                                         <span class="dropdown-label truncate" data-t="select_detail">Seleziona
                                             dettaglio...</span>
@@ -127,9 +127,9 @@
                                     <div class="dropdown-actions">
                                         <button type="button" class="btn-manage-config-inline"
                                             data-config-id="modello_veicolo" title="Aggiungi nuovo">
-                                            <span class="material-symbols-outlined">add</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">add</span>
                                         </button>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                        <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
                                     </div>
                                 </div>
                                 <div class="base-dropdown-menu scrollable role-menu"></div>
@@ -145,7 +145,7 @@
                                 <div class="base-btn-secondary dropdown-trigger" role="button" tabindex="0">
                                     <div class="dropdown-trigger-content">
                                         <div class="dropdown-icon-box icon-purple">
-                                            <span class="material-symbols-outlined">description</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">description</span>
                                         </div>
                                         <span class="dropdown-label truncate" data-t="select_template">Seleziona
                                             template...</span>
@@ -153,9 +153,9 @@
                                     <div class="dropdown-actions">
                                         <button type="button" class="btn-manage-config-inline"
                                             data-config-id="testo_email_select" title="Aggiungi nuovo">
-                                            <span class="material-symbols-outlined">add</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">add</span>
                                         </button>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                        <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
                                     </div>
                                 </div>
                                 <div class="base-dropdown-menu scrollable role-menu"></div>
@@ -177,11 +177,11 @@
                             <div class="form-group">
                                 <label class="label-sm" for="dueDate">
                                     <span
-                                        class="material-symbols-outlined icon-amber label-icon">notifications_active</span>
+                                        class="material-symbols-outlined icon-amber label-icon notranslate" translate="no">notifications_active</span>
                                     <span data-t="expiry_date">Data Scadenza</span>
                                 </label>
                                 <div class="input-wrapper">
-                                    <span class="material-symbols-outlined">calendar_today</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">calendar_today</span>
                                     <input id="dueDate" type="date" class="input">
                                 </div>
                             </div>
@@ -202,7 +202,7 @@
                         <div class="planning-grid">
                             <div class="planning-info-box">
                                 <div class="planning-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">timer</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">timer</span>
                                 </div>
                                 <div class="planning-text-box">
                                     <span class="planning-label" data-t="notice_days">GG Preavviso</span>
@@ -212,7 +212,7 @@
                             </div>
                             <div class="planning-info-box">
                                 <div class="planning-icon-box icon-purple">
-                                    <span class="material-symbols-outlined">update</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">update</span>
                                 </div>
                                 <div class="planning-text-box">
                                     <span class="planning-label" data-t="frequency_days">GG Frequenza</span>
@@ -237,7 +237,7 @@
                             </select>
                         </div>
                         <button type="button" id="btn-manage-deadline-contacts" class="base-btn-secondary">
-                            <span class="material-symbols-outlined">manage_accounts</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">manage_accounts</span>
                             Gestisci destinatari
                         </button>
                         <div id="deadline-recipients-list" class="deadline-recipients-list" aria-live="polite"></div>
@@ -259,7 +259,7 @@
                     <!-- Collegamento web -->
                     <div class="form-group">
                         <label class="label-sm" for="deadline_url">
-                            <span class="material-symbols-outlined icon-amber label-icon">link</span>
+                            <span class="material-symbols-outlined icon-amber label-icon notranslate" translate="no">link</span>
                             <span>URL</span>
                         </label>
                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="deadline_url" class="input" type="url" inputmode="url" autocomplete="url"
@@ -269,7 +269,7 @@
                     <!-- Note -->
                     <div class="form-group">
                         <label class="label-sm" for="notes">
-                            <span class="material-symbols-outlined icon-amber label-icon">description</span>
+                            <span class="material-symbols-outlined icon-amber label-icon notranslate" translate="no">description</span>
                             <span data-t="notes">Note Aggiuntive</span>
                         </label>
                         <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="notes" class="input-textarea" placeholder="Dettagli sulla scadenza..."></textarea>
@@ -280,7 +280,7 @@
                         <!-- Premium Upload Trigger -->
                         <button type="button" id="btn-trigger-upload" class="upload-trigger-btn">
                             <div class="upload-icon">
-                                <span class="material-symbols-outlined">attach_file</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">attach_file</span>
                             </div>
                             <div class="upload-text">
                                 <span class="upload-title">Aggiungi Allegato</span>
@@ -321,17 +321,17 @@
 
             <div class="modal-grid">
                 <button type="button" class="source-option-btn" data-source="camera">
-                    <span class="material-symbols-outlined">photo_camera</span>
+                    <span class="material-symbols-outlined notranslate" translate="no">photo_camera</span>
                     <span class="source-btn-label">Camera</span>
                 </button>
 
                 <button type="button" class="source-option-btn" data-source="gallery">
-                    <span class="material-symbols-outlined">collections</span>
+                    <span class="material-symbols-outlined notranslate" translate="no">collections</span>
                     <span class="source-btn-label">Galleria</span>
                 </button>
 
                 <button type="button" class="source-option-btn full-width source-btn-row" data-source="file">
-                    <span class="material-symbols-outlined">description</span>
+                    <span class="material-symbols-outlined notranslate" translate="no">description</span>
                     <span class="source-btn-label">Documento</span>
                 </button>
             </div>

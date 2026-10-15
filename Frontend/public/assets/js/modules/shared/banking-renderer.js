@@ -76,7 +76,7 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                             rerender();
                         }
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
+                }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })])
             ]),
 
             isOpen ? createElement('div', { className: 'bank-details' }, [
@@ -88,12 +88,12 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                 _createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
 
                 options.onAddWidget ? createElement('div', { className: 'detail-section-header bank-widget-action' }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'widgets' }),
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'widgets' }),
                     createElement('span', { className: 'section-title', textContent: 'Campi personalizzati' }),
                     createElement('button', {
                         type: 'button', className: 'btn-icon-header', title: 'Aggiungi Widget',
                         'aria-label': 'Aggiungi Widget', onclick: () => options.onAddWidget(acc.bankId)
-                    }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })])
+                    }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })])
                 ]) : null,
 
                 widgetHost,
@@ -118,7 +118,7 @@ export function renderBankAccounts(bankAccounts, rerender, options = {}) {
                                 });
                                 rerender();
                             }
-                        }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'add_card' })])
+                        }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_card' })])
                     ]),
                     createElement('div', { className: 'flex-col-gap' },
                         (acc.cards || []).map((card, cIdx) => _renderCardEntry(bankAccounts, idx, cIdx, card, rerender))
@@ -165,7 +165,7 @@ function _renderCardEntry(bankAccounts, bankIdx, cardIdx, card, rerender) {
                         rerender();
                     }
                 }
-            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
+            }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })])
         ]),
 
         isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
@@ -198,7 +198,7 @@ function _createInputField(label, value, onInput, icon, type = 'text', options =
     return createElement('div', { className: 'glass-field-container w-full' }, [
         createElement('label', { className: 'view-label', textContent: label }),
         createElement('div', { className: 'glass-field border-glow' }, [
-            createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
+            createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40 notranslate', textContent: icon }),
             createElement('input', {
                 className: 'field-input',
                 type: type,
