@@ -7,12 +7,13 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.187';
-import { initComponents } from '../../components-v129.js?v=1.2.187';
+} from '../../auth.js?v=1.2.188';
+import { initComponents } from '../../components-v129.js?v=1.2.188';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.187';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.188';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
+import { openInitialLanguageDialog, rememberUserLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 
 /**
  * LOGIN MODULE (V5.0 ADAPTER)
@@ -24,6 +25,7 @@ export async function initLogin() {
     
 
     try {
+        openInitialLanguageDialog({ required: false });
         // 1. AppState di base (Local Scope o Global se necessario per compatibilità)
         let savedLang = 'it';
         try { savedLang = localStorage.getItem('app_language') || 'it'; } catch (e) { }
@@ -105,7 +107,7 @@ function setupLanguageSelector() {
             dataset: { code: lang.code },
             onclick: () => {
                 const code = lang.code;
-                localStorage.setItem('app_language', code);
+                setLanguagePreference(code, { explicit: true });
                 window.location.reload(); // Forza reload per coerenza globale
             }
         }, [
@@ -221,6 +223,7 @@ function setupLoginForm() {
         document.body.classList.add('is-auth-progress');
 
         try {
+            let result = null;
             if (awaitingTotp) {
                 if (usingRecoveryCode) {
                     const recoveryCode = document.getElementById('recovery-code')?.value.trim() || '';
@@ -234,9 +237,9 @@ function setupLoginForm() {
                 if (!/^\d{6}$/.test(totpCode)) {
                     throw new Error("Inserisci il codice Authenticator di 6 cifre.");
                 }
-                await completeTotpLogin(totpCode, pendingEmail);
+                result = await completeTotpLogin(totpCode, pendingEmail);
             } else {
-                const result = await login(email, password, rememberDevice);
+                result = await login(email, password, rememberDevice);
                 if (result?.emailVerificationRequired) {
                     window.dispatchEvent(new CustomEvent('codex:email-verification-required'));
                     submitBtn.disabled = false;
@@ -263,6 +266,7 @@ function setupLoginForm() {
                     return;
                 }
             }
+            rememberUserLanguage(result?.user?.uid, result?.profileData);
 
             // Login riuscito: azzera contatore tentativi
             failedAttempts = 0;

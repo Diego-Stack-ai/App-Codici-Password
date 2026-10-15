@@ -79,6 +79,8 @@ Il modello può produrre esclusivamente intenti e parametri tipizzati; il codice
 
 **Uscita P3:** nessuna stringa utente hard-coded nei nuovi moduli, parità funzionale verificata e revisione umana dei testi sensibili.
 
+**Incremento corrente 14/10/2026:** infrastruttura e flusso sono in lavorazione isolata sulla base `1.2.186`: preferenza pre-identità, recupero per profilo, cambio in Impostazioni, prima configurazione e locale vocale dell'Assistente base. L'incremento non chiude P3 finché i dizionari delle lingue dichiarate non hanno copertura editoriale completa e non sono conclusi i collaudi fisici previsti.
+
 ### Confini del ciclo
 
 - Per alcuni mesi resta in valutazione la PWA esistente: nessun wrapper App Store/Play Store o riprogettazione nativa.

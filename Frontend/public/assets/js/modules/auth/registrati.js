@@ -10,11 +10,21 @@ import { t, supportedLanguages, applyGlobalTranslations } from '../../translatio
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
+import { configurationText, hasExplicitLanguageChoice, openInitialLanguageDialog, resolveLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 
 export async function initRegistrati() {
     
 
     try {
+        openInitialLanguageDialog({
+            required: true,
+            onConfirm: async code => {
+                setLanguagePreference(code, { explicit: true });
+                const { loadLanguage } = await import('../../translations.js');
+                await loadLanguage(code);
+                applyGlobalTranslations();
+            }
+        });
         // 1. AppState init
         // 2. SETUP FUNZIONALITÀ
 
@@ -66,6 +76,12 @@ function setupRegisterForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        if (!hasExplicitLanguageChoice()) {
+            openInitialLanguageDialog({ required: true });
+            showToast(configurationText('initial_language_registration_warning'), 'warning');
+            return;
+        }
+
         const nome = document.getElementById('nome').value.trim();
         const cognome = document.getElementById('cognome').value.trim();
         const email = document.getElementById('email').value.trim();
@@ -103,7 +119,7 @@ function setupRegisterForm() {
 
         try {
             LOG("[REGISTER] Creating account...");
-            const success = await register(nome, cognome, email, password);
+            const success = await register(nome, cognome, email, password, resolveLanguage());
 
             if (success) {
                 showToast(t('success_registration'), "success");
@@ -154,7 +170,7 @@ function setupLanguageSelector() {
             dataset: { code: lang.code },
             onclick: () => {
                 const code = lang.code;
-                localStorage.setItem('app_language', code);
+                setLanguagePreference(code, { explicit: true });
                 window.location.reload(); // Forza reload per coerenza globale
             }
         }, [

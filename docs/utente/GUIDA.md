@@ -1,5 +1,11 @@
 # Guida
 
+## Lingua e prima configurazione
+
+Alla prima apertura il selettore lingua compare prima dell'identificazione. Se possiedi già un account puoi chiuderlo e accedere: quando il profilo viene riconosciuto, l'app applica la lingua associata. Per creare un nuovo account devi invece scegliere una lingua. Puoi cambiarla in seguito da **Impostazioni → Lingua App**; il cambio riguarda pulsanti, intestazioni, istruzioni, messaggi e voce dell'Assistente, non nomi, note o altri dati che hai inserito.
+
+Dopo il primo accesso la Home propone di aprire le Impostazioni oppure esplorare l'app. La conferma della lingua è obbligatoria prima di creare o modificare dati. Tema, area Azienda, Assistente base, notifiche, MFA, biometria e backup restano scelte facoltative e possono essere completate in seguito. I requisiti autonomi di accesso e sblocco del Vault continuano comunque a valere.
+
 > Stato di implementazione, verifiche e distribuzione: [STATO](../progetto/STATO.md). Le fonti storiche conservate sotto hanno la propria data; per nuovi aiuti valgono i contratti e il riesame delle schede della guida.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.

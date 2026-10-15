@@ -1,11 +1,16 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.187';
+import { auth, db } from './firebase-config.js?v=1.2.188';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.187';
+import { showToast } from './ui-core-v129.js?v=1.2.188';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
+const FIRST_CONFIGURATION_VERSION = 1;
+const normalizeLanguage = (value, fallback = 'it') => {
+    const code = String(value || '').trim().toLowerCase().split('-')[0];
+    return ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'].includes(code) ? code : fallback;
+};
 
 let pendingMfaResolver = null;
 const RESET_POLICY_MARKER = 'codex_password_reset_policy_v1';
@@ -61,11 +66,13 @@ export function observeAuth(callback) {
  * @param {string} email - User's email.
  * @param {string} password - User's password.
  */
-async function register(nome, cognome, email, password) {
+async function register(nome, cognome, email, password, language) {
     try {
         if (!evaluatePassword(password, 'account').valid) {
             throw { code: 'auth/weak-password', message: firstPasswordPolicyError(password, 'account') };
         }
+        const selectedLanguage = normalizeLanguage(language, '');
+        if (!selectedLanguage) throw { code: 'auth/language-required', message: 'Scegli la lingua prima di registrarti.' };
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -82,7 +89,15 @@ async function register(nome, cognome, email, password) {
             email: email,
             createdAt: new Date(),
             photoURL: "",
-            settings: { theme: 'system' },
+            settings: {
+                theme: 'system',
+                language: selectedLanguage,
+                firstConfiguration: {
+                    version: FIRST_CONFIGURATION_VERSION,
+                    completed: false,
+                    startedAt: new Date().toISOString()
+                }
+            },
             passwordPolicyVersion: ACCOUNT_PASSWORD_POLICY_VERSION
         });
 
@@ -128,6 +143,7 @@ async function finalizeLogin(user, email) {
     const userDocRef = doc(db, "users", updatedUser.uid);
     const userDoc = await getDoc(userDocRef);
 
+    let profileData = null;
     if (!userDoc.exists()) {
         await setDoc(userDocRef, {
             email,
@@ -139,12 +155,13 @@ async function finalizeLogin(user, email) {
         });
         showToast("Profilo ripristinato! Benvenuto.", "success");
     } else {
+        profileData = userDoc.data();
         showToast("Login effettuato con successo!", "success");
     }
 
     sessionStorage.removeItem('codex_explicit_logout');
     pendingMfaResolver = null;
-    return { user: updatedUser, mfaRequired: false };
+    return { user: updatedUser, mfaRequired: false, profileData };
 }
 
 async function login(email, password, rememberDevice = true) {

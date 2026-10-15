@@ -1,10 +1,12 @@
 # Incarico corrente
 
-## Hotfix Agente Codex base proposto 1.2.187 — 14/10/2026
+## Lingue e prima configurazione — candidata 1.2.188 su base 1.2.187 — 15/10/2026
 
-Diego richiede un lotto solo client sulla base pubblicata `1.2.186`: eliminare il comando `?` transitorio montato nel footer durante il bootstrap delle pagine private, conservando un solo aiuto dentro il dialogo Agente Codex; sostituire esempi riconducibili a dati personali con esempi generici; dopo la concessione del microfono proseguire nello stesso gesto fino all'avvio del riconoscimento disponibile. Restano invariati primer e sintesi iPhone, ricerca deterministica, contesto dei risultati e separazione fra **Cerca** e la futura modalità **Chiedi**.
+Diego incarica l'Orchestratore di riallineare il lotto Lingue e prima configurazione al merge pubblicato `6e7fb862` (`1.2.187`) nel worktree isolato, senza modificare il checkout principale. Il perimetro comprende: scelta lingua prima dell'identificazione, distinzione fra nuovo utente e utente già registrato, recupero della preferenza associata dopo login, cambio in Impostazioni, invito post-login alla prima configurazione, requisito minimo e opzioni facoltative, blocco delle pagine di inserimento finché il requisito minimo non è confermato e predisposizione di guida e Agente base alla lingua scelta.
 
-Il lavoro è delegato in worktree isolato su `8f7029f8`; non autorizza commit, push, merge o deploy. Functions, Rules, dati reali, Archivio portabile, Lingue e AI avanzata sono esclusi. Consegna richiesta: diff revisionabile, test Assistente e documentazione, diagnosi della causa e versione proposta.
+La lingua è l'unico requisito obbligatorio di questa prima iterazione. Tema, area Azienda, Assistente base, notifiche, MFA, biometria e backup sono facoltativi. Titoli, note, credenziali e altri dati inseriti dall'utente non vengono tradotti. L'utente esistente può chiudere il primo selettore e autenticarsi; dopo l'accesso prevale la lingua valida del suo profilo. Il nuovo utente deve invece scegliere una lingua prima di registrarsi. La prima configurazione può essere rimandata per esplorare l'app, ma non per creare o modificare dati nelle pagine censite.
+
+Il lotto conserva integralmente l'hotfix `1.2.187`: un solo aiuto `?` interno all'Agente nelle pagine private, esempi generici, prosecuzione del primo tocco microfono dopo il consenso e versionamento/cache coerenti. Diego autorizza la chiusura e pubblicazione coordinata come `1.2.188`; l'agente Lingue prepara versione, documentazione, diff e test, ma non esegue autonomamente commit, push, PR o deploy. Sono esclusi AI di secondo livello, pacchetti modello, Rules, Functions e dati reali. La consegna deve riportare copertura editoriale reale dei dizionari, fallback, test automatici, gate fisici su PC/iPhone/PWA e ogni residuo prima del rilascio.
 
 ## Agente Codex unico: Cerca/Chiedi e continuità dei comandi — 14/10/2026
 

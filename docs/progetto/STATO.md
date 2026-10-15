@@ -2,6 +2,14 @@
 
 <a id="stato-corrente"></a>
 
+## Candidata 1.2.188 — Lingue e prima configurazione — 15/10/2026
+
+Il lotto è riallineato al merge pubblicato `6e7fb862` (`1.2.187`) e prepara la candidata `1.2.188`. Prima dell'identificazione viene proposta la lingua; un nuovo utente deve confermarla prima della registrazione, mentre un utente esistente può autenticarsi e recuperare la preferenza valida associata al profilo. Dopo il login la Home propone la prima configurazione senza impedire l'esplorazione; le pagine censite di inserimento o modifica restano bloccate finché la lingua, unico requisito obbligatorio di questa iterazione, non viene confermata nelle Impostazioni. Tema, area Azienda, Assistente base, notifiche, MFA, biometria e backup restano facoltativi. I dati inseriti dall'utente non vengono tradotti.
+
+La prima configurazione e i relativi stili sono caricati soltanto quando necessari e fanno parte della shell offline. L'Agente base usa il locale vocale corrispondente alla lingua scelta; resta preservato l'hotfix `1.2.187`: un solo `?` interno nelle pagine private, esempi generici e prosecuzione del primo tocco microfono dopo il consenso. L'onboarding dispone di testi italiani e inglesi; per le altre lingue usa esplicitamente il fallback inglese finché i pacchetti editoriali non saranno completati. I dizionari UI preesistenti restano parziali e non autorizzano a dichiarare l'intera app tradotta.
+
+Versione applicativa, lockfile, `APP_VERSION`, cache del service worker, versione mostrata e riferimenti asset sono allineati a `1.2.188`. Implementazione e test locali non equivalgono ancora a commit, merge o Hosting distribuito. Restano necessari il collaudo fisico PC/iPhone/PWA dei flussi lingua, prima configurazione e primo microfono, oltre alla revisione editoriale delle lingue non italiane/inglesi.
+
 ## Hotfix locale proposto 1.2.187 — continuità microfono e unico aiuto privato — 14/10/2026
 
 La causa del `?` che compariva brevemente durante i cambi pagina era un doppio proprietario del comando: `main-v129.js` montava la guida nel footer all'inizio di `DOMContentLoaded`, prima della lingua e dei moduli pagina; i successivi owner del footer lo ricostruivano e rimuovevano. La candidata elimina quel montaggio privato transitorio invece di nasconderlo via CSS. Nelle pagine private rimane il solo `?` interno all'Agente Codex; gli ingressi pubblici indipendenti da Auth conservano l'adattatore della guida.
