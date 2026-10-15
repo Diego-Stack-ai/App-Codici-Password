@@ -1,4 +1,5 @@
 import { LOG } from './logger.js';
+import { settingsCatalogs } from './translations/settings.js';
 
 const APP_LANGUAGE_CODES = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
 const normalizeAppLanguage = (value, fallback = 'it') => {
@@ -21,6 +22,9 @@ const normalizeAppLanguage = (value, fallback = 'it') => {
 
 // ─── Dizionario runtime (lingua attiva) ──────────────────────────────────────
 let _dict = {};
+let _activeLanguage = 'it';
+const _missingKeys = new Set();
+let _translationObserver = null;
 
 // ─── Italiano inline (fallback universale) ────────────────────────────────────
 const _it = {
@@ -419,10 +423,12 @@ export function getCurrentLanguage() {
  */
 export async function loadLanguage(lang = 'it') {
     lang = normalizeAppLanguage(lang || 'it');
+    _activeLanguage = lang;
+    _missingKeys.clear();
     document.documentElement.lang = lang;
     document.documentElement.dir = 'ltr';
     if (lang === 'it') {
-        _dict = _it;
+        _dict = { ..._it, ...settingsCatalogs.it };
         LOG('[i18n] Lingua attiva: it (inline)');
         return;
     }
@@ -430,11 +436,11 @@ export async function loadLanguage(lang = 'it') {
         // Risolve il percorso relativo a questo modulo
         const baseUrl = import.meta.url.replace(/[^/]+$/, '');
         const module = await import(`${baseUrl}translations/${lang}.js`);
-        _dict = module.default;
+        _dict = { ...module.default, ...(settingsCatalogs[lang] || {}) };
         LOG(`[i18n] Lingua attiva: ${lang} (${Object.keys(_dict).length} chiavi)`);
     } catch (e) {
         console.warn(`[i18n] Lingua '${lang}' non disponibile — fallback a 'it'`);
-        _dict = _it;
+        _dict = { ..._it, ...settingsCatalogs.it };
     }
 }
 
@@ -444,7 +450,32 @@ export async function loadLanguage(lang = 'it') {
  * SINCRONA — funziona solo dopo che loadLanguage() è stato chiamato.
  */
 export function t(key) {
-    return _dict[key] || _it[key] || key;
+    if (_dict[key]) return _dict[key];
+    if (_activeLanguage !== 'it') {
+        _missingKeys.add(key);
+        document.documentElement.dataset.i18nFallback = 'true';
+        console.warn(`[i18n] Chiave mancante per ${_activeLanguage}: ${key}`);
+    }
+    return _it[key] || key;
+}
+
+export function getMissingTranslationKeys() {
+    return [..._missingKeys].sort();
+}
+
+export function setTranslatedText(element, key) {
+    if (!element || !key) return element;
+    element.dataset.t = key;
+    element.textContent = t(key);
+    return element;
+}
+
+export function setTranslatedAttribute(element, attribute, key) {
+    if (!element || !attribute || !key) return element;
+    const datasetName = `t${attribute.charAt(0).toUpperCase()}${attribute.slice(1)}`;
+    element.dataset[datasetName] = key;
+    element.setAttribute(attribute === 'aria' ? 'aria-label' : attribute, t(key));
+    return element;
 }
 
 /**
@@ -470,8 +501,44 @@ export function applyGlobalTranslations(root = document) {
         const val = t(key);
         if (val && val !== key) el.setAttribute('aria-label', val);
     });
-    document.documentElement.setAttribute('data-i18n', 'ready');
-    document.dispatchEvent(new CustomEvent('app-language-applied', { detail: { language: document.documentElement.lang } }));
+    root.querySelectorAll('[data-t-title]').forEach(el => {
+        const key = el.dataset.tTitle;
+        if (!key) return;
+        const val = t(key);
+        if (val && val !== key) el.setAttribute('title', val);
+    });
+    root.querySelectorAll('[data-t-alt]').forEach(el => {
+        const key = el.dataset.tAlt;
+        if (!key) return;
+        const val = t(key);
+        if (val && val !== key) el.setAttribute('alt', val);
+    });
+    if (root === document) {
+        document.documentElement.setAttribute('data-i18n', 'ready');
+        if (!_missingKeys.size) delete document.documentElement.dataset.i18nFallback;
+        document.dispatchEvent(new CustomEvent('app-language-applied', {
+            detail: { language: document.documentElement.lang, missingKeys: getMissingTranslationKeys() }
+        }));
+    }
+}
+
+export function observeTranslatedSubtrees(root = document.body) {
+    _translationObserver?.disconnect();
+    if (!root || typeof MutationObserver === 'undefined') return () => {};
+    _translationObserver = new MutationObserver(records => {
+        for (const record of records) {
+            for (const node of record.addedNodes) {
+                if (!(node instanceof Element)) continue;
+                if (node.matches('[data-t],[data-t-placeholder],[data-t-aria],[data-t-title],[data-t-alt]')) {
+                    applyGlobalTranslations({ querySelectorAll: selector => [node, ...node.querySelectorAll(selector)].filter(item => item.matches(selector)) });
+                } else {
+                    applyGlobalTranslations(node);
+                }
+            }
+        }
+    });
+    _translationObserver.observe(root, { childList: true, subtree: true });
+    return () => _translationObserver?.disconnect();
 }
 
 // Compatibilità con vecchi moduli

@@ -577,13 +577,18 @@ function showBackupWorking(title, message, action) {
         className: 'modal-overlay backup-working-overlay', role: 'alertdialog',
         'aria-modal': 'true', 'aria-live': 'polite', 'aria-busy': 'true'
     });
+    const cancelButton = action ? createElement('button', {
+        type: 'button', className: 'btn-modal btn-secondary', textContent: t('cancel'),
+        onclick: () => action.dispose()
+    }) : null;
     modal.appendChild(createElement('div', {className: 'modal-box backup-working-modal'}, [
         createElement('span', {
             className: 'material-symbols-outlined modal-icon animate-spin icon-accent-blue notranslate',
             textContent: 'progress_activity', 'aria-hidden': 'true'
         }),
         createElement('h3', {className: 'modal-title', textContent: title}),
-        createElement('p', {className: 'modal-text', textContent: message})
+        createElement('p', {className: 'modal-text', textContent: message}),
+        ...(cancelButton ? [createElement('div', {className: 'modal-actions'}, [cancelButton])] : [])
     ]));
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('active'));
@@ -770,7 +775,7 @@ function setupEncryptedBackup(user) {
         const action = createBackupRestoreAction(user.uid, button); currentAction = action;
         button.disabled = true;
         const modal = createElement('div', {className: 'modal-overlay'});
-        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
+        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('cancel')});
         const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Preparazione…', disabled: true});
         const modulePromise = import('./backup-export-service.js');
         modulePromise.then(() => {
@@ -827,6 +832,14 @@ function setupEncryptedBackup(user) {
 }
 
 let disposePortableArchiveSetup = () => {};
+function portablePasswordMessage(assessment) {
+    const keys = {
+        PORTABLE_PASSWORD_REQUIRED: 'portable_password_required', PORTABLE_PASSWORD_TOO_SHORT: 'portable_password_short',
+        PORTABLE_PASSWORD_TOO_LONG: 'portable_password_long', PORTABLE_PASSWORD_COMMON: 'portable_password_common',
+        PORTABLE_PASSWORD_REPETITIVE: 'portable_password_repetitive', PORTABLE_PASSWORD_WEAK: 'portable_password_weak'
+    };
+    return assessment.valid ? t('portable_password_strong') : t(keys[assessment.code] || 'portable_password_required');
+}
 function setupPortableArchive(user) {
     disposePortableArchiveSetup();
     const button = document.getElementById('btn-export-portable-archive');
@@ -840,25 +853,25 @@ function setupPortableArchive(user) {
         const modal = createElement('div', {className: 'modal-overlay'});
         const password = createElement('input', {
             type: 'password', className: 'glass-field modal-input-glass', autocomplete: 'new-password',
-            placeholder: 'Password archivio robusta (almeno 14 caratteri)', 'aria-label': 'Password archivio portabile'
+            placeholder: t('portable_password_placeholder'), 'aria-label': t('portable_password_aria')
         });
         const confirmation = createElement('input', {
             type: 'password', className: 'glass-field modal-input-glass', autocomplete: 'new-password',
-            placeholder: 'Ripeti la password', 'aria-label': 'Conferma password archivio portabile'
+            placeholder: t('portable_confirm_placeholder'), 'aria-label': t('portable_confirm_aria')
         });
         const includeAttachments = createElement('input', {type: 'checkbox', checked: true, id: 'portable-include-attachments'});
         const acknowledged = createElement('input', {type: 'checkbox', id: 'portable-risk-ack'});
-        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
-        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Crea archivio', disabled: true});
+        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: t('cancel')});
+        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: t('portable_create'), disabled: true});
         const status = createElement('p', {className: 'portable-archive-status', role: 'alert'});
         const validate = () => {
             const assessment = evaluatePortableArchivePassword(password.value);
             const same = password.value === confirmation.value;
             startButton.disabled = !(assessment.valid && same && acknowledged.checked);
             status.textContent = password.value && !assessment.valid
-                ? assessment.message
-                : confirmation.value && !same ? 'Le password non coincidono.'
-                    : assessment.valid ? assessment.message : '';
+                ? portablePasswordMessage(assessment)
+                : confirmation.value && !same ? t('error_password_mismatch')
+                    : assessment.valid ? portablePasswordMessage(assessment) : '';
         };
         password.addEventListener('input', validate);
         confirmation.addEventListener('input', validate);
@@ -880,8 +893,7 @@ function setupPortableArchive(user) {
                 password.value = ''; confirmation.value = '';
                 close();
                 working = showBackupWorking(
-                    'Creazione archivio portabile…',
-                    'I dati vengono decifrati soltanto in memoria, cifrati a blocchi e scritti progressivamente.', action
+                    t('portable_working_title'), t('portable_working_desc'), action
                 );
                 const vaultKeyMaterial = await ensureVaultKeyMaterial({forceReload: true, promptImmediately: true});
                 action.check();
@@ -921,12 +933,12 @@ function setupPortableArchive(user) {
         });
         modal.appendChild(createElement('div', {className: 'modal-box portable-archive-modal'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'folder_zip'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Esporta archivio portabile'}),
-            createElement('p', {className: 'modal-text', textContent: 'Stai creando una copia leggibile dei tuoi dati, utilizzabile anche al di fuori di questa app.'}),
-            createElement('p', {className: 'portable-archive-warning', textContent: 'La copia può contenere dati personali, credenziali e allegati sensibili. Conservala in un luogo sicuro e non condividerla con persone non autorizzate.'}),
+            createElement('h3', {className: 'modal-title', textContent: t('portable_title')}),
+            createElement('p', {className: 'modal-text', textContent: t('portable_intro')}),
+            createElement('p', {className: 'portable-archive-warning', textContent: t('portable_warning')}),
             password, confirmation,
-            createElement('label', {className: 'portable-archive-choice'}, [includeAttachments, createElement('span', {textContent: 'Includi gli allegati'})]),
-            createElement('label', {className: 'portable-archive-choice'}, [acknowledged, createElement('span', {textContent: 'Ho compreso che questo file non è un backup reimportabile.'})]),
+            createElement('label', {className: 'portable-archive-choice'}, [includeAttachments, createElement('span', {textContent: t('portable_include_attachments')})]),
+            createElement('label', {className: 'portable-archive-choice'}, [acknowledged, createElement('span', {textContent: t('portable_acknowledge')})]),
             status,
             createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
         ]));

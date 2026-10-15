@@ -32,7 +32,7 @@ import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showConfirmModal, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
-import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
+import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js?v=1.2.191&push=20260908b&deadline-share=20260908a';
@@ -713,6 +713,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     initComponents();
     applyGlobalTranslations();
+    observeTranslatedSubtrees();
     setTimeout(() => document.body?.classList.add('revealed'), 100);
 });
 

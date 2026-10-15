@@ -1,7 +1,7 @@
 /** Bootstrap minimale della pagina di accesso. */
 import { initLogin } from './modules/auth/login.js?v=1.2.191';
 import { mountDocumentationHelp, getDocumentationPageContext } from './guide.js';
-import { loadLanguage, getCurrentLanguage, applyGlobalTranslations } from './translations.js';
+import { loadLanguage, getCurrentLanguage, applyGlobalTranslations, observeTranslatedSubtrees } from './translations.js';
 import { initOfflineStatus } from './offline-status.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadLanguage(getCurrentLanguage());
         await initLogin();
         applyGlobalTranslations();
+        observeTranslatedSubtrees();
     } catch (error) {
         console.error('[LOGIN] Bootstrap fallito:', error);
     } finally {

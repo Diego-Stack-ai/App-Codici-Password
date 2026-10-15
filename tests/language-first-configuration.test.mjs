@@ -73,3 +73,28 @@ test('registrazione e Impostazioni persistono lingua e completamento senza tradu
     assert.match(settings, /firstConfigurationPatch\(code\)/);
     assert.doesNotMatch(settings, /translateUserData|translateVaultData/);
 });
+
+test('runtime i18n traduce tutti gli attributi dichiarati e osserva i sottoalberi dinamici', async () => {
+    const source = await readFile('Frontend/public/assets/js/translations.js', 'utf8');
+    for (const attribute of ['data-t', 'data-t-placeholder', 'data-t-aria', 'data-t-title', 'data-t-alt']) {
+        assert.match(source, new RegExp(`querySelectorAll\\('\\[${attribute}\\]'\\)`));
+    }
+    assert.match(source, /export function observeTranslatedSubtrees/);
+    assert.match(source, /dataset\.i18nFallback = 'true'/);
+    assert.match(source, /missingKeys: getMissingTranslationKeys\(\)/);
+});
+
+test('onboarding dispone di un catalogo esplicito per tutte le lingue dichiarate', async () => {
+    const source = await readFile('Frontend/public/assets/js/translations/onboarding.js', 'utf8');
+    for (const language of ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt']) {
+        assert.match(source, new RegExp(`const ${language} = \\{`));
+    }
+    assert.match(source, /const catalogs = \{ it, en, es, fr, de, zh, hi, pt \}/);
+});
+
+test('archivio portabile offre Annulla prima della password e durante la preparazione', async () => {
+    const source = await readFile('Frontend/public/assets/js/modules/settings/impostazioni.js', 'utf8');
+    assert.match(source, /const cancelButton = action \? createElement\('button',[\s\S]*onclick: \(\) => action\.dispose\(\)/);
+    assert.match(source, /setupPortableArchive[\s\S]*textContent: t\('cancel'\)/);
+    assert.match(source, /preparedOutput\?\.cleanup\(\)/);
+});
