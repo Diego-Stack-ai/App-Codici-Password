@@ -1,12 +1,12 @@
 # Incarico corrente
 
-## AI-LOCALE-A2-A3-01 — integrazione autorizzata su base 1.2.191 — 15/10/2026
+## AI-LOCALE-A2-A3-01 — candidata 1.2.192 autorizzata al rilascio — 15/10/2026
 
 Diego autorizza download, verifica, hosting e distribuzione Firebase degli artefatti AI.2/AI.3, accettando il relativo consumo di storage e banda. Il lotto viene riallineato sulla baseline `1.2.191` (`d5bb2beea85a14ec446bd6139ed0ec749045dcfa`). **A1** resta il motore deterministico e fallback universale; **A2** aggiunge ricerca semantica locale installabile/rimovibile; **A3** aggiunge generazione locale soltanto sui dispositivi che superano capability probe e benchmark.
 
 Modelli, tokenizer e runtime devono provenire dalle revisioni immutabili censite, con licenza/NOTICE, dimensione e SHA-256 verificati. I pacchetti sono ospitati same-origin ma esclusi da shell, precache e download ordinario; installazione e rimozione richiedono consenso, mostrano peso/progresso, supportano annullamento e non lasciano staging parziali. Il modello non accede direttamente al Vault e non riceve D4: opera su envelope D0–D2 minimo e restituisce soltanto intenti JSON chiusi validati dal codice deterministico. Memoria solo in RAM e cancellata sui confini di sessione.
 
-Il perimetro comprende lifecycle pacchetti, loader, capability/benchmark, UI in Impostazioni e Agente Codex, chiavi i18n compatibili con il lazy loading `1.2.191`, test negativi e documentazione. Sono esclusi Rules, Functions e dati reali. Commit locale autorizzato; push, PR, merge e deploy sono eseguiti soltanto dall'Orchestratore dopo revisione. La consegna è DA_VERIFICARE e non equivale a pubblicazione.
+Il perimetro comprende lifecycle pacchetti, loader, capability/benchmark, UI in Impostazioni e Agente Codex, chiavi i18n compatibili con il lazy loading `1.2.191`, test negativi e documentazione. Sono esclusi Rules, Functions e dati reali. Diego ha autorizzato commit, push, PR, merge e deploy Hosting della candidata `1.2.192`; l'Orchestratore li esegue soltanto dopo revisione e gate verdi. A3 resta vincolata al capability probe e non viene forzata sui dispositivi non idonei.
 
 ## Gate i18n incrementale — candidata 1.2.191 su base 1.2.190 — 15/10/2026
 
