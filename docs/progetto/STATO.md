@@ -2,6 +2,12 @@
 
 <a id="stato-corrente"></a>
 
+## Candidata 1.2.189 — icone escluse dalla traduzione automatica — 15/10/2026
+
+Le ligature testuali delle icone Material Symbols sono ora marcate `notranslate` e `translate="no"` nel markup statico e nei template HTML; le classi generate in JavaScript includono `notranslate` e il costruttore DOM condiviso applica automaticamente entrambi i segnali alle icone create a runtime. La protezione è limitata agli elementi Material Symbols/Icons: testi, etichette e contenuti dell'interfaccia continuano a seguire la lingua scelta dall'utente.
+
+Un audit dedicato esamina HTML e JavaScript e blocca nuove icone statiche o generate prive della protezione. Implementazione e test locali non equivalgono ancora a merge o Hosting distribuito; la verifica finale deve includere Chrome con traduzione automatica attiva nella pagina Impostazioni.
+
 ## Candidata 1.2.188 — Lingue e prima configurazione — 15/10/2026
 
 Il lotto è riallineato al merge pubblicato `6e7fb862` (`1.2.187`) e prepara la candidata `1.2.188`. Prima dell'identificazione viene proposta la lingua; un nuovo utente deve confermarla prima della registrazione, mentre un utente esistente può autenticarsi e recuperare la preferenza valida associata al profilo. Dopo il login la Home propone la prima configurazione senza impedire l'esplorazione; le pagine censite di inserimento o modifica restano bloccate finché la lingua, unico requisito obbligatorio di questa iterazione, non viene confermata nelle Impostazioni. Tema, area Azienda, Assistente base, notifiche, MFA, biometria e backup restano facoltativi. I dati inseriti dall'utente non vengono tradotti.

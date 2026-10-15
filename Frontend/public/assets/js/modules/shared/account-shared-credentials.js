@@ -39,7 +39,7 @@ async function editCredential(record, context, refresh) {
             if (field.encrypted) controls.push(createElement('button', {
                 type: 'button', className: 'shared-account-reveal', 'aria-label': 'Mostra o nascondi valore',
                 onclick: () => input.classList.toggle('local-data-masked')
-            }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+            }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'visibility'})]));
             return {field, input, element: createElement('label', {}, [
                 createElement('strong', {textContent: field.label || 'Campo'}),
                 createElement('div', {className: 'account-widget-inline-control'}, controls)
@@ -144,12 +144,12 @@ function credentialCard(record, widget, context, refresh) {
         if (field.encrypted) children.push(createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Mostra ${field.label || 'dato'}`,
             onclick: event => revealField(event.currentTarget, field, context)
-        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+        }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'visibility'})]));
         fields.appendChild(createElement('div', {className: 'shared-account-field'}, children));
     }
     const cardChildren = [
         createElement('div', {className: 'shared-account-card-heading'}, [
-            createElement('span', {className: 'material-symbols-outlined', textContent: record.icon || 'key'}),
+            createElement('span', {className: 'material-symbols-outlined notranslate', textContent: record.icon || 'key'}),
             createElement('strong', {textContent: record.title || 'Credenziale comune'})
         ]),
         fields

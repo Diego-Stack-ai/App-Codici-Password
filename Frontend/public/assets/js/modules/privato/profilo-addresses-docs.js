@@ -38,7 +38,7 @@ function createCopyBtn(text) {
             showToast(t('copied') || 'Copiato!', 'success');
         }
     }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'content_copy' })
     ]);
 }
 // ─── ADDRESSES ───────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ export function renderAddressesView() {
     clearElement(container);
 
     const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_location_alt' }),
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_location_alt' }),
         createElement('span', { textContent: t('add_address') })
     ]);
     btnAdd.onclick = () => _callbacks.onAddAddress();
@@ -68,16 +68,16 @@ function _createAddressCard(addr, idx) {
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
                 createElement('div', { className: 'card-icon-box' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled', textContent: addr.type === 'Lavoro' ? 'work' : 'home' })
+                    createElement('span', { className: 'material-symbols-outlined filled notranslate', textContent: addr.type === 'Lavoro' ? 'work' : 'home' })
                 ]),
                 createElement('span', { className: 'card-title-accent', textContent: addr.type || t('profile_addresses') })
             ]),
             createElement('div', { className: 'card-actions-row' }, [
                 createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-address', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'edit' })
                 ]),
                 createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-address', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'delete' })
                 ])
             ])
         ]),
@@ -116,7 +116,7 @@ function _createAddressCard(addr, idx) {
         className: 'btn-upload-trigger',
         dataset: { action: 'add-utility', idx }
     }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_circle' }),
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_circle' }),
         createElement('span', { textContent: t('add_utility') })
     ]);
     card.appendChild(btnAddUtil);
@@ -134,10 +134,10 @@ function _renderUtilitiesInCard(utils, list, addrIdx) {
             createElement('span', { className: 'data-label', textContent: u.type }),
             createElement('div', { className: 'card-actions-row' }, [
                 createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-utility', idx: addrIdx, uidx: uIdx } }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
                 ]),
                 createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-utility', idx: addrIdx, uidx: uIdx } }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                 ])
             ])
         ]),
@@ -163,7 +163,7 @@ export function renderDocumentiView() {
     clearElement(container);
 
     const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_card' }),
+        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_card' }),
         createElement('span', { textContent: t('add_doc') })
     ]);
     btnAdd.onclick = () => _callbacks.onAddDoc();
@@ -180,19 +180,19 @@ export function renderDocumentiView() {
             createElement('div', { className: 'card-header-row' }, [
                 createElement('div', { className: 'card-icon-stack' }, [
                     createElement('div', { className: 'card-icon-box' }, [
-                        createElement('span', { className: 'material-symbols-outlined filled', textContent: 'description' })
+                        createElement('span', { className: 'material-symbols-outlined filled notranslate', textContent: 'description' })
                     ]),
                     createElement('span', { className: 'card-title-accent', textContent: docItem.type })
                 ]),
                 createElement('div', { className: 'card-actions-row' }, [
                     createElement('button', { className: 'btn-edit-section', title: 'Allegati', dataset: { action: 'document-attachments', idx } }, [
-                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'attach_file' })
+                        createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'attach_file' })
                     ]),
                     createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-doc', idx } }, [
-                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                        createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'edit' })
                     ]),
                     createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-doc', idx } }, [
-                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                        createElement('span', { className: 'material-symbols-outlined icon-edit notranslate', textContent: 'delete' })
                     ])
                 ])
             ]),
@@ -226,7 +226,7 @@ export function renderDocumentiView() {
                                         span.dataset.visible = !isVisible;
                                         e.currentTarget.querySelector('span').textContent = isVisible ? 'visibility' : 'visibility_off';
                                     }
-                                }, [createElement('span', { className: 'material-symbols-outlined document-action-icon', textContent: 'visibility' })]),
+                                }, [createElement('span', { className: 'material-symbols-outlined document-action-icon notranslate', textContent: 'visibility' })]),
                                 createCopyBtn(docItem.password)
                             ])
                         ]) : null,
@@ -249,17 +249,17 @@ export function renderDocumentiView() {
 
                     createElement('div', { className: 'flex-col-gap-xs document-date-list' }, [
                         docItem.data_rilascio ? createElement('div', { className: 'flex-center-row document-meta-row' }, [
-                            createElement('span', { className: 'material-symbols-outlined document-meta-icon', textContent: 'history' }),
+                            createElement('span', { className: 'material-symbols-outlined document-meta-icon notranslate', textContent: 'history' }),
                             createElement('span', { className: 'data-value-sub', textContent: `Emesso: ${formatDateToIT(docItem.data_rilascio)}` })
                         ]) : null,
                         docItem.expiry_date ? createElement('div', { className: 'flex-center-row document-meta-row' }, [
-                            createElement('span', { className: 'material-symbols-outlined document-meta-icon', textContent: 'event' }),
+                            createElement('span', { className: 'material-symbols-outlined document-meta-icon notranslate', textContent: 'event' }),
                             createElement('span', { className: 'data-value-sub', textContent: `Scadenza: ${formatDateToIT(docItem.expiry_date)}` })
                         ]) : null
                     ].filter(Boolean)),
 
                     docItem.home_page ? createElement('div', { className: 'flex-center-row document-link-row' }, [
-                        createElement('span', { className: 'material-symbols-outlined document-link-icon', textContent: 'language' }),
+                        createElement('span', { className: 'material-symbols-outlined document-link-icon notranslate', textContent: 'language' }),
                         createElement('a', {
                             href: docItem.home_page.startsWith('http') ? docItem.home_page : `https://${docItem.home_page}`,
                             target: '_blank',

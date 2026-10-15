@@ -99,19 +99,19 @@ function renderModal() {
     const header = createElement('div', { className: 'dp-header' }, [
         createElement('div', { className: 'dp-nav-group' }, [
             createElement('button', { className: 'dp-nav-btn', title: 'Anno precedente', 'aria-label': 'Anno precedente', onclick: () => changeYear(-1) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'keyboard_double_arrow_left' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'keyboard_double_arrow_left' })
             ]),
             createElement('button', { className: 'dp-nav-btn', title: 'Mese precedente', 'aria-label': 'Mese precedente', onclick: () => changeMonth(-1) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'chevron_left' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'chevron_left' })
             ])
         ]),
         createElement('span', { className: 'dp-title-btn', textContent: `${MONTH_NAMES[currentMonth]} ${currentYear}` }),
         createElement('div', { className: 'dp-nav-group' }, [
             createElement('button', { className: 'dp-nav-btn', title: 'Mese successivo', 'aria-label': 'Mese successivo', onclick: () => changeMonth(1) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'chevron_right' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'chevron_right' })
             ]),
             createElement('button', { className: 'dp-nav-btn', title: 'Anno successivo', 'aria-label': 'Anno successivo', onclick: () => changeYear(1) }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'keyboard_double_arrow_right' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'keyboard_double_arrow_right' })
             ])
         ])
     ]);

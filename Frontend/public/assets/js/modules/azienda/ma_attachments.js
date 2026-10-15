@@ -52,7 +52,7 @@ export function renderAttachments() {
                 className: 'btn-remove-item',
                 onclick: () => removeAttachment(f.idx, f.existing)
             }, [
-                createElement('span', { className: 'material-symbols-outlined action-icon-compact', textContent: 'close' })
+                createElement('span', { className: 'material-symbols-outlined action-icon-compact notranslate', textContent: 'close' })
             ])
         ]);
     });

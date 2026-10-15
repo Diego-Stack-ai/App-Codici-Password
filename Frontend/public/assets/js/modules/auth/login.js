@@ -7,11 +7,11 @@
 import {
     login, completeTotpLogin, checkAuthState, logout,
     resendVerificationEmail, refreshEmailVerification
-} from '../../auth.js?v=1.2.188';
-import { initComponents } from '../../components-v129.js?v=1.2.188';
+} from '../../auth.js?v=1.2.189';
+import { initComponents } from '../../components-v129.js?v=1.2.189';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.188';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.189';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 import { openInitialLanguageDialog, rememberUserLanguage, setLanguagePreference } from '../settings/first-configuration.js';
 
@@ -159,7 +159,7 @@ function setupLoginForm() {
         submitBtn.disabled = true;
 
         throttleTimer = setInterval(() => {
-            const icon = createElement('span', { className: 'material-symbols-outlined', textContent: 'lock_clock' });
+            const icon = createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'lock_clock' });
             clearElement(submitBtn);
             setChildren(submitBtn, [icon, document.createTextNode(` Attendi ${remaining}s`)]);
             remaining--;
@@ -169,7 +169,7 @@ function setupLoginForm() {
                 submitBtn.disabled = false;
                 clearElement(submitBtn);
                 setChildren(submitBtn, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'login' }),
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'login' }),
                     document.createTextNode(t('auth_button') || ' Accedi')
                 ]);
             }
@@ -218,7 +218,7 @@ function setupLoginForm() {
         submitBtn.disabled = true;
         clearElement(submitBtn);
         setChildren(submitBtn, [
-            createElement('span', { className: 'animate-spin material-symbols-outlined', textContent: 'sync' })
+            createElement('span', { className: 'animate-spin material-symbols-outlined notranslate', textContent: 'sync' })
         ]);
         document.body.classList.add('is-auth-progress');
 
@@ -257,7 +257,7 @@ function setupLoginForm() {
                     if (codeInput) codeInput.focus();
                     clearElement(submitBtn);
                     setChildren(submitBtn, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'verified_user' }),
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'verified_user' }),
                         document.createTextNode(' Verifica codice')
                     ]);
                     submitBtn.disabled = false;
@@ -288,7 +288,7 @@ function setupLoginForm() {
 
             clearElement(submitBtn);
             setChildren(submitBtn, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: originalIcon }),
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: originalIcon }),
                 document.createTextNode(originalText)
             ]);
             document.body.classList.remove('is-auth-progress');

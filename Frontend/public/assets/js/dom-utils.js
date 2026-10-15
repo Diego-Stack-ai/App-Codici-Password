@@ -66,6 +66,17 @@ export const createElement = (tag, props = {}, children = []) => {
         }
     }
 
+    // I nomi delle icone Material Symbols sono ligature tecniche, non testo UI.
+    // Chrome Translate non deve convertirli (es. expand_more -> ESPANDI_ALTRO).
+    const materialIconClass = typeof el.className === 'string' &&
+        /(?:^|\s)material-(?:symbols-(?:outlined|rounded|sharp)|icons)(?:\s|$)/.test(el.className);
+    if (materialIconClass) {
+        if (!/(?:^|\s)notranslate(?:\s|$)/.test(el.className)) {
+            el.className = `${el.className} notranslate`;
+        }
+        el.setAttribute('translate', 'no');
+    }
+
     const childrenArray = Array.isArray(children) ? children : [children];
     childrenArray.forEach(child => {
         if (child === null || child === undefined) return;

@@ -48,7 +48,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     }
                 }
             }, [createElement('span', {
-                className: 'material-symbols-outlined account-action-icon',
+                className: 'material-symbols-outlined account-action-icon notranslate',
                 textContent: 'visibility'
             })]) : null,
             createElement('button', {
@@ -71,7 +71,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     }
                 }
             }, [createElement('span', {
-                className: 'material-symbols-outlined account-action-icon',
+                className: 'material-symbols-outlined account-action-icon notranslate',
                 textContent: 'content_copy'
             })])
         ].filter(Boolean))
@@ -100,10 +100,10 @@ function createAccountCard(account, options) {
         }
     }, [
         createElement('div', { className: 'swipe-action-bg bg-archive' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'archive' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'archive' })
         ]),
         createElement('div', { className: 'swipe-action-bg bg-delete' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
         ]),
         createElement('div', { className: 'swipe-content' }, [
             createElement('div', { className: 'account-card-layout' }, [
@@ -135,7 +135,7 @@ function createAccountCard(account, options) {
                         }
                     }, [
                         createElement('span', {
-                            className: 'material-symbols-outlined',
+                            className: 'material-symbols-outlined notranslate',
                             textContent: 'link_off'
                         }),
                         createElement('span', { textContent: t('shared_leave_action') })

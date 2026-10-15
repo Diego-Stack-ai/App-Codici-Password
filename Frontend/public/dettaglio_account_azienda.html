@@ -9,18 +9,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Dettaglio Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/account_detail.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="detail">
@@ -41,7 +41,7 @@
                     <div class="detail-avatar-container">
                         <div id="detail-avatar" class="detail-avatar border-glow"></div>
                         <div id="hero-status-dot" class="hero-status-dot">
-                            <span class="material-symbols-outlined">business</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">business</span>
                         </div>
                     </div>
                     <h1 id="hero-title" class="hero-title selectable">-</h1>
@@ -56,7 +56,7 @@
                     <!-- Credenziali Principali -->
                     <section>
                         <div class="detail-section-header">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
                             <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
                         <div class="flex-col-gap">
@@ -66,13 +66,13 @@
                                 <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
                                     Account</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">badge</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">badge</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-nomeAccount" readonly class="field-input no-transform"
                                         autocomplete="off" spellcheck="false">
                                     <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-nomeAccount">
-                                            <span class="material-symbols-outlined">content_copy</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
@@ -82,13 +82,13 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="detail-username" data-t="username">Utente</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">person</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">person</span>
                                     <input id="detail-username" type="text" readonly class="field-input no-transform"
                                         autocomplete="off" autocorrect="off" spellcheck="false">
                                     <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-username">
-                                            <span class="material-symbols-outlined">content_copy</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
@@ -100,13 +100,13 @@
                                     <label class="view-label" for="detail-account" data-t="account_code">Account /
                                         Codice</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">pin</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">pin</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-account" type="text" readonly class="field-input no-transform"
                                             autocomplete="off" spellcheck="false">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-field="detail-account">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -116,18 +116,18 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-password" data-t="password">Password</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">lock</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">lock</span>
                                         <input id="detail-password" type="text" readonly
                                             class="field-input field-value-password no-transform base-shield"
                                             autocomplete="off" autocorrect="off" spellcheck="false">
                                         <div class="detail-field-actions">
                                             <button id="toggle-password" class="btn-icon-header btn-field-toggle"
                                                 type="button">
-                                                <span class="material-symbols-outlined">visibility</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">visibility</span>
                                             </button>
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-field="detail-password">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -138,17 +138,17 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">language</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">language</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="detail-website" readonly
                                         class="field-input link-underlined no-transform">
                                     <div class="detail-field-actions">
                                         <button id="open-website" class="btn-icon-header btn-field-toggle"
                                             type="button">
-                                            <span class="material-symbols-outlined">open_in_new</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">open_in_new</span>
                                         </button>
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-website">
-                                            <span class="material-symbols-outlined">content_copy</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
@@ -160,13 +160,13 @@
                                     <label class="view-label" for="detail-numero-iscrizione"
                                         data-t="numero_iscrizione">Numero Iscrizione</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">app_registration</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">app_registration</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-numero-iscrizione" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-field="detail-numero-iscrizione">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -175,13 +175,13 @@
                                     <label class="view-label" for="detail-codice-societa" data-t="codice_societa">Codice
                                         Società</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">id_card</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">id_card</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="detail-codice-societa" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-field="detail-codice-societa">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -197,12 +197,12 @@
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald notranslate" translate="no">account_balance</span>
                                 <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
                             </div>
                             <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
                                 <span id="banking-chevron"
-                                    class="material-symbols-outlined icon-chevron-muted">expand_more</span>
+                                    class="material-symbols-outlined icon-chevron-muted notranslate" translate="no">expand_more</span>
                             </button>
                         </div>
                         <div id="banking-content" class="flex-col-gap content-spacing hidden">
@@ -214,7 +214,7 @@
                     <section id="section-referente" class="section-spacing">
                         <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
+                                class="material-symbols-outlined detail-section-icon icon-accent-orange notranslate" translate="no">assignment_ind</span>
                             <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
                         </div>
                         <div class="flex-col-gap content-spacing">
@@ -222,11 +222,11 @@
                             <div class="glass-field-container">
                                 <label class="view-label">Nome Referente</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">badge</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">badge</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-name" readonly class="field-input no-transform" autocomplete="off">
                                     <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
-                                            <span class="material-symbols-outlined">content_copy</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
@@ -237,17 +237,17 @@
                                 <div class="glass-field-container">
                                     <label class="view-label">Telefono</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">call</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">call</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-phone" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button id="btn-call-ref-phone" class="btn-icon-header btn-field-toggle"
                                                 type="button">
-                                                <span class="material-symbols-outlined">phone_forwarded</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">phone_forwarded</span>
                                             </button>
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-field="ref-phone">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -256,17 +256,17 @@
                                 <div class="glass-field-container">
                                     <label class="view-label">Cellulare</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">smartphone</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">smartphone</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="ref-mobile" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
                                             <button id="btn-call-ref-mobile" class="btn-icon-header btn-field-toggle"
                                                 type="button">
-                                                <span class="material-symbols-outlined">phone_forwarded</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">phone_forwarded</span>
                                             </button>
                                             <button class="btn-icon-header copy-btn" type="button"
                                                 data-field="ref-mobile">
-                                                <span class="material-symbols-outlined">content_copy</span>
+                                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
@@ -278,7 +278,7 @@
                     <section id="account-widgets-section" class="section-spacing hidden">
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
-                                <span class="material-symbols-outlined detail-section-icon icon-accent-blue">widgets</span>
+                                <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">widgets</span>
                                 <h3 class="detail-section-title">Widget dell’account</h3>
                             </div>
                         </div>
@@ -291,7 +291,7 @@
                                 </div>
                             </div>
                             <button id="btn-add-account-widget" type="button" class="btn-modal btn-primary">
-                                <span class="material-symbols-outlined">add</span> Crea nuovo profilo Widget Account
+                                <span class="material-symbols-outlined notranslate" translate="no">add</span> Crea nuovo profilo Widget Account
                             </button>
                         </div>
                         <div id="account-widgets-list" class="shared-account-credentials content-spacing"></div>
@@ -300,11 +300,11 @@
                     <section id="shared-credentials-section" class="section-spacing hidden">
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
-                                <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                                <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
                                 <h3 class="detail-section-title">Credenziali comuni</h3>
                             </div>
                             <button id="btn-link-shared-credential" type="button" class="btn-icon-header" aria-label="Collega Credenziale comune">
-                                <span class="material-symbols-outlined">add_link</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">add_link</span>
                             </button>
                         </div>
                         <div id="shared-credentials-list" class="shared-account-credentials content-spacing"></div>
@@ -315,19 +315,19 @@
                     <section id="section-notes" class="section-spacing">
                         <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber notranslate" translate="no">sticky_note_2</span>
                             <h3 class="detail-section-title" data-t="notes">Note</h3>
                             <button id="btn-modify-account-note" type="button" class="btn-icon-header hidden" title="Modifica nota" aria-label="Modifica nota">
-                                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">edit</span>
                             </button>
                             <button id="btn-delete-account-note" type="button" class="btn-icon-header hidden" title="Elimina nota" aria-label="Elimina nota">
-                                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">delete</span>
                             </button>
                         </div>
                         <div class="glass-field note-box border-glow content-spacing">
                             <p id="detail-note" class="note-text no-transform">-</p>
                             <button id="copy-note" class="btn-icon-header" type="button">
-                                <span class="material-symbols-outlined">content_copy</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">content_copy</span>
                             </button>
                         </div>
                     </section>
@@ -337,11 +337,11 @@
                         <div class="detail-section-header detail-section-header-spread">
                             <div class="header-left-group">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">attach_file</span>
                                 <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
                             </div>
                             <button id="btn-add-attachment" type="button" class="btn-icon-header">
-                                <span class="material-symbols-outlined">add</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">add</span>
                             </button>
                         </div>
                         <div id="attachments-list" class="flex-col-gap content-spacing">
@@ -353,7 +353,7 @@
                     <!-- SHARING (sola lettura: la gestione vive nel form Modifica) -->
                     <section id="shared-management-section" class="section-spacing section-bottom hidden">
                         <div class="detail-section-header">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">share</span>
                             <h3 class="detail-section-title">Condivisione</h3>
                         </div>
                         <div id="guests-list" class="flex-col-gap content-spacing">

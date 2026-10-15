@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.188';
+import { db } from '../../firebase-config.js?v=1.2.189';
 import { LOG } from '../../logger.js';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -195,8 +195,8 @@ function renderTypes() {
                     ])
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
-                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })]),
-                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })])
+                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'check' })]),
+                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })])
                 ])
             ]));
         } else {
@@ -209,8 +209,8 @@ function renderTypes() {
                     ])
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
-                    createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]),
-                    createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
+                    createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })]),
+                    createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })])
                 ])
             ]));
         }
@@ -237,16 +237,16 @@ function renderSimpleList(containerId, data, listKey, itemLabel) {
                     createElement('input', { id: `edit-item-${listKey}-${index}`, type: 'text', value: item, className: 'inline-input-glass detail-input' })
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
-                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })]),
-                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })])
+                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'check' })]),
+                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'close' })])
                 ])
             ]));
         } else {
             container.appendChild(createElement('div', { className: 'config-list-item' }, [
                 createElement('span', { className: 'config-item-desc truncate pr-4', textContent: item }),
                 createElement('div', { className: 'config-item-actions' }, [
-                    createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: listKey, index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]),
-                    createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: listKey, index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
+                    createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: listKey, index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })]),
+                    createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: listKey, index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })])
                 ])
             ]));
         }

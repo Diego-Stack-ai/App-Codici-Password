@@ -9,7 +9,7 @@
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.188';
+import { db, functions } from '../../firebase-config.js?v=1.2.189';
 import { LOG } from '../../logger.js';
 import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -238,7 +238,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     }
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'visibility' })
+                createElement('span', { className: 'material-symbols-outlined account-action-icon notranslate', textContent: 'visibility' })
             ]) : null,
             createElement('button', {
                 className: 'btn-mini-action',
@@ -253,7 +253,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     }
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'content_copy' })
+                createElement('span', { className: 'material-symbols-outlined account-action-icon notranslate', textContent: 'content_copy' })
             ])
         ].filter(Boolean))
     ]);
@@ -302,13 +302,13 @@ function createContactItem(uid, c) {
                 className: 'rubrica-item-action action-edit',
                 onclick: () => editContact(c)
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
             ]),
             createElement('button', {
                 className: 'rubrica-item-action action-delete',
                 onclick: () => deleteContact(uid, c.id)
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
             ])
         ])
     ]);
@@ -487,7 +487,7 @@ function setupFABs() {
                 title: t('account_archive') || 'Archivio',
                 dataset: { label: t('archive') || 'Archivio' }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'inventory_2' })
             ]),
             createElement('button', {
                 id: 'add-account-btn',
@@ -496,7 +496,7 @@ function setupFABs() {
                 dataset: { label: t('add_short') || 'Aggiungi' },
                 onclick: () => window.location.href = 'form_account_privato.html'
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })
             ])
         ]));
     }

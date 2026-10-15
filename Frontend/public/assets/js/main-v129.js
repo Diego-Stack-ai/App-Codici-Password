@@ -26,7 +26,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.188';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.189';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.188&push=20260908b&deadline-share=20260908a';
+import * as Pages from './pages-init.js?v=1.2.189&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.188');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.189');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
@@ -476,7 +476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modal = createElement('div', { id: 'invite-modal', className: 'modal-overlay active' }, [
             createElement('div', { className: 'modal-box pb-8' }, [
                 createElement('div', { className: 'flex justify-center mb-4' }, [
-                    createElement('span', { className: 'material-symbols-outlined text-4xl text-purple-400', textContent: 'mail' })
+                    createElement('span', { className: 'material-symbols-outlined text-4xl text-purple-400 notranslate', textContent: 'mail' })
                 ]),
                 createElement('h3', { className: 'modal-title text-center mb-1', textContent: t('invite_received_title') || 'Nuovo Invito' }),
                 createElement('div', { className: 'flex justify-center mb-4' }, [
@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modal = createElement('div', { id: `reject-modal-${inviteId}`, className: 'modal-overlay active' }, [
             createElement('div', { className: 'modal-box pb-8' }, [
                 createElement('div', { className: 'flex justify-center mb-4' }, [
-                    createElement('span', { className: 'material-symbols-outlined text-4xl text-red-400', textContent: 'person_remove' })
+                    createElement('span', { className: 'material-symbols-outlined text-4xl text-red-400 notranslate', textContent: 'person_remove' })
                 ]),
                 createElement('h3', { className: 'modal-title text-center', textContent: 'Invito Rifiutato' }),
                 createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: `${data.recipientEmail} ha declinato la condivisione per: ${data.accountName}` }),

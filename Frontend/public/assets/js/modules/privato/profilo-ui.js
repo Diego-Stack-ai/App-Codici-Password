@@ -1,4 +1,4 @@
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.188';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.189';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
@@ -211,7 +211,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                             }
                         }
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'edit' })]),
+                }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon notranslate', textContent: 'edit' })]),
                 createElement('button', {
                     className: 'btn-action-mini profile-label-action profile-label-delete',
                     onclick: async (ev) => {
@@ -223,7 +223,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                             showToast('Voce eliminata!');
                         }
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'delete' })])
+                }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon notranslate', textContent: 'delete' })])
             ]) : null
         ]);
 
@@ -257,7 +257,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                 }
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined profile-label-add-icon', textContent: 'add_circle' }),
+            createElement('span', { className: 'material-symbols-outlined profile-label-add-icon notranslate', textContent: 'add_circle' }),
             createElement('span', { textContent: 'Aggiungi voce...' })
         ]);
         menu.appendChild(btnAdd);

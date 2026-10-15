@@ -10,19 +10,19 @@
     <title data-t="title_archive_accounts">Archivio Account - PROTOCOLLO BASE V5.0</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/archivio_account.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/archivio_account.css?v=1.2.189">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="list">
@@ -33,7 +33,7 @@
 
         <!-- Background Watermark (Global) -->
         <div class="archive-watermark" aria-hidden="true">
-            <span class="material-symbols-outlined">archive</span>
+            <span class="material-symbols-outlined notranslate" translate="no">archive</span>
         </div>
 
         <!-- Automated Header -->
@@ -54,7 +54,7 @@
                             <span id="active-context-label" class="archive-context-label"
                                 data-t="archive_all">Tutti
                                 gli archiviati</span>
-                            <span class="material-symbols-outlined">expand_more</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">expand_more</span>
                         </button>
                         <div id="archive-context-menu" class="base-dropdown-menu archive-context-menu">
                             <div class="base-dropdown-item active" data-value="all" data-t="archive_all">Tutti
@@ -67,7 +67,7 @@
 
                     <!-- Search Input (Standardized V5.0) -->
                     <div class="search-field-box">
-                        <span class="material-symbols-outlined archive-search-icon">search</span>
+                        <span class="material-symbols-outlined archive-search-icon notranslate" translate="no">search</span>
                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" type="search" id="archive-search" class="search-input-field"
                             placeholder="Cerca nell'archivio..." data-t-placeholder="archive_search_placeholder">
                     </div>
@@ -78,7 +78,7 @@
                 <div id="accounts-container" class="archive-list-group">
                     <!-- Loading State -->
                     <div class="ui-state ui-state-loading" role="status" aria-live="polite" aria-busy="true">
-                        <span class="material-symbols-outlined ui-state-icon is-spinning" aria-hidden="true">progress_activity</span>
+                        <span class="material-symbols-outlined ui-state-icon is-spinning notranslate" aria-hidden="true" translate="no">progress_activity</span>
                         <p class="ui-state-message" data-t="loading">Caricamento...</p>
                     </div>
                 </div>
@@ -86,10 +86,10 @@
                 <!-- Hint Swipe (Moved below list) -->
                 <div class="page-footer-info archive-hint-wrap">
                     <div class="swipe-hint-container">
-                        <span class="swipe-hint"><span class="material-symbols-outlined">swipe_right</span> <span
+                        <span class="swipe-hint"><span class="material-symbols-outlined notranslate" translate="no">swipe_right</span> <span
                                 data-t="restore">Ripristina</span></span>
                         <span class="swipe-hint"><span data-t="delete">Elimina</span> <span
-                                class="material-symbols-outlined">swipe_left</span></span>
+                                class="material-symbols-outlined notranslate" translate="no">swipe_left</span></span>
                     </div>
                 </div>
 
@@ -97,7 +97,7 @@
                 <div class="settings-group archive-action-group">
                     <button id="btn-empty-trash" class="btn-action-danger" aria-label="Svuota Cestino"
                         data-t-aria="empty_trash">
-                        <span class="material-symbols-outlined">delete_forever</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">delete_forever</span>
                         <span data-t="empty_trash">Svuota Cestino</span>
                     </button>
                 </div>

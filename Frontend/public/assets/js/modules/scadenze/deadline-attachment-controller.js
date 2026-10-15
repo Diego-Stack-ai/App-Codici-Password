@@ -43,7 +43,7 @@ export function createDeadlineAttachmentController() {
                         else selectedFiles.splice(file.index, 1);
                         render();
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
+                }, [createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })])
             ]));
         });
     }

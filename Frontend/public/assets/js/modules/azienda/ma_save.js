@@ -7,7 +7,7 @@
  */
 
 import { state } from './ma_state.js';
-import { db, storage } from '../../firebase-config.js?v=1.2.188';
+import { db, storage } from '../../firebase-config.js?v=1.2.189';
 import { doc, updateDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteCompany, companyDeletionMessage } from './company-list-service.js';
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ export async function saveAzienda() {
     const btn = document.getElementById('btn-save');
     if (btn) {
         btn.disabled = true;
-        setChildren(btn, createElement('span', { className: 'material-symbols-outlined animate-spin action-icon-compact', textContent: 'sync' }));
+        setChildren(btn, createElement('span', { className: 'material-symbols-outlined animate-spin action-icon-compact notranslate', textContent: 'sync' }));
     }
 
     // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
@@ -47,7 +47,7 @@ export async function saveAzienda() {
         showToast("Accesso negato: Chiave di crittografia richiesta.", "error");
         if (btn) {
             btn.disabled = false;
-            setChildren(btn, createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }));
+            setChildren(btn, createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' }));
         }
         return;
     }
@@ -192,7 +192,7 @@ export async function saveAzienda() {
         showToast(e.message?.startsWith('Scollega') || e.message?.startsWith('Contatti modificati') ? e.message : t('error_generic'), "error");
         if (btn) {
             btn.disabled = false;
-            setChildren(btn, createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }));
+            setChildren(btn, createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'save' }));
         }
     }
 }

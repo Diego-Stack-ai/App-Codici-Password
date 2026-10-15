@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.188';
+import { db, functions } from '../../firebase-config.js?v=1.2.189';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -121,7 +121,7 @@ export function mountAccountPrivati(user, options = {}) {
                 className: 'btn-icon-header',
                 onclick: () => navigate('area_privata.html')
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'arrow_back' })
             ]));
         }
 
@@ -164,7 +164,7 @@ export function mountAccountPrivati(user, options = {}) {
                     title: t('account_archive') || 'Archivio',
                     dataset: { label: t('archive') || 'Archivio' }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'inventory_2' })
                 ]),
                 createElement('button', {
                     id: 'add-account-btn',
@@ -173,7 +173,7 @@ export function mountAccountPrivati(user, options = {}) {
                     dataset: { label: t('add_short') || 'Aggiungi' },
                     onclick: () => navigate(`form_account_privato.html?type=${type}`)
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })
                 ])
             ]));
         }

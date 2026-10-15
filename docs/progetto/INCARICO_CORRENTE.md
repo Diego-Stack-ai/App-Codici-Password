@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Hotfix icone Material Symbols — candidata 1.2.189 — 15/10/2026
+
+Diego autorizza un hotfix client successivo alla `1.2.188`: la traduzione automatica di Chrome interpreta le ligature tecniche delle icone Material Symbols come testo e trasforma, per esempio, `manage_accounts`, `translate` ed `expand_more` in parole visibili sovrapposte. La correzione deve proteggere esclusivamente le icone tramite `notranslate` e `translate="no"`, compresi markup statico, template JavaScript ed elementi creati dal costruttore DOM condiviso. Il resto dell'interfaccia mantiene la normale i18n e non viene escluso dalla traduzione.
+
+Il perimetro comprende audit automatico anti-regressione, bump `1.2.189`, documentazione e test completi. Sono esclusi Functions, Rules, dati reali e modifiche ai contenuti utente. Commit e push avvengono sul branch dedicato `codex/settings-icon-translation-hotfix-1.2.189`; merge, PR e deploy restano sotto il controllo dell'Orchestratore.
+
 ## Lingue e prima configurazione — candidata 1.2.188 su base 1.2.187 — 15/10/2026
 
 Diego incarica l'Orchestratore di riallineare il lotto Lingue e prima configurazione al merge pubblicato `6e7fb862` (`1.2.187`) nel worktree isolato, senza modificare il checkout principale. Il perimetro comprende: scelta lingua prima dell'identificazione, distinzione fra nuovo utente e utente già registrato, recupero della preferenza associata dopo login, cambio in Impostazioni, invito post-login alla prima configurazione, requisito minimo e opzioni facoltative, blocco delle pagine di inserimento finché il requisito minimo non è confermato e predisposizione di guida e Agente base alla lingua scelta.

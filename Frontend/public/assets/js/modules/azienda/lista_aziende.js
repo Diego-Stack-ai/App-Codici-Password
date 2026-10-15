@@ -87,7 +87,7 @@ async function initProtocolUI() {
                 window.location.href = 'modifica_azienda.html';
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add' })
         ]);
 
         const deleteBtn = createElement('button', {
@@ -96,7 +96,7 @@ async function initProtocolUI() {
             title: isDeleteMode ? 'Esci da Elimina' : 'Elimina Azienda',
             onclick: toggleDeleteMode
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: isDeleteMode ? 'close' : 'delete' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: isDeleteMode ? 'close' : 'delete' })
         ]);
 
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [addBtn, deleteBtn]));
@@ -164,7 +164,7 @@ function createAziendaCard(a) {
     }, [
         // Delete Indicator (Solo in modalità elimina)
         isDeleteMode ? createElement('div', { className: 'delete-indicator' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
+            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete_forever' })
         ]) : null,
         // Pin Button
         createElement('button', {

@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.188';
+import { db, storage } from '../../firebase-config.js?v=1.2.189';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -235,7 +235,7 @@ function renderAttachments(list, active = _active) {
                 className: 'btn-delete-attachment',
                 onclick: (e) => { e.stopPropagation(); if (active()) deleteAttachment(a); }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
             ]) : null
         ]);
     });

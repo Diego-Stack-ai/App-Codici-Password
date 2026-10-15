@@ -12,17 +12,17 @@
     <title>Codici & Password - Accedi</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="./assets/images/apple-touch-icon-180.png">
 
 
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
 
-    <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.189">
 
 </head>
 
@@ -42,7 +42,7 @@
                 <div class="lang-selector-container">
                     <button id="lang-toggle-btn" class="lang-btn" aria-label="Cambia Lingua"
                         data-t-aria="select_language">
-                        <span class="material-symbols-outlined">language</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">language</span>
                     </button>
                     <div id="lang-dropdown" class="lang-dropdown">
                         <!-- Popolato via JS -->
@@ -55,7 +55,7 @@
 
                 <!-- Icona Centrale -->
                 <div class="icon-box">
-                    <span class="material-symbols-outlined">security</span>
+                    <span class="material-symbols-outlined notranslate" translate="no">security</span>
                 </div>
 
                 <!-- Titoli -->
@@ -81,7 +81,7 @@
                                 data-t-placeholder="password_placeholder">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password" data-t-aria="show_hide_data">
-                                <span class="material-symbols-outlined">visibility</span>
+                                <span class="material-symbols-outlined notranslate" translate="no">visibility</span>
                             </button>
                         </div>
 
@@ -97,7 +97,7 @@
                             aria-describedby="totp-help">
                         <p id="totp-help" class="auth-help">Apri la tua app Authenticator e inserisci il codice di 6 cifre.</p>
                         <button type="button" id="btn-use-recovery-code" class="auth-secondary-action">
-                            <span class="material-symbols-outlined">key</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">key</span>
                             <span>Non hai accesso all'Authenticator?</span>
                         </button>
                     </div>
@@ -116,26 +116,26 @@
 
                     <!-- Submit Button -->
                     <button type="submit" id="login-submit-btn" class="btn-primary" data-t="auth_button">
-                        <span class="material-symbols-outlined">login</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">login</span>
                         Accedi
                     </button>
 
                 </form>
 
                 <section id="email-verification-panel" class="auth-verification-panel hidden" aria-live="polite">
-                    <span class="material-symbols-outlined auth-verification-icon">mark_email_unread</span>
+                    <span class="material-symbols-outlined auth-verification-icon notranslate" translate="no">mark_email_unread</span>
                     <h2>Verifica il tuo indirizzo email</h2>
                     <p>Per proteggere la Vault, l’accesso resta bloccato finché non confermi il collegamento ricevuto via email.</p>
                     <button type="button" id="btn-email-verified" class="btn-primary">
-                        <span class="material-symbols-outlined">verified</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">verified</span>
                         Ho verificato, controlla
                     </button>
                     <button type="button" id="btn-resend-verification" class="auth-secondary-action">
-                        <span class="material-symbols-outlined">forward_to_inbox</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">forward_to_inbox</span>
                         Reinvia email di verifica
                     </button>
                     <button type="button" id="btn-change-verification-email" class="auth-secondary-action">
-                        <span class="material-symbols-outlined">person</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">person</span>
                         Usa un altro account
                     </button>
                 </section>
@@ -157,7 +157,7 @@
     </div>
 
     <!-- Scripts (In fondo per performance) -->
-    <script type="module" src="assets/js/login-entry.js?v=1.2.188"></script>
+    <script type="module" src="assets/js/login-entry.js?v=1.2.189"></script>
 
 
 </body>

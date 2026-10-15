@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.188';
+import { auth } from './firebase-config.js?v=1.2.189';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -159,7 +159,7 @@ export async function initComponents() {
 
                 headerLeft.appendChild(
                     createElement('button', { className: 'btn-icon-header', dataset: { action: 'back' }, onclick: backFn }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+                        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'arrow_back' })
                     ])
                 );
             }
@@ -211,13 +211,13 @@ export async function initComponents() {
                                 }
                             }
                         }, [
-                            createElement('span', { className: 'material-symbols-outlined', textContent: 'logout' })
+                            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'logout' })
                         ])
                     );
                 } else {
                     headerRight.appendChild(
                         createElement('a', { href: 'home_page.html', className: 'btn-icon-header' }, [
-                            createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
+                            createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'home' })
                         ])
                     );
                 }
@@ -246,7 +246,7 @@ export async function initComponents() {
                     title: 'Apri assistente AI',
                     ariaLabel: 'Apri assistente AI'
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'smart_toy' }),
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'smart_toy' }),
                     createElement('span', { className: 'ai-assistant-label', textContent: 'AI attiva' })
                 ]));
             }
@@ -268,7 +268,7 @@ export async function initComponents() {
                         ]);
                     }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'info' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'info' })
                 ]);
                 footerCenter.appendChild(guideBtn);
 
@@ -286,7 +286,7 @@ export async function initComponents() {
                             className: 'btn-footer-secondary footer-settings-link',
                             title: 'Impostazioni'
                         }, [
-                            createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
+                            createElement('span', { className: 'material-symbols-outlined footer-settings-icon notranslate', textContent: 'tune' })
                         ])
                     );
                     footerRight.appendChild(settLink);
@@ -352,7 +352,7 @@ function openGuideModal(title, steps) {
     });
 
     const content = createElement('div', { className: 'modal-box' }, [
-        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
+        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue notranslate', textContent: 'help_outline' }),
         createElement('h3', { className: 'modal-title', textContent: title }),
         createElement('div', { className: 'modal-body mt-4 mb-4 text-left w-full' }, stepsContent),
         createElement('div', { className: 'modal-actions' }, [btnClose])

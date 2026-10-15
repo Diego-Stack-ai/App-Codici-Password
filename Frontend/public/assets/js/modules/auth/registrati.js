@@ -111,7 +111,7 @@ function setupRegisterForm() {
         submitBtn.disabled = true;
         clearElement(submitBtn);
         setChildren(submitBtn, [
-            createElement('span', { className: 'animate-spin material-symbols-outlined', textContent: 'sync' })
+            createElement('span', { className: 'animate-spin material-symbols-outlined notranslate', textContent: 'sync' })
         ]);
         document.body.classList.add('is-auth-progress');
 

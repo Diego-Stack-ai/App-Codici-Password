@@ -8,19 +8,19 @@
     <title>Account Azienda - PROTOCOLLO BASE V5.3</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.188" />
+    <link rel="manifest" href="manifest.json?v=1.2.189" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.188">
-    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.189">
+    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.189">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -50,14 +50,14 @@
                                 <img loading="lazy" id="account-logo-preview" alt="Logo" class="avatar-image hidden" />
                                 <div id="logo-placeholder" class="logo-placeholder-content">
                                     <span
-                                        class="material-symbols-outlined logo-placeholder-icon">add_photo_alternate</span>
+                                        class="material-symbols-outlined logo-placeholder-icon notranslate" translate="no">add_photo_alternate</span>
                                     <span class="logo-placeholder-text" data-t="company_logo">Logo Azienda</span>
                                 </div>
                             </div>
                         </div>
                         <!-- Tasto Rimozione Logo -->
                         <button id="btn-remove-logo" type="button" class="btn-remove-logo hidden">
-                            <span class="material-symbols-outlined">close</span>
+                            <span class="material-symbols-outlined notranslate" translate="no">close</span>
                         </button>
                     </div>
                     <input type="file" id="logo-input" accept="image/*" class="hidden" />
@@ -68,7 +68,7 @@
                     <!-- 1. Dati Principali -->
                     <section>
                         <div class="detail-section-header">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
                             <h3 class="detail-section-title" data-t="access_protocol_data">Dati Protocollo Accesso
                             </h3>
                         </div>
@@ -78,7 +78,7 @@
                                 <label class="view-label" for="account-name" data-t="account_name">Nome
                                     Account</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">badge</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">badge</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="account-name" type="text" data-t-placeholder="account_name_placeholder"
                                         autocomplete="off" spellcheck="false" class="field-input" />
                                 </div>
@@ -88,7 +88,7 @@
                                 <label class="view-label" for="account-username" data-t="username_email">Username /
                                     Email</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">person</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">person</span>
                                     <input id="account-username" type="text" data-t-placeholder="username_placeholder"
                                         autocomplete="username" autocorrect="off" spellcheck="false" class="field-input" />
                                 </div>
@@ -99,7 +99,7 @@
                                     <label class="view-label" for="account-code" data-t="account_code">Account /
                                         Codice</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">pin</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">pin</span>
                                         <input id="account-code" type="text" data-t-placeholder="code_placeholder"
                                             autocomplete="off" spellcheck="false" class="field-input" />
                                     </div>
@@ -108,12 +108,12 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="account-password" data-t="password">Password</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">lock</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">lock</span>
                                         <input id="account-password" type="password" class="field-input base-shield"
                                             data-t-placeholder="password_placeholder" autocomplete="current-password"
                                             autocorrect="off" spellcheck="false" />
                                         <button id="btn-toggle-password-edit" type="button" class="btn-field-toggle">
-                                            <span class="material-symbols-outlined">visibility</span>
+                                            <span class="material-symbols-outlined notranslate" translate="no">visibility</span>
                                         </button>
                                     </div>
                                 </div>
@@ -122,7 +122,7 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="account-url" data-t="website">Sito Web</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">language</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">language</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" id="account-url" type="url" placeholder="https://"
                                         class="field-input" autocomplete="off" />
                                 </div>
@@ -133,7 +133,7 @@
                                 <label class="option-card border-glow">
                                     <div class="option-content">
                                         <span
-                                            class="material-symbols-outlined icon-accent-purple bg-purple-soft option-icon">account_balance</span>
+                                            class="material-symbols-outlined icon-accent-purple bg-purple-soft option-icon notranslate" translate="no">account_balance</span>
                                         <span class="option-label" data-t="is_banking_account">Account
                                             Bancario</span>
                                     </div>
@@ -149,7 +149,7 @@
                         <div class="detail-section-header">
                             <div class="header-left-group">
                                 <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-purple">account_balance</span>
+                                    class="material-symbols-outlined detail-section-icon icon-accent-purple notranslate" translate="no">account_balance</span>
                                 <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
                             </div>
                             <button type="button" id="btn-add-iban" class="btn-add-iban">+ IBAN</button>
@@ -161,7 +161,7 @@
                     <section>
                         <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
+                                class="material-symbols-outlined detail-section-icon icon-accent-orange notranslate" translate="no">assignment_ind</span>
                             <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
                         </div>
 
@@ -169,7 +169,7 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="ref-name" data-t="full_name">Nome e Cognome</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined">badge</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">badge</span>
                                     <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="ref-name" type="text" class="field-input" />
                                 </div>
                             </div>
@@ -177,14 +177,14 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="ref-phone" data-t="phone">Telefono</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">call</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">call</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="ref-phone" type="tel" class="field-input" />
                                     </div>
                                 </div>
                                 <div class="glass-field-container">
                                     <label class="view-label" for="ref-mobile" data-t="mobile">Cellulare</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">smartphone</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">smartphone</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="ref-mobile" type="tel" class="field-input" />
                                     </div>
                                 </div>
@@ -196,7 +196,7 @@
                     <section>
                         <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber notranslate" translate="no">sticky_note_2</span>
                             <h3 class="detail-section-title" data-t="notes_and_sharing">Note e Condivisione</h3>
                         </div>
 
@@ -206,7 +206,7 @@
                                     <label class="view-label" for="account-numero-iscrizione"
                                         data-t="numero_iscrizione">Numero Iscrizione</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">app_registration</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">app_registration</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" type="text" id="account-numero-iscrizione" class="field-input"
                                             placeholder="Numero Iscrizione">
                                     </div>
@@ -215,7 +215,7 @@
                                     <label class="view-label" for="account-codice-societa"
                                         data-t="codice_societa">Codice Società</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined">id_card</span>
+                                        <span class="material-symbols-outlined notranslate" translate="no">id_card</span>
                                         <input data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" type="text" id="account-codice-societa" class="field-input"
                                             placeholder="Codice Società">
                                     </div>
@@ -231,10 +231,10 @@
 
                             <section id="shared-credentials-section" class="hidden">
                                 <div class="detail-section-header shared-credentials-header">
-                                    <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                                    <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">key</span>
                                     <h3 class="detail-section-title">Credenziali comuni</h3>
                                     <button id="btn-link-shared-credential" type="button" class="btn-modal btn-secondary" aria-label="Collega Credenziale comune">
-                                        <span class="material-symbols-outlined">add_link</span> Collega credenziale comune
+                                        <span class="material-symbols-outlined notranslate" translate="no">add_link</span> Collega credenziale comune
                                     </button>
                                 </div>
                                 <div id="shared-credentials-list" class="shared-account-credentials"></div>
@@ -242,7 +242,7 @@
 
                             <section id="account-widgets-section" class="hidden">
                                 <div class="detail-section-header">
-                                    <span class="material-symbols-outlined detail-section-icon icon-accent-blue">widgets</span>
+                                    <span class="material-symbols-outlined detail-section-icon icon-accent-blue notranslate" translate="no">widgets</span>
                                     <h3 class="detail-section-title">Widget dell’account</h3>
                                 </div>
                                 <div id="account-widget-actions" class="account-widget-actions hidden">
@@ -254,7 +254,7 @@
                                         </div>
                                     </div>
                                     <button id="btn-add-account-widget" type="button" class="btn-modal btn-primary">
-                                        <span class="material-symbols-outlined">add</span> Crea nuovo profilo Widget Account
+                                        <span class="material-symbols-outlined notranslate" translate="no">add</span> Crea nuovo profilo Widget Account
                                     </button>
                                 </div>
                                 <div id="account-widgets-list" class="shared-account-fields"></div>
@@ -265,7 +265,7 @@
                                 <label class="option-card border-glow">
                                     <div class="option-content">
                                         <span
-                                            class="material-symbols-outlined icon-accent-blue bg-blue-soft option-icon">share</span>
+                                            class="material-symbols-outlined icon-accent-blue bg-blue-soft option-icon notranslate" translate="no">share</span>
                                         <span class="option-label" data-t="shared_account">Account Condiviso</span>
                                     </div>
                                     <input class="hidden" type="checkbox" id="flag-shared" />
@@ -284,7 +284,7 @@
                                 <div id="rubrica-suggestions" class="hidden suggestions-box">
                                 </div>
                                 <a class="base-btn-secondary manage-recipients-link" href="gestione_destinatari.html">
-                                    <span class="material-symbols-outlined">manage_accounts</span>
+                                    <span class="material-symbols-outlined notranslate" translate="no">manage_accounts</span>
                                     Gestisci destinatari
                                 </a>
                             </div>
@@ -293,7 +293,7 @@
                             <label class="option-card border-glow">
                                 <div class="option-content">
                                     <span
-                                        class="material-symbols-outlined icon-accent-orange bg-orange-soft option-icon">lightbulb</span>
+                                        class="material-symbols-outlined icon-accent-orange bg-orange-soft option-icon notranslate" translate="no">lightbulb</span>
                                     <span class="option-label" data-t="memorandum">Memorandum</span>
                                 </div>
                                 <input class="hidden" type="checkbox" id="flag-memo" />
@@ -304,7 +304,7 @@
                             <label class="option-card border-glow">
                                 <div class="option-content">
                                     <span
-                                        class="material-symbols-outlined icon-accent-green bg-green-soft option-icon">broadcast_on_personal</span>
+                                        class="material-symbols-outlined icon-accent-green bg-green-soft option-icon notranslate" translate="no">broadcast_on_personal</span>
                                     <span class="option-label" data-t="memo_shared">Memorandum Condiviso</span>
                                 </div>
                                 <input class="hidden" type="checkbox" id="flag-memo-shared" />

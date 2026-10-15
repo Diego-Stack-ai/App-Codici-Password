@@ -195,7 +195,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                                     rebuildOptions();
                                     showToast('Etichetta aggiornata!', 'success');
                                 }
-                            }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'edit' })]),
+                            }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon notranslate', textContent: 'edit' })]),
                             createElement('button', {
                                 className: 'btn-action-mini profile-label-action profile-label-delete',
                                 title: `Elimina ${opt}`,
@@ -217,7 +217,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                                     rebuildOptions();
                                     showToast('Etichetta eliminata!', 'success');
                                 }
-                            }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'delete' })])
+                            }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon notranslate', textContent: 'delete' })])
                         ]) : null
                     ]));
 
@@ -238,7 +238,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                             showToast('Etichetta aggiunta!', 'success');
                         }
                     }, [
-                        createElement('span', { className: 'material-symbols-outlined profile-label-add-icon', textContent: 'add_circle' }),
+                        createElement('span', { className: 'material-symbols-outlined profile-label-add-icon notranslate', textContent: 'add_circle' }),
                         createElement('span', { textContent: 'Aggiungi etichetta...' })
                     ]));
                     setChildren(menu, rows);
@@ -255,7 +255,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                     }
                 }, [
                     selectedText,
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'expand_more' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'expand_more' })
                 ]);
 
                 finalInputEl = createElement('div', { className: 'custom-select-wrapper' }, [hiddenSelect, trigger, menu]);
@@ -310,7 +310,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                             }
                         }
                     }, [
-                        createElement('span', { className: 'material-symbols-outlined profile-modal-visibility-icon', textContent: 'visibility_off' })
+                        createElement('span', { className: 'material-symbols-outlined profile-modal-visibility-icon notranslate', textContent: 'visibility_off' })
                     ]);
                     finalInputEl = createElement('div', {
                         className: 'flex-center-row profile-modal-sensitive-row'

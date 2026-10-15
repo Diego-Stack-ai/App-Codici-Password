@@ -3,7 +3,7 @@
 
 <head>
   <script src="assets/js/private-auth-gate.js"></script>
-  <script src="assets/js/home-bootstrap.js?v=1.2.188"></script>
+  <script src="assets/js/home-bootstrap.js?v=1.2.189"></script>
   <!-- Anti-flicker & Theme Master (V3.9) -->
   <script src="assets/js/theme-init.js"></script>
   <meta charset="UTF-8">
@@ -11,19 +11,19 @@
   <title>Home Page</title>
 
   <!-- PWA / Mobile Capable -->
-  <link rel="manifest" href="manifest.json?v=1.2.188" />
+  <link rel="manifest" href="manifest.json?v=1.2.189" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Design System Master (PROTOCOLLO V5.0) -->
-  <link rel="stylesheet" href="assets/css/core.css?v=1.2.188">
+  <link rel="stylesheet" href="assets/css/core.css?v=1.2.189">
   <link rel="stylesheet" href="assets/css/core_fonts.css">
   <link rel="stylesheet" href="assets/css/core_fascie.css">
-  <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.2.188">
-  <link rel="stylesheet" href="assets/css/home_page.css?v=1.2.188">
-  <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.188">
+  <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.2.189">
+  <link rel="stylesheet" href="assets/css/home_page.css?v=1.2.189">
+  <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.189">
 </head>
 
 <body data-private-auth hidden inert class="base-bg home-page" data-ui-model="hub">
@@ -38,13 +38,13 @@
       <div class="page-container pt-header-extra pb-footer-extra">
         <div class="matrix-grid">
           <a href="area_privata.html" class="matrix-card card-blue border-glow adaptive-shadow area-privato">
-            <div class="matrix-icon-box"><span class="material-symbols-outlined">lock</span></div>
+            <div class="matrix-icon-box"><span class="material-symbols-outlined notranslate" translate="no">lock</span></div>
             <div class="card-text-block">
               <h3 data-t="section_private_title">Privato</h3>
             </div>
           </a>
           <a href="lista_aziende.html" class="matrix-card card-green border-glow adaptive-shadow area-azienda" data-company-area>
-            <div class="matrix-icon-box"><span class="material-symbols-outlined">apartment</span></div>
+            <div class="matrix-icon-box"><span class="material-symbols-outlined notranslate" translate="no">apartment</span></div>
             <div class="card-text-block">
               <h3 data-t="section_company_title">Azienda</h3>
             </div>
@@ -53,7 +53,7 @@
           <a href="scadenze.html?filter=in_scadenza"
             class="matrix-card card-orange border-glow adaptive-shadow area-scadenze">
             <div class="matrix-card-top-row">
-              <div class="matrix-icon-box"><span class="material-symbols-outlined">calendar_month</span></div>
+              <div class="matrix-icon-box"><span class="material-symbols-outlined notranslate" translate="no">calendar_month</span></div>
               <span id="upcoming-count-badge" class="badge-count badge-initial-hide">
                 <span id="upcoming-count">0</span>
               </span>
@@ -67,7 +67,7 @@
 
           <a href="scadenze.html?filter=urgenti" class="matrix-card card-red border-glow adaptive-shadow area-urgenze">
             <div class="matrix-card-top-row">
-              <div class="matrix-icon-box"><span class="material-symbols-outlined">warning</span></div>
+              <div class="matrix-icon-box"><span class="material-symbols-outlined notranslate" translate="no">warning</span></div>
               <span id="expired-count-badge" class="badge-count badge-initial-hide">
                 <span id="expired-count">0</span>
               </span>
@@ -82,13 +82,13 @@
 
         <button id="app-presentation-open" class="app-presentation-open" type="button"
           aria-haspopup="dialog" aria-controls="app-presentation-modal">
-          <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
+          <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">play_circle</span>
           <span>Presentazione dell’app</span>
         </button>
 
         <!-- Versione applicazione: valorizzata dalla configurazione centrale -->
         <div class="version-display">
-          APP VERSION: <span id="app-version-label" data-app-version>v1.2.188</span>
+          APP VERSION: <span id="app-version-label" data-app-version>v1.2.189</span>
         </div>
       </div>
 
@@ -109,17 +109,17 @@
         </div>
         <button class="app-presentation-close" type="button" data-presentation-close
           aria-label="Chiudi presentazione">
-          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">close</span>
         </button>
       </header>
       <div id="app-presentation-stage" class="app-presentation-stage">
         <div class="app-presentation-loading" role="status">
-          <span class="material-symbols-outlined" aria-hidden="true">movie</span>
+          <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">movie</span>
           <span>Premi Riproduci per caricare il video protetto.</span>
         </div>
       </div>
       <button id="app-presentation-play" class="app-presentation-play" type="button">
-        <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+        <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">play_arrow</span>
         <span>Riproduci</span>
       </button>
     </section>
