@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 if (isPrivatePage && !firstConfigurationComplete && firstConfiguration.pageRequiresFirstConfiguration(currentPage)) {
-                    firstConfiguration.openFirstConfigurationDialog({ blocking: true });
+                    await firstConfiguration.openFirstConfigurationDialog({ blocking: true });
                     return;
                 }
 
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
                 }
                 if (currentPage === 'home' && !firstConfigurationComplete) {
-                    firstConfiguration.openFirstConfigurationDialog({ blocking: false });
+                    await firstConfiguration.openFirstConfigurationDialog({ blocking: false });
                 }
                 if (isPrivatePage) endMetric('private-page-bootstrap', { page: currentPage });
 

@@ -1308,12 +1308,12 @@ async function loadUserData(user) {
         const firstConfigurationStatus = document.getElementById('first-configuration-status');
         if (firstConfigurationStatus) {
             safeSetText(firstConfigurationStatus,
-                configurationText(readFirstConfiguration(currentUserData).complete
+                await configurationText(readFirstConfiguration(currentUserData).complete
                     ? 'first_config_status_complete'
                     : 'first_config_status_pending'));
-            document.querySelectorAll('[data-onboarding-key]').forEach(element => {
-                element.textContent = configurationText(element.dataset.onboardingKey);
-            });
+            for (const element of document.querySelectorAll('[data-onboarding-key]')) {
+                element.textContent = await configurationText(element.dataset.onboardingKey);
+            }
         }
     } catch (e) {
         console.error(e);

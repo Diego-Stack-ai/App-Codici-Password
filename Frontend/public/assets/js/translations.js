@@ -1,5 +1,4 @@
 import { LOG } from './logger.js';
-import { settingsCatalogs } from './translations/settings.js';
 
 const APP_LANGUAGE_CODES = ['it', 'en', 'es', 'fr', 'de', 'zh', 'hi', 'pt'];
 const normalizeAppLanguage = (value, fallback = 'it') => {
@@ -7,26 +6,16 @@ const normalizeAppLanguage = (value, fallback = 'it') => {
     return APP_LANGUAGE_CODES.includes(code) ? code : fallback;
 };
 
-/**
- * TRANSLATIONS LAZY LOADER (V2.0 — Auto-generato il 2026-06-06)
- * Italiano caricato inline (fallback universale, ~9.5 KB).
- * Altre 7 lingue caricate on-demand via import() dinamico da ./translations/{lang}.js
- *
- * API pubblica:
- *   loadLanguage(lang) — async, chiama all'avvio PRIMA di qualsiasi render
- *   t(key)            — sincrona, traduce la chiave nella lingua attiva
- *   applyGlobalTranslations() — applica data-t, data-t-placeholder, data-t-aria al DOM
- *
- * Rigenera le lingue con: node scripts/split-translations.mjs
- */
-
-// ─── Dizionario runtime (lingua attiva) ──────────────────────────────────────
 let _dict = {};
+const needsSettingsCatalog = () => /(?:^|\/)impostazioni(?:\.html)?$/i.test(location.pathname);
+async function loadPageCatalog(language) {
+    if (!needsSettingsCatalog()) return {};
+    const { settingsCatalogs } = await import('./translations/settings.js');
+    return settingsCatalogs[language] || {};
+}
 let _activeLanguage = 'it';
 const _missingKeys = new Set();
-let _translationObserver = null;
 
-// ─── Italiano inline (fallback universale) ────────────────────────────────────
 const _it = {
         account_archive: "Archivio Account",
         account_archive_desc: "Gestisci gli account archiviati",
@@ -416,11 +405,6 @@ export function getCurrentLanguage() {
     try { return normalizeAppLanguage(localStorage.getItem('app_language')); } catch { return 'it'; }
 }
 
-/**
- * Carica la lingua attiva. Da chiamare ALL'AVVIO prima di qualsiasi render.
- * Italiano è disponibile immediatamente senza alcuna fetch (inline).
- * @param {string} lang - Codice lingua (es. 'it', 'en')
- */
 export async function loadLanguage(lang = 'it') {
     lang = normalizeAppLanguage(lang || 'it');
     _activeLanguage = lang;
@@ -428,27 +412,21 @@ export async function loadLanguage(lang = 'it') {
     document.documentElement.lang = lang;
     document.documentElement.dir = 'ltr';
     if (lang === 'it') {
-        _dict = { ..._it, ...settingsCatalogs.it };
+        _dict = { ..._it, ...(await loadPageCatalog('it')) };
         LOG('[i18n] Lingua attiva: it (inline)');
         return;
     }
     try {
-        // Risolve il percorso relativo a questo modulo
         const baseUrl = import.meta.url.replace(/[^/]+$/, '');
         const module = await import(`${baseUrl}translations/${lang}.js`);
-        _dict = { ...module.default, ...(settingsCatalogs[lang] || {}) };
+        _dict = { ...module.default, ...(await loadPageCatalog(lang)) };
         LOG(`[i18n] Lingua attiva: ${lang} (${Object.keys(_dict).length} chiavi)`);
     } catch (e) {
         console.warn(`[i18n] Lingua '${lang}' non disponibile — fallback a 'it'`);
-        _dict = { ..._it, ...settingsCatalogs.it };
+        _dict = { ..._it, ...(await loadPageCatalog('it')) };
     }
 }
 
-/**
- * Traduce una chiave nella lingua attiva.
- * Fallback: chiave italiana → chiave grezza se non trovata.
- * SINCRONA — funziona solo dopo che loadLanguage() è stato chiamato.
- */
 export function t(key) {
     if (_dict[key]) return _dict[key];
     if (_activeLanguage !== 'it') {
@@ -463,56 +441,28 @@ export function getMissingTranslationKeys() {
     return [..._missingKeys].sort();
 }
 
+const TRANSLATED_ATTRIBUTES = [
+    ['placeholder', 'tPlaceholder'], ['aria-label', 'tAria'],
+    ['title', 'tTitle'], ['alt', 'tAlt']
+];
+
 export function setTranslatedText(element, key) {
-    if (!element || !key) return element;
-    element.dataset.t = key;
-    element.textContent = t(key);
+    if (element && key) Object.assign(element, { textContent: t(key) }).dataset.t = key;
     return element;
 }
 
-export function setTranslatedAttribute(element, attribute, key) {
-    if (!element || !attribute || !key) return element;
-    const datasetName = `t${attribute.charAt(0).toUpperCase()}${attribute.slice(1)}`;
-    element.dataset[datasetName] = key;
-    element.setAttribute(attribute === 'aria' ? 'aria-label' : attribute, t(key));
-    return element;
+function translateElement(element) {
+    if (element.dataset.t) element.textContent = t(element.dataset.t);
+    for (const [attribute, datasetKey] of TRANSLATED_ATTRIBUTES) {
+        const key = element.dataset[datasetKey];
+        if (key) element.setAttribute(attribute, t(key));
+    }
 }
 
-/**
- * Applica le traduzioni agli elementi DOM con data-t, data-t-placeholder, data-t-aria.
- * Da richiamare dopo loadLanguage() e dopo ogni cambio lingua.
- */
 export function applyGlobalTranslations(root = document) {
-    root.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.dataset.t;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.textContent = val;
-    });
-    root.querySelectorAll('[data-t-placeholder]').forEach(el => {
-        const key = el.dataset.tPlaceholder;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.placeholder = val;
-    });
-    root.querySelectorAll('[data-t-aria]').forEach(el => {
-        const key = el.dataset.tAria;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.setAttribute('aria-label', val);
-    });
-    root.querySelectorAll('[data-t-title]').forEach(el => {
-        const key = el.dataset.tTitle;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.setAttribute('title', val);
-    });
-    root.querySelectorAll('[data-t-alt]').forEach(el => {
-        const key = el.dataset.tAlt;
-        if (!key) return;
-        const val = t(key);
-        if (val && val !== key) el.setAttribute('alt', val);
-    });
+    const selector = '[data-t],[data-t-placeholder],[data-t-aria],[data-t-title],[data-t-alt]';
+    if (root instanceof Element && root.matches(selector)) translateElement(root);
+    root.querySelectorAll(selector).forEach(translateElement);
     if (root === document) {
         document.documentElement.setAttribute('data-i18n', 'ready');
         if (!_missingKeys.size) delete document.documentElement.dataset.i18nFallback;
@@ -523,22 +473,8 @@ export function applyGlobalTranslations(root = document) {
 }
 
 export function observeTranslatedSubtrees(root = document.body) {
-    _translationObserver?.disconnect();
-    if (!root || typeof MutationObserver === 'undefined') return () => {};
-    _translationObserver = new MutationObserver(records => {
-        for (const record of records) {
-            for (const node of record.addedNodes) {
-                if (!(node instanceof Element)) continue;
-                if (node.matches('[data-t],[data-t-placeholder],[data-t-aria],[data-t-title],[data-t-alt]')) {
-                    applyGlobalTranslations({ querySelectorAll: selector => [node, ...node.querySelectorAll(selector)].filter(item => item.matches(selector)) });
-                } else {
-                    applyGlobalTranslations(node);
-                }
-            }
-        }
-    });
-    _translationObserver.observe(root, { childList: true, subtree: true });
-    return () => _translationObserver?.disconnect();
+    const moduleUrl = new URL('./translations/', import.meta.url);
+    import(`${moduleUrl.href}observer.js`).then(module => module.observeTranslatedSubtrees(root));
 }
 
 // Compatibilità con vecchi moduli

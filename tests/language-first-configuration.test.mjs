@@ -76,10 +76,13 @@ test('registrazione e Impostazioni persistono lingua e completamento senza tradu
 
 test('runtime i18n traduce tutti gli attributi dichiarati e osserva i sottoalberi dinamici', async () => {
     const source = await readFile('Frontend/public/assets/js/translations.js', 'utf8');
+    const observer = await readFile('Frontend/public/assets/js/translations/observer.js', 'utf8');
     for (const attribute of ['data-t', 'data-t-placeholder', 'data-t-aria', 'data-t-title', 'data-t-alt']) {
-        assert.match(source, new RegExp(`querySelectorAll\\('\\[${attribute}\\]'\\)`));
+        assert.match(source, new RegExp(`\\[${attribute}\\]`));
     }
     assert.match(source, /export function observeTranslatedSubtrees/);
+    assert.match(observer, /new MutationObserver/);
+    assert.match(observer, /applyGlobalTranslations\(node\)/);
     assert.match(source, /dataset\.i18nFallback = 'true'/);
     assert.match(source, /missingKeys: getMissingTranslationKeys\(\)/);
 });

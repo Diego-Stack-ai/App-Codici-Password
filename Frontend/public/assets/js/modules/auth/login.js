@@ -25,7 +25,7 @@ export async function initLogin() {
     
 
     try {
-        openInitialLanguageDialog({ required: false });
+        await openInitialLanguageDialog({ required: false });
         // 1. AppState di base (Local Scope o Global se necessario per compatibilità)
         let savedLang = 'it';
         try { savedLang = localStorage.getItem('app_language') || 'it'; } catch (e) { }

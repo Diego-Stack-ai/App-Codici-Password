@@ -249,6 +249,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/translations/fr.js",
   "assets/js/translations/hi.js",
   "assets/js/translations/onboarding.js",
+  "assets/js/translations/observer.js",
   "assets/js/translations/pt.js",
   "assets/js/translations/settings.js",
   "assets/js/translations/zh.js",
