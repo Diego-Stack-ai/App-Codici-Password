@@ -29,7 +29,7 @@ async function walk(directory) {
 }
 
 const sourceFiles = (await walk(jsDir))
-  .filter(file => file.endsWith('.js'))
+  .filter(file => /\.m?js$/i.test(file))
   .filter(file => !file.startsWith(vendorDir));
 const requestedExports = new Map();
 const requestedNames = new Set();
@@ -104,7 +104,7 @@ await build({
   legalComments: 'none'
 });
 
-const cacheableExtensions = new Set(['.html', '.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
+const cacheableExtensions = new Set(['.html', '.js', '.mjs', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2', '.ttf']);
 const onlineOnlyDiagnostics = new Set([
   'prova.html',
   'assets/css/prova.css',

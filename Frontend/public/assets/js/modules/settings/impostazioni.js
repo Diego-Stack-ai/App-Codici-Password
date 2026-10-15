@@ -18,6 +18,9 @@ import { runAppDiagnostics } from '../../app-diagnostics.js';
 import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vault-repository.js';
 import { setupPushSettings } from './push-settings-controller.js?push=20260908b';
 import { configurationText, firstConfigurationPatch, readFirstConfiguration, setLanguagePreference } from './first-configuration.js';
+import {evaluatePortableArchivePassword} from './portable-archive-stream.mjs';
+
+const portableArchiveModulePromise = import('./portable-archive-service.js');
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -43,6 +46,7 @@ export async function initImpostazioni(user) {
     setupTermsShort();
     setupPerformanceDiagnostics();
     setupEncryptedBackup(user);
+    setupPortableArchive(user);
     setupEncryptedRestore(user);
     setupCredentialHealth(user);
     setupAccountFieldUsage(user);
@@ -820,6 +824,121 @@ function setupEncryptedBackup(user) {
     };
     button.addEventListener('click', click);
     disposeExportSetup = () => { currentAction?.dispose(); button.removeEventListener('click', click); button.disabled = false; };
+}
+
+let disposePortableArchiveSetup = () => {};
+function setupPortableArchive(user) {
+    disposePortableArchiveSetup();
+    const button = document.getElementById('btn-export-portable-archive');
+    if (!button || auth.currentUser?.uid !== user.uid) return;
+    let currentAction = null;
+    const click = () => {
+        if (button.disabled || auth.currentUser?.uid !== user.uid) return;
+        const action = createBackupRestoreAction(user.uid, button);
+        currentAction = action;
+        button.disabled = true;
+        const modal = createElement('div', {className: 'modal-overlay'});
+        const password = createElement('input', {
+            type: 'password', className: 'glass-field modal-input-glass', autocomplete: 'new-password',
+            placeholder: 'Password archivio robusta (almeno 14 caratteri)', 'aria-label': 'Password archivio portabile'
+        });
+        const confirmation = createElement('input', {
+            type: 'password', className: 'glass-field modal-input-glass', autocomplete: 'new-password',
+            placeholder: 'Ripeti la password', 'aria-label': 'Conferma password archivio portabile'
+        });
+        const includeAttachments = createElement('input', {type: 'checkbox', checked: true, id: 'portable-include-attachments'});
+        const acknowledged = createElement('input', {type: 'checkbox', id: 'portable-risk-ack'});
+        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
+        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Crea archivio', disabled: true});
+        const status = createElement('p', {className: 'portable-archive-status', role: 'alert'});
+        const validate = () => {
+            const assessment = evaluatePortableArchivePassword(password.value);
+            const same = password.value === confirmation.value;
+            startButton.disabled = !(assessment.valid && same && acknowledged.checked);
+            status.textContent = password.value && !assessment.valid
+                ? assessment.message
+                : confirmation.value && !same ? 'Le password non coincidono.'
+                    : assessment.valid ? assessment.message : '';
+        };
+        password.addEventListener('input', validate);
+        confirmation.addEventListener('input', validate);
+        acknowledged.addEventListener('change', validate);
+        const close = () => { password.value = ''; confirmation.value = ''; modal.remove(); };
+        action.own(() => { close(); if (currentAction === action) button.disabled = false; });
+        cancelButton.addEventListener('click', () => action.dispose());
+        startButton.addEventListener('click', async () => {
+            if (!action.active() || startButton.disabled) return;
+            startButton.disabled = true;
+            const archivePassword = password.value;
+            const createdAt = new Date().toISOString();
+            let preparedOutput = null;
+            let working = null;
+            try {
+                const archiveModule = await portableArchiveModulePromise;
+                preparedOutput = await archiveModule.preparePortableArchiveOutput(createdAt);
+                action.check();
+                password.value = ''; confirmation.value = '';
+                close();
+                working = showBackupWorking(
+                    'Creazione archivio portabile…',
+                    'I dati vengono decifrati soltanto in memoria, cifrati a blocchi e scritti progressivamente.', action
+                );
+                const vaultKey = await ensureVaultKeyMaterial({forceReload: true, promptImmediately: true});
+                action.check();
+                const result = await archiveModule.exportPortableArchive(user.uid, {
+                    password: archivePassword, vaultKey, includeAttachments: includeAttachments.checked,
+                    signal: action.signal, isActive: action.active, preparedOutput, createdAt
+                });
+                preparedOutput = null;
+                action.check();
+                const destination = result.streamed
+                    ? ` Pacchetto salvato nella cartella ${result.packageName}.`
+                    : ' Browser senza salvataggio progressivo: scaricati archivio e visualizzatore separati entro il limite sicuro.';
+                showToast(`Archivio creato: ${result.recordCount} schede e ${result.attachmentCount} allegati.${destination}`, 'success');
+            } catch (error) {
+                try { await preparedOutput?.cleanup(); } catch {}
+                if (action.active() && error?.name !== 'AbortError') {
+                    const capacityCodes = new Set(['PORTABLE_CAPACITY_EXCEEDED', 'PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED']);
+                    const inventoryCodes = new Set([
+                        'PORTABLE_ATTACHMENT_INVENTORY_DUPLICATE', 'PORTABLE_ATTACHMENT_INVENTORY_MISMATCH',
+                        'PORTABLE_ATTACHMENT_OWNER_MISSING', 'PORTABLE_ATTACHMENT_METADATA_CONFLICT'
+                    ]);
+                    const message = capacityCodes.has(error?.code)
+                        ? 'Gli allegati superano la capacità sicura di questa versione. Ripeti senza allegati oppure riduci i file inclusi.'
+                        : inventoryCodes.has(error?.code)
+                            ? 'Gli allegati non corrispondono in modo completo alle schede: archivio interrotto senza creare una copia parziale.'
+                            : error?.code === 'PORTABLE_DECRYPT_FAILED'
+                                ? 'Un dato non è decifrabile: archivio interrotto senza creare una copia incompleta.'
+                                : error?.code === 'PORTABLE_STREAMING_REQUIRED'
+                                    ? 'Questo browser non può salvare progressivamente un archivio di queste dimensioni. Usa un browser desktop Chromium oppure ripeti senza allegati.'
+                                : 'Archivio non creato. Nessun dato è stato modificato.';
+                    showToast(message, 'error');
+                }
+            } finally {
+                working?.close();
+                action.dispose();
+            }
+        });
+        modal.appendChild(createElement('div', {className: 'modal-box portable-archive-modal'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'folder_zip'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Esporta archivio portabile'}),
+            createElement('p', {className: 'modal-text', textContent: 'Stai creando una copia leggibile dei tuoi dati, utilizzabile anche al di fuori di questa app.'}),
+            createElement('p', {className: 'portable-archive-warning', textContent: 'La copia può contenere dati personali, credenziali e allegati sensibili. Conservala in un luogo sicuro e non condividerla con persone non autorizzate.'}),
+            password, confirmation,
+            createElement('label', {className: 'portable-archive-choice'}, [includeAttachments, createElement('span', {textContent: 'Includi gli allegati'})]),
+            createElement('label', {className: 'portable-archive-choice'}, [acknowledged, createElement('span', {textContent: 'Ho compreso che questo file non è un backup reimportabile.'})]),
+            status,
+            createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
+        ]));
+        document.body.appendChild(modal);
+        requestAnimationFrame(() => { if (action.active()) { modal.classList.add('active'); password.focus(); } });
+    };
+    button.addEventListener('click', click);
+    disposePortableArchiveSetup = () => {
+        currentAction?.dispose();
+        button.removeEventListener('click', click);
+        button.disabled = false;
+    };
 }
 
 async function setupSettingsProfileQr(user) {

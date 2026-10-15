@@ -758,6 +758,40 @@ h3.settings-desc {
     }
 }
 
+.portable-archive-modal {
+    width: min(92vw, 34rem);
+}
+
+.portable-archive-warning {
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.14);
+    color: var(--text-primary);
+    font-size: var(--fs-xs);
+}
+
+.portable-archive-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    width: 100%;
+    margin: 0.55rem 0;
+    text-align: left;
+}
+
+.portable-archive-choice input {
+    flex: 0 0 auto;
+    margin-top: 0.2rem;
+}
+
+.portable-archive-status {
+    min-height: 1.25rem;
+    margin: 0.3rem 0 0;
+    color: var(--danger-color, #b91c1c);
+    font-size: var(--fs-xs);
+}
+
 .shared-credentials-heading,
 .shared-credentials-card,
 .shared-credentials-sensitive {
