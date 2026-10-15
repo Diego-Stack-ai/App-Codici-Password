@@ -52,6 +52,8 @@ Prima fase:
 
 **Uscita P1:** pacchetto completo verificato su almeno due programmi compatibili ODS e nei browser destinatari, inventario allegati riconciliato, nessun segreto in chiaro senza scelta e protezione esplicite, distinzione visibile da backup/ripristino.
 
+**Incremento locale PORTABILITA-01 (14–15/10/2026):** il percorso runtime nelle Impostazioni produce un pacchetto offline composto da visualizzatore e contenitore `.cpportable`. Il formato v2 cifra a chunk AES-GCM concatenati, scrive con backpressure tramite File System Access, autentica ordine, `entryCount`, manifest ed EOF e rifiuta output manomessi, riordinati, troncati, sovraccarichi o con dati dopo il terminatore prima di mostrare dati. Writer e lettori condividono limiti espliciti; la creazione applica una policy password robusta distinta dalla compatibilità di lettura. Annullamento ed errore rimuovono il file incompleto quando l'API lo consente; il fallback senza streaming conserva soltanto ciphertext ed è limitato a 12 MiB, senza promessa mobile. Le proiezioni includono JSON completo, ODS e CSV schema-evolutivi e protetti contro formula injection. Fixture, inventario multi-ambito, 10.000 record, browser desktop, test ostili, annullamento e capacità sono raccolti nel gate `test:portable-archive-prerelease`: il picco passa dai circa 627/1.075 MiB del monolite su 32/64 MiB a circa 284/296 MiB e resta circa 297 MiB su 256 MiB cumulativi. Il secondo programma ODS resta gate per dichiarare conclusa l'interoperabilità P1; i dispositivi fisici restano gate per l'attivazione generale mobile, non per una eventuale anteprima desktop esplicitamente limitata.
+
 ### P2 — Assistente specifico dell'app
 
 **Obiettivo:** trovare, spiegare e guidare; non offrire una chat generalista.
