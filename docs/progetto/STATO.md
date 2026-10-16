@@ -1,10 +1,10 @@
 # Stato
 
-## Candidata 1.2.195 — icone invio e microfono di Agente Codex — 16/10/2026
+## Release 1.2.195 pubblicata — icone invio e microfono di Agente Codex — 16/10/2026
 
 Il costruttore DOM interno di Agente Codex protegge ora tutte le proprie icone Material dinamiche con `notranslate` e `translate="no"`. In particolare i due comandi accanto al campo di testo continuano a mostrare le icone di invio e microfono anche quando Chrome tenta la traduzione automatica, invece delle ligature testuali tradotte.
 
-La modifica funzionale riguarda soltanto l'Assistente e dispone di una regressione dedicata per `arrow_upward` e `mic`; l'allineamento a `1.2.195` invalida la cache applicativa precedente. Nessuna modifica a Lingue, AI, guida, Rules, Functions o dati reali appartiene a questo hotfix. Implementazione e verifiche locali non equivalgono ancora a integrazione o Hosting distribuito.
+La modifica funzionale riguarda soltanto l'Assistente e dispone di una regressione dedicata per `arrow_upward` e `mic`; l'allineamento a `1.2.195` invalida la cache applicativa precedente. La release è stata integrata con PR `#155` e distribuita sul solo Firebase Hosting il 16/10/2026 dopo suite GitHub completa verde. La verifica HTTP successiva al deploy ha confermato versione `1.2.195`, protezione `notranslate`/`translate="no"` e presenza delle due icone nel modulo pubblico. Nessuna modifica a Lingue, AI, guida, Rules, Functions o dati reali appartiene a questo hotfix.
 
 ## Release 1.2.194 pubblicata — ricerca per anno, pacchetti AI e catalogo Archivio — 15/10/2026
 
