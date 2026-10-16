@@ -6,6 +6,8 @@ Diego autorizza una pubblicazione client strettamente limitata ai due comandi di
 
 Il perimetro comprende la correzione UI, il test anti-regressione, l'allineamento versione/cache a `1.2.195`, la documentazione obbligatoria, commit, push, integrazione e deploy del solo Firebase Hosting dopo gate verdi. Sono esclusi Lingue, nuova architettura AI, guida, Rules, Functions e dati reali.
 
+Esito: implementazione integrata con PR `#155` e release `1.2.195` pubblicata sul solo Firebase Hosting il 16/10/2026 dopo suite GitHub completa verde e verifica HTTP pubblica. Rules, Functions e dati reali non sono stati distribuiti.
+
 ## Release 1.2.194 — pacchetti AI, ricerca scadenze e catalogo Archivio — 15/10/2026
 
 Diego autorizza la correzione client dei difetti osservati dopo l'installazione locale di AI.2/AI.3: lo stato installato deve essere ricostruito dalla cache verificata anche quando il marcatore locale non sopravvive al refresh; una domanda naturale che identifica una scadenza per anno deve essere trattata come ricerca dei dati Vault e non richiedere la presenza delle parole colloquiali; il microfono deve poter inviare anche una domanda in modalità **Chiedi** e pronunciare la risposta asincrona dopo il rilascio della sessione audio.
