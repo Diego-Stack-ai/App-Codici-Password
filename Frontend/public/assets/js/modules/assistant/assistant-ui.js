@@ -60,11 +60,11 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         element('p', '', 'In Cerca puoi cercare il nome completo o parziale di un Account, poi dire “apri il secondo”, “apri il due” oppure indicare il nome esatto.'),
         element('p', '', onExplain
             ? 'In Chiedi il pacchetto locale spiega questa pagina senza inviare dati a servizi esterni.'
-            : 'Per usare Chiedi installa e attiva AI.2 o AI.3 nelle Impostazioni.')
+            : 'Per usare Chiedi installa e verifica AI.1 Locale oppure AI.2 Avanzata per PC nelle Impostazioni.')
     );
     const modeNotice = element('p', 'vault-assistant-mode-notice', onExplain
         ? 'Chiedi usa il pacchetto AI locale installato e non invia contenuti a servizi esterni.'
-        : 'Installa e attiva AI.2 o AI.3 nelle Impostazioni. Cerca resta sempre disponibile.');
+        : 'Installa e verifica AI.1 Locale oppure AI.2 Avanzata per PC nelle Impostazioni. Cerca resta sempre disponibile.');
     modeNotice.hidden = true;
 
     const conversation = element('div', 'vault-assistant-conversation'); conversation.setAttribute('aria-live', 'polite');
@@ -194,26 +194,34 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             swipeLists.clear(); swipeLists.add(swipeList);
         }
     };
+    let lastShortlist = [];
     const ask = query => {
         const value = query.trim(); if (!value) return;
         addBubble('user', value); input.value = '';
         if (!onExplain || activeMode === 'search') {
-            const answer = onAsk(value); addBubble('assistant', answer.message); void addResults(answer.items || []);
+            const answer = onAsk(value); if (answer.items?.length) lastShortlist = answer.items;
+            addBubble('assistant', answer.message); void addResults(answer.items || []);
             if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
             return answer;
         }
         const vaultAnswer = onAsk(value);
         if (vaultAnswer?.items?.length || vaultAnswer?.navigateTo) {
+            if (vaultAnswer.items?.length) lastShortlist = vaultAnswer.items;
             addBubble('assistant', vaultAnswer.message); void addResults(vaultAnswer.items || []);
             if (vaultAnswer.navigateTo) window.setTimeout(() => { window.location.href = vaultAnswer.navigateTo; }, 450);
             return Promise.resolve(vaultAnswer);
         }
         status.textContent = 'Elaborazione locale…';
-        return onExplain(value).then(message => {
+        return onExplain(value, { shortlist:lastShortlist }).then(message => {
             addBubble('assistant', message); return { message, items:[] };
-        }).catch(error => {
-            const message = `AI locale non disponibile: ${error.message}. Puoi continuare con Cerca.`;
-            addBubble('assistant', message); return { message, items:[] };
+        }).catch(() => {
+            const fallback = onAsk(value);
+            const message = fallback?.items?.length
+                ? fallback.message
+                : 'Il pacchetto locale non è pronto su questo dispositivo. Puoi continuare con Cerca.';
+            if (fallback?.items?.length) lastShortlist = fallback.items;
+            addBubble('assistant', message); void addResults(fallback?.items || []);
+            return { message, items:fallback?.items || [] };
         }).finally(() => { status.textContent = 'I dati segreti non vengono mostrati nella conversazione.'; });
     };
     searchRow.addEventListener('submit', event => { event.preventDefault(); void ask(input.value); });

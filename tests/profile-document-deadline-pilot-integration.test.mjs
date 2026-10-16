@@ -11,12 +11,13 @@ test('salvataggio documento offre il pilot soltanto dopo la persistenza', async 
   assert.ok(saveIndex > -1 && offerIndex > saveIndex);
 });
 
-test('runtime pilot mantiene consegna e allegati disattivati', async () => {
+test('runtime pilot mantiene le consegne disattivate e collega gli allegati del documento', async () => {
   const source = await read('Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot.js');
   assert.match(source, /pilotDeliveryDisabled:\s*true/);
   assert.match(source, /notificationsEnabled:\s*false/);
   assert.match(source, /recipients:\s*\[\]/);
-  assert.match(source, /attachments:\s*\[\]/);
+  assert.match(source, /buildLinkedDocumentDeadlineDraft/);
+  assert.match(source, /attachments:\s*linkedDraft\.attachments/);
   assert.match(source, /showConfirmModal/);
   assert.match(source, /await ensureDocumentPersisted\?\.\(\)/);
   assert.doesNotMatch(source, /uploadBytes|httpsCallable|sendEmail/);

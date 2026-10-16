@@ -31,6 +31,10 @@ export function profileDocumentPilotTitle(documentItem = {}) {
     return `Prova scadenze · ${normalizedProfileDocumentType(documentItem.type)}`;
 }
 
+export function profileDocumentNumber(documentItem = {}) {
+    return String(documentItem.num_serie || documentItem.id_number || documentItem.cf_value || '').trim();
+}
+
 export function hasTraditionalProfileDocumentDeadlineReference(documentItem = {}) {
     return Boolean(documentItem.expiryReference?.deadlineId
         && documentItem.expiryReference.experimentTag !== PROFILE_DOCUMENT_DEADLINE_EXPERIMENT);
@@ -109,11 +113,17 @@ export function planProfileDocumentDeadlineReconciliation(documentItem = {}, dea
     return Object.freeze({action: 'current', candidate, deadline});
 }
 
-export function buildProfileDocumentPilotDeadline(documentItem = {}, profile = {}, now = new Date()) {
+export function buildProfileDocumentPilotDeadline(documentItem = {}, profile = {}, now = new Date(), {attachments = []} = {}) {
     const candidate = profileDocumentDeadlineCandidate(documentItem);
     if (!candidate) throw new Error('PROFILE_DOCUMENT_EXPIRY_MISSING');
     const owner = [profile.nome, profile.cognome].filter(Boolean).join(' ').trim();
     const documentType = normalizedProfileDocumentType(documentItem.type);
+    const documentNumber = profileDocumentNumber(documentItem);
+    const linkedAttachments = (Array.isArray(attachments) ? attachments : [])
+        .filter(item => item?.linkedSource?.type === 'profileDocumentAttachment'
+            && typeof item.storagePath === 'string'
+            && item.storagePath.includes(`/profile-documents/${candidate.sourceDocumentId}/attachments/`))
+        .map(item => Object.freeze({...item, linkedSource: Object.freeze({...item.linkedSource})}));
     return Object.freeze({
         ...candidate,
         experimentTag: PROFILE_DOCUMENT_DEADLINE_EXPERIMENT,
@@ -125,12 +135,15 @@ export function buildProfileDocumentPilotDeadline(documentItem = {}, profile = {
         recipients: [],
         email1: '',
         email2: '',
-        attachments: [],
+        attachments: linkedAttachments,
+        sourceAttachmentCountAtLink: linkedAttachments.length,
         name: owner || 'Utente',
         title: profileDocumentPilotTitle(documentItem),
         documentType,
+        documentNumber,
         type: documentType,
         category: documentType,
+        templateText: documentNumber ? `${documentType} · ${documentNumber}` : documentType,
         mode: 'documenti',
         completed: false,
         notif_days_before: 14,

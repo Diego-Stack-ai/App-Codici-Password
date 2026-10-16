@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Candidata 1.2.197 — AI locale, Scadenze documenti e Archivio portabile — 16/10/2026
+
+Diego autorizza l'integrazione e la pubblicazione congiunta sul solo Firebase Hosting di tre lotti già sviluppati in worktree isolati. L'Assistente espone due prodotti: **AI.1 Locale**, che unisce ricerca deterministica e pacchetto semantico installabile, e **AI.2 Avanzata per PC**, con taglie `light`, `medium` e `power` selezionate da capability probe, quota e verifica runtime. Il modello non accede direttamente al Vault e i pacchetti same-origin non entrano nella shell offline.
+
+Il pilot **Prova scadenze** conserva l'identità documento+campo e aggiunge alla copia sperimentale il numero del documento, il testo descrittivo e i riferimenti agli allegati DS-002 già esistenti, senza duplicare file. Invii Email e Push restano disattivati: la presenza dei riferimenti non costituisce invio degli allegati. Le Scadenze tradizionali non vengono migrate o sostituite e il marcatore **Prova scadenze** resta visibile per un ulteriore collaudo reale dell'utente.
+
+Il visualizzatore dell'**Archivio portabile** usa una navigazione a tre colonne — sezione, elenco ricercabile, dettaglio — mostra etichette italiane comprensibili, filtra gli Account aziendali per azienda e rende gli allegati immagine visualizzabili o scaricabili senza esporre il Base64 come campo. JSON, CSV e ODS restano disponibili sotto **Esportazioni tecniche**. Il formato cifrato v2, i limiti e la distinzione dal backup non cambiano.
+
+Il rilascio comprende codice client, asset AI ospitati su Firebase Hosting, test, versione e documentazione. Sono esclusi Functions, Rules, indici, dati reali, invii e migrazioni. Implementazione locale, commit, push, integrazione e distribuzione devono essere registrati separatamente; la candidata diventa pubblicata soltanto dopo gate locali, controlli remoti e verifica HTTP della versione `1.2.197`.
+
 ## Candidata 1.2.196 — «Prova scadenze» dai documenti del Profilo — 16/10/2026
 
 Diego autorizza un pilot isolato che lascia invariati i record e i flussi delle Scadenze tradizionali. Dopo il salvataggio di un documento personale dotato del campo standard `expiry_date`, l'app propone — senza creare nulla prima della conferma — una Scadenza riconoscibile dal badge **Prova scadenze**. I tre documenti già presenti restano utilizzabili tramite il comando contestuale nella rispettiva card; non è autorizzato alcun accesso automatico ai dati reali durante sviluppo o test.

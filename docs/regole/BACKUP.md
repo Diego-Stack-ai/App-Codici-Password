@@ -41,6 +41,10 @@ Checklist esterna ripetibile prima della chiusura P1:
 
 Il secondo programma ODS è un gate di interoperabilità, non una nuova misura di sicurezza: può seguire una pubblicazione desktop dichiarata come anteprima con JSON/CSV disponibili, ma resta bloccante per chiamare **concluso P1** o presentare l'ODS come definitivamente certificato. Le prove fisiche iPhone/Android non bloccano una pubblicazione desktop con fallback esplicitamente limitato, ma restano bloccanti per l'attivazione generale mobile, perché Web Crypto, file locali e download hanno differenze non certificabili con la sola emulazione responsive. Non sono richiesti dati reali: la checklist usa esclusivamente fixture sintetiche.
 
+### Catalogo umano del visualizzatore — candidata 1.2.197
+
+Il visualizzatore offline presenta il contenuto con tre aree: sezioni, elenco ricercabile e dettaglio della scheda selezionata. Gli Account aziendali possono essere filtrati per azienda; le chiavi tecniche note vengono rese con etichette italiane comprensibili. Le immagini allegate entro il limite locale possono essere visualizzate e ogni allegato può essere scaricato dopo una seconda lettura verificata del contenitore. Il Base64 incorporato non viene mostrato come testo. JSON, CSV e ODS restano invariati e sono raccolti sotto **Esportazioni tecniche**. Questa modifica riguarda soltanto la presentazione: non modifica formato v2, cifratura, manifest, limiti o natura non reimportabile dell'archivio.
+
 ## Snapshot preventivo prima dei collaudi — 09/10/2026
 
 Creato il bucket privato UE `appcodici-password-firestore-backup-eu-20261009`, con accesso uniforme, prevenzione accesso pubblico e soft-delete predefinito. Il service account Firestore ha `Storage Admin` limitato al bucket. Export gestito completo riuscito nel prefisso `pre-test-2026-10-09T15-10-09Z`: 551 documenti, 422,61 kB, completamento 17:15:02 Europe/Rome. È una copia Firestore verificata dalla Console; non include una prova di importazione/ripristino e non sostituisce il backup cifrato utente degli allegati Storage.

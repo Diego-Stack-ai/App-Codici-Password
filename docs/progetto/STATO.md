@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.197 — integrazione AI, Scadenze documenti e Archivio portabile — 16/10/2026
+
+Nel worktree isolato di rilascio sono integrati i tre lotti autorizzati. L'Assistente presenta **AI.1 Locale** e **AI.2 Avanzata per PC**; la seconda sceglie fra taglie `light`, `medium` e `power` solo dopo controllo del dispositivo e verifica del pacchetto. Gli asset `medium` e `power` sono presenti nella snapshot di deploy e verificati dal catalogo generato, ma non sono precache della PWA.
+
+Il pilot dei documenti mantiene il badge **Prova scadenze** e ora porta numero documento, testo descrittivo e riferimenti agli allegati DS-002 già presenti. Non duplica allegati e non abilita Email o Push. Il visualizzatore dell'Archivio portabile espone sezione, elenco e dettaglio, ricerca, filtro azienda, etichette umane e anteprima/download degli allegati; le esportazioni JSON/CSV/ODS sono raccolte nella sezione tecnica.
+
+La versione locale è `1.2.197`. Build offline, sintassi, AI/Assistente, pilot Scadenze, Archivio, capacità, browser, shell offline, riferimenti statici, versione e baseline i18n risultano verificati localmente nel worktree di integrazione; la baseline i18n resta un limite di non regressione e non certifica la completezza editoriale delle otto lingue. Commit, push, integrazione remota, Hosting e verifica HTTP restano fasi distinte finché non vengono effettivamente concluse. Functions, Rules e dati reali non appartengono al rilascio.
+
 ## Candidata 1.2.196 «Prova scadenze» dai documenti — 16/10/2026
 
 Nel worktree isolato `codex/deadline-document-pilot` è implementata, ma non ancora integrata né pubblicata, la candidata `1.2.196` con il primo pilot delle Scadenze collegate ai documenti personali. Dopo il salvataggio di un documento con `expiry_date` valida viene chiesta conferma; le card dei tre documenti già esistenti consentono la stessa prova su richiesta. I record pilot usano identità deterministica documento+campo e i metadati `sourceType`, `sourceDocumentId`, `sourceFieldId`, `sourceValueAtLink`, `experimentTag: 'prova-scadenze'`. Lista e dettaglio espongono il badge **Prova scadenze**. I due moduli del pilot sono inclusi nella shell offline della candidata.

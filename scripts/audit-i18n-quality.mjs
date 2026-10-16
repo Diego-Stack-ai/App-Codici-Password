@@ -14,7 +14,10 @@ const walk = directory => fs.readdirSync(directory, { withFileTypes: true }).fla
   const absolute = path.join(directory, entry.name);
   return entry.isDirectory() ? walk(absolute) : [absolute];
 });
-const isExcluded = file => baseline.excludedPathFragments.some(fragment => `/${relative(file)}`.includes(fragment));
+const isHostedModelRuntimeBundle = file => relative(file).includes('/assets/local-ai-packages/')
+  && path.basename(file) === 'web-llm.js';
+const isExcluded = file => baseline.excludedPathFragments.some(fragment => `/${relative(file)}`.includes(fragment))
+  || isHostedModelRuntimeBundle(file);
 const sourceFiles = walk(publicRoot).filter(file => /\.(?:html|js)$/.test(file) && !isExcluded(file));
 const htmlFiles = sourceFiles.filter(file => file.endsWith('.html'));
 const jsFiles = sourceFiles.filter(file => file.endsWith('.js'));

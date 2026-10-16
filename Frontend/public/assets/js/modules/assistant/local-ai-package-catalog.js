@@ -1,10 +1,11 @@
 import { validateLocalAiPackageManifest } from './advanced-local-ai-contract.js';
+import { HOSTED_ADVANCED_AI_CATALOG } from './local-ai-hosting-catalog.generated.js';
 
 const MIB = 1024 * 1024;
 const file = (path, bytes, sha256) => Object.freeze({ path, bytes, sha256 });
 
-const A2_MANIFEST = validateLocalAiPackageManifest({
-    schemaVersion:1, level:'A2', packageId:'granite-embedding-97m-multilingual-r2-onnx-int8', version:'0.1.0',
+const A1_MANIFEST = validateLocalAiPackageManifest({
+    schemaVersion:1, level:'A1', packageId:'granite-embedding-97m-multilingual-r2-onnx-int8', version:'0.1.0',
     runtime:'transformers-js-onnx',
     model:{ provider:'yuiseki / IBM Granite', modelId:'yuiseki/granite-embedding-97m-multilingual-r2-ONNX', revision:'9639449beea46c2d70bc73c31458f71ad7eed838', license:'Apache-2.0' },
     approxDownloadBytes:145871600, maxResidentBytes:512*MIB,
@@ -17,15 +18,15 @@ const A2_MANIFEST = validateLocalAiPackageManifest({
         file('model/special_tokens_map.json',871,'013787ee251ff611722479197c00853b62113ad303cb0a36524231783c676c69'),
         file('model/tokenizer_config.json',12856,'9b628d2b366a8350b944fd0914f24f4e0b100bbf120d47b9c59e44dfb2a1b63f'),
         file('model/tokenizer.json',25301671,'51947676cae1f991fa51c6b9a24e14ee5460e5f0b9f692f13bb3159829d1592a'),
-        file('runtime/factory.js',824,'c4a9079773a6e2ac945329e898661f956a7ad312cba22475b6420d4c94315fc7'),
+        file('runtime/factory.js',824,'15c3a51caa7dae2973d8c617e3ce69ebd30a63cf10933c5ca87d5f66cce27c0a'),
         file('runtime/ort-wasm-simd-threaded.jsep.mjs',44484,'08fb86ec433c78bfb032c5d84a68b8e8e5a8d81268fa39e24314179a5767a5b9'),
         file('runtime/ort-wasm-simd-threaded.jsep.wasm',21596019,'c46655e8a94afc45338d4cb2b840475f88e5012d524509916e505079c00bfa39'),
         file('runtime/transformers.bundle.js',893963,'3b025bd3419b4876c017008839f79972d55446c534b30df920824bb1d51190d9')
     ]
 });
 
-const A3_MANIFEST = validateLocalAiPackageManifest({
-    schemaVersion:1, level:'A3', packageId:'qwen2.5-0.5b-instruct-q4f16-1-mlc', version:'0.1.0', runtime:'webllm-webgpu',
+const A2_LIGHT_MANIFEST = validateLocalAiPackageManifest({
+    schemaVersion:1, level:'A2', packageId:'qwen2.5-0.5b-instruct-q4f16-1-mlc', version:'0.1.0', runtime:'webllm-webgpu',
     model:{ provider:'MLC AI / Qwen', modelId:'mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC', revision:'32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad', license:'Apache-2.0' },
     approxDownloadBytes:301981904, maxResidentBytes:Math.ceil(944.62*MIB),
     locales:['it-IT','en-US','es-ES','fr-FR','de-DE','zh-CN','pt-PT'],
@@ -43,7 +44,7 @@ const A3_MANIFEST = validateLocalAiPackageManifest({
         file('params_shard_5.bin',29211648,'19dfd7a3064b84082915575c0e5a57fc1cd7108828e1ce9fbbbaf9db4b63b9af'),
         file('params_shard_6.bin',33297408,'192576d43956aa977ec60848b8a7fc8483b5fe38ca9669aa9a3ca2ba795a7a33'),
         file('params_shard_7.bin',14605824,'1ee25c2a41dad6833e000b7e3ec13a5a1761c32ffbed0ad8a98a6ad313338dc0'),
-        file('runtime/factory.js',975,'2611311e6642b11ac4fb8111ec361c77626fe452c93ec73306ce1cc5e935e4bb'),
+        file('runtime/factory.js',975,'8b2614cdf3e54b0aee6b7600f48430eeff3b5db9efd99c6d21fbcd61284ddfad'),
         file('runtime/web-llm.js',6817091,'4c9772f6973eb03b2499c2128a71a2f9cfb542321dc4ef01a66de4a9f376c66f'),
         file('tokenizer_config.json',7308,'5214600ee45ca2f887ce2eede8910378a0111ea99d657428bcbce94778e65a92'),
         file('tokenizer.json',7031645,'c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539'),
@@ -53,19 +54,43 @@ const A3_MANIFEST = validateLocalAiPackageManifest({
 });
 
 export const LOCAL_AI_RUNTIME_PROVENANCE = Object.freeze({
-    A2:Object.freeze({ package:'@huggingface/transformers', version:'3.8.1', gitRevision:'2ec882e739e4cb461f8d440d4d7394cbf5372429', license:'Apache-2.0', licenseSha256:'3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5', upstreamRevision:'835ad14087e140460703cf0fae09f97d469d65c2', npmIntegrity:'sha512-tsTk4zVjImqdqjS8/AOZg2yNLd1z9S5v+7oUPpXaasDRwEDhB+xnglK1k5cad26lL5/ZIaeREgWWy0bs9y9pPA==' }),
-    A3:Object.freeze({ package:'@mlc-ai/web-llm', version:'0.2.86', gitRevision:'c42c36670cfc426c75e53ee297443882f1ae8d84', license:'Apache-2.0', licenseSha256:'2924cf70d9e0ee3786cea316851ac9f4fe49e56de5c3124f6b69cccfdb248187', npmIntegrity:'sha512-plciXBCYtY7iTKHzEcsqOfSO+s5u8NqMYFPnHmRbsN8CEdKcolgXIoGLPbzO6FtJHV43m7YP00x6qQ6Kb8CJJw==', modelLibraryRevision:'00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0', upstreamRevision:'7ae557604adf67be50417f59c2c2f167def9a775', upstreamLicenseSha256:'832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e' })
+    A1:Object.freeze({ package:'@huggingface/transformers', version:'3.8.1', gitRevision:'2ec882e739e4cb461f8d440d4d7394cbf5372429', license:'Apache-2.0', licenseSha256:'3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5', upstreamRevision:'835ad14087e140460703cf0fae09f97d469d65c2', npmIntegrity:'sha512-tsTk4zVjImqdqjS8/AOZg2yNLd1z9S5v+7oUPpXaasDRwEDhB+xnglK1k5cad26lL5/ZIaeREgWWy0bs9y9pPA==' }),
+    A2:Object.freeze({ package:'@mlc-ai/web-llm', version:'0.2.86', gitRevision:'c42c36670cfc426c75e53ee297443882f1ae8d84', license:'Apache-2.0', licenseSha256:'2924cf70d9e0ee3786cea316851ac9f4fe49e56de5c3124f6b69cccfdb248187', npmIntegrity:'sha512-plciXBCYtY7iTKHzEcsqOfSO+s5u8NqMYFPnHmRbsN8CEdKcolgXIoGLPbzO6FtJHV43m7YP00x6qQ6Kb8CJJw==', modelLibraryRevision:'00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0', upstreamRevision:'7ae557604adf67be50417f59c2c2f167def9a775', upstreamLicenseSha256:'832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e' })
+});
+
+const A2_LIGHT = Object.freeze({ tier:'light', level:'A2', legacyLevel:'A3', status:'available', blockReason:null,
+    manifest:A2_LIGHT_MANIFEST,
+    baseUrl:'/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/',
+    runtimeUrl:'/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/factory.js',
+    source:'https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC' });
+
+export const LOCAL_AI_ADVANCED_TIERS = Object.freeze({
+    light:A2_LIGHT,
+    medium:Object.freeze({ ...HOSTED_ADVANCED_AI_CATALOG.medium,
+        manifest:validateLocalAiPackageManifest(HOSTED_ADVANCED_AI_CATALOG.medium.manifest),
+        minimum:Object.freeze({ deviceMemoryGiB:8, hardwareConcurrency:8, storageBytes:4*1024*1024*1024 }),
+        artifactPlan:Object.freeze({ packageId:'qwen2.5-1.5b-instruct-q4f16-1-mlc', quantization:'q4f16_1',
+            modelSource:'https://huggingface.co/mlc-ai/Qwen2.5-1.5B-Instruct-q4f16_1-MLC', revision:'9bd564b064631febf14deadcac492efb761d60c3',
+            upstream:'https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct', license:'Apache-2.0', approxDownloadBytes:880289238, weightFiles:30,
+            maxResidentBytes:Math.ceil(1629.75*MIB), runtimeLibrary:'Qwen2-1.5B-Instruct-q4f16_1_cs1k-webgpu.wasm' }) }),
+    power:Object.freeze({ ...HOSTED_ADVANCED_AI_CATALOG.power,
+        manifest:validateLocalAiPackageManifest(HOSTED_ADVANCED_AI_CATALOG.power.manifest),
+        minimum:Object.freeze({ deviceMemoryGiB:16, hardwareConcurrency:12, storageBytes:8*1024*1024*1024 }),
+        artifactPlan:Object.freeze({ packageId:'smollm2-1.7b-instruct-q4f16-1-mlc', quantization:'q4f16_1',
+            modelSource:'https://huggingface.co/mlc-ai/SmolLM2-1.7B-Instruct-q4f16_1-MLC', revision:'84f57f8580a9d8d623266b600ad4273bb9fd84c1',
+            upstream:'https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct', license:'Apache-2.0', approxDownloadBytes:966375820, weightFiles:37,
+            maxResidentBytes:Math.ceil(1774.19*MIB), runtimeLibrary:'SmolLM2-1.7B-Instruct-q4f16_1_cs1k-webgpu.wasm' }) })
 });
 
 export const LOCAL_AI_PACKAGE_CATALOG = Object.freeze({
-    A2:Object.freeze({ level:'A2', status:'available', blockReason:null, manifest:A2_MANIFEST,
+    A1:Object.freeze({ level:'A1', legacyLevel:'A2', status:'available', blockReason:null, manifest:A1_MANIFEST,
         baseUrl:'/assets/local-ai/a2/granite-embedding-97m-multilingual-r2-onnx-int8/0.1.0/',
         runtimeUrl:'/assets/local-ai/a2/granite-embedding-97m-multilingual-r2-onnx-int8/0.1.0/runtime/factory.js',
         source:'https://huggingface.co/yuiseki/granite-embedding-97m-multilingual-r2-ONNX' }),
-    A3:Object.freeze({ level:'A3', status:'available', blockReason:null, manifest:A3_MANIFEST,
-        baseUrl:'/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/',
-        runtimeUrl:'/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/factory.js',
-        source:'https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC' })
+    A2:Object.freeze({ ...A2_LIGHT, tiers:LOCAL_AI_ADVANCED_TIERS })
 });
 
-export function getLocalAiPackageCandidate(level) { return LOCAL_AI_PACKAGE_CATALOG[level] || null; }
+export function getLocalAiPackageCandidate(level, { tier = 'light' } = {}) {
+    if (level === 'A2') return LOCAL_AI_ADVANCED_TIERS[tier] || null;
+    return LOCAL_AI_PACKAGE_CATALOG[level] || null;
+}

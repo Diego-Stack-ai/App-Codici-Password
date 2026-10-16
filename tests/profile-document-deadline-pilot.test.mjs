@@ -9,6 +9,7 @@ const {
   normalizedProfileDocumentType,
   planProfileDocumentDeadlineReconciliation,
   profileDocumentDeadlineCandidate,
+  profileDocumentNumber,
   profileDocumentPilotDeadlineId,
   profileDocumentPilotTitle
 } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
@@ -31,8 +32,11 @@ test('l identificatore pilot è deterministico per documento e campo', () => {
   assert.match(first, /^pilot-profile-document-/);
 });
 
-test('record pilot è riconoscibile, privo di destinatari e allegati', () => {
-  const record = buildProfileDocumentPilotDeadline(documentFixture, {nome: 'Mario', cognome: 'Rossi'}, new Date('2026-10-16T10:00:00Z'));
+test('record pilot è riconoscibile, privo di destinatari e collega gli allegati senza copiarli', () => {
+  const attachment = {name: 'documento.pdf', storagePath: 'users/synthetic/profile-documents/document-synthetic-1/attachments/att-1',
+    encryption: {version: 1}, linkedSource: {type: 'profileDocumentAttachment', id: 'att-1'}};
+  const record = buildProfileDocumentPilotDeadline({...documentFixture, num_serie: 'AB123'},
+    {nome: 'Mario', cognome: 'Rossi'}, new Date('2026-10-16T10:00:00Z'), {attachments: [attachment]});
   assert.equal(record.experimentTag, 'prova-scadenze');
   assert.equal(record.title, 'Prova scadenze · Passaporto');
   assert.equal(record.sourceType, 'profileDocument');
@@ -42,9 +46,16 @@ test('record pilot è riconoscibile, privo di destinatari e allegati', () => {
   assert.equal(record.pilotDeliveryDisabled, true);
   assert.equal(record.notificationsEnabled, false);
   assert.deepEqual(record.recipients, []);
-  assert.deepEqual(record.attachments, []);
+  assert.equal(record.documentNumber, 'AB123');
+  assert.equal(record.templateText, 'Passaporto · AB123');
+  assert.equal(record.sourceAttachmentCountAtLink, 1);
+  assert.equal(record.attachments[0].storagePath, attachment.storagePath);
+  assert.equal(record.attachments[0].linkedSource.id, 'att-1');
   assert.equal(record.name, 'Mario Rossi');
-  assert.equal(Object.values(record).includes('AB123'), false);
+  assert.equal(profileDocumentNumber({id_number: 'XY987'}), 'XY987');
+  const foreign = buildProfileDocumentPilotDeadline(documentFixture, {}, new Date(), {attachments: [{...attachment,
+    storagePath: 'users/synthetic/profile-documents/other/attachments/att-1'}]});
+  assert.deepEqual(foreign.attachments, []);
 });
 
 test('normalizza i tipi noti e conserva un titolo facilmente promuovibile', () => {

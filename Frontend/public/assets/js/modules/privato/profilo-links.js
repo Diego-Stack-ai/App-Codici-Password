@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.196';
+import { auth, db } from '../../firebase-config.js?v=1.2.197';
 import { collection, doc, runTransaction, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -78,7 +78,7 @@ async function connectContactAccount(contact, syncData, contactType) {
 }
 
 export async function createDeadlineFromDocument(documentItem, syncData, profile = {}) {
-    const pilot = await import('./profile-document-deadline-pilot.js?v=1.2.196');
+    const pilot = await import('./profile-document-deadline-pilot.js?v=1.2.197');
     return pilot.reconcileProfileDocumentDeadlinePilot({
         documentItem,
         profile,
