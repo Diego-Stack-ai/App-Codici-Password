@@ -72,16 +72,15 @@ test('ogni documento mostra dati, allegati e azioni nello stesso blocco e in que
     assert.ok(attachmentsPosition > dataPosition, 'gli allegati devono seguire i dati del documento');
     assert.ok(actionsPosition > attachmentsPosition, 'le azioni devono seguire gli allegati');
     assert.match(documentRenderer.slice(actionsPosition), /Collega o crea Account/);
-    assert.match(documentRenderer.slice(actionsPosition), /Apri scadenza collegata/);
+    assert.match(documentRenderer.slice(actionsPosition), /pilot_deadline_card_open_traditional/);
+    assert.match(documentRenderer.slice(actionsPosition), /pilot_deadline_card_create_parallel/);
 });
 
-test('gli allegati del documento sono collegati alla bozza Scadenza senza duplicare il file', async () => {
-    const [links, linkage, deadline] = await Promise.all([
-        read('Frontend/public/assets/js/modules/privato/profilo-links.js'),
+test('il costruttore legacy conserva gli allegati nella bozza Scadenza senza duplicare il file', async () => {
+    const [linkage, deadline] = await Promise.all([
         read('Frontend/public/assets/js/modules/privato/profile-document-deadline-link.js'),
         read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js')
     ]);
-    assert.match(links, /profile-document-deadline-link\.js/);
     assert.match(linkage, /listProfileDocumentAttachments/);
     assert.match(linkage, /linkedSource: \{type: 'profileDocumentAttachment', id: item\.id\}/);
     assert.match(linkage, /storagePath: item\.storagePath/);

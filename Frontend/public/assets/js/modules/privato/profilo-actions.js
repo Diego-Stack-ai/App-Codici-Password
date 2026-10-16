@@ -20,7 +20,7 @@
  */
 
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { auth, db } from '../../firebase-config.js?v=1.2.195';
+import { auth, db } from '../../firebase-config.js?v=1.2.196';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { createProfileItemId } from './profile-model.js';
@@ -112,7 +112,7 @@ export async function editAddress(idx, ctx) {
  * @param {number} idx - Indice documento, -1 per nuovo
  */
 export async function editUserDocument(idx, ctx, initialType = '') {
-    const { userDocuments, profileLabels, syncData, renderDocumentiView } = ctx;
+    const { userDocuments, profileLabels, syncData, renderDocumentiView, onDocumentSaved } = ctx;
     const isNew = idx === -1;
     let tempDoc = isNew
         ? { type: initialType || profileLabels.documentTypes[0], num_serie: '', expiry_date: '' }
@@ -177,6 +177,7 @@ export async function editUserDocument(idx, ctx, initialType = '') {
     const openModal = (currentVals) => {
         const fields = getDocumentFields(currentVals.type);
         showProfileModal(isNew ? 'Nuovo Documento' : 'Modifica Documento', fields, currentVals, async (newData) => {
+            const previousDocument = isNew ? null : { ...userDocuments[idx] };
             const finalData = { ...currentVals, ...newData };
             if (finalData.type.toLowerCase().includes('patente')) finalData.license_number = finalData.num_serie;
             if (finalData.type.toLowerCase().includes('fiscale')) finalData.cf_value = finalData.num_serie;
@@ -188,6 +189,7 @@ export async function editUserDocument(idx, ctx, initialType = '') {
             }
             await syncData();
             renderDocumentiView();
+            await onDocumentSaved?.({ previousDocument, documentItem: finalData, isNew });
         });
 
         // Cambio tipo documento → riapertura modale con campi aggiornati

@@ -276,6 +276,17 @@ html:not(.dark) .deadline-card-subtitle {
     opacity: 0.6;
 }
 
+.deadline-pilot-badge {
+    align-self: flex-start;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 58%, transparent);
+    border-radius: 999px;
+    color: var(--primary-color);
+    font: var(--font-badge);
+    letter-spacing: .04em;
+    padding: .28rem .52rem;
+    text-transform: uppercase;
+}
+
 .deadline-card-title {
     font: var(--font-label);
     color: var(--text-primary);

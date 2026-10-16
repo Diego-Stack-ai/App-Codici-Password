@@ -158,6 +158,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/privato/private-account-offline-policy.js",
   "assets/js/modules/privato/profile-document-attachments.js",
   "assets/js/modules/privato/profile-document-deadline-link.js",
+  "assets/js/modules/privato/profile-document-deadline-pilot-model.js",
+  "assets/js/modules/privato/profile-document-deadline-pilot.js",
   "assets/js/modules/privato/profile-model.js",
   "assets/js/modules/privato/profilo-actions.js",
   "assets/js/modules/privato/profilo-addresses-docs.js",
