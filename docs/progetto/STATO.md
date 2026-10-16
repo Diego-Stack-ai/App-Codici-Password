@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.196 «Prova scadenze» dai documenti — 16/10/2026
+
+Nel worktree isolato `codex/deadline-document-pilot` è implementata, ma non ancora integrata né pubblicata, la candidata `1.2.196` con il primo pilot delle Scadenze collegate ai documenti personali. Dopo il salvataggio di un documento con `expiry_date` valida viene chiesta conferma; le card dei tre documenti già esistenti consentono la stessa prova su richiesta. I record pilot usano identità deterministica documento+campo e i metadati `sourceType`, `sourceDocumentId`, `sourceFieldId`, `sourceValueAtLink`, `experimentTag: 'prova-scadenze'`. Lista e dettaglio espongono il badge **Prova scadenze**. I due moduli del pilot sono inclusi nella shell offline della candidata.
+
+Il pilot non modifica o migra le Scadenze tradizionali. Se un documento ha già una Scadenza reale, una conferma specifica consente di affiancare una sola copia pilot senza sostituire `expiryReference`; dalla card restano distinti i comandi per aprire la reale e creare/aprire la prova. Destinatari e allegati sono vuoti, Email/Push sono disattivati e ogni mutazione della data richiede conferma. Campo o documento rimossi marcano il record **da verificare** senza cambiare silenziosamente la data; eventuali duplicati pilot bloccano il flusso. I test usano esclusivamente dati sintetici. Diego ha autorizzato la successiva pubblicazione del solo Firebase Hosting dopo gate e riconciliazione; Rules, Functions e dati reali restano esclusi. In questo stato la candidata non equivale ancora a commit, PR, merge o Hosting pubblicato.
+
 ## Release 1.2.195 pubblicata — icone invio e microfono di Agente Codex — 16/10/2026
 
 Il costruttore DOM interno di Agente Codex protegge ora tutte le proprie icone Material dinamiche con `notranslate` e `translate="no"`. In particolare i due comandi accanto al campo di testo continuano a mostrare le icone di invio e microfono anche quando Chrome tenta la traduzione automatica, invece delle ligature testuali tradotte.

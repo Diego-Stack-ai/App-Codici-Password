@@ -386,7 +386,31 @@ const _it = {
         without_name: "Senza Nome",
         back: "Indietro",
         ok: "Ho Capito",
-        delete_short: "Elimina"
+        delete_short: "Elimina",
+        pilot_deadline_badge: "Prova scadenze",
+        pilot_deadline_create_title: "Prova scadenze dal documento",
+        pilot_deadline_create_message: "Vuoi creare una scadenza di prova per {type}, con data {date}? Email, notifiche e allegati restano disattivati.",
+        pilot_deadline_create_parallel_message: "Esiste già una scadenza reale per questo documento. Vuoi creare anche la copia «Prova scadenze» con data {date}? La scadenza reale e il suo collegamento non saranno modificati; Email, notifiche e allegati resteranno disattivati.",
+        pilot_deadline_create_action: "Crea prova",
+        pilot_deadline_created: "Scadenza di prova creata.",
+        pilot_deadline_update_title: "Data del documento modificata",
+        pilot_deadline_update_message: "La data collegata ora è {date}. Vuoi aggiornare la scadenza di prova?",
+        pilot_deadline_update_action: "Aggiorna prova",
+        pilot_deadline_updated: "Scadenza di prova aggiornata.",
+        pilot_deadline_review_title: "Scadenza da verificare",
+        pilot_deadline_source_missing_message: "Il campo data collegato non è più disponibile. La scadenza non è stata modificata ed è stata segnata da verificare.",
+        pilot_deadline_duplicate_title: "Collegamento duplicato",
+        pilot_deadline_duplicate_message: "Sono presenti più scadenze di prova per lo stesso documento. Nessun dato è stato modificato.",
+        pilot_deadline_existing_title: "Scadenza già presente",
+        pilot_deadline_existing_message: "Esiste già una scadenza tradizionale compatibile per questo documento. La prova non ne crea una copia e non modifica quella esistente.",
+        pilot_deadline_existing_multiple_message: "Esistono più scadenze tradizionali compatibili. Verificale nella sezione Scadenze: la prova non ha creato né modificato dati.",
+        pilot_deadline_open_document: "Apri documento nel Profilo",
+        pilot_deadline_error: "Impossibile aggiornare la prova scadenze. Riprova.",
+        pilot_deadline_date_required: "Inserisci prima la data di scadenza del documento.",
+        pilot_deadline_card_open: "Apri Prova scadenze",
+        pilot_deadline_card_open_traditional: "Apri scadenza reale",
+        pilot_deadline_card_create_parallel: "Crea Prova scadenze parallela",
+        pilot_deadline_card_create: "Crea Prova scadenze"
 };
 
 // ─── Metadati lingue ─────────────────────────────────────────────────────────

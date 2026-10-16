@@ -94,11 +94,25 @@ export function buildProfileDocumentDeadlineDraft(documentItem = {}, profile = {
 
 export function resolveProfileDocumentDeadlineState(documents = [], deadlines = []) {
     return documents.map(documentItem => {
-        if (documentItem?.expiryReference?.deadlineId) return documentItem;
+        const pilot = deadlines.find(deadline => deadline?.experimentTag === 'prova-scadenze'
+            && deadline?.sourceType === 'profileDocument'
+            && deadline?.sourceDocumentId === documentItem?.id);
+        const withPilot = pilot ? {...documentItem, pilotDeadlineReference: {
+            deadlineId: pilot.id,
+            experimentTag: pilot.experimentTag,
+            sourceFieldId: pilot.sourceFieldId
+        }} : documentItem;
+        if (documentItem?.expiryReference?.deadlineId) return withPilot;
+        if (pilot) return {...withPilot, expiryReference: withPilot.pilotDeadlineReference};
         const explicit = deadlines.find(deadline =>
-            deadline?.sourceRef?.type === 'profileDocument' && deadline.sourceRef.id === documentItem?.id
+            (deadline?.sourceRef?.type === 'profileDocument' && deadline.sourceRef.id === documentItem?.id)
+            || (deadline?.sourceType === 'profileDocument' && deadline.sourceDocumentId === documentItem?.id)
         );
-        if (explicit) return {...documentItem, expiryReference: {deadlineId: explicit.id}};
+        if (explicit) return {...documentItem, expiryReference: {
+            deadlineId: explicit.id,
+            ...(explicit.experimentTag ? {experimentTag: explicit.experimentTag} : {}),
+            ...(explicit.sourceFieldId ? {sourceFieldId: explicit.sourceFieldId} : {})
+        }};
         const compatible = findCompatibleDocumentDeadlines(documentItem, deadlines);
         return compatible.length === 1
             ? {...documentItem, compatibleDeadlineId: compatible[0].id}

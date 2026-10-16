@@ -44,3 +44,16 @@ test('distingue collegamento certo e scadenza legacy soltanto compatibile', asyn
   assert.equal(result[0].expiryReference, undefined);
   assert.equal(result[1].expiryReference.deadlineId, 'd2');
 });
+
+test('mantiene il collegamento reale e affianca un riferimento pilot soltanto di visualizzazione', async () => {
+  const {resolveProfileDocumentDeadlineState} = await loadModel();
+  const [result] = resolveProfileDocumentDeadlineState([{
+    id: 'doc-parallel', type: 'Patente', expiry_date: '2030-04-14',
+    expiryReference: {deadlineId: 'deadline-real'}
+  }], [{
+    id: 'deadline-pilot', experimentTag: 'prova-scadenze', sourceType: 'profileDocument',
+    sourceDocumentId: 'doc-parallel', sourceFieldId: 'document.expiry_date'
+  }]);
+  assert.equal(result.expiryReference.deadlineId, 'deadline-real');
+  assert.equal(result.pilotDeadlineReference.deadlineId, 'deadline-pilot');
+});

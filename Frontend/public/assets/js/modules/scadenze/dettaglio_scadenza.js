@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.195';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.196';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -361,6 +361,10 @@ function renderDeadlineContents(scadenza, mount) {
     const presentation = deadlinePresentation(scadenza);
     const pageLabel = document.querySelector('.detail-page-label');
     if (pageLabel) pageLabel.textContent = scadenza.received ? 'Scadenza ricevuta' : 'Oggetto Scadenza';
+    if (pageLabel && scadenza.experimentTag === 'prova-scadenze') {
+        const review = scadenza.sourceStatus === 'needs-review' ? ` · ${t('pilot_deadline_review_title')}` : '';
+        pageLabel.textContent = `${t('pilot_deadline_badge')}${review} · ${pageLabel.textContent}`;
+    }
     document.getElementById('detail-title').textContent = presentation.title;
     document.getElementById('detail-intestatario').textContent = presentation.owner;
     document.getElementById('detail-category').textContent = presentation.category;
@@ -369,7 +373,7 @@ function renderDeadlineContents(scadenza, mount) {
     if (actions && scadenza.sourceRef?.type === 'profileDocument') {
         setChildren(actions, createElement('button', {
             className: 'btn-modal btn-secondary',
-            textContent: 'Apri documento nel Profilo',
+            textContent: t('pilot_deadline_open_document'),
             onclick: () => {
                 if (!active()) return;
                 window.location.href = `profilo_privato.html?profileTab=documents&profileDocumentId=${encodeURIComponent(scadenza.sourceRef.id)}`;

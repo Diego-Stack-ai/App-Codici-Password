@@ -3,7 +3,7 @@ const changeProfileAccount = (...args) => import('../shared/profile-account-mana
 const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /** Profilo privato: stato condiviso, inizializzazione dei moduli e caricamento progressivo. */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.195';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.196';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -22,7 +22,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.195';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.196';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -90,7 +90,7 @@ const manageDocumentAttachments = async documentItem => {
     const uid = currentUserUid;
     const vaultKey = await ensureVaultKeyMaterial();
     if (!uid || !vaultKey || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per gestire gli allegati.');
-    const module = await import('./profile-document-attachments.js?v=1.2.195');
+    const module = await import('./profile-document-attachments.js?v=1.2.196');
     return module.openProfileDocumentAttachments({
         uid, documentItem, vaultKey,
         encryptName: value => encrypt(value, vaultKey),
@@ -104,7 +104,7 @@ async function refreshDocumentAttachmentPreviews() {
     if (!uid || auth.currentUser?.uid !== uid) return;
     try {
         const vaultKey = await ensureVaultKeyMaterial();
-        const module = await import('./profile-document-attachments.js?v=1.2.195');
+        const module = await import('./profile-document-attachments.js?v=1.2.196');
         if (uid !== currentUserUid || auth.currentUser?.uid !== uid) return;
         await module.renderProfileDocumentAttachmentPreviews({
             uid,
@@ -225,7 +225,14 @@ function buildCtx() {
         syncData,
         renderAddressesView,
         renderDocumentiView,
-        loadUserData
+        loadUserData,
+        onDocumentSaved: ({ documentItem }) => import('./profile-document-deadline-pilot.js?v=1.2.196')
+            .then(module => module.reconcileProfileDocumentDeadlinePilot({documentItem, profile: currentUserData}))
+            .then(() => renderDocumentiView())
+            .catch(error => {
+                logError('ProfileDocumentDeadlinePilot', error);
+                showToast(t('pilot_deadline_error'), 'error');
+            })
     };
 }
 
@@ -537,12 +544,21 @@ async function deleteDocumento(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo documento?')) return;
     try {
         const removedLinks = [userDocuments[idx]];
-        const linkedDeadlineId = userDocuments[idx]?.expiryReference?.deadlineId;
+        const removedDocument = userDocuments[idx];
+        const linkedDeadlineId = removedDocument?.expiryReference?.deadlineId;
         userDocuments.splice(idx, 1);
         userDocuments = userDocuments.filter(d => d !== undefined && d !== null);
         await syncData();
         for (const item of removedLinks) await refreshProfileAccountReferences(item?.linkedAccountId,item?.linkedAccountCompanyId);
-        if (linkedDeadlineId) {
+        if (removedDocument?.pilotDeadlineReference?.deadlineId
+            || removedDocument?.expiryReference?.experimentTag === 'prova-scadenze') {
+            try {
+                const module = await import('./profile-document-deadline-pilot.js?v=1.2.196');
+                await module.markRemovedProfileDocumentPilot(removedDocument);
+            } catch (unlinkError) {
+                console.warn('[Documento] Pilot da verificare non aggiornato durante la rimozione:', unlinkError);
+            }
+        } else if (linkedDeadlineId) {
             try {
                 await updateDoc(doc(db, 'users', currentUserUid, 'scadenze', linkedDeadlineId), { sourceRef: deleteField() });
             } catch (unlinkError) {
