@@ -4,7 +4,7 @@
 
 import { createElement, setChildren } from '../../dom-utils.js';
 import { listDeadlines, listDeadlineNotifications } from '../data/vault-repository.js';
-import { auth } from '../../firebase-config.js?v=1.2.194';
+import { auth } from '../../firebase-config.js?v=1.2.195';
 import { onAuthStateChanged } from '/assets/js/vendor/firebase-runtime.js';
 import { deadlinePresentation, projectDeadlineReminders } from '../scadenze/deadline-model.js';
 import { renderHomeDeadlineDashboard, clearHomeDeadlineDashboard } from './home-deadline-dashboard.js';

@@ -10,6 +10,10 @@ import {
 function element(tag, className, text = '') {
     const node = document.createElement(tag);
     if (className) node.className = className;
+    if (/\bmaterial-(?:symbols|icons)(?:-[\w-]+)?\b/i.test(className)) {
+        node.classList.add('notranslate');
+        node.setAttribute('translate', 'no');
+    }
     if (text) node.textContent = text;
     return node;
 }

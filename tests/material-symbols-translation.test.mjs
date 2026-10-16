@@ -48,3 +48,12 @@ test('createElement applica translate=no alle icone Material Symbols dinamiche',
     assert.match(source, /el\.className = `\$\{el\.className\} notranslate`/);
     assert.match(source, /setAttribute\('translate', 'no'\)/);
 });
+
+test('Agente Codex protegge le icone dinamiche di invio e microfono', async () => {
+    const source = await readFile(path.join(PUBLIC_ROOT, 'assets/js/modules/assistant/assistant-ui.js'), 'utf8');
+    assert.match(source, /material-\(\?:symbols\|icons\)/);
+    assert.match(source, /classList\.add\('notranslate'\)/);
+    assert.match(source, /setAttribute\('translate', 'no'\)/);
+    assert.match(source, /'material-symbols-outlined', 'arrow_upward'/);
+    assert.match(source, /'material-symbols-outlined', 'mic'/);
+});
