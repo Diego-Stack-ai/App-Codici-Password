@@ -10,13 +10,13 @@ Il visualizzatore dell'**Archivio portabile** usa una navigazione a tre colonne 
 
 Il rilascio comprende codice client, asset AI ospitati su Firebase Hosting, test, versione e documentazione. Sono esclusi Functions, Rules, indici, dati reali, invii e migrazioni. Implementazione locale, commit, push, integrazione e distribuzione devono essere registrati separatamente; la candidata diventa pubblicata soltanto dopo gate locali, controlli remoti e verifica HTTP della versione `1.2.197`.
 
-## Candidata 1.2.196 — «Prova scadenze» dai documenti del Profilo — 16/10/2026
+## Release 1.2.196 — «Prova scadenze» dai documenti del Profilo — 16/10/2026
 
 Diego autorizza un pilot isolato che lascia invariati i record e i flussi delle Scadenze tradizionali. Dopo il salvataggio di un documento personale dotato del campo standard `expiry_date`, l'app propone — senza creare nulla prima della conferma — una Scadenza riconoscibile dal badge **Prova scadenze**. I tre documenti già presenti restano utilizzabili tramite il comando contestuale nella rispettiva card; non è autorizzato alcun accesso automatico ai dati reali durante sviluppo o test.
 
 Il record pilot porta `sourceType`, `sourceDocumentId`, `sourceFieldId`, `sourceValueAtLink` ed `experimentTag: 'prova-scadenze'`; usa un ID deterministico per documento e campo e non include destinatari o allegati. Email, Push e altre consegne restano disattivate. Se la data cambia, l'aggiornamento richiede conferma; se il campo o il documento vengono rimossi, la data già salvata non viene sovrascritta e la Scadenza passa allo stato **da verificare**. Più pilot per la stessa identità bloccano ogni modifica. Le Scadenze tradizionali e i loro collegamenti preesistenti non vengono convertiti, migrati o riscritti: dopo conferma esplicita il pilot può affiancare una sola copia di prova, mantenendo intatto l'`expiryReference` reale. La promozione o eliminazione futura resta un flusso separato e non autorizzato in questo incarico.
 
-Il perimetro comprende solo client, modello puro, integrazione Profilo/lista/dettaglio, shell offline, cataloghi i18n, test sintetici e documentazione già autorizzata. Diego autorizza integrazione, commit, push e pubblicazione della sola candidata `1.2.196` su Firebase Hosting dopo tutti i gate verdi e la riconciliazione dell'Orchestratore. Sono esclusi Rules, Functions, dati reali, invii e allegati email. Finché integrazione e verifica HTTP non sono concluse, la `1.2.196` resta una candidata e non va dichiarata pubblicata.
+Il perimetro comprende solo client, modello puro, integrazione Profilo/lista/dettaglio, shell offline, cataloghi i18n, test sintetici e documentazione già autorizzata. La `1.2.196` è stata integrata con PR `#157` e pubblicata sul solo Firebase Hosting dopo gate verdi e riconciliazione dell'Orchestratore; la verifica HTTP pubblica ha confermato versione e moduli pilot. Sono rimasti esclusi Rules, Functions, dati reali, invii e allegati email.
 
 ## Hotfix 1.2.195 — icone invio e microfono di Agente Codex — 16/10/2026
 
