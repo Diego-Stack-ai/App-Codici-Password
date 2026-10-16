@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.195 — icone invio e microfono di Agente Codex — 16/10/2026
+
+Il costruttore DOM interno di Agente Codex protegge ora tutte le proprie icone Material dinamiche con `notranslate` e `translate="no"`. In particolare i due comandi accanto al campo di testo continuano a mostrare le icone di invio e microfono anche quando Chrome tenta la traduzione automatica, invece delle ligature testuali tradotte.
+
+La modifica funzionale riguarda soltanto l'Assistente e dispone di una regressione dedicata per `arrow_upward` e `mic`; l'allineamento a `1.2.195` invalida la cache applicativa precedente. Nessuna modifica a Lingue, AI, guida, Rules, Functions o dati reali appartiene a questo hotfix. Implementazione e verifiche locali non equivalgono ancora a integrazione o Hosting distribuito.
+
 ## Release 1.2.194 pubblicata — ricerca per anno, pacchetti AI e catalogo Archivio — 15/10/2026
 
 Il difetto riprodotto con le frasi «Sto cercando una scadenza del 2035 ma non la trovo» e «stavo cercando una scadenza del 2029 ma non mi ricordo cosa» appartiene al percorso **Cerca** mostrato negli screenshot: le parole colloquiali venivano considerate termini obbligatori insieme a `scadenza` e all'anno. Il motore locale ora elimina tali termini senza significato documentale e conserva categoria e anno; le schede Scadenza indicizzano già la data normalizzata mostrata nell'interfaccia. Due regressioni sintetiche verificano entrambe le frasi complete, compreso il passaggio da una ricerca precedente, senza utilizzare dati reali.
