@@ -1,5 +1,14 @@
 # Collaudi
 
+## 17/10/2026 — pubblicazione 1.2.200, configurazione Scadenza da Documento
+
+- Test mirati **28/28**, navigazione **161/161**, offline **14/14**, i18n **14/14**, guida **6/6**, documentazione **11/11**, diagnostica prestazioni **3/3**; verdi anche versione, sintassi di **218 moduli**, riferimenti statici su **311 file**, CSS, dipendenze circolari, hardening e `git diff --check`.
+- Il catalogo guida è stato riesaminato sulla `1.2.200`: **30 pagine**, **126 istruzioni** e **112 target** univoci; il target del Preavviso punta al nuovo campo modificabile `notif_days_before`.
+- Graphify principale è stato rigenerato dopo le modifiche JavaScript strutturali: 13.126 nodi, 34.766 archi e 601 comunità. Il grafo resta un indice di supporto e non sostituisce i test.
+- PR `#165`: due controlli documentali e `validate` completa verde in 7m49s; merge `572ad57b` in `master`.
+- Deploy riuscito sul solo Firebase Hosting: **343 file**. Verifica remota HTTP `200` su Home, editor Scadenza, modulo bozza di ritorno e catalogo guida, con versione `1.2.200` confermata.
+- Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi. La ricezione effettiva di Email e Push non è attestata dai test sintetici e resta una prova manuale dell'utente.
+
 ## 17/10/2026 — pubblicazione 1.2.199, Scadenze definitive dai Documenti
 
 - I test sintetici devono verificare che la proposta avvenga soltanto dopo la persistenza del Documento e che **Configura scadenza** apra l'editor completo; dopo il collegamento la scheda deve mostrare **Apri scadenza del documento** e nessun secondo comando per record storici.
