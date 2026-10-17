@@ -15,8 +15,122 @@ async function loadPageCatalog(language) {
 }
 let _activeLanguage = 'it';
 const _missingKeys = new Set();
+const _sourceText = new WeakMap();
+const _sourceAttributes = new WeakMap();
 
 const _it = {
+        access_credentials: "Credenziali di accesso",
+        access_protocol_data: "Dati di accesso e protocollo",
+        account_code: "Codice account",
+        account_name: "Nome account",
+        account_name_placeholder: "Inserisci il nome dell’account",
+        account_not_found: "Account non trovato",
+        account_private: "Account privato",
+        add_account: "Aggiungi account",
+        add_custom_email: "Aggiungi e-mail personalizzata",
+        add_deadline: "Aggiungi scadenza",
+        add_doc_photo: "Aggiungi foto del documento",
+        add_location: "Aggiungi sede",
+        aria_add_new_doc_owner: "Aggiungi un nuovo intestatario",
+        aria_add_new_doc_type: "Aggiungi un nuovo tipo di documento",
+        aria_add_new_template: "Aggiungi un nuovo modello",
+        aria_add_new_type: "Aggiungi un nuovo tipo",
+        aria_add_new_vehicle: "Aggiungi un nuovo veicolo",
+        attachments: "Allegati",
+        attachments_notes: "Allegati e note",
+        avatar_updated: "Immagine del profilo aggiornata",
+        category: "Categoria",
+        category_object: "Oggetto della categoria",
+        cciaa_placeholder: "Provincia e numero CCIAA",
+        civic_number: "Numero civico",
+        close: "Chiudi",
+        code_placeholder: "Inserisci il codice",
+        company_accounts: "Account aziendali",
+        company_details: "Dettagli azienda",
+        company_info: "Informazioni azienda",
+        company_locations: "Sedi aziendali",
+        company_referent: "Referente aziendale",
+        compone_deadline: "Componi scadenza",
+        confirm_remove_account: "Vuoi rimuovere questo account?",
+        confirm_reset_views_msg: "Vuoi azzerare le statistiche delle visualizzazioni?",
+        confirm_reset_views_title: "Azzera statistiche",
+        contact_updated: "Contatto aggiornato",
+        date_alerts: "Avvisi scadenza",
+        deadline_detail: "Dettaglio scadenza",
+        deadline_info: "Informazioni scadenza",
+        deadlines: "Scadenze",
+        documents: "Documenti",
+        edit: "Modifica",
+        email_categories: "Categorie e-mail",
+        email_password: "Password e-mail",
+        email_required: "L’indirizzo e-mail è obbligatorio",
+        email_subject_preview: "Anteprima oggetto e-mail",
+        email_template: "Testo e-mail",
+        emails_dest: "Destinatari e-mail",
+        emails_pec: "E-mail e PEC",
+        error_loading: "Errore durante il caricamento",
+        error_loading_accounts: "Errore durante il caricamento degli account",
+        error_missing_company_name: "Inserisci la ragione sociale",
+        error_not_found: "Elemento non trovato",
+        error_only_owner_pin: "Solo il proprietario può fissare questo elemento",
+        error_upload: "Errore durante il caricamento",
+        expiry_date: "Data di scadenza",
+        finance_iban: "Dati finanziari e IBAN",
+        first_name: "Nome",
+        fiscal_data: "Dati fiscali",
+        frequency_days: "Frequenza in giorni",
+        full_name: "Nome e cognome",
+        general: "Generale",
+        holder: "Intestatario",
+        is_banking_account: "Account bancario",
+        last_name: "Cognome",
+        limit_pin_reached: "Hai raggiunto il numero massimo di elementi fissati",
+        mandatory: "Obbligatorio",
+        memo_shared: "Memorandum condiviso",
+        memorandum: "Memorandum",
+        missing_id: "Identificativo mancante",
+        mobile: "Cellulare",
+        my_companies: "Le mie aziende",
+        no_companies_found: "Nessuna azienda trovata",
+        notes_and_sharing: "Note e condivisione",
+        notice: "Preavviso",
+        notice_days: "Giorni di preavviso",
+        password: "Password",
+        password_placeholder: "Inserisci la password",
+        pec_password: "Password PEC",
+        phone: "Telefono",
+        pinned_to_top: "Fissato in alto",
+        planning: "Pianificazione",
+        profile_guide_step3: "Puoi allegare documenti e collegare le relative scadenze.",
+        province_short: "Provincia",
+        referent_info: "Informazioni referente",
+        removed_from_pinned: "Rimosso dagli elementi fissati",
+        replica: "Ripetizione",
+        reset_vault_desc: "Elimina i dati locali della Vault da questo dispositivo",
+        reset_vault_title: "Reimposta Vault locale",
+        scan_to_import: "Scansiona per importare",
+        search_placeholder: "Cerca…",
+        search_short: "Cerca",
+        select_category: "Seleziona categoria",
+        select_detail: "Seleziona dettaglio",
+        select_template: "Seleziona modello",
+        shared_account: "Account condiviso",
+        sort_by: "Ordina per",
+        text_email_text: "Testo dell’e-mail",
+        text_vehicle: "Veicolo",
+        title_config_documents: "Configurazione documenti",
+        title_config_general: "Configurazione generale",
+        title_deadline_rules: "Regole delle scadenze",
+        update: "Aggiorna",
+        uploading_avatar: "Caricamento immagine del profilo…",
+        username: "Nome utente",
+        username_email: "Nome utente o e-mail",
+        vehicle: "Veicolo",
+        vehicle_extra: "Dettagli veicolo",
+        vehicles: "Veicoli",
+        views_reset_success: "Statistiche azzerate",
+        website: "Sito web",
+        whatsapp_number: "Numero WhatsApp",
         account_archive: "Archivio Account",
         account_archive_desc: "Gestisci gli account archiviati",
         add_address: "Aggiungi Indirizzo",
@@ -471,15 +585,32 @@ const TRANSLATED_ATTRIBUTES = [
 ];
 
 export function setTranslatedText(element, key) {
-    if (element && key) Object.assign(element, { textContent: t(key) }).dataset.t = key;
+    if (element && key) {
+        if (!_sourceText.has(element)) _sourceText.set(element, element.textContent);
+        const translated = t(key);
+        element.textContent = translated === key ? _sourceText.get(element) : translated;
+        element.dataset.t = key;
+    }
     return element;
 }
 
 function translateElement(element) {
-    if (element.dataset.t) element.textContent = t(element.dataset.t);
+    if (element.dataset.t) {
+        if (!_sourceText.has(element)) _sourceText.set(element, element.textContent);
+        const translated = t(element.dataset.t);
+        element.textContent = translated === element.dataset.t ? _sourceText.get(element) : translated;
+    }
     for (const [attribute, datasetKey] of TRANSLATED_ATTRIBUTES) {
         const key = element.dataset[datasetKey];
-        if (key) element.setAttribute(attribute, t(key));
+        if (!key) continue;
+        let originals = _sourceAttributes.get(element);
+        if (!originals) {
+            originals = new Map();
+            _sourceAttributes.set(element, originals);
+        }
+        if (!originals.has(attribute)) originals.set(attribute, element.getAttribute(attribute) || '');
+        const translated = t(key);
+        element.setAttribute(attribute, translated === key ? originals.get(attribute) : translated);
     }
 }
 

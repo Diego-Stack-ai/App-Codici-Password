@@ -85,6 +85,8 @@ test('runtime i18n traduce tutti gli attributi dichiarati e osserva i sottoalber
     assert.match(observer, /applyGlobalTranslations\(node\)/);
     assert.match(source, /dataset\.i18nFallback = 'true'/);
     assert.match(source, /missingKeys: getMissingTranslationKeys\(\)/);
+    assert.match(source, /translated === element\.dataset\.t \? _sourceText\.get\(element\) : translated/);
+    assert.match(source, /translated === key \? originals\.get\(attribute\) : translated/);
 });
 
 test('onboarding dispone di un catalogo esplicito per tutte le lingue dichiarate', async () => {

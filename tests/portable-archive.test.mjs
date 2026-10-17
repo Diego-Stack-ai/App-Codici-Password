@@ -135,6 +135,9 @@ test('il visualizzatore presenta un catalogo umano e relega le esportazioni tecn
     assert.match(html, /Account aziendali/);
     assert.match(html, /Tutte le aziende/);
     assert.match(html, /nomeAccount/);
+    assert.match(html, /numeroCCIAA:'Numero CCIAA'/);
+    assert.match(html, /referenteCognome:'Cognome referente'/);
+    assert.match(html, /data:image/);
     assert.match(html, /Seleziona una scheda per visualizzarne i dettagli/);
     assert.match(html, /aria-label','Scarica '/);
     assert.doesNotMatch(html, /Identificativo archivio/);

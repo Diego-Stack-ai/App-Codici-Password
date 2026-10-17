@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "description": "Baseline transitoria del debito i18n rilevato sulla 1.2.190 dopo il merge Archivio. I valori possono diminuire ma non aumentare.",
-  "sourceVersion": "1.2.190",
-  "sourceCommit": "cee3929925a2bd4f30255906f3f358316ff049bf",
-  "completeLanguages": [],
+  "description": "Baseline del debito i18n aggiornata con i cataloghi italiano e inglese completi nella candidata 1.2.197. I valori possono diminuire ma non aumentare.",
+  "sourceVersion": "1.2.197",
+  "sourceCommit": "4c9cafb1fb2289f07d673bf6d00841d10b17641a",
+  "completeLanguages": ["it", "en"],
   "declaredLanguages": ["it", "en", "es", "fr", "de", "zh", "hi", "pt"],
   "nonTranslatableExact": [
     "Codex",
@@ -30,20 +30,20 @@
     "/ui-preview/"
   ],
   "debt": {
-    "missingItalianKeys": 113,
+    "missingItalianKeys": 0,
     "missingKeysByLanguage": {
-      "it": 113,
-      "en": 174,
-      "es": 328,
-      "fr": 343,
-      "de": 343,
-      "zh": 344,
-      "hi": 344,
-      "pt": 344
+      "it": 0,
+      "en": 0,
+      "es": 319,
+      "fr": 334,
+      "de": 334,
+      "zh": 335,
+      "hi": 335,
+      "pt": 335
     },
-    "onboardingMissingLanguages": 6,
+    "onboardingMissingLanguages": 0,
     "htmlLiteralSegments": 1018,
-    "htmlLiteralAttributes": 85,
+    "htmlLiteralAttributes": 78,
     "jsLiteralSinks": 792
   },
   "previousBaseline": {

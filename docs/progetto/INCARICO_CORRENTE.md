@@ -1,5 +1,17 @@
 # Incarico corrente
 
+## BONIFICA-LINGUE-02 — 17/10/2026
+
+| Campo | Valore |
+|---|---|
+| Autorità | Diego: «procedi con la bonifica» dopo il rapporto i18n read-only della candidata 1.2.197 |
+| Obiettivo | Eliminare chiavi tecniche e commistioni linguistiche visibili, completando prima l’italiano e i percorsi P0 di Impostazioni, Account, Scadenze e Archivio portabile |
+| Primo lotto locale | Cataloghi italiano e inglese delle chiavi usate completi; fallback DOM non espone la chiave tecnica; colori di Impostazioni tradotti nelle otto lingue; catalogo italiano dell’Archivio ampliato e immagini Base64 presentate come anteprime |
+| Criterio | Una lingua è dichiarabile completa soltanto con zero chiavi usate mancanti; nessun aumento di baseline o allowlist per occultare il debito |
+| Dati utente | Nomi, note, valori, allegati e campi personalizzati restano invariati e non vengono tradotti |
+| Distribuzione | Implementazione e verifiche locali non autorizzano automaticamente merge o Hosting; la candidata 1.2.197 resta sospesa fino al nuovo gate |
+
+
 ## Candidata 1.2.197 — AI locale, Scadenze documenti e Archivio portabile — 16/10/2026
 
 Diego autorizza l'integrazione e la pubblicazione congiunta sul solo Firebase Hosting di tre lotti già sviluppati in worktree isolati. L'Assistente espone due prodotti: **AI.1 Locale**, che unisce ricerca deterministica e pacchetto semantico installabile, e **AI.2 Avanzata per PC**, con taglie `light`, `medium` e `power` selezionate da capability probe, quota e verifica runtime. Il modello non accede direttamente al Vault e i pacchetti same-origin non entrano nella shell offline.

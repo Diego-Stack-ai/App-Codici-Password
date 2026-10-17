@@ -1,5 +1,12 @@
 # Stato
 
+## Bonifica lingue 1.2.197 in corso — 17/10/2026
+
+Il rapporto read-only ha prodotto un **NO-GO** e la bonifica è ora entrata nella fase esecutiva su un worktree isolato derivato dalla candidata `4c9cafb1`. Il primo lotto porta da **112 a zero** le chiavi italiane usate ma mancanti e da **165 a zero** quelle inglesi: italiano e inglese sono ora i soli cataloghi dichiarati completi. Il runtime conserva il testo umano già presente nel markup se una futura regressione introducesse una chiave sconosciuta, evitando di mostrare identificatori tecnici; il gate continua comunque a considerare la chiave mancante un errore.
+
+I colori di Impostazioni dispongono ora di traduzioni esplicite nelle otto lingue. Il visualizzatore dell’Archivio portabile amplia le etichette italiane di Profilo, Account, Aziende e Scadenze e presenta le immagini incorporate come anteprime invece di lunghe stringhe Base64. Le verifiche mirate i18n e Archivio risultano verdi. Spagnolo, francese, tedesco, cinese, hindi e portoghese restano cataloghi parziali e non sono ancora dichiarati completi; merge e pubblicazione restano sospesi.
+
+
 ## Candidata 1.2.197 — integrazione AI, Scadenze documenti e Archivio portabile — 16/10/2026
 
 Nel worktree isolato di rilascio sono integrati i tre lotti autorizzati. L'Assistente presenta **AI.1 Locale** e **AI.2 Avanzata per PC**; la seconda sceglie fra taglie `light`, `medium` e `power` solo dopo controllo del dispositivo e verifica del pacchetto. Gli asset `medium` e `power` sono presenti nella snapshot di deploy e verificati dal catalogo generato, ma non sono precache della PWA.
