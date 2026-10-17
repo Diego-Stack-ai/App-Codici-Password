@@ -51,9 +51,10 @@ function readDictionaries() {
   const declaredLanguages = languagesMatch
     ? [...languagesMatch[1].matchAll(/['"]([^'"]+)['"]/g)].map(match => match[1])
     : [];
-  const start = source.indexOf('const _it = {');
-  const end = source.indexOf('\n};', start);
-  const dictionaries = { it: dictionaryKeys(source.slice(start, end)) };
+  const italianFile = path.join(publicRoot, 'assets', 'js', 'translations', 'it.js');
+  const dictionaries = {
+    it: fs.existsSync(italianFile) ? dictionaryKeys(fs.readFileSync(italianFile, 'utf8')) : []
+  };
   const domainSources = ['settings.js', 'deadline-rules.js']
     .map(file => fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', file), 'utf8'));
   for (const language of declaredLanguages.filter(language => language !== 'it')) {

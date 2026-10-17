@@ -11,7 +11,7 @@
 | Dati utente | Nomi, note, valori, allegati e campi personalizzati restano invariati e non vengono tradotti |
 | Distribuzione | Diego ha successivamente ordinato di sistemare gli errori e pubblicare; push e Hosting della 1.2.197 sono autorizzati soltanto dopo gate finali verdi e aggiornamento dello stato |
 
-Esito: italiano e inglese hanno zero chiavi usate mancanti; le altre sei lingue restano dichiarate parziali. La release integrata comprende inoltre Regole scadenze, correzione mobile dei documenti Profilo, hotfix destinatari Push e correzione del visualizzatore Archivio trovata dal banco browser. I gate finali sono verdi; ramo finale e Firebase Hosting sono stati pubblicati e la verifica HTTP della `1.2.197` è positiva. Il deploy conclusivo ha riguardato soltanto Hosting.
+Esito: italiano e inglese hanno zero chiavi usate mancanti; le altre sei lingue restano dichiarate parziali. La release integrata comprende inoltre Regole scadenze, correzione mobile dei documenti Profilo, hotfix destinatari Push e correzione del visualizzatore Archivio trovata dal banco browser. Il catalogo italiano è separato dal bootstrap globale, precaricato offline e verificato senza aumentare la baseline; Profilo e Impostazioni rispettano così il budget statico. I gate finali sono verdi; ramo finale e Firebase Hosting sono stati pubblicati e la verifica HTTP della `1.2.197` è positiva. Il deploy conclusivo ha riguardato soltanto Hosting.
 
 
 ## Candidata 1.2.197 — AI locale, Scadenze documenti e Archivio portabile — 16/10/2026
