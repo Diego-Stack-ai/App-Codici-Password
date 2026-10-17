@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.200 — 17/10/2026
+
+PR `#165` unita in `master` nel commit `572ad57b` dopo due controlli documentali e validazione GitHub completa verdi. Pubblicati **343 file** sul solo Firebase Hosting. La verifica remota ha restituito HTTP `200` e confermato versione `1.2.200`, data del Documento vincolante nell'editor Scadenza, campi Preavviso/Frequenza, ritorno protetto dalla rubrica Destinatari e catalogo guida aggiornato. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
+
 ## Esito operativo 1.2.199 — 17/10/2026
 
 PR `#163` unita in `master` nel commit `5917cc93` dopo controlli documentali e validazione GitHub completa verdi. Pubblicati Firebase Hosting e Functions: **342 file** Hosting e Functions Node.js 22 in `europe-west1`, incluse le funzioni di scheduler, Email/Push e lifecycle delle Scadenze. La verifica remota ha restituito HTTP `200` per Home, Profilo e Regole scadenze, confermando versione `1.2.199` e moduli `profile-document-deadline-v1` online. Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati. Il collaudo reale Email/Push e la cancellazione manuale delle tre vecchie Scadenze personali restano attività dell'utente; gli allegati sono consultabili nell'app ma non vengono inviati come file nell'email.

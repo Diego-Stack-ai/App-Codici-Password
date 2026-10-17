@@ -6,6 +6,8 @@ Diego precisa che le due date del Documento hanno ruoli distinti: la Data di ril
 
 Il perimetro corrente autorizza implementazione locale, prove sintetiche, aggiornamento dei documenti e del grafo principale. Dopo la consegna locale Diego ordina esplicitamente **«Pubblica»**: sono quindi autorizzati bump patch `1.2.200`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Restano esclusi accesso all'account reale, invii Email/Push reali, Functions, Rules, indici, migrazioni e operazioni sui dati reali.
 
+Esito: la PR `#165` è stata integrata su `master` nel commit `572ad57b`; i gate GitHub sono verdi e Firebase Hosting ha pubblicato 343 file. La verifica pubblica ha confermato la versione `1.2.200` e gli asset del nuovo flusso. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi; la ricezione effettiva di Email e Push resta una prova manuale dell'utente.
+
 ## Scadenze definitive dai Documenti del Profilo — 17/10/2026
 
 Diego conferma il flusso definitivo in **Profilo → Documenti**. **Configura scadenza** apre l'editor completo e, dopo la creazione, diventa **Apri scadenza del documento**. Il flusso crea una Scadenza attiva con preavviso, frequenza, destinatari/canali e nota, mantenendo il collegamento al Documento e i riferimenti agli allegati senza duplicare i file. Non deve essere offerto dalla scheda Documento un comando dedicato alla vecchia Scadenza.
