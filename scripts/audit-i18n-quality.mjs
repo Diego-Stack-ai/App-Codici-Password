@@ -54,12 +54,15 @@ function readDictionaries() {
   const start = source.indexOf('const _it = {');
   const end = source.indexOf('\n};', start);
   const dictionaries = { it: dictionaryKeys(source.slice(start, end)) };
-  const settingsSource = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', 'settings.js'), 'utf8');
+  const domainSources = ['settings.js', 'deadline-rules.js']
+    .map(file => fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', file), 'utf8'));
   for (const language of declaredLanguages.filter(language => language !== 'it')) {
     const file = path.join(publicRoot, 'assets', 'js', 'translations', `${language}.js`);
     dictionaries[language] = fs.existsSync(file) ? dictionaryKeys(fs.readFileSync(file, 'utf8')) : [];
   }
-  for (const language of declaredLanguages) dictionaries[language].push(...domainDictionaryKeys(settingsSource, language));
+  for (const language of declaredLanguages) {
+    for (const domainSource of domainSources) dictionaries[language].push(...domainDictionaryKeys(domainSource, language));
+  }
   return { declaredLanguages, dictionaries };
 }
 
@@ -103,6 +106,9 @@ function collectHtmlLiterals() {
       if (isAllowlistedLiteral(value)) continue;
       const before = withoutNonUi.slice(Math.max(0, match.index - 220), match.index);
       if (/material-(?:symbols|icons)[^>]*>[^<]*$/i.test(before)) continue;
+      const tagStart = withoutNonUi.lastIndexOf('<', match.index);
+      const openingTag = withoutNonUi.slice(tagStart, match.index + 1);
+      if (/\bdata-t\s*=/.test(openingTag)) continue;
       pageFindings.push({ file: page, line: lineOf(withoutNonUi, match.index), kind: 'text', value });
     }
     for (const match of withoutNonUi.matchAll(/\b(placeholder|title|aria-label|alt)\s*=\s*["']([^"']+)["']/gi)) {

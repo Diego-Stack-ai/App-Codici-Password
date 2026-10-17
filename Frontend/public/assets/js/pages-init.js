@@ -60,7 +60,9 @@ export async function initImpostazioni(user) {
 
 // --- CONFIG SCADENZE ---
 export async function initRegoleScadenze(user) {
-    LOG("[Router] Init Regole Scadenze (Static)");
+    LOG("[Router] Init Regole Scadenze");
+    const module = await import('./modules/scadenze/deadline-rules-hub.js?v=1.2.197');
+    return module.initDeadlineRulesHub(user);
 }
 
 export async function initGestioneDestinatari(user) {

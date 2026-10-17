@@ -7,11 +7,16 @@ const normalizeAppLanguage = (value, fallback = 'it') => {
 };
 
 let _dict = {};
-const needsSettingsCatalog = () => /(?:^|\/)impostazioni(?:\.html)?$/i.test(location.pathname);
 async function loadPageCatalog(language) {
-    if (!needsSettingsCatalog()) return {};
-    const { settingsCatalogs } = await import('./translations/settings.js');
-    return settingsCatalogs[language] || {};
+    if (/(?:^|\/)impostazioni(?:\.html)?$/i.test(location.pathname)) {
+        const { settingsCatalogs } = await import('./translations/settings.js');
+        return settingsCatalogs[language] || {};
+    }
+    if (/(?:^|\/)regole_scadenze(?:\.html)?$/i.test(location.pathname)) {
+        const { deadlineRulesCatalogs } = await import('./translations/deadline-rules.js');
+        return deadlineRulesCatalogs[language] || {};
+    }
+    return {};
 }
 let _activeLanguage = 'it';
 const _missingKeys = new Set();

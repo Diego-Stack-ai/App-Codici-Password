@@ -45,6 +45,75 @@
 
                 <div class="saetta-master"></div>
 
+                <section class="deadline-hub" aria-labelledby="deadline-hub-title">
+                    <div class="deadline-hub-heading">
+                        <div>
+                            <p class="deadline-hub-eyebrow" data-t="deadline_hub_eyebrow">NUOVO PROGETTO</p>
+                            <h2 id="deadline-hub-title" data-t="deadline_hub_title">Ambiti delle scadenze</h2>
+                            <p data-t="deadline_hub_intro">Scegli un ambito. Le configurazioni storiche restano disponibili più sotto durante la progettazione.</p>
+                        </div>
+                        <span class="deadline-hub-badge" data-t="deadline_hub_design_badge">IN PROGETTAZIONE</span>
+                    </div>
+
+                    <div class="deadline-domain-tabs" role="tablist" aria-label="Ambiti delle scadenze" data-t-aria="deadline_hub_tabs_aria">
+                        <button type="button" class="deadline-domain-tab is-active" role="tab" aria-selected="true" aria-controls="deadline-panel-personal" id="deadline-tab-personal" data-deadline-domain="personal">
+                            <span class="material-symbols-outlined notranslate" translate="no">badge</span><span data-t="deadline_domain_personal">Documenti personali</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-vehicles" id="deadline-tab-vehicles" data-deadline-domain="vehicles" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">directions_car</span><span data-t="deadline_domain_vehicles">Automezzi</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-home" id="deadline-tab-home" data-deadline-domain="home" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">home_work</span><span data-t="deadline_domain_home">Casa e immobili</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-health" id="deadline-tab-health" data-deadline-domain="health" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">cardiology</span><span data-t="deadline_domain_health">Salute</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-sport" id="deadline-tab-sport" data-deadline-domain="sport" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">sports</span><span data-t="deadline_domain_sport">Sport e associazioni</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-contracts" id="deadline-tab-contracts" data-deadline-domain="contracts" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">contract</span><span data-t="deadline_domain_contracts">Contratti e rapporti</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-generic" id="deadline-tab-generic" data-deadline-domain="generic" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">inventory_2</span><span data-t="deadline_domain_generic">Documenti generici</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-user-company" id="deadline-tab-user-company" data-deadline-domain="user-company" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">handshake</span><span data-t="deadline_domain_user_company">Utente–azienda</span>
+                        </button>
+                        <button type="button" class="deadline-domain-tab" role="tab" aria-selected="false" aria-controls="deadline-panel-company" id="deadline-tab-company" data-deadline-domain="company" tabindex="-1">
+                            <span class="material-symbols-outlined notranslate" translate="no">domain</span><span data-t="deadline_domain_company">Documenti aziendali</span>
+                        </button>
+                    </div>
+
+                    <div class="deadline-domain-panels">
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-personal" aria-labelledby="deadline-tab-personal" data-deadline-panel="personal">
+                            <div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">verified_user</span><div><h3 data-t="deadline_personal_title">Documenti personali collegati</h3><p data-t="deadline_personal_desc">Patente, carta d’identità e altri documenti nascono nel Profilo. Qui saranno riepilogati e potrai regolare preavviso e frequenza.</p></div></div>
+                            <a class="deadline-domain-action" href="profilo_privato.html?profileTab=documents"><span data-t="deadline_open_profile_documents">Apri Documenti nel Profilo</span><span class="material-symbols-outlined notranslate" translate="no">arrow_forward</span></a>
+                        </article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-vehicles" aria-labelledby="deadline-tab-vehicles" data-deadline-panel="vehicles" hidden>
+                            <div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">car_repair</span><div><h3 data-t="deadline_vehicles_title">Scadenze degli automezzi</h3><p data-t="deadline_vehicles_desc">Revisione, bollo, assicurazione e manutenzioni confluiranno qui senza interrompere la configurazione attuale.</p></div></div>
+                            <a class="deadline-domain-action" href="configurazione_automezzi.html"><span data-t="deadline_open_legacy_vehicle_rules">Apri configurazione attuale</span><span class="material-symbols-outlined notranslate" translate="no">arrow_forward</span></a>
+                        </article>
+                        <article class="deadline-domain-panel deadline-home-concept" role="tabpanel" id="deadline-panel-home" aria-labelledby="deadline-tab-home" data-deadline-panel="home" hidden>
+                            <div class="deadline-concept-topline"><div><span class="deadline-concept-label" data-t="deadline_concept_preview">ANTEPRIMA UI</span><h3 data-t="deadline_home_title">Casa e immobili</h3><p data-t="deadline_home_desc">Un unico spazio per pagamenti, manutenzioni e documenti periodici, anche quando l’allegato non è ancora disponibile.</p></div><a class="deadline-round-action" href="configurazione_generali.html" aria-label="Apri le regole generali" data-t-aria="deadline_open_general_rules"><span class="material-symbols-outlined notranslate" translate="no">add</span></a></div>
+                            <div class="deadline-concept-grid">
+                                <div class="deadline-concept-card"><span class="deadline-concept-icon color-amber"><span class="material-symbols-outlined notranslate" translate="no">account_balance</span></span><strong>IMU</strong><small data-t="deadline_home_imu_hint">Pagamento e documento dell’anno corrente</small><span class="deadline-concept-state" data-t="deadline_state_to_configure">Da configurare</span></div>
+                                <div class="deadline-concept-card"><span class="deadline-concept-icon color-emerald"><span class="material-symbols-outlined notranslate" translate="no">delete_sweep</span></span><strong>TARI</strong><small data-t="deadline_home_tari_hint">Avviso periodico e allegato facoltativo</small><span class="deadline-concept-state" data-t="deadline_state_to_configure">Da configurare</span></div>
+                                <div class="deadline-concept-card"><span class="deadline-concept-icon color-blue"><span class="material-symbols-outlined notranslate" translate="no">heat_pump</span></span><strong data-t="deadline_home_boiler">Manutenzione caldaia</strong><small data-t="deadline_home_boiler_hint">Controllo, rapporto e prossimo richiamo</small><span class="deadline-concept-state" data-t="deadline_state_to_configure">Da configurare</span></div>
+                            </div>
+                            <div class="deadline-concept-footer"><span class="material-symbols-outlined notranslate" translate="no">attachment</span><p data-t="deadline_home_attachment_note">La regola può nascere senza allegato. Potrai aggiungere il documento quando arriva e sostituirlo al ciclo successivo.</p></div>
+                        </article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-health" aria-labelledby="deadline-tab-health" data-deadline-panel="health" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">health_and_safety</span><div><h3 data-t="deadline_health_title">Salute</h3><p data-t="deadline_health_desc">Visite, certificati e richiami personali. La progettazione dei dati inizierà dopo la validazione della navigazione.</p></div></div></article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-sport" aria-labelledby="deadline-tab-sport" data-deadline-panel="sport" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">sailing</span><div><h3 data-t="deadline_sport_title">Sport e associazioni</h3><p data-t="deadline_sport_desc">Tesseramenti, quote, licenze e certificati collegati alle attività.</p></div></div></article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-contracts" aria-labelledby="deadline-tab-contracts" data-deadline-panel="contracts" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">signature</span><div><h3 data-t="deadline_contracts_title">Contratti e rapporti</h3><p data-t="deadline_contracts_desc">Rinnovi, disdette, comodati e rapporti periodici personali.</p></div></div></article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-generic" aria-labelledby="deadline-tab-generic" data-deadline-panel="generic" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">note_stack</span><div><h3 data-t="deadline_generic_title">Documenti generici</h3><p data-t="deadline_generic_desc">Uno spazio flessibile per ciò che non appartiene agli altri ambiti.</p></div></div><a class="deadline-domain-action" href="configurazione_documenti.html"><span data-t="deadline_open_legacy_document_rules">Apri configurazione attuale</span><span class="material-symbols-outlined notranslate" translate="no">arrow_forward</span></a></article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-user-company" aria-labelledby="deadline-tab-user-company" data-deadline-panel="user-company" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">account_tree</span><div><h3 data-t="deadline_user_company_title">Rapporti utente–azienda</h3><p data-t="deadline_user_company_desc">Futuro contenitore unico per scadenze create dall’utente o dall’azienda e riferite allo stesso rapporto.</p></div></div></article>
+                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-company" aria-labelledby="deadline-tab-company" data-deadline-panel="company" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">business_center</span><div><h3 data-t="deadline_company_title">Documenti aziendali</h3><p data-t="deadline_company_desc">Area futura per licenze, autorizzazioni, contratti e adempimenti delle singole aziende.</p></div></div><span class="deadline-future-badge" data-t="deadline_future_phase">FASE FUTURA</span></article>
+                    </div>
+                </section>
+
+                <div class="deadline-legacy-divider"><span data-t="deadline_legacy_title">Configurazioni attuali</span></div>
+
                 <!-- Settings Group -->
                 <div class="settings-group">
 
