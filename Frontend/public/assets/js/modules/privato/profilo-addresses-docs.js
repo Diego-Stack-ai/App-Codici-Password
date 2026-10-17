@@ -162,11 +162,20 @@ export function renderDocumentiView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
+    const btnAdd = createElement('button', {
+        id: 'btn-add-profile-document',
+        type: 'button',
+        className: 'btn-upload-trigger profile-document-add-trigger',
+        ariaLabel: t('add_doc')
+    }, [
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'add_card' }),
         createElement('span', { textContent: t('add_doc') })
     ]);
-    btnAdd.onclick = () => _callbacks.onAddDoc();
+    btnAdd.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        _callbacks.onAddDoc();
+    });
 
     const items = userDocuments.map((docItem, idx) => {
         const pilotDeadlineId = docItem.pilotDeadlineReference?.deadlineId
