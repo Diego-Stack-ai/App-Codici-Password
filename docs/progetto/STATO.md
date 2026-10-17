@@ -1,12 +1,14 @@
 # Stato
 
-## Candidata 1.2.197 verificata localmente — 17/10/2026
+## Release 1.2.197 pubblicata — 17/10/2026
 
 Il precedente **NO-GO** della bonifica è stato risolto nel worktree finale della candidata. Il lotto porta da **112 a zero** le chiavi italiane usate ma mancanti e da **165 a zero** quelle inglesi: italiano e inglese sono i soli cataloghi dichiarati completi. Il runtime conserva il testo umano già presente nel markup se una futura regressione introducesse una chiave sconosciuta, evitando di mostrare identificatori tecnici; il gate continua comunque a considerare la chiave mancante un errore.
 
 I colori di Impostazioni dispongono ora di traduzioni esplicite nelle otto lingue. Il visualizzatore dell’Archivio portabile amplia le etichette italiane di Profilo, Account, Aziende e Scadenze, separa elenco e dettaglio e presenta immagini e allegati senza esporre Base64. Il collaudo browser ha inoltre individuato e corretto una barra non sufficientemente escapata nel codice generato. Spagnolo, francese, tedesco, cinese, hindi e portoghese restano cataloghi parziali e non sono dichiarati completi.
 
-La candidata integra anche la nuova navigazione di **Regole scadenze**, la correzione mobile che riattiva aggiunta e modifica dei documenti del Profilo e il precedente hotfix dei destinatari Push. Gate verdi: 133 test integrati, documentazione 11/11, i18n 14/14, AI locale 31/31, Archivio 15/15 più banco browser, offline 14/14, CSS, dipendenze, sintassi, riferimenti statici, HTML e hardening. Graphify è stato rigenerato sul codice finale. Commit locali e verifiche non equivalgono ancora a push o Hosting: la produzione resta `1.2.196` finché la `1.2.197` non viene distribuita e verificata via HTTP.
+La release integra anche la nuova navigazione di **Regole scadenze**, la correzione mobile che riattiva aggiunta e modifica dei documenti del Profilo e il precedente hotfix dei destinatari Push. Gate verdi: 133 test integrati, documentazione 11/11, i18n 14/14, AI locale 31/31, Archivio 15/15 più banco browser, offline 14/14, CSS, dipendenze, sintassi, riferimenti statici, HTML e hardening. Graphify è stato rigenerato sul codice finale.
+
+Il ramo `codex/release-finalize-1-2-197` è stato pubblicato e Firebase Hosting ha distribuito 341 file. La verifica HTTP pubblica ha confermato `1.2.197`, bootstrap principale, guardia mobile `profileTabs` e visualizzatore Archivio corretto con risposta `200`. Il rilascio finale ha distribuito soltanto Hosting: non ha modificato nuovamente Functions, Rules o dati reali.
 
 
 ## Candidata 1.2.197 — integrazione AI, Scadenze documenti e Archivio portabile — 16/10/2026
