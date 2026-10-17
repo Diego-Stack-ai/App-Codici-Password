@@ -1,10 +1,12 @@
 # Stato
 
-## Candidata 1.2.198 — date dei documenti Profilo — 17/10/2026
+## Release 1.2.198 pubblicata — date dei documenti Profilo — 17/10/2026
 
 La mancata proposta Scadenza dopo il salvataggio di un Passaporto è stata riprodotta senza dati reali. Le definizioni di Data di rilascio e Data di scadenza erano corrette, ma il motore del popup trasformava ogni campo non selettivo in testo: un valore come `17/10/2026` restava quindi fuori dal formato ISO richiesto dal pilot.
 
-Nel ramo `codex/fix-passport-deadline` i campi data vengono ora resi come input HTML `date`; i valori storici italiani con separatore `/`, `.` o `-` sono normalizzati in `AAAA-MM-GG`, mentre date impossibili e testo libero non vengono accettati. Le prove sintetiche coprono Passaporto, normalizzazione e collegamento al pilot; Profilo, navigazione, offline, sintassi, riferimenti statici, i18n e documentazione sono verdi. La versione candidata è `1.2.198`; commit, integrazione, Hosting e verifica pubblica vengono registrati separatamente quando conclusi. La distribuzione autorizzata riguarda soltanto Hosting.
+I campi data vengono ora resi come input HTML `date`; i valori storici italiani con separatore `/`, `.` o `-` sono normalizzati in `AAAA-MM-GG`, mentre date impossibili e testo libero non vengono accettati. Le prove sintetiche coprono Passaporto, normalizzazione e collegamento al pilot; Profilo, navigazione, offline, sintassi, riferimenti statici, i18n, guida e documentazione sono verdi.
+
+La PR `#161` è stata integrata su `master` nel commit `8785abe9`. Firebase Hosting ha distribuito 342 file e la verifica HTTP pubblica ha confermato cache `1.2.198`, input data nel modulo Profilo, normalizzatore delle date e catalogo guida riesaminato sulla stessa versione. Il rilascio ha riguardato soltanto Hosting: Functions, Rules, indici e dati reali non sono stati modificati.
 
 ## Release 1.2.197 pubblicata — 17/10/2026
 

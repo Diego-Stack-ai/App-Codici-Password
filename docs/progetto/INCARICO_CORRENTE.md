@@ -6,6 +6,8 @@ Diego segnala che un nuovo Passaporto salvato in **Profilo → Documenti** non p
 
 Il difetto confermato è nel motore modale condiviso: i campi dichiarati `date` vengono resi come testo. Una data italiana digitata liberamente viene quindi salvata ma non supera il contratto ISO del pilot. La correzione deve rendere i due campi veri input data, recuperare in modo deterministico le date legacy `GG/MM/AAAA`, `GG.MM.AAAA` o `GG-MM-AAAA`, rifiutare date impossibili e conservare il requisito `AAAA-MM-GG` usato dal collegamento Scadenze.
 
+Esito: la correzione è stata verificata, integrata con PR `#161` nel commit `8785abe9` e pubblicata come `1.2.198` sul solo Firebase Hosting. La verifica HTTP ha confermato versione, input data, normalizzatore e catalogo guida aggiornato; Functions, Rules, indici e dati reali sono rimasti esclusi.
+
 ## BONIFICA-LINGUE-02 — 17/10/2026
 
 | Campo | Valore |
