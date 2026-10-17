@@ -1,6 +1,6 @@
 # Collaudi
 
-## 17/10/2026 — Scadenze definitive dai Documenti, verifica locale conclusa
+## 17/10/2026 — pubblicazione 1.2.199, Scadenze definitive dai Documenti
 
 - I test sintetici devono verificare che la proposta avvenga soltanto dopo la persistenza del Documento e che **Configura scadenza** apra l'editor completo; dopo il collegamento la scheda deve mostrare **Apri scadenza del documento** e nessun secondo comando per record storici.
 - Il collegamento definitivo usa il marcatore `profile-document-deadline-v1` e non adotta come definitiva una Scadenza storica soltanto perché compatibile o già collegata. L'eventuale eliminazione resta manuale nella lista Scadenze.
@@ -8,7 +8,10 @@
 - La linguetta **Regole scadenze → Documenti personali** deve leggere gli stessi record, renderne il riepilogo senza duplicarli e coprire caricamento, vuoto, errore, nuovo tentativo, campi sensibili esclusi e comandi Configura/Apri.
 - Sul diff integrato risultano verdi: test mirati Documenti/Scadenze **44/44**, backend Email/Push/scheduler **42/42**, navigazione **159/159**, Profilo **167/167**, allegati **70/70**, i18n **14/14**, offline **14/14**, diagnostica performance **3/3**, documentazione **11/11**, sintassi **217 moduli**, riferimenti statici **310 file**, HTML puro **31 pagine**, shell pagina **5 pubbliche + 24 interne**, budget statico **30 pagine**, hardening, app leggera e coerenza versione `1.2.199`. Stylelint è verde usando le dipendenze già installate nel progetto principale; Madge non rileva dipendenze circolari nei **217 moduli**. `git diff --check` è verde.
 - Graphify principale è stato rigenerato sul lotto JavaScript e interrogato sul percorso Documenti Profilo → Scadenza definitiva → riepilogo Regole scadenze; il grafo continua a essere un indice di supporto, non un'evidenza sostitutiva dei test.
-- Il collaudo reale Passaporto con ricezione Email e Push e la successiva creazione/cancellazione delle tre Scadenze appartengono alla prova dell'utente dopo un eventuale rilascio autorizzato. Nessun dato reale è stato usato nella verifica locale.
+- PR `#163`: due controlli documentali e validazione GitHub completa verdi; merge `5917cc93` in `master`.
+- Deploy Firebase riuscito per Hosting e Functions: **342 file** Hosting; funzioni Node.js 22 aggiornate in `europe-west1`. `functions:list` conferma `checkDeadlines`, `sendDeadlinePushTest` e i trigger `onScadenzaCreated`, `onScadenzaUpdated`, `onScadenzaDeleted`.
+- Verifica remota: HTTP `200` su Home, Profilo e Regole scadenze con versione `1.2.199`; HTTP `200` e marcatore `profile-document-deadline-v1` nei tre moduli pubblici del salvataggio, riepilogo e Profilo.
+- Il collaudo reale Passaporto con ricezione Email e Push e la successiva creazione/cancellazione delle tre Scadenze appartengono alla prova dell'utente. Nessun dato reale è stato usato nella verifica automatica. Firestore Rules, Storage Rules, indici e migrazioni non sono stati distribuiti.
 
 ## 13/10/2026 — pubblicazione 1.2.177, qualità Tessera/Carta
 
