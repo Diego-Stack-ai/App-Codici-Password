@@ -309,7 +309,7 @@
 
 .deadline-personal-state > .material-symbols-outlined {
     color: var(--accent);
-    font-size: 2rem;
+    font-size: var(--fs-xl);
 }
 
 .deadline-personal-state .deadline-personal-action {
