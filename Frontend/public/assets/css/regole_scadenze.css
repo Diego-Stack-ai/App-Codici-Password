@@ -46,7 +46,7 @@
     padding: 0.4rem 0.7rem;
     color: var(--accent);
     background: rgb(var(--accent-rgb) / 0.08);
-    font-size: 0.67rem;
+    font-size: var(--fs-micro);
     font-weight: 800;
     letter-spacing: 0.06em;
 }
@@ -81,7 +81,7 @@
 }
 
 .deadline-domain-tab .material-symbols-outlined {
-    font-size: 1.15rem;
+    font-size: var(--fs-lg);
 }
 
 .deadline-domain-tab:hover,
