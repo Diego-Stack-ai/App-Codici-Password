@@ -4,9 +4,12 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 const source = fs.readFileSync(require.resolve("../index.js"), "utf8");
-const start = source.indexOf("exports.onScadenzaCreated = onDocumentCreated(");
-const end = source.indexOf("exports.onScadenzaUpdated = onDocumentUpdated(", start);
-assert.ok(start >= 0 && end > start);
+const start = source.indexOf("function deadlineDeliveryEnabled(");
+const schedulerStart = source.indexOf("exports.checkDeadlines = onSchedule(", start);
+const triggerStart = source.indexOf("exports.onScadenzaCreated = onDocumentCreated(", schedulerStart);
+const end = source.indexOf("exports.onScadenzaUpdated = onDocumentUpdated(", triggerStart);
+assert.ok(start >= 0 && schedulerStart > start && triggerStart > schedulerStart && end > triggerStart);
+const triggerCode = source.slice(start, schedulerStart) + source.slice(triggerStart, end);
 test("creation trigger observes Italian midnight and rejects invalid/expired dates", async () => {
   for (const [dueDate, expected] of [["2026-09-27", 0], ["2026-09-28", 1], ["2026-09-26", null], ["2026-02-30", null]]) {
     const calls = [];
@@ -19,9 +22,32 @@ test("creation trigger observes Italian midnight and rejects invalid/expired dat
       sendDeadlinePush: async (_db, _uid, _id, _s, days, options) => {calls.push(["push", days]); assert.equal(options.forceImmediate, true);},
       sendRecipientDeadlinePushes: async (_db, _uid, _id, _s, days) => calls.push(["recipient", days]),
       sendScadenzaEmail: async (_t, _u, _s, days) => calls.push(["email", days])};
-    vm.runInNewContext(source.slice(start, end), context);
+    vm.runInNewContext(triggerCode, context);
     await context.exports.onScadenzaCreated({params: {uid: "owner", scadenzaId: "synthetic"}, data: {data: () => ({dueDate}), ref: {}}});
     assert.deepEqual(calls, expected === null ? [] : [["push", expected], ["recipient", expected], ["email", expected]]);
+  }
+});
+
+test("creation trigger blocks disabled and pilot deadlines before sync or delivery", async () => {
+  for (const patch of [
+    {notificationsEnabled: false},
+    {pilotDeliveryDisabled: true},
+    {experimentTag: " Prova-Scadenze "}
+  ]) {
+    const calls = [];
+    const context = {Date, deadlineCalendar: require("../deadline-calendar"), exports: {},
+      onSchedule: (_config, handler) => handler, onDocumentCreated: (_config, handler) => handler,
+      admin: {firestore: () => ({})},
+      syncReceivedDeadlines: async () => calls.push("sync"), console: {log() {}, error() {}},
+      GMAIL_USER: {value: () => "synthetic"}, GMAIL_APP_PASSWORD: {value: () => "synthetic"},
+      createTransporter: () => ({}), deadlineRecipients: () => [{sendEmail: true}],
+      sendDeadlinePush: async () => calls.push("push"),
+      sendRecipientDeadlinePushes: async () => calls.push("recipient"),
+      sendScadenzaEmail: async () => calls.push("email")};
+    vm.runInNewContext(triggerCode, context);
+    await context.exports.onScadenzaCreated({params: {uid: "owner", scadenzaId: "synthetic"},
+      data: {data: () => ({dueDate: "2099-09-30", ...patch}), ref: {}}});
+    assert.deepEqual(calls, []);
   }
 });
 

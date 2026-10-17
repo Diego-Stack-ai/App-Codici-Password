@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 const source = fs.readFileSync(require.resolve("../index.js"), "utf8");
-const start = source.indexOf("exports.checkDeadlines = onSchedule(");
+const start = source.indexOf("function deadlineDeliveryEnabled(");
 const end = source.indexOf("exports.onScadenzaCreated = onDocumentCreated(", start);
 assert.ok(start >= 0 && end > start);
 const NOW = new Date(2026, 8, 26, 12).getTime();
@@ -62,6 +62,20 @@ test("scheduler skips expired, outside window, completed and missing-date record
   assert.deepEqual(h.calls, []);
   assert.deepEqual(h.queries, [["completed", "==", false]]);
   assert.deepEqual(h.errors, []);
+});
+test("scheduler blocks disabled and pilot deadlines before every delivery channel", async () => {
+  const h = harness([
+    record("notifications-disabled", 1, {notificationsEnabled: false}),
+    record("pilot-disabled", 1, {pilotDeliveryDisabled: true}),
+    record("pilot-tagged", 1, {experimentTag: " Prova-Scadenze "}),
+    record("legacy-enabled", 1),
+    record("explicitly-enabled", 1, {notificationsEnabled: true, pilotDeliveryDisabled: false})
+  ]);
+  await h.run();
+  assert.deepEqual(h.calls.map(call => [call[0], call[1]]), [
+    ["push", "legacy-enabled"], ["recipient", "legacy-enabled"], ["email", "legacy-enabled"],
+    ["push", "explicitly-enabled"], ["recipient", "explicitly-enabled"], ["email", "explicitly-enabled"]
+  ]);
 });
 test("scheduler default window and custom window include eligible records", async () => {
   const h = harness([record("default", 14), record("custom", 20, {notif_days_before: 21})]);

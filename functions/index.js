@@ -1839,6 +1839,13 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     return true;
 }
 
+function deadlineDeliveryEnabled(scadenza) {
+    if (!scadenza || typeof scadenza !== "object") return false;
+    if (scadenza.notificationsEnabled === false) return false;
+    if (scadenza.pilotDeliveryDisabled === true) return false;
+    return String(scadenza.experimentTag || "").trim().toLowerCase() !== "prova-scadenze";
+}
+
 // ─────────────────────────────────────────────────────────────
 // FUNZIONE 1 — Schedulata ogni giorno alle 09:00
 // ─────────────────────────────────────────────────────────────
@@ -1876,6 +1883,7 @@ exports.checkDeadlines = onSchedule(
 
                 for (const sDoc of scadenzeSnap.docs) {
                     const s = sDoc.data();
+                    if (!deadlineDeliveryEnabled(s)) continue;
                     if (!s.dueDate) continue;
 
                     const dueDay = deadlineCalendar.day(s.dueDate);
@@ -1937,6 +1945,8 @@ exports.onScadenzaCreated = onDocumentCreated(
     async (event) => {
         const s = event.data.data();
         const docRef = event.data.ref;
+
+        if (!deadlineDeliveryEnabled(s)) return;
 
         try {
             await syncReceivedDeadlines(admin.firestore(), event.params.uid, event.params.scadenzaId, s);

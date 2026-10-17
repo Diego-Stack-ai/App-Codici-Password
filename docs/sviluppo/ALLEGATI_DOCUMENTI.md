@@ -1,5 +1,11 @@
 # Allegati documenti
 
+## Documenti personali e Scadenze definitive — 17/10/2026
+
+La Scadenza definitiva conserva riferimenti agli allegati già cifrati del Documento del Profilo. `storagePath`, proprietà e origine devono restare quelli del Documento: non viene creato un secondo file in Storage e la cancellazione della Scadenza non può eliminare l'oggetto sorgente. Il riepilogo **Regole scadenze → Documenti personali** mostra soltanto il conteggio; l'apertura del file continua ad avvenire nel percorso autenticato dell'app.
+
+Questo collegamento non equivale all'invio del file nell'email. Il backend delle notifiche non dispone delle chiavi del Vault necessarie a decifrare l'allegato del Documento e non va descritto come capace di allegare quei byte. Un'eventuale consegna email dei file richiede un progetto distinto che mantenga il modello zero-knowledge, autorizzazioni, minimizzazione e tracciamento degli invii.
+
 ## Conferma cestino Account aziendale — candidata 1.2.180
 
 Il dettaglio Account aziendale non definisce più uno stile globale `.modal-overlay` per il selettore sorgente legacy. Quel residuo rendeva invisibile anche `protocol-confirm-modal`, lasciando sospesa la cancellazione richiesta dal cestino. La conferma torna quindi a usare lo strato canonico di `core_ui.css`, già condiviso con gli altri flussi; repository, ordine di cancellazione Storage/metadati e Rules restano invariati.

@@ -4,23 +4,23 @@ import {readFile} from 'node:fs/promises';
 
 const read = path => readFile(path, 'utf8');
 
-test('salvataggio documento offre il pilot soltanto dopo la persistenza', async () => {
+test('salvataggio documento offre la configurazione definitiva soltanto dopo la persistenza', async () => {
   const source = await read('Frontend/public/assets/js/modules/privato/profilo-actions.js');
   const saveIndex = source.indexOf('await syncData();', source.indexOf('export async function editUserDocument'));
   const offerIndex = source.indexOf('await onDocumentSaved?.', saveIndex);
   assert.ok(saveIndex > -1 && offerIndex > saveIndex);
 });
 
-test('runtime pilot mantiene le consegne disattivate e collega gli allegati del documento', async () => {
-  const source = await read('Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot.js');
-  assert.match(source, /pilotDeliveryDisabled:\s*true/);
-  assert.match(source, /notificationsEnabled:\s*false/);
-  assert.match(source, /recipients:\s*\[\]/);
-  assert.match(source, /buildLinkedDocumentDeadlineDraft/);
-  assert.match(source, /attachments:\s*linkedDraft\.attachments/);
-  assert.match(source, /showConfirmModal/);
-  assert.match(source, /await ensureDocumentPersisted\?\.\(\)/);
-  assert.doesNotMatch(source, /uploadBytes|httpsCallable|sendEmail/);
+test('runtime definitivo apre il modulo completo e conserva il pilot solo come compatibilità storica', async () => {
+  const links = await read('Frontend/public/assets/js/modules/privato/profilo-links.js');
+  const profile = await read('Frontend/public/assets/js/modules/privato/profilo_privato.js');
+  assert.match(links, /buildLinkedDocumentDeadlineDraft/);
+  assert.match(links, /profile-deadline-link-draft/);
+  assert.match(links, /aggiungi_scadenza\.html\?profileDocumentId=/);
+  assert.match(links, /profile_deadline_configure_existing_message/);
+  assert.match(profile, /createDeadlineFromDocument\(/);
+  assert.doesNotMatch(profile, /reconcileProfileDocumentDeadlinePilot/);
+  assert.match(links, /showConfirmModal/);
 });
 
 test('lista e dettaglio mostrano il marcatore prova scadenze', async () => {
@@ -32,23 +32,51 @@ test('lista e dettaglio mostrano il marcatore prova scadenze', async () => {
   assert.match(detail, /pilot_deadline_badge/);
 });
 
-test('la card distingue apertura reale e creazione o apertura del pilot parallelo', async () => {
+test('la card espone solo apertura e configurazione definitiva, senza comandi Prova scadenze', async () => {
   const source = await read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js');
-  assert.match(source, /pilot_deadline_card_open_traditional/);
-  assert.match(source, /pilot_deadline_card_create_parallel/);
-  assert.match(source, /pilotDeadlineReference/);
+  assert.doesNotMatch(source, /profile_deadline_card_open_previous/);
+  assert.match(source, /profile_deadline_card_configure/);
+  assert.match(source, /profile_deadline_card_open/);
+  assert.doesNotMatch(source, /pilot_deadline_card_(?:open|create)/);
 });
 
-test('tutte le lingue dichiarano le chiavi del pilot', async () => {
-  const required = ['pilot_deadline_badge', 'pilot_deadline_create_title', 'pilot_deadline_create_message',
-    'pilot_deadline_update_title', 'pilot_deadline_review_title', 'pilot_deadline_open_document',
-    'pilot_deadline_date_required', 'pilot_deadline_existing_title', 'pilot_deadline_existing_message',
-    'pilot_deadline_existing_multiple_message', 'pilot_deadline_create_parallel_message',
-    'pilot_deadline_card_open', 'pilot_deadline_card_open_traditional',
-    'pilot_deadline_card_create_parallel', 'pilot_deadline_card_create'];
+test('tutte le lingue dichiarano le chiavi del flusso definitivo', async () => {
+  const required = ['profile_deadline_configure_title', 'profile_deadline_configure_message',
+    'profile_deadline_configure_existing_message', 'profile_deadline_configure_action',
+    'profile_deadline_card_configure', 'profile_deadline_card_open',
+    'profile_deadline_update_title',
+    'profile_deadline_update_message', 'profile_deadline_updated', 'profile_deadline_error'];
   const files = ['translations/it.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];
   for (const file of files) {
     const source = await read(`Frontend/public/assets/js/${file}`);
     for (const key of required) assert.match(source, new RegExp(`${key}\\s*[\":]`), `${file}: ${key}`);
   }
+});
+
+test('il salvataggio crea una scadenza attiva con fonte e riferimento definitivo', async () => {
+  const source = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
+  assert.match(source, /notificationsEnabled\s*=\s*true/);
+  assert.match(source, /pilotDeliveryDisabled\s*=\s*false/);
+  assert.match(source, /linkKind:\s*'profile-document-deadline-v1'/);
+  assert.match(source, /sourceFieldId:\s*'document\.expiry_date'/);
+  assert.match(source, /La data del documento è cambiata/);
+  assert.match(source, /runTransaction/);
+  assert.match(source, /profileDocumentLinkDraft\.ownerUid !== user\.uid/);
+  assert.match(source, /profile-documents\/\$\{documentId\}\/attachments/);
+});
+
+test('la cancellazione dalla lista scollega atomicamente la scadenza dal documento', async () => {
+  const source = await read('Frontend/public/assets/js/modules/scadenze/scadenze.js');
+  assert.match(source, /runTransaction/);
+  assert.match(source, /item\.expiryReference\?\.deadlineId === id/);
+  assert.match(source, /expiryReference: null/);
+});
+
+test('il modulo completo precompila regole, testo e documenti non ancora presenti nelle vecchie liste', async () => {
+  const source = await read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js');
+  const config = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
+  assert.match(source, /selectValuePreservingCustomOption\(typeSelect, documentType, schedule \|\| \{\}\)/);
+  assert.match(source, /getSuggestedSchedule\(documentType\)/);
+  assert.match(source, /getSuggestedTemplate\(documentType\) \|\| documentType/);
+  assert.match(config, /getSuggestedSchedule\(type\)/);
 });

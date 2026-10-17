@@ -16,8 +16,25 @@ test('precompila nominativo, categoria, dettaglio e data nelle rispettive zone',
     id: 'doc-1', type: 'Patente', num_serie: 'AB123', expiry_date: '2030-04-14'
   }, {nome: 'Diego', cognome: 'Boschetto'}), {
     profileDocumentId: 'doc-1', documentType: 'Patente', name: 'Diego Boschetto',
-    detail: 'Patente - AB123', dueDate: '2030-04-14'
+    detail: 'Patente - AB123', dueDate: '2030-04-14',
+    sourceFieldId: 'document.expiry_date', sourceValueAtLink: '2030-04-14'
   }));
+});
+
+test('marca in modo esplicito soltanto il collegamento definitivo creato dal nuovo flusso', async () => {
+  const {
+    buildDefinitiveProfileDocumentDeadlineReference,
+    isDefinitiveProfileDocumentDeadlineReference
+  } = await loadModel();
+  const reference = buildDefinitiveProfileDocumentDeadlineReference('deadline-new');
+  assert.equal(isDefinitiveProfileDocumentDeadlineReference(reference), true);
+  assert.equal(isDefinitiveProfileDocumentDeadlineReference({deadlineId: 'deadline-old'}), false);
+  assert.equal(isDefinitiveProfileDocumentDeadlineReference({
+    deadlineId: 'deadline-pilot', sourceType: 'profileDocument', experimentTag: 'prova-scadenze'
+  }), false);
+  assert.equal(isDefinitiveProfileDocumentDeadlineReference({
+    deadlineId: 'deadline-old', sourceType: 'profileDocument'
+  }), false);
 });
 
 test('riconosce una scadenza legacy per categoria e data senza falsi match evidenti', async () => {
@@ -38,11 +55,13 @@ test('distingue collegamento certo e scadenza legacy soltanto compatibile', asyn
   ];
   const result = resolveProfileDocumentDeadlineState(documents, [
     {id: 'd1', type: 'Patente', dueDate: '2030-04-14'},
-    {id: 'd2', type: 'Passaporto', dueDate: '2031-05-20', sourceRef: {type: 'profileDocument', id: 'doc-2'}}
+    {id: 'd2', type: 'Passaporto', dueDate: '2031-05-20', linkKind: 'profile-document-deadline-v1',
+      sourceRef: {type: 'profileDocument', id: 'doc-2'}}
   ]);
   assert.equal(result[0].compatibleDeadlineId, 'd1');
   assert.equal(result[0].expiryReference, undefined);
   assert.equal(result[1].expiryReference.deadlineId, 'd2');
+  assert.equal(result[1].expiryReference.linkKind, 'profile-document-deadline-v1');
 });
 
 test('mantiene il collegamento reale e affianca un riferimento pilot soltanto di visualizzazione', async () => {

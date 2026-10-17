@@ -178,12 +178,11 @@ export function renderDocumentiView() {
     });
 
     const items = userDocuments.map((docItem, idx) => {
-        const pilotDeadlineId = docItem.pilotDeadlineReference?.deadlineId
-            || (docItem.expiryReference?.experimentTag === 'prova-scadenze' ? docItem.expiryReference.deadlineId : '');
-        const traditionalDeadlineId = docItem.expiryReference?.deadlineId
+        const definitiveDeadlineId = docItem.expiryReference?.deadlineId
             && docItem.expiryReference.experimentTag !== 'prova-scadenze'
+            && docItem.expiryReference.linkKind === 'profile-document-deadline-v1'
             ? docItem.expiryReference.deadlineId
-            : docItem.compatibleDeadlineId || '';
+            : '';
         const num = docItem.num_serie || docItem.cf_value || docItem.id_number || docItem.license_number || docItem.cf || '-';
         const subDetails = [];
         if (docItem.categoria) subDetails.push(docItem.categoria);
@@ -299,26 +298,12 @@ export function renderDocumentiView() {
                             createElement('button',{className:'btn-upload-trigger',textContent:docItem.linkedAccountId?'Apri Account collegato':'Collega o crea Account',onclick:()=>docItem.linkedAccountId?_callbacks.openLinkedAccount(docItem.linkedAccountId,docItem.linkedAccountCompanyId):_callbacks.connectDocumentAccount(docItem,_callbacks.syncData)}),
                             ...accountManagementButtons(docItem,'document')
                         ]),
-                        traditionalDeadlineId ? createElement('button', {
-                            className: 'btn-upload-trigger',
-                            textContent: t('pilot_deadline_card_open_traditional'),
-                            onclick: () => {
-                                window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(traditionalDeadlineId)}`;
-                            }
-                        }) : null,
                         createElement('button', {
                             className: 'btn-upload-trigger',
-                            textContent: pilotDeadlineId
-                                ? t('pilot_deadline_card_open')
-                                : traditionalDeadlineId
-                                    ? t('pilot_deadline_card_create_parallel')
-                                    : t('pilot_deadline_card_create'),
-                            onclick: async event => {
-                                const result = await _callbacks.createDeadlineFromDocument(docItem);
-                                if (['created', 'current'].includes(result?.action) && event.currentTarget?.isConnected) {
-                                    event.currentTarget.textContent = t('pilot_deadline_card_open');
-                                }
-                            }
+                            textContent: definitiveDeadlineId
+                                ? t('profile_deadline_card_open')
+                                : t('profile_deadline_card_configure'),
+                            onclick: () => _callbacks.createDeadlineFromDocument(docItem)
                         })
                     ].filter(Boolean))
                 ])

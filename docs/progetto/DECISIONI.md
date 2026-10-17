@@ -1,5 +1,13 @@
 # Decisioni
 
+## 17/10/2026 — Scadenze definitive dei Documenti personali
+
+Diego approva il flusso definitivo in **Profilo → Documenti**. Un Documento privo del collegamento mostra **Configura scadenza** e apre il modulo completo già esistente; dopo il salvataggio il comando diventa **Apri scadenza del documento**. Preavviso, frequenza, destinatari e canali Email/Push, nota e riferimenti agli allegati sono configurati nello stesso flusso. Non deve comparire un comando separato per aprire una Scadenza precedente.
+
+La linguetta **Documenti personali** di **Impostazioni → Regole scadenze** mostra direttamente il riepilogo dei Documenti del Profilo: dati del Documento, data, pianificazione, destinatari/canali, nota, numero di allegati e lo stesso comando **Configura scadenza** oppure **Apri scadenza del documento**. Non duplica i Documenti, le Scadenze o gli allegati e non presenta una scheda introduttiva separata. Le configurazioni storiche e le Scadenze già presenti restano disponibili e non vengono riscritte automaticamente.
+
+Il cutover resta manuale e sequenziale: prima si usa un Passaporto fittizio con data nella finestra di preavviso per verificare Email e Push; poi si creano le Scadenze definitive di Patente, Codice fiscale e Carta d'identità. Dopo la verifica Diego elimina immediatamente e singolarmente soltanto le proprie tre vecchie Scadenze; le Scadenze degli altri familiari restano attive. Non sono autorizzate cancellazioni automatiche, massive o per tipologia, né l'adozione silenziosa di record storici. I riferimenti agli allegati consentono la consultazione protetta dentro l'app; l'invio dei relativi byte come allegati email non è dichiarato implementato.
+
 ## 14/10/2026 — lingua iniziale e prima configurazione
 
 Il selettore lingua appare prima che l'app conosca l'identità. Un utente già registrato può chiuderlo e autenticarsi; dopo il login l'app recupera la preferenza valida associata al profilo. La registrazione di un nuovo utente richiede invece una scelta esplicita. La lingua resta modificabile nelle Impostazioni e interessa esclusivamente testi statici, guida, ARIA, errori, comandi e voce dell'Assistente: i contenuti creati dall'utente restano invariati.

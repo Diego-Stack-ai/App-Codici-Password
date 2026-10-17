@@ -88,21 +88,40 @@ function deadlineIsoDate(deadline = {}) {
 }
 
 export function findCompatibleDocumentDeadlines(documentItem = {}, deadlines = []) {
+    const documentDate = normalizeProfileDateInputValue(documentItem.expiry_date);
     return deadlines.filter(deadline =>
         normalizedDeadlineText(deadline.type || deadline.category) === normalizedDeadlineText(documentItem.type) &&
-        deadlineIsoDate(deadline) === String(documentItem.expiry_date || '').slice(0, 10)
+        deadlineIsoDate(deadline) === documentDate
     );
 }
 
 export function buildProfileDocumentDeadlineDraft(documentItem = {}, profile = {}) {
     const documentType = String(documentItem.type || 'Documento').trim();
+    const dueDate = normalizeProfileDateInputValue(documentItem.expiry_date);
     return {
         profileDocumentId: documentItem.id,
         documentType,
         name: [profile.nome, profile.cognome].filter(Boolean).join(' ').trim(),
         detail: [documentType, documentItem.num_serie || documentItem.id_number || documentItem.cf_value]
             .filter(Boolean).join(' - '),
-        dueDate: documentItem.expiry_date
+        dueDate,
+        sourceFieldId: 'document.expiry_date',
+        sourceValueAtLink: dueDate
+    };
+}
+
+export function isDefinitiveProfileDocumentDeadlineReference(reference = {}) {
+    return Boolean(reference?.deadlineId
+        && reference.experimentTag !== 'prova-scadenze'
+        && reference.linkKind === 'profile-document-deadline-v1');
+}
+
+export function buildDefinitiveProfileDocumentDeadlineReference(deadlineId) {
+    return {
+        deadlineId,
+        sourceType: 'profileDocument',
+        sourceFieldId: 'document.expiry_date',
+        linkKind: 'profile-document-deadline-v1'
     };
 }
 
@@ -116,17 +135,18 @@ export function resolveProfileDocumentDeadlineState(documents = [], deadlines = 
             experimentTag: pilot.experimentTag,
             sourceFieldId: pilot.sourceFieldId
         }} : documentItem;
-        if (documentItem?.expiryReference?.deadlineId) return withPilot;
+        if (documentItem?.expiryReference?.deadlineId) {
+            return withPilot;
+        }
         if (pilot) return {...withPilot, expiryReference: withPilot.pilotDeadlineReference};
         const explicit = deadlines.find(deadline =>
-            (deadline?.sourceRef?.type === 'profileDocument' && deadline.sourceRef.id === documentItem?.id)
-            || (deadline?.sourceType === 'profileDocument' && deadline.sourceDocumentId === documentItem?.id)
+            deadline?.experimentTag !== 'prova-scadenze'
+            && deadline?.linkKind === 'profile-document-deadline-v1' && (
+                (deadline?.sourceRef?.type === 'profileDocument' && deadline.sourceRef.id === documentItem?.id)
+                || (deadline?.sourceType === 'profileDocument' && deadline.sourceDocumentId === documentItem?.id)
+            )
         );
-        if (explicit) return {...documentItem, expiryReference: {
-            deadlineId: explicit.id,
-            ...(explicit.experimentTag ? {experimentTag: explicit.experimentTag} : {}),
-            ...(explicit.sourceFieldId ? {sourceFieldId: explicit.sourceFieldId} : {})
-        }};
+        if (explicit) return {...documentItem, expiryReference: buildDefinitiveProfileDocumentDeadlineReference(explicit.id)};
         const compatible = findCompatibleDocumentDeadlines(documentItem, deadlines);
         return compatible.length === 1
             ? {...documentItem, compatibleDeadlineId: compatible[0].id}

@@ -109,7 +109,7 @@ test("real scheduler and recipient sender retry next day, respect cadence and st
     GMAIL_USER: {value: () => "synthetic"}, GMAIL_APP_PASSWORD: {value: () => "synthetic"},
     createTransporter: () => ({}), sendDeadlinePush: async () => {},
     sendScadenzaEmail: async () => {throw new Error("email must stay opted out");}});
-  vm.runInNewContext(section("exports.checkDeadlines = onSchedule(", "exports.onScadenzaCreated = onDocumentCreated("), h.context);
+  vm.runInNewContext(section("function deadlineDeliveryEnabled(", "exports.onScadenzaCreated = onDocumentCreated("), h.context);
   await h.context.exports.checkDeadlines();
   assert.equal(h.sent.length, 1);
   assert.equal(h.records.get(deadlinePath).lastRecipientPushNotifiedAt, "2026-09-18");

@@ -4,16 +4,16 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.198';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.199';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { updateDoc, deleteDoc, doc, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.198';
+import { initComponents } from '../../components-v129.js?v=1.2.199';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -412,7 +412,32 @@ async function deleteScadenza(id) {
             .map(item => String(item?.storagePath || ''))
             .filter(path => path.startsWith(`users/${ownerUid}/scadenze/${id}/`));
         const docRef = doc(db, "users", ownerUid, "scadenze", id);
-        await deleteDoc(docRef);
+        if (deadline?.sourceRef?.type !== 'profileDocument') {
+            await deleteDoc(docRef);
+        } else {
+            const profileRef = doc(db, 'users', ownerUid);
+            const documentId = deadline.sourceRef.id;
+            await runTransaction(db, async transaction => {
+                if (!listActive()) throw new Error('DEADLINE_LIST_INACTIVE');
+                const snapshot = await transaction.get(profileRef);
+                let changed = false;
+                let documents = [];
+                if (snapshot.exists()) {
+                    documents = snapshot.data()?.documenti ?? [];
+                    if (!Array.isArray(documents)) throw new Error('PROFILE_DOCUMENTS_INVALID');
+                    documents = documents.map(item => {
+                        if (documentId && item?.id === documentId
+                            && item.expiryReference?.deadlineId === id) {
+                            changed = true;
+                            return {...item, expiryReference: null};
+                        }
+                        return item;
+                    });
+                }
+                transaction.delete(docRef);
+                if (changed) transaction.update(profileRef, {documenti: documents});
+            });
+        }
         const results = await Promise.allSettled(attachmentPaths.map(path => deleteObject(ref(storage, path))));
         const failure = results.find(result => result.status === 'rejected' && result.reason?.code !== 'storage/object-not-found');
         if (failure) throw failure.reason;
