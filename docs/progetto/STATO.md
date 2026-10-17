@@ -1,12 +1,14 @@
 # Stato
 
-## Candidata 1.2.199 — Scadenze definitive dai Documenti — 17/10/2026
+## Release 1.2.199 pubblicata — Scadenze definitive dai Documenti — 17/10/2026
 
 Il flusso sperimentale **Prova scadenze** è sostituito dal collegamento definitivo fra Documento del Profilo e Scadenza. La scheda espone **Configura scadenza** prima della creazione e **Apri scadenza del documento** dopo; l'editor raccoglie preavviso, frequenza, destinatari Email/Push e nota. La linguetta **Regole scadenze → Documenti personali** riepiloga direttamente gli stessi documenti e parametri senza creare copie. Le Scadenze storiche non vengono migrate o cancellate automaticamente.
 
 Il salvataggio definitivo e il riferimento nel Profilo sono transazionali, vincolati a proprietario e marcatore `profile-document-deadline-v1`; eliminando la Scadenza dalla lista viene rimosso anche il riferimento coerente. Il backend esclude dagli invii i record disattivati o marcati come prova, preservando la compatibilità dei record storici privi dei nuovi flag. Gli allegati restano consultabili nell'app tramite riferimenti protetti e non vengono dichiarati allegati materiali dell'email.
 
-La candidata locale `1.2.199` comprende Hosting e Functions; Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi. Test mirati e gate statici risultano verdi; commit, integrazione, distribuzione e verifica pubblica vengono registrati separatamente quando effettivamente conclusi.
+La PR `#163` è stata integrata su `master` nel commit `5917cc93` dopo i gate GitHub documentali e `validate` verdi. Firebase ha distribuito **342 file Hosting** e aggiornato le Functions Node.js 22 in `europe-west1`, comprese `checkDeadlines`, `onScadenzaCreated`, `onScadenzaUpdated`, `onScadenzaDeleted` e `sendDeadlinePushTest`. La verifica HTTP pubblica ha confermato risposta `200`, versione `1.2.199` e presenza dei moduli del nuovo flusso. Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati.
+
+Resta distinto il collaudo reale dell'utente: creare un Passaporto fittizio, verificare Email e Push, configurare le tre Scadenze definitive dei propri documenti e soltanto dopo cancellare manualmente le tre Scadenze precedenti. L'invio materiale dei file come allegati email non appartiene a questa release; gli allegati restano consultabili nell'app tramite riferimenti protetti.
 
 ## Release 1.2.198 pubblicata — date dei documenti Profilo — 17/10/2026
 

@@ -10,6 +10,8 @@ Il collaudo operativo previsto dall'utente è sequenziale: prima un Passaporto f
 
 Il perimetro iniziale comprendeva implementazione locale, test sintetici, aggiornamento dei documenti esistenti e del grafo principale dopo le modifiche strutturali. Dopo la consegna locale Diego ha ordinato esplicitamente «Pubblica»: sono quindi autorizzati bump `1.2.199`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e Functions dopo gate verdi. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni e operazioni sui record reali.
 
+Esito: la PR `#163` è stata integrata su `master` nel commit `5917cc93`; Hosting e Functions sono stati distribuiti con successo e verificati pubblicamente sulla versione `1.2.199`. Rules, indici, migrazioni e dati reali sono rimasti esclusi. Restano a Diego la prova reale del Passaporto con Email e Push e, solo dopo esito positivo, la cancellazione manuale delle proprie tre Scadenze precedenti. Gli allegati restano disponibili nell'app e non sono dichiarati allegati materiali delle email.
+
 ## Correzione locale — date del Passaporto e proposta Scadenza — 17/10/2026
 
 Diego segnala che un nuovo Passaporto salvato in **Profilo → Documenti** non propone la creazione della Scadenza e che Data di rilascio e Data di scadenza non sono presentate come date. Dopo la verifica locale Diego ordina «Pubblica»: sono quindi autorizzati bump `1.2.198`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo gate verdi. Restano esclusi accesso a dati reali, Functions, Rules e indici.
