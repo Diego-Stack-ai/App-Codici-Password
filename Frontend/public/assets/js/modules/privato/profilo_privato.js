@@ -22,7 +22,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.197';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.197&touch=20261017b';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -62,13 +62,14 @@ let qrCodeInclusions = {
 
 const avatarImg = document.getElementById('profile-avatar');
 const nameDisplay = document.getElementById('user-display-name');
+const profileTabs = document.getElementById('profile-tabs');
 
 // Load editing code only after an explicit action, retaining the originating view.
 async function runProfileEdit(action, args) {
     const uid = currentUserUid;
     const version = profileEditVersion;
     const active = () => uid && auth.currentUser?.uid === uid &&
-        currentUserUid === uid && profileEditVersion === version && nameDisplay?.isConnected;
+        currentUserUid === uid && profileEditVersion === version && profileTabs?.isConnected;
     if (!active()) return;
     try {
         const editor = await import('./profilo-actions.js');

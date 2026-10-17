@@ -49,7 +49,7 @@ export async function initArchivioAccount(user) {
 }
 
 export async function initProfiloPrivato(user) {
-    const module = await import('./modules/privato/profilo_privato.js?v=1.2.197');
+    const module = await import('./modules/privato/profilo_privato.js?v=1.2.197&touch=20261017b');
     await module.initProfiloPrivato(user);
 }
 
