@@ -35,9 +35,21 @@ test('una lingua potrà essere dichiarata completa soltanto con parità delle ch
   }
 });
 
-test('il riallineamento 1.2.190 espone il delta Archivio senza nasconderlo', () => {
+test('il catalogo italiano è completo e non può tornare a mostrare chiavi tecniche', () => {
+  const inventory = buildI18nInventory();
+  assert.ok(inventory.completeLanguages.includes('it'));
+  assert.deepEqual(inventory.missingKeysByLanguage.it, []);
+});
+
+test('il catalogo inglese è completo e non può ricadere su testi italiani', () => {
+    const inventory = buildI18nInventory();
+  assert.ok(inventory.completeLanguages.includes('en'));
+  assert.deepEqual(inventory.missingKeysByLanguage.en, []);
+});
+
+test('la baseline conserva lo storico del delta Archivio senza nasconderlo', () => {
   const { baseline } = evaluateI18nBaseline(buildI18nInventory());
-  assert.equal(baseline.sourceVersion, '1.2.190');
+  assert.equal(baseline.sourceVersion, '1.2.197');
   assert.equal(
     baseline.previousBaseline.htmlLiteralSegments + baseline.acceptedBaseDelta.htmlLiteralSegments,
     baseline.debt.htmlLiteralSegments

@@ -141,5 +141,13 @@ export default {
     "pilot_deadline_card_open": "打开测试到期项",
     "pilot_deadline_card_open_traditional": "打开真实到期项",
     "pilot_deadline_card_create_parallel": "创建并行测试到期项",
-    "pilot_deadline_card_create": "创建测试到期项"
+    "pilot_deadline_card_create": "创建测试到期项",
+    "theme_color_title": "应用颜色",
+    "theme_color_blue": "蓝色",
+    "theme_color_green": "绿色",
+    "theme_color_red": "红色",
+    "theme_color_sand": "沙色",
+    "theme_color_petrol": "蓝绿色",
+    "theme_color_lavender": "薰衣草色",
+    "theme_color_dusty_rose": "灰粉色"
 };

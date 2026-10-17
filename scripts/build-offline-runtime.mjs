@@ -111,12 +111,14 @@ const onlineOnlyDiagnostics = new Set([
   'assets/js/prova.js'
 ]);
 const localAiPrefix = 'assets/local-ai/';
+const localAiPackagePrefix = 'assets/local-ai-packages/';
 const publicFiles = await walk(publicDir);
 const offlineAssets = publicFiles
   .filter(file => cacheableExtensions.has(path.extname(file).toLowerCase()))
   .filter(file => path.basename(file) !== 'sw.js')
   .map(file => path.relative(publicDir, file).replaceAll('\\', '/'))
   .filter(file => !file.startsWith(localAiPrefix))
+  .filter(file => !file.startsWith(localAiPackagePrefix))
   .filter(file => !onlineOnlyDiagnostics.has(file))
   .sort();
 await writeFile(

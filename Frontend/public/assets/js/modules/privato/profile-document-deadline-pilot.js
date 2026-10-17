@@ -1,8 +1,9 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.196';
+import {auth, db} from '../../firebase-config.js?v=1.2.197';
 import {doc, runTransaction, Timestamp, updateDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {showAlertModal, showConfirmModal, showToast} from '../../ui-core-v129.js';
 import {t} from '../../translations.js';
 import {listDeadlines} from '../data/vault-repository.js';
+import {buildLinkedDocumentDeadlineDraft} from './profile-document-deadline-link.js';
 import {
     buildProfileDocumentPilotDeadline,
     hasTraditionalProfileDocumentDeadlineReference,
@@ -19,7 +20,10 @@ async function createPilotDeadline(user, documentItem, profile, candidate) {
     const deadlineId = profileDocumentPilotDeadlineId(candidate.sourceDocumentId, candidate.sourceFieldId);
     const deadlineRef = doc(db, 'users', user.uid, 'scadenze', deadlineId);
     const profileRef = doc(db, 'users', user.uid);
-    const base = buildProfileDocumentPilotDeadline(documentItem, profile);
+    const linkedDraft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
+    const base = buildProfileDocumentPilotDeadline(documentItem, profile, new Date(), {
+        attachments: linkedDraft.attachments
+    });
     await runTransaction(db, async transaction => {
         const [deadlineSnapshot, profileSnapshot] = await Promise.all([
             transaction.get(deadlineRef), transaction.get(profileRef)
@@ -53,7 +57,11 @@ async function createPilotDeadline(user, documentItem, profile, candidate) {
     return deadlineId;
 }
 
-async function updatePilotDeadline(deadline, candidate) {
+async function updatePilotDeadline(deadline, candidate, documentItem, profile) {
+    const linkedDraft = await buildLinkedDocumentDeadlineDraft(auth.currentUser.uid, documentItem, profile);
+    const refreshed = buildProfileDocumentPilotDeadline(documentItem, profile, new Date(), {
+        attachments: linkedDraft.attachments
+    });
     await updateDoc(doc(db, 'users', auth.currentUser.uid, 'scadenze', deadline.id), {
         dueDate: candidate.dueDate,
         sourceValueAtLink: candidate.sourceValueAtLink,
@@ -64,7 +72,10 @@ async function updatePilotDeadline(deadline, candidate) {
         recipients: [],
         email1: '',
         email2: '',
-        attachments: [],
+        documentNumber: refreshed.documentNumber,
+        templateText: refreshed.templateText,
+        attachments: refreshed.attachments,
+        sourceAttachmentCountAtLink: refreshed.sourceAttachmentCountAtLink,
         updatedAt: Timestamp.now()
     });
 }
@@ -79,7 +90,6 @@ async function markPilotDeadlineForReview(deadline, issue) {
         recipients: [],
         email1: '',
         email2: '',
-        attachments: [],
         updatedAt: Timestamp.now()
     });
 }
@@ -123,7 +133,7 @@ export async function reconcileProfileDocumentDeadlinePilot({
             await markPilotDeadlineForReview(plan.deadline, 'source-value-changed');
             return {...plan, action: 'review-required'};
         }
-        await updatePilotDeadline(plan.deadline, plan.candidate);
+        await updatePilotDeadline(plan.deadline, plan.candidate, documentItem, profile);
         showToast(t('pilot_deadline_updated'), 'success');
         return {...plan, action: 'updated'};
     }

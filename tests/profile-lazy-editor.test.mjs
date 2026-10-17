@@ -16,7 +16,7 @@ function setup() {
   const calls = [], toasts = [], errors = [];
   const context = vm.createContext({
     currentUserUid: 'owner', profileEditVersion: 1,
-    auth: {currentUser: {uid: 'owner'}}, nameDisplay: {isConnected: true},
+    auth: {currentUser: {uid: 'owner'}}, profileTabs: {isConnected: true},
     loadEditor: () => { loads += 1; return pending; },
     showToast: (...args) => toasts.push(args), logError: (...args) => errors.push(args),
   });
@@ -47,7 +47,7 @@ test('pending editor never opens after UID, profile generation or DOM lifecycle 
   for (const invalidate of [
     context => { context.auth.currentUser = {uid: 'other'}; },
     context => { context.profileEditVersion += 1; },
-    context => { context.nameDisplay.isConnected = false; },
+    context => { context.profileTabs.isConnected = false; },
   ]) {
     const runtime = setup();
     const pending = runtime.context.actions.editAddress(-1, {});
@@ -63,7 +63,7 @@ test('editor import failure is visible only in the originating active profile', 
   for (const active of [true, false]) {
     const runtime = setup();
     const pending = runtime.context.actions.editSection('personal', {});
-    runtime.context.nameDisplay.isConnected = active;
+    runtime.context.profileTabs.isConnected = active;
     runtime.reject(new Error('synthetic module failure'));
     await pending;
     assert.equal(runtime.toasts.length, active ? 1 : 0);

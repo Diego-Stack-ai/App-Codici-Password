@@ -1,7 +1,7 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.196';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.196';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.197';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.197';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
@@ -15,7 +15,7 @@ let activeController = null;
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.196'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.197'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -59,7 +59,7 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             advanced = createLocalAiAssistantService({ language:getCurrentLanguage() });
             dialog = createAssistantUI({
             onAsk: query => conversation.ask(query),
-            onExplain: advanced ? query => advanced.ask(query) : null,
+            onExplain: advanced ? (query, context) => advanced.ask(query, context) : null,
             onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
                 onArchive: async (item, { requireConfirmation = true } = {}) => {

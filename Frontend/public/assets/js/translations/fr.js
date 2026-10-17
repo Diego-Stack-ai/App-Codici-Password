@@ -142,5 +142,13 @@ export default {
     "pilot_deadline_card_open": "Ouvrir l’échéance de test",
     "pilot_deadline_card_open_traditional": "Ouvrir l’échéance réelle",
     "pilot_deadline_card_create_parallel": "Créer une échéance de test parallèle",
-    "pilot_deadline_card_create": "Créer une échéance de test"
+    "pilot_deadline_card_create": "Créer une échéance de test",
+    "theme_color_title": "Couleur de l’application",
+    "theme_color_blue": "Bleu",
+    "theme_color_green": "Vert",
+    "theme_color_red": "Rouge",
+    "theme_color_sand": "Sable",
+    "theme_color_petrol": "Bleu pétrole",
+    "theme_color_lavender": "Lavande",
+    "theme_color_dusty_rose": "Vieux rose"
 };

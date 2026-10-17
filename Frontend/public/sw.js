@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.196';
+const CACHE_NAME = 'codex-shell-v1.2.197';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./offline-assets.js');
@@ -66,7 +66,7 @@ self.addEventListener('fetch', (event) => {
     // I pacchetti AI locali vengono inseriti nelle cache dedicate soltanto
     // dopo verifica di dimensione e SHA-256. Il service worker li serve
     // offline senza copiarli nella shell e senza accettare file non verificati.
-    if (url.pathname.startsWith('/assets/local-ai/')) {
+    if (url.pathname.startsWith('/assets/local-ai/') || url.pathname.startsWith('/assets/local-ai-packages/')) {
         event.respondWith((async () => {
             const cached = await caches.match(request);
             return cached || fetch(request, { cache: 'no-store', credentials: 'omit' });

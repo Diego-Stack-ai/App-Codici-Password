@@ -24,6 +24,7 @@ const onlineOnlyDiagnostics = new Set([
   'assets/js/prova.js'
 ]);
 const localAiPrefix = 'assets/local-ai/';
+const localAiPackagePrefix = 'assets/local-ai-packages/';
 const serviceWorker = await readFile(path.join(publicDir, 'sw.js'), 'utf8');
 const pushWorker = await readFile(path.join(publicDir, 'firebase-messaging-sw.js'), 'utf8');
 const loginEntry = await readFile(path.join(publicDir, 'assets/js/login-entry.js'), 'utf8');
@@ -34,6 +35,7 @@ for (const file of files) {
   if (/\.(?:html|js|css|json|png|jpe?g|svg|webp|woff2)$/i.test(relative)
       && relative !== 'sw.js'
       && !relative.startsWith(localAiPrefix)
+      && !relative.startsWith(localAiPackagePrefix)
       && !onlineOnlyDiagnostics.has(relative)) {
     assert.ok(assetSet.has(relative), `Risorsa statica non precaricata: ${relative}`);
   }
@@ -41,6 +43,7 @@ for (const file of files) {
 
 for (const asset of assets) {
   assert.ok(!asset.startsWith(localAiPrefix), `Pacchetto AI incluso per errore nella shell offline: ${asset}`);
+  assert.ok(!asset.startsWith(localAiPackagePrefix), `Pacchetto AI avanzato incluso per errore nella shell offline: ${asset}`);
 }
 
 for (const diagnostic of onlineOnlyDiagnostics) {

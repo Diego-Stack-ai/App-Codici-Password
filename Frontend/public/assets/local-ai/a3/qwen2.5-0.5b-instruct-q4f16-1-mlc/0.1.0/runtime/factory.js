@@ -14,7 +14,7 @@ export async function createGenerativeRuntime({ packageBaseUrl, onProgress = () 
     };
     const engine = await CreateMLCEngine(MODEL_ID, { appConfig, initProgressCallback: onProgress });
     return Object.freeze({
-        level: 'A3',
+        level: 'A2',
         async complete(messages, options = {}) {
             return engine.chat.completions.create({
                 messages,

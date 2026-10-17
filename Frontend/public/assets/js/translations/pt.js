@@ -141,5 +141,13 @@ export default {
     "pilot_deadline_card_open": "Abrir prazo de teste",
     "pilot_deadline_card_open_traditional": "Abrir prazo real",
     "pilot_deadline_card_create_parallel": "Criar prazo de teste paralelo",
-    "pilot_deadline_card_create": "Criar prazo de teste"
+    "pilot_deadline_card_create": "Criar prazo de teste",
+    "theme_color_title": "Cor da aplicação",
+    "theme_color_blue": "Azul",
+    "theme_color_green": "Verde",
+    "theme_color_red": "Vermelho",
+    "theme_color_sand": "Areia",
+    "theme_color_petrol": "Azul petróleo",
+    "theme_color_lavender": "Lavanda",
+    "theme_color_dusty_rose": "Rosa antigo"
 };

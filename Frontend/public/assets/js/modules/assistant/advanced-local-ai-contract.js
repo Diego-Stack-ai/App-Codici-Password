@@ -1,4 +1,5 @@
-const LEVELS = new Set(['A2', 'A3']);
+const LEVELS = new Set(['A1', 'A2']);
+const ADVANCED_TIERS = Object.freeze(['light', 'medium', 'power']);
 const INTENTS = new Set(['explain_page', 'semantic_search', 'select_result', 'clarify']);
 const LOCALE = /^[a-z]{2}(?:-[A-Z]{2})?$/;
 const PACKAGE_ID = /^[a-z0-9][a-z0-9._-]{2,80}$/;
@@ -78,8 +79,8 @@ export function validateLocalAiPackageManifest(input) {
         requireCondition(Number.isSafeInteger(total), 'PACKAGE_FILE_TOTAL');
     }
     requireCondition(total === input.approxDownloadBytes, 'PACKAGE_FILE_TOTAL');
-    if (input.level === 'A2') requireCondition(input.runtime === 'transformers-js-onnx', 'PACKAGE_LEVEL_RUNTIME');
-    if (input.level === 'A3') requireCondition(input.runtime === 'webllm-webgpu', 'PACKAGE_LEVEL_RUNTIME');
+    if (input.level === 'A1') requireCondition(input.runtime === 'transformers-js-onnx', 'PACKAGE_LEVEL_RUNTIME');
+    if (input.level === 'A2') requireCondition(input.runtime === 'webllm-webgpu', 'PACKAGE_LEVEL_RUNTIME');
     return freezeTree(structuredClone(input));
 }
 
@@ -91,19 +92,52 @@ export function assessLocalAiCapabilities(input) {
     requireCondition(Number.isSafeInteger(input.hardwareConcurrency) && input.hardwareConcurrency >= 1, 'CAPABILITY_CPU');
     requireCondition(input.deviceMemoryGiB === null || (Number.isFinite(input.deviceMemoryGiB) && input.deviceMemoryGiB > 0), 'CAPABILITY_MEMORY');
     requireCondition(Number.isSafeInteger(input.storageAvailableBytes) && input.storageAvailableBytes >= 0, 'CAPABILITY_STORAGE');
+    const a1Reasons = [];
+    if (!input.wasm) a1Reasons.push('wasm-unavailable');
+    if (input.storageAvailableBytes < 160 * 1024 * 1024) a1Reasons.push('storage-below-ai1-budget');
     const a2Reasons = [];
-    if (!input.wasm) a2Reasons.push('wasm-unavailable');
-    if (input.storageAvailableBytes < 160 * 1024 * 1024) a2Reasons.push('storage-below-a2-budget');
-    const a3Reasons = [];
-    if (!input.webgpu) a3Reasons.push('webgpu-unavailable');
-    if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB < 4) a3Reasons.push('memory-below-a3-lab-budget');
-    if (input.storageAvailableBytes < 1600 * 1024 * 1024) a3Reasons.push('storage-below-a3-lab-budget');
-    if (input.ios) a3Reasons.push('ios-physical-benchmark-required');
+    if (input.mobile || input.ios) a2Reasons.push('desktop-required');
+    if (!input.webgpu) a2Reasons.push('webgpu-unavailable');
+    if (input.deviceMemoryGiB === null) a2Reasons.push('memory-unknown');
+    else if (input.deviceMemoryGiB < 4) a2Reasons.push('memory-below-ai2-budget');
+    if (input.storageAvailableBytes < 1600 * 1024 * 1024) a2Reasons.push('storage-below-ai2-budget');
+    const allowedTiers = [];
+    if (!a2Reasons.length) {
+        allowedTiers.push('light');
+        if (input.deviceMemoryGiB >= 8 && input.hardwareConcurrency >= 8
+            && input.storageAvailableBytes >= 4 * 1024 * 1024 * 1024) allowedTiers.push('medium');
+        if (input.deviceMemoryGiB >= 16 && input.hardwareConcurrency >= 12
+            && input.storageAvailableBytes >= 8 * 1024 * 1024 * 1024) allowedTiers.push('power');
+    }
     return freezeTree({
-        A1: { status: 'available', reasons: [] },
-        A2: { status: a2Reasons.length ? 'unavailable' : 'candidate', reasons: a2Reasons },
-        A3: { status: a3Reasons.length ? 'lab-only' : 'candidate', reasons: a3Reasons }
+        A1: { status: a1Reasons.length ? 'fallback-only' : 'candidate', reasons: a1Reasons },
+        A2: { status: a2Reasons.length ? 'unavailable' : 'candidate', reasons: a2Reasons,
+            allowedTiers, recommendedTier:allowedTiers.at(-1) || null }
     });
+}
+
+export function validateAdvancedTier(tier) {
+    requireCondition(ADVANCED_TIERS.includes(tier), 'ADVANCED_TIER');
+    return tier;
+}
+
+export function assessAdvancedRuntimeBenchmark(input) {
+    exactKeys(input, ['tier', 'firstTokenMs', 'tokensPerSecond', 'peakMemoryMiB', 'cancelMs'], 'BENCHMARK_SHAPE');
+    const tier = validateAdvancedTier(input.tier);
+    for (const key of ['firstTokenMs', 'tokensPerSecond', 'peakMemoryMiB', 'cancelMs']) {
+        requireCondition(Number.isFinite(input[key]) && input[key] >= 0, `BENCHMARK_${key}`);
+    }
+    const limits = {
+        light:{ firstTokenMs:12000, tokensPerSecond:4, peakMemoryMiB:1400, cancelMs:1500 },
+        medium:{ firstTokenMs:18000, tokensPerSecond:3, peakMemoryMiB:2400, cancelMs:1500 },
+        power:{ firstTokenMs:25000, tokensPerSecond:2, peakMemoryMiB:3200, cancelMs:2000 }
+    }[tier];
+    const reasons = [];
+    if (input.firstTokenMs > limits.firstTokenMs) reasons.push('first-token-too-slow');
+    if (input.tokensPerSecond < limits.tokensPerSecond) reasons.push('generation-too-slow');
+    if (input.peakMemoryMiB > limits.peakMemoryMiB) reasons.push('memory-above-budget');
+    if (input.cancelMs > limits.cancelMs) reasons.push('cancel-too-slow');
+    return freezeTree({ tier, passed:reasons.length === 0, reasons, limits });
 }
 
 export async function probeLocalAiCapabilities({ navigatorObject = globalThis.navigator } = {}) {

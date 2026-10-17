@@ -142,5 +142,13 @@ export default {
     "pilot_deadline_card_open": "Testfrist öffnen",
     "pilot_deadline_card_open_traditional": "Echte Frist öffnen",
     "pilot_deadline_card_create_parallel": "Parallele Testfrist erstellen",
-    "pilot_deadline_card_create": "Testfrist erstellen"
+    "pilot_deadline_card_create": "Testfrist erstellen",
+    "theme_color_title": "App-Farbe",
+    "theme_color_blue": "Blau",
+    "theme_color_green": "Grün",
+    "theme_color_red": "Rot",
+    "theme_color_sand": "Sand",
+    "theme_color_petrol": "Petrol",
+    "theme_color_lavender": "Lavendel",
+    "theme_color_dusty_rose": "Altrosa"
 };

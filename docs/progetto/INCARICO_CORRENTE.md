@@ -1,5 +1,29 @@
 # Incarico corrente
 
+## BONIFICA-LINGUE-02 — 17/10/2026
+
+| Campo | Valore |
+|---|---|
+| Autorità | Diego: «procedi con la bonifica» dopo il rapporto i18n read-only della candidata 1.2.197 |
+| Obiettivo | Eliminare chiavi tecniche e commistioni linguistiche visibili, completando prima l’italiano e i percorsi P0 di Impostazioni, Account, Scadenze e Archivio portabile |
+| Primo lotto locale | Cataloghi italiano e inglese delle chiavi usate completi; fallback DOM non espone la chiave tecnica; colori di Impostazioni tradotti nelle otto lingue; catalogo italiano dell’Archivio ampliato e immagini Base64 presentate come anteprime |
+| Criterio | Una lingua è dichiarabile completa soltanto con zero chiavi usate mancanti; nessun aumento di baseline o allowlist per occultare il debito |
+| Dati utente | Nomi, note, valori, allegati e campi personalizzati restano invariati e non vengono tradotti |
+| Distribuzione | Diego ha successivamente ordinato di sistemare gli errori e pubblicare; push e Hosting della 1.2.197 sono autorizzati soltanto dopo gate finali verdi e aggiornamento dello stato |
+
+Esito: italiano e inglese hanno zero chiavi usate mancanti; le altre sei lingue restano dichiarate parziali. La release integrata comprende inoltre Regole scadenze, correzione mobile dei documenti Profilo, hotfix destinatari Push e correzione del visualizzatore Archivio trovata dal banco browser. Il catalogo italiano è separato dal bootstrap globale, precaricato offline e verificato senza aumentare la baseline; Profilo e Impostazioni rispettano così il budget statico. I gate finali sono verdi; ramo finale e Firebase Hosting sono stati pubblicati e la verifica HTTP della `1.2.197` è positiva. Il deploy conclusivo ha riguardato soltanto Hosting.
+
+
+## Candidata 1.2.197 — AI locale, Scadenze documenti e Archivio portabile — 16/10/2026
+
+Diego autorizza l'integrazione e la pubblicazione congiunta sul solo Firebase Hosting di tre lotti già sviluppati in worktree isolati. L'Assistente espone due prodotti: **AI.1 Locale**, che unisce ricerca deterministica e pacchetto semantico installabile, e **AI.2 Avanzata per PC**, con taglie `light`, `medium` e `power` selezionate da capability probe, quota e verifica runtime. Il modello non accede direttamente al Vault e i pacchetti same-origin non entrano nella shell offline.
+
+Il pilot **Prova scadenze** conserva l'identità documento+campo e aggiunge alla copia sperimentale il numero del documento, il testo descrittivo e i riferimenti agli allegati DS-002 già esistenti, senza duplicare file. Invii Email e Push restano disattivati: la presenza dei riferimenti non costituisce invio degli allegati. Le Scadenze tradizionali non vengono migrate o sostituite e il marcatore **Prova scadenze** resta visibile per un ulteriore collaudo reale dell'utente.
+
+Il visualizzatore dell'**Archivio portabile** usa una navigazione a tre colonne — sezione, elenco ricercabile, dettaglio — mostra etichette italiane comprensibili, filtra gli Account aziendali per azienda e rende gli allegati immagine visualizzabili o scaricabili senza esporre il Base64 come campo. JSON, CSV e ODS restano disponibili sotto **Esportazioni tecniche**. Il formato cifrato v2, i limiti e la distinzione dal backup non cambiano.
+
+Il rilascio comprende codice client, asset AI ospitati su Firebase Hosting, test, versione e documentazione. Sono esclusi Functions, Rules, indici, dati reali, invii e migrazioni. Implementazione locale, commit, push, integrazione e distribuzione devono essere registrati separatamente; la candidata diventa pubblicata soltanto dopo gate locali, controlli remoti e verifica HTTP della versione `1.2.197`.
+
 ## Release 1.2.196 — «Prova scadenze» dai documenti del Profilo — 16/10/2026
 
 Diego autorizza un pilot isolato che lascia invariati i record e i flussi delle Scadenze tradizionali. Dopo il salvataggio di un documento personale dotato del campo standard `expiry_date`, l'app propone — senza creare nulla prima della conferma — una Scadenza riconoscibile dal badge **Prova scadenze**. I tre documenti già presenti restano utilizzabili tramite il comando contestuale nella rispettiva card; non è autorizzato alcun accesso automatico ai dati reali durante sviluppo o test.

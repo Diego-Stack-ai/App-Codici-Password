@@ -12,7 +12,7 @@ export async function createSemanticRuntime({ packageBaseUrl, onProgress = () =>
         progress_callback: onProgress
     });
     return Object.freeze({
-        level: 'A2',
+        level: 'A1',
         async embed(text) {
             const output = await extractor(String(text || ''), { pooling: 'mean', normalize: true });
             return Array.from(output.data || []);

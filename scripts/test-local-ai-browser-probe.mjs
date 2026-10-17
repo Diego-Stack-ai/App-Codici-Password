@@ -18,7 +18,7 @@ const server = createServer(async (request, response) => {
                 import { probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
                 import { LOCAL_AI_PACKAGE_CATALOG } from '/assets/js/modules/assistant/local-ai-package-catalog.js';
                 window.__probe = await probeLocalAiCapabilities();
-                window.__catalog = { A2: LOCAL_AI_PACKAGE_CATALOG.A2.status, A3: LOCAL_AI_PACKAGE_CATALOG.A3.status };
+                window.__catalog = { A1: LOCAL_AI_PACKAGE_CATALOG.A1.status, A2: LOCAL_AI_PACKAGE_CATALOG.A2.status };
                 window.__cacheNames = await caches.keys();
                 window.__ready = true;
             </script>`);
@@ -52,9 +52,9 @@ try {
         const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,caches:window.__cacheNames}) : null',returnByValue:true});
         value=result.result.value; if(value)break; await delay(100);
     }
-    assert.equal(value.probe.A1.status,'available');
+    assert.equal(value.probe.A1.status,'candidate');
     assert.equal(value.probe.A2.status,'candidate');
-    assert.deepEqual(value.catalog,{A2:'available',A3:'available'});
+    assert.deepEqual(value.catalog,{A1:'available',A2:'available'});
     assert.deepEqual(value.caches,[]);
     console.log('Local AI browser probe: OK');
 } finally {

@@ -3,6 +3,7 @@ import { hashReadableStream } from './incremental-sha256.js';
 
 const CACHE_PREFIX = 'codex-local-ai-';
 const ACTIVE_KEY = 'codex.local-ai.active.v1';
+const VERIFIED_KEY = 'codex.local-ai.verified.v2';
 
 function packageCacheName(manifest, suffix = 'ready') {
     return `${CACHE_PREFIX}${manifest.level.toLowerCase()}-${manifest.packageId}-${manifest.version}-${suffix}`;
@@ -24,6 +25,14 @@ function readActive(storage) {
 
 function writeActive(storage, value) {
     storage.setItem(ACTIVE_KEY, JSON.stringify(value));
+}
+
+function readVerified(storage) {
+    try { return JSON.parse(storage.getItem(VERIFIED_KEY) || '{}'); } catch { return {}; }
+}
+
+function legacyCacheName(manifest, legacyLevel) {
+    return legacyLevel ? `${CACHE_PREFIX}${legacyLevel.toLowerCase()}-${manifest.packageId}-${manifest.version}-ready` : null;
 }
 
 export function createLocalAiPackageManager({
@@ -62,11 +71,22 @@ export function createLocalAiPackageManager({
         const readyName = packageCacheName(manifest);
         let completedBytes = 0;
         try {
-            await cacheStorage.delete(stagingName);
             const staging = await cacheStorage.open(stagingName);
             for (const file of manifest.files) {
                 if (controller.signal.aborted) throw new DOMException('Download annullato', 'AbortError');
                 const sourceUrl = safeUrl(baseUrl, file.path, origin);
+                const stagedResponse = await staging.match(new Request(sourceUrl));
+                if (stagedResponse?.body) {
+                    const staged = await hashReadableStream(stagedResponse.body, { signal:controller.signal });
+                    if (staged.bytes === file.bytes && staged.sha256 === file.sha256) {
+                        completedBytes += file.bytes;
+                        onProgress(Object.freeze({ completedBytes, totalBytes:manifest.approxDownloadBytes,
+                            path:file.path, resumed:true }));
+                        continue;
+                    }
+                    await cacheStorage.delete(stagingName);
+                    throw new Error('LOCAL_AI_STAGED_FILE_INTEGRITY');
+                }
                 const response = await fetchFn(sourceUrl, { cache: 'no-store', credentials: 'omit', signal: controller.signal });
                 if (!response.ok) throw new Error(`LOCAL_AI_FETCH_${response.status}`);
                 if (!response.body) throw new Error('LOCAL_AI_STREAM_UNAVAILABLE');
@@ -89,12 +109,20 @@ export function createLocalAiPackageManager({
             const ready = await cacheStorage.open(readyName);
             for (const request of await staging.keys()) await ready.put(request, await staging.match(request));
             await cacheStorage.delete(stagingName);
+            for (const name of await cacheStorage.keys()) {
+                if (name !== readyName && name.startsWith(`${CACHE_PREFIX}${manifest.level.toLowerCase()}-`)
+                    && name.endsWith('-ready')) await cacheStorage.delete(name);
+            }
             const active = readActive(storage);
             active[manifest.level] = { packageId: manifest.packageId, version: manifest.version, cacheName: readyName };
             writeActive(storage, active);
+            const verified = readVerified(storage); delete verified[manifest.level];
+            storage.setItem(VERIFIED_KEY, JSON.stringify(verified));
             return Object.freeze({ manifest, cacheName: readyName, completedBytes });
         } catch (error) {
-            await cacheStorage.delete(stagingName);
+            if (/HASH_MISMATCH|SIZE_MISMATCH|STAGED_FILE_INTEGRITY/.test(String(error?.message || error))) {
+                await cacheStorage.delete(stagingName);
+            }
             throw error;
         } finally {
             signal?.removeEventListener('abort', abort);
@@ -108,21 +136,25 @@ export function createLocalAiPackageManager({
         if (selected?.cacheName) await cacheStorage.delete(selected.cacheName);
         delete active[level];
         writeActive(storage, active);
+        const verified = readVerified(storage); delete verified[level];
+        storage.setItem(VERIFIED_KEY, JSON.stringify(verified));
         for (const name of await cacheStorage.keys()) {
             if (name.startsWith(`${CACHE_PREFIX}${String(level).toLowerCase()}-`)) await cacheStorage.delete(name);
         }
     }
 
-    async function status(level, { manifest: manifestInput, baseUrl } = {}) {
+    async function status(level, { manifest: manifestInput, baseUrl, legacyLevel = null } = {}) {
         const active = readActive(storage);
         let selected = active[level] || null;
         if (manifestInput && baseUrl) {
             const manifest = validateLocalAiPackageManifest(manifestInput);
             const cacheName = packageCacheName(manifest);
+            const oldCacheName = legacyCacheName(manifest, legacyLevel);
             const names = await cacheStorage.keys();
-            let complete = names.includes(cacheName);
+            const resolvedCacheName = names.includes(cacheName) ? cacheName : (oldCacheName && names.includes(oldCacheName) ? oldCacheName : null);
+            let complete = Boolean(resolvedCacheName);
             if (complete) {
-                const cache = await cacheStorage.open(cacheName);
+                const cache = await cacheStorage.open(resolvedCacheName);
                 for (const file of manifest.files) {
                     if (!await cache.match(new Request(safeUrl(baseUrl, file.path, origin)))) {
                         complete = false;
@@ -131,7 +163,7 @@ export function createLocalAiPackageManager({
                 }
             }
             if (complete) {
-                const expected = { packageId: manifest.packageId, version: manifest.version, cacheName };
+                const expected = { packageId: manifest.packageId, version: manifest.version, cacheName:resolvedCacheName };
                 if (!selected || selected.packageId !== expected.packageId || selected.version !== expected.version
                     || selected.cacheName !== expected.cacheName) {
                     active[level] = expected;
@@ -144,11 +176,20 @@ export function createLocalAiPackageManager({
                 selected = null;
             }
         }
-        return Object.freeze({ level, downloading: Boolean(activeDownload), installed: Boolean(selected), active: selected });
+        const receipt = readVerified(storage)[level] || null;
+        const verified = Boolean(selected && receipt?.packageId === selected.packageId && receipt?.version === selected.version);
+        return Object.freeze({ level, downloading: Boolean(activeDownload), installed: Boolean(selected), verified, active: selected });
+    }
+
+    function markVerified(level, manifestInput) {
+        const manifest = validateLocalAiPackageManifest(manifestInput);
+        const verified = readVerified(storage);
+        verified[level] = { packageId:manifest.packageId, version:manifest.version, verifiedAt:new Date().toISOString() };
+        storage.setItem(VERIFIED_KEY, JSON.stringify(verified));
     }
 
     return Object.freeze({
-        estimate, install, remove, status,
+        estimate, install, remove, status, markVerified,
         abort() { activeDownload?.abort(); }
     });
 }

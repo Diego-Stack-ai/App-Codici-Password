@@ -14,7 +14,10 @@ const walk = directory => fs.readdirSync(directory, { withFileTypes: true }).fla
   const absolute = path.join(directory, entry.name);
   return entry.isDirectory() ? walk(absolute) : [absolute];
 });
-const isExcluded = file => baseline.excludedPathFragments.some(fragment => `/${relative(file)}`.includes(fragment));
+const isHostedModelRuntimeBundle = file => relative(file).includes('/assets/local-ai-packages/')
+  && path.basename(file) === 'web-llm.js';
+const isExcluded = file => baseline.excludedPathFragments.some(fragment => `/${relative(file)}`.includes(fragment))
+  || isHostedModelRuntimeBundle(file);
 const sourceFiles = walk(publicRoot).filter(file => /\.(?:html|js)$/.test(file) && !isExcluded(file));
 const htmlFiles = sourceFiles.filter(file => file.endsWith('.html'));
 const jsFiles = sourceFiles.filter(file => file.endsWith('.js'));
@@ -48,15 +51,19 @@ function readDictionaries() {
   const declaredLanguages = languagesMatch
     ? [...languagesMatch[1].matchAll(/['"]([^'"]+)['"]/g)].map(match => match[1])
     : [];
-  const start = source.indexOf('const _it = {');
-  const end = source.indexOf('\n};', start);
-  const dictionaries = { it: dictionaryKeys(source.slice(start, end)) };
-  const settingsSource = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', 'settings.js'), 'utf8');
+  const italianFile = path.join(publicRoot, 'assets', 'js', 'translations', 'it.js');
+  const dictionaries = {
+    it: fs.existsSync(italianFile) ? dictionaryKeys(fs.readFileSync(italianFile, 'utf8')) : []
+  };
+  const domainSources = ['settings.js', 'deadline-rules.js']
+    .map(file => fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'translations', file), 'utf8'));
   for (const language of declaredLanguages.filter(language => language !== 'it')) {
     const file = path.join(publicRoot, 'assets', 'js', 'translations', `${language}.js`);
     dictionaries[language] = fs.existsSync(file) ? dictionaryKeys(fs.readFileSync(file, 'utf8')) : [];
   }
-  for (const language of declaredLanguages) dictionaries[language].push(...domainDictionaryKeys(settingsSource, language));
+  for (const language of declaredLanguages) {
+    for (const domainSource of domainSources) dictionaries[language].push(...domainDictionaryKeys(domainSource, language));
+  }
   return { declaredLanguages, dictionaries };
 }
 
@@ -100,6 +107,9 @@ function collectHtmlLiterals() {
       if (isAllowlistedLiteral(value)) continue;
       const before = withoutNonUi.slice(Math.max(0, match.index - 220), match.index);
       if (/material-(?:symbols|icons)[^>]*>[^<]*$/i.test(before)) continue;
+      const tagStart = withoutNonUi.lastIndexOf('<', match.index);
+      const openingTag = withoutNonUi.slice(tagStart, match.index + 1);
+      if (/\bdata-t\s*=/.test(openingTag)) continue;
       pageFindings.push({ file: page, line: lineOf(withoutNonUi, match.index), kind: 'text', value });
     }
     for (const match of withoutNonUi.matchAll(/\b(placeholder|title|aria-label|alt)\s*=\s*["']([^"']+)["']/gi)) {

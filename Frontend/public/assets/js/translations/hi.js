@@ -141,5 +141,13 @@ export default {
     "pilot_deadline_card_open": "परीक्षण समय-सीमा खोलें",
     "pilot_deadline_card_open_traditional": "वास्तविक समय-सीमा खोलें",
     "pilot_deadline_card_create_parallel": "समानांतर परीक्षण समय-सीमा बनाएँ",
-    "pilot_deadline_card_create": "परीक्षण समय-सीमा बनाएँ"
+    "pilot_deadline_card_create": "परीक्षण समय-सीमा बनाएँ",
+    "theme_color_title": "ऐप का रंग",
+    "theme_color_blue": "नीला",
+    "theme_color_green": "हरा",
+    "theme_color_red": "लाल",
+    "theme_color_sand": "रेतीला",
+    "theme_color_petrol": "पेट्रोल नीला",
+    "theme_color_lavender": "लैवेंडर",
+    "theme_color_dusty_rose": "धूमिल गुलाबी"
 };

@@ -1,5 +1,24 @@
 # Stato
 
+## Release 1.2.197 pubblicata — 17/10/2026
+
+Il precedente **NO-GO** della bonifica è stato risolto nel worktree finale della candidata. Il lotto porta da **112 a zero** le chiavi italiane usate ma mancanti e da **165 a zero** quelle inglesi: italiano e inglese sono i soli cataloghi dichiarati completi. Il runtime conserva il testo umano già presente nel markup se una futura regressione introducesse una chiave sconosciuta, evitando di mostrare identificatori tecnici; il gate continua comunque a considerare la chiave mancante un errore.
+
+I colori di Impostazioni dispongono ora di traduzioni esplicite nelle otto lingue. Il visualizzatore dell’Archivio portabile amplia le etichette italiane di Profilo, Account, Aziende e Scadenze, separa elenco e dettaglio e presenta immagini e allegati senza esporre Base64. Il collaudo browser ha inoltre individuato e corretto una barra non sufficientemente escapata nel codice generato. Spagnolo, francese, tedesco, cinese, hindi e portoghese restano cataloghi parziali e non sono dichiarati completi.
+
+La release integra anche la nuova navigazione di **Regole scadenze**, la correzione mobile che riattiva aggiunta e modifica dei documenti del Profilo e il precedente hotfix dei destinatari Push. Il catalogo italiano completo è ora caricato come modulo dedicato e resta incluso nella shell offline: il contenuto non cambia, mentre Profilo e Impostazioni rientrano nel budget statico. Gate verdi: 133 test integrati, documentazione 11/11, i18n 14/14, AI locale 31/31, Archivio 15/15 più banco browser, offline 14/14, CSS, dipendenze, sintassi, riferimenti statici, HTML e hardening. Graphify è stato rigenerato sul codice finale.
+
+Il ramo `codex/release-finalize-1-2-197` è stato pubblicato e Firebase Hosting ha distribuito 341 file. La verifica HTTP pubblica ha confermato `1.2.197`, bootstrap principale, guardia mobile `profileTabs` e visualizzatore Archivio corretto con risposta `200`. Il rilascio finale ha distribuito soltanto Hosting: non ha modificato nuovamente Functions, Rules o dati reali.
+
+
+## Candidata 1.2.197 — integrazione AI, Scadenze documenti e Archivio portabile — 16/10/2026
+
+Nel worktree isolato di rilascio sono integrati i tre lotti autorizzati. L'Assistente presenta **AI.1 Locale** e **AI.2 Avanzata per PC**; la seconda sceglie fra taglie `light`, `medium` e `power` solo dopo controllo del dispositivo e verifica del pacchetto. Gli asset `medium` e `power` sono presenti nella snapshot di deploy e verificati dal catalogo generato, ma non sono precache della PWA.
+
+Il pilot dei documenti mantiene il badge **Prova scadenze** e ora porta numero documento, testo descrittivo e riferimenti agli allegati DS-002 già presenti. Non duplica allegati e non abilita Email o Push. Il visualizzatore dell'Archivio portabile espone sezione, elenco e dettaglio, ricerca, filtro azienda, etichette umane e anteprima/download degli allegati; le esportazioni JSON/CSV/ODS sono raccolte nella sezione tecnica.
+
+La versione locale è `1.2.197`. Build offline, sintassi, AI/Assistente, pilot Scadenze, Archivio, capacità, browser, shell offline, riferimenti statici, versione e baseline i18n risultano verificati localmente nel worktree di integrazione; la baseline i18n resta un limite di non regressione e non certifica la completezza editoriale delle otto lingue. Commit, push, integrazione remota, Hosting e verifica HTTP restano fasi distinte finché non vengono effettivamente concluse. Functions, Rules e dati reali non appartengono al rilascio.
+
 ## Release 1.2.196 pubblicata — «Prova scadenze» dai documenti — 16/10/2026
 
 La release `1.2.196` pubblica il primo pilot delle Scadenze collegate ai documenti personali. Dopo il salvataggio di un documento con `expiry_date` valida viene chiesta conferma; le card dei tre documenti già esistenti consentono la stessa prova su richiesta. I record pilot usano identità deterministica documento+campo e i metadati `sourceType`, `sourceDocumentId`, `sourceFieldId`, `sourceValueAtLink`, `experimentTag: 'prova-scadenze'`. Lista e dettaglio espongono il badge **Prova scadenze**. I due moduli del pilot sono inclusi nella shell offline.

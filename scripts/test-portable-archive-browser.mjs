@@ -140,22 +140,22 @@ try {
     assert.equal(await page.locator('#content').isVisible(), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.getByRole('button', {name: /Account privati 1/}).click();
-    await page.getByText('Account sintetico', {exact: true}).waitFor();
+    await page.getByRole('heading', {name: 'Account sintetico', exact: true}).waitFor();
     assert.equal(await page.getByText('fixture', {exact: true}).count(), 0);
     await page.getByRole('button', {name: /Account aziendali 1/}).click();
     await page.locator('#company-filter').selectOption('azienda-fixture');
-    await page.getByText('Portale sintetico', {exact: true}).waitFor();
+    await page.getByRole('heading', {name: 'Portale sintetico', exact: true}).waitFor();
     await page.locator('#search').fill('Portale sintetico');
-    await page.getByText(/1 elementi mostrati su 3/).waitFor();
+    await page.getByText(/1 schede su 3/).waitFor();
 
-    await page.locator('.exports-panel').evaluate(element => { element.open = true; });
-    const json = JSON.parse((await downloadBytes(page, 'button', 'Scarica Archivio completo (JSON)')).toString('utf8'));
+    await page.locator('.technical').evaluate(element => { element.open = true; });
+    const json = JSON.parse((await downloadBytes(page, 'button', 'Scarica dati-completi.json')).toString('utf8'));
     assert.equal(json.records[0].data.campoFuturo.valore, 42);
-    const csv = (await downloadBytes(page, 'button', 'Scarica Account privati')).toString('utf8');
+    const csv = (await downloadBytes(page, 'button', 'Scarica private-account.csv')).toString('utf8');
     assert.match(csv, /utente-sintetico/);
     await page.locator('#search').fill('Account sintetico');
     await page.getByRole('button', {name: /Account privati 1/}).click();
-    const attachment = (await downloadBytes(page, 'button', 'Scarica allegato')).toString('utf8');
+    const attachment = (await downloadBytes(page, 'button', 'Scarica fixture.txt')).toString('utf8');
     assert.equal(attachment, 'allegato sintetico senza dati reali');
 
     await page.getByRole('button', {name: 'Chiudi archivio', exact: true}).click();
