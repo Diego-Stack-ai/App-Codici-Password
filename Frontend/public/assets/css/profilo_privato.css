@@ -556,6 +556,19 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     font: var(--font-button);
 }
 
+.profile-document-add-trigger {
+    position: relative;
+    z-index: 2;
+    min-height: var(--touch-target-min, 48px);
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.profile-document-add-trigger > * {
+    pointer-events: none;
+}
+
 .dark .btn-upload-trigger {
     color: var(--accent);
     background: rgb(var(--accent-rgb) / );
