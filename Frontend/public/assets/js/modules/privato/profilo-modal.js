@@ -7,7 +7,7 @@
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { filterProfileAccounts } from './profile-model.js';
+import { filterProfileAccounts, normalizeProfileDateInputValue } from './profile-model.js';
 
 export function showProfileAccountPicker({ title, accounts, companies, onSelect, initialScope = 'all', allowCreate = true, confirmLabel = 'Continua' }) {
     document.getElementById('profile-account-picker')?.remove();
@@ -281,10 +281,11 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                     k.includes('num_serie') || k.includes('cf') || k.includes('username') ||
                     k.includes('id_number') || k.includes('license') || k.includes('app_code');
 
+                const inputType = f.type === 'date' ? 'date' : 'text';
                 const inputEl = createElement('input', {
-                    type: 'text',
+                    type: inputType,
                     className: `glass-field-input profile-modal-input ${isSensitive ? 'base-shield' : ''}`,
-                    value: val,
+                    value: inputType === 'date' ? normalizeProfileDateInputValue(val) : val,
                     placeholder: f.label,
                     autocomplete: 'off',
                     autocorrect: 'off',

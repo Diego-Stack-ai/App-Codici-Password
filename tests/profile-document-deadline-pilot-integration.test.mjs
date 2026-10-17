@@ -46,7 +46,7 @@ test('tutte le lingue dichiarano le chiavi del pilot', async () => {
     'pilot_deadline_existing_multiple_message', 'pilot_deadline_create_parallel_message',
     'pilot_deadline_card_open', 'pilot_deadline_card_open_traditional',
     'pilot_deadline_card_create_parallel', 'pilot_deadline_card_create'];
-  const files = ['translations.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];
+  const files = ['translations/it.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];
   for (const file of files) {
     const source = await read(`Frontend/public/assets/js/${file}`);
     for (const key of required) assert.match(source, new RegExp(`${key}\\s*[\":]`), `${file}: ${key}`);

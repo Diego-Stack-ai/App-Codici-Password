@@ -32,6 +32,14 @@ test('normalizza i dati legacy con ID stabili senza mutare la sorgente', () => {
     assert.equal(sourceProfile.contactPhones[0].id, undefined);
 });
 
+test('normalizza le date documento italiane per il selettore HTML senza accettare date impossibili', () => {
+    assert.equal(model.normalizeProfileDateInputValue('17/10/2026'), '2026-10-17');
+    assert.equal(model.normalizeProfileDateInputValue('7.2.2031'), '2031-02-07');
+    assert.equal(model.normalizeProfileDateInputValue('2035-04-12'), '2035-04-12');
+    assert.equal(model.normalizeProfileDateInputValue('31/02/2030'), '');
+    assert.equal(model.normalizeProfileDateInputValue('testo libero'), '');
+});
+
 test('converte le selezioni QR legacy da indici a ID', () => {
     const profile = model.normalizeLegacyProfile({ contactPhones: [{ number: '123' }], contactEmails: [], userAddresses: [] });
     const migrated = model.migrateQrIndexesToIds({ phones: [0], emails: [], addresses: [] }, profile);
