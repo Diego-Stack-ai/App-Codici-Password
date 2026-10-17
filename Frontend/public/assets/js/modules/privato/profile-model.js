@@ -54,6 +54,20 @@ export function filterProfileAccounts(accounts, search = '', scope = 'all') {
     });
 }
 
+export function normalizeProfileDateInputValue(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    const localMatch = /^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/.exec(text);
+    const candidate = localMatch
+        ? `${localMatch[3]}-${localMatch[2].padStart(2, '0')}-${localMatch[1].padStart(2, '0')}`
+        : text;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(candidate)) return '';
+    const parsed = new Date(`${candidate}T00:00:00Z`);
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === candidate
+        ? candidate
+        : '';
+}
+
 export function profileAccountUrl(accountId, companyId = '', { edit = false, contactId = '' } = {}) {
     const params = new URLSearchParams();
     if (accountId) params.set('id', accountId);

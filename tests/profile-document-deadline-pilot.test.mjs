@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const source = await readFile('Frontend/public/assets/js/modules/privato/profile-document-deadline-pilot-model.js', 'utf8');
+const profileSource = await readFile('Frontend/public/assets/js/modules/privato/profile-model.js', 'utf8');
+const {normalizeProfileDateInputValue} = await import(`data:text/javascript;base64,${Buffer.from(profileSource).toString('base64')}`);
 const {
   buildProfileDocumentPilotDeadline,
   hasTraditionalProfileDocumentDeadlineReference,
@@ -23,6 +25,14 @@ test('riconosce soltanto una data ISO valida nel campo standard stabile', () => 
   });
   assert.equal(profileDocumentDeadlineCandidate({...documentFixture, expiry_date: '12/04/2035'}), null);
   assert.equal(profileDocumentDeadlineCandidate({...documentFixture, expiry_date: '2035-02-30'}), null);
+});
+
+test('un Passaporto con data italiana recuperata propone la creazione della Scadenza', () => {
+  const expiry_date = normalizeProfileDateInputValue('12/04/2035');
+  const plan = planProfileDocumentDeadlineReconciliation({...documentFixture, expiry_date}, []);
+  assert.equal(expiry_date, '2035-04-12');
+  assert.equal(plan.action, 'offer-create');
+  assert.equal(plan.candidate.dueDate, '2035-04-12');
 });
 
 test('l identificatore pilot è deterministico per documento e campo', () => {

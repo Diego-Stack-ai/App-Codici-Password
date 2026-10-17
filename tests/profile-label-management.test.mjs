@@ -12,6 +12,11 @@ test('il modal usa configKey per aggiungere, rinominare ed eliminare etichette',
     assert.match(modalSource, /Elimina etichetta/);
 });
 
+test('il modal conserva il tipo date dichiarato dai campi del Passaporto', () => {
+    assert.match(modalSource, /inputType = f\.type === 'date' \? 'date' : 'text'/);
+    assert.match(modalSource, /normalizeProfileDateInputValue\(val\)/);
+});
+
 test('email e telefoni collegano il gestore alla configurazione corretta', () => {
     assert.match(contactsSource, /configKey: 'emailLabels', onOptionsChanged: _callbacks\.updateProfileLabelOptions/);
     assert.match(contactsSource, /configKey: 'phoneLabels', onOptionsChanged: _callbacks\.updateProfileLabelOptions/);

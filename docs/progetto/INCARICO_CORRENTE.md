@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Correzione locale — date del Passaporto e proposta Scadenza — 17/10/2026
+
+Diego segnala che un nuovo Passaporto salvato in **Profilo → Documenti** non propone la creazione della Scadenza e che Data di rilascio e Data di scadenza non sono presentate come date. Dopo la verifica locale Diego ordina «Pubblica»: sono quindi autorizzati bump `1.2.198`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo gate verdi. Restano esclusi accesso a dati reali, Functions, Rules e indici.
+
+Il difetto confermato è nel motore modale condiviso: i campi dichiarati `date` vengono resi come testo. Una data italiana digitata liberamente viene quindi salvata ma non supera il contratto ISO del pilot. La correzione deve rendere i due campi veri input data, recuperare in modo deterministico le date legacy `GG/MM/AAAA`, `GG.MM.AAAA` o `GG-MM-AAAA`, rifiutare date impossibili e conservare il requisito `AAAA-MM-GG` usato dal collegamento Scadenze.
+
 ## BONIFICA-LINGUE-02 — 17/10/2026
 
 | Campo | Valore |

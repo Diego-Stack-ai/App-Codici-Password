@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.198 — date dei documenti Profilo — 17/10/2026
+
+La mancata proposta Scadenza dopo il salvataggio di un Passaporto è stata riprodotta senza dati reali. Le definizioni di Data di rilascio e Data di scadenza erano corrette, ma il motore del popup trasformava ogni campo non selettivo in testo: un valore come `17/10/2026` restava quindi fuori dal formato ISO richiesto dal pilot.
+
+Nel ramo `codex/fix-passport-deadline` i campi data vengono ora resi come input HTML `date`; i valori storici italiani con separatore `/`, `.` o `-` sono normalizzati in `AAAA-MM-GG`, mentre date impossibili e testo libero non vengono accettati. Le prove sintetiche coprono Passaporto, normalizzazione e collegamento al pilot; Profilo, navigazione, offline, sintassi, riferimenti statici, i18n e documentazione sono verdi. La versione candidata è `1.2.198`; commit, integrazione, Hosting e verifica pubblica vengono registrati separatamente quando conclusi. La distribuzione autorizzata riguarda soltanto Hosting.
+
 ## Release 1.2.197 pubblicata — 17/10/2026
 
 Il precedente **NO-GO** della bonifica è stato risolto nel worktree finale della candidata. Il lotto porta da **112 a zero** le chiavi italiane usate ma mancanti e da **165 a zero** quelle inglesi: italiano e inglese sono i soli cataloghi dichiarati completi. Il runtime conserva il testo umano già presente nel markup se una futura regressione introducesse una chiave sconosciuta, evitando di mostrare identificatori tecnici; il gate continua comunque a considerare la chiave mancante un errore.
