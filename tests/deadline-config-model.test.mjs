@@ -15,12 +15,25 @@ test('frequenza consentita da 1 a 30 senza migrare i dati storici', () => {
     assert.equal(model.normalizeDeadlineConfig({deadlineTypes: [{name: 'Storica', freq: 90}]}).deadlineTypes[0].freq, 90);
 });
 
+test('preavviso consentito da 0 a 3650 giorni', () => {
+    for (const value of [0, 14, 3650, '56']) assert.equal(model.validateDeadlineNotice(value), Number(value));
+    for (const value of [-1, 3651, 1.5, '14x', '', null, Infinity]) {
+        assert.throws(() => model.validateDeadlineNotice(value), /0 a 3650/);
+    }
+});
+
 test('salvataggio reale rifiuta la frequenza prima di upload e scritture', async () => {
     const saveSource = await readFile(new URL('../Frontend/public/assets/js/modules/scadenze/deadline-save-service.js', import.meta.url), 'utf8');
     const stripped = saveSource.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
-    const save = new Function('validateDeadlineFrequency', `${stripped}\nreturn saveDeadline;`)(model.validateDeadlineFrequency);
+    const save = new Function('validateDeadlineFrequency', 'validateDeadlineNotice', `${stripped}\nreturn saveDeadline;`)(
+        model.validateDeadlineFrequency,
+        model.validateDeadlineNotice
+    );
     // Nessuna dipendenza SDK fornita: qualunque accesso prima del rifiuto fallirebbe.
     await assert.rejects(save({user: {uid: 'synthetic'}, data: {notif_frequency: 31}, selectedFiles: [{}]}), /1 a 30/);
+    await assert.rejects(save({
+        user: {uid: 'synthetic'}, data: {notif_days_before: -1, notif_frequency: 7}, selectedFiles: [{}]
+    }), /0 a 3650/);
 });
 
 test('clona le configurazioni senza condividere riferimenti', () => {

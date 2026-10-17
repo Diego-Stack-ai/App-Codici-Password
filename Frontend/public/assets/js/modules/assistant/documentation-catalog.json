@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contentVersion": 2,
-  "reviewedAppVersion": "1.2.199",
+  "reviewedAppVersion": "1.2.200",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -637,7 +637,7 @@
         {
           "stepId": "step-3",
           "bodyKey": "guide.pages.aggiungi_scadenza.step-3",
-          "target": "#display_notif_days"
+          "target": "#notif_days_before"
         },
         {
           "stepId": "step-4",

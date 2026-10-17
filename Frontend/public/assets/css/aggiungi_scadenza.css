@@ -256,6 +256,35 @@
     color: var(--text-primary);
 }
 
+.planning-value-input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
+    background: transparent;
+    color: var(--text-primary);
+    font-size: var(--fs-xs);
+    font-weight: var(--font-title-weight);
+    padding: 0.2rem 0;
+}
+
+.planning-value-input:focus-visible {
+    border-bottom-color: var(--primary-color);
+    outline: 2px solid color-mix(in srgb, var(--primary-color) 28%, transparent);
+    outline-offset: 2px;
+}
+
+.deadline-field-help {
+    margin: 0.45rem 0 0;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+    line-height: 1.4;
+}
+
+.linked-document-date {
+    cursor: default;
+}
+
 .whatsapp-toggle-card {
     display: flex;
     align-items: center;

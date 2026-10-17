@@ -43,6 +43,7 @@ test('la card espone solo apertura e configurazione definitiva, senza comandi Pr
 test('tutte le lingue dichiarano le chiavi del flusso definitivo', async () => {
   const required = ['profile_deadline_configure_title', 'profile_deadline_configure_message',
     'profile_deadline_configure_existing_message', 'profile_deadline_configure_action',
+    'linked_document_expiry_help',
     'profile_deadline_card_configure', 'profile_deadline_card_open',
     'profile_deadline_update_title',
     'profile_deadline_update_message', 'profile_deadline_updated', 'profile_deadline_error'];
@@ -79,4 +80,17 @@ test('il modulo completo precompila regole, testo e documenti non ancora present
   assert.match(source, /getSuggestedSchedule\(documentType\)/);
   assert.match(source, /getSuggestedTemplate\(documentType\) \|\| documentType/);
   assert.match(config, /getSuggestedSchedule\(type\)/);
+});
+
+test('la configurazione blocca la data del Documento e rende modificabili preavviso e frequenza', async () => {
+  const source = await read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js');
+  const html = await read('Frontend/public/aggiungi_scadenza.html');
+  assert.match(source, /if \(!profileDocumentLinkDraft\) initDatePickerV5\('dueDate'\)/);
+  assert.match(source, /deadlineDateForSave\(profileDocumentLinkDraft/);
+  assert.match(source, /dateInput\.readOnly = true/);
+  assert.match(html, /id="notif_days_before"[^>]+type="number"/);
+  assert.match(html, /id="notif_frequency"[^>]+type="number"/);
+  assert.match(html, /id="deadline-contact-select"/);
+  assert.match(html, /Email e Push sono indipendenti/);
+  assert.match(html, /Può gestire/);
 });

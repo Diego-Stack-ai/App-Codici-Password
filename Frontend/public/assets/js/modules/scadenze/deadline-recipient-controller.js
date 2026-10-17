@@ -1,7 +1,7 @@
 import { clearElement, createElement } from '../../dom-utils.js';
 import { mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
 
-export function createDeadlineRecipientController() {
+export function createDeadlineRecipientController({ onManageContacts } = {}) {
     let recipients = [];
     let contacts = [];
 
@@ -57,8 +57,12 @@ export function createDeadlineRecipientController() {
     }
 
     function init() {
-        document.getElementById('btn-manage-deadline-contacts')?.addEventListener('click', () => {
+        document.getElementById('btn-manage-deadline-contacts')?.addEventListener('click', async () => {
             const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
+            if (onManageContacts) {
+                await onManageContacts(returnTo);
+                return;
+            }
             window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
         });
         document.getElementById('deadline-contact-select')?.addEventListener('change', event => {

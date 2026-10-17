@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Correzione della configurazione Scadenza da Documento — 17/10/2026
+
+Diego precisa che le due date del Documento hanno ruoli distinti: la Data di rilascio è informativa, mentre la Data di scadenza è già la data finale della Scadenza e non deve essere ricalcolata o riproposta come data modificabile. Il modulo deve quindi mostrarla in sola lettura e permettere di configurare soltanto preavviso, frequenza, nota e destinatari. Per ogni destinatario restano scelte indipendenti Email, Push e permesso **Può gestire**. La selezione deve usare la medesima rubrica di **Impostazioni → Destinatari email** e consentire di aprirla per aggiungere o modificare un contatto, tornando poi alla Scadenza senza perdere i dati del modulo.
+
+Il perimetro corrente autorizza implementazione locale, prove sintetiche, aggiornamento dei documenti e del grafo principale. Dopo la consegna locale Diego ordina esplicitamente **«Pubblica»**: sono quindi autorizzati bump patch `1.2.200`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Restano esclusi accesso all'account reale, invii Email/Push reali, Functions, Rules, indici, migrazioni e operazioni sui dati reali.
+
 ## Scadenze definitive dai Documenti del Profilo — 17/10/2026
 
 Diego conferma il flusso definitivo in **Profilo → Documenti**. **Configura scadenza** apre l'editor completo e, dopo la creazione, diventa **Apri scadenza del documento**. Il flusso crea una Scadenza attiva con preavviso, frequenza, destinatari/canali e nota, mantenendo il collegamento al Documento e i riferimenti agli allegati senza duplicare i file. Non deve essere offerto dalla scheda Documento un comando dedicato alla vecchia Scadenza.

@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.199" />
+    <link rel="manifest" href="manifest.json?v=1.2.200" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.199">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.199">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.199">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.199">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.199">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.199">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.199&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.200">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.200">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.200">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.200">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.200">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.200">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.200&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -184,6 +184,7 @@
                                     <span class="material-symbols-outlined notranslate" translate="no">calendar_today</span>
                                     <input id="dueDate" type="date" class="input">
                                 </div>
+                                <p id="linked-document-date-help" class="deadline-field-help hidden" data-t="linked_document_expiry_help">Questa è la data di scadenza già salvata nel Documento. Per cambiarla, modifica il Documento nel Profilo.</p>
                             </div>
 
                             <!-- Anteprima Oggetto -->
@@ -205,9 +206,8 @@
                                     <span class="material-symbols-outlined notranslate" translate="no">timer</span>
                                 </div>
                                 <div class="planning-text-box">
-                                    <span class="planning-label" data-t="notice_days">GG Preavviso</span>
-                                    <span id="display_notif_days" class="planning-value">14</span>
-                                    <input id="notif_days_before" type="hidden" value="14">
+                                    <label class="planning-label" for="notif_days_before" data-t="notice_days">GG Preavviso</label>
+                                    <input id="notif_days_before" class="planning-value-input" type="number" min="0" max="3650" step="1" value="14" inputmode="numeric">
                                 </div>
                             </div>
                             <div class="planning-info-box">
@@ -215,9 +215,8 @@
                                     <span class="material-symbols-outlined notranslate" translate="no">update</span>
                                 </div>
                                 <div class="planning-text-box">
-                                    <span class="planning-label" data-t="frequency_days">GG Frequenza</span>
-                                    <span id="display_notif_freq" class="planning-value">7</span>
-                                    <input id="notif_frequency" type="hidden" value="7">
+                                    <label class="planning-label" for="notif_frequency" data-t="frequency_days">GG Frequenza</label>
+                                    <input id="notif_frequency" class="planning-value-input" type="number" min="1" max="30" step="1" value="7" inputmode="numeric">
                                 </div>
                             </div>
                         </div>

@@ -250,6 +250,7 @@ export default {
     "profile_deadline_configure_message": "¿Configurar el vencimiento de {type} para el {date}? Antes de guardar podrás elegir aviso, frecuencia, destinatarios, correo, Push y una nota.",
     "profile_deadline_configure_existing_message": "Ya existe un vencimiento anterior para este documento. ¿Configurar el nuevo vencimiento de {type} para el {date}? El anterior no cambiará hasta que lo elimines expresamente.",
     "profile_deadline_configure_action": "Configurar",
+    "linked_document_expiry_help": "Esta es la fecha de vencimiento ya guardada en el Documento. Para cambiarla, edita el Documento en el Perfil.",
     "profile_deadline_card_configure": "Configurar vencimiento",
     "profile_deadline_card_open": "Abrir vencimiento del documento",
     "profile_deadline_update_title": "Fecha del documento modificada",
@@ -263,5 +264,9 @@ export default {
     "theme_color_sand": "Arena",
     "theme_color_petrol": "Azul petróleo",
     "theme_color_lavender": "Lavanda",
-    "theme_color_dusty_rose": "Rosa empolvado"
+    "theme_color_dusty_rose": "Rosa empolvado",
+    "recipient_attachment_navigation_warning": "Los archivos nuevos seleccionados en este dispositivo no pueden conservarse al cambiar de página. ¿Quieres continuar y volver a seleccionarlos al regresar?",
+    "recipient_manager_unavailable": "No se puede abrir la libreta de destinatarios desde esta página.",
+    "deadline_draft_preserve_error": "No se han podido conservar temporalmente los datos del vencimiento.",
+    "deadline_draft_restored": "Datos del vencimiento restaurados. La libreta está actualizada."
 };

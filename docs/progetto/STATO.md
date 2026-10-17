@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.200 — data e configurazione della Scadenza da Documento — 17/10/2026
+
+La Scadenza collegata usa ora in modo vincolante la **Data di scadenza** già salvata nel Documento del Profilo: il modulo la mostra in sola lettura e non propone una nuova data calcolata. Per cambiarla occorre modificare il Documento; il collegamento transazionale continua a verificare che data del Documento, bozza e Scadenza coincidano.
+
+Nel medesimo modulo **Preavviso** e **Frequenza** sono campi numerici modificabili; restano disponibili Nota, selezione dei destinatari e, per ciascuno, i comandi separati **Email**, **Push** e **Può gestire**. **Gestisci destinatari** apre la stessa rubrica di **Impostazioni → Destinatari email**, dove si possono aggiungere o modificare i contatti; tornando al modulo vengono ripristinati campi e selezioni non ancora salvati e gli eventuali contatti modificati vengono riconciliati tramite il loro identificatore. I file locali appena selezionati richiedono conferma perché il browser non può conservarli nel cambio pagina.
+
+La candidata `1.2.200` ha superato i controlli mirati, navigazione, offline, i18n, sintassi, riferimenti statici, prestazioni, CSS, dipendenze, hardening e documentazione. Commit, PR, merge e Hosting restano fasi distinte finché non risultano effettivamente concluse. La pubblicazione autorizzata riguarda soltanto Firebase Hosting e non modifica Functions, Rules, indici o dati reali.
+
 ## Release 1.2.199 pubblicata — Scadenze definitive dai Documenti — 17/10/2026
 
 Il flusso sperimentale **Prova scadenze** è sostituito dal collegamento definitivo fra Documento del Profilo e Scadenza. La scheda espone **Configura scadenza** prima della creazione e **Apri scadenza del documento** dopo; l'editor raccoglie preavviso, frequenza, destinatari Email/Push e nota. La linguetta **Regole scadenze → Documenti personali** riepiloga direttamente gli stessi documenti e parametri senza creare copie. Le Scadenze storiche non vengono migrate o cancellate automaticamente.

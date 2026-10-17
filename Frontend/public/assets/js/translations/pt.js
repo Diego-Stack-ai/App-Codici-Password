@@ -146,6 +146,7 @@ export default {
     "profile_deadline_configure_message": "Configurar o prazo de {type} para {date}? Antes de guardar pode escolher aviso, frequência, destinatários, Email, Push e uma nota.",
     "profile_deadline_configure_existing_message": "Já existe um prazo anterior para este documento. Configurar o novo prazo de {type} para {date}? O anterior permanecerá inalterado até ser eliminado explicitamente.",
     "profile_deadline_configure_action": "Configurar",
+    "linked_document_expiry_help": "Esta é a data de validade já guardada no Documento. Para a alterar, edite o Documento no Perfil.",
     "profile_deadline_card_configure": "Configurar prazo",
     "profile_deadline_card_open": "Abrir prazo do documento",
     "profile_deadline_update_title": "Data do documento alterada",
@@ -159,5 +160,9 @@ export default {
     "theme_color_sand": "Areia",
     "theme_color_petrol": "Azul petróleo",
     "theme_color_lavender": "Lavanda",
-    "theme_color_dusty_rose": "Rosa antigo"
+    "theme_color_dusty_rose": "Rosa antigo",
+    "recipient_attachment_navigation_warning": "Os novos anexos selecionados neste dispositivo não podem ser mantidos ao mudar de página. Pretende continuar e selecioná-los novamente ao regressar?",
+    "recipient_manager_unavailable": "Não é possível abrir o livro de destinatários a partir desta página.",
+    "deadline_draft_preserve_error": "Não foi possível conservar temporariamente os dados do prazo.",
+    "deadline_draft_restored": "Dados do prazo restaurados. O livro de destinatários está atualizado."
 };

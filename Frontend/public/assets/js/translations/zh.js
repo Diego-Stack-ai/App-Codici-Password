@@ -146,6 +146,7 @@ export default {
     "profile_deadline_configure_message": "要为 {type} 配置 {date} 的到期提醒吗？保存前可选择提前天数、频率、收件人、电子邮件、推送和备注。",
     "profile_deadline_configure_existing_message": "此证件已有旧的到期提醒。要为 {type} 配置 {date} 的新提醒吗？旧提醒会保持不变，直到你明确删除它。",
     "profile_deadline_configure_action": "配置",
+    "linked_document_expiry_help": "这是已保存在证件中的到期日期。如需更改，请在个人资料中编辑该证件。",
     "profile_deadline_card_configure": "配置到期提醒",
     "profile_deadline_card_open": "打开证件到期提醒",
     "profile_deadline_update_title": "证件日期已更改",
@@ -159,5 +160,9 @@ export default {
     "theme_color_sand": "沙色",
     "theme_color_petrol": "蓝绿色",
     "theme_color_lavender": "薰衣草色",
-    "theme_color_dusty_rose": "灰粉色"
+    "theme_color_dusty_rose": "灰粉色",
+    "recipient_attachment_navigation_warning": "切换页面时无法保留刚从此设备选择的附件。是否继续，并在返回后重新选择？",
+    "recipient_manager_unavailable": "无法从此页面打开收件人通讯录。",
+    "deadline_draft_preserve_error": "无法临时保留到期事项数据。",
+    "deadline_draft_restored": "已恢复到期事项数据，通讯录已更新。"
 };
