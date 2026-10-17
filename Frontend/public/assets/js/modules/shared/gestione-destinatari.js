@@ -1,4 +1,4 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.199';
+import { db, functions } from '../../firebase-config.js?v=1.2.200';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -7,6 +7,18 @@ import { listContacts } from '../data/vault-repository.js';
 let currentUser = null;
 let contacts = [];
 let editingId = '';
+const ALLOWED_RETURN_PAGES = new Set([
+    'aggiungi_scadenza.html',
+    'form_account_azienda.html',
+    'form_account_privato.html'
+]);
+
+function safeReturnTarget(value) {
+    const target = String(value || '').trim();
+    if (!/^[a-z0-9_-]+\.html(?:\?[^#]*)?$/i.test(target)) return '';
+    const page = target.split('?')[0];
+    return ALLOWED_RETURN_PAGES.has(page) ? target : '';
+}
 
 function normalizeEmail(value) {
     return String(value || '').trim().toLowerCase();
@@ -125,9 +137,9 @@ async function saveContact() {
 
 export async function initGestioneDestinatari(user) {
     currentUser = user;
-    const returnTarget = new URLSearchParams(window.location.search).get('return');
+    const returnTarget = safeReturnTarget(new URLSearchParams(window.location.search).get('return'));
     const returnLink = document.getElementById('recipient-return');
-    if (returnTarget && /^[a-z0-9_-]+\.html(?:\?[^#]*)?$/i.test(returnTarget)) {
+    if (returnTarget) {
         returnLink.href = returnTarget;
         returnLink.classList.remove('hidden');
     }

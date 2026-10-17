@@ -146,6 +146,7 @@ export default {
     "profile_deadline_configure_message": "{type} की {date} वाली समय-सीमा कॉन्फ़िगर करें? सहेजने से पहले सूचना अवधि, आवृत्ति, प्राप्तकर्ता, ईमेल, Push और नोट चुन सकते हैं।",
     "profile_deadline_configure_existing_message": "इस दस्तावेज़ के लिए पुरानी समय-सीमा पहले से है। {type} की नई {date} वाली समय-सीमा कॉन्फ़िगर करें? पुरानी समय-सीमा स्पष्ट रूप से हटाने तक नहीं बदलेगी।",
     "profile_deadline_configure_action": "कॉन्फ़िगर करें",
+    "linked_document_expiry_help": "यह दस्तावेज़ में पहले से सहेजी गई समाप्ति तिथि है। इसे बदलने के लिए प्रोफ़ाइल में दस्तावेज़ संपादित करें।",
     "profile_deadline_card_configure": "समय-सीमा कॉन्फ़िगर करें",
     "profile_deadline_card_open": "दस्तावेज़ की समय-सीमा खोलें",
     "profile_deadline_update_title": "दस्तावेज़ की तारीख बदली",
@@ -159,5 +160,9 @@ export default {
     "theme_color_sand": "रेतीला",
     "theme_color_petrol": "पेट्रोल नीला",
     "theme_color_lavender": "लैवेंडर",
-    "theme_color_dusty_rose": "धूमिल गुलाबी"
+    "theme_color_dusty_rose": "धूमिल गुलाबी",
+    "recipient_attachment_navigation_warning": "इस डिवाइस से चुने गए नए अटैचमेंट पेज बदलते समय सुरक्षित नहीं रह सकते। क्या जारी रखकर लौटने पर उन्हें फिर से चुनना है?",
+    "recipient_manager_unavailable": "इस पेज से प्राप्तकर्ता पता-पुस्तिका नहीं खोली जा सकती।",
+    "deadline_draft_preserve_error": "समय-सीमा का डेटा अस्थायी रूप से सुरक्षित नहीं किया जा सका।",
+    "deadline_draft_restored": "समय-सीमा का डेटा पुनर्स्थापित हुआ। पता-पुस्तिका अपडेट है।"
 };

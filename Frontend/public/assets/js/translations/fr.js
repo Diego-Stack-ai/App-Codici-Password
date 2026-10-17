@@ -147,6 +147,7 @@ export default {
     "profile_deadline_configure_message": "Configurer l’échéance de {type} au {date} ? Vous pourrez choisir le préavis, la fréquence, les destinataires, l’e-mail, le Push et une note avant l’enregistrement.",
     "profile_deadline_configure_existing_message": "Une ancienne échéance existe déjà pour ce document. Configurer la nouvelle échéance de {type} au {date} ? L’ancienne restera inchangée jusqu’à sa suppression explicite.",
     "profile_deadline_configure_action": "Configurer",
+    "linked_document_expiry_help": "Il s’agit de la date d’expiration déjà enregistrée dans le Document. Pour la modifier, éditez le Document dans le Profil.",
     "profile_deadline_card_configure": "Configurer l’échéance",
     "profile_deadline_card_open": "Ouvrir l’échéance du document",
     "profile_deadline_update_title": "Date du document modifiée",
@@ -160,5 +161,9 @@ export default {
     "theme_color_sand": "Sable",
     "theme_color_petrol": "Bleu pétrole",
     "theme_color_lavender": "Lavande",
-    "theme_color_dusty_rose": "Vieux rose"
+    "theme_color_dusty_rose": "Vieux rose",
+    "recipient_attachment_navigation_warning": "Les nouvelles pièces jointes choisies sur cet appareil ne peuvent pas être conservées lors du changement de page. Continuer et les sélectionner à nouveau au retour ?",
+    "recipient_manager_unavailable": "Impossible d’ouvrir le carnet des destinataires depuis cette page.",
+    "deadline_draft_preserve_error": "Impossible de conserver temporairement les données de l’échéance.",
+    "deadline_draft_restored": "Données de l’échéance restaurées. Le carnet est à jour."
 };

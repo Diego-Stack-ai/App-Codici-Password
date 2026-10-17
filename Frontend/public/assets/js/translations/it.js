@@ -509,10 +509,15 @@ export default {
     profile_deadline_configure_message: "Vuoi configurare la scadenza di {type} con data {date}? Potrai scegliere preavviso, frequenza, destinatari, Email, Push e nota prima di salvarla.",
     profile_deadline_configure_existing_message: "Esiste già una scadenza precedente per questo documento. Vuoi configurare la nuova scadenza di {type} con data {date}? La precedente resterà invariata finché non la eliminerai esplicitamente.",
     profile_deadline_configure_action: "Configura",
+    linked_document_expiry_help: "Questa è la data di scadenza già salvata nel Documento. Per cambiarla, modifica il Documento nel Profilo.",
     profile_deadline_card_configure: "Configura scadenza",
     profile_deadline_card_open: "Apri scadenza del documento",
     profile_deadline_update_title: "Data del documento modificata",
     profile_deadline_update_message: "La nuova data è {date}. Vuoi aggiornare la scadenza collegata mantenendo avvisi, destinatari e nota?",
     profile_deadline_updated: "Scadenza collegata aggiornata.",
-    profile_deadline_error: "Impossibile configurare la scadenza del documento. Riprova."
+    profile_deadline_error: "Impossibile configurare la scadenza del documento. Riprova.",
+    recipient_attachment_navigation_warning: "I nuovi allegati scelti dal dispositivo non possono essere conservati durante il cambio pagina. Vuoi continuare e selezionarli di nuovo al ritorno?",
+    recipient_manager_unavailable: "Impossibile aprire la rubrica da questa pagina.",
+    deadline_draft_preserve_error: "Impossibile conservare temporaneamente i dati della scadenza.",
+    deadline_draft_restored: "Dati della scadenza ripristinati. La rubrica è aggiornata."
 };

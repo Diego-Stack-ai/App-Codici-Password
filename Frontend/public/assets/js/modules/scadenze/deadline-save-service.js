@@ -1,4 +1,4 @@
-import { db, storage } from '../../firebase-config.js?v=1.2.199';
+import { db, storage } from '../../firebase-config.js?v=1.2.200';
 import {
     addDoc,
     arrayUnion,
@@ -23,7 +23,7 @@ import {
     validateAttachmentFile
 } from '../shared/attachment-security.js';
 import { deadlineRecipientFields } from './deadline-recipient-model.js';
-import { validateDeadlineFrequency } from './deadline-config-model.js';
+import { validateDeadlineFrequency, validateDeadlineNotice } from './deadline-config-model.js';
 
 const CONFIG_DOCUMENT_BY_MODE = Object.freeze({
     automezzi: 'deadlineConfig',
@@ -221,6 +221,7 @@ export async function saveDeadline({
             existingAttachments
         );
     }
+    const notice = validateDeadlineNotice(data?.notif_days_before);
     const frequency = validateDeadlineFrequency(data?.notif_frequency);
 
     let previousAttachments = [];
@@ -241,6 +242,7 @@ export async function saveDeadline({
     const recipientFields = deadlineRecipientFields(recipients);
     const deadlineData = {
         ...data,
+        notif_days_before: notice,
         notif_frequency: frequency,
         uid: user.uid,
         mode,

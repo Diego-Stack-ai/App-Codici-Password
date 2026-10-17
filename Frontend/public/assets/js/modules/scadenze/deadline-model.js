@@ -21,6 +21,16 @@ export function deadlineInputDate(isoValue, displayValue) {
     return fallbackMatch ? datePartsToIso(Number(fallbackMatch[3]), Number(fallbackMatch[2]), Number(fallbackMatch[1])) : '';
 }
 
+export function deadlineDateForSave(profileDocumentLinkDraft, isoValue, displayValue) {
+    if (profileDocumentLinkDraft?.profileDocumentId) {
+        return deadlineInputDate(
+            profileDocumentLinkDraft.sourceValueAtLink || profileDocumentLinkDraft.dueDate,
+            profileDocumentLinkDraft.dueDate
+        );
+    }
+    return deadlineInputDate(isoValue, displayValue);
+}
+
 export function deadlineDate(record = {}) {
     const value = record.dueDate || record.date;
     if (!value) return null;

@@ -4,22 +4,28 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.199';
+import { auth } from '../../firebase-config.js?v=1.2.200';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { normalizeExternalUrl } from '../shared/attachment-security.js';
 import { getDeadline } from '../data/vault-repository.js';
 import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
-import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
+import { deadlineDateForSave, deadlineDateInputFields } from './deadline-model.js';
 import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
 import { createDeadlineRecipientController } from './deadline-recipient-controller.js';
+import {
+    DEADLINE_EDITOR_RETURN_DRAFT_KEY,
+    consumeDeadlineEditorReturnDraft,
+    createDeadlineEditorReturnDraft,
+    deadlineEditorReturnTarget
+} from './deadline-editor-return-draft.js';
 import { createDeadlineConfigController, deadlineConfigValuesMatch } from './deadline-config-controller.js';
 import { saveDeadline } from './deadline-save-service.js';
 
@@ -30,7 +36,7 @@ let currentUser = null;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 const attachmentController = createDeadlineAttachmentController();
-const recipientController = createDeadlineRecipientController();
+const recipientController = createDeadlineRecipientController({ onManageContacts: openRecipientManager });
 const configController = createDeadlineConfigController({
     recipientController,
     onRender: () => syncCustomDropdowns()
@@ -41,6 +47,95 @@ let linkedSourceRef = null;
 
 const PROFILE_DEADLINE_DRAFT_KEY = 'profile-deadline-link-draft';
 const ACCOUNT_DEADLINE_DRAFT_KEY = 'account-deadline-link-draft';
+
+function deadlineEditorFieldValues() {
+    const dateInput = document.getElementById('dueDate');
+    return {
+        name: document.getElementById('nome_cognome')?.value,
+        type: typeSelect?.value,
+        dueDate: dateInput?.value,
+        dueDateIso: dateInput?.dataset.isoValue,
+        detail: document.getElementById('modello_veicolo')?.value,
+        referenceUrl: document.getElementById('deadline_url')?.value,
+        notes: document.getElementById('notes')?.value,
+        templateText: document.getElementById('testo_email_select')?.value,
+        notice: document.getElementById('notif_days_before')?.value,
+        frequency: document.getElementById('notif_frequency')?.value
+    };
+}
+
+async function openRecipientManager(returnTo) {
+    if (attachmentController.getSelectedFiles().length) {
+        const confirmed = await showConfirmModal(
+            t('notification_recipients'),
+            t('recipient_attachment_navigation_warning'),
+            t('confirm'),
+            t('cancel')
+        );
+        if (!confirmed) return;
+    }
+    const draft = createDeadlineEditorReturnDraft({
+        ownerUid: currentUser?.uid,
+        returnTarget: returnTo,
+        mode: currentMode,
+        fields: deadlineEditorFieldValues(),
+        recipients: recipientController.getRecipients()
+    });
+    if (!draft) return showToast(t('recipient_manager_unavailable'), 'error');
+    try {
+        sessionStorage.setItem(DEADLINE_EDITOR_RETURN_DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+        return showToast(t('deadline_draft_preserve_error'), 'error');
+    }
+    window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
+}
+
+function restoreDeadlineEditorAfterRecipientManagement() {
+    const draft = consumeDeadlineEditorReturnDraft(sessionStorage, {
+        ownerUid: currentUser?.uid,
+        returnTarget: deadlineEditorReturnTarget(window.location)
+    });
+    if (!draft) return;
+    setMode(draft.mode);
+    const fields = draft.fields || {};
+    const nameInput = document.getElementById('nome_cognome');
+    if (nameInput) nameInput.value = fields.name || '';
+    if (typeSelect && fields.type) selectValuePreservingCustomOption(typeSelect, fields.type);
+    const dateInput = document.getElementById('dueDate');
+    if (dateInput && !profileDocumentLinkDraft) {
+        dateInput.value = fields.dueDate || '';
+        dateInput.dataset.isoValue = fields.dueDateIso || '';
+    }
+    const detailSelect = document.getElementById('modello_veicolo');
+    if (detailSelect && fields.detail) selectValuePreservingCustomOption(detailSelect, fields.detail);
+    const templateSelect = document.getElementById('testo_email_select');
+    if (templateSelect && fields.templateText) selectValuePreservingCustomOption(templateSelect, fields.templateText);
+    const directValues = {
+        deadline_url: fields.referenceUrl,
+        notes: fields.notes,
+        notif_days_before: fields.notice,
+        notif_frequency: fields.frequency
+    };
+    Object.entries(directValues).forEach(([id, value]) => {
+        const input = document.getElementById(id);
+        if (input) input.value = value || '';
+    });
+    const contactsById = new Map(recipientController.getContacts()
+        .filter(contact => contact.id)
+        .map(contact => [contact.id, contact]));
+    const reconciledRecipients = (draft.recipients || []).map(recipient => {
+        const contact = contactsById.get(recipient.contactId);
+        return contact ? {
+            ...recipient,
+            displayName: [contact.nome, contact.cognome].filter(Boolean).join(' ').trim(),
+            email: contact.email
+        } : recipient;
+    });
+    recipientController.setRecipients(reconciledRecipients);
+    syncCustomDropdowns();
+    updatePreview();
+    showToast(t('deadline_draft_restored'), 'success');
+}
 
 function discardProfileDocumentDraft() {
     sessionStorage.removeItem(PROFILE_DEADLINE_DRAFT_KEY);
@@ -122,8 +217,9 @@ export async function initAggiungiScadenza(user) {
         }
     });
 
-    // Custom Datepicker V5.0
-    initDatePickerV5('dueDate');
+    // La data delle Scadenze collegate deriva esclusivamente dal Documento.
+    // Il calendario resta disponibile per tutte le altre Scadenze.
+    if (!profileDocumentLinkDraft) initDatePickerV5('dueDate');
 
     initProxyDropdowns();
     attachmentController.init();
@@ -234,8 +330,16 @@ export async function initAggiungiScadenza(user) {
             const dateInput = document.getElementById('dueDate');
             if (nameInput) nameInput.value = sourceDraft.name || 'Account';
             if (dateInput) {
-                dateInput.value = sourceDraft.dueDate || '';
-                dateInput.dataset.isoValue = sourceDraft.dueDate || '';
+                const dateFields = deadlineDateInputFields({dueDate: sourceDraft.dueDate});
+                dateInput.value = dateFields.displayValue;
+                dateInput.dataset.isoValue = dateFields.isoValue;
+                if (profileDocumentLinkDraft) {
+                    dateInput.type = 'text';
+                    dateInput.readOnly = true;
+                    dateInput.setAttribute('aria-readonly', 'true');
+                    dateInput.classList.add('linked-document-date');
+                    document.getElementById('linked-document-date-help')?.classList.remove('hidden');
+                }
             }
             if (typeSelect && sourceDraft.documentType) selectValuePreservingCustomOption(typeSelect, sourceDraft.documentType);
             if (typeSelect && profileDocumentLinkDraft?.profileDocumentId) {
@@ -244,15 +348,11 @@ export async function initAggiungiScadenza(user) {
                 selectValuePreservingCustomOption(typeSelect, documentType, schedule || {});
                 const noticeInput = document.getElementById('notif_days_before');
                 const frequencyInput = document.getElementById('notif_frequency');
-                const noticeDisplay = document.getElementById('display_notif_days');
-                const frequencyDisplay = document.getElementById('display_notif_freq');
                 if (schedule?.period !== undefined) {
                     if (noticeInput) noticeInput.value = String(schedule.period);
-                    if (noticeDisplay) noticeDisplay.textContent = String(schedule.period);
                 }
                 if (schedule?.freq !== undefined) {
                     if (frequencyInput) frequencyInput.value = String(schedule.freq);
-                    if (frequencyDisplay) frequencyDisplay.textContent = String(schedule.freq);
                 }
                 const template = configController.getSuggestedTemplate(documentType) || documentType;
                 const templateSelect = document.getElementById('testo_email_select');
@@ -265,6 +365,8 @@ export async function initAggiungiScadenza(user) {
             syncCustomDropdowns();
         }
     }
+
+    restoreDeadlineEditorAfterRecipientManagement();
 
     
 }
@@ -352,7 +454,7 @@ function setupSaveLogic() {
         const name = document.getElementById('nome_cognome').value.trim();
         const type = typeSelect.value;
         const dateInput = document.getElementById('dueDate');
-        const date = deadlineInputDate(dateInput.dataset.isoValue, dateInput.value);
+        const date = deadlineDateForSave(profileDocumentLinkDraft, dateInput.dataset.isoValue, dateInput.value);
 
         if (!name || !type || !date) {
             return showToast("Compila i campi obbligatori (Nome, Categoria, Data)", "error");
@@ -477,16 +579,12 @@ async function loadScadenzaForEdit(id) {
         document.getElementById('notes').value = data.notes || '';
 
         // 4. Notifiche (Valori numerici)
-        const dNotice = document.getElementById('display_notif_days');
         const iNotice = document.getElementById('notif_days_before');
         const period = data.notif_days_before || data.period || '14';
-        if (dNotice) dNotice.textContent = period;
         if (iNotice) iNotice.value = period;
 
-        const dFreq = document.getElementById('display_notif_freq');
         const iFreq = document.getElementById('notif_frequency');
         const freq = data.notif_frequency || data.freq || '7';
-        if (dFreq) dFreq.textContent = freq;
         if (iFreq) iFreq.value = freq;
 
 
@@ -649,15 +747,11 @@ function syncCustomDropdowns() {
                 // --- Nuovo: Aggiorna campi notifica se presenti nel dataset dell'opzione ---
                 if (sel.id === 'tipo_scadenza') {
                     if (opt.dataset.period) {
-                        const displayPeriod = document.getElementById('display_notif_days');
                         const inputPeriod = document.getElementById('notif_days_before');
-                        if (displayPeriod) displayPeriod.textContent = opt.dataset.period;
                         if (inputPeriod) inputPeriod.value = opt.dataset.period;
                     }
                     if (opt.dataset.freq) {
-                        const displayFreq = document.getElementById('display_notif_freq');
                         const inputFreq = document.getElementById('notif_frequency');
-                        if (displayFreq) displayFreq.textContent = opt.dataset.freq;
                         if (inputFreq) inputFreq.value = opt.dataset.freq;
                     }
                 }

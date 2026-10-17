@@ -67,6 +67,16 @@ test('normalizza esclusivamente date di input realmente valide', () => {
     assert.equal(model.deadlineInputDate('', 'domani'), '');
 });
 
+test('una Scadenza collegata usa sempre la data finale del Documento', () => {
+    const draft = {
+        profileDocumentId: 'passport-1',
+        dueDate: '2034-10-30',
+        sourceValueAtLink: '2034-10-30'
+    };
+    assert.equal(model.deadlineDateForSave(draft, '2027-10-30', '30/10/2027'), '2034-10-30');
+    assert.equal(model.deadlineDateForSave(null, '2027-10-30', '30/10/2027'), '2027-10-30');
+});
+
 test('prepara data ISO e visuale senza duplicare la logica del form', () => {
     assert.deepEqual(model.deadlineDateInputFields({ dueDate: '30/09/2026' }), {
         isoValue: '2026-09-30', displayValue: '30/09/2026'

@@ -147,6 +147,7 @@ export default {
     "profile_deadline_configure_message": "Frist für {type} zum {date} konfigurieren? Vor dem Speichern können Sie Vorlauf, Häufigkeit, Empfänger, E-Mail, Push und eine Notiz wählen.",
     "profile_deadline_configure_existing_message": "Für dieses Dokument besteht bereits eine frühere Frist. Neue Frist für {type} zum {date} konfigurieren? Die frühere Frist bleibt unverändert, bis Sie sie ausdrücklich löschen.",
     "profile_deadline_configure_action": "Konfigurieren",
+    "linked_document_expiry_help": "Dies ist das bereits im Dokument gespeicherte Ablaufdatum. Um es zu ändern, bearbeiten Sie das Dokument im Profil.",
     "profile_deadline_card_configure": "Frist konfigurieren",
     "profile_deadline_card_open": "Dokumentfrist öffnen",
     "profile_deadline_update_title": "Dokumentdatum geändert",
@@ -160,5 +161,9 @@ export default {
     "theme_color_sand": "Sand",
     "theme_color_petrol": "Petrol",
     "theme_color_lavender": "Lavendel",
-    "theme_color_dusty_rose": "Altrosa"
+    "theme_color_dusty_rose": "Altrosa",
+    "recipient_attachment_navigation_warning": "Neu auf diesem Gerät ausgewählte Anhänge können beim Seitenwechsel nicht erhalten bleiben. Fortfahren und sie nach der Rückkehr erneut auswählen?",
+    "recipient_manager_unavailable": "Das Empfängeradressbuch kann von dieser Seite nicht geöffnet werden.",
+    "deadline_draft_preserve_error": "Die Fälligkeitsdaten konnten nicht vorübergehend gespeichert werden.",
+    "deadline_draft_restored": "Fälligkeitsdaten wiederhergestellt. Das Adressbuch ist aktuell."
 };

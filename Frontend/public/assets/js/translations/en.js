@@ -337,6 +337,7 @@ export default {
     "profile_deadline_configure_message": "Configure the {type} deadline for {date}? You can choose notice, frequency, recipients, Email, Push and a note before saving.",
     "profile_deadline_configure_existing_message": "A previous deadline already exists for this document. Configure the new {type} deadline for {date}? The previous deadline stays unchanged until you explicitly delete it.",
     "profile_deadline_configure_action": "Configure",
+    "linked_document_expiry_help": "This is the expiry date already saved in the Document. To change it, edit the Document in Profile.",
     "profile_deadline_card_configure": "Configure deadline",
     "profile_deadline_card_open": "Open document deadline",
     "profile_deadline_update_title": "Document date changed",
@@ -515,5 +516,9 @@ export default {
     "theme_color_sand": "Sand",
     "theme_color_petrol": "Petrol blue",
     "theme_color_lavender": "Lavender",
-    "theme_color_dusty_rose": "Dusty rose"
+    "theme_color_dusty_rose": "Dusty rose",
+    "recipient_attachment_navigation_warning": "New attachments selected from this device cannot be kept while changing pages. Continue and select them again when you return?",
+    "recipient_manager_unavailable": "The address book cannot be opened from this page.",
+    "deadline_draft_preserve_error": "The deadline data could not be kept temporarily.",
+    "deadline_draft_restored": "Deadline data restored. The address book is up to date."
 };

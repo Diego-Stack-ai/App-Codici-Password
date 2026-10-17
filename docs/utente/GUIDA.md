@@ -8,7 +8,9 @@ Dopo il primo accesso la Home propone di aprire le Impostazioni oppure esplorare
 
 ## Documenti personali e relative Scadenze
 
-In **Profilo → Documenti**, salva prima il Documento con una data di scadenza valida. Se non esiste ancora il collegamento, premi **Configura scadenza**: si apre il normale modulo Scadenza con i dati già riconosciuti, nel quale puoi controllare data, preavviso, frequenza, destinatari, Email/Push e nota. Dopo il salvataggio il pulsante diventa **Apri scadenza del documento**.
+In **Profilo → Documenti**, salva prima il Documento con una data di scadenza valida. Se non esiste ancora il collegamento, premi **Configura scadenza**: la data finale viene presa direttamente dalla Data di scadenza del Documento e compare in sola lettura. Puoi impostare preavviso, frequenza e nota, aggiungere i destinatari e scegliere separatamente per ciascuno Email, Push e **Può gestire**. Dopo il salvataggio il pulsante diventa **Apri scadenza del documento**. Per cambiare la data finale, modifica il Documento nel Profilo.
+
+Il comando **Gestisci destinatari** apre la stessa rubrica disponibile in **Impostazioni → Destinatari email**. Da questa pagina si può aggiungere o modificare un contatto e poi usare **Torna al modulo precedente**: preavviso, frequenza, nota, campi della Scadenza e destinatari già selezionati vengono ripristinati. Se erano stati scelti nuovi file dal dispositivo, l'app chiede conferma prima di cambiare pagina perché tali file dovranno essere selezionati nuovamente.
 
 La stessa situazione è visibile in **Impostazioni → Regole scadenze → Documenti personali**. Ogni scheda riassume direttamente il Documento e i parametri della sua Scadenza; non è una seconda copia e le modifiche riguardano gli stessi record. Le vecchie Scadenze non vengono eliminate automaticamente e vanno gestite dalla normale lista Scadenze. Il conteggio allegati indica i file consultabili in modo protetto nell'app: non significa che i file vengano spediti come allegati dell'email.
 

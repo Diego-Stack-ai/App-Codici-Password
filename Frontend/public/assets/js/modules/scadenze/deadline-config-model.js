@@ -6,6 +6,17 @@ export function validateDeadlineFrequency(value = 7) {
     return frequency;
 }
 
+export function validateDeadlineNotice(value = 14) {
+    if (value === null || (typeof value === 'string' && !value.trim())) {
+        throw new Error('Il preavviso deve essere un numero intero da 0 a 3650 giorni.');
+    }
+    const notice = Number(value);
+    if (!Number.isInteger(notice) || notice < 0 || notice > 3650) {
+        throw new Error('Il preavviso deve essere un numero intero da 0 a 3650 giorni.');
+    }
+    return notice;
+}
+
 export function cloneDeadlineConfig(config = {}) {
     return structuredClone(config);
 }
