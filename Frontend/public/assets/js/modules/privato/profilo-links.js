@@ -1,13 +1,18 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.198';
-import { collection, doc, runTransaction, deleteField } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from '../../ui-core-v129.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.199';
+import { collection, doc, runTransaction, deleteField, Timestamp } from "/assets/js/vendor/firebase-runtime.js";
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { showProfileAccountPicker } from './profilo-modal.js';
 import {listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 import {
-    buildProfileAccountLinkDraft, profileAccountUrl, profileAccountReferences
+    buildProfileAccountLinkDraft,
+    isDefinitiveProfileDocumentDeadlineReference,
+    normalizeProfileDateInputValue,
+    profileAccountUrl,
+    profileAccountReferences
 } from './profile-model.js';
+import {t} from '../../translations.js';
 
 export async function readLinkedEmailAccountPassword(email) {
     const uid = auth.currentUser?.uid;
@@ -77,14 +82,133 @@ async function connectContactAccount(contact, syncData, contactType) {
     }
 }
 
-export async function createDeadlineFromDocument(documentItem, syncData, profile = {}) {
-    const pilot = await import('./profile-document-deadline-pilot.js?v=1.2.198');
-    return pilot.reconcileProfileDocumentDeadlinePilot({
-        documentItem,
-        profile,
-        openWhenCurrent: true,
-        ensureDocumentPersisted: syncData
-    });
+function deadlineIsoDate(deadline = {}) {
+    const value = deadline.dueDate || deadline.date || '';
+    if (typeof value === 'string') return value.slice(0, 10);
+    if (typeof value?.toDate === 'function') return value.toDate().toISOString().slice(0, 10);
+    return '';
+}
+
+export async function createDeadlineFromDocument(documentItem, syncData, profile = {}, {
+    openWhenCurrent = true
+} = {}) {
+    const user = auth.currentUser;
+    if (!user || !documentItem?.id) return {action: 'none'};
+    const dueDate = normalizeProfileDateInputValue(documentItem.expiry_date);
+    if (!dueDate) {
+        showToast(t('pilot_deadline_date_required'), 'warning');
+        return {action: 'date-required'};
+    }
+
+    if (isDefinitiveProfileDocumentDeadlineReference(documentItem.expiryReference)) {
+        const deadlineId = documentItem.expiryReference.deadlineId;
+        const deadlineRef = doc(db, 'users', user.uid, 'scadenze', deadlineId);
+        const profileRef = doc(db, 'users', user.uid);
+        let deadline;
+        try {
+            deadline = await runTransaction(db, async transaction => {
+                const [profileSnapshot, deadlineSnapshot] = await Promise.all([
+                    transaction.get(profileRef), transaction.get(deadlineRef)
+                ]);
+                if (!profileSnapshot.exists() || !deadlineSnapshot.exists()) {
+                    throw new Error('PROFILE_DOCUMENT_DEADLINE_LINK_BROKEN');
+                }
+                const sourceDocument = (profileSnapshot.data()?.documenti || [])
+                    .find(item => item?.id === documentItem.id);
+                if (!sourceDocument
+                    || !isDefinitiveProfileDocumentDeadlineReference(sourceDocument.expiryReference)
+                    || sourceDocument.expiryReference.deadlineId !== deadlineId) {
+                    throw new Error('PROFILE_DOCUMENT_DEADLINE_LINK_CHANGED');
+                }
+                const current = deadlineSnapshot.data();
+                const currentSourceId = current?.sourceRef?.type === 'profileDocument'
+                    ? current.sourceRef.id : current?.sourceDocumentId;
+                if (current?.linkKind !== 'profile-document-deadline-v1'
+                    || currentSourceId !== documentItem.id) {
+                    throw new Error('PROFILE_DOCUMENT_DEADLINE_SOURCE_CHANGED');
+                }
+                return current;
+            });
+            if (deadlineIsoDate(deadline) !== dueDate) {
+                const confirmed = await showConfirmModal(
+                    t('profile_deadline_update_title'),
+                    t('profile_deadline_update_message').replaceAll('{date}', dueDate),
+                    t('profile_deadline_configure_action'),
+                    t('cancel')
+                );
+                if (!confirmed) return {action: 'declined', deadlineId};
+                await runTransaction(db, async transaction => {
+                    const [profileSnapshot, deadlineSnapshot] = await Promise.all([
+                        transaction.get(profileRef), transaction.get(deadlineRef)
+                    ]);
+                    if (!profileSnapshot.exists() || !deadlineSnapshot.exists()) {
+                        throw new Error('PROFILE_DOCUMENT_DEADLINE_LINK_BROKEN');
+                    }
+                    const sourceDocument = (profileSnapshot.data()?.documenti || [])
+                        .find(item => item?.id === documentItem.id);
+                    if (!sourceDocument
+                        || sourceDocument.expiryReference?.deadlineId !== deadlineId
+                        || sourceDocument.expiryReference?.linkKind !== 'profile-document-deadline-v1') {
+                        throw new Error('PROFILE_DOCUMENT_DEADLINE_LINK_CHANGED');
+                    }
+                    const storedDeadline = deadlineSnapshot.data();
+                    const storedSourceId = storedDeadline?.sourceRef?.type === 'profileDocument'
+                        ? storedDeadline.sourceRef.id : storedDeadline?.sourceDocumentId;
+                    if (storedDeadline?.linkKind !== 'profile-document-deadline-v1'
+                        || storedSourceId !== documentItem.id) {
+                        throw new Error('PROFILE_DOCUMENT_DEADLINE_SOURCE_CHANGED');
+                    }
+                    transaction.update(deadlineRef, {
+                        dueDate,
+                        completed: false,
+                        status: 'active',
+                        sourceValueAtLink: dueDate,
+                        sourceStatus: 'active',
+                        sourceIssue: '',
+                        notificationsEnabled: true,
+                        pilotDeliveryDisabled: false,
+                        updatedAt: Timestamp.now()
+                    });
+                });
+                deadline = {...deadline, dueDate, completed: false, status: 'active', updated: true};
+            }
+        } catch (error) {
+            showToast(t('profile_deadline_error'), 'error');
+            return {action: 'error', deadlineId, error: error?.message || 'PROFILE_DOCUMENT_DEADLINE_ERROR'};
+        }
+        if (deadline?.updated) {
+            showToast(t('profile_deadline_updated'), 'success');
+        }
+        if (openWhenCurrent) {
+            window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(deadlineId)}`;
+        }
+        return {action: 'current', deadlineId};
+    }
+
+    const legacyDeadlineId = documentItem.expiryReference?.deadlineId
+        || documentItem.compatibleDeadlineId
+        || documentItem.pilotDeadlineReference?.deadlineId
+        || '';
+    const confirmed = await showConfirmModal(
+        t('profile_deadline_configure_title'),
+        t(legacyDeadlineId
+            ? 'profile_deadline_configure_existing_message'
+            : 'profile_deadline_configure_message')
+            .replaceAll('{type}', documentItem.type || t('document'))
+            .replaceAll('{date}', dueDate),
+        t('profile_deadline_configure_action'),
+        t('cancel')
+    );
+    if (!confirmed) return {action: 'declined'};
+
+    await syncData?.();
+    if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.199');
+    const draft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
+    if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
+    sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({...draft, ownerUid: user.uid}));
+    window.location.href = `aggiungi_scadenza.html?profileDocumentId=${encodeURIComponent(documentItem.id)}`;
+    return {action: 'configure', legacyDeadlineId};
 }
 
 export async function refreshProfileAccountReferences(accountId, companyId='') {

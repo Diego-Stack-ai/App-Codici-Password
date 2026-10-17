@@ -1,5 +1,15 @@
 # Collaudi
 
+## 17/10/2026 — Scadenze definitive dai Documenti, verifica locale conclusa
+
+- I test sintetici devono verificare che la proposta avvenga soltanto dopo la persistenza del Documento e che **Configura scadenza** apra l'editor completo; dopo il collegamento la scheda deve mostrare **Apri scadenza del documento** e nessun secondo comando per record storici.
+- Il collegamento definitivo usa il marcatore `profile-document-deadline-v1` e non adotta come definitiva una Scadenza storica soltanto perché compatibile o già collegata. L'eventuale eliminazione resta manuale nella lista Scadenze.
+- Il modulo precompila tipo, identificativo e data; recupera preavviso, frequenza e testo dalle regole esistenti quando disponibili; consente destinatari Email/Push e nota. I riferimenti agli allegati sono riutilizzati senza duplicazione per la consultazione nell'app; l'invio dei file come allegati email non è attestato.
+- La linguetta **Regole scadenze → Documenti personali** deve leggere gli stessi record, renderne il riepilogo senza duplicarli e coprire caricamento, vuoto, errore, nuovo tentativo, campi sensibili esclusi e comandi Configura/Apri.
+- Sul diff integrato risultano verdi: test mirati Documenti/Scadenze **44/44**, backend Email/Push/scheduler **42/42**, navigazione **159/159**, Profilo **167/167**, allegati **70/70**, i18n **14/14**, offline **14/14**, diagnostica performance **3/3**, documentazione **11/11**, sintassi **217 moduli**, riferimenti statici **310 file**, HTML puro **31 pagine**, shell pagina **5 pubbliche + 24 interne**, budget statico **30 pagine**, hardening, app leggera e coerenza versione `1.2.199`. Stylelint è verde usando le dipendenze già installate nel progetto principale; Madge non rileva dipendenze circolari nei **217 moduli**. `git diff --check` è verde.
+- Graphify principale è stato rigenerato sul lotto JavaScript e interrogato sul percorso Documenti Profilo → Scadenza definitiva → riepilogo Regole scadenze; il grafo continua a essere un indice di supporto, non un'evidenza sostitutiva dei test.
+- Il collaudo reale Passaporto con ricezione Email e Push e la successiva creazione/cancellazione delle tre Scadenze appartengono alla prova dell'utente dopo un eventuale rilascio autorizzato. Nessun dato reale è stato usato nella verifica locale.
+
 ## 13/10/2026 — pubblicazione 1.2.177, qualità Tessera/Carta
 
 - Diagnosi sul sorgente e sulla cronologia: il percorso guidato e l'editor Carta producevano sempre una JPEG `1012×638`, indipendentemente dalla risoluzione disponibile; Camera/Galleria con allegato originale non subivano quel ricampionamento.

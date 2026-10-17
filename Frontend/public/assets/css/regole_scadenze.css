@@ -135,6 +135,195 @@
     font-weight: 750;
 }
 
+.deadline-personal-panel {
+    min-height: 180px;
+}
+
+.deadline-personal-summary,
+.deadline-personal-grid {
+    width: 100%;
+}
+
+.deadline-personal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.deadline-personal-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    background: rgb(255 255 255 / 0.045);
+}
+
+.deadline-personal-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.deadline-personal-card-header > div {
+    min-width: 0;
+}
+
+.deadline-personal-card-header h3 {
+    overflow-wrap: anywhere;
+}
+
+.deadline-personal-card-icon {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.1);
+}
+
+.deadline-personal-status {
+    display: inline-flex;
+    margin-top: 0.25rem;
+    font-size: var(--fs-micro);
+    font-weight: 750;
+}
+
+.deadline-personal-status.is-linked {
+    color: var(--status-success);
+}
+
+.deadline-personal-status.is-unlinked {
+    color: var(--status-warning);
+}
+
+.deadline-personal-data {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+}
+
+.deadline-personal-data-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 0.8fr) minmax(0, 1.2fr);
+    align-items: start;
+    gap: 0.65rem;
+}
+
+.deadline-personal-data dt,
+.deadline-personal-data dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.deadline-personal-data dt {
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+}
+
+.deadline-personal-data dd {
+    color: var(--text-primary);
+    font-size: var(--fs-xs);
+}
+
+.deadline-personal-alert-summary {
+    padding: 0.8rem;
+    border-radius: 16px;
+    background: rgb(var(--accent-rgb) / 0.06);
+}
+
+.deadline-personal-alert-summary h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.7rem;
+    color: var(--text-primary);
+}
+
+.deadline-personal-alert-summary h4 .material-symbols-outlined {
+    color: var(--accent);
+}
+
+.deadline-personal-recipients {
+    margin-top: 0.75rem;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+}
+
+.deadline-personal-recipients ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+}
+
+.deadline-personal-recipients p,
+.deadline-personal-missing,
+.deadline-personal-state p {
+    margin: 0.35rem 0 0;
+}
+
+.deadline-personal-missing {
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.deadline-personal-action {
+    width: 100%;
+    min-height: 44px;
+    margin-top: auto;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgb(var(--accent-rgb) / 0.4);
+    border-radius: 14px;
+    color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.08);
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.deadline-personal-action:hover,
+.deadline-personal-action:focus-visible {
+    border-color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.14);
+}
+
+.deadline-personal-action:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.deadline-personal-state {
+    min-height: 130px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.65rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.deadline-personal-state > .material-symbols-outlined {
+    color: var(--accent);
+    font-size: var(--fs-xl);
+}
+
+.deadline-personal-state .deadline-personal-action {
+    width: auto;
+}
+
+.deadline-personal-spinner {
+    animation: deadlinePersonalSpin 900ms linear infinite;
+}
+
+@keyframes deadlinePersonalSpin {
+    to { transform: rotate(360deg); }
+}
+
 .deadline-round-action {
     width: 46px;
     height: 46px;
@@ -236,6 +425,8 @@
     .deadline-hub-heading { flex-direction: column; }
     .deadline-concept-grid { grid-template-columns: 1fr; }
     .deadline-domain-panel { border-radius: 20px; padding: 1rem; }
+    .deadline-personal-grid { grid-template-columns: 1fr; }
+    .deadline-personal-data-row { grid-template-columns: 1fr; gap: 0.15rem; }
 }
 
 .settings-group {

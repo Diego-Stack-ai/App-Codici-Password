@@ -138,8 +138,11 @@ Il [contratto funzionale](DATI.md#fonte-docs-functional-data-contract-md-l1) con
 - Widget incorporati e Credenziali comuni hanno proprietà e percorsi distinti. I valori comuni non si duplicano e non vengono ereditati automaticamente dagli ospiti di un Account.
 - Il QR contiene soltanto i dati esplicitamente ammessi e selezionati. Foto e dati del contatto seguono il ricevitore pubblico; password, PIN, PUK e campi sensibili restano esclusi.
 - Scadenze proprie e copie ricevute sono domini distinti. Il backend verifica destinatario e permesso corrente; notifiche e link non sostituiscono l'autorizzazione.
+- Nei Documenti del Profilo l'unico comando Scadenza è **Configura scadenza** finché manca il collegamento definitivo e **Apri scadenza del documento** dopo la creazione. Non aggiungere un comando parallelo per la Scadenza storica.
 
 Le configurazioni Scadenze rimangono separate in `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig`. Non cambiare automaticamente le scadenze esistenti quando si aggiorna una configurazione. Le cancellazioni seguono i contratti del dominio e i gate di recupero: nessun gesto UI autorizza da solo una bonifica massiva.
+
+La linguetta **Documenti personali** di `regole_scadenze.html` è una proiezione diretta degli stessi record del Profilo e delle Scadenze definitive. Non deve essere preceduta da una scheda introduttiva duplicata: presenta una card per Documento con dati utili, stato del collegamento, pianificazione, destinatari/canali, nota, conteggio allegati e lo stesso comando del Profilo. Caricamento, vuoto, errore e nuovo tentativo sono espliciti; campi personalizzati sensibili non vengono proiettati. Le altre linguette e le configurazioni storiche restano distinte finché il relativo dominio non viene migrato con un incarico separato.
 
 <a id="fonte-frontend-guida-md-6-sicurezza-e-condivisione"></a>
 

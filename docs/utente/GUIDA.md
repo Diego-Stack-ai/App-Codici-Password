@@ -6,6 +6,12 @@ Alla prima apertura il selettore lingua compare prima dell'identificazione. Se p
 
 Dopo il primo accesso la Home propone di aprire le Impostazioni oppure esplorare l'app. La conferma della lingua è obbligatoria prima di creare o modificare dati. Tema, area Azienda, Assistente base, notifiche, MFA, biometria e backup restano scelte facoltative e possono essere completate in seguito. I requisiti autonomi di accesso e sblocco del Vault continuano comunque a valere.
 
+## Documenti personali e relative Scadenze
+
+In **Profilo → Documenti**, salva prima il Documento con una data di scadenza valida. Se non esiste ancora il collegamento, premi **Configura scadenza**: si apre il normale modulo Scadenza con i dati già riconosciuti, nel quale puoi controllare data, preavviso, frequenza, destinatari, Email/Push e nota. Dopo il salvataggio il pulsante diventa **Apri scadenza del documento**.
+
+La stessa situazione è visibile in **Impostazioni → Regole scadenze → Documenti personali**. Ogni scheda riassume direttamente il Documento e i parametri della sua Scadenza; non è una seconda copia e le modifiche riguardano gli stessi record. Le vecchie Scadenze non vengono eliminate automaticamente e vanno gestite dalla normale lista Scadenze. Il conteggio allegati indica i file consultabili in modo protetto nell'app: non significa che i file vengano spediti come allegati dell'email.
+
 > Stato di implementazione, verifiche e distribuzione: [STATO](../progetto/STATO.md). Le fonti storiche conservate sotto hanno la propria data; per nuovi aiuti valgono i contratti e il riesame delle schede della guida.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
@@ -27,7 +33,7 @@ La guida descrive come orientarsi e quali comandi usare; lo stato di implementaz
 | `account_privati` | Account privati: Cerca e consulta gli Account della categoria scelta. | Ricerca, ordinamento, azioni e permessi | Testo + walkthrough |
 | `form_account_privato` | Crea o modifica Account privato: Prepara un Account o memorandum e controlla i dati prima di salvarli. | Tipi, banking, Widget, comuni, destinatari, Salva | Checklist + walkthrough |
 | `dettaglio_account_privato` | Dettaglio Account privato: Consulta credenziali, note, Widget e allegati dell’Account selezionato. | Mostra/copia, banking, note, allegati e condivisione | Testo + walkthrough; video allegati opzionale |
-| `profilo_privato` | Profilo utente: Organizza identità, contatti, indirizzi, documenti e tessera digitale. | Tab, foto, contatti, indirizzi, documenti, collegamenti, QR | Checklist + walkthrough; video QR/allegati opzionale |
+| `profilo_privato` | Profilo utente: Organizza identità, contatti, indirizzi, documenti e tessera digitale. | Tab, foto, contatti, indirizzi, documenti, collegamenti, Configura/Apri scadenza del documento, QR | Checklist + walkthrough; video QR/allegati opzionale |
 | `lista_aziende` | Aziende: Scegli l’azienda e accedi ai suoi dati e Account. | Elenco, creazione e scelta contesto | Testo + walkthrough |
 | `dati_azienda` | Dati azienda: Consulta il profilo aziendale, i contatti e le proiezioni condivisibili. | Riepilogo, tessera/QR, PDF e sedi | Testo + walkthrough; video PDF/QR opzionale |
 | `modifica_azienda` | Crea o modifica azienda: Aggiorna anagrafica, referente, sedi, contatti e note aziendali. | Anagrafica, fiscale, referente, sedi, email, note/allegati | Checklist + walkthrough |
@@ -37,7 +43,7 @@ La guida descrive come orientarsi e quali comandi usare; lo stato di implementaz
 | `scadenze` | Scadenze: Cerca le date da seguire e distingui scadenze proprie e ricevute. | Filtro, ricerca, ordinamento, proprie/ricevute | Testo + walkthrough |
 | `aggiungi_scadenza` | Crea o modifica scadenza: Imposta data, categoria, preavviso, destinatari e contenuti della scadenza. | Categoria, data, preavviso, frequenza, destinatari e allegati | Checklist + walkthrough |
 | `dettaglio_scadenza` | Dettaglio scadenza: Controlla data, pianificazione, contenuti e azioni della scadenza scelta. | Pianificazione, fonte, allegati e azioni autorizzate | Testo + walkthrough |
-| `regole_scadenze` | Regole delle scadenze: Apri la configurazione della categoria da gestire. | Scelta fra tre configurazioni | Testo |
+| `regole_scadenze` | Regole delle scadenze: Consulta gli ambiti e configura le scadenze dei Documenti personali. | Riepilogo diretto dei Documenti personali, parametri e accesso alla Scadenza; configurazioni storiche separate | Testo + walkthrough breve |
 | `configurazione_automezzi` | Configurazione Automezzi: Gestisci tipi, modelli e testi per le scadenze dei veicoli. | Tipi, modelli, testi e assenza di riscrittura retroattiva | Checklist + walkthrough |
 | `configurazione_documenti` | Configurazione Documenti: Gestisci tipi, modelli e testi per le scadenze dei documenti. | Tipi, modelli e testi | Checklist + walkthrough |
 | `configurazione_generali` | Configurazione Generali: Gestisci tipi e testi delle scadenze generali. | Tipi e testi separati dagli altri domini | Checklist + walkthrough |

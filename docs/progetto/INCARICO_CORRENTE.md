@@ -1,10 +1,20 @@
 # Incarico corrente
 
+## Scadenze definitive dai Documenti del Profilo — 17/10/2026
+
+Diego conferma il flusso definitivo in **Profilo → Documenti**. **Configura scadenza** apre l'editor completo e, dopo la creazione, diventa **Apri scadenza del documento**. Il flusso crea una Scadenza attiva con preavviso, frequenza, destinatari/canali e nota, mantenendo il collegamento al Documento e i riferimenti agli allegati senza duplicare i file. Non deve essere offerto dalla scheda Documento un comando dedicato alla vecchia Scadenza.
+
+In **Impostazioni → Regole scadenze → Documenti personali** il riepilogo viene mostrato direttamente dentro la linguetta, senza una sezione introduttiva intermedia. Ogni scheda ripropone i dati utili già presenti nel Profilo, i parametri della Scadenza e il comando coerente **Configura scadenza**/**Apri scadenza del documento**; resta una proiezione degli stessi record, non una seconda copia. Le configurazioni storiche più sotto e le Scadenze già esistenti restano valide finché l'utente non interviene esplicitamente.
+
+Il collaudo operativo previsto dall'utente è sequenziale: prima un Passaporto fittizio con data di prova deve confermare Email e Push; poi verranno create le Scadenze definitive per Patente, Codice fiscale e Carta d'identità. Soltanto dopo tale verifica Diego eliminerà esplicitamente, una per una, le proprie tre vecchie Scadenze; quelle degli altri familiari restano attive. Nessuna cancellazione automatica, migrazione massiva per tipologia o accesso ai dati reali è autorizzato da questo incarico. Gli allegati collegati sono consultabili nell'app; allegarli materialmente all'email richiede un percorso sicuro distinto e non va presentato come disponibile.
+
+Il perimetro iniziale comprendeva implementazione locale, test sintetici, aggiornamento dei documenti esistenti e del grafo principale dopo le modifiche strutturali. Dopo la consegna locale Diego ha ordinato esplicitamente «Pubblica»: sono quindi autorizzati bump `1.2.199`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e Functions dopo gate verdi. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni e operazioni sui record reali.
+
 ## Correzione locale — date del Passaporto e proposta Scadenza — 17/10/2026
 
 Diego segnala che un nuovo Passaporto salvato in **Profilo → Documenti** non propone la creazione della Scadenza e che Data di rilascio e Data di scadenza non sono presentate come date. Dopo la verifica locale Diego ordina «Pubblica»: sono quindi autorizzati bump `1.2.198`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo gate verdi. Restano esclusi accesso a dati reali, Functions, Rules e indici.
 
-Il difetto confermato è nel motore modale condiviso: i campi dichiarati `date` vengono resi come testo. Una data italiana digitata liberamente viene quindi salvata ma non supera il contratto ISO del pilot. La correzione deve rendere i due campi veri input data, recuperare in modo deterministico le date legacy `GG/MM/AAAA`, `GG.MM.AAAA` o `GG-MM-AAAA`, rifiutare date impossibili e conservare il requisito `AAAA-MM-GG` usato dal collegamento Scadenze.
+Il difetto confermato è nel motore modale condiviso: i campi dichiarati `date` vengono resi come testo. Una data italiana digitata liberamente viene quindi salvata ma non supera il contratto ISO del collegamento definitivo. La correzione deve rendere i due campi veri input data, recuperare in modo deterministico le date legacy `GG/MM/AAAA`, `GG.MM.AAAA` o `GG-MM-AAAA`, rifiutare date impossibili e conservare il requisito `AAAA-MM-GG` usato dal collegamento Scadenze.
 
 Esito: la correzione è stata verificata, integrata con PR `#161` nel commit `8785abe9` e pubblicata come `1.2.198` sul solo Firebase Hosting. La verifica HTTP ha confermato versione, input data, normalizzatore e catalogo guida aggiornato; Functions, Rules, indici e dati reali sono rimasti esclusi.
 

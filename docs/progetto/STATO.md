@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.199 — Scadenze definitive dai Documenti — 17/10/2026
+
+Il flusso sperimentale **Prova scadenze** è sostituito dal collegamento definitivo fra Documento del Profilo e Scadenza. La scheda espone **Configura scadenza** prima della creazione e **Apri scadenza del documento** dopo; l'editor raccoglie preavviso, frequenza, destinatari Email/Push e nota. La linguetta **Regole scadenze → Documenti personali** riepiloga direttamente gli stessi documenti e parametri senza creare copie. Le Scadenze storiche non vengono migrate o cancellate automaticamente.
+
+Il salvataggio definitivo e il riferimento nel Profilo sono transazionali, vincolati a proprietario e marcatore `profile-document-deadline-v1`; eliminando la Scadenza dalla lista viene rimosso anche il riferimento coerente. Il backend esclude dagli invii i record disattivati o marcati come prova, preservando la compatibilità dei record storici privi dei nuovi flag. Gli allegati restano consultabili nell'app tramite riferimenti protetti e non vengono dichiarati allegati materiali dell'email.
+
+La candidata locale `1.2.199` comprende Hosting e Functions; Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi. Test mirati e gate statici risultano verdi; commit, integrazione, distribuzione e verifica pubblica vengono registrati separatamente quando effettivamente conclusi.
+
 ## Release 1.2.198 pubblicata — date dei documenti Profilo — 17/10/2026
 
 La mancata proposta Scadenza dopo il salvataggio di un Passaporto è stata riprodotta senza dati reali. Le definizioni di Data di rilascio e Data di scadenza erano corrette, ma il motore del popup trasformava ogni campo non selettivo in testo: un valore come `17/10/2026` restava quindi fuori dal formato ISO richiesto dal pilot.

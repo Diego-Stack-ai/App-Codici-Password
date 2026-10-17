@@ -77,7 +77,7 @@ assert.doesNotMatch(deadline, /uploadBytes\(|writeBatch\(|addDoc\(/,
     'Il form Scadenza contiene ancora dettagli Storage o Firestore della persistenza');
 assert.match(deadlineSaveService, /contentType: 'application\/octet-stream'[\s\S]+encrypted: 'v1'/,
     'Il servizio Scadenze non conserva il contratto degli allegati cifrati');
-assert.match(deadlineSaveService, /batch\.set\(deadlineRef, deadlineData\)[\s\S]+expiryReference/,
+assert.match(deadlineSaveService, /await runTransaction\(db,[\s\S]+transaction\.set\(deadlineRef, deadlineData\)[\s\S]+expiryReference/,
     'Il servizio Scadenze non mantiene atomico il collegamento ai documenti Profilo');
 for (const [name, source] of [['privata', privateAccountList], ['aziendale', companyAccountList]]) {
     assert.match(source, /createAccountListView\(\{/,

@@ -1,4 +1,4 @@
-import { db, storage } from '../../firebase-config.js?v=1.2.198';
+import { db, storage } from '../../firebase-config.js?v=1.2.199';
 import {
     addDoc,
     arrayUnion,
@@ -7,15 +7,16 @@ import {
     deleteObject,
     getDownloadURL,
     ref,
+    runTransaction,
     setDoc,
     Timestamp,
     updateDoc,
-    uploadBytes,
-    writeBatch
+    uploadBytes
 } from '/assets/js/vendor/firebase-runtime.js';
 import { LOG } from '../../logger.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { getDeadline, getUserProfile } from '../data/vault-repository.js';
+import { getDeadline } from '../data/vault-repository.js';
+import {normalizeProfileDateInputValue} from '../privato/profile-model.js';
 import {
     createStorageObjectName,
     encryptAttachmentFile,
@@ -68,6 +69,18 @@ function deadlineAttachmentPath(userId, attachment) {
     return path.startsWith(`users/${userId}/scadenze/`) ? path : null;
 }
 
+function validateLinkedProfileDocumentAttachments(userId, documentId, attachments = []) {
+    const prefix = `users/${userId}/profile-documents/${documentId}/attachments/`;
+    for (const attachment of attachments) {
+        const path = String(attachment?.storagePath || '');
+        if (attachment?.linkedSource?.type !== 'profileDocumentAttachment'
+            || !attachment.linkedSource.id
+            || !path.startsWith(prefix)) {
+            throw new Error('Allegato del documento non valido');
+        }
+    }
+}
+
 async function removeDeadlineAttachmentObjects(userId, attachments) {
     const paths = [...new Set(attachments.map(item => deadlineAttachmentPath(userId, item)).filter(Boolean))];
     const results = await Promise.allSettled(paths.map(path => deleteObject(ref(storage, path))));
@@ -87,32 +100,77 @@ async function persistDeadlineDocument({
 
     if (editingDeadlineId && linkedSourceRef?.type === 'profileDocument') {
         const profileRef = doc(db, 'users', userId);
-        const profile = await getUserProfile(userId);
-        const documents = profile?.documenti || [];
-        const batch = writeBatch(db);
-        batch.update(doc(db, 'users', userId, 'scadenze', editingDeadlineId), deadlineData);
-        batch.update(profileRef, {
-            documenti: documents.map(item => item.id === linkedSourceRef.id
-                ? { ...item, expiry_date: deadlineData.dueDate }
-                : item)
+        const deadlineRef = doc(db, 'users', userId, 'scadenze', editingDeadlineId);
+        await runTransaction(db, async transaction => {
+            const [profileSnapshot, deadlineSnapshot] = await Promise.all([
+                transaction.get(profileRef), transaction.get(deadlineRef)
+            ]);
+            if (!profileSnapshot.exists()) throw new Error('Profilo non disponibile');
+            if (!deadlineSnapshot.exists()) throw new Error('Scadenza non disponibile');
+            const documents = profileSnapshot.data()?.documenti || [];
+            if (!Array.isArray(documents)) throw new Error('Documenti del Profilo non validi');
+            const sourceDocument = documents.find(item => item?.id === linkedSourceRef.id);
+            if (!sourceDocument) throw new Error('Documento del Profilo non disponibile');
+            if (sourceDocument.expiryReference?.deadlineId !== editingDeadlineId
+                || sourceDocument.expiryReference?.linkKind !== 'profile-document-deadline-v1') {
+                throw new Error('Il collegamento alla scadenza del documento è cambiato');
+            }
+            const storedDeadline = deadlineSnapshot.data();
+            if (storedDeadline?.sourceRef?.type !== 'profileDocument'
+                || storedDeadline.sourceRef.id !== linkedSourceRef.id
+                || storedDeadline.linkKind !== 'profile-document-deadline-v1') {
+                throw new Error('La fonte della scadenza non corrisponde al documento');
+            }
+            transaction.update(deadlineRef, deadlineData);
+            transaction.update(profileRef, {
+                documenti: documents.map(item => item.id === linkedSourceRef.id
+                    ? { ...item, expiry_date: deadlineData.dueDate }
+                    : item)
+            });
         });
-        await batch.commit();
     } else if (editingDeadlineId) {
         await updateDoc(doc(db, 'users', userId, 'scadenze', editingDeadlineId), deadlineData);
     } else if (profileDocumentLinkDraft?.profileDocumentId) {
         const deadlineRef = doc(collection(db, 'users', userId, 'scadenze'));
         finalDeadlineId = deadlineRef.id;
         const profileRef = doc(db, 'users', userId);
-        const profile = await getUserProfile(userId);
-        const documents = profile?.documenti || [];
-        const batch = writeBatch(db);
-        batch.set(deadlineRef, deadlineData);
-        batch.update(profileRef, {
-            documenti: documents.map(item => item.id === profileDocumentLinkDraft.profileDocumentId
-                ? { ...item, expiryReference: { deadlineId: finalDeadlineId } }
-                : item)
+        await runTransaction(db, async transaction => {
+            const profileSnapshot = await transaction.get(profileRef);
+            if (!profileSnapshot.exists()) throw new Error('Profilo non disponibile');
+            const documents = profileSnapshot.data()?.documenti || [];
+            if (!Array.isArray(documents)) throw new Error('Documenti del Profilo non validi');
+            const sourceDocument = documents.find(item => item.id === profileDocumentLinkDraft.profileDocumentId);
+            if (!sourceDocument) throw new Error('Documento del Profilo non disponibile');
+            const sourceDate = normalizeProfileDateInputValue(sourceDocument.expiry_date);
+            const draftDate = normalizeProfileDateInputValue(profileDocumentLinkDraft.sourceValueAtLink);
+            const deadlineDate = normalizeProfileDateInputValue(deadlineData.dueDate);
+            if (!sourceDate || sourceDate !== draftDate || sourceDate !== deadlineDate) {
+                throw new Error('La data del documento è cambiata. Torna al Profilo e ripeti la configurazione.');
+            }
+            const currentReference = sourceDocument.expiryReference || {};
+            const definitiveReference = currentReference.deadlineId
+                && currentReference.experimentTag !== 'prova-scadenze'
+                && currentReference.linkKind === 'profile-document-deadline-v1';
+            if (definitiveReference && currentReference.deadlineId !== finalDeadlineId) {
+                const currentDeadlineSnapshot = await transaction.get(
+                    doc(db, 'users', userId, 'scadenze', currentReference.deadlineId)
+                );
+                if (currentDeadlineSnapshot.exists()) {
+                    throw new Error('Esiste già una scadenza definitiva collegata a questo documento.');
+                }
+            }
+            transaction.set(deadlineRef, deadlineData);
+            transaction.update(profileRef, {
+                documenti: documents.map(item => item.id === profileDocumentLinkDraft.profileDocumentId
+                    ? { ...item, expiryReference: {
+                        deadlineId: finalDeadlineId,
+                        sourceType: 'profileDocument',
+                        sourceFieldId: 'document.expiry_date',
+                        linkKind: 'profile-document-deadline-v1'
+                    } }
+                    : item)
+            });
         });
-        await batch.commit();
     } else {
         const deadlineRef = await addDoc(collection(db, 'users', userId, 'scadenze'), deadlineData);
         finalDeadlineId = deadlineRef.id;
@@ -148,6 +206,21 @@ export async function saveDeadline({
     onProgress = () => {}
 }) {
     if (!user?.uid) throw new Error('Utente non autenticato');
+    if (profileDocumentLinkDraft?.profileDocumentId) {
+        if (profileDocumentLinkDraft.ownerUid !== user.uid) {
+            throw new Error('La configurazione appartiene a un altro account');
+        }
+        validateLinkedProfileDocumentAttachments(
+            user.uid,
+            profileDocumentLinkDraft.profileDocumentId,
+            profileDocumentLinkDraft.attachments || []
+        );
+        validateLinkedProfileDocumentAttachments(
+            user.uid,
+            profileDocumentLinkDraft.profileDocumentId,
+            existingAttachments
+        );
+    }
     const frequency = validateDeadlineFrequency(data?.notif_frequency);
 
     let previousAttachments = [];
@@ -176,9 +249,30 @@ export async function saveDeadline({
         updatedAt: Timestamp.now()
     };
     if (profileDocumentLinkDraft?.profileDocumentId) {
-        deadlineData.sourceRef = { type: 'profileDocument', id: profileDocumentLinkDraft.profileDocumentId };
+        deadlineData.sourceRef = {
+            type: 'profileDocument',
+            id: profileDocumentLinkDraft.profileDocumentId,
+            fieldId: profileDocumentLinkDraft.sourceFieldId || 'document.expiry_date'
+        };
+        deadlineData.sourceType = 'profileDocument';
+        deadlineData.sourceDocumentId = profileDocumentLinkDraft.profileDocumentId;
+        deadlineData.sourceFieldId = profileDocumentLinkDraft.sourceFieldId || 'document.expiry_date';
+        deadlineData.sourceValueAtLink = profileDocumentLinkDraft.sourceValueAtLink || data.dueDate;
+        deadlineData.sourceStatus = 'active';
+        deadlineData.sourceIssue = '';
+        deadlineData.linkKind = 'profile-document-deadline-v1';
+        deadlineData.notificationsEnabled = true;
+        deadlineData.pilotDeliveryDisabled = false;
     } else if (linkedSourceRef?.type) {
         deadlineData.sourceRef = linkedSourceRef;
+        if (linkedSourceRef.type === 'profileDocument') {
+            deadlineData.sourceType = 'profileDocument';
+            deadlineData.sourceDocumentId = linkedSourceRef.id;
+            deadlineData.sourceFieldId = linkedSourceRef.fieldId || 'document.expiry_date';
+            deadlineData.sourceValueAtLink = data.dueDate;
+            deadlineData.sourceStatus = 'active';
+            deadlineData.sourceIssue = '';
+        }
     }
     if (!editingDeadlineId) deadlineData.createdAt = Timestamp.now();
 

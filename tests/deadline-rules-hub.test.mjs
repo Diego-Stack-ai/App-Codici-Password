@@ -17,14 +17,43 @@ test('the deadline hub exposes nine accessible domains while preserving legacy c
   assert.match(html, /href="configurazione_documenti\.html"/);
   assert.match(html, /href="configurazione_generali\.html"/);
   assert.match(html, /href="gestione_destinatari\.html"/);
+  assert.match(html, /id="personal-documents-summary"/);
+  assert.doesNotMatch(html, /Documenti personali collegati|Apri Documenti nel Profilo/);
 });
 
-test('the deadline hub controller is navigation-only and keyboard accessible', async () => {
+test('the deadline hub loads profile documents and keeps keyboard navigation accessible', async () => {
   const source = await read('assets/js/modules/scadenze/deadline-rules-hub.js');
   assert.match(source, /ArrowLeft/);
   assert.match(source, /ArrowRight/);
   assert.match(source, /aria-selected/);
-  assert.doesNotMatch(source, /firebase|setDoc|addDoc|updateDoc|deleteDoc/);
+  assert.match(source, /getUserProfile/);
+  assert.match(source, /listDeadlines/);
+  assert.match(source, /resolveProfileDocumentDeadlineState/);
+  assert.match(source, /isDefinitiveProfileDocumentDeadlineReference/);
+  assert.match(source, /deadline\.linkKind !== 'profile-document-deadline-v1'/);
+  assert.match(source, /sourceDocumentId === documentItem\.id/);
+  assert.match(source, /profile_deadline_card_configure/);
+  assert.match(source, /profile_deadline_card_open/);
+  assert.match(source, /auth\.currentUser\?\.uid === user\.uid/);
+  assert.match(source, /normalizeProfileDateInputValue/);
+  assert.doesNotMatch(source, /profile_deadline_card_open_previous|pilotDeadlineReference\?\.deadlineId/);
+  assert.doesNotMatch(source, /setDoc|addDoc|updateDoc|deleteDoc/);
+});
+
+test('personal document summary has loading, empty, error and responsive card states', async () => {
+  const [source, css] = await Promise.all([
+    read('assets/js/modules/scadenze/deadline-rules-hub.js'),
+    read('assets/css/regole_scadenze.css')
+  ]);
+  assert.match(source, /deadline_personal_loading/);
+  assert.match(source, /deadline_personal_empty/);
+  assert.match(source, /deadline_personal_error/);
+  assert.match(source, /deadline_personal_retry/);
+  assert.match(source, /deadlineRecipientsFromRecord/);
+  assert.match(source, /deadline\.attachments/);
+  assert.match(source, /deadline\.notes/);
+  assert.match(css, /\.deadline-personal-grid/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
 });
 
 test('the deadline hub catalog has identical keys in all eight application languages', async () => {

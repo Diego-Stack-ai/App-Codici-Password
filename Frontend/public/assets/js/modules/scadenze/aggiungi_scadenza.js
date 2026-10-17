@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.198';
+import { auth } from '../../firebase-config.js?v=1.2.199';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -20,7 +20,7 @@ import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
 import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
 import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
 import { createDeadlineRecipientController } from './deadline-recipient-controller.js';
-import { createDeadlineConfigController } from './deadline-config-controller.js';
+import { createDeadlineConfigController, deadlineConfigValuesMatch } from './deadline-config-controller.js';
 import { saveDeadline } from './deadline-save-service.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
@@ -39,6 +39,34 @@ let profileDocumentLinkDraft = null;
 let accountDeadlineLinkDraft = null;
 let linkedSourceRef = null;
 
+const PROFILE_DEADLINE_DRAFT_KEY = 'profile-deadline-link-draft';
+const ACCOUNT_DEADLINE_DRAFT_KEY = 'account-deadline-link-draft';
+
+function discardProfileDocumentDraft() {
+    sessionStorage.removeItem(PROFILE_DEADLINE_DRAFT_KEY);
+    profileDocumentLinkDraft = null;
+}
+
+function discardAccountDeadlineDraft() {
+    sessionStorage.removeItem(ACCOUNT_DEADLINE_DRAFT_KEY);
+    accountDeadlineLinkDraft = null;
+    linkedSourceRef = null;
+}
+
+function selectValuePreservingCustomOption(select, value, dataset = {}) {
+    if (!select || !value) return null;
+    let option = Array.from(select.options).find(item => deadlineConfigValuesMatch(item.value, value));
+    if (!option) {
+        option = new Option(value, value);
+        select.appendChild(option);
+    }
+    Object.entries(dataset).forEach(([key, entry]) => {
+        if (entry !== undefined && entry !== null) option.dataset[key] = String(entry);
+    });
+    select.value = option.value;
+    return option;
+}
+
 /**
  * AGGIUNGI SCADENZA MODULE (V5.0 ADAPTER)
  * Gestisce l'aggiunta o la modifica di scadenze.
@@ -49,23 +77,41 @@ export async function initAggiungiScadenza(user) {
     
     if (!user) return;
     currentUser = user;
+    profileDocumentLinkDraft = null;
+    accountDeadlineLinkDraft = null;
+    linkedSourceRef = null;
 
     editingScadenzaId = new URLSearchParams(window.location.search).get('id');
     const profileDocumentId = new URLSearchParams(window.location.search).get('profileDocumentId');
     if (!editingScadenzaId && profileDocumentId) {
         try {
-            const draft = JSON.parse(sessionStorage.getItem('profile-deadline-link-draft') || 'null');
-            if (draft?.profileDocumentId === profileDocumentId) profileDocumentLinkDraft = draft;
-        } catch { profileDocumentLinkDraft = null; }
+            const draft = JSON.parse(sessionStorage.getItem(PROFILE_DEADLINE_DRAFT_KEY) || 'null');
+            if (draft?.profileDocumentId === profileDocumentId && draft.ownerUid === user.uid) {
+                profileDocumentLinkDraft = draft;
+            } else {
+                discardProfileDocumentDraft();
+            }
+        } catch {
+            discardProfileDocumentDraft();
+        }
+    } else {
+        discardProfileDocumentDraft();
     }
-    if (!editingScadenzaId && new URLSearchParams(window.location.search).get('accountSource') === '1') {
+    const accountSource = new URLSearchParams(window.location.search).get('accountSource');
+    if (!editingScadenzaId && accountSource === '1') {
         try {
-            const draft = JSON.parse(sessionStorage.getItem('account-deadline-link-draft') || 'null');
+            const draft = JSON.parse(sessionStorage.getItem(ACCOUNT_DEADLINE_DRAFT_KEY) || 'null');
             if (draft?.sourceRef?.type === 'account' && draft.sourceRef.id) {
                 accountDeadlineLinkDraft = draft;
                 linkedSourceRef = draft.sourceRef;
+            } else {
+                discardAccountDeadlineDraft();
             }
-        } catch { accountDeadlineLinkDraft = null; linkedSourceRef = null; }
+        } catch {
+            discardAccountDeadlineDraft();
+        }
+    } else {
+        discardAccountDeadlineDraft();
     }
 
     // Mode Switching Listeners
@@ -115,6 +161,10 @@ export async function initAggiungiScadenza(user) {
             title: t('cancel') || 'Annulla',
             dataset: { label: t('cancel_short') || 'Annulla' },
             onclick: () => {
+                if (!editingScadenzaId) {
+                    discardProfileDocumentDraft();
+                    discardAccountDeadlineDraft();
+                }
                 if (editingScadenzaId) window.location.href = `dettaglio_scadenza.html?id=${editingScadenzaId}`;
                 else window.location.href = 'scadenze.html';
             }
@@ -187,24 +237,30 @@ export async function initAggiungiScadenza(user) {
                 dateInput.value = sourceDraft.dueDate || '';
                 dateInput.dataset.isoValue = sourceDraft.dueDate || '';
             }
-            if (typeSelect && sourceDraft.documentType && [...typeSelect.options].some(option => option.value === sourceDraft.documentType)) {
-                typeSelect.value = sourceDraft.documentType;
-            }
+            if (typeSelect && sourceDraft.documentType) selectValuePreservingCustomOption(typeSelect, sourceDraft.documentType);
             if (typeSelect && profileDocumentLinkDraft?.profileDocumentId) {
                 const documentType = profileDocumentLinkDraft.documentType || '';
-                if ([...typeSelect.options].some(option => option.value === documentType)) typeSelect.value = documentType;
-                const template = configController.getSuggestedTemplate(typeSelect.value);
-                const templateSelect = document.getElementById('testo_email_select');
-                if (templateSelect && template && [...templateSelect.options].some(option => option.value === template)) {
-                    templateSelect.value = template;
+                const schedule = configController.getSuggestedSchedule(documentType);
+                selectValuePreservingCustomOption(typeSelect, documentType, schedule || {});
+                const noticeInput = document.getElementById('notif_days_before');
+                const frequencyInput = document.getElementById('notif_frequency');
+                const noticeDisplay = document.getElementById('display_notif_days');
+                const frequencyDisplay = document.getElementById('display_notif_freq');
+                if (schedule?.period !== undefined) {
+                    if (noticeInput) noticeInput.value = String(schedule.period);
+                    if (noticeDisplay) noticeDisplay.textContent = String(schedule.period);
                 }
+                if (schedule?.freq !== undefined) {
+                    if (frequencyInput) frequencyInput.value = String(schedule.freq);
+                    if (frequencyDisplay) frequencyDisplay.textContent = String(schedule.freq);
+                }
+                const template = configController.getSuggestedTemplate(documentType) || documentType;
+                const templateSelect = document.getElementById('testo_email_select');
+                if (templateSelect && template) selectValuePreservingCustomOption(templateSelect, template);
             }
             const detailsSelect = document.getElementById('modello_veicolo');
             if (detailsSelect && sourceDraft.detail) {
-                if (![...detailsSelect.options].some(option => option.value === sourceDraft.detail)) {
-                    detailsSelect.appendChild(new Option(sourceDraft.detail, sourceDraft.detail));
-                }
-                detailsSelect.value = sourceDraft.detail;
+                selectValuePreservingCustomOption(detailsSelect, sourceDraft.detail);
             }
             syncCustomDropdowns();
         }
@@ -282,7 +338,13 @@ function setupSaveLogic() {
     oldBtnSave.parentNode.replaceChild(btnSave, oldBtnSave);
 
     btnSave.addEventListener('click', async () => {
-        if (!auth.currentUser || isSubmitting) {
+        if (!auth.currentUser || auth.currentUser.uid !== currentUser?.uid) {
+            discardProfileDocumentDraft();
+            discardAccountDeadlineDraft();
+            LOG("[FRONTEND] Click ignorato: sessione utente non coerente.");
+            return;
+        }
+        if (isSubmitting) {
             LOG("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
             return;
         }
@@ -347,12 +409,10 @@ function setupSaveLogic() {
             });
             const finalDocId = result.deadlineId;
             if (result.consumedProfileDocumentDraft) {
-                sessionStorage.removeItem('profile-deadline-link-draft');
-                profileDocumentLinkDraft = null;
+                discardProfileDocumentDraft();
             }
             if (!editingScadenzaId && accountDeadlineLinkDraft) {
-                sessionStorage.removeItem('account-deadline-link-draft');
-                accountDeadlineLinkDraft = null;
+                discardAccountDeadlineDraft();
             }
 
             if (btnText) btnText.textContent = "Completato!";
@@ -392,17 +452,19 @@ async function loadScadenzaForEdit(id) {
         linkedSourceRef = data.sourceRef || null;
 
         // 1. Identifica il Mode corretto in base al tipo salvato
-        const foundMode = configController.getModeForDeadlineType(data.type);
+        const foundMode = linkedSourceRef?.type === 'profileDocument'
+            ? 'documenti'
+            : configController.getModeForDeadlineType(data.type);
 
         // 2. Imposta il Mode (popola i select nativi)
         setMode(foundMode);
 
         // 3. Riempi i campi base e i menu a tendina
         document.getElementById('nome_cognome').value = data.name || '';
-        if (typeSelect && data.type) typeSelect.value = data.type;
+        if (typeSelect && data.type) selectValuePreservingCustomOption(typeSelect, data.type);
 
         const modVeicolo = document.getElementById('modello_veicolo');
-        if (modVeicolo && data.veicolo_modello) modVeicolo.value = data.veicolo_modello;
+        if (modVeicolo && data.veicolo_modello) selectValuePreservingCustomOption(modVeicolo, data.veicolo_modello);
 
         const notifChannel = document.getElementById('notif_channel_select');
         if (notifChannel && data.notifChannel) notifChannel.value = data.notifChannel;
@@ -432,8 +494,7 @@ async function loadScadenzaForEdit(id) {
 
         const testoEmailSelect = document.getElementById('testo_email_select');
         if (data.templateText && testoEmailSelect) {
-            const opt = Array.from(testoEmailSelect.options).find(o => o.value === data.templateText);
-            if (opt) { testoEmailSelect.value = data.templateText; }
+            selectValuePreservingCustomOption(testoEmailSelect, data.templateText);
         }
 
         // 6. Allegati esistenti

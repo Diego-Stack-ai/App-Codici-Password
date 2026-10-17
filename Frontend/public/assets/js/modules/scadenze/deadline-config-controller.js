@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.2.198';
+import { db } from '../../firebase-config.js?v=1.2.199';
 import { doc, setDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
@@ -103,6 +103,25 @@ function itemName(item) {
     return typeof item === 'object' ? item?.name : item;
 }
 
+export function normalizeDeadlineComparableValue(value) {
+    return String(value || '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[’`´]/g, "'")
+        .toLocaleLowerCase('it-IT')
+        .replace(/'/g, ' ')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(token => token && token !== 'd')
+        .join(' ');
+}
+
+export function deadlineConfigValuesMatch(left, right) {
+    const normalizedLeft = normalizeDeadlineComparableValue(left);
+    return Boolean(normalizedLeft) && normalizedLeft === normalizeDeadlineComparableValue(right);
+}
+
 export function createDeadlineConfigController({ recipientController, onRender = () => {} } = {}) {
     let user = null;
     let mode = 'automezzi';
@@ -116,7 +135,10 @@ export function createDeadlineConfigController({ recipientController, onRender =
         clearElement(select);
         select.appendChild(new Option('Seleziona...', ''));
         options.forEach(option => select.appendChild(new Option(option, option)));
-        if (currentValue && options.includes(currentValue)) select.value = currentValue;
+        const matchingOption = currentValue
+            ? Array.from(select.options).find(option => deadlineConfigValuesMatch(option.value, currentValue))
+            : null;
+        if (matchingOption) select.value = matchingOption.value;
     }
 
     function populateEmailSelects(emails = []) {
@@ -152,9 +174,10 @@ export function createDeadlineConfigController({ recipientController, onRender =
                 }
                 typeSelect.appendChild(option);
             });
-            typeSelect.value = currentValue && Array.from(typeSelect.options).some(option => option.value === currentValue)
-                ? currentValue
-                : '';
+            const matchingOption = currentValue
+                ? Array.from(typeSelect.options).find(option => deadlineConfigValuesMatch(option.value, currentValue))
+                : null;
+            typeSelect.value = matchingOption?.value || '';
         }
 
         const modelSelect = document.getElementById('modello_veicolo');
@@ -366,14 +389,20 @@ export function createDeadlineConfigController({ recipientController, onRender =
         deleteItem,
         editItem,
         getModeForDeadlineType(type) {
-            if (configs.documenti?.deadlineTypes?.some(item => itemName(item) === type)) return 'documenti';
-            if (configs.generali?.deadlineTypes?.some(item => itemName(item) === type)) return 'generali';
+            if (configs.documenti?.deadlineTypes?.some(item => deadlineConfigValuesMatch(itemName(item), type))) return 'documenti';
+            if (configs.generali?.deadlineTypes?.some(item => deadlineConfigValuesMatch(itemName(item), type))) return 'generali';
             return 'automezzi';
         },
         getSuggestedTemplate(type) {
             const config = currentConfig();
-            const index = (config.deadlineTypes || []).findIndex(item => itemName(item) === type);
+            const index = (config.deadlineTypes || []).findIndex(item => deadlineConfigValuesMatch(itemName(item), type));
             return index >= 0 ? config.emailTemplates?.[index] || '' : '';
+        },
+        getSuggestedSchedule(type) {
+            const item = (currentConfig().deadlineTypes || []).find(entry => deadlineConfigValuesMatch(itemName(entry), type));
+            return item && typeof item === 'object'
+                ? {period: item.period, freq: item.freq}
+                : null;
         },
         initManagementButtons,
         load,

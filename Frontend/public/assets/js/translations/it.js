@@ -504,5 +504,15 @@ export default {
     pilot_deadline_card_open: "Apri Prova scadenze",
     pilot_deadline_card_open_traditional: "Apri scadenza reale",
     pilot_deadline_card_create_parallel: "Crea Prova scadenze parallela",
-    pilot_deadline_card_create: "Crea Prova scadenze"
+    pilot_deadline_card_create: "Crea Prova scadenze",
+    profile_deadline_configure_title: "Configura la scadenza del documento",
+    profile_deadline_configure_message: "Vuoi configurare la scadenza di {type} con data {date}? Potrai scegliere preavviso, frequenza, destinatari, Email, Push e nota prima di salvarla.",
+    profile_deadline_configure_existing_message: "Esiste già una scadenza precedente per questo documento. Vuoi configurare la nuova scadenza di {type} con data {date}? La precedente resterà invariata finché non la eliminerai esplicitamente.",
+    profile_deadline_configure_action: "Configura",
+    profile_deadline_card_configure: "Configura scadenza",
+    profile_deadline_card_open: "Apri scadenza del documento",
+    profile_deadline_update_title: "Data del documento modificata",
+    profile_deadline_update_message: "La nuova data è {date}. Vuoi aggiornare la scadenza collegata mantenendo avvisi, destinatari e nota?",
+    profile_deadline_updated: "Scadenza collegata aggiornata.",
+    profile_deadline_error: "Impossibile configurare la scadenza del documento. Riprova."
 };
