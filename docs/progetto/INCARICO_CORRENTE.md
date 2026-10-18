@@ -8,6 +8,8 @@ La navigazione delle nove linguette deve essere effettivamente inizializzata anc
 
 L’ordine **«fai tutti gli aggiornamenti e poi pubblica la nuova versione»** autorizza bump patch, commit, push, PR, merge e distribuzione Firebase Hosting dopo i gate verdi. Le Functions verranno distribuite soltanto se il diff finale rispetto alla produzione contiene modifiche backend. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni e operazioni sui dati reali. La ricezione della Push di sistema sul telefono richiede infine l’apertura della nuova versione sul dispositivo, la rigenerazione del token e una prova reale distinta.
 
+Esito: la PR `#173` è stata integrata su `master` nel commit `b48bb8fa` dopo gate GitHub verdi. Firebase Hosting ha pubblicato 343 file e la verifica HTTP pubblica conferma versione `1.2.204`, rotta corretta di Regole scadenze e modulo di recupero Push. Nessuna Function, Rule, indice, migrazione o dato reale è stato modificato o distribuito. La prova di ricezione della Push di sistema sul telefono resta distinta e richiede l’apertura della nuova versione sul dispositivo.
+
 ## Testo dei Documenti personali e diagnosi App Check — 18/10/2026
 
 Diego richiede che la frase automatica del Passaporto sia grammaticalmente corretta: **«è in scadenza il passaporto»**. La correzione locale non antepone indiscriminatamente «il»: il modello usa forme localizzate distinte per Passaporto, Patente, Carta d’identità e Codice fiscale, conserva un testo realmente personalizzato e normalizza invece le vecchie proposte standard come «Il tuo passaporto».
