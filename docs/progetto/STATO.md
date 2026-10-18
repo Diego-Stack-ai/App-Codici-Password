@@ -1,5 +1,31 @@
 # Stato
 
+## Candidata 1.2.204 — Regole scadenze e recupero Push mobile — 18/10/2026
+
+Il lotto autorizzato risolve la mancata inizializzazione delle linguette di **Regole scadenze**: il router riconosce ora `regole_scadenze.html` prima della pagina generica Scadenze. Solo la linguetta attiva ha il fondo azzurro chiaro e il testo resta leggibile; le altre hanno fondo trasparente. **Documenti personali** continua a leggere automaticamente i Documenti del Profilo, ma espone soltanto tipo/data come riferimento e i parametri specifici dell’avviso, evitando di ripetere numero, ente, allegati e campi personalizzati.
+
+Restano compresi nel candidato i pulsanti di copia dei dati finanziari, la modifica sincronizzata della data e della nota delle Scadenze collegate, il testo localizzato del Passaporto e il recupero protetto della registrazione FCM quando il dispositivo conserva un ambito attivo e il permesso notifiche è già concesso. Il token iPhone precedente è stato confermato non registrato; la ricezione sul cellulare potrà essere verificata soltanto dopo la pubblicazione, l’apertura della nuova versione sul telefono e una nuova prova reale.
+
+La versione locale è `1.2.204`. Sono verdi i test mirati del flusso Documento/Scadenza, recupero Push e copia finanziaria, oltre a navigazione, Profilo, accesso dati, guida, i18n, sintassi, CSS, riferimenti statici, shell offline, sicurezza statica, hardening di rilascio, dipendenze e documentazione. Il runtime offline è stato rigenerato e Graphify riallineato alle modifiche strutturali.
+
+Implementazione, verifiche locali, integrazione remota e distribuzione restano registrate come fasi distinte. La produzione espone ancora `1.2.203` finché merge e Hosting non risultano effettivamente completati. Functions, Rules, indici, migrazioni e dati reali non vengono distribuiti perché il diff candidato non contiene modifiche backend.
+
+## Correzione locale del testo Passaporto e diagnosi App Check — 18/10/2026
+
+La frase automatica dei Documenti personali usa ora il nome grammaticalmente completo e localizzato: in italiano il Passaporto produce **«Ciao, è in scadenza il passaporto»**, mentre Patente, Carta d’identità e Codice fiscale ricevono il proprio articolo corretto. I vecchi suggerimenti standard vengono normalizzati; un testo realmente personalizzato dall’utente resta invariato.
+
+La verifica del sorgente e della documentazione ufficiale ha ricondotto i `401` su `recaptcha/api2/pat` al tentativo Private State Token del widget reCAPTCHA di Firebase App Check. Il warning `private-token` è un segnale di compatibilità del widget/browser e non costituisce, isolatamente, evidenza di fallimento dell’exchange App Check o della Push. La ricezione della notifica di sistema sul cellulare non è ancora dichiarata verificata: la correzione di recupero FCM è locale e la produzione resta alla `1.2.203`.
+
+## Correzioni locali in verifica — copia finanziaria, Push mobile e Scadenze collegate — 18/10/2026
+
+Nel ramo di lavoro sono state corrette tre regressioni senza modificare dati reali. I pulsanti di copia dei campi bancari mantengono ora il proprio gestore specializzato anche nel dettaglio degli account privati; il renderer condiviso resta utilizzato anche dagli account aziendali. La configurazione di una Scadenza collegata a un Documento consente di modificare data e nota; la data viene sincronizzata transazionalmente con il Documento del Profilo, mentre la nota resta un'informazione della Scadenza.
+
+La diagnosi in produzione sul Passaporto ha distinto correttamente i canali: l'Email è stata inviata, il backend ha accettato la Push sul dispositivo desktop, ma i token Android e iOS erano già marcati invalidi e disabilitati. La correzione locale aggiunge il recupero automatico della registrazione FCM sui dispositivi che conservano un ambito di notifica attivo e hanno già concesso il permesso, senza mostrare una nuova richiesta e senza riattivare una disabilitazione volontaria.
+
+Il successivo tentativo reale richiesto dall'utente verso l'iPhone registrato è stato rifiutato da FCM con `messaging/registration-token-not-registered`; nessuna notifica ha quindi potuto raggiungere il cellulare e nessun dato è stato modificato dalla sonda. Per il collaudo end-to-end occorre pubblicare il recupero FCM locale, aprire l'app sul telefono con il permesso già concesso e verificare la nuova registrazione prima di ripetere l'invio.
+
+Le prove mirate dei tre flussi sono verdi: navigazione **165/165**, profilo e integrazioni mirate **181/181**, accesso dati **95/95**, guida **6/6**, offline **14/14** e documentazione **11/11**. Sono inoltre verdi sintassi JavaScript, riferimenti statici e controllo i18n senza aumento del debito noto. Graphify deve essere riallineato al termine perché il lotto modifica flussi JavaScript e contratti operativi. Nessun commit, push, merge o deploy è compreso in questa fase; la versione pubblicata resta la `1.2.203`.
+
 ## Release 1.2.203 pubblicata — invio immediato dopo cambio data — 18/10/2026
 
 Il collaudo reale della Scadenza Passaporto ha confermato parametri validi — data dentro la finestra di preavviso e destinatari con Email e Push — ma nessun tentativo immediato dopo la modifica. I log di produzione hanno mostrato l'esecuzione regolare di `onScadenzaUpdated`; il sorgente ha confermato che il trigger risolveva i vecchi avvisi e azzerava i marcatori, lasciando però la consegna al controllo delle 09:00 del giorno successivo.

@@ -1,5 +1,31 @@
 # Incarico corrente
 
+## Pubblicazione coordinata: Regole scadenze, Push mobile e correzioni correnti — 18/10/2026
+
+Diego autorizza il completamento e la pubblicazione congiunta del lotto locale corrente. In **Regole scadenze → Documenti personali** i Documenti del Profilo devono apparire automaticamente, ma numero, ente, rilascio, allegati e campi personalizzati restano canonici nel Profilo e non vengono ripetuti. La linguetta mostra il riferimento minimo al Documento e rende modificabili tramite l’unico editor collegato soltanto i parametri ulteriori della Scadenza: pianificazione, testo dell’avviso, destinatari e canali, permesso di gestione e nota. La data resta condivisa con il Documento e ogni modifica dall’editor viene sincronizzata nello stesso flusso.
+
+La navigazione delle nove linguette deve essere effettivamente inizializzata anche su `regole_scadenze.html`: la rotta specializzata precede il riconoscimento generico di `scadenze.html`. Solo la linguetta selezionata usa il fondo azzurro chiaro; tutte mantengono testo scuro nel tema chiaro e le altre hanno fondo trasparente. Il lotto comprende inoltre i comandi di copia dei dati finanziari, il recupero protetto della registrazione FCM mobile già diagnosticata come invalida, la modifica data/nota delle Scadenze collegate e il testo italiano del Passaporto.
+
+L’ordine **«fai tutti gli aggiornamenti e poi pubblica la nuova versione»** autorizza bump patch, commit, push, PR, merge e distribuzione Firebase Hosting dopo i gate verdi. Le Functions verranno distribuite soltanto se il diff finale rispetto alla produzione contiene modifiche backend. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni e operazioni sui dati reali. La ricezione della Push di sistema sul telefono richiede infine l’apertura della nuova versione sul dispositivo, la rigenerazione del token e una prova reale distinta.
+
+## Testo dei Documenti personali e diagnosi App Check — 18/10/2026
+
+Diego richiede che la frase automatica del Passaporto sia grammaticalmente corretta: **«è in scadenza il passaporto»**. La correzione locale non antepone indiscriminatamente «il»: il modello usa forme localizzate distinte per Passaporto, Patente, Carta d’identità e Codice fiscale, conserva un testo realmente personalizzato e normalizza invece le vecchie proposte standard come «Il tuo passaporto».
+
+I messaggi Chrome `recaptcha/api2/pat` con stato `401` e `Unrecognized feature: 'private-token'` provengono dal percorso Private State Token del widget Google reCAPTCHA usato da Firebase App Check. Da soli non provano un errore di App Check né una consegna Push fallita: la Push di sistema sul cellulare resta distinta dalle notifiche visualizzate dentro l’app e richiede il collaudo reale end-to-end dopo la pubblicazione della correzione FCM locale. Nessun nuovo commit, push, merge o deploy è autorizzato da questa precisazione.
+
+## Copia dei dati finanziari, recupero Push mobile e modifica delle Scadenze collegate — 18/10/2026
+
+Diego richiede tre correzioni coordinate. Nei dettagli degli account privati i comandi di copia dei campi bancari e delle carte devono restare attivi; la verifica deve inoltre escludere regressioni equivalenti negli account aziendali. La causa individuata nel dettaglio privato è la seconda inizializzazione generica dei pulsanti, che sostituiva il gestore specifico dei dati finanziari.
+
+Il collaudo reale del nuovo Passaporto ha prodotto l'Email ma non la notifica sul cellulare. La diagnosi autorizzata e in sola lettura ha confermato che il trigger ha lavorato e che la Push del proprietario è stata accettata sul dispositivo desktop, mentre i token Android e iOS risultavano invalidi e disabilitati dal backend. L'app deve quindi conservare l'intenzione dell'utente e tentare in modo protetto la rigenerazione della registrazione FCM quando il permesso del browser è già concesso, senza riattivare dispositivi disabilitati volontariamente.
+
+Su richiesta esplicita di Diego è stato eseguito un singolo tentativo FCM reale verso l'iPhone registrato, senza creare Scadenze e senza modificare record: il provider ha risposto `messaging/registration-token-not-registered`. Il risultato conferma che il vecchio token non può raggiungere il telefono; la prova utile richiede prima una nuova registrazione dal dispositivo mediante la correzione locale.
+
+Per una Scadenza collegata a un Documento personale, data e nota integrativa devono essere modificabili sia dal Profilo sia dalla modalità Scadenze. La data rimane un solo dato condiviso: il salvataggio dalla Scadenza aggiorna nello stesso flusso anche la data del Documento collegato, evitando copie divergenti. La nota resta propria della Scadenza e non altera il Documento.
+
+Il perimetro autorizza implementazione locale, verifiche pertinenti, diagnostica reale in sola lettura, documentazione e aggiornamento Graphify. Non autorizza una nuova versione, commit, push, merge o distribuzione: la produzione resta separata e attualmente espone la `1.2.203`.
+
 ## Invio immediato dopo modifica della data di Scadenza — 18/10/2026
 
 Diego conferma il contratto storico degli avvisi: quando una Scadenza viene creata oppure la sua data viene modificata e i giorni mancanti sono minori o uguali al preavviso configurato, Email e Push devono essere tentate immediatamente al salvataggio, indipendentemente dall'orario. Il controllo giornaliero delle 09:00 resta responsabile degli invii successivi secondo frequenza e del recupero delle consegne non ancora effettuate; non sostituisce il primo tentativo immediato.

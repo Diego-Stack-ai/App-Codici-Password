@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.203';
+import {db} from '../../firebase-config.js?v=1.2.204';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -149,6 +149,9 @@ export const findSuspendedGuestInvite = async (ownerId, accountId, email, compan
         && invite.sharingState === 'suspended') || null;
 };
 export const getPushDevice = (uid, deviceId) => getRecordByPath(`users/${uid}/pushDevices/${deviceId}`);
+export const getPushDeviceConfirmed = (uid, deviceId) => readConfirmedRecord(
+    doc(db, 'users', uid, 'pushDevices', deviceId)
+);
 
 export const listContacts = uid => readRecords(`contacts:${uid}`,
     collection(db, 'users', uid, 'contacts'));

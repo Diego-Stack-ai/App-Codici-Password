@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contentVersion": 2,
-  "reviewedAppVersion": "1.2.203",
+  "reviewedAppVersion": "1.2.204",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -1261,9 +1261,9 @@
       "guide.pages.dettaglio_scadenza.step-3": "Apri gli allegati disponibili. Quelli referenziati da Account o Documenti restano di proprietà della scheda origine.",
       "guide.pages.dettaglio_scadenza.step-4": "Rinnovo, completamento e altre azioni dipendono dai permessi; leggi le conferme dell’app prima di eseguirle.",
       "guide.pages.regole_scadenze.title": "Regole delle scadenze",
-      "guide.pages.regole_scadenze.purpose": "Consulta i documenti personali collegati e apri le configurazioni degli altri ambiti.",
-      "guide.pages.regole_scadenze.step-1": "Apri Documenti personali per vedere i documenti del Profilo e lo stato della relativa Scadenza.",
-      "guide.pages.regole_scadenze.step-2": "Nel riepilogo puoi configurare una Scadenza non ancora collegata oppure aprire quella definitiva già creata. I dati restano gli stessi del Profilo e non vengono duplicati.",
+      "guide.pages.regole_scadenze.purpose": "Configura gli avvisi dei documenti personali e apri le configurazioni degli altri ambiti.",
+      "guide.pages.regole_scadenze.step-1": "Apri Documenti personali per vedere ogni documento del Profilo e lo stato della relativa Scadenza.",
+      "guide.pages.regole_scadenze.step-2": "Il riepilogo mostra soltanto il riferimento minimo al Documento e i parametri dell’avviso. Numero, ente, allegati e campi personalizzati restano nel Profilo e non vengono duplicati.",
       "guide.pages.regole_scadenze.step-3": "Le configurazioni attuali di Automezzi, Documenti e Regole generali restano disponibili più sotto. Modificarle non aggiorna automaticamente le Scadenze già esistenti.",
       "guide.pages.configurazione_automezzi.title": "Configurazione Automezzi",
       "guide.pages.configurazione_automezzi.purpose": "Gestisci tipi, modelli e testi per le scadenze dei veicoli.",

@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.203';
+import { auth } from '../../firebase-config.js?v=1.2.204';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -96,7 +96,7 @@ function configureProfileDocumentEditor(data = {}, {suggestedTemplate = '', mess
     };
     document.getElementById('deadline-mode-selector')?.classList.add('hidden');
     document.getElementById('deadline-generic-info-section')?.classList.add('hidden');
-    document.getElementById('deadline-date-field')?.classList.add('hidden');
+    document.getElementById('deadline-date-field')?.classList.remove('hidden');
     document.getElementById('profile-document-summary')?.classList.remove('hidden');
     document.getElementById('testo_email_wrapper')?.classList.add('hidden');
     document.getElementById('vehicle_fields_wrapper')?.classList.add('hidden');
@@ -164,7 +164,7 @@ function restoreDeadlineEditorAfterRecipientManagement() {
     if (nameInput) nameInput.value = fields.name || '';
     if (typeSelect && fields.type) selectValuePreservingCustomOption(typeSelect, fields.type);
     const dateInput = document.getElementById('dueDate');
-    if (dateInput && !profileDocumentLinkDraft) {
+    if (dateInput) {
         dateInput.value = fields.dueDate || '';
         dateInput.dataset.isoValue = fields.dueDateIso || '';
     }
@@ -285,9 +285,9 @@ export async function initAggiungiScadenza(user) {
         }
     });
 
-    // La data delle Scadenze collegate deriva esclusivamente dal Documento.
-    // Il calendario resta disponibile per tutte le altre Scadenze.
-    if (!profileDocumentLinkDraft) initDatePickerV5('dueDate');
+    // Il calendario è disponibile anche per le Scadenze collegate: il
+    // salvataggio aggiorna nella stessa transazione Scadenza e Documento.
+    initDatePickerV5('dueDate');
 
     initProxyDropdowns();
     attachmentController.init();
@@ -402,9 +402,6 @@ export async function initAggiungiScadenza(user) {
                 dateInput.value = dateFields.displayValue;
                 dateInput.dataset.isoValue = dateFields.isoValue;
                 if (profileDocumentLinkDraft) {
-                    dateInput.type = 'text';
-                    dateInput.readOnly = true;
-                    dateInput.setAttribute('aria-readonly', 'true');
                     dateInput.classList.add('linked-document-date');
                     document.getElementById('linked-document-date-help')?.classList.remove('hidden');
                 }
@@ -673,12 +670,11 @@ async function loadScadenzaForEdit(id) {
         }
 
         if (linkedSourceRef?.type === 'profileDocument') {
-            dateInput.type = 'text';
-            dateInput.readOnly = true;
-            dateInput.setAttribute('aria-readonly', 'true');
+            dateInput.classList.add('linked-document-date');
+            document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.203');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.204');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);

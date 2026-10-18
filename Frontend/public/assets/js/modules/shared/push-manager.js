@@ -1,8 +1,8 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.203';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.204';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20260908d';
-import { getPushDevice } from '../data/vault-repository.js';
+import { getPushDevice, getPushDeviceConfirmed } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
 const DEVICE_ID_KEY = 'codex_push_device_id';
@@ -12,6 +12,16 @@ let foregroundListenerStarted = false;
 
 function rememberActiveScopes(scopes) {
     localStorage.setItem(ACTIVE_SCOPES_KEY, JSON.stringify([...new Set(scopes.filter(Boolean))]));
+}
+
+function rememberedActiveScopes() {
+    try {
+        const scopes = JSON.parse(localStorage.getItem(ACTIVE_SCOPES_KEY) || '[]');
+        return Array.isArray(scopes) ? scopes.filter(scope => ['deadlines', 'sharing'].includes(scope)) : [];
+    } catch {
+        localStorage.removeItem(ACTIVE_SCOPES_KEY);
+        return [];
+    }
 }
 
 function getDeviceId() {
@@ -130,7 +140,10 @@ export async function getCurrentPushState(user = auth.currentUser, scope = 'dead
     const device = await getPushDevice(user.uid, getDeviceId());
     const scopes = Array.isArray(device?.notificationScopes)
         ? device.notificationScopes : (device ? [device.notificationScope] : []);
-    rememberActiveScopes(device?.enabled === true ? scopes : []);
+    // Se il backend ha invalidato un token, conserviamo l'intenzione locale:
+    // al prossimo avvio il dispositivo potrà registrarsi di nuovo.
+    if (device?.enabled === true) rememberActiveScopes(scopes);
+    else if (device?.status !== 'invalid') rememberActiveScopes([]);
     return {
         compatible: true,
         enabled: Notification.permission === 'granted' && device?.enabled === true && scopes.includes(scope),
@@ -138,14 +151,7 @@ export async function getCurrentPushState(user = auth.currentUser, scope = 'dead
     };
 }
 
-async function enablePushScope(scope, user = auth.currentUser) {
-    const compatibility = getPushCompatibility();
-    if (!user) throw new Error('Accesso richiesto.');
-    if (!compatibility.compatible) throw new Error(compatibility.reason);
-
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') throw new Error('Permesso notifiche non concesso.');
-
+async function writePushRegistration(user, scopes, {forceReset = false} = {}) {
     let messaging;
     try {
         messaging = await getPushMessagingInstance();
@@ -161,15 +167,13 @@ async function enablePushScope(scope, user = auth.currentUser) {
         console.error('[PUSH] Service Worker non disponibile.', error);
         throw new Error('Impossibile preparare le notifiche su questo dispositivo. Ricarica la pagina e riprova.');
     }
+    if (forceReset) await resetLocalPushSubscription(messaging, registration);
     const token = await getTokenWithLocalRecovery(messaging, registration);
     if (!token) throw new Error('Firebase non ha restituito il token del dispositivo.');
 
     const deviceId = getDeviceId();
     const deviceRef = doc(db, 'users', user.uid, 'pushDevices', deviceId);
-    const existing = await getPushDevice(user.uid, deviceId);
-    const previousScopes = Array.isArray(existing?.notificationScopes)
-        ? existing.notificationScopes : (existing?.notificationScope ? [existing.notificationScope] : []);
-    const notificationScopes = [...new Set([...previousScopes, scope])];
+    const notificationScopes = [...new Set(scopes.filter(scope => ['deadlines', 'sharing'].includes(scope)))];
     await setDoc(deviceRef, {
         token,
         platform: platformName(),
@@ -184,6 +188,42 @@ async function enablePushScope(scope, user = auth.currentUser) {
     }, { merge: true });
     rememberActiveScopes(notificationScopes);
     return true;
+}
+
+export async function recoverPushRegistration(user = auth.currentUser) {
+    const compatibility = getPushCompatibility();
+    if (!user || !compatibility.compatible || Notification.permission !== 'granted') return false;
+    const deviceId = getDeviceId();
+    const device = await getPushDeviceConfirmed(user.uid, deviceId);
+    const serverScopes = Array.isArray(device?.notificationScopes)
+        ? device.notificationScopes : (device?.notificationScope ? [device.notificationScope] : []);
+    const intendedScopes = [...new Set([...rememberedActiveScopes(), ...serverScopes])]
+        .filter(scope => ['deadlines', 'sharing'].includes(scope));
+    if (!intendedScopes.length) return false;
+    const current = device?.enabled === true && Boolean(device.token)
+        && intendedScopes.every(scope => serverScopes.includes(scope));
+    if (current) {
+        rememberActiveScopes(intendedScopes);
+        return false;
+    }
+    await writePushRegistration(user, intendedScopes, {forceReset: device?.status === 'invalid'});
+    return true;
+}
+
+async function enablePushScope(scope, user = auth.currentUser) {
+    const compatibility = getPushCompatibility();
+    if (!user) throw new Error('Accesso richiesto.');
+    if (!compatibility.compatible) throw new Error(compatibility.reason);
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') throw new Error('Permesso notifiche non concesso.');
+
+    const deviceId = getDeviceId();
+    const existing = await getPushDeviceConfirmed(user.uid, deviceId);
+    const previousScopes = Array.isArray(existing?.notificationScopes)
+        ? existing.notificationScopes : (existing?.notificationScope ? [existing.notificationScope] : []);
+    const notificationScopes = [...new Set([...previousScopes, scope])];
+    return writePushRegistration(user, notificationScopes, {forceReset: existing?.status === 'invalid'});
 }
 
 export async function enableDeadlinePush(user = auth.currentUser) { return enablePushScope('deadlines', user); }

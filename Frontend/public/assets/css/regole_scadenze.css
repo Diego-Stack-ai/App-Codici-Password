@@ -65,14 +65,17 @@
     appearance: none;
     border: 1px solid var(--card-border);
     border-radius: 16px;
-    background: var(--card-bg);
-    color: var(--text-secondary);
+    background: transparent;
+    color: var(--text-primary);
     padding: 0.75rem 0.9rem;
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
     white-space: nowrap;
     cursor: pointer;
+    position: relative;
+    z-index: 1;
+    touch-action: manipulation;
     font: inherit;
     font-size: var(--fs-micro);
     font-weight: 700;
@@ -88,14 +91,15 @@
 .deadline-domain-tab:focus-visible {
     color: var(--text-primary);
     border-color: rgb(var(--accent-rgb) / 0.6);
+    background: rgb(var(--accent-rgb) / 0.06);
     transform: translateY(-1px);
 }
 
 .deadline-domain-tab.is-active {
-    color: #fff;
-    border-color: transparent;
-    background: linear-gradient(135deg, var(--accent), rgb(var(--accent-rgb) / 0.72));
-    box-shadow: 0 12px 28px rgb(var(--accent-rgb) / 0.22);
+    color: var(--text-primary);
+    border-color: rgb(var(--accent-rgb) / 0.45);
+    background: rgb(var(--accent-rgb) / 0.14);
+    box-shadow: 0 8px 20px rgb(var(--accent-rgb) / 0.12);
 }
 
 .deadline-domain-panel {

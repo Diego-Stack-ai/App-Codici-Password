@@ -18,6 +18,28 @@ function fillTemplate(template, values) {
         result.replaceAll(`{${key}}`, String(value || '').trim()), String(template || ''));
 }
 
+function foldedDocumentType(value) {
+    return text(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('it').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
+const DOCUMENT_LABEL_SPECS = Object.freeze([
+    {key: 'profile_document_name_driving_licence', aliases: ['patente', 'patente di guida', 'driving licence', 'driving license'], defaults: ['la tua patente']},
+    {key: 'profile_document_name_identity_card', aliases: ['carta identita', 'carta d identita', 'carta di identita', 'identity card'], defaults: ['il tuo documento di identita']},
+    {key: 'profile_document_name_tax_code', aliases: ['codice fiscale', 'tax code', 'fiscal code'], defaults: ['il tuo codice fiscale']},
+    {key: 'profile_document_name_passport', aliases: ['passaporto', 'passport', 'pasaporte', 'passeport', 'reisepass', 'passaporte', '护照', 'पासपोर्ट'], defaults: ['il tuo passaporto']}
+]);
+
+function documentLabelSpec(documentType) {
+    const folded = foldedDocumentType(documentType);
+    return DOCUMENT_LABEL_SPECS.find(({aliases}) => aliases.includes(folded));
+}
+
+function localizedDocumentLabel(documentType, translate) {
+    const spec = documentLabelSpec(documentType);
+    return spec ? translate(spec.key) : text(documentType);
+}
+
 export function deadlineInputDate(isoValue, displayValue) {
     const iso = text(isoValue);
     const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
@@ -32,12 +54,8 @@ export function deadlineInputDate(isoValue, displayValue) {
 }
 
 export function deadlineDateForSave(profileDocumentLinkDraft, isoValue, displayValue) {
-    if (profileDocumentLinkDraft?.profileDocumentId) {
-        return deadlineInputDate(
-            profileDocumentLinkDraft.sourceValueAtLink || profileDocumentLinkDraft.dueDate,
-            profileDocumentLinkDraft.dueDate
-        );
-    }
+    // Anche una Scadenza collegata può cambiare data dall'editor. Il servizio
+    // di persistenza sincronizza poi atomicamente il Documento sorgente.
     return deadlineInputDate(isoValue, displayValue);
 }
 
@@ -52,7 +70,13 @@ export function deadlineDateDisplay(value, language = 'it') {
 
 export function profileDocumentDeadlineMessage({templateText, documentType, documentNumber, documentIssuer} = {}, translate) {
     const tr = typeof translate === 'function' ? translate : key => key;
-    const documentLabel = text(templateText) || text(documentType) || tr('document');
+    const configuredLabel = text(templateText);
+    const typeLabel = text(documentType);
+    const spec = documentLabelSpec(typeLabel);
+    const configuredIsDefault = spec && [foldedDocumentType(typeLabel), ...spec.defaults].includes(foldedDocumentType(configuredLabel));
+    const documentLabel = configuredLabel && !configuredIsDefault
+        ? configuredLabel
+        : localizedDocumentLabel(typeLabel, tr) || tr('document');
     const sections = [fillTemplate(tr('profile_document_message_expiry'), {document: documentLabel})];
     if (text(documentNumber)) {
         sections.push(fillTemplate(tr('profile_document_message_number'), {number: documentNumber}));

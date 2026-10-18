@@ -22,7 +22,10 @@ test('the deadline hub exposes nine accessible domains while preserving legacy c
 });
 
 test('the deadline hub loads profile documents and keeps keyboard navigation accessible', async () => {
-  const source = await read('assets/js/modules/scadenze/deadline-rules-hub.js');
+  const [source, main] = await Promise.all([
+    read('assets/js/modules/scadenze/deadline-rules-hub.js'),
+    read('assets/js/main-v129.js')
+  ]);
   assert.match(source, /ArrowLeft/);
   assert.match(source, /ArrowRight/);
   assert.match(source, /aria-selected/);
@@ -36,6 +39,10 @@ test('the deadline hub loads profile documents and keeps keyboard navigation acc
   assert.match(source, /profile_deadline_card_open/);
   assert.match(source, /auth\.currentUser\?\.uid === user\.uid/);
   assert.match(source, /normalizeProfileDateInputValue/);
+  assert.ok(
+    main.indexOf("path.includes('regole_scadenze')") < main.indexOf("path.includes('scadenze')"),
+    'the specialized deadline-rules route must be resolved before the generic deadlines route'
+  );
   assert.doesNotMatch(source, /profile_deadline_card_open_previous|pilotDeadlineReference\?\.deadlineId/);
   assert.doesNotMatch(source, /setDoc|addDoc|updateDoc|deleteDoc/);
 });
@@ -50,13 +57,17 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(source, /deadline_personal_error/);
   assert.match(source, /deadline_personal_retry/);
   assert.match(source, /deadlineRecipientsFromRecord/);
-  assert.match(source, /deadline\.attachments/);
+  assert.doesNotMatch(source, /deadline\.attachments/);
   assert.match(source, /deadline\.notes/);
   assert.match(source, /deadline\.templateText/);
+  assert.match(source, /renderDocumentReference/);
+  assert.doesNotMatch(source, /deadline_personal_number/);
   assert.match(source, /deadline_personal_message/);
   assert.match(source, /deadline_personal_can_manage/);
   assert.match(source, /deadline_personal_view_only/);
   assert.match(css, /\.deadline-personal-grid/);
+  assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
+  assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
 });
 

@@ -1,4 +1,4 @@
-import { db, storage } from '../../firebase-config.js?v=1.2.203';
+import { db, storage } from '../../firebase-config.js?v=1.2.204';
 import {
     addDoc,
     arrayUnion,
@@ -144,7 +144,7 @@ async function persistDeadlineDocument({
             const sourceDate = normalizeProfileDateInputValue(sourceDocument.expiry_date);
             const draftDate = normalizeProfileDateInputValue(profileDocumentLinkDraft.sourceValueAtLink);
             const deadlineDate = normalizeProfileDateInputValue(deadlineData.dueDate);
-            if (!sourceDate || sourceDate !== draftDate || sourceDate !== deadlineDate) {
+            if (!sourceDate || sourceDate !== draftDate || !deadlineDate) {
                 throw new Error('La data del documento è cambiata. Torna al Profilo e ripeti la configurazione.');
             }
             const currentReference = sourceDocument.expiryReference || {};
@@ -162,7 +162,7 @@ async function persistDeadlineDocument({
             transaction.set(deadlineRef, deadlineData);
             transaction.update(profileRef, {
                 documenti: documents.map(item => item.id === profileDocumentLinkDraft.profileDocumentId
-                    ? { ...item, expiryReference: {
+                    ? { ...item, expiry_date: deadlineData.dueDate, expiryReference: {
                         deadlineId: finalDeadlineId,
                         sourceType: 'profileDocument',
                         sourceFieldId: 'document.expiry_date',
@@ -259,7 +259,7 @@ export async function saveDeadline({
         deadlineData.sourceType = 'profileDocument';
         deadlineData.sourceDocumentId = profileDocumentLinkDraft.profileDocumentId;
         deadlineData.sourceFieldId = profileDocumentLinkDraft.sourceFieldId || 'document.expiry_date';
-        deadlineData.sourceValueAtLink = profileDocumentLinkDraft.sourceValueAtLink || data.dueDate;
+        deadlineData.sourceValueAtLink = data.dueDate;
         deadlineData.sourceStatus = 'active';
         deadlineData.sourceIssue = '';
         deadlineData.linkKind = 'profile-document-deadline-v1';

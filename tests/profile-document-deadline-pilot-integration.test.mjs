@@ -97,12 +97,16 @@ test('il dettaglio non ricompone il testo né presenta il numero come veicolo', 
   assert.match(source, /profile_document_number_icon/);
 });
 
-test('la configurazione blocca la data del Documento e rende modificabili preavviso e frequenza', async () => {
+test('la configurazione modifica data e nota e sincronizza la data con il Documento', async () => {
   const source = await read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js');
+  const save = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
   const html = await read('Frontend/public/aggiungi_scadenza.html');
-  assert.match(source, /if \(!profileDocumentLinkDraft\) initDatePickerV5\('dueDate'\)/);
+  assert.match(source, /initDatePickerV5\('dueDate'\)/);
   assert.match(source, /deadlineDateForSave\(profileDocumentLinkDraft/);
-  assert.match(source, /dateInput\.readOnly = true/);
+  assert.doesNotMatch(source, /deadline-date-field'\)\?\.classList\.add\('hidden'\)/);
+  assert.match(save, /expiry_date:\s*deadlineData\.dueDate/);
+  assert.match(source, /notes:\s*document\.getElementById\('notes'\)\.value/);
+  assert.match(html, /id="notes"/);
   assert.match(html, /id="notif_days_before"[^>]+type="number"/);
   assert.match(html, /id="notif_frequency"[^>]+type="number"/);
   assert.match(html, /id="deadline-contact-select"/);
@@ -120,6 +124,8 @@ test('tutte le lingue dichiarano i testi dell’editor documento personale', asy
   const required = ['profile_document_summary_title', 'profile_document_summary_intro',
     'profile_document_not_provided', 'profile_document_type', 'profile_document_number', 'profile_document_number_label', 'profile_document_number_icon', 'profile_document_issued_by',
     'profile_document_message_label', 'profile_document_message_help',
+    'profile_document_name_driving_licence', 'profile_document_name_identity_card',
+    'profile_document_name_tax_code', 'profile_document_name_passport',
     'profile_document_message_expiry', 'profile_document_message_number', 'profile_document_message_issuer'];
   const files = ['translations/it.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];
   for (const file of files) {

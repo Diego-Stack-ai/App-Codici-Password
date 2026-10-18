@@ -67,13 +67,13 @@ test('normalizza esclusivamente date di input realmente valide', () => {
     assert.equal(model.deadlineInputDate('', 'domani'), '');
 });
 
-test('una Scadenza collegata usa sempre la data finale del Documento', () => {
+test('una Scadenza collegata accetta la data scelta e la persistenza la sincronizza col Documento', () => {
     const draft = {
         profileDocumentId: 'passport-1',
         dueDate: '2034-10-30',
         sourceValueAtLink: '2034-10-30'
     };
-    assert.equal(model.deadlineDateForSave(draft, '2027-10-30', '30/10/2027'), '2034-10-30');
+    assert.equal(model.deadlineDateForSave(draft, '2027-10-30', '30/10/2027'), '2027-10-30');
     assert.equal(model.deadlineDateForSave(null, '2027-10-30', '30/10/2027'), '2027-10-30');
 });
 
@@ -97,13 +97,26 @@ test('compone il messaggio documento da catalogo, configurazione, numero ed ente
         profile_document_message_expiry: 'È in scadenza {document}.',
         profile_document_message_number: 'Numero {number}.',
         profile_document_message_issuer: 'Rilasciato da {issuer}.',
+        profile_document_name_driving_licence: 'la patente',
+        profile_document_name_identity_card: 'la carta d’identità',
+        profile_document_name_tax_code: 'il codice fiscale',
+        profile_document_name_passport: 'il passaporto',
         document: 'Documento'
     };
     const translate = key => catalog[key] || key;
     assert.equal(model.profileDocumentDeadlineMessage({
         documentType: 'Passaporto', documentNumber: 'AA123', documentIssuer: 'Questura'
-    }, translate), 'È in scadenza Passaporto. Numero AA123. Rilasciato da Questura.');
+    }, translate), 'È in scadenza il passaporto. Numero AA123. Rilasciato da Questura.');
     assert.equal(model.profileDocumentDeadlineMessage({
         templateText: 'il passaporto', documentType: 'Passaporto', documentNumber: 'AA123'
     }, translate), 'È in scadenza il passaporto. Numero AA123.');
+    assert.equal(model.profileDocumentDeadlineMessage({
+        templateText: 'Il tuo passaporto', documentType: 'Passaporto'
+    }, translate), 'È in scadenza il passaporto.');
+    assert.equal(model.profileDocumentDeadlineMessage({
+        templateText: 'il passaporto diplomatico', documentType: 'Passaporto'
+    }, translate), 'È in scadenza il passaporto diplomatico.');
+    assert.equal(model.profileDocumentDeadlineMessage({documentType: 'Patente'}, translate), 'È in scadenza la patente.');
+    assert.equal(model.profileDocumentDeadlineMessage({documentType: "Carta d'identità"}, translate), 'È in scadenza la carta d’identità.');
+    assert.equal(model.profileDocumentDeadlineMessage({documentType: 'Codice fiscale'}, translate), 'È in scadenza il codice fiscale.');
 });

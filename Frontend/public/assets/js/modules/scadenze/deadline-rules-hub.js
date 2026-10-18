@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.203';
+import {auth} from '../../firebase-config.js?v=1.2.204';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';
@@ -26,7 +26,6 @@ const DOCUMENT_ENCRYPTED_FIELDS = Object.freeze([
     'rilasciato_da', 'luogo_rilascio', 'username', 'password',
     'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
 ]);
-const SENSITIVE_CUSTOM_FIELD = /password|passphrase|pin|puk|secret|token|codice[_ -]?app|username|credenzial/i;
 let disposeMount = () => {};
 
 function icon(name, className = '') {
@@ -40,25 +39,6 @@ function icon(name, className = '') {
 function formatDate(value) {
     const normalized = normalizeProfileDateInputValue(value);
     return normalized ? deadlineDateDisplay(normalized, getCurrentLanguage()) : String(value || '').trim();
-}
-
-function documentNumber(documentItem = {}) {
-    return String(documentItem.num_serie || documentItem.cf_value || documentItem.id_number
-        || documentItem.license_number || documentItem.cf || '').trim();
-}
-
-function readableCustomFields(documentItem = {}) {
-    const source = Array.isArray(documentItem.customFields) ? documentItem.customFields
-        : Array.isArray(documentItem.additionalFields) ? documentItem.additionalFields : [];
-    return source.filter(field => {
-        const label = String(field?.label || field?.name || '').trim();
-        const value = field?.value;
-        return label && !SENSITIVE_CUSTOM_FIELD.test(label) && field?.encrypted !== true
-            && ['string', 'number', 'boolean'].includes(typeof value) && String(value).trim();
-    }).slice(0, 8).map(field => ({
-        label: String(field.label || field.name).trim(),
-        value: String(field.value).trim()
-    }));
 }
 
 function definitiveDeadlineForDocument(documentItem, deadlinesById) {
@@ -80,19 +60,13 @@ function dataRow(label, value) {
     ]);
 }
 
-function renderDocumentData(documentItem) {
-    const rows = [
-        dataRow(t('deadline_personal_number'), documentNumber(documentItem)),
-        dataRow(t('deadline_personal_category'), documentItem.categoria),
-        dataRow(t('deadline_personal_issued_by'), documentItem.rilasciato_da),
-        dataRow(t('deadline_personal_issue_place'), documentItem.luogo_rilascio),
-        dataRow(t('deadline_personal_issue_date'), formatDate(documentItem.data_rilascio)),
-        dataRow(t('deadline_personal_expiry_date'), formatDate(documentItem.expiry_date)),
-        dataRow(t('deadline_personal_website'), documentItem.home_page),
-        dataRow(t('deadline_personal_document_note'), documentItem.note),
-        ...readableCustomFields(documentItem).map(field => dataRow(field.label, field.value))
-    ].filter(Boolean);
-    return createElement('dl', {className: 'deadline-personal-data'}, rows);
+function renderDocumentReference(documentItem) {
+    // Il Profilo resta la fonte dei dati del Documento. Qui mostriamo soltanto
+    // la data minima necessaria a distinguere il richiamo, senza duplicare
+    // numero, ente, rilascio, allegati o campi personalizzati.
+    return createElement('dl', {className: 'deadline-personal-data deadline-personal-source-reference'}, [
+        dataRow(t('deadline_personal_expiry_date'), formatDate(documentItem.expiry_date))
+    ].filter(Boolean));
 }
 
 function recipientText(recipient) {
@@ -107,14 +81,12 @@ function recipientText(recipient) {
 
 function renderDeadlineSummary(deadline) {
     const recipients = deadlineRecipientsFromRecord(deadline);
-    const attachments = Array.isArray(deadline.attachments) ? deadline.attachments.length : 0;
     const notice = deadline.notif_days_before ?? deadline.period ?? 14;
     const frequency = deadline.notif_frequency ?? deadline.freq ?? 7;
     const details = [
         dataRow(t('deadline_personal_notice'), `${notice} ${t('deadline_personal_days')}`),
         dataRow(t('deadline_personal_frequency'), `${frequency} ${t('deadline_personal_days')}`),
-        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email),
-        dataRow(t('deadline_personal_attachments'), String(attachments))
+        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email)
     ].filter(Boolean);
     if (deadline.notes) details.push(dataRow(t('deadline_personal_note'), deadline.notes));
     return createElement('section', {className: 'deadline-personal-alert-summary'}, [
@@ -166,7 +138,7 @@ function renderDocumentCard({documentItem, deadline, profile, active}) {
                 })
             ])
         ]),
-        renderDocumentData(documentItem),
+        renderDocumentReference(documentItem),
         deadlineIsAvailable ? renderDeadlineSummary(deadline) : createElement('p', {
             className: 'deadline-personal-missing',
             textContent: t('deadline_personal_missing_deadline')

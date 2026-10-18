@@ -26,7 +26,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.203';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.204';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.203&push=20260908b&deadline-share=20260908a&touch=20261017b';
+import * as Pages from './pages-init.js?v=1.2.204&push=20260908b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -63,11 +63,13 @@ function getCurrentPage() {
     if (path.includes('impostazioni')) return 'impostazioni';
     if (path.includes('gestione_destinatari')) return 'gestione_destinatari';
 
+    // Le route specialistiche devono precedere la lista generica: il nome
+    // `regole_scadenze.html` contiene a sua volta "scadenze".
+    if (path.includes('regole_scadenze')) return 'regole';
     if (path.includes('scadenze')) return 'scadenze';
     if (path.includes('aggiungi_scadenza')) return 'aggiungi_scadenza';
     if (path.includes('dettaglio_scadenza')) return 'dettaglio_scadenza';
 
-    if (path.includes('regole_scadenze')) return 'regole';
     if (path.includes('configurazione_automezzi')) return 'automezzi';
     if (path.includes('configurazione_documenti')) return 'documenti';
     if (path.includes('configurazione_generali')) return 'regole_generali';
@@ -347,8 +349,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Le Push di scadenza devono essere visualizzate anche quando
                     // l'app è aperta su una pagina diversa dalle Impostazioni.
                     const pushScopes = localStorage.getItem('codex_push_active_scopes');
-                    const legacyPushCandidate = pushScopes === null
-                        && Boolean(localStorage.getItem('codex_push_device_id'));
+                    const hasPushDeviceId = Boolean(localStorage.getItem('codex_push_device_id'));
+                    const legacyPushCandidate = pushScopes === null && hasPushDeviceId;
                     let pushEnabledHere = legacyPushCandidate;
                     if (pushScopes) {
                         try { pushEnabledHere = JSON.parse(pushScopes).includes('deadlines'); }
@@ -357,11 +359,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (navigator.onLine
                         && 'Notification' in window
                         && Notification.permission === 'granted'
-                        && pushEnabledHere) {
+                        && (pushEnabledHere || hasPushDeviceId)) {
                         // Il listener non produce contenuto necessario alla pagina:
                         // inizializzarlo in background evita di ritardare il primo render.
                         void import('./modules/shared/push-manager.js')
-                            .then(({ listenForDeadlinePushInForeground }) => listenForDeadlinePushInForeground())
+                            .then(async ({ recoverPushRegistration, listenForDeadlinePushInForeground }) => {
+                                await recoverPushRegistration(user);
+                                void listenForDeadlinePushInForeground()
+                                    .catch((error) => console.warn('[PUSH] Listener foreground non inizializzato.', error));
+                            })
                             .catch((error) => console.warn('[PUSH] Listener foreground non inizializzato.', error));
                     }
                 }
@@ -384,7 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.203');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.204');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
