@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.201';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.202';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -390,6 +390,20 @@ function renderDeadlineContents(scadenza, mount) {
     const vSec = document.getElementById('section-vehicle');
     if (presentation.vehicle) {
         vSec?.classList.remove('hidden');
+        const label = vSec?.querySelector('.detail-info-label');
+        const icon = vSec?.querySelector('.material-symbols-outlined');
+        if (scadenza.linkKind === 'profile-document-deadline-v1') {
+            if (label) {
+                label.dataset.t = 'profile_document_number_label';
+                label.textContent = t('profile_document_number_label');
+            }
+            if (icon) icon.textContent = t('profile_document_number_icon');
+        } else {
+            if (label) {
+                label.dataset.t = 'vehicle';
+                label.textContent = t('vehicle');
+            }
+        }
         document.getElementById('display-veicolo').textContent = presentation.vehicle;
     }
 
@@ -474,7 +488,9 @@ function renderDeadlineContents(scadenza, mount) {
         if (templateSec) templateSec.classList.remove('hidden');
 
         let compiledText = '';
-        if (scadenza.mode === 'automezzi') {
+        if (scadenza.linkKind === 'profile-document-deadline-v1') {
+            compiledText = scadenza.templateText.trim();
+        } else if (scadenza.mode === 'automezzi') {
             const subject = scadenza.templateText.trim();
             const vehicle = scadenza.veicolo_modello ? ` ${scadenza.veicolo_modello.trim()}` : '';
             compiledText = `E' in scadenza ${subject}${vehicle}`;

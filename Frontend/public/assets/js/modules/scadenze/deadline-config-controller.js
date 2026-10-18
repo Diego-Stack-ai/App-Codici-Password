@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.2.201';
+import { db } from '../../firebase-config.js?v=1.2.202';
 import { doc, setDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
@@ -11,7 +11,8 @@ import {
     removeDeadlineListItem,
     updateDeadlineListItem,
     validateDeadlineFrequency,
-    updateDeadlineType
+    updateDeadlineType,
+    resolveDocumentDeadlineTemplate
 } from './deadline-config-model.js';
 
 const EMPTY_CONFIG = Object.freeze({
@@ -395,6 +396,7 @@ export function createDeadlineConfigController({ recipientController, onRender =
         },
         getSuggestedTemplate(type) {
             const config = currentConfig();
+            if (mode === 'documenti') return resolveDocumentDeadlineTemplate(config, type);
             const index = (config.deadlineTypes || []).findIndex(item => deadlineConfigValuesMatch(itemName(item), type));
             return index >= 0 ? config.emailTemplates?.[index] || '' : '';
         },

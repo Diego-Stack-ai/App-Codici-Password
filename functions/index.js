@@ -1036,7 +1036,7 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
         }
     }
 
-    if ((acceptedCount > 0 || devices.length === 0) && !retryableFailure) {
+    if (acceptedCount > 0 && !retryableFailure) {
         await db.collection("users").doc(uid).collection("scadenze").doc(deadlineId).update({
             lastPushNotifiedAt: deadlineCalendar.day(new Date())
         });
@@ -1052,11 +1052,14 @@ exports.sendDeadlinePushTest = onCall(
         const db = admin.firestore();
         const deviceRef = db.collection("users").doc(request.auth.uid).collection("pushDevices").doc(deviceId);
         const device = await deviceRef.get();
-        if (!device.exists || !device.data().enabled || device.data().notificationScope !== "deadlines") {
+        const deviceData = device.data() || {};
+        const scopes = Array.isArray(deviceData.notificationScopes)
+            ? deviceData.notificationScopes : [deviceData.notificationScope];
+        if (!device.exists || !deviceData.enabled || !deviceData.token || !scopes.includes("deadlines")) {
             throw new HttpsError("failed-precondition", "Notifiche non attive su questo dispositivo.");
         }
         const now = Date.now();
-        const lastTest = device.data().lastTestAt?.toMillis?.() || 0;
+        const lastTest = deviceData.lastTestAt?.toMillis?.() || 0;
         if (now - lastTest < 60000) {
             return { ok: false, cooldownSeconds: Math.ceil((60000 - (now - lastTest)) / 1000) };
         }
@@ -1078,7 +1081,7 @@ exports.sendDeadlinePushTest = onCall(
             : { title: "Codici & Password", body: "Notifica scadenza di prova" };
         try {
             await admin.messaging().send({
-                token: device.data().token,
+                token: deviceData.token,
                 data: {
                     eventType: "deadline", deadlineId, title: text.title, body: text.body,
                     deliveryTag: `deadline-test-${deviceId}-${now}`

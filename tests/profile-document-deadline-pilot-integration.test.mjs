@@ -46,7 +46,9 @@ test('tutte le lingue dichiarano le chiavi del flusso definitivo', async () => {
     'linked_document_expiry_help',
     'profile_deadline_card_configure', 'profile_deadline_card_open',
     'profile_deadline_update_title',
-    'profile_deadline_update_message', 'profile_deadline_updated', 'profile_deadline_error'];
+    'profile_deadline_update_message', 'profile_deadline_updated', 'profile_deadline_error',
+    'profile_document_attachment_prompt_title', 'profile_document_attachment_prompt_message',
+    'profile_document_attachment_add_action', 'profile_document_attachment_skip_action'];
   const files = ['translations/it.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];
   for (const file of files) {
     const source = await read(`Frontend/public/assets/js/${file}`);
@@ -85,6 +87,14 @@ test('l’editor dedicato precompila regole e testo senza dipendere dai menu gen
   assert.match(source, /profileDocumentEditorData\?\.documentNumber/);
   assert.match(source, /deadline-generic-info-section/);
   assert.match(config, /getSuggestedSchedule\(type\)/);
+  assert.match(config, /resolveDocumentDeadlineTemplate\(config, type\)/);
+});
+
+test('il dettaglio non ricompone il testo né presenta il numero come veicolo', async () => {
+  const source = await read('Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js');
+  assert.match(source, /scadenza\.linkKind === 'profile-document-deadline-v1'[\s\S]+compiledText = scadenza\.templateText\.trim\(\)/);
+  assert.match(source, /profile_document_number_label/);
+  assert.match(source, /profile_document_number_icon/);
 });
 
 test('la configurazione blocca la data del Documento e rende modificabili preavviso e frequenza', async () => {
@@ -108,7 +118,7 @@ test('il dialogo di conferma mostra la data localizzata ma conserva la data ISO 
 
 test('tutte le lingue dichiarano i testi dell’editor documento personale', async () => {
   const required = ['profile_document_summary_title', 'profile_document_summary_intro',
-    'profile_document_not_provided', 'profile_document_type', 'profile_document_number', 'profile_document_issued_by',
+    'profile_document_not_provided', 'profile_document_type', 'profile_document_number', 'profile_document_number_label', 'profile_document_number_icon', 'profile_document_issued_by',
     'profile_document_message_label', 'profile_document_message_help',
     'profile_document_message_expiry', 'profile_document_message_number', 'profile_document_message_issuer'];
   const files = ['translations/it.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];

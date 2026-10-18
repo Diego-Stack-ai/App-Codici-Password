@@ -152,7 +152,7 @@ export async function renderProfileDocumentAttachmentPreviews({uid, documentItem
     }
 }
 
-export async function openProfileDocumentAttachments({uid, documentItem, vaultKey, encryptName, onChanged}) {
+export async function openProfileDocumentAttachments({uid, documentItem, vaultKey, encryptName, onChanged, onUploaded}) {
     if (!uid || !documentItem?.id || !vaultKey) throw new Error('Allegati non disponibili: documento o Vault non valido.');
     closeActiveDialog();
     const overlay = createElement('div', {className: 'profile-document-attachments-overlay'});
@@ -206,6 +206,7 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
     async function uploadFiles(files, {initialMode = 'free', skipImageEditor = false} = {}) {
         if (busy || !files.length) return;
         setBusy(true);
+        let uploadedCount = 0;
         try {
             for (const selectedFile of files) {
                 let file = selectedFile;
@@ -230,10 +231,16 @@ export async function openProfileDocumentAttachments({uid, documentItem, vaultKe
                     encryption: encrypted.metadata,
                     payloadBase64
                 });
+                uploadedCount += 1;
             }
+            if (!uploadedCount) return;
             showToast('Allegato salvato.', 'success');
             await load();
             await onChanged?.();
+            if (typeof onUploaded === 'function') {
+                closeActiveDialog();
+                await onUploaded({count: uploadedCount});
+            }
         } catch (error) {
             status.textContent = 'Caricamento non riuscito.';
             showToast(error.message || 'Caricamento non riuscito.', 'error');

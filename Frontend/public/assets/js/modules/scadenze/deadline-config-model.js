@@ -46,6 +46,37 @@ export function normalizeDeadlineConfig(config = {}, listKeys = []) {
     return normalized;
 }
 
+function normalizedTemplateHint(value) {
+    return String(value || '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('it-IT')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+}
+
+const DOCUMENT_TEMPLATE_STEMS = Object.freeze([
+    ['patente', 'patent'],
+    ['passaporto', 'passaport'],
+    ['identita', 'identit'],
+    ['codice fiscale', 'fiscal']
+]);
+
+// Le vecchie impostazioni conservano tipi e testi in due liste separate. Non
+// associarli per indice: le liste possono essere state riordinate in momenti
+// diversi e un Passaporto finirebbe, per esempio, con il testo dell'IMU.
+export function resolveDocumentDeadlineTemplate(config = {}, type = '') {
+    const normalizedType = normalizedTemplateHint(type);
+    const configuredType = (config.deadlineTypes || []).find(item =>
+        normalizedTemplateHint(typeof item === 'object' ? item?.name : item) === normalizedType);
+    if (typeof configuredType === 'object' && String(configuredType.templateText || '').trim()) {
+        return String(configuredType.templateText).trim();
+    }
+    const stem = DOCUMENT_TEMPLATE_STEMS.find(([typeStem]) => normalizedType.includes(typeStem))?.[1];
+    if (!stem) return '';
+    return (config.emailTemplates || []).find(template => normalizedTemplateHint(template).includes(stem)) || '';
+}
+
 export function updateDeadlineType(config, index, values) {
     validateDeadlineFrequency(values?.freq);
     const item = normalizeDeadlineType(values);

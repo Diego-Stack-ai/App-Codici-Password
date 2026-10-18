@@ -58,7 +58,7 @@ test("manual push test selects the current Italian day, then next day after midn
   for (const [instant, expected] of [["2026-09-26T21:30:00Z", "today"], ["2026-09-26T22:30:00Z", "tomorrow"]]) {
     class Clock extends Date {constructor(...args) {super(...(args.length ? args : [instant]));} static now() {return Date.parse(instant);}}
     const sent = [];
-    const device = {enabled: true, notificationScope: "deadlines", token: "synthetic"};
+    const device = {enabled: true, notificationScopes: ["deadlines"], token: "synthetic"};
     const rows = [{id: "today", data: () => ({dueDate: "2026-09-26"})}, {id: "tomorrow", data: () => ({dueDate: "2026-09-27"})}];
     const ref = {doc: () => ref, collection: () => ref, get: async () => ({exists: true, data: () => device}),
       set: async () => {}, where: () => ({get: async () => ({docs: rows})})};
