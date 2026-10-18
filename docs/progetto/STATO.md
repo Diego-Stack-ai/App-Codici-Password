@@ -1,12 +1,14 @@
 # Stato
 
-## Candidata 1.2.201 — editor dedicato delle Scadenze dei Documenti personali — 18/10/2026
+## Release 1.2.201 pubblicata — editor dedicato delle Scadenze dei Documenti personali — 18/10/2026
 
 Le Scadenze collegate a Patente, Passaporto, Carta d’identità, Codice fiscale e agli altri Documenti personali usano un editor dedicato. Intestatario, tipo, numero o codice, ente emittente e Data di scadenza arrivano dal Documento e sono presentati separatamente in sola lettura; la data resta ISO nel contratto ma in italiano appare `GG/MM/AAAA` anche nei messaggi di conferma.
 
 Il testo comune a Email e Push viene proposto dal catalogo linguistico e dalla frase configurata per il tipo di Documento, include numero ed ente quando disponibili e può essere personalizzato per la singola Scadenza. Preavviso, frequenza, destinatari, canali, permesso **Può gestire**, allegati e note restano configurabili. **Regole scadenze → Documenti personali** proietta gli stessi record e rende visibili testo, parametri, destinatari e relativo permesso senza creare copie.
 
-Diego ha autorizzato la pubblicazione coordinata come `1.2.201`. Implementazione e gate locali sono distinti da commit, push, merge, Hosting e Functions finché ciascuna fase non è completata. Firestore Rules, Storage Rules, indici, migrazioni, dati reali e invii reali sono esclusi.
+La PR `#167` è stata integrata su `master` nel commit `43d9d238` dopo i controlli documentali e la validazione GitHub completa, conclusa in 6m26s. Poiché il job automatico di deploy risultava saltato, la pubblicazione autorizzata è stata completata esplicitamente: Firebase Hosting ha distribuito **343 file** e le Functions Node.js 22 sono state aggiornate con successo in `europe-west1`. La verifica HTTP pubblica ha confermato risposta `200`, versione `1.2.201`, nuovo editor, generatore del messaggio e catalogo italiano aggiornato.
+
+Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione effettiva di Email e Push e la resa su telefono restano un collaudo manuale distinto dell'utente.
 
 ## Release 1.2.200 pubblicata — data e configurazione della Scadenza da Documento — 17/10/2026
 
