@@ -11,7 +11,12 @@ test('il runtime rinnova un token push invalidato conservando gli ambiti scelti'
     assert.match(push, /export async function recoverPushRegistration/);
     assert.match(push, /device\?\.status === 'invalid'/);
     assert.match(push, /resetLocalPushSubscription\(messaging, registration\)/);
+    assert.match(push, /serviceWorkerRegistration: registration/);
     assert.match(push, /rememberedActiveScopes\(\)/);
+    assert.match(push, /error\?\.details\?\.reason !== 'push-token-invalid'/);
+    assert.match(push, /await recoverPushRegistration\(auth\.currentUser\)/);
+    assert.equal((push.match(/result = \(await call\(\{ deviceId \}\)\)\.data/g) || []).length, 2,
+        'il test Push può essere ritentato una sola volta dopo il rinnovo');
     assert.match(main, /await recoverPushRegistration\(user\)/);
     assert.match(main, /void listenForDeadlinePushInForeground\(\)/);
     assert.ok(main.indexOf('await recoverPushRegistration(user)') < main.indexOf('void listenForDeadlinePushInForeground()'));

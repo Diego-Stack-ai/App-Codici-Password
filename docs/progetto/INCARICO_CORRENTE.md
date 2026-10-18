@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Ripristino della notifica Push di prova su iPhone — 18/10/2026
+
+Il collaudo reale successivo alla `1.2.204` mostra entrambe le preferenze Push attive sull’iPhone, ma il comando **Invia notifica di prova su questo dispositivo** termina con `[500]`. I log della callable confermano autenticazione e App Check validi e identificano la causa nel rifiuto FCM `messaging/registration-token-not-registered`: non è una notifica interna dell’app e non è un errore dei due interruttori.
+
+La correzione deve rendere il test coerente con gli invii ordinari: il backend invalida in modo condizionale soltanto il token effettivamente rifiutato, libera il limite del tentativo fallito e restituisce un motivo strutturato; il client associa esplicitamente il token al Service Worker, ricrea la registrazione conservando gli ambiti scelti e ripete l’invio una sola volta. Un errore temporaneo non deve disattivare il dispositivo e un token sostituito in parallelo non deve essere sovrascritto.
+
+Il lotto è verificato localmente. Con l’ordine esplicito **«Pubblica»**, Diego autorizza il bump patch `1.2.205`, commit, push, PR, merge e distribuzione di Firebase Hosting e della sola callable `sendDeadlinePushTest` dopo i gate verdi. Rules, indici, migrazioni e modifiche ai dati reali restano esclusi.
+
 ## Pubblicazione coordinata: Regole scadenze, Push mobile e correzioni correnti — 18/10/2026
 
 Diego autorizza il completamento e la pubblicazione congiunta del lotto locale corrente. In **Regole scadenze → Documenti personali** i Documenti del Profilo devono apparire automaticamente, ma numero, ente, rilascio, allegati e campi personalizzati restano canonici nel Profilo e non vengono ripetuti. La linguetta mostra il riferimento minimo al Documento e rende modificabili tramite l’unico editor collegato soltanto i parametri ulteriori della Scadenza: pianificazione, testo dell’avviso, destinatari e canali, permesso di gestione e nota. La data resta condivisa con il Documento e ogni modifica dall’editor viene sincronizzata nello stesso flusso.

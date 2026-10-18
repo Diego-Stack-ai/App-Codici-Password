@@ -1091,6 +1091,24 @@ exports.sendDeadlinePushTest = onCall(
             return { ok: true, opensDeadline: Boolean(deadlineId) };
         } catch (error) {
             console.error("[PUSH TEST FAILED]", error.code || error.message);
+            const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"]
+                .includes(error.code);
+            if (invalid) {
+                await db.runTransaction(async transaction => {
+                    const current = await transaction.get(deviceRef);
+                    if (!current.exists) return;
+                    const patch = {lastTestAt: admin.firestore.FieldValue.delete()};
+                    if (current.data().token === deviceData.token) Object.assign(patch, {
+                        enabled: false,
+                        status: "invalid",
+                        invalidatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                    transaction.set(deviceRef, patch, {merge: true});
+                });
+                throw new HttpsError("failed-precondition",
+                    "La registrazione Push del dispositivo non è più valida. La sto rinnovando: riprova tra pochi secondi.",
+                    {reason: "push-token-invalid"});
+            }
             throw new HttpsError("internal", "Invio della notifica di prova non riuscito.");
         }
     }
