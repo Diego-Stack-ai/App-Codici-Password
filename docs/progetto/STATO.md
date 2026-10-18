@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.203 — invio immediato dopo cambio data — 18/10/2026
+
+Il collaudo reale della Scadenza Passaporto ha confermato parametri validi — data dentro la finestra di preavviso e destinatari con Email e Push — ma nessun tentativo immediato dopo la modifica. I log di produzione hanno mostrato l'esecuzione regolare di `onScadenzaUpdated`; il sorgente ha confermato che il trigger risolveva i vecchi avvisi e azzerava i marcatori, lasciando però la consegna al controllo delle 09:00 del giorno successivo.
+
+La correzione locale fa seguire al cambio data, quando la nuova data è valida e già dentro il preavviso, il tentativo immediato di Push del proprietario, Push dei destinatari ed Email. I marcatori precedenti vengono rimossi prima dell'invio e non condizionano la nuova identità di consegna; scadenze completate, disabilitate, già trascorse o fuori finestra non inviano. Il controllo giornaliero delle 09:00 resta invariato per la frequenza successiva e i recuperi.
+
+I test mirati di creazione, aggiornamento, scheduler, Email e Push sono verdi: **41/41**. Sintassi ed ESLint dei file modificati sono verdi. La candidata è allineata alla versione `1.2.203`; commit, integrazione e distribuzione restano registrati separatamente fino alla loro conclusione. Nessun dato reale, Rule, indice o migrazione viene modificato.
+
 ## Release 1.2.202 pubblicata — flusso Documento/Scadenza e affidabilità Push — 18/10/2026
 
 Il nuovo Documento personale viene prima salvato; l'app propone quindi di aggiungere una foto o un file e apre la configurazione della Scadenza dopo l'upload, oppure subito se l'utente sceglie di continuare senza allegato. L'associazione fra tipo e frase non usa più la posizione delle liste storiche: risolve il testo per tipo o per contenuto, impedendo ad esempio che **Passaporto** riceva il testo dell'IMU. Il dettaglio mostra **Numero documento** e visualizza esattamente il testo salvato, senza ricomporlo o duplicare numero ed ente.

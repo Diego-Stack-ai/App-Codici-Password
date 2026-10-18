@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Invio immediato dopo modifica della data di Scadenza — 18/10/2026
+
+Diego conferma il contratto storico degli avvisi: quando una Scadenza viene creata oppure la sua data viene modificata e i giorni mancanti sono minori o uguali al preavviso configurato, Email e Push devono essere tentate immediatamente al salvataggio, indipendentemente dall'orario. Il controllo giornaliero delle 09:00 resta responsabile degli invii successivi secondo frequenza e del recupero delle consegne non ancora effettuate; non sostituisce il primo tentativo immediato.
+
+La correzione locale estende `onScadenzaUpdated`: dopo aver risolto gli avvisi della data precedente e azzerato i relativi marcatori, il trigger verifica data, stato, abilitazione e finestra di preavviso, quindi usa gli stessi canali della creazione per proprietario e destinatari. La modifica della data non deve produrre invii se la Scadenza è completata, disabilitata, scaduta, invalida o ancora fuori dalla finestra. Test sintetici dedicati coprono sia il tentativo immediato sia l'esclusione fuori finestra, senza usare dati reali.
+
+La precisazione autorizza implementazione locale, verifiche pertinenti, documentazione e aggiornamento Graphify. Dopo la verifica locale Diego ordina **«Chiudi la task e pubblica»**: sono quindi autorizzati bump patch `1.2.203`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e della Function modificata dopo gate verdi. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni e modifiche ai dati reali.
+
 ## Chiusura del flusso Passaporto, allegati e Push — 18/10/2026
 
 Diego richiede di chiudere le chat separate e pubblicare un unico lotto correttivo. Per un nuovo Documento personale il percorso deve essere ordinato: salvataggio del Documento, proposta facoltativa di aggiungere foto o file e, dopo il caricamento oppure dopo la scelta di proseguire senza allegato, configurazione della Scadenza. La frase proposta deve corrispondere semanticamente al tipo di Documento e non alla posizione nelle vecchie liste separate; in particolare un Passaporto non deve ricevere il testo dell'IMU. Nel dettaglio della Scadenza il numero va presentato come **Numero documento** e il testo salvato non deve essere ricomposto o duplicato.
