@@ -1,7 +1,7 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.204';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.205';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
-import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20260908d';
+import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261018a';
 import { getPushDevice, getPushDeviceConfirmed } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
@@ -108,9 +108,9 @@ async function resetLocalPushSubscription(messaging, registration) {
 }
 
 async function getTokenWithLocalRecovery(messaging, registration) {
-    // Il worker convenzionale è già attivo; Firebase lo associa internamente
-    // al proprio componente Messaging.
-    const options = { vapidKey: VAPID_KEY };
+    // Associa esplicitamente il token al worker che gestisce le notifiche:
+    // su iOS/PWA evita che il rinnovo utilizzi una registrazione differente.
+    const options = { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration };
     try {
         return await getToken(messaging, options);
     } catch (firstError) {
@@ -257,7 +257,17 @@ export async function sendDeadlinePushTest() {
     const remainingSeconds = Math.ceil((60000 - (Date.now() - lastTestAt)) / 1000);
     if (remainingSeconds > 0) throw new Error(`Attendi ancora ${remainingSeconds} secondi prima di riprovare.`);
     const call = httpsCallable(functions, 'sendDeadlinePushTest');
-    const result = (await call({ deviceId: getDeviceId() })).data;
+    const deviceId = getDeviceId();
+    let result;
+    try {
+        result = (await call({ deviceId })).data;
+    } catch (error) {
+        if (error?.details?.reason !== 'push-token-invalid') throw error;
+        // Il backend ha invalidato esclusivamente il token rifiutato da FCM.
+        // Rigeneriamo la registrazione e ritentiamo una sola volta.
+        await recoverPushRegistration(auth.currentUser);
+        result = (await call({ deviceId })).data;
+    }
     if (!result?.ok && result?.cooldownSeconds) {
         localStorage.setItem(LAST_TEST_KEY, String(Date.now() - (60000 - result.cooldownSeconds * 1000)));
         throw new Error(`Attendi ancora ${result.cooldownSeconds} secondi prima di riprovare.`);

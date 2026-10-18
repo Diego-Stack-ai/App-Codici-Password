@@ -1,5 +1,13 @@
 # Collaudi
 
+## 18/10/2026 — candidata 1.2.205, test Push iPhone con rinnovo del token FCM
+
+- Evidenza reale: callable raggiunta con Auth e App Check validi; FCM restituisce `messaging/registration-token-not-registered` per il token iPhone. Il `[500]` mostrato dall’app era quindi la perdita di questa classificazione nel solo comando di prova.
+- Prove sintetiche dedicate: token rifiutato marcato `invalid` e limite del tentativo liberato; errore temporaneo senza disattivazione; token sostituito in parallelo conservato. Recupero client: Service Worker esplicito, conservazione degli ambiti e un solo nuovo tentativo.
+- Test mirati **26/26**; suite Functions/security **473 totali, 464 superati, 9 esclusi esplicitamente, 0 errori**; sintassi JavaScript **218 moduli**; `git diff --check` verde prima dell’aggiornamento documentale.
+- Graphify principale rigenerato sulla candidata: **13.274 nodi, 34.932 archi e 677 comunità**; l’indice resta un supporto e le decisioni sono state verificate nel sorgente e nei log.
+- Il banco dimostra la correzione locale, non la ricezione su iPhone. La prova end-to-end richiede distribuzione di Hosting e della callable `sendDeadlinePushTest`, apertura dell’app installata e nuovo invio dal pulsante di prova.
+
 ## 18/10/2026 — pubblicazione 1.2.201, editor dedicato Scadenze dei Documenti personali
 
 - La data del Documento è conservata in formato canonico nel modello e mostrata secondo la lingua dell'app; in italiano usa `gg/mm/aaaa`. Il nuovo editor dedicato presenta come riepilogo non modificabile intestatario, tipo, numero, ente emittente e scadenza, senza riproporre i selettori del compositore storico.

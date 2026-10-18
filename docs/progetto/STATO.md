@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.205 — rinnovo del token Push iPhone — 18/10/2026
+
+Il test reale da **Impostazioni → Notifiche scadenze** ha restituito `[500]` benché gli interruttori Scadenze e Inviti fossero attivi. Nei log di produzione la callable ha superato Auth e App Check, ma FCM ha rifiutato il token iPhone con `messaging/registration-token-not-registered`. La `1.2.204` recuperava soltanto record già marcati invalidi; la callable di prova, diversamente dagli invii ordinari, trasformava invece il rifiuto in un errore generico senza aggiornare il record. Per questo ogni nuovo tentativo riutilizzava lo stesso token non più registrato.
+
+La candidata locale allinea i due percorsi. La callable marca come invalido solo il token che FCM ha effettivamente rifiutato, senza disattivare un’eventuale sostituzione concorrente, e rimuove il limite temporale del tentativo fallito. Il client collega esplicitamente il token al Service Worker, conserva gli ambiti abilitati, rigenera la registrazione e ritenta una sola volta. Gli errori FCM temporanei continuano a lasciare attivo il dispositivo.
+
+I test mirati Email/Push e recupero registrazione sono verdi (**26/26**); l’intera suite Functions/security è verde con **473 prove: 464 superate, 9 escluse esplicitamente e 0 errori**. Anche la verifica sintattica dei **218 moduli JavaScript** è verde. Graphify è riallineato alla candidata con **13.274 nodi, 34.932 archi e 677 comunità**. La candidata locale è `1.2.205` e la pubblicazione di Hosting e della sola callable `sendDeadlinePushTest` è autorizzata; la ricezione effettiva dovrà comunque essere confermata ripetendo il comando sull’iPhone dopo la distribuzione.
+
 ## Release 1.2.204 pubblicata — Regole scadenze e recupero Push mobile — 18/10/2026
 
 Il lotto autorizzato risolve la mancata inizializzazione delle linguette di **Regole scadenze**: il router riconosce ora `regole_scadenze.html` prima della pagina generica Scadenze. Solo la linguetta attiva ha il fondo azzurro chiaro e il testo resta leggibile; le altre hanno fondo trasparente. **Documenti personali** continua a leggere automaticamente i Documenti del Profilo, ma espone soltanto tipo/data come riferimento e i parametri specifici dell’avviso, evitando di ripetere numero, ente, allegati e campi personalizzati.
