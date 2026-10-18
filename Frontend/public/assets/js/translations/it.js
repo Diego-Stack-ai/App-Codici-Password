@@ -519,5 +519,16 @@ export default {
     recipient_attachment_navigation_warning: "I nuovi allegati scelti dal dispositivo non possono essere conservati durante il cambio pagina. Vuoi continuare e selezionarli di nuovo al ritorno?",
     recipient_manager_unavailable: "Impossibile aprire la rubrica da questa pagina.",
     deadline_draft_preserve_error: "Impossibile conservare temporaneamente i dati della scadenza.",
-    deadline_draft_restored: "Dati della scadenza ripristinati. La rubrica è aggiornata."
+    deadline_draft_restored: "Dati della scadenza ripristinati. La rubrica è aggiornata.",
+    profile_document_summary_title: "Documento personale",
+    profile_document_summary_intro: "I dati arrivano dal Profilo e non si modificano in questa pagina.",
+    profile_document_not_provided: "Non disponibile",
+    profile_document_type: "Tipo documento",
+    profile_document_number: "Numero o codice",
+    profile_document_issued_by: "Rilasciato da",
+    profile_document_message_label: "Testo dell’email e della notifica",
+    profile_document_message_help: "Il testo è proposto in base al tipo di documento. Puoi personalizzarlo per questa scadenza.",
+    profile_document_message_expiry: "È in scadenza {document}.",
+    profile_document_message_number: "Numero {number}.",
+    profile_document_message_issuer: "Rilasciato da {issuer}."
 };

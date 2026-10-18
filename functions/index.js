@@ -747,11 +747,19 @@ function sanitizeEmail(email) {
     return String(email || "").toLowerCase().replace(/[^a-zA-Z0-9]/g, "_") || "unknown_guest";
 }
 
+function isProfileDocumentDeadline(scadenza = {}) {
+    return scadenza.linkKind === "profile-document-deadline-v1"
+        || scadenza.sourceRef?.type === "profileDocument";
+}
+
 function pushText(scadenza, diffDays) {
-    const tipo = String(scadenza.type || scadenza.templateText || "Scadenza").trim();
+    const profileDocument = isProfileDocumentDeadline(scadenza);
+    const tipo = String(profileDocument
+        ? scadenza.templateText || scadenza.type || "Scadenza"
+        : scadenza.type || scadenza.templateText || "Scadenza").trim().slice(0, 300);
     const veicolo = String(scadenza.veicolo_modello || "").trim();
     const when = diffDays === 0 ? "Scade oggi" : diffDays === 1 ? "Scade domani" : `Scadenza tra ${diffDays} giorni`;
-    return { title: "Codici & Password", body: `${tipo}${veicolo ? ` · ${veicolo}` : ""}\n${when}` };
+    return { title: "Codici & Password", body: `${tipo}${!profileDocument && veicolo ? ` · ${veicolo}` : ""}\n${when}` };
 }
 
 function normalizeEmail(email) {
@@ -1730,7 +1738,9 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     const dueDateFormatted = deadlineCalendar.format(dueDay);
 
     const templateText = s.templateText || s.type || "una scadenza";
-    const veicolo = s.veicolo_modello ? ` ${escapeHtml(s.veicolo_modello)}` : "";
+    const profileDocument = s.linkKind === "profile-document-deadline-v1"
+        || s.sourceRef?.type === "profileDocument";
+    const veicolo = !profileDocument && s.veicolo_modello ? ` ${escapeHtml(s.veicolo_modello)}` : "";
 
     const giorniLabel =
         diffDays === 0 ? "⚠️ OGGI" :
@@ -1760,7 +1770,7 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
       <h1>⏰ Promemoria Scadenza</h1>
     </div>
     <p>Gentile <strong>${escapeHtml(s.name || "Utente")}</strong>,</p>
-    <p>ti ricordiamo che sta per scadere:</p>
+    <p>${profileDocument ? "ti ricordiamo questa scadenza:" : "ti ricordiamo che sta per scadere:"}</p>
 
     <div class="label">Oggetto</div>
     <div class="value">📋 ${escapeHtml(templateText)}${veicolo}</div>

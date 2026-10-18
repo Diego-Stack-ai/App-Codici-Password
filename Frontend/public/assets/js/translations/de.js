@@ -165,5 +165,16 @@ export default {
     "recipient_attachment_navigation_warning": "Neu auf diesem Gerät ausgewählte Anhänge können beim Seitenwechsel nicht erhalten bleiben. Fortfahren und sie nach der Rückkehr erneut auswählen?",
     "recipient_manager_unavailable": "Das Empfängeradressbuch kann von dieser Seite nicht geöffnet werden.",
     "deadline_draft_preserve_error": "Die Fälligkeitsdaten konnten nicht vorübergehend gespeichert werden.",
-    "deadline_draft_restored": "Fälligkeitsdaten wiederhergestellt. Das Adressbuch ist aktuell."
+    "deadline_draft_restored": "Fälligkeitsdaten wiederhergestellt. Das Adressbuch ist aktuell.",
+    "profile_document_summary_title": "Persönliches Dokument",
+    "profile_document_summary_intro": "Diese Angaben stammen aus dem Profil und können auf dieser Seite nicht geändert werden.",
+    "profile_document_not_provided": "Nicht angegeben",
+    "profile_document_type": "Dokumenttyp",
+    "profile_document_number": "Nummer oder Code",
+    "profile_document_issued_by": "Ausgestellt von",
+    "profile_document_message_label": "E-Mail- und Benachrichtigungstext",
+    "profile_document_message_help": "Der Text wird anhand des Dokumenttyps vorgeschlagen und kann für diese Frist angepasst werden.",
+    "profile_document_message_expiry": "{document} läuft bald ab.",
+    "profile_document_message_number": "Nummer {number}.",
+    "profile_document_message_issuer": "Ausgestellt von {issuer}."
 };

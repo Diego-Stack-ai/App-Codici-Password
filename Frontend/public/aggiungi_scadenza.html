@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.200" />
+    <link rel="manifest" href="manifest.json?v=1.2.201" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.200">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.200">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.200">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.200">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.200">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.200">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.200&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.201">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.201">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.201">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.201">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.201">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.201">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.201&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -41,7 +41,7 @@
             <div class="page-container pt-header-extra pb-footer-extra">
 
                 <!-- Header Pagina e Mode Switch -->
-                <div class="detail-header-container">
+                <div id="deadline-mode-selector" class="detail-header-container">
                     <!-- Mode Selector Tab Style -->
                     <div class="mode-selector-tabs">
                         <button type="button" id="mode-automezzi" class="mode-tab active" data-mode="automezzi">
@@ -59,15 +59,29 @@
                     </div>
                 </div>
 
+                <section id="profile-document-summary" class="form-section profile-document-editor-summary hidden" aria-labelledby="profile-document-summary-title">
+                    <div class="form-section-header">
+                        <h3 id="profile-document-summary-title" class="form-section-title" data-t="profile_document_summary_title">Documento personale</h3>
+                    </div>
+                    <p class="profile-document-editor-intro" data-t="profile_document_summary_intro">I dati arrivano dal Profilo e non si modificano in questa pagina.</p>
+                    <dl class="profile-document-editor-grid">
+                        <div><dt data-t="holder">Intestatario</dt><dd id="profile-document-holder">—</dd></div>
+                        <div><dt data-t="profile_document_type">Tipo documento</dt><dd id="profile-document-type">—</dd></div>
+                        <div><dt data-t="profile_document_number">Numero o codice</dt><dd id="profile-document-number">—</dd></div>
+                        <div><dt data-t="profile_document_issued_by">Rilasciato da</dt><dd id="profile-document-issuer">—</dd></div>
+                        <div><dt data-t="expiry_date">Data di scadenza</dt><dd id="profile-document-expiry">—</dd></div>
+                    </dl>
+                </section>
+
                 <!-- 1. Dati Principali -->
-                <div class="form-section">
+                <div id="deadline-generic-info-section" class="form-section">
                     <div class="form-section-header">
                         <h3 class="form-section-title" data-t="deadline_info">Dati Scadenza</h3>
                     </div>
 
                     <div class="flex-col-gap-4">
                         <!-- Intestatario / Nominativo -->
-                        <div class="form-group">
+                        <div id="deadline-holder-field" class="form-group">
                             <label class="label-sm">
                                 <span class="material-symbols-outlined icon-blue label-icon notranslate" translate="no">edit_calendar</span>
                                 <span data-t="holder">Intestatario / Nominativo</span>
@@ -86,7 +100,7 @@
                         </div>
 
                         <!-- Categoria / Oggetto (Custom Dropdown Proxy) -->
-                        <div class="form-group">
+                        <div id="deadline-category-field" class="form-group">
                             <label class="label-sm" data-t="category_object">Categoria / Oggetto Scadenza</label>
                             <div class="base-dropdown base-dropdown-full" data-custom-select="tipo_scadenza">
                                 <div class="base-btn-secondary dropdown-trigger" role="button" tabindex="0">
@@ -174,7 +188,7 @@
                     <div class="flex-col-gap-4">
                         <div class="form-grid">
                             <!-- Data Scadenza -->
-                            <div class="form-group">
+                            <div id="deadline-date-field" class="form-group">
                                 <label class="label-sm" for="dueDate">
                                     <span
                                         class="material-symbols-outlined icon-amber label-icon notranslate" translate="no">notifications_active</span>
@@ -188,14 +202,15 @@
                             </div>
 
                             <!-- Anteprima Oggetto -->
-                            <div class="form-group">
-                                <label class="label-sm" for="oggetto_email" data-t="email_subject_preview">Anteprima
+                            <div class="form-group deadline-message-field">
+                                <label id="deadline-message-label" class="label-sm" for="oggetto_email" data-t="email_subject_preview">Anteprima
                                     Oggetto</label>
                                 <div class="input-wrapper read-only input-wrapper-textarea">
                                     <textarea data-form-type="other" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" autocomplete="off" id="oggetto_email" readonly
                                         class="input italic input-textarea-resize-none"
                                         placeholder="Oggetto automatico..." rows="3"></textarea>
                                 </div>
+                                <p id="profile-document-message-help" class="deadline-field-help hidden" data-t="profile_document_message_help">Il testo è proposto in base al tipo di documento. Puoi personalizzarlo per questa scadenza.</p>
                             </div>
                         </div>
 

@@ -92,6 +92,12 @@ test("push helper filters scopes/tokens and normalizes/deduplicates recipients",
     sendEmail: true, sendPush: true, canManage: true}]);
   assert.equal(h.context.deadlineRecipients({email1: "legacy@example.invalid"})[0].sendEmail, true);
   assert.match(h.context.pushText({}, 0).body, /Scade oggi/);
+  assert.equal(h.context.pushText({
+    linkKind: "profile-document-deadline-v1",
+    type: "Passaporto",
+    templateText: "È in scadenza il tuo passaporto. Numero AA123.",
+    veicolo_modello: "AA123"
+  }, 4).body, "È in scadenza il tuo passaporto. Numero AA123.\nScadenza tra 4 giorni");
 });
 
 test("real scheduler and recipient sender retry next day, respect cadence and stop after expiry", async () => {

@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.201 — editor dedicato delle Scadenze dei Documenti personali — 18/10/2026
+
+Le Scadenze collegate a Patente, Passaporto, Carta d’identità, Codice fiscale e agli altri Documenti personali usano un editor dedicato. Intestatario, tipo, numero o codice, ente emittente e Data di scadenza arrivano dal Documento e sono presentati separatamente in sola lettura; la data resta ISO nel contratto ma in italiano appare `GG/MM/AAAA` anche nei messaggi di conferma.
+
+Il testo comune a Email e Push viene proposto dal catalogo linguistico e dalla frase configurata per il tipo di Documento, include numero ed ente quando disponibili e può essere personalizzato per la singola Scadenza. Preavviso, frequenza, destinatari, canali, permesso **Può gestire**, allegati e note restano configurabili. **Regole scadenze → Documenti personali** proietta gli stessi record e rende visibili testo, parametri, destinatari e relativo permesso senza creare copie.
+
+Diego ha autorizzato la pubblicazione coordinata come `1.2.201`. Implementazione e gate locali sono distinti da commit, push, merge, Hosting e Functions finché ciascuna fase non è completata. Firestore Rules, Storage Rules, indici, migrazioni, dati reali e invii reali sono esclusi.
+
 ## Release 1.2.200 pubblicata — data e configurazione della Scadenza da Documento — 17/10/2026
 
 La Scadenza collegata usa ora in modo vincolante la **Data di scadenza** già salvata nel Documento del Profilo: il modulo la mostra in sola lettura e non propone una nuova data calcolata. Per cambiarla occorre modificare il Documento; il collegamento transazionale continua a verificare che data del Documento, bozza e Scadenza coincidano.

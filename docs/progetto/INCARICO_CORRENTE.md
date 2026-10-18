@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Editor dedicato per le Scadenze dei Documenti personali — 17/10/2026
+
+Diego richiede di sostituire, per Patente, Passaporto, Carta d’identità, Codice fiscale e gli altri Documenti personali, la composizione generica della Scadenza con una vista dedicata. Intestatario, tipo, numero o codice, ente di rilascio e Data di scadenza provengono dal Documento: vengono riepilogati separatamente e non sono selezionabili o modificabili nell’editor Scadenza. La data resta ISO nel contratto dati ma viene presentata secondo la lingua dell’app; in italiano deve apparire `GG/MM/AAAA` anche nei messaggi di conferma.
+
+Il testo dell’email e della notifica viene proposto attraverso catalogo linguistico e testo configurato per il tipo di Documento, includendo quando disponibili numero e ente di rilascio; non è scelto dal menu generico ed è modificabile per la singola Scadenza. Restano configurabili preavviso, frequenza, destinatari, canali Email/Push, permesso di gestione, allegati e note. **Impostazioni → Regole scadenze → Documenti personali** proietta lo stesso testo e gli stessi parametri degli stessi record, senza duplicarli.
+
+Il perimetro iniziale autorizzava implementazione locale, test pertinenti, documentazione e aggiornamento del grafo principale. Il 18/10/2026, dopo la consegna del candidato locale, Diego ordina esplicitamente **«Procedi e pubblica»**: sono quindi autorizzati bump patch `1.2.201`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e Functions dopo gate verdi. Restano esclusi accesso o modifica dei dati reali, invii reali di collaudo, Firestore Rules, Storage Rules, indici e migrazioni.
+
 ## Correzione della configurazione Scadenza da Documento — 17/10/2026
 
 Diego precisa che le due date del Documento hanno ruoli distinti: la Data di rilascio è informativa, mentre la Data di scadenza è già la data finale della Scadenza e non deve essere ricalcolata o riproposta come data modificabile. Il modulo deve quindi mostrarla in sola lettura e permettere di configurare soltanto preavviso, frequenza, nota e destinatari. Per ogni destinatario restano scelte indipendenti Email, Push e permesso **Può gestire**. La selezione deve usare la medesima rubrica di **Impostazioni → Destinatari email** e consentire di aprirla per aggiungere o modificare un contatto, tornando poi alla Scadenza senza perdere i dati del modulo.

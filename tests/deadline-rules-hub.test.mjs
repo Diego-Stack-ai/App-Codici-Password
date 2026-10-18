@@ -52,6 +52,10 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(source, /deadlineRecipientsFromRecord/);
   assert.match(source, /deadline\.attachments/);
   assert.match(source, /deadline\.notes/);
+  assert.match(source, /deadline\.templateText/);
+  assert.match(source, /deadline_personal_message/);
+  assert.match(source, /deadline_personal_can_manage/);
+  assert.match(source, /deadline_personal_view_only/);
   assert.match(css, /\.deadline-personal-grid/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
 });

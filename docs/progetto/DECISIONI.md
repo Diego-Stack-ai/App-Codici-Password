@@ -1,5 +1,11 @@
 # Decisioni
 
+## 17/10/2026 — editor dedicato delle Scadenze dei Documenti personali
+
+Il flusso Documento → Scadenza non usa più la composizione generica per i dati già determinati dal Documento. Intestatario, tipo, numero o codice, ente di rilascio e Data di scadenza sono mostrati come riepilogo non modificabile; tipo ed ente restano campi distinti. Il valore data persistito rimane ISO, mentre la presentazione segue la lingua dell’app e in italiano usa `GG/MM/AAAA`.
+
+Il messaggio proposto deriva dal catalogo linguistico e dal testo configurato per il tipo di Documento, non da una frase inserita direttamente nel controller. Numero ed ente vengono aggiunti quando disponibili e il risultato resta modificabile per la singola Scadenza. Preavviso, frequenza, destinatari, Email, Push, permesso **Può gestire**, allegati e note rimangono configurabili. La linguetta **Documenti personali** nelle Regole scadenze mostra lo stesso messaggio e gli stessi parametri degli stessi record.
+
 ## 17/10/2026 — Scadenze definitive dei Documenti personali
 
 Diego approva il flusso definitivo in **Profilo → Documenti**. Un Documento privo del collegamento mostra **Configura scadenza** e apre il modulo completo già esistente; dopo il salvataggio il comando diventa **Apri scadenza del documento**. Preavviso, frequenza, destinatari e canali Email/Push, nota e riferimenti agli allegati sono configurati nello stesso flusso. Non deve comparire un comando separato per aprire una Scadenza precedente.

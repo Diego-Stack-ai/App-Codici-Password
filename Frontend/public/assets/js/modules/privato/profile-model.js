@@ -98,12 +98,16 @@ export function findCompatibleDocumentDeadlines(documentItem = {}, deadlines = [
 export function buildProfileDocumentDeadlineDraft(documentItem = {}, profile = {}) {
     const documentType = String(documentItem.type || 'Documento').trim();
     const dueDate = normalizeProfileDateInputValue(documentItem.expiry_date);
+    const documentNumber = String(documentItem.num_serie || documentItem.id_number
+        || documentItem.cf_value || documentItem.license_number || documentItem.cf || '').trim();
     return {
         profileDocumentId: documentItem.id,
         documentType,
         name: [profile.nome, profile.cognome].filter(Boolean).join(' ').trim(),
-        detail: [documentType, documentItem.num_serie || documentItem.id_number || documentItem.cf_value]
+        detail: [documentType, documentNumber]
             .filter(Boolean).join(' - '),
+        documentNumber,
+        documentIssuer: String(documentItem.rilasciato_da || '').trim(),
         dueDate,
         sourceFieldId: 'document.expiry_date',
         sourceValueAtLink: dueDate

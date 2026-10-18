@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.200';
+import {auth} from '../../firebase-config.js?v=1.2.201';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';
@@ -14,6 +14,7 @@ import {
 } from '../privato/profile-model.js';
 import {createDeadlineFromDocument} from '../privato/profilo-links.js';
 import {deadlineRecipientsFromRecord} from './deadline-recipient-model.js';
+import {deadlineDateDisplay} from './deadline-model.js';
 
 const SELECTOR = Object.freeze({
     tab: '[data-deadline-domain]',
@@ -26,8 +27,6 @@ const DOCUMENT_ENCRYPTED_FIELDS = Object.freeze([
     'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
 ]);
 const SENSITIVE_CUSTOM_FIELD = /password|passphrase|pin|puk|secret|token|codice[_ -]?app|username|credenzial/i;
-const LOCALES = Object.freeze({it: 'it-IT', en: 'en-GB', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', zh: 'zh-CN', hi: 'hi-IN', pt: 'pt-PT'});
-
 let disposeMount = () => {};
 
 function icon(name, className = '') {
@@ -40,13 +39,7 @@ function icon(name, className = '') {
 
 function formatDate(value) {
     const normalized = normalizeProfileDateInputValue(value);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized;
-    const [year, month, day] = normalized.split('-').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day));
-    if (Number.isNaN(date.getTime())) return normalized;
-    return new Intl.DateTimeFormat(LOCALES[getCurrentLanguage()] || 'it-IT', {
-        day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC'
-    }).format(date);
+    return normalized ? deadlineDateDisplay(normalized, getCurrentLanguage()) : String(value || '').trim();
 }
 
 function documentNumber(documentItem = {}) {
@@ -106,7 +99,10 @@ function recipientText(recipient) {
     const channels = [recipient.sendEmail ? t('deadline_personal_channel_email') : '',
         recipient.sendPush ? t('deadline_personal_channel_push') : ''].filter(Boolean).join(' + ');
     const identity = recipient.displayName || recipient.email;
-    return channels ? `${identity} · ${channels}` : `${identity} · ${t('deadline_personal_channel_suspended')}`;
+    const permission = t(recipient.canManage
+        ? 'deadline_personal_can_manage'
+        : 'deadline_personal_view_only');
+    return `${identity} · ${channels || t('deadline_personal_channel_suspended')} · ${permission}`;
 }
 
 function renderDeadlineSummary(deadline) {
@@ -117,6 +113,7 @@ function renderDeadlineSummary(deadline) {
     const details = [
         dataRow(t('deadline_personal_notice'), `${notice} ${t('deadline_personal_days')}`),
         dataRow(t('deadline_personal_frequency'), `${frequency} ${t('deadline_personal_days')}`),
+        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email),
         dataRow(t('deadline_personal_attachments'), String(attachments))
     ].filter(Boolean);
     if (deadline.notes) details.push(dataRow(t('deadline_personal_note'), deadline.notes));

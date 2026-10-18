@@ -1,5 +1,14 @@
 # Collaudi
 
+## 18/10/2026 — candidata 1.2.201, editor dedicato Scadenze dei Documenti personali
+
+- La data del Documento è conservata in formato canonico nel modello e mostrata secondo la lingua dell'app; in italiano usa `gg/mm/aaaa`. Il nuovo editor dedicato presenta come riepilogo non modificabile intestatario, tipo, numero, ente emittente e scadenza, senza riproporre i selettori del compositore storico.
+- Il messaggio proposto deriva dalle regole configurate per la tipologia del Documento e può essere modificato per la singola Scadenza. Numero ed ente emittente restano campi distinti; Email e Push usano lo stesso testo salvato senza duplicare il numero.
+- Restano modificabili preavviso, frequenza, destinatari e canali, permesso di gestione, allegati e note. **Regole scadenze → Documenti personali** legge lo stesso record collegato e mostra anche il messaggio configurato, senza crearne una copia.
+- Test mirati frontend **30/30**, Functions Email/Push **28/28**, Profilo **167/167**, navigazione **163/163**, offline **14/14**, i18n **14/14**, guida **6/6**, diagnostica prestazioni **3/3**, documentazione **11/11**. La suite Functions/security conta **468** prove: **459 superate**, **9 saltate esplicitamente**, **0 errori**. Verdi anche sintassi di **218 moduli**, riferimenti statici su **311 file**, HTML puro, shell pagine, CSS, dipendenze circolari, hardening e budget statico.
+- Graphify principale è stato rigenerato sulla candidata `1.2.201`: **13.184 nodi**, **34.859 archi** e **622 comunità**; le relazioni del generatore di messaggio e del riepilogo destinatari con l'editor sono state poi verificate nel sorgente.
+- Diego ha autorizzato commit, push, PR, merge e pubblicazione coordinata di Hosting e Functions. La ricezione reale di Email e Push e la resa su telefono richiedono comunque un collaudo distinto dopo la pubblicazione; Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## 17/10/2026 — pubblicazione 1.2.200, configurazione Scadenza da Documento
 
 - Test mirati **28/28**, navigazione **161/161**, offline **14/14**, i18n **14/14**, guida **6/6**, documentazione **11/11**, diagnostica prestazioni **3/3**; verdi anche versione, sintassi di **218 moduli**, riferimenti statici su **311 file**, CSS, dipendenze circolari, hardening e `git diff --check`.

@@ -520,5 +520,16 @@ export default {
     "recipient_attachment_navigation_warning": "New attachments selected from this device cannot be kept while changing pages. Continue and select them again when you return?",
     "recipient_manager_unavailable": "The address book cannot be opened from this page.",
     "deadline_draft_preserve_error": "The deadline data could not be kept temporarily.",
-    "deadline_draft_restored": "Deadline data restored. The address book is up to date."
+    "deadline_draft_restored": "Deadline data restored. The address book is up to date.",
+    "profile_document_summary_title": "Personal document",
+    "profile_document_summary_intro": "These details come from your Profile and cannot be changed on this page.",
+    "profile_document_not_provided": "Not provided",
+    "profile_document_type": "Document type",
+    "profile_document_number": "Number or code",
+    "profile_document_issued_by": "Issued by",
+    "profile_document_message_label": "Email and notification text",
+    "profile_document_message_help": "The text is suggested from the document type. You can customise it for this deadline.",
+    "profile_document_message_expiry": "The expiry date for {document} is approaching.",
+    "profile_document_message_number": "Number {number}.",
+    "profile_document_message_issuer": "Issued by {issuer}."
 };
