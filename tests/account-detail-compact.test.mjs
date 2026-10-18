@@ -89,11 +89,17 @@ test('new banking fields retain copy guards and readonly banking hides add actio
     assert.ok(created.some(item => item.textContent === 'Numero verde'));
     assert.ok(created.some(item => item.textContent === 'Referente banca'));
     const buttons = created.filter(item => item.className?.includes('copy-btn'));
+    assert.ok(buttons.every(button => button.dataset?.bankingCopy === 'true'));
     for (const button of buttons) await button.onclick({stopPropagation() {}});
     assert.deepEqual(copies, ['800-synthetic', 'Synthetic Contact']);
     active = false;
     for (const button of buttons) await button.onclick({stopPropagation() {}});
     assert.equal(copies.length, 2);
+});
+
+test('private detail preserves the banking copy handler instead of replacing it with the legacy input handler', async () => {
+    const privateSource = await readFile(new URL('../Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js', import.meta.url), 'utf8');
+    assert.match(privateSource, /\.copy-btn:not\(\[data-banking-copy="true"\]\)/);
 });
 
 test('banking view renders the complete IBAN in a responsive single-line value', async () => {
