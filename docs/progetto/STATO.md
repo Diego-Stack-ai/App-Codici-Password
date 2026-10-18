@@ -1,12 +1,16 @@
 # Stato
 
-## Candidata 1.2.205 — rinnovo del token Push iPhone — 18/10/2026
+## Release 1.2.205 pubblicata — rinnovo del token Push iPhone — 18/10/2026
 
 Il test reale da **Impostazioni → Notifiche scadenze** ha restituito `[500]` benché gli interruttori Scadenze e Inviti fossero attivi. Nei log di produzione la callable ha superato Auth e App Check, ma FCM ha rifiutato il token iPhone con `messaging/registration-token-not-registered`. La `1.2.204` recuperava soltanto record già marcati invalidi; la callable di prova, diversamente dagli invii ordinari, trasformava invece il rifiuto in un errore generico senza aggiornare il record. Per questo ogni nuovo tentativo riutilizzava lo stesso token non più registrato.
 
 La candidata locale allinea i due percorsi. La callable marca come invalido solo il token che FCM ha effettivamente rifiutato, senza disattivare un’eventuale sostituzione concorrente, e rimuove il limite temporale del tentativo fallito. Il client collega esplicitamente il token al Service Worker, conserva gli ambiti abilitati, rigenera la registrazione e ritenta una sola volta. Gli errori FCM temporanei continuano a lasciare attivo il dispositivo.
 
-I test mirati Email/Push e recupero registrazione sono verdi (**26/26**); l’intera suite Functions/security è verde con **473 prove: 464 superate, 9 escluse esplicitamente e 0 errori**. Anche la verifica sintattica dei **218 moduli JavaScript** è verde. Graphify è riallineato alla candidata con **13.274 nodi, 34.932 archi e 677 comunità**. La candidata locale è `1.2.205` e la pubblicazione di Hosting e della sola callable `sendDeadlinePushTest` è autorizzata; la ricezione effettiva dovrà comunque essere confermata ripetendo il comando sull’iPhone dopo la distribuzione.
+I test mirati Email/Push e recupero registrazione sono verdi (**26/26**); l’intera suite Functions/security è verde con **473 prove: 464 superate, 9 escluse esplicitamente e 0 errori**. Anche la verifica sintattica dei **218 moduli JavaScript** è verde. Graphify è riallineato alla release con **13.274 nodi, 34.932 archi e 677 comunità**.
+
+La PR `#175` è stata integrata su `master` nel commit `0ae341c0` dopo i due gate documentali e la validazione GitHub completa, conclusa in 7m58s. Firebase Hosting ha pubblicato **343 file** e la sola callable `sendDeadlinePushTest` è stata aggiornata in `europe-west1`; la Function risulta attiva sulla revisione `senddeadlinepushtest-00023-mif`. La verifica HTTP pubblica conferma versione `1.2.205`, cache-bust Push `20261018a`, motivo strutturato `push-token-invalid` e associazione esplicita al Service Worker.
+
+Firestore Rules, Storage Rules, indici, migrazioni, altre Functions e dati reali non sono stati modificati o distribuiti. La ricezione effettiva dovrà comunque essere confermata ripetendo il comando sull’iPhone dalla versione pubblicata.
 
 ## Release 1.2.204 pubblicata — Regole scadenze e recupero Push mobile — 18/10/2026
 

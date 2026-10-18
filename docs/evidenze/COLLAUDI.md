@@ -1,12 +1,15 @@
 # Collaudi
 
-## 18/10/2026 — candidata 1.2.205, test Push iPhone con rinnovo del token FCM
+## 18/10/2026 — pubblicazione 1.2.205, test Push iPhone con rinnovo del token FCM
 
 - Evidenza reale: callable raggiunta con Auth e App Check validi; FCM restituisce `messaging/registration-token-not-registered` per il token iPhone. Il `[500]` mostrato dall’app era quindi la perdita di questa classificazione nel solo comando di prova.
 - Prove sintetiche dedicate: token rifiutato marcato `invalid` e limite del tentativo liberato; errore temporaneo senza disattivazione; token sostituito in parallelo conservato. Recupero client: Service Worker esplicito, conservazione degli ambiti e un solo nuovo tentativo.
 - Test mirati **26/26**; suite Functions/security **473 totali, 464 superati, 9 esclusi esplicitamente, 0 errori**; sintassi JavaScript **218 moduli**; `git diff --check` verde prima dell’aggiornamento documentale.
 - Graphify principale rigenerato sulla candidata: **13.274 nodi, 34.932 archi e 677 comunità**; l’indice resta un supporto e le decisioni sono state verificate nel sorgente e nei log.
-- Il banco dimostra la correzione locale, non la ricezione su iPhone. La prova end-to-end richiede distribuzione di Hosting e della callable `sendDeadlinePushTest`, apertura dell’app installata e nuovo invio dal pulsante di prova.
+- PR `#175`: due controlli documentali e validazione GitHub completa verdi; merge `0ae341c0` in `master`, con validazione conclusa in 7m58s.
+- Deploy Firebase riuscito: **343 file Hosting** e sola callable `sendDeadlinePushTest` aggiornata in `europe-west1`. `gcloud functions describe` la conferma `ACTIVE`, revisione `senddeadlinepushtest-00023-mif`, aggiornamento `2026-10-18T21:07:05Z`.
+- Verifica remota: Home serve `v1.2.205`; `main-v129.js` usa il cache-bust `push=20261018a`; il modulo Push pubblico contiene `push-token-invalid` e `serviceWorkerRegistration`.
+- Firestore Rules, Storage Rules, indici, migrazioni, altre Functions e dati reali sono rimasti esclusi. La ricezione reale su iPhone non è attestata dal banco: richiede l’apertura dell’app installata e un nuovo invio dal pulsante di prova.
 
 ## 18/10/2026 — pubblicazione 1.2.201, editor dedicato Scadenze dei Documenti personali
 
