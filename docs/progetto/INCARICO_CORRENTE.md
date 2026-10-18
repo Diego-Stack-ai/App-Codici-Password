@@ -8,6 +8,8 @@ Per le Push il marcatore di avvenuta notifica del proprietario può avanzare sol
 
 L'ordine **«chiudi le task e pubblica»** autorizza bump patch `1.2.202`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e Functions dopo gate verdi. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni, accessi ai dati reali e invii reali di collaudo. Le due chat separate sono state archiviate; questo documento e STATO restano le fonti del lavoro consolidato.
 
+Esito: la PR `#169` è stata integrata su `master` nel commit `fe9171a8` dopo gate GitHub verdi. Graphify è stato aggiornato; Firebase Hosting ha pubblicato 343 file e tutte le Functions Node.js 22 sono state aggiornate con successo in `europe-west1`. La verifica HTTP pubblica conferma la versione `1.2.202` e i nuovi moduli. Rules, indici, migrazioni e dati reali sono rimasti esclusi; Email, Push e resa su telefono richiedono il collaudo manuale dell'utente.
+
 ## Editor dedicato per le Scadenze dei Documenti personali — 17/10/2026
 
 Diego richiede di sostituire, per Patente, Passaporto, Carta d’identità, Codice fiscale e gli altri Documenti personali, la composizione generica della Scadenza con una vista dedicata. Intestatario, tipo, numero o codice, ente di rilascio e Data di scadenza provengono dal Documento: vengono riepilogati separatamente e non sono selezionabili o modificabili nell’editor Scadenza. La data resta ISO nel contratto dati ma viene presentata secondo la lingua dell’app; in italiano deve apparire `GG/MM/AAAA` anche nei messaggi di conferma.
