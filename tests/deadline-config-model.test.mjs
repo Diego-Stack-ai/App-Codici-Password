@@ -73,3 +73,25 @@ test('aggiorna liste e tipi senza mutare la configurazione corrente', () => {
         models: ['Automobile']
     });
 });
+
+test('associa il testo al tipo documento per contenuto e mai per posizione', () => {
+    const config = {
+        deadlineTypes: [
+            {name: 'Passaporto', period: 28, freq: 14},
+            {name: 'Carta Identità', period: 56, freq: 14},
+            {name: 'IMU', period: 30, freq: 7}
+        ],
+        emailTemplates: [
+            'Pagamento IMU abitazione principale',
+            'Il tuo documento di Identità',
+            'Il tuo passaporto'
+        ]
+    };
+    assert.equal(model.resolveDocumentDeadlineTemplate(config, 'Passaporto'), 'Il tuo passaporto');
+    assert.equal(model.resolveDocumentDeadlineTemplate(config, 'Carta d’identità'), 'Il tuo documento di Identità');
+    assert.equal(model.resolveDocumentDeadlineTemplate(config, 'IMU'), '');
+    assert.equal(model.resolveDocumentDeadlineTemplate({
+        deadlineTypes: [{name: 'Passaporto', templateText: 'Testo personalizzato'}],
+        emailTemplates: ['Il tuo passaporto']
+    }, 'Passaporto'), 'Testo personalizzato');
+});

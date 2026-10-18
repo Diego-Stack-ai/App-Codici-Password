@@ -3,7 +3,7 @@ const changeProfileAccount = (...args) => import('../shared/profile-account-mana
 const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /** Profilo privato: stato condiviso, inizializzazione dei moduli e caricamento progressivo. */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.201';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.202';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -22,7 +22,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.201&touch=20261017b';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.202&touch=20261017b';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -87,25 +87,45 @@ const editAddress = (...args) => runProfileEdit('editAddress', args);
 const editUserDocument = (...args) => runProfileEdit('editUserDocument', args);
 const addUtility = (...args) => runProfileEdit('addUtility', args);
 const editUtility = (...args) => runProfileEdit('editUtility', args);
-const manageDocumentAttachments = async documentItem => {
+const manageDocumentAttachments = async (documentItem, {onUploaded} = {}) => {
     const uid = currentUserUid;
     const vaultKey = await ensureVaultKeyMaterial();
     if (!uid || !vaultKey || auth.currentUser?.uid !== uid) throw new Error('Sblocca il Vault per gestire gli allegati.');
-    const module = await import('./profile-document-attachments.js?v=1.2.201');
+    const module = await import('./profile-document-attachments.js?v=1.2.202');
     return module.openProfileDocumentAttachments({
         uid, documentItem, vaultKey,
         encryptName: value => encrypt(value, vaultKey),
         decryptName: value => decryptIfPossible(value, vaultKey),
-        onChanged: refreshDocumentAttachmentPreviews
+        onChanged: refreshDocumentAttachmentPreviews,
+        onUploaded
     });
 };
+
+async function continueNewDocumentFlow(documentItem) {
+    const addAttachment = await showConfirmModal(
+        t('profile_document_attachment_prompt_title'),
+        t('profile_document_attachment_prompt_message'),
+        t('profile_document_attachment_add_action'),
+        t('profile_document_attachment_skip_action')
+    );
+    if (addAttachment) {
+        let continued = false;
+        await manageDocumentAttachments(documentItem, {onUploaded: async () => {
+            if (continued) return;
+            continued = true;
+            await createDeadlineFromDocument(documentItem, syncData, currentUserData, {openWhenCurrent: false});
+        }});
+        return;
+    }
+    await createDeadlineFromDocument(documentItem, syncData, currentUserData, {openWhenCurrent: false});
+}
 
 async function refreshDocumentAttachmentPreviews() {
     const uid = currentUserUid;
     if (!uid || auth.currentUser?.uid !== uid) return;
     try {
         const vaultKey = await ensureVaultKeyMaterial();
-        const module = await import('./profile-document-attachments.js?v=1.2.201');
+        const module = await import('./profile-document-attachments.js?v=1.2.202');
         if (uid !== currentUserUid || auth.currentUser?.uid !== uid) return;
         await module.renderProfileDocumentAttachmentPreviews({
             uid,
@@ -227,12 +247,9 @@ function buildCtx() {
         renderAddressesView,
         renderDocumentiView,
         loadUserData,
-        onDocumentSaved: ({ documentItem }) => createDeadlineFromDocument(
-            documentItem,
-            syncData,
-            currentUserData,
-            {openWhenCurrent: false}
-        )
+        onDocumentSaved: ({ documentItem, isNew }) => (isNew
+            ? continueNewDocumentFlow(documentItem)
+            : createDeadlineFromDocument(documentItem, syncData, currentUserData, {openWhenCurrent: false}))
             .then(() => renderDocumentiView())
             .catch(error => {
                 logError('ProfileDocumentDeadline', error);
@@ -558,7 +575,7 @@ async function deleteDocumento(idx) {
         if (removedDocument?.pilotDeadlineReference?.deadlineId
             || removedDocument?.expiryReference?.experimentTag === 'prova-scadenze') {
             try {
-                const module = await import('./profile-document-deadline-pilot.js?v=1.2.201');
+                const module = await import('./profile-document-deadline-pilot.js?v=1.2.202');
                 await module.markRemovedProfileDocumentPilot(removedDocument);
             } catch (unlinkError) {
                 console.warn('[Documento] Pilot da verificare non aggiornato durante la rimozione:', unlinkError);

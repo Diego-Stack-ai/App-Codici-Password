@@ -185,7 +185,7 @@ test("push no devices still produces inbox record; D0 has distinct ID and short 
   await h.run();
   assert.equal(h.sent.length, 0);
   assert.equal(h.records.get(notification).status, "unread");
-  assert.equal(h.updates.length, 1);
+  assert.equal(h.updates.length, 0);
   const today = harness();
   await today.run({}, 0);
   assert.equal(today.sent[0].data.notificationId, "dl_20260930_D0");

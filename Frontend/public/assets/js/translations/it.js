@@ -516,6 +516,10 @@ export default {
     profile_deadline_update_message: "La nuova data è {date}. Vuoi aggiornare la scadenza collegata mantenendo avvisi, destinatari e nota?",
     profile_deadline_updated: "Scadenza collegata aggiornata.",
     profile_deadline_error: "Impossibile configurare la scadenza del documento. Riprova.",
+    profile_document_attachment_prompt_title: "Allega il documento",
+    profile_document_attachment_prompt_message: "Vuoi aggiungere ora una foto o un file del documento? Dopo il caricamento potrai configurare la sua scadenza.",
+    profile_document_attachment_add_action: "Aggiungi allegato",
+    profile_document_attachment_skip_action: "Continua senza allegato",
     recipient_attachment_navigation_warning: "I nuovi allegati scelti dal dispositivo non possono essere conservati durante il cambio pagina. Vuoi continuare e selezionarli di nuovo al ritorno?",
     recipient_manager_unavailable: "Impossibile aprire la rubrica da questa pagina.",
     deadline_draft_preserve_error: "Impossibile conservare temporaneamente i dati della scadenza.",
@@ -525,10 +529,12 @@ export default {
     profile_document_not_provided: "Non disponibile",
     profile_document_type: "Tipo documento",
     profile_document_number: "Numero o codice",
+    profile_document_number_label: "Numero documento",
+    profile_document_number_icon: "badge",
     profile_document_issued_by: "Rilasciato da",
     profile_document_message_label: "Testo dell’email e della notifica",
     profile_document_message_help: "Il testo è proposto in base al tipo di documento. Puoi personalizzarlo per questa scadenza.",
-    profile_document_message_expiry: "È in scadenza {document}.",
-    profile_document_message_number: "Numero {number}.",
-    profile_document_message_issuer: "Rilasciato da {issuer}."
+    profile_document_message_expiry: "Ciao, è in scadenza {document}",
+    profile_document_message_number: "con numero di serie {number}",
+    profile_document_message_issuer: "rilasciato da {issuer}."
 };

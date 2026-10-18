@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Chiusura del flusso Passaporto, allegati e Push — 18/10/2026
+
+Diego richiede di chiudere le chat separate e pubblicare un unico lotto correttivo. Per un nuovo Documento personale il percorso deve essere ordinato: salvataggio del Documento, proposta facoltativa di aggiungere foto o file e, dopo il caricamento oppure dopo la scelta di proseguire senza allegato, configurazione della Scadenza. La frase proposta deve corrispondere semanticamente al tipo di Documento e non alla posizione nelle vecchie liste separate; in particolare un Passaporto non deve ricevere il testo dell'IMU. Nel dettaglio della Scadenza il numero va presentato come **Numero documento** e il testo salvato non deve essere ricomposto o duplicato.
+
+Per le Push il marcatore di avvenuta notifica del proprietario può avanzare soltanto dopo almeno una consegna accettata: l'assenza di dispositivi attivi non equivale a invio riuscito. La Push di prova deve accettare il contratto corrente `notificationScopes[]`, continuando a tollerare il vecchio campo singolo, e deve rifiutare dispositivi senza token.
+
+L'ordine **«chiudi le task e pubblica»** autorizza bump patch `1.2.202`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e Functions dopo gate verdi. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni, accessi ai dati reali e invii reali di collaudo. Le due chat separate sono state archiviate; questo documento e STATO restano le fonti del lavoro consolidato.
+
 ## Editor dedicato per le Scadenze dei Documenti personali — 17/10/2026
 
 Diego richiede di sostituire, per Patente, Passaporto, Carta d’identità, Codice fiscale e gli altri Documenti personali, la composizione generica della Scadenza con una vista dedicata. Intestatario, tipo, numero o codice, ente di rilascio e Data di scadenza provengono dal Documento: vengono riepilogati separatamente e non sono selezionabili o modificabili nell’editor Scadenza. La data resta ISO nel contratto dati ma viene presentata secondo la lingua dell’app; in italiano deve apparire `GG/MM/AAAA` anche nei messaggi di conferma.

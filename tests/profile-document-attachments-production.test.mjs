@@ -40,6 +40,8 @@ test('Profilo Documenti usa selettore e fallback Carta condivisi con gli account
     assert.match(companyDetail, /consumeAttachmentInitialMode/);
     assert.match(controller, /application\/pdf/);
     assert.match(controller, /uploadProfileDocumentAttachment/);
+    assert.match(controller, /onUploaded/);
+    assert.match(controller, /closeActiveDialog\(\);[\s\S]+await onUploaded/);
     assert.match(controller, /removeProfileDocumentAttachment/);
     assert.match(page, /profile-document-attachments\.css/);
     assert.match(cards, /profile-document-inline-attachments/);
@@ -59,6 +61,19 @@ test('Profilo Documenti usa selettore e fallback Carta condivisi con gli account
     ]) {
         assert.doesNotMatch(html, /source-selector-modal|btn-card-camera/);
     }
+});
+
+test('un nuovo documento propone prima l’allegato e configura la scadenza dopo il caricamento', async () => {
+    const profile = await read('Frontend/public/assets/js/modules/privato/profilo_privato.js');
+    const actions = await read('Frontend/public/assets/js/modules/privato/profilo-actions.js');
+    const saved = actions.indexOf('await syncData();', actions.indexOf('export async function editUserDocument'));
+    const callback = actions.indexOf('await onDocumentSaved?.', saved);
+    assert.ok(saved >= 0 && callback > saved, 'il documento deve essere persistito prima del seguito');
+    const flow = profile.slice(profile.indexOf('async function continueNewDocumentFlow'));
+    const attachment = flow.indexOf('manageDocumentAttachments');
+    const deadline = flow.indexOf('createDeadlineFromDocument');
+    assert.ok(attachment >= 0 && deadline > attachment, 'il caricamento deve precedere la configurazione della scadenza');
+    assert.match(flow, /isNew\s*\?\s*continueNewDocumentFlow/);
 });
 
 test('ogni documento mostra dati, allegati e azioni nello stesso blocco e in questo ordine', async () => {

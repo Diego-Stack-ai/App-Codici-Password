@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.202 — flusso Documento/Scadenza e affidabilità Push — 18/10/2026
+
+Il nuovo Documento personale viene prima salvato; l'app propone quindi di aggiungere una foto o un file e apre la configurazione della Scadenza dopo l'upload, oppure subito se l'utente sceglie di continuare senza allegato. L'associazione fra tipo e frase non usa più la posizione delle liste storiche: risolve il testo per tipo o per contenuto, impedendo ad esempio che **Passaporto** riceva il testo dell'IMU. Il dettaglio mostra **Numero documento** e visualizza esattamente il testo salvato, senza ricomporlo o duplicare numero ed ente.
+
+Il backend non registra più una Push come inviata quando non esiste alcun dispositivo attivo. Il comando di prova riconosce il contratto corrente `notificationScopes[]`, preserva la compatibilità col vecchio campo singolo e richiede un token. Le prove mirate di configurazione Documenti, allegati, dettaglio, Email e Push sono verdi; prima della pubblicazione restano i gate complessivi pertinenti, l'aggiornamento Graphify, l'integrazione e la verifica HTTP.
+
+Per questa candidata sono autorizzati Hosting e Functions. Firestore Rules, Storage Rules, indici, migrazioni, dati reali e invii reali sono esclusi.
+
 ## Release 1.2.201 pubblicata — editor dedicato delle Scadenze dei Documenti personali — 18/10/2026
 
 Le Scadenze collegate a Patente, Passaporto, Carta d’identità, Codice fiscale e agli altri Documenti personali usano un editor dedicato. Intestatario, tipo, numero o codice, ente emittente e Data di scadenza arrivano dal Documento e sono presentati separatamente in sola lettura; la data resta ISO nel contratto ma in italiano appare `GG/MM/AAAA` anche nei messaggi di conferma.

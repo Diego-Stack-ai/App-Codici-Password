@@ -1,5 +1,11 @@
 # Allegati documenti
 
+## Sequenza di creazione Documento e Scadenza — candidata 1.2.202
+
+Un nuovo Documento viene persistito prima di qualsiasi upload. Subito dopo l'app propone facoltativamente di aggiungere un allegato: se l'upload riesce, il gestore si chiude e prosegue una sola volta verso la configurazione della Scadenza; se l'utente sceglie **Continua senza allegato**, la configurazione si apre senza creare file. Chiudere il gestore senza caricare nulla non crea automaticamente una Scadenza; resta disponibile il comando **Configura scadenza** sulla scheda del Documento.
+
+Upload, cifratura, percorsi Storage e riferimenti nella Scadenza restano quelli già definiti. Questa sequenza non rende il file un allegato materiale dell'email e non modifica Rules o dati esistenti.
+
 ## Documenti personali e Scadenze definitive — 17/10/2026
 
 La Scadenza definitiva conserva riferimenti agli allegati già cifrati del Documento del Profilo. `storagePath`, proprietà e origine devono restare quelli del Documento: non viene creato un secondo file in Storage e la cancellazione della Scadenza non può eliminare l'oggetto sorgente. Il riepilogo **Regole scadenze → Documenti personali** mostra soltanto il conteggio; l'apertura del file continua ad avvenire nel percorso autenticato dell'app.

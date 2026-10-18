@@ -1,5 +1,11 @@
 # Profilo e account
 
+## Collegamento Documento/Scadenza — candidata 1.2.202
+
+Dopo il salvataggio di un nuovo Documento, il Profilo propone prima l'eventuale allegato e poi la configurazione della Scadenza. La frase suggerita è associata semanticamente al tipo di Documento e non all'indice delle vecchie liste di configurazione; un tipo privo di corrispondenza non eredita testi estranei. Nel dettaglio collegato il campo derivato dal Documento è etichettato **Numero documento** e il messaggio viene mostrato esattamente come salvato.
+
+La modifica di un Documento già collegato continua a usare il controllo transazionale esistente e non riapre il percorso iniziale degli allegati. Nessun Documento o Scadenza storico viene migrato o eliminato automaticamente.
+
 ## Scadenze definitive dai Documenti del Profilo
 
 Il comando **Configura scadenza** della scheda Documento apre una vista dedicata dell’editor Scadenza. La pagina riepiloga senza menu modificabili intestatario, tipo di documento, numero o codice, ente di rilascio e data finale; tipo ed ente non vengono uniti. La data deriva esclusivamente da `document.expiry_date`, resta ISO nel modello ed è presentata nella lingua dell’app (`GG/MM/AAAA` in italiano). Il messaggio viene proposto dal catalogo e dal testo configurato per il tipo, completato con numero ed ente quando disponibili, e può essere personalizzato per la singola Scadenza. L’utente modifica inoltre preavviso, frequenza e nota, gestisce gli allegati e configura i destinatari scegliendo separatamente **Email**, **Push** e **Può gestire**. Un tipo di documento non ancora presente nelle vecchie liste resta comunque configurabile. Dopo il salvataggio il comando diventa **Apri scadenza del documento**.
