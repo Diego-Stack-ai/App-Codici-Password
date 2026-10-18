@@ -8,6 +8,8 @@ La correzione locale estende `onScadenzaUpdated`: dopo aver risolto gli avvisi d
 
 La precisazione autorizza implementazione locale, verifiche pertinenti, documentazione e aggiornamento Graphify. Dopo la verifica locale Diego ordina **«Chiudi la task e pubblica»**: sono quindi autorizzati bump patch `1.2.203`, commit, push, PR, merge e distribuzione coordinata di Firebase Hosting e della Function modificata dopo gate verdi. Restano esclusi Firestore Rules, Storage Rules, indici, migrazioni e modifiche ai dati reali.
 
+Esito: la PR `#171` è stata integrata su `master` nel commit `30c57ae6` dopo gate GitHub verdi. Firebase Hosting ha pubblicato 343 file e la sola Function `onScadenzaUpdated` è stata aggiornata con successo in `europe-west1`; la verifica HTTP pubblica conferma la versione `1.2.203`. Rules, indici, migrazioni e dati reali sono rimasti esclusi. La ricezione effettiva di Email e Push richiede il collaudo manuale dell'utente modificando nuovamente la data di una Scadenza dentro la finestra di preavviso.
+
 ## Chiusura del flusso Passaporto, allegati e Push — 18/10/2026
 
 Diego richiede di chiudere le chat separate e pubblicare un unico lotto correttivo. Per un nuovo Documento personale il percorso deve essere ordinato: salvataggio del Documento, proposta facoltativa di aggiungere foto o file e, dopo il caricamento oppure dopo la scelta di proseguire senza allegato, configurazione della Scadenza. La frase proposta deve corrispondere semanticamente al tipo di Documento e non alla posizione nelle vecchie liste separate; in particolare un Passaporto non deve ricevere il testo dell'IMU. Nel dettaglio della Scadenza il numero va presentato come **Numero documento** e il testo salvato non deve essere ricomposto o duplicato.
