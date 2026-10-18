@@ -1,12 +1,14 @@
 # Stato
 
-## Candidata 1.2.202 — flusso Documento/Scadenza e affidabilità Push — 18/10/2026
+## Release 1.2.202 pubblicata — flusso Documento/Scadenza e affidabilità Push — 18/10/2026
 
 Il nuovo Documento personale viene prima salvato; l'app propone quindi di aggiungere una foto o un file e apre la configurazione della Scadenza dopo l'upload, oppure subito se l'utente sceglie di continuare senza allegato. L'associazione fra tipo e frase non usa più la posizione delle liste storiche: risolve il testo per tipo o per contenuto, impedendo ad esempio che **Passaporto** riceva il testo dell'IMU. Il dettaglio mostra **Numero documento** e visualizza esattamente il testo salvato, senza ricomporlo o duplicare numero ed ente.
 
-Il backend non registra più una Push come inviata quando non esiste alcun dispositivo attivo. Il comando di prova riconosce il contratto corrente `notificationScopes[]`, preserva la compatibilità col vecchio campo singolo e richiede un token. Le prove mirate di configurazione Documenti, allegati, dettaglio, Email e Push sono verdi; prima della pubblicazione restano i gate complessivi pertinenti, l'aggiornamento Graphify, l'integrazione e la verifica HTTP.
+Il backend non registra più una Push come inviata quando non esiste alcun dispositivo attivo. Il comando di prova riconosce il contratto corrente `notificationScopes[]`, preserva la compatibilità col vecchio campo singolo e richiede un token.
 
-Per questa candidata sono autorizzati Hosting e Functions. Firestore Rules, Storage Rules, indici, migrazioni, dati reali e invii reali sono esclusi.
+La PR `#169` è stata integrata su `master` nel commit `fe9171a8` dopo i controlli documentali e la validazione GitHub completa, conclusa in 8m19s. Graphify è stato aggiornato sul corpus strutturale della release. Firebase Hosting ha distribuito **343 file** e le Functions Node.js 22 sono state aggiornate con successo in `europe-west1`. La verifica HTTP pubblica ha confermato versione `1.2.202`, percorso allegato→Scadenza, etichetta del numero documento e risolutore semantico del testo.
+
+Firestore Rules, Storage Rules, indici, migrazioni, dati reali e invii reali non sono stati modificati o distribuiti. La ricezione effettiva di Email e Push e la prova completa su telefono restano un collaudo manuale distinto dell'utente.
 
 ## Release 1.2.201 pubblicata — editor dedicato delle Scadenze dei Documenti personali — 18/10/2026
 

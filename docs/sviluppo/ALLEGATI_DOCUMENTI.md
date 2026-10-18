@@ -1,6 +1,6 @@
 # Allegati documenti
 
-## Sequenza di creazione Documento e Scadenza — candidata 1.2.202
+## Sequenza di creazione Documento e Scadenza — pubblicata 1.2.202
 
 Un nuovo Documento viene persistito prima di qualsiasi upload. Subito dopo l'app propone facoltativamente di aggiungere un allegato: se l'upload riesce, il gestore si chiude e prosegue una sola volta verso la configurazione della Scadenza; se l'utente sceglie **Continua senza allegato**, la configurazione si apre senza creare file. Chiudere il gestore senza caricare nulla non crea automaticamente una Scadenza; resta disponibile il comando **Configura scadenza** sulla scheda del Documento.
 

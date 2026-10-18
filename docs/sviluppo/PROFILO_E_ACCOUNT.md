@@ -1,6 +1,6 @@
 # Profilo e account
 
-## Collegamento Documento/Scadenza — candidata 1.2.202
+## Collegamento Documento/Scadenza — pubblicato 1.2.202
 
 Dopo il salvataggio di un nuovo Documento, il Profilo propone prima l'eventuale allegato e poi la configurazione della Scadenza. La frase suggerita è associata semanticamente al tipo di Documento e non all'indice delle vecchie liste di configurazione; un tipo privo di corrispondenza non eredita testi estranei. Nel dettaglio collegato il campo derivato dal Documento è etichettato **Numero documento** e il messaggio viene mostrato esattamente come salvato.
 
