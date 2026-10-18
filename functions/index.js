@@ -2017,6 +2017,7 @@ exports.onScadenzaCreated = onDocumentCreated(
 exports.onScadenzaUpdated = onDocumentUpdated(
     {
         document: "users/{uid}/scadenze/{scadenzaId}",
+        secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
         region: "europe-west1",
         memory: "256MiB",
         timeoutSeconds: 60,
@@ -2052,6 +2053,50 @@ exports.onScadenzaUpdated = onDocumentUpdated(
             });
         }
         await batch.commit();
+
+        // Una nuova data dentro la finestra di preavviso equivale, per la
+        // consegna, alla creazione di una nuova scadenza: non attendere il
+        // controllo schedulato delle 09:00. I marker legacy appena rimossi non
+        // devono influenzare la nuova identita di consegna basata sulla data.
+        if (!dueDateChanged || after.completed || !deadlineDeliveryEnabled(after)) return;
+        const today = deadlineCalendar.day(new Date());
+        const dueDay = deadlineCalendar.day(after.dueDate);
+        if (dueDay === null) return;
+        const diffDays = deadlineCalendar.distance(today, dueDay);
+        const daysBefore = Number(after.notif_days_before || 14);
+        if (diffDays === null || diffDays < 0 || diffDays > daysBefore) return;
+
+        const deliveryData = {
+            ...after,
+            lastPushNotifiedAt: null,
+            lastRecipientPushNotifiedAt: null,
+            lastNotifiedAt: null
+        };
+        try {
+            await sendDeadlinePush(db, event.params.uid, event.params.scadenzaId, deliveryData, diffDays, {
+                forceImmediate: true
+            });
+        } catch (pushErr) {
+            console.error(`[UPDATE PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
+        }
+        try {
+            await sendRecipientDeadlinePushes(db, event.params.uid, event.params.scadenzaId, deliveryData, diffDays, {
+                forceImmediate: true
+            });
+        } catch (pushErr) {
+            console.error(`[UPDATE RECIPIENT PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
+        }
+        if (!deadlineRecipients(deliveryData).some((recipient) => recipient.sendEmail)) return;
+
+        const gmailUser = GMAIL_USER.value();
+        const gmailPass = GMAIL_APP_PASSWORD.value();
+        const transporter = createTransporter(gmailUser, gmailPass);
+        try {
+            await sendScadenzaEmail(transporter, gmailUser, deliveryData, diffDays, event.data.after.ref);
+            console.log(`[UPDATE] Email immediata inviata per scadenza ${event.params.scadenzaId}`);
+        } catch (emailErr) {
+            console.error(`[UPDATE EMAIL FAILED] ${event.params.scadenzaId}:`, emailErr.message);
+        }
     }
 );
 
