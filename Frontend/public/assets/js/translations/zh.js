@@ -164,5 +164,16 @@ export default {
     "recipient_attachment_navigation_warning": "切换页面时无法保留刚从此设备选择的附件。是否继续，并在返回后重新选择？",
     "recipient_manager_unavailable": "无法从此页面打开收件人通讯录。",
     "deadline_draft_preserve_error": "无法临时保留到期事项数据。",
-    "deadline_draft_restored": "已恢复到期事项数据，通讯录已更新。"
+    "deadline_draft_restored": "已恢复到期事项数据，通讯录已更新。",
+    "profile_document_summary_title": "个人证件",
+    "profile_document_summary_intro": "这些资料来自个人资料页，不能在此页面修改。",
+    "profile_document_not_provided": "未提供",
+    "profile_document_type": "证件类型",
+    "profile_document_number": "号码或代码",
+    "profile_document_issued_by": "签发机构",
+    "profile_document_message_label": "电子邮件和通知文字",
+    "profile_document_message_help": "文字会根据证件类型提出建议，你可以为本次到期提醒进行修改。",
+    "profile_document_message_expiry": "{document} 即将到期。",
+    "profile_document_message_number": "号码 {number}。",
+    "profile_document_message_issuer": "签发机构：{issuer}。"
 };

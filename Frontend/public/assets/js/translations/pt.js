@@ -164,5 +164,16 @@ export default {
     "recipient_attachment_navigation_warning": "Os novos anexos selecionados neste dispositivo não podem ser mantidos ao mudar de página. Pretende continuar e selecioná-los novamente ao regressar?",
     "recipient_manager_unavailable": "Não é possível abrir o livro de destinatários a partir desta página.",
     "deadline_draft_preserve_error": "Não foi possível conservar temporariamente os dados do prazo.",
-    "deadline_draft_restored": "Dados do prazo restaurados. O livro de destinatários está atualizado."
+    "deadline_draft_restored": "Dados do prazo restaurados. O livro de destinatários está atualizado.",
+    "profile_document_summary_title": "Documento pessoal",
+    "profile_document_summary_intro": "Estes dados vêm do Perfil e não podem ser alterados nesta página.",
+    "profile_document_not_provided": "Não disponível",
+    "profile_document_type": "Tipo de documento",
+    "profile_document_number": "Número ou código",
+    "profile_document_issued_by": "Emitido por",
+    "profile_document_message_label": "Texto do email e da notificação",
+    "profile_document_message_help": "O texto é sugerido com base no tipo de documento. Pode personalizá-lo para este prazo.",
+    "profile_document_message_expiry": "{document} está próximo do vencimento.",
+    "profile_document_message_number": "Número {number}.",
+    "profile_document_message_issuer": "Emitido por {issuer}."
 };

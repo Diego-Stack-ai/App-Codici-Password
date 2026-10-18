@@ -16,7 +16,7 @@ test('precompila nominativo, categoria, dettaglio e data nelle rispettive zone',
     id: 'doc-1', type: 'Patente', num_serie: 'AB123', expiry_date: '2030-04-14'
   }, {nome: 'Diego', cognome: 'Boschetto'}), {
     profileDocumentId: 'doc-1', documentType: 'Patente', name: 'Diego Boschetto',
-    detail: 'Patente - AB123', dueDate: '2030-04-14',
+    detail: 'Patente - AB123', documentNumber: 'AB123', documentIssuer: '', dueDate: '2030-04-14',
     sourceFieldId: 'document.expiry_date', sourceValueAtLink: '2030-04-14'
   }));
 });

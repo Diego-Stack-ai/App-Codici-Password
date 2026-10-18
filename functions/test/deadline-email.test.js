@@ -65,6 +65,17 @@ test("email without enabled recipients performs no delivery or update", async ()
   assert.equal(h.mails.length + h.updates.length + h.lookups.length, 0);
 });
 
+test("profile document email uses the configured full message without repeating its number", async () => {
+  const h = harness();
+  await h.send({
+    linkKind: "profile-document-deadline-v1",
+    templateText: "È in scadenza il tuo passaporto. Numero AA123. Rilasciato dalla Questura.",
+    veicolo_modello: "AA123"
+  });
+  assert.match(h.mails[0].html, /ti ricordiamo questa scadenza/);
+  assert.equal((h.mails[0].html.match(/AA123/g) || []).length, 1);
+});
+
 test("overlapping email calls reserve once for the same deadline", async () => {
   const h = harness();
   await Promise.all([h.send(), h.send()]);

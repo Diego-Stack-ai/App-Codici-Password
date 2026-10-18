@@ -268,5 +268,16 @@ export default {
     "recipient_attachment_navigation_warning": "Los archivos nuevos seleccionados en este dispositivo no pueden conservarse al cambiar de página. ¿Quieres continuar y volver a seleccionarlos al regresar?",
     "recipient_manager_unavailable": "No se puede abrir la libreta de destinatarios desde esta página.",
     "deadline_draft_preserve_error": "No se han podido conservar temporalmente los datos del vencimiento.",
-    "deadline_draft_restored": "Datos del vencimiento restaurados. La libreta está actualizada."
+    "deadline_draft_restored": "Datos del vencimiento restaurados. La libreta está actualizada.",
+    "profile_document_summary_title": "Documento personal",
+    "profile_document_summary_intro": "Estos datos proceden del Perfil y no se modifican en esta página.",
+    "profile_document_not_provided": "No disponible",
+    "profile_document_type": "Tipo de documento",
+    "profile_document_number": "Número o código",
+    "profile_document_issued_by": "Expedido por",
+    "profile_document_message_label": "Texto del correo y de la notificación",
+    "profile_document_message_help": "El texto se propone según el tipo de documento. Puedes personalizarlo para este vencimiento.",
+    "profile_document_message_expiry": "Está a punto de vencer {document}.",
+    "profile_document_message_number": "Número {number}.",
+    "profile_document_message_issuer": "Expedido por {issuer}."
 };

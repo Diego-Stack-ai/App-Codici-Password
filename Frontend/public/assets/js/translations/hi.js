@@ -164,5 +164,16 @@ export default {
     "recipient_attachment_navigation_warning": "इस डिवाइस से चुने गए नए अटैचमेंट पेज बदलते समय सुरक्षित नहीं रह सकते। क्या जारी रखकर लौटने पर उन्हें फिर से चुनना है?",
     "recipient_manager_unavailable": "इस पेज से प्राप्तकर्ता पता-पुस्तिका नहीं खोली जा सकती।",
     "deadline_draft_preserve_error": "समय-सीमा का डेटा अस्थायी रूप से सुरक्षित नहीं किया जा सका।",
-    "deadline_draft_restored": "समय-सीमा का डेटा पुनर्स्थापित हुआ। पता-पुस्तिका अपडेट है।"
+    "deadline_draft_restored": "समय-सीमा का डेटा पुनर्स्थापित हुआ। पता-पुस्तिका अपडेट है।",
+    "profile_document_summary_title": "व्यक्तिगत दस्तावेज़",
+    "profile_document_summary_intro": "ये विवरण प्रोफ़ाइल से आते हैं और इस पृष्ठ पर बदले नहीं जा सकते।",
+    "profile_document_not_provided": "उपलब्ध नहीं",
+    "profile_document_type": "दस्तावेज़ प्रकार",
+    "profile_document_number": "नंबर या कोड",
+    "profile_document_issued_by": "जारीकर्ता",
+    "profile_document_message_label": "ईमेल और सूचना का पाठ",
+    "profile_document_message_help": "दस्तावेज़ के प्रकार के आधार पर पाठ सुझाया जाता है। आप इसे इस समय-सीमा के लिए बदल सकते हैं।",
+    "profile_document_message_expiry": "{document} की समय-सीमा निकट है।",
+    "profile_document_message_number": "नंबर {number}।",
+    "profile_document_message_issuer": "{issuer} द्वारा जारी।"
 };

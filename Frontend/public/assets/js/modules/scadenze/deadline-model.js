@@ -8,6 +8,16 @@ function datePartsToIso(day, month, year) {
     return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+const DEADLINE_LOCALES = Object.freeze({
+    it: 'it-IT', en: 'en-GB', es: 'es-ES', fr: 'fr-FR', de: 'de-DE',
+    zh: 'zh-CN', hi: 'hi-IN', pt: 'pt-PT'
+});
+
+function fillTemplate(template, values) {
+    return Object.entries(values).reduce((result, [key, value]) =>
+        result.replaceAll(`{${key}}`, String(value || '').trim()), String(template || ''));
+}
+
 export function deadlineInputDate(isoValue, displayValue) {
     const iso = text(isoValue);
     const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
@@ -29,6 +39,28 @@ export function deadlineDateForSave(profileDocumentLinkDraft, isoValue, displayV
         );
     }
     return deadlineInputDate(isoValue, displayValue);
+}
+
+export function deadlineDateDisplay(value, language = 'it') {
+    const iso = deadlineInputDate(value, value);
+    if (!iso) return text(value);
+    const [year, month, day] = iso.split('-').map(Number);
+    return new Intl.DateTimeFormat(DEADLINE_LOCALES[language] || DEADLINE_LOCALES.it, {
+        day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC'
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+export function profileDocumentDeadlineMessage({templateText, documentType, documentNumber, documentIssuer} = {}, translate) {
+    const tr = typeof translate === 'function' ? translate : key => key;
+    const documentLabel = text(templateText) || text(documentType) || tr('document');
+    const sections = [fillTemplate(tr('profile_document_message_expiry'), {document: documentLabel})];
+    if (text(documentNumber)) {
+        sections.push(fillTemplate(tr('profile_document_message_number'), {number: documentNumber}));
+    }
+    if (text(documentIssuer)) {
+        sections.push(fillTemplate(tr('profile_document_message_issuer'), {issuer: documentIssuer}));
+    }
+    return sections.filter(Boolean).join(' ');
 }
 
 export function deadlineDate(record = {}) {
@@ -110,13 +142,12 @@ export function deadlinePresentation(record = {}) {
     };
 }
 
-export function deadlineDateInputFields(record = {}) {
+export function deadlineDateInputFields(record = {}, language = 'it') {
     const raw = record.dueDate || record.date;
     if (typeof raw === 'string') {
         const iso = deadlineInputDate(raw, raw);
         if (iso) {
-            const [year, month, day] = iso.split('-');
-            return { isoValue: iso, displayValue: `${day}/${month}/${year}` };
+            return { isoValue: iso, displayValue: deadlineDateDisplay(iso, language) };
         }
     }
     const value = deadlineDate(record);
@@ -124,5 +155,6 @@ export function deadlineDateInputFields(record = {}) {
     const day = String(value.getDate()).padStart(2, '0');
     const month = String(value.getMonth() + 1).padStart(2, '0');
     const year = String(value.getFullYear());
-    return { isoValue: `${year}-${month}-${day}`, displayValue: `${day}/${month}/${year}` };
+    const isoValue = `${year}-${month}-${day}`;
+    return { isoValue, displayValue: deadlineDateDisplay(isoValue, language) };
 }

@@ -180,6 +180,47 @@
     color: var(--text-primary);
 }
 
+.profile-document-editor-intro {
+    margin: -0.25rem 0 1rem;
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    line-height: 1.5;
+}
+
+.profile-document-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.profile-document-editor-grid > div {
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-document-editor-grid dt {
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    font-weight: var(--font-label-weight);
+    text-transform: uppercase;
+}
+
+.profile-document-editor-grid dd {
+    margin: 0.35rem 0 0;
+    color: var(--text-primary);
+    font-size: var(--fs-xs);
+    font-weight: var(--font-title-weight);
+    overflow-wrap: anywhere;
+}
+
+.profile-document-editor-summary:not(.hidden) ~ .form-section .deadline-message-field textarea {
+    min-height: 7rem;
+}
+
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -188,6 +229,10 @@
 
 @media (max-width: 600px) {
     .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-document-editor-grid {
         grid-template-columns: 1fr;
     }
 }

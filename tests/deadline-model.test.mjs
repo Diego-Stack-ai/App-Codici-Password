@@ -85,3 +85,25 @@ test('prepara data ISO e visuale senza duplicare la logica del form', () => {
         isoValue: '', displayValue: 'dato storico non valido'
     });
 });
+
+test('presenta la data secondo la lingua senza cambiare il valore ISO salvato', () => {
+    assert.equal(model.deadlineDateDisplay('2034-10-30', 'it'), '30/10/2034');
+    assert.equal(model.deadlineDateDisplay('2034-10-30', 'en'), '30/10/2034');
+    assert.equal(model.deadlineDateInputFields({dueDate: '2034-10-30'}, 'it').isoValue, '2034-10-30');
+});
+
+test('compone il messaggio documento da catalogo, configurazione, numero ed ente', () => {
+    const catalog = {
+        profile_document_message_expiry: 'È in scadenza {document}.',
+        profile_document_message_number: 'Numero {number}.',
+        profile_document_message_issuer: 'Rilasciato da {issuer}.',
+        document: 'Documento'
+    };
+    const translate = key => catalog[key] || key;
+    assert.equal(model.profileDocumentDeadlineMessage({
+        documentType: 'Passaporto', documentNumber: 'AA123', documentIssuer: 'Questura'
+    }, translate), 'È in scadenza Passaporto. Numero AA123. Rilasciato da Questura.');
+    assert.equal(model.profileDocumentDeadlineMessage({
+        templateText: 'il passaporto', documentType: 'Passaporto', documentNumber: 'AA123'
+    }, translate), 'È in scadenza il passaporto. Numero AA123.');
+});

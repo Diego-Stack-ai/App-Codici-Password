@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.200';
+import { auth, db } from '../../firebase-config.js?v=1.2.201';
 import { collection, doc, runTransaction, deleteField, Timestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -12,7 +12,8 @@ import {
     profileAccountUrl,
     profileAccountReferences
 } from './profile-model.js';
-import {t} from '../../translations.js';
+import {getCurrentLanguage, t} from '../../translations.js';
+import {deadlineDateDisplay} from '../scadenze/deadline-model.js';
 
 export async function readLinkedEmailAccountPassword(email) {
     const uid = auth.currentUser?.uid;
@@ -132,7 +133,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
             if (deadlineIsoDate(deadline) !== dueDate) {
                 const confirmed = await showConfirmModal(
                     t('profile_deadline_update_title'),
-                    t('profile_deadline_update_message').replaceAll('{date}', dueDate),
+                    t('profile_deadline_update_message').replaceAll('{date}', deadlineDateDisplay(dueDate, getCurrentLanguage())),
                     t('profile_deadline_configure_action'),
                     t('cancel')
                 );
@@ -195,7 +196,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
             ? 'profile_deadline_configure_existing_message'
             : 'profile_deadline_configure_message')
             .replaceAll('{type}', documentItem.type || t('document'))
-            .replaceAll('{date}', dueDate),
+            .replaceAll('{date}', deadlineDateDisplay(dueDate, getCurrentLanguage())),
         t('profile_deadline_configure_action'),
         t('cancel')
     );
@@ -203,7 +204,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
 
     await syncData?.();
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
-    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.200');
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.201');
     const draft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({...draft, ownerUid: user.uid}));

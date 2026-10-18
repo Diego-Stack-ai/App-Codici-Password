@@ -165,5 +165,16 @@ export default {
     "recipient_attachment_navigation_warning": "Les nouvelles pièces jointes choisies sur cet appareil ne peuvent pas être conservées lors du changement de page. Continuer et les sélectionner à nouveau au retour ?",
     "recipient_manager_unavailable": "Impossible d’ouvrir le carnet des destinataires depuis cette page.",
     "deadline_draft_preserve_error": "Impossible de conserver temporairement les données de l’échéance.",
-    "deadline_draft_restored": "Données de l’échéance restaurées. Le carnet est à jour."
+    "deadline_draft_restored": "Données de l’échéance restaurées. Le carnet est à jour.",
+    "profile_document_summary_title": "Document personnel",
+    "profile_document_summary_intro": "Ces données proviennent du Profil et ne sont pas modifiables sur cette page.",
+    "profile_document_not_provided": "Non renseigné",
+    "profile_document_type": "Type de document",
+    "profile_document_number": "Numéro ou code",
+    "profile_document_issued_by": "Délivré par",
+    "profile_document_message_label": "Texte de l’e-mail et de la notification",
+    "profile_document_message_help": "Le texte est proposé selon le type de document. Vous pouvez le personnaliser pour cette échéance.",
+    "profile_document_message_expiry": "{document} arrive à expiration.",
+    "profile_document_message_number": "Numéro {number}.",
+    "profile_document_message_issuer": "Délivré par {issuer}."
 };

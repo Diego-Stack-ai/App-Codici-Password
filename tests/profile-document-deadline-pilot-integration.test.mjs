@@ -11,7 +11,7 @@ test('salvataggio documento offre la configurazione definitiva soltanto dopo la 
   assert.ok(saveIndex > -1 && offerIndex > saveIndex);
 });
 
-test('runtime definitivo apre il modulo completo e conserva il pilot solo come compatibilità storica', async () => {
+test('runtime definitivo apre l’editor dedicato e conserva il pilot solo come compatibilità storica', async () => {
   const links = await read('Frontend/public/assets/js/modules/privato/profilo-links.js');
   const profile = await read('Frontend/public/assets/js/modules/privato/profilo_privato.js');
   assert.match(links, /buildLinkedDocumentDeadlineDraft/);
@@ -73,12 +73,17 @@ test('la cancellazione dalla lista scollega atomicamente la scadenza dal documen
   assert.match(source, /expiryReference: null/);
 });
 
-test('il modulo completo precompila regole, testo e documenti non ancora presenti nelle vecchie liste', async () => {
+test('l’editor dedicato precompila regole e testo senza dipendere dai menu generici', async () => {
   const source = await read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js');
   const config = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
   assert.match(source, /selectValuePreservingCustomOption\(typeSelect, documentType, schedule \|\| \{\}\)/);
   assert.match(source, /getSuggestedSchedule\(documentType\)/);
   assert.match(source, /getSuggestedTemplate\(documentType\) \|\| documentType/);
+  assert.match(source, /configureProfileDocumentEditor/);
+  assert.match(source, /profileDocumentDeadlineMessage/);
+  assert.match(source, /deadlineDateDisplay/);
+  assert.match(source, /profileDocumentEditorData\?\.documentNumber/);
+  assert.match(source, /deadline-generic-info-section/);
   assert.match(config, /getSuggestedSchedule\(type\)/);
 });
 
@@ -93,4 +98,22 @@ test('la configurazione blocca la data del Documento e rende modificabili preavv
   assert.match(html, /id="deadline-contact-select"/);
   assert.match(html, /Email e Push sono indipendenti/);
   assert.match(html, /Può gestire/);
+});
+
+test('il dialogo di conferma mostra la data localizzata ma conserva la data ISO nel modello', async () => {
+  const source = await read('Frontend/public/assets/js/modules/privato/profilo-links.js');
+  assert.match(source, /deadlineDateDisplay\(dueDate, getCurrentLanguage\(\)\)/);
+  assert.match(source, /const dueDate = normalizeProfileDateInputValue/);
+});
+
+test('tutte le lingue dichiarano i testi dell’editor documento personale', async () => {
+  const required = ['profile_document_summary_title', 'profile_document_summary_intro',
+    'profile_document_not_provided', 'profile_document_type', 'profile_document_number', 'profile_document_issued_by',
+    'profile_document_message_label', 'profile_document_message_help',
+    'profile_document_message_expiry', 'profile_document_message_number', 'profile_document_message_issuer'];
+  const files = ['translations/it.js', ...['en','es','fr','de','zh','hi','pt'].map(code => `translations/${code}.js`)];
+  for (const file of files) {
+    const source = await read(`Frontend/public/assets/js/${file}`);
+    for (const key of required) assert.match(source, new RegExp(`${key}\\s*[\":]`), `${file}: ${key}`);
+  }
 });
