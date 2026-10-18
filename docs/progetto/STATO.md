@@ -1,6 +1,6 @@
 # Stato
 
-## Candidata 1.2.204 — Regole scadenze e recupero Push mobile — 18/10/2026
+## Release 1.2.204 pubblicata — Regole scadenze e recupero Push mobile — 18/10/2026
 
 Il lotto autorizzato risolve la mancata inizializzazione delle linguette di **Regole scadenze**: il router riconosce ora `regole_scadenze.html` prima della pagina generica Scadenze. Solo la linguetta attiva ha il fondo azzurro chiaro e il testo resta leggibile; le altre hanno fondo trasparente. **Documenti personali** continua a leggere automaticamente i Documenti del Profilo, ma espone soltanto tipo/data come riferimento e i parametri specifici dell’avviso, evitando di ripetere numero, ente, allegati e campi personalizzati.
 
@@ -8,7 +8,9 @@ Restano compresi nel candidato i pulsanti di copia dei dati finanziari, la modif
 
 La versione locale è `1.2.204`. Sono verdi i test mirati del flusso Documento/Scadenza, recupero Push e copia finanziaria, oltre a navigazione, Profilo, accesso dati, guida, i18n, sintassi, CSS, riferimenti statici, shell offline, sicurezza statica, hardening di rilascio, dipendenze e documentazione. Il runtime offline è stato rigenerato e Graphify riallineato alle modifiche strutturali.
 
-Implementazione, verifiche locali, integrazione remota e distribuzione restano registrate come fasi distinte. La produzione espone ancora `1.2.203` finché merge e Hosting non risultano effettivamente completati. Functions, Rules, indici, migrazioni e dati reali non vengono distribuiti perché il diff candidato non contiene modifiche backend.
+La PR `#173` è stata integrata su `master` nel commit `b48bb8fa` dopo i gate GitHub documentali e `validate` verdi; quest’ultimo ha concluso in 6m07s. Firebase Hosting ha pubblicato **343 file**. La verifica HTTP pubblica ha confermato risposta `200`, versione `1.2.204`, precedenza della rotta specializzata di Regole scadenze e presenza del recupero Push.
+
+Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione effettiva della Push di sistema sul cellulare resta un collaudo manuale distinto: occorre aprire la nuova versione sul telefono, lasciare completare la nuova registrazione FCM e poi generare una Scadenza dentro la finestra di preavviso.
 
 ## Correzione locale del testo Passaporto e diagnosi App Check — 18/10/2026
 
