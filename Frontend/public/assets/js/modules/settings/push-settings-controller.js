@@ -7,7 +7,7 @@ import {
     getCurrentPushState,
     listenForDeadlinePushInForeground,
     sendDeadlinePushTest
-} from '../shared/push-manager.js?push=20261018b';
+} from '../shared/push-manager.js?push=20261019c';
 
 const PUSH_SETTINGS = {
     deadlines: {
@@ -78,6 +78,7 @@ async function setupPushToggle(user, scope) {
                 showToast(error.message || 'Invio di prova non riuscito', 'error');
             } finally {
                 testButton.disabled = false;
+                await render();
             }
         });
     }

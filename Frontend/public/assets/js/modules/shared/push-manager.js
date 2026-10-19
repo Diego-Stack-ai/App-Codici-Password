@@ -1,7 +1,7 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.206';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.207';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
-import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261018b';
+import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261019c';
 import { getPushDevice, getPushDeviceConfirmed } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
@@ -291,20 +291,50 @@ async function disablePushScope(scope, user = auth.currentUser) {
 
 export async function disableSharingPush(user = auth.currentUser) { return disablePushScope('sharing', user); }
 
+function pushTestNeedsRecovery(error) {
+    const reason = String(error?.details?.reason || '');
+    const message = String(error?.message || '');
+    return reason === 'push-token-invalid'
+        || (error?.code === 'functions/failed-precondition'
+            && message.includes('Notifiche non attive su questo dispositivo'));
+}
+
+async function renewDeadlinePushRegistration(user) {
+    if (!user) throw new Error('Accesso richiesto.');
+    const device = await getPushDeviceConfirmed(user.uid, getDeviceId());
+    const serverScopes = Array.isArray(device?.notificationScopes)
+        ? device.notificationScopes : (device?.notificationScope ? [device.notificationScope] : []);
+    const scopes = [...new Set([...rememberedActiveScopes(), ...serverScopes, 'deadlines'])];
+    await writePushRegistration(user, scopes, {forceReset: true});
+}
+
+async function ensureDeadlinePushTestRegistration(user) {
+    if (!user) throw new Error('Accesso richiesto.');
+    const device = await getPushDeviceConfirmed(user.uid, getDeviceId());
+    const scopes = Array.isArray(device?.notificationScopes)
+        ? device.notificationScopes : (device?.notificationScope ? [device.notificationScope] : []);
+    const active = device?.enabled === true && device?.status !== 'invalid'
+        && Boolean(device.token) && scopes.includes('deadlines');
+    if (!active) await renewDeadlinePushRegistration(user);
+}
+
 export async function sendDeadlinePushTest() {
     const lastTestAt = Number(localStorage.getItem(LAST_TEST_KEY) || 0);
     const remainingSeconds = Math.ceil((60000 - (Date.now() - lastTestAt)) / 1000);
     if (remainingSeconds > 0) throw new Error(`Attendi ancora ${remainingSeconds} secondi prima di riprovare.`);
+    const user = auth.currentUser;
+    await ensureDeadlinePushTestRegistration(user);
     const call = httpsCallable(functions, 'sendDeadlinePushTest');
     const deviceId = getDeviceId();
     let result;
     try {
         result = (await call({ deviceId })).data;
     } catch (error) {
-        if (error?.details?.reason !== 'push-token-invalid') throw error;
-        // Il backend ha invalidato esclusivamente il token rifiutato da FCM.
-        // Rigeneriamo la registrazione e ritentiamo una sola volta.
-        await recoverPushRegistration(auth.currentUser);
+        if (!pushTestNeedsRecovery(error)) throw error;
+        // Il backend può aver già invalidato il token oppure il dispositivo può
+        // risultare non attivo dopo un ripristino locale interrotto. In entrambi
+        // i casi creiamo una registrazione distinta e ritentiamo una sola volta.
+        await renewDeadlinePushRegistration(user);
         result = (await call({ deviceId })).data;
     }
     if (!result?.ok && result?.cooldownSeconds) {

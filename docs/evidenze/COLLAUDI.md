@@ -1,5 +1,13 @@
 # Collaudi
 
+## 19/10/2026 — recupero della prova Push da record già non attivo
+
+- Evidenza iPhone sulla `1.2.206`: runtime `push=20261018b` caricato, revoca FCM della registrazione precedente conclusa con `403` e successiva callable `sendDeadlinePushTest` conclusa con HTTP `400`; il warning di durata del gestore `load` non è causale.
+- Il sorgente conferma che il client recuperava `push-token-invalid`, ma non eseguiva un precontrollo prima della prova e non gestiva la risposta backend **Notifiche non attive su questo dispositivo**.
+- La candidata `1.2.207` interroga il record confermato, forza la registrazione distinta se token, stato o ambito Scadenze non sono coerenti, conserva gli ambiti locali/server e limita a uno il nuovo tentativo della callable.
+- La schermata rilegge lo stato dopo la prova, così un fallimento non lascia interruttore o pulsante in uno stato soltanto apparente.
+- Prove mirate `push-registration-recovery` verdi **2/2** e `git diff --check` verde. La suite integrale `npm test` è terminata con codice **0**, compresi documentazione, controlli statici, sicurezza, offline, Functions, Firestore Rules, Storage Rules, Vault, ripristino e tutti gli emulatori Firebase. Il primo avvio isolato si era fermato sul noto limite Windows `EPERM` dei repository temporanei documentali; la ripetizione fuori sandbox ha completato l'intera catena senza errori applicativi. Graphify principale riallineato: **13.320 nodi, 34.960 archi e 727 comunità**. Ordine di pubblicazione ricevuto: i gate completi precedono commit, integrazione e distribuzione del solo Hosting; il collaudo fisico resta distinto.
+
 ## 19/10/2026 — compatibilità CSP del motore AI locale WebAssembly
 
 - Evidenza del browser: `WebAssembly.instantiate()` del runtime ONNX viene bloccato dalla direttiva `script-src` perché mancava una sorgente che autorizzasse la compilazione WebAssembly.

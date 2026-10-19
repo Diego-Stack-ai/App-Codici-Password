@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.206';
+import { auth, db } from '../../firebase-config.js?v=1.2.207';
 import { collection, getDocsFromServer, limit, query, doc, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 
 export async function setCompanyPinned(uid, companyId, isPinned) {
