@@ -10,6 +10,10 @@ Diego segnala inoltre che, aprendo la modifica di un Account privato o aziendale
 
 Il perimetro iniziale autorizzava implementazione locale, test pertinenti, aggiornamento dei documenti e riallineamento Graphify per le modifiche strutturali. Con l'ordine esplicito **«Publica»** del 19/10/2026 Diego autorizza ora il bump patch `1.2.209`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni, accessi a dati reali e invii reali restano esclusi.
 
+Esito: PR `#183` unita nel commit `dc7d0955`; workflow `39259111507` verde con validazione completa in 6m38s e distribuzione del solo Hosting in 41s. La verifica pubblica HTTP `200` conferma la `1.2.209` sui moduli interessati. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
+
+Diego considera inoltre conclusa, salvo un ultimo controllo di coerenza, la parte del punto 3 relativa alle Scadenze generate dai Documenti personali e alla loro nuova sezione in Regole scadenze. La progettazione delle altre famiglie di Scadenze resta sospesa: IMU, casa, salute, contratti e casi periodici autonomi non devono essere forzati nella logica Documento del Profilo senza una decisione successiva.
+
 ## Card aziendali con accessi distinti per Account e Memorandum — 19/10/2026
 
 Diego autorizza l'avvio del primo punto della scaletta successiva al ripristino delle Push: la revisione delle card nella Lista aziende. Ogni card deve mantenere separato l'accesso ai **Dati azienda** e rendere immediatamente disponibili quattro categorie reali: **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. Le categorie devono mostrare il numero dei record non archiviati e aprire la Lista Account dell'azienda già filtrata; il comando di aggiunta deve ereditare la categoria selezionata.

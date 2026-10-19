@@ -1,10 +1,12 @@
 # Rilascio
 
-## Candidata 1.2.209 — selettore Account/Memorandum simmetrico — 19/10/2026
+## Esito operativo 1.2.209 — selettore Account/Memorandum simmetrico — 19/10/2026
 
 Diego ha autorizzato la pubblicazione sul solo Firebase Hosting della correzione ai moduli Account privato e aziendale. I quattro modi **Account**, **Account condiviso**, **Memorandum** e **Memorandum condiviso** appartengono ora allo stesso gruppo: durante la modifica il modo corrente resta nascosto e sono sempre disponibili le altre tre conversioni, senza il lampeggio della scelta poi rimossa.
 
-Il primo gate integrale ha bloccato correttamente un import che portava i due form oltre il budget prestazionale. La logica è stata consolidata nel modello Account già caricato; budget e prove mirate sono tornati verdi. Dopo l'allineamento della Guida alla nuova base, la ripetizione completa di `npm test` è terminata con codice **0**, inclusi tutti gli emulatori. Il rilascio non comprende Functions, Firestore Rules, Storage Rules, indici, migrazioni o accessi ai dati reali. Esito di PR, merge, workflow e verifica HTTP da registrare dopo ciascun passaggio.
+Il primo gate integrale ha bloccato correttamente un import che portava i due form oltre il budget prestazionale. La logica è stata consolidata nel modello Account già caricato; budget e prove mirate sono tornati verdi. Dopo l'allineamento della Guida alla nuova base, la ripetizione completa di `npm test` è terminata con codice **0**, inclusi tutti gli emulatori.
+
+La PR `#183` è stata unita in `master` nel commit `dc7d0955` dopo gate GitHub verdi. Il workflow manuale `39259111507` ha ripetuto la suite in 6m38s e pubblicato esclusivamente Firebase Hosting in 41s. La verifica HTTP pubblica restituisce `200` per Home, i moduli Account privato e aziendale e il modello condiviso, confermando la `1.2.209`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
 
 ## Esito operativo 1.2.208 — card aziendali per tipologia — 19/10/2026
 

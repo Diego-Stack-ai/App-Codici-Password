@@ -12,7 +12,8 @@
 - Il secondo gate integrale ha superato anche il budget, poi si è fermato sul controllo intenzionale della Guida: `reviewedAppVersion` conservava la base `1.2.208`. Il catalogo è stato riesaminato senza modifiche editoriali e allineato alla candidata `1.2.209` prima della ripetizione completa.
 - La ripetizione definitiva di `npm test` è terminata con codice **0**: documentazione **11/11**, Guida **6/6**, navigazione **168/168**, accesso dati **95/95**, sicurezza **25/25**, i18n **14/14**, budget, dipendenze, Functions/security, Firestore Rules, Storage Rules, Vault e tutti gli emulatori sono verdi.
 - Graphify principale riallineato dopo il consolidamento e il bump: **13.370 nodi**, **35.068 archi** e **748 comunità**.
-- Verifica soltanto locale e sintetica: nessun dato reale, invito reale, commit, push, merge, bump o deploy. Il controllo visivo/manuale dei contatori dopo una condivisione reale resta nella lista dei collaudi futuri.
+- PR `#183` integrata nel commit `dc7d0955`; gate GitHub verdi. Il workflow manuale `39259111507` ha ripetuto la validazione completa in 6m38s e completato **Deploy Hosting only** in 41s.
+- Verifica HTTP pubblica `200` su Home, modulo Account privato, modulo Account aziendale e modello condiviso; le pagine confermano la versione `1.2.209`. Nessuna Function, Rule, indice, migrazione o dato reale è stato modificato o distribuito. Il controllo visivo/manuale dei contatori dopo una condivisione reale resta nella lista dei collaudi futuri.
 
 ## 19/10/2026 — candidata 1.2.208, card aziendali per tipologia
 
