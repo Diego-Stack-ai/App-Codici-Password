@@ -87,6 +87,8 @@ Il progetto deve considerare almeno:
 | Cancellazione o corruzione | Cestino cifrato, backup autenticato, versioni e prova periodica di ripristino |
 | Log o notifica rivelatrice | Nessun segreto, allegato o contenuto Vault nei log, push, email o analytics |
 
+Il motore AI locale può richiedere compilazione WebAssembly sotto CSP esclusivamente tramite la sorgente mirata `'wasm-unsafe-eval'` e artefatti fissati same-origin. La sorgente generale `'unsafe-eval'`, che estenderebbe il permesso anche alla valutazione dinamica JavaScript, resta vietata e deve essere controllata come token distinto nei gate di rilascio.
+
 Prima di una modifica strutturale deve essere indicato quale rischio viene ridotto e quale nuovo rischio viene introdotto.
 
 <a id="fonte-docs-architettura-sicurezza-v1-md-5-classificazione-dei-dati"></a>

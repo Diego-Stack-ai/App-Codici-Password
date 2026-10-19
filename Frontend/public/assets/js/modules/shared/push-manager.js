@@ -1,13 +1,16 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.205';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.206';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
-import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261018a';
+import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261018b';
 import { getPushDevice, getPushDeviceConfirmed } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
 const DEVICE_ID_KEY = 'codex_push_device_id';
 const LAST_TEST_KEY = 'codex_push_last_test_at';
 const ACTIVE_SCOPES_KEY = 'codex_push_active_scopes';
+const PUSH_SW_GENERATION_KEY = 'codex_push_sw_generation';
+const PUSH_SW_PATH = '/firebase-messaging-sw.js';
+const PUSH_SW_SCOPE = '/firebase-cloud-messaging-push-scope';
 let foregroundListenerStarted = false;
 
 function rememberActiveScopes(scopes) {
@@ -76,11 +79,38 @@ async function waitForActiveWorker(registration) {
     return registration;
 }
 
-async function serviceWorkerRegistration() {
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-        scope: '/firebase-cloud-messaging-push-scope'
+function pushWorkerGeneration() {
+    const value = Number.parseInt(localStorage.getItem(PUSH_SW_GENERATION_KEY) || '0', 10);
+    return Number.isSafeInteger(value) && value >= 0 ? value : 0;
+}
+
+function pushWorkerScope(generation = pushWorkerGeneration()) {
+    return generation > 0 ? `${PUSH_SW_SCOPE}-r${generation}/` : PUSH_SW_SCOPE;
+}
+
+async function registerPushWorker(generation = pushWorkerGeneration()) {
+    const registration = await navigator.serviceWorker.register(PUSH_SW_PATH, {
+        scope: pushWorkerScope(generation)
     });
     return waitForActiveWorker(registration);
+}
+
+async function serviceWorkerRegistration() {
+    return registerPushWorker();
+}
+
+async function rotatePushWorkerRegistration() {
+    const generation = pushWorkerGeneration() + 1;
+    const registration = await registerPushWorker(generation);
+    localStorage.setItem(PUSH_SW_GENERATION_KEY, String(generation));
+    return registration;
+}
+
+async function unregisterReplacedPushWorker(registration) {
+    if (!registration) return;
+    try { await registration.unregister(); } catch (error) {
+        console.warn('[PUSH] Service Worker precedente non revocabile.', error);
+    }
 }
 
 function pushErrorMessage(error) {
@@ -161,13 +191,21 @@ async function writePushRegistration(user, scopes, {forceReset = false} = {}) {
     }
     if (!messaging) throw new Error('Firebase Messaging non è supportato su questo dispositivo.');
     let registration;
+    let replacedRegistration = null;
     try {
         registration = await serviceWorkerRegistration();
     } catch (error) {
         console.error('[PUSH] Service Worker non disponibile.', error);
         throw new Error('Impossibile preparare le notifiche su questo dispositivo. Ricarica la pagina e riprova.');
     }
-    if (forceReset) await resetLocalPushSubscription(messaging, registration);
+    if (forceReset) {
+        replacedRegistration = registration;
+        await resetLocalPushSubscription(messaging, registration);
+        // Su iOS una unsubscribe può restituire la stessa sottoscrizione. Un nuovo
+        // scope crea invece una registrazione Web Push distinta e impedisce al SDK
+        // Firebase di riutilizzare il token FCM già rifiutato dal backend.
+        registration = await rotatePushWorkerRegistration();
+    }
     const token = await getTokenWithLocalRecovery(messaging, registration);
     if (!token) throw new Error('Firebase non ha restituito il token del dispositivo.');
 
@@ -186,6 +224,7 @@ async function writePushRegistration(user, scopes, {forceReset = false} = {}) {
         updatedAt: serverTimestamp(),
         lastSeenAt: serverTimestamp()
     }, { merge: true });
+    await unregisterReplacedPushWorker(replacedRegistration);
     rememberActiveScopes(notificationScopes);
     return true;
 }

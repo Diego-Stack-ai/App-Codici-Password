@@ -1,7 +1,7 @@
 import { getCurrentLanguage } from '../../translations.js';
 import { assistantText } from '../../translations/assistant.js';
 import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
-import { LOCAL_AI_ADVANCED_TIERS, LOCAL_AI_PACKAGE_CATALOG } from './local-ai-package-catalog.js';
+import { getLocalAiPackageCandidate, LOCAL_AI_ADVANCED_TIERS } from './local-ai-package-catalog.js';
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
 import { createLocalAiRuntimeLoader } from './local-ai-runtime-loader.js';
 import { readSelectedAdvancedTier, readSelectedLocalAi, writeSelectedAdvancedTier, writeSelectedLocalAi } from './local-ai-selection.js';
@@ -28,21 +28,22 @@ export async function initAssistantPackageSettings(container = document.getEleme
         heading.innerHTML = `<strong>${label('title')}</strong><small>${label('device')}</small>`;
         container.append(heading);
         for (const level of ['A1', 'A2']) {
-            const candidate = LOCAL_AI_PACKAGE_CATALOG[level];
+            const capability = capabilities[level];
+            const compatible = capability.status === 'candidate';
+            let usableTiers = [];
+            if (level === 'A2') {
+                usableTiers = capability.allowedTiers.filter(tier => LOCAL_AI_ADVANCED_TIERS[tier].status === 'available');
+                if (!usableTiers.includes(selectedTier)) {
+                    selectedTier = usableTiers.at(-1) || 'light';
+                    writeSelectedAdvancedTier(selectedTier);
+                }
+            }
+            const candidate = getLocalAiPackageCandidate(level, { tier:selectedTier });
             const status = await manager.status(level, {
                 manifest: candidate.manifest,
                 baseUrl: candidate.baseUrl,
                 legacyLevel: candidate.legacyLevel
             });
-            const capability = capabilities[level];
-            const compatible = capability.status === 'candidate';
-            if (level === 'A2') {
-                const usable = capability.allowedTiers.filter(tier => LOCAL_AI_ADVANCED_TIERS[tier].status === 'available');
-                if (!usable.includes(selectedTier)) {
-                    selectedTier = usable.at(-1) || 'light';
-                    writeSelectedAdvancedTier(selectedTier);
-                }
-            }
             if (selected === level && level === 'A2' && (!status.verified || !compatible)) {
                 selected = 'A1';
                 writeSelectedLocalAi(selected);
@@ -54,23 +55,43 @@ export async function initAssistantPackageSettings(container = document.getEleme
             const meta = `${mib(candidate.manifest.approxDownloadBytes)} · ${label('memory')} ${mib(candidate.manifest.maxResidentBytes)}`;
             card.innerHTML = `<div><strong>${title}</strong><small>${desc}</small><small>${meta}</small></div>`;
             if (level === 'A2') {
-                const tierList = document.createElement('small');
-                tierList.className = 'assistant-package-tiers';
-                const tierSummary = ['light','medium','power'].map(tier => {
+                const recommendation = document.createElement('small');
+                recommendation.className = 'assistant-package-tier-recommendation';
+                recommendation.textContent = capability.recommendedTier
+                    ? `${label('tierHardwareRecommendation')} ${label(`tier_${capability.recommendedTier}`)}`
+                    : label('unavailable');
+                card.firstElementChild.append(recommendation);
+                const tierSelector = document.createElement('div');
+                tierSelector.className = 'assistant-package-tier-selector';
+                tierSelector.setAttribute('role', 'radiogroup');
+                tierSelector.setAttribute('aria-label', label('tierChoose'));
+                for (const tier of ['light','medium','power']) {
                     const entry = LOCAL_AI_ADVANCED_TIERS[tier];
-                    const allowed = capability.allowedTiers.includes(tier);
-                    const state = entry.status === 'available' && allowed
-                        ? (tier === selectedTier ? label('tierSelected') : label('tierAvailable'))
-                        : entry.status !== 'available' ? label('tierPending') : label('unavailable');
-                    return `${label(`tier_${tier}`)}: ${state}`;
-                }).join(' · ');
-                tierList.replaceChildren(document.createTextNode(tierSummary));
-                card.firstElementChild.append(tierList);
-                if (capability.recommendedTier && LOCAL_AI_ADVANCED_TIERS[capability.recommendedTier].status !== 'available') {
-                    const pending = document.createElement('small');
-                    pending.replaceChildren(document.createTextNode(`${label('tierHardwareRecommendation')} ${label(`tier_${capability.recommendedTier}`)} · ${label('tierFallbackLight')}`));
-                    card.firstElementChild.append(pending);
+                    const allowed = usableTiers.includes(tier);
+                    const tierButton = document.createElement('button');
+                    tierButton.type = 'button';
+                    tierButton.className = 'assistant-package-tier';
+                    tierButton.dataset.tier = tier;
+                    tierButton.disabled = !allowed || entry.status !== 'available' || Boolean(downloading);
+                    tierButton.setAttribute('role', 'radio');
+                    tierButton.setAttribute('aria-checked', String(tier === selectedTier));
+                    tierButton.classList.toggle('selected', tier === selectedTier);
+                    tierButton.classList.toggle('recommended', tier === capability.recommendedTier);
+                    const state = !allowed ? label('unavailable')
+                        : tier === capability.recommendedTier ? label('tierRecommended') : label('tierAvailable');
+                    tierButton.replaceChildren(document.createTextNode(
+                        `${label(`tier_${tier}`)} · ${mib(entry.manifest.approxDownloadBytes)} · ${state}`
+                    ));
+                    tierButton.onclick = () => {
+                        if (tier === selectedTier) return;
+                        selectedTier = tier;
+                        writeSelectedAdvancedTier(tier);
+                        delete errors.A2;
+                        void render();
+                    };
+                    tierSelector.append(tierButton);
                 }
+                card.firstElementChild.append(tierSelector);
             }
             if (errors[level]) {
                 const error = document.createElement('small');
