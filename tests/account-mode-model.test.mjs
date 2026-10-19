@@ -77,3 +77,23 @@ test('riepiloga e filtra i quattro modi senza contare gli archiviati', () => {
     assert.equal(model.accountMatchesModeView(accounts[1], 'unknown'), true);
     assert.equal(model.normalizeAccountModeView(' SHARED_MEMO '), 'shared_memo');
 });
+
+test('i conteggi spostano il record nella categoria condivisa senza duplicarlo', () => {
+    const account = {id: 'account', type: 'account', visibility: 'private'};
+    const memorandum = {id: 'memo', type: 'memo', visibility: 'private'};
+    assert.deepEqual(model.summarizeAccountModes([account, memorandum]), {
+        standard: 1,
+        shared: 0,
+        memo: 1,
+        shared_memo: 0
+    });
+
+    account.visibility = 'shared';
+    memorandum.visibility = 'shared';
+    assert.deepEqual(model.summarizeAccountModes([account, memorandum]), {
+        standard: 0,
+        shared: 1,
+        memo: 0,
+        shared_memo: 1
+    });
+});

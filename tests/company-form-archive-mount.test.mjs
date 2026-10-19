@@ -73,6 +73,8 @@ function fixture() {
         normalizeEditableBankingAccounts: () => [], hasRealBankingData: () => false, renderBankAccounts: () => {},
         findProfileAccountItem: () => null, prepareProfileEmailAccountValues: () => ({}),
         accountModeFromRecord: () => 'standard', accountModeFromFlags: () => 'standard', validateAccountMode: () => ({}),
+        accountModeFromFlagId: () => 'account-private', getAccountModeFlags: () => [],
+        selectAccountMode: () => {}, showAccountModeAlternatives: () => {},
         initAccountEmbeddedWidgets: async () => null, initAccountSharedCredentials: async () => {}, initNewAccountSharedCredentials: () => {},
         showConfirmModal: async (title, message) => { confirmations.push({title, message}); return true; },
         showToast: (...args) => toasts.push(args), t: value => value, logError: (...args) => errors.push(args),

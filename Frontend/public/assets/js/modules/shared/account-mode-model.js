@@ -120,3 +120,40 @@ export function isOwnerRecipientEmail(email, ownerEmail = '') {
     const normalized = normalizeRecipientEmail(email);
     return Boolean(normalized && normalized === normalizeRecipientEmail(ownerEmail));
 }
+
+const ACCOUNT_MODE_FLAG_IDS = Object.freeze({
+    [ACCOUNT_MODES.PRIVATE]: 'flag-account',
+    [ACCOUNT_MODES.SHARED]: 'flag-shared',
+    [ACCOUNT_MODES.MEMO_PRIVATE]: 'flag-memo',
+    [ACCOUNT_MODES.MEMO_SHARED]: 'flag-memo-shared'
+});
+
+export function accountModeFlagId(mode) {
+    return ACCOUNT_MODE_FLAG_IDS[mode] || ACCOUNT_MODE_FLAG_IDS[ACCOUNT_MODES.PRIVATE];
+}
+
+export function accountModeFromFlagId(flagId) {
+    return Object.entries(ACCOUNT_MODE_FLAG_IDS).find(([, id]) => id === flagId)?.[0] || ACCOUNT_MODES.PRIVATE;
+}
+
+export function getAccountModeFlags(root = document) {
+    return Object.values(ACCOUNT_MODE_FLAG_IDS).map(id => root.getElementById(id)).filter(Boolean);
+}
+
+export function selectAccountMode(mode, root = document) {
+    const selectedId = accountModeFlagId(mode);
+    for (const flag of getAccountModeFlags(root)) flag.checked = flag.id === selectedId;
+}
+
+export function showAccountModeAlternatives(currentMode, { editing = false, root = document } = {}) {
+    const container = root.getElementById('account-mode-edit-controls');
+    if (!container) return;
+
+    for (const [mode, id] of Object.entries(ACCOUNT_MODE_FLAG_IDS)) {
+        const card = root.getElementById(id)?.closest('[data-account-mode-choice]');
+        if (!card) continue;
+        const hidden = editing ? mode === currentMode : mode === ACCOUNT_MODES.PRIVATE;
+        card.classList.toggle('hidden', hidden);
+    }
+    container.classList.remove('hidden');
+}

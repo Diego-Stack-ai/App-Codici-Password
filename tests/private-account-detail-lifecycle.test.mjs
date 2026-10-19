@@ -5,6 +5,11 @@ import {readFile} from 'node:fs/promises';
 
 const root = new URL('../Frontend/public/assets/js/modules/privato/', import.meta.url);
 const strip = value => value.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+const sharedRoot = new URL('../Frontend/public/assets/js/modules/shared/', import.meta.url);
+const messageSource = await readFile(new URL('read-error-message.js', sharedRoot), 'utf8');
+const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+const modeSource = await readFile(new URL('account-mode-model.js', sharedRoot), 'utf8');
+const {accountModeFromRecord} = await import('data:text/javascript;base64,' + Buffer.from(modeSource).toString('base64'));
 const source = strip(await readFile(new URL('dettaglio_account_privato.js', root), 'utf8'))
     .replaceAll("import('../shared/account-note-editor.js')", "Promise.resolve({initAccountNoteEditor() {}})")
     .replace(/import\('\.\.\/shared\/account-shared-credentials\.js\?v=\d+\.\d+\.\d+'\)/, 'loadCredentials()')
@@ -31,7 +36,7 @@ function detailFixture() {
     const span = node(); nodes['toggle-password'].querySelector = () => span;
     const container = node();
     const window = {location: {search: '?id=A', pathname: '/dettaglio_account_privato.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({window, URLSearchParams, AbortController, auth: {currentUser: {uid: 'owner'}},
+    const context = vm.createContext({window, URLSearchParams, AbortController, readErrorMessage, accountModeFromRecord, auth: {currentUser: {uid: 'owner'}},
         onAuthStateChanged: (_auth, callback) => { observers.add(callback); return () => observers.delete(callback); },
         addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events),
         document: {title: 'Dettaglio', body: {style: {}}, getElementById: id => nodes[id] || null,

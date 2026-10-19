@@ -24,7 +24,13 @@ for (const [label, path, renderName] of [
         });
         const passwordContainer = node();
         nodes['detail-password'] = node({closest: selector => selector === '.glass-field-container' ? passwordContainer : null});
+        const accountModeFromRecord = account => {
+            const memo = ['memo', 'memorandum'].includes(account.type) || account.isMemo || account.hasMemo || account.isMemoShared;
+            const shared = account.visibility === 'shared' || account.shared || account.isMemoShared;
+            return memo ? (shared ? 'memo-shared' : 'memo-private') : (shared ? 'account-shared' : 'account-private');
+        };
         const realm = vm.createContext({document: {getElementById: id => nodes[id] || null, querySelector: () => null},
+            accountModeFromRecord,
             renderAccountBanking() {}, t: () => '', window: {location: {}}, showConfirmModal() {}});
         vm.runInContext(await source(path), realm);
         realm[renderName]({username: 'first', account: 'code', note: 'note', referenteNome: 'name'}, () => true);
@@ -97,9 +103,22 @@ test('new banking fields retain copy guards and readonly banking hides add actio
     assert.equal(copies.length, 2);
 });
 
-test('private detail preserves the banking copy handler instead of replacing it with the legacy input handler', async () => {
-    const privateSource = await readFile(new URL('../Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js', import.meta.url), 'utf8');
-    assert.match(privateSource, /\.copy-btn:not\(\[data-banking-copy="true"\]\)/);
+test('private and company details preserve banking copy handlers', async () => {
+    for (const type of ['privato', 'azienda']) {
+        const detailSource = await readFile(new URL(`../Frontend/public/assets/js/modules/${type}/dettaglio_account_${type}.js`, import.meta.url), 'utf8');
+        assert.match(detailSource, /\.copy-btn:not\(\[data-banking-copy="true"\]\)/);
+    }
+});
+
+test('private and company details derive shared and memorandum rendering from canonical mode fields', async () => {
+    for (const type of ['privato', 'azienda']) {
+        const detailSource = await readFile(new URL(`../Frontend/public/assets/js/modules/${type}/dettaglio_account_${type}.js`, import.meta.url), 'utf8');
+        assert.match(detailSource, /import \{ accountModeFromRecord \} from '\.\.\/shared\/account-mode-model\.js'/);
+        assert.match(detailSource, /accountModeFromRecord\(acc\)\.endsWith\('-shared'\)/);
+        assert.match(detailSource, /mode === 'memo-shared'/);
+        assert.match(detailSource, /mode === 'account-shared'/);
+        assert.match(detailSource, /mode === 'memo-private'/);
+    }
 });
 
 test('banking view renders the complete IBAN in a responsive single-line value', async () => {

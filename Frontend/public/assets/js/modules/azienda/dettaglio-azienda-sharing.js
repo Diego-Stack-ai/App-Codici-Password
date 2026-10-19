@@ -4,6 +4,7 @@
  */
 
 import { createElement, clearElement } from '../../dom-utils.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 
 let activeView = () => true;
 
@@ -32,7 +33,9 @@ export function renderSharingMap(account, contactNames = new Map()) {
     const list = document.getElementById('guests-list');
     const section = document.getElementById('shared-management-section');
     if (!list) return;
-    const guests = account?.visibility === 'shared' ? activeGuests(Object.values(account?.sharedWith || {})) : [];
+    const guests = accountModeFromRecord(account).endsWith('-shared')
+        ? activeGuests(Object.values(account?.sharedWith || {}))
+        : [];
     section?.classList.toggle('hidden', guests.length === 0);
     renderGuestList(list, guests, contactNames);
 }

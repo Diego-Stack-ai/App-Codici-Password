@@ -8,19 +8,19 @@
     <title>Account Azienda - PROTOCOLLO BASE V5.3</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.208" />
+    <link rel="manifest" href="manifest.json?v=1.2.209" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.208">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.209">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.208">
-    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.208">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.209">
+    <link rel="stylesheet" href="assets/css/account_form.css?v=1.2.209">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.208">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.209">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -260,15 +260,48 @@
                                 <div id="account-widgets-list" class="shared-account-fields"></div>
                             </section>
 
-                            <div id="account-mode-edit-controls" class="flex-col-gap">
+                            <div id="account-mode-edit-controls" class="flex-col-gap hidden">
+                                <!-- Private Account Toggle: shown only as an alternative while editing -->
+                                <label class="option-card border-glow" data-account-mode-choice="account-private">
+                                    <div class="option-content">
+                                        <span
+                                            class="material-symbols-outlined icon-accent-purple bg-purple-soft option-icon notranslate" translate="no">person</span>
+                                        <span class="option-label" data-t="company_card_accounts">Account</span>
+                                    </div>
+                                    <input class="hidden" type="checkbox" id="flag-account" />
+                                    <div class="base-switch"></div>
+                                </label>
+
                                 <!-- Shared Toggle -->
-                                <label class="option-card border-glow">
+                                <label class="option-card border-glow" data-account-mode-choice="account-shared">
                                     <div class="option-content">
                                         <span
                                             class="material-symbols-outlined icon-accent-blue bg-blue-soft option-icon notranslate" translate="no">share</span>
                                         <span class="option-label" data-t="shared_account">Account Condiviso</span>
                                     </div>
                                     <input class="hidden" type="checkbox" id="flag-shared" />
+                                    <div class="base-switch"></div>
+                                </label>
+
+                                <!-- Memorandum Toggle -->
+                                <label class="option-card border-glow" data-account-mode-choice="memo-private">
+                                    <div class="option-content">
+                                        <span
+                                            class="material-symbols-outlined icon-accent-orange bg-orange-soft option-icon notranslate" translate="no">lightbulb</span>
+                                        <span class="option-label" data-t="memorandum">Memorandum</span>
+                                    </div>
+                                    <input class="hidden" type="checkbox" id="flag-memo" />
+                                    <div class="base-switch"></div>
+                                </label>
+
+                                <!-- Memorandum Shared Toggle -->
+                                <label class="option-card border-glow" data-account-mode-choice="memo-shared">
+                                    <div class="option-content">
+                                        <span
+                                            class="material-symbols-outlined icon-accent-green bg-green-soft option-icon notranslate" translate="no">broadcast_on_personal</span>
+                                        <span class="option-label" data-t="memo_shared">Memorandum Condiviso</span>
+                                    </div>
+                                    <input class="hidden" type="checkbox" id="flag-memo-shared" />
                                     <div class="base-switch"></div>
                                 </label>
                             </div>
@@ -288,28 +321,6 @@
                                     Gestisci destinatari
                                 </a>
                             </div>
-
-                            <!-- Memorandum Toggle -->
-                            <label class="option-card border-glow">
-                                <div class="option-content">
-                                    <span
-                                        class="material-symbols-outlined icon-accent-orange bg-orange-soft option-icon notranslate" translate="no">lightbulb</span>
-                                    <span class="option-label" data-t="memorandum">Memorandum</span>
-                                </div>
-                                <input class="hidden" type="checkbox" id="flag-memo" />
-                                <div class="base-switch"></div>
-                            </label>
-
-                            <!-- Memorandum Shared Toggle -->
-                            <label class="option-card border-glow">
-                                <div class="option-content">
-                                    <span
-                                        class="material-symbols-outlined icon-accent-green bg-green-soft option-icon notranslate" translate="no">broadcast_on_personal</span>
-                                    <span class="option-label" data-t="memo_shared">Memorandum Condiviso</span>
-                                </div>
-                                <input class="hidden" type="checkbox" id="flag-memo-shared" />
-                                <div class="base-switch"></div>
-                            </label>
                         </div>
                     </section>
                 </div> <!-- Close Detail Content Wrap -->

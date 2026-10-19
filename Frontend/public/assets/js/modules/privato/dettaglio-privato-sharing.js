@@ -4,6 +4,7 @@
  */
 
 import { createElement, clearElement } from '../../dom-utils.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 
 let mounted = null;
 
@@ -37,7 +38,7 @@ export function renderPrivateSharingMap(account, contactNames = new Map(), mount
     if (!list) return;
 
     clearElement(list);
-    const guests = account?.visibility === 'shared' ? activeGuests(account) : [];
+    const guests = accountModeFromRecord(account).endsWith('-shared') ? activeGuests(account) : [];
     section?.classList.toggle('hidden', guests.length === 0);
     for (const guest of guests) {
         const email = normalizeEmail(guest.email);

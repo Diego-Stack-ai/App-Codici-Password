@@ -4,6 +4,8 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
 const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+const modeSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-mode-model.js', import.meta.url), 'utf8');
+const {accountModeFromRecord} = await import('data:text/javascript;base64,' + Buffer.from(modeSource).toString('base64'));
 
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js', import.meta.url), 'utf8');
@@ -27,7 +29,7 @@ function fixture() {
     };
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
-    const context = vm.createContext({readErrorMessage, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
+    const context = vm.createContext({readErrorMessage, accountModeFromRecord, URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)}, window, navigator: {onLine: true}, console,
         inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         consumeAttachmentInitialMode: input => input?.dataset?.attachmentInitialMode === 'card' ? 'card' : 'free',
         document: {getElementById: id => id === 'footer-center-actions' ? footer : nodes[id] || find(footer.children, id),

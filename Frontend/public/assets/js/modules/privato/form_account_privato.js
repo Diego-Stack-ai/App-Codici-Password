@@ -1,6 +1,6 @@
 import {normalizeEditableBankingAccounts, hasRealBankingData} from '../shared/banking-model.js';
 import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
-import {auth} from '../../firebase-config.js?v=1.2.208';
+import {auth} from '../../firebase-config.js?v=1.2.209';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -16,16 +16,16 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
-import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.208';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.208';
+import { ACCOUNT_MODES, accountModeFromFlagId, accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, getAccountModeFlags, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, selectAccountMode, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, showAccountModeAlternatives, validateAccountMode } from '../shared/account-mode-model.js';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.209';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.209';
 async function savePrivateAccount(...args) {
     let module;
     // Il modulo di salvataggio e' caricato solo al primo click. Deve quindi
     // partecipare esplicitamente al versionamento della release: senza query
     // il service worker/browser puo' riusare il controller della release
     // precedente e perdere una modifica successiva pur mostrando successo.
-    try { module = await import('./form-privato-save.js?v=1.2.208'); }
+    try { module = await import('./form-privato-save.js?v=1.2.209'); }
     catch {
         if (args[0]?.isActive?.()) {
             showToast('Impossibile caricare il salvataggio. Riprova.', 'error');
@@ -196,8 +196,13 @@ export async function initFormAccountPrivato(user) {
         formVersion++;
         pagehideContext?.invalidate();
     }, {once:true});
-    document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
-    ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.remove('hidden'));
+    // In creazione Account privato resta il modo implicito; in modifica le
+    // alternative vengono mostrate solo dopo aver letto il modo reale, evitando
+    // il lampo iniziale di una quarta opzione che poi scompare.
+    if (!isEditing) {
+        selectAccountMode(ACCOUNT_MODES.PRIVATE);
+        showAccountModeAlternatives(ACCOUNT_MODES.PRIVATE);
+    }
     if (isEditing) {
         document.getElementById('shared-management')?.classList.add('hidden');
     }
@@ -546,13 +551,10 @@ async function loadData() {
         // Flags & Sharing UI (V5.1 Master - Strict Mode)
         const loadedMode = accountModeFromRecord(data);
         loadedAccountMode = loadedMode;
-        const isMemo = loadedMode.startsWith('memo-');
         const isShared = loadedMode.endsWith('-shared');
-        const isMemoShared = loadedMode === 'memo-shared';
 
-        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared && !isMemo;
-        if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = isMemo && !isShared;
-        if (document.getElementById('flag-memo-shared')) document.getElementById('flag-memo-shared').checked = isMemoShared;
+        selectAccountMode(loadedMode);
+        showAccountModeAlternatives(loadedMode, {editing: true});
 
         if (isShared) {
             const mgmt = document.getElementById('shared-management');
@@ -598,7 +600,7 @@ async function loadRubrica() {
  */
 function setupUI() {
     // Flag Mutual Exclusion & Sharing Rules
-    const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'].map(id => document.getElementById(id)).filter(Boolean);
+    const flags = getAccountModeFlags();
     flags.forEach(f => {
         f.onchange = async () => {
             const namePopulated = !!get('account-name');
@@ -611,11 +613,7 @@ function setupUI() {
                     return;
                 }
 
-                const candidateMode = accountModeFromFlags({
-                    shared: f.id === 'flag-shared',
-                    memo: f.id === 'flag-memo',
-                    memoShared: f.id === 'flag-memo-shared'
-                });
+                const candidateMode = accountModeFromFlagId(f.id);
                 const validation = validateAccountMode(candidateMode, credentialValues);
                 if (validation.reason === 'memo-has-credentials') {
                     f.checked = false;
@@ -631,11 +629,7 @@ function setupUI() {
                         'Continua', 'Annulla'
                     );
                     if (!confirmed) {
-                        f.checked = false;
-                        const originalFlag = loadedAccountMode === 'account-shared' ? 'flag-shared'
-                            : loadedAccountMode === 'memo-shared' ? 'flag-memo-shared'
-                            : loadedAccountMode === 'memo-private' ? 'flag-memo' : '';
-                        if (originalFlag) document.getElementById(originalFlag).checked = true;
+                        selectAccountMode(loadedAccountMode);
                         return;
                     }
                     resetExistingSharing = true;
@@ -644,9 +638,7 @@ function setupUI() {
                     renderGuestsList();
                 }
 
-                if (f.id === 'flag-memo') isExplicitMemo = true;
-                if (f.id === 'flag-shared') isExplicitMemo = false;
-                // Se è flag-memo-shared (Verde), NON tocchiamo isExplicitMemo per preservare la natura originale
+                isExplicitMemo = candidateMode.startsWith('memo-');
 
                 flags.forEach(other => { if (other !== f) other.checked = false; });
             }
