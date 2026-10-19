@@ -10,6 +10,8 @@ Con l'ordine esplicito **«Pubblica»** del 19/10/2026 Diego autorizza commit, p
 
 Verifica locale: contratto di recupero **2/2**, `git diff --check` verde e suite completa `npm test` conclusa con codice **0**, inclusi i banchi Functions, Rules, Storage, Vault ed emulatori Firebase. Il collaudo della ricezione sul telefono resta una verifica successiva alla pubblicazione.
 
+Esito: PR `#179` unita in `master` nel commit `1d91eee1` dopo gate GitHub verdi. Il workflow manuale `39221884870` ha ripetuto la validazione completa in 8m00s e ha pubblicato esclusivamente Firebase Hosting in 47s. La verifica pubblica HTTP `200` conferma la versione `1.2.207`, il cache-bust `push=20261019c`, il precontrollo della registrazione e il riallineamento UI. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi; la ricezione fisica sul telefono resta da verificare.
+
 ## Ripristino del motore AI locale WebAssembly sotto CSP — 19/10/2026
 
 Il collaudo del pacchetto ONNX locale ha rilevato che il browser interrompe `WebAssembly.instantiate()` perché la Content Security Policy pubblicata non autorizza la compilazione WebAssembly. Il runtime e gli artefatti restano locali e same-origin; non è necessario consentire valutazione dinamica di codice JavaScript.

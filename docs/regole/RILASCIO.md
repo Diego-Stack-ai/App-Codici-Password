@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.207 — 19/10/2026
+
+PR `#179` unita in `master` nel commit `1d91eee1` dopo gate documentali e validazione GitHub completa verdi. Il workflow manuale `39221884870` ha ripetuto la suite e pubblicato esclusivamente Firebase Hosting. La verifica remota HTTP `200` conferma versione `1.2.207`, cache-bust Push `20261019c`, precontrollo della registrazione e recupero del dispositivo già non attivo. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione della notifica di sistema resta da confermare sull'iPhone.
+
 ## Esito operativo 1.2.206 — 19/10/2026
 
 PR `#177` unita in `master` nel commit `7ce91633` dopo due controlli documentali e validazione GitHub completa verde. Il workflow `39212436454` ha ripetuto i gate e pubblicato esclusivamente Firebase Hosting. La verifica remota HTTP `200` conferma versione `1.2.206`, rotazione della sottoscrizione Push iPhone, selezione delle tre taglie AI.2 compatibili e CSP mirata per WebAssembly senza abilitare `'unsafe-eval'` JavaScript. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione effettiva della Push richiede un nuovo collaudo sull'iPhone.
