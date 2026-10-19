@@ -1,12 +1,14 @@
 # Stato
 
-## Correzione locale CSP per l'AI WebAssembly — 19/10/2026
+## Release 1.2.206 pubblicata — Push iPhone e AI locale — 19/10/2026
 
 L'errore `WebAssembly.instantiate()` del runtime ONNX non dipende dal modello AI: la CSP di Hosting non concedeva la compilazione WebAssembly. Il candidato locale aggiunge la sola sorgente `'wasm-unsafe-eval'` a `script-src`. La sorgente più ampia `'unsafe-eval'` resta vietata, quindi `eval()` e le altre forme di valutazione dinamica JavaScript non vengono abilitate.
 
 Il controllo di hardening ora interpreta le sorgenti CSP come token esatti e verifica entrambe le proprietà; una prova dedicata lega inoltre la CSP al contratto degli artefatti AI locali. Nelle Impostazioni, AI.2 espone ora tre scelte effettive: Leggera, Media e Potente. Soltanto le taglie ammesse dal dispositivo sono attive, la taglia consigliata è riconoscibile e la scheda aggiorna peso, memoria, download e verifica usando il manifest selezionato. L'intero blocco **Livello Agente Codex** segue inoltre l'interruttore **Attiva Agente AI**: è nascosto quando l'assistente è disattivato, compare immediatamente all'attivazione e torna allo stato precedente se il salvataggio non riesce. Sul PC osservato la matrice ammette tutte e tre le taglie e raccomanda Potente; i runtime Media e Potente risultano raggiungibili su Hosting con risposta HTTP `200`. Sono verdi i contratti AI locale **34/34**, il collaudo Chrome headless della UI, sicurezza **25/25**, offline **14/14**, navigazione **165/165**, i18n **14/14**, fondazioni UI **6/6**, sintassi JavaScript su **218 moduli**, riferimenti statici su **311 file**, HTML, CSS e hardening. Graphify è riallineato con **13.302 nodi, 34.948 archi e 708 comunità**.
 
-Diego ha ora autorizzato con **«pubblica»** il rilascio coordinato delle correzioni applicate. La candidata è la `1.2.206`: comprende il recupero Push iPhone, la selezione e la visibilità coerente dei pacchetti AI.2 e l'abilitazione CSP mirata per WebAssembly. La suite completa, inclusi Rules, Storage, Vault ed emulatori Firebase, è verde. Il perimetro di distribuzione resta il solo Firebase Hosting; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non devono essere modificati o distribuiti.
+Diego ha autorizzato con **«pubblica»** il rilascio coordinato delle correzioni applicate. La PR `#177` è stata integrata in `master` nel commit `7ce91633` dopo due controlli documentali e la validazione GitHub completa, conclusa in 6m39s. Il workflow di pubblicazione `39212436454` ha ripetuto la validazione in 7m59s e ha distribuito con successo il solo Firebase Hosting in 45s.
+
+La verifica pubblica restituisce HTTP `200` per Home, Impostazioni e modulo Push, conferma versione `1.2.206`, rotazione dello scope Push, pannello AI.2, sorgente CSP `'wasm-unsafe-eval'` e assenza della sorgente generale `'unsafe-eval'`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione effettiva della Push richiede ora la riapertura dell'app installata su iPhone e un nuovo comando di prova.
 
 ## Correzione locale successiva alla 1.2.205 — sottoscrizione Push iPhone — 18/10/2026
 

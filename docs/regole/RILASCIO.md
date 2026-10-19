@@ -1,5 +1,9 @@
 # Rilascio
 
+## Esito operativo 1.2.206 — 19/10/2026
+
+PR `#177` unita in `master` nel commit `7ce91633` dopo due controlli documentali e validazione GitHub completa verde. Il workflow `39212436454` ha ripetuto i gate e pubblicato esclusivamente Firebase Hosting. La verifica remota HTTP `200` conferma versione `1.2.206`, rotazione della sottoscrizione Push iPhone, selezione delle tre taglie AI.2 compatibili e CSP mirata per WebAssembly senza abilitare `'unsafe-eval'` JavaScript. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione effettiva della Push richiede un nuovo collaudo sull'iPhone.
+
 ## Esito operativo 1.2.200 — 17/10/2026
 
 PR `#165` unita in `master` nel commit `572ad57b` dopo due controlli documentali e validazione GitHub completa verdi. Pubblicati **343 file** sul solo Firebase Hosting. La verifica remota ha restituito HTTP `200` e confermato versione `1.2.200`, data del Documento vincolante nell'editor Scadenza, campi Preavviso/Frequenza, ritorno protetto dalla rubrica Destinatari e catalogo guida aggiornato. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
