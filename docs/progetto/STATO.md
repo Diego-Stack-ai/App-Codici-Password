@@ -1,12 +1,12 @@
 # Stato
 
-## Candidata locale 1.2.207 — prova Push con dispositivo già invalidato — 19/10/2026
+## Release 1.2.207 pubblicata — prova Push con dispositivo già invalidato — 19/10/2026
 
 Il collaudo iPhone successivo alla `1.2.206` ha ristretto il difetto residuo: il browser carica il runtime pubblicato, tenta la revoca della vecchia registrazione FCM e riceve `403`; subito dopo la callable di prova risponde `400` perché il record è già non attivo. Il warning `[Violation] 'load' handler took 218ms` è soltanto prestazionale. La rotazione dello scope era presente, ma il comando di prova entrava nel recupero soltanto dopo il motivo `push-token-invalid` e non prima di chiamare un backend che vedeva già il dispositivo invalidato.
 
 La candidata `1.2.207` effettua ora un precontrollo confermato sul server e rigenera token e registrazione quando il dispositivo non possiede più uno stato attivo coerente con l'ambito Scadenze. Mantiene inoltre un solo tentativo di recupero per entrambi gli stati backend ammessi — token appena rifiutato oppure dispositivo non attivo — e rilegge lo stato al termine per riallineare la schermata. I test mirati del contratto di recupero sono verdi **2/2**; anche `npm test` è terminato con codice **0**, includendo documentazione, controlli statici, sicurezza, offline, Functions, Rules, Storage, Vault e tutti i banchi con emulatori Firebase. Graphify è riallineato con **13.320 nodi, 34.960 archi e 727 comunità**. Resta distinto il collaudo fisico dopo la pubblicazione.
 
-Diego ha autorizzato con **«Pubblica»** commit, push, PR, merge e distribuzione della `1.2.207` sul solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono coinvolti dalla correzione.
+Diego ha autorizzato con **«Pubblica»** commit, push, PR, merge e distribuzione della `1.2.207` sul solo Firebase Hosting dopo i gate verdi. La PR `#179` è stata integrata nel commit `1d91eee1`; i due gate documentali e la validazione GitHub sono verdi, quest'ultima in 6m46s. Il workflow di produzione `39221884870` ha ripetuto la suite in 8m00s e ha pubblicato il solo Hosting in 47s. La verifica HTTP pubblica restituisce `200` per Home, Impostazioni e i due moduli Push, confermando versione `1.2.207`, cache-bust `push=20261019c`, precontrollo del dispositivo e riallineamento finale della UI. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. Resta distinto il collaudo della notifica di sistema sull'iPhone.
 
 ## Release 1.2.206 pubblicata — Push iPhone e AI locale — 19/10/2026
 

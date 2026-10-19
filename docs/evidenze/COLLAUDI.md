@@ -7,6 +7,8 @@
 - La candidata `1.2.207` interroga il record confermato, forza la registrazione distinta se token, stato o ambito Scadenze non sono coerenti, conserva gli ambiti locali/server e limita a uno il nuovo tentativo della callable.
 - La schermata rilegge lo stato dopo la prova, così un fallimento non lascia interruttore o pulsante in uno stato soltanto apparente.
 - Prove mirate `push-registration-recovery` verdi **2/2** e `git diff --check` verde. La suite integrale `npm test` è terminata con codice **0**, compresi documentazione, controlli statici, sicurezza, offline, Functions, Firestore Rules, Storage Rules, Vault, ripristino e tutti gli emulatori Firebase. Il primo avvio isolato si era fermato sul noto limite Windows `EPERM` dei repository temporanei documentali; la ripetizione fuori sandbox ha completato l'intera catena senza errori applicativi. Graphify principale riallineato: **13.320 nodi, 34.960 archi e 727 comunità**. Ordine di pubblicazione ricevuto: i gate completi precedono commit, integrazione e distribuzione del solo Hosting; il collaudo fisico resta distinto.
+- PR `#179` integrata nel commit `1d91eee1`; due gate documentali e validazione GitHub verde in 6m46s. Il workflow manuale `39221884870` ha ripetuto la suite in 8m00s e completato **Deploy Hosting only** in 47s.
+- Verifica pubblica: HTTP `200` su Home, Impostazioni, `push-manager.js?push=20261019c` e `push-settings-controller.js?push=20261019c`; versione `1.2.207`, precontrollo del record, recupero dello stato non attivo e `await render()` presenti. Functions, Rules, indici, migrazioni e dati reali non sono stati distribuiti.
 
 ## 19/10/2026 — compatibilità CSP del motore AI locale WebAssembly
 
