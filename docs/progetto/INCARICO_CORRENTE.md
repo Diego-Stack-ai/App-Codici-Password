@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## Riconciliazione delle Scadenze storiche nelle nuove linguette — 20/10/2026
+
+Diego autorizza la mappatura completa delle Scadenze che non nascono dai Documenti personali, la ricollocazione delle rispettive voci nelle nuove linguette di **Regole invio scadenze** e la verifica totale dei collegamenti. I record esistenti devono conservare data, preavviso, frequenza, destinatari, canali, note e allegati: il riordino non autorizza copie, riscritture, normalizzazioni o cancellazioni automatiche dei dati reali.
+
+L'audit autenticato e in sola lettura ha controllato 37 record: 24 appartengono agli ambiti da riconciliare — 16 Automezzi, 6 Casa e immobili, 1 Salute e 1 Sport e associazioni — mentre 13 sono Documenti personali o residui familiari esclusi. Le due Patenti familiari indicate da Diego restano intatte. L'inventario delle configurazioni comprende 17 regole, 7 riferimenti/mezzi e 18 testi email; queste tre liste sono indipendenti e non devono essere accoppiate per indice.
+
+La candidata `1.2.210` rende tali inventari e le Scadenze collegate direttamente disponibili nelle rispettive linguette, mantenendo i collegamenti agli editor sorgente. Le tre card separate Automezzi, Documenti e Regole generali vengono rimosse; Destinatari email resta una sezione condivisa. **Comodato d'uso** continua a essere segnalato come doppione senza fusione. La Scadenza Federazione Italiana Vela conserva i 14 giorni reali e mostra il confronto con la regola a 70 giorni senza sovrascrittura.
+
+Le Scadenze collegate ai Documenti personali restano governate dal flusso Profilo già pubblicato. Diego ha precisato che cancellerà personalmente la voce **Contratto** e correggerà la regola FIV da 70 a 14 giorni dopo il lavoro; l'agente deve ricordarglielo alla consegna e non deve eseguire tali scritture.
+
+Con gli ordini **«procedi e poi finita la verifica pubblica»** e **«quando hai controllato che tutto sia ok allora pubblica»** del 20/10/2026, Diego autorizza bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo tutti i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi. La pubblicazione non può precedere test pertinenti, `npm run test:docs`, suite completa, diff finale e riallineamento Graphify.
+
+Verifica locale: modello e pagina **13/13**, documentazione **11/11**, navigazione **168/168**, i18n **14/14**, sintassi su **219 moduli**, CSS e `git diff --check` verdi. `npm test` è terminato con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. La shell offline contiene **308 risorse** e Graphify principale è riallineato a **13.411 nodi, 35.159 archi e 753 comunità**.
+
 ## Revisione Account e Memorandum — 19/10/2026
 
 Diego autorizza il secondo punto della scaletta: revisione coordinata dei quattro modi **Account**, **Account condiviso**, **Memorandum** e **Memorandum condiviso**, nei contesti privato e aziendale. Il controllo comprende creazione/modifica, liste e filtri, dettaglio, condivisione, allegati, note, dati finanziari, archiviazione e compatibilità dei record storici con i campi canonici `type` e `visibility`.

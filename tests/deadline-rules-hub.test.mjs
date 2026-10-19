@@ -5,7 +5,7 @@ import test from 'node:test';
 const publicRoot = new URL('../Frontend/public/', import.meta.url);
 const read = path => fs.readFile(new URL(path, publicRoot), 'utf8');
 
-test('the deadline hub exposes nine accessible domains while preserving legacy configurations', async () => {
+test('the deadline hub exposes nine accessible domains and removes the three separate legacy cards', async () => {
   const html = await read('regole_scadenze.html');
   const tabs = [...html.matchAll(/data-deadline-domain="([^"]+)"/g)].map(match => match[1]);
   const panels = [...html.matchAll(/data-deadline-panel="([^"]+)"/g)].map(match => match[1]);
@@ -13,11 +13,15 @@ test('the deadline hub exposes nine accessible domains while preserving legacy c
   assert.deepEqual(tabs, ['personal', 'vehicles', 'home', 'health', 'sport', 'contracts', 'generic', 'user-company', 'company']);
   assert.deepEqual(panels, tabs);
   assert.match(html, /role="tablist"/);
-  assert.match(html, /href="configurazione_automezzi\.html"/);
-  assert.match(html, /href="configurazione_documenti\.html"/);
-  assert.match(html, /href="configurazione_generali\.html"/);
+  assert.doesNotMatch(html, /href="configurazione_automezzi\.html"/);
+  assert.doesNotMatch(html, /href="configurazione_documenti\.html"/);
+  assert.doesNotMatch(html, /href="configurazione_generali\.html"/);
   assert.match(html, /href="gestione_destinatari\.html"/);
+  assert.doesNotMatch(html, /deadline-legacy-divider/);
   assert.match(html, /id="personal-documents-summary"/);
+  for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'generic']) {
+    assert.match(html, new RegExp(`data-deadline-domain-summary="${domain}"`));
+  }
   assert.doesNotMatch(html, /Documenti personali collegati|Apri Documenti nel Profilo/);
 });
 
@@ -57,7 +61,16 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(source, /deadline_personal_error/);
   assert.match(source, /deadline_personal_retry/);
   assert.match(source, /deadlineRecipientsFromRecord/);
-  assert.doesNotMatch(source, /deadline\.attachments/);
+  assert.match(source, /buildDeadlineDomainInventory/);
+  assert.match(source, /deadline\.templateText \|\| deadline\.oggetto_email/);
+  assert.match(source, /deadline\.attachments\.length/);
+  assert.match(source, /deadline_domain_references_title/);
+  assert.match(source, /deadline_domain_templates_title/);
+  assert.match(source, /deadline\.domainAudit\?\.scheduleMismatch/);
+  assert.match(source, /deadline_domain_default_schedule/);
+  assert.match(source, /getUserSetting\(user\.uid, 'deadlineConfig'\)/);
+  assert.match(source, /getUserSetting\(user\.uid, 'deadlineConfigDocuments'\)/);
+  assert.match(source, /getUserSetting\(user\.uid, 'generalConfig'\)/);
   assert.match(source, /deadline\.notes/);
   assert.match(source, /deadline\.templateText/);
   assert.match(source, /renderDocumentReference/);
@@ -66,6 +79,8 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(source, /deadline_personal_can_manage/);
   assert.match(source, /deadline_personal_view_only/);
   assert.match(css, /\.deadline-personal-grid/);
+  assert.match(css, /\.deadline-domain-resource-card/);
+  assert.match(css, /\.deadline-domain-schedule-warning/);
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
   assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
