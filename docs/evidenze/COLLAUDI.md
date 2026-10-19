@@ -11,6 +11,9 @@
 - Graphify principale aggiornato dopo il cambiamento strutturale e il bump della candidata: **13.302 nodi, 34.948 archi e 708 comunità**.
 - Candidata `1.2.206`: suite completa verde, inclusi i banchi Rules, Storage, Vault e tutti gli emulatori Firebase. Il solo arresto iniziale era dovuto a `firebase-tools` assente dal `node_modules` isolato del worktree; collegata la dipendenza già installata nel progetto principale, il banco e tutti i controlli successivi sono terminati senza errori applicativi.
 - Ordine di pubblicazione ricevuto il 19/10/2026. Perimetro: solo Firebase Hosting; nessuna modifica o distribuzione di Functions, Firestore Rules, Storage Rules, indici, migrazioni o dati reali.
+- PR `#177` integrata nel commit `7ce91633`; due gate documentali e validazione GitHub verde in 6m39s. Il workflow `39212436454` ha ripetuto la validazione in 7m59s e pubblicato il solo Hosting in 45s.
+- Verifica remota: HTTP `200` su Home, Impostazioni e modulo Push; versione `1.2.206`, rotazione dello scope Push, pannello AI.2 e CSP `'wasm-unsafe-eval'` presenti. La sorgente generale `'unsafe-eval'` resta assente.
+- Nessun deploy di Functions, Firestore Rules, Storage Rules, indici, migrazioni o dati. La consegna fisica della Push resta da confermare sull'iPhone dopo la riapertura dell'app installata.
 
 ## 18/10/2026 — correzione locale successiva alla 1.2.205, rotazione Web Push iPhone
 
