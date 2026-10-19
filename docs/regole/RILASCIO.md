@@ -98,9 +98,9 @@ Promemoria datato, subordinato ai contratti e alle decisioni: non autorizza merg
 
 > “Verificabile” indica l’esecuzione dei controlli documentati nel repository. Non dimostra da solo il deploy effettivo, l’enforcement della Firebase Console, i dati reali, la resistenza crittografica o tutti i dispositivi.
 
-Il gate automatico controlla header di sicurezza Hosting, assenza di `unsafe-eval`, protezione anti-framing, vincoli UID nelle Rules, App Check obbligatorio su tutte le callable e lockfile moderno. La suite completa comprende inoltre sintassi, dipendenze circolari, CSP/riferimenti statici, sicurezza dei dati, emulatori Firestore e Storage e tutti i laboratori M5–M9.
+Il gate automatico controlla header di sicurezza Hosting, assenza della sorgente generale `'unsafe-eval'`, presenza della sola sorgente mirata `'wasm-unsafe-eval'` richiesta dal motore AI locale, protezione anti-framing, vincoli UID nelle Rules, App Check obbligatorio su tutte le callable e lockfile moderno. La suite completa comprende inoltre sintassi, dipendenze circolari, CSP/riferimenti statici, sicurezza dei dati, emulatori Firestore e Storage e tutti i laboratori M5–M9.
 
-L'audit del 08/09/2026 rileva zero vulnerabilità note nelle dipendenze di produzione. Le pagine non contengono script inline e la CSP non concede più `unsafe-inline` a `script-src`; sono inoltre vincolati `base-uri`, `object-src` e `form-action`. `unsafe-inline` resta per i soli stili perché alcuni componenti runtime impostano ancora proprietà visive dinamiche: è un debito esplicito da eliminare componente per componente, senza una rimozione globale non collaudata.
+L'audit del 08/09/2026 rileva zero vulnerabilità note nelle dipendenze di produzione. Le pagine non contengono script inline e la CSP non concede più `unsafe-inline` a `script-src`; sono inoltre vincolati `base-uri`, `object-src` e `form-action`. La sorgente `'wasm-unsafe-eval'` autorizza soltanto la compilazione WebAssembly degli artefatti AI fissati e same-origin e non autorizza `eval()` JavaScript. `unsafe-inline` resta per i soli stili perché alcuni componenti runtime impostano ancora proprietà visive dinamiche: è un debito esplicito da eliminare componente per componente, senza una rimozione globale non collaudata.
 
 <a id="fonte-docs-m10-hardening-rilascio-md-gate-che-richiedono-ambiente-reale"></a>
 

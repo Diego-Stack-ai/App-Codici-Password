@@ -15,8 +15,11 @@ const csp = header('Content-Security-Policy') ?? '';
 assert.equal(header('X-Frame-Options'), 'DENY', 'X-Frame-Options deve negare il framing');
 assert.equal(header('X-Content-Type-Options'), 'nosniff', 'X-Content-Type-Options mancante');
 assert.match(csp, /frame-ancestors 'none'/, 'CSP frame-ancestors mancante');
-assert.doesNotMatch(csp, /unsafe-eval/, 'CSP non deve consentire unsafe-eval');
 const scriptPolicy = csp.match(/(?:^|;)\s*script-src\s+([^;]+)/)?.[1] ?? '';
+const scriptSources = new Set(scriptPolicy.trim().split(/\s+/).filter(Boolean));
+assert.equal(scriptSources.has("'unsafe-eval'"), false, 'CSP non deve consentire unsafe-eval JavaScript');
+assert.equal(scriptSources.has("'wasm-unsafe-eval'"), true,
+  'CSP deve consentire soltanto la compilazione WebAssembly richiesta dal motore AI locale');
 assert.doesNotMatch(scriptPolicy, /'unsafe-inline'/, 'CSP script-src non deve consentire script inline');
 assert.match(csp, /(?:^|;)\s*object-src 'none'/, 'CSP object-src deve negare i plugin');
 assert.match(csp, /(?:^|;)\s*base-uri 'self'/, 'CSP base-uri deve essere confinata');

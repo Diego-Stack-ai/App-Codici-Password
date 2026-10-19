@@ -238,7 +238,10 @@ assert.match(auth, /consumePasswordResetPolicyMarker\(updatedUser\)/, 'Il login 
 assert.match(resetPasswordModule, /auth\/network-request-failed[\s\S]*?Connessione assente/, 'Il recupero password non distingue un errore di rete reale');
 assert.match(settings, /auth\/user-token-expired[\s\S]*?requireSecurityReauthentication/, 'La disattivazione 2FA non gestisce il token scaduto');
 assert.match(auth, /reauthFlow === 'security-settings'[\s\S]*?impostazioni\.html/, 'La riautenticazione 2FA non torna alle Impostazioni');
-assert.match(pushManager, /register\('\/firebase-messaging-sw\.js'[\s\S]*?firebase-cloud-messaging-push-scope/, 'La registrazione non usa il worker Push dedicato');
+assert.match(pushManager, /const PUSH_SW_PATH = '\/firebase-messaging-sw\.js';/, 'Il worker Push dedicato non ha un percorso vincolato');
+assert.match(pushManager, /const PUSH_SW_SCOPE = '\/firebase-cloud-messaging-push-scope';/, 'Il worker Push dedicato non ha uno scope vincolato');
+assert.match(pushManager, /navigator\.serviceWorker\.register\(PUSH_SW_PATH,\s*\{[\s\S]*?scope:\s*pushWorkerScope\(generation\)/, 'La registrazione non usa il worker Push dedicato con lo scope isolato');
+assert.match(pushManager, /if \(forceReset\) \{[\s\S]*?resetLocalPushSubscription\(messaging, registration\)[\s\S]*?rotatePushWorkerRegistration\(\)/, 'Il recupero di un token Push invalidato non ruota la registrazione dedicata');
 assert.match(pushWorker, /onBackgroundMessage[\s\S]*?external_deadline/, 'Il worker dedicato non gestisce le notifiche di scadenza ricevute');
 assert.doesNotMatch(pushManager, /throw new Error\([^\n]*technicalPushError|\$\{details\}/, 'La UI Push può ancora esporre dettagli tecnici grezzi');
 assert.match(cloudFunctions, /deadlineShares[\s\S]*?recipientUids/, 'La revoca delle scadenze ricevute non conserva gli UID risolti');

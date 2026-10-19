@@ -42,3 +42,14 @@ test('i pacchetti avanzati sono same-origin, immutabili e fuori dalla shell PWA'
     assert.match(worker, /url\.pathname\.startsWith\('\/assets\/local-ai-packages\/'\)/);
     assert.match(worker, /!name\.startsWith\('codex-local-ai-'\)/);
 });
+
+test('la CSP abilita WebAssembly per l AI locale senza abilitare eval JavaScript', () => {
+    const firebase = JSON.parse(readFileSync(fileURLToPath(new URL('../firebase.json', import.meta.url)), 'utf8'));
+    const globalHeaders = firebase.hosting.headers.find(rule => rule.source === '**')?.headers ?? [];
+    const csp = globalHeaders.find(header => header.key === 'Content-Security-Policy')?.value ?? '';
+    const scriptPolicy = csp.match(/(?:^|;)\s*script-src\s+([^;]+)/)?.[1] ?? '';
+    const scriptSources = new Set(scriptPolicy.trim().split(/\s+/).filter(Boolean));
+
+    assert.equal(scriptSources.has("'wasm-unsafe-eval'"), true);
+    assert.equal(scriptSources.has("'unsafe-eval'"), false);
+});

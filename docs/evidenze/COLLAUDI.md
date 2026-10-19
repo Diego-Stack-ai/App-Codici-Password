@@ -1,5 +1,24 @@
 # Collaudi
 
+## 19/10/2026 — compatibilità CSP del motore AI locale WebAssembly
+
+- Evidenza del browser: `WebAssembly.instantiate()` del runtime ONNX viene bloccato dalla direttiva `script-src` perché mancava una sorgente che autorizzasse la compilazione WebAssembly.
+- Il candidato aggiunge esclusivamente `'wasm-unsafe-eval'`; la sorgente generale `'unsafe-eval'`, che consentirebbe valutazione dinamica JavaScript, resta assente.
+- Il gate di hardening confronta ora token CSP esatti e un test degli artefatti AI verifica congiuntamente presenza del permesso WebAssembly e assenza del permesso JavaScript generale.
+- La UI precedente elencava Leggera, Media e Potente ma usava sempre il candidato Leggera. Il candidato locale espone un gruppo di scelta accessibile, marca la raccomandazione del dispositivo e passa la taglia selezionata al catalogo, al download e alla verifica. Il blocco dei pacchetti nasce nascosto e segue immediatamente l'interruttore Agente AI; il percorso di errore riallinea sia l'interruttore sia la visibilità.
+- Verifica remota in sola lettura: i `runtime/factory.js` delle taglie Media e Potente rispondono entrambi HTTP `200` sull'Hosting pubblico; il difetto non dipende dall'assenza dei pacchetti distribuiti.
+- Verdi: contratti AI locale **34/34**, prova Chrome headless con tre scelte e raccomandazione coerente, sicurezza **25/25**, shell offline **14/14**, navigazione **165/165**, i18n **14/14**, fondazioni UI **6/6**, sintassi JavaScript su **218 moduli**, riferimenti statici su **311 file**, HTML puro, CSS e hardening di rilascio.
+- Graphify principale aggiornato dopo il cambiamento strutturale e il bump della candidata: **13.302 nodi, 34.948 archi e 708 comunità**.
+- Candidata `1.2.206`: suite completa verde, inclusi i banchi Rules, Storage, Vault e tutti gli emulatori Firebase. Il solo arresto iniziale era dovuto a `firebase-tools` assente dal `node_modules` isolato del worktree; collegata la dipendenza già installata nel progetto principale, il banco e tutti i controlli successivi sono terminati senza errori applicativi.
+- Ordine di pubblicazione ricevuto il 19/10/2026. Perimetro: solo Firebase Hosting; nessuna modifica o distribuzione di Functions, Firestore Rules, Storage Rules, indici, migrazioni o dati reali.
+
+## 18/10/2026 — correzione locale successiva alla 1.2.205, rotazione Web Push iPhone
+
+- Il racconto del collaudo e i log Cloud Run coincidono: il primo tentativo ha invalidato il token FCM non registrato; i successivi hanno trovato il dispositivo inattivo. Otto richieste fra le 23:41 e le 23:43 sono terminate con HTTP `400`; quattro riportano esplicitamente `messaging/registration-token-not-registered`.
+- La console iPhone conferma anche il tentativo di eliminazione remota della vecchia registrazione FCM con risposta `403`. Nel runtime Firebase `12.18.0` questo errore viene intercettato; non coincide con gli avvisi prestazionali dei gestori `setTimeout`/`load` e non elimina la necessità di creare una subscription distinta.
+- La causa residua è nel recupero client: su iOS `unsubscribe()` può produrre di nuovo gli stessi parametri della subscription e il SDK Firebase riutilizza il token memorizzato. Il candidato locale registra il worker sotto uno scope progressivo solo dopo un rifiuto permanente, forza così una subscription distinta, conserva gli ambiti e revoca il worker sostituito dopo il salvataggio del nuovo token.
+- Prova mirata del contratto di recupero **1/1**, sicurezza **25/25**, shell offline **14/14**, navigazione **165/165**, i18n **14/14**, guida **6/6**, documentazione **11/11**, sintassi JavaScript **218 moduli**, riferimenti statici su **311 file** e hardening di rilascio verdi. Il primo avvio dei test documentali nel sandbox Windows è stato impedito da `EPERM` sui repository temporanei; la ripetizione autorizzata fuori dal sandbox ha superato tutte le **11/11** prove. Graphify principale riallineato: **13.263 nodi, 34.899 archi e 692 comunità**. Il collaudo fisico richiede una futura pubblicazione esplicitamente autorizzata e un nuovo comando di prova sull’iPhone.
+
 ## 18/10/2026 — pubblicazione 1.2.205, test Push iPhone con rinnovo del token FCM
 
 - Evidenza reale: callable raggiunta con Auth e App Check validi; FCM restituisce `messaging/registration-token-not-registered` per il token iPhone. Il `[500]` mostrato dall’app era quindi la perdita di questa classificazione nel solo comando di prova.

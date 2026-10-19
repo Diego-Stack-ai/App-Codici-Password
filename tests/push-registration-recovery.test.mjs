@@ -11,6 +11,11 @@ test('il runtime rinnova un token push invalidato conservando gli ambiti scelti'
     assert.match(push, /export async function recoverPushRegistration/);
     assert.match(push, /device\?\.status === 'invalid'/);
     assert.match(push, /resetLocalPushSubscription\(messaging, registration\)/);
+    assert.match(push, /const PUSH_SW_GENERATION_KEY = 'codex_push_sw_generation'/);
+    assert.match(push, /function pushWorkerScope/);
+    assert.match(push, /async function rotatePushWorkerRegistration/);
+    assert.match(push, /registration = await rotatePushWorkerRegistration\(\)/);
+    assert.match(push, /await unregisterReplacedPushWorker\(replacedRegistration\)/);
     assert.match(push, /serviceWorkerRegistration: registration/);
     assert.match(push, /rememberedActiveScopes\(\)/);
     assert.match(push, /error\?\.details\?\.reason !== 'push-token-invalid'/);

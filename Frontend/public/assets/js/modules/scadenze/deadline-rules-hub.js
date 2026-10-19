@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.205';
+import {auth} from '../../firebase-config.js?v=1.2.206';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';

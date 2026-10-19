@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## Ripristino del motore AI locale WebAssembly sotto CSP — 19/10/2026
+
+Il collaudo del pacchetto ONNX locale ha rilevato che il browser interrompe `WebAssembly.instantiate()` perché la Content Security Policy pubblicata non autorizza la compilazione WebAssembly. Il runtime e gli artefatti restano locali e same-origin; non è necessario consentire valutazione dinamica di codice JavaScript.
+
+La correzione locale aggiunge alla sola direttiva `script-src` la sorgente CSP specifica `'wasm-unsafe-eval'`, mantenendo vietata la sorgente generale `'unsafe-eval'`. I gate di rilascio e i test degli artefatti AI devono distinguere esplicitamente le due parole chiave, impedendo che una futura modifica allarghi il permesso agli `eval()` JavaScript.
+
+La schermata AI.2 deve inoltre rendere realmente selezionabili le taglie Leggera, Media e Potente permesse dalla capacità rilevata, evidenziare la raccomandazione per il PC e usare manifest, dimensioni, installazione e verifica della taglia scelta. Il testo statico che dichiarava le taglie disponibili senza consentire la scelta non soddisfa il contratto. Quando **Attiva Agente AI** è spento, l'intero blocco **Livello Agente Codex** deve restare nascosto; l'attivazione lo mostra subito senza ricaricare la pagina e un errore di salvataggio ripristina coerentemente interruttore e pannello. Con l'ordine esplicito **«pubblica»** del 19/10/2026 Diego autorizza bump patch `1.2.206`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+## Secondo recupero della Push iPhone — rotazione della sottoscrizione — 18/10/2026
+
+Il collaudo reale della `1.2.205` ha precisato la sequenza: il primo comando di prova ha ricevuto da FCM `messaging/registration-token-not-registered`, ha mostrato brevemente il messaggio di rinnovo e ha disattivato correttamente il record rifiutato; i tentativi successivi hanno restituito `[400]` perché il dispositivo risultava ormai inattivo. Anche dopo spegnimento e riattivazione, iOS/Firebase ha riutilizzato la medesima sottoscrizione e quindi lo stesso token non registrato.
+
+La correzione locale deve forzare, soltanto dopo un rifiuto permanente confermato, una nuova registrazione del Service Worker con scope progressivo. In questo modo la Web Push subscription cambia realmente anche quando `unsubscribe()` su iOS restituisce gli stessi parametri; gli ambiti Scadenze e Inviti vengono conservati e il worker precedente viene revocato soltanto dopo la persistenza del nuovo token. Il test continua a ripetere la callable una sola volta. Il lavoro è incluso nella candidata `1.2.206` e nell'ordine esplicito **«pubblica»** del 19/10/2026. Sono autorizzati commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi; backend, Rules, indici e dati reali restano esclusi.
+
 ## Ripristino della notifica Push di prova su iPhone — 18/10/2026
 
 Il collaudo reale successivo alla `1.2.204` mostra entrambe le preferenze Push attive sull’iPhone, ma il comando **Invia notifica di prova su questo dispositivo** termina con `[500]`. I log della callable confermano autenticazione e App Check validi e identificano la causa nel rifiuto FCM `messaging/registration-token-not-registered`: non è una notifica interna dell’app e non è un errore dei due interruttori.

@@ -14,11 +14,19 @@ const server = createServer(async (request, response) => {
         const url = new URL(request.url, 'http://127.0.0.1');
         if (url.pathname === '/') {
             response.setHeader('Content-Type', 'text/html');
-            response.end(`<script type="module">
+            response.end(`<div id="assistant-package-settings"></div><script type="module">
                 import { probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
                 import { LOCAL_AI_PACKAGE_CATALOG } from '/assets/js/modules/assistant/local-ai-package-catalog.js';
+                import { initAssistantPackageSettings } from '/assets/js/modules/assistant/assistant-package-settings.js';
                 window.__probe = await probeLocalAiCapabilities();
                 window.__catalog = { A1: LOCAL_AI_PACKAGE_CATALOG.A1.status, A2: LOCAL_AI_PACKAGE_CATALOG.A2.status };
+                await initAssistantPackageSettings();
+                window.__tiers = [...document.querySelectorAll('.assistant-package-tier')].map(button => ({
+                    tier:button.dataset.tier,
+                    disabled:button.disabled,
+                    selected:button.getAttribute('aria-checked') === 'true',
+                    recommended:button.classList.contains('recommended')
+                }));
                 window.__cacheNames = await caches.keys();
                 window.__ready = true;
             </script>`);
@@ -49,12 +57,16 @@ try {
     await command('Runtime.enable');
     let value;
     for(let attempt=0;attempt<100;attempt++){
-        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,caches:window.__cacheNames}) : null',returnByValue:true});
+        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,tiers:window.__tiers,caches:window.__cacheNames}) : null',returnByValue:true});
         value=result.result.value; if(value)break; await delay(100);
     }
     assert.equal(value.probe.A1.status,'candidate');
     assert.equal(value.probe.A2.status,'candidate');
     assert.deepEqual(value.catalog,{A1:'available',A2:'available'});
+    assert.deepEqual(value.tiers.map(item => item.tier), ['light','medium','power']);
+    assert.deepEqual(value.tiers.filter(item => !item.disabled).map(item => item.tier), value.probe.A2.allowedTiers);
+    assert.equal(value.tiers.find(item => item.recommended)?.tier, value.probe.A2.recommendedTier);
+    assert.equal(value.tiers.filter(item => item.selected).length, 1);
     assert.deepEqual(value.caches,[]);
     console.log('Local AI browser probe: OK');
 } finally {

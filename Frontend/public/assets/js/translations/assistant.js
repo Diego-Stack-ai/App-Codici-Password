@@ -10,6 +10,7 @@ const it = {
     verify:'Verifica', verifying:'Verifica in corso…', verified:'Verificato', verificationRequired:'Installato · verifica richiesta',
     tier_light:'Leggera', tier_medium:'Media', tier_power:'Potente', tierSelected:'selezionata', tierAvailable:'disponibile',
     tierPending:'modello non ancora disponibile', tierHardwareRecommendation:'Taglia consigliata dal dispositivo:',
+    tierChoose:'Scegli il livello AI.2', tierRecommended:'consigliata per questo PC',
     tierFallbackLight:'nel frattempo è disponibile la taglia leggera'
 };
 const translations = {
@@ -30,6 +31,14 @@ Object.assign(translations.de, { tier_light:'Leicht', tier_medium:'Mittel', tier
 Object.assign(translations.zh, { tier_light:'轻量', tier_medium:'中型', tier_power:'高性能', tierSelected:'已选择', tierAvailable:'可用', tierPending:'模型尚未提供', tierHardwareRecommendation:'设备建议：', tierFallbackLight:'目前可使用轻量模型' });
 Object.assign(translations.hi, { tier_light:'हल्का', tier_medium:'मध्यम', tier_power:'शक्तिशाली', tierSelected:'चयनित', tierAvailable:'उपलब्ध', tierPending:'मॉडल अभी उपलब्ध नहीं', tierHardwareRecommendation:'डिवाइस की सिफारिश:', tierFallbackLight:'फिलहाल हल्का मॉडल उपलब्ध है' });
 Object.assign(translations.pt, { tier_light:'Leve', tier_medium:'Média', tier_power:'Potente', tierSelected:'selecionada', tierAvailable:'disponível', tierPending:'modelo ainda não disponível', tierHardwareRecommendation:'Recomendação do dispositivo:', tierFallbackLight:'entretanto está disponível o modelo leve' });
+
+Object.assign(translations.en, { tierChoose:'Choose the AI.2 level', tierRecommended:'recommended for this PC' });
+Object.assign(translations.es, { tierChoose:'Elige el nivel AI.2', tierRecommended:'recomendada para este PC' });
+Object.assign(translations.fr, { tierChoose:'Choisir le niveau AI.2', tierRecommended:'recommandée pour ce PC' });
+Object.assign(translations.de, { tierChoose:'AI.2-Stufe auswählen', tierRecommended:'für diesen PC empfohlen' });
+Object.assign(translations.zh, { tierChoose:'选择 AI.2 级别', tierRecommended:'推荐用于此电脑' });
+Object.assign(translations.hi, { tierChoose:'AI.2 स्तर चुनें', tierRecommended:'इस पीसी के लिए अनुशंसित' });
+Object.assign(translations.pt, { tierChoose:'Escolher o nível AI.2', tierRecommended:'recomendada para este PC' });
 
 export function assistantText(language, key) {
     const code = String(language || 'it').toLowerCase().split('-')[0];

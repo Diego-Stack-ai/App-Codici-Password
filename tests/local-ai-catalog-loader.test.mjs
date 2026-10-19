@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LOCAL_AI_ADVANCED_TIERS, LOCAL_AI_PACKAGE_CATALOG, LOCAL_AI_RUNTIME_PROVENANCE, getLocalAiPackageCandidate } from '../Frontend/public/assets/js/modules/assistant/local-ai-package-catalog.js';
 import { createLocalAiRuntimeLoader } from '../Frontend/public/assets/js/modules/assistant/local-ai-runtime-loader.js';
+import { readFileSync } from 'node:fs';
 
 test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile', () => {
     for (const level of ['A1','A2']) {
@@ -38,6 +39,27 @@ test('il loader usa il runtime Hosting della taglia AI.2 medium materializzata',
     });
     await loader.load('A2', { tier:'medium', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light','medium'] } } });
     assert.match(imported, /^https:\/\/app\.example\/assets\/local-ai-packages\/a2\//);
+});
+
+test('le impostazioni espongono la scelta operativa delle tre taglie AI.2', () => {
+    const source = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-package-settings.js', import.meta.url), 'utf8');
+    assert.match(source, /getLocalAiPackageCandidate\(level, \{ tier:selectedTier \}\)/);
+    assert.match(source, /setAttribute\('role', 'radiogroup'\)/);
+    assert.match(source, /writeSelectedAdvancedTier\(tier\)/);
+    assert.match(source, /tierButton\.classList\.toggle\('recommended'/);
+});
+
+test('il pannello dei pacchetti segue lo stato dell’interruttore Agente AI', () => {
+    const settings = readFileSync(new URL('../Frontend/public/assets/js/modules/settings/impostazioni.js', import.meta.url), 'utf8');
+    const html = readFileSync(new URL('../Frontend/public/impostazioni.html', import.meta.url), 'utf8');
+    const css = readFileSync(new URL('../Frontend/public/assets/css/impostazioni.css', import.meta.url), 'utf8');
+    assert.match(html, /id="assistant-package-settings"[\s\S]*?aria-hidden="true" hidden/);
+    assert.match(settings, /toggle\.checked = data\?\.settings_ai_assistant === true;\s*syncAssistantPackageSettingsVisibility\(toggle\.checked\)/);
+    assert.match(settings, /const enabled = toggle\.checked;\s*syncAssistantPackageSettingsVisibility\(enabled\)/);
+    assert.match(settings, /toggle\.checked = !enabled;\s*syncAssistantPackageSettingsVisibility\(toggle\.checked\)/);
+    assert.match(settings, /packageSettings\.hidden = !enabled/);
+    assert.match(settings, /setAttribute\('aria-hidden', String\(!enabled\)\)/);
+    assert.match(css, /\.assistant-package-settings\[hidden\]\s*\{\s*display:none;/);
 });
 
 test('il loader non importa runtime quando il pacchetto non è installato', async () => {
