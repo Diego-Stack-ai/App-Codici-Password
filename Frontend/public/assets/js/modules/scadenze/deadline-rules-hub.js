@@ -1,11 +1,11 @@
-import {auth} from '../../firebase-config.js?v=1.2.209';
+import {auth} from '../../firebase-config.js?v=1.2.210';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
 import {showToast} from '../../ui-core-v129.js';
 import {logError} from '../../utils.js';
 import {decryptIfPossible} from '../core/crypto-utils.js';
 import {ensureVaultKeyMaterial} from '../core/security-manager.js';
-import {getUserProfile, listDeadlines} from '../data/vault-repository.js';
+import {getUserProfile, getUserSetting, listDeadlines} from '../data/vault-repository.js';
 import {
     isDefinitiveProfileDocumentDeadlineReference,
     normalizeProfileDateInputValue,
@@ -15,6 +15,7 @@ import {
 import {createDeadlineFromDocument} from '../privato/profilo-links.js';
 import {deadlineRecipientsFromRecord} from './deadline-recipient-model.js';
 import {deadlineDateDisplay} from './deadline-model.js';
+import {buildDeadlineDomainInventory} from './deadline-domain-model.js';
 
 const SELECTOR = Object.freeze({
     tab: '[data-deadline-domain]',
@@ -147,6 +148,190 @@ function renderDocumentCard({documentItem, deadline, profile, active}) {
     ]);
 }
 
+function scheduleText(period, frequency) {
+    const values = [];
+    if (period !== undefined && period !== null && period !== '') {
+        values.push(`${t('deadline_personal_notice')}: ${period} ${t('deadline_personal_days')}`);
+    }
+    if (frequency !== undefined && frequency !== null && frequency !== '') {
+        values.push(`${t('deadline_personal_frequency')}: ${frequency} ${t('deadline_personal_days')}`);
+    }
+    return values.join(' · ');
+}
+
+function sourceLabel(sourceId) {
+    const labels = {
+        deadlineConfig: 'deadline_domain_source_vehicles',
+        deadlineConfigDocuments: 'deadline_domain_source_documents',
+        generalConfig: 'deadline_domain_source_general'
+    };
+    return t(labels[sourceId] || 'deadline_domain_source_general');
+}
+
+function renderConfigurationCard(configuration) {
+    const count = configuration.linkedDeadlineIds.length;
+    return createElement('article', {className: 'deadline-domain-config-card'}, [
+        createElement('header', {}, [
+            createElement('div', {}, [
+                createElement('h4', {textContent: configuration.name}),
+                createElement('span', {className: 'deadline-domain-source', textContent: sourceLabel(configuration.sourceId)})
+            ]),
+            createElement('span', {
+                className: 'deadline-domain-count',
+                textContent: `${count} ${t(count === 1 ? 'deadline_domain_linked_one' : 'deadline_domain_linked_many')}`
+            })
+        ]),
+        createElement('p', {
+            className: 'deadline-domain-schedule',
+            textContent: scheduleText(configuration.period, configuration.frequency) || t('deadline_domain_schedule_missing')
+        }),
+        configuration.templateText ? createElement('p', {
+            className: 'deadline-domain-template',
+            textContent: `${t('deadline_personal_message')}: ${configuration.templateText}`
+        }) : null,
+        createElement('a', {className: 'deadline-domain-inline-action', href: configuration.href}, [
+            createElement('span', {textContent: t('deadline_domain_manage_rule')}), icon('arrow_forward')
+        ])
+    ].filter(Boolean));
+}
+
+function renderResourceCard(resource) {
+    return createElement('article', {className: 'deadline-domain-resource-card'}, [
+        createElement('div', {className: 'deadline-domain-resource-copy'}, [
+            createElement('p', {textContent: resource.value}),
+            createElement('span', {className: 'deadline-domain-source', textContent: sourceLabel(resource.sourceId)})
+        ]),
+        createElement('a', {className: 'deadline-domain-inline-action', href: resource.href}, [
+            createElement('span', {textContent: t('deadline_domain_manage_rule')}), icon('arrow_forward')
+        ])
+    ]);
+}
+
+function renderResourceSection(titleKey, resources) {
+    if (!resources.length) return null;
+    return createElement('section', {className: 'deadline-domain-section'}, [
+        createElement('h4', {className: 'deadline-domain-section-title', textContent: t(titleKey)}),
+        createElement('div', {className: 'deadline-domain-grid'}, resources.map(renderResourceCard))
+    ]);
+}
+
+function deadlineDetail(deadline) {
+    return [deadline.name, deadline.veicolo_modello].filter(Boolean).join(' · ');
+}
+
+function renderMappedDeadline(deadline) {
+    const recipients = deadlineRecipientsFromRecord(deadline);
+    const recipientSummary = recipients.length
+        ? recipients.map(recipientText).join(' | ')
+        : t('deadline_personal_no_recipients');
+    const details = [
+        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email),
+        dataRow(t('deadline_personal_note'), deadline.notes),
+        dataRow(t('deadline_personal_attachments'), Array.isArray(deadline.attachments)
+            ? String(deadline.attachments.length) : '')
+    ].filter(Boolean);
+    const configuredSchedule = scheduleText(
+        deadline.domainAudit?.configuredPeriod,
+        deadline.domainAudit?.configuredFrequency
+    );
+    return createElement('article', {className: 'deadline-domain-deadline-card'}, [
+        createElement('header', {}, [
+            createElement('div', {}, [
+                createElement('h4', {textContent: deadline.type || deadline.category || deadline.title || t('deadline_personal_document_fallback')}),
+                deadlineDetail(deadline) ? createElement('p', {textContent: deadlineDetail(deadline)}) : null
+            ].filter(Boolean)),
+            createElement('time', {textContent: formatDate(deadline.dueDate || deadline.date)})
+        ]),
+        createElement('p', {className: 'deadline-domain-schedule', textContent: scheduleText(
+            deadline.notif_days_before ?? deadline.period,
+            deadline.notif_frequency ?? deadline.freq
+        ) || t('deadline_domain_schedule_missing')}),
+        deadline.domainAudit?.scheduleMismatch ? createElement('div', {
+            className: 'deadline-domain-schedule-warning'
+        }, [
+            icon('info'),
+            createElement('div', {}, [
+                createElement('strong', {textContent: t('deadline_domain_schedule_mismatch')}),
+                createElement('p', {textContent: t('deadline_domain_default_schedule')
+                    .replace('{schedule}', configuredSchedule || t('deadline_domain_schedule_missing'))})
+            ])
+        ]) : null,
+        createElement('p', {className: 'deadline-domain-recipients', textContent: recipientSummary}),
+        details.length ? createElement('dl', {className: 'deadline-personal-data deadline-domain-details'}, details) : null,
+        createElement('a', {
+            className: 'deadline-domain-inline-action',
+            href: `dettaglio_scadenza.html?id=${encodeURIComponent(deadline.id)}`
+        }, [createElement('span', {textContent: t('deadline_domain_open_deadline')}), icon('arrow_forward')])
+    ].filter(Boolean));
+}
+
+function renderDomainSummary(container, group) {
+    if (!container) return;
+    const blocks = [];
+    if (group.duplicateConfigurations.length) {
+        blocks.push(createElement('div', {className: 'deadline-domain-warning'}, [
+            icon('warning'), createElement('p', {textContent: t('deadline_domain_duplicate_warning')})
+        ]));
+    }
+    blocks.push(createElement('section', {className: 'deadline-domain-section'}, [
+        createElement('h4', {className: 'deadline-domain-section-title', textContent: t('deadline_domain_rules_title')}),
+        group.configurations.length
+            ? createElement('div', {className: 'deadline-domain-grid'}, group.configurations.map(renderConfigurationCard))
+            : createElement('p', {className: 'deadline-domain-empty', textContent: t('deadline_domain_rules_empty')})
+    ]));
+    blocks.push(renderResourceSection('deadline_domain_references_title', group.references));
+    blocks.push(renderResourceSection('deadline_domain_templates_title', group.templates));
+    blocks.push(createElement('section', {className: 'deadline-domain-section'}, [
+        createElement('h4', {className: 'deadline-domain-section-title', textContent: t('deadline_domain_current_title')}),
+        group.deadlines.length
+            ? createElement('div', {className: 'deadline-domain-grid'}, group.deadlines.map(renderMappedDeadline))
+            : createElement('p', {className: 'deadline-domain-empty', textContent: t('deadline_domain_current_empty')})
+    ]));
+    if (group.unmatchedDeadlines.length) {
+        blocks.push(createElement('p', {
+            className: 'deadline-domain-audit-note',
+            textContent: t('deadline_domain_unmatched_warning').replace('{count}', String(group.unmatchedDeadlines.length))
+        }));
+    }
+    setChildren(container, blocks.filter(Boolean));
+}
+
+async function loadDomainInventories(user, root, active) {
+    const containers = [...root.querySelectorAll('[data-deadline-domain-summary]')];
+    if (!containers.length || !user?.uid) return;
+    containers.forEach(container => {
+        container.setAttribute('aria-busy', 'true');
+        setChildren(container, createElement('div', {className: 'deadline-personal-state'}, [
+            icon('progress_activity', 'deadline-personal-spinner'),
+            createElement('p', {textContent: t('deadline_domain_loading')})
+        ]));
+    });
+    try {
+        const [deadlineConfig, deadlineConfigDocuments, generalConfig, deadlines] = await Promise.all([
+            getUserSetting(user.uid, 'deadlineConfig'),
+            getUserSetting(user.uid, 'deadlineConfigDocuments'),
+            getUserSetting(user.uid, 'generalConfig'),
+            listDeadlines(user.uid)
+        ]);
+        if (!active()) return;
+        const inventory = buildDeadlineDomainInventory({
+            configs: {deadlineConfig, deadlineConfigDocuments, generalConfig}, deadlines
+        });
+        containers.forEach(container => renderDomainSummary(
+            container,
+            inventory[container.dataset.deadlineDomainSummary]
+        ));
+    } catch (error) {
+        if (!active()) return;
+        logError('DeadlineRulesDomainInventory', error);
+        containers.forEach(container => setChildren(container, createElement('div', {
+            className: 'deadline-personal-state is-error'
+        }, [icon('error'), createElement('p', {textContent: t('deadline_domain_error')})])));
+    } finally {
+        if (active()) containers.forEach(container => container.setAttribute('aria-busy', 'false'));
+    }
+}
+
 async function decryptProfile(profile) {
     if (!profile) return normalizeLegacyProfile({});
     const vaultKey = await ensureVaultKeyMaterial();
@@ -243,5 +428,6 @@ export function initDeadlineRulesHub(user) {
 
     activate(tabs.find(tab => tab.getAttribute('aria-selected') === 'true')?.dataset.deadlineDomain);
     void loadPersonalDocuments(user, root.querySelector('#personal-documents-summary'), active);
+    void loadDomainInventories(user, root, active);
     return disposeMount;
 }

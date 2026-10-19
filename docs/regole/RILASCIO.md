@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.210 — riconciliazione Scadenze per ambito — 20/10/2026
+
+Le configurazioni storiche e le Scadenze non personali vengono presentate nelle nuove linguette di **Regole invio scadenze** senza migrare o riscrivere i record: 17 regole, 7 riferimenti/mezzi e 18 testi email restano inventari indipendenti; le 24 Scadenze riconciliate conservano i propri valori effettivi e i collegamenti agli editor esistenti. Le card storiche separate sono rimosse dalla pagina, mentre Destinatari email resta condivisa.
+
+I test mirati sono verdi **13/13** e `npm test` è terminato integralmente con codice **0**, inclusi documentazione, controlli statici, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify è riallineato a **13.411 nodi, 35.159 archi e 753 comunità**. Il rilascio autorizzato riguarda esclusivamente Firebase Hosting; Functions, Rules, indici, migrazioni e dati reali restano esclusi. La voce **Contratto** e il valore FIV da 70 a 14 giorni restano correzioni manuali dell'utente dopo la pubblicazione.
+
 ## Esito operativo 1.2.209 — selettore Account/Memorandum simmetrico — 19/10/2026
 
 Diego ha autorizzato la pubblicazione sul solo Firebase Hosting della correzione ai moduli Account privato e aziendale. I quattro modi **Account**, **Account condiviso**, **Memorandum** e **Memorandum condiviso** appartengono ora allo stesso gruppo: durante la modifica il modo corrente resta nascosto e sono sempre disponibili le altre tre conversioni, senza il lampeggio della scelta poi rimossa.

@@ -1,5 +1,15 @@
 # Stato
 
+## Candidata 1.2.210 — riconciliazione delle Scadenze per ambito — 20/10/2026
+
+L'audit autenticato e in sola lettura è stato completato prima dell'intervento: **37 Scadenze** controllate, delle quali **24** ricondotte alle famiglie non personali — **16 Automezzi, 6 Casa e immobili, 1 Salute e 1 Sport e associazioni** — e **13** Documenti personali o residui familiari esclusi. Le due Patenti familiari indicate dall'utente restano deliberatamente intatte. Nessuna Scadenza reale, destinatario, allegato o configurazione è stata modificata durante l'inventario.
+
+La pagina **Regole invio scadenze** legge gli stessi documenti storici e presenta ora dentro ogni linguetta tre inventari distinti: **17 regole**, **7 riferimenti/mezzi** e **18 testi email**. Le liste non vengono più accoppiate per posizione, perché hanno cardinalità e significato indipendenti. Ogni Scadenza collegata conserva i propri valori effettivi di data, preavviso, frequenza, destinatari, canali, nota e allegati; gli editor storici restano raggiungibili dalle singole voci. Le tre card separate Automezzi, Documenti e Regole generali sono rimosse dalla pagina, mentre la rubrica Destinatari email resta disponibile.
+
+Il doppione **Comodato d'uso** viene segnalato senza fusione o cancellazione. La regola **Federazione Italiana Vela** è ancora configurata a 70 giorni mentre la Scadenza reale usa 14 giorni: la UI mostra la differenza e non sovrascrive il record. L'utente eseguirà separatamente la cancellazione della voce **Contratto** e la correzione della regola FIV da 70 a 14 giorni. Le Scadenze senza regola omonima restano valide e visibili per l'audit.
+
+La candidata client è `1.2.210`; la shell offline contiene **308 risorse**. I test mirati del modello e della pagina sono verdi **13/13**. `npm test` è terminato integralmente con codice **0**, inclusi documentazione **11/11**, navigazione **168/168**, i18n **14/14**, sintassi JavaScript su **219 moduli**, CSS, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. `git diff --check` è verde. Graphify principale è stato riallineato con **13.411 nodi, 35.159 archi e 753 comunità**. Commit, merge e Hosting sono riportati soltanto dopo la loro esecuzione. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano invariati.
+
 ## Release 1.2.209 pubblicata — selettore Account/Memorandum simmetrico — 19/10/2026
 
 Il secondo punto della scaletta è pubblicato. Le card della Lista aziende della `1.2.208` restano chiuse e funzionanti; il controllo futuro ancora richiesto è che una condivisione o conversione sposti il record fra **Account**, **Condivisi**, **Memorandum** e **Memo condivisi** senza duplicarlo e senza contare gli archiviati. Il modello condiviso ora possiede una regressione esplicita per questa transizione.
