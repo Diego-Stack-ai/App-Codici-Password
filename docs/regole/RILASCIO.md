@@ -1,10 +1,10 @@
 # Rilascio
 
-## Candidata 1.2.208 — card aziendali per tipologia — 19/10/2026
+## Esito operativo 1.2.208 — card aziendali per tipologia — 19/10/2026
 
 Diego ha autorizzato la pubblicazione del lotto frontend che separa, su ogni card Azienda, **Dati azienda**, **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. I quattro contatori derivano dai record non archiviati già esistenti; le azioni aprono la Lista Account con il filtro corrispondente e il comando Aggiungi eredita la categoria selezionata. Nessuna collezione, Rule o Function cambia.
 
-La candidata `1.2.208` ha superato integralmente `npm test` dopo la rigenerazione della shell offline con 307 risorse. Il perimetro di distribuzione è il solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi. Prima del deploy sono richiesti commit, PR, gate GitHub verdi e merge in `master`; la verifica remota deve confermare versione e asset pubblicati.
+La candidata `1.2.208` ha superato integralmente `npm test` dopo la rigenerazione della shell offline con 307 risorse. La PR `#181` è stata unita in `master` nel commit `eeb67bf7` dopo gate GitHub verdi. Il workflow manuale `39243406078` ha ripetuto la suite e pubblicato esclusivamente Firebase Hosting; la verifica HTTP `200` conferma versione e nuovi moduli. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
 
 ## Esito operativo 1.2.207 — 19/10/2026
 
