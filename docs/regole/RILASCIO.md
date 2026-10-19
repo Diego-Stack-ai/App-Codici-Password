@@ -1,10 +1,12 @@
 # Rilascio
 
-## Candidata 1.2.210 — riconciliazione Scadenze per ambito — 20/10/2026
+## Esito operativo 1.2.210 — riconciliazione Scadenze per ambito — 20/10/2026
 
 Le configurazioni storiche e le Scadenze non personali vengono presentate nelle nuove linguette di **Regole invio scadenze** senza migrare o riscrivere i record: 17 regole, 7 riferimenti/mezzi e 18 testi email restano inventari indipendenti; le 24 Scadenze riconciliate conservano i propri valori effettivi e i collegamenti agli editor esistenti. Le card storiche separate sono rimosse dalla pagina, mentre Destinatari email resta condivisa.
 
 I test mirati sono verdi **13/13** e `npm test` è terminato integralmente con codice **0**, inclusi documentazione, controlli statici, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify è riallineato a **13.411 nodi, 35.159 archi e 753 comunità**. Il rilascio autorizzato riguarda esclusivamente Firebase Hosting; Functions, Rules, indici, migrazioni e dati reali restano esclusi. La voce **Contratto** e il valore FIV da 70 a 14 giorni restano correzioni manuali dell'utente dopo la pubblicazione.
+
+La PR `#185` è stata unita in `master` nel commit `e84ac87a` dopo i gate GitHub verdi. Il workflow manuale `39343048542` ha ripetuto la validazione in 6m34s e pubblicato esclusivamente Firebase Hosting in 43s. La verifica HTTP pubblica restituisce `200` per Home, pagina Regole e moduli interessati, confermando la `1.2.210`; il collaudo autenticato nella sessione sbloccata conferma la selezione delle linguette e il rendering dei dati reali riconciliati. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
 
 ## Esito operativo 1.2.209 — selettore Account/Memorandum simmetrico — 19/10/2026
 
