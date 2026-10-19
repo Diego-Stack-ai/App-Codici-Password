@@ -11,6 +11,8 @@ const archiveModelSource = await readFile(new URL('../Frontend/public/assets/js/
 const {archiveRecipients, archiveConfirmMessage} = await import('data:text/javascript;base64,' + Buffer.from(archiveModelSource).toString('base64'));
 const sortSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-list-sort.js', import.meta.url), 'utf8');
 const {accountSortMode, compareAccounts, nextAccountSortMode} = await import('data:text/javascript;base64,' + Buffer.from(sortSource).toString('base64'));
+const accountModeSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-mode-model.js', import.meta.url), 'utf8');
+const {ACCOUNT_MODE_VIEWS, accountMatchesModeView, normalizeAccountModeView, summarizeAccountModes} = await import('data:text/javascript;base64,' + Buffer.from(accountModeSource).toString('base64'));
 
 
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
@@ -31,6 +33,7 @@ async function fixture(company, overrides = {}) {
     const window = {location: {search: company ? '?id=company-fixture' : '', pathname: '/fixture.html'}, history: {replaceState() {}}};
     const context = vm.createContext({readErrorMessage, archiveRecipients, archiveConfirmMessage,
         accountSortMode, compareAccounts, nextAccountSortMode,
+        ACCOUNT_MODE_VIEWS, accountMatchesModeView, normalizeAccountModeView, summarizeAccountModes,
         window, document: {getElementById: id => elements[id]}, URLSearchParams, AbortController, DOMException,
         navigator: {onLine: true}, console, db: {}, LOG() {}, logError() {}, t: value => value,
         clearElement: node => { node.children = []; }, setChildren: (node, children) => { node.children = children; },

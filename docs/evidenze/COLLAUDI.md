@@ -1,5 +1,15 @@
 # Collaudi
 
+## 19/10/2026 — candidata 1.2.208, card aziendali per tipologia
+
+- Ogni card della Lista aziende conserva l'accesso separato ai Dati azienda e aggiunge quattro azioni con contatore: Account, Condivisi, Memorandum e Memo condivisi.
+- I conteggi usano i record Account dell'azienda, ignorano gli archiviati e non vengono scritti nel documento Azienda. La rotta filtrata usa `type`; la rotta senza parametro conserva la vista completa.
+- La pagina Account azienda espone gli stessi filtri con conteggi e il comando di aggiunta eredita la categoria selezionata. Le otto lingue possiedono le nuove chiavi e la guida locale è stata riesaminata come `contentVersion` 3.
+- Primo avvio completo interrotto dal gate Guida perché il metadato conservava correttamente la base precedente `1.2.207`; aggiornati versione e contenuti del catalogo, il gate mirato è tornato verde.
+- Secondo avvio `npm test` terminato con codice **0**, inclusi documentazione **11/11**, guida **6/6**, navigazione **166/166**, accesso dati **95/95**, sicurezza **25/25**, offline **14/14**, i18n **14/14**, Functions/security **473 totali, 464 superati, 9 esclusi e 0 errori**, Rules, Storage, Vault e tutti gli emulatori Firebase. Shell offline: **307 risorse**; sintassi: **218 moduli**; riferimenti statici: **311 file**; nessuna dipendenza circolare.
+- Graphify principale riallineato dopo il bump/versionamento degli asset: **13.347 nodi, 35.010 archi e 740 comunità**. Il diff non contiene modifiche a Functions, Rules o indici.
+- Pubblicazione autorizzata sul solo Firebase Hosting; il collaudo della Push sul secondo telefono resta indipendente.
+
 ## 19/10/2026 — recupero della prova Push da record già non attivo
 
 - Evidenza iPhone sulla `1.2.206`: runtime `push=20261018b` caricato, revoca FCM della registrazione precedente conclusa con `403` e successiva callable `sendDeadlinePushTest` conclusa con HTTP `400`; il warning di durata del gestore `load` non è causale.

@@ -1,5 +1,11 @@
 # Stato
 
+## Lotto locale successivo alla 1.2.207 — card aziendali per tipologia — 19/10/2026
+
+La Lista aziende dispone localmente di un accesso separato ai **Dati azienda** e di quattro comandi con contatore per i record non archiviati: **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. Ogni comando apre la pagina Account nel contesto dell'azienda e applica il relativo filtro; nella stessa pagina restano disponibili tutte le categorie, con conteggi aggiornati, e il pulsante di aggiunta eredita la categoria scelta. Il percorso storico senza parametro continua a mostrare tutti i record.
+
+L'implementazione riusa esclusivamente i flag esistenti e non modifica schema Firestore, Rules o dati. La candidata è stata portata a `1.2.208` e la shell offline rigenerata con **307 risorse**. Dopo la correzione del solo metadato Guida rimasto alla base precedente, il secondo avvio integrale di `npm test` è terminato con codice **0**. Sono verdi il modello Account/Memorandum **6/6**, navigazione **166/166**, accesso dati **95/95**, sicurezza **25/25**, offline **14/14**, i18n **14/14**, sintassi JavaScript su **218 moduli**, CSS, fondazioni UI **6/6**, guida **6/6**, riferimenti statici su **311 file**, documentazione **11/11**, Functions/security **473 totali con 0 errori**, Rules, Storage, Vault e tutti gli emulatori; non risultano dipendenze circolari. Graphify è stato riallineato dopo il bump con **13.347 nodi, 35.010 archi e 740 comunità**. Diego ha autorizzato la pubblicazione sul solo Firebase Hosting; commit, push, merge e deploy non sono ancora stati eseguiti. La ricezione Push sul secondo telefono rimane una verifica manuale distinta comunicata dall'utente.
+
 ## Candidata locale 1.2.207 — prova Push con dispositivo già invalidato — 19/10/2026
 
 Il collaudo iPhone successivo alla `1.2.206` ha ristretto il difetto residuo: il browser carica il runtime pubblicato, tenta la revoca della vecchia registrazione FCM e riceve `403`; subito dopo la callable di prova risponde `400` perché il record è già non attivo. Il warning `[Violation] 'load' handler took 218ms` è soltanto prestazionale. La rotazione dello scope era presente, ma il comando di prova entrava nel recupero soltanto dopo il motivo `push-token-invalid` e non prima di chiamare un backend che vedeva già il dispositivo invalidato.

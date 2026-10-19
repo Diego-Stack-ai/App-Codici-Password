@@ -289,6 +289,8 @@ La soluzione read-your-writes dovrà distinguere le normali letture cache-first 
 - Note, sito, widget e allegati restano disponibili in tutte le tipologie.
 - La validazione deve esistere nel dominio/repository o backend, non soltanto nella UI.
 
+Nella Lista aziende queste quattro modalità costituiscono ora anche quattro accessi distinti sulla card dell'azienda. Il conteggio deriva dai record già esistenti e ignora quelli archiviati; non viene persistito sull'azienda. La pagina Account azienda applica il filtro tramite il parametro `type` (`standard`, `shared`, `memo`, `shared_memo`), conserva la vista completa quando il parametro manca e trasmette la modalità al modulo di creazione. Questo è un comportamento di navigazione e proiezione: i flag canonici del record, le collezioni e il contratto di salvataggio non cambiano.
+
 <a id="fonte-docs-profilo-account-widget-cache-roadmap-md-corpo-dinamico-della-pagina"></a>
 
 ##### Corpo dinamico della pagina

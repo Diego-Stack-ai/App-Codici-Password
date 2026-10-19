@@ -10,15 +10,24 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import {listCompanies} from '../data/vault-repository.js';
+import {listCompanies, listCompanyAccounts} from '../data/vault-repository.js';
 import { deleteCompany, companyDeletionMessage, setCompanyPinned } from './company-list-service.js';
 import { createUiState } from '../shared/ui-state-view.js';
+import { ACCOUNT_MODE_VIEWS, summarizeAccountModes } from '../shared/account-mode-model.js';
 
 // --- STATE ---
 let allAziende = [];
 let sortOrder = 'asc';
 let currentUser = null;
 let isDeleteMode = false;
+let accountSummaries = new Map();
+
+const companyAccountActions = Object.freeze([
+    { view: ACCOUNT_MODE_VIEWS.STANDARD, icon: 'key', labelKey: 'company_card_accounts', fallback: 'Account' },
+    { view: ACCOUNT_MODE_VIEWS.SHARED, icon: 'group', labelKey: 'company_card_shared_accounts', fallback: 'Condivisi' },
+    { view: ACCOUNT_MODE_VIEWS.MEMO, icon: 'description', labelKey: 'company_card_memos', fallback: 'Memorandum' },
+    { view: ACCOUNT_MODE_VIEWS.SHARED_MEMO, icon: 'hub', labelKey: 'company_card_shared_memos', fallback: 'Memo condivisi' }
+]);
 
 const companyPalettes = [
     { key: 'blue', label: 'Blue' },
@@ -106,6 +115,16 @@ async function initProtocolUI() {
 async function loadAziende(uid) {
     try {
         allAziende = await listCompanies(uid);
+        accountSummaries = new Map();
+        renderAziende();
+        const results = await Promise.allSettled(allAziende.map(async azienda => {
+            const accounts = await listCompanyAccounts(uid, azienda.id);
+            return [azienda.id, summarizeAccountModes(accounts)];
+        }));
+        for (const result of results) {
+            if (result.status === 'fulfilled') accountSummaries.set(...result.value);
+            else logError('LoadCompanyAccountSummary', result.reason);
+        }
         renderAziende();
     } catch (e) {
         logError("LoadAziende", e);
@@ -150,6 +169,28 @@ function renderAziende() {
 function createAziendaCard(a) {
     const palKey = getPaletteKey(a.ragioneSociale, a.colorIndex);
     const isPinned = !!a.isPinned;
+    const summary = accountSummaries.get(a.id);
+
+    const accountButtons = companyAccountActions.map(action => {
+        const translated = t(action.labelKey);
+        const label = translated && translated !== action.labelKey ? translated : action.fallback;
+        const count = summary ? summary[action.view] : null;
+        const countLabel = count == null ? '…' : String(count);
+        return createElement('button', {
+            type: 'button',
+            className: `btn-company-account-mode mode-${action.view.replace('_', '-')}`,
+            title: `${label}: ${countLabel}`,
+            ariaLabel: `${label}: ${countLabel}`,
+            onclick: event => {
+                event.stopPropagation();
+                window.location.href = `account_azienda.html?id=${encodeURIComponent(a.id)}&type=${encodeURIComponent(action.view)}`;
+            }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined company-mode-icon notranslate', translate: 'no', textContent: action.icon }),
+            createElement('span', { className: 'company-mode-label', textContent: label }),
+            createElement('strong', { className: 'company-mode-count', textContent: countLabel })
+        ]);
+    });
 
     return createElement('div', {
         className: `azienda-card card-${palKey} border-glow adaptive-shadow ${isDeleteMode ? 'is-delete-mode' : ''}`,
@@ -199,13 +240,15 @@ function createAziendaCard(a) {
         // Footer Actions
         createElement('div', { className: 'card-actions' }, [
             createElement('button', {
-                className: 'btn-card-action',
+                className: 'btn-card-action btn-company-data',
                 onclick: (e) => { e.stopPropagation(); window.location.href = `dati_azienda.html?id=${a.id}`; }
-            }, [createElement('span', { textContent: 'Dati Azienda' })]),
-            createElement('button', {
-                className: 'btn-card-action',
-                onclick: (e) => { e.stopPropagation(); window.location.href = `account_azienda.html?id=${a.id}`; }
-            }, [createElement('span', { textContent: 'Account' })])
+            }, [createElement('span', {
+                textContent: (() => {
+                    const translated = t('company_card_data');
+                    return translated && translated !== 'company_card_data' ? translated : 'Dati Azienda';
+                })()
+            })]),
+            createElement('div', { className: 'company-account-mode-grid' }, accountButtons)
         ])
     ]);
 }

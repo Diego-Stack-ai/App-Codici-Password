@@ -10,6 +10,7 @@ const deadlineConfigController = await read('Frontend/public/assets/js/modules/s
 const deadlineSaveService = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
 const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
 const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
+const companyAccountForm = await read('Frontend/public/assets/js/modules/azienda/form_account_azienda.js');
 const accountListView = await read('Frontend/public/assets/js/modules/shared/account-list-view.js');
 const companyDetail = await read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js');
 const accountBankingView = await read('Frontend/public/assets/js/modules/shared/account-banking-view.js');
@@ -133,6 +134,16 @@ assert.match(companyList, /setCompanyPinned\(currentUser\.uid, id, state\)/,
     'La lista Aziende non delega la persistenza del pin');
 assert.match(companyList, /deleteCompany\(currentUser\.uid, id\)/,
     'La lista Aziende non delega la cancellazione');
+assert.match(companyList, /listCompanyAccounts\(uid, azienda\.id\)[\s\S]+summarizeAccountModes\(accounts\)/,
+    'Le card Azienda non ricavano i quattro conteggi dagli Account già esistenti');
+assert.match(companyList, /account_azienda\.html\?id=\$\{encodeURIComponent\(a\.id\)\}&type=\$\{encodeURIComponent\(action\.view\)\}/,
+    'Le azioni delle card Azienda non aprono la categoria selezionata');
+assert.match(companyAccountList, /currentAccountView = normalizeAccountModeView\(urlParams\.get\('type'\)\)/,
+    'La lista Account aziendali non legge il filtro proveniente dalla card Azienda');
+assert.match(companyAccountList, /accountMatchesModeView\(acc, currentAccountView\)/,
+    'La lista Account aziendali non applica il filtro dei quattro modi');
+assert.match(companyAccountForm, /applyRequestedAccountMode\(normalizeAccountModeView\(urlParams\.get\('type'\)\)\)/,
+    'Il nuovo elemento aziendale non eredita il tipo selezionato nella card');
 assert.doesNotMatch(companyList, /updateDoc|deleteDoc|\bdoc\(/,
     'La lista Aziende contiene ancora dettagli delle scritture Firestore');
 assert.match(companyListService, /updateDoc\(doc\(db,[\s\S]+isPinned/,

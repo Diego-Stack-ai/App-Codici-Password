@@ -2,7 +2,7 @@
  * Rendering e apertura sicura degli allegati incorporati nell'anagrafica azienda.
  */
 
-import { auth, storage } from '../../firebase-config.js?v=1.2.207';
+import { auth, storage } from '../../firebase-config.js?v=1.2.208';
 import { getBytes, ref, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';

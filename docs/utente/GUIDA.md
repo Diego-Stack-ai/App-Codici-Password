@@ -38,10 +38,10 @@ La guida descrive come orientarsi e quali comandi usare; lo stato di implementaz
 | `form_account_privato` | Crea o modifica Account privato: Prepara un Account o memorandum e controlla i dati prima di salvarli. | Tipi, banking, Widget, comuni, destinatari, Salva | Checklist + walkthrough |
 | `dettaglio_account_privato` | Dettaglio Account privato: Consulta credenziali, note, Widget e allegati dell’Account selezionato. | Mostra/copia, banking, note, allegati e condivisione | Testo + walkthrough; video allegati opzionale |
 | `profilo_privato` | Profilo utente: Organizza identità, contatti, indirizzi, documenti e tessera digitale. | Tab, foto, contatti, indirizzi, documenti, collegamenti, Configura/Apri scadenza del documento, QR | Checklist + walkthrough; video QR/allegati opzionale |
-| `lista_aziende` | Aziende: Scegli l’azienda e accedi ai suoi dati e Account. | Elenco, creazione e scelta contesto | Testo + walkthrough |
+| `lista_aziende` | Aziende: Scegli l’azienda e accedi ai dati oppure direttamente ad Account, Condivisi, Memorandum e Memo condivisi. | Elenco, contatori per tipologia, creazione e scelta contesto | Testo + walkthrough |
 | `dati_azienda` | Dati azienda: Consulta il profilo aziendale, i contatti e le proiezioni condivisibili. | Riepilogo, tessera/QR, PDF e sedi | Testo + walkthrough; video PDF/QR opzionale |
 | `modifica_azienda` | Crea o modifica azienda: Aggiorna anagrafica, referente, sedi, contatti e note aziendali. | Anagrafica, fiscale, referente, sedi, email, note/allegati | Checklist + walkthrough |
-| `account_azienda` | Account azienda: Cerca gli Account nel contesto dell’azienda scelta. | Ricerca e categoria nel contesto aziendale | Testo + walkthrough |
+| `account_azienda` | Account azienda: Cerca e filtra Account, Condivisi, Memorandum e Memo condivisi nel contesto dell’azienda scelta. | Filtro per tipologia, ricerca e categoria nel contesto aziendale | Testo + walkthrough |
 | `form_account_azienda` | Crea o modifica Account aziendale: Prepara un Account o memorandum dell’azienda selezionata. | Tipi, banking, Widget, comuni, destinatari, Salva | Checklist + walkthrough |
 | `dettaglio_account_azienda` | Dettaglio Account aziendale: Consulta le informazioni dell’Account nell’azienda corrente. | Mostra/copia, note, Widget, allegati e permessi | Testo + walkthrough; video allegati condiviso |
 | `scadenze` | Scadenze: Cerca le date da seguire e distingui scadenze proprie e ricevute. | Filtro, ricerca, ordinamento, proprie/ricevute | Testo + walkthrough |
@@ -178,7 +178,7 @@ pagina e un solo modulo inizializzatore.
 |---|---|---|---|
 | Account privati | credenziali cifrate, note, URL, archiviazione, revisione per la coda offline | `area_privata.html`, `account_privati.html`, `form_account_privato.html`, `dettaglio_account_privato.html` | [V] |
 | Credenziali bancarie nei record | più banche/carte per record, PIN e CCV su richiesta | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` (matrice bancaria) | [V] in laboratorio; [E] su dispositivo |
-| Aziende e Account aziendali | stesso modello con contesto aziendale, collegamenti e widget | `lista_aziende.html`, `dati_azienda.html`, `modifica_azienda.html`, `account_azienda.html`, `form_account_azienda.html`, `dettaglio_account_azienda.html` | [V] |
+| Aziende e Account aziendali | stesso modello con contesto aziendale, collegamenti e widget; la card separa Dati azienda e le quattro viste Account/Condivisi/Memorandum/Memo condivisi | `lista_aziende.html`, `dati_azienda.html`, `modifica_azienda.html`, `account_azienda.html`, `form_account_azienda.html`, `dettaglio_account_azienda.html` | [V] locale; [E] su dispositivo |
 | Widget e credenziali comuni | campi aggiuntivi collegati a un Account o condivisi fra i record del proprietario | `accountWidgets`, `sharedVaultData` (`functions/index.js`) | [V] |
 | Campi protetti (lucchetto) | valore nascosto all'apertura, mostrato su richiesta e riazzerato all'uscita | banchi a freddo (`COLD_*_CLEAR`) | [V] |
 

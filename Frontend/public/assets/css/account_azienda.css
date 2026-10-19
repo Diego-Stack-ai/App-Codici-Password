@@ -3,6 +3,44 @@
    ========================================================================== */
 
 /* --- 1. SEARCH SYSTEM --- */
+.company-account-mode-filter {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.25rem 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    scrollbar-width: thin;
+}
+
+.company-account-filter-chip {
+    min-height: var(--touch-target-min, 44px);
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    cursor: pointer;
+    font: var(--font-badge);
+}
+
+.company-account-filter-chip strong {
+    min-width: 1.5rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+
+.company-account-filter-chip.is-active {
+    background: color-mix(in srgb, var(--accent) 20%, var(--card-bg));
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
 .search-container {
     padding: 0 0.5rem;
     margin-bottom: 2rem;
