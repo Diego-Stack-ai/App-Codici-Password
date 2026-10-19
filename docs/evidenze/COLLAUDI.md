@@ -1,5 +1,19 @@
 # Collaudi
 
+## 19/10/2026 — revisione locale Account/Memorandum
+
+- Le card della Lista aziende già pubblicate nella `1.2.208` non sono state modificate. È stato aggiunto un caso di regressione che trasforma un Account e un Memorandum da privati a condivisi e verifica che ciascun record cambi una sola categoria, senza duplicazioni; gli archiviati restano esclusi dal riepilogo.
+- Riprodotta la sovrascrittura dei comandi di copia bancari nel solo dettaglio aziendale: il selettore generico ora esclude in entrambi i contesti i pulsanti con `data-banking-copy="true"`.
+- Dettagli e riepiloghi dei destinatari riconoscono i quattro modi tramite il modello canonico comune, inclusi i flag dei record storici.
+- I moduli di modifica privato e aziendale non nascondono più **Account condiviso** sui record esistenti. Restano attive esclusione reciproca dei modi, validazione delle credenziali dei Memorandum, conferma della revoca e selezione dei destinatari.
+- Il controllo successivo ha riprodotto il lampeggio riferito dall'utente: **Account condiviso** era l'unico modo in un contenitore autonomo. I quattro modi sono ora nello stesso gruppo, inizialmente chiuso durante il caricamento. In modifica viene nascosto soltanto il modo corrente e sono mostrate esattamente le altre tre alternative; il nuovo comando **Account** consente il ritorno esplicito da Account condiviso o da un Memorandum.
+- Verdi: matrice delle quattro modalità e dei due moduli **3/3**, regressione estesa dei form e flussi Account/Memorandum **291/291**, navigazione **168/168**, i18n **14/14**, accesso dati **95/95**, sicurezza **25/25**, HTML puro, CSS, shell pagine, riferimenti statici, sintassi JavaScript su **218 moduli**, documentazione **11/11** e `git diff --check`.
+- Il primo gate integrale della candidata `1.2.209` ha respinto entrambi i form a **46 moduli > 45**. Eliminato il nuovo import senza eliminare il comportamento: il selettore usa ora il modello Account già caricato, la shell offline torna a **307 risorse** e il budget è verde su 30 pagine.
+- Il secondo gate integrale ha superato anche il budget, poi si è fermato sul controllo intenzionale della Guida: `reviewedAppVersion` conservava la base `1.2.208`. Il catalogo è stato riesaminato senza modifiche editoriali e allineato alla candidata `1.2.209` prima della ripetizione completa.
+- La ripetizione definitiva di `npm test` è terminata con codice **0**: documentazione **11/11**, Guida **6/6**, navigazione **168/168**, accesso dati **95/95**, sicurezza **25/25**, i18n **14/14**, budget, dipendenze, Functions/security, Firestore Rules, Storage Rules, Vault e tutti gli emulatori sono verdi.
+- Graphify principale riallineato dopo il consolidamento e il bump: **13.370 nodi**, **35.068 archi** e **748 comunità**.
+- Verifica soltanto locale e sintetica: nessun dato reale, invito reale, commit, push, merge, bump o deploy. Il controllo visivo/manuale dei contatori dopo una condivisione reale resta nella lista dei collaudi futuri.
+
 ## 19/10/2026 — candidata 1.2.208, card aziendali per tipologia
 
 - Ogni card della Lista aziende conserva l'accesso separato ai Dati azienda e aggiunge quattro azioni con contatore: Account, Condivisi, Memorandum e Memo condivisi.

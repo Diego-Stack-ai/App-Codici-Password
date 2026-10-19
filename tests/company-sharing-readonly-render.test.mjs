@@ -6,6 +6,8 @@ import {readFile} from 'node:fs/promises';
 const modules = new URL('../Frontend/public/assets/js/modules/', import.meta.url);
 const source = (await readFile(new URL('azienda/dettaglio-azienda-sharing.js', modules), 'utf8'))
     .replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
+const modeSource = await readFile(new URL('shared/account-mode-model.js', modules), 'utf8');
+const {accountModeFromRecord} = await import('data:text/javascript;base64,' + Buffer.from(modeSource).toString('base64'));
 
 function fixture() {
     let active = true;
@@ -13,6 +15,7 @@ function fixture() {
     const list = {children: [], appendChild(node) { this.children.push(node); }};
     const section = {classList: {toggle(name, force) { if (force) classes.add(name); else classes.delete(name); }}};
     const context = vm.createContext({
+        accountModeFromRecord,
         createElement: (tag, props, children) => ({tag, ...props, children}),
         clearElement: node => { node.children = []; },
         document: {getElementById: id => id === 'guests-list' ? list : section}
@@ -44,6 +47,15 @@ test('array legacy resta visualizzabile senza scritture o lookup inviti', async 
     await f.context.renderGuests(guests, new Map([['legacy@example.invalid', 'Legacy Sintetico']]));
     assert.deepEqual(guests, ['legacy@example.invalid']);
     assert.equal(f.list.children[0].children[0].textContent, 'Legacy Sintetico');
+});
+
+test('un record condiviso storico usa la stessa lista del modo canonico', () => {
+    const f = fixture();
+    f.context.renderSharingMap({shared: true, sharedWith: {
+        legacy: {email: 'legacy@example.invalid', status: 'accepted'}
+    }}, new Map([['legacy@example.invalid', 'Condiviso storico']]));
+    assert.equal(f.list.children[0].children[0].textContent, 'Condiviso storico');
+    assert.equal(f.classes.has('hidden'), false);
 });
 
 test('una vista scaduta non esegue rendering tardivo', () => {

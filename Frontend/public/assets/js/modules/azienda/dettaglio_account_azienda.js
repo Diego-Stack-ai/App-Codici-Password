@@ -7,7 +7,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.208';
+import { auth, db } from '../../firebase-config.js?v=1.2.209';
 import { doc, updateDoc, increment, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -24,6 +24,7 @@ import {consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { loadDetailSharingContactNames } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import {findSuspendedGuestInvite, getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 
 // --- STATE ---
@@ -277,7 +278,7 @@ async function loadAccount(mount = mounted) {
         if (!active()) return;
         const widgetContext = {compactView: true, uid: loadViewerId, context: 'company', accountId, companyId, readOnly: isReadOnly, active: actionActive, signal};
         for (const [path, initializer] of [['account-shared-credentials', 'initAccountSharedCredentials'], ['account-embedded-widgets', 'initAccountEmbeddedWidgets']]) {
-            import(`../shared/${path}.js?v=1.2.208`).then(async module => {
+            import(`../shared/${path}.js?v=1.2.209`).then(async module => {
                 if (!active()) return;
                 const controller = await module[initializer](widgetContext);
                 if (!active()) controller?.destroy();
@@ -394,7 +395,7 @@ function render(acc, active) {
     );
 
     // Shared Management V3
-    if (acc.visibility === 'shared') {
+    if (accountModeFromRecord(acc).endsWith('-shared')) {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
         renderSharingMap(acc);
@@ -427,8 +428,10 @@ function setupActions(active, fileInputs = new Set()) {
         if (val) window.location.href = `tel:${val.replace(/\s+/g, '')}`;
     };
 
-    // Copy Buttons logic
-    document.querySelectorAll('.copy-btn').forEach(btn => {
+    // I campi bancari installano un gestore dedicato anche quando il valore e'
+    // reso come testo. Il gestore legacy dei campi principali non deve
+    // sostituirlo, come gia' avviene nel dettaglio privato.
+    document.querySelectorAll('.copy-btn:not([data-banking-copy="true"])').forEach(btn => {
         btn.onclick = () => {
             if (!active()) return;
             const fieldId = btn.dataset.field;
@@ -512,9 +515,10 @@ function setupActions(active, fileInputs = new Set()) {
 
 function getAccentColors(acc) {
     if (acc.isBanking) return { rgb: '16, 185, 129', hex: '#10b981' };
-    if (acc.isMemoShared) return { rgb: '34, 197, 94', hex: '#22c55e' };
-    if (acc.shared) return { rgb: '244, 63, 94', hex: '#f43f5e' };
-    if (acc.hasMemo) return { rgb: '245, 158, 11', hex: '#f59e0b' };
+    const mode = accountModeFromRecord(acc);
+    if (mode === 'memo-shared') return { rgb: '34, 197, 94', hex: '#22c55e' };
+    if (mode === 'account-shared') return { rgb: '244, 63, 94', hex: '#f43f5e' };
+    if (mode === 'memo-private') return { rgb: '245, 158, 11', hex: '#f59e0b' };
     return { rgb: '59, 130, 246', hex: '#3b82f6' };
 }
 

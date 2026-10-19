@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Revisione Account e Memorandum — 19/10/2026
+
+Diego autorizza il secondo punto della scaletta: revisione coordinata dei quattro modi **Account**, **Account condiviso**, **Memorandum** e **Memorandum condiviso**, nei contesti privato e aziendale. Il controllo comprende creazione/modifica, liste e filtri, dettaglio, condivisione, allegati, note, dati finanziari, archiviazione e compatibilità dei record storici con i campi canonici `type` e `visibility`.
+
+Le card della Lista aziende pubblicate nella `1.2.208` sono considerate completate e funzionanti e non devono essere riprogettate. Resta nella lista dei collaudi futuri la verifica che, dopo una condivisione o la conversione di tipo, i contatori delle quattro categorie spostino il singolo record nella categoria corretta senza duplicarlo e continuino a escludere gli archiviati.
+
+Diego segnala inoltre che, aprendo la modifica di un Account privato o aziendale, una delle alternative appare durante il caricamento e poi scompare. Il contratto richiesto è unico per i quattro modi: dopo aver identificato il modo corrente, il modulo nasconde soltanto quello e rende disponibili le altre tre conversioni. Per un Account condiviso devono quindi comparire **Account**, **Memorandum** e **Memorandum condiviso**; la stessa regola simmetrica vale per gli altri modi.
+
+Il perimetro iniziale autorizzava implementazione locale, test pertinenti, aggiornamento dei documenti e riallineamento Graphify per le modifiche strutturali. Con l'ordine esplicito **«Publica»** del 19/10/2026 Diego autorizza ora il bump patch `1.2.209`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni, accessi a dati reali e invii reali restano esclusi.
+
 ## Card aziendali con accessi distinti per Account e Memorandum — 19/10/2026
 
 Diego autorizza l'avvio del primo punto della scaletta successiva al ripristino delle Push: la revisione delle card nella Lista aziende. Ogni card deve mantenere separato l'accesso ai **Dati azienda** e rendere immediatamente disponibili quattro categorie reali: **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. Le categorie devono mostrare il numero dei record non archiviati e aprire la Lista Account dell'azienda già filtrata; il comando di aggiunta deve ereditare la categoria selezionata.

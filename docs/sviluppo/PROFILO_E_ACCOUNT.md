@@ -286,6 +286,10 @@ La soluzione read-your-writes dovrà distinguere le normali letture cache-first 
 - Memorandum e Memorandum condiviso non possono contenere questi tre valori e non devono mostrarne i campi.
 - Il passaggio a Memorandum è bloccato finché l'utente non svuota consapevolmente le credenziali; non si conservano copie nascoste.
 - Se un Memorandum torna Account, i tre campi ricompaiono vuoti.
+- Tipologia e condivisione si gestiscono nell'unico modulo Crea/Modifica anche per un record esistente. Il dettaglio resta di consultazione e non contiene un secondo writer.
+- Il selettore di modifica comprende i quattro modi nello stesso gruppo. Il caricamento identifica prima il modo canonico corrente, lo nasconde e mostra le altre tre conversioni; non deve esistere un contenitore separato capace di far apparire o scomparire una sola scelta. In creazione Account privato resta il modo implicito.
+- Liste, dettagli, colori, destinatari e conteggi derivano dal modello canonico `type`/`visibility`; i flag storici sono compatibilità di lettura e vengono rimossi al successivo salvataggio.
+- I comandi copia dei dati finanziari appartengono al renderer bancario condiviso e non devono essere sostituiti dai gestori generici del dettaglio privato o aziendale.
 - Note, sito, widget e allegati restano disponibili in tutte le tipologie.
 - La validazione deve esistere nel dominio/repository o backend, non soltanto nella UI.
 

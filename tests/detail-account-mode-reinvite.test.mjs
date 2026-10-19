@@ -37,6 +37,9 @@ test('tipo e destinatari restano gestiti nei form e i rifiutati non sono presele
     for (const file of ['privato/form_account_privato.js', 'azienda/form_account_azienda.js']) {
         const source = await readFile(new URL(file, modules), 'utf8');
         assert.match(source, /status !== 'suspended' && guest\?\.status !== 'rejected'/);
+        assert.match(source, /showAccountModeAlternatives\(loadedMode, \{editing: true\}\)/);
+        assert.match(source, /getAccountModeFlags\(\)/);
+        assert.doesNotMatch(source, /account-mode-edit-controls'\)\?\.classList\.toggle\('hidden', isEditing\)/);
     }
 });
 

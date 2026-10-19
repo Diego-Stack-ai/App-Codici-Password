@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.209 — selettore Account/Memorandum simmetrico — 19/10/2026
+
+Diego ha autorizzato la pubblicazione sul solo Firebase Hosting della correzione ai moduli Account privato e aziendale. I quattro modi **Account**, **Account condiviso**, **Memorandum** e **Memorandum condiviso** appartengono ora allo stesso gruppo: durante la modifica il modo corrente resta nascosto e sono sempre disponibili le altre tre conversioni, senza il lampeggio della scelta poi rimossa.
+
+Il primo gate integrale ha bloccato correttamente un import che portava i due form oltre il budget prestazionale. La logica è stata consolidata nel modello Account già caricato; budget e prove mirate sono tornati verdi. Dopo l'allineamento della Guida alla nuova base, la ripetizione completa di `npm test` è terminata con codice **0**, inclusi tutti gli emulatori. Il rilascio non comprende Functions, Firestore Rules, Storage Rules, indici, migrazioni o accessi ai dati reali. Esito di PR, merge, workflow e verifica HTTP da registrare dopo ciascun passaggio.
+
 ## Esito operativo 1.2.208 — card aziendali per tipologia — 19/10/2026
 
 Diego ha autorizzato la pubblicazione del lotto frontend che separa, su ogni card Azienda, **Dati azienda**, **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. I quattro contatori derivano dai record non archiviati già esistenti; le azioni aprono la Lista Account con il filtro corrispondente e il comando Aggiungi eredita la categoria selezionata. Nessuna collezione, Rule o Function cambia.

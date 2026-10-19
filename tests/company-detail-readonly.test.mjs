@@ -10,6 +10,8 @@ const utilsSource = await readFile(new URL('../Frontend/public/assets/js/utils.j
 const {inviteIdForGuest, sanitizeEmail, sharingCycleOf} = await import('data:text/javascript;base64,' + Buffer.from(utilsSource).toString('base64'));
 const messageSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/read-error-message.js', import.meta.url), 'utf8');
 const {readErrorMessage} = await import('data:text/javascript;base64,' + Buffer.from(messageSource).toString('base64'));
+const modeSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-mode-model.js', import.meta.url), 'utf8');
+const {accountModeFromRecord} = await import('data:text/javascript;base64,' + Buffer.from(modeSource).toString('base64'));
 const deferred = () => { let resolve; const promise = new Promise(yes => { resolve = yes; }); return {promise, resolve}; };
 function fixture({suspended = false, denied = false, networkError = false} = {}) {
     const writes = [], reads = [], errors = [], modules = [], classes = new Set(), suspendedReads = [];
@@ -27,7 +29,7 @@ function fixture({suspended = false, denied = false, networkError = false} = {})
     let read = async () => ({nomeAccount: 'Synthetic company account'});
     const window = {location: {search: '?id=account&aziendaId=company', pathname: '/dettaglio_account_azienda.html', href: ''}, history: {replaceState() {}}};
     const context = vm.createContext({URLSearchParams, AbortController, auth:{currentUser:null}, onAuthStateChanged:()=>()=>{}, window, navigator: {onLine: true}, console,
-        readErrorMessage, inviteIdForGuest, sanitizeEmail, sharingCycleOf,
+        readErrorMessage, accountModeFromRecord, inviteIdForGuest, sanitizeEmail, sharingCycleOf,
         document: {getElementById: id => id === 'footer-center-actions' ? footer : find(footer.children, id),
             querySelector: () => null, querySelectorAll: () => []},
         db: {}, doc: (_db, ...path) => path.join('/'), increment: value => ({increment: value}),
