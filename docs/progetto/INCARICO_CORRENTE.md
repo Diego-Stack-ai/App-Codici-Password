@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Recupero della prova Push dopo dispositivo già invalidato — 19/10/2026
+
+Il collaudo reale della `1.2.206` conferma il caricamento del nuovo runtime (`push=20261018b`), ma mostra ancora la sequenza `DELETE` FCM `403` seguita dalla callable `sendDeadlinePushTest` con HTTP `400`. L'avviso prestazionale sul gestore `load` non è causale. Il caso residuo nasce quando la registrazione locale tenta il rinnovo mentre il record del dispositivo è già stato invalidato dal backend: il comando di prova partiva comunque e sapeva recuperare soltanto il motivo `push-token-invalid`, non la risposta **Notifiche non attive su questo dispositivo**.
+
+La correzione candidata `1.2.207` verifica sul server il record del dispositivo prima della prova. Se token, stato o ambito Scadenze non sono validi, ricrea preventivamente una registrazione distinta conservando gli ambiti scelti. Se la callable invalida il token durante il primo invio oppure osserva ancora il dispositivo non attivo, il client esegue un solo rinnovo completo e un solo nuovo tentativo. Al termine la UI rilegge lo stato reale e riallinea interruttore, testo e visibilità del pulsante.
+
+Con l'ordine esplicito **«Pubblica»** del 19/10/2026 Diego autorizza commit, push, PR, merge e distribuzione della `1.2.207` sul solo Firebase Hosting dopo i gate verdi. Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+
+Verifica locale: contratto di recupero **2/2**, `git diff --check` verde e suite completa `npm test` conclusa con codice **0**, inclusi i banchi Functions, Rules, Storage, Vault ed emulatori Firebase. Il collaudo della ricezione sul telefono resta una verifica successiva alla pubblicazione.
+
 ## Ripristino del motore AI locale WebAssembly sotto CSP — 19/10/2026
 
 Il collaudo del pacchetto ONNX locale ha rilevato che il browser interrompe `WebAssembly.instantiate()` perché la Content Security Policy pubblicata non autorizza la compilazione WebAssembly. Il runtime e gli artefatti restano locali e same-origin; non è necessario consentire valutazione dinamica di codice JavaScript.
