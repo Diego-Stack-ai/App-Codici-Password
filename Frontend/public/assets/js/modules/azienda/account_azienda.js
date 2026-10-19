@@ -4,7 +4,7 @@ import { readErrorMessage } from '../shared/read-error-message.js';
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.207';
+import { db } from '../../firebase-config.js?v=1.2.208';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -16,6 +16,7 @@ import { createAccountListView } from '../shared/account-list-view.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveRecipients, archiveConfirmMessage } from '../settings/archive-account-model.js';
 import {accountSortMode, compareAccounts, nextAccountSortMode} from '../shared/account-list-sort.js';
+import { ACCOUNT_MODE_VIEWS, accountMatchesModeView, normalizeAccountModeView, summarizeAccountModes } from '../shared/account-mode-model.js';
 
 // Compatibility entry point: one active mount per canonical document.
 let activeMount = null;
@@ -59,6 +60,15 @@ export function mountAccountAziendaList(user, options = {}) {
     let currentUser = null;
     let sortMode = 'name-asc';
     let currentAziendaId = null;
+    let currentAccountView = '';
+
+    const modeFilters = Object.freeze([
+        { view: '', labelKey: 'company_account_view_all', fallback: 'Tutti' },
+        { view: ACCOUNT_MODE_VIEWS.STANDARD, labelKey: 'company_card_accounts', fallback: 'Account' },
+        { view: ACCOUNT_MODE_VIEWS.SHARED, labelKey: 'company_card_shared_accounts', fallback: 'Condivisi' },
+        { view: ACCOUNT_MODE_VIEWS.MEMO, labelKey: 'company_card_memos', fallback: 'Memorandum' },
+        { view: ACCOUNT_MODE_VIEWS.SHARED_MEMO, labelKey: 'company_card_shared_memos', fallback: 'Memo condivisi' }
+    ]);
 
     const THEMES = {
         standard: { accent: 'theme-accent-standard', text: 'theme-text-standard' },
@@ -90,6 +100,7 @@ export function mountAccountAziendaList(user, options = {}) {
         currentUser = user;
         const urlParams = new URLSearchParams(query);
         currentAziendaId = urlParams.get('id');
+        currentAccountView = normalizeAccountModeView(urlParams.get('type'));
 
         if (!currentAziendaId) { navigate('lista_aziende.html'); return; }
 
@@ -144,7 +155,8 @@ export function mountAccountAziendaList(user, options = {}) {
             clearElement(fCenter);
             setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
                 createElement('a', {
-                    href: `form_account_azienda.html?aziendaId=${currentAziendaId}`,
+                    id: 'add-company-account-link',
+                    href: createAccountFormUrl(),
                     className: 'btn-fab-action btn-fab-scadenza',
                     title: t('add_account') || 'Nuovo Account',
                     dataset: { label: t('add_short') || 'Aggiungi' }
@@ -199,6 +211,7 @@ export function mountAccountAziendaList(user, options = {}) {
             }
 
             }
+            renderModeFilter();
             filterAndRender();
         } catch (e) {
             if (signal.aborted) return;
@@ -213,6 +226,7 @@ export function mountAccountAziendaList(user, options = {}) {
 
         let filtered = allAccounts.filter(acc => {
             if (acc.isArchived) return false;
+            if (!accountMatchesModeView(acc, currentAccountView)) return false;
             if (!term) return true;
             const n = (acc.nomeAccount || "").toLowerCase();
             const u = (acc.username || "").toLowerCase();
@@ -223,6 +237,47 @@ export function mountAccountAziendaList(user, options = {}) {
         filtered.sort((a, b) => compareAccounts(a, b, sortMode));
 
         accountListView.render(filtered);
+    }
+
+    function createAccountFormUrl() {
+        const params = new URLSearchParams({aziendaId: currentAziendaId});
+        if (currentAccountView) params.set('type', currentAccountView);
+        return `form_account_azienda.html?${params}`;
+    }
+
+    function setAccountView(view) {
+        currentAccountView = normalizeAccountModeView(view);
+        const params = new URLSearchParams(query);
+        params.set('id', currentAziendaId);
+        if (currentAccountView) params.set('type', currentAccountView);
+        else params.delete('type');
+        window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+        const addLink = document.getElementById('add-company-account-link');
+        if (addLink) addLink.href = createAccountFormUrl();
+        renderModeFilter();
+        filterAndRender();
+    }
+
+    function renderModeFilter() {
+        const container = document.getElementById('account-mode-filter');
+        if (!container) return;
+        const summary = summarizeAccountModes(allAccounts);
+        const total = Object.values(summary).reduce((sum, count) => sum + count, 0);
+        setChildren(container, modeFilters.map(item => {
+            const translated = t(item.labelKey);
+            const label = translated && translated !== item.labelKey ? translated : item.fallback;
+            const count = item.view ? summary[item.view] : total;
+            const active = currentAccountView === item.view;
+            return createElement('button', {
+                type: 'button',
+                className: `company-account-filter-chip${active ? ' is-active' : ''}`,
+                ariaPressed: String(active),
+                onclick: () => setAccountView(item.view)
+            }, [
+                createElement('span', { textContent: label }),
+                createElement('strong', { textContent: String(count) })
+            ]);
+        }));
     }
 
     // --- ACTIONS ---

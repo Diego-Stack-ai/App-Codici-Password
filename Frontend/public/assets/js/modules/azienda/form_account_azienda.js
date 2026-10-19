@@ -8,12 +8,12 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.207';
+import { db } from '../../firebase-config.js?v=1.2.208';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.207';
+import { renderBankAccounts } from '../shared/banking-renderer.js?v=1.2.208';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 async function saveAccount(...args) {
@@ -43,9 +43,9 @@ async function deleteAccount(...args) {
 import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
-import { accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.207';
-import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.207';
+import { ACCOUNT_MODE_VIEWS, accountModeFromFlags, accountModeFromRecord, filterRecipientContacts, isOwnerRecipientEmail, normalizeAccountModeView, normalizeRecipientEmail, preferenceForRecipient, recipientPreferencesFromSharedWith, serializeRecipientPreferences, sharedModeTransitionRevokesRecipients, validateAccountMode } from '../shared/account-mode-model.js';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.208';
+import { initAccountSharedCredentials, initNewAccountSharedCredentials } from '../shared/account-shared-credentials.js?v=1.2.208';
 import { DECRYPT_FAILURE_MESSAGE, createAccountLoadContext, isAccountSaveAllowed } from '../shared/credential-decrypt-guard.js';
 
 // --- STATE ---
@@ -119,6 +119,7 @@ export async function initFormAccountAzienda(user) {
     observedSharing = null;
     loadedAccountMode = 'account-private';
     resetExistingSharing = false;
+    isExplicitMemo = false;
     try {
         const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
         if (draft?.profileContactId === urlParams.get('profileContactId') && draft.ownerUid === user.uid &&
@@ -165,6 +166,7 @@ export async function initFormAccountAzienda(user) {
 
     initBaseUI();
     setupUI();
+    if (!isEditing) applyRequestedAccountMode(normalizeAccountModeView(urlParams.get('type')));
     setupImageUploader();
     await Promise.all([
         loadRubrica(),
@@ -217,6 +219,28 @@ export async function initFormAccountAzienda(user) {
     } else {
         initNewAccountSharedCredentials({saveButtonId: 'save-btn-footer'});
     }
+}
+
+function applyRequestedAccountMode(view) {
+    const flagId = ({
+        [ACCOUNT_MODE_VIEWS.SHARED]: 'flag-shared',
+        [ACCOUNT_MODE_VIEWS.MEMO]: 'flag-memo',
+        [ACCOUNT_MODE_VIEWS.SHARED_MEMO]: 'flag-memo-shared'
+    })[view];
+    if (!flagId) return;
+    const flag = document.getElementById(flagId);
+    if (!flag) return;
+    flag.checked = true;
+    isExplicitMemo = view === ACCOUNT_MODE_VIEWS.MEMO || view === ACCOUNT_MODE_VIEWS.SHARED_MEMO;
+    loadedAccountMode = accountModeFromFlags({
+        shared: view === ACCOUNT_MODE_VIEWS.SHARED,
+        memo: view === ACCOUNT_MODE_VIEWS.MEMO,
+        memoShared: view === ACCOUNT_MODE_VIEWS.SHARED_MEMO
+    });
+    if (view !== ACCOUNT_MODE_VIEWS.SHARED && view !== ACCOUNT_MODE_VIEWS.SHARED_MEMO) return;
+    const management = document.getElementById('shared-management');
+    management?.classList.remove('hidden');
+    flag.closest('.option-card')?.after(management);
 }
 
 function initBaseUI() {

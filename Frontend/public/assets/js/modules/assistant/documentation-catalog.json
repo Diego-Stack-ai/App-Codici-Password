@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 2,
-  "reviewedAppVersion": "1.2.207",
+  "contentVersion": 3,
+  "reviewedAppVersion": "1.2.208",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -1202,8 +1202,8 @@
       "guide.pages.profilo_privato.step-5": "Ogni documento raccoglie dati, note, allegati e collegamenti ad Account o Scadenza. Per rimuovere un allegato usa il cestino e la conferma.",
       "guide.pages.profilo_privato.step-6": "Scegli esplicitamente i dati da includere nella tessera e nel QR. Controlla cosa rendi condivisibile prima di inviarlo.",
       "guide.pages.lista_aziende.title": "Aziende",
-      "guide.pages.lista_aziende.purpose": "Scegli l’azienda e accedi ai suoi dati e Account.",
-      "guide.pages.lista_aziende.step-1": "Apri l’azienda desiderata oppure usa il comando di creazione dell’app. I dati aziendali restano separati dagli Account privati.",
+      "guide.pages.lista_aziende.purpose": "Scegli l’azienda e accedi ai dati oppure direttamente ad Account, Condivisi, Memorandum e Memo condivisi.",
+      "guide.pages.lista_aziende.step-1": "Apri i Dati azienda oppure scegli una delle quattro categorie con contatore. I dati aziendali restano separati dagli Account privati.",
       "guide.pages.lista_aziende.step-2": "Per aggiornare un’azienda passa al suo modulo di modifica; la guida non cambia o cancella dati.",
       "guide.pages.dati_azienda.title": "Dati azienda",
       "guide.pages.dati_azienda.purpose": "Consulta il profilo aziendale, i contatti e le proiezioni condivisibili.",
@@ -1220,8 +1220,8 @@
       "guide.pages.modifica_azienda.step-5": "Aggiungi allegati dai comandi disponibili e controlla limiti e conferma.",
       "guide.pages.modifica_azienda.step-6": "Salva con il comando dell’app e verifica l’esito; le modifiche non si applicano premendo Avanti nella guida.",
       "guide.pages.account_azienda.title": "Account azienda",
-      "guide.pages.account_azienda.purpose": "Cerca gli Account nel contesto dell’azienda scelta.",
-      "guide.pages.account_azienda.step-1": "Cerca nell’elenco dell’azienda corrente. Prima di creare un elemento verifica di essere nel contesto giusto.",
+      "guide.pages.account_azienda.purpose": "Cerca e filtra Account, Condivisi, Memorandum e Memo condivisi nel contesto dell’azienda scelta.",
+      "guide.pages.account_azienda.step-1": "Scegli la categoria e cerca nell’elenco dell’azienda corrente. Il comando Aggiungi eredita la categoria selezionata.",
       "guide.pages.account_azienda.step-2": "Scegli l’ordinamento e apri il dettaglio. Categoria e permessi determinano le azioni disponibili.",
       "guide.pages.account_azienda.step-3": "Gli Account aziendali supportano anche memorandum e condivisioni; l’archiviazione si gestisce separatamente.",
       "guide.pages.form_account_azienda.title": "Crea o modifica Account aziendale",

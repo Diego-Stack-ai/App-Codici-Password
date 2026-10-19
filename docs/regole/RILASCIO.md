@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.208 — card aziendali per tipologia — 19/10/2026
+
+Diego ha autorizzato la pubblicazione del lotto frontend che separa, su ogni card Azienda, **Dati azienda**, **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. I quattro contatori derivano dai record non archiviati già esistenti; le azioni aprono la Lista Account con il filtro corrispondente e il comando Aggiungi eredita la categoria selezionata. Nessuna collezione, Rule o Function cambia.
+
+La candidata `1.2.208` ha superato integralmente `npm test` dopo la rigenerazione della shell offline con 307 risorse. Il perimetro di distribuzione è il solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi. Prima del deploy sono richiesti commit, PR, gate GitHub verdi e merge in `master`; la verifica remota deve confermare versione e asset pubblicati.
+
 ## Esito operativo 1.2.207 — 19/10/2026
 
 PR `#179` unita in `master` nel commit `1d91eee1` dopo gate documentali e validazione GitHub completa verdi. Il workflow manuale `39221884870` ha ripetuto la suite e pubblicato esclusivamente Firebase Hosting. La verifica remota HTTP `200` conferma versione `1.2.207`, cache-bust Push `20261019c`, precontrollo della registrazione e recupero del dispositivo già non attivo. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti. La ricezione della notifica di sistema resta da confermare sull'iPhone.

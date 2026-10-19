@@ -57,3 +57,23 @@ test('la conversione in campi persistiti è deterministica', () => {
         visibility: 'shared'
     });
 });
+
+test('riepiloga e filtra i quattro modi senza contare gli archiviati', () => {
+    const accounts = [
+        {id: 'standard'},
+        {id: 'shared', visibility: 'shared'},
+        {id: 'memo', type: 'memo'},
+        {id: 'shared-memo', type: 'memorandum', visibility: 'shared'},
+        {id: 'archived', type: 'memo', isArchived: true},
+        {id: 'archived-legacy', visibility: 'shared', isArchived: 1}
+    ];
+    assert.deepEqual(model.summarizeAccountModes(accounts), {
+        standard: 1,
+        shared: 1,
+        memo: 1,
+        shared_memo: 1
+    });
+    assert.deepEqual(accounts.filter(account => model.accountMatchesModeView(account, 'memo')).map(account => account.id), ['memo', 'archived']);
+    assert.equal(model.accountMatchesModeView(accounts[1], 'unknown'), true);
+    assert.equal(model.normalizeAccountModeView(' SHARED_MEMO '), 'shared_memo');
+});

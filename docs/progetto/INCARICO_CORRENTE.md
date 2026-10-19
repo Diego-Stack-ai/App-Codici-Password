@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Card aziendali con accessi distinti per Account e Memorandum — 19/10/2026
+
+Diego autorizza l'avvio del primo punto della scaletta successiva al ripristino delle Push: la revisione delle card nella Lista aziende. Ogni card deve mantenere separato l'accesso ai **Dati azienda** e rendere immediatamente disponibili quattro categorie reali: **Account**, **Condivisi**, **Memorandum** e **Memo condivisi**. Le categorie devono mostrare il numero dei record non archiviati e aprire la Lista Account dell'azienda già filtrata; il comando di aggiunta deve ereditare la categoria selezionata.
+
+Il lavoro riusa i flag e il modello Account/Memorandum esistenti, senza introdurre nuove collezioni, migrazioni o scritture automatiche. I record archiviati non concorrono ai contatori. Il filtro resta modificabile nella pagina Account azienda e la rotta senza categoria continua a mostrare l'insieme completo per compatibilità.
+
+Con l'ordine esplicito **«pubblica»** del 19/10/2026 Diego autorizza il bump patch `1.2.208`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Backend, Functions, Firestore Rules, Storage Rules, indici, migrazioni e accessi ai dati reali restano esclusi. La prova della Push sul secondo telefono resta un collaudo fisico distinto e non blocca questo rilascio.
+
 ## Recupero della prova Push dopo dispositivo già invalidato — 19/10/2026
 
 Il collaudo reale della `1.2.206` conferma il caricamento del nuovo runtime (`push=20261018b`), ma mostra ancora la sequenza `DELETE` FCM `403` seguita dalla callable `sendDeadlinePushTest` con HTTP `400`. L'avviso prestazionale sul gestore `load` non è causale. Il caso residuo nasce quando la registrazione locale tenta il rinnovo mentre il record del dispositivo è già stato invalidato dal backend: il comando di prova partiva comunque e sapeva recuperare soltanto il motivo `push-token-invalid`, non la risposta **Notifiche non attive su questo dispositivo**.

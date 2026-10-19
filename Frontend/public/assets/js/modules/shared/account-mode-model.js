@@ -5,6 +5,15 @@ export const ACCOUNT_MODES = Object.freeze({
     MEMO_SHARED: 'memo-shared'
 });
 
+export const ACCOUNT_MODE_VIEWS = Object.freeze({
+    STANDARD: 'standard',
+    SHARED: 'shared',
+    MEMO: 'memo',
+    SHARED_MEMO: 'shared_memo'
+});
+
+const ACCOUNT_VIEW_VALUES = new Set(Object.values(ACCOUNT_MODE_VIEWS));
+
 export function hasAccountCredentials(account = {}) {
     return [account.username, account.account ?? account.codice, account.password]
         .some(value => String(value || '').trim().length > 0);
@@ -15,6 +24,38 @@ export function accountModeFromRecord(account = {}) {
     const isShared = account.visibility === 'shared' || account._isGuest === true || account.shared === true || account.isMemoShared === true;
     if (isMemo) return isShared ? ACCOUNT_MODES.MEMO_SHARED : ACCOUNT_MODES.MEMO_PRIVATE;
     return isShared ? ACCOUNT_MODES.SHARED : ACCOUNT_MODES.PRIVATE;
+}
+
+export function normalizeAccountModeView(value = '') {
+    const normalized = String(value || '').trim().toLowerCase();
+    return ACCOUNT_VIEW_VALUES.has(normalized) ? normalized : '';
+}
+
+export function accountModeViewFromRecord(account = {}) {
+    const mode = accountModeFromRecord(account);
+    if (mode === ACCOUNT_MODES.SHARED) return ACCOUNT_MODE_VIEWS.SHARED;
+    if (mode === ACCOUNT_MODES.MEMO_PRIVATE) return ACCOUNT_MODE_VIEWS.MEMO;
+    if (mode === ACCOUNT_MODES.MEMO_SHARED) return ACCOUNT_MODE_VIEWS.SHARED_MEMO;
+    return ACCOUNT_MODE_VIEWS.STANDARD;
+}
+
+export function summarizeAccountModes(accounts = []) {
+    const summary = {
+        [ACCOUNT_MODE_VIEWS.STANDARD]: 0,
+        [ACCOUNT_MODE_VIEWS.SHARED]: 0,
+        [ACCOUNT_MODE_VIEWS.MEMO]: 0,
+        [ACCOUNT_MODE_VIEWS.SHARED_MEMO]: 0
+    };
+    for (const account of accounts) {
+        if (account?.isArchived) continue;
+        summary[accountModeViewFromRecord(account)] += 1;
+    }
+    return summary;
+}
+
+export function accountMatchesModeView(account = {}, view = '') {
+    const normalized = normalizeAccountModeView(view);
+    return !normalized || accountModeViewFromRecord(account) === normalized;
 }
 
 export function accountModeFromFlags({ shared = false, memo = false, memoShared = false } = {}) {
