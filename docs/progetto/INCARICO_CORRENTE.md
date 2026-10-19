@@ -8,6 +8,8 @@ Il lavoro riusa i flag e il modello Account/Memorandum esistenti, senza introdur
 
 Con l'ordine esplicito **«pubblica»** del 19/10/2026 Diego autorizza il bump patch `1.2.208`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Backend, Functions, Firestore Rules, Storage Rules, indici, migrazioni e accessi ai dati reali restano esclusi. La prova della Push sul secondo telefono resta un collaudo fisico distinto e non blocca questo rilascio.
 
+Esito: PR `#181` unita in `master` nel commit `eeb67bf7` dopo gate GitHub verdi. Il workflow manuale `39243406078` ha ripetuto la validazione in 6m34s e pubblicato esclusivamente Firebase Hosting in 44s. La verifica HTTP pubblica conferma la `1.2.208` e i nuovi percorsi Account/Condivisi/Memorandum/Memo condivisi. Backend, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
+
 ## Recupero della prova Push dopo dispositivo già invalidato — 19/10/2026
 
 Il collaudo reale della `1.2.206` conferma il caricamento del nuovo runtime (`push=20261018b`), ma mostra ancora la sequenza `DELETE` FCM `403` seguita dalla callable `sendDeadlinePushTest` con HTTP `400`. L'avviso prestazionale sul gestore `load` non è causale. Il caso residuo nasce quando la registrazione locale tenta il rinnovo mentre il record del dispositivo è già stato invalidato dal backend: il comando di prova partiva comunque e sapeva recuperare soltanto il motivo `push-token-invalid`, non la risposta **Notifiche non attive su questo dispositivo**.

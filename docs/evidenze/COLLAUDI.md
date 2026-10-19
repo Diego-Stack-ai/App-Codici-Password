@@ -9,6 +9,7 @@
 - Secondo avvio `npm test` terminato con codice **0**, inclusi documentazione **11/11**, guida **6/6**, navigazione **166/166**, accesso dati **95/95**, sicurezza **25/25**, offline **14/14**, i18n **14/14**, Functions/security **473 totali, 464 superati, 9 esclusi e 0 errori**, Rules, Storage, Vault e tutti gli emulatori Firebase. Shell offline: **307 risorse**; sintassi: **218 moduli**; riferimenti statici: **311 file**; nessuna dipendenza circolare.
 - Graphify principale riallineato dopo il bump/versionamento degli asset: **13.347 nodi, 35.010 archi e 740 comunità**. Il diff non contiene modifiche a Functions, Rules o indici.
 - Pubblicazione autorizzata sul solo Firebase Hosting; il collaudo della Push sul secondo telefono resta indipendente.
+- PR `#181` integrata nel commit `eeb67bf7`; due gate documentali e validazione GitHub completa verde in 7m56s. Il workflow manuale `39243406078` ha ripetuto la validazione in 6m34s e completato **Deploy Hosting only** in 44s. Home, Lista aziende e i tre moduli interessati rispondono HTTP `200` e mostrano versione o contratti della `1.2.208`.
 
 ## 19/10/2026 — recupero della prova Push da record già non attivo
 
