@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.216 — editor contestuale per tutte le regole non personali — 20/10/2026
+
+Automezzi, Casa e immobili, Salute, Sport e associazioni, Contratti e rapporti e Documenti generici condividono ora l’editor contestuale a card **Parametri** espandibili. Preavviso e frequenza sono contenuti e affiancati nella singola card; Automezzi conserva modello, targa e compositore; le Regole generali non introducono il terzo riferimento storico. Le sei linguette operative consentono inoltre di creare nuove regole e aprono sempre la sola configurazione selezionata.
+
+Diego ha autorizzato la pubblicazione del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi; in particolare nessuna Scadenza esistente viene cancellata o ricreata in questo rilascio.
+
 ## Esito operativo 1.2.215 — Parametri compatti nell’editor Automezzi — 20/10/2026
 
 L’editor contestuale delle regole **Automezzi** non mostra più i campi ridondanti **Nome configurazione** e **Oggetto della scadenza**. Il nome della regola alimenta automaticamente il compositore; ogni configurazione è una card **Parametri** con preavviso e frequenza affiancati anche su mobile, modello, targa, segmenti testuali e anteprima.

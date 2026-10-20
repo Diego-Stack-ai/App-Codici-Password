@@ -100,7 +100,7 @@ Object.assign(it, {
   deadline_domain_rule_linked_blocked: 'Regola in uso: non può essere rinominata o eliminata.',
   deadline_domain_delete_rule_confirm: 'Eliminare questa regola non collegata?',
   deadline_rule_filter_label: 'Filtro regola', deadline_rule_filter_remove: 'Rimuovi filtro regola',
-  deadline_vehicle_select_rule: 'Apri una regola dalla linguetta Automezzi.',
+  deadline_vehicle_select_rule: 'Apri una regola dalla pagina Regole scadenze.',
   deadline_vehicle_back_rules: 'Torna alle regole', deadline_vehicle_scoped_editor: 'CONFIGURAZIONE DELLA REGOLA',
   deadline_vehicle_scoped_help: 'Modifica soltanto la regola selezionata.',
   deadline_vehicle_add_object: 'Aggiungi parametri', deadline_vehicle_email_object: 'Parametri',
@@ -117,7 +117,9 @@ Object.assign(it, {
   deadline_vehicle_text_before_plate: 'Prima della targa', deadline_vehicle_text_after_plate: 'Testo finale',
   deadline_vehicle_message_before_object: 'È in scadenza ', deadline_vehicle_message_before_model: '{space}',
   deadline_vehicle_message_before_plate: ', con targa ', deadline_vehicle_message_after_plate: '.',
-  deadline_vehicle_model_example: 'Moto Guzzi Nevada 750', deadline_vehicle_plate_example: 'CJ14146'
+  deadline_vehicle_model_example: 'Moto Guzzi Nevada 750', deadline_vehicle_plate_example: 'CJ14146',
+  deadline_rule_message: 'Testo email e notifica', deadline_rule_reference: 'Riferimento',
+  deadline_rule_add_reference: 'Aggiungi riferimento', deadline_rule_remove_reference: 'Rimuovi riferimento'
 });
 
 const deadlineRulesActionFallback = {
@@ -126,7 +128,7 @@ const deadlineRulesActionFallback = {
   deadline_domain_rule_linked_blocked: 'This rule is in use and cannot be renamed or deleted.',
   deadline_domain_delete_rule_confirm: 'Delete this unlinked rule?',
   deadline_rule_filter_label: 'Rule filter', deadline_rule_filter_remove: 'Remove rule filter',
-  deadline_vehicle_select_rule: 'Open a rule from the Vehicles tab.',
+  deadline_vehicle_select_rule: 'Open a rule from the Deadline rules page.',
   deadline_vehicle_back_rules: 'Back to rules', deadline_vehicle_scoped_editor: 'RULE CONFIGURATION',
   deadline_vehicle_scoped_help: 'Edit only the selected rule.',
   deadline_vehicle_add_object: 'Add parameters', deadline_vehicle_email_object: 'Parameters',
@@ -143,7 +145,9 @@ const deadlineRulesActionFallback = {
   deadline_vehicle_text_before_plate: 'Before plate', deadline_vehicle_text_after_plate: 'Final text',
   deadline_vehicle_message_before_object: 'Expiring: ', deadline_vehicle_message_before_model: '{space}',
   deadline_vehicle_message_before_plate: ', plate ', deadline_vehicle_message_after_plate: '.',
-  deadline_vehicle_model_example: 'Vehicle model', deadline_vehicle_plate_example: 'AB123CD'
+  deadline_vehicle_model_example: 'Vehicle model', deadline_vehicle_plate_example: 'AB123CD',
+  deadline_rule_message: 'Email and notification text', deadline_rule_reference: 'Reference',
+  deadline_rule_add_reference: 'Add reference', deadline_rule_remove_reference: 'Remove reference'
 };
 [en, es, fr, de, zh, hi, pt].forEach(catalog => Object.assign(catalog, deadlineRulesActionFallback));
 

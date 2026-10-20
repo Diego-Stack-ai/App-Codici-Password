@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.215';
+import {auth, db} from '../../firebase-config.js?v=1.2.216';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -180,10 +180,8 @@ function sourceLabel(sourceId) {
 function renderConfigurationCard(configuration, actions = {}) {
     const count = configuration.linkedDeadlineIds.length;
     const countLabel = `${count} ${t(count === 1 ? 'deadline_domain_linked_one' : 'deadline_domain_linked_many')}`;
-    const vehicleRule = configuration.sourceId === 'deadlineConfig';
-    const manageHref = vehicleRule
-        ? `${configuration.href}?rule=${encodeURIComponent(configuration.routeKey)}`
-        : configuration.href;
+    const manageHref = `configurazione_automezzi.html?source=${encodeURIComponent(configuration.sourceId)}`
+        + `&rule=${encodeURIComponent(configuration.routeKey)}&domain=${encodeURIComponent(configuration.domain)}`;
     return createElement('article', {className: 'deadline-domain-config-card'}, [
         createElement('header', {}, [
             createElement('div', {}, [
@@ -205,18 +203,18 @@ function renderConfigurationCard(configuration, actions = {}) {
             textContent: `${t('deadline_personal_message')}: ${configuration.templateText}`
         }) : null,
         createElement('div', {className: 'deadline-domain-card-actions'}, [
-            vehicleRule ? createElement('button', {
+            createElement('button', {
                 type: 'button', className: 'deadline-domain-icon-action',
                 title: t('deadline_domain_rename_rule'),
                 ariaLabel: t('deadline_domain_rename_rule'),
                 onclick: () => actions.rename?.(configuration)
-            }, icon('edit')) : null,
-            vehicleRule ? createElement('button', {
+            }, icon('edit')),
+            createElement('button', {
                 type: 'button', className: 'deadline-domain-icon-action is-danger',
                 title: t('deadline_domain_delete_rule'),
                 ariaLabel: t('deadline_domain_delete_rule'),
                 onclick: () => actions.remove?.(configuration)
-            }, icon('delete')) : null,
+            }, icon('delete')),
             createElement('a', {className: 'deadline-domain-inline-action', href: manageHref}, [
             createElement('span', {textContent: t('deadline_domain_manage_rule')}), icon('arrow_forward')
             ])
@@ -257,11 +255,12 @@ async function loadDomainInventories(user, root, active) {
         const inventory = buildDeadlineDomainInventory({
             configs: {deadlineConfig, deadlineConfigDocuments, generalConfig}, deadlines
         });
-        const persistVehicleRules = async nextRules => {
-            await setDoc(doc(db, 'users', user.uid, 'settings', 'deadlineConfig'), {deadlineTypes: nextRules}, {merge: true});
+        const configsBySource = {deadlineConfig, deadlineConfigDocuments, generalConfig};
+        const persistRules = async (sourceId, nextRules) => {
+            if (!Object.hasOwn(configsBySource, sourceId)) throw new Error(t('deadline_domain_error'));
+            await setDoc(doc(db, 'users', user.uid, 'settings', sourceId), {deadlineTypes: nextRules}, {merge: true});
             if (active()) await loadDomainInventories(user, root, active);
         };
-        const vehicleConfig = deadlineConfig || {deadlineTypes: []};
         const actions = {
             async rename(configuration) {
                 if (configuration.linkedDeadlineIds.length) {
@@ -270,10 +269,11 @@ async function loadDomainInventories(user, root, active) {
                 }
                 const name = await showInputModal(t('deadline_domain_rename_rule'), configuration.name, t('deadline_domain_rule_name'));
                 if (!name?.trim() || name.trim() === configuration.name) return;
-                const next = updateDeadlineType(vehicleConfig, configuration.sourceIndex, {
-                    ...vehicleConfig.deadlineTypes[configuration.sourceIndex], name: name.trim()
+                const sourceConfig = configsBySource[configuration.sourceId] || {deadlineTypes: []};
+                const next = updateDeadlineType(sourceConfig, configuration.sourceIndex, {
+                    ...sourceConfig.deadlineTypes[configuration.sourceIndex], name: name.trim()
                 });
-                await persistVehicleRules(next.deadlineTypes);
+                await persistRules(configuration.sourceId, next.deadlineTypes);
             },
             async remove(configuration) {
                 if (configuration.linkedDeadlineIds.length) {
@@ -281,20 +281,27 @@ async function loadDomainInventories(user, root, active) {
                     return;
                 }
                 if (!await showConfirmModal(t('deadline_domain_delete_rule'), t('deadline_domain_delete_rule_confirm'))) return;
-                const next = vehicleConfig.deadlineTypes.filter((_, index) => index !== configuration.sourceIndex);
-                await persistVehicleRules(next);
+                const sourceConfig = configsBySource[configuration.sourceId] || {deadlineTypes: []};
+                const next = sourceConfig.deadlineTypes.filter((_, index) => index !== configuration.sourceIndex);
+                await persistRules(configuration.sourceId, next);
             }
         };
         containers.forEach(container => renderDomainSummary(container,
             inventory[container.dataset.deadlineDomainSummary], actions));
 
-        const addRule = root.querySelector('#btn-add-vehicle-rule');
-        if (addRule) addRule.onclick = async () => {
-            const name = await showInputModal(t('deadline_domain_new_rule'), '', t('deadline_domain_rule_name'));
-            if (!name?.trim()) return;
-            const next = appendDeadlineType(deadlineConfig || {deadlineTypes: []}, {name: name.trim(), period: 14, freq: 7});
-            await persistVehicleRules(next.deadlineTypes);
-        };
+        root.querySelectorAll('[data-deadline-add-rule]').forEach(addRule => {
+            addRule.onclick = async () => {
+                const domain = addRule.dataset.deadlineAddRule || 'generic';
+                const sourceId = domain === 'vehicles' ? 'deadlineConfig' : 'generalConfig';
+                const sourceConfig = configsBySource[sourceId] || {deadlineTypes: []};
+                const name = await showInputModal(t('deadline_domain_new_rule'), '', t('deadline_domain_rule_name'));
+                if (!name?.trim()) return;
+                const next = appendDeadlineType(sourceConfig, {
+                    name: name.trim(), period: 14, freq: 7, domain
+                });
+                await persistRules(sourceId, next.deadlineTypes);
+            };
+        });
     } catch (error) {
         if (!active()) return;
         logError('DeadlineRulesDomainInventory', error);

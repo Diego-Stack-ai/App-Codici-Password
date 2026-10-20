@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.216 autorizzata — editor contestuale per tutte le regole non personali — 20/10/2026
+
+La pagina **Regole scadenze** apre ora lo stesso editor contestuale per Automezzi, Casa e immobili, Salute, Sport e associazioni, Contratti e rapporti e Documenti generici. Ogni configurazione interna è una card **Parametri** espandibile: preavviso e frequenza rimangono affiancati nella card; Automezzi conserva modello, targa e compositore guidato; le fonti storiche Documenti possono conservare riferimenti pertinenti all’ambito; le Regole generali mantengono soltanto il tipo fissato dalla regola e il testo email/notifica. Le sei linguette operative espongono inoltre un unico comando **Nuova regola** e rinomina/eliminazione restano bloccate quando esistono Scadenze collegate.
+
+Diego ha autorizzato la pubblicazione del solo Firebase Hosting come versione `1.2.216`, subordinata ai gate del repository e del workflow. Nessuna Scadenza reale viene modificata, cancellata o ricreata: la riconciliazione dei record esistenti resta la fase successiva, dopo la stabilizzazione delle configurazioni e una nuova autorizzazione esplicita.
+
+Verifica locale: modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell delle pagine e riferimenti statici sono verdi. La suite completa ha superato tutti i gruppi applicativi eseguiti e i **473** test Functions, poi si è arrestata per indisponibilità dell’emulatore Firebase sulla porta locale `4400`; il fermo infrastrutturale non costituisce una pubblicazione né una prova sui dati reali. Graphify principale è riallineato al lotto strutturale.
+
 ## Release 1.2.215 pubblicata — Parametri compatti nell’editor Automezzi — 20/10/2026
 
 L’editor contestuale di una regola **Automezzi** non richiede più i campi manuali **Nome configurazione** e **Oggetto della scadenza**: il nome è già quello della regola aperta e l’oggetto usato dal compositore deriva automaticamente da tale nome. Ogni configurazione è presentata come card **Parametri**, che contiene preavviso e frequenza affiancati, modelli e targhe separati, segmenti del testo modificabili e anteprima risultante. I record storici restano leggibili; la nuova forma viene salvata soltanto su azione esplicita dell’utente.
