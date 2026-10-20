@@ -1,10 +1,12 @@
 # Stato
 
-## Candidata 1.2.213 — Documenti personali compatti ed espandibili — 20/10/2026
+## Release 1.2.213 pubblicata — Documenti personali compatti ed espandibili — 20/10/2026
 
 La pagina **Regole invio scadenze** non mostra più il badge progettuale «RICONCILIATE». Nella linguetta **Documenti personali**, il pannello necessario al funzionamento delle linguette resta semanticamente presente ma perde bordo, fondo e spaziatura propri: Patente, Carta d’identità, Codice fiscale e gli eventuali altri Documenti sono quindi presentati direttamente come card autonome.
 
 Ogni card Documento usa un controllo nativo espandibile, azionabile anche da tastiera, con freccia che indica lo stato. A card chiusa restano visibili tipo Documento e stato della Scadenza; espandendola compaiono data, configurazione dell’avviso, destinatari e comando di gestione già esistenti. Nessun Documento o record Scadenza viene modificato. La candidata porta il client a `1.2.213`; i test mirati dell’hub sono verdi **5/5**, l’audit i18n è verde **14/14**, la documentazione è verde **11/11** e la suite completa, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori, è terminata con codice **0**. La shell offline contiene **309 risorse**, `git diff --check` è verde e Graphify principale è riallineato a **13.479 nodi, 35.340 archi e 786 comunità**.
+
+La PR `#191` è stata unita in `master` nel commit `a3521b5c` dopo i gate GitHub verdi. Il workflow manuale `39421438256` ha ripetuto la validazione completa in 7m59s e pubblicato esclusivamente Firebase Hosting in 52s. La verifica HTTP pubblica restituisce `200` per pagina e asset, conferma la `1.2.213`, l’assenza del badge, le card native espandibili e il pannello esterno trasparente. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Release 1.2.212 pubblicata — etichette e associazioni dell’editor Automezzi — 20/10/2026
 
