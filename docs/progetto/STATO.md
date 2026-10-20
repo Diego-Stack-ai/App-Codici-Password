@@ -1,10 +1,12 @@
 # Stato
 
-## Candidata 1.2.215 — Parametri compatti nell’editor Automezzi — 20/10/2026
+## Release 1.2.215 pubblicata — Parametri compatti nell’editor Automezzi — 20/10/2026
 
 L’editor contestuale di una regola **Automezzi** non richiede più i campi manuali **Nome configurazione** e **Oggetto della scadenza**: il nome è già quello della regola aperta e l’oggetto usato dal compositore deriva automaticamente da tale nome. Ogni configurazione è presentata come card **Parametri**, che contiene preavviso e frequenza affiancati, modelli e targhe separati, segmenti del testo modificabili e anteprima risultante. I record storici restano leggibili; la nuova forma viene salvata soltanto su azione esplicita dell’utente.
 
-La candidata porta il client a `1.2.215`. Sono verdi il controllo mirato di modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell offline con **309 risorse** e suite completa `npm test` con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify principale è riallineato a **13.492 nodi, 35.288 archi e 790 comunità**; restano il collaudo visivo pubblico e la distribuzione. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi.
+La release porta il client a `1.2.215`. Sono verdi il controllo mirato di modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell offline con **309 risorse** e suite completa `npm test` con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify principale è riallineato a **13.492 nodi, 35.288 archi e 790 comunità**.
+
+La PR `#194` è stata unita in `master` nel commit `10149429`; il workflow manuale `39429041671` ha ripetuto la validazione completa in 6m25s e pubblicato esclusivamente Firebase Hosting in 38s. La verifica HTTP pubblica conferma la `1.2.215`, l’assenza dei due campi manuali, l’oggetto derivato dalla regola, la card **Parametri** e la pianificazione a due colonne. Il collaudo autenticato a **393 × 852** conferma la resa mobile senza scritture sui dati. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Release 1.2.214 pubblicata — filtro Regola nella ricerca e apertura card — 20/10/2026
 

@@ -6,7 +6,7 @@ Diego chiede di semplificare le configurazioni delle regole nella linguetta **Au
 
 Con l’ordine **«procedi e poi pubblica»** del 20/10/2026 Diego autorizza implementazione, bump patch `1.2.215`, commit, push, PR, merge e pubblicazione del solo Firebase Hosting dopo i gate verdi. La modifica non autorizza scritture sui record reali né deploy di Functions, Firestore Rules, Storage Rules, indici o migrazioni. Le strutture legacy restano leggibili e vengono persistite nel nuovo formato soltanto dopo un salvataggio esplicito dell’utente.
 
-Verifica locale: modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi su **220 moduli**, CSS, shell offline con **309 risorse** e suite completa `npm test` con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify principale è riallineato a **13.492 nodi, 35.288 archi e 790 comunità**; nessuna distribuzione è ancora stata eseguita.
+Esito: modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi su **220 moduli**, CSS, shell offline con **309 risorse** e suite completa `npm test` con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify principale è riallineato a **13.492 nodi, 35.288 archi e 790 comunità**. La PR `#194` è stata unita nel commit `10149429`; il workflow `39429041671` ha validato in 6m25s e pubblicato il solo Hosting in 38s. Verifica HTTP e collaudo autenticato mobile a **393 × 852** sono verdi. Backend, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Filtro regola e apertura card nella lista Scadenze — 20/10/2026
 
