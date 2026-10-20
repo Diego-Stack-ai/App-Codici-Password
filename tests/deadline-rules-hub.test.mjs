@@ -117,12 +117,15 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(list, /searchInput\.value = activeRuleFilter/);
   assert.match(list, /clearRuleFilterFromUrl/);
   assert.doesNotMatch(list, /renderRuleFilterChip|deadline-rule-filter/);
-  assert.match(editor, /deadlineRuleEmailObjects/);
+  assert.match(editor, /deadlineRuleVehicleCards/);
+  assert.match(editor, /updateDeadlineRuleVehicleCards/);
   assert.match(editor, /dataName: 'vehicleModel'|dataName/);
   assert.match(editor, /compileDeadlineMessage/);
   assert.match(editor, /objectText: currentRule\(\)\?\.name/);
   assert.doesNotMatch(editor, /\[data-object-name\]|\[data-object-text\]/);
-  assert.match(editor, /vehicle-rule-schedule/);
+  assert.match(editor, /dataName: 'rulePeriod'|rulePeriod/);
+  assert.match(editor, /dataName: 'ruleFrequency'|ruleFrequency/);
+  assert.match(editor, /dataName: 'vehicleCard'|vehicleCard/);
   assert.match(editor, /createElement\('details'/);
   assert.match(editor, /createElement\('summary'/);
   assert.match(editor, /vehicle-rule-object-chevron/);
@@ -136,6 +139,8 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(controller, /populateParameterSelect/);
   assert.match(controller, /applySelectedParameterSchedule/);
   assert.match(controller, /selectedParameter\.references/);
+  assert.match(hub, /showInputModal\(t\('prompt_days_notice'\)/);
+  assert.match(hub, /showInputModal\(t\('prompt_freq_days'\)/);
   assert.match(editorCss, /\.vehicle-rule-fields\.vehicle-rule-schedule\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,/);
   assert.match(editorCss, /\.vehicle-rule-object\[open\] \.vehicle-rule-object-chevron/);
   assert.match(catalog, /deadline_vehicle_reference:\s*'Parametri'/);

@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.217 — una card per mezzo e pianificazione unica Automezzi — 20/10/2026
+
+L’editor delle regole Automezzi è stato riallineato al modello deciso: preavviso e frequenza sono campi unici della regola e valgono per tutti i mezzi associati; auto, moto e rimorchi non vengono più compattati in gruppi derivati dal vecchio testo email. Ogni mezzo è presentato in una card espandibile con modello, targa, compositore guidato e anteprima. La creazione di una nuova regola richiede esplicitamente nome, preavviso e frequenza; una pianificazione diversa richiede una seconda regola.
+
+La lettura resta compatibile con gli oggetti email storici e la proiezione non scrive nulla finché l’utente non salva. Il formato salvato conserva un oggetto compatibile per mezzo e una sola pianificazione canonica sulla regola; un marcatore esplicito impedisce che una regola volontariamente lasciata senza mezzi ripopoli automaticamente i riferimenti legacy. Le Scadenze esistenti non vengono modificate né riconciliate. Verifica locale completa con codice **0**: modello e hub **20/20**, navigazione **175/175**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell delle pagine, riferimenti statici, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori verdi. Graphify principale è riallineato a **13.528 nodi, 35.338 archi e 829 comunità**. L’ordine **«pubblica»** autorizza la candidata `1.2.217`, da distribuire sul solo Firebase Hosting; backend, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Release 1.2.216 pubblicata — editor contestuale per tutte le regole non personali — 20/10/2026
 
 La pagina **Regole scadenze** apre ora lo stesso editor contestuale per Automezzi, Casa e immobili, Salute, Sport e associazioni, Contratti e rapporti e Documenti generici. Ogni configurazione interna è una card **Parametri** espandibile: preavviso e frequenza rimangono affiancati nella card; Automezzi conserva modello, targa e compositore guidato; le fonti storiche Documenti possono conservare riferimenti pertinenti all’ambito; le Regole generali mantengono soltanto il tipo fissato dalla regola e il testo email/notifica. Le sei linguette operative espongono inoltre un unico comando **Nuova regola** e rinomina/eliminazione restano bloccate quando esistono Scadenze collegate.

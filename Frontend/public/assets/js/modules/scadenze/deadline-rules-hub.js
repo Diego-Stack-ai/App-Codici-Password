@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.216';
+import {auth, db} from '../../firebase-config.js?v=1.2.217';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -17,7 +17,13 @@ import {createDeadlineFromDocument} from '../privato/profilo-links.js';
 import {deadlineRecipientsFromRecord} from './deadline-recipient-model.js';
 import {deadlineDateDisplay} from './deadline-model.js';
 import {buildDeadlineDomainInventory} from './deadline-domain-model.js';
-import {appendDeadlineType, deadlineRuleRouteKey, updateDeadlineType} from './deadline-config-model.js';
+import {
+    appendDeadlineType,
+    deadlineRuleRouteKey,
+    updateDeadlineType,
+    validateDeadlineFrequency,
+    validateDeadlineNotice
+} from './deadline-config-model.js';
 
 const SELECTOR = Object.freeze({
     tab: '[data-deadline-domain]',
@@ -296,10 +302,19 @@ async function loadDomainInventories(user, root, active) {
                 const sourceConfig = configsBySource[sourceId] || {deadlineTypes: []};
                 const name = await showInputModal(t('deadline_domain_new_rule'), '', t('deadline_domain_rule_name'));
                 if (!name?.trim()) return;
-                const next = appendDeadlineType(sourceConfig, {
-                    name: name.trim(), period: 14, freq: 7, domain
-                });
-                await persistRules(sourceId, next.deadlineTypes);
+                const periodValue = await showInputModal(t('prompt_days_notice'), '14', t('prompt_days_notice'));
+                if (periodValue === null) return;
+                const frequencyValue = await showInputModal(t('prompt_freq_days'), '7', t('prompt_freq_days'));
+                if (frequencyValue === null) return;
+                try {
+                    const next = appendDeadlineType(sourceConfig, {
+                        name: name.trim(), period: validateDeadlineNotice(periodValue),
+                        freq: validateDeadlineFrequency(frequencyValue), domain
+                    });
+                    await persistRules(sourceId, next.deadlineTypes);
+                } catch (error) {
+                    showToast(error.message || t('error_config_save'), 'error');
+                }
             };
         });
     } catch (error) {

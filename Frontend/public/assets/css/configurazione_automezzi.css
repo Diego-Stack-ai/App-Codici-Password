@@ -386,6 +386,7 @@
 
 .vehicle-rule-object,
 .vehicle-reference-editor,
+.vehicle-rule-schedule-card,
 .vehicle-rule-empty {
     display: grid;
     gap: 0.85rem;
@@ -394,6 +395,10 @@
     border-radius: 18px;
     background: var(--card-bg);
 }
+
+.vehicle-rule-schedule-card h3,
+.vehicle-rule-schedule-card p { margin: 0; }
+.vehicle-rule-schedule-card p { color: var(--text-secondary); font-size: var(--fs-micro); }
 
 .vehicle-rule-object {
     padding: 0;
@@ -421,6 +426,9 @@
     gap: 0.85rem;
     padding: 0 1rem 1rem;
 }
+
+.vehicle-card .vehicle-reference-heading { justify-content: flex-end; }
+.vehicle-card .vehicle-rule-object-header h3 { overflow-wrap: anywhere; }
 
 .vehicle-rule-object-actions {
     display: flex;

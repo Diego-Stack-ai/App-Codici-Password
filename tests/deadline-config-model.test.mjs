@@ -161,3 +161,44 @@ test('le nuove referenze conservano modello e targa come campi distinti', () => 
     assert.equal(updated.deadlineTypes[0].emailObjects[0].vehicles[0].plate, 'GM277DC');
     assert.equal(config.deadlineTypes[0].emailObjects, undefined);
 });
+
+test('la vista automezzi espone una sola card per mezzo senza gruppi auto o moto', () => {
+    const config = {
+        deadlineTypes: [{name: 'Bollo', period: 14, freq: 7}],
+        models: ['Moto Guzzi Nevada 750 - CJ14146', 'Hyundai I10 - FL790AX'],
+        emailTemplates: ['Il bollo del motociclo targato', "Il bollo dell'auto targata"]
+    };
+    const cards = model.deadlineRuleVehicleCards(config.deadlineTypes[0], config, {
+        beforeObject: 'È in scadenza ', betweenObjectModel: ' ', betweenModelPlate: ', con targa ', afterPlate: '.'
+    });
+    assert.deepEqual(cards.map(card => card.plate), ['CJ14146', 'FL790AX']);
+    assert.ok(cards.every(card => !Object.hasOwn(card, 'period') && !Object.hasOwn(card, 'freq')));
+    assert.equal(config.deadlineTypes[0].emailObjects, undefined);
+});
+
+test('il salvataggio automezzi conserva una pianificazione unica e un oggetto compatibile per mezzo', () => {
+    const config = {deadlineTypes: [{name: 'Bollo', period: 14, freq: 7}]};
+    const updated = model.updateDeadlineRuleVehicleCards(config, 0, [
+        {id: 'moto', model: 'Moto Guzzi Nevada 750', plate: 'CJ14146', message: {beforeObject: 'Scade '}},
+        {id: 'auto', model: 'Hyundai I10', plate: 'FL790AX', message: {beforeObject: 'Scade '}}
+    ], {period: 28, freq: 4});
+    const rule = updated.deadlineTypes[0];
+    assert.equal(rule.period, 28);
+    assert.equal(rule.freq, 4);
+    assert.equal(rule.emailObjects.length, 2);
+    assert.deepEqual(rule.emailObjects.map(object => object.vehicles[0].plate), ['CJ14146', 'FL790AX']);
+    assert.ok(rule.emailObjects.every(object => object.period === 28 && object.freq === 4
+        && object.name === 'Bollo' && object.vehicles.length === 1));
+    assert.equal(config.deadlineTypes[0].emailObjects, undefined);
+});
+
+test('una regola salvata senza mezzi non ripristina automaticamente i riferimenti legacy', () => {
+    const config = {
+        deadlineTypes: [{name: 'Tagliando', period: 28, freq: 7}],
+        models: ['Hyundai I10 - FL790AX'], emailTemplates: ['Il tagliando dell’auto']
+    };
+    const updated = model.updateDeadlineRuleVehicleCards(config, 0, [], {period: 28, freq: 7});
+    assert.equal(updated.deadlineTypes[0].vehicleCardsConfigured, true);
+    assert.deepEqual(model.deadlineRuleVehicleCards(updated.deadlineTypes[0], updated), []);
+    assert.deepEqual(model.deadlineRuleEmailObjects(updated.deadlineTypes[0], updated), []);
+});
