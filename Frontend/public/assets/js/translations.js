@@ -12,7 +12,7 @@ async function loadPageCatalog(language) {
         const { settingsCatalogs } = await import('./translations/settings.js');
         return settingsCatalogs[language] || {};
     }
-    if (/(?:^|\/)regole_scadenze(?:\.html)?$/i.test(location.pathname)) {
+    if (/(?:^|\/)(?:regole_scadenze|configurazione_automezzi)(?:\.html)?$/i.test(location.pathname)) {
         const { deadlineRulesCatalogs } = await import('./translations/deadline-rules.js');
         return deadlineRulesCatalogs[language] || {};
     }

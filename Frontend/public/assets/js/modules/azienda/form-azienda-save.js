@@ -7,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.211';
+import { auth, db } from '../../firebase-config.js?v=1.2.212';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteField

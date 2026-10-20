@@ -116,6 +116,38 @@ test('la configurazione automezzi annida oggetti, modelli, targhe e testo senza 
     assert.equal(legacy.deadlineTypes[0].emailObjects, undefined);
 });
 
+test('la conversione legacy assegna ogni mezzo soltanto al testo email coerente', () => {
+    const legacy = {
+        deadlineTypes: [{name: 'Assicurazione', period: 14, freq: 7}],
+        models: [
+            'Moto Guzzi Nevada 750 - CJ14146',
+            'Moto Guzzi California - CC60256',
+            'Land Rover - GK910HB',
+            'Hyundai I10 - FL790AX',
+            'Rimorchio Ellebì - AA36924'
+        ],
+        emailTemplates: [
+            "l'assicurazione del motociclo targato",
+            "l'assicurazione dell'auto targata"
+        ]
+    };
+    const objects = model.deadlineRuleEmailObjects(legacy.deadlineTypes[0], legacy);
+    assert.deepEqual(objects[0].vehicles.map(vehicle => vehicle.plate), ['CJ14146', 'CC60256']);
+    assert.deepEqual(objects[1].vehicles.map(vehicle => vehicle.plate), ['GK910HB', 'FL790AX']);
+    assert.ok(objects.every(object => !object.vehicles.some(vehicle => vehicle.plate === 'AA36924')));
+    assert.equal(legacy.deadlineTypes[0].emailObjects, undefined);
+});
+
+test('un testo legacy generico conserva tutti i mezzi finché l’utente non salva la nuova struttura', () => {
+    const legacy = {
+        deadlineTypes: [{name: 'Olio motore', period: 14, freq: 7}],
+        models: ['Moto Guzzi Nevada 750 - CJ14146', 'Hyundai I10 - FL790AX'],
+        emailTemplates: ['Olio motore da controllare']
+    };
+    const [object] = model.deadlineRuleEmailObjects(legacy.deadlineTypes[0], legacy);
+    assert.deepEqual(object.vehicles.map(vehicle => vehicle.plate), ['CJ14146', 'FL790AX']);
+});
+
 test('le nuove referenze conservano modello e targa come campi distinti', () => {
     assert.deepEqual(model.splitLegacyVehicleReference({model: 'Peugeot e-208', plate: 'GM277DC'}), {
         id: '', model: 'Peugeot e-208', plate: 'GM277DC', message: null
