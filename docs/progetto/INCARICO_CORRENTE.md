@@ -6,6 +6,8 @@ Il riscontro pubblico successivo alla `1.2.211` mostra chiavi tecniche al posto 
 
 Il lavoro resta compreso nella riconciliazione già autorizzata e nella relativa autorizzazione alla pubblicazione dopo i gate verdi. La candidata è `1.2.212`; restano esclusi Functions, Rules, indici, migrazioni e dati reali.
 
+Esito: PR `#189` unita nel commit `bfd6b878`; workflow manuale `39416691715` verde con validazione completa in 8m12s e pubblicazione del solo Hosting in 45s. La verifica HTTP pubblica conferma la `1.2.212` e gli asset corretti. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
+
 ## Riconciliazione delle Scadenze storiche nelle nuove linguette — 20/10/2026
 
 Diego autorizza la mappatura completa delle Scadenze che non nascono dai Documenti personali, la ricollocazione delle rispettive voci nelle nuove linguette di **Regole invio scadenze** e la verifica totale dei collegamenti. I record esistenti devono conservare data, preavviso, frequenza, destinatari, canali, note e allegati: il riordino non autorizza copie, riscritture, normalizzazioni o cancellazioni automatiche dei dati reali.

@@ -1,5 +1,11 @@
 # Rilascio
 
+## Esito operativo 1.2.212 — editor Automezzi tradotto e riferimenti coerenti — 20/10/2026
+
+L’editor contestuale **Configurazione Automezzi** carica ora il catalogo Regole scadenze e non mostra più chiavi tecniche nei campi, nei comandi o nell’anteprima. La proiezione delle configurazioni storiche separa i mezzi per automobile, motociclo, rimorchio o camion quando il testo è esplicito; i testi generici restano conservativi e nessun dato viene riscritto senza un salvataggio volontario.
+
+I test mirati sono verdi **17/17**, i18n **14/14**, documentazione **11/11** e la catena completa locale, inclusi sicurezza, Functions, Rules, Storage, Vault ed emulatori, si è conclusa con codice **0**. Graphify principale è riallineato a **13.464 nodi, 35.340 archi e 771 comunità**. La PR `#189` è stata unita in `master` nel commit `bfd6b878`; il workflow manuale `39416691715` ha ripetuto la validazione completa in 8m12s e pubblicato esclusivamente Firebase Hosting in 45s. La verifica HTTP pubblica restituisce `200` e conferma la `1.2.212` e i nuovi asset. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
+
 ## Esito operativo 1.2.211 — regole Automezzi contestuali — 20/10/2026
 
 Le linguette di **Regole invio scadenze** mostrano soltanto le regole disponibili, senza duplicare riferimenti, testi e Scadenze collegate. Il conteggio di ciascuna regola apre il contenitore canonico **Scadenze** con un filtro visibile e removibile. In Automezzi ogni card apre un editor contestuale che comprende uno o più oggetti email con pianificazione, modelli e targhe distinti e compositore guidato; i token Oggetto, Modello e Targa sono protetti, mentre i segmenti linguistici restano modificabili e persistiti. La pagina offre un solo comando **Nuova regola** e blocca rinomina o eliminazione quando esistono Scadenze collegate.
