@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.212 — etichette e associazioni dell’editor Automezzi — 20/10/2026
+
+Il collaudo pubblico della `1.2.211` ha rilevato che **Configurazione Automezzi** mostrava le chiavi tecniche `deadline_vehicle_*` al posto delle etichette tradotte. La causa era nel caricatore dei cataloghi: il catalogo **Regole scadenze** veniva richiesto dalla pagina principale, ma non dall’editor contestuale. La candidata estende lo stesso catalogo all’editor, inclusi campi, comandi, aiuti e composizione dell’anteprima.
+
+La proiezione delle configurazioni storiche non ripete più automaticamente tutte le targhe dentro ogni oggetto email. Quando il testo distingue esplicitamente automobile, motociclo, rimorchio o camion, vengono mostrati soltanto i mezzi coerenti; un testo generico conserva invece tutti i riferimenti, senza scritture automatiche. La nuova struttura viene ancora persistita soltanto con un salvataggio esplicito dell’utente.
+
+La candidata porta il client a `1.2.212`. I test mirati del modello e dell’hub sono verdi **17/17**, l’audit i18n è verde **14/14** e la documentazione è verde **11/11**. La catena completa dei gate, ripresa dal primo controllo successivo alle verifiche statiche, ha concluso con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori; la shell offline contiene ancora **309 risorse** e `git diff --check` è verde. Graphify principale è riallineato a **13.464 nodi, 35.340 archi e 771 comunità**. Pubblicazione, commit, push, merge e Hosting restano distinti fino al completamento del rilascio.
+
 ## Release 1.2.211 pubblicata — regole Automezzi contestuali — 20/10/2026
 
 L'audit autenticato e in sola lettura è stato completato prima dell'intervento: **37 Scadenze** controllate, delle quali **24** ricondotte alle famiglie non personali — **16 Automezzi, 6 Casa e immobili, 1 Salute e 1 Sport e associazioni** — e **13** Documenti personali o residui familiari esclusi. Le due Patenti familiari indicate dall'utente restano deliberatamente intatte. Nessuna Scadenza reale, destinatario, allegato o configurazione è stata modificata durante l'inventario.

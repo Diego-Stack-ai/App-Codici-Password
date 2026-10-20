@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Correzione dell’editor contestuale Automezzi — 20/10/2026
+
+Il riscontro pubblico successivo alla `1.2.211` mostra chiavi tecniche al posto delle etichette italiane nell’editor di una regola Automezzi e la ripetizione di tutti i mezzi dentro ogni oggetto email storico. La correzione deve caricare il catalogo Regole scadenze anche su `configurazione_automezzi.html` e separare, senza scrivere dati reali, i riferimenti legacy quando il testo identifica chiaramente automobile, motociclo, rimorchio o camion. I testi generici devono restare conservativi e mantenere tutti i riferimenti finché l’utente non salva volontariamente la nuova struttura.
+
+Il lavoro resta compreso nella riconciliazione già autorizzata e nella relativa autorizzazione alla pubblicazione dopo i gate verdi. La candidata è `1.2.212`; restano esclusi Functions, Rules, indici, migrazioni e dati reali.
+
 ## Riconciliazione delle Scadenze storiche nelle nuove linguette — 20/10/2026
 
 Diego autorizza la mappatura completa delle Scadenze che non nascono dai Documenti personali, la ricollocazione delle rispettive voci nelle nuove linguette di **Regole invio scadenze** e la verifica totale dei collegamenti. I record esistenti devono conservare data, preavviso, frequenza, destinatari, canali, note e allegati: il riordino non autorizza copie, riscritture, normalizzazioni o cancellazioni automatiche dei dati reali.

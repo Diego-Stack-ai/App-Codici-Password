@@ -87,11 +87,11 @@ test('personal document summary has loading, empty, error and responsive card st
 });
 
 test('vehicle rules expose scoped management, safe actions and official list filters', async () => {
-  const [html, hub, list, editor, pages] = await Promise.all([
+  const [html, hub, list, editor, pages, translations] = await Promise.all([
     read('regole_scadenze.html'), read('assets/js/modules/scadenze/deadline-rules-hub.js'),
     read('assets/js/modules/scadenze/scadenze.js'),
     read('assets/js/modules/scadenze/configurazione_automezzi_v2.js'),
-    read('assets/js/pages-init.js')
+    read('assets/js/pages-init.js'), read('assets/js/translations.js')
   ]);
   assert.match(html, /id="btn-add-vehicle-rule"/);
   assert.match(hub, /scadenze\.html\?rule=/);
@@ -103,6 +103,7 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(editor, /dataName: 'vehicleModel'|dataName/);
   assert.match(editor, /compileDeadlineMessage/);
   assert.match(pages, /configurazione_automezzi_v2\.js/);
+  assert.match(translations, /regole_scadenze\|configurazione_automezzi/);
 });
 
 test('the deadline hub catalog has identical keys in all eight application languages', async () => {

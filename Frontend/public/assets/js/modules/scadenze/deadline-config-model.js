@@ -192,6 +192,30 @@ export function legacyTemplatesForRule(ruleName, templates = []) {
     return matching.length ? matching : [];
 }
 
+function legacyVehicleKind(value) {
+    const normalized = normalizedTemplateHint(typeof value === 'object'
+        ? `${value.model || value.name || ''} ${value.vehicleType || value.type || ''}`
+        : value);
+    if (/\bmoto\b|\b(?:motocicl|scooter)\w*/.test(normalized)) return 'motorcycle';
+    if (/\b(rimorch|carrell|roulotte)\w*/.test(normalized)) return 'trailer';
+    if (/\b(camion|autocarro|furgon)\w*/.test(normalized)) return 'truck';
+    return 'car';
+}
+
+function legacyTemplateVehicleKind(value) {
+    const normalized = normalizedTemplateHint(value);
+    if (/\bmoto\b|\b(?:motocicl|scooter)\w*/.test(normalized)) return 'motorcycle';
+    if (/\b(rimorch|carrell|roulotte)\w*/.test(normalized)) return 'trailer';
+    if (/\b(camion|autocarro|furgon)\w*/.test(normalized)) return 'truck';
+    if (/\b(auto|automobil|vettura)\w*/.test(normalized)) return 'car';
+    return '';
+}
+
+function legacyVehiclesForTemplate(template, vehicles) {
+    const kind = legacyTemplateVehicleKind(template);
+    return kind ? vehicles.filter(vehicle => legacyVehicleKind(vehicle) === kind) : vehicles;
+}
+
 export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) {
     if (Array.isArray(rule.emailObjects) && rule.emailObjects.length) {
         return rule.emailObjects.map((item, index) => normalizedEmailObject(item, rule, index, defaults));
@@ -212,7 +236,7 @@ export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) 
         objectText,
         period: rule.period,
         freq: rule.freq,
-        vehicles
+        vehicles: legacyVehiclesForTemplate(objectText, vehicles)
     }, rule, index, defaults));
 }
 
