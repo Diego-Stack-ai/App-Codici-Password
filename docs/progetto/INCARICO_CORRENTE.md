@@ -4,7 +4,7 @@
 
 Diego chiede che il filtro ricevuto dalla pagina Regole tramite `?rule=` sia mostrato direttamente nel campo **Cerca scadenze**, senza un quinto chip nella riga dei filtri. Modificare o cancellare quel testo converte il vincolo esatto in una normale ricerca e rimuove `rule` dall’URL; cancellare tutto ripristina l’elenco non filtrato. Le card della lista devono mostrare una freccia verso destra per rendere evidente l’apertura del dettaglio.
 
-L’intervento riguarda la candidata `1.2.213`: nessuna modifica a record, configurazioni, destinatari, backend, Rules o dati reali. Con l’ordine esplicito **«procedi»** del 20/10/2026 Diego autorizza commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+L’intervento riguarda la candidata `1.2.214`, successiva alla `1.2.213` già pubblicata: nessuna modifica a record, configurazioni, destinatari, backend, Rules o dati reali. Con l’ordine esplicito **«procedi»** del 20/10/2026 Diego autorizza commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
 Verifica locale: regressioni Scadenze **13/13**, documentazione **11/11**, i18n **14/14**, icone **3/3**, sintassi **220 moduli**, budget statico **30 pagine**, Stylelint e suite completa `npm test` con codice **0**; la shell offline contiene **309 risorse**. Controllo visivo a **393 × 852** con campo valorizzato, quattro chip e chevron senza sovrapposizioni. Graphify principale riallineato; nessun deploy ancora eseguito.
 
