@@ -217,6 +217,47 @@
     font-weight: 700;
 }
 
+.deadline-domain-count-link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.deadline-domain-card-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.deadline-domain-icon-action,
+.deadline-domain-new-rule {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.08);
+    cursor: pointer;
+}
+
+.deadline-domain-icon-action {
+    display: grid;
+    place-items: center;
+}
+
+.deadline-domain-icon-action.is-danger { color: var(--status-error); }
+
+.deadline-domain-new-rule {
+    margin-top: 1rem;
+    padding: 0.65rem 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font: inherit;
+    font-weight: 750;
+}
+
 .deadline-domain-count,
 .deadline-domain-deadline-card time {
     flex: 0 0 auto;

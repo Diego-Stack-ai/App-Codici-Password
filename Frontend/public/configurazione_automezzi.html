@@ -10,19 +10,19 @@
     <title data-t="vehicles_config_title">Configurazione Automezzi - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.210" />
+    <link rel="manifest" href="manifest.json?v=1.2.211" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.210">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.211">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.210">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.210">
-    <link rel="stylesheet" href="assets/css/configurazione_automezzi.css?v=1.2.210">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.211">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.211">
+    <link rel="stylesheet" href="assets/css/configurazione_automezzi.css?v=1.2.211">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="configuration">
@@ -46,102 +46,29 @@
 
                 <div class="saetta-master"></div>
 
-                <!-- 1. Tipi Scadenza / Oggetti Email -->
-                <div class="settings-group">
-                    <div class="settings-item collapsible-header" data-target="container-types" role="button"
-                        aria-expanded="false" data-t-aria="aria_toggle_section">
-                        <div class="settings-item-header-row">
-                            <div class="settings-icon-box icon-blue">
-                                <span class="material-symbols-outlined notranslate" translate="no">directions_car</span>
-                            </div>
-                            <div class="settings-item-info">
-                                <h3 class="settings-label" data-t="email_subjects">Tipi Scadenza</h3>
-                            </div>
-                            <div class="settings-header-actions">
-                                <button type="button" id="btn-add-type" class="btn-icon-add"
-                                    data-t-aria="aria_add_new_type">
-                                    <span class="material-symbols-outlined notranslate" translate="no">add</span>
-                                </button>
-                                <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="container-types" class="settings-dropdown-panel hidden">
-                        <!-- Rendered via JS -->
-                    </div>
-                </div>
+                <section id="vehicle-rule-empty" class="vehicle-rule-empty hidden">
+                    <span class="material-symbols-outlined notranslate" translate="no">info</span>
+                    <p data-t="deadline_vehicle_select_rule">Apri una regola dalla linguetta Automezzi per gestirne la configurazione.</p>
+                    <a href="regole_scadenze.html" data-t="deadline_vehicle_back_rules">Torna alle regole</a>
+                </section>
 
-                <!-- 2. Modelli & Targhe -->
-                <div class="settings-group">
-                    <div class="settings-item collapsible-header" data-target="container-models" role="button"
-                        aria-expanded="false" data-t-aria="aria_toggle_section">
-                        <div class="settings-item-header-row">
-                            <div class="settings-icon-box icon-amber">
-                                <span class="material-symbols-outlined notranslate" translate="no">minor_crash</span>
-                            </div>
-                            <div class="settings-item-info">
-                                <h3 class="settings-label" data-t="models_plates">Modelli & Targhe</h3>
-                            </div>
-                            <div class="settings-header-actions">
-                                <button type="button" id="btn-add-model" class="btn-icon-add"
-                                    data-t-aria="aria_add_new_vehicle">
-                                    <span class="material-symbols-outlined notranslate" translate="no">add</span>
-                                </button>
-                                <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
-                            </div>
+                <section id="vehicle-rule-editor" class="vehicle-rule-editor hidden">
+                    <header class="vehicle-rule-page-header">
+                        <div>
+                            <p class="vehicle-rule-eyebrow" data-t="deadline_vehicle_scoped_editor">CONFIGURAZIONE DELLA REGOLA</p>
+                            <h2 id="vehicle-rule-title"></h2>
+                            <p data-t="deadline_vehicle_scoped_help">Oggetti, pianificazione, modelli, targhe e testo appartengono soltanto a questa regola.</p>
                         </div>
-                    </div>
-                    <div id="container-models" class="settings-dropdown-panel hidden">
-                        <!-- Rendered via JS -->
-                    </div>
-                </div>
-
-                <!-- 3. Testi E-Mail -->
-                <div class="settings-group">
-                    <div class="settings-item collapsible-header" data-target="container-templates" role="button"
-                        aria-expanded="false" data-t-aria="aria_toggle_section">
-                        <div class="settings-item-header-row">
-                            <div class="settings-icon-box icon-purple">
-                                <span class="material-symbols-outlined notranslate" translate="no">mail</span>
-                            </div>
-                            <div class="settings-item-info">
-                                <h3 class="settings-label" data-t="email_templates">Testo E-Mail</h3>
-                            </div>
-                            <div class="settings-header-actions">
-                                <button type="button" id="btn-add-template" class="btn-icon-add"
-                                    data-t-aria="aria_add_new_template">
-                                    <span class="material-symbols-outlined notranslate" translate="no">add</span>
-                                </button>
-                                <span class="material-symbols-outlined arrow-icon notranslate" translate="no">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="container-templates" class="settings-dropdown-panel hidden">
-                        <!-- Rendered via JS -->
-                    </div>
-                </div>
-
-                <!-- Syntax Info (V5.0 Standard) -->
-                <div class="page-footer-info">
-                    <div class="archive-row-container">
-                        <div class="syntax-header">
-                            <span class="material-symbols-outlined notranslate" translate="no">info</span>
-                            <span class="syntax-title" data-t="section_syntax_title">Sintassi Automatica</span>
-                        </div>
-                        <div class="syntax-inline-container">
-                            <div class="syntax-row">
-                                <span class="config-item-desc" data-t="subject_label">Oggetto:</span>
-                                <span class="config-badge config-badge-blue" data-t="object_tag">[Oggetto]</span>
-                                <span class="config-badge config-badge-amber" data-t="plate_tag">[Targa]</span>
-                            </div>
-                            <div class="syntax-row">
-                                <span class="config-item-desc" data-t="body_label">Corpo:</span>
-                                <span class="config-badge config-badge-blue" data-t="object_tag">[Oggetto]</span>
-                                <span class="config-badge config-badge-emerald" data-t="data_tag">[Data]</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        <button type="button" id="btn-add-email-object" class="btn-icon-add" data-t-aria="deadline_vehicle_add_object">
+                            <span class="material-symbols-outlined notranslate" translate="no">add</span>
+                        </button>
+                    </header>
+                    <div id="vehicle-rule-objects" class="vehicle-rule-objects"></div>
+                    <button type="button" id="btn-save-vehicle-rule" class="vehicle-save-rule">
+                        <span class="material-symbols-outlined notranslate" translate="no">save</span>
+                        <span data-t="save">Salva</span>
+                    </button>
+                </section>
 
                 <!-- Spacer rimosso: gestito da pb-footer-extra -->
             </div>

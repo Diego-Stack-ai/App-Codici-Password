@@ -70,6 +70,15 @@ test('il codice fiscale canonico proviene esclusivamente dal documento', () => {
     assert.doesNotMatch(vcard, /CAMPO-DUPLICATO/);
 });
 
+test('la scadenza del codice fiscale usa il numero documento e non il codice personale', () => {
+    const draft = model.buildProfileDocumentDeadlineDraft({
+        id: 'cf-1', type: 'Codice Fiscale', num_serie: 'RSSMRA80A01H501U',
+        cf_value: 'RSSMRA80A01H501U', id_number: '80380000500313823013', expiry_date: '2030-01-31'
+    }, {nome: 'Mario', cognome: 'Rossi'});
+    assert.equal(draft.documentNumber, '80380000500313823013');
+    assert.equal(draft.detail, 'Codice Fiscale - 80380000500313823013');
+});
+
 test('vieta segreti e limita i campi dei widget', () => {
     assert.equal(model.isQrEligibleField({ type: 'password', includeInQr: true }), false);
     assert.equal(model.isQrEligibleField({ type: 'text', includeInQr: true }), true);

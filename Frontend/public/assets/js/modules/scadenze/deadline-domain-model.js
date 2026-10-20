@@ -8,6 +8,10 @@ export const DEADLINE_CONFIG_SOURCES = Object.freeze({
     generalConfig: Object.freeze({mode: 'generali', href: 'configurazione_generali.html'})
 });
 
+function ruleRouteKey(item, index) {
+    return String(item?.id || '').trim() || `legacy-${index}`;
+}
+
 const PERSONAL_DOCUMENT_TYPES = Object.freeze([
     'patente', 'patente di guida', 'carta identita', 'carta di identita',
     'codice fiscale', 'passaporto'
@@ -77,6 +81,7 @@ function configEntries(configs = {}) {
                 sourceId,
                 sourceMode: source.mode,
                 href: source.href,
+                routeKey: ruleRouteKey(item, index),
                 sourceIndex: index,
                 period: typeof item === 'object' ? item?.period : undefined,
                 frequency: typeof item === 'object' ? item?.freq : undefined,

@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.210';
+import { auth } from '../../firebase-config.js?v=1.2.211';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -549,6 +549,9 @@ function setupSaveLogic() {
             ]);
             const btnText = document.getElementById('save-btn-text');
 
+            const selectedVehicle = document.getElementById('modello_veicolo')?.value || '';
+            const vehicleParts = currentMode === 'automezzi'
+                ? configController.getVehicleParts(selectedVehicle) : null;
             const result = await saveDeadline({
                 user: currentUser,
                 editingDeadlineId: editingScadenzaId,
@@ -561,14 +564,18 @@ function setupSaveLogic() {
                     dueDate: date,
                     veicolo_modello: isProfileDocumentEditor()
                         ? profileDocumentEditorData?.documentNumber || ''
-                        : document.getElementById('modello_veicolo')?.value || '',
+                        : selectedVehicle,
+                    vehicleModel: vehicleParts?.model || '',
+                    vehiclePlate: vehicleParts?.plate || '',
                     referenceUrl,
                     notes: document.getElementById('notes').value,
                     status: 'active',
                     completed: false,
                     templateText: isProfileDocumentEditor()
                         ? document.getElementById('oggetto_email')?.value.trim() || ''
-                        : document.getElementById('testo_email_select')?.value || '',
+                        : currentMode === 'automezzi'
+                            ? document.getElementById('oggetto_email')?.value.trim() || ''
+                            : document.getElementById('testo_email_select')?.value || '',
                     notifChannel: 'multichannel',
                     notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
                     notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
@@ -674,7 +681,7 @@ async function loadScadenzaForEdit(id) {
             document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.210');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.211');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);
@@ -870,8 +877,8 @@ function updatePreview() {
     let compiledText = '';
     if (currentMode === 'automezzi') {
         const vehicle = document.getElementById('modello_veicolo')?.value || '';
-        const vehicleStr = vehicle ? ` ${vehicle.trim()}` : '';
-        compiledText = `E' in scadenza ${templateText.trim()}${vehicleStr}`;
+        const type = document.getElementById('tipo_scadenza')?.value || '';
+        compiledText = configController.compileVehicleMessage(type, vehicle, templateText.trim());
     } else if (currentMode === 'documenti') {
         const vehicle = document.getElementById('modello_veicolo')?.value || '';
         let code = vehicle.trim();

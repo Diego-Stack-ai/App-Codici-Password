@@ -182,7 +182,7 @@ const PAGE_ROUTE_MODULES = {
   'Frontend/public/scadenze.html': 'Frontend/public/assets/js/modules/scadenze/scadenze.js',
   'Frontend/public/aggiungi_scadenza.html': 'Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js',
   'Frontend/public/dettaglio_scadenza.html': 'Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js',
-  'Frontend/public/configurazione_automezzi.html': 'Frontend/public/assets/js/modules/scadenze/configurazione_automezzi.js',
+  'Frontend/public/configurazione_automezzi.html': 'Frontend/public/assets/js/modules/scadenze/configurazione_automezzi_v2.js',
   'Frontend/public/configurazione_documenti.html': 'Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js',
   'Frontend/public/configurazione_generali.html': 'Frontend/public/assets/js/modules/scadenze/configurazione_generali.js',
   'Frontend/public/lista_aziende.html': 'Frontend/public/assets/js/modules/azienda/lista_aziende.js',

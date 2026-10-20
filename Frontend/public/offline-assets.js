@@ -176,6 +176,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/privato/profilo_privato.js",
   "assets/js/modules/scadenze/aggiungi_scadenza.js",
   "assets/js/modules/scadenze/configurazione_automezzi.js",
+  "assets/js/modules/scadenze/configurazione_automezzi_v2.js",
   "assets/js/modules/scadenze/configurazione_documenti.js",
   "assets/js/modules/scadenze/configurazione_generali.js",
   "assets/js/modules/scadenze/deadline-attachment-controller.js",

@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.2.210';
+import { db } from '../../firebase-config.js?v=1.2.211';
 import { doc, setDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
@@ -12,7 +12,10 @@ import {
     updateDeadlineListItem,
     validateDeadlineFrequency,
     updateDeadlineType,
-    resolveDocumentDeadlineTemplate
+    resolveDocumentDeadlineTemplate,
+    compileDeadlineMessage,
+    deadlineRuleEmailObjects,
+    vehicleReferenceLabel
 } from './deadline-config-model.js';
 
 const EMPTY_CONFIG = Object.freeze({
@@ -128,6 +131,7 @@ export function createDeadlineConfigController({ recipientController, onRender =
     let mode = 'automezzi';
     let emailSeeded = false;
     let configs = { automezzi: null, documenti: null, generali: null };
+    let vehicleMessageRecords = [];
 
     const currentConfig = () => configs[mode] || { ...EMPTY_CONFIG };
 
@@ -181,13 +185,39 @@ export function createDeadlineConfigController({ recipientController, onRender =
             typeSelect.value = matchingOption?.value || '';
         }
 
+        const selectedType = typeSelect?.value || '';
+        const selectedRule = (config.deadlineTypes || []).find(item =>
+            deadlineConfigValuesMatch(itemName(item), selectedType));
+        const scopedObjects = mode === 'automezzi' && selectedRule
+            ? deadlineRuleEmailObjects(selectedRule, config, {
+                beforeObject: t('deadline_vehicle_message_before_object'),
+                betweenObjectModel: t('deadline_vehicle_message_before_model') === '{space}' ? ' ' : t('deadline_vehicle_message_before_model'),
+                betweenModelPlate: t('deadline_vehicle_message_before_plate'),
+                afterPlate: t('deadline_vehicle_message_after_plate')
+            }) : [];
+        vehicleMessageRecords = scopedObjects.flatMap(object => object.vehicles.map(vehicle => ({
+            objectText: object.objectText,
+            label: vehicleReferenceLabel(vehicle),
+            model: vehicle.model,
+            plate: vehicle.plate,
+            message: vehicle.message
+        })));
+
         const modelSelect = document.getElementById('modello_veicolo');
-        if (modelSelect && mode !== 'generali') populateSimpleSelect(modelSelect, config.models || []);
+        if (modelSelect && mode !== 'generali') {
+            const values = mode === 'automezzi' && selectedRule
+                ? [...new Set(vehicleMessageRecords.map(item => item.label).filter(Boolean))]
+                : config.models || [];
+            populateSimpleSelect(modelSelect, values);
+        }
 
         const templateSelect = document.getElementById('testo_email_select');
         if (templateSelect) {
             document.getElementById('testo_email_wrapper')?.classList.remove('hidden');
-            populateSimpleSelect(templateSelect, [...new Set(config.emailTemplates || [])]);
+            const templates = mode === 'automezzi' && selectedRule
+                ? scopedObjects.map(item => item.objectText)
+                : config.emailTemplates || [];
+            populateSimpleSelect(templateSelect, [...new Set(templates.filter(Boolean))]);
         }
 
         // Compatibilità con le vecchie select: la rubrica destinatari resta la fonte primaria.
@@ -205,6 +235,10 @@ export function createDeadlineConfigController({ recipientController, onRender =
             names.forEach(name => namesList.appendChild(new Option(name, name)));
         }
         onRender();
+        if (typeSelect && !typeSelect.dataset.scopedRuleListener) {
+            typeSelect.dataset.scopedRuleListener = 'true';
+            typeSelect.addEventListener('change', render);
+        }
     }
 
     async function load(nextUser) {
@@ -397,8 +431,30 @@ export function createDeadlineConfigController({ recipientController, onRender =
         getSuggestedTemplate(type) {
             const config = currentConfig();
             if (mode === 'documenti') return resolveDocumentDeadlineTemplate(config, type);
-            const index = (config.deadlineTypes || []).findIndex(item => deadlineConfigValuesMatch(itemName(item), type));
-            return index >= 0 ? config.emailTemplates?.[index] || '' : '';
+            const rule = (config.deadlineTypes || []).find(item => deadlineConfigValuesMatch(itemName(item), type));
+            if (!rule) return '';
+            return deadlineRuleEmailObjects(rule, config)[0]?.objectText || '';
+        },
+        compileVehicleMessage(type, vehicleValue, fallbackObjectText = '') {
+            const match = vehicleMessageRecords.find(item => deadlineConfigValuesMatch(item.label, vehicleValue)
+                && (!fallbackObjectText || deadlineConfigValuesMatch(item.objectText, fallbackObjectText)))
+                || vehicleMessageRecords.find(item => deadlineConfigValuesMatch(item.label, vehicleValue));
+            if (match) return compileDeadlineMessage(match);
+            const config = currentConfig();
+            const rule = (config.deadlineTypes || []).find(item => deadlineConfigValuesMatch(itemName(item), type));
+            const object = rule ? deadlineRuleEmailObjects(rule, config, {
+                beforeObject: t('deadline_vehicle_message_before_object'),
+                betweenObjectModel: t('deadline_vehicle_message_before_model') === '{space}' ? ' ' : t('deadline_vehicle_message_before_model'),
+                betweenModelPlate: t('deadline_vehicle_message_before_plate'),
+                afterPlate: t('deadline_vehicle_message_after_plate')
+            })[0] : null;
+            return object ? compileDeadlineMessage({
+                message: object.message, objectText: object.objectText || fallbackObjectText
+            }) : '';
+        },
+        getVehicleParts(vehicleValue) {
+            const match = vehicleMessageRecords.find(item => deadlineConfigValuesMatch(item.label, vehicleValue));
+            return match ? {model: match.model, plate: match.plate} : null;
         },
         getSuggestedSchedule(type) {
             const item = (currentConfig().deadlineTypes || []).find(entry => deadlineConfigValuesMatch(itemName(entry), type));

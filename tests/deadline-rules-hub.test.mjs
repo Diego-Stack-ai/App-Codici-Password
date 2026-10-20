@@ -48,7 +48,8 @@ test('the deadline hub loads profile documents and keeps keyboard navigation acc
     'the specialized deadline-rules route must be resolved before the generic deadlines route'
   );
   assert.doesNotMatch(source, /profile_deadline_card_open_previous|pilotDeadlineReference\?\.deadlineId/);
-  assert.doesNotMatch(source, /setDoc|addDoc|updateDoc|deleteDoc/);
+  assert.match(source, /deadlineConfig'\), \{deadlineTypes: nextRules\}/);
+  assert.match(source, /deadline_domain_rule_linked_blocked/);
 });
 
 test('personal document summary has loading, empty, error and responsive card states', async () => {
@@ -64,10 +65,9 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(source, /buildDeadlineDomainInventory/);
   assert.match(source, /deadline\.templateText \|\| deadline\.oggetto_email/);
   assert.match(source, /deadline\.attachments\.length/);
-  assert.match(source, /deadline_domain_references_title/);
-  assert.match(source, /deadline_domain_templates_title/);
-  assert.match(source, /deadline\.domainAudit\?\.scheduleMismatch/);
-  assert.match(source, /deadline_domain_default_schedule/);
+  assert.doesNotMatch(source, /blocks\.push\(renderResourceSection/);
+  assert.doesNotMatch(source, /group\.deadlines\.map\(renderMappedDeadline\)/);
+  assert.doesNotMatch(source, /deadline_domain_duplicate_warning/);
   assert.match(source, /getUserSetting\(user\.uid, 'deadlineConfig'\)/);
   assert.match(source, /getUserSetting\(user\.uid, 'deadlineConfigDocuments'\)/);
   assert.match(source, /getUserSetting\(user\.uid, 'generalConfig'\)/);
@@ -84,6 +84,25 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
   assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
+});
+
+test('vehicle rules expose scoped management, safe actions and official list filters', async () => {
+  const [html, hub, list, editor, pages] = await Promise.all([
+    read('regole_scadenze.html'), read('assets/js/modules/scadenze/deadline-rules-hub.js'),
+    read('assets/js/modules/scadenze/scadenze.js'),
+    read('assets/js/modules/scadenze/configurazione_automezzi_v2.js'),
+    read('assets/js/pages-init.js')
+  ]);
+  assert.match(html, /id="btn-add-vehicle-rule"/);
+  assert.match(hub, /scadenze\.html\?rule=/);
+  assert.match(hub, /configuration\.href\}\?rule=/);
+  assert.match(hub, /linkedDeadlineIds\.length/);
+  assert.match(list, /activeRuleFilter/);
+  assert.match(list, /deadline-rule-filter/);
+  assert.match(editor, /deadlineRuleEmailObjects/);
+  assert.match(editor, /dataName: 'vehicleModel'|dataName/);
+  assert.match(editor, /compileDeadlineMessage/);
+  assert.match(pages, /configurazione_automezzi_v2\.js/);
 });
 
 test('the deadline hub catalog has identical keys in all eight application languages', async () => {

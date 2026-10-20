@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.210';
+import { auth, db } from '../../firebase-config.js?v=1.2.211';
 import { collection, doc, runTransaction, deleteField, Timestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -7,6 +7,7 @@ import { showProfileAccountPicker } from './profilo-modal.js';
 import {listPrivateAccounts, listCompanies, listCompanyAccounts, getPrivateAccount, getCompanyAccount, getPrivateAccountConfirmed, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 import {
     buildProfileAccountLinkDraft,
+    buildProfileDocumentDeadlineDraft,
     isDefinitiveProfileDocumentDeadlineReference,
     normalizeProfileDateInputValue,
     profileAccountUrl,
@@ -130,6 +131,9 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
                 }
                 return current;
             });
+            const nextDocumentNumber = buildProfileDocumentDeadlineDraft(documentItem).documentNumber;
+            const numberChanged = String(deadline.documentNumber || deadline.veicolo_modello || '').trim()
+                !== nextDocumentNumber;
             if (deadlineIsoDate(deadline) !== dueDate) {
                 const confirmed = await showConfirmModal(
                     t('profile_deadline_update_title'),
@@ -161,6 +165,8 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
                     }
                     transaction.update(deadlineRef, {
                         dueDate,
+                        documentNumber: nextDocumentNumber,
+                        veicolo_modello: nextDocumentNumber,
                         completed: false,
                         status: 'active',
                         sourceValueAtLink: dueDate,
@@ -172,6 +178,25 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
                     });
                 });
                 deadline = {...deadline, dueDate, completed: false, status: 'active', updated: true};
+            } else if (numberChanged) {
+                await runTransaction(db, async transaction => {
+                    const deadlineSnapshot = await transaction.get(deadlineRef);
+                    if (!deadlineSnapshot.exists()) throw new Error('PROFILE_DOCUMENT_DEADLINE_LINK_BROKEN');
+                    const stored = deadlineSnapshot.data();
+                    const storedSourceId = stored?.sourceRef?.type === 'profileDocument'
+                        ? stored.sourceRef.id : stored?.sourceDocumentId;
+                    if (stored?.linkKind !== 'profile-document-deadline-v1'
+                        || storedSourceId !== documentItem.id) {
+                        throw new Error('PROFILE_DOCUMENT_DEADLINE_SOURCE_CHANGED');
+                    }
+                    transaction.update(deadlineRef, {
+                        documentNumber: nextDocumentNumber,
+                        veicolo_modello: nextDocumentNumber,
+                        updatedAt: Timestamp.now()
+                    });
+                });
+                deadline = {...deadline, documentNumber: nextDocumentNumber,
+                    veicolo_modello: nextDocumentNumber, updated: true};
             }
         } catch (error) {
             showToast(t('profile_deadline_error'), 'error');
@@ -204,7 +229,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
 
     await syncData?.();
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
-    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.210');
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.211');
     const draft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({...draft, ownerUid: user.uid}));

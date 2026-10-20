@@ -1,7 +1,8 @@
-import {auth} from '../../firebase-config.js?v=1.2.210';
+import {auth, db} from '../../firebase-config.js?v=1.2.211';
+import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
-import {showToast} from '../../ui-core-v129.js';
+import {showConfirmModal, showInputModal, showToast} from '../../ui-core-v129.js';
 import {logError} from '../../utils.js';
 import {decryptIfPossible} from '../core/crypto-utils.js';
 import {ensureVaultKeyMaterial} from '../core/security-manager.js';
@@ -16,6 +17,7 @@ import {createDeadlineFromDocument} from '../privato/profilo-links.js';
 import {deadlineRecipientsFromRecord} from './deadline-recipient-model.js';
 import {deadlineDateDisplay} from './deadline-model.js';
 import {buildDeadlineDomainInventory} from './deadline-domain-model.js';
+import {appendDeadlineType, deadlineRuleRouteKey, updateDeadlineType} from './deadline-config-model.js';
 
 const SELECTOR = Object.freeze({
     tab: '[data-deadline-domain]',
@@ -87,7 +89,9 @@ function renderDeadlineSummary(deadline) {
     const details = [
         dataRow(t('deadline_personal_notice'), `${notice} ${t('deadline_personal_days')}`),
         dataRow(t('deadline_personal_frequency'), `${frequency} ${t('deadline_personal_days')}`),
-        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email)
+        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email),
+        dataRow(t('deadline_personal_attachments'), Array.isArray(deadline.attachments)
+            ? String(deadline.attachments.length) : '')
     ].filter(Boolean);
     if (deadline.notes) details.push(dataRow(t('deadline_personal_note'), deadline.notes));
     return createElement('section', {className: 'deadline-personal-alert-summary'}, [
@@ -168,18 +172,24 @@ function sourceLabel(sourceId) {
     return t(labels[sourceId] || 'deadline_domain_source_general');
 }
 
-function renderConfigurationCard(configuration) {
+function renderConfigurationCard(configuration, actions = {}) {
     const count = configuration.linkedDeadlineIds.length;
+    const countLabel = `${count} ${t(count === 1 ? 'deadline_domain_linked_one' : 'deadline_domain_linked_many')}`;
+    const vehicleRule = configuration.sourceId === 'deadlineConfig';
+    const manageHref = vehicleRule
+        ? `${configuration.href}?rule=${encodeURIComponent(configuration.routeKey)}`
+        : configuration.href;
     return createElement('article', {className: 'deadline-domain-config-card'}, [
         createElement('header', {}, [
             createElement('div', {}, [
                 createElement('h4', {textContent: configuration.name}),
                 createElement('span', {className: 'deadline-domain-source', textContent: sourceLabel(configuration.sourceId)})
             ]),
-            createElement('span', {
-                className: 'deadline-domain-count',
-                textContent: `${count} ${t(count === 1 ? 'deadline_domain_linked_one' : 'deadline_domain_linked_many')}`
-            })
+            count ? createElement('a', {
+                className: 'deadline-domain-count deadline-domain-count-link',
+                href: `scadenze.html?rule=${encodeURIComponent(configuration.name)}`,
+                textContent: countLabel
+            }) : createElement('span', {className: 'deadline-domain-count', textContent: countLabel})
         ]),
         createElement('p', {
             className: 'deadline-domain-schedule',
@@ -189,110 +199,35 @@ function renderConfigurationCard(configuration) {
             className: 'deadline-domain-template',
             textContent: `${t('deadline_personal_message')}: ${configuration.templateText}`
         }) : null,
-        createElement('a', {className: 'deadline-domain-inline-action', href: configuration.href}, [
+        createElement('div', {className: 'deadline-domain-card-actions'}, [
+            vehicleRule ? createElement('button', {
+                type: 'button', className: 'deadline-domain-icon-action',
+                title: t('deadline_domain_rename_rule'),
+                ariaLabel: t('deadline_domain_rename_rule'),
+                onclick: () => actions.rename?.(configuration)
+            }, icon('edit')) : null,
+            vehicleRule ? createElement('button', {
+                type: 'button', className: 'deadline-domain-icon-action is-danger',
+                title: t('deadline_domain_delete_rule'),
+                ariaLabel: t('deadline_domain_delete_rule'),
+                onclick: () => actions.remove?.(configuration)
+            }, icon('delete')) : null,
+            createElement('a', {className: 'deadline-domain-inline-action', href: manageHref}, [
             createElement('span', {textContent: t('deadline_domain_manage_rule')}), icon('arrow_forward')
-        ])
-    ].filter(Boolean));
-}
-
-function renderResourceCard(resource) {
-    return createElement('article', {className: 'deadline-domain-resource-card'}, [
-        createElement('div', {className: 'deadline-domain-resource-copy'}, [
-            createElement('p', {textContent: resource.value}),
-            createElement('span', {className: 'deadline-domain-source', textContent: sourceLabel(resource.sourceId)})
-        ]),
-        createElement('a', {className: 'deadline-domain-inline-action', href: resource.href}, [
-            createElement('span', {textContent: t('deadline_domain_manage_rule')}), icon('arrow_forward')
-        ])
-    ]);
-}
-
-function renderResourceSection(titleKey, resources) {
-    if (!resources.length) return null;
-    return createElement('section', {className: 'deadline-domain-section'}, [
-        createElement('h4', {className: 'deadline-domain-section-title', textContent: t(titleKey)}),
-        createElement('div', {className: 'deadline-domain-grid'}, resources.map(renderResourceCard))
-    ]);
-}
-
-function deadlineDetail(deadline) {
-    return [deadline.name, deadline.veicolo_modello].filter(Boolean).join(' · ');
-}
-
-function renderMappedDeadline(deadline) {
-    const recipients = deadlineRecipientsFromRecord(deadline);
-    const recipientSummary = recipients.length
-        ? recipients.map(recipientText).join(' | ')
-        : t('deadline_personal_no_recipients');
-    const details = [
-        dataRow(t('deadline_personal_message'), deadline.templateText || deadline.oggetto_email),
-        dataRow(t('deadline_personal_note'), deadline.notes),
-        dataRow(t('deadline_personal_attachments'), Array.isArray(deadline.attachments)
-            ? String(deadline.attachments.length) : '')
-    ].filter(Boolean);
-    const configuredSchedule = scheduleText(
-        deadline.domainAudit?.configuredPeriod,
-        deadline.domainAudit?.configuredFrequency
-    );
-    return createElement('article', {className: 'deadline-domain-deadline-card'}, [
-        createElement('header', {}, [
-            createElement('div', {}, [
-                createElement('h4', {textContent: deadline.type || deadline.category || deadline.title || t('deadline_personal_document_fallback')}),
-                deadlineDetail(deadline) ? createElement('p', {textContent: deadlineDetail(deadline)}) : null
-            ].filter(Boolean)),
-            createElement('time', {textContent: formatDate(deadline.dueDate || deadline.date)})
-        ]),
-        createElement('p', {className: 'deadline-domain-schedule', textContent: scheduleText(
-            deadline.notif_days_before ?? deadline.period,
-            deadline.notif_frequency ?? deadline.freq
-        ) || t('deadline_domain_schedule_missing')}),
-        deadline.domainAudit?.scheduleMismatch ? createElement('div', {
-            className: 'deadline-domain-schedule-warning'
-        }, [
-            icon('info'),
-            createElement('div', {}, [
-                createElement('strong', {textContent: t('deadline_domain_schedule_mismatch')}),
-                createElement('p', {textContent: t('deadline_domain_default_schedule')
-                    .replace('{schedule}', configuredSchedule || t('deadline_domain_schedule_missing'))})
             ])
-        ]) : null,
-        createElement('p', {className: 'deadline-domain-recipients', textContent: recipientSummary}),
-        details.length ? createElement('dl', {className: 'deadline-personal-data deadline-domain-details'}, details) : null,
-        createElement('a', {
-            className: 'deadline-domain-inline-action',
-            href: `dettaglio_scadenza.html?id=${encodeURIComponent(deadline.id)}`
-        }, [createElement('span', {textContent: t('deadline_domain_open_deadline')}), icon('arrow_forward')])
+        ].filter(Boolean))
     ].filter(Boolean));
 }
 
-function renderDomainSummary(container, group) {
+function renderDomainSummary(container, group, actions = {}) {
     if (!container) return;
     const blocks = [];
-    if (group.duplicateConfigurations.length) {
-        blocks.push(createElement('div', {className: 'deadline-domain-warning'}, [
-            icon('warning'), createElement('p', {textContent: t('deadline_domain_duplicate_warning')})
-        ]));
-    }
     blocks.push(createElement('section', {className: 'deadline-domain-section'}, [
         createElement('h4', {className: 'deadline-domain-section-title', textContent: t('deadline_domain_rules_title')}),
         group.configurations.length
-            ? createElement('div', {className: 'deadline-domain-grid'}, group.configurations.map(renderConfigurationCard))
+            ? createElement('div', {className: 'deadline-domain-grid'}, group.configurations.map(item => renderConfigurationCard(item, actions)))
             : createElement('p', {className: 'deadline-domain-empty', textContent: t('deadline_domain_rules_empty')})
     ]));
-    blocks.push(renderResourceSection('deadline_domain_references_title', group.references));
-    blocks.push(renderResourceSection('deadline_domain_templates_title', group.templates));
-    blocks.push(createElement('section', {className: 'deadline-domain-section'}, [
-        createElement('h4', {className: 'deadline-domain-section-title', textContent: t('deadline_domain_current_title')}),
-        group.deadlines.length
-            ? createElement('div', {className: 'deadline-domain-grid'}, group.deadlines.map(renderMappedDeadline))
-            : createElement('p', {className: 'deadline-domain-empty', textContent: t('deadline_domain_current_empty')})
-    ]));
-    if (group.unmatchedDeadlines.length) {
-        blocks.push(createElement('p', {
-            className: 'deadline-domain-audit-note',
-            textContent: t('deadline_domain_unmatched_warning').replace('{count}', String(group.unmatchedDeadlines.length))
-        }));
-    }
     setChildren(container, blocks.filter(Boolean));
 }
 
@@ -317,10 +252,44 @@ async function loadDomainInventories(user, root, active) {
         const inventory = buildDeadlineDomainInventory({
             configs: {deadlineConfig, deadlineConfigDocuments, generalConfig}, deadlines
         });
-        containers.forEach(container => renderDomainSummary(
-            container,
-            inventory[container.dataset.deadlineDomainSummary]
-        ));
+        const persistVehicleRules = async nextRules => {
+            await setDoc(doc(db, 'users', user.uid, 'settings', 'deadlineConfig'), {deadlineTypes: nextRules}, {merge: true});
+            if (active()) await loadDomainInventories(user, root, active);
+        };
+        const vehicleConfig = deadlineConfig || {deadlineTypes: []};
+        const actions = {
+            async rename(configuration) {
+                if (configuration.linkedDeadlineIds.length) {
+                    showToast(t('deadline_domain_rule_linked_blocked'), 'info');
+                    return;
+                }
+                const name = await showInputModal(t('deadline_domain_rename_rule'), configuration.name, t('deadline_domain_rule_name'));
+                if (!name?.trim() || name.trim() === configuration.name) return;
+                const next = updateDeadlineType(vehicleConfig, configuration.sourceIndex, {
+                    ...vehicleConfig.deadlineTypes[configuration.sourceIndex], name: name.trim()
+                });
+                await persistVehicleRules(next.deadlineTypes);
+            },
+            async remove(configuration) {
+                if (configuration.linkedDeadlineIds.length) {
+                    showToast(t('deadline_domain_rule_linked_blocked'), 'info');
+                    return;
+                }
+                if (!await showConfirmModal(t('deadline_domain_delete_rule'), t('deadline_domain_delete_rule_confirm'))) return;
+                const next = vehicleConfig.deadlineTypes.filter((_, index) => index !== configuration.sourceIndex);
+                await persistVehicleRules(next);
+            }
+        };
+        containers.forEach(container => renderDomainSummary(container,
+            inventory[container.dataset.deadlineDomainSummary], actions));
+
+        const addRule = root.querySelector('#btn-add-vehicle-rule');
+        if (addRule) addRule.onclick = async () => {
+            const name = await showInputModal(t('deadline_domain_new_rule'), '', t('deadline_domain_rule_name'));
+            if (!name?.trim()) return;
+            const next = appendDeadlineType(deadlineConfig || {deadlineTypes: []}, {name: name.trim(), period: 14, freq: 7});
+            await persistVehicleRules(next.deadlineTypes);
+        };
     } catch (error) {
         if (!active()) return;
         logError('DeadlineRulesDomainInventory', error);
