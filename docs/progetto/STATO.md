@@ -1,6 +1,6 @@
 # Stato
 
-## Candidata 1.2.211 — regole Automezzi contestuali — 20/10/2026
+## Release 1.2.211 pubblicata — regole Automezzi contestuali — 20/10/2026
 
 L'audit autenticato e in sola lettura è stato completato prima dell'intervento: **37 Scadenze** controllate, delle quali **24** ricondotte alle famiglie non personali — **16 Automezzi, 6 Casa e immobili, 1 Salute e 1 Sport e associazioni** — e **13** Documenti personali o residui familiari esclusi. Le due Patenti familiari indicate dall'utente restano deliberatamente intatte. Nessuna Scadenza reale, destinatario, allegato o configurazione è stata modificata durante l'inventario.
 
@@ -10,7 +10,9 @@ In **Automezzi**, **Gestisci configurazione** apre esclusivamente la regola scel
 
 Le due configurazioni storiche **Comodato d'uso** restano separate, senza fusione o cancellazione; entrambe risultano associate a **0 Scadenze**. L'avviso generale duplicato non viene mostrato. Il Codice fiscale collegato usa ora il numero di serie del documento quando presente, non il codice fiscale personale, e riallinea la Scadenza esistente senza crearne una seconda. L'utente eseguirà separatamente la cancellazione delle voci **Contratto** e **Comodato d'uso** ridondante e la correzione della regola FIV da 70 a 14 giorni.
 
-La candidata client è `1.2.211` e la shell offline contiene **309 risorse**. `npm test` è terminato integralmente con codice **0**: documentazione **11/11**, navigazione **170/170**, i18n **14/14**, Profilo **169/169**, sintassi JavaScript su **220 moduli**, riferimenti statici **313**, budget, CSS, sicurezza, Functions (**473 prove, 0 errori**), Rules, Storage, Vault e tutti gli emulatori sono verdi. I test mirati di hub, configurazione e Documenti personali sono verdi **32/32**; anche i **6** scenari browser della Guida e `git diff --check` sono verdi. Graphify principale è riallineato a **13.451 nodi, 35.332 archi e 780 comunità**. Commit, merge e pubblicazione Hosting saranno registrati soltanto dopo la loro esecuzione. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano fuori perimetro.
+La release client è `1.2.211` e la shell offline contiene **309 risorse**. `npm test` è terminato integralmente con codice **0**: documentazione **11/11**, navigazione **170/170**, i18n **14/14**, Profilo **169/169**, sintassi JavaScript su **220 moduli**, riferimenti statici **313**, budget, CSS, sicurezza, Functions (**473 prove, 0 errori**), Rules, Storage, Vault e tutti gli emulatori sono verdi. I test mirati di hub, configurazione e Documenti personali sono verdi **32/32**; anche i **6** scenari browser della Guida e `git diff --check` sono verdi. Graphify principale è riallineato a **13.451 nodi, 35.332 archi e 780 comunità**.
+
+La PR `#187` è stata unita in `master` nel commit `6ff6c4ae` dopo i gate GitHub verdi. Il workflow manuale `39396442063` ha ripetuto la validazione completa in 8m00s e pubblicato esclusivamente Firebase Hosting in 50s. La verifica HTTP pubblica restituisce `200` per Home, Regole scadenze, configurazione Automezzi, contenitore Scadenze e nuovo modulo, confermando la `1.2.211`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Release 1.2.210 pubblicata — riconciliazione delle Scadenze per ambito — 20/10/2026
 
