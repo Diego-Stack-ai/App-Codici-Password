@@ -5,6 +5,10 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Lista Scadenze — filtro regola e apertura card — 20/10/2026
+
+Il filtro esatto ricevuto con `?rule=` usa il campo **Cerca scadenze** esistente; alla prima modifica diventa ricerca libera e `rule` viene rimosso dall’URL, senza aggiungere un chip alla riga dei filtri. Le card mostrano un chevron verso destra per comunicare l’apertura del dettaglio. Il cambiamento non modifica record, configurazioni, destinatari o regole di accesso.
+
 ## Predisposizione per Assistente e Multilingua — 11/10/2026
 
 La revisione completa delle lingue resta l'ultima fase del nuovo programma, dopo la stabilizzazione dell'Assistente. Da subito, però, ogni nuovo testo visibile, placeholder, ARIA, errore, domanda di chiarimento e guida deve usare chiavi i18n; intenti e azioni mantengono identificatori interni stabili e indipendenti dalla lingua. Nomi e contenuti creati dall'utente non vengono tradotti automaticamente.

@@ -5,18 +5,25 @@ import {readFile} from 'node:fs/promises';
 const base=new URL('../Frontend/public/assets/js/modules/scadenze/',import.meta.url);
 const strip=s=>s.replace(/^import .*;\r?\n/gm,'').replace(/\bexport /g,'');
 const source=(await Promise.all(['deadline-model.js','scadenze.js'].map(p=>readFile(new URL(p,base),'utf8')))).map(strip).join('\n');
-function fixture(){
+function fixture(route=''){
  let clock=new Date(2026,8,26,23,59,59).getTime(), ready=true, pending=null;
  class Clock extends Date{constructor(...a){super(...(a.length?a:[clock]));}}
  const events=new Map(),timers=new Map(),callbacks=[],swipes=[],reads=[],writes=[];
  const target={addEventListener:(n,fn)=>{if(!events.has(n))events.set(n,new Set());events.get(n).add(fn);},removeEventListener:(n,fn)=>events.get(n)?.delete(fn)};
- const node=(tag,props={},children=[])=>({tag,...props,children,appendChild(x){this.children.push(x);},replaceChildren(...xs){this.children=xs;}});
- const list=node('div'),count=node('span');
+ const node=(tag,props={},children=[])=>{const local=new Map();return{tag,...props,children,
+  appendChild(x){this.children.push(x);},replaceChildren(...xs){this.children=xs;},
+  addEventListener(n,fn){if(!local.has(n))local.set(n,new Set());local.get(n).add(fn);},
+  removeEventListener(n,fn){local.get(n)?.delete(fn);},dispatch(n,event={}){for(const fn of local.get(n)||[])fn(event);}};};
+ const list=node('div'),count=node('span'),search=node('input',{value:''});
  const data={owned:[{id:'same',type:'Bollo',dueDate:'2026-09-26'}],received:[{id:'same',type:'Bollo',dueDate:'2026-09-26',permission:'view'}]};
  const auth={currentUser:{uid:'A'}};
- const context=vm.createContext({Date:Clock,URLSearchParams,auth,db:{},console,
-  document:{...target,visibilityState:'visible',querySelector:s=>s==='#scadenze-list'?list:null,querySelectorAll:()=>[],getElementById:id=>id==='deadline-count'?count:null},
-  window:{...target,location:{search:'',href:''},privateAuthGate:{isReady:()=>ready}},
+ const location={search:route,href:`https://app.test/scadenze.html${route}`};
+ let replaced='';
+ const history={replaceState(_state,_title,value){replaced=value;const parsed=new URL(value,location.href);location.href=parsed.href;location.search=parsed.search;}};
+ const context=vm.createContext({Date:Clock,URL,URLSearchParams,auth,db:{},console,
+  document:{...target,visibilityState:'visible',querySelector:s=>s==='#scadenze-list'?list:null,querySelectorAll:()=>[],
+   getElementById:id=>id==='deadline-count'?count:id==='deadline-search'?search:null},
+  window:{...target,location,history,privateAuthGate:{isReady:()=>ready}},
   setTimeout:(fn,ms)=>{const id=Symbol();timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),
   createElement:node,setChildren:(n,xs)=>n.replaceChildren(...(Array.isArray(xs)?xs:[xs])),clearElement:n=>n.replaceChildren(),t:k=>k,
   getFooterReady:()=>({center:null}),SwipeList:class{constructor(selector,options){swipes.push({selector,options});}},
@@ -27,8 +34,9 @@ function fixture(){
  });
  vm.runInContext(source,context);
  const drain=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
- return {context,data,auth,list,count,reads,writes,swipes,callbacks,timers,
+ return {context,data,auth,list,count,search,reads,writes,swipes,callbacks,timers,
   start:()=>vm.runInContext('initScadenze(auth.currentUser)',context),
+  input:value=>{search.value=value;search.dispatch('input',{target:search});},replaced:()=>replaced,
   filter:value=>{context.filterValue=value;vm.runInContext('activeFilter=filterValue;renderFilteredScadenze()',context);},
   fire:async name=>{for(const fn of [...(events.get(name)||[])])fn();await drain();},
   date:value=>clock=value.getTime(),
@@ -56,9 +64,10 @@ test('completed records excluded from urgency, invalid dates excluded, 30-day bo
 });
 for(const event of ['pagehide','private-auth-blocked'])test(`list ${event} cancels timer and stale card/swipe callbacks`,async()=>{
  const f=fixture();await f.start();const card=f.list.children[0],swipe=f.swipes[0].options;
+ const initialHref=f.context.window.location.href;
  await f.fire(event);card.onclick();await swipe.onSwipeLeft({dataset:{id:'same'}});
  assert.equal(f.list.children.length,0);assert.equal(f.timers.size,0);assert.equal(f.callbacks[0].stopped,true);
- assert.equal(f.context.window.location.href,'');assert.equal(f.writes.length,0);
+ assert.equal(f.context.window.location.href,initialHref);assert.equal(f.writes.length,0);
 });
 test('old UID and same UID pending loads cannot replace the fresh mount',async()=>{
  const f=fixture();const release=f.defer();const first=f.start();
@@ -73,4 +82,19 @@ test('visibility refresh picks up completion/date changes without writes',async(
  const f=fixture();await f.start();f.data.owned[0].completed=true;f.data.received[0].dueDate='2026-09-20';
  await f.fire('visibilitychange');assert.equal(f.count.textContent,1);
  assert.ok(f.list.children[0].className.includes('deadline-card-expired'));assert.equal(f.writes.length,0);
+});
+test('rule route is shown in search and clearing it removes the exact rule constraint',async()=>{
+ const f=fixture('?rule=Bollo');
+ f.data.owned.push({id:'insurance',type:'Assicurazione',dueDate:'2026-09-26'});
+ await f.start();
+ assert.equal(f.search.value,'Bollo');assert.equal(f.count.textContent,2);
+ f.input('');
+ assert.equal(f.count.textContent,3);assert.equal(f.replaced(),'/scadenze.html');
+});
+test('deadline cards expose a chevron that indicates opening the detail',async()=>{
+ const f=fixture();await f.start();
+ const descendants=node=>[node,...(node.children||[]).flatMap(descendants)];
+ const nodes=descendants(f.list.children[0]);
+ assert.ok(nodes.some(node=>node.className?.includes('deadline-card-chevron')));
+ assert.ok(nodes.some(node=>node.textContent==='chevron_right'));
 });

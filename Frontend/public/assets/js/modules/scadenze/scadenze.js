@@ -70,13 +70,16 @@ export async function initScadenze(user) {
     if (urlFilter === 'urgenti') activeFilter = 'urgent';
     else if (urlFilter === 'in_scadenza') activeFilter = 'expiring';
 
+    if (searchInput) {
+        searchInput.value = activeRuleFilter;
+        searchQuery = activeRuleFilter;
+    }
+
     // Sync chips with URL filter
     filterChips.forEach(chip => {
         if (chip.dataset.filter === activeFilter) chip.classList.add('active');
         else chip.classList.remove('active');
     });
-
-    renderRuleFilterChip();
 
     // Filter Chips Events
     filterChips.forEach(chip => {
@@ -115,7 +118,12 @@ export async function initScadenze(user) {
     // Search Input
     if (searchInput) {
         const handleSearchInput = (e) => {
-            searchQuery = e.target.value;
+            const nextQuery = e.target.value;
+            if (activeRuleFilter && nextQuery !== activeRuleFilter) {
+                activeRuleFilter = '';
+                clearRuleFilterFromUrl();
+            }
+            searchQuery = nextQuery;
             renderFilteredScadenze();
         };
         searchInput.addEventListener('input', handleSearchInput);
@@ -298,27 +306,10 @@ function normalizeRuleFilterValue(value) {
         .toLocaleLowerCase('it-IT').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 }
 
-function renderRuleFilterChip() {
-    document.getElementById('deadline-rule-filter')?.remove();
-    if (!activeRuleFilter) return;
-    const filters = document.querySelector('.filter-container');
-    if (!filters) return;
-    const button = createElement('button', {
-        id: 'deadline-rule-filter', type: 'button', className: 'filter-chip deadline-rule-filter active',
-        title: t('deadline_rule_filter_remove'), ariaLabel: t('deadline_rule_filter_remove')
-    }, [
-        createElement('span', {textContent: `${t('deadline_rule_filter_label')}: ${activeRuleFilter}`}),
-        createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'close', translate: 'no'})
-    ]);
-    button.addEventListener('click', () => {
-        activeRuleFilter = '';
-        const url = new URL(window.location.href);
-        url.searchParams.delete('rule');
-        window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
-        button.remove();
-        renderFilteredScadenze();
-    });
-    filters.appendChild(button);
+function clearRuleFilterFromUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('rule');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
 function createScadenzaCard(scadenza) {
@@ -376,10 +367,16 @@ function createScadenzaCard(scadenza) {
                     createElement('p', { className: 'deadline-card-subtitle', textContent: cardVehicle })
                 ].filter(Boolean))
             ]),
-            createElement('span', {
-                className: 'deadline-date-badge',
-                textContent: dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: '2-digit' }).toUpperCase()
-            })
+            createElement('div', {className: 'deadline-card-trailing'}, [
+                createElement('span', {
+                    className: 'deadline-date-badge',
+                    textContent: dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: '2-digit' }).toUpperCase()
+                }),
+                createElement('span', {
+                    className: 'material-symbols-outlined notranslate deadline-card-chevron',
+                    textContent: 'chevron_right', ariaHidden: 'true'
+                })
+            ])
         ]),
 
 

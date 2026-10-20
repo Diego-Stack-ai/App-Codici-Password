@@ -123,17 +123,6 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-.deadline-rule-filter {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    max-width: 100%;
-}
-
-.deadline-rule-filter .material-symbols-outlined {
-    font-size: var(--fs-base);
-}
-
 /* --- 2. DEADLINE CARDS --- */
 .deadline-card {
     position: relative;
@@ -259,6 +248,7 @@ html:not(.dark) .deadline-card-subtitle {
     align-items: center;
     gap: 1rem;
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .deadline-icon-box {
@@ -310,6 +300,20 @@ html:not(.dark) .deadline-card-subtitle {
     font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     opacity: 0.8;
+}
+
+.deadline-card-trailing {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 0 0 auto;
+}
+
+.deadline-card-chevron {
+    color: var(--text-secondary);
+    font-size: var(--fs-lg);
+    opacity: 0.65;
 }
 
 .deadline-date-badge {
