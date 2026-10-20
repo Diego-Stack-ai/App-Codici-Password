@@ -1,10 +1,18 @@
 # Stato
 
-## Candidata 1.2.214 — filtro Regola nella ricerca e apertura card — 20/10/2026
+## Candidata 1.2.215 — Parametri compatti nell’editor Automezzi — 20/10/2026
+
+L’editor contestuale di una regola **Automezzi** non richiede più i campi manuali **Nome configurazione** e **Oggetto della scadenza**: il nome è già quello della regola aperta e l’oggetto usato dal compositore deriva automaticamente da tale nome. Ogni configurazione è presentata come card **Parametri**, che contiene preavviso e frequenza affiancati, modelli e targhe separati, segmenti del testo modificabili e anteprima risultante. I record storici restano leggibili; la nuova forma viene salvata soltanto su azione esplicita dell’utente.
+
+La candidata porta il client a `1.2.215`. Sono verdi il controllo mirato di modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell offline con **309 risorse** e suite completa `npm test` con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify principale è riallineato a **13.492 nodi, 35.288 archi e 790 comunità**; restano il collaudo visivo pubblico e la distribuzione. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono esclusi.
+
+## Release 1.2.214 pubblicata — filtro Regola nella ricerca e apertura card — 20/10/2026
 
 La lista **Scadenze** mostra il filtro ricevuto da **Regole invio scadenze** tramite `?rule=` direttamente nel campo **Cerca scadenze**, senza aggiungere un quinto chip. Alla prima modifica il vincolo esatto diventa una ricerca libera e il parametro viene rimosso dall’URL; cancellando il testo ricompare l’elenco non filtrato. Le card mostrano inoltre un chevron verso destra per comunicare chiaramente l’apertura del dettaglio.
 
-Le modifiche provengono dalla task **Correggi filtri e schede scadenze**, avviata per errore fuori dal progetto e poi incorporata nell’Orchestratore; la task originale è stata archiviata senza duplicare commit o deploy. La candidata è `1.2.214`; le regressioni Scadenze sono verdi **13/13**, documentazione **11/11**, i18n **14/14**, icone **3/3**, sintassi su **220 moduli**, budget statico su **30 pagine**, Stylelint e suite completa `npm test` con codice **0**. La shell offline contiene **309 risorse**, il controllo visivo mobile a **393 × 852** è verde e Graphify principale è riallineato. Nessuna Function, Rule, indice, migrazione o dato reale è coinvolto.
+Le modifiche provengono dalla task **Correggi filtri e schede scadenze**, avviata per errore fuori dal progetto e poi incorporata nell’Orchestratore; la task originale è stata archiviata senza duplicare commit o deploy. Le regressioni Scadenze sono verdi **13/13**, documentazione **11/11**, i18n **14/14**, icone **3/3**, sintassi su **220 moduli**, budget statico su **30 pagine**, Stylelint e suite completa `npm test` con codice **0**. La shell offline contiene **309 risorse**, il controllo visivo mobile a **393 × 852** è verde e Graphify principale è riallineato.
+
+La PR `#193` è stata unita in `master` nel commit `c50ef87e`; il workflow manuale `39425358320` ha ripetuto la validazione completa in 7m51s e pubblicato esclusivamente Firebase Hosting in 43s. La verifica HTTP pubblica restituisce `200`, conferma la `1.2.214`, il filtro nel campo ricerca, la rimozione del vecchio chip e il chevron sulle card. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Release 1.2.213 pubblicata — Documenti personali compatti ed espandibili — 20/10/2026
 

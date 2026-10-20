@@ -1,12 +1,20 @@
 # Incarico corrente
 
+## Parametri compatti nell’editor Automezzi — 20/10/2026
+
+Diego chiede di semplificare le configurazioni delle regole nella linguetta **Automezzi**. Il titolo della regola sostituisce il campo ridondante **Nome configurazione**; **Oggetto della scadenza** non è più compilabile perché deriva dal nome della regola insieme a modello e targa. Preavviso e frequenza devono restare affiancati anche su mobile e confluire, insieme a modello, targa, compositore e anteprima, in una card chiamata **Parametri**.
+
+Con l’ordine **«procedi e poi pubblica»** del 20/10/2026 Diego autorizza implementazione, bump patch `1.2.215`, commit, push, PR, merge e pubblicazione del solo Firebase Hosting dopo i gate verdi. La modifica non autorizza scritture sui record reali né deploy di Functions, Firestore Rules, Storage Rules, indici o migrazioni. Le strutture legacy restano leggibili e vengono persistite nel nuovo formato soltanto dopo un salvataggio esplicito dell’utente.
+
+Verifica locale: modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi su **220 moduli**, CSS, shell offline con **309 risorse** e suite completa `npm test` con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. Graphify principale è riallineato a **13.492 nodi, 35.288 archi e 790 comunità**; nessuna distribuzione è ancora stata eseguita.
+
 ## Filtro regola e apertura card nella lista Scadenze — 20/10/2026
 
 Diego chiede che il filtro ricevuto dalla pagina Regole tramite `?rule=` sia mostrato direttamente nel campo **Cerca scadenze**, senza un quinto chip nella riga dei filtri. Modificare o cancellare quel testo converte il vincolo esatto in una normale ricerca e rimuove `rule` dall’URL; cancellare tutto ripristina l’elenco non filtrato. Le card della lista devono mostrare una freccia verso destra per rendere evidente l’apertura del dettaglio.
 
 L’intervento riguarda la candidata `1.2.214`, successiva alla `1.2.213` già pubblicata: nessuna modifica a record, configurazioni, destinatari, backend, Rules o dati reali. Con l’ordine esplicito **«procedi»** del 20/10/2026 Diego autorizza commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
-Verifica locale: regressioni Scadenze **13/13**, documentazione **11/11**, i18n **14/14**, icone **3/3**, sintassi **220 moduli**, budget statico **30 pagine**, Stylelint e suite completa `npm test` con codice **0**; la shell offline contiene **309 risorse**. Controllo visivo a **393 × 852** con campo valorizzato, quattro chip e chevron senza sovrapposizioni. Graphify principale riallineato; nessun deploy ancora eseguito.
+Esito: PR `#193` unita nel commit `c50ef87e`; workflow `39425358320` verde con validazione completa in 7m51s e pubblicazione del solo Hosting in 43s. La verifica HTTP pubblica conferma la `1.2.214`, il filtro nel campo ricerca e il chevron. La task esterna incorporata è stata archiviata. Backend, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Compattazione delle card Documenti personali — 20/10/2026
 

@@ -1,4 +1,4 @@
-import {db} from '../../firebase-config.js?v=1.2.214';
+import {db} from '../../firebase-config.js?v=1.2.215';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
@@ -62,7 +62,7 @@ function updatePreview(card) {
     const preview = card?.querySelector('[data-object-preview]');
     if (!preview) return;
     preview.textContent = compileDeadlineMessage({
-        objectText: card.querySelector('[data-object-text]')?.value || '',
+        objectText: currentRule()?.name || '',
         model: vehicle?.querySelector('[data-vehicle-model]')?.value || t('deadline_vehicle_model_example'),
         plate: vehicle?.querySelector('[data-vehicle-plate]')?.value || t('deadline_vehicle_plate_example'),
         message: vehicle ? readMessage(vehicle) : composerDefaults()
@@ -76,7 +76,6 @@ function renderVehicleRow(vehicle, objectIndex, vehicleIndex) {
         dataset: {vehicleRow: '', vehicleId: vehicle.id || nextId('vehicle')}
     }, [
         createElement('div', {className: 'vehicle-reference-heading'}, [
-            createElement('strong', {textContent: t('deadline_vehicle_reference')}),
             createElement('button', {
                 type: 'button', className: 'btn-icon-delete', title: t('deadline_vehicle_remove'),
                 onclick: () => {
@@ -108,10 +107,11 @@ function renderVehicleRow(vehicle, objectIndex, vehicleIndex) {
 }
 
 function readWorkingObjects() {
+    const ruleName = currentRule()?.name || '';
     return [...document.querySelectorAll('[data-object-card]')].map(card => ({
         id: card.dataset.objectId,
-        name: card.querySelector('[data-object-name]')?.value.trim() || '',
-        objectText: card.querySelector('[data-object-text]')?.value.trim() || '',
+        name: ruleName,
+        objectText: ruleName,
         period: Number(card.querySelector('[data-object-period]')?.value || 14),
         freq: Number(card.querySelector('[data-object-frequency]')?.value || 7),
         vehicles: [...card.querySelectorAll('[data-vehicle-row]')].map(row => ({
@@ -120,7 +120,7 @@ function readWorkingObjects() {
             plate: row.querySelector('[data-vehicle-plate]')?.value.trim() || '',
             message: readMessage(row)
         })).filter(vehicle => vehicle.model || vehicle.plate)
-    })).filter(item => item.name || item.objectText);
+    }));
 }
 
 function renderObject(object, objectIndex) {
@@ -130,7 +130,7 @@ function renderObject(object, objectIndex) {
         className: 'vehicle-rule-object', dataset: {objectCard: '', objectId: object.id || nextId('object')}
     }, [
         createElement('header', {className: 'vehicle-rule-object-header'}, [
-            createElement('h3', {textContent: object.name || t('deadline_vehicle_email_object')}),
+            createElement('h3', {textContent: t('deadline_vehicle_reference')}),
             createElement('button', {
                 type: 'button', className: 'btn-icon-delete', title: t('deadline_vehicle_remove_object'),
                 onclick: async () => {
@@ -141,11 +141,7 @@ function renderObject(object, objectIndex) {
                 }
             }, createElement('span', {className: 'material-symbols-outlined notranslate', textContent: ICON_DELETE, translate: 'no'}))
         ]),
-        createElement('div', {className: 'vehicle-rule-fields'}, [
-            field(t('deadline_vehicle_object_name'), object.name, 'objectName'),
-            field(t('deadline_vehicle_object_text'), object.objectText, 'objectText')
-        ]),
-        createElement('div', {className: 'vehicle-rule-fields two-columns'}, [
+        createElement('div', {className: 'vehicle-rule-fields two-columns vehicle-rule-schedule'}, [
             field(t('deadline_personal_notice'), object.period, 'objectPeriod', {type: 'number', min: '0', max: '3650'}),
             field(t('deadline_personal_frequency'), object.freq, 'objectFrequency', {type: 'number', min: '1', max: '30'})
         ]),

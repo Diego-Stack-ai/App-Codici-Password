@@ -395,9 +395,13 @@
     background: var(--card-bg);
 }
 
-.vehicle-reference-editor { background: rgb(var(--accent-rgb) / 0.035); }
+.vehicle-reference-editor {
+    padding: 0.85rem;
+    background: rgb(var(--accent-rgb) / 0.035);
+}
 .vehicle-rule-fields { display: grid; gap: 0.75rem; }
 .vehicle-rule-fields.two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.vehicle-rule-schedule { margin-bottom: 0.15rem; }
 
 .vehicle-rule-field { display: grid; gap: 0.35rem; color: var(--text-secondary); font-size: var(--fs-micro); }
 .vehicle-rule-field .inline-input-glass { width: 100%; box-sizing: border-box; }
@@ -442,5 +446,9 @@
 
 @media (max-width: 760px) {
     .vehicle-rule-fields.two-columns { grid-template-columns: 1fr; }
+    .vehicle-rule-fields.vehicle-rule-schedule {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.55rem;
+    }
     .vehicle-rule-page-header { align-items: center; }
 }
