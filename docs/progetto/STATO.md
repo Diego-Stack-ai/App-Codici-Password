@@ -1,6 +1,6 @@
 # Stato
 
-## Candidata 1.2.210 — riconciliazione delle Scadenze per ambito — 20/10/2026
+## Release 1.2.210 pubblicata — riconciliazione delle Scadenze per ambito — 20/10/2026
 
 L'audit autenticato e in sola lettura è stato completato prima dell'intervento: **37 Scadenze** controllate, delle quali **24** ricondotte alle famiglie non personali — **16 Automezzi, 6 Casa e immobili, 1 Salute e 1 Sport e associazioni** — e **13** Documenti personali o residui familiari esclusi. Le due Patenti familiari indicate dall'utente restano deliberatamente intatte. Nessuna Scadenza reale, destinatario, allegato o configurazione è stata modificata durante l'inventario.
 
@@ -8,7 +8,9 @@ La pagina **Regole invio scadenze** legge gli stessi documenti storici e present
 
 Il doppione **Comodato d'uso** viene segnalato senza fusione o cancellazione. La regola **Federazione Italiana Vela** è ancora configurata a 70 giorni mentre la Scadenza reale usa 14 giorni: la UI mostra la differenza e non sovrascrive il record. L'utente eseguirà separatamente la cancellazione della voce **Contratto** e la correzione della regola FIV da 70 a 14 giorni. Le Scadenze senza regola omonima restano valide e visibili per l'audit.
 
-La candidata client è `1.2.210`; la shell offline contiene **308 risorse**. I test mirati del modello e della pagina sono verdi **13/13**. `npm test` è terminato integralmente con codice **0**, inclusi documentazione **11/11**, navigazione **168/168**, i18n **14/14**, sintassi JavaScript su **219 moduli**, CSS, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. `git diff --check` è verde. Graphify principale è stato riallineato con **13.411 nodi, 35.159 archi e 753 comunità**. Commit, merge e Hosting sono riportati soltanto dopo la loro esecuzione. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano invariati.
+La release client è `1.2.210`; la shell offline contiene **308 risorse**. I test mirati del modello e della pagina sono verdi **13/13**. `npm test` è terminato integralmente con codice **0**, inclusi documentazione **11/11**, navigazione **168/168**, i18n **14/14**, sintassi JavaScript su **219 moduli**, CSS, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. `git diff --check` è verde. Graphify principale è stato riallineato con **13.411 nodi, 35.159 archi e 753 comunità**.
+
+La PR `#185` è stata unita in `master` nel commit `e84ac87a` dopo i gate GitHub verdi. Il workflow manuale `39343048542` ha ripetuto la validazione completa in 6m34s e pubblicato esclusivamente Firebase Hosting in 43s. La verifica HTTP pubblica restituisce `200` per Home, Regole scadenze e i due moduli della riconciliazione, confermando la versione `1.2.210`. Il collaudo autenticato nella sessione sbloccata conferma la navigazione delle linguette e la presenza di regole, riferimenti, testi email, destinatari, allegati e Scadenze collegate negli ambiti interessati. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Release 1.2.209 pubblicata — selettore Account/Memorandum simmetrico — 19/10/2026
 

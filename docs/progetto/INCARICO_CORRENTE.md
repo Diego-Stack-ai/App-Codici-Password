@@ -14,6 +14,8 @@ Con gli ordini **«procedi e poi finita la verifica pubblica»** e **«quando ha
 
 Verifica locale: modello e pagina **13/13**, documentazione **11/11**, navigazione **168/168**, i18n **14/14**, sintassi su **219 moduli**, CSS e `git diff --check` verdi. `npm test` è terminato con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. La shell offline contiene **308 risorse** e Graphify principale è riallineato a **13.411 nodi, 35.159 archi e 753 comunità**.
 
+Esito: PR `#185` unita in `master` nel commit `e84ac87a`; workflow `39343048542` verde con validazione completa in 6m34s e distribuzione del solo Hosting in 43s. La verifica HTTP pubblica conferma la `1.2.210`. Il collaudo autenticato e in sola lettura conferma che Documenti personali, Automezzi, Casa e immobili, Salute, Sport e associazioni e Contratti e rapporti cambiano linguetta correttamente e mostrano i collegamenti reali previsti. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
+
 ## Revisione Account e Memorandum — 19/10/2026
 
 Diego autorizza il secondo punto della scaletta: revisione coordinata dei quattro modi **Account**, **Account condiviso**, **Memorandum** e **Memorandum condiviso**, nei contesti privato e aziendale. Il controllo comprende creazione/modifica, liste e filtri, dettaglio, condivisione, allegati, note, dati finanziari, archiviazione e compatibilità dei record storici con i campi canonici `type` e `visibility`.
