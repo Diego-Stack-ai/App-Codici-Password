@@ -15,7 +15,7 @@ const pageModules = {
   'aggiungi_scadenza.html': 'assets/js/modules/scadenze/aggiungi_scadenza.js',
   'archivio_account.html': 'assets/js/modules/settings/archivio_account.js',
   'area_privata.html': 'assets/js/modules/privato/area_privata.js',
-  'configurazione_automezzi.html': 'assets/js/modules/scadenze/configurazione_automezzi.js',
+  'configurazione_automezzi.html': 'assets/js/modules/scadenze/configurazione_automezzi_v2.js',
   'configurazione_documenti.html': 'assets/js/modules/scadenze/configurazione_documenti.js',
   'configurazione_generali.html': 'assets/js/modules/scadenze/configurazione_generali.js',
   'dati_azienda.html': 'assets/js/modules/azienda/dati_azienda.js',

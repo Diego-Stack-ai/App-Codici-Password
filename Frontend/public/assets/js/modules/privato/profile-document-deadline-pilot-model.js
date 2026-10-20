@@ -32,6 +32,9 @@ export function profileDocumentPilotTitle(documentItem = {}) {
 }
 
 export function profileDocumentNumber(documentItem = {}) {
+    if (normalizedProfileDocumentType(documentItem.type) === 'Codice fiscale') {
+        return String(documentItem.id_number || documentItem.num_serie || documentItem.cf_value || '').trim();
+    }
     return String(documentItem.num_serie || documentItem.id_number || documentItem.cf_value || '').trim();
 }
 

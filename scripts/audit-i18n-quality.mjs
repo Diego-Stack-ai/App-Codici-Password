@@ -41,6 +41,15 @@ function domainDictionaryKeys(source, language) {
     const portableEnd = commaEnd >= 0 ? commaEnd : source.indexOf(' }\n};', portableStart);
     keys.push(...[...source.slice(portableStart, portableEnd).matchAll(/(?:\{|,)\s*([A-Za-z][A-Za-z0-9_.-]*)\s*:/gm)].map(match => match[1]));
   }
+  for (const match of source.matchAll(new RegExp(`Object\\.assign\\(${language},\\s*\\{([\\s\\S]*?)\\}\\);`, 'g'))) {
+    keys.push(...[...match[1].matchAll(/(?:^|,)\s*([A-Za-z][A-Za-z0-9_.-]*)\s*:/gm)].map(item => item[1]));
+  }
+  for (const match of source.matchAll(/\[([^\]]+)\]\.forEach\(catalog\s*=>\s*Object\.assign\(catalog,\s*([A-Za-z_$][\w$]*)\)\);/g)) {
+    const languages = [...match[1].matchAll(/\b([a-z]{2})\b/g)].map(item => item[1]);
+    if (!languages.includes(language)) continue;
+    const fallback = new RegExp(`const\\s+${match[2]}\\s*=\\s*\\{([\\s\\S]*?)\\};`).exec(source);
+    if (fallback) keys.push(...[...fallback[1].matchAll(/(?:^|,)\s*([A-Za-z][A-Za-z0-9_.-]*)\s*:/gm)].map(item => item[1]));
+  }
   return keys;
 }
 

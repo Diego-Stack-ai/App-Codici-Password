@@ -4,7 +4,7 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.210';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.211';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -13,7 +13,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction } from "/
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.210';
+import { initComponents } from '../../components-v129.js?v=1.2.211';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -22,6 +22,7 @@ let currentUser = null;
 let allScadenze = [];
 let activeFilter = 'all';
 let searchQuery = '';
+let activeRuleFilter = '';
 let sortType = 'date-asc';
 let scadenzeContainer = null; // Module-scoped
 let stopDeadlineList = null;
@@ -47,6 +48,7 @@ export async function initScadenze(user) {
     const active = () => mount === listMount && listActive();
     activeFilter = 'all';
     searchQuery = '';
+    activeRuleFilter = '';
 
     scadenzeContainer = document.querySelector('#scadenze-list');
     if (!scadenzeContainer) return; // Se non siamo nella pagina scadenze, stop
@@ -64,6 +66,7 @@ export async function initScadenze(user) {
     // URL Filter
     const urlParams = new URLSearchParams(window.location.search);
     const urlFilter = urlParams.get('filter');
+    activeRuleFilter = String(urlParams.get('rule') || '').trim();
     if (urlFilter === 'urgenti') activeFilter = 'urgent';
     else if (urlFilter === 'in_scadenza') activeFilter = 'expiring';
 
@@ -72,6 +75,8 @@ export async function initScadenze(user) {
         if (chip.dataset.filter === activeFilter) chip.classList.add('active');
         else chip.classList.remove('active');
     });
+
+    renderRuleFilterChip();
 
     // Filter Chips Events
     filterChips.forEach(chip => {
@@ -230,6 +235,15 @@ function renderFilteredScadenze() {
         return true;
     });
 
+    if (activeRuleFilter) {
+        const normalizedRule = normalizeRuleFilterValue(activeRuleFilter);
+        filtered = filtered.filter(item => {
+            const presentation = deadlinePresentation(item);
+            return [item.type, item.category, item.title, presentation.title, presentation.category]
+                .some(value => normalizeRuleFilterValue(value) === normalizedRule);
+        });
+    }
+
     // Apply Search
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
@@ -277,6 +291,34 @@ function renderFilteredScadenze() {
 
     const cards = filtered.map(s => createScadenzaCard(s));
     setChildren(scadenzeContainer, cards);
+}
+
+function normalizeRuleFilterValue(value) {
+    return String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('it-IT').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
+function renderRuleFilterChip() {
+    document.getElementById('deadline-rule-filter')?.remove();
+    if (!activeRuleFilter) return;
+    const filters = document.querySelector('.filter-container');
+    if (!filters) return;
+    const button = createElement('button', {
+        id: 'deadline-rule-filter', type: 'button', className: 'filter-chip deadline-rule-filter active',
+        title: t('deadline_rule_filter_remove'), ariaLabel: t('deadline_rule_filter_remove')
+    }, [
+        createElement('span', {textContent: `${t('deadline_rule_filter_label')}: ${activeRuleFilter}`}),
+        createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'close', translate: 'no'})
+    ]);
+    button.addEventListener('click', () => {
+        activeRuleFilter = '';
+        const url = new URL(window.location.href);
+        url.searchParams.delete('rule');
+        window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+        button.remove();
+        renderFilteredScadenze();
+    });
+    filters.appendChild(button);
 }
 
 function createScadenzaCard(scadenza) {

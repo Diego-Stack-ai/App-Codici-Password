@@ -95,3 +95,37 @@ test('associa il testo al tipo documento per contenuto e mai per posizione', () 
         emailTemplates: ['Il tuo passaporto']
     }, 'Passaporto'), 'Testo personalizzato');
 });
+
+test('la configurazione automezzi annida oggetti, modelli, targhe e testo senza mutare i dati legacy', () => {
+    const legacy = {
+        deadlineTypes: [{name: 'Assicurazione', period: 14, freq: 7}],
+        models: ['Moto Guzzi Nevada 750 - CJ14146'],
+        emailTemplates: ["l'assicurazione del motociclo"]
+    };
+    const objects = model.deadlineRuleEmailObjects(legacy.deadlineTypes[0], legacy, {
+        beforeObject: 'È in scadenza ', betweenObjectModel: ' ', betweenModelPlate: ', con targa ', afterPlate: '.'
+    });
+    assert.equal(objects[0].vehicles[0].model, 'Moto Guzzi Nevada 750');
+    assert.equal(objects[0].vehicles[0].plate, 'CJ14146');
+    assert.equal(model.compileDeadlineMessage({
+        objectText: objects[0].objectText,
+        model: objects[0].vehicles[0].model,
+        plate: objects[0].vehicles[0].plate,
+        message: objects[0].vehicles[0].message
+    }), "È in scadenza l'assicurazione del motociclo Moto Guzzi Nevada 750, con targa CJ14146.");
+    assert.equal(legacy.deadlineTypes[0].emailObjects, undefined);
+});
+
+test('le nuove referenze conservano modello e targa come campi distinti', () => {
+    assert.deepEqual(model.splitLegacyVehicleReference({model: 'Peugeot e-208', plate: 'GM277DC'}), {
+        id: '', model: 'Peugeot e-208', plate: 'GM277DC', message: null
+    });
+    assert.equal(model.vehicleReferenceLabel({model: 'Peugeot e-208', plate: 'GM277DC'}), 'Peugeot e-208 - GM277DC');
+    const config = {deadlineTypes: [{name: 'Bollo', period: 14, freq: 7}]};
+    const updated = model.updateDeadlineRuleEmailObjects(config, 0, [{
+        id: 'object-1', name: 'Bollo auto', objectText: 'il bollo', period: 28, freq: 7,
+        vehicles: [{id: 'vehicle-1', model: 'Peugeot e-208', plate: 'GM277DC', message: {beforeObject: 'Sta per scadere '}}]
+    }]);
+    assert.equal(updated.deadlineTypes[0].emailObjects[0].vehicles[0].plate, 'GM277DC');
+    assert.equal(config.deadlineTypes[0].emailObjects, undefined);
+});

@@ -63,6 +63,8 @@ test('record pilot è riconoscibile, privo di destinatari e collega gli allegati
   assert.equal(record.attachments[0].linkedSource.id, 'att-1');
   assert.equal(record.name, 'Mario Rossi');
   assert.equal(profileDocumentNumber({id_number: 'XY987'}), 'XY987');
+  assert.equal(profileDocumentNumber({type: 'Codice Fiscale', num_serie: 'RSSMRA', id_number: '80380000500313823013'}),
+    '80380000500313823013');
   const foreign = buildProfileDocumentPilotDeadline(documentFixture, {}, new Date(), {attachments: [{...attachment,
     storagePath: 'users/synthetic/profile-documents/other/attachments/att-1'}]});
   assert.deepEqual(foreign.attachments, []);

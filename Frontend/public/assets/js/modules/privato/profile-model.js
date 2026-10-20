@@ -98,8 +98,11 @@ export function findCompatibleDocumentDeadlines(documentItem = {}, deadlines = [
 export function buildProfileDocumentDeadlineDraft(documentItem = {}, profile = {}) {
     const documentType = String(documentItem.type || 'Documento').trim();
     const dueDate = normalizeProfileDateInputValue(documentItem.expiry_date);
-    const documentNumber = String(documentItem.num_serie || documentItem.id_number
-        || documentItem.cf_value || documentItem.license_number || documentItem.cf || '').trim();
+    const fiscalDocument = normalizedDeadlineText(documentType) === normalizedDeadlineText('Codice fiscale');
+    const documentNumber = String(fiscalDocument
+        ? documentItem.id_number || documentItem.num_serie || documentItem.cf_value || documentItem.cf || ''
+        : documentItem.num_serie || documentItem.id_number || documentItem.cf_value
+            || documentItem.license_number || documentItem.cf || '').trim();
     return {
         profileDocumentId: documentItem.id,
         documentType,

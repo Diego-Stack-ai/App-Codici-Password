@@ -113,3 +113,117 @@ export function removeDeadlineListItem(config, listKey, index) {
     if (!source[index]) return config;
     return { ...config, [listKey]: source.filter((_, itemIndex) => itemIndex !== index) };
 }
+
+export function deadlineRuleRouteKey(item, index = 0) {
+    const explicitId = String(item?.id || '').trim();
+    return explicitId || `legacy-${Number(index)}`;
+}
+
+export function splitLegacyVehicleReference(value) {
+    if (value && typeof value === 'object') {
+        return {
+            id: String(value.id || '').trim(),
+            model: String(value.model || value.name || '').trim(),
+            plate: String(value.plate || value.targa || '').trim(),
+            message: value.message && typeof value.message === 'object' ? {...value.message} : null
+        };
+    }
+    const text = String(value || '').trim();
+    const separator = text.lastIndexOf(' - ');
+    return {
+        id: '',
+        model: separator > 0 ? text.slice(0, separator).trim() : text,
+        plate: separator > 0 ? text.slice(separator + 3).trim() : '',
+        message: null
+    };
+}
+
+export function vehicleReferenceLabel(value) {
+    const vehicle = splitLegacyVehicleReference(value);
+    return [vehicle.model, vehicle.plate].filter(Boolean).join(' - ');
+}
+
+function messagePart(value) {
+    return String(value || '');
+}
+
+export function normalizeDeadlineMessage(message = {}, defaults = {}) {
+    return {
+        beforeObject: messagePart(message.beforeObject ?? defaults.beforeObject),
+        betweenObjectModel: messagePart(message.betweenObjectModel ?? defaults.betweenObjectModel),
+        betweenModelPlate: messagePart(message.betweenModelPlate ?? defaults.betweenModelPlate),
+        afterPlate: messagePart(message.afterPlate ?? defaults.afterPlate)
+    };
+}
+
+export function compileDeadlineMessage({message = {}, objectText = '', model = '', plate = ''} = {}) {
+    const parts = normalizeDeadlineMessage(message);
+    return `${parts.beforeObject}${String(objectText || '')}${parts.betweenObjectModel}${String(model || '')}`
+        + `${parts.betweenModelPlate}${String(plate || '')}${parts.afterPlate}`;
+}
+
+function normalizedEmailObject(item = {}, rule = {}, index = 0, defaults = {}) {
+    const vehicles = Array.isArray(item.vehicles) ? item.vehicles.map((vehicle, vehicleIndex) => {
+        const normalized = splitLegacyVehicleReference(vehicle);
+        return {
+            ...normalized,
+            id: normalized.id || `vehicle-${vehicleIndex}`,
+            message: normalizeDeadlineMessage(normalized.message || item.message, defaults)
+        };
+    }).filter(vehicle => vehicle.model || vehicle.plate) : [];
+    return {
+        id: String(item.id || `object-${index}`),
+        name: String(item.name || item.objectText || rule.name || '').trim(),
+        objectText: String(item.objectText || item.name || rule.templateText || rule.name || '').trim(),
+        period: validateDeadlineNotice(item.period ?? rule.period ?? 14),
+        freq: validateDeadlineFrequency(item.freq ?? rule.freq ?? 7),
+        message: normalizeDeadlineMessage(item.message, defaults),
+        vehicles
+    };
+}
+
+export function legacyTemplatesForRule(ruleName, templates = []) {
+    const rule = normalizedTemplateHint(ruleName);
+    const stems = rule.split(' ').filter(token => token.length > 3);
+    const matching = (Array.isArray(templates) ? templates : []).filter(template => {
+        const normalized = normalizedTemplateHint(template);
+        return stems.every(stem => normalized.includes(stem));
+    });
+    return matching.length ? matching : [];
+}
+
+export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) {
+    if (Array.isArray(rule.emailObjects) && rule.emailObjects.length) {
+        return rule.emailObjects.map((item, index) => normalizedEmailObject(item, rule, index, defaults));
+    }
+    const templates = legacyTemplatesForRule(rule.name, config.emailTemplates);
+    const vehicles = (Array.isArray(config.models) ? config.models : []).map((vehicle, index) => {
+        const normalized = splitLegacyVehicleReference(vehicle);
+        return {
+            ...normalized,
+            id: normalized.id || `legacy-vehicle-${index}`,
+            message: normalizeDeadlineMessage({}, defaults)
+        };
+    });
+    const sources = templates.length ? templates : [rule.templateText || rule.name];
+    return sources.filter(Boolean).map((objectText, index) => normalizedEmailObject({
+        id: `legacy-object-${index}`,
+        name: objectText,
+        objectText,
+        period: rule.period,
+        freq: rule.freq,
+        vehicles
+    }, rule, index, defaults));
+}
+
+export function updateDeadlineRuleEmailObjects(config, ruleIndex, emailObjects) {
+    const deadlineTypes = [...(config.deadlineTypes || [])];
+    const rule = deadlineTypes[ruleIndex];
+    if (!rule) return config;
+    deadlineTypes[ruleIndex] = {
+        ...rule,
+        emailObjects: (Array.isArray(emailObjects) ? emailObjects : []).map((item, index) =>
+            normalizedEmailObject(item, rule, index))
+    };
+    return {...config, deadlineTypes};
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contentVersion": 3,
-  "reviewedAppVersion": "1.2.210",
+  "reviewedAppVersion": "1.2.211",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -737,17 +737,17 @@
         {
           "stepId": "step-1",
           "bodyKey": "guide.pages.configurazione_automezzi.step-1",
-          "target": "#btn-add-type"
+            "target": "#vehicle-rule-title"
         },
         {
           "stepId": "step-2",
           "bodyKey": "guide.pages.configurazione_automezzi.step-2",
-          "target": "#btn-add-model"
+            "target": "#btn-add-email-object"
         },
         {
           "stepId": "step-3",
           "bodyKey": "guide.pages.configurazione_automezzi.step-3",
-          "target": "#btn-add-template"
+            "target": "#btn-save-vehicle-rule"
         }
       ],
       "relatedPageIds": [
@@ -1266,10 +1266,10 @@
       "guide.pages.regole_scadenze.step-2": "Il riepilogo mostra soltanto il riferimento minimo al Documento e i parametri dell’avviso. Numero, ente, allegati e campi personalizzati restano nel Profilo e non vengono duplicati.",
       "guide.pages.regole_scadenze.step-3": "Le configurazioni attuali di Automezzi, Documenti e Regole generali restano disponibili più sotto. Modificarle non aggiorna automaticamente le Scadenze già esistenti.",
       "guide.pages.configurazione_automezzi.title": "Configurazione Automezzi",
-      "guide.pages.configurazione_automezzi.purpose": "Gestisci tipi, modelli e testi per le scadenze dei veicoli.",
-      "guide.pages.configurazione_automezzi.step-1": "Aggiungi o modifica il tipo di scadenza necessario.",
-      "guide.pages.configurazione_automezzi.step-2": "Gestisci i modelli dei veicoli separatamente dai tipi di scadenza.",
-      "guide.pages.configurazione_automezzi.step-3": "Gestisci i testi disponibili nei nuovi moduli. Le scadenze esistenti conservano le proprie impostazioni.",
+      "guide.pages.configurazione_automezzi.purpose": "Gestisci la sola regola Automezzi scelta, con pianificazione, oggetti email, modelli, targhe e testo guidato.",
+      "guide.pages.configurazione_automezzi.step-1": "Apri la regola dalla linguetta Automezzi: l’editor resta limitato a quella configurazione.",
+      "guide.pages.configurazione_automezzi.step-2": "Aggiungi uno o più oggetti email e collega modello e targa in campi distinti.",
+      "guide.pages.configurazione_automezzi.step-3": "Componi il testo tra i token automatici e salva. Le scadenze esistenti conservano le proprie impostazioni.",
       "guide.pages.configurazione_documenti.title": "Configurazione Documenti",
       "guide.pages.configurazione_documenti.purpose": "Gestisci tipi, modelli e testi per le scadenze dei documenti.",
       "guide.pages.configurazione_documenti.step-1": "Gestisci il tipo di documento o di scadenza necessario.",
