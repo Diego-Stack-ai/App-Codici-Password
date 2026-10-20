@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Card Parametri per tutte le regole non personali — 20/10/2026
+
+Diego chiede di estendere l’editor contestuale già introdotto per **Automezzi** a tutte le regole delle linguette non personali di **Regole scadenze**. Ogni configurazione interna deve diventare una card **Parametri** espandibile, con preavviso e frequenza affiancati al suo interno. Le configurazioni provenienti dalle vecchie **Regole generali** mantengono due soli elementi storici — tipo della scadenza e testo email/notifica — senza aggiungere il terzo riferimento; **Documenti personali** resta esclusa perché usa il collegamento diretto al Profilo.
+
+L’ordine successivo **«pubblica»** autorizza il bump patch `1.2.216`, commit, push, PR, merge e pubblicazione del solo Firebase Hosting dopo i gate verdi. La riconciliazione dei record reali resta esclusa: cancellazione o ricreazione delle vecchie Scadenze, riallineamento dei destinatari e qualsiasi migrazione saranno una fase successiva separata, da affrontare soltanto dopo aver stabilizzato tutte le regole. Functions, Firestore Rules, Storage Rules e indici non fanno parte del rilascio.
+
 ## Parametri compatti nell’editor Automezzi — 20/10/2026
 
 Diego chiede di semplificare le configurazioni delle regole nella linguetta **Automezzi**. Il titolo della regola sostituisce il campo ridondante **Nome configurazione**; **Oggetto della scadenza** non è più compilabile perché deriva dal nome della regola insieme a modello e targa. Preavviso e frequenza devono restare affiancati anche su mobile e confluire, insieme a modello, targa, compositore e anteprima, in una card chiamata **Parametri**.

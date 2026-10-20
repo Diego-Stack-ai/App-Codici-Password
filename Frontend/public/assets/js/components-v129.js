@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.215';
+import { auth } from './firebase-config.js?v=1.2.216';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -188,7 +188,12 @@ export async function initComponents() {
                     else if (path.includes('archivio_account.html')) displayTitle = t('account_archive');
                     else if (path.includes('profilo_privato.html')) displayTitle = t('page_title_profile');
                     else if (path.includes('regole_scadenze.html')) displayTitle = t('expiry_rules_title_page');
-                    else if (path.includes('configurazione_automezzi.html')) displayTitle = t('vehicles_config_title');
+                    else if (path.includes('configurazione_automezzi.html')) {
+                        const configSource = new URLSearchParams(window.location.search).get('source');
+                        displayTitle = configSource === 'generalConfig' ? t('general_config_title')
+                            : configSource === 'deadlineConfigDocuments' ? t('documents_config_title')
+                                : t('vehicles_config_title');
+                    }
                     else if (path.includes('configurazione_documenti.html')) displayTitle = t('documents_config_title');
                     else if (path.includes('configurazione_generali.html')) displayTitle = t('general_config_title');
 

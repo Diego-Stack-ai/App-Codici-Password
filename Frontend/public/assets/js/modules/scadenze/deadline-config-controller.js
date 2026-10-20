@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.2.215';
+import { db } from '../../firebase-config.js?v=1.2.216';
 import { doc, setDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
@@ -146,6 +146,33 @@ export function createDeadlineConfigController({ recipientController, onRender =
         if (matchingOption) select.value = matchingOption.value;
     }
 
+    function populateParameterSelect(select, parameters = []) {
+        const currentValue = select.value;
+        clearElement(select);
+        select.appendChild(new Option('Seleziona...', ''));
+        parameters.forEach(parameter => {
+            const text = String(parameter?.templateText || '').trim();
+            if (!text) return;
+            const option = new Option(text, text);
+            option.dataset.period = parameter.period;
+            option.dataset.freq = parameter.freq;
+            select.appendChild(option);
+        });
+        const matchingOption = currentValue
+            ? Array.from(select.options).find(option => deadlineConfigValuesMatch(option.value, currentValue))
+            : null;
+        if (matchingOption) select.value = matchingOption.value;
+    }
+
+    function applySelectedParameterSchedule(select) {
+        const option = select?.selectedOptions?.[0];
+        if (!option) return;
+        const period = document.getElementById('notif_days_before');
+        const frequency = document.getElementById('notif_frequency');
+        if (period && option.dataset.period !== undefined) period.value = option.dataset.period;
+        if (frequency && option.dataset.freq !== undefined) frequency.value = option.dataset.freq;
+    }
+
     function populateEmailSelects(emails = []) {
         ['email_primaria_select', 'email_secondaria_select'].forEach(id => {
             const select = document.getElementById(id);
@@ -195,6 +222,11 @@ export function createDeadlineConfigController({ recipientController, onRender =
                 betweenModelPlate: t('deadline_vehicle_message_before_plate'),
                 afterPlate: t('deadline_vehicle_message_after_plate')
             }) : [];
+        const scopedParameters = mode !== 'automezzi' && selectedRule && Array.isArray(selectedRule.parameters)
+            ? selectedRule.parameters.filter(parameter => parameter && typeof parameter === 'object') : [];
+        const selectedParameterText = document.getElementById('testo_email_select')?.value || '';
+        const selectedParameter = scopedParameters.find(parameter =>
+            deadlineConfigValuesMatch(parameter.templateText, selectedParameterText));
         vehicleMessageRecords = scopedObjects.flatMap(object => object.vehicles.map(vehicle => ({
             objectText: object.objectText,
             label: vehicleReferenceLabel(vehicle),
@@ -207,7 +239,10 @@ export function createDeadlineConfigController({ recipientController, onRender =
         if (modelSelect && mode !== 'generali') {
             const values = mode === 'automezzi' && selectedRule
                 ? [...new Set(vehicleMessageRecords.map(item => item.label).filter(Boolean))]
-                : config.models || [];
+                : scopedParameters.length
+                    ? [...new Set((selectedParameter ? selectedParameter.references || []
+                        : scopedParameters.flatMap(parameter => parameter.references || [])).filter(Boolean))]
+                    : config.models || [];
             populateSimpleSelect(modelSelect, values);
         }
 
@@ -217,7 +252,15 @@ export function createDeadlineConfigController({ recipientController, onRender =
             const templates = mode === 'automezzi' && selectedRule
                 ? scopedObjects.map(item => item.objectText)
                 : config.emailTemplates || [];
-            populateSimpleSelect(templateSelect, [...new Set(templates.filter(Boolean))]);
+            if (scopedParameters.length) populateParameterSelect(templateSelect, scopedParameters);
+            else populateSimpleSelect(templateSelect, [...new Set(templates.filter(Boolean))]);
+            if (!templateSelect.dataset.scopedParameterListener) {
+                templateSelect.dataset.scopedParameterListener = 'true';
+                templateSelect.addEventListener('change', () => {
+                    applySelectedParameterSchedule(templateSelect);
+                    if (mode === 'documenti') render();
+                });
+            }
         }
 
         // Compatibilità con le vecchie select: la rubrica destinatari resta la fonte primaria.

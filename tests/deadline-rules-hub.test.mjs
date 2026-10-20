@@ -48,7 +48,7 @@ test('the deadline hub loads profile documents and keeps keyboard navigation acc
     'the specialized deadline-rules route must be resolved before the generic deadlines route'
   );
   assert.doesNotMatch(source, /profile_deadline_card_open_previous|pilotDeadlineReference\?\.deadlineId/);
-  assert.match(source, /deadlineConfig'\), \{deadlineTypes: nextRules\}/);
+  assert.match(source, /settings', sourceId\), \{deadlineTypes: nextRules\}/);
   assert.match(source, /deadline_domain_rule_linked_blocked/);
 });
 
@@ -95,17 +95,23 @@ test('personal document summary has loading, empty, error and responsive card st
 });
 
 test('vehicle rules expose scoped management, safe actions and official list filters', async () => {
-  const [html, hub, list, editor, editorCss, pages, translations, catalog] = await Promise.all([
+  const [html, hub, list, editor, controller, editorCss, pages, translations, catalog] = await Promise.all([
     read('regole_scadenze.html'), read('assets/js/modules/scadenze/deadline-rules-hub.js'),
     read('assets/js/modules/scadenze/scadenze.js'),
     read('assets/js/modules/scadenze/configurazione_automezzi_v2.js'),
+    read('assets/js/modules/scadenze/deadline-config-controller.js'),
     read('assets/css/configurazione_automezzi.css'),
     read('assets/js/pages-init.js'), read('assets/js/translations.js'),
     read('assets/js/translations/deadline-rules.js')
   ]);
   assert.match(html, /id="btn-add-vehicle-rule"/);
+  for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'generic']) {
+    assert.match(html, new RegExp(`data-deadline-add-rule="${domain}"`));
+  }
   assert.match(hub, /scadenze\.html\?rule=/);
-  assert.match(hub, /configuration\.href\}\?rule=/);
+  assert.match(hub, /configurazione_automezzi\.html\?source=/);
+  assert.match(hub, /configsBySource\[configuration\.sourceId\]/);
+  assert.doesNotMatch(hub, /const vehicleRule =/);
   assert.match(hub, /linkedDeadlineIds\.length/);
   assert.match(list, /activeRuleFilter/);
   assert.match(list, /searchInput\.value = activeRuleFilter/);
@@ -117,7 +123,21 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(editor, /objectText: currentRule\(\)\?\.name/);
   assert.doesNotMatch(editor, /\[data-object-name\]|\[data-object-text\]/);
   assert.match(editor, /vehicle-rule-schedule/);
+  assert.match(editor, /createElement\('details'/);
+  assert.match(editor, /createElement\('summary'/);
+  assert.match(editor, /vehicle-rule-object-chevron/);
+  assert.match(editor, /deadlineConfigDocuments:[\s\S]*kind: 'references'/);
+  assert.match(editor, /generalConfig:[\s\S]*kind: 'general'/);
+  assert.match(editor, /sourceDefinition\.kind === 'references'/);
+  assert.match(editor, /dataName: 'parameterTemplate'|parameterTemplate/);
+  assert.match(editor, /validateDeadlineNotice\(parameter\.period\)/);
+  assert.match(editor, /validateDeadlineFrequency\(parameter\.freq\)/);
+  assert.match(controller, /Array\.isArray\(selectedRule\.parameters\)/);
+  assert.match(controller, /populateParameterSelect/);
+  assert.match(controller, /applySelectedParameterSchedule/);
+  assert.match(controller, /selectedParameter\.references/);
   assert.match(editorCss, /\.vehicle-rule-fields\.vehicle-rule-schedule\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,/);
+  assert.match(editorCss, /\.vehicle-rule-object\[open\] \.vehicle-rule-object-chevron/);
   assert.match(catalog, /deadline_vehicle_reference:\s*'Parametri'/);
   assert.match(pages, /configurazione_automezzi_v2\.js/);
   assert.match(translations, /regole_scadenze\|configurazione_automezzi/);
