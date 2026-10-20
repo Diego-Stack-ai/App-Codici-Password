@@ -346,7 +346,12 @@
 }
 
 .deadline-personal-panel {
-    min-height: 180px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
 }
 
 .deadline-personal-summary,
@@ -362,23 +367,33 @@
 
 .deadline-personal-card {
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 1rem;
     border: 1px solid var(--card-border);
     border-radius: 20px;
     background: rgb(255 255 255 / 0.045);
+    overflow: clip;
 }
 
 .deadline-personal-card-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    padding: 1rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.deadline-personal-card-header::-webkit-details-marker {
+    display: none;
+}
+
+.deadline-personal-card-header:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
 }
 
 .deadline-personal-card-header > div {
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .deadline-personal-card-header h3 {
@@ -394,6 +409,28 @@
     border-radius: 14px;
     color: var(--accent);
     background: rgb(var(--accent-rgb) / 0.1);
+}
+
+.deadline-personal-card-chevron {
+    flex: 0 0 auto;
+    color: var(--text-secondary);
+    transition: transform 160ms ease;
+}
+
+.deadline-personal-card[open] .deadline-personal-card-chevron {
+    transform: rotate(180deg);
+}
+
+.deadline-personal-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 0 1rem 1rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.12);
+}
+
+.deadline-personal-card-content > :first-child {
+    margin-top: 1rem;
 }
 
 .deadline-personal-status {
@@ -635,6 +672,7 @@
     .deadline-hub-heading { flex-direction: column; }
     .deadline-concept-grid { grid-template-columns: 1fr; }
     .deadline-domain-panel { border-radius: 20px; padding: 1rem; }
+    .deadline-domain-panel.deadline-personal-panel { border-radius: 0; padding: 0; }
     .deadline-personal-grid { grid-template-columns: 1fr; }
     .deadline-personal-data-row { grid-template-columns: 1fr; gap: 0.15rem; }
     .deadline-domain-grid { grid-template-columns: 1fr; }

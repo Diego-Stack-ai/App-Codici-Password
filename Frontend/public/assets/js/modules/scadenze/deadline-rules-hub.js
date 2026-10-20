@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.212';
+import {auth, db} from '../../firebase-config.js?v=1.2.213';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -127,11 +127,20 @@ function renderDocumentCard({documentItem, deadline, profile, active}) {
         }
     });
 
-    return createElement('article', {
+    const content = createElement('div', {className: 'deadline-personal-card-content'}, [
+        renderDocumentReference(documentItem),
+        deadlineIsAvailable ? renderDeadlineSummary(deadline) : createElement('p', {
+            className: 'deadline-personal-missing',
+            textContent: t('deadline_personal_missing_deadline')
+        }),
+        action
+    ]);
+
+    return createElement('details', {
         className: 'deadline-personal-card',
         dataset: {profileDocumentId: documentItem.id}
     }, [
-        createElement('header', {className: 'deadline-personal-card-header'}, [
+        createElement('summary', {className: 'deadline-personal-card-header'}, [
             createElement('span', {className: 'deadline-personal-card-icon'}, icon('badge')),
             createElement('div', {}, [
                 createElement('h3', {textContent: documentItem.type || t('deadline_personal_document_fallback')}),
@@ -141,14 +150,10 @@ function renderDocumentCard({documentItem, deadline, profile, active}) {
                         ? 'deadline_personal_status_linked'
                         : 'deadline_personal_status_to_configure')
                 })
-            ])
+            ]),
+            icon('expand_more', 'deadline-personal-card-chevron')
         ]),
-        renderDocumentReference(documentItem),
-        deadlineIsAvailable ? renderDeadlineSummary(deadline) : createElement('p', {
-            className: 'deadline-personal-missing',
-            textContent: t('deadline_personal_missing_deadline')
-        }),
-        action
+        content
     ]);
 }
 
