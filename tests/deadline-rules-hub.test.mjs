@@ -106,7 +106,9 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(hub, /configuration\.href\}\?rule=/);
   assert.match(hub, /linkedDeadlineIds\.length/);
   assert.match(list, /activeRuleFilter/);
-  assert.match(list, /deadline-rule-filter/);
+  assert.match(list, /searchInput\.value = activeRuleFilter/);
+  assert.match(list, /clearRuleFilterFromUrl/);
+  assert.doesNotMatch(list, /renderRuleFilterChip|deadline-rule-filter/);
   assert.match(editor, /deadlineRuleEmailObjects/);
   assert.match(editor, /dataName: 'vehicleModel'|dataName/);
   assert.match(editor, /compileDeadlineMessage/);
