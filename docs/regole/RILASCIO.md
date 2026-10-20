@@ -1,5 +1,11 @@
 # Rilascio
 
+## Esito operativo 1.2.215 — Parametri compatti nell’editor Automezzi — 20/10/2026
+
+L’editor contestuale delle regole **Automezzi** non mostra più i campi ridondanti **Nome configurazione** e **Oggetto della scadenza**. Il nome della regola alimenta automaticamente il compositore; ogni configurazione è una card **Parametri** con preavviso e frequenza affiancati anche su mobile, modello, targa, segmenti testuali e anteprima.
+
+La PR `#194` è stata unita nel commit `10149429`; il workflow `39429041671` ha validato in 6m25s e pubblicato esclusivamente Firebase Hosting in 38s. La verifica HTTP della `1.2.215` e il collaudo autenticato a **393 × 852** sono verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
+
 ## Esito operativo 1.2.214 — filtro Regola nella ricerca e apertura card — 20/10/2026
 
 Il filtro ricevuto da **Regole invio scadenze** viene mostrato nel campo **Cerca scadenze** e non come chip aggiuntivo; modificarlo o cancellarlo rimuove il parametro `rule` e ripristina il comportamento di ricerca ordinario. Le card mostrano un chevron di apertura. La task nata fuori dal progetto è stata incorporata senza duplicare il lavoro e poi archiviata.
