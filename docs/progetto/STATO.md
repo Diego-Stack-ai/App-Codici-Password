@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.213 — Documenti personali compatti ed espandibili — 20/10/2026
+
+La pagina **Regole invio scadenze** non mostra più il badge progettuale «RICONCILIATE». Nella linguetta **Documenti personali**, il pannello necessario al funzionamento delle linguette resta semanticamente presente ma perde bordo, fondo e spaziatura propri: Patente, Carta d’identità, Codice fiscale e gli eventuali altri Documenti sono quindi presentati direttamente come card autonome.
+
+Ogni card Documento usa un controllo nativo espandibile, azionabile anche da tastiera, con freccia che indica lo stato. A card chiusa restano visibili tipo Documento e stato della Scadenza; espandendola compaiono data, configurazione dell’avviso, destinatari e comando di gestione già esistenti. Nessun Documento o record Scadenza viene modificato. La candidata porta il client a `1.2.213`; i test mirati dell’hub sono verdi **5/5**, l’audit i18n è verde **14/14**, la documentazione è verde **11/11** e la suite completa, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori, è terminata con codice **0**. La shell offline contiene **309 risorse**, `git diff --check` è verde e Graphify principale è riallineato a **13.479 nodi, 35.340 archi e 786 comunità**.
+
 ## Release 1.2.212 pubblicata — etichette e associazioni dell’editor Automezzi — 20/10/2026
 
 Il collaudo pubblico della `1.2.211` ha rilevato che **Configurazione Automezzi** mostrava le chiavi tecniche `deadline_vehicle_*` al posto delle etichette tradotte. La causa era nel caricatore dei cataloghi: il catalogo **Regole scadenze** veniva richiesto dalla pagina principale, ma non dall’editor contestuale. La candidata estende lo stesso catalogo all’editor, inclusi campi, comandi, aiuti e composizione dell’anteprima.

@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Compattazione delle card Documenti personali — 20/10/2026
+
+Diego chiede di rimuovere dalla pagina **Regole invio scadenze** il badge «RICONCILIATE», eliminare il contenitore visivo esterno ridondante nella linguetta **Documenti personali** e rendere le card Documento espandibili mediante una freccia. L’intervento riguarda soltanto struttura e stile dell’interfaccia: dati dei Documenti, Scadenze collegate, destinatari e configurazioni restano invariati. La candidata è `1.2.213`.
+
+La verifica locale è completata: test mirati **5/5**, i18n **14/14**, documentazione **11/11**, `git diff --check` e suite completa con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. La shell offline contiene **309 risorse** e Graphify principale è riallineato a **13.479 nodi, 35.340 archi e 786 comunità**. Con l’ordine esplicito **«pubblica»** Diego autorizza commit, push, PR, merge e distribuzione del solo Firebase Hosting della `1.2.213`; backend, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Correzione dell’editor contestuale Automezzi — 20/10/2026
 
 Il riscontro pubblico successivo alla `1.2.211` mostra chiavi tecniche al posto delle etichette italiane nell’editor di una regola Automezzi e la ripetizione di tutti i mezzi dentro ogni oggetto email storico. La correzione deve caricare il catalogo Regole scadenze anche su `configurazione_automezzi.html` e separare, senza scrivere dati reali, i riferimenti legacy quando il testo identifica chiaramente automobile, motociclo, rimorchio o camion. I testi generici devono restare conservativi e mantenere tutti i riferimenti finché l’utente non salva volontariamente la nuova struttura.

@@ -53,10 +53,13 @@ test('the deadline hub loads profile documents and keeps keyboard navigation acc
 });
 
 test('personal document summary has loading, empty, error and responsive card states', async () => {
-  const [source, css] = await Promise.all([
+  const [html, source, css] = await Promise.all([
+    read('regole_scadenze.html'),
     read('assets/js/modules/scadenze/deadline-rules-hub.js'),
     read('assets/css/regole_scadenze.css')
   ]);
+  assert.doesNotMatch(html, /deadline-hub-badge|RICONCILIATE/);
+  assert.match(html, /<div class="deadline-domain-panel deadline-personal-panel"/);
   assert.match(source, /deadline_personal_loading/);
   assert.match(source, /deadline_personal_empty/);
   assert.match(source, /deadline_personal_error/);
@@ -78,7 +81,12 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(source, /deadline_personal_message/);
   assert.match(source, /deadline_personal_can_manage/);
   assert.match(source, /deadline_personal_view_only/);
+  assert.match(source, /createElement\('details'/);
+  assert.match(source, /createElement\('summary'/);
+  assert.match(source, /deadline-personal-card-chevron/);
   assert.match(css, /\.deadline-personal-grid/);
+  assert.match(css, /\.deadline-personal-panel\s*\{[\s\S]*?border:\s*0;/);
+  assert.match(css, /\.deadline-personal-card\[open\] \.deadline-personal-card-chevron/);
   assert.match(css, /\.deadline-domain-resource-card/);
   assert.match(css, /\.deadline-domain-schedule-warning/);
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
