@@ -6,6 +6,8 @@ Diego precisa che una regola Automezzi, per esempio **Bollo**, deve possedere un
 
 L’ordine **«procedi»** autorizza implementazione locale, test pertinenti, aggiornamento dei documenti e riallineamento Graphify. Le configurazioni storiche devono restare leggibili e non vengono riscritte prima di un salvataggio esplicito. La modifica delle regole non riallinea, cancella o ricrea le Scadenze reali: la riconciliazione sarà una fase successiva e separata. Il successivo ordine **«pubblica»** autorizza il bump patch `1.2.217`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
+Esito: PR `#198` unita nel commit `bdb5948b`; workflow manuale `39486639294` verde con validazione completa in 7m51s e deploy del solo Hosting in 42s. La verifica HTTP pubblica restituisce `200`, conferma la `1.2.217`, una pianificazione per regola e le card autonome per mezzo. Backend, Rules, indici, migrazioni e Scadenze reali sono rimasti esclusi.
+
 ## Card Parametri per tutte le regole non personali — 20/10/2026
 
 Diego chiede di estendere l’editor contestuale già introdotto per **Automezzi** a tutte le regole delle linguette non personali di **Regole scadenze**. Ogni configurazione interna deve diventare una card **Parametri** espandibile, con preavviso e frequenza affiancati al suo interno. Le configurazioni provenienti dalle vecchie **Regole generali** mantengono due soli elementi storici — tipo della scadenza e testo email/notifica — senza aggiungere il terzo riferimento; **Documenti personali** resta esclusa perché usa il collegamento diretto al Profilo.

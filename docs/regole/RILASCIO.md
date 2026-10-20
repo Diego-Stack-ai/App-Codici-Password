@@ -1,10 +1,10 @@
 # Rilascio
 
-## Candidata 1.2.217 — una card per mezzo e pianificazione unica Automezzi — 20/10/2026
+## Esito operativo 1.2.217 — una card per mezzo e pianificazione unica Automezzi — 20/10/2026
 
 Le regole **Automezzi** espongono una sola pianificazione comune e una card espandibile autonoma per ciascun mezzo associato, senza raggruppamenti intermedi per automobile, motociclo o rimorchio. Modello, targa, compositore guidato e anteprima restano nel mezzo; preavviso e frequenza appartengono alla regola. La compatibilità con le configurazioni storiche resta in sola lettura fino al salvataggio esplicito e nessuna Scadenza reale viene riallineata in questo rilascio.
 
-L’ordine **«pubblica»** autorizza bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. La suite completa locale è terminata con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori; Graphify principale è riallineato a **13.528 nodi, 35.338 archi e 829 comunità**. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+La suite completa locale è terminata con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori; Graphify principale è riallineato a **13.528 nodi, 35.338 archi e 829 comunità**. La PR `#198` è stata unita nel commit `bdb5948b`; il workflow manuale `39486639294` ha validato in 7m51s e pubblicato esclusivamente Firebase Hosting in 42s. La verifica HTTP pubblica restituisce `200` e conferma versione `1.2.217`, pagina e moduli aggiornati. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Esito operativo 1.2.216 — editor contestuale per tutte le regole non personali — 20/10/2026
 
