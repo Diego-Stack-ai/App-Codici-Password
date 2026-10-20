@@ -1,5 +1,11 @@
 # Rilascio
 
+## Esito operativo 1.2.213 — Documenti personali compatti ed espandibili — 20/10/2026
+
+La pagina **Regole invio scadenze** non mostra più il badge «RICONCILIATE». Nella linguetta **Documenti personali** il pannello necessario alle schede non introduce più un contenitore visivo aggiuntivo e ogni Documento è una card nativa espandibile, accessibile anche da tastiera, con freccia di stato. La card chiusa conserva nome e stato; data, configurazione, destinatari e comando di gestione restano disponibili all’espansione, senza modificare Documenti o Scadenze reali.
+
+I test mirati sono verdi **5/5**, i18n **14/14**, documentazione **11/11** e la suite completa locale è terminata con codice **0**, inclusi sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. La shell offline contiene **309 risorse** e Graphify principale è riallineato a **13.479 nodi, 35.340 archi e 786 comunità**. La PR `#191` è stata unita nel commit `a3521b5c`; il workflow manuale `39421438256` ha validato in 7m59s e pubblicato esclusivamente Firebase Hosting in 52s. La verifica HTTP pubblica restituisce `200` e conferma versione e asset `1.2.213`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
+
 ## Esito operativo 1.2.212 — editor Automezzi tradotto e riferimenti coerenti — 20/10/2026
 
 L’editor contestuale **Configurazione Automezzi** carica ora il catalogo Regole scadenze e non mostra più chiavi tecniche nei campi, nei comandi o nell’anteprima. La proiezione delle configurazioni storiche separa i mezzi per automobile, motociclo, rimorchio o camion quando il testo è esplicito; i testi generici restano conservativi e nessun dato viene riscritto senza un salvataggio volontario.
