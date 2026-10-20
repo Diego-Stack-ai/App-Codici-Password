@@ -1,12 +1,12 @@
 # Stato
 
-## Candidata 1.2.216 autorizzata — editor contestuale per tutte le regole non personali — 20/10/2026
+## Release 1.2.216 pubblicata — editor contestuale per tutte le regole non personali — 20/10/2026
 
 La pagina **Regole scadenze** apre ora lo stesso editor contestuale per Automezzi, Casa e immobili, Salute, Sport e associazioni, Contratti e rapporti e Documenti generici. Ogni configurazione interna è una card **Parametri** espandibile: preavviso e frequenza rimangono affiancati nella card; Automezzi conserva modello, targa e compositore guidato; le fonti storiche Documenti possono conservare riferimenti pertinenti all’ambito; le Regole generali mantengono soltanto il tipo fissato dalla regola e il testo email/notifica. Le sei linguette operative espongono inoltre un unico comando **Nuova regola** e rinomina/eliminazione restano bloccate quando esistono Scadenze collegate.
 
-Diego ha autorizzato la pubblicazione del solo Firebase Hosting come versione `1.2.216`, subordinata ai gate del repository e del workflow. Nessuna Scadenza reale viene modificata, cancellata o ricreata: la riconciliazione dei record esistenti resta la fase successiva, dopo la stabilizzazione delle configurazioni e una nuova autorizzazione esplicita.
+La PR `#196` è stata unita in `master` nel commit `2958c64f`; il workflow manuale `39474263554` ha ripetuto la suite completa in 8m09s e pubblicato esclusivamente Firebase Hosting in 43s. La verifica HTTP pubblica restituisce `200` per pagina e modulo e conferma versione `1.2.216`, sei comandi **Nuova regola**, sorgenti contestuali e card espandibili.
 
-Verifica locale: modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell delle pagine e riferimenti statici sono verdi. La suite completa ha superato tutti i gruppi applicativi eseguiti e i **473** test Functions, poi si è arrestata per indisponibilità dell’emulatore Firebase sulla porta locale `4400`; il fermo infrastrutturale non costituisce una pubblicazione né una prova sui dati reali. Graphify principale è riallineato al lotto strutturale.
+Verifiche locali: modello e hub **17/17**, documentazione **11/11**, i18n **14/14**, sintassi JavaScript su **220 moduli**, Stylelint, shell delle pagine e riferimenti statici verdi; la suite ha superato i gruppi applicativi e i **473** test Functions prima di fermarsi sulla porta locale `4400`. Lo stesso gate integrale è poi terminato con successo nel workflow GitHub. Graphify principale è riallineato al lotto strutturale. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati; nessuna Scadenza reale è stata modificata, cancellata o ricreata.
 
 ## Release 1.2.215 pubblicata — Parametri compatti nell’editor Automezzi — 20/10/2026
 
