@@ -1,5 +1,11 @@
 # Rilascio
 
+## Esito operativo 1.2.214 — filtro Regola nella ricerca e apertura card — 20/10/2026
+
+Il filtro ricevuto da **Regole invio scadenze** viene mostrato nel campo **Cerca scadenze** e non come chip aggiuntivo; modificarlo o cancellarlo rimuove il parametro `rule` e ripristina il comportamento di ricerca ordinario. Le card mostrano un chevron di apertura. La task nata fuori dal progetto è stata incorporata senza duplicare il lavoro e poi archiviata.
+
+La PR `#193` è stata unita nel commit `c50ef87e`; il workflow manuale `39425358320` ha validato in 7m51s e pubblicato esclusivamente Firebase Hosting in 43s. La verifica HTTP pubblica restituisce `200` e conferma versione e asset `1.2.214`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati modificati o distribuiti.
+
 ## Esito operativo 1.2.213 — Documenti personali compatti ed espandibili — 20/10/2026
 
 La pagina **Regole invio scadenze** non mostra più il badge «RICONCILIATE». Nella linguetta **Documenti personali** il pannello necessario alle schede non introduce più un contenitore visivo aggiuntivo e ogni Documento è una card nativa espandibile, accessibile anche da tastiera, con freccia di stato. La card chiusa conserva nome e stato; data, configurazione, destinatari e comando di gestione restano disponibili all’espansione, senza modificare Documenti o Scadenze reali.

@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.214';
+import { auth, db } from '../../firebase-config.js?v=1.2.215';
 import { collection, doc, runTransaction, deleteField, Timestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -229,7 +229,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
 
     await syncData?.();
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
-    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.214');
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.215');
     const draft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({...draft, ownerUid: user.uid}));
