@@ -1,4 +1,4 @@
-import {db} from '../../firebase-config.js?v=1.2.216';
+import {db} from '../../firebase-config.js?v=1.2.217';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
@@ -6,11 +6,11 @@ import {t} from '../../translations.js';
 import {getUserSetting} from '../data/vault-repository.js';
 import {
     compileDeadlineMessage,
-    deadlineRuleEmailObjects,
     deadlineRuleRouteKey,
+    deadlineRuleVehicleCards,
     normalizeDeadlineConfig,
     normalizeDeadlineMessage,
-    updateDeadlineRuleEmailObjects,
+    updateDeadlineRuleVehicleCards,
     validateDeadlineFrequency,
     validateDeadlineNotice
 } from './deadline-config-model.js';
@@ -70,7 +70,7 @@ function readMessage(row) {
 
 function updatePreview(card) {
     const vehicle = card?.querySelector('[data-vehicle-row]');
-    const preview = card?.querySelector('[data-object-preview]');
+    const preview = card?.querySelector('[data-vehicle-preview]');
     if (!preview) return;
     preview.textContent = compileDeadlineMessage({
         objectText: currentRule()?.name || '',
@@ -80,22 +80,45 @@ function updatePreview(card) {
     });
 }
 
-function renderVehicleRow(vehicle, objectIndex, vehicleIndex) {
+function vehicleCardTitle(vehicle = {}) {
+    return [String(vehicle.model || '').trim(), String(vehicle.plate || '').trim()].filter(Boolean).join(' · ')
+        || t('deadline_vehicle_new_reference');
+}
+
+function readRuleSchedule() {
+    const rule = currentRule() || {};
+    return {
+        period: Number(document.querySelector('[data-rule-period]')?.value ?? rule.period ?? 14),
+        freq: Number(document.querySelector('[data-rule-frequency]')?.value ?? rule.freq ?? 7)
+    };
+}
+
+function renderRuleSchedule(rule) {
+    return createElement('section', {className: 'vehicle-rule-schedule-card'}, [
+        createElement('h3', {textContent: t('deadline_vehicle_schedule_title')}),
+        createElement('p', {textContent: t('deadline_vehicle_schedule_help')}),
+        createElement('div', {className: 'vehicle-rule-fields two-columns vehicle-rule-schedule'}, [
+            field(t('deadline_personal_notice'), rule.period ?? 14, 'rulePeriod', {type: 'number', min: '0', max: '3650'}),
+            field(t('deadline_personal_frequency'), rule.freq ?? 7, 'ruleFrequency', {type: 'number', min: '1', max: '30'})
+        ])
+    ]);
+}
+
+function renderVehicleCard(vehicle, vehicleIndex) {
     const message = normalizeDeadlineMessage(vehicle.message, composerDefaults());
-    const row = createElement('section', {
-        className: 'vehicle-reference-editor',
+    const row = createElement('div', {
+        className: 'vehicle-rule-object-content vehicle-card-content',
         dataset: {vehicleRow: '', vehicleId: vehicle.id || nextId('vehicle')}
     }, [
-        createElement('div', {className: 'vehicle-reference-heading'}, [
-            createElement('button', {
-                type: 'button', className: 'btn-icon-delete', title: t('deadline_vehicle_remove'),
-                onclick: () => {
-                    workingObjects = readWorkingObjects();
-                    workingObjects[objectIndex].vehicles.splice(vehicleIndex, 1);
-                    render();
-                }
-            }, createElement('span', {className: 'material-symbols-outlined notranslate', textContent: ICON_DELETE, translate: 'no'}))
-        ]),
+        createElement('div', {className: 'vehicle-reference-heading'}, [createElement('button', {
+            type: 'button', className: 'btn-icon-delete', title: t('deadline_vehicle_remove'),
+            onclick: async () => {
+                if (!await showConfirmModal(t('deadline_vehicle_remove'), t('deadline_vehicle_remove_confirm'))) return;
+                workingObjects = readWorkingVehicles();
+                workingObjects.splice(vehicleIndex, 1);
+                render();
+            }
+        }, createElement('span', {className: 'material-symbols-outlined notranslate', textContent: ICON_DELETE, translate: 'no'}))]),
         createElement('div', {className: 'vehicle-rule-fields two-columns'}, [
             field(t('deadline_vehicle_model'), vehicle.model, 'vehicleModel'),
             field(t('deadline_vehicle_plate'), vehicle.plate, 'vehiclePlate')
@@ -111,75 +134,44 @@ function renderVehicleRow(vehicle, objectIndex, vehicleIndex) {
                 token(t('deadline_vehicle_token_plate')),
                 field(t('deadline_vehicle_text_after_plate'), message.afterPlate, 'messageAfterPlate')
             ])
+        ]),
+        createElement('div', {className: 'vehicle-message-result'}, [
+            createElement('strong', {textContent: t('deadline_vehicle_result')}),
+            createElement('p', {className: 'vehicle-message-preview', dataset: {vehiclePreview: ''}})
         ])
     ]);
-    row.querySelectorAll('input').forEach(input => input.addEventListener('input', () => updatePreview(row.closest('[data-object-card]'))));
-    return row;
+    const card = createElement('details', {
+        className: 'vehicle-rule-object vehicle-card', open: vehicleIndex === 0,
+        dataset: {vehicleCard: '', vehicleId: vehicle.id || nextId('vehicle')}
+    }, [
+        createElement('summary', {className: 'vehicle-rule-object-header'}, [
+            createElement('h3', {textContent: vehicleCardTitle(vehicle), dataset: {vehicleCardTitle: ''}}),
+            iconButton('expand_more', 'vehicle-rule-object-chevron')
+        ]),
+        row
+    ]);
+    card.querySelectorAll('input').forEach(input => input.addEventListener('input', () => {
+        const title = card.querySelector('[data-vehicle-card-title]');
+        if (title) title.textContent = vehicleCardTitle({
+            model: card.querySelector('[data-vehicle-model]')?.value,
+            plate: card.querySelector('[data-vehicle-plate]')?.value
+        });
+        updatePreview(card);
+    }));
+    queueMicrotask(() => updatePreview(card));
+    return card;
 }
 
-function readWorkingObjects() {
-    const ruleName = currentRule()?.name || '';
-    return [...document.querySelectorAll('[data-object-card]')].map(card => ({
-        id: card.dataset.objectId,
-        name: ruleName,
-        objectText: ruleName,
-        period: Number(card.querySelector('[data-object-period]')?.value || 14),
-        freq: Number(card.querySelector('[data-object-frequency]')?.value || 7),
-        vehicles: [...card.querySelectorAll('[data-vehicle-row]')].map(row => ({
+function readWorkingVehicles() {
+    return [...document.querySelectorAll('[data-vehicle-card]')].map(card => {
+        const row = card.querySelector('[data-vehicle-row]');
+        return {
             id: row.dataset.vehicleId,
             model: row.querySelector('[data-vehicle-model]')?.value.trim() || '',
             plate: row.querySelector('[data-vehicle-plate]')?.value.trim() || '',
             message: readMessage(row)
-        })).filter(vehicle => vehicle.model || vehicle.plate)
-    }));
-}
-
-function renderObject(object, objectIndex) {
-    const vehicleList = createElement('div', {className: 'vehicle-reference-list'},
-        object.vehicles.map((vehicle, vehicleIndex) => renderVehicleRow(vehicle, objectIndex, vehicleIndex)));
-    const card = createElement('details', {
-        className: 'vehicle-rule-object', open: objectIndex === 0,
-        dataset: {objectCard: '', objectId: object.id || nextId('object')}
-    }, [
-        createElement('summary', {className: 'vehicle-rule-object-header'}, [
-            createElement('h3', {textContent: t('deadline_vehicle_reference')}),
-            iconButton('expand_more', 'vehicle-rule-object-chevron')
-        ]),
-        createElement('div', {className: 'vehicle-rule-object-content'}, [
-            createElement('div', {className: 'vehicle-rule-object-actions'}, [createElement('button', {
-                type: 'button', className: 'btn-icon-delete', title: t('deadline_vehicle_remove_object'),
-                onclick: async () => {
-                    if (!await showConfirmModal(t('deadline_vehicle_remove_object'), t('deadline_vehicle_remove_object_confirm'))) return;
-                    workingObjects = readWorkingObjects();
-                    workingObjects.splice(objectIndex, 1);
-                    render();
-                }
-            }, createElement('span', {className: 'material-symbols-outlined notranslate', textContent: ICON_DELETE, translate: 'no'}))]),
-            createElement('div', {className: 'vehicle-rule-fields two-columns vehicle-rule-schedule'}, [
-                field(t('deadline_personal_notice'), object.period, 'objectPeriod', {type: 'number', min: '0', max: '3650'}),
-                field(t('deadline_personal_frequency'), object.freq, 'objectFrequency', {type: 'number', min: '1', max: '30'})
-            ]),
-            vehicleList,
-            createElement('button', {
-                type: 'button', className: 'vehicle-add-reference',
-                onclick: () => {
-                    workingObjects = readWorkingObjects();
-                    workingObjects[objectIndex].vehicles.push({id: nextId('vehicle'), model: '', plate: '', message: composerDefaults()});
-                    render();
-                }
-            }, [
-                createElement('span', {className: 'material-symbols-outlined notranslate', textContent: ICON_ADD, translate: 'no'}),
-                createElement('span', {textContent: t('deadline_vehicle_add_reference')})
-            ]),
-            createElement('div', {className: 'vehicle-message-result'}, [
-                createElement('strong', {textContent: t('deadline_vehicle_result')}),
-                createElement('p', {className: 'vehicle-message-preview', dataset: {objectPreview: ''}})
-            ])
-        ])
-    ]);
-    card.querySelectorAll('input').forEach(input => input.addEventListener('input', () => updatePreview(card)));
-    queueMicrotask(() => updatePreview(card));
-    return card;
+        };
+    }).filter(vehicle => vehicle.model || vehicle.plate);
 }
 
 function normalizeGenericParameters(rule, config) {
@@ -290,36 +282,43 @@ function render() {
     empty?.classList.add('hidden');
     editor?.classList.remove('hidden');
     clearElement(container);
+    if (sourceDefinition.kind === 'vehicles') container.appendChild(renderRuleSchedule(rule));
     workingObjects.forEach((object, index) => container.appendChild(sourceDefinition.kind === 'vehicles'
-        ? renderObject(object, index) : renderGenericParameter(object, index)));
+        ? renderVehicleCard(object, index) : renderGenericParameter(object, index)));
     if (!workingObjects.length) setChildren(container,
+        ...(sourceDefinition.kind === 'vehicles' ? [renderRuleSchedule(rule)] : []),
         createElement('p', {className: 'vehicle-empty', textContent: t('deadline_vehicle_no_objects')}));
 }
 
 async function save() {
     if (!currentRule() || !currentUser) return;
-    workingObjects = sourceDefinition.kind === 'vehicles' ? readWorkingObjects() : readGenericParameters();
-    if (!workingObjects.length) return showToast(t('deadline_vehicle_object_required'), 'error');
+    const schedule = sourceDefinition.kind === 'vehicles' ? readRuleSchedule() : null;
+    workingObjects = sourceDefinition.kind === 'vehicles' ? readWorkingVehicles() : readGenericParameters();
+    if (sourceDefinition.kind !== 'vehicles' && !workingObjects.length) {
+        return showToast(t('deadline_vehicle_object_required'), 'error');
+    }
     try {
-        if (sourceDefinition.kind !== 'vehicles') workingObjects = workingObjects.map(parameter => ({
-            ...parameter,
-            period: validateDeadlineNotice(parameter.period),
-            freq: validateDeadlineFrequency(parameter.freq)
-        }));
+        if (sourceDefinition.kind === 'vehicles') {
+            schedule.period = validateDeadlineNotice(schedule.period);
+            schedule.freq = validateDeadlineFrequency(schedule.freq);
+        } else {
+            workingObjects = workingObjects.map(parameter => ({
+                ...parameter,
+                period: validateDeadlineNotice(parameter.period),
+                freq: validateDeadlineFrequency(parameter.freq)
+            }));
+        }
         const next = sourceDefinition.kind === 'vehicles'
-            ? updateDeadlineRuleEmailObjects(currentConfig, ruleIndex, workingObjects)
+            ? updateDeadlineRuleVehicleCards(currentConfig, ruleIndex, workingObjects, schedule)
             : {...currentConfig, deadlineTypes: currentConfig.deadlineTypes.map((rule, index) => index === ruleIndex
                 ? {...rule, parameters: workingObjects, period: workingObjects[0].period,
                     freq: workingObjects[0].freq, templateText: workingObjects[0].templateText}
                 : rule)};
-        const first = sourceDefinition.kind === 'vehicles'
-            ? next.deadlineTypes[ruleIndex].emailObjects[0] : next.deadlineTypes[ruleIndex].parameters[0];
-        next.deadlineTypes[ruleIndex] = {...next.deadlineTypes[ruleIndex], period: first.period, freq: first.freq};
         await setDoc(doc(db, 'users', currentUser.uid, 'settings', sourceDefinition.settingId),
             {deadlineTypes: next.deadlineTypes}, {merge: true});
         currentConfig = next;
         workingObjects = sourceDefinition.kind === 'vehicles'
-            ? deadlineRuleEmailObjects(currentRule(), currentConfig, composerDefaults())
+            ? deadlineRuleVehicleCards(currentRule(), currentConfig, composerDefaults())
             : normalizeGenericParameters(currentRule(), currentConfig);
         render();
         showToast(t('success_config_saved'), 'success');
@@ -343,13 +342,19 @@ export async function initConfigurazioneAutomezzi(user) {
     const requestedRule = params.get('rule');
     ruleIndex = currentConfig.deadlineTypes.findIndex((item, index) => deadlineRuleRouteKey(item, index) === requestedRule);
     if (ruleIndex >= 0) workingObjects = sourceDefinition.kind === 'vehicles'
-        ? deadlineRuleEmailObjects(currentRule(), currentConfig, composerDefaults())
+        ? deadlineRuleVehicleCards(currentRule(), currentConfig, composerDefaults())
         : normalizeGenericParameters(currentRule(), currentConfig);
-    document.getElementById('btn-add-email-object')?.addEventListener('click', () => {
-        workingObjects = sourceDefinition.kind === 'vehicles' ? readWorkingObjects() : readGenericParameters();
+    const addButton = document.getElementById('btn-add-email-object');
+    if (addButton) {
+        const addLabel = t(sourceDefinition.kind === 'vehicles'
+            ? 'deadline_vehicle_add_reference' : 'deadline_vehicle_add_object');
+        addButton.setAttribute('aria-label', addLabel);
+        addButton.title = addLabel;
+    }
+    addButton?.addEventListener('click', () => {
+        workingObjects = sourceDefinition.kind === 'vehicles' ? readWorkingVehicles() : readGenericParameters();
         workingObjects.push(sourceDefinition.kind === 'vehicles'
-            ? {id: nextId('object'), name: currentRule()?.name || '', objectText: currentRule()?.name || '',
-                period: currentRule()?.period || 14, freq: currentRule()?.freq || 7, vehicles: []}
+            ? {id: nextId('vehicle'), model: '', plate: '', message: composerDefaults()}
             : {id: nextId('parameter'), period: currentRule()?.period || 14, freq: currentRule()?.freq || 7,
                 templateText: currentRule()?.templateText || currentRule()?.name || '', references: []});
         render();

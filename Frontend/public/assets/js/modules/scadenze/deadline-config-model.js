@@ -220,6 +220,7 @@ export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) 
     if (Array.isArray(rule.emailObjects) && rule.emailObjects.length) {
         return rule.emailObjects.map((item, index) => normalizedEmailObject(item, rule, index, defaults));
     }
+    if (rule.vehicleCardsConfigured === true) return [];
     const templates = legacyTemplatesForRule(rule.name, config.emailTemplates);
     const vehicles = (Array.isArray(config.models) ? config.models : []).map((vehicle, index) => {
         const normalized = splitLegacyVehicleReference(vehicle);
@@ -238,6 +239,57 @@ export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) 
         freq: rule.freq,
         vehicles: legacyVehiclesForTemplate(objectText, vehicles)
     }, rule, index, defaults));
+}
+
+function vehicleCardKey(vehicle = {}) {
+    const normalized = splitLegacyVehicleReference(vehicle);
+    const plate = normalizedTemplateHint(normalized.plate);
+    const id = normalizedTemplateHint(normalized.id);
+    const model = normalizedTemplateHint(normalized.model);
+    return plate ? `plate:${plate}` : id ? `id:${id}` : `model:${model}`;
+}
+
+// L'editor Automezzi presenta un mezzo per card. Le configurazioni storiche
+// restano leggibili anche quando raggruppavano più mezzi sotto lo stesso testo
+// email (per esempio auto e moto): la proiezione non modifica i dati finché
+// l'utente non salva esplicitamente la regola.
+export function deadlineRuleVehicleCards(rule = {}, config = {}, defaults = {}) {
+    const cards = [];
+    const seen = new Set();
+    deadlineRuleEmailObjects(rule, config, defaults).forEach(object => {
+        object.vehicles.forEach((vehicle, index) => {
+            const key = vehicleCardKey(vehicle);
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            cards.push({
+                ...vehicle,
+                id: String(vehicle.id || `${object.id}-vehicle-${index}`),
+                message: normalizeDeadlineMessage(vehicle.message || object.message, defaults)
+            });
+        });
+    });
+    return cards;
+}
+
+export function updateDeadlineRuleVehicleCards(config, ruleIndex, vehicleCards, schedule = {}) {
+    const deadlineTypes = [...(config.deadlineTypes || [])];
+    const rule = deadlineTypes[ruleIndex];
+    if (!rule) return config;
+    const period = validateDeadlineNotice(schedule.period ?? rule.period ?? 14);
+    const freq = validateDeadlineFrequency(schedule.freq ?? rule.freq ?? 7);
+    const emailObjects = (Array.isArray(vehicleCards) ? vehicleCards : [])
+        .map((vehicle, index) => splitLegacyVehicleReference(vehicle))
+        .filter(vehicle => vehicle.model || vehicle.plate)
+        .map((vehicle, index) => normalizedEmailObject({
+            id: `vehicle-card-${vehicle.id || index}`,
+            name: rule.name,
+            objectText: rule.name,
+            period,
+            freq,
+            vehicles: [{...vehicle, id: vehicle.id || `vehicle-${index}`}]
+        }, rule, index));
+    deadlineTypes[ruleIndex] = {...rule, period, freq, emailObjects, vehicleCardsConfigured: true};
+    return {...config, deadlineTypes};
 }
 
 export function updateDeadlineRuleEmailObjects(config, ruleIndex, emailObjects) {

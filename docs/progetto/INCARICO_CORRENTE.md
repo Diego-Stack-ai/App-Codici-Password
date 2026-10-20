@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Pianificazione unica e una card per mezzo nelle regole Automezzi — 20/10/2026
+
+Diego precisa che una regola Automezzi, per esempio **Bollo**, deve possedere una sola pianificazione comune: preavviso e frequenza appartengono alla regola e non alle singole auto, moto o rimorchi. Nell’editor devono comparire tante card espandibili quanti sono i mezzi associati, identificate da modello e targa, senza raggruppamenti intermedi per tipologia. Ogni card contiene soltanto modello, targa, compositore email/Push e anteprima. Se occorre una pianificazione differente, l’utente crea una nuova regola distinta, per esempio **Bollo rimorchio**.
+
+L’ordine **«procedi»** autorizza implementazione locale, test pertinenti, aggiornamento dei documenti e riallineamento Graphify. Le configurazioni storiche devono restare leggibili e non vengono riscritte prima di un salvataggio esplicito. La modifica delle regole non riallinea, cancella o ricrea le Scadenze reali: la riconciliazione sarà una fase successiva e separata. Il successivo ordine **«pubblica»** autorizza il bump patch `1.2.217`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Card Parametri per tutte le regole non personali — 20/10/2026
 
 Diego chiede di estendere l’editor contestuale già introdotto per **Automezzi** a tutte le regole delle linguette non personali di **Regole scadenze**. Ogni configurazione interna deve diventare una card **Parametri** espandibile, con preavviso e frequenza affiancati al suo interno. Le configurazioni provenienti dalle vecchie **Regole generali** mantengono due soli elementi storici — tipo della scadenza e testo email/notifica — senza aggiungere il terzo riferimento; **Documenti personali** resta esclusa perché usa il collegamento diretto al Profilo.
