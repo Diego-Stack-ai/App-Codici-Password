@@ -219,8 +219,19 @@ function legacyTemplateVehicleKind(value) {
 
 function legacyVehiclesForTemplate(template, vehicles, ruleName = '') {
     const kind = legacyTemplateVehicleKind(template);
-    if (kind) return vehicles.filter(vehicle => legacyVehicleKind(vehicle) === kind);
-    if (normalizedTemplateHint(ruleName).includes('olio motore')) {
+    const normalizedRule = normalizedTemplateHint(ruleName);
+    const matchingVehicles = kind
+        ? vehicles.filter(vehicle => legacyVehicleKind(vehicle) === kind)
+        : vehicles;
+    // Il Comodato legacy è una relazione riferita a un singolo mezzo. Il
+    // vecchio testo "dell'auto" identifica il tipo, non autorizza a estendere
+    // automaticamente la relazione a tutte le automobili del catalogo. In
+    // assenza di riferimenti strutturati conserviamo quindi soltanto il primo
+    // riferimento storico compatibile; gli altri mezzi vanno aggiunti in modo
+    // esplicito e diventano strutturati solo dopo Salva.
+    if (normalizedRule.includes('comodato')) return matchingVehicles.slice(0, 1);
+    if (kind) return matchingVehicles;
+    if (normalizedRule.includes('olio motore')) {
         return vehicles.filter(vehicle => legacyVehicleKind(vehicle) !== 'trailer');
     }
     return vehicles;

@@ -1,5 +1,13 @@
 # Rilascio
 
+## Preflight Git e chiusura completa del ramo — candidata 1.2.219, 21/10/2026
+
+Dopo commit e push, prima di aprire o unire la PR destinata al rilascio, si esegue `npm run git:preflight` dal ramo di lavoro. Il comando è un gate, non una pulizia automatica: richiede prefisso `codex/`, base non arretrata rispetto a `origin/master`, almeno un commit, worktree corrente pulito, SHA già presente sul ramo remoto corrispondente, nessun worktree secondario diverso dal checkout pulito di `master` e nessun altro ramo locale o remoto oltre a `master` e al ramo corrente, anche se già integrato. Qualunque anomalia blocca merge e deploy e deve essere risolta o preservata esplicitamente; non sono ammesse esclusioni per nascondere drift storico.
+
+Dopo i gate GitHub verdi, il ramo viene unito in `master`; il workflow Hosting continua ad accettare soltanto lo SHA corrente del `master` remoto. Dopo la verifica pubblica si rimuove o archivia il worktree e si elimina il ramo di lavoro locale e remoto. Un branch già integrato non sparisce con il merge: la sua eliminazione è un passaggio esplicito e obbligatorio della chiusura. Per l'intervento corrente gli stati storici unici sono stati preservati in commit snapshot e in un bundle Git completo verificato prima della rimozione dei vecchi worktree; l'eliminazione definitiva dei rami storici richiede conferma dell'utente.
+
+La stessa candidata corregge la sola proiezione legacy del Comodato: la `1.2.218` non ha creato né salvato nuove regole, ma mostrava automaticamente tutte le auto del catalogo. In assenza di `emailObjects` strutturati viene conservato un solo riferimento compatibile; associazioni esplicite già salvate non vengono ridotte. Nessuna migrazione o scrittura sui dati reali fa parte del rilascio.
+
 ## Esito operativo 1.2.218 — regole Automezzi coerenti e sorgente deploy vincolata — 21/10/2026
 
 Comodato d’uso, Olio motore, Revisione Auto, Revisione Moto e Tagliando usano ora la stessa proiezione a pianificazione unica e card per mezzo verificata per Assicurazione e Bollo. La compatibilità legacy seleziona i mezzi pertinenti, esclude il rimorchio da Olio motore e compone articoli, raccordi e spazi in base alla regola e al tipo di mezzo, senza riscrivere configurazioni o Scadenze reali fino a un salvataggio esplicito.

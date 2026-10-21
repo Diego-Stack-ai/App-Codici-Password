@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Correzione conservativa del Comodato e preflight Git — 21/10/2026
+
+Diego chiede di verificare che il lavoro sulle regole Automezzi non abbia creato regole ulteriori rispetto a quelle già esistenti. Il collaudo autenticato in sola lettura della `1.2.218` conferma che non sono state create nuove regole né scritti dati: nell’editor della singola regola storica **Comodato d'uso** comparivano però, per una deduzione troppo ampia del testo legacy «dell'auto», tre card derivate — Land Rover, Hyundai e Peugeot — mentre l'associazione ricordata e attesa è la sola Land Rover. Il comando **Salva** non è stato eseguito. Le due configurazioni Comodato presenti nelle sorgenti storiche esistevano già prima della `1.2.218` e restano separate; anche Documenti personali resta invariato.
+
+La correzione candidata `1.2.219` deve essere strettamente conservativa: un Comodato legacy privo di riferimenti strutturati mostra soltanto il primo mezzo compatibile già presente nel catalogo, senza estendersi automaticamente alle altre automobili. Se una configurazione è stata invece salvata con `emailObjects`, tutti e soli i mezzi associati esplicitamente restano visibili. Olio motore, Revisione Auto, Revisione Moto e Tagliando conservano il comportamento verificato nella `1.2.218`; nessuna regola, configurazione o Scadenza reale viene creata, modificata o cancellata automaticamente.
+
+L'incarico comprende inoltre un preflight Git ripetibile prima di ogni rilascio. Il controllo deve bloccare checkout corrente sporco, base arretrata, commit non inviato, worktree secondari diversi dal checkout pulito di `master` e qualunque altro ramo locale o remoto, anche se già integrato. Il deploy resta consentito soltanto dallo SHA corrente di `master`. I checkout storici con modifiche uniche sono stati prima preservati mediante commit snapshot e bundle verificato; la cancellazione definitiva dei rami storici locali e remoti resta subordinata alla conferma esplicita di Diego.
+
 ## Stesso metodo di Assicurazione e Bollo per le altre regole Automezzi — 21/10/2026
 
 Diego chiede di verificare nell’app come sono state configurate **Assicurazione** e **Bollo** e di applicare lo stesso metodo a **Comodato d’uso**, **Olio motore**, **Revisione Auto**, **Revisione Moto** e **Tagliando**. Il controllo autenticato in sola lettura conferma una pianificazione unica e una card per mezzo: Assicurazione contiene cinque moto/auto e Bollo sei mezzi incluso il rimorchio, con raccordi del messaggio distinti per tipo di veicolo. Le altre regole hanno già i riferimenti corretti, salvo Olio motore che, essendo nato da un testo generico, proietta anche il rimorchio senza motore; usano ancora il testo neutro della compatibilità legacy.
