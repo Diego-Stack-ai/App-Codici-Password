@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.218",
+  "version": "1.2.219",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -23,6 +23,8 @@
     "version:minor": "node scripts/bump-version.mjs minor",
     "version:major": "node scripts/bump-version.mjs major",
     "version:check": "node scripts/bump-version.mjs --check",
+    "git:audit": "node scripts/audit-git-state.mjs",
+    "git:preflight": "node scripts/audit-git-state.mjs --strict",
     "build:offline-runtime": "node scripts/build-offline-runtime.mjs",
     "build:card-importer-prototype": "node scripts/build-card-importer-prototype.mjs",
     "migrate:offline-reads": "node scripts/migrate-offline-firestore-reads.mjs",
@@ -105,7 +107,7 @@
     "test:history-prototype": "node --test experiments/history-recovery/*.test.mjs tests/archive-account-model.test.mjs tests/archive-session.test.mjs tests/archive-list-filter.test.mjs tests/account-archive-paths.test.mjs tests/archive-recipients.test.mjs tests/company-archive-conflict.test.mjs tests/company-form-archive-mount.test.mjs",
     "test:backup-prototype": "node --test experiments/backup-recovery/*.test.mjs tests/backup-crypto-runtime.test.mjs tests/backup-header-cleartext.test.mjs tests/backup-export-model.test.mjs tests/backup-export-session.test.mjs tests/backup-import-model.test.mjs tests/backup-restore-session.test.mjs tests/backup-restore-ui.test.mjs",
     "test:credential-health-prototype": "node --test experiments/credential-health/*.test.mjs tests/credential-health-runtime.test.mjs tests/credential-health-session.test.mjs",
-    "test:release-hardening": "node scripts/audit-release-hardening.mjs",
+    "test:release-hardening": "node scripts/audit-release-hardening.mjs && node --test tests/git-state-governance.test.mjs",
     "test:functions-security": "node --check functions/index.js && node --check functions/recovery-security.js && node --check functions/offline-sync-service.js && node --check functions/history-recovery-service.js && node --check functions/archive-purge-service.js && node --check functions/backup-restore-service.js && node functions/node_modules/eslint/bin/eslint.js --config functions/eslint.config.js functions && node --test functions/test/*.test.js",
     "test:storage-rules": "node --test tests/storage-emulator-loopback-dispatcher.test.mjs && node scripts/run-storage-rules-tests.mjs",
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",

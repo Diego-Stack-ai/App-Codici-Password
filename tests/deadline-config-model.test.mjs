@@ -215,6 +215,8 @@ test('il Comodato generale usa il catalogo mezzi condiviso senza spostare la reg
         models: [
             'Moto Guzzi Nevada 750 - CJ14146',
             'Land Rover - GK910HB',
+            'Hyundai I10 - FL790AX',
+            'Peugeot e-208 - GM277DC',
             'Rimorchio Ellebì - AA36924'
         ]
     };
@@ -230,8 +232,37 @@ test('il Comodato generale usa il catalogo mezzi condiviso senza spostare la reg
     assert.deepEqual(vehicleConfig.models, [
         'Moto Guzzi Nevada 750 - CJ14146',
         'Land Rover - GK910HB',
+        'Hyundai I10 - FL790AX',
+        'Peugeot e-208 - GM277DC',
         'Rimorchio Ellebì - AA36924'
     ]);
+});
+
+test('il Comodato gia salvato conserva soltanto i mezzi associati esplicitamente', () => {
+    const rule = {
+        name: "Comodato d'uso", period: 28, freq: 7,
+        emailObjects: [{
+            id: 'comodato-salvato', name: "Comodato d'uso", objectText: "Comodato d'uso",
+            period: 28, freq: 7,
+            vehicles: [
+                {id: 'land-rover', model: 'Land Rover', plate: 'GK910HB'},
+                {id: 'peugeot', model: 'Peugeot e-208', plate: 'GM277DC'}
+            ]
+        }]
+    };
+    const config = {
+        deadlineTypes: [rule],
+        models: [
+            'Land Rover - GK910HB',
+            'Hyundai I10 - FL790AX',
+            'Peugeot e-208 - GM277DC'
+        ]
+    };
+
+    assert.deepEqual(
+        model.deadlineRuleVehicleCards(rule, config).map(card => card.plate),
+        ['GK910HB', 'GM277DC']
+    );
 });
 
 test('le nuove referenze conservano modello e targa come campi distinti', () => {
