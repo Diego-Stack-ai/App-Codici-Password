@@ -1,4 +1,4 @@
-import {db} from '../../firebase-config.js?v=1.2.217';
+import {db} from '../../firebase-config.js?v=1.2.218';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
@@ -12,7 +12,8 @@ import {
     normalizeDeadlineMessage,
     updateDeadlineRuleVehicleCards,
     validateDeadlineFrequency,
-    validateDeadlineNotice
+    validateDeadlineNotice,
+    withDeadlineVehicleReferences
 } from './deadline-config-model.js';
 import {classifyDeadlineDomain} from './deadline-domain-model.js';
 
@@ -26,6 +27,7 @@ const ICON_ADD = 'add';
 const ICON_DELETE = 'delete';
 let currentUser = null;
 let currentConfig = null;
+let sharedVehicleConfig = null;
 let ruleIndex = -1;
 let workingObjects = [];
 let currentSourceId = 'deadlineConfig';
@@ -35,6 +37,9 @@ let currentDomain = 'generic';
 const nextId = prefix => `${prefix}-${globalThis.crypto?.randomUUID?.()
     || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
 const currentRule = () => currentConfig?.deadlineTypes?.[ruleIndex] || null;
+const usesVehicleCards = () => sourceDefinition.kind === 'vehicles' || (currentDomain === 'vehicles'
+    && currentRule() && classifyDeadlineDomain({...currentRule(), sourceId: currentSourceId}) === 'vehicles');
+const vehicleProjectionConfig = () => withDeadlineVehicleReferences(currentConfig, sharedVehicleConfig || {});
 
 function composerDefaults() {
     const segment = key => t(key) === '{space}' ? ' ' : t(key);
@@ -282,23 +287,23 @@ function render() {
     empty?.classList.add('hidden');
     editor?.classList.remove('hidden');
     clearElement(container);
-    if (sourceDefinition.kind === 'vehicles') container.appendChild(renderRuleSchedule(rule));
-    workingObjects.forEach((object, index) => container.appendChild(sourceDefinition.kind === 'vehicles'
+    if (usesVehicleCards()) container.appendChild(renderRuleSchedule(rule));
+    workingObjects.forEach((object, index) => container.appendChild(usesVehicleCards()
         ? renderVehicleCard(object, index) : renderGenericParameter(object, index)));
     if (!workingObjects.length) setChildren(container,
-        ...(sourceDefinition.kind === 'vehicles' ? [renderRuleSchedule(rule)] : []),
+        ...(usesVehicleCards() ? [renderRuleSchedule(rule)] : []),
         createElement('p', {className: 'vehicle-empty', textContent: t('deadline_vehicle_no_objects')}));
 }
 
 async function save() {
     if (!currentRule() || !currentUser) return;
-    const schedule = sourceDefinition.kind === 'vehicles' ? readRuleSchedule() : null;
-    workingObjects = sourceDefinition.kind === 'vehicles' ? readWorkingVehicles() : readGenericParameters();
-    if (sourceDefinition.kind !== 'vehicles' && !workingObjects.length) {
+    const schedule = usesVehicleCards() ? readRuleSchedule() : null;
+    workingObjects = usesVehicleCards() ? readWorkingVehicles() : readGenericParameters();
+    if (!usesVehicleCards() && !workingObjects.length) {
         return showToast(t('deadline_vehicle_object_required'), 'error');
     }
     try {
-        if (sourceDefinition.kind === 'vehicles') {
+        if (usesVehicleCards()) {
             schedule.period = validateDeadlineNotice(schedule.period);
             schedule.freq = validateDeadlineFrequency(schedule.freq);
         } else {
@@ -308,7 +313,7 @@ async function save() {
                 freq: validateDeadlineFrequency(parameter.freq)
             }));
         }
-        const next = sourceDefinition.kind === 'vehicles'
+        const next = usesVehicleCards()
             ? updateDeadlineRuleVehicleCards(currentConfig, ruleIndex, workingObjects, schedule)
             : {...currentConfig, deadlineTypes: currentConfig.deadlineTypes.map((rule, index) => index === ruleIndex
                 ? {...rule, parameters: workingObjects, period: workingObjects[0].period,
@@ -317,8 +322,8 @@ async function save() {
         await setDoc(doc(db, 'users', currentUser.uid, 'settings', sourceDefinition.settingId),
             {deadlineTypes: next.deadlineTypes}, {merge: true});
         currentConfig = next;
-        workingObjects = sourceDefinition.kind === 'vehicles'
-            ? deadlineRuleVehicleCards(currentRule(), currentConfig, composerDefaults())
+        workingObjects = usesVehicleCards()
+            ? deadlineRuleVehicleCards(currentRule(), vehicleProjectionConfig(), composerDefaults())
             : normalizeGenericParameters(currentRule(), currentConfig);
         render();
         showToast(t('success_config_saved'), 'success');
@@ -335,25 +340,30 @@ export async function initConfigurazioneAutomezzi(user) {
     currentSourceId = CONFIG_SOURCES[params.get('source')] ? params.get('source') : 'deadlineConfig';
     sourceDefinition = CONFIG_SOURCES[currentSourceId];
     currentDomain = params.get('domain') || 'generic';
-    document.title = currentSourceId === 'generalConfig' ? t('general_config_title')
-        : currentSourceId === 'deadlineConfigDocuments' ? t('documents_config_title')
-            : t('vehicles_config_title');
     currentConfig = normalizeDeadlineConfig(await getUserSetting(user.uid, sourceDefinition.settingId) || {}, sourceDefinition.listFields);
     const requestedRule = params.get('rule');
     ruleIndex = currentConfig.deadlineTypes.findIndex((item, index) => deadlineRuleRouteKey(item, index) === requestedRule);
-    if (ruleIndex >= 0) workingObjects = sourceDefinition.kind === 'vehicles'
-        ? deadlineRuleVehicleCards(currentRule(), currentConfig, composerDefaults())
+    sharedVehicleConfig = sourceDefinition.kind === 'vehicles' ? currentConfig : null;
+    if (usesVehicleCards() && !sharedVehicleConfig) {
+        sharedVehicleConfig = normalizeDeadlineConfig(await getUserSetting(user.uid, 'deadlineConfig') || {}, LIST_FIELDS);
+    }
+    document.title = usesVehicleCards() ? t('vehicles_config_title')
+        : currentSourceId === 'generalConfig' ? t('general_config_title')
+            : currentSourceId === 'deadlineConfigDocuments' ? t('documents_config_title')
+                : t('vehicles_config_title');
+    if (ruleIndex >= 0) workingObjects = usesVehicleCards()
+        ? deadlineRuleVehicleCards(currentRule(), vehicleProjectionConfig(), composerDefaults())
         : normalizeGenericParameters(currentRule(), currentConfig);
     const addButton = document.getElementById('btn-add-email-object');
     if (addButton) {
-        const addLabel = t(sourceDefinition.kind === 'vehicles'
+        const addLabel = t(usesVehicleCards()
             ? 'deadline_vehicle_add_reference' : 'deadline_vehicle_add_object');
         addButton.setAttribute('aria-label', addLabel);
         addButton.title = addLabel;
     }
     addButton?.addEventListener('click', () => {
-        workingObjects = sourceDefinition.kind === 'vehicles' ? readWorkingVehicles() : readGenericParameters();
-        workingObjects.push(sourceDefinition.kind === 'vehicles'
+        workingObjects = usesVehicleCards() ? readWorkingVehicles() : readGenericParameters();
+        workingObjects.push(usesVehicleCards()
             ? {id: nextId('vehicle'), model: '', plate: '', message: composerDefaults()}
             : {id: nextId('parameter'), period: currentRule()?.period || 14, freq: currentRule()?.freq || 7,
                 templateText: currentRule()?.templateText || currentRule()?.name || '', references: []});

@@ -46,6 +46,12 @@ export function normalizeDeadlineConfig(config = {}, listKeys = []) {
     return normalized;
 }
 
+export function withDeadlineVehicleReferences(config = {}, vehicleConfig = {}) {
+    const ownModels = Array.isArray(config.models) ? config.models : [];
+    const sharedModels = Array.isArray(vehicleConfig.models) ? vehicleConfig.models : [];
+    return {...config, models: cloneDeadlineConfig(ownModels.length ? ownModels : sharedModels)};
+}
+
 function normalizedTemplateHint(value) {
     return String(value || '')
         .normalize('NFKD')
@@ -211,9 +217,38 @@ function legacyTemplateVehicleKind(value) {
     return '';
 }
 
-function legacyVehiclesForTemplate(template, vehicles) {
+function legacyVehiclesForTemplate(template, vehicles, ruleName = '') {
     const kind = legacyTemplateVehicleKind(template);
-    return kind ? vehicles.filter(vehicle => legacyVehicleKind(vehicle) === kind) : vehicles;
+    if (kind) return vehicles.filter(vehicle => legacyVehicleKind(vehicle) === kind);
+    if (normalizedTemplateHint(ruleName).includes('olio motore')) {
+        return vehicles.filter(vehicle => legacyVehicleKind(vehicle) !== 'trailer');
+    }
+    return vehicles;
+}
+
+function legacyVehicleMessage(ruleName, vehicle, defaults) {
+    const rule = normalizedTemplateHint(ruleName);
+    const kind = legacyVehicleKind(vehicle);
+    const vehicleText = kind === 'motorcycle' ? ' della moto '
+        : kind === 'trailer' || kind === 'truck' ? ' del ' : ' della ';
+    if (rule.includes('olio motore')) {
+        return normalizeDeadlineMessage({
+            beforeObject: 'Promemoria: ',
+            betweenObjectModel: kind === 'motorcycle' ? ' da controllare sulla moto '
+                : kind === 'truck' ? ' da controllare sul ' : ' da controllare sulla ',
+            betweenModelPlate: ' con targa ',
+            afterPlate: '.'
+        }, defaults);
+    }
+    const article = /\b(?:assicur|revision)\w*/.test(rule) ? 'la '
+        : /\b(?:bollo|tagliand|comodato)\w*/.test(rule) ? 'il ' : '';
+    if (!article) return normalizeDeadlineMessage({}, defaults);
+    return normalizeDeadlineMessage({
+        beforeObject: `È in scadenza ${article}`,
+        betweenObjectModel: vehicleText,
+        betweenModelPlate: ' con targa ',
+        afterPlate: '.'
+    }, defaults);
 }
 
 export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) {
@@ -237,7 +272,7 @@ export function deadlineRuleEmailObjects(rule = {}, config = {}, defaults = {}) 
         objectText,
         period: rule.period,
         freq: rule.freq,
-        vehicles: legacyVehiclesForTemplate(objectText, vehicles)
+        vehicles: legacyVehiclesForTemplate(objectText, vehicles, rule.name)
     }, rule, index, defaults));
 }
 
@@ -256,6 +291,7 @@ function vehicleCardKey(vehicle = {}) {
 export function deadlineRuleVehicleCards(rule = {}, config = {}, defaults = {}) {
     const cards = [];
     const seen = new Set();
+    const hasConfiguredObjects = Array.isArray(rule.emailObjects) && rule.emailObjects.length > 0;
     deadlineRuleEmailObjects(rule, config, defaults).forEach(object => {
         object.vehicles.forEach((vehicle, index) => {
             const key = vehicleCardKey(vehicle);
@@ -264,7 +300,9 @@ export function deadlineRuleVehicleCards(rule = {}, config = {}, defaults = {}) 
             cards.push({
                 ...vehicle,
                 id: String(vehicle.id || `${object.id}-vehicle-${index}`),
-                message: normalizeDeadlineMessage(vehicle.message || object.message, defaults)
+                message: hasConfiguredObjects
+                    ? normalizeDeadlineMessage(vehicle.message || object.message, defaults)
+                    : legacyVehicleMessage(rule.name, vehicle, defaults)
             });
         });
     });

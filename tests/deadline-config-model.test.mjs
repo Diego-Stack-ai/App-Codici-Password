@@ -138,14 +138,100 @@ test('la conversione legacy assegna ogni mezzo soltanto al testo email coerente'
     assert.equal(legacy.deadlineTypes[0].emailObjects, undefined);
 });
 
-test('un testo legacy generico conserva tutti i mezzi finché l’utente non salva la nuova struttura', () => {
+test('olio motore conserva i mezzi a motore ma non associa il rimorchio senza motore', () => {
     const legacy = {
         deadlineTypes: [{name: 'Olio motore', period: 14, freq: 7}],
-        models: ['Moto Guzzi Nevada 750 - CJ14146', 'Hyundai I10 - FL790AX'],
+        models: [
+            'Moto Guzzi Nevada 750 - CJ14146',
+            'Hyundai I10 - FL790AX',
+            'Rimorchio Ellebì - AA36924'
+        ],
         emailTemplates: ['Olio motore da controllare']
     };
     const [object] = model.deadlineRuleEmailObjects(legacy.deadlineTypes[0], legacy);
     assert.deepEqual(object.vehicles.map(vehicle => vehicle.plate), ['CJ14146', 'FL790AX']);
+});
+
+test('le regole automezzi legacy riusano mezzi e raccordi coerenti con Assicurazione e Bollo', () => {
+    const vehicles = [
+        'Moto Guzzi Nevada 750 - CJ14146',
+        'Moto Guzzi California - CC60256',
+        'Land Rover - GK910HB',
+        'Hyundai I10 - FL790AX',
+        'Rimorchio Ellebì - AA36924',
+        'Peugeot e-208 - GM277DC'
+    ];
+    const config = {
+        models: vehicles,
+        emailTemplates: [
+            "l'assicurazione del motociclo targato",
+            "l'assicurazione dell'auto targata",
+            'la revisione del motociclo targato',
+            "la revisione dell'auto targata",
+            'Il bollo del motociclo targato',
+            "Il bollo dell'auto targata",
+            'Il bollo del carrello targato',
+            'Il tagliando del motociclo targato',
+            "Il tagliando dell'auto targata",
+            'Olio motore da controllare'
+        ]
+    };
+    const cards = name => model.deadlineRuleVehicleCards({name, period: 14, freq: 7}, config);
+
+    assert.deepEqual(cards('Assicurazione').map(card => card.plate), [
+        'CJ14146', 'CC60256', 'GK910HB', 'FL790AX', 'GM277DC'
+    ]);
+    assert.deepEqual(cards('Bollo').map(card => card.plate), [
+        'CJ14146', 'CC60256', 'GK910HB', 'FL790AX', 'GM277DC', 'AA36924'
+    ]);
+    assert.deepEqual(cards('Revisione Moto').map(card => card.plate), ['CJ14146', 'CC60256']);
+    assert.deepEqual(cards('Revisione Auto').map(card => card.plate), ['GK910HB', 'FL790AX', 'GM277DC']);
+    assert.deepEqual(cards('Tagliando').map(card => card.plate), [
+        'CJ14146', 'CC60256', 'GK910HB', 'FL790AX', 'GM277DC'
+    ]);
+    assert.deepEqual(cards('Olio motore').map(card => card.plate), [
+        'CJ14146', 'CC60256', 'GK910HB', 'FL790AX', 'GM277DC'
+    ]);
+    assert.deepEqual(cards('Revisione Moto')[0].message, {
+        beforeObject: 'È in scadenza la ', betweenObjectModel: ' della moto ',
+        betweenModelPlate: ' con targa ', afterPlate: '.'
+    });
+    assert.deepEqual(cards('Tagliando')[2].message, {
+        beforeObject: 'È in scadenza il ', betweenObjectModel: ' della ',
+        betweenModelPlate: ' con targa ', afterPlate: '.'
+    });
+    assert.deepEqual(cards('Olio motore')[0].message, {
+        beforeObject: 'Promemoria: ', betweenObjectModel: ' da controllare sulla moto ',
+        betweenModelPlate: ' con targa ', afterPlate: '.'
+    });
+});
+
+test('il Comodato generale usa il catalogo mezzi condiviso senza spostare la regola di sorgente', () => {
+    const generalConfig = {
+        deadlineTypes: [{name: "Comodato d'uso", period: 28, freq: 7}],
+        emailTemplates: ["Il comodato d'uso dell'auto targata"]
+    };
+    const vehicleConfig = {
+        models: [
+            'Moto Guzzi Nevada 750 - CJ14146',
+            'Land Rover - GK910HB',
+            'Rimorchio Ellebì - AA36924'
+        ]
+    };
+    const projection = model.withDeadlineVehicleReferences(generalConfig, vehicleConfig);
+    const cards = model.deadlineRuleVehicleCards(generalConfig.deadlineTypes[0], projection);
+
+    assert.deepEqual(cards.map(card => card.plate), ['GK910HB']);
+    assert.deepEqual(cards[0].message, {
+        beforeObject: 'È in scadenza il ', betweenObjectModel: ' della ',
+        betweenModelPlate: ' con targa ', afterPlate: '.'
+    });
+    assert.equal(generalConfig.models, undefined);
+    assert.deepEqual(vehicleConfig.models, [
+        'Moto Guzzi Nevada 750 - CJ14146',
+        'Land Rover - GK910HB',
+        'Rimorchio Ellebì - AA36924'
+    ]);
 });
 
 test('le nuove referenze conservano modello e targa come campi distinti', () => {
