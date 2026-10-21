@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Stesso metodo di Assicurazione e Bollo per le altre regole Automezzi — 21/10/2026
+
+Diego chiede di verificare nell’app come sono state configurate **Assicurazione** e **Bollo** e di applicare lo stesso metodo a **Comodato d’uso**, **Olio motore**, **Revisione Auto**, **Revisione Moto** e **Tagliando**. Il controllo autenticato in sola lettura conferma una pianificazione unica e una card per mezzo: Assicurazione contiene cinque moto/auto e Bollo sei mezzi incluso il rimorchio, con raccordi del messaggio distinti per tipo di veicolo. Le altre regole hanno già i riferimenti corretti, salvo Olio motore che, essendo nato da un testo generico, proietta anche il rimorchio senza motore; usano ancora il testo neutro della compatibilità legacy.
+
+L’intervento deve rendere la proiezione legacy coerente con il metodo verificato: Revisione Auto usa le tre auto, Revisione Moto le due moto, Tagliando e Olio motore i cinque mezzi a motore, Comodato d’uso le auto; articoli, raccordi e spazi sono generati in base alla regola e al tipo di mezzo. Una regola classificata Automezzi conserva lo stesso editor anche quando proviene da `generalConfig`, riusando in sola lettura il catalogo mezzi di `deadlineConfig` e salvando sempre nella sorgente originaria. Oggetti email già configurati, impostazioni reali e Scadenze esistenti non vengono riscritti automaticamente: la nuova struttura viene persistita soltanto con **Salva**.
+
+Gli ordini **«allinea la cartella locale con GitHub e con la app»** e la successiva precisazione che GitHub deve seguire la cartella locale autorizzano implementazione, documenti, test, Graphify, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Il deploy non sostituisce commit e push. Functions, Firestore Rules, Storage Rules, indici, migrazioni e scritture automatiche sui dati reali restano esclusi.
+
+Verifica locale della candidata `1.2.218` completata: test mirati **31/31**, suite integrale `npm test` con codice **0**, documentazione **11/11**, sintassi su **220 moduli**, controllo versione e diff verdi. Graphify principale è riallineato a **13.524 nodi, 35.311 archi e 846 comunità**. Restano i passaggi distinti di commit/push/merge su GitHub e successiva pubblicazione del solo Hosting.
+
 ## Pianificazione unica e una card per mezzo nelle regole Automezzi — 20/10/2026
 
 Diego precisa che una regola Automezzi, per esempio **Bollo**, deve possedere una sola pianificazione comune: preavviso e frequenza appartengono alla regola e non alle singole auto, moto o rimorchi. Nell’editor devono comparire tante card espandibili quanti sono i mezzi associati, identificate da modello e targa, senza raggruppamenti intermedi per tipologia. Ogni card contiene soltanto modello, targa, compositore email/Push e anteprima. Se occorre una pianificazione differente, l’utente crea una nuova regola distinta, per esempio **Bollo rimorchio**.

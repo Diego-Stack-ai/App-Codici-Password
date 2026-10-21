@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.218 — raccordi e mezzi coerenti nelle regole Automezzi — 21/10/2026
+
+La base locale pulita è stata riallineata a `origin/master` `1.2.217` senza sovrascrivere il checkout storico non pulito. La verifica HTTP ha confermato che il Firebase Hosting pubblico serve gli stessi asset della `1.2.217`; il deploy e l’aggiornamento GitHub restano passaggi distinti. Il controllo autenticato in sola lettura ha verificato Assicurazione con cinque card moto/auto e Bollo con sei card incluso il rimorchio, entrambe con pianificazione unica e segmenti del messaggio configurati per tipo di mezzo.
+
+La candidata estende lo stesso metodo alla compatibilità legacy di Comodato d’uso, Olio motore, Revisione Auto, Revisione Moto e Tagliando. La proiezione dell’editor usa articoli e raccordi coerenti, mantiene soltanto i mezzi pertinenti ed esclude il rimorchio privo di motore da Olio motore. Le regole classificate Automezzi che provengono da `generalConfig` riusano il catalogo mezzi di `deadlineConfig` ma restano salvate nella sorgente originaria. Nessun oggetto email già configurato, record Scadenza o dato reale viene modificato senza un salvataggio esplicito dell’utente.
+
+Verifica locale completata: modello, dominio e hub verdi **31/31**; `npm test` è terminato con codice **0**, inclusi documentazione **11/11**, guida, i18n, sintassi JavaScript su **220 moduli**, sicurezza, Functions, Rules, Storage, Vault e tutti gli emulatori. `version:check` conferma la `1.2.218` e i **266** riferimenti agli asset; `git diff --check` è verde. Graphify principale è riallineato al sorgente finale con **13.524 nodi, 35.311 archi e 846 comunità** e individua i nuovi raccordi fra dominio, catalogo mezzi ed editor. GitHub `master` e l’app pubblica restano correttamente alla `1.2.217` fino alla pubblicazione autorizzata del solo Hosting.
+
 ## Release 1.2.217 pubblicata — una card per mezzo e pianificazione unica Automezzi — 20/10/2026
 
 L’editor delle regole Automezzi è stato riallineato al modello deciso: preavviso e frequenza sono campi unici della regola e valgono per tutti i mezzi associati; auto, moto e rimorchi non vengono più compattati in gruppi derivati dal vecchio testo email. Ogni mezzo è presentato in una card espandibile con modello, targa, compositore guidato e anteprima. La creazione di una nuova regola richiede esplicitamente nome, preavviso e frequenza; una pianificazione diversa richiede una seconda regola.

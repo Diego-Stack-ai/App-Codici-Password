@@ -119,6 +119,11 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.doesNotMatch(list, /renderRuleFilterChip|deadline-rule-filter/);
   assert.match(editor, /deadlineRuleVehicleCards/);
   assert.match(editor, /updateDeadlineRuleVehicleCards/);
+  assert.match(editor, /usesVehicleCards/);
+  assert.match(editor, /currentDomain === 'vehicles'/);
+  assert.match(editor, /classifyDeadlineDomain\(\{\.\.\.currentRule\(\), sourceId: currentSourceId\}\) === 'vehicles'/);
+  assert.match(editor, /withDeadlineVehicleReferences/);
+  assert.match(editor, /getUserSetting\(user\.uid, 'deadlineConfig'\)/);
   assert.match(editor, /dataName: 'vehicleModel'|dataName/);
   assert.match(editor, /compileDeadlineMessage/);
   assert.match(editor, /objectText: currentRule\(\)\?\.name/);
