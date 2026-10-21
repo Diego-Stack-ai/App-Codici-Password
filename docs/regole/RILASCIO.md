@@ -1,12 +1,14 @@
 # Rilascio
 
-## Preflight Git e chiusura completa del ramo — candidata 1.2.219, 21/10/2026
+## Preflight Git e chiusura completa del ramo — release 1.2.219, 21/10/2026
 
 Dopo commit e push, prima di aprire o unire la PR destinata al rilascio, si esegue `npm run git:preflight` dal ramo di lavoro. Il comando è un gate, non una pulizia automatica: richiede prefisso `codex/`, base non arretrata rispetto a `origin/master`, almeno un commit, worktree corrente pulito, SHA già presente sul ramo remoto corrispondente, nessun worktree secondario diverso dal checkout pulito di `master` e nessun altro ramo locale o remoto oltre a `master` e al ramo corrente, anche se già integrato. Qualunque anomalia blocca merge e deploy e deve essere risolta o preservata esplicitamente; non sono ammesse esclusioni per nascondere drift storico.
 
 Dopo i gate GitHub verdi, il ramo viene unito in `master`; il workflow Hosting continua ad accettare soltanto lo SHA corrente del `master` remoto. Dopo la verifica pubblica si rimuove o archivia il worktree e si elimina il ramo di lavoro locale e remoto. Un branch già integrato non sparisce con il merge: la sua eliminazione è un passaggio esplicito e obbligatorio della chiusura. Per l'intervento corrente, dopo conferma esplicita dell'utente, sono stati rimossi 33 vecchi worktree, 104 rami locali e 27 rami remoti. Prima della rimozione, sei stati unici non committati sono stati preservati in commit snapshot e tutti i 289 riferimenti sono stati verificati nel bundle `all-refs-after-snapshots-2026-10-21.bundle`, SHA-256 `CD3FCE42C86F7E7D20F6890A95A37EBF1BE758FB2CE5054373140FAF374CE27E`. Restano soltanto `master` e il ramo corrente e il preflight è verde; la vecchia cartella `tmp` è stata conservata separatamente per recupero.
 
 La stessa candidata corregge la sola proiezione legacy del Comodato: la `1.2.218` non ha creato né salvato nuove regole, ma mostrava automaticamente tutte le auto del catalogo. In assenza di `emailObjects` strutturati viene conservato un solo riferimento compatibile; associazioni esplicite già salvate non vengono ridotte. Nessuna migrazione o scrittura sui dati reali fa parte del rilascio.
+
+Esito: PR `#202` unita in `master` nel commit `5abfa6b0` dopo gate GitHub verdi. Il workflow manuale `39603167116` ha validato lo stesso SHA in 8m01s e pubblicato esclusivamente Firebase Hosting in 46s. La verifica pubblica HTTP `200` conferma la `1.2.219` e il modulo aggiornato; il controllo autenticato in sola lettura conferma una sola card Comodato, Land Rover `GK910HB`, senza salvataggi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti invariati.
 
 ## Esito operativo 1.2.218 — regole Automezzi coerenti e sorgente deploy vincolata — 21/10/2026
 
