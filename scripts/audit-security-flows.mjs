@@ -297,6 +297,14 @@ assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Fire
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
 assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
+assert.match(deployWorkflow, /if: github\.event_name == 'workflow_dispatch' && github\.ref == 'refs\/heads\/master'/,
+    'Il deploy manuale può partire da un riferimento diverso da master');
+assert.match(deployWorkflow, /Verify manual release source[\s\S]*?git ls-remote origin refs\/heads\/master[\s\S]*?GITHUB_SHA[\s\S]*?remote_master/,
+    'La validazione manuale non confronta la candidata con il master remoto');
+assert.match(deployWorkflow, /Verify master before deploy[\s\S]*?GITHUB_SHA[\s\S]*?remote_master[\s\S]*?Deploy Hosting only/,
+    'Il deploy non ricontrolla master immediatamente prima della pubblicazione');
+assert.match(deployWorkflow, /Deploy Hosting only[\s\S]*?Record deployed commit[\s\S]*?GITHUB_SHA[\s\S]*?GITHUB_STEP_SUMMARY/,
+    'Il workflow non verifica e registra lo SHA distribuito dopo il deploy');
 assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');
 assert.match(loginHtml, /id="recovery-code"[^>]+autocomplete="off"/, 'Campo codice recupero assente o esposto ad autofill');
 assert.match(login, /recoverTotpAccess\(pendingEmail, password, recoveryCode\)/, 'Flusso recupero 2FA non collegato al login');

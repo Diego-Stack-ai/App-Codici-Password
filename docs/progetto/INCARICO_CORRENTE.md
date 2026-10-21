@@ -8,7 +8,9 @@ L’intervento deve rendere la proiezione legacy coerente con il metodo verifica
 
 Gli ordini **«allinea la cartella locale con GitHub e con la app»** e la successiva precisazione che GitHub deve seguire la cartella locale autorizzano implementazione, documenti, test, Graphify, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Il deploy non sostituisce commit e push. Functions, Firestore Rules, Storage Rules, indici, migrazioni e scritture automatiche sui dati reali restano esclusi.
 
-Verifica locale della candidata `1.2.218` completata: test mirati **31/31**, suite integrale `npm test` con codice **0**, documentazione **11/11**, sintassi su **220 moduli**, controllo versione e diff verdi. Graphify principale è riallineato a **13.524 nodi, 35.311 archi e 846 comunità**. Restano i passaggi distinti di commit/push/merge su GitHub e successiva pubblicazione del solo Hosting.
+Esito: test mirati **31/31**, suite integrale `npm test` con codice **0**, documentazione **11/11**, sintassi su **220 moduli**, controllo versione e diff verdi. Graphify principale è riallineato a **13.524 nodi, 35.311 archi e 846 comunità**. La PR `#200` è stata unita nel commit `d6e70d9d`; il workflow `39557338915` ha validato `master` in 7m33s e pubblicato il solo Hosting in 38s. Verifica HTTP e collaudo autenticato pubblico sono verdi; nessun comando **Salva** è stato eseguito.
+
+Diego chiede inoltre di impedire che un futuro deploy verde lasci GitHub e la versione pubblicata su commit differenti. Il workflow manuale deve quindi accettare soltanto l’ultimo `master`, confrontare lo SHA remoto prima e dopo il deploy e registrare lo SHA pubblicato. La sincronizzazione di una cartella locale pulita resta un’operazione Git distinta; un checkout non pulito non viene mai sovrascritto automaticamente.
 
 ## Pianificazione unica e una card per mezzo nelle regole Automezzi — 20/10/2026
 
