@@ -1,5 +1,13 @@
 # Rilascio
 
+## Esito operativo 1.2.218 — regole Automezzi coerenti e sorgente deploy vincolata — 21/10/2026
+
+Comodato d’uso, Olio motore, Revisione Auto, Revisione Moto e Tagliando usano ora la stessa proiezione a pianificazione unica e card per mezzo verificata per Assicurazione e Bollo. La compatibilità legacy seleziona i mezzi pertinenti, esclude il rimorchio da Olio motore e compone articoli, raccordi e spazi in base alla regola e al tipo di mezzo, senza riscrivere configurazioni o Scadenze reali fino a un salvataggio esplicito.
+
+La PR `#200` è stata unita nel commit `d6e70d9d`; il workflow `39557338915` ha validato in 7m33s e pubblicato il solo Firebase Hosting in 38s. Verifica HTTP e collaudo autenticato in sola lettura confermano versione `1.2.218`, asset aggiornati e quantità attese dei mezzi. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
+
+I deploy manuali successivi sono vincolati a `refs/heads/master`: `GITHUB_SHA` deve coincidere con il `master` remoto all’avvio, immediatamente prima della pubblicazione e dopo il deploy. Il workflow registra nel riepilogo ref, SHA e perimetro `hosting`; se `master` avanza durante la validazione o la pubblicazione, l’esito non può essere accettato come verde e il rilascio va ripetuto. Questo controllo non crea commit dopo il deploy e non modifica checkout locali: prima del lavoro si usa un checkout pulito aggiornato da `origin/master`, mentre modifiche locali non integrate vanno preservate e risolte separatamente.
+
 ## Esito operativo 1.2.217 — una card per mezzo e pianificazione unica Automezzi — 20/10/2026
 
 Le regole **Automezzi** espongono una sola pianificazione comune e una card espandibile autonoma per ciascun mezzo associato, senza raggruppamenti intermedi per automobile, motociclo o rimorchio. Modello, targa, compositore guidato e anteprima restano nel mezzo; preavviso e frequenza appartengono alla regola. La compatibilità con le configurazioni storiche resta in sola lettura fino al salvataggio esplicito e nessuna Scadenza reale viene riallineata in questo rilascio.

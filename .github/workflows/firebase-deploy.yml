@@ -24,6 +24,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Verify manual release source
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/master"
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
+          {
+            echo "### Production candidate"
+            echo "- Ref: \`$GITHUB_REF\`"
+            echo "- Commit: \`$GITHUB_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -47,7 +62,7 @@ jobs:
 
   deploy:
     name: Deploy Firebase production
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
     needs: validate
     runs-on: ubuntu-latest
     environment: production
@@ -57,6 +72,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Verify master before deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -71,3 +94,17 @@ jobs:
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.
       - name: Deploy Hosting only
         run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Record deployed commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_master="$(git ls-remote origin refs/heads/master | cut -f1)"
+          test -n "$remote_master"
+          test "$GITHUB_SHA" = "$remote_master"
+          {
+            echo "### Firebase Hosting deployed"
+            echo "- Ref: \`$GITHUB_REF\`"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Scope: \`hosting\`"
+          } >> "$GITHUB_STEP_SUMMARY"
