@@ -36,7 +36,6 @@ const firestoreRules = await read('firestore.rules');
 const storageRules = await read('storage.rules');
 const firebaseJson = JSON.parse(await read('firebase.json'));
 const deployWorkflow = await read('.github/workflows/firebase-deploy.yml');
-const docsWorkflow = await read('.github/workflows/docs.yml');
 const cloudFunctions = await read('functions/index.js');
 const manifest = JSON.parse(await read('Frontend/public/manifest.json'));
 const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/reset_password.js');
@@ -304,8 +303,6 @@ assert.match(deployWorkflow, /Setup Node\.js[\s\S]*?if: steps\.scope\.outputs\.r
     'La suite completa non è vincolata alla classificazione del perimetro');
 assert.match(deployWorkflow, /Confirm documentation-only pull request[\s\S]*?if: steps\.scope\.outputs\.run_full_suite == 'false'/,
     'Il percorso documentale non mantiene un esito validate esplicito');
-assert.match(docsWorkflow, /push:\s*\n\s*branches:\s*\n\s*- master[\s\S]*?pull_request:[\s\S]*?workflow_dispatch:/,
-    'Il workflow documentale deve evitare i push di ramo ma restare attivo su PR, master e avvio manuale');
 assert.match(deployWorkflow, /if: github\.event_name == 'workflow_dispatch' && github\.ref == 'refs\/heads\/master'/,
     'Il deploy manuale può partire da un riferimento diverso da master');
 assert.match(deployWorkflow, /Verify manual release source[\s\S]*?git ls-remote origin refs\/heads\/master[\s\S]*?GITHUB_SHA[\s\S]*?remote_master/,

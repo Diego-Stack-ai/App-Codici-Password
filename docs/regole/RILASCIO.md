@@ -14,7 +14,7 @@ Una pull request è **solo documentale** esclusivamente quando tutti i percorsi 
 
 La classificazione fallisce in modo conservativo: una modifica vuota, ambigua, a script, configurazioni, workflow, codice o qualunque file non documentale mantiene la suite completa. Anche i push applicativi su `master` e ogni `workflow_dispatch` eseguono sempre `npm test`; il percorso rapido non è quindi utilizzabile per una pubblicazione. Restano invariati il vincolo allo SHA corrente del `master` remoto, il ricontrollo immediatamente prima e dopo il deploy e il perimetro manuale del rilascio.
 
-Il workflow documentale non viene più duplicato sul push del ramo che avrà già una pull request: resta attivo sulla pull request, sul `master` risultante e su avvio manuale. Questa riduzione elimina soltanto ripetizioni prive di copertura aggiuntiva e non riduce i gate applicativi o produttivi.
+Il workflow documentale è un controllo strutturale protetto e resta invariato: continua a verificare push, pull request e avvii manuali. Si accetta quindi la ripetizione del controllo documentale breve; l'ottimizzazione riguarda soltanto la suite applicativa completa nelle pull request interamente documentali e non riduce i gate applicativi o produttivi.
 
 ## Esito operativo 1.2.223 — form unico delle Scadenze — 22/10/2026
 

@@ -10,7 +10,7 @@ Sono verdi i test mirati del form, del catalogo, dei Documenti personali e dell'
 
 L'audit delle esecuzioni GitHub ha misurato un controllo applicativo completo di **8 minuti** sulla pull request che modificava soltanto la documentazione della release `1.2.224`, in aggiunta ai controlli documentali dedicati. La candidata locale conserva il job `validate` ma riconosce in modo fail-safe le sole pull request composte da Markdown o file sotto `docs/`: soltanto per queste evita installazioni, Java, emulatori e suite applicativa. Script, configurazioni, workflow, codice, casi ambigui, push applicativi su `master` e avvii manuali di pubblicazione mantengono `npm test` completo.
 
-Il workflow documentale resta attivo sulla pull request, sul `master` risultante e manualmente, eliminando soltanto la duplicazione sul push del ramo. Sono verdi l'audit statico dei nuovi invarianti, `test:docs` **11/11**, `git diff --check` e l'intera suite locale `npm test`, inclusi Functions, Rules, Storage, Vault ed emulatori. La modifica fa parte della candidata `1.2.225` e sarà pubblicata soltanto insieme al form, dopo gli stessi gate applicativi completi.
+Il workflow documentale protetto resta invariato e continua a eseguire i controlli brevi su push e pull request. L'ottimizzazione elimina soltanto la ripetizione della costosa suite applicativa nelle PR interamente documentali. Sono verdi l'audit statico dei nuovi invarianti, `test:docs` **11/11**, `git diff --check` e l'intera suite locale `npm test`, inclusi Functions, Rules, Storage, Vault ed emulatori. La modifica fa parte della candidata `1.2.225` e sarà pubblicata soltanto insieme al form, dopo gli stessi gate applicativi completi.
 
 ## Release 1.2.224 pubblicata — Scadenze archiviate — 22/10/2026
 
