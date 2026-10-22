@@ -1,12 +1,12 @@
 # Rilascio
 
-## Candidata 1.2.225 — scelta esplicita del tipo di Scadenza — 22/10/2026
+## Esito operativo 1.2.225 — scelta esplicita del tipo di Scadenza — 22/10/2026
 
 Il form di creazione parte ora da **Tipo di scadenza** e presenta gli stessi otto ambiti delle Regole scadenze. Una nuova Scadenza non preseleziona più Automezzi, la prima regola o il primo riferimento: soltanto dopo la scelta dell'ambito mostra le configurazioni pertinenti e il relativo riferimento. Gli ambiti senza regole espongono uno stato vuoto con accesso alla configurazione; **Documenti personali** rimanda al Profilo, perché quelle Scadenze devono nascere dal Documento sorgente. Modifica e flusso Documento → Scadenza conservano le preselezioni necessarie a riaprire collegamenti esistenti.
 
 La candidata comprende anche la classificazione conservativa dei controlli CI: solo le pull request composte interamente da Markdown o file sotto `docs/` evitano la ripetizione della suite applicativa; ogni modifica a codice, script, configurazioni o workflow, ogni push applicativo su `master` e ogni pubblicazione manuale continuano a eseguire `npm test` completo. Sono verdi localmente test mirati **16/16**, navigazione **179/179**, suite integrale, documentazione, sintassi JavaScript, CSS, i18n, purezza HTML, riferimenti statici, controllo versione e diff.
 
-L'ordine **«Pubblica»** autorizza patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni, riconciliazioni e dati reali restano esclusi.
+La PR `#215` è stata unita nel merge commit `22d5b5c5` dopo i gate verdi. Il run automatico del `master` `39802166170` ha completato la validazione in 8m14s; il workflow manuale `39803558242` ha ripetuto i controlli sullo stesso SHA e pubblicato esclusivamente Firebase Hosting in 43s. La verifica HTTP pubblica restituisce `200` e conferma versione, selezione del tipo e guida dei Documenti personali. Functions, Firestore Rules, Storage Rules, indici, migrazioni, riconciliazioni e dati reali sono rimasti esclusi.
 
 ## Classificazione conservativa dei controlli CI — 22/10/2026
 
