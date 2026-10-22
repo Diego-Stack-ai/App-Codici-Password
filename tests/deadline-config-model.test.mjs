@@ -5,6 +5,17 @@ import test from 'node:test';
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/scadenze/deadline-config-model.js', import.meta.url), 'utf8');
 const model = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
+test('rule identity keeps stable IDs and makes domain and schema explicit', () => {
+    const created = model.withDeadlineRuleIdentity({name: 'IMU'}, {id: 'rule-imu', domain: 'home'});
+    assert.equal(created.id, 'rule-imu');
+    assert.equal(created.domain, 'home');
+    assert.equal(created.schemaVersion, model.DEADLINE_RULE_SCHEMA_VERSION);
+
+    const updated = model.withDeadlineRuleIdentity(created, {id: 'rule-other', domain: 'contracts'});
+    assert.equal(updated.id, 'rule-imu');
+    assert.equal(updated.domain, 'contracts');
+});
+
 test('frequenza consentita da 1 a 30 senza migrare i dati storici', () => {
     for (const value of [1, 7, 30, '30']) assert.equal(model.validateDeadlineFrequency(value), Number(value));
     for (const value of [0, 31, 90, -1, 1.5, '7x', '', null, Infinity]) {

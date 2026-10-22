@@ -1,5 +1,13 @@
 # Stato
 
+## Candidata 1.2.220 — linguette operative uniformi e regole identificabili — 22/10/2026
+
+Le sei linguette operative di **Regole scadenze** condividono ora la struttura richiesta: la presentazione è una nota autonoma, incorniciata e più compatta; il pannello semantico perde bordo, fondo e spaziatura propri; le card delle regole sono mostrate direttamente nella linguetta. **Documenti personali** conserva il flusso separato già stabilizzato. Nell’editor contestuale ogni regola operativa usa una sola pianificazione; le card Automezzi restano identificate da modello e targa, mentre le altre richiedono un **Nome configurazione** che ne aggiorna il titolo.
+
+La convergenza dei dati è predisposta ma non anticipata: le regole nuove o salvate esplicitamente ricevono ID stabile, `domain` ricavato dalla regola effettivamente aperta e `schemaVersion`; le sorgenti storiche `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig` non vengono spostate o fuse. La migrazione verso una sorgente canonica e il collegamento delle Scadenze tramite `ruleId` restano un cutover successivo con inventario, deduplica, prova e rollback. Nessuna configurazione reale o Scadenza è stata letta o scritta durante questo intervento.
+
+La suite completa `npm test` è verde con codice **0**, inclusi test applicativi, documentazione, guida, i18n, Assistant, fondazioni UI, lint, Functions e tutti gli scenari Firebase su emulatori. Restano inoltre verdi `git diff --check` e i test mirati su modello, dominio e hub **33/33** e navigazione **179/179**. La candidata è stata portata a `1.2.220`, con **266** riferimenti agli asset riallineati; il grafo strutturale aggiornato contiene **13.608 nodi**, **35.367 archi** e **894 comunità**. L’ordine del 22/10/2026 autorizza commit, push, PR, merge e pubblicazione del solo Firebase Hosting dopo preflight e gate GitHub verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e accessi ai dati reali restano esclusi.
+
 ## Release 1.2.219 pubblicata — Comodato conservativo e controllo dello stato Git — 21/10/2026
 
 Il collaudo autenticato in sola lettura della `1.2.218` ha individuato una regressione di sola proiezione: la regola storica **Comodato d'uso** mostrava Land Rover, Hyundai e Peugeot perché il testo generico «dell'auto» veniva applicato a tutte le automobili del catalogo. Non è stata creata alcuna nuova regola, non è stato premuto **Salva** e non risultano scritture su configurazioni o Scadenze reali. Le due configurazioni Comodato già censite erano preesistenti; Documenti personali non è stato modificato dalla `1.2.218`.

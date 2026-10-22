@@ -1,5 +1,9 @@
 # Decisioni
 
+## 21/10/2026 — uniformità delle regole senza migrazione implicita
+
+Le sei linguette operative adottano la stessa gerarchia visiva e lo stesso principio di configurazione: nota autonoma, card delle regole senza grande contenitore esterno, pianificazione unica a livello di regola e card interne nominate. La forma fisica storica resta temporaneamente distribuita tra `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig`; non viene nascosta né riscritta durante il caricamento. Le regole nuove o salvate esplicitamente ricevono ID stabile, ambito esplicito e versione di schema. La scelta e il popolamento di una sorgente canonica, seguiti dal collegamento delle Scadenze tramite `ruleId`, costituiscono un cutover separato con inventario, prova e rollback.
+
 ## 17/10/2026 — editor dedicato delle Scadenze dei Documenti personali
 
 Il flusso Documento → Scadenza non usa più la composizione generica per i dati già determinati dal Documento. Intestatario, tipo, numero o codice, ente di rilascio e Data di scadenza sono mostrati come riepilogo non modificabile; tipo ed ente restano campi distinti. Il valore data persistito rimane ISO, mentre la presentazione segue la lingua dell’app e in italiano usa `GG/MM/AAAA`.
