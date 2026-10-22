@@ -12,7 +12,9 @@ Criteri di chiusura locale: sette linguette non personali con la stessa struttur
 
 Diego esprime l’intenzione di ricreare successivamente tutte le proprie Scadenze e chiede se le regole potranno convergere in un contenitore unico. Questa è una fase successiva: non autorizza una migrazione implicita nella release corrente e non modifica la separazione obbligatoria delle copie ricevute. L’ordine successivo **«pubblica»** autorizza la patch `1.2.222`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e scritture sui dati reali restano esclusi.
 
-Esito locale: requisiti implementati e candidata portata alla `1.2.222`; test mirati **18/18** e suite integrale `npm test` con codice **0**. Sono verdi anche documentazione **11/11**, guida **6/6**, i18n **14/14**, CSS, sintassi JavaScript, controllo versione e diff. Graphify principale è aggiornato a **13.633 nodi**, **35.373 archi** e **911 comunità**. Nessun salvataggio sui dati reali è stato eseguito.
+Esito locale: requisiti implementati e candidata portata alla `1.2.222`; test mirati **18/18** e suite integrale `npm test` con codice **0**. Sono verdi anche documentazione **11/11**, guida **6/6**, i18n **14/14**, CSS, sintassi JavaScript, controllo versione e diff. Graphify principale è aggiornato sul merge `389dc47d` a **13.612 nodi**, **35.327 archi** e **913 comunità**. Nessun salvataggio sui dati reali è stato eseguito.
+
+Esito di rilascio: commit `62653066`, PR `#209` e merge commit `389dc47d`. Il gate automatico `39739199567` ha verificato il `master` in 6m30s; il workflow manuale `39739980892` ha ripetuto la validazione in 14m35s e pubblicato il solo Firebase Hosting in 2m47s. Le verifiche HTTP pubbliche sono `200` e confermano versione, linguette, riclassificazioni e icone Destinatari. Il ramo applicativo è stato eliminato in locale e su GitHub. Backend, Rules, indici, migrazioni, configurazioni reali e Scadenze esistenti sono rimasti invariati.
 
 ## Note uniformi in Documenti personali e nelle linguette aziendali — 22/10/2026
 

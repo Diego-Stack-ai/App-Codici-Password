@@ -1,12 +1,14 @@
 # Rilascio
 
-## Candidata 1.2.222 — riclassificazione delle regole e stato destinatari — 22/10/2026
+## Esito operativo 1.2.222 — riclassificazione delle regole e stato destinatari — 22/10/2026
 
 La candidata sostituisce **Contratti e rapporti** con **Contratti e documenti**, elimina la linguetta vuota **Documenti generici** e rende operative le aree **Utente–azienda** e **Documenti aziendali**. La proiezione assegna Comodato d’uso a Utente–azienda e le regole Capannone a Documenti aziendali; vecchie regole generiche o non classificate ricadono in Contratti e documenti. Il Comodato conserva il comportamento a card modello/targa.
 
 La rubrica Destinatari corregge la sola semantica visiva del comando di stato: spunta per il contatto attivo e omino barrato per quello disattivato, mentre **Disattiva/Riattiva** continuano a descrivere l’azione. Persistenza, filtri e dati reali non cambiano.
 
-Il perimetro non comprende una migrazione Firestore: `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig` restano sorgenti fisiche distinte; salvataggio e modifica puntano sempre alla sorgente originaria e le Scadenze esistenti non vengono riallineate. Il controllo autenticato è stato solo di lettura e non è stato premuto **Salva**. La convergenza futura delle regole in un contenitore canonico unico resta un cutover separato; `receivedDeadlines` conserva comunque il proprio contratto distinto. Test mirati **18/18** e suite integrale `npm test` sono verdi; Graphify principale è riallineato a **13.633 nodi**, **35.373 archi** e **911 comunità**. L’ordine **«pubblica»** autorizza bump patch, commit, push, PR, merge e workflow del solo Firebase Hosting dopo i gate verdi; Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+Il perimetro non comprende una migrazione Firestore: `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig` restano sorgenti fisiche distinte; salvataggio e modifica puntano sempre alla sorgente originaria e le Scadenze esistenti non vengono riallineate. Il controllo autenticato è stato solo di lettura e non è stato premuto **Salva**. La convergenza futura delle regole in un contenitore canonico unico resta un cutover separato; `receivedDeadlines` conserva comunque il proprio contratto distinto. Test mirati **18/18** e suite integrale `npm test` sono verdi; Graphify principale è riallineato al merge `389dc47d` con **13.612 nodi**, **35.327 archi** e **913 comunità**. L’ordine **«pubblica»** autorizza bump patch, commit, push, PR, merge e workflow del solo Firebase Hosting dopo i gate verdi; Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+
+Il commit `62653066` è stato unito tramite PR `#209` nel merge commit `389dc47d`. Il run automatico `39739199567` ha verificato il `master` in 6m30s; il workflow manuale `39739980892` ha ripetuto la validazione in 14m35s e pubblicato esclusivamente Firebase Hosting in 2m47s. La verifica HTTP pubblica restituisce `200`, serve la `1.2.222` e conferma le nuove linguette, l’assenza di Documenti generici, le riclassificazioni e la semantica visiva corretta dei Destinatari. Il ramo applicativo è stato eliminato in locale e su GitHub. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Esito operativo 1.2.221 — note uniformi nelle linguette Regole scadenze — 22/10/2026
 
