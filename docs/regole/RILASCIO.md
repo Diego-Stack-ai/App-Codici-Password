@@ -1,8 +1,10 @@
 # Rilascio
 
-## Candidata 1.2.221 — note uniformi nelle linguette Regole scadenze — 22/10/2026
+## Esito operativo 1.2.221 — note uniformi nelle linguette Regole scadenze — 22/10/2026
 
-**Documenti personali** aggiunge una nota introduttiva autonoma prima delle card, mentre **Utente–azienda** e **Documenti aziendali** perdono la grande card esterna e mantengono messaggi e badge nel pannello neutro. La modifica è limitata al Frontend statico e ai testi localizzati: non autorizza né richiede Functions, Rules, indici, migrazioni o accessi ai dati reali. La suite integrale locale è verde con codice **0**, insieme ai controlli mirati, documentali, i18n, CSS, versione e diff; commit, merge, gate GitHub e pubblicazione Hosting saranno registrati soltanto dopo il relativo esito.
+**Documenti personali** aggiunge una nota introduttiva autonoma prima delle card, mentre **Utente–azienda** e **Documenti aziendali** perdono la grande card esterna e mantengono messaggi e badge nel pannello neutro. La modifica è limitata al Frontend statico e ai testi localizzati: non autorizza né richiede Functions, Rules, indici, migrazioni o accessi ai dati reali. La suite integrale locale è verde con codice **0**, insieme ai controlli mirati, documentali, i18n, CSS, versione e diff.
+
+La PR `#207` è stata unita nel commit `ee37c19e` dopo i gate verdi. Il run automatico `39712366772` ha verificato il `master` e il workflow manuale `39714092635` ha ripetuto la validazione e pubblicato esclusivamente Firebase Hosting. La verifica pubblica restituisce HTTP `200` e conferma la `1.2.221`, la nuova nota dei Documenti personali e i pannelli aziendali visivamente neutri. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Esito operativo 1.2.220 — uniformità delle linguette operative — 22/10/2026
 

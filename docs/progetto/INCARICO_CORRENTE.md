@@ -8,7 +8,7 @@ La candidata `1.2.221` usa quindi pannelli semanticamente accessibili ma visivam
 
 L’ordine **«fai la modifica e poi pubblica»** autorizza implementazione, documentazione, test, bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Graphify è stato interrogato prima dell’intervento; non viene rigenerato perché il lotto modifica soltanto HTML, CSS, testi e documentazione, senza struttura JavaScript, Functions, Rules, import, contratti dati, autenticazione, Vault, cifratura o flussi applicativi.
 
-Esito locale: `npm test` è terminato con codice **0**; sono verdi anche hub **5/5**, guida **6/6**, documentazione **11/11**, i18n **14/14**, navigazione **179/179**, CSS, controllo versione e `git diff --check`. I **266** riferimenti agli asset sono allineati alla `1.2.221`. Merge, workflow Hosting e verifica pubblica restano distinti e non sono ancora dichiarati eseguiti.
+Esito: `npm test` è terminato con codice **0**; sono verdi anche hub **5/5**, guida **6/6**, documentazione **11/11**, i18n **14/14**, navigazione **179/179**, CSS, controllo versione e `git diff --check`. I **266** riferimenti agli asset sono allineati alla `1.2.221`. La PR `#207` è stata unita nel commit `ee37c19e`; il gate automatico `39712366772` e il workflow manuale `39714092635` sono verdi. Quest’ultimo ha pubblicato esclusivamente Firebase Hosting e la verifica HTTP pubblica conferma stato `200`, versione e marcatori aggiornati. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Uniformità delle linguette operative e identità stabile delle regole — 22/10/2026
 
