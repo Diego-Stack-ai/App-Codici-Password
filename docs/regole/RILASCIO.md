@@ -1,5 +1,9 @@
 # Rilascio
 
+## Candidata 1.2.221 — note uniformi nelle linguette Regole scadenze — 22/10/2026
+
+**Documenti personali** aggiunge una nota introduttiva autonoma prima delle card, mentre **Utente–azienda** e **Documenti aziendali** perdono la grande card esterna e mantengono messaggi e badge nel pannello neutro. La modifica è limitata al Frontend statico e ai testi localizzati: non autorizza né richiede Functions, Rules, indici, migrazioni o accessi ai dati reali. La suite integrale locale è verde con codice **0**, insieme ai controlli mirati, documentali, i18n, CSS, versione e diff; commit, merge, gate GitHub e pubblicazione Hosting saranno registrati soltanto dopo il relativo esito.
+
 ## Esito operativo 1.2.220 — uniformità delle linguette operative — 22/10/2026
 
 Le sei linguette operative di **Regole scadenze** adottano una nota introduttiva autonoma e compatta, un pannello esterno visivamente neutro e card delle regole mostrate direttamente. L’editor contestuale usa una sola pianificazione per regola; Automezzi identifica le card tramite modello e targa, mentre gli altri ambiti richiedono un nome della configurazione. Le regole nuove o salvate volontariamente ricevono ID stabile, ambito esplicito e versione di schema, senza spostare le sorgenti storiche o modificare automaticamente le Scadenze reali.

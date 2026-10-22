@@ -23,6 +23,9 @@ test('the deadline hub exposes nine accessible domains and removes the three sep
     assert.match(html, new RegExp(`data-deadline-domain-summary="${domain}"`));
     assert.match(html, new RegExp(`class="deadline-domain-panel deadline-operational-panel"[^>]+data-deadline-panel="${domain}"`));
   }
+  for (const domain of ['user-company', 'company']) {
+    assert.match(html, new RegExp(`class="deadline-domain-panel deadline-information-panel"[^>]+data-deadline-panel="${domain}"`));
+  }
   assert.doesNotMatch(html, /Documenti personali collegati|Apri Documenti nel Profilo/);
 });
 
@@ -61,6 +64,8 @@ test('personal document summary has loading, empty, error and responsive card st
   ]);
   assert.doesNotMatch(html, /deadline-hub-badge|RICONCILIATE/);
   assert.match(html, /<div class="deadline-domain-panel deadline-personal-panel"/);
+  assert.match(html, /data-t="deadline_personal_title"/);
+  assert.match(html, /data-t="deadline_personal_desc"/);
   assert.match(source, /deadline_personal_loading/);
   assert.match(source, /deadline_personal_empty/);
   assert.match(source, /deadline_personal_error/);
@@ -92,8 +97,9 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(css, /\.deadline-domain-schedule-warning/);
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
   assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
-  assert.match(css, /\.deadline-operational-panel\s*\{[\s\S]*?padding:\s*0;[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;/);
-  assert.match(css, /\.deadline-operational-panel \.deadline-domain-copy\s*\{[\s\S]*?border:[\s\S]*?background:/);
+  assert.match(css, /\.deadline-operational-panel,[\s\S]*?\.deadline-information-panel\s*\{[\s\S]*?padding:\s*0;[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;/);
+  assert.match(css, /\.deadline-operational-panel \.deadline-domain-copy,[\s\S]*?\.deadline-information-panel \.deadline-domain-copy,[\s\S]*?\.deadline-personal-panel \.deadline-domain-copy\s*\{[\s\S]*?border:[\s\S]*?background:/);
+  assert.match(css, /\.deadline-personal-summary\s*\{[\s\S]*?margin-top:\s*1\.1rem;/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
 });
 

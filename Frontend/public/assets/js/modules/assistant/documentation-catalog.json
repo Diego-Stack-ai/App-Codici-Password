@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 3,
-  "reviewedAppVersion": "1.2.220",
+  "contentVersion": 4,
+  "reviewedAppVersion": "1.2.221",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -1261,9 +1261,9 @@
       "guide.pages.dettaglio_scadenza.step-3": "Apri gli allegati disponibili. Quelli referenziati da Account o Documenti restano di proprietà della scheda origine.",
       "guide.pages.dettaglio_scadenza.step-4": "Rinnovo, completamento e altre azioni dipendono dai permessi; leggi le conferme dell’app prima di eseguirle.",
       "guide.pages.regole_scadenze.title": "Regole delle scadenze",
-      "guide.pages.regole_scadenze.purpose": "Consulta i Documenti personali e gestisci le regole nelle sei linguette operative.",
-      "guide.pages.regole_scadenze.step-1": "Apri Documenti personali per vedere ogni documento del Profilo e lo stato della relativa Scadenza.",
-      "guide.pages.regole_scadenze.step-2": "Nelle linguette operative la nota introduttiva è separata e le schede delle regole sono mostrate direttamente, senza un contenitore esterno.",
+      "guide.pages.regole_scadenze.purpose": "Consulta i Documenti personali, gestisci le regole operative e riconosci le aree future.",
+      "guide.pages.regole_scadenze.step-1": "Apri Documenti personali: la nota iniziale ricorda che le schede provengono dal Profilo e che configurare l’avviso non crea copie.",
+      "guide.pages.regole_scadenze.step-2": "Nelle linguette operative e nelle due aree aziendali il pannello è neutro: la nota resta separata e le eventuali schede delle regole sono mostrate direttamente.",
       "guide.pages.regole_scadenze.step-3": "Apri una regola per gestire una sola pianificazione e le relative configurazioni. La provenienza storica resta visibile e le Scadenze già esistenti non vengono modificate automaticamente.",
       "guide.pages.configurazione_automezzi.title": "Configurazione della regola",
       "guide.pages.configurazione_automezzi.purpose": "Gestisci la regola scelta con una pianificazione unica e configurazioni riconoscibili.",

@@ -10,19 +10,19 @@
     <title data-t="title_deadline_rules">Regole Scadenze - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.220" />
+    <link rel="manifest" href="manifest.json?v=1.2.221" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.220">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.221">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.220">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.220">
-    <link rel="stylesheet" href="assets/css/regole_scadenze.css?v=1.2.220">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.221">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.221">
+    <link rel="stylesheet" href="assets/css/regole_scadenze.css?v=1.2.221">
 </head>
 
 <body data-private-auth hidden inert class="base-bg" data-ui-model="configuration">
@@ -86,6 +86,7 @@
 
                     <div class="deadline-domain-panels">
                         <div class="deadline-domain-panel deadline-personal-panel" role="tabpanel" id="deadline-panel-personal" aria-labelledby="deadline-tab-personal" data-deadline-panel="personal">
+                            <div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">badge</span><div><h3 data-t="deadline_personal_title">Scadenze dei documenti personali</h3><p data-t="deadline_personal_desc">Qui trovi i documenti del Profilo e configuri i relativi avvisi di scadenza senza creare copie.</p></div></div>
                             <div id="personal-documents-summary" class="deadline-personal-summary" aria-live="polite" aria-busy="true"></div>
                         </div>
                         <article class="deadline-domain-panel deadline-operational-panel" role="tabpanel" id="deadline-panel-vehicles" aria-labelledby="deadline-tab-vehicles" data-deadline-panel="vehicles" hidden>
@@ -105,8 +106,8 @@
                         <article class="deadline-domain-panel deadline-operational-panel" role="tabpanel" id="deadline-panel-sport" aria-labelledby="deadline-tab-sport" data-deadline-panel="sport" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">sailing</span><div><h3 data-t="deadline_sport_title">Sport e associazioni</h3><p data-t="deadline_sport_desc">Tesseramenti, quote, licenze e certificati collegati alle attività.</p></div></div><div class="deadline-domain-summary" data-deadline-domain-summary="sport" aria-live="polite"></div><button type="button" class="deadline-domain-new-rule" data-deadline-add-rule="sport"><span class="material-symbols-outlined notranslate" translate="no">add</span><span data-t="deadline_domain_new_rule">Nuova regola</span></button></article>
                         <article class="deadline-domain-panel deadline-operational-panel" role="tabpanel" id="deadline-panel-contracts" aria-labelledby="deadline-tab-contracts" data-deadline-panel="contracts" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">signature</span><div><h3 data-t="deadline_contracts_title">Contratti e rapporti</h3><p data-t="deadline_contracts_desc">Rinnovi, disdette, comodati e rapporti periodici personali.</p></div></div><div class="deadline-domain-summary" data-deadline-domain-summary="contracts" aria-live="polite"></div><button type="button" class="deadline-domain-new-rule" data-deadline-add-rule="contracts"><span class="material-symbols-outlined notranslate" translate="no">add</span><span data-t="deadline_domain_new_rule">Nuova regola</span></button></article>
                         <article class="deadline-domain-panel deadline-operational-panel" role="tabpanel" id="deadline-panel-generic" aria-labelledby="deadline-tab-generic" data-deadline-panel="generic" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">note_stack</span><div><h3 data-t="deadline_generic_title">Documenti generici</h3><p data-t="deadline_generic_desc">Uno spazio flessibile per ciò che non appartiene agli altri ambiti.</p></div></div><div class="deadline-domain-summary" data-deadline-domain-summary="generic" aria-live="polite"></div><button type="button" class="deadline-domain-new-rule" data-deadline-add-rule="generic"><span class="material-symbols-outlined notranslate" translate="no">add</span><span data-t="deadline_domain_new_rule">Nuova regola</span></button></article>
-                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-user-company" aria-labelledby="deadline-tab-user-company" data-deadline-panel="user-company" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">account_tree</span><div><h3 data-t="deadline_user_company_title">Rapporti utente–azienda</h3><p data-t="deadline_user_company_desc">Futuro contenitore unico per scadenze create dall’utente o dall’azienda e riferite allo stesso rapporto.</p></div></div></article>
-                        <article class="deadline-domain-panel" role="tabpanel" id="deadline-panel-company" aria-labelledby="deadline-tab-company" data-deadline-panel="company" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">business_center</span><div><h3 data-t="deadline_company_title">Documenti aziendali</h3><p data-t="deadline_company_desc">Area futura per licenze, autorizzazioni, contratti e adempimenti delle singole aziende.</p></div></div><span class="deadline-future-badge" data-t="deadline_future_phase">FASE FUTURA</span></article>
+                        <article class="deadline-domain-panel deadline-information-panel" role="tabpanel" id="deadline-panel-user-company" aria-labelledby="deadline-tab-user-company" data-deadline-panel="user-company" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">account_tree</span><div><h3 data-t="deadline_user_company_title">Rapporti utente–azienda</h3><p data-t="deadline_user_company_desc">Futuro contenitore unico per scadenze create dall’utente o dall’azienda e riferite allo stesso rapporto.</p></div></div></article>
+                        <article class="deadline-domain-panel deadline-information-panel" role="tabpanel" id="deadline-panel-company" aria-labelledby="deadline-tab-company" data-deadline-panel="company" hidden><div class="deadline-domain-copy"><span class="material-symbols-outlined notranslate" translate="no">business_center</span><div><h3 data-t="deadline_company_title">Documenti aziendali</h3><p data-t="deadline_company_desc">Area futura per licenze, autorizzazioni, contratti e adempimenti delle singole aziende.</p></div></div><span class="deadline-future-badge" data-t="deadline_future_phase">FASE FUTURA</span></article>
                     </div>
                 </section>
 

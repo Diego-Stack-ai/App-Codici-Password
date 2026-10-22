@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Note uniformi in Documenti personali e nelle linguette aziendali — 22/10/2026
+
+Diego chiede di eliminare la grande card visiva che circonda i messaggi informativi di **Utente–azienda** e **Documenti aziendali**, mantenendo però i contenuti e l’indicazione di fase futura. Chiede inoltre di aggiungere a **Documenti personali** una frase di presentazione analoga alle note già presenti nelle linguette operative.
+
+La candidata `1.2.221` usa quindi pannelli semanticamente accessibili ma visivamente neutri per le due aree aziendali e introduce in Documenti personali una nota autonoma che spiega il rapporto diretto con i Documenti del Profilo. Il perimetro non comprende modifiche a configurazioni, Scadenze, destinatari, Functions, Rules, indici, migrazioni o dati reali.
+
+L’ordine **«fai la modifica e poi pubblica»** autorizza implementazione, documentazione, test, bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Graphify è stato interrogato prima dell’intervento; non viene rigenerato perché il lotto modifica soltanto HTML, CSS, testi e documentazione, senza struttura JavaScript, Functions, Rules, import, contratti dati, autenticazione, Vault, cifratura o flussi applicativi.
+
+Esito locale: `npm test` è terminato con codice **0**; sono verdi anche hub **5/5**, guida **6/6**, documentazione **11/11**, i18n **14/14**, navigazione **179/179**, CSS, controllo versione e `git diff --check`. I **266** riferimenti agli asset sono allineati alla `1.2.221`. Merge, workflow Hosting e verifica pubblica restano distinti e non sono ancora dichiarati eseguiti.
+
 ## Uniformità delle linguette operative e identità stabile delle regole — 22/10/2026
 
 Diego chiede di applicare alle sei linguette operative di **Regole scadenze** una struttura visiva unica: il testo introduttivo diventa una nota autonoma, compatta e con carattere più piccolo; il grande riquadro che inglobava tutte le regole perde bordo, fondo e spaziatura; le card delle singole regole occupano direttamente il pannello. **Documenti personali** resta esclusa perché segue il collegamento diretto Profilo–Scadenza già stabilizzato.

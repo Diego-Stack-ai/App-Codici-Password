@@ -1,5 +1,11 @@
 # Stato
 
+## Release 1.2.221 candidata — note uniformi nelle linguette Regole scadenze — 22/10/2026
+
+La linguetta **Documenti personali** presenta ora una nota introduttiva autonoma che chiarisce il collegamento diretto con i Documenti del Profilo e l’assenza di copie. Le linguette **Utente–azienda** e **Documenti aziendali** non usano più la grande card esterna: conservano il proprio messaggio informativo, il badge di fase futura dove previsto e la semantica accessibile del pannello, dentro la stessa struttura visivamente neutra delle altre linguette.
+
+L’intervento riguarda esclusivamente markup, stile e testi localizzati. Non modifica regole, configurazioni, Documenti, Scadenze, destinatari, backend o dati reali. La verifica locale è completata: `npm test` è verde con codice **0**, inclusi documentazione **11/11**, guida **6/6**, hub **5/5**, i18n **14/14**, navigazione **179/179**, Functions, Rules, Storage, Vault e tutti gli emulatori; sono verdi anche CSS, `git diff --check` e il controllo dei **266** riferimenti della `1.2.221`. Merge e pubblicazione Hosting saranno registrati separatamente dopo il relativo esito.
+
 ## Release 1.2.220 pubblicata — linguette operative uniformi e regole identificabili — 22/10/2026
 
 Le sei linguette operative di **Regole scadenze** condividono ora la struttura richiesta: la presentazione è una nota autonoma, incorniciata e più compatta; il pannello semantico perde bordo, fondo e spaziatura propri; le card delle regole sono mostrate direttamente nella linguetta. **Documenti personali** conserva il flusso separato già stabilizzato. Nell’editor contestuale ogni regola operativa usa una sola pianificazione; le card Automezzi restano identificate da modello e targa, mentre le altre richiedono un **Nome configurazione** che ne aggiorna il titolo.
