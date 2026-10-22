@@ -1,4 +1,4 @@
-import {db} from '../../firebase-config.js?v=1.2.219';
+import {db} from '../../firebase-config.js?v=1.2.220';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
@@ -13,6 +13,7 @@ import {
     updateDeadlineRuleVehicleCards,
     validateDeadlineFrequency,
     validateDeadlineNotice,
+    withDeadlineRuleIdentity,
     withDeadlineVehicleReferences
 } from './deadline-config-model.js';
 import {classifyDeadlineDomain} from './deadline-domain-model.js';
@@ -88,6 +89,10 @@ function updatePreview(card) {
 function vehicleCardTitle(vehicle = {}) {
     return [String(vehicle.model || '').trim(), String(vehicle.plate || '').trim()].filter(Boolean).join(' · ')
         || t('deadline_vehicle_new_reference');
+}
+
+function genericParameterTitle(parameter = {}) {
+    return String(parameter.name || '').trim() || t('deadline_rule_new_configuration');
 }
 
 function readRuleSchedule() {
@@ -183,8 +188,8 @@ function normalizeGenericParameters(rule, config) {
     if (Array.isArray(rule?.parameters) && rule.parameters.length) {
         return rule.parameters.map((item, index) => ({
             id: String(item.id || `parameter-${index}`),
-            period: Number(item.period ?? rule.period ?? 14),
-            freq: Number(item.freq ?? rule.freq ?? 7),
+            name: String(item.name || item.label || (Array.isArray(item.references) ? item.references[0] : '')
+                || (rule.parameters.length === 1 ? rule.name : `${rule.name} ${index + 1}`) || '').trim(),
             templateText: String(item.templateText || item.text || rule.templateText || rule.name || '').trim(),
             references: sourceDefinition.kind === 'references' && Array.isArray(item.references)
                 ? item.references.map(value => String(value || '').trim()).filter(Boolean) : []
@@ -199,7 +204,7 @@ function normalizeGenericParameters(rule, config) {
         && classifyDeadlineDomain({name: value, sourceId: currentSourceId}) === currentDomain);
     const safeLegacyTemplate = domainTemplates.length === 1 ? domainTemplates[0] : '';
     return [{
-        id: 'legacy-parameter-0', period: Number(rule?.period ?? 14), freq: Number(rule?.freq ?? 7),
+        id: 'legacy-parameter-0', name: String(rule?.name || '').trim(),
         templateText: String(rule?.templateText || safeLegacyTemplate || rule?.name || '').trim(), references
     }];
 }
@@ -207,8 +212,7 @@ function normalizeGenericParameters(rule, config) {
 function readGenericParameters() {
     return [...document.querySelectorAll('[data-object-card]')].map(card => ({
         id: card.dataset.objectId,
-        period: Number(card.querySelector('[data-object-period]')?.value || 14),
-        freq: Number(card.querySelector('[data-object-frequency]')?.value || 7),
+        name: card.querySelector('[data-parameter-name]')?.value.trim() || '',
         templateText: card.querySelector('[data-parameter-template]')?.value.trim() || '',
         references: [...card.querySelectorAll('[data-parameter-reference]')]
             .map(input => input.value.trim()).filter(Boolean)
@@ -230,12 +234,12 @@ function renderGenericParameter(parameter, parameterIndex) {
                 }
             }, iconButton(ICON_DELETE))
         ])));
-    return createElement('details', {
+    const card = createElement('details', {
         className: 'vehicle-rule-object', open: parameterIndex === 0,
         dataset: {objectCard: '', objectId: parameter.id || nextId('parameter')}
     }, [
         createElement('summary', {className: 'vehicle-rule-object-header'}, [
-            createElement('h3', {textContent: t('deadline_vehicle_reference')}),
+            createElement('h3', {textContent: genericParameterTitle(parameter), dataset: {parameterCardTitle: ''}}),
             iconButton('expand_more', 'vehicle-rule-object-chevron')
         ]),
         createElement('div', {className: 'vehicle-rule-object-content'}, [
@@ -248,10 +252,7 @@ function renderGenericParameter(parameter, parameterIndex) {
                     render();
                 }
             }, iconButton(ICON_DELETE))]),
-            createElement('div', {className: 'vehicle-rule-fields two-columns vehicle-rule-schedule'}, [
-                field(t('deadline_personal_notice'), parameter.period, 'objectPeriod', {type: 'number', min: '0', max: '3650'}),
-                field(t('deadline_personal_frequency'), parameter.freq, 'objectFrequency', {type: 'number', min: '1', max: '30'})
-            ]),
+            field(t('deadline_vehicle_object_name'), parameter.name, 'parameterName'),
             field(t('deadline_rule_message'), parameter.templateText, 'parameterTemplate'),
             sourceDefinition.kind === 'references' ? references : null,
             sourceDefinition.kind === 'references' ? createElement('button', {
@@ -264,6 +265,11 @@ function renderGenericParameter(parameter, parameterIndex) {
             }, [iconButton(ICON_ADD), createElement('span', {textContent: t('deadline_rule_add_reference')})]) : null
         ].filter(Boolean))
     ]);
+    card.querySelector('[data-parameter-name]')?.addEventListener('input', event => {
+        const title = card.querySelector('[data-parameter-card-title]');
+        if (title) title.textContent = genericParameterTitle({name: event.currentTarget.value});
+    });
+    return card;
 }
 
 function iconButton(name, className = '') {
@@ -287,38 +293,41 @@ function render() {
     empty?.classList.add('hidden');
     editor?.classList.remove('hidden');
     clearElement(container);
-    if (usesVehicleCards()) container.appendChild(renderRuleSchedule(rule));
+    container.appendChild(renderRuleSchedule(rule));
     workingObjects.forEach((object, index) => container.appendChild(usesVehicleCards()
         ? renderVehicleCard(object, index) : renderGenericParameter(object, index)));
     if (!workingObjects.length) setChildren(container,
-        ...(usesVehicleCards() ? [renderRuleSchedule(rule)] : []),
+        renderRuleSchedule(rule),
         createElement('p', {className: 'vehicle-empty', textContent: t('deadline_vehicle_no_objects')}));
 }
 
 async function save() {
     if (!currentRule() || !currentUser) return;
-    const schedule = usesVehicleCards() ? readRuleSchedule() : null;
+    const schedule = readRuleSchedule();
     workingObjects = usesVehicleCards() ? readWorkingVehicles() : readGenericParameters();
     if (!usesVehicleCards() && !workingObjects.length) {
         return showToast(t('deadline_vehicle_object_required'), 'error');
     }
+    if (!usesVehicleCards() && workingObjects.some(parameter => !parameter.name)) {
+        return showToast(t('deadline_rule_name_required'), 'error');
+    }
     try {
-        if (usesVehicleCards()) {
-            schedule.period = validateDeadlineNotice(schedule.period);
-            schedule.freq = validateDeadlineFrequency(schedule.freq);
-        } else {
-            workingObjects = workingObjects.map(parameter => ({
-                ...parameter,
-                period: validateDeadlineNotice(parameter.period),
-                freq: validateDeadlineFrequency(parameter.freq)
-            }));
-        }
+        schedule.period = validateDeadlineNotice(schedule.period);
+        schedule.freq = validateDeadlineFrequency(schedule.freq);
+        if (!usesVehicleCards()) workingObjects = workingObjects.map(parameter => ({
+            ...parameter,
+            period: schedule.period,
+            freq: schedule.freq
+        }));
         const next = usesVehicleCards()
             ? updateDeadlineRuleVehicleCards(currentConfig, ruleIndex, workingObjects, schedule)
             : {...currentConfig, deadlineTypes: currentConfig.deadlineTypes.map((rule, index) => index === ruleIndex
-                ? {...rule, parameters: workingObjects, period: workingObjects[0].period,
-                    freq: workingObjects[0].freq, templateText: workingObjects[0].templateText}
+                ? {...rule, parameters: workingObjects, period: schedule.period,
+                    freq: schedule.freq, templateText: workingObjects[0].templateText}
                 : rule)};
+        next.deadlineTypes[ruleIndex] = withDeadlineRuleIdentity(next.deadlineTypes[ruleIndex], {
+            id: nextId('rule'), domain: currentDomain
+        });
         await setDoc(doc(db, 'users', currentUser.uid, 'settings', sourceDefinition.settingId),
             {deadlineTypes: next.deadlineTypes}, {merge: true});
         currentConfig = next;
@@ -339,10 +348,12 @@ export async function initConfigurazioneAutomezzi(user) {
     const params = new URLSearchParams(window.location.search);
     currentSourceId = CONFIG_SOURCES[params.get('source')] ? params.get('source') : 'deadlineConfig';
     sourceDefinition = CONFIG_SOURCES[currentSourceId];
-    currentDomain = params.get('domain') || 'generic';
     currentConfig = normalizeDeadlineConfig(await getUserSetting(user.uid, sourceDefinition.settingId) || {}, sourceDefinition.listFields);
     const requestedRule = params.get('rule');
     ruleIndex = currentConfig.deadlineTypes.findIndex((item, index) => deadlineRuleRouteKey(item, index) === requestedRule);
+    currentDomain = ruleIndex >= 0
+        ? classifyDeadlineDomain({...currentRule(), sourceId: currentSourceId})
+        : 'generic';
     sharedVehicleConfig = sourceDefinition.kind === 'vehicles' ? currentConfig : null;
     if (usesVehicleCards() && !sharedVehicleConfig) {
         sharedVehicleConfig = normalizeDeadlineConfig(await getUserSetting(user.uid, 'deadlineConfig') || {}, LIST_FIELDS);
@@ -365,7 +376,7 @@ export async function initConfigurazioneAutomezzi(user) {
         workingObjects = usesVehicleCards() ? readWorkingVehicles() : readGenericParameters();
         workingObjects.push(usesVehicleCards()
             ? {id: nextId('vehicle'), model: '', plate: '', message: composerDefaults()}
-            : {id: nextId('parameter'), period: currentRule()?.period || 14, freq: currentRule()?.freq || 7,
+            : {id: nextId('parameter'), name: '',
                 templateText: currentRule()?.templateText || currentRule()?.name || '', references: []});
         render();
     });

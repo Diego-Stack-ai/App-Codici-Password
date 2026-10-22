@@ -1,5 +1,17 @@
 # Incarico corrente
 
+## Uniformità delle linguette operative e identità stabile delle regole — 22/10/2026
+
+Diego chiede di applicare alle sei linguette operative di **Regole scadenze** una struttura visiva unica: il testo introduttivo diventa una nota autonoma, compatta e con carattere più piccolo; il grande riquadro che inglobava tutte le regole perde bordo, fondo e spaziatura; le card delle singole regole occupano direttamente il pannello. **Documenti personali** resta esclusa perché segue il collegamento diretto Profilo–Scadenza già stabilizzato.
+
+Nell’editor contestuale tutte le regole operative seguono inoltre il modello Automezzi: una sola pianificazione a livello di regola, card interne espandibili e identificabili, e nessuna ripetizione di preavviso e frequenza dentro ogni card. Per i mezzi il titolo continua a derivare da modello e targa; per gli altri ambiti una nuova card parte come **Nuova configurazione**, espone **Nome configurazione** e aggiorna il proprio titolo durante la digitazione. Il salvataggio richiede tale nome e mantiene nei parametri la pianificazione della regola per compatibilità con i lettori esistenti.
+
+La diversità fisica tra `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig` non viene eliminata mediante una riscrittura implicita. Ogni regola nuova, e ogni regola storica salvata volontariamente nel nuovo editor, riceve invece un identificatore stabile, `domain` esplicito e `schemaVersion`; la sorgente originaria resta invariata. Il successivo cutover dovrà scegliere una sorgente canonica, trasferire e deduplicare le configurazioni con inventario e rollback, quindi collegare le Scadenze reali tramite `ruleId`. Fino ad allora il nome è soltanto una compatibilità di lettura e nessuna Scadenza reale viene aggiornata automaticamente.
+
+Esito locale: requisiti visivi e comportamento comune sono implementati; il `domain` da salvare viene ricavato dalla regola caricata e non dal parametro URL. La suite completa `npm test` è verde con codice **0**, inclusi Functions e tutti gli scenari Firebase su emulatori; sono verdi anche `git diff --check`, i test mirati **33/33** e la navigazione **179/179**. Il grafo strutturale è stato rigenerato sulla candidata `1.2.220` con **13.608 nodi**, **35.367 archi** e **894 comunità**.
+
+Con l’ordine **«procedi con commit, push, aggiorna GitHub e pubblica»** del 22/10/2026 Diego autorizza il rilascio patch `1.2.220`: commit e push del ramo `codex/`, PR, merge in `master` e workflow manuale del solo Firebase Hosting dopo suite integrale, preflight e gate GitHub verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Correzione conservativa del Comodato e preflight Git — 21/10/2026
 
 Diego chiede di verificare che il lavoro sulle regole Automezzi non abbia creato regole ulteriori rispetto a quelle già esistenti. Il collaudo autenticato in sola lettura della `1.2.218` conferma che non sono state create nuove regole né scritti dati: nell’editor della singola regola storica **Comodato d'uso** comparivano però, per una deduzione troppo ampia del testo legacy «dell'auto», tre card derivate — Land Rover, Hyundai e Peugeot — mentre l'associazione ricordata e attesa è la sola Land Rover. Il comando **Salva** non è stato eseguito. Le due configurazioni Comodato presenti nelle sorgenti storiche esistevano già prima della `1.2.218` e restano separate; anche Documenti personali resta invariato.

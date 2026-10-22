@@ -16,6 +16,8 @@ Il comando **Gestisci destinatari** apre la stessa rubrica disponibile in **Impo
 
 La stessa situazione è visibile in **Impostazioni → Regole scadenze → Documenti personali**. Ogni scheda riassume direttamente il Documento, il testo dell’email/notifica e i parametri della sua Scadenza; non è una seconda copia e le modifiche riguardano gli stessi record. Le vecchie Scadenze non vengono eliminate automaticamente e vanno gestite dalla normale lista Scadenze. Il conteggio allegati indica i file consultabili in modo protetto nell'app: non significa che i file vengano spediti come allegati dell'email.
 
+Nelle altre sei linguette di **Regole scadenze** la nota iniziale è separata dall’elenco e le regole sono mostrate direttamente come card. Aprendo una regola si imposta una sola pianificazione comune; in **Automezzi** ogni card è identificata da modello e targa, negli altri ambiti dal campo **Nome configurazione**. Cambiare una regola non modifica automaticamente le Scadenze già create.
+
 > Stato di implementazione, verifiche e distribuzione: [STATO](../progetto/STATO.md). Le fonti storiche conservate sotto hanno la propria data; per nuovi aiuti valgono i contratti e il riesame delle schede della guida.
 
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
@@ -47,8 +49,8 @@ La guida descrive come orientarsi e quali comandi usare; lo stato di implementaz
 | `scadenze` | Scadenze: Cerca le date da seguire e distingui scadenze proprie e ricevute. | Filtro, ricerca, ordinamento, proprie/ricevute | Testo + walkthrough |
 | `aggiungi_scadenza` | Crea o modifica scadenza: Imposta data, categoria, preavviso, destinatari e contenuti della scadenza. | Categoria, data, preavviso, frequenza, destinatari e allegati | Checklist + walkthrough |
 | `dettaglio_scadenza` | Dettaglio scadenza: Controlla data, pianificazione, contenuti e azioni della scadenza scelta. | Pianificazione, fonte, allegati e azioni autorizzate | Testo + walkthrough |
-| `regole_scadenze` | Regole delle scadenze: Consulta gli ambiti e configura le scadenze dei Documenti personali. | Riepilogo diretto dei Documenti personali, parametri e accesso alla Scadenza; configurazioni storiche separate | Testo + walkthrough breve |
-| `configurazione_automezzi` | Configurazione Automezzi: Gestisci tipi, modelli e testi per le scadenze dei veicoli. | Tipi, modelli, testi e assenza di riscrittura retroattiva | Checklist + walkthrough |
+| `regole_scadenze` | Regole delle scadenze: Consulta gli ambiti e configura le regole disponibili. | Documenti personali diretti; sei linguette operative con nota autonoma e card delle regole | Testo + walkthrough breve |
+| `configurazione_automezzi` | Configurazione della regola: Gestisci la pianificazione unica e le card della regola scelta. | Modello e targa per Automezzi; nome, testo ed eventuali riferimenti negli altri ambiti; nessuna riscrittura retroattiva | Checklist + walkthrough |
 | `configurazione_documenti` | Configurazione Documenti: Gestisci tipi, modelli e testi per le scadenze dei documenti. | Tipi, modelli e testi | Checklist + walkthrough |
 | `configurazione_generali` | Configurazione Generali: Gestisci tipi e testi delle scadenze generali. | Tipi e testi separati dagli altri domini | Checklist + walkthrough |
 | `impostazioni` | Impostazioni: Configura aspetto, servizi, sicurezza e gestione dei dati dal centro di controllo. | Lingua/tema, Assistente, Azienda, Archivio, comuni, backup, salute, campi, regole, sicurezza, push, diagnostica e logout | Indice ricercabile + walkthrough per gruppo; video backup opzionale |

@@ -21,6 +21,7 @@ test('the deadline hub exposes nine accessible domains and removes the three sep
   assert.match(html, /id="personal-documents-summary"/);
   for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'generic']) {
     assert.match(html, new RegExp(`data-deadline-domain-summary="${domain}"`));
+    assert.match(html, new RegExp(`class="deadline-domain-panel deadline-operational-panel"[^>]+data-deadline-panel="${domain}"`));
   }
   assert.doesNotMatch(html, /Documenti personali collegati|Apri Documenti nel Profilo/);
 });
@@ -91,6 +92,8 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(css, /\.deadline-domain-schedule-warning/);
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
   assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
+  assert.match(css, /\.deadline-operational-panel\s*\{[\s\S]*?padding:\s*0;[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;/);
+  assert.match(css, /\.deadline-operational-panel \.deadline-domain-copy\s*\{[\s\S]*?border:[\s\S]*?background:/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
 });
 
@@ -137,9 +140,17 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(editor, /deadlineConfigDocuments:[\s\S]*kind: 'references'/);
   assert.match(editor, /generalConfig:[\s\S]*kind: 'general'/);
   assert.match(editor, /sourceDefinition\.kind === 'references'/);
+  assert.match(editor, /genericParameterTitle/);
+  assert.match(editor, /dataName: 'parameterName'|parameterName/);
+  assert.match(editor, /dataName: 'parameterCardTitle'|parameterCardTitle/);
   assert.match(editor, /dataName: 'parameterTemplate'|parameterTemplate/);
-  assert.match(editor, /validateDeadlineNotice\(parameter\.period\)/);
-  assert.match(editor, /validateDeadlineFrequency\(parameter\.freq\)/);
+  assert.match(editor, /schedule\.period = validateDeadlineNotice\(schedule\.period\)/);
+  assert.match(editor, /schedule\.freq = validateDeadlineFrequency\(schedule\.freq\)/);
+  assert.doesNotMatch(editor, /dataName: 'objectPeriod'|objectPeriod/);
+  assert.doesNotMatch(editor, /dataName: 'objectFrequency'|objectFrequency/);
+  assert.match(editor, /withDeadlineRuleIdentity/);
+  assert.match(editor, /currentDomain = ruleIndex >= 0[\s\S]*?classifyDeadlineDomain\(\{\.\.\.currentRule\(\), sourceId: currentSourceId\}\)/);
+  assert.doesNotMatch(editor, /currentDomain = params\.get\('domain'\)/);
   assert.match(controller, /Array\.isArray\(selectedRule\.parameters\)/);
   assert.match(controller, /populateParameterSelect/);
   assert.match(controller, /applySelectedParameterSchedule/);
@@ -148,7 +159,8 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(hub, /showInputModal\(t\('prompt_freq_days'\)/);
   assert.match(editorCss, /\.vehicle-rule-fields\.vehicle-rule-schedule\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2,/);
   assert.match(editorCss, /\.vehicle-rule-object\[open\] \.vehicle-rule-object-chevron/);
-  assert.match(catalog, /deadline_vehicle_reference:\s*'Parametri'/);
+  assert.match(catalog, /deadline_rule_new_configuration:\s*'Nuova configurazione'/);
+  assert.match(catalog, /deadline_rule_name_required:/);
   assert.match(pages, /configurazione_automezzi_v2\.js/);
   assert.match(translations, /regole_scadenze\|configurazione_automezzi/);
 });

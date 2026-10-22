@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.220 — uniformità delle linguette operative — 22/10/2026
+
+Le sei linguette operative di **Regole scadenze** adottano una nota introduttiva autonoma e compatta, un pannello esterno visivamente neutro e card delle regole mostrate direttamente. L’editor contestuale usa una sola pianificazione per regola; Automezzi identifica le card tramite modello e targa, mentre gli altri ambiti richiedono un nome della configurazione. Le regole nuove o salvate volontariamente ricevono ID stabile, ambito esplicito e versione di schema, senza spostare le sorgenti storiche o modificare automaticamente le Scadenze reali.
+
+Il rilascio autorizzato riguarda esclusivamente Firebase Hosting. La suite completa locale è verde con codice **0** e Graphify è aggiornato sulla candidata `1.2.220`; prima del merge restano obbligatori commit e push del ramo `codex/`, `npm run git:preflight` e gate GitHub verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni, riconciliazione delle Scadenze e accessi ai dati reali restano esclusi.
+
 ## Preflight Git e chiusura completa del ramo — release 1.2.219, 21/10/2026
 
 Dopo commit e push, prima di aprire o unire la PR destinata al rilascio, si esegue `npm run git:preflight` dal ramo di lavoro. Il comando è un gate, non una pulizia automatica: richiede prefisso `codex/`, base non arretrata rispetto a `origin/master`, almeno un commit, worktree corrente pulito, SHA già presente sul ramo remoto corrispondente, nessun worktree secondario diverso dal checkout pulito di `master` e nessun altro ramo locale o remoto oltre a `master` e al ramo corrente, anche se già integrato. Qualunque anomalia blocca merge e deploy e deve essere risolta o preservata esplicitamente; non sono ammesse esclusioni per nascondere drift storico.

@@ -21,6 +21,19 @@ export function cloneDeadlineConfig(config = {}) {
     return structuredClone(config);
 }
 
+export const DEADLINE_RULE_SCHEMA_VERSION = 2;
+
+export function withDeadlineRuleIdentity(rule = {}, {id = '', domain = ''} = {}) {
+    const stableId = String(rule.id || id || '').trim();
+    const stableDomain = String(domain || rule.domain || '').trim();
+    return {
+        ...rule,
+        ...(stableId ? {id: stableId} : {}),
+        ...(stableDomain ? {domain: stableDomain} : {}),
+        schemaVersion: DEADLINE_RULE_SCHEMA_VERSION
+    };
+}
+
 export function normalizeDeadlineType(item, defaultPeriod = 14, defaultFrequency = 7) {
     const source = typeof item === 'string' ? { name: item } : (item || {});
     const name = String(source.name || '').trim();

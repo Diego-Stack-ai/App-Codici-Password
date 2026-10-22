@@ -207,6 +207,8 @@ invites/{inviteId}
 
 Le Scadenze nuove usano `recipients[]` con `contactId?`, `displayName`, `email`, `sendEmail`, `sendPush`, `canManage`; `emails[]`, `email1` ed `email2` restano letti come formato legacy. Per un destinatario registrato con Push o permesso di gestione, il backend mantiene una copia minima in `receivedDeadlines`: il client può leggerla ma non scriverla. La callable `manageReceivedDeadline` verifica identità, email e permesso corrente prima di segnare l'originale come completato o aggiornarne la data. Le condivisioni Account usano invece `sharedWith`, `sharedWithUids` e inviti con `recipientEmail`; gli UID accettati non sostituiscono l'email nell'interfaccia.
 
+Per le Regole Scadenze la vista unificata non elimina le tre sorgenti fisiche storiche. Ogni nuova regola, e ogni regola storica salvata volontariamente nell’editor corrente, porta un `id` stabile, `domain` esplicito e `schemaVersion`; questi campi preparano il cutover senza modificare i record al solo caricamento. La migrazione futura deve prima deduplicare le regole e preservarne la provenienza, poi scrivere sulle Scadenze reali un `ruleId` verificato. Fino a quel passaggio il collegamento per nome resta una compatibilità di lettura e non autorizza fusioni automatiche.
+
 Il backend conserva inoltre in `deadlineShares/{shareId}` l'elenco tecnico degli UID destinatari già risolti. Il client non accede a questa collezione: serve esclusivamente a eliminare in modo affidabile le copie revocate o cancellate anche quando l'email dell'utente non è più risolvibile.
 
 <a id="fonte-docs-functional-data-contract-md-collegamento-documenti-profilo--scadenze"></a>

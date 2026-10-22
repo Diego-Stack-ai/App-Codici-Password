@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.219';
+import {auth, db} from '../../firebase-config.js?v=1.2.220';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -22,7 +22,8 @@ import {
     deadlineRuleRouteKey,
     updateDeadlineType,
     validateDeadlineFrequency,
-    validateDeadlineNotice
+    validateDeadlineNotice,
+    withDeadlineRuleIdentity
 } from './deadline-config-model.js';
 
 const SELECTOR = Object.freeze({
@@ -307,10 +308,10 @@ async function loadDomainInventories(user, root, active) {
                 const frequencyValue = await showInputModal(t('prompt_freq_days'), '7', t('prompt_freq_days'));
                 if (frequencyValue === null) return;
                 try {
-                    const next = appendDeadlineType(sourceConfig, {
+                    const next = appendDeadlineType(sourceConfig, withDeadlineRuleIdentity({
                         name: name.trim(), period: validateDeadlineNotice(periodValue),
                         freq: validateDeadlineFrequency(frequencyValue), domain
-                    });
+                    }, {id: `rule-${globalThis.crypto?.randomUUID?.() || Date.now()}`, domain}));
                     await persistRules(sourceId, next.deadlineTypes);
                 } catch (error) {
                     showToast(error.message || t('error_config_save'), 'error');

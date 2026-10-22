@@ -1,4 +1,4 @@
-import { auth } from '../../firebase-config.js?v=1.2.219';
+import { auth } from '../../firebase-config.js?v=1.2.220';
 import { listContacts } from '../data/vault-repository.js';
 
 const normalizeEmail = email => String(email || '').trim().toLowerCase();
