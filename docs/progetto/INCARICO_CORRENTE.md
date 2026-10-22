@@ -12,6 +12,8 @@ Esito locale: requisiti visivi e comportamento comune sono implementati; il `dom
 
 Con l’ordine **«procedi con commit, push, aggiorna GitHub e pubblica»** del 22/10/2026 Diego autorizza il rilascio patch `1.2.220`: commit e push del ramo `codex/`, PR, merge in `master` e workflow manuale del solo Firebase Hosting dopo suite integrale, preflight e gate GitHub verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
+Esito di rilascio: commit `a45a7706` inviato sul ramo dedicato, PR `#204` unita nel merge commit `ef7600eb`, gate della PR e del `master` verdi. Il workflow manuale `39704981716` ha verificato il medesimo `master` e pubblicato il solo Firebase Hosting in 6m23s. Le verifiche HTTP pubbliche confermano stato `200`, versione `1.2.220`, struttura delle linguette, stile e moduli aggiornati. Il ramo applicativo locale e remoto è stato eliminato dopo il merge; nessun dato reale è stato letto o scritto.
+
 ## Correzione conservativa del Comodato e preflight Git — 21/10/2026
 
 Diego chiede di verificare che il lavoro sulle regole Automezzi non abbia creato regole ulteriori rispetto a quelle già esistenti. Il collaudo autenticato in sola lettura della `1.2.218` conferma che non sono state create nuove regole né scritti dati: nell’editor della singola regola storica **Comodato d'uso** comparivano però, per una deduzione troppo ampia del testo legacy «dell'auto», tre card derivate — Land Rover, Hyundai e Peugeot — mentre l'associazione ricordata e attesa è la sola Land Rover. Il comando **Salva** non è stato eseguito. Le due configurazioni Comodato presenti nelle sorgenti storiche esistevano già prima della `1.2.218` e restano separate; anche Documenti personali resta invariato.
