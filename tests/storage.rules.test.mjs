@@ -117,6 +117,19 @@ test('il formato binario è ammesso soltanto se marcato come allegato cifrato v1
   }));
 });
 
+test('i blocchi cifrati di un video restano confinati nel percorso allegato', async () => {
+  const storage = testEnv.authenticatedContext(OWNER_UID).storage();
+  const chunkPath = `users/${OWNER_UID}/accounts/a1/attachments/video-1/chunks/0000.bin`;
+  const chunkRef = ref(storage, chunkPath);
+  await assertSucceeds(uploadBytes(chunkRef, new Uint8Array([7, 8, 9]), {
+    contentType: 'application/octet-stream',
+    customMetadata: {encrypted: 'v1', chunk: '0'},
+  }));
+  assert.deepEqual(new Uint8Array(await assertSucceeds(getBytes(chunkRef))), new Uint8Array([7, 8, 9]));
+  await assertFails(getBytes(ref(testEnv.authenticatedContext(OTHER_UID).storage(), chunkPath)));
+  await assertSucceeds(deleteObject(chunkRef));
+});
+
 test('un destinatario accettato legge i byte cifrati e la revoca blocca subito il download', async () => {
   const accountId = 'shared-memo';
   const objectPath = `users/${OWNER_UID}/accounts/${accountId}/attachments/shared.bin`;

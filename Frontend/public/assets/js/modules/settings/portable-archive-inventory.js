@@ -47,6 +47,9 @@ function visitAttachments(value, callback) {
         return;
     }
     if (!value || typeof value !== 'object') return;
+    if (value.encryption?.chunked === true && Array.isArray(value.chunks)) {
+        throw portableError('PORTABLE_CHUNKED_ATTACHMENT_UNSUPPORTED');
+    }
     if (typeof value.storagePath === 'string') callback(value);
     for (const child of Object.values(value)) visitAttachments(child, callback);
 }

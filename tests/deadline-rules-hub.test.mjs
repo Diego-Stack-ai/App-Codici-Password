@@ -167,7 +167,7 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(catalog, /deadline_rule_new_configuration:\s*'Nuova configurazione'/);
   assert.match(catalog, /deadline_rule_name_required:/);
   assert.match(pages, /configurazione_automezzi_v2\.js/);
-  assert.match(translations, /regole_scadenze\|configurazione_automezzi/);
+  assert.match(translations, /regole_scadenze\|configurazione_automezzi\|aggiungi_scadenza/);
 });
 
 test('the deadline hub catalog has identical keys in all eight application languages', async () => {

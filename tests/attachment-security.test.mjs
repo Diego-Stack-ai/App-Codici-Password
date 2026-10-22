@@ -11,13 +11,21 @@ globalThis.File = class File {
     this.bytes = bytes || new Uint8Array(size);
   }
   arrayBuffer() { return Promise.resolve(this.bytes.buffer.slice(0)); }
+  slice(start, end) {
+    const bytes = this.bytes.slice(start, end);
+    return {arrayBuffer: () => Promise.resolve(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength))};
+  }
 };
 
-const source = await readFile(
-  new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url),
-  'utf8',
+const securitySource = await readFile(
+  new URL('../Frontend/public/assets/js/modules/shared/attachment-security.js', import.meta.url), 'utf8',
 );
-const security = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const securityUrl = `data:text/javascript;base64,${Buffer.from(securitySource).toString('base64')}`;
+const security = await import(securityUrl);
+const chunkedSource = (await readFile(
+  new URL('../Frontend/public/assets/js/modules/shared/chunked-attachment-security.js', import.meta.url), 'utf8',
+)).replace("from './attachment-security.js'", `from '${securityUrl}'`);
+const chunkedSecurity = await import(`data:text/javascript;base64,${Buffer.from(chunkedSource).toString('base64')}`);
 
 async function withCryptoProbe(fault, run) {
   const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
@@ -96,6 +104,51 @@ test('accetta file previsti e rifiuta dimensioni o MIME pericolosi', () => {
   assert.throws(() => security.validateAttachmentFile(new File('attack.html', 'text/html', 1024)));
   assert.throws(() => security.validateAttachmentFile(new File('large.pdf', 'application/pdf', 32 * 1024 * 1024 + 1)));
   assert.throws(() => security.validateAttachmentFile(new File('avatar.pdf', 'application/pdf', 1024), {imageOnly: true}));
+});
+
+test('ammette video fino a 512 MB nel flusso account, senza estendere gli altri formati', () => {
+  const video = new File('video.mp4', 'video/mp4', 1);
+  video.size = 512 * 1024 * 1024;
+  assert.doesNotThrow(() => security.validateAccountAttachmentFile(video));
+  video.size += 1;
+  assert.throws(() => security.validateAccountAttachmentFile(video));
+  const document = new File('documento.pdf', 'application/pdf', 1);
+  document.size = 32 * 1024 * 1024 + 1;
+  assert.throws(() => security.validateAccountAttachmentFile(document));
+});
+
+test('cifra e ricompone un video in blocchi autenticati e vincolati all’ordine', async () => {
+  const clear = new TextEncoder().encode('video sintetico suddiviso in più blocchi');
+  const encryptedChunks = [];
+  const encrypted = await chunkedSecurity.encryptAttachmentFileInChunks(
+    new File('video.mp4', 'video/mp4', clear.length, clear),
+    'vault-video',
+    {
+      binding: 'attachment-fixture',
+      chunkSize: 7,
+      onChunk: async chunk => {
+        encryptedChunks.push(new Uint8Array(await chunk.blob.arrayBuffer()));
+        return {storagePath: `users/owner/video/${chunk.index}.bin`};
+      }
+    }
+  );
+  assert.equal(encrypted.metadata.chunked, true);
+  assert.equal(encrypted.chunks.length, Math.ceil(clear.length / 7));
+  const fileKey = await security.unwrapAttachmentFileKey(encrypted.metadata, 'vault-video');
+  try {
+    const restored = [];
+    for (const chunk of encrypted.chunks) {
+      restored.push(new Uint8Array(await chunkedSecurity.decryptAttachmentChunkBytesWithFileKey(
+        encryptedChunks[chunk.index], encrypted.metadata, chunk, fileKey
+      )));
+    }
+    assert.deepEqual(Buffer.concat(restored.map(value => Buffer.from(value))), Buffer.from(clear));
+    await assert.rejects(chunkedSecurity.decryptAttachmentChunkBytesWithFileKey(
+      encryptedChunks[0], encrypted.metadata, {...encrypted.chunks[0], index: 1}, fileKey
+    ));
+  } finally {
+    fileKey.fill(0);
+  }
 });
 
 test('genera nomi Storage casuali senza includere il nome originale', () => {

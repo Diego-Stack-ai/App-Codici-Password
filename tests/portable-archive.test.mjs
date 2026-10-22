@@ -252,6 +252,23 @@ test('l’inventario sintetico riconcilia ogni allegato e tutte le relazioni', (
     );
 });
 
+test('l’archivio portatile rifiuta esplicitamente i video cifrati a blocchi', () => {
+    const owner = {scope: 'private-account', id: 'a1', data: {nome: 'Privato'}};
+    const attachment = {
+        scope: 'private-account-attachment', id: 'v1', accountId: 'a1',
+        data: {
+            name: 'video.mp4',
+            encryption: {chunked: true, originalType: 'video/mp4'},
+            chunks: [{storagePath: 'users/fixture/accounts/a1/attachments/v1/chunks/0000.bin'}]
+        }
+    };
+    assert.throws(() => reconcilePortableAttachmentInventory(
+        [owner, attachment],
+        ['users/fixture/accounts/a1/attachments/v1/chunks/0000.bin'],
+        new Set([portableRecordKey(owner)])
+    ), {code: 'PORTABLE_CHUNKED_ATTACHMENT_UNSUPPORTED'});
+});
+
 test('la proiezione regge il limite sintetico di 10.000 record', async () => {
     const records = Array.from({length: 10000}, (_, index) => ({
         key: `private-account:::fixture-${index}`, scope: 'private-account', id: `fixture-${index}`,

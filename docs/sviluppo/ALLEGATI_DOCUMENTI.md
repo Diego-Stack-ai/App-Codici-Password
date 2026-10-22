@@ -1,5 +1,13 @@
 # Allegati documenti
 
+## Video grandi negli allegati Account e Memorandum — candidata locale 22/10/2026
+
+Il contratto storico resta identico per immagini, PDF, documenti e video fino a 32 MiB. Un video più grande può arrivare a 512 MiB ed è elaborato senza lettura integrale: il client genera una sola chiave-file, divide il contenuto in blocchi da 8 MiB e cifra ogni blocco con AES-GCM, IV autonomo e AAD vincolato a identificativo, posizione e numero totale dei blocchi. Il record allegato conserva `encryption.chunked`, dimensioni, conteggio e manifest ordinato; ciascun elemento del manifest contiene il proprio `storagePath`.
+
+Il record Firestore viene creato soltanto dopo l'ultimo upload riuscito. Un errore rimuove al meglio tutti i blocchi già caricati. La cancellazione visibile e il purge definitivo dell'Account eliminano ogni percorso verificato prima dei metadati; il backup cifrato indicizza ogni `storagePath` del manifest. Il visualizzatore portatile non tratta i blocchi come allegati autonomi: interrompe l'esportazione con un errore di capacità dichiarato finché quel formato non avrà un proprio protocollo di ricomposizione.
+
+La riproduzione scarica e decifra un blocco alla volta in un file OPFS temporaneo, quindi apre un URL `blob:` del file ricomposto. Se OPFS non è disponibile il client fallisce in modo esplicito e non usa un ripiego che accumuli l'intero video nella memoria JavaScript. La condivisione riusa la chiave-file già avvolta e le buste individuali esistenti; i byte dei blocchi restano sempre opachi in Storage.
+
 ## Sequenza di creazione Documento e Scadenza — pubblicata 1.2.202
 
 Un nuovo Documento viene persistito prima di qualsiasi upload. Subito dopo l'app propone facoltativamente di aggiungere un allegato: se l'upload riesce, il gestore si chiude e prosegue una sola volta verso la configurazione della Scadenza; se l'utente sceglie **Continua senza allegato**, la configurazione si apre senza creare file. Chiudere il gestore senza caricare nulla non crea automaticamente una Scadenza; resta disponibile il comando **Configura scadenza** sulla scheda del Documento.

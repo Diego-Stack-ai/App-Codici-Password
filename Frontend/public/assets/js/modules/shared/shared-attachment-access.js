@@ -1,4 +1,4 @@
-import {functions} from '../../firebase-config.js?v=1.2.225';
+import {functions} from '../../firebase-config.js?v=1.2.226';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {
     decryptAttachmentBytesWithFileKey,
@@ -84,6 +84,18 @@ async function decryptReceivedAttachment({
     } finally {
         fileKeyBytes.fill(0);
     }
+}
+
+export async function unwrapReceivedAttachmentFileKey({
+    ownerUid, companyId = '', accountId, attachment, recipientUid, vaultKeyMaterial
+}) {
+    const envelope = attachment?.recipientKeyEnvelopes?.[recipientUid];
+    if (!envelope) throw new Error('SHARED_ATTACHMENT_KEY_PENDING');
+    const identity = await ensureSharingIdentity({uid: recipientUid, vaultKeyMaterial});
+    const contextId = await sharedAttachmentContextId({
+        ownerUid, companyId, accountId, attachmentId: attachment.id
+    });
+    return unwrapRecordKeyForRecipient(envelope, identity.privateKey, contextId, recipientUid);
 }
 
 export const decryptReceivedPrivateAttachment = options => decryptReceivedAttachment(options);

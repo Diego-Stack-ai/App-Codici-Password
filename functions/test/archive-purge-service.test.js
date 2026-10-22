@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
-  accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
+  accountPath, attachmentStoragePaths, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
   assertNoExternalAccountReferences
 } = require("../archive-purge-service");
 
@@ -62,6 +62,21 @@ test("costruisce il percorso aziendale senza accettare attraversamenti", () => {
   assert.equal(accountPath("u1", command), "users/u1/aziende/c1/accounts/a1");
   assert.equal(isSafeAttachmentPath("u1", command, "users/u1/aziende/c1/accounts/a1/attachments/file.pdf"), true);
   assert.equal(isSafeAttachmentPath("u1", command, "users/u2/aziende/c1/accounts/a1/attachments/file.pdf"), false);
+});
+
+test('attachmentStoragePaths include tutti i blocchi video e fallisce chiuso sui metadati incompleti', () => {
+  assert.deepEqual(attachmentStoragePaths({
+    encryption: {chunked: true},
+    chunks: [
+      {storagePath: 'users/u1/accounts/a1/attachments/v1/chunks/0000.bin'},
+      {storagePath: 'users/u1/accounts/a1/attachments/v1/chunks/0001.bin'}
+    ]
+  }), [
+    'users/u1/accounts/a1/attachments/v1/chunks/0000.bin',
+    'users/u1/accounts/a1/attachments/v1/chunks/0001.bin'
+  ]);
+  assert.deepEqual(attachmentStoragePaths({encryption: {chunked: true}, chunks: []}), [undefined]);
+  assert.deepEqual(attachmentStoragePaths({url: 'https://example.invalid/legacy'}), [undefined]);
 });
 
 test('purge never coerces malformed identifiers or revisions into a destructive command', () => {

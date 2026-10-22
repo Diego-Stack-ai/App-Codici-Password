@@ -67,13 +67,13 @@ const purgeStore = {
 };
 
 const purge = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'isArchivePurgeSuspended',
-    'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
+    'accountPath', 'attachmentStoragePaths', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
     'assertGlobalPurgeLockHeld', 'releaseGlobalPurgeLock',
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`)({}, HttpsError, FieldValue,
-    {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision,
+    {log() {}, warn() {}, error() {}}, () => false, policy.accountPath, policy.attachmentStoragePaths, policy.isSafeAttachmentPath, policy.purgeDecision,
     policy.planProfileReferenceCleanup, policy.validatePurgeCommand,
     // Historical purge/restore characterization: live purge safety interlocks
     // are verified separately and intentionally bypassed in this laboratory.

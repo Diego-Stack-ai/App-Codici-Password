@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Video grandi nei Memorandum e traduzioni del nuovo form Scadenze — 22/10/2026
+
+Diego chiede di poter conservare anche un video da circa 450 MB negli allegati dei Memorandum. L'implementazione locale mantiene invariati i file ordinari fino a 32 MiB e introduce, soltanto per i video, un limite di 512 MiB con cifratura e upload sequenziale in blocchi da 8 MiB. Firestore conserva un solo allegato logico e il manifest dei blocchi; Storage conserva esclusivamente i blocchi cifrati. La condivisione continua a distribuire una sola chiave-file cifrata per destinatario, mentre cancellazione manuale, purge dell'Account e backup cifrato devono coprire tutti i percorsi del manifest.
+
+L'apertura usa un file temporaneo nel contenitore privato del browser e richiede il supporto OPFS; un browser privo di tale capacità mostra un errore esplicito senza tentare di caricare centinaia di megabyte nella memoria della pagina. L'archivio portatile conserva i propri limiti e rifiuta in modo dichiarato i video a blocchi; il backup cifrato completo li include come oggetti separati e li ricostruisce tramite i metadati ripristinati.
+
+Le schermate inviate da Diego mostrano inoltre chiavi `deadline_*` nel nuovo form Scadenze. La causa è il mancato caricamento del catalogo specializzato sulla route `aggiungi_scadenza.html`; la correzione include tale route nello stesso catalogo già usato da Regole scadenze e Configurazione automezzi.
+
+L'ordine **«procediamo»** autorizza implementazione locale, documentazione e test. Il successivo ordine **«quando hai finito pubblica»** autorizza bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. La modifica alla Function di purge viene versionata e collaudata ma resta esclusa dal deploy: finché non sarà autorizzata separatamente, una cancellazione definitiva dell'intero Account che contiene allegati a blocchi si interrompe in sicurezza senza rimuovere i metadati. Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Tipo di scadenza come primo passo del nuovo form — 22/10/2026
 
 Diego chiede che la creazione di una Scadenza inizi dalla scelta esplicita del tipo, usando gli stessi ambiti delle Regole scadenze. Il form non preseleziona più Automezzi e non sceglie automaticamente la prima regola o il primo riferimento: mostra anzitutto le linguette **Documenti personali**, **Automezzi**, **Casa e immobili**, **Salute**, **Sport e associazioni**, **Contratti e documenti**, **Utente–azienda** e **Documenti aziendali**; soltanto dopo la scelta espone **Regola** e **Riferimento**.

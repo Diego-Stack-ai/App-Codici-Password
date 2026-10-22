@@ -29,6 +29,13 @@ test('descrittori e allegati restano confinati al proprietario', async () => {
   );
   assert.equal(linked.sharedDataId, 's1');
   assert.deepEqual(api.collectStoragePaths([record], 'owner'), ['users/owner/accounts/a1/attachments/f1']);
+  assert.deepEqual(api.collectStoragePaths([{data: {chunks: [
+    {storagePath: 'users/owner/accounts/a1/attachments/video/chunks/0000.bin'},
+    {storagePath: 'users/owner/accounts/a1/attachments/video/chunks/0001.bin'}
+  ]}}], 'owner'), [
+    'users/owner/accounts/a1/attachments/video/chunks/0000.bin',
+    'users/owner/accounts/a1/attachments/video/chunks/0001.bin'
+  ]);
   assert.throws(() => api.collectStoragePaths([{data: {storagePath: 'users/other/file'}}], 'owner'), /STORAGE_PATH/);
 });
 

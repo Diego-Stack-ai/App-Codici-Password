@@ -46,7 +46,7 @@ const bucket = getStorage(app).bucket(`${PROJECT_ID}.appspot.com`);
 // Il purge viene montato con `new Function`, quindi **nello stesso realm**
 // dell'Admin SDK; `onCall` esegue direttamente il corpo della callable.
 const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'Timestamp', 'console', 'isArchivePurgeSuspended',
-    'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
+    'accountPath', 'attachmentStoragePaths', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
@@ -54,7 +54,7 @@ const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'Timest
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, Timestamp, {log() {}, warn() {}, error() {}},
     () => false,
-    policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
+    policy.accountPath, policy.attachmentStoragePaths, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
     policy.validatePurgeCommand, policy.assertNoExternalAccountReferences,
     receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
     (_options, run) => run, () => db, () => ({bucket: () => bucket}),
