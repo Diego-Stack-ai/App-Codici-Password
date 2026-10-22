@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.221';
+import {auth, db} from '../../firebase-config.js?v=1.2.222';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -298,7 +298,7 @@ async function loadDomainInventories(user, root, active) {
 
         root.querySelectorAll('[data-deadline-add-rule]').forEach(addRule => {
             addRule.onclick = async () => {
-                const domain = addRule.dataset.deadlineAddRule || 'generic';
+                const domain = addRule.dataset.deadlineAddRule || 'contracts';
                 const sourceId = domain === 'vehicles' ? 'deadlineConfig' : 'generalConfig';
                 const sourceConfig = configsBySource[sourceId] || {deadlineTypes: []};
                 const name = await showInputModal(t('deadline_domain_new_rule'), '', t('deadline_domain_rule_name'));

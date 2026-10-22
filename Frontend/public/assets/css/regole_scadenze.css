@@ -38,7 +38,6 @@
 }
 
 .deadline-hub-badge,
-.deadline-future-badge,
 .deadline-concept-state {
     flex: 0 0 auto;
     border: 1px solid rgb(var(--accent-rgb) / 0.35);
@@ -117,8 +116,7 @@
 
 /* Le linguette con una nota autonoma conservano il pannello semantico, ma non
    una grande card visiva: nota e contenuti rimangono elementi separati. */
-.deadline-operational-panel,
-.deadline-information-panel {
+.deadline-operational-panel {
     min-height: 0;
     padding: 0;
     border: 0;
@@ -134,7 +132,6 @@
 }
 
 .deadline-operational-panel .deadline-domain-copy,
-.deadline-information-panel .deadline-domain-copy,
 .deadline-personal-panel .deadline-domain-copy {
     padding: 0.75rem 0.85rem;
     border: 1px solid rgb(var(--accent-rgb) / 0.24);
@@ -143,26 +140,15 @@
 }
 
 .deadline-operational-panel .deadline-domain-copy h3,
-.deadline-information-panel .deadline-domain-copy h3,
 .deadline-personal-panel .deadline-domain-copy h3 {
     font-size: var(--fs-xs);
 }
 
 .deadline-operational-panel .deadline-domain-copy p,
-.deadline-information-panel .deadline-domain-copy p,
 .deadline-personal-panel .deadline-domain-copy p {
     margin-top: 0.2rem;
     font-size: var(--fs-micro);
     line-height: 1.4;
-}
-
-.deadline-information-panel {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.deadline-information-panel .deadline-future-badge {
-    width: fit-content;
 }
 
 .deadline-domain-copy > .material-symbols-outlined {
@@ -721,8 +707,7 @@
     .deadline-concept-grid { grid-template-columns: 1fr; }
     .deadline-domain-panel { border-radius: 20px; padding: 1rem; }
     .deadline-domain-panel.deadline-personal-panel,
-    .deadline-domain-panel.deadline-operational-panel,
-    .deadline-domain-panel.deadline-information-panel { border-radius: 0; padding: 0; }
+    .deadline-domain-panel.deadline-operational-panel { border-radius: 0; padding: 0; }
     .deadline-personal-grid { grid-template-columns: 1fr; }
     .deadline-personal-data-row { grid-template-columns: 1fr; gap: 0.15rem; }
     .deadline-domain-grid { grid-template-columns: 1fr; }

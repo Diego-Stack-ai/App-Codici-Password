@@ -1,4 +1,4 @@
-import {db} from '../../firebase-config.js?v=1.2.221';
+import {db} from '../../firebase-config.js?v=1.2.222';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {clearElement, createElement, setChildren} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
@@ -16,7 +16,7 @@ import {
     withDeadlineRuleIdentity,
     withDeadlineVehicleReferences
 } from './deadline-config-model.js';
-import {classifyDeadlineDomain} from './deadline-domain-model.js';
+import {classifyDeadlineDomain, isVehicleComodatoDeadlineType} from './deadline-domain-model.js';
 
 const LIST_FIELDS = ['deadlineTypes', 'models', 'emailTemplates'];
 const CONFIG_SOURCES = Object.freeze({
@@ -33,13 +33,14 @@ let ruleIndex = -1;
 let workingObjects = [];
 let currentSourceId = 'deadlineConfig';
 let sourceDefinition = CONFIG_SOURCES.deadlineConfig;
-let currentDomain = 'generic';
+let currentDomain = 'contracts';
 
 const nextId = prefix => `${prefix}-${globalThis.crypto?.randomUUID?.()
     || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
 const currentRule = () => currentConfig?.deadlineTypes?.[ruleIndex] || null;
 const usesVehicleCards = () => sourceDefinition.kind === 'vehicles' || (currentDomain === 'vehicles'
-    && currentRule() && classifyDeadlineDomain({...currentRule(), sourceId: currentSourceId}) === 'vehicles');
+    && currentRule() && classifyDeadlineDomain({...currentRule(), sourceId: currentSourceId}) === 'vehicles')
+    || (currentDomain === 'user-company' && isVehicleComodatoDeadlineType(currentRule()?.name));
 const vehicleProjectionConfig = () => withDeadlineVehicleReferences(currentConfig, sharedVehicleConfig || {});
 
 function composerDefaults() {
@@ -353,7 +354,7 @@ export async function initConfigurazioneAutomezzi(user) {
     ruleIndex = currentConfig.deadlineTypes.findIndex((item, index) => deadlineRuleRouteKey(item, index) === requestedRule);
     currentDomain = ruleIndex >= 0
         ? classifyDeadlineDomain({...currentRule(), sourceId: currentSourceId})
-        : 'generic';
+        : 'contracts';
     sharedVehicleConfig = sourceDefinition.kind === 'vehicles' ? currentConfig : null;
     if (usesVehicleCards() && !sharedVehicleConfig) {
         sharedVehicleConfig = normalizeDeadlineConfig(await getUserSetting(user.uid, 'deadlineConfig') || {}, LIST_FIELDS);

@@ -5,12 +5,12 @@ import test from 'node:test';
 const publicRoot = new URL('../Frontend/public/', import.meta.url);
 const read = path => fs.readFile(new URL(path, publicRoot), 'utf8');
 
-test('the deadline hub exposes nine accessible domains and removes the three separate legacy cards', async () => {
+test('the deadline hub exposes eight accessible domains and removes the generic tab and legacy cards', async () => {
   const html = await read('regole_scadenze.html');
   const tabs = [...html.matchAll(/data-deadline-domain="([^"]+)"/g)].map(match => match[1]);
   const panels = [...html.matchAll(/data-deadline-panel="([^"]+)"/g)].map(match => match[1]);
 
-  assert.deepEqual(tabs, ['personal', 'vehicles', 'home', 'health', 'sport', 'contracts', 'generic', 'user-company', 'company']);
+  assert.deepEqual(tabs, ['personal', 'vehicles', 'home', 'health', 'sport', 'contracts', 'user-company', 'company']);
   assert.deepEqual(panels, tabs);
   assert.match(html, /role="tablist"/);
   assert.doesNotMatch(html, /href="configurazione_automezzi\.html"/);
@@ -19,13 +19,11 @@ test('the deadline hub exposes nine accessible domains and removes the three sep
   assert.match(html, /href="gestione_destinatari\.html"/);
   assert.doesNotMatch(html, /deadline-legacy-divider/);
   assert.match(html, /id="personal-documents-summary"/);
-  for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'generic']) {
+  for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'user-company', 'company']) {
     assert.match(html, new RegExp(`data-deadline-domain-summary="${domain}"`));
     assert.match(html, new RegExp(`class="deadline-domain-panel deadline-operational-panel"[^>]+data-deadline-panel="${domain}"`));
   }
-  for (const domain of ['user-company', 'company']) {
-    assert.match(html, new RegExp(`class="deadline-domain-panel deadline-information-panel"[^>]+data-deadline-panel="${domain}"`));
-  }
+  assert.doesNotMatch(html, /deadline-panel-generic|deadline_domain_generic|deadline-information-panel|deadline-future-badge/);
   assert.doesNotMatch(html, /Documenti personali collegati|Apri Documenti nel Profilo/);
 });
 
@@ -97,8 +95,8 @@ test('personal document summary has loading, empty, error and responsive card st
   assert.match(css, /\.deadline-domain-schedule-warning/);
   assert.match(css, /\.deadline-domain-tab\s*\{[\s\S]*?background:\s*transparent;/);
   assert.match(css, /\.deadline-domain-tab\.is-active\s*\{[\s\S]*?background:\s*rgb\(var\(--accent-rgb\) \/ 0\.14\);/);
-  assert.match(css, /\.deadline-operational-panel,[\s\S]*?\.deadline-information-panel\s*\{[\s\S]*?padding:\s*0;[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;/);
-  assert.match(css, /\.deadline-operational-panel \.deadline-domain-copy,[\s\S]*?\.deadline-information-panel \.deadline-domain-copy,[\s\S]*?\.deadline-personal-panel \.deadline-domain-copy\s*\{[\s\S]*?border:[\s\S]*?background:/);
+  assert.match(css, /\.deadline-operational-panel\s*\{[\s\S]*?padding:\s*0;[\s\S]*?border:\s*0;[\s\S]*?background:\s*transparent;/);
+  assert.match(css, /\.deadline-operational-panel \.deadline-domain-copy,[\s\S]*?\.deadline-personal-panel \.deadline-domain-copy\s*\{[\s\S]*?border:[\s\S]*?background:/);
   assert.match(css, /\.deadline-personal-summary\s*\{[\s\S]*?margin-top:\s*1\.1rem;/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.deadline-personal-grid \{ grid-template-columns: 1fr; \}/);
 });
@@ -114,7 +112,7 @@ test('vehicle rules expose scoped management, safe actions and official list fil
     read('assets/js/translations/deadline-rules.js')
   ]);
   assert.match(html, /id="btn-add-vehicle-rule"/);
-  for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'generic']) {
+  for (const domain of ['vehicles', 'home', 'health', 'sport', 'contracts', 'user-company', 'company']) {
     assert.match(html, new RegExp(`data-deadline-add-rule="${domain}"`));
   }
   assert.match(hub, /scadenze\.html\?rule=/);
@@ -131,6 +129,7 @@ test('vehicle rules expose scoped management, safe actions and official list fil
   assert.match(editor, /usesVehicleCards/);
   assert.match(editor, /currentDomain === 'vehicles'/);
   assert.match(editor, /classifyDeadlineDomain\(\{\.\.\.currentRule\(\), sourceId: currentSourceId\}\) === 'vehicles'/);
+  assert.match(editor, /currentDomain === 'user-company' && isVehicleComodatoDeadlineType\(currentRule\(\)\?\.name\)/);
   assert.match(editor, /withDeadlineVehicleReferences/);
   assert.match(editor, /getUserSetting\(user\.uid, 'deadlineConfig'\)/);
   assert.match(editor, /dataName: 'vehicleModel'|dataName/);

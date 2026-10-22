@@ -1,5 +1,17 @@
 # Stato
 
+## Candidata 1.2.222 — ambiti Regole scadenze e stato destinatari — 22/10/2026
+
+La pagina **Regole scadenze** espone ora sette linguette operative oltre a **Documenti personali**: **Automezzi**, **Casa e immobili**, **Salute**, **Sport e associazioni**, **Contratti e documenti**, **Utente–azienda** e **Documenti aziendali**. La linguetta **Documenti generici** è rimossa; le regole storiche con `domain: generic` e quelle prive di una classificazione specifica confluiscono in **Contratti e documenti**, senza essere cancellate.
+
+**Comodato d’uso** viene proiettato in **Utente–azienda** e conserva le card modello/targa anche se proviene da una sorgente generale. Le regole il cui nome contiene **Capannone** vengono proiettate in **Documenti aziendali**. Queste due riclassificazioni prevalgono sull’eventuale vecchio `domain`, ma non spostano i documenti Firestore: ogni regola continua a essere letta e salvata nella propria sorgente tra `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig`; le nuove regole non Automezzi nascono in `generalConfig`. Le Scadenze reali non sono riconciliate o riscritte automaticamente.
+
+Nella rubrica Destinatari l’icona comunica ora lo stato corrente: `person_check` per un contatto attivo e `person_off` per uno disattivato. Il titolo del pulsante continua a indicare l’azione successiva, rispettivamente **Disattiva** o **Riattiva**. Il valore `active`, il filtro dei destinatari disponibili e le scritture Firestore non cambiano.
+
+Il controllo autenticato in sola lettura ha trovato **zero** regole in Documenti generici, una regola Comodato d’uso in `deadlineConfig` senza Scadenze collegate e due regole Capannone in `deadlineConfigDocuments`, ciascuna con una Scadenza collegata. Nessun comando **Salva** è stato eseguito e nessun dato reale è stato scritto. I test mirati su modello, hub, compatibilità Comodato, rubrica e cataloghi linguistici sono verdi **18/18**; la suite integrale `npm test` è terminata con codice **0**, inclusi documentazione **11/11**, guida **6/6**, i18n **14/14**, Functions, Rules, Storage, Vault e tutti gli emulatori. `version:check`, CSS, sintassi JavaScript e `git diff --check` sono verdi. Graphify principale è riallineato al sorgente locale con **13.633 nodi**, **35.373 archi** e **911 comunità**.
+
+Diego intende ricreare in seguito le proprie Scadenze e convergere le regole in un contenitore canonico unico. Questo cutover non fa parte della `1.2.222`: le Scadenze proprie restano nella raccolta canonica `scadenze`, le copie ricevute restano separate in `receivedDeadlines` per il contratto di autorizzazione e le tre sorgenti storiche delle regole non vengono migrate o cancellate. L’ordine **«pubblica»** autorizza bump patch, commit, push, PR, merge e deploy del solo Firebase Hosting dopo tutti i gate verdi; Functions, Rules, indici, migrazioni e scritture sui dati reali restano esclusi.
+
 ## Release 1.2.221 pubblicata — note uniformi nelle linguette Regole scadenze — 22/10/2026
 
 La linguetta **Documenti personali** presenta ora una nota introduttiva autonoma che chiarisce il collegamento diretto con i Documenti del Profilo e l’assenza di copie. Le linguette **Utente–azienda** e **Documenti aziendali** non usano più la grande card esterna: conservano il proprio messaggio informativo, il badge di fase futura dove previsto e la semantica accessibile del pannello, dentro la stessa struttura visivamente neutra delle altre linguette.

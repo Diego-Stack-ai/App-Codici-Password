@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## Riclassificazione delle regole nelle linguette operative — 22/10/2026
+
+Diego chiede di spostare la regola **Comodato d’uso** da **Automezzi** a **Utente–azienda**, le regole del **Capannone** da **Casa e immobili** a **Documenti aziendali**, rinominare **Contratti e rapporti** in **Contratti e documenti** ed eliminare la linguetta **Documenti generici**. La verifica autenticata in sola lettura ha accertato che Documenti generici non contiene regole; esistono una regola Comodato d’uso nella configurazione Automezzi e due rate IMU Capannone nella configurazione Documenti.
+
+Prima del rilascio Diego segnala inoltre che nella rubrica Destinatari le icone vengono lette come stato corrente ma rappresentano l’azione futura: il contatto attivo mostra l’omino barrato e quello disattivato la spunta. La correzione deve invertire soltanto le due icone, mantenendo invariati il valore `active`, il titolo operativo **Disattiva/Riattiva**, i filtri e i dati reali.
+
+L’ordine **«procedi»** autorizza implementazione locale, documentazione, test pertinenti e riallineamento del grafo strutturale. Non autorizza ancora bump di versione, commit, push, PR, merge o deploy, né scritture, copie, cancellazioni o migrazioni sui dati reali. La riclassificazione deve quindi agire sulla proiezione funzionale: il documento fisico di ogni regola resta nella sorgente storica e viene aggiornato lì solo se l’utente preme **Salva**. Le Scadenze collegate non vengono modificate automaticamente.
+
+Criteri di chiusura locale: sette linguette non personali con la stessa struttura visiva e operativa; nessuna linguetta generica; ricaduta sicura in **Contratti e documenti** per vecchie regole generiche o non classificate; Comodato d’uso in Utente–azienda con card veicolo conservate; Capannone in Documenti aziendali; sorgente fisica e conteggi delle Scadenze invariati; test completi e Graphify riallineato.
+
+Diego esprime l’intenzione di ricreare successivamente tutte le proprie Scadenze e chiede se le regole potranno convergere in un contenitore unico. Questa è una fase successiva: non autorizza una migrazione implicita nella release corrente e non modifica la separazione obbligatoria delle copie ricevute. L’ordine successivo **«pubblica»** autorizza la patch `1.2.222`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e scritture sui dati reali restano esclusi.
+
+Esito locale: requisiti implementati e candidata portata alla `1.2.222`; test mirati **18/18** e suite integrale `npm test` con codice **0**. Sono verdi anche documentazione **11/11**, guida **6/6**, i18n **14/14**, CSS, sintassi JavaScript, controllo versione e diff. Graphify principale è aggiornato a **13.633 nodi**, **35.373 archi** e **911 comunità**. Nessun salvataggio sui dati reali è stato eseguito.
+
 ## Note uniformi in Documenti personali e nelle linguette aziendali — 22/10/2026
 
 Diego chiede di eliminare la grande card visiva che circonda i messaggi informativi di **Utente–azienda** e **Documenti aziendali**, mantenendo però i contenuti e l’indicazione di fase futura. Chiede inoltre di aggiungere a **Documenti personali** una frase di presentazione analoga alle note già presenti nelle linguette operative.

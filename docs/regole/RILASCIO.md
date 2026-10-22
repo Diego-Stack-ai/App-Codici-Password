@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.222 — riclassificazione delle regole e stato destinatari — 22/10/2026
+
+La candidata sostituisce **Contratti e rapporti** con **Contratti e documenti**, elimina la linguetta vuota **Documenti generici** e rende operative le aree **Utente–azienda** e **Documenti aziendali**. La proiezione assegna Comodato d’uso a Utente–azienda e le regole Capannone a Documenti aziendali; vecchie regole generiche o non classificate ricadono in Contratti e documenti. Il Comodato conserva il comportamento a card modello/targa.
+
+La rubrica Destinatari corregge la sola semantica visiva del comando di stato: spunta per il contatto attivo e omino barrato per quello disattivato, mentre **Disattiva/Riattiva** continuano a descrivere l’azione. Persistenza, filtri e dati reali non cambiano.
+
+Il perimetro non comprende una migrazione Firestore: `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig` restano sorgenti fisiche distinte; salvataggio e modifica puntano sempre alla sorgente originaria e le Scadenze esistenti non vengono riallineate. Il controllo autenticato è stato solo di lettura e non è stato premuto **Salva**. La convergenza futura delle regole in un contenitore canonico unico resta un cutover separato; `receivedDeadlines` conserva comunque il proprio contratto distinto. Test mirati **18/18** e suite integrale `npm test` sono verdi; Graphify principale è riallineato a **13.633 nodi**, **35.373 archi** e **911 comunità**. L’ordine **«pubblica»** autorizza bump patch, commit, push, PR, merge e workflow del solo Firebase Hosting dopo i gate verdi; Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Esito operativo 1.2.221 — note uniformi nelle linguette Regole scadenze — 22/10/2026
 
 **Documenti personali** aggiunge una nota introduttiva autonoma prima delle card, mentre **Utente–azienda** e **Documenti aziendali** perdono la grande card esterna e mantengono messaggi e badge nel pannello neutro. La modifica è limitata al Frontend statico e ai testi localizzati: non autorizza né richiede Functions, Rules, indici, migrazioni o accessi ai dati reali. La suite integrale locale è verde con codice **0**, insieme ai controlli mirati, documentali, i18n, CSS, versione e diff.
