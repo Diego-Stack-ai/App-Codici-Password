@@ -2,6 +2,18 @@
 // Rigenera con: node scripts/split-translations.mjs
 // Lingua: fr — 117 chiavi
 export default {
+    "deadline_swipe_archive_restore": "Balayez vers la droite pour archiver ou restaurer",
+    "deadline_swipe_delete_archived": "Dans Archivées, balayez vers la gauche pour supprimer",
+    "filter_completed": "Archivées",
+    "deadline_swipe_actions": "Actions rapides sur les échéances",
+    "deadline_archive_action": "Archiver",
+    "deadline_restore_action": "Restaurer",
+    "deadline_delete_action": "Supprimer",
+    "deadline_delete_archived_confirm": "L’échéance sera définitivement supprimée. Continuer ?",
+    "deadline_archived_success": "Échéance archivée",
+    "deadline_restored_success": "Échéance restaurée",
+    "deadline_archive_error": "Impossible d’archiver l’échéance",
+    "deadline_restore_error": "Impossible de restaurer l’échéance",
     "account_archive": "Archives des Comptes",
     "account_archive_desc": "Gérer les comptes archivés",
     "app_info_security_desc": "Développée pour offrir un chiffrement maximal et une facilité de partage via des normes de base.",

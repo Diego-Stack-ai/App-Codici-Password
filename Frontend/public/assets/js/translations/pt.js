@@ -2,6 +2,18 @@
 // Rigenera con: node scripts/split-translations.mjs
 // Lingua: pt — 116 chiavi
 export default {
+    "deadline_swipe_archive_restore": "Deslize para a direita para arquivar ou restaurar",
+    "deadline_swipe_delete_archived": "Em Arquivadas, deslize para a esquerda para eliminar",
+    "filter_completed": "Arquivadas",
+    "deadline_swipe_actions": "Ações rápidas de prazos",
+    "deadline_archive_action": "Arquivar",
+    "deadline_restore_action": "Restaurar",
+    "deadline_delete_action": "Eliminar",
+    "deadline_delete_archived_confirm": "O prazo será eliminado definitivamente. Continuar?",
+    "deadline_archived_success": "Prazo arquivado",
+    "deadline_restored_success": "Prazo restaurado",
+    "deadline_archive_error": "Não foi possível arquivar o prazo",
+    "deadline_restore_error": "Não foi possível restaurar o prazo",
     "account_archive": "Arquivo de Contas",
     "account_archive_desc": "Gerenciar contas arquivadas",
     "app_info_security_desc": "Desenvolvida para oferecer criptografia máxima e facilidade de compartilhamento via padrões base.",

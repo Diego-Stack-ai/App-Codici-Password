@@ -2,15 +2,17 @@
 
 /**
  * SwipeList Utility
- * Handles swipe gestures for list items (Left: Archive, Right: Delete)
+ * Handles configurable left/right swipe gestures for list items.
  * Supports Touch and Mouse (Desktop) interactions.
  */
 export class SwipeList {
     constructor(selector, options = {}) {
         this.selector = selector;
         this.options = {
-            onSwipeLeft: options.onSwipeLeft || (() => { }),   // Action: Archive
-            onSwipeRight: options.onSwipeRight || (() => { }), // Action: Delete
+            onSwipeLeft: options.onSwipeLeft || (() => { }),
+            onSwipeRight: options.onSwipeRight || (() => { }),
+            canSwipeLeft: options.canSwipeLeft || (() => true),
+            canSwipeRight: options.canSwipeRight || (() => true),
             threshold: options.threshold || 0.3, // 30% of width to trigger
             ...options
         };
@@ -150,11 +152,11 @@ export class SwipeList {
         const width = this.activeItem.offsetWidth;
         const ratio = this.currentX / width;
 
-        if (ratio < -this.options.threshold) {
-            // Swiped Left (Archive) -> Fly out to Left
+        if (ratio < -this.options.threshold && this.options.canSwipeLeft(this.activeItem)) {
+            // Enabled left action -> fly out to the left.
             this.completeSwipe(this.activeItem, 'left');
-        } else if (ratio > this.options.threshold) {
-            // Swiped Right (Delete) -> Fly out to Right
+        } else if (ratio > this.options.threshold && this.options.canSwipeRight(this.activeItem)) {
+            // Enabled right action -> fly out to the right.
             this.completeSwipe(this.activeItem, 'right');
         } else {
             // Not enough -> Snap Back

@@ -5,6 +5,10 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Lista Scadenze — archivio separato dagli Account — 22/10/2026
+
+Il filtro **Archiviate** raccoglie le Scadenze con `completed: true` e non appartiene all’Archivio Account delle Impostazioni. Nelle viste attive lo scorrimento verso destra archivia la card; in Archiviate lo stesso gesto ripristina la Scadenza. Lo scorrimento verso sinistra è disabilitato per le Scadenze attive ed è disponibile soltanto sulle card archiviate, dove richiede una conferma prima della cancellazione definitiva. Le Scadenze ricevute sono consultabili ma non espongono gesti proprietari.
+
 ## Form unico delle Scadenze — 22/10/2026
 
 `aggiungi_scadenza.html` presenta una sola sequenza **Ambito → Regola → Parametro**. Le tre modalità storiche restano soltanto adattatori interni di compatibilità e non sono scelte parallele esposte all’utente. Preavviso, frequenza e testo derivano dalla regola selezionata e sono mostrati senza consentire una divergenza silenziosa nel singolo record; destinatari, canali, nota, URL, allegati e data restano propri della Scadenza. La modifica di un record anteriore tenta prima gli identificativi della regola e ricade poi sul confronto normalizzato di tipo e dettaglio.

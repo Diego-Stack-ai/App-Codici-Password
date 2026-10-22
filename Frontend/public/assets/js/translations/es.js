@@ -2,6 +2,18 @@
 // Rigenera con: node scripts/split-translations.mjs
 // Lingua: es — 135 chiavi
 export default {
+    "deadline_swipe_archive_restore": "Desliza a la derecha para archivar o restaurar",
+    "deadline_swipe_delete_archived": "En Archivadas, desliza a la izquierda para eliminar",
+    "filter_completed": "Archivadas",
+    "deadline_swipe_actions": "Acciones rápidas de vencimientos",
+    "deadline_archive_action": "Archivar",
+    "deadline_restore_action": "Restaurar",
+    "deadline_delete_action": "Eliminar",
+    "deadline_delete_archived_confirm": "El vencimiento se eliminará definitivamente. ¿Continuar?",
+    "deadline_archived_success": "Vencimiento archivado",
+    "deadline_restored_success": "Vencimiento restaurado",
+    "deadline_archive_error": "No se pudo archivar el vencimiento",
+    "deadline_restore_error": "No se pudo restaurar el vencimiento",
     "access_credentials": "Credenciales de acceso",
     "access_protocol_data": "Datos de acceso y protocolo",
     "account_code": "Código de cuenta",

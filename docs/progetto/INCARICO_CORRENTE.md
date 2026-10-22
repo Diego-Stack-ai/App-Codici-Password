@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Archivio autonomo delle Scadenze — 22/10/2026
+
+Diego chiede di rinominare il filtro **Completate** in **Archiviate** e di separare definitivamente questo ciclo di vita dall’**Archivio Account** delle Impostazioni. Nella lista Scadenze, uno scorrimento verso destra archivia una Scadenza attiva; nella linguetta Archiviate lo stesso gesto la ripristina. Soltanto una Scadenza già archiviata può essere eliminata definitivamente, con scorrimento verso sinistra e conferma esplicita.
+
+L’intervento conserva la raccolta canonica `users/{uid}/scadenze`: l’archiviazione aggiorna `completed` e il timestamp `completedAt`, il ripristino li annulla e la cancellazione continua a usare il percorso già protetto che rimuove anche gli eventuali allegati. Le copie ricevute restano in sola lettura e non acquisiscono gesti di mutazione. Nessuna Scadenza reale viene modificata durante il rilascio.
+
+L’ordine **«procedi»**, seguito da **«poi pubblica»**, autorizza implementazione, test, bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e scritture sui dati reali restano esclusi.
+
 ## Nuovo form unico delle Scadenze — 22/10/2026
 
 Diego autorizza la costruzione locale del nuovo form di creazione e modifica delle Scadenze. Il form non usa più come interfaccia primaria i tre selettori storici Automezzi, Documenti e Generali: presenta un solo percorso **Ambito → Regola → Parametro**, legge preavviso, frequenza e testo dalla regola già configurata e lascia alla Scadenza data, intestatario o sorgente, destinatari e canali, nota e allegati. Il record conserva inoltre `ruleDomain`, `ruleId`, `ruleSourceId`, `ruleRouteKey`, `ruleSchemaVersion`, `ruleParameterId` e `ruleParameterLabel`; i record anteriori restano apribili mediante compatibilità per nome e dettaglio.
