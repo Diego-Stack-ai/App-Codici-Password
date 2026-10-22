@@ -6,7 +6,9 @@ Diego autorizza la costruzione locale del nuovo form di creazione e modifica del
 
 I Documenti personali usano lo stesso form ma vengono avviati dal Documento del Profilo: tipo, numero, intestatario, ente e data provengono dalla sorgente; la regola fornisce pianificazione e composizione del messaggio. Non è autorizzata in questa fase la cancellazione delle tre Scadenze personali esistenti, la loro ricreazione, la riconciliazione delle altre Scadenze o qualsiasi migrazione/scrittura massiva sui dati reali. Tali operazioni seguiranno soltanto dopo il collaudo del form.
 
-La freccia del Dettaglio scadenza deve tornare sempre alla lista canonica `scadenze.html`, senza seguire una cronologia che possa riportare alla Home. L’incarico corrente comprende implementazione, test e documentazione locali; non comprende ancora bump, commit, push, PR, merge o deploy.
+La freccia del Dettaglio scadenza torna sempre alla lista canonica `scadenze.html`, senza seguire una cronologia che possa riportare alla Home.
+
+Esito: la release `1.2.223` è stata unita tramite PR `#211` nel commit `c2482e2b`. Il workflow manuale `39752733091` ha ripetuto la suite completa e pubblicato esclusivamente Firebase Hosting; la verifica HTTP conferma versione, nuovo form e navigazione aggiornata. La cancellazione o ricreazione delle tre Scadenze personali e la riconciliazione delle Scadenze esistenti non fanno parte di questo rilascio. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Riclassificazione delle regole nelle linguette operative — 22/10/2026
 

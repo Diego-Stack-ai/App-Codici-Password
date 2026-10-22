@@ -1,10 +1,10 @@
 # Stato
 
-## Candidata locale — form unico delle Scadenze — 22/10/2026
+## Release 1.2.223 pubblicata — form unico delle Scadenze — 22/10/2026
 
 Il form Scadenza usa ora il catalogo unificato **Ambito → Regola → Parametro**, eredita pianificazione e testo dalle Regole scadenze e persiste gli identificativi necessari al collegamento stabile. I Documenti personali entrano nello stesso percorso dal Profilo con sorgente vincolata; nessuna Scadenza reale è stata cancellata, ricreata, riconciliata o migrata. La freccia del Dettaglio scadenza torna in modo deterministico a `scadenze.html`.
 
-Lo stato è soltanto locale: non sono stati eseguiti bump, commit, push, PR, merge o deploy. La ricreazione delle tre Scadenze personali e la riconciliazione delle altre restano una fase successiva al collaudo autenticato del nuovo form.
+La PR `#211` è stata unita nel merge commit `c2482e2b` dopo i gate verdi. Il workflow manuale `39752733091` ha validato lo stesso `master` e pubblicato esclusivamente Firebase Hosting; la verifica HTTP pubblica conferma versione `1.2.223`, nuovo form e asset del Dettaglio aggiornati. La ricreazione delle tre Scadenze personali e la riconciliazione delle altre restano una fase successiva al collaudo autenticato del nuovo form. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Release 1.2.222 pubblicata — ambiti Regole scadenze e stato destinatari — 22/10/2026
 

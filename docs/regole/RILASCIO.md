@@ -1,5 +1,11 @@
 # Rilascio
 
+## Esito operativo 1.2.223 — form unico delle Scadenze — 22/10/2026
+
+Il form di creazione e modifica usa ora il percorso unico **Ambito → Regola → Parametro**. Pianificazione e testo provengono dalle Regole scadenze; il record conserva gli identificativi stabili della configurazione selezionata. I Documenti personali entrano nello stesso catalogo dal Profilo, mantenendo tipo, numero, intestatario, ente e data nella sorgente Documento. La freccia del Dettaglio scadenza torna sempre al contenitore `scadenze.html`.
+
+La suite completa della PR è verde in **6m26s** e il workflow manuale ha ripetuto tutti i controlli in **6m44s**. La PR `#211` è stata unita nel merge commit `c2482e2b`; il workflow `39752733091` ha pubblicato esclusivamente Firebase Hosting in **33s**. La verifica HTTP pubblica conferma la `1.2.223`, il nuovo selettore unificato e gli asset del Dettaglio aggiornati. Functions, Firestore Rules, Storage Rules, indici, migrazioni, riconciliazione e dati reali sono rimasti esclusi.
+
 ## Esito operativo 1.2.222 — riclassificazione delle regole e stato destinatari — 22/10/2026
 
 La candidata sostituisce **Contratti e rapporti** con **Contratti e documenti**, elimina la linguetta vuota **Documenti generici** e rende operative le aree **Utente–azienda** e **Documenti aziendali**. La proiezione assegna Comodato d’uso a Utente–azienda e le regole Capannone a Documenti aziendali; vecchie regole generiche o non classificate ricadono in Contratti e documenti. Il Comodato conserva il comportamento a card modello/targa.
