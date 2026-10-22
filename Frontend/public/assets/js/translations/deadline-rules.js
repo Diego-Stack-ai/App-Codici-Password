@@ -1,4 +1,5 @@
 const it = {
+  deadline_personal_title: 'Scadenze dei documenti personali', deadline_personal_desc: 'Qui trovi i documenti del Profilo e configuri i relativi avvisi di scadenza senza creare copie.',
   deadline_personal_message: 'Testo dell’email e della notifica',
   deadline_domain_loading: 'Mappatura di regole e scadenze…', deadline_domain_error: 'Impossibile caricare la mappatura delle scadenze.', deadline_domain_rules_title: 'Regole disponibili', deadline_domain_rules_empty: 'Nessuna regola configurata in questo ambito.', deadline_domain_manage_rule: 'Gestisci configurazione', deadline_domain_schedule_missing: 'Preavviso e frequenza non configurati', deadline_domain_linked_one: 'scadenza', deadline_domain_linked_many: 'scadenze', deadline_domain_source_vehicles: 'Configurazione Automezzi', deadline_domain_source_documents: 'Configurazione Documenti', deadline_domain_source_general: 'Regole generali',
   deadline_personal_can_manage: 'Può gestire', deadline_personal_view_only: 'Solo notifica',
@@ -11,6 +12,7 @@ const it = {
 };
 
 const en = {
+  deadline_personal_title: 'Personal document deadlines', deadline_personal_desc: 'Find your Profile documents here and configure their deadline alerts without creating copies.',
   deadline_personal_message: 'Email and notification text',
   deadline_domain_loading: 'Mapping rules and deadlines…', deadline_domain_error: 'The deadline map could not be loaded.', deadline_domain_rules_title: 'Available rules', deadline_domain_rules_empty: 'No rule is configured in this area.', deadline_domain_manage_rule: 'Manage configuration', deadline_domain_schedule_missing: 'Notice and frequency are not configured', deadline_domain_linked_one: 'deadline', deadline_domain_linked_many: 'deadlines', deadline_domain_source_vehicles: 'Vehicle configuration', deadline_domain_source_documents: 'Document configuration', deadline_domain_source_general: 'General rules',
   deadline_personal_can_manage: 'Can manage', deadline_personal_view_only: 'Notification only',
@@ -23,6 +25,7 @@ const en = {
 };
 
 const es = {
+  deadline_personal_title: 'Vencimientos de documentos personales', deadline_personal_desc: 'Aquí encontrarás los documentos del Perfil y podrás configurar sus avisos de vencimiento sin crear copias.',
   deadline_personal_message: 'Texto del correo y de la notificación',
   deadline_domain_loading: 'Mapeando reglas y vencimientos…', deadline_domain_error: 'No se pudo cargar el mapa de vencimientos.', deadline_domain_rules_title: 'Reglas disponibles', deadline_domain_rules_empty: 'No hay reglas configuradas en este ámbito.', deadline_domain_manage_rule: 'Gestionar configuración', deadline_domain_schedule_missing: 'Aviso y frecuencia no configurados', deadline_domain_linked_one: 'vencimiento', deadline_domain_linked_many: 'vencimientos', deadline_domain_source_vehicles: 'Configuración de vehículos', deadline_domain_source_documents: 'Configuración de documentos', deadline_domain_source_general: 'Reglas generales',
   deadline_personal_can_manage: 'Puede gestionar', deadline_personal_view_only: 'Solo notificación',
@@ -35,6 +38,7 @@ const es = {
 };
 
 const fr = {
+  deadline_personal_title: 'Échéances des documents personnels', deadline_personal_desc: 'Retrouvez ici les documents du Profil et configurez leurs alertes d’échéance sans créer de copies.',
   deadline_personal_message: 'Texte de l’e-mail et de la notification',
   deadline_domain_loading: 'Mappage des règles et échéances…', deadline_domain_error: 'Impossible de charger la carte des échéances.', deadline_domain_rules_title: 'Règles disponibles', deadline_domain_rules_empty: 'Aucune règle configurée dans ce domaine.', deadline_domain_manage_rule: 'Gérer la configuration', deadline_domain_schedule_missing: 'Préavis et fréquence non configurés', deadline_domain_linked_one: 'échéance', deadline_domain_linked_many: 'échéances', deadline_domain_source_vehicles: 'Configuration Véhicules', deadline_domain_source_documents: 'Configuration Documents', deadline_domain_source_general: 'Règles générales',
   deadline_personal_can_manage: 'Peut gérer', deadline_personal_view_only: 'Notification uniquement',
@@ -47,6 +51,7 @@ const fr = {
 };
 
 const de = {
+  deadline_personal_title: 'Fristen persönlicher Dokumente', deadline_personal_desc: 'Hier finden Sie die Dokumente aus dem Profil und konfigurieren deren Fristmeldungen, ohne Kopien anzulegen.',
   deadline_personal_message: 'E-Mail- und Benachrichtigungstext',
   deadline_domain_loading: 'Regeln und Fristen werden zugeordnet…', deadline_domain_error: 'Die Fristenzuordnung konnte nicht geladen werden.', deadline_domain_rules_title: 'Verfügbare Regeln', deadline_domain_rules_empty: 'In diesem Bereich ist keine Regel konfiguriert.', deadline_domain_manage_rule: 'Konfiguration verwalten', deadline_domain_schedule_missing: 'Vorlauf und Häufigkeit nicht konfiguriert', deadline_domain_linked_one: 'Frist', deadline_domain_linked_many: 'Fristen', deadline_domain_source_vehicles: 'Fahrzeugkonfiguration', deadline_domain_source_documents: 'Dokumentkonfiguration', deadline_domain_source_general: 'Allgemeine Regeln',
   deadline_personal_can_manage: 'Kann verwalten', deadline_personal_view_only: 'Nur Benachrichtigung',
@@ -59,6 +64,7 @@ const de = {
 };
 
 const zh = {
+  deadline_personal_title: '个人证件到期事项', deadline_personal_desc: '在此查看个人资料中的证件并配置到期提醒，无需创建副本。',
   deadline_personal_message: '电子邮件和通知文字',
   deadline_domain_loading: '正在映射规则和到期事项…', deadline_domain_error: '无法加载到期事项映射。', deadline_domain_rules_title: '可用规则', deadline_domain_rules_empty: '此分类没有已配置的规则。', deadline_domain_manage_rule: '管理配置', deadline_domain_schedule_missing: '未配置提前通知和频率', deadline_domain_linked_one: '项到期事项', deadline_domain_linked_many: '项到期事项', deadline_domain_source_vehicles: '车辆配置', deadline_domain_source_documents: '文档配置', deadline_domain_source_general: '通用规则',
   deadline_personal_can_manage: '可管理', deadline_personal_view_only: '仅通知',
@@ -71,6 +77,7 @@ const zh = {
 };
 
 const hi = {
+  deadline_personal_title: 'व्यक्तिगत दस्तावेज़ों की समय-सीमाएँ', deadline_personal_desc: 'यहाँ प्रोफ़ाइल के दस्तावेज़ देखें और उनकी प्रतियाँ बनाए बिना समय-सीमा सूचनाएँ कॉन्फ़िगर करें।',
   deadline_personal_message: 'ईमेल और सूचना का पाठ',
   deadline_domain_loading: 'नियम और समय-सीमाएँ मैप की जा रही हैं…', deadline_domain_error: 'समय-सीमा मानचित्र लोड नहीं हो सका।', deadline_domain_rules_title: 'उपलब्ध नियम', deadline_domain_rules_empty: 'इस क्षेत्र में कोई नियम कॉन्फ़िगर नहीं है।', deadline_domain_manage_rule: 'कॉन्फ़िगरेशन प्रबंधित करें', deadline_domain_schedule_missing: 'पूर्व सूचना और आवृत्ति कॉन्फ़िगर नहीं हैं', deadline_domain_linked_one: 'समय-सीमा', deadline_domain_linked_many: 'समय-सीमाएँ', deadline_domain_source_vehicles: 'वाहन कॉन्फ़िगरेशन', deadline_domain_source_documents: 'दस्तावेज़ कॉन्फ़िगरेशन', deadline_domain_source_general: 'सामान्य नियम',
   deadline_personal_can_manage: 'प्रबंधित कर सकता है', deadline_personal_view_only: 'केवल सूचना',
@@ -83,6 +90,7 @@ const hi = {
 };
 
 const pt = {
+  deadline_personal_title: 'Prazos dos documentos pessoais', deadline_personal_desc: 'Encontre aqui os documentos do Perfil e configure os respetivos avisos de prazo sem criar cópias.',
   deadline_personal_message: 'Texto do email e da notificação',
   deadline_domain_loading: 'A mapear regras e prazos…', deadline_domain_error: 'Não foi possível carregar o mapa dos prazos.', deadline_domain_rules_title: 'Regras disponíveis', deadline_domain_rules_empty: 'Não há regras configuradas nesta área.', deadline_domain_manage_rule: 'Gerir configuração', deadline_domain_schedule_missing: 'Aviso e frequência não configurados', deadline_domain_linked_one: 'prazo', deadline_domain_linked_many: 'prazos', deadline_domain_source_vehicles: 'Configuração de veículos', deadline_domain_source_documents: 'Configuração de documentos', deadline_domain_source_general: 'Regras gerais',
   deadline_personal_can_manage: 'Pode gerir', deadline_personal_view_only: 'Apenas notificação',
