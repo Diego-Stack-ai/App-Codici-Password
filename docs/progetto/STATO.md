@@ -1,10 +1,12 @@
 # Stato
 
-## Release 1.2.221 candidata — note uniformi nelle linguette Regole scadenze — 22/10/2026
+## Release 1.2.221 pubblicata — note uniformi nelle linguette Regole scadenze — 22/10/2026
 
 La linguetta **Documenti personali** presenta ora una nota introduttiva autonoma che chiarisce il collegamento diretto con i Documenti del Profilo e l’assenza di copie. Le linguette **Utente–azienda** e **Documenti aziendali** non usano più la grande card esterna: conservano il proprio messaggio informativo, il badge di fase futura dove previsto e la semantica accessibile del pannello, dentro la stessa struttura visivamente neutra delle altre linguette.
 
-L’intervento riguarda esclusivamente markup, stile e testi localizzati. Non modifica regole, configurazioni, Documenti, Scadenze, destinatari, backend o dati reali. La verifica locale è completata: `npm test` è verde con codice **0**, inclusi documentazione **11/11**, guida **6/6**, hub **5/5**, i18n **14/14**, navigazione **179/179**, Functions, Rules, Storage, Vault e tutti gli emulatori; sono verdi anche CSS, `git diff --check` e il controllo dei **266** riferimenti della `1.2.221`. Merge e pubblicazione Hosting saranno registrati separatamente dopo il relativo esito.
+L’intervento riguarda esclusivamente markup, stile e testi localizzati. Non modifica regole, configurazioni, Documenti, Scadenze, destinatari, backend o dati reali. La verifica locale è completata: `npm test` è verde con codice **0**, inclusi documentazione **11/11**, guida **6/6**, hub **5/5**, i18n **14/14**, navigazione **179/179**, Functions, Rules, Storage, Vault e tutti gli emulatori; sono verdi anche CSS, `git diff --check` e il controllo dei **266** riferimenti della `1.2.221`.
+
+La PR `#207` è stata unita nel commit `ee37c19e`; il gate automatico `39712366772` ha verificato il `master` in 18m56s e il workflow manuale `39714092635` ha nuovamente validato lo stesso SHA e pubblicato esclusivamente Firebase Hosting in 23m50s. La verifica HTTP pubblica restituisce `200` per home, pagina Regole scadenze, CSS e catalogo di traduzione e conferma la `1.2.221`, `deadline_personal_title` e `deadline-information-panel`. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Release 1.2.220 pubblicata — linguette operative uniformi e regole identificabili — 22/10/2026
 
