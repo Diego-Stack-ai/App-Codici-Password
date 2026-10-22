@@ -1,12 +1,14 @@
 # Stato
 
-## Candidata 1.2.220 — linguette operative uniformi e regole identificabili — 22/10/2026
+## Release 1.2.220 pubblicata — linguette operative uniformi e regole identificabili — 22/10/2026
 
 Le sei linguette operative di **Regole scadenze** condividono ora la struttura richiesta: la presentazione è una nota autonoma, incorniciata e più compatta; il pannello semantico perde bordo, fondo e spaziatura propri; le card delle regole sono mostrate direttamente nella linguetta. **Documenti personali** conserva il flusso separato già stabilizzato. Nell’editor contestuale ogni regola operativa usa una sola pianificazione; le card Automezzi restano identificate da modello e targa, mentre le altre richiedono un **Nome configurazione** che ne aggiorna il titolo.
 
 La convergenza dei dati è predisposta ma non anticipata: le regole nuove o salvate esplicitamente ricevono ID stabile, `domain` ricavato dalla regola effettivamente aperta e `schemaVersion`; le sorgenti storiche `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig` non vengono spostate o fuse. La migrazione verso una sorgente canonica e il collegamento delle Scadenze tramite `ruleId` restano un cutover successivo con inventario, deduplica, prova e rollback. Nessuna configurazione reale o Scadenza è stata letta o scritta durante questo intervento.
 
-La suite completa `npm test` è verde con codice **0**, inclusi test applicativi, documentazione, guida, i18n, Assistant, fondazioni UI, lint, Functions e tutti gli scenari Firebase su emulatori. Restano inoltre verdi `git diff --check` e i test mirati su modello, dominio e hub **33/33** e navigazione **179/179**. La candidata è stata portata a `1.2.220`, con **266** riferimenti agli asset riallineati; il grafo strutturale aggiornato contiene **13.608 nodi**, **35.367 archi** e **894 comunità**. L’ordine del 22/10/2026 autorizza commit, push, PR, merge e pubblicazione del solo Firebase Hosting dopo preflight e gate GitHub verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e accessi ai dati reali restano esclusi.
+La suite completa `npm test` è verde con codice **0**, inclusi test applicativi, documentazione, guida, i18n, Assistant, fondazioni UI, lint, Functions e tutti gli scenari Firebase su emulatori. Restano inoltre verdi `git diff --check`, i test mirati su modello, dominio e hub **33/33**, navigazione **179/179** e `git:preflight`. La release è `1.2.220`, con **266** riferimenti agli asset riallineati; il grafo strutturale aggiornato contiene **13.608 nodi**, **35.367 archi** e **894 comunità**.
+
+La PR `#204` è stata unita nel commit `ef7600eb` dopo gate GitHub verdi. Il run automatico `39704130380` ha verificato lo stesso `master` in 8m03s; il workflow manuale `39704981716` ha nuovamente validato il sorgente e pubblicato esclusivamente Firebase Hosting in 6m23s. La verifica pubblica restituisce HTTP `200` per home, Regole scadenze, CSS e moduli interessati, confermando la `1.2.220` e i nuovi marcatori. Functions, Firestore Rules, Storage Rules, indici, migrazioni, dati reali e riconciliazione delle Scadenze sono rimasti esclusi.
 
 ## Release 1.2.219 pubblicata — Comodato conservativo e controllo dello stato Git — 21/10/2026
 
