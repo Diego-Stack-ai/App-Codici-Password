@@ -8,6 +8,8 @@ L’intervento conserva la raccolta canonica `users/{uid}/scadenze`: l’archivi
 
 L’ordine **«procedi»**, seguito da **«poi pubblica»**, autorizza implementazione, test, bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e scritture sui dati reali restano esclusi.
 
+Esito: la release `1.2.224` è stata unita tramite PR `#213` nel merge commit `eca02aa6`. La suite locale integrale e i gate GitHub sono verdi; il workflow manuale `39769890177` ha ripetuto la validazione e pubblicato esclusivamente Firebase Hosting. La verifica HTTP pubblica conferma stato `200`, versione, filtro **Archiviate**, archiviazione/ripristino e cancellazione protetta. Nessuna Scadenza reale è stata modificata dal rilascio.
+
 ## Nuovo form unico delle Scadenze — 22/10/2026
 
 Diego autorizza la costruzione locale del nuovo form di creazione e modifica delle Scadenze. Il form non usa più come interfaccia primaria i tre selettori storici Automezzi, Documenti e Generali: presenta un solo percorso **Ambito → Regola → Parametro**, legge preavviso, frequenza e testo dalla regola già configurata e lascia alla Scadenza data, intestatario o sorgente, destinatari e canali, nota e allegati. Il record conserva inoltre `ruleDomain`, `ruleId`, `ruleSourceId`, `ruleRouteKey`, `ruleSchemaVersion`, `ruleParameterId` e `ruleParameterLabel`; i record anteriori restano apribili mediante compatibilità per nome e dettaglio.
