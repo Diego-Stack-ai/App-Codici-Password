@@ -1,10 +1,12 @@
 # Rilascio
 
-## Candidata 1.2.226 — video grandi nei Memorandum e traduzioni Scadenze — 22/10/2026
+## Esito operativo 1.2.226 — video grandi nei Memorandum e traduzioni Scadenze — 22/10/2026
 
 I soli video allegati ad Account o Memorandum possono ora arrivare a 512 MiB. Oltre 32 MiB il client cifra e carica sequenzialmente blocchi autenticati da 8 MiB, mantenendo un solo allegato logico e una sola chiave-file condivisibile. Apertura tramite OPFS, condivisione, cancellazione dell'allegato, backup cifrato e inventari di purge riconoscono il manifest completo; un caricamento interrotto compensa i blocchi già inviati. L'Archivio portatile rifiuta esplicitamente questo formato invece di generare una copia incompleta. Il form **Componi scadenza** carica inoltre il catalogo specializzato e non espone più chiavi `deadline_*` grezze.
 
 La suite applicativa completa è verde, inclusi Allegati **72/72**, navigazione **179/179**, Functions/security **466 pass e 9 skip dichiarati**, Rules Storage e tutti i profili Firebase Emulator. L'ordine **«quando hai finito pubblica»** autorizza bump patch, commit, push, PR, merge e workflow del solo Firebase Hosting. La modifica sorgente al purge viene inclusa e verificata ma non distribuita: finché non sarà autorizzato un deploy Functions separato, la cancellazione definitiva dell'intero Account contenente allegati a blocchi si interrompe in sicurezza. Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+Il commit applicativo `91f99b8a` è stato unito tramite PR `#217` nel merge commit `17942a2b`. Il gate automatico del `master` `39813538756` e il workflow manuale `39813684766` sono verdi; quest'ultimo ha pubblicato esclusivamente Firebase Hosting. La verifica HTTP pubblica senza cache conferma la versione `1.2.226`, il nuovo modulo video a blocchi e il catalogo italiano del form Scadenze. Il ramo applicativo è stato rimosso localmente dopo il merge; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati distribuiti o modificati.
 
 ## Esito operativo 1.2.225 — scelta esplicita del tipo di Scadenza — 22/10/2026
 

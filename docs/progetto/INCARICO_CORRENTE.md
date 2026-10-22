@@ -10,6 +10,8 @@ Le schermate inviate da Diego mostrano inoltre chiavi `deadline_*` nel nuovo for
 
 L'ordine **«procediamo»** autorizza implementazione locale, documentazione e test. Il successivo ordine **«quando hai finito pubblica»** autorizza bump patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. La modifica alla Function di purge viene versionata e collaudata ma resta esclusa dal deploy: finché non sarà autorizzata separatamente, una cancellazione definitiva dell'intero Account che contiene allegati a blocchi si interrompe in sicurezza senza rimuovere i metadati. Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
+Esito: la PR `#217` è stata unita nel merge commit `17942a2b`. Il gate automatico del `master` `39813538756` e il workflow manuale `39813684766` sono verdi; quest'ultimo ha pubblicato esclusivamente Firebase Hosting. La verifica HTTP pubblica senza cache conferma la versione `1.2.226`, il modulo per gli allegati video a blocchi e il catalogo italiano del form Scadenze. Functions, Rules, indici, migrazioni e dati reali sono rimasti esclusi.
+
 ## Tipo di scadenza come primo passo del nuovo form — 22/10/2026
 
 Diego chiede che la creazione di una Scadenza inizi dalla scelta esplicita del tipo, usando gli stessi ambiti delle Regole scadenze. Il form non preseleziona più Automezzi e non sceglie automaticamente la prima regola o il primo riferimento: mostra anzitutto le linguette **Documenti personali**, **Automezzi**, **Casa e immobili**, **Salute**, **Sport e associazioni**, **Contratti e documenti**, **Utente–azienda** e **Documenti aziendali**; soltanto dopo la scelta espone **Regola** e **Riferimento**.
