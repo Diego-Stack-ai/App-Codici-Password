@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.222';
+import { auth } from '../../firebase-config.js?v=1.2.223';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -15,8 +15,8 @@ import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { getCurrentLanguage, t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { normalizeExternalUrl } from '../shared/attachment-security.js';
-import { getDeadline } from '../data/vault-repository.js';
-import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
+import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
+import { deadlineRecipientsFromRecord, normalizeRecipientEmail } from './deadline-recipient-model.js';
 import {
     deadlineDateDisplay,
     deadlineDateForSave,
@@ -31,7 +31,13 @@ import {
     createDeadlineEditorReturnDraft,
     deadlineEditorReturnTarget
 } from './deadline-editor-return-draft.js';
-import { createDeadlineConfigController, deadlineConfigValuesMatch } from './deadline-config-controller.js';
+import {
+    DEADLINE_FORM_DOMAINS,
+    buildDeadlineRuleCatalog,
+    deadlineRuleLinkFields,
+    findDeadlineParameter,
+    findDeadlineRule
+} from './deadline-form-model.js';
 import { saveDeadline } from './deadline-save-service.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
@@ -42,17 +48,168 @@ let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 const attachmentController = createDeadlineAttachmentController();
 const recipientController = createDeadlineRecipientController({ onManageContacts: openRecipientManager });
-const configController = createDeadlineConfigController({
-    recipientController,
-    onRender: () => syncCustomDropdowns()
-});
 let profileDocumentLinkDraft = null;
 let accountDeadlineLinkDraft = null;
 let linkedSourceRef = null;
 let profileDocumentEditorData = null;
+let deadlineRuleCatalog = [];
+let currentDeadlineRule = null;
+let currentDeadlineParameter = null;
 
 const PROFILE_DEADLINE_DRAFT_KEY = 'profile-deadline-link-draft';
 const ACCOUNT_DEADLINE_DRAFT_KEY = 'account-deadline-link-draft';
+
+function availableDeadlineRules() {
+    const personalOnly = isProfileDocumentEditor();
+    return deadlineRuleCatalog.filter(rule => personalOnly ? rule.domain === 'personal' : rule.domain !== 'personal');
+}
+
+function replaceSelectOptions(select, entries, placeholder) {
+    if (!select) return;
+    clearElement(select);
+    if (placeholder) select.appendChild(new Option(placeholder, ''));
+    entries.forEach(entry => select.appendChild(new Option(entry.label, entry.value)));
+}
+
+function normalizeComparable(value) {
+    return String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[’`´]/g, "'").toLocaleLowerCase('it-IT').replace(/'/g, '')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/\s+/g, ' ');
+}
+
+function valuesMatch(left, right) {
+    return normalizeComparable(left) === normalizeComparable(right);
+}
+
+async function loadDeadlineFormCatalog(user) {
+    const [deadlineConfig, deadlineConfigDocuments, generalConfig, profile, contacts] = await Promise.all([
+        getUserSetting(user.uid, 'deadlineConfig'),
+        getUserSetting(user.uid, 'deadlineConfigDocuments'),
+        getUserSetting(user.uid, 'generalConfig'),
+        getUserProfile(user.uid),
+        listContacts(user.uid)
+    ]);
+    const general = generalConfig || {};
+    const recipientContacts = (contacts || []).filter(contact => contact.active !== false);
+    (general.notificationEmails || []).forEach(email => {
+        const normalized = normalizeRecipientEmail(email);
+        if (normalized && !recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === normalized)) {
+            recipientContacts.push({id: '', nome: 'Email salvata', cognome: '', email: normalized});
+        }
+    });
+    recipientController.setContacts(recipientContacts);
+    const names = [...new Set([
+        ...(deadlineConfig?.names || []),
+        ...(deadlineConfigDocuments?.names || []),
+        ...(general.names || []),
+        profile?.displayName,
+        ...recipientContacts.map(contact => [contact.nome, contact.cognome].filter(Boolean).join(' ').trim())
+    ].filter(Boolean))].sort((left, right) => String(left).localeCompare(String(right), 'it'));
+    const namesList = document.getElementById('names-list');
+    if (namesList) {
+        clearElement(namesList);
+        names.forEach(name => namesList.appendChild(new Option(name, name)));
+    }
+    return buildDeadlineRuleCatalog({
+        deadlineConfig: deadlineConfig || {},
+        deadlineConfigDocuments: deadlineConfigDocuments || {},
+        generalConfig: general
+    });
+}
+
+function deadlineDomainLabel(domain) {
+    const entry = DEADLINE_FORM_DOMAINS.find(item => item.id === domain);
+    return entry ? t(entry.labelKey) : domain;
+}
+
+function setDeadlineRuleSummary() {
+    const name = document.getElementById('deadline-rule-summary-name');
+    const schedule = document.getElementById('deadline-rule-summary-schedule');
+    if (name) name.textContent = currentDeadlineRule
+        ? `${deadlineDomainLabel(currentDeadlineRule.domain)} · ${currentDeadlineRule.name}` : '—';
+    if (schedule) schedule.textContent = currentDeadlineRule
+        ? `${t('deadline_personal_notice')} ${currentDeadlineRule.period} ${t('deadline_personal_days')} · ${t('deadline_personal_frequency')} ${currentDeadlineRule.frequency} ${t('deadline_personal_days')}` : '—';
+}
+
+function applyDeadlineRuleValues() {
+    if (!currentDeadlineRule) return;
+    currentMode = currentDeadlineRule.mode;
+    setMode(currentMode);
+    selectValuePreservingCustomOption(typeSelect, currentDeadlineRule.name, {
+        period: currentDeadlineRule.period,
+        freq: currentDeadlineRule.frequency
+    });
+    const parameter = currentDeadlineParameter;
+    const detailSelect = document.getElementById('modello_veicolo');
+    if (detailSelect && parameter?.detail) selectValuePreservingCustomOption(detailSelect, parameter.detail);
+    const templateSelect = document.getElementById('testo_email_select');
+    if (templateSelect && parameter?.templateText) {
+        selectValuePreservingCustomOption(templateSelect, parameter.templateText);
+    }
+    const notice = document.getElementById('notif_days_before');
+    const frequency = document.getElementById('notif_frequency');
+    if (notice) notice.value = String(currentDeadlineRule.period);
+    if (frequency) frequency.value = String(currentDeadlineRule.frequency);
+    setDeadlineRuleSummary();
+    updatePreview();
+}
+
+function renderDeadlineParameters(preferred = {}) {
+    const select = document.getElementById('deadline-parameter-select');
+    const sourceParameters = currentDeadlineRule?.parameters || [];
+    const preferredParameter = findDeadlineParameter(currentDeadlineRule, preferred);
+    replaceSelectOptions(select, sourceParameters.map(parameter => ({
+        value: parameter.id,
+        label: parameter.label || parameter.detail || currentDeadlineRule.name
+    })), sourceParameters.length ? '' : t('deadline_form_no_parameter'));
+    if (select && preferredParameter) select.value = preferredParameter.id;
+    currentDeadlineParameter = preferredParameter || sourceParameters[0] || null;
+    document.getElementById('deadline-parameter-field')?.classList.toggle('hidden', !sourceParameters.length);
+    applyDeadlineRuleValues();
+}
+
+function renderDeadlineRules(preferred = {}) {
+    const domainSelect = document.getElementById('deadline-domain-select');
+    const ruleSelect = document.getElementById('deadline-rule-select');
+    const rules = availableDeadlineRules().filter(rule => rule.domain === domainSelect?.value);
+    const preferredRule = findDeadlineRule(rules, preferred);
+    replaceSelectOptions(ruleSelect, rules.map(rule => ({value: rule.id, label: rule.name})), t('deadline_form_select_rule'));
+    currentDeadlineRule = preferredRule || rules[0] || null;
+    if (ruleSelect && currentDeadlineRule) ruleSelect.value = currentDeadlineRule.id;
+    renderDeadlineParameters(preferred);
+}
+
+function selectDeadlineRule(preferred = {}) {
+    const domainSelect = document.getElementById('deadline-domain-select');
+    const candidates = availableDeadlineRules();
+    const preferredRule = findDeadlineRule(candidates, preferred);
+    const preferredDomain = preferredRule?.domain || preferred.ruleDomain || preferred.domain;
+    const domains = DEADLINE_FORM_DOMAINS.filter(domain => candidates.some(rule => rule.domain === domain.id));
+    replaceSelectOptions(domainSelect, domains.map(domain => ({value: domain.id, label: t(domain.labelKey)})), t('deadline_form_select_domain'));
+    if (domainSelect) domainSelect.value = domains.some(domain => domain.id === preferredDomain)
+        ? preferredDomain : domains[0]?.id || '';
+    renderDeadlineRules({...preferred, ruleId: preferredRule?.ruleId || preferred.ruleId});
+}
+
+function initDeadlineRuleSelector() {
+    const domainSelect = document.getElementById('deadline-domain-select');
+    const rules = availableDeadlineRules();
+    const domains = DEADLINE_FORM_DOMAINS.filter(domain => rules.some(rule => rule.domain === domain.id));
+    replaceSelectOptions(domainSelect, domains.map(domain => ({value: domain.id, label: t(domain.labelKey)})), t('deadline_form_select_domain'));
+    const initialDomain = isProfileDocumentEditor() ? 'personal'
+        : domains.find(domain => domain.id === 'vehicles')?.id || domains[0]?.id || '';
+    if (domainSelect) domainSelect.value = initialDomain;
+    domainSelect?.addEventListener('change', () => renderDeadlineRules());
+    document.getElementById('deadline-rule-select')?.addEventListener('change', event => {
+        currentDeadlineRule = availableDeadlineRules().find(rule => rule.id === event.currentTarget.value) || null;
+        renderDeadlineParameters();
+    });
+    document.getElementById('deadline-parameter-select')?.addEventListener('change', event => {
+        currentDeadlineParameter = currentDeadlineRule?.parameters.find(parameter => parameter.id === event.currentTarget.value) || null;
+        applyDeadlineRuleValues();
+    });
+    renderDeadlineRules();
+}
 
 function deadlineEditorFieldValues() {
     const dateInput = document.getElementById('dueDate');
@@ -68,7 +225,8 @@ function deadlineEditorFieldValues() {
             ? document.getElementById('oggetto_email')?.value
             : document.getElementById('testo_email_select')?.value,
         notice: document.getElementById('notif_days_before')?.value,
-        frequency: document.getElementById('notif_frequency')?.value
+        frequency: document.getElementById('notif_frequency')?.value,
+        ...deadlineRuleLinkFields(currentDeadlineRule, currentDeadlineParameter)
     };
 }
 
@@ -115,10 +273,8 @@ function configureProfileDocumentEditor(data = {}, {suggestedTemplate = '', mess
     }
     const preview = document.getElementById('oggetto_email');
     if (preview) {
-        preview.readOnly = false;
-        preview.removeAttribute('aria-readonly');
-        preview.classList.remove('italic');
-        preview.closest('.input-wrapper')?.classList.remove('read-only');
+        preview.readOnly = true;
+        preview.setAttribute('aria-readonly', 'true');
         preview.value = String(message || '').trim() || profileDocumentDeadlineMessage({
             ...profileDocumentEditorData,
             templateText: suggestedTemplate
@@ -160,6 +316,7 @@ function restoreDeadlineEditorAfterRecipientManagement() {
     if (!draft) return;
     setMode(draft.mode);
     const fields = draft.fields || {};
+    selectDeadlineRule(fields);
     const nameInput = document.getElementById('nome_cognome');
     if (nameInput) nameInput.value = fields.name || '';
     if (typeSelect && fields.type) selectValuePreservingCustomOption(typeSelect, fields.type);
@@ -199,7 +356,6 @@ function restoreDeadlineEditorAfterRecipientManagement() {
         } : recipient;
     });
     recipientController.setRecipients(reconciledRecipients);
-    syncCustomDropdowns();
     updatePreview();
     showToast(t('deadline_draft_restored'), 'success');
 }
@@ -217,7 +373,7 @@ function discardAccountDeadlineDraft() {
 
 function selectValuePreservingCustomOption(select, value, dataset = {}) {
     if (!select || !value) return null;
-    let option = Array.from(select.options).find(item => deadlineConfigValuesMatch(item.value, value));
+    let option = Array.from(select.options).find(item => valuesMatch(item.value, value));
     if (!option) {
         option = new Option(value, value);
         select.appendChild(option);
@@ -243,6 +399,9 @@ export async function initAggiungiScadenza(user) {
     accountDeadlineLinkDraft = null;
     linkedSourceRef = null;
     profileDocumentEditorData = null;
+    deadlineRuleCatalog = [];
+    currentDeadlineRule = null;
+    currentDeadlineParameter = null;
 
     editingScadenzaId = new URLSearchParams(window.location.search).get('id');
     const profileDocumentId = new URLSearchParams(window.location.search).get('profileDocumentId');
@@ -277,19 +436,10 @@ export async function initAggiungiScadenza(user) {
         discardAccountDeadlineDraft();
     }
 
-    // Mode Switching Listeners
-    ['automezzi', 'documenti', 'generali'].forEach(mode => {
-        const btn = document.getElementById(`mode-${mode}`);
-        if (btn) {
-            btn.addEventListener('click', () => setMode(mode));
-        }
-    });
-
     // Il calendario è disponibile anche per le Scadenze collegate: il
     // salvataggio aggiorna nella stessa transazione Scadenza e Documento.
     initDatePickerV5('dueDate');
 
-    initProxyDropdowns();
     attachmentController.init();
     const linkedDraftAttachments = profileDocumentLinkDraft?.attachments || accountDeadlineLinkDraft?.attachments;
     if (linkedDraftAttachments) {
@@ -374,10 +524,9 @@ export async function initAggiungiScadenza(user) {
         document.addEventListener('footer:ready', (e) => initFooterFromDetail(e.detail), { once: true });
     }
 
-    configController.initManagementButtons();
-    configController.render();
     try {
-        await configController.load(currentUser);
+        deadlineRuleCatalog = await loadDeadlineFormCatalog(currentUser);
+        initDeadlineRuleSelector();
     } catch (error) {
         console.error('Config Load Error', error);
     }
@@ -409,7 +558,10 @@ export async function initAggiungiScadenza(user) {
             if (typeSelect && sourceDraft.documentType) selectValuePreservingCustomOption(typeSelect, sourceDraft.documentType);
             if (typeSelect && profileDocumentLinkDraft?.profileDocumentId) {
                 const documentType = profileDocumentLinkDraft.documentType || '';
-                const schedule = configController.getSuggestedSchedule(documentType);
+                selectDeadlineRule({type: documentType, domain: 'personal'});
+                const schedule = currentDeadlineRule
+                    ? {period: currentDeadlineRule.period, freq: currentDeadlineRule.frequency}
+                    : null;
                 selectValuePreservingCustomOption(typeSelect, documentType, schedule || {});
                 const noticeInput = document.getElementById('notif_days_before');
                 const frequencyInput = document.getElementById('notif_frequency');
@@ -419,16 +571,21 @@ export async function initAggiungiScadenza(user) {
                 if (schedule?.freq !== undefined) {
                     if (frequencyInput) frequencyInput.value = String(schedule.freq);
                 }
-                const template = configController.getSuggestedTemplate(documentType) || documentType;
+                const template = currentDeadlineParameter?.templateText || documentType;
                 const templateSelect = document.getElementById('testo_email_select');
                 if (templateSelect && template) selectValuePreservingCustomOption(templateSelect, template);
                 configureProfileDocumentEditor(sourceDraft, {suggestedTemplate: template});
+                document.getElementById('deadline-rule-selector-section')?.classList.add('deadline-rule-locked');
+                document.getElementById('deadline-domain-select')?.setAttribute('aria-disabled', 'true');
+                document.getElementById('deadline-rule-select')?.setAttribute('aria-disabled', 'true');
+                document.getElementById('deadline-parameter-select')?.setAttribute('aria-disabled', 'true');
+            } else if (sourceDraft.documentType) {
+                selectDeadlineRule({type: sourceDraft.documentType, detail: sourceDraft.detail});
             }
             const detailsSelect = document.getElementById('modello_veicolo');
             if (detailsSelect && sourceDraft.detail) {
                 selectValuePreservingCustomOption(detailsSelect, sourceDraft.detail);
             }
-            syncCustomDropdowns();
         }
     }
 
@@ -438,49 +595,11 @@ export async function initAggiungiScadenza(user) {
 }
 function setMode(mode) {
     currentMode = mode;
-    updateUIButtons(mode);
-
-    // Update labels and visibility
-    const vehicleSection = document.getElementById('vehicle_fields_wrapper');
-    const vehicleLabel = vehicleSection?.querySelector('.label-sm');
-    const vehicleIcon = document.getElementById('vehicle-icon');
-
-    if (mode === 'automezzi') {
-        vehicleSection?.classList.remove('hidden');
-        if (vehicleLabel) {
-            vehicleLabel.textContent = "Dettaglio Veicolo";
-            vehicleLabel.setAttribute('data-t', 'vehicle_extra');
-        }
-        if (vehicleIcon) vehicleIcon.textContent = 'directions_car';
-    } else if (mode === 'documenti') {
-        vehicleSection?.classList.remove('hidden');
-        if (vehicleLabel) {
-            vehicleLabel.textContent = "Intestatario / Dettagli";
-            vehicleLabel.setAttribute('data-t', 'holder_details');
-        }
-        if (vehicleIcon) vehicleIcon.textContent = 'badge';
-    } else if (mode === 'generali') {
-        vehicleSection?.classList.add('hidden');
-    }
-
-    configController.setMode(mode);
-    if (isProfileDocumentEditor()) {
-        vehicleSection?.classList.add('hidden');
-        document.getElementById('testo_email_wrapper')?.classList.add('hidden');
-    }
-}
-
-function updateUIButtons(activeMode) {
-    ['automezzi', 'documenti', 'generali'].forEach(mode => {
-        const btn = document.getElementById(`mode-${mode}`);
-        if (btn) {
-            if (mode === activeMode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        }
-    });
+    // Il nuovo form usa Ambito → Regola → Parametro. Le vecchie select
+    // restano soltanto come adattatore per leggere e modificare record legacy.
+    document.getElementById('vehicle_fields_wrapper')?.classList.add('hidden');
+    document.getElementById('deadline-category-field')?.classList.add('hidden');
+    document.getElementById('testo_email_wrapper')?.classList.add('hidden');
 }
 
 function updateAttachmentsUI() {
@@ -522,12 +641,12 @@ function setupSaveLogic() {
         }
 
         const name = document.getElementById('nome_cognome').value.trim();
-        const type = typeSelect.value;
+        const type = currentDeadlineRule?.name || typeSelect.value;
         const dateInput = document.getElementById('dueDate');
         const date = deadlineDateForSave(profileDocumentLinkDraft, dateInput.dataset.isoValue, dateInput.value);
 
-        if (!name || !type || !date) {
-            return showToast("Compila i campi obbligatori (Nome, Categoria, Data)", "error");
+        if (!name || !currentDeadlineRule || !currentDeadlineParameter || !date) {
+            return showToast(t('deadline_form_required'), "error");
         }
 
         const rawReferenceUrl = document.getElementById('deadline_url')?.value.trim() || '';
@@ -549,9 +668,10 @@ function setupSaveLogic() {
             ]);
             const btnText = document.getElementById('save-btn-text');
 
-            const selectedVehicle = document.getElementById('modello_veicolo')?.value || '';
-            const vehicleParts = currentMode === 'automezzi'
-                ? configController.getVehicleParts(selectedVehicle) : null;
+            const selectedVehicle = currentDeadlineParameter.detail || '';
+            const vehicleParts = currentDeadlineParameter.model || currentDeadlineParameter.plate
+                ? {model: currentDeadlineParameter.model || '', plate: currentDeadlineParameter.plate || ''}
+                : null;
             const result = await saveDeadline({
                 user: currentUser,
                 editingDeadlineId: editingScadenzaId,
@@ -571,14 +691,12 @@ function setupSaveLogic() {
                     notes: document.getElementById('notes').value,
                     status: 'active',
                     completed: false,
-                    templateText: isProfileDocumentEditor()
-                        ? document.getElementById('oggetto_email')?.value.trim() || ''
-                        : currentMode === 'automezzi'
-                            ? document.getElementById('oggetto_email')?.value.trim() || ''
-                            : document.getElementById('testo_email_select')?.value || '',
+                    templateText: document.getElementById('oggetto_email')?.value.trim()
+                        || currentDeadlineParameter.templateText || '',
                     notifChannel: 'multichannel',
-                    notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
-                    notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
+                    notif_days_before: Number(currentDeadlineRule.period),
+                    notif_frequency: Number(currentDeadlineRule.frequency),
+                    ...deadlineRuleLinkFields(currentDeadlineRule, currentDeadlineParameter)
                 },
                 recipients: recipientController.getRecipients(),
                 selectedFiles: attachmentController.getSelectedFiles(),
@@ -633,11 +751,20 @@ async function loadScadenzaForEdit(id) {
             return;
         }
         linkedSourceRef = data.sourceRef || null;
+        selectDeadlineRule({
+            ruleId: data.ruleId,
+            ruleSourceId: data.ruleSourceId,
+            ruleRouteKey: data.ruleRouteKey,
+            ruleParameterId: data.ruleParameterId,
+            ruleDomain: data.ruleDomain,
+            type: data.type,
+            detail: data.veicolo_modello
+        });
 
         // 1. Identifica il Mode corretto in base al tipo salvato
-        const foundMode = linkedSourceRef?.type === 'profileDocument'
+        const foundMode = currentDeadlineRule?.mode || (linkedSourceRef?.type === 'profileDocument'
             ? 'documenti'
-            : configController.getModeForDeadlineType(data.type);
+            : 'generali');
 
         // 2. Imposta il Mode (popola i select nativi)
         setMode(foundMode);
@@ -661,11 +788,11 @@ async function loadScadenzaForEdit(id) {
 
         // 4. Notifiche (Valori numerici)
         const iNotice = document.getElementById('notif_days_before');
-        const period = data.notif_days_before || data.period || '14';
+        const period = currentDeadlineRule?.period ?? data.notif_days_before ?? data.period ?? '14';
         if (iNotice) iNotice.value = period;
 
         const iFreq = document.getElementById('notif_frequency');
-        const freq = data.notif_frequency || data.freq || '7';
+        const freq = currentDeadlineRule?.frequency ?? data.notif_frequency ?? data.freq ?? '7';
         if (iFreq) iFreq.value = freq;
 
 
@@ -681,7 +808,7 @@ async function loadScadenzaForEdit(id) {
             document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.222');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.223');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);
@@ -691,16 +818,14 @@ async function loadScadenzaForEdit(id) {
                 documentType: data.type,
                 detail: data.veicolo_modello,
                 dueDate: dateFields.isoValue
-            }, {message: data.templateText});
+            }, {suggestedTemplate: currentDeadlineParameter?.templateText || data.templateText});
+            document.getElementById('deadline-rule-selector-section')?.classList.add('deadline-rule-locked');
         }
 
         // 6. Allegati esistenti
         attachmentController.setExistingAttachments(data.attachments);
 
-        // 7. Sincronizzazione Dropdown Custom (V4.1 System)
-        syncCustomDropdowns();
-
-        // 8. Refresh Anteprima Oggetto
+        // 7. Refresh Anteprima Oggetto
         updatePreview();
 
     } catch (e) {
@@ -709,187 +834,22 @@ async function loadScadenzaForEdit(id) {
     }
 }
 
-/**
- * CUSTOM PREMIUM DROPDOWNS (PROXY SYSTEM)
- * Sincronizza i div 'base-dropdown' con i select nativi (hidden).
- */
-function initProxyDropdowns() {
-    document.addEventListener('click', (e) => {
-        const trigger = e.target.closest('.dropdown-trigger');
-        const container = trigger?.closest('[data-custom-select]');
-        const menu = container?.querySelector('.base-dropdown-menu');
-
-        // Chiudi tutti gli altri
-        document.querySelectorAll('.base-dropdown-menu.show').forEach(m => {
-            if (m !== menu) m.classList.remove('show');
-        });
-
-        if (trigger && menu) {
-            e.stopPropagation();
-            menu.classList.toggle('show');
-        } else {
-            document.querySelectorAll('.base-dropdown-menu.show').forEach(m => m.classList.remove('show'));
-        }
-    });
-
-    // Auto-Sync iniziale e osservazione cambiamenti
-    syncCustomDropdowns();
-}
-
-function syncCustomDropdowns() {
-    document.querySelectorAll('[data-custom-select]').forEach(container => {
-        const select = container.querySelector('select');
-        const trigger = container.querySelector('.dropdown-trigger');
-        const labelEl = container.querySelector('.dropdown-label');
-        const menu = container.querySelector('.base-dropdown-menu');
-
-        if (!select || !trigger || !menu) return;
-
-        // Reset menu
-        clearElement(menu);
-
-        // Build items
-        Array.from(select.children).forEach(child => {
-            if (child.tagName === 'OPTGROUP') {
-                menu.appendChild(createElement('div', { className: 'base-dropdown-group-label', textContent: child.label }));
-                Array.from(child.children).forEach(opt => createItem(opt, menu, select, labelEl));
-            } else {
-                createItem(child, menu, select, labelEl);
-            }
-        });
-
-        // Sync Label
-        const updateSelectionUI = () => {
-            const selectedOpt = select.options[select.selectedIndex];
-            if (selectedOpt) {
-                labelEl.textContent = selectedOpt.textContent;
-                if (selectedOpt.dataset.t) labelEl.setAttribute('data-t', selectedOpt.dataset.t);
-                else labelEl.removeAttribute('data-t');
-
-                // Sync Active Class in menu
-                menu.querySelectorAll('.base-dropdown-item').forEach(i => {
-                    i.classList.toggle('active', i.dataset.value === select.value);
-                });
-            }
-
-            if (['testo_email_select', 'modello_veicolo'].includes(select.id)) {
-                if (typeof updatePreview === 'function') updatePreview();
-            }
-        };
-
-        updateSelectionUI();
-
-        // Ri-sincronizza se il select cambia (programmaticamente o via proxy)
-        if (!select._proxyInit) {
-            select.addEventListener('change', updateSelectionUI);
-            // Osserva se cambiano le opzioni (es. populateTypeSelect)
-            const observer = new MutationObserver(() => syncCustomDropdowns());
-            observer.observe(select, { childList: true });
-            select._proxyInit = true;
-        }
-
-        function createItem(opt, parent, sel, lab) {
-            const item = createElement('div', {
-                className: `base-dropdown-item ${opt.selected ? 'active' : ''}`,
-                dataset: { value: opt.value }
-            }, [
-                createElement('span', {
-                    textContent: opt.textContent,
-                    className: 'truncate',
-                    dataset: opt.dataset.t ? { t: opt.dataset.t } : {}
-                })
-            ]);
-
-            // Add delete button for user-defined items (skip placeholders or manual triggers)
-            const isUserItem = opt.value && !['manual', ''].includes(opt.value);
-            const isManageable = ['tipo_scadenza', 'modello_veicolo', 'testo_email_select', 'email_primaria_select', 'email_secondaria_select'].includes(sel.id);
-
-            if (isUserItem && isManageable) {
-                const actions = createElement('div', { className: 'dropdown-item-actions' });
-
-                const editBtn = createElement('button', {
-                    type: 'button',
-                    className: 'btn-edit-opt',
-                    title: 'Modifica voce',
-                    onclick: (e) => {
-                        e.stopPropagation();
-                        configController.editItem(sel.id, opt.value);
-                    }
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
-                ]);
-
-                const delBtn = createElement('button', {
-                    type: 'button',
-                    className: 'btn-delete-opt',
-                    title: 'Elimina voce',
-                    onclick: (e) => {
-                        e.stopPropagation();
-                        configController.deleteItem(sel.id, opt.value);
-                    }
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
-                ]);
-
-                actions.appendChild(editBtn);
-                actions.appendChild(delBtn);
-                item.appendChild(actions);
-            }
-
-            if (opt.dataset.t) item.setAttribute('data-t', opt.dataset.t);
-
-            item.onclick = (e) => {
-                e.stopPropagation();
-                sel.value = opt.value;
-                sel.dispatchEvent(new Event('change'));
-
-                // --- Nuovo: Aggiorna campi notifica se presenti nel dataset dell'opzione ---
-                if (sel.id === 'tipo_scadenza') {
-                    if (opt.dataset.period) {
-                        const inputPeriod = document.getElementById('notif_days_before');
-                        if (inputPeriod) inputPeriod.value = opt.dataset.period;
-                    }
-                    if (opt.dataset.freq) {
-                        const inputFreq = document.getElementById('notif_frequency');
-                        if (inputFreq) inputFreq.value = opt.dataset.freq;
-                    }
-                }
-
-                parent.classList.remove('show');
-            };
-            parent.appendChild(item);
-        }
-    });
-}
-
 function updatePreview() {
     const previewArea = document.getElementById('oggetto_email');
     if (!previewArea) return;
 
-    if (isProfileDocumentEditor()) return;
-
-    const templateText = document.getElementById('testo_email_select')?.value || '';
-    if (!templateText) {
-        previewArea.value = '';
+    if (currentDeadlineRule && currentDeadlineParameter) {
+        if (isProfileDocumentEditor() && profileDocumentEditorData) {
+            previewArea.value = profileDocumentDeadlineMessage({
+                ...profileDocumentEditorData,
+                templateText: currentDeadlineParameter.templateText || currentDeadlineRule.name
+            }, t);
+        } else {
+            previewArea.value = currentDeadlineParameter.templateText
+                || `È in scadenza ${currentDeadlineRule.name}`;
+        }
         return;
     }
 
-    let compiledText = '';
-    if (currentMode === 'automezzi') {
-        const vehicle = document.getElementById('modello_veicolo')?.value || '';
-        const type = document.getElementById('tipo_scadenza')?.value || '';
-        compiledText = configController.compileVehicleMessage(type, vehicle, templateText.trim());
-    } else if (currentMode === 'documenti') {
-        const vehicle = document.getElementById('modello_veicolo')?.value || '';
-        let code = vehicle.trim();
-        if (code.includes(' - ')) {
-            code = code.split(' - ')[1].trim();
-        }
-        const vehicleStr = code ? ` ${code}` : '';
-        compiledText = `E' in scadenza ${templateText.trim()}${vehicleStr}`;
-    } else {
-        compiledText = `E' in scadenza ${templateText.trim()}`;
-    }
-
-    previewArea.value = compiledText;
+    previewArea.value = '';
 }

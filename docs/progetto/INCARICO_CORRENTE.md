@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Nuovo form unico delle Scadenze — 22/10/2026
+
+Diego autorizza la costruzione locale del nuovo form di creazione e modifica delle Scadenze. Il form non usa più come interfaccia primaria i tre selettori storici Automezzi, Documenti e Generali: presenta un solo percorso **Ambito → Regola → Parametro**, legge preavviso, frequenza e testo dalla regola già configurata e lascia alla Scadenza data, intestatario o sorgente, destinatari e canali, nota e allegati. Il record conserva inoltre `ruleDomain`, `ruleId`, `ruleSourceId`, `ruleRouteKey`, `ruleSchemaVersion`, `ruleParameterId` e `ruleParameterLabel`; i record anteriori restano apribili mediante compatibilità per nome e dettaglio.
+
+I Documenti personali usano lo stesso form ma vengono avviati dal Documento del Profilo: tipo, numero, intestatario, ente e data provengono dalla sorgente; la regola fornisce pianificazione e composizione del messaggio. Non è autorizzata in questa fase la cancellazione delle tre Scadenze personali esistenti, la loro ricreazione, la riconciliazione delle altre Scadenze o qualsiasi migrazione/scrittura massiva sui dati reali. Tali operazioni seguiranno soltanto dopo il collaudo del form.
+
+La freccia del Dettaglio scadenza deve tornare sempre alla lista canonica `scadenze.html`, senza seguire una cronologia che possa riportare alla Home. L’incarico corrente comprende implementazione, test e documentazione locali; non comprende ancora bump, commit, push, PR, merge o deploy.
+
 ## Riclassificazione delle regole nelle linguette operative — 22/10/2026
 
 Diego chiede di spostare la regola **Comodato d’uso** da **Automezzi** a **Utente–azienda**, le regole del **Capannone** da **Casa e immobili** a **Documenti aziendali**, rinominare **Contratti e rapporti** in **Contratti e documenti** ed eliminare la linguetta **Documenti generici**. La verifica autenticata in sola lettura ha accertato che Documenti generici non contiene regole; esistono una regola Comodato d’uso nella configurazione Automezzi e due rate IMU Capannone nella configurazione Documenti.

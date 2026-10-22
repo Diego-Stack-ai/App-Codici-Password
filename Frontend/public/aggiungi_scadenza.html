@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.222" />
+    <link rel="manifest" href="manifest.json?v=1.2.223" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.222">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.222">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.222">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.222">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.222">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.222">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.222&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.223&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -41,7 +41,7 @@
             <div class="page-container pt-header-extra pb-footer-extra">
 
                 <!-- Header Pagina e Mode Switch -->
-                <div id="deadline-mode-selector" class="detail-header-container">
+                <div id="deadline-mode-selector" class="detail-header-container hidden" aria-hidden="true">
                     <!-- Mode Selector Tab Style -->
                     <div class="mode-selector-tabs">
                         <button type="button" id="mode-automezzi" class="mode-tab active" data-mode="automezzi">
@@ -58,6 +58,31 @@
                         </button>
                     </div>
                 </div>
+
+                <section id="deadline-rule-selector-section" class="form-section" aria-labelledby="deadline-rule-selector-title">
+                    <div class="form-section-header">
+                        <h3 id="deadline-rule-selector-title" class="form-section-title" data-t="deadline_form_rule_section">Regola della scadenza</h3>
+                    </div>
+                    <p class="deadline-rule-help" data-t="deadline_form_rule_help">Scegli l'ambito, la regola e il parametro già configurati nelle Regole scadenze.</p>
+                    <div class="deadline-rule-grid">
+                        <label class="form-group" for="deadline-domain-select">
+                            <span class="label-sm" data-t="deadline_form_domain">Ambito</span>
+                            <select id="deadline-domain-select" class="input" required></select>
+                        </label>
+                        <label class="form-group" for="deadline-rule-select">
+                            <span class="label-sm" data-t="deadline_form_rule">Regola</span>
+                            <select id="deadline-rule-select" class="input" required></select>
+                        </label>
+                    </div>
+                    <label id="deadline-parameter-field" class="form-group" for="deadline-parameter-select">
+                        <span class="label-sm" data-t="deadline_form_parameter">Parametro</span>
+                        <select id="deadline-parameter-select" class="input" required></select>
+                    </label>
+                    <div id="deadline-rule-summary" class="deadline-rule-summary" aria-live="polite">
+                        <span id="deadline-rule-summary-name">—</span>
+                        <span id="deadline-rule-summary-schedule">—</span>
+                    </div>
+                </section>
 
                 <section id="profile-document-summary" class="form-section profile-document-editor-summary hidden" aria-labelledby="profile-document-summary-title">
                     <div class="form-section-header">
@@ -100,7 +125,7 @@
                         </div>
 
                         <!-- Categoria / Oggetto (Custom Dropdown Proxy) -->
-                        <div id="deadline-category-field" class="form-group">
+                        <div id="deadline-category-field" class="form-group hidden" aria-hidden="true">
                             <label class="label-sm" data-t="category_object">Categoria / Oggetto Scadenza</label>
                             <div class="base-dropdown base-dropdown-full" data-custom-select="tipo_scadenza">
                                 <div class="base-btn-secondary dropdown-trigger" role="button" tabindex="0">
@@ -125,7 +150,7 @@
                         </div>
 
                         <!-- Veicolo / Dettaglio (Custom Dropdown Proxy) -->
-                        <div id="vehicle_fields_wrapper" class="form-group hidden">
+                        <div id="vehicle_fields_wrapper" class="form-group hidden" aria-hidden="true">
                             <label class="label-sm" id="vehicle-label-text" data-t="vehicle_extra">Dettaglio Veicolo /
                                 Altro</label>
                             <div class="base-dropdown base-dropdown-full" data-custom-select="modello_veicolo">
@@ -152,7 +177,7 @@
                         </div>
 
                         <!-- Template Messaggio (Custom Dropdown Proxy) -->
-                        <div id="testo_email_wrapper" class="form-group hidden">
+                        <div id="testo_email_wrapper" class="form-group hidden" aria-hidden="true">
                             <label class="label-sm" for="testo_email_select" data-t="email_template">Template
                                 Messaggio</label>
                             <div class="base-dropdown base-dropdown-full" data-custom-select="testo_email_select">
@@ -210,7 +235,7 @@
                                         class="input italic input-textarea-resize-none"
                                         placeholder="Oggetto automatico..." rows="3"></textarea>
                                 </div>
-                                <p id="profile-document-message-help" class="deadline-field-help hidden" data-t="profile_document_message_help">Il testo è proposto in base al tipo di documento. Puoi personalizzarlo per questa scadenza.</p>
+                                <p id="profile-document-message-help" class="deadline-field-help hidden" data-t="deadline_form_personal_message_help">Il testo arriva dalla regola selezionata e viene composto con i dati del documento.</p>
                             </div>
                         </div>
 
@@ -222,7 +247,7 @@
                                 </div>
                                 <div class="planning-text-box">
                                     <label class="planning-label" for="notif_days_before" data-t="notice_days">GG Preavviso</label>
-                                    <input id="notif_days_before" class="planning-value-input" type="number" min="0" max="3650" step="1" value="14" inputmode="numeric">
+                                    <input id="notif_days_before" class="planning-value-input" type="number" min="0" max="3650" step="1" value="14" inputmode="numeric" readonly aria-readonly="true">
                                 </div>
                             </div>
                             <div class="planning-info-box">
@@ -231,7 +256,7 @@
                                 </div>
                                 <div class="planning-text-box">
                                     <label class="planning-label" for="notif_frequency" data-t="frequency_days">GG Frequenza</label>
-                                    <input id="notif_frequency" class="planning-value-input" type="number" min="1" max="30" step="1" value="7" inputmode="numeric">
+                                    <input id="notif_frequency" class="planning-value-input" type="number" min="1" max="30" step="1" value="7" inputmode="numeric" readonly aria-readonly="true">
                                 </div>
                             </div>
                         </div>
