@@ -1,10 +1,12 @@
 # Stato
 
-## Candidata 1.2.224 — Scadenze archiviate — 22/10/2026
+## Release 1.2.224 pubblicata — Scadenze archiviate — 22/10/2026
 
 La lista Scadenze distingue ora chiaramente il proprio archivio dall’Archivio Account: il filtro **Completate** diventa **Archiviate**. Lo scorrimento verso destra archivia una Scadenza attiva e ripristina una Scadenza archiviata; nella sola vista Archiviate, lo scorrimento verso sinistra consente la cancellazione definitiva dopo conferma. Le copie ricevute restano prive di azioni di mutazione.
 
 Il record usa i campi di compatibilità già esistenti `completed` e `completedAt`, senza migrazioni né modifiche automatiche dei dati reali. L’Archivio Account nelle Impostazioni resta dedicato esclusivamente agli Account. La candidata aggiunge test sul ciclo archivia–ripristina–elimina e sul blocco delle direzioni di scorrimento non ammesse.
+
+La PR `#213` è stata unita nel merge commit `eca02aa6` dopo i gate verdi. Il workflow manuale `39769890177` ha validato lo stesso `master` e pubblicato esclusivamente Firebase Hosting; la verifica HTTP pubblica restituisce `200` per pagina e modulo Scadenze e conferma versione `1.2.224`, filtro **Archiviate** e nuove azioni di scorrimento. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
 ## Release 1.2.223 pubblicata — form unico delle Scadenze — 22/10/2026
 
