@@ -1,8 +1,24 @@
 # Rilascio
 
+## Candidata 1.2.225 — scelta esplicita del tipo di Scadenza — 22/10/2026
+
+Il form di creazione parte ora da **Tipo di scadenza** e presenta gli stessi otto ambiti delle Regole scadenze. Una nuova Scadenza non preseleziona più Automezzi, la prima regola o il primo riferimento: soltanto dopo la scelta dell'ambito mostra le configurazioni pertinenti e il relativo riferimento. Gli ambiti senza regole espongono uno stato vuoto con accesso alla configurazione; **Documenti personali** rimanda al Profilo, perché quelle Scadenze devono nascere dal Documento sorgente. Modifica e flusso Documento → Scadenza conservano le preselezioni necessarie a riaprire collegamenti esistenti.
+
+La candidata comprende anche la classificazione conservativa dei controlli CI: solo le pull request composte interamente da Markdown o file sotto `docs/` evitano la ripetizione della suite applicativa; ogni modifica a codice, script, configurazioni o workflow, ogni push applicativo su `master` e ogni pubblicazione manuale continuano a eseguire `npm test` completo. Sono verdi localmente test mirati **16/16**, navigazione **179/179**, suite integrale, documentazione, sintassi JavaScript, CSS, i18n, purezza HTML, riferimenti statici, controllo versione e diff.
+
+L'ordine **«Pubblica»** autorizza patch, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni, riconciliazioni e dati reali restano esclusi.
+
+## Classificazione conservativa dei controlli CI — 22/10/2026
+
+Una pull request è **solo documentale** esclusivamente quando tutti i percorsi modificati sono file Markdown oppure si trovano sotto `docs/`. In tale caso il gate `validate` resta presente ma non installa dipendenze, Java o emulatori e non ripete la suite applicativa: la validazione effettiva è affidata al workflow documentale, che continua a eseguire elenco, collegamenti, regressioni e confronto della struttura con la base.
+
+La classificazione fallisce in modo conservativo: una modifica vuota, ambigua, a script, configurazioni, workflow, codice o qualunque file non documentale mantiene la suite completa. Anche i push applicativi su `master` e ogni `workflow_dispatch` eseguono sempre `npm test`; il percorso rapido non è quindi utilizzabile per una pubblicazione. Restano invariati il vincolo allo SHA corrente del `master` remoto, il ricontrollo immediatamente prima e dopo il deploy e il perimetro manuale del rilascio.
+
+Il workflow documentale è un controllo strutturale protetto e resta invariato: continua a verificare push, pull request e avvii manuali. Si accetta quindi la ripetizione del controllo documentale breve; l'ottimizzazione riguarda soltanto la suite applicativa completa nelle pull request interamente documentali e non riduce i gate applicativi o produttivi.
+
 ## Esito operativo 1.2.223 — form unico delle Scadenze — 22/10/2026
 
-Il form di creazione e modifica usa ora il percorso unico **Ambito → Regola → Parametro**. Pianificazione e testo provengono dalle Regole scadenze; il record conserva gli identificativi stabili della configurazione selezionata. I Documenti personali entrano nello stesso catalogo dal Profilo, mantenendo tipo, numero, intestatario, ente e data nella sorgente Documento. La freccia del Dettaglio scadenza torna sempre al contenitore `scadenze.html`.
+Il form di creazione e modifica usa il percorso unico **Ambito → Regola → Parametro**. Pianificazione e testo provengono dalle Regole scadenze; il record conserva gli identificativi stabili della configurazione selezionata. I Documenti personali entrano nello stesso catalogo dal Profilo, mantenendo tipo, numero, intestatario, ente e data nella sorgente Documento. La freccia del Dettaglio scadenza torna sempre al contenitore `scadenze.html`.
 
 La suite completa della PR è verde in **6m26s** e il workflow manuale ha ripetuto tutti i controlli in **6m44s**. La PR `#211` è stata unita nel merge commit `c2482e2b`; il workflow `39752733091` ha pubblicato esclusivamente Firebase Hosting in **33s**. La verifica HTTP pubblica conferma la `1.2.223`, il nuovo selettore unificato e gli asset del Dettaglio aggiornati. Functions, Firestore Rules, Storage Rules, indici, migrazioni, riconciliazione e dati reali sono rimasti esclusi.
 

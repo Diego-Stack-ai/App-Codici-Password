@@ -1,5 +1,9 @@
 # Decisioni
 
+## 22/10/2026 — tipo obbligatorio prima della regola
+
+Una nuova Scadenza non assume un ambito predefinito. L'utente sceglie prima il **Tipo di scadenza**, poi la **Regola** e infine il **Riferimento**; la pianificazione e il testo restano proprietà della regola. La modifica di una Scadenza conserva invece la selezione persistita. **Documenti personali** è un percorso guidato verso i Documenti del Profilo e non permette di creare dal form generico una Scadenza scollegata dalla propria sorgente.
+
 ## 21/10/2026 — uniformità delle regole senza migrazione implicita
 
 Le sei linguette operative adottano la stessa gerarchia visiva e lo stesso principio di configurazione: nota autonoma, card delle regole senza grande contenitore esterno, pianificazione unica a livello di regola e card interne nominate. La forma fisica storica resta temporaneamente distribuita tra `deadlineConfig`, `deadlineConfigDocuments` e `generalConfig`; non viene nascosta né riscritta durante il caricamento. Le regole nuove o salvate esplicitamente ricevono ID stabile, ambito esplicito e versione di schema. La scelta e il popolamento di una sorgente canonica, seguiti dal collegamento delle Scadenze tramite `ruleId`, costituiscono un cutover separato con inventario, prova e rollback.

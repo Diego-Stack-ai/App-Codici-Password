@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.224';
+import { auth } from '../../firebase-config.js?v=1.2.225';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -151,32 +151,105 @@ function applyDeadlineRuleValues() {
     if (notice) notice.value = String(currentDeadlineRule.period);
     if (frequency) frequency.value = String(currentDeadlineRule.frequency);
     setDeadlineRuleSummary();
+    document.getElementById('deadline-rule-summary')?.classList.remove('hidden');
     updatePreview();
 }
 
-function renderDeadlineParameters(preferred = {}) {
+function hasPreferredParameter(preferred = {}) {
+    return Boolean(preferred.ruleParameterId || preferred.detail);
+}
+
+function renderDeadlineParameters(preferred = {}, {selectFirst = false} = {}) {
     const select = document.getElementById('deadline-parameter-select');
     const sourceParameters = currentDeadlineRule?.parameters || [];
-    const preferredParameter = findDeadlineParameter(currentDeadlineRule, preferred);
+    const preferredParameter = hasPreferredParameter(preferred)
+        ? findDeadlineParameter(currentDeadlineRule, preferred)
+        : null;
     replaceSelectOptions(select, sourceParameters.map(parameter => ({
         value: parameter.id,
         label: parameter.label || parameter.detail || currentDeadlineRule.name
-    })), sourceParameters.length ? '' : t('deadline_form_no_parameter'));
-    if (select && preferredParameter) select.value = preferredParameter.id;
-    currentDeadlineParameter = preferredParameter || sourceParameters[0] || null;
-    document.getElementById('deadline-parameter-field')?.classList.toggle('hidden', !sourceParameters.length);
+    })), sourceParameters.length ? t('deadline_form_select_reference') : t('deadline_form_no_parameter'));
+    currentDeadlineParameter = preferredParameter || (selectFirst ? sourceParameters[0] : null) || null;
+    if (select) {
+        select.disabled = !sourceParameters.length;
+        select.value = currentDeadlineParameter?.id || '';
+    }
+    document.getElementById('deadline-parameter-field')?.classList.toggle('hidden', !currentDeadlineRule);
     applyDeadlineRuleValues();
+}
+
+function deadlineFormDomains() {
+    return isProfileDocumentEditor()
+        ? DEADLINE_FORM_DOMAINS.filter(domain => domain.id === 'personal')
+        : DEADLINE_FORM_DOMAINS;
+}
+
+function renderDeadlineDomainTabs(selectedDomain = '') {
+    const container = document.getElementById('deadline-domain-tabs');
+    if (!container) return;
+    setChildren(container, deadlineFormDomains().map(domain => createElement('button', {
+        type: 'button',
+        className: 'deadline-domain-tab',
+        role: 'tab',
+        'aria-selected': String(domain.id === selectedDomain),
+        tabIndex: domain.id === selectedDomain || (!selectedDomain && domain.id === deadlineFormDomains()[0]?.id) ? 0 : -1,
+        dataset: {deadlineDomain: domain.id},
+        disabled: isProfileDocumentEditor(),
+        'aria-disabled': String(isProfileDocumentEditor()),
+        onclick: () => {
+            const domainSelect = document.getElementById('deadline-domain-select');
+            if (domainSelect) domainSelect.value = domain.id;
+            renderDeadlineDomainTabs(domain.id);
+            renderDeadlineRules();
+            [...container.querySelectorAll('[role="tab"]')]
+                .find(tab => tab.dataset.deadlineDomain === domain.id)?.focus();
+        }
+    }, [
+        createElement('span', {
+            className: 'material-symbols-outlined notranslate',
+            translate: 'no',
+            textContent: domain.icon
+        }),
+        createElement('span', {textContent: t(domain.labelKey)})
+    ])));
+}
+
+function clearDeadlineRuleState({clearRules = true} = {}) {
+    currentDeadlineRule = null;
+    currentDeadlineParameter = null;
+    if (clearRules) {
+        replaceSelectOptions(document.getElementById('deadline-rule-select'), [], t('deadline_form_select_rule'));
+    }
+    replaceSelectOptions(document.getElementById('deadline-parameter-select'), [], t('deadline_form_select_reference'));
+    document.getElementById('deadline-parameter-select')?.setAttribute('disabled', '');
+    document.getElementById('deadline-rule-summary')?.classList.add('hidden');
+    setDeadlineRuleSummary();
+    updatePreview();
 }
 
 function renderDeadlineRules(preferred = {}) {
     const domainSelect = document.getElementById('deadline-domain-select');
     const ruleSelect = document.getElementById('deadline-rule-select');
-    const rules = availableDeadlineRules().filter(rule => rule.domain === domainSelect?.value);
+    const selectedDomain = domainSelect?.value || '';
+    const rules = availableDeadlineRules().filter(rule => rule.domain === selectedDomain);
     const preferredRule = findDeadlineRule(rules, preferred);
+    const personalGuidance = selectedDomain === 'personal' && !isProfileDocumentEditor();
+    const noRules = Boolean(selectedDomain) && !personalGuidance && !rules.length;
+    document.getElementById('deadline-personal-guidance')?.classList.toggle('hidden', !personalGuidance);
+    document.getElementById('deadline-domain-empty-state')?.classList.toggle('hidden', !noRules);
+    document.getElementById('deadline-rule-fields')?.classList.toggle('hidden', !selectedDomain || personalGuidance || noRules);
     replaceSelectOptions(ruleSelect, rules.map(rule => ({value: rule.id, label: rule.name})), t('deadline_form_select_rule'));
-    currentDeadlineRule = preferredRule || rules[0] || null;
-    if (ruleSelect && currentDeadlineRule) ruleSelect.value = currentDeadlineRule.id;
-    renderDeadlineParameters(preferred);
+    currentDeadlineRule = preferredRule || null;
+    if (ruleSelect) {
+        ruleSelect.disabled = !rules.length;
+        ruleSelect.value = currentDeadlineRule?.id || '';
+    }
+    if (!currentDeadlineRule) {
+        clearDeadlineRuleState({clearRules: !rules.length});
+        document.getElementById('deadline-rule-fields')?.classList.toggle('hidden', !selectedDomain || personalGuidance || noRules);
+        return;
+    }
+    renderDeadlineParameters(preferred, {selectFirst: isProfileDocumentEditor()});
 }
 
 function selectDeadlineRule(preferred = {}) {
@@ -184,24 +257,40 @@ function selectDeadlineRule(preferred = {}) {
     const candidates = availableDeadlineRules();
     const preferredRule = findDeadlineRule(candidates, preferred);
     const preferredDomain = preferredRule?.domain || preferred.ruleDomain || preferred.domain;
-    const domains = DEADLINE_FORM_DOMAINS.filter(domain => candidates.some(rule => rule.domain === domain.id));
+    const domains = deadlineFormDomains();
     replaceSelectOptions(domainSelect, domains.map(domain => ({value: domain.id, label: t(domain.labelKey)})), t('deadline_form_select_domain'));
     if (domainSelect) domainSelect.value = domains.some(domain => domain.id === preferredDomain)
-        ? preferredDomain : domains[0]?.id || '';
+        ? preferredDomain : (isProfileDocumentEditor() ? 'personal' : '');
+    renderDeadlineDomainTabs(domainSelect?.value || '');
     renderDeadlineRules({...preferred, ruleId: preferredRule?.ruleId || preferred.ruleId});
 }
 
 function initDeadlineRuleSelector() {
     const domainSelect = document.getElementById('deadline-domain-select');
-    const rules = availableDeadlineRules();
-    const domains = DEADLINE_FORM_DOMAINS.filter(domain => rules.some(rule => rule.domain === domain.id));
+    const domains = deadlineFormDomains();
     replaceSelectOptions(domainSelect, domains.map(domain => ({value: domain.id, label: t(domain.labelKey)})), t('deadline_form_select_domain'));
-    const initialDomain = isProfileDocumentEditor() ? 'personal'
-        : domains.find(domain => domain.id === 'vehicles')?.id || domains[0]?.id || '';
+    const initialDomain = isProfileDocumentEditor() ? 'personal' : '';
     if (domainSelect) domainSelect.value = initialDomain;
-    domainSelect?.addEventListener('change', () => renderDeadlineRules());
+    renderDeadlineDomainTabs(initialDomain);
+    domainSelect?.addEventListener('change', () => {
+        renderDeadlineDomainTabs(domainSelect.value);
+        renderDeadlineRules();
+    });
+    document.getElementById('deadline-domain-tabs')?.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        const tabs = [...event.currentTarget.querySelectorAll('[role="tab"]')];
+        const currentIndex = tabs.indexOf(document.activeElement);
+        if (currentIndex < 0 || !tabs.length) return;
+        event.preventDefault();
+        const delta = event.key === 'ArrowRight' ? 1 : -1;
+        tabs[(currentIndex + delta + tabs.length) % tabs.length]?.focus();
+    });
     document.getElementById('deadline-rule-select')?.addEventListener('change', event => {
         currentDeadlineRule = availableDeadlineRules().find(rule => rule.id === event.currentTarget.value) || null;
+        if (!currentDeadlineRule) {
+            clearDeadlineRuleState({clearRules: false});
+            return;
+        }
         renderDeadlineParameters();
     });
     document.getElementById('deadline-parameter-select')?.addEventListener('change', event => {
@@ -232,6 +321,17 @@ function deadlineEditorFieldValues() {
 
 function isProfileDocumentEditor() {
     return Boolean(profileDocumentLinkDraft?.profileDocumentId || linkedSourceRef?.type === 'profileDocument');
+}
+
+function lockDeadlineRuleSelector() {
+    document.getElementById('deadline-rule-selector-section')?.classList.add('deadline-rule-locked');
+    document.getElementById('deadline-domain-select')?.setAttribute('disabled', '');
+    document.getElementById('deadline-rule-select')?.setAttribute('disabled', '');
+    document.getElementById('deadline-parameter-select')?.setAttribute('disabled', '');
+    document.querySelectorAll('#deadline-domain-tabs [role="tab"]').forEach(tab => {
+        tab.disabled = true;
+        tab.setAttribute('aria-disabled', 'true');
+    });
 }
 
 function legacyDocumentNumber(detail = '') {
@@ -575,10 +675,7 @@ export async function initAggiungiScadenza(user) {
                 const templateSelect = document.getElementById('testo_email_select');
                 if (templateSelect && template) selectValuePreservingCustomOption(templateSelect, template);
                 configureProfileDocumentEditor(sourceDraft, {suggestedTemplate: template});
-                document.getElementById('deadline-rule-selector-section')?.classList.add('deadline-rule-locked');
-                document.getElementById('deadline-domain-select')?.setAttribute('aria-disabled', 'true');
-                document.getElementById('deadline-rule-select')?.setAttribute('aria-disabled', 'true');
-                document.getElementById('deadline-parameter-select')?.setAttribute('aria-disabled', 'true');
+                lockDeadlineRuleSelector();
             } else if (sourceDraft.documentType) {
                 selectDeadlineRule({type: sourceDraft.documentType, detail: sourceDraft.detail});
             }
@@ -808,7 +905,7 @@ async function loadScadenzaForEdit(id) {
             document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.224');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.225');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);
@@ -819,7 +916,7 @@ async function loadScadenzaForEdit(id) {
                 detail: data.veicolo_modello,
                 dueDate: dateFields.isoValue
             }, {suggestedTemplate: currentDeadlineParameter?.templateText || data.templateText});
-            document.getElementById('deadline-rule-selector-section')?.classList.add('deadline-rule-locked');
+            lockDeadlineRuleSelector();
         }
 
         // 6. Allegati esistenti

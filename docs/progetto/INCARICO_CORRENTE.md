@@ -1,5 +1,21 @@
 # Incarico corrente
 
+## Tipo di scadenza come primo passo del nuovo form — 22/10/2026
+
+Diego chiede che la creazione di una Scadenza inizi dalla scelta esplicita del tipo, usando gli stessi ambiti delle Regole scadenze. Il form non preseleziona più Automezzi e non sceglie automaticamente la prima regola o il primo riferimento: mostra anzitutto le linguette **Documenti personali**, **Automezzi**, **Casa e immobili**, **Salute**, **Sport e associazioni**, **Contratti e documenti**, **Utente–azienda** e **Documenti aziendali**; soltanto dopo la scelta espone **Regola** e **Riferimento**.
+
+**Documenti personali** non apre una creazione generica: spiega che la Scadenza nasce dal Documento salvato nel Profilo e porta a **Profilo → Documenti**. Gli altri ambiti leggono esclusivamente le regole già configurate; un ambito senza regole mostra uno stato vuoto e il collegamento a **Regole scadenze**. La modifica di record esistenti e il flusso avviato dal Profilo continuano a preselezionare i collegamenti già noti.
+
+L'ordine **«Procedi»** autorizza implementazione locale, documentazione e test. Il successivo ordine **«Pubblica»** autorizza la patch `1.2.225`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Riconciliazioni, cancellazioni, scritture sui dati reali, Functions, Firestore Rules, Storage Rules, indici e migrazioni restano esclusi. Le modifiche CI già presenti nel ramo fanno parte dello stesso rilascio e mantengono il perimetro prudente già verificato.
+
+## Semplificazione prudente dei controlli CI — 22/10/2026
+
+Diego chiede di verificare le istruzioni Markdown prima di alleggerire la procedura e preferisce conservare un controllo in più piuttosto che introdurre rischi futuri. L'audit dei workflow ha confermato che una pull request composta soltanto dalla registrazione documentale della release `1.2.224` ha eseguito per otto minuti l'intera suite applicativa, oltre al workflow documentale dedicato; le release applicative eseguono invece controlli distinti sulla PR, sul `master` risultante e sulla candidata manuale esatta destinata al deploy.
+
+L'intervento autorizzato è quindi limitato alle ridondanze documentali. Il job `validate` classifica in modo fail-safe le pull request: salta installazioni, Java, emulatori e `npm test` soltanto se ogni file modificato è Markdown o appartiene a `docs/`, mantenendo il proprio esito e delegando la verifica al workflow documentale. Qualunque cambiamento non documentale o ambiguo, ogni push applicativo su `master` e ogni avvio manuale di pubblicazione continuano a eseguire la suite completa. Il workflow documentale protetto resta invariato e continua a controllare sia i push sia le pull request: si conserva quindi un controllo breve in più, evitando soltanto la ripetizione della costosa suite applicativa.
+
+Non cambiano autorizzazioni, vincoli dello SHA di `master`, controlli prima e dopo il deploy, perimetri Firebase o obbligo di documentare e collaudare le modifiche. Questo incarico non autorizza commit, push, PR, merge o deploy.
+
 ## Archivio autonomo delle Scadenze — 22/10/2026
 
 Diego chiede di rinominare il filtro **Completate** in **Archiviate** e di separare definitivamente questo ciclo di vita dall’**Archivio Account** delle Impostazioni. Nella lista Scadenze, uno scorrimento verso destra archivia una Scadenza attiva; nella linguetta Archiviate lo stesso gesto la ripristina. Soltanto una Scadenza già archiviata può essere eliminata definitivamente, con scorrimento verso sinistra e conferma esplicita.

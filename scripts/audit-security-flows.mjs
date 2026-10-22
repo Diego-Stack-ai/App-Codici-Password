@@ -297,6 +297,12 @@ assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Fire
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
 assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
+assert.match(deployWorkflow, /Classify validation scope[\s\S]*?run_full_suite=true[\s\S]*?GITHUB_EVENT_NAME[^\n]*pull_request[\s\S]*?git diff --name-only[\s\S]*?\(\^docs\/[\s\S]*?\\\.md\$[\s\S]*?run_full_suite=false/,
+    'Le pull request esclusivamente documentali non sono classificate in modo conservativo');
+assert.match(deployWorkflow, /Setup Node\.js[\s\S]*?if: steps\.scope\.outputs\.run_full_suite == 'true'[\s\S]*?Run security and offline checks[\s\S]*?if: steps\.scope\.outputs\.run_full_suite == 'true'[\s\S]*?npm test/,
+    'La suite completa non è vincolata alla classificazione del perimetro');
+assert.match(deployWorkflow, /Confirm documentation-only pull request[\s\S]*?if: steps\.scope\.outputs\.run_full_suite == 'false'/,
+    'Il percorso documentale non mantiene un esito validate esplicito');
 assert.match(deployWorkflow, /if: github\.event_name == 'workflow_dispatch' && github\.ref == 'refs\/heads\/master'/,
     'Il deploy manuale può partire da un riferimento diverso da master');
 assert.match(deployWorkflow, /Verify manual release source[\s\S]*?git ls-remote origin refs\/heads\/master[\s\S]*?GITHUB_SHA[\s\S]*?remote_master/,
