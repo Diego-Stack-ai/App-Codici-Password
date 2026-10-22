@@ -4,16 +4,16 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.223';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.224';
 import { getFooterReady } from '../../footer-state.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.223';
+import { initComponents } from '../../components-v129.js?v=1.2.224';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -26,6 +26,7 @@ let activeRuleFilter = '';
 let sortType = 'date-asc';
 let scadenzeContainer = null; // Module-scoped
 let stopDeadlineList = null;
+let deadlineSwipeList = null;
 let listEpoch = 0;
 let listMount = 0;
 const listActive = () => currentUser?.uid && auth.currentUser?.uid === currentUser.uid
@@ -133,13 +134,6 @@ export async function initScadenze(user) {
     await loadScadenze();
     if (!active()) return;
 
-    // Inizializzazione SwipeList (V6)
-    new SwipeList('.deadline-card-owned', {
-        threshold: 0.25,
-        onSwipeRight: (item) => active() && archiveScadenza(item.dataset.id),
-        onSwipeLeft: (item) => active() && deleteScadenza(item.dataset.id)
-    });
-
     // FAB Button Setup
     setupFAB();
 
@@ -157,6 +151,8 @@ function startDeadlineListLifecycle(uid) {
         ++listEpoch;
         clearTimeout(timer);
         unsubscribe?.();
+        deadlineSwipeList?.destroy();
+        deadlineSwipeList = null;
         currentUser = null;
         allScadenze = [];
         clearElement(scadenzeContainer);
@@ -285,6 +281,7 @@ function renderFilteredScadenze() {
     // Render
     clearElement(scadenzeContainer);
     if (filtered.length === 0) {
+        setupDeadlineSwipe(false);
         const empty = createElement('div', { className: 'archive-empty-state' }, [
             createElement('span', { className: 'material-symbols-outlined archive-empty-icon notranslate', textContent: 'event_busy' }),
             createElement('p', {
@@ -299,6 +296,20 @@ function renderFilteredScadenze() {
 
     const cards = filtered.map(s => createScadenzaCard(s));
     setChildren(scadenzeContainer, cards);
+    setupDeadlineSwipe(filtered.some(item => !item.received));
+}
+
+function setupDeadlineSwipe(hasOwnedCards) {
+    deadlineSwipeList?.destroy();
+    deadlineSwipeList = null;
+    if (!hasOwnedCards) return;
+
+    deadlineSwipeList = new SwipeList('.deadline-card-owned', {
+        threshold: 0.25,
+        canSwipeLeft: item => item.dataset.archived === 'true',
+        onSwipeRight: item => listActive() && setDeadlineArchived(item.dataset.id, item.dataset.archived !== 'true'),
+        onSwipeLeft: item => listActive() && requestDeleteArchivedDeadline(item.dataset.id)
+    });
 }
 
 function normalizeRuleFilterValue(value) {
@@ -330,11 +341,16 @@ function createScadenzaCard(scadenza) {
     }
 
     // 1. BACKGROUND AZIONI (Sotto la card)
-    const bgArchive = createElement('div', { className: 'swipe-action-bg bg-restore' }, [
-        createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'archive' })
+    const bgArchive = createElement('div', { className: `swipe-action-bg ${scadenza.completed ? 'bg-restore' : 'bg-archive'}` }, [
+        createElement('span', {
+            className: 'material-symbols-outlined notranslate',
+            textContent: scadenza.completed ? 'restore_from_trash' : 'archive'
+        }),
+        createElement('span', { textContent: t(scadenza.completed ? 'deadline_restore_action' : 'deadline_archive_action') })
     ]);
 
     const bgDelete = createElement('div', { className: 'swipe-action-bg bg-delete' }, [
+        createElement('span', { textContent: t('deadline_delete_action') }),
         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
     ]);
 
@@ -386,12 +402,13 @@ function createScadenzaCard(scadenza) {
         className: `deadline-card ${scadenza.received ? 'deadline-card-received' : 'deadline-card-owned'} ${stateClass}`,
         dataset: {
             id: scadenza.id,
+            archived: String(Boolean(scadenza.completed)),
             action: 'navigate',
             href: scadenza.received
                 ? `dettaglio_scadenza.html?received=${encodeURIComponent(scadenza.id)}`
                 : `dettaglio_scadenza.html?id=${encodeURIComponent(scadenza.id)}`
         }
-    }, scadenza.received ? [swipeContent] : [bgArchive, bgDelete, swipeContent]);
+    }, scadenza.received ? [swipeContent] : [bgArchive, ...(scadenza.completed ? [bgDelete] : []), swipeContent]);
 
     card.onclick = () => {
         if (mount !== listMount || !listActive()) return;
@@ -402,41 +419,48 @@ function createScadenzaCard(scadenza) {
 }
 
 // --- ACTIONS HANDLERS ---
-async function toggleCompleted(id, newStatus) {
+async function setDeadlineArchived(id, archived) {
     if (!currentUser) return;
     try {
         const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
-        await updateDoc(docRef, { completed: newStatus });
-
-        const idx = allScadenze.findIndex(s => s.id === id);
-        if (idx !== -1) allScadenze[idx].completed = newStatus;
-
-        renderFilteredScadenze();
-        showToast(newStatus ? 'Completata' : 'Riaperta', 'success');
-    } catch (error) {
-        console.error(error);
-        showToast("Errore aggiornamento", "error");
-    }
-}
-
-async function archiveScadenza(id) {
-    if (!currentUser) return;
-    try {
-        const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
-        // Archivio nel contesto scadenza significa completata e tolta dalla vista principale
-        await updateDoc(docRef, { completed: true });
+        await updateDoc(docRef, {
+            completed: archived,
+            completedAt: archived ? serverTimestamp() : null
+        });
 
         const idx = allScadenze.findIndex(s => s.id === id);
         if (idx !== -1) {
-            allScadenze[idx].completed = true;
+            allScadenze[idx].completed = archived;
+            allScadenze[idx].completedAt = archived ? new Date() : null;
         }
-        showToast("Scadenza archiviata", "success");
-        // Nota: Rerender post-animazione
+
+        showToast(t(archived ? 'deadline_archived_success' : 'deadline_restored_success'), 'success');
         setTimeout(() => renderFilteredScadenze(), 400);
     } catch (error) {
         console.error(error);
-        showToast("Errore archiviazione", "error");
+        showToast(t(archived ? 'deadline_archive_error' : 'deadline_restore_error'), 'error');
+        renderFilteredScadenze();
     }
+}
+
+async function requestDeleteArchivedDeadline(id) {
+    const deadline = allScadenze.find(item => item.id === id && !item.received);
+    if (!deadline?.completed) {
+        renderFilteredScadenze();
+        return;
+    }
+    const confirmed = await showConfirmModal(
+        t('confirm_delete_title'),
+        t('deadline_delete_archived_confirm'),
+        t('deadline_delete_action'),
+        t('cancel') || 'Annulla'
+    );
+    if (!listActive()) return;
+    if (!confirmed) {
+        renderFilteredScadenze();
+        return;
+    }
+    await deleteScadenza(id);
 }
 
 async function deleteScadenza(id) {

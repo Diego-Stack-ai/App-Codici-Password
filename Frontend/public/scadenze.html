@@ -13,16 +13,16 @@
     <title data-t="deadlines">Scadenze - PROTOCOLLO V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.223" />
+    <link rel="manifest" href="manifest.json?v=1.2.224" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.224">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.223">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.224">
     <link rel="stylesheet" href="assets/css/moduli.css">
-    <link rel="stylesheet" href="assets/css/scadenze.css?v=1.2.223&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/scadenze.css?v=1.2.224&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -83,7 +83,7 @@
                     <button class="filter-chip active" data-filter="all" data-t="filter_all">Tutte</button>
                     <button class="filter-chip" data-filter="urgent" data-t="filter_urgent">Urgenti</button>
                     <button class="filter-chip" data-filter="expiring" data-t="filter_expiring">In scadenza</button>
-                    <button class="filter-chip" data-filter="completed" data-t="filter_completed">Completate</button>
+                    <button class="filter-chip" data-filter="completed" data-t="filter_completed">Archiviate</button>
                 </div>
 
                 <!-- List Content -->
@@ -93,6 +93,13 @@
                         <div class="archive-spinner"></div>
                         <p class="archive-loading-text" data-t="analyzing_data">Analisi dati...</p>
                     </div>
+                </div>
+
+                <div class="deadline-swipe-hint" data-t-aria="deadline_swipe_actions">
+                    <span><span class="material-symbols-outlined notranslate" translate="no">swipe_right</span>
+                        <span data-t="deadline_swipe_archive_restore">Scorri a destra per archiviare o ripristinare</span></span>
+                    <span><span data-t="deadline_swipe_delete_archived">Nelle Archiviate scorri a sinistra per eliminare</span>
+                        <span class="material-symbols-outlined notranslate" translate="no">swipe_left</span></span>
                 </div>
 
                 <!-- Spacer Footer rimosso: gestito da padding .page-container -->

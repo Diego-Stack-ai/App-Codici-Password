@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata 1.2.224 — Scadenze archiviate — 22/10/2026
+
+La lista Scadenze distingue ora chiaramente il proprio archivio dall’Archivio Account: il filtro **Completate** diventa **Archiviate**. Lo scorrimento verso destra archivia una Scadenza attiva e ripristina una Scadenza archiviata; nella sola vista Archiviate, lo scorrimento verso sinistra consente la cancellazione definitiva dopo conferma. Le copie ricevute restano prive di azioni di mutazione.
+
+Il record usa i campi di compatibilità già esistenti `completed` e `completedAt`, senza migrazioni né modifiche automatiche dei dati reali. L’Archivio Account nelle Impostazioni resta dedicato esclusivamente agli Account. La candidata aggiunge test sul ciclo archivia–ripristina–elimina e sul blocco delle direzioni di scorrimento non ammesse.
+
 ## Release 1.2.223 pubblicata — form unico delle Scadenze — 22/10/2026
 
 Il form Scadenza usa ora il catalogo unificato **Ambito → Regola → Parametro**, eredita pianificazione e testo dalle Regole scadenze e persiste gli identificativi necessari al collegamento stabile. I Documenti personali entrano nello stesso percorso dal Profilo con sorgente vincolata; nessuna Scadenza reale è stata cancellata, ricreata, riconciliata o migrata. La freccia del Dettaglio scadenza torna in modo deterministico a `scadenze.html`.

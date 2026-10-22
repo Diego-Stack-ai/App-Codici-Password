@@ -81,6 +81,26 @@ test('active swipe still calls its action exactly once', () => {
     assert.equal(f.timers.size, 0);
 });
 
+test('disabled swipe direction snaps back without firing its action', () => {
+    const f = fixture();
+    let mutations = 0;
+    f.context.onSwipeLeft = () => mutations++;
+    const swipe = f.run("new SwipeList('.fixture', {onSwipeLeft, canSwipeLeft: () => false})");
+    const content = {style: {}};
+    const item = {
+        style: {}, offsetWidth: 200,
+        querySelector: selector => selector === '.swipe-content' ? content : null,
+        querySelectorAll: () => []
+    };
+    swipe.activeItem = item;
+    swipe.isDragging = true;
+    swipe.currentX = -100;
+    swipe.handleEnd({});
+    assert.equal(mutations, 0);
+    assert.equal(content.style.transform, 'translateX(0)');
+    swipe.destroy();
+});
+
 test('destroy prevents a pending reveal from writing plaintext into the old card', async () => {
     const f = fixture();
     let resolve;

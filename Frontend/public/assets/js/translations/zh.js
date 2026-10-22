@@ -2,6 +2,18 @@
 // Rigenera con: node scripts/split-translations.mjs
 // Lingua: zh — 116 chiavi
 export default {
+    "deadline_swipe_archive_restore": "向右滑动以归档或恢复",
+    "deadline_swipe_delete_archived": "在已归档中向左滑动以删除",
+    "filter_completed": "已归档",
+    "deadline_swipe_actions": "到期事项快捷操作",
+    "deadline_archive_action": "归档",
+    "deadline_restore_action": "恢复",
+    "deadline_delete_action": "删除",
+    "deadline_delete_archived_confirm": "该到期事项将被永久删除。是否继续？",
+    "deadline_archived_success": "到期事项已归档",
+    "deadline_restored_success": "到期事项已恢复",
+    "deadline_archive_error": "无法归档该到期事项",
+    "deadline_restore_error": "无法恢复该到期事项",
     "account_archive": "账户归档",
     "account_archive_desc": "管理归档账户",
     "app_info_security_desc": "开发旨在通过基础标准提供最大加密和易于共享。",

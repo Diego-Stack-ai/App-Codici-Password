@@ -2,6 +2,18 @@
 // Rigenera con: node scripts/split-translations.mjs
 // Lingua: hi — 116 chiavi
 export default {
+    "deadline_swipe_archive_restore": "संग्रहित या पुनर्स्थापित करने के लिए दाईं ओर स्वाइप करें",
+    "deadline_swipe_delete_archived": "संग्रहित में हटाने के लिए बाईं ओर स्वाइप करें",
+    "filter_completed": "संग्रहित",
+    "deadline_swipe_actions": "समय-सीमा की त्वरित कार्रवाइयाँ",
+    "deadline_archive_action": "संग्रहित करें",
+    "deadline_restore_action": "पुनर्स्थापित करें",
+    "deadline_delete_action": "हटाएँ",
+    "deadline_delete_archived_confirm": "समय-सीमा स्थायी रूप से हटा दी जाएगी। जारी रखें?",
+    "deadline_archived_success": "समय-सीमा संग्रहित की गई",
+    "deadline_restored_success": "समय-सीमा पुनर्स्थापित की गई",
+    "deadline_archive_error": "समय-सीमा संग्रहित नहीं की जा सकी",
+    "deadline_restore_error": "समय-सीमा पुनर्स्थापित नहीं की जा सकी",
     "account_archive": "खाता संग्रह",
     "account_archive_desc": "संग्रहीत खाते प्रबंधित करें",
     "app_info_security_desc": "आधार मानकों के माध्यम से अधिकतम एन्क्रिप्शन और साझा करने में आसानी प्रदान करने के लिए विकसित।",

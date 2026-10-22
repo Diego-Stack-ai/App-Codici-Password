@@ -8,7 +8,7 @@ const source=(await Promise.all(['deadline-model.js','scadenze.js'].map(p=>readF
 function fixture(route=''){
  let clock=new Date(2026,8,26,23,59,59).getTime(), ready=true, pending=null;
  class Clock extends Date{constructor(...a){super(...(a.length?a:[clock]));}}
- const events=new Map(),timers=new Map(),callbacks=[],swipes=[],reads=[],writes=[];
+ const events=new Map(),timers=new Map(),callbacks=[],swipes=[],reads=[],writes=[],confirmations=[];
  const target={addEventListener:(n,fn)=>{if(!events.has(n))events.set(n,new Set());events.get(n).add(fn);},removeEventListener:(n,fn)=>events.get(n)?.delete(fn)};
  const node=(tag,props={},children=[])=>{const local=new Map();return{tag,...props,children,
   appendChild(x){this.children.push(x);},replaceChildren(...xs){this.children=xs;},
@@ -26,15 +26,20 @@ function fixture(route=''){
   window:{...target,location,history,privateAuthGate:{isReady:()=>ready}},
   setTimeout:(fn,ms)=>{const id=Symbol();timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),
   createElement:node,setChildren:(n,xs)=>n.replaceChildren(...(Array.isArray(xs)?xs:[xs])),clearElement:n=>n.replaceChildren(),t:k=>k,
-  getFooterReady:()=>({center:null}),SwipeList:class{constructor(selector,options){swipes.push({selector,options});}},
+  getFooterReady:()=>({center:null}),SwipeList:class{
+   constructor(selector,options){this.selector=selector;this.options=options;swipes.push(this);}
+   destroy(){this.destroyed=true;}
+  },
   onAuthStateChanged:(_,fn)=>{const cb={fn,stopped:false};callbacks.push(cb);return()=>cb.stopped=true;},
   listDeadlines:async uid=>{reads.push(uid);const result=data.owned;if(pending)await pending;return result;},
   listReceivedDeadlines:async uid=>{reads.push(uid);const result=data.received;if(pending)await pending;return result;},
-  doc:(_, ...parts)=>parts.join('/'),updateDoc:async(...a)=>writes.push(a),deleteDoc:async(...a)=>writes.push(a),showToast(){},logError(){}
+  doc:(_, ...parts)=>parts.join('/'),serverTimestamp:()=>({server:true}),
+  updateDoc:async(...a)=>writes.push(['update',...a]),deleteDoc:async(...a)=>writes.push(['delete',...a]),
+  showConfirmModal:async(...a)=>{confirmations.push(a);return true;},showToast(){},logError(){}
  });
  vm.runInContext(source,context);
  const drain=async()=>{for(let i=0;i<20;i++)await Promise.resolve();};
- return {context,data,auth,list,count,search,reads,writes,swipes,callbacks,timers,
+ return {context,data,auth,list,count,search,reads,writes,swipes,callbacks,timers,confirmations,
   start:()=>vm.runInContext('initScadenze(auth.currentUser)',context),
   input:value=>{search.value=value;search.dispatch('input',{target:search});},replaced:()=>replaced,
   filter:value=>{context.filterValue=value;vm.runInContext('activeFilter=filterValue;renderFilteredScadenze()',context);},
@@ -97,4 +102,25 @@ test('deadline cards expose a chevron that indicates opening the detail',async()
  const nodes=descendants(f.list.children[0]);
  assert.ok(nodes.some(node=>node.className?.includes('deadline-card-chevron')));
  assert.ok(nodes.some(node=>node.textContent==='chevron_right'));
+});
+
+test('right swipe archives active deadlines and restores archived deadlines',async()=>{
+ const f=fixture();f.data.received=[];await f.start();
+ const activeSwipe=f.swipes.at(-1).options;
+ assert.equal(activeSwipe.canSwipeLeft({dataset:{archived:'false'}}),false);
+ await activeSwipe.onSwipeRight({dataset:{id:'same',archived:'false'}});
+ assert.equal(JSON.stringify(f.writes.at(-1)),JSON.stringify(['update','users/A/scadenze/same',{completed:true,completedAt:{server:true}}]));
+ f.filter('completed');
+ const archivedSwipe=f.swipes.at(-1).options;
+ assert.equal(archivedSwipe.canSwipeLeft({dataset:{archived:'true'}}),true);
+ await archivedSwipe.onSwipeRight({dataset:{id:'same',archived:'true'}});
+ assert.equal(JSON.stringify(f.writes.at(-1)),JSON.stringify(['update','users/A/scadenze/same',{completed:false,completedAt:null}]));
+});
+
+test('left swipe permanently deletes only archived deadlines after confirmation',async()=>{
+ const f=fixture();f.data.received=[];f.data.owned[0].completed=true;await f.start();f.filter('completed');
+ const archivedSwipe=f.swipes.at(-1).options;
+ await archivedSwipe.onSwipeLeft({dataset:{id:'same',archived:'true'}});
+ assert.equal(f.confirmations.length,1);
+ assert.deepEqual(f.writes.at(-1),['delete','users/A/scadenze/same']);
 });

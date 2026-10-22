@@ -169,6 +169,13 @@
     font-size: var(--fs-xl);
     font-weight: bold;
     color: white;
+    gap: 0.45rem;
+}
+
+.swipe-action-bg.bg-archive {
+    justify-content: flex-start;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--status-success);
 }
 
 .swipe-action-bg.bg-restore {
@@ -183,6 +190,21 @@
     background-color: rgba(255, 255, 255, 0.05);
     /* Neutral/Dark */
     color: var(--status-error);
+}
+
+.deadline-swipe-hint {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0.9rem 0 0;
+    color: var(--text-muted);
+}
+
+.deadline-swipe-hint > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    text-align: center;
 }
 
 .deadline-card .swipe-content {
