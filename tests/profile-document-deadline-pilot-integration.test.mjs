@@ -75,19 +75,20 @@ test('la cancellazione dalla lista scollega atomicamente la scadenza dal documen
   assert.match(source, /expiryReference: null/);
 });
 
-test('l’editor dedicato precompila regole e testo senza dipendere dai menu generici', async () => {
+test('l’editor dedicato risolve regola, pianificazione e testo dal catalogo unificato', async () => {
   const source = await read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js');
-  const config = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
-  assert.match(source, /selectValuePreservingCustomOption\(typeSelect, documentType, schedule \|\| \{\}\)/);
-  assert.match(source, /getSuggestedSchedule\(documentType\)/);
-  assert.match(source, /getSuggestedTemplate\(documentType\) \|\| documentType/);
+  const catalog = await read('Frontend/public/assets/js/modules/scadenze/deadline-form-model.js');
+  assert.match(source, /selectDeadlineRule\(\{type: documentType, domain: 'personal'\}\)/);
+  assert.match(source, /currentDeadlineRule\.period/);
+  assert.match(source, /currentDeadlineRule\.frequency/);
+  assert.match(source, /currentDeadlineParameter\?\.templateText \|\| documentType/);
   assert.match(source, /configureProfileDocumentEditor/);
   assert.match(source, /profileDocumentDeadlineMessage/);
   assert.match(source, /deadlineDateDisplay/);
   assert.match(source, /profileDocumentEditorData\?\.documentNumber/);
   assert.match(source, /deadline-generic-info-section/);
-  assert.match(config, /getSuggestedSchedule\(type\)/);
-  assert.match(config, /resolveDocumentDeadlineTemplate\(config, type\)/);
+  assert.match(catalog, /isPersonalDocumentDeadlineType\(name\)[\s\S]*\? 'personal'/);
+  assert.match(catalog, /\{id:\s*'deadlineConfigDocuments',\s*mode:\s*'documenti'\}/);
 });
 
 test('il dettaglio non ricompone il testo né presenta il numero come veicolo', async () => {

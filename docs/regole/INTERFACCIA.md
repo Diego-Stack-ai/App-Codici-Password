@@ -5,6 +5,12 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Form unico delle Scadenze — 22/10/2026
+
+`aggiungi_scadenza.html` presenta una sola sequenza **Ambito → Regola → Parametro**. Le tre modalità storiche restano soltanto adattatori interni di compatibilità e non sono scelte parallele esposte all’utente. Preavviso, frequenza e testo derivano dalla regola selezionata e sono mostrati senza consentire una divergenza silenziosa nel singolo record; destinatari, canali, nota, URL, allegati e data restano propri della Scadenza. La modifica di un record anteriore tenta prima gli identificativi della regola e ricade poi sul confronto normalizzato di tipo e dettaglio.
+
+Quando il form viene aperto da un Documento personale, l’ambito e la regola sono vincolati al tipo del Documento. Il riepilogo anagrafico e la data provengono dal Profilo, mentre pianificazione e testo provengono dalla regola. Il collegamento definitivo resta uno solo e non crea una seconda scheda Documento. Il ritorno dal Dettaglio scadenza è sempre la lista canonica Scadenze; la cronologia del browser non può riportare alla Home.
+
 ## Regole scadenze — struttura uniforme e ambiti operativi — 22/10/2026
 
 Le sette linguette operative **Automezzi**, **Casa e immobili**, **Salute**, **Sport e associazioni**, **Contratti e documenti**, **Utente–azienda** e **Documenti aziendali** non usano una grande card esterna. Il pannello conserva la semantica accessibile di `tabpanel`, ma è visivamente neutro: la presentazione dell’ambito è una nota autonoma, compatta e bordata, mentre le card delle regole sono mostrate direttamente sotto di essa. **Documenti personali** mantiene il proprio contratto specifico.

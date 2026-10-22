@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 6,
-  "reviewedAppVersion": "1.2.222",
+  "contentVersion": 7,
+  "reviewedAppVersion": "1.2.223",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -627,7 +627,7 @@
         {
           "stepId": "step-1",
           "bodyKey": "guide.pages.aggiungi_scadenza.step-1",
-          "target": "#mode-automezzi"
+          "target": "#deadline-domain-select"
         },
         {
           "stepId": "step-2",
@@ -1247,10 +1247,10 @@
       "guide.pages.scadenze.step-2": "Scegli l’ordinamento. Una scadenza di oggi diventa urgente dal giorno successivo.",
       "guide.pages.scadenze.step-3": "Apri il dettaglio per stato, destinatari, note e allegati; i permessi delle scadenze ricevute dipendono dal proprietario.",
       "guide.pages.aggiungi_scadenza.title": "Crea o modifica scadenza",
-      "guide.pages.aggiungi_scadenza.purpose": "Imposta data, categoria, preavviso, destinatari e contenuti della scadenza.",
-      "guide.pages.aggiungi_scadenza.step-1": "Scegli Automezzi, Documenti o Generali e poi il tipo configurato per quella categoria.",
+      "guide.pages.aggiungi_scadenza.purpose": "Crea o modifica una scadenza partendo da ambito, regola e parametro già configurati.",
+      "guide.pages.aggiungi_scadenza.step-1": "Scegli l’ambito, la regola e il parametro. Pianificazione e testo vengono applicati dalla configurazione selezionata.",
       "guide.pages.aggiungi_scadenza.step-2": "Controlla data e intestatario. Una data proveniente da un Documento o Widget può preparare una Scadenza collegata.",
-      "guide.pages.aggiungi_scadenza.step-3": "Scegli preavviso e frequenza fra i valori ammessi. Le notifiche richiedono canali e permessi configurati.",
+      "guide.pages.aggiungi_scadenza.step-3": "Controlla preavviso e frequenza ereditati dalla regola. Per cambiarli modifica prima la configurazione della regola.",
       "guide.pages.aggiungi_scadenza.step-4": "Scegli i destinatari e verifica i permessi assegnati. La rubrica da sola non invia o concede accessi.",
       "guide.pages.aggiungi_scadenza.step-5": "Gli allegati collegati possono appartenere all’Account o Documento origine; il collegamento non duplica il file.",
       "guide.pages.aggiungi_scadenza.step-6": "Usa il comando Salva dell’app e controlla la conferma. La guida non rinnova, invia o cancella scadenze.",

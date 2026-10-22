@@ -1,5 +1,11 @@
 # Dati
 
+## Collegamento Scadenza–Regola nel nuovo form — 22/10/2026
+
+La raccolta canonica delle Scadenze non cambia. I nuovi record e quelli modificati dal form unico aggiungono metadati di collegamento: `ruleDomain`, `ruleId`, `ruleSourceId`, `ruleRouteKey`, `ruleSchemaVersion`, `ruleParameterId` e `ruleParameterLabel`. `ruleSourceId` continua a distinguere le tre sorgenti fisiche storiche delle regole; `ruleId` è l’identità stabile quando presente, mentre `ruleRouteKey` mantiene la compatibilità con una regola legacy non ancora salvata nel nuovo schema. Questi campi non autorizzano una migrazione automatica delle configurazioni o delle Scadenze esistenti.
+
+Il payload della Scadenza conserva per compatibilità `type`, `veicolo_modello`, `templateText`, `notif_days_before` e `notif_frequency`, ma nel nuovo form tali valori sono una proiezione della regola e del parametro selezionati, non una seconda configurazione indipendente. Per i Documenti personali `sourceRef` e `linkKind: 'profile-document-deadline-v1'` restano l’autorità del collegamento al Documento; dati identificativi e data provengono dal Profilo, mentre regola e parametro descrivono soltanto l’avviso. I record legacy senza metadati vengono risolti in lettura per tipo e dettaglio e ricevono i nuovi riferimenti soltanto dopo un salvataggio esplicito dell’utente.
+
 ## Promemoria correnti — PROMEMORIA-06, 26/09/2026
 
 La Home proietta in lettura un solo promemoria per identità della scadenza nella raccolta dell'utente. Gli eventi di una data precedente non appartengono al ciclo corrente; a parità di data prevale lo stage con meno giorni memorizzati, poi il timestamp e un ordinamento deterministico. Lo stato corrente risolto non fa riapparire stage precedenti; un avviso già visto resta consultabile come tale fino alle Urgenze. Giorni e data visualizzati provengono dalla scadenza corrente e dal calendario locale: «Scade oggi» per tutta la giornata, urgente dal giorno dopo, secondo DECISIONI. Rendering paginato a 10 correnti, senza eliminare i successivi; eventi persistiti, sorgente e politiche email/push invariati. L'aggiornamento Home avviene al ritorno visibile, periodicamente quando visibile e al cambio giorno, con invalidazione su sessione/blocco/pagehide. Nessuna garanzia di refresh remoto quando offline; test e limiti in COLLAUDI.

@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.222';
+import { auth } from './firebase-config.js?v=1.2.223';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -111,6 +111,9 @@ export async function initComponents() {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
                     fallbackHref = 'scadenze.html';
+                    // Il dettaglio appartiene sempre al contenitore Scadenze:
+                    // non seguire la history, che potrebbe riportare alla Home.
+                    preferHistory = false;
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
                     const id = urlParams.get('id');
                     fallbackHref = id ? `dettaglio_scadenza.html?id=${id}` : 'scadenze.html';

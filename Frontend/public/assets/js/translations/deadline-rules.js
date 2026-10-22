@@ -103,6 +103,13 @@ const pt = {
 };
 
 Object.assign(it, {
+  deadline_form_rule_section: 'Regola della scadenza',
+  deadline_form_rule_help: 'Scegli l’ambito, la regola e il parametro già configurati nelle Regole scadenze.',
+  deadline_form_domain: 'Ambito', deadline_form_rule: 'Regola', deadline_form_parameter: 'Parametro',
+  deadline_form_select_domain: 'Seleziona ambito…', deadline_form_select_rule: 'Seleziona regola…',
+  deadline_form_no_parameter: 'Nessun parametro configurato',
+  deadline_form_required: 'Compila i campi obbligatori: intestatario, regola, parametro e data.',
+  deadline_form_personal_message_help: 'Il testo arriva dalla regola selezionata e viene composto con i dati del documento.',
   deadline_domain_new_rule: 'Nuova regola', deadline_domain_rename_rule: 'Rinomina regola',
   deadline_domain_delete_rule: 'Elimina regola', deadline_domain_rule_name: 'Nome della regola',
   deadline_domain_rule_linked_blocked: 'Regola in uso: non può essere rinominata o eliminata.',
@@ -133,6 +140,13 @@ Object.assign(it, {
 });
 
 const deadlineRulesActionFallback = {
+  deadline_form_rule_section: 'Deadline rule',
+  deadline_form_rule_help: 'Choose the area, rule and parameter already configured in Deadline rules.',
+  deadline_form_domain: 'Area', deadline_form_rule: 'Rule', deadline_form_parameter: 'Parameter',
+  deadline_form_select_domain: 'Select area…', deadline_form_select_rule: 'Select rule…',
+  deadline_form_no_parameter: 'No parameter configured',
+  deadline_form_required: 'Complete the required fields: holder, rule, parameter and date.',
+  deadline_form_personal_message_help: 'The text comes from the selected rule and is composed with the document data.',
   deadline_domain_new_rule: 'New rule', deadline_domain_rename_rule: 'Rename rule',
   deadline_domain_delete_rule: 'Delete rule', deadline_domain_rule_name: 'Rule name',
   deadline_domain_rule_linked_blocked: 'This rule is in use and cannot be renamed or deleted.',

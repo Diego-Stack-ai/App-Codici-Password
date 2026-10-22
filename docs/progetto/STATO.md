@@ -1,5 +1,11 @@
 # Stato
 
+## Candidata locale — form unico delle Scadenze — 22/10/2026
+
+Il form Scadenza usa ora il catalogo unificato **Ambito → Regola → Parametro**, eredita pianificazione e testo dalle Regole scadenze e persiste gli identificativi necessari al collegamento stabile. I Documenti personali entrano nello stesso percorso dal Profilo con sorgente vincolata; nessuna Scadenza reale è stata cancellata, ricreata, riconciliata o migrata. La freccia del Dettaglio scadenza torna in modo deterministico a `scadenze.html`.
+
+Lo stato è soltanto locale: non sono stati eseguiti bump, commit, push, PR, merge o deploy. La ricreazione delle tre Scadenze personali e la riconciliazione delle altre restano una fase successiva al collaudo autenticato del nuovo form.
+
 ## Release 1.2.222 pubblicata — ambiti Regole scadenze e stato destinatari — 22/10/2026
 
 La pagina **Regole scadenze** espone ora sette linguette operative oltre a **Documenti personali**: **Automezzi**, **Casa e immobili**, **Salute**, **Sport e associazioni**, **Contratti e documenti**, **Utente–azienda** e **Documenti aziendali**. La linguetta **Documenti generici** è rimossa; le regole storiche con `domain: generic` e quelle prive di una classificazione specifica confluiscono in **Contratti e documenti**, senza essere cancellate.

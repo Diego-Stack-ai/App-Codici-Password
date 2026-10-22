@@ -7,6 +7,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
 const homeDeadlineDashboard = await read('Frontend/public/assets/js/modules/home/home-deadline-dashboard.js');
 const deadlineConfigController = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
+const deadlineFormModel = await read('Frontend/public/assets/js/modules/scadenze/deadline-form-model.js');
 const deadlineSaveService = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
 const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
 const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
@@ -64,10 +65,14 @@ assert.match(homeDeadlineDashboard, /deadlineBucket\(deadline, today\)/,
     'La dashboard Home non usa il calendario condiviso (finestra verificata dal renderer)');
 assert.match(homeDeadlineDashboard, /items\.slice\(0, 3\)/,
     'La dashboard Home non limita le anteprime per sezione');
-assert.match(deadline, /createDeadlineConfigController\(\{[\s\S]+recipientController/,
-    'Il form Scadenza non delega la configurazione dinamica al controller dedicato');
-assert.doesNotMatch(deadline, /getUserSetting\(|DEFAULT_CONFIGS|function populateTypeSelect/,
-    'Il form Scadenza contiene ancora caricamento o rendering delle configurazioni');
+assert.match(deadline, /buildDeadlineRuleCatalog\(\{[\s\S]+deadlineConfigDocuments[\s\S]+generalConfig/,
+    'Il form Scadenza non costruisce il catalogo unificato dalle configurazioni disponibili');
+assert.match(deadline, /Promise\.all\(\[[\s\S]+getUserSetting\(user\.uid, 'deadlineConfig'\)[\s\S]+getUserSetting\(user\.uid, 'deadlineConfigDocuments'\)[\s\S]+getUserSetting\(user\.uid, 'generalConfig'\)/,
+    'Il form Scadenza non carica in parallelo le tre sorgenti delle regole');
+assert.match(deadlineFormModel, /export function buildDeadlineRuleCatalog/,
+    'Il catalogo unificato delle regole non è isolato nel modello dedicato');
+assert.doesNotMatch(deadline, /DEFAULT_CONFIGS|function populateTypeSelect/,
+    'Il form Scadenza contiene ancora configurazioni predefinite o il vecchio rendering');
 assert.match(deadlineConfigController, /Promise\.all\(\[[\s\S]+getUserSetting\(user\.uid, MODE_DOCUMENTS\.automezzi\)/,
     'Il controller configurazioni non carica in parallelo i dati necessari');
 assert.match(deadlineConfigController, /normalizeDeadlineConfig\(/,

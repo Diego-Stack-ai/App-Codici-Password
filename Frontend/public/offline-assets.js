@@ -184,6 +184,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/scadenze/deadline-config-model.js",
   "assets/js/modules/scadenze/deadline-domain-model.js",
   "assets/js/modules/scadenze/deadline-editor-return-draft.js",
+  "assets/js/modules/scadenze/deadline-form-model.js",
   "assets/js/modules/scadenze/deadline-model.js",
   "assets/js/modules/scadenze/deadline-recipient-controller.js",
   "assets/js/modules/scadenze/deadline-recipient-model.js",

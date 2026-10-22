@@ -33,12 +33,12 @@ test('la bozza documento personale è vincolata all’UID e viene rimossa se inc
   assert.match(source, /auth\.currentUser\.uid !== currentUser\?\.uid[\s\S]*discardProfileDocumentDraft\(\)/);
 });
 
-test('la modifica collegata al Profilo resta nei documenti e conserva valori personalizzati', async () => {
+test('la modifica collegata al Profilo resta nei documenti e risolve la regola selezionata', async () => {
   const source = await readFile(editorPath, 'utf8');
   assert.match(source, /linkedSourceRef\?\.type === 'profileDocument'[\s\S]*\? 'documenti'/);
   assert.match(source, /selectValuePreservingCustomOption\(typeSelect, data\.type\)/);
-  assert.match(source, /selectValuePreservingCustomOption\(testoEmailSelect, data\.templateText\)/);
-  assert.match(source, /deadlineConfigValuesMatch\(item\.value, value\)/);
+  assert.match(source, /selectDeadlineRule\(\{[\s\S]*?ruleId: data\.ruleId/);
+  assert.match(source, /valuesMatch\(item\.value, value\)/);
 });
 
 test('regole e template usano il confronto normalizzato', async () => {
