@@ -18,6 +18,8 @@ test('il runtime rinnova un token push invalidato conservando gli ambiti scelti'
     assert.match(push, /await unregisterReplacedPushWorker\(replacedRegistration\)/);
     assert.match(push, /serviceWorkerRegistration: registration/);
     assert.match(push, /rememberedActiveScopes\(\)/);
+    assert.match(push, /status: 'active'/);
+    assert.match(push, /invalidatedAt: deleteField\(\)/);
     assert.match(push, /function pushTestNeedsRecovery/);
     assert.match(push, /reason === 'push-token-invalid'/);
     assert.match(push, /message\.includes\('Notifiche non attive su questo dispositivo'\)/);

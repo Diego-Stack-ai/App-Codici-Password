@@ -26,7 +26,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.226';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.227';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.226&push=20261019c&ai=20261019b&deadline-share=20260908a&touch=20261017b';
+import * as Pages from './pages-init.js?v=1.2.227&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         && (pushEnabledHere || hasPushDeviceId)) {
                         // Il listener non produce contenuto necessario alla pagina:
                         // inizializzarlo in background evita di ritardare il primo render.
-                        void import('./modules/shared/push-manager.js?push=20261019c')
+                        void import('./modules/shared/push-manager.js?push=20261022a')
                             .then(async ({ recoverPushRegistration, listenForDeadlinePushInForeground }) => {
                                 await recoverPushRegistration(user);
                                 void listenForDeadlinePushInForeground()
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     try {
                         const trigger = document.getElementById('ai-assistant-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.226');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.227');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {

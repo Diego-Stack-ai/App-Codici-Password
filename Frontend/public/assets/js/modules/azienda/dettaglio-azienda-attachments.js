@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.226';
+import { db, storage } from '../../firebase-config.js?v=1.2.227';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -14,7 +14,8 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import {
     MAX_ATTACHMENT_BYTES, createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile,
-    openDecryptedAttachment, openExternalUrl, unwrapAttachmentFileKey, validateAccountAttachmentFile
+    openDecryptedAttachment, openExternalUrl, resolveAccountAttachmentMime, unwrapAttachmentFileKey,
+    validateAccountAttachmentFile
 } from '../shared/attachment-security.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listCompanyAccountAttachments } from '../data/vault-repository.js';
@@ -22,7 +23,10 @@ import {
     decryptReceivedCompanyAttachment, syncCompanyAttachmentAccess, unwrapReceivedAttachmentFileKey
 } from '../shared/shared-attachment-access.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
-import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/attachment-source-picker.js';
+import {
+    attachmentUploadErrorMessage, beginLargeAttachmentUploadFeedback, closeAttachmentSourcePicker,
+    selectAttachmentSource
+} from '../shared/attachment-source-picker.js';
 import {captureCardAttachment as captureGuidedCard} from '../shared/card-attachment-capture.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
@@ -97,7 +101,8 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
         input.value = '';
         return;
     }
-    if (file.type.startsWith('image/') && !skipImageEditor) {
+    const resolvedMime = resolveAccountAttachmentMime(file);
+    if (resolvedMime.startsWith('image/') && !skipImageEditor) {
         file = await editImageBeforeUpload(file, {initialMode});
         if (!file || !active()) {input.value = ''; return;}
     }
@@ -118,6 +123,9 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
 
     showToast(file.size > MAX_ATTACHMENT_BYTES ? 'Preparazione video a blocchi…' : 'Caricamento in corso...', 'info');
     const uploadedPaths = [];
+    const uploadFeedback = file.size > MAX_ATTACHMENT_BYTES
+        ? await beginLargeAttachmentUploadFeedback(file)
+        : null;
 
     try {
         const vaultKey = await ensureVaultKeyMaterial();
@@ -139,6 +147,7 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
                     });
                     uploadedPaths.push(storagePath);
                     const progress = Math.floor(chunk.progress * 100);
+                    uploadFeedback?.update(progress);
                     if (progress === 100 || progress - lastProgress >= 10) {
                         lastProgress = progress;
                         showToast(`Caricamento video: ${progress}%`, 'info');
@@ -149,7 +158,7 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
             if (!active()) throw new Error('ATTACHMENT_UPLOAD_ABORTED');
             await setDoc(attachmentRef, {
                 name: file.name,
-                type: file.type || 'application/octet-stream',
+                type: resolvedMime || 'application/octet-stream',
                 size: file.size,
                 chunks: encryptedFile.chunks,
                 encryption: encryptedFile.metadata,
@@ -157,7 +166,7 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
             });
         } else {
             const storagePath = `users/${owner}/aziende/${company}/accounts/${account}/attachments/${createStorageObjectName(file)}`;
-            const encryptedFile = await encryptAttachmentFile(file, vaultKey);
+            const encryptedFile = await encryptAttachmentFile(file, vaultKey, {mimeType: resolvedMime});
             if (!active()) return;
             await uploadBytes(ref(storage, storagePath), encryptedFile.blob, {
                 contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
@@ -166,7 +175,7 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
             await addDoc(colRef, {
                 name: file.name,
                 storagePath,
-                type: file.type || 'application/octet-stream',
+                type: resolvedMime || 'application/octet-stream',
                 size: file.size,
                 encryption: encryptedFile.metadata,
                 createdAt: serverTimestamp()
@@ -174,14 +183,17 @@ export async function handleFileUpload(input, {initialMode = 'free', skipImageEd
         }
 
         if (!active()) return;
+        uploadFeedback?.success();
         showToast("Allegato caricato!", "success");
         await loadAttachments();
     } catch (e) {
         await Promise.allSettled(uploadedPaths.map(storagePath => deleteObject(ref(storage, storagePath))));
         if (!active()) return;
         logError("UploadAttachment", e);
-        showToast("Errore durante il caricamento", "error");
+        uploadFeedback?.fail(e);
+        showToast(attachmentUploadErrorMessage(e), "error");
     } finally {
+        await uploadFeedback?.release();
         input.value = '';
     }
 }

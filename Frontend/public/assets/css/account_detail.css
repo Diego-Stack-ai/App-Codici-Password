@@ -588,3 +588,19 @@
     outline: 2px solid var(--accent-hex, #1688f8);
     outline-offset: 2px;
 }
+.attachment-upload-status {
+    display: grid;
+    gap: .55rem;
+    margin: .85rem 0;
+    padding: .9rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--accent-primary, #6d5bd0) 35%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--card-bg, #fff) 88%, var(--accent-primary, #6d5bd0) 12%);
+}
+
+.attachment-upload-title,
+.attachment-upload-message { overflow-wrap: anywhere; }
+.attachment-upload-message { font-size: var(--fs-sm); opacity: .82; }
+.attachment-upload-progress { width: 100%; accent-color: var(--accent-primary, #6d5bd0); }
+.attachment-upload-status.is-success { border-color: #22c55e; }
+.attachment-upload-status.is-error { border-color: #ef4444; }

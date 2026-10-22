@@ -1,6 +1,7 @@
 import {
     ATTACHMENT_CHUNK_BYTES,
     MAX_ATTACHMENT_BYTES,
+    resolveAccountAttachmentMime,
     validateAccountAttachmentFile,
     wrapAttachmentFileKey
 } from './attachment-security.js';
@@ -33,7 +34,8 @@ export async function encryptAttachmentFileInChunks(file, vaultKey, {
     onChunk
 } = {}) {
     validateAccountAttachmentFile(file);
-    if (!String(file.type || '').toLowerCase().startsWith('video/')) {
+    const resolvedMime = resolveAccountAttachmentMime(file);
+    if (!resolvedMime.startsWith('video/')) {
         throw new Error('ATTACHMENT_CHUNKED_VIDEO_REQUIRED');
     }
     if (!vaultKey) throw new Error('VAULT_KEY_REQUIRED');
@@ -82,7 +84,7 @@ export async function encryptAttachmentFileInChunks(file, vaultKey, {
                 chunkBinding: binding,
                 chunkSize,
                 chunkCount,
-                originalType: file.type,
+                originalType: resolvedMime,
                 originalSize: file.size
             }
         };

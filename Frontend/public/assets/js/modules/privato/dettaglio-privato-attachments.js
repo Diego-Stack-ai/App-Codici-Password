@@ -3,7 +3,7 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.226';
+import { db, storage } from '../../firebase-config.js?v=1.2.227';
 import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -12,7 +12,8 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import {
     MAX_ATTACHMENT_BYTES, createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile,
-    openDecryptedAttachment, openExternalUrl, unwrapAttachmentFileKey, validateAccountAttachmentFile
+    openDecryptedAttachment, openExternalUrl, resolveAccountAttachmentMime, unwrapAttachmentFileKey,
+    validateAccountAttachmentFile
 } from '../shared/attachment-security.js';
 import {
     decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess, unwrapReceivedAttachmentFileKey
@@ -20,7 +21,10 @@ import {
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
-import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/attachment-source-picker.js';
+import {
+    attachmentUploadErrorMessage, beginLargeAttachmentUploadFeedback, closeAttachmentSourcePicker,
+    selectAttachmentSource
+} from '../shared/attachment-source-picker.js';
 import {captureCardAttachment, consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 
 let mounted = null;
@@ -127,7 +131,8 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
         input.value = '';
         return;
     }
-    if (file.type.startsWith('image/') && !skipImageEditor) {
+    const resolvedMime = resolveAccountAttachmentMime(file);
+    if (resolvedMime.startsWith('image/') && !skipImageEditor) {
         file = await editImageBeforeUpload(file, {initialMode});
         if (!file || !mount.active()) {input.value = ''; return;}
     }
@@ -147,6 +152,9 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
 
     showToast(file.size > MAX_ATTACHMENT_BYTES ? 'Preparazione video a blocchi…' : 'Caricamento in corso...', 'info');
     const uploadedPaths = [];
+    const uploadFeedback = file.size > MAX_ATTACHMENT_BYTES
+        ? await beginLargeAttachmentUploadFeedback(file)
+        : null;
     try {
         const vaultKey = await ensureVaultKeyMaterial();
         if (!mount.active()) return;
@@ -166,6 +174,7 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
                     });
                     uploadedPaths.push(storagePath);
                     const progress = Math.floor(chunk.progress * 100);
+                    uploadFeedback?.update(progress);
                     if (progress === 100 || progress - lastProgress >= 10) {
                         lastProgress = progress;
                         showToast(`Caricamento video: ${progress}%`, 'info');
@@ -176,7 +185,7 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
             if (!mount.active()) throw new Error('ATTACHMENT_UPLOAD_ABORTED');
             await setDoc(attachmentRef, {
                 name: file.name,
-                type: file.type || 'application/octet-stream',
+                type: resolvedMime || 'application/octet-stream',
                 size: file.size,
                 chunks: encryptedFile.chunks,
                 encryption: encryptedFile.metadata,
@@ -185,7 +194,7 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
         } else {
             const storagePath = `users/${ownerId}/accounts/${accountId}/attachments/${createStorageObjectName(file)}`;
             const storageRef = ref(storage, storagePath);
-            const encryptedFile = await encryptAttachmentFile(file, vaultKey);
+            const encryptedFile = await encryptAttachmentFile(file, vaultKey, {mimeType: resolvedMime});
             if (!mount.active()) return;
             await uploadBytes(storageRef, encryptedFile.blob, {
                 contentType: 'application/octet-stream',
@@ -196,21 +205,24 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
             await addDoc(collection(db, 'users', ownerId, 'accounts', accountId, 'attachments'), {
                 name: file.name,
                 storagePath,
-                type: file.type || 'application/octet-stream',
+                type: resolvedMime || 'application/octet-stream',
                 size: file.size,
                 encryption: encryptedFile.metadata,
                 createdAt: serverTimestamp()
             });
         }
         if (!mount.active()) return;
+        uploadFeedback?.success();
         showToast('Allegato caricato!', 'success');
         await loadPrivateAttachments(mount);
     } catch (error) {
         await Promise.allSettled(uploadedPaths.map(storagePath => deleteObject(ref(storage, storagePath))));
         if (!mount.active()) return;
         logError('UploadAttachment', error);
-        showToast('Errore durante il caricamento', 'error');
+        uploadFeedback?.fail(error);
+        showToast(attachmentUploadErrorMessage(error), 'error');
     } finally {
+        await uploadFeedback?.release();
         input.value = '';
     }
 }

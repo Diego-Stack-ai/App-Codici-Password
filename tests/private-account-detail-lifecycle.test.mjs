@@ -156,6 +156,11 @@ function attachmentFixture() {
         MAX_ATTACHMENT_BYTES: 32 * 1024 * 1024, MAX_LARGE_VIDEO_BYTES: 512 * 1024 * 1024,
         validateAttachmentFile() {},
         validateAccountAttachmentFile() {},
+        resolveAccountAttachmentMime: file => file.type,
+        attachmentUploadErrorMessage: () => 'Errore durante il caricamento',
+        beginLargeAttachmentUploadFeedback: async () => ({
+            update() {}, success() {}, fail() {}, async release() {}
+        }),
         createStorageObjectName: () => 'file', encryptAttachmentFile: async () => ({blob: {}, metadata: {version: 1}}),
         listPrivateAccountAttachments: async () => [],
         createElement: (tag, props = {}, children = []) => node({tag, ...props, children}), clearElement: element => { element.children = []; },
