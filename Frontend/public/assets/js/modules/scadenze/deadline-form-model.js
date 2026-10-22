@@ -13,14 +13,14 @@ import {
 } from './deadline-domain-model.js';
 
 export const DEADLINE_FORM_DOMAINS = Object.freeze([
-    {id: 'personal', labelKey: 'deadline_domain_personal'},
-    {id: 'vehicles', labelKey: 'deadline_domain_vehicles'},
-    {id: 'home', labelKey: 'deadline_domain_home'},
-    {id: 'health', labelKey: 'deadline_domain_health'},
-    {id: 'sport', labelKey: 'deadline_domain_sport'},
-    {id: 'contracts', labelKey: 'deadline_domain_contracts'},
-    {id: 'user-company', labelKey: 'deadline_domain_user_company'},
-    {id: 'company', labelKey: 'deadline_domain_company'}
+    {id: 'personal', labelKey: 'deadline_domain_personal', icon: 'badge'},
+    {id: 'vehicles', labelKey: 'deadline_domain_vehicles', icon: 'directions_car'},
+    {id: 'home', labelKey: 'deadline_domain_home', icon: 'home_work'},
+    {id: 'health', labelKey: 'deadline_domain_health', icon: 'cardiology'},
+    {id: 'sport', labelKey: 'deadline_domain_sport', icon: 'sports'},
+    {id: 'contracts', labelKey: 'deadline_domain_contracts', icon: 'contract'},
+    {id: 'user-company', labelKey: 'deadline_domain_user_company', icon: 'handshake'},
+    {id: 'company', labelKey: 'deadline_domain_company', icon: 'domain'}
 ]);
 
 const SOURCES = Object.freeze([

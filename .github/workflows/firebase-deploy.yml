@@ -23,6 +23,30 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Classify validation scope
+        id: scope
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          run_full_suite=true
+
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            mapfile -t changed_files < <(git diff --name-only "$BASE_SHA" "$GITHUB_SHA")
+            if [ "${#changed_files[@]}" -gt 0 ] && ! printf '%s\n' "${changed_files[@]}" | grep -Ev '(^docs/|\.md$)' >/dev/null; then
+              run_full_suite=false
+            fi
+          fi
+
+          echo "run_full_suite=$run_full_suite" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Validation scope"
+            echo "- Full application suite: \`$run_full_suite\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify manual release source
         if: github.event_name == 'workflow_dispatch'
@@ -40,25 +64,34 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup Node.js
+        if: steps.scope.outputs.run_full_suite == 'true'
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
       - name: Setup Java for Firebase Emulator
+        if: steps.scope.outputs.run_full_suite == 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
       - name: Install dependencies
+        if: steps.scope.outputs.run_full_suite == 'true'
         run: npm ci
 
       - name: Install Functions dependencies
+        if: steps.scope.outputs.run_full_suite == 'true'
         run: npm ci --prefix functions
 
       - name: Run security and offline checks
+        if: steps.scope.outputs.run_full_suite == 'true'
         run: npm test
+
+      - name: Confirm documentation-only pull request
+        if: steps.scope.outputs.run_full_suite == 'false'
+        run: echo "Application checks skipped; the dedicated documentation workflow validates this pull request."
 
   deploy:
     name: Deploy Firebase production

@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.224" />
+    <link rel="manifest" href="manifest.json?v=1.2.225" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.224">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.224">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.224">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.224">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.224">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.224">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.224&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.225">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.225">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.225">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.225">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.225">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.225">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.225&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -61,24 +61,41 @@
 
                 <section id="deadline-rule-selector-section" class="form-section" aria-labelledby="deadline-rule-selector-title">
                     <div class="form-section-header">
-                        <h3 id="deadline-rule-selector-title" class="form-section-title" data-t="deadline_form_rule_section">Regola della scadenza</h3>
+                        <h3 id="deadline-rule-selector-title" class="form-section-title" data-t="deadline_form_rule_section">Tipo di scadenza</h3>
                     </div>
-                    <p class="deadline-rule-help" data-t="deadline_form_rule_help">Scegli l'ambito, la regola e il parametro già configurati nelle Regole scadenze.</p>
-                    <div class="deadline-rule-grid">
-                        <label class="form-group" for="deadline-domain-select">
-                            <span class="label-sm" data-t="deadline_form_domain">Ambito</span>
-                            <select id="deadline-domain-select" class="input" required></select>
-                        </label>
-                        <label class="form-group" for="deadline-rule-select">
+                    <p class="deadline-rule-help" data-t="deadline_form_rule_help">Scegli prima il tipo di scadenza, poi la regola e il riferimento già configurati.</p>
+                    <select id="deadline-domain-select" class="hidden" aria-hidden="true" tabindex="-1" required></select>
+                    <div id="deadline-domain-tabs" class="deadline-domain-tabs" role="tablist" data-t-aria="deadline_form_domain_tabs_aria" aria-label="Tipi di scadenza"></div>
+
+                    <div id="deadline-personal-guidance" class="deadline-form-guidance hidden">
+                        <span class="material-symbols-outlined notranslate" translate="no">badge</span>
+                        <div>
+                            <strong data-t="deadline_form_personal_guidance_title">Documenti personali</strong>
+                            <p data-t="deadline_form_personal_guidance">Le scadenze dei documenti personali nascono dai documenti salvati nel Profilo.</p>
+                            <a class="btn-link" href="profilo_privato.html?profileTab=documents" data-t="deadline_form_open_personal_documents">Apri Documenti personali</a>
+                        </div>
+                    </div>
+
+                    <div id="deadline-domain-empty-state" class="deadline-form-guidance hidden">
+                        <span class="material-symbols-outlined notranslate" translate="no">info</span>
+                        <div>
+                            <strong data-t="deadline_form_no_rules_title">Nessuna regola disponibile</strong>
+                            <p data-t="deadline_form_no_rules_help">Configura almeno una regola per questo tipo prima di creare la scadenza.</p>
+                            <a class="btn-link" href="regole_scadenze.html" data-t="deadline_form_open_rules">Apri Regole scadenze</a>
+                        </div>
+                    </div>
+
+                    <div id="deadline-rule-fields" class="deadline-rule-grid hidden">
+                        <label id="deadline-rule-field" class="form-group" for="deadline-rule-select">
                             <span class="label-sm" data-t="deadline_form_rule">Regola</span>
                             <select id="deadline-rule-select" class="input" required></select>
                         </label>
+                        <label id="deadline-parameter-field" class="form-group hidden" for="deadline-parameter-select">
+                            <span class="label-sm" data-t="deadline_form_parameter">Riferimento</span>
+                            <select id="deadline-parameter-select" class="input" required disabled></select>
+                        </label>
                     </div>
-                    <label id="deadline-parameter-field" class="form-group" for="deadline-parameter-select">
-                        <span class="label-sm" data-t="deadline_form_parameter">Parametro</span>
-                        <select id="deadline-parameter-select" class="input" required></select>
-                    </label>
-                    <div id="deadline-rule-summary" class="deadline-rule-summary" aria-live="polite">
+                    <div id="deadline-rule-summary" class="deadline-rule-summary hidden" aria-live="polite">
                         <span id="deadline-rule-summary-name">—</span>
                         <span id="deadline-rule-summary-schedule">—</span>
                     </div>

@@ -1,5 +1,17 @@
 # Stato
 
+## Candidata 1.2.225 — nuovo form Scadenze guidato dal tipo — 22/10/2026
+
+La creazione non parte più da Automezzi né seleziona implicitamente la prima configurazione. Otto linguette presentano gli stessi tipi delle Regole scadenze; dopo una scelta esplicita compaiono **Regola** e **Riferimento**. Gli ambiti privi di regole hanno uno stato vuoto con accesso alla configurazione, mentre **Documenti personali** rimanda al percorso sorgente del Profilo. In modifica e nel flusso Documento → Scadenza restano attive le preselezioni necessarie a riaprire il collegamento esistente.
+
+Sono verdi i test mirati del form, del catalogo, dei Documenti personali e dell'hub (**16/16**), la navigazione (**179/179**) e l'intera suite `npm test` con codice **0**, inclusi Functions, Firestore/Storage Rules, Vault ed emulatori. Sono verdi anche gli audit di sintassi JavaScript, CSS, i18n, purezza HTML, riferimenti statici e diff. Nessuna Scadenza o regola reale è stata creata, modificata, riconciliata o cancellata. L'ordine **«Pubblica»** autorizza la distribuzione della candidata `1.2.225` esclusivamente su Firebase Hosting dopo i gate verdi.
+
+## Ottimizzazione CI documentale verificata localmente — 22/10/2026
+
+L'audit delle esecuzioni GitHub ha misurato un controllo applicativo completo di **8 minuti** sulla pull request che modificava soltanto la documentazione della release `1.2.224`, in aggiunta ai controlli documentali dedicati. La candidata locale conserva il job `validate` ma riconosce in modo fail-safe le sole pull request composte da Markdown o file sotto `docs/`: soltanto per queste evita installazioni, Java, emulatori e suite applicativa. Script, configurazioni, workflow, codice, casi ambigui, push applicativi su `master` e avvii manuali di pubblicazione mantengono `npm test` completo.
+
+Il workflow documentale resta attivo sulla pull request, sul `master` risultante e manualmente, eliminando soltanto la duplicazione sul push del ramo. Sono verdi l'audit statico dei nuovi invarianti, `test:docs` **11/11**, `git diff --check` e l'intera suite locale `npm test`, inclusi Functions, Rules, Storage, Vault ed emulatori. La modifica fa parte della candidata `1.2.225` e sarà pubblicata soltanto insieme al form, dopo gli stessi gate applicativi completi.
+
 ## Release 1.2.224 pubblicata — Scadenze archiviate — 22/10/2026
 
 La lista Scadenze distingue ora chiaramente il proprio archivio dall’Archivio Account: il filtro **Completate** diventa **Archiviate**. Lo scorrimento verso destra archivia una Scadenza attiva e ripristina una Scadenza archiviata; nella sola vista Archiviate, lo scorrimento verso sinistra consente la cancellazione definitiva dopo conferma. Le copie ricevute restano prive di azioni di mutazione.
@@ -10,7 +22,7 @@ La PR `#213` è stata unita nel merge commit `eca02aa6` dopo i gate verdi. Il wo
 
 ## Release 1.2.223 pubblicata — form unico delle Scadenze — 22/10/2026
 
-Il form Scadenza usa ora il catalogo unificato **Ambito → Regola → Parametro**, eredita pianificazione e testo dalle Regole scadenze e persiste gli identificativi necessari al collegamento stabile. I Documenti personali entrano nello stesso percorso dal Profilo con sorgente vincolata; nessuna Scadenza reale è stata cancellata, ricreata, riconciliata o migrata. La freccia del Dettaglio scadenza torna in modo deterministico a `scadenze.html`.
+Il form Scadenza usa il catalogo unificato **Ambito → Regola → Parametro**, eredita pianificazione e testo dalle Regole scadenze e persiste gli identificativi necessari al collegamento stabile. I Documenti personali entrano nello stesso percorso dal Profilo con sorgente vincolata; nessuna Scadenza reale è stata cancellata, ricreata, riconciliata o migrata. La freccia del Dettaglio scadenza torna in modo deterministico a `scadenze.html`.
 
 La PR `#211` è stata unita nel merge commit `c2482e2b` dopo i gate verdi. Il workflow manuale `39752733091` ha validato lo stesso `master` e pubblicato esclusivamente Firebase Hosting; la verifica HTTP pubblica conferma versione `1.2.223`, nuovo form e asset del Dettaglio aggiornati. La ricreazione delle tre Scadenze personali e la riconciliazione delle altre restano una fase successiva al collaudo autenticato del nuovo form. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali sono rimasti esclusi.
 
