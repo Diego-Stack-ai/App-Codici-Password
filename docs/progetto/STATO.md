@@ -1,12 +1,14 @@
 # Stato
 
-## Candidata locale — video grandi nei Memorandum e catalogo del form Scadenze — 22/10/2026
+## Release 1.2.226 pubblicata — video grandi nei Memorandum e catalogo del form Scadenze — 22/10/2026
 
 Gli allegati di Account e Memorandum privati o aziendali conservano il formato attuale fino a 32 MiB. I soli video oltre tale soglia, fino a 512 MiB, vengono cifrati localmente e caricati in blocchi autenticati da 8 MiB sotto un unico metadato Firestore. Un errore durante l'upload compensa i blocchi già completati; apertura, condivisione, cancellazione dell'allegato, backup cifrato e purge definitivo dell'Account riconoscono l'intero manifest. L'apertura ricompone il video in un file temporaneo OPFS, senza accodare 450 MiB nella memoria JavaScript. L'archivio portatile mantiene il proprio limite prudente e rifiuta esplicitamente gli allegati a blocchi invece di produrre una copia incompleta.
 
 Il catalogo specializzato delle Regole scadenze viene ora caricato anche in `aggiungi_scadenza.html`: tipo, riferimento e riepilogo non mostrano più chiavi grezze come `deadline_domain_vehicles` o `deadline_form_select_reference`.
 
-Sono verdi i test mirati di cifratura a blocchi, backup, archivio portatile e catalogo Scadenze (**46/46**), la suite Allegati (**72/72**), la sintassi JavaScript su **222 moduli**, la navigazione (**179/179**), la suite Functions/security (**466 superati, 9 scenari emulatori saltati come previsto, zero errori**) e tutti i profili Firebase Emulator previsti dalla suite completa. Nessun file reale è stato caricato e nessun dato di produzione è stato modificato. La candidata `1.2.226` è autorizzata per il solo Firebase Hosting; la Function di purge aggiornata resta versionata ma non distribuita e pertanto la cancellazione definitiva di un Account con allegati a blocchi fallisce chiusa fino a un deploy backend separatamente autorizzato.
+Sono verdi i test mirati di cifratura a blocchi, backup, archivio portatile e catalogo Scadenze (**46/46**), la suite Allegati (**72/72**), la sintassi JavaScript su **222 moduli**, la navigazione (**179/179**), la suite Functions/security (**466 superati, 9 scenari emulatori saltati come previsto, zero errori**) e tutti i profili Firebase Emulator previsti dalla suite completa. Nessun file reale è stato caricato e nessun dato di produzione è stato modificato.
+
+La PR `#217` è stata unita nel merge commit `17942a2b`. Il gate automatico `39813538756` e il workflow manuale `39813684766` hanno validato lo stesso SHA; il workflow manuale ha pubblicato esclusivamente Firebase Hosting. La verifica pubblica senza cache conferma `1.2.226`, il modulo video a blocchi e le etichette italiane del form Scadenze. La Function di purge aggiornata resta versionata ma non distribuita e pertanto la cancellazione definitiva di un Account con allegati a blocchi fallisce chiusa fino a un deploy backend separatamente autorizzato.
 
 ## Release 1.2.225 pubblicata — nuovo form Scadenze guidato dal tipo — 22/10/2026
 
