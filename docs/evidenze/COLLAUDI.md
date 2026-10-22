@@ -1,5 +1,22 @@
 # Collaudi
 
+## 22/10/2026 — recupero dello stato Push dopo token revocato
+
+- I log di produzione hanno mostrato il precedente token iOS come non registrato; il record dispositivo era stato invalidato correttamente.
+- Dopo la nuova registrazione sul secondo telefono, la prova Push è arrivata in pochi secondi: token, destinatario e callable risultano quindi operativi.
+- Individuata l'incoerenza residua nel client: la registrazione riuscita riattivava il dispositivo senza rimuovere `status: invalid` e `invalidatedAt`.
+- La candidata `1.2.227` salva `status: active`, elimina `invalidatedAt` e forza il nuovo modulo con `push=20261022a`.
+- Il test mirato `push-registration-recovery` verifica sia il recupero sia la normalizzazione del record. Nessun dato reale è stato modificato manualmente.
+
+## 22/10/2026 — diagnosi del video da 485 MB nel Memorandum
+
+- Controllo autenticato in sola lettura del record **Impianto elettrico sottotetto casa**: presente `IMG_2282.jpeg`, 6.384.039 byte, `image/jpeg`; nessun metadato video nella sottoraccolta allegati.
+- Inventario Storage dello stesso Account: presente soltanto l'oggetto cifrato della foto; nessun blocco video orfano. Il flusso ha quindi rifiutato il file prima dell'invio oppure ha compensato correttamente un upload interrotto.
+- Circa 485 MB restano sotto il limite applicativo di 512 MiB. Aggiunta compatibilità prudente per MIME generico dei video `.mov`, `.mp4`, `.m4v` e `.webm`, senza estendere formati o documenti non video.
+- Durante un video grande la pagina mostra ora avanzamento persistente, avviso di non uscita, Wake Lock ove supportato e causa operativa in caso di errore. La prova mirata della sicurezza allegati è verde **22/22**; sintassi JavaScript su **222 moduli** e riferimenti statici su **315 file** sono verdi.
+- La suite integrale `npm test` è terminata con codice **0**, inclusi Functions/security, Firestore Rules, Storage Rules, Vault e tutti gli emulatori Firebase previsti. Verdi anche lifecycle e Allegati mirati **34/34**, budget su **30 pagine**, CSS, fondamenta UI e `git diff --check`.
+- Nessun file reale è stato ritentato, caricato, cancellato o modificato durante il controllo. Il collaudo fisico resta a Diego dopo la pubblicazione Hosting.
+
 ## 19/10/2026 — revisione locale Account/Memorandum
 
 - Le card della Lista aziende già pubblicate nella `1.2.208` non sono state modificate. È stato aggiunto un caso di regressione che trasforma un Account e un Memorandum da privati a condivisi e verifica che ciascun record cambi una sola categoria, senza duplicazioni; gli archiviati restano esclusi dal riepilogo.

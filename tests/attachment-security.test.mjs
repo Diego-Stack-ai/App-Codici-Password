@@ -117,6 +117,17 @@ test('ammette video fino a 512 MB nel flusso account, senza estendere gli altri 
   assert.throws(() => security.validateAccountAttachmentFile(document));
 });
 
+test('riconosce i video iOS dal nome quando il browser dichiara un MIME generico', () => {
+  const mov = new File('IMG_2283.MOV', 'application/octet-stream', 1);
+  mov.size = 485 * 1000 * 1000;
+  assert.equal(security.resolveAccountAttachmentMime(mov), 'video/quicktime');
+  assert.doesNotThrow(() => security.validateAccountAttachmentFile(mov));
+
+  const unknown = new File('archivio.bin', 'application/octet-stream', 1);
+  unknown.size = 33 * 1024 * 1024;
+  assert.throws(() => security.validateAccountAttachmentFile(unknown));
+});
+
 test('cifra e ricompone un video in blocchi autenticati e vincolati all’ordine', async () => {
   const clear = new TextEncoder().encode('video sintetico suddiviso in più blocchi');
   const encryptedChunks = [];

@@ -1,5 +1,15 @@
 # Incarico corrente
 
+## Riallineamento dello stato Push dopo una nuova registrazione — 22/10/2026
+
+Il collaudo reale sul secondo telefono ha confermato che la nuova prova Push arriva dopo pochi secondi. L'analisi dei log e del record dispositivo ha però rilevato uno stato contraddittorio: dopo la sostituzione riuscita del token revocato il dispositivo tornava abilitato, ma conservava ancora `status: invalid` e `invalidatedAt` della registrazione precedente.
+
+La candidata `1.2.227` rende atomico il recupero: ogni registrazione Push riuscita salva `enabled: true`, ripristina `status: active` e rimuove `invalidatedAt`. Non cambiano destinatari, permessi, Functions, Rules o dati delle Scadenze. Il cache-bust dedicato `push=20261022a` impedisce all'iPhone di riutilizzare il modulo precedente. L'ordine **«procedi che poi ricontrollo»** autorizza implementazione, verifiche e pubblicazione del solo Firebase Hosting necessaria al nuovo collaudo sui due telefoni; backend, Rules, indici, migrazioni e scritture manuali sui dati reali restano esclusi.
+
+Durante lo stesso collaudo Diego segnala che il video da circa 485 MB scelto nel nuovo Memorandum **Impianto elettrico sottotetto casa** non compare tra gli allegati. La verifica autenticata in sola lettura conferma la sola foto JPEG da 6,09 MB e l'assenza sia del metadato video sia di blocchi orfani in Storage: il tentativo è stato respinto prima dell'upload oppure interrotto e compensato. La candidata riconosce quindi `.mov`, `.mp4`, `.m4v` e `.webm` anche quando iOS dichiara un MIME vuoto o generico; per i video grandi mostra un avanzamento persistente fino al 100%, mantiene acceso lo schermo quando il browser lo consente, avverte prima dell'uscita e distingue gli errori di rete, autorizzazione e interruzione. La pubblicazione già autorizzata resta un unico rilascio Hosting `1.2.227`; il nuovo tentativo sul file reale spetta a Diego dopo la verifica pubblica.
+
+Esito locale: test mirati Allegati e lifecycle **34/34**, budget prestazionale su **30 pagine**, sintassi su **222 moduli**, riferimenti statici su **315 file**, CSS, fondamenta UI e `git diff --check` sono verdi; la suite integrale `npm test` è terminata con codice **0**, inclusi Functions/security, Firestore Rules, Storage Rules, Vault e tutti gli emulatori previsti.
+
 ## Video grandi nei Memorandum e traduzioni del nuovo form Scadenze — 22/10/2026
 
 Diego chiede di poter conservare anche un video da circa 450 MB negli allegati dei Memorandum. L'implementazione locale mantiene invariati i file ordinari fino a 32 MiB e introduce, soltanto per i video, un limite di 512 MiB con cifratura e upload sequenziale in blocchi da 8 MiB. Firestore conserva un solo allegato logico e il manifest dei blocchi; Storage conserva esclusivamente i blocchi cifrati. La condivisione continua a distribuire una sola chiave-file cifrata per destinatario, mentre cancellazione manuale, purge dell'Account e backup cifrato devono coprire tutti i percorsi del manifest.

@@ -84,3 +84,79 @@ export function selectAttachmentSource() {
     });
 }
 
+function createUploadElement(tagName, className, textContent = '') {
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    if (textContent) element.textContent = textContent;
+    return element;
+}
+
+export function attachmentUploadErrorMessage(error) {
+    const code = String(error?.code || error?.message || '');
+    if (code.includes('retry-limit-exceeded') || code.includes('network')) {
+        return 'Caricamento interrotto dalla connessione. Riprova mantenendo aperta questa pagina.';
+    }
+    if (code.includes('unauthorized')) {
+        return 'Il caricamento non è autorizzato. Aggiorna la pagina e riprova.';
+    }
+    if (code.includes('ATTACHMENT_UPLOAD_ABORTED') || code.includes('canceled')) {
+        return 'Caricamento interrotto prima del completamento. Riprova mantenendo aperta questa pagina.';
+    }
+    return 'Il video non è stato caricato. Riprova mantenendo aperta questa pagina fino al 100%.';
+}
+
+export async function beginLargeAttachmentUploadFeedback(file) {
+    document.getElementById('large-attachment-upload-status')?.remove();
+    const status = createUploadElement('div', 'attachment-upload-status');
+    status.id = 'large-attachment-upload-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    const title = createUploadElement('strong', 'attachment-upload-title', `Caricamento di ${file.name}`);
+    const message = createUploadElement('span', 'attachment-upload-message', 'Preparazione del video… Non chiudere questa pagina.');
+    const progress = createUploadElement('progress', 'attachment-upload-progress');
+    progress.max = 100;
+    progress.value = 0;
+    status.append(title, message, progress);
+    const attachmentList = document.getElementById('attachments-list');
+    attachmentList?.parentNode?.insertBefore(status, attachmentList);
+
+    const preventNavigation = event => {
+        event.preventDefault();
+        event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', preventNavigation);
+    let wakeLock = null;
+    try {
+        wakeLock = await navigator.wakeLock?.request?.('screen');
+    } catch {
+        wakeLock = null;
+    }
+
+    let finished = false;
+    return {
+        update(percent) {
+            const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+            progress.value = safePercent;
+            message.textContent = `Video in caricamento: ${safePercent}%. Non chiudere questa pagina.`;
+        },
+        success() {
+            finished = true;
+            progress.value = 100;
+            status.classList.add('is-success');
+            message.textContent = 'Video caricato correttamente.';
+            setTimeout(() => status.remove(), 2500);
+        },
+        fail(error) {
+            finished = true;
+            status.classList.add('is-error');
+            progress.remove();
+            message.textContent = attachmentUploadErrorMessage(error);
+        },
+        async release() {
+            window.removeEventListener('beforeunload', preventNavigation);
+            await (wakeLock?.release?.())?.catch(() => {});
+            if (!finished) status.remove();
+        }
+    };
+}
+

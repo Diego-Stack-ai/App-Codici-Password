@@ -1,5 +1,15 @@
 # Rilascio
 
+## Candidata 1.2.227 — stato Push e affidabilità percepibile dei video grandi — 22/10/2026
+
+Una registrazione Push conclusa con successo deve lasciare un solo stato canonico del dispositivo: `enabled: true`, `status: active` e nessun `invalidatedAt`. La candidata applica questi tre aggiornamenti nello stesso `setDoc` con merge e aggiunge una regressione automatica che impedisce di conservare l'invalidazione del token precedente.
+
+Il perimetro di pubblicazione è esclusivamente Firebase Hosting e usa il cache-bust `push=20261022a`. Functions, Firestore Rules, Storage Rules, indici, migrazioni, destinatari e record delle Scadenze restano esclusi.
+
+Il controllo autenticato del Memorandum segnalato dall'utente è soltanto di lettura: la foto è presente, mentre non esistono metadati o blocchi Storage del video da circa 485 MB. Il client deve accettare un video iOS supportato anche quando il picker restituisce MIME vuoto o `application/octet-stream`, deducendolo esclusivamente dalle estensioni ammesse. Durante l'upload a blocchi deve mostrare uno stato persistente, avvertire prima dell'uscita, richiedere il Wake Lock ove disponibile e lasciare visibile una causa operativa in caso di interruzione. Nessun retry sul file reale o caricamento automatico fa parte del rilascio.
+
+La candidata ha superato localmente la suite integrale `npm test` con codice **0**, oltre ai test mirati **34/34**, budget su **30 pagine**, sintassi su **222 moduli**, riferimenti statici su **315 file**, CSS, fondamenta UI e controllo del diff.
+
 ## Esito operativo 1.2.226 — video grandi nei Memorandum e traduzioni Scadenze — 22/10/2026
 
 I soli video allegati ad Account o Memorandum possono ora arrivare a 512 MiB. Oltre 32 MiB il client cifra e carica sequenzialmente blocchi autenticati da 8 MiB, mantenendo un solo allegato logico e una sola chiave-file condivisibile. Apertura tramite OPFS, condivisione, cancellazione dell'allegato, backup cifrato e inventari di purge riconoscono il manifest completo; un caricamento interrotto compensa i blocchi già inviati. L'Archivio portatile rifiuta esplicitamente questo formato invece di generare una copia incompleta. Il form **Componi scadenza** carica inoltre il catalogo specializzato e non espone più chiavi `deadline_*` grezze.

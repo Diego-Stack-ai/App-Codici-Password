@@ -12,6 +12,12 @@ const ALLOWED_MIME_TYPES = new Set([
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'text/plain'
 ]);
+const VIDEO_MIME_BY_EXTENSION = new Map([
+    ['mp4', 'video/mp4'],
+    ['m4v', 'video/mp4'],
+    ['mov', 'video/quicktime'],
+    ['webm', 'video/webm']
+]);
 const ATTACHMENT_AAD = new TextEncoder().encode('CodiciPassword-Attachment-v1');
 
 function bytesToBase64(value) {
@@ -89,8 +95,8 @@ export async function decryptAttachmentBytesWithFileKey(ciphertext, encryption, 
     }
 }
 
-export async function encryptAttachmentFile(file, vaultKey) {
-    validateAttachmentFile(file);
+export async function encryptAttachmentFile(file, vaultKey, {mimeType = file?.type} = {}) {
+    validateAttachmentFile(file, {mimeType});
     if (!vaultKey) throw new Error('VAULT_KEY_REQUIRED');
     const fileKeyBytes = crypto.getRandomValues(new Uint8Array(32));
     let plaintext = null;
@@ -113,7 +119,7 @@ export async function encryptAttachmentFile(file, vaultKey) {
                 cipher: 'AES-GCM-256',
                 ...wrappedKey,
                 contentIv: bytesToBase64(contentIv),
-                originalType: file.type,
+                originalType: mimeType,
                 originalSize: file.size
             }
         };
@@ -140,10 +146,25 @@ export function openDecryptedAttachment(bytes, attachment) {
     setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
 }
 
-export function validateAttachmentFile(file, { imageOnly = false, maxBytes = MAX_ATTACHMENT_BYTES } = {}) {
+function fileExtension(file) {
+    return String(file?.name || '').toLowerCase().match(/\.([a-z0-9]{1,10})$/)?.[1] || '';
+}
+
+export function resolveAccountAttachmentMime(file) {
+    const declared = String(file?.type || '').toLowerCase();
+    if (ALLOWED_MIME_TYPES.has(declared)) return declared;
+    if (declared && declared !== 'application/octet-stream' && declared !== 'video/x-m4v') return declared;
+    return VIDEO_MIME_BY_EXTENSION.get(fileExtension(file)) || declared;
+}
+
+export function validateAttachmentFile(file, {
+    imageOnly = false,
+    maxBytes = MAX_ATTACHMENT_BYTES,
+    mimeType = file?.type
+} = {}) {
     if (!(file instanceof File) || file.size <= 0) throw new Error('Seleziona un file valido.');
     if (file.size > maxBytes) throw new Error(`Il file supera il limite di ${Math.floor(maxBytes / 1024 / 1024)} MB.`);
-    const mime = String(file.type || '').toLowerCase();
+    const mime = String(mimeType || '').toLowerCase();
     if (!ALLOWED_MIME_TYPES.has(mime) || (imageOnly && !mime.startsWith('image/'))) {
         throw new Error('Formato file non consentito.');
     }
@@ -152,9 +173,9 @@ export function validateAttachmentFile(file, { imageOnly = false, maxBytes = MAX
 
 export function validateAccountAttachmentFile(file) {
     if (!(file instanceof File) || file.size <= 0) throw new Error('Seleziona un file valido.');
-    const mime = String(file.type || '').toLowerCase();
+    const mime = resolveAccountAttachmentMime(file);
     const maxBytes = mime.startsWith('video/') ? MAX_LARGE_VIDEO_BYTES : MAX_ATTACHMENT_BYTES;
-    return validateAttachmentFile(file, {maxBytes});
+    return validateAttachmentFile(file, {maxBytes, mimeType: mime});
 }
 
 export function createStorageObjectName(file) {

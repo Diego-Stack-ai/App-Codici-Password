@@ -1,5 +1,15 @@
 # Stato
 
+## Candidata 1.2.227 — recupero Push e caricamento osservabile dei video grandi — 22/10/2026
+
+La prova sul telefono destinatario è nuovamente arrivata dopo pochi secondi, confermando token, associazione del destinatario e callable. Restava tuttavia un'incoerenza nel record dispositivo: la registrazione successiva a un token revocato impostava `enabled: true` senza cancellare lo storico `status: invalid` e `invalidatedAt`.
+
+Il client ora normalizza lo stato nello stesso salvataggio della registrazione riuscita: `status` torna `active` e `invalidatedAt` viene rimosso. La correzione evita recuperi ripetuti e rende il record coerente con il dispositivo effettivamente raggiungibile.
+
+Nel Memorandum reale **Impianto elettrico sottotetto casa** il controllo in sola lettura trova la foto da 6,09 MB ma non il video da circa 485 MB e non rileva blocchi residui in Storage. Il limite di 512 MiB non è stato superato. Il flusso ora riconosce per estensione i formati video sicuri quando iOS fornisce un MIME generico e rende persistente l'avanzamento del caricamento a blocchi, con blocco di uscita, richiesta Wake Lock e messaggio d'errore specifico. Il rilascio è solo Hosting, con cache-bust `push=20261022a`; non modifica Functions, Rules, destinatari, Memorandum o Scadenze reali.
+
+La suite integrale locale `npm test` è verde con codice **0**; sono verdi anche i test mirati **34/34**, il budget delle **30 pagine**, sintassi JavaScript su **222 moduli**, riferimenti statici su **315 file**, CSS, fondamenta UI e diff Git.
+
 ## Release 1.2.226 pubblicata — video grandi nei Memorandum e catalogo del form Scadenze — 22/10/2026
 
 Gli allegati di Account e Memorandum privati o aziendali conservano il formato attuale fino a 32 MiB. I soli video oltre tale soglia, fino a 512 MiB, vengono cifrati localmente e caricati in blocchi autenticati da 8 MiB sotto un unico metadato Firestore. Un errore durante l'upload compensa i blocchi già completati; apertura, condivisione, cancellazione dell'allegato, backup cifrato e purge definitivo dell'Account riconoscono l'intero manifest. L'apertura ricompone il video in un file temporaneo OPFS, senza accodare 450 MiB nella memoria JavaScript. L'archivio portatile mantiene il proprio limite prudente e rifiuta esplicitamente gli allegati a blocchi invece di produrre una copia incompleta.

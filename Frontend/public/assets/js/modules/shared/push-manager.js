@@ -1,7 +1,7 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.226';
-import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.227';
+import { deleteField, doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
-import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261019c';
+import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261022a';
 import { getPushDevice, getPushDeviceConfirmed } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
@@ -217,6 +217,8 @@ async function writePushRegistration(user, scopes, {forceReset = false} = {}) {
         platform: platformName(),
         browser: navigator.userAgentData?.brands?.map((b) => b.brand).join(', ') || 'browser',
         enabled: true,
+        status: 'active',
+        invalidatedAt: deleteField(),
         notificationScope: 'deadlines',
         notificationScopes,
         privacyMode: 'detailed',
