@@ -3,15 +3,20 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.225';
-import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
+import { db, storage } from '../../firebase-config.js?v=1.2.226';
+import { doc, collection, addDoc, setDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
-import {decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess} from '../shared/shared-attachment-access.js';
+import {
+    MAX_ATTACHMENT_BYTES, createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile,
+    openDecryptedAttachment, openExternalUrl, unwrapAttachmentFileKey, validateAccountAttachmentFile
+} from '../shared/attachment-security.js';
+import {
+    decryptReceivedPrivateAttachment, syncPrivateAttachmentAccess, unwrapReceivedAttachmentFileKey
+} from '../shared/shared-attachment-access.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listPrivateAccountAttachments } from '../data/vault-repository.js';
 import {editImageBeforeUpload} from '../shared/image-crop-editor.js';
@@ -19,6 +24,12 @@ import {closeAttachmentSourcePicker, selectAttachmentSource} from '../shared/att
 import {captureCardAttachment, consumeAttachmentInitialMode} from '../shared/card-attachment-capture.js';
 
 let mounted = null;
+
+function isChunkedAttachment(attachment) {
+    return attachment?.encryption?.chunked === true &&
+        attachment.encryption?.chunkVersion === 1 &&
+        Array.isArray(attachment?.chunks) && attachment.chunks.length > 0;
+}
 
 export function initPrivateAttachmentModule(context) {
     mounted?.destroy();
@@ -110,7 +121,7 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
     let file = input.files[0];
     if (!file) return;
     try {
-        validateAttachmentFile(file);
+        validateAccountAttachmentFile(file);
     } catch (error) {
         showToast(error.message, 'error');
         input.value = '';
@@ -134,32 +145,68 @@ async function processFileUpload(input, mount = mounted, {initialMode = 'free', 
         return;
     }
 
-    showToast('Caricamento in corso...', 'info');
+    showToast(file.size > MAX_ATTACHMENT_BYTES ? 'Preparazione video a blocchi…' : 'Caricamento in corso...', 'info');
+    const uploadedPaths = [];
     try {
-        const storagePath = `users/${ownerId}/accounts/${accountId}/attachments/${createStorageObjectName(file)}`;
-        const storageRef = ref(storage, storagePath);
         const vaultKey = await ensureVaultKeyMaterial();
         if (!mount.active()) return;
-        const encryptedFile = await encryptAttachmentFile(file, vaultKey);
-        if (!mount.active()) return;
-        await uploadBytes(storageRef, encryptedFile.blob, {
-            contentType: 'application/octet-stream',
-            customMetadata: { encrypted: 'v1' }
-        });
-        if (!mount.active()) return;
+        if (file.size > MAX_ATTACHMENT_BYTES) {
+            const attachmentRef = doc(collection(db, 'users', ownerId, 'accounts', accountId, 'attachments'));
+            let lastProgress = 0;
+            const {encryptAttachmentFileInChunks} = await import('../shared/chunked-attachment-security.js');
+            if (!mount.active()) return;
+            const encryptedFile = await encryptAttachmentFileInChunks(file, vaultKey, {
+                binding: attachmentRef.id,
+                onChunk: async chunk => {
+                    if (!mount.active()) throw new Error('ATTACHMENT_UPLOAD_ABORTED');
+                    const storagePath = `users/${ownerId}/accounts/${accountId}/attachments/${attachmentRef.id}/chunks/${String(chunk.index).padStart(4, '0')}.bin`;
+                    await uploadBytes(ref(storage, storagePath), chunk.blob, {
+                        contentType: 'application/octet-stream',
+                        customMetadata: {encrypted: 'v1', chunk: String(chunk.index)}
+                    });
+                    uploadedPaths.push(storagePath);
+                    const progress = Math.floor(chunk.progress * 100);
+                    if (progress === 100 || progress - lastProgress >= 10) {
+                        lastProgress = progress;
+                        showToast(`Caricamento video: ${progress}%`, 'info');
+                    }
+                    return {storagePath};
+                }
+            });
+            if (!mount.active()) throw new Error('ATTACHMENT_UPLOAD_ABORTED');
+            await setDoc(attachmentRef, {
+                name: file.name,
+                type: file.type || 'application/octet-stream',
+                size: file.size,
+                chunks: encryptedFile.chunks,
+                encryption: encryptedFile.metadata,
+                createdAt: serverTimestamp()
+            });
+        } else {
+            const storagePath = `users/${ownerId}/accounts/${accountId}/attachments/${createStorageObjectName(file)}`;
+            const storageRef = ref(storage, storagePath);
+            const encryptedFile = await encryptAttachmentFile(file, vaultKey);
+            if (!mount.active()) return;
+            await uploadBytes(storageRef, encryptedFile.blob, {
+                contentType: 'application/octet-stream',
+                customMetadata: { encrypted: 'v1' }
+            });
+            if (!mount.active()) return;
 
-        await addDoc(collection(db, 'users', ownerId, 'accounts', accountId, 'attachments'), {
-            name: file.name,
-            storagePath,
-            type: file.type || 'application/octet-stream',
-            size: file.size,
-            encryption: encryptedFile.metadata,
-            createdAt: serverTimestamp()
-        });
+            await addDoc(collection(db, 'users', ownerId, 'accounts', accountId, 'attachments'), {
+                name: file.name,
+                storagePath,
+                type: file.type || 'application/octet-stream',
+                size: file.size,
+                encryption: encryptedFile.metadata,
+                createdAt: serverTimestamp()
+            });
+        }
         if (!mount.active()) return;
         showToast('Allegato caricato!', 'success');
         await loadPrivateAttachments(mount);
     } catch (error) {
+        await Promise.allSettled(uploadedPaths.map(storagePath => deleteObject(ref(storage, storagePath))));
         if (!mount.active()) return;
         logError('UploadAttachment', error);
         showToast('Errore durante il caricamento', 'error');
@@ -294,9 +341,30 @@ async function openAttachment(attachment, mount = mounted) {
             if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
             return;
         }
-        if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
+        const chunked = isChunkedAttachment(attachment);
+        if (!chunked && !attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureVaultKeyMaterial();
         if (!mount.active()) return;
+        if (chunked) {
+            const fileKeyBytes = mount.readOnly
+                ? await unwrapReceivedAttachmentFileKey({
+                    ownerUid: mount.ownerId, accountId: mount.accountId, attachment,
+                    recipientUid: mount.currentUid, vaultKeyMaterial: vaultKey
+                })
+                : await unwrapAttachmentFileKey(attachment.encryption, vaultKey);
+            try {
+                const {openChunkedDecryptedAttachment} = await import('../shared/chunked-attachment-security.js');
+                if (!mount.active()) return;
+                await openChunkedDecryptedAttachment({
+                    attachment,
+                    fileKeyBytes,
+                    loadChunk: chunk => getBytes(ref(storage, chunk.storagePath), Number(chunk.encryptedSize) + 1024)
+                });
+            } finally {
+                fileKeyBytes.fill(0);
+            }
+            return;
+        }
         const bytes = await getBytes(ref(storage, attachment.storagePath), 32 * 1024 * 1024 + 1024);
         if (!mount.active()) return;
         const clear = mount.readOnly
@@ -316,9 +384,12 @@ async function openAttachment(attachment, mount = mounted) {
         logError('OpenEncryptedAttachment', error);
         const pending = ['SHARED_ATTACHMENT_KEY_PENDING', 'SHARING_IDENTITY_NOT_PERSISTED',
             'SHARING_PUBLIC_IDENTITY_MISSING'].includes(error?.message);
+        const unsupported = error?.message === 'ATTACHMENT_LARGE_PREVIEW_UNSUPPORTED';
         showToast(pending
             ? 'Allegato in preparazione: aggiorna entrambi i dispositivi e fai riaprire il Memorandum al proprietario.'
-            : 'Impossibile aprire l’allegato cifrato.', pending ? 'warning' : 'error');
+            : unsupported
+                ? 'Questo browser non supporta ancora l’apertura sicura dei video grandi.'
+                : 'Impossibile aprire l’allegato cifrato.', pending || unsupported ? 'warning' : 'error');
     }
 }
 
@@ -343,7 +414,11 @@ async function deleteAttachment(attachment, mount = mounted) {
     if (!mount.active() || !confirmed) return;
 
     try {
-        if (storagePath) await deleteObject(ref(storage, storagePath));
+        const storagePaths = attachment?.encryption?.chunked === true && Array.isArray(attachment?.chunks)
+            ? attachment.chunks.map(chunk => chunk.storagePath).filter(Boolean)
+            : [storagePath].filter(Boolean);
+        const deleted = await Promise.allSettled(storagePaths.map(path => deleteObject(ref(storage, path))));
+        if (deleted.some(result => result.status === 'rejected')) throw new Error('ATTACHMENT_STORAGE_DELETE_FAILED');
         if (!mount.active()) return;
         await deleteDoc(doc(db, 'users', ownerId, 'accounts', accountId, 'attachments', id));
         if (!mount.active()) return;

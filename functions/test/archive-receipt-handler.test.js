@@ -176,6 +176,21 @@ test('listed attachment bytes are deleted, in order, before the recursive deleti
   assert.equal(f.states.has(auditPath), true);
 });
 
+test('chunked video bytes are all deleted before the recursive deletion', async () => {
+  const paths = [
+    'users/owner/accounts/account/attachments/video/chunks/0000.bin',
+    'users/owner/accounts/account/attachments/video/chunks/0001.bin'
+  ];
+  const f = fixture({attachments: [{
+    encryption: {chunked: true},
+    chunks: paths.map(storagePath => ({storagePath}))
+  }]});
+  const result = await f.run();
+  assert.equal(result.status, 'purged');
+  assert.deepEqual(f.storageDeletes.map(call => call.path), paths);
+  assert.deepEqual(f.storageOrder, ['list', 'delete', 'delete', 'recursiveDelete']);
+});
+
 test('a legacy URL-only attachment aborts the whole purge before deleting any valid listed file', async () => {
   const f = fixture({attachments: [
     {storagePath: 'users/owner/accounts/account/attachments/a.bin'},

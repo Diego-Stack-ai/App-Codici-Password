@@ -43,7 +43,7 @@ const adminApp = initializeApp({projectId: PROJECT_ID, storageBucket: `${PROJECT
 const adminDb = getFirestore(adminApp);
 let bucket = null;
 const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'console', 'isArchivePurgeSuspended',
-    'accountPath', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
+    'accountPath', 'attachmentStoragePaths', 'isSafeAttachmentPath', 'purgeDecision', 'planProfileReferenceCleanup', 'validatePurgeCommand',
     'assertNoExternalAccountReferences',
     'createArchivePurgeBinding', 'verifyArchivePurgeReceipt', 'onCall', 'getFirestore', 'getStorage',
     'createGlobalPurgeLockBinding', 'globalPurgeLockRef', 'acquireGlobalPurgeLock',
@@ -51,7 +51,7 @@ const purgeFactory = new Function('exports', 'HttpsError', 'FieldValue', 'consol
     `${ownerGuardSlice}\n${purgeSlice}\nreturn exports.purgeArchivedAccount;`);
 const purge = purgeFactory({}, HttpsError, FieldValue, {log() {}, warn() {}, error() {}},
     () => false,
-    policy.accountPath, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
+    policy.accountPath, policy.attachmentStoragePaths, policy.isSafeAttachmentPath, policy.purgeDecision, policy.planProfileReferenceCleanup,
     policy.validatePurgeCommand, policy.assertNoExternalAccountReferences,
     receipts.createArchivePurgeBinding, receipts.verifyArchivePurgeReceipt,
     (_options, run) => run, () => adminDb, () => ({bucket: () => bucket}),

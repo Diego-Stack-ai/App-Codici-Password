@@ -1,4 +1,6 @@
 export const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024;
+export const MAX_LARGE_VIDEO_BYTES = 512 * 1024 * 1024;
+export const ATTACHMENT_CHUNK_BYTES = 8 * 1024 * 1024;
 export const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -34,6 +36,21 @@ async function deriveAttachmentWrappingKey(vaultKey, salt) {
     } finally {
         materialBytes.fill(0);
     }
+}
+
+export async function wrapAttachmentFileKey(fileKeyBytes, vaultKey) {
+    const wrapSalt = crypto.getRandomValues(new Uint8Array(32));
+    const wrapIv = crypto.getRandomValues(new Uint8Array(12));
+    const wrappingKey = await deriveAttachmentWrappingKey(vaultKey, wrapSalt);
+    const wrappedFileKey = await crypto.subtle.encrypt(
+        {name: 'AES-GCM', iv: wrapIv, additionalData: ATTACHMENT_AAD}, wrappingKey, fileKeyBytes
+    );
+    return {
+        keyWrap: 'HKDF-SHA256+A256GCM',
+        wrapSalt: bytesToBase64(wrapSalt),
+        wrapIv: bytesToBase64(wrapIv),
+        wrappedFileKey: bytesToBase64(wrappedFileKey)
+    };
 }
 
 export async function unwrapAttachmentFileKey(encryption, vaultKey) {
@@ -87,23 +104,15 @@ export async function encryptAttachmentFile(file, vaultKey) {
             plaintext
         );
 
-        const wrapSalt = crypto.getRandomValues(new Uint8Array(32));
-        const wrapIv = crypto.getRandomValues(new Uint8Array(12));
-        const wrappingKey = await deriveAttachmentWrappingKey(vaultKey, wrapSalt);
-        const wrappedFileKey = await crypto.subtle.encrypt(
-            {name: 'AES-GCM', iv: wrapIv, additionalData: ATTACHMENT_AAD}, wrappingKey, fileKeyBytes
-        );
+        const wrappedKey = await wrapAttachmentFileKey(fileKeyBytes, vaultKey);
 
         return {
             blob: new Blob([ciphertext], {type: 'application/octet-stream'}),
             metadata: {
                 version: 1,
                 cipher: 'AES-GCM-256',
-                keyWrap: 'HKDF-SHA256+A256GCM',
+                ...wrappedKey,
                 contentIv: bytesToBase64(contentIv),
-                wrapSalt: bytesToBase64(wrapSalt),
-                wrapIv: bytesToBase64(wrapIv),
-                wrappedFileKey: bytesToBase64(wrappedFileKey),
                 originalType: file.type,
                 originalSize: file.size
             }
@@ -139,6 +148,13 @@ export function validateAttachmentFile(file, { imageOnly = false, maxBytes = MAX
         throw new Error('Formato file non consentito.');
     }
     return file;
+}
+
+export function validateAccountAttachmentFile(file) {
+    if (!(file instanceof File) || file.size <= 0) throw new Error('Seleziona un file valido.');
+    const mime = String(file.type || '').toLowerCase();
+    const maxBytes = mime.startsWith('video/') ? MAX_LARGE_VIDEO_BYTES : MAX_ATTACHMENT_BYTES;
+    return validateAttachmentFile(file, {maxBytes});
 }
 
 export function createStorageObjectName(file) {

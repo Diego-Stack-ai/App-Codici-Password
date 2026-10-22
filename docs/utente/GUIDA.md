@@ -1,5 +1,11 @@
 # Guida
 
+## Video grandi nei Memorandum
+
+Negli allegati di un Account o Memorandum puoi selezionare dalla **Galleria** un video fino a 512 MB. Oltre 32 MB l'app lo prepara e lo carica in più blocchi cifrati, mostrando l'avanzamento; il risultato resta un solo allegato e non devi unire manualmente i pezzi. Mantieni l'app aperta e la connessione attiva fino al messaggio di completamento.
+
+Per aprire un video grande il browser deve supportare lo spazio temporaneo privato necessario alla ricomposizione. Se non lo supporta, l'app lo segnala senza scaricare tutto il file nella memoria della pagina. Il normale **Backup cifrato** comprende i blocchi; l'**Archivio portatile** con allegati conserva invece un limite più prudente e può chiederti di ripetere l'esportazione senza allegati grandi.
+
 ## Lingua e prima configurazione
 
 Alla prima apertura il selettore lingua compare prima dell'identificazione. Se possiedi già un account puoi chiuderlo e accedere: quando il profilo viene riconosciuto, l'app applica la lingua associata. Per creare un nuovo account devi invece scegliere una lingua. Puoi cambiarla in seguito da **Impostazioni → Lingua App**; il cambio riguarda pulsanti, intestazioni, istruzioni, messaggi e voce dell'Assistente, non nomi, note o altri dati che hai inserito.

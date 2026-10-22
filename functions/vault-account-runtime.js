@@ -75,6 +75,16 @@ var require_archive_purge_service = __commonJS({
     function isSafeAttachmentPath(uid2, command, storagePath) {
       return typeof storagePath === "string" && storagePath.startsWith(allowedAttachmentPrefix(uid2, command)) && !storagePath.includes("..") && storagePath.length <= 1024;
     }
+    function attachmentStoragePaths(attachment) {
+      if (!attachment || typeof attachment !== "object" || Array.isArray(attachment)) return [void 0];
+      const paths = [];
+      if (Object.hasOwn(attachment, "storagePath")) paths.push(attachment.storagePath);
+      if (attachment.encryption?.chunked === true) {
+        if (!Array.isArray(attachment.chunks) || attachment.chunks.length === 0) return [void 0];
+        paths.push(...attachment.chunks.map((chunk) => chunk?.storagePath));
+      }
+      return paths.length ? [...new Set(paths)] : [void 0];
+    }
     function purgeDecision({ record, expectedRevision, confirmed, previous }) {
       if (previous?.status === "purged") return { status: "purged", duplicate: true };
       if (previous?.status === "processing" && !record) return { status: "resume", duplicate: false };
@@ -171,6 +181,7 @@ var require_archive_purge_service = __commonJS({
       isArchivePurgeSuspended,
       assertNoExternalAccountReferences,
       accountPath,
+      attachmentStoragePaths,
       isSafeAttachmentPath,
       purgeDecision,
       planProfileReferenceCleanup,

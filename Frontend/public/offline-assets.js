@@ -232,6 +232,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/shared/card-attachment-capture.js",
   "assets/js/modules/shared/card-camera-capture.js",
   "assets/js/modules/shared/card-secret.js",
+  "assets/js/modules/shared/chunked-attachment-security.js",
   "assets/js/modules/shared/company-area-preference.js",
   "assets/js/modules/shared/contact-card-model.js",
   "assets/js/modules/shared/contact-card-photo.js",

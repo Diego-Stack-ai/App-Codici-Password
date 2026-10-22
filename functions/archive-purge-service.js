@@ -44,6 +44,17 @@ function isSafeAttachmentPath(uid, command, storagePath) {
     !storagePath.includes("..") && storagePath.length <= 1024;
 }
 
+function attachmentStoragePaths(attachment) {
+  if (!attachment || typeof attachment !== 'object' || Array.isArray(attachment)) return [undefined];
+  const paths = [];
+  if (Object.hasOwn(attachment, 'storagePath')) paths.push(attachment.storagePath);
+  if (attachment.encryption?.chunked === true) {
+    if (!Array.isArray(attachment.chunks) || attachment.chunks.length === 0) return [undefined];
+    paths.push(...attachment.chunks.map(chunk => chunk?.storagePath));
+  }
+  return paths.length ? [...new Set(paths)] : [undefined];
+}
+
 function purgeDecision({record, expectedRevision, confirmed, previous}) {
   if (previous?.status === "purged") return {status: "purged", duplicate: true};
   if (previous?.status === "processing" && !record) return {status: "resume", duplicate: false};
@@ -143,6 +154,7 @@ module.exports = {
   isArchivePurgeSuspended,
   assertNoExternalAccountReferences,
   accountPath,
+  attachmentStoragePaths,
   isSafeAttachmentPath,
   purgeDecision,
   planProfileReferenceCleanup,

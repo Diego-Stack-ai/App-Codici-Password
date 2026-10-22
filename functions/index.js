@@ -44,7 +44,7 @@ const {
     RETENTION_MS, restoreDecision, safeAudit, trashDecision, validateRecoveryCommand
 } = require("./history-recovery-service");
 const {
-    accountPath, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
+    accountPath, attachmentStoragePaths, isSafeAttachmentPath, purgeDecision, planProfileReferenceCleanup, validatePurgeCommand,
     isArchivePurgeSuspended
 } = require("./archive-purge-service");
 const {isMaturityTestActor} = require("./maturity-rollout-policy");
@@ -470,7 +470,7 @@ exports.purgeArchivedAccount = onCall(
 
         const attachments = await recordRef.collection("attachments").get();
         // Missing paths are not absent attachments: preserve their metadata for repair.
-        const storagePaths = attachments.docs.map(snapshot => snapshot.data()?.storagePath);
+        const storagePaths = attachments.docs.flatMap(snapshot => attachmentStoragePaths(snapshot.data()));
         if (storagePaths.some(path => !isSafeAttachmentPath(ownerUid, command, path))) {
             throw new HttpsError("failed-precondition", "Percorso allegato non sicuro: eliminazione interrotta.");
         }

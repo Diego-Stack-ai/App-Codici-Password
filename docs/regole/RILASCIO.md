@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.226 — video grandi nei Memorandum e traduzioni Scadenze — 22/10/2026
+
+I soli video allegati ad Account o Memorandum possono ora arrivare a 512 MiB. Oltre 32 MiB il client cifra e carica sequenzialmente blocchi autenticati da 8 MiB, mantenendo un solo allegato logico e una sola chiave-file condivisibile. Apertura tramite OPFS, condivisione, cancellazione dell'allegato, backup cifrato e inventari di purge riconoscono il manifest completo; un caricamento interrotto compensa i blocchi già inviati. L'Archivio portatile rifiuta esplicitamente questo formato invece di generare una copia incompleta. Il form **Componi scadenza** carica inoltre il catalogo specializzato e non espone più chiavi `deadline_*` grezze.
+
+La suite applicativa completa è verde, inclusi Allegati **72/72**, navigazione **179/179**, Functions/security **466 pass e 9 skip dichiarati**, Rules Storage e tutti i profili Firebase Emulator. L'ordine **«quando hai finito pubblica»** autorizza bump patch, commit, push, PR, merge e workflow del solo Firebase Hosting. La modifica sorgente al purge viene inclusa e verificata ma non distribuita: finché non sarà autorizzato un deploy Functions separato, la cancellazione definitiva dell'intero Account contenente allegati a blocchi si interrompe in sicurezza. Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Esito operativo 1.2.225 — scelta esplicita del tipo di Scadenza — 22/10/2026
 
 Il form di creazione parte ora da **Tipo di scadenza** e presenta gli stessi otto ambiti delle Regole scadenze. Una nuova Scadenza non preseleziona più Automezzi, la prima regola o il primo riferimento: soltanto dopo la scelta dell'ambito mostra le configurazioni pertinenti e il relativo riferimento. Gli ambiti senza regole espongono uno stato vuoto con accesso alla configurazione; **Documenti personali** rimanda al Profilo, perché quelle Scadenze devono nascere dal Documento sorgente. Modifica e flusso Documento → Scadenza conservano le preselezioni necessarie a riaprire collegamenti esistenti.

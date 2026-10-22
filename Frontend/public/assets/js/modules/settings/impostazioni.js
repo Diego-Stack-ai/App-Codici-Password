@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.225';
+import { auth, db } from '../../firebase-config.js?v=1.2.226';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -40,7 +40,7 @@ export async function initImpostazioni(user) {
     initSettingsEvents(user);
     setupSecurityToggles(currentUserData);
     setupAIAssistantToggle(user, currentUserData);
-    import('../assistant/assistant-package-settings.js?v=1.2.225&ai=20261019a')
+    import('../assistant/assistant-package-settings.js?v=1.2.226&ai=20261019a')
         .then(module => module.initAssistantPackageSettings())
         .catch(error => console.error('[LOCAL AI] Impostazioni pacchetto non disponibili.', error));
     setupCompanyAreaToggle(user, currentUserData);
@@ -63,7 +63,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.225');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.226');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -177,7 +177,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.225');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.226');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -309,7 +309,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.225');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.226');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -931,7 +931,10 @@ function setupPortableArchive(user) {
             } catch (error) {
                 try { await preparedOutput?.cleanup(); } catch {}
                 if (action.active() && error?.name !== 'AbortError') {
-                    const capacityCodes = new Set(['PORTABLE_CAPACITY_EXCEEDED', 'PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED']);
+                    const capacityCodes = new Set([
+                        'PORTABLE_CAPACITY_EXCEEDED', 'PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED',
+                        'PORTABLE_CHUNKED_ATTACHMENT_UNSUPPORTED'
+                    ]);
                     const inventoryCodes = new Set([
                         'PORTABLE_ATTACHMENT_INVENTORY_DUPLICATE', 'PORTABLE_ATTACHMENT_INVENTORY_MISMATCH',
                         'PORTABLE_ATTACHMENT_OWNER_MISSING', 'PORTABLE_ATTACHMENT_METADATA_CONFLICT'
@@ -1134,7 +1137,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.225');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.226');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
