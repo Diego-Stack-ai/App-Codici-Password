@@ -8,6 +8,8 @@ Diego chiede che la creazione di una Scadenza inizi dalla scelta esplicita del t
 
 L'ordine **«Procedi»** autorizza implementazione locale, documentazione e test. Il successivo ordine **«Pubblica»** autorizza la patch `1.2.225`, commit, push, PR, merge e distribuzione del solo Firebase Hosting dopo i gate verdi. Riconciliazioni, cancellazioni, scritture sui dati reali, Functions, Firestore Rules, Storage Rules, indici e migrazioni restano esclusi. Le modifiche CI già presenti nel ramo fanno parte dello stesso rilascio e mantengono il perimetro prudente già verificato.
 
+Esito: la PR `#215` è stata unita nel merge commit `22d5b5c5`; il gate automatico `39802166170` e il workflow manuale `39803558242` sono verdi. Il workflow manuale ha pubblicato esclusivamente Firebase Hosting e la verifica HTTP pubblica conferma `1.2.225`, scelta esplicita del tipo e percorso Documenti personali. Nessuna Scadenza o regola reale è stata modificata e backend, Rules, indici e migrazioni sono rimasti esclusi.
+
 ## Semplificazione prudente dei controlli CI — 22/10/2026
 
 Diego chiede di verificare le istruzioni Markdown prima di alleggerire la procedura e preferisce conservare un controllo in più piuttosto che introdurre rischi futuri. L'audit dei workflow ha confermato che una pull request composta soltanto dalla registrazione documentale della release `1.2.224` ha eseguito per otto minuti l'intera suite applicativa, oltre al workflow documentale dedicato; le release applicative eseguono invece controlli distinti sulla PR, sul `master` risultante e sulla candidata manuale esatta destinata al deploy.
