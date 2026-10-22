@@ -1,4 +1,4 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.221';
+import { db, functions } from '../../firebase-config.js?v=1.2.222';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
@@ -101,7 +101,7 @@ function renderContacts() {
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'edit' })
             ]),
             createElement('button', { type: 'button', className: 'recipient-icon-button', title: contact.active === false ? 'Riattiva' : 'Disattiva', onclick: () => toggleActive(contact) }, [
-                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: contact.active === false ? 'person_check' : 'person_off' })
+                createElement('span', { className: 'material-symbols-outlined notranslate', textContent: contact.active === false ? 'person_off' : 'person_check' })
             ]),
             createElement('button', { type: 'button', className: 'recipient-icon-button action-delete', title: 'Elimina', onclick: () => deleteContact(contact) }, [
                 createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })

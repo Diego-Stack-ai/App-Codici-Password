@@ -1,5 +1,5 @@
 const DOMAIN_KEYS = Object.freeze([
-    'vehicles', 'home', 'health', 'sport', 'contracts', 'generic'
+    'vehicles', 'home', 'health', 'sport', 'contracts', 'user-company', 'company'
 ]);
 
 export const DEADLINE_CONFIG_SOURCES = Object.freeze({
@@ -33,27 +33,38 @@ function includesAny(value, candidates) {
     return candidates.some(candidate => value.includes(candidate));
 }
 
+export function isVehicleComodatoDeadlineType(value) {
+    const normalized = normalizeDeadlineDomainValue(value);
+    return normalized === 'comodato d uso'
+        || (normalized.includes('comodato')
+            && includesAny(normalized, ['comodato auto', 'comodato d uso auto', 'auto targat']));
+}
+
 export function isPersonalDocumentDeadlineType(value) {
     const normalized = normalizeDeadlineDomainValue(value);
     return PERSONAL_DOCUMENT_TYPES.some(type => normalized === type || normalized.startsWith(`${type} `));
 }
 
 export function classifyDeadlineDomain({name, sourceId, domain, detail} = {}) {
-    if (DOMAIN_KEYS.includes(domain)) return domain;
     const normalized = normalizeDeadlineDomainValue([name, detail].filter(Boolean).join(' '));
-    if (!normalized) return 'generic';
+    if (!normalized) return domain === 'generic' ? 'contracts'
+        : DOMAIN_KEYS.includes(domain) ? domain : 'contracts';
     if (isPersonalDocumentDeadlineType(name)) return 'personal';
+    // Queste due riclassificazioni sostituiscono anche gli ambiti espliciti
+    // salvati dalle versioni precedenti, senza riscrivere la sorgente fisica.
+    if (normalized.includes('capannone')) return 'company';
+    if (isVehicleComodatoDeadlineType(normalized)) return 'user-company';
+    if (domain === 'generic') return 'contracts';
+    if (DOMAIN_KEYS.includes(domain)) return domain;
     if (sourceId === 'deadlineConfig') return 'vehicles';
     if (includesAny(normalized, ['assicurazione', 'revisione auto', 'revisione moto', 'bollo',
         'tagliando', 'olio motore', 'motociclo', 'rimorchio'])) return 'vehicles';
-    if (includesAny(normalized, ['imu', 'imposta municipale', 'tari', 'immobile', 'garage', 'capannone', 'casa',
+    if (includesAny(normalized, ['imu', 'imposta municipale', 'tari', 'immobile', 'garage', 'casa',
         'condominio', 'affitto', 'caldaia', 'addolcitore', 'isola ecologica'])) return 'home';
     if (includesAny(normalized, ['visita medica', 'certificato medico', 'salute', 'vaccin'])) return 'health';
     if (includesAny(normalized, ['federazione italiana vela', 'tessera fiv', 'sport', 'associazion'])) return 'sport';
-    if (normalized === 'comodato d uso'
-        || includesAny(normalized, ['comodato auto', 'comodato d uso auto', 'auto targat'])) return 'vehicles';
     if (includesAny(normalized, ['contratto', 'comodato', 'disdetta', 'rinnovo'])) return 'contracts';
-    return 'generic';
+    return 'contracts';
 }
 
 function itemName(item) {
@@ -194,7 +205,7 @@ export function buildDeadlineDomainInventory({configs = {}, deadlines = []} = {}
             sourceId: matching[0]?.sourceId,
             detail: deadline?.veicolo_modello
         });
-        const safeDomain = DOMAIN_KEYS.includes(domain) ? domain : 'generic';
+        const safeDomain = DOMAIN_KEYS.includes(domain) ? domain : 'contracts';
         const auditedDeadline = deadlineWithAudit(deadline, matching);
         result[safeDomain].deadlines.push(auditedDeadline);
         if (!matching.length) result[safeDomain].unmatchedDeadlines.push(auditedDeadline);

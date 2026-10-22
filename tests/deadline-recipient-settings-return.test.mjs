@@ -71,5 +71,7 @@ test('il controller delega la navigazione al salvataggio della bozza', async () 
     assert.match(editor, /restoreDeadlineEditorAfterRecipientManagement\(\)/);
     assert.match(contacts, /ALLOWED_RETURN_PAGES/);
     assert.match(contacts, /safeReturnTarget\(new URLSearchParams/);
+    assert.match(contacts, /title: contact\.active === false \? 'Riattiva' : 'Disattiva'/);
+    assert.match(contacts, /textContent: contact\.active === false \? 'person_off' : 'person_check'/);
     assert.match(editor, /contactsById\.get\(recipient\.contactId\)/);
 });

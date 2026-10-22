@@ -8,6 +8,7 @@ const {
   buildDeadlineDomainInventory,
   classifyDeadlineDomain,
   isPersonalDocumentDeadlineType,
+  isVehicleComodatoDeadlineType,
   normalizeDeadlineDomainValue
 } = await import(moduleUrl);
 
@@ -17,6 +18,9 @@ test('normalizza le etichette storiche senza dipendere da apostrofi o accenti', 
   assert.equal(isPersonalDocumentDeadlineType('Patente'), true);
   assert.equal(isPersonalDocumentDeadlineType('Patente nautica'), true);
   assert.equal(isPersonalDocumentDeadlineType('Revisione Auto'), false);
+  assert.equal(isVehicleComodatoDeadlineType("Comodato d'uso"), true);
+  assert.equal(isVehicleComodatoDeadlineType("Il comodato d'uso dell'auto targata"), true);
+  assert.equal(isVehicleComodatoDeadlineType('Auto targata'), false);
 });
 
 test('mappa le configurazioni storiche nelle nuove famiglie senza cambiare sorgente', () => {
@@ -28,7 +32,10 @@ test('mappa le configurazioni storiche nelle nuove famiglie senza cambiare sorge
         emailTemplates: ['La revisione dell’auto targata']
       },
       deadlineConfigDocuments: {
-        deadlineTypes: [{name: '2 rata IMU Garage', period: 14, freq: 7}],
+        deadlineTypes: [
+          {name: '2 rata IMU Garage', period: 14, freq: 7},
+          {name: '1 rata IMU Capannone', period: 14, freq: 7}
+        ],
         models: ['IMPOSTA MUNICIPALE UNICA'],
         emailTemplates: ['Seconda rata IMU']
       },
@@ -36,7 +43,8 @@ test('mappa le configurazioni storiche nelle nuove famiglie senza cambiare sorge
         {name: 'Sale Addolcitore', period: 14, freq: 7},
         {name: 'Visita medica', period: 14, freq: 7},
         {name: 'Federazione Italiana Vela', period: 70, freq: 7},
-        {name: 'Contratto', period: 14, freq: 7}
+        {name: 'Contratto', period: 14, freq: 7},
+        {name: "Comodato d'uso", period: 28, freq: 7}
       ]}
     }
   });
@@ -46,6 +54,8 @@ test('mappa le configurazioni storiche nelle nuove famiglie senza cambiare sorge
   assert.deepEqual(inventory.health.configurations.map(item => item.name), ['Visita medica']);
   assert.deepEqual(inventory.sport.configurations.map(item => item.name), ['Federazione Italiana Vela']);
   assert.deepEqual(inventory.contracts.configurations.map(item => item.name), ['Contratto']);
+  assert.deepEqual(inventory['user-company'].configurations.map(item => item.name), ["Comodato d'uso"]);
+  assert.deepEqual(inventory.company.configurations.map(item => item.name), ['1 rata IMU Capannone']);
   assert.equal(inventory.home.configurations[0].sourceId, 'deadlineConfigDocuments');
   assert.equal(inventory.home.configurations[1].sourceId, 'generalConfig');
   assert.equal(inventory.vehicles.configurations[0].templateText, '');
@@ -75,15 +85,16 @@ test('collega le scadenze per nome e conserva quelle senza regola come elementi 
     },
     deadlines: [
       {id: 'vehicle', type: 'Bollo', name: 'Fixture', dueDate: '2027-01-31', notif_days_before: 14, notif_frequency: 7},
-      {id: 'home', type: '1 rata IMU Capannone', dueDate: '2027-06-16'},
+      {id: 'company', type: '1 rata IMU Capannone', dueDate: '2027-06-16'},
       {id: 'health', type: 'Visita medica', dueDate: '2027-02-28'},
       {id: 'unmatched', type: 'Tessera isola ecologica', dueDate: '2035-10-24'}
     ]
   });
 
   assert.deepEqual(inventory.vehicles.configurations[0].linkedDeadlineIds, ['vehicle']);
-  assert.deepEqual(inventory.home.deadlines.map(item => item.id), ['home', 'unmatched']);
+  assert.deepEqual(inventory.home.deadlines.map(item => item.id), ['unmatched']);
   assert.deepEqual(inventory.home.unmatchedDeadlines.map(item => item.id), ['unmatched']);
+  assert.deepEqual(inventory.company.deadlines.map(item => item.id), ['company']);
   assert.deepEqual(inventory.health.deadlines.map(item => item.id), ['health']);
   assert.equal(inventory.vehicles.deadlines[0].domainAudit.scheduleMismatch, false);
 });
@@ -124,8 +135,8 @@ test('segnala il comodato duplicato senza fonderlo o cancellarlo', () => {
     deadlineConfig: {deadlineTypes: [{name: "Comodato d'uso", period: 28, freq: 7, domain: 'vehicles'}]},
     generalConfig: {deadlineTypes: [{name: "Comodato d’uso", period: 28, freq: 7, domain: 'vehicles'}]}
   }});
-  assert.equal(inventory.vehicles.configurations.length, 2);
-  assert.equal(inventory.vehicles.duplicateConfigurations.length, 1);
+  assert.equal(inventory['user-company'].configurations.length, 2);
+  assert.equal(inventory['user-company'].duplicateConfigurations.length, 1);
 });
 
 test('mantiene separati i tre inventari completi verificati nelle configurazioni', () => {
@@ -141,7 +152,10 @@ test('mantiene separati i tre inventari completi verificati nelle configurazioni
       emailTemplates: Array.from({length: 11}, (_, index) => `Testo veicolo sintetico ${index + 1}`)
     },
     deadlineConfigDocuments: {
-      deadlineTypes: ['1 rata IMU', '2 rata IMU', '3 rata IMU', '4 rata IMU'].map(name => type(name)),
+      deadlineTypes: [
+        '1 rata IMU Capannone', '1 rata IMU Garage',
+        '2 rata IMU Capannone', '2 rata IMU Garage'
+      ].map(name => type(name)),
       models: ['IMPOSTA MUNICIPALE UNICA'],
       emailTemplates: ['Prima rata IMU', 'Seconda rata IMU']
     },
@@ -165,15 +179,21 @@ test('mantiene separati i tre inventari completi verificati nelle configurazioni
     home: [inventory.home.configurations.length, inventory.home.references.length, inventory.home.templates.length],
     health: [inventory.health.configurations.length, inventory.health.references.length, inventory.health.templates.length],
     sport: [inventory.sport.configurations.length, inventory.sport.references.length, inventory.sport.templates.length],
-    contracts: [inventory.contracts.configurations.length, inventory.contracts.references.length, inventory.contracts.templates.length]
+    contracts: [inventory.contracts.configurations.length, inventory.contracts.references.length, inventory.contracts.templates.length],
+    userCompany: [inventory['user-company'].configurations.length, inventory['user-company'].references.length, inventory['user-company'].templates.length],
+    company: [inventory.company.configurations.length, inventory.company.references.length, inventory.company.templates.length]
   }, {
-    vehicles: [8, 6, 12], home: [6, 1, 4], health: [1, 0, 1], sport: [1, 0, 1], contracts: [1, 0, 0]
+    vehicles: [6, 6, 11], home: [4, 1, 4], health: [1, 0, 1], sport: [1, 0, 1],
+    contracts: [1, 0, 0], userCompany: [2, 0, 1], company: [2, 0, 0]
   });
 });
 
-test('la classificazione esplicita prevale sulle euristiche', () => {
+test('le riclassificazioni deliberate prevalgono sui vecchi ambiti espliciti', () => {
   assert.equal(classifyDeadlineDomain({name: 'Contratto', domain: 'vehicles'}), 'vehicles');
-  assert.equal(classifyDeadlineDomain({name: "Comodato d'uso"}), 'vehicles');
+  assert.equal(classifyDeadlineDomain({name: "Comodato d'uso", domain: 'vehicles'}), 'user-company');
+  assert.equal(classifyDeadlineDomain({name: '1 rata IMU Capannone', domain: 'home'}), 'company');
+  assert.equal(classifyDeadlineDomain({name: 'Documento non classificato', domain: 'generic'}), 'contracts');
   assert.equal(classifyDeadlineDomain({name: 'Assicurazione'}), 'vehicles');
   assert.equal(classifyDeadlineDomain({name: 'Visita medica'}), 'health');
+  assert.equal(classifyDeadlineDomain({name: 'Documento non classificato'}), 'contracts');
 });
