@@ -1,10 +1,12 @@
 # Stato
 
-## Candidata 1.2.228 — testo Scadenza completo in Dettaglio, e-mail e Push — 23/10/2026
+## Release 1.2.228 pubblicata — testo Scadenza completo in Dettaglio, e-mail e Push — 23/10/2026
 
 La Scadenza reale **Olio motore** conserva correttamente nel record il testo completo configurato. La duplicazione osservata nasceva in due lettori legacy: il Dettaglio anteponeva nuovamente «E' in scadenza» e accodava il veicolo, mentre la Function e-mail accodava una seconda volta modello e targa.
 
-La candidata riconosce i record del nuovo form tramite `ruleId` e `ruleDomain` e mostra/invia `templateText` senza ricomporlo; Documenti personali e record storici conservano i rispettivi percorsi compatibili. I test mirati su modello, Dettaglio, invio e-mail e notifiche Push sono verdi **60/60**; anche la regressione completa `npm test` ha concluso con codice 0. Nessun dato reale è stato riscritto e nessuna Function o risorsa Firebase è stata distribuita.
+La release riconosce i record del nuovo form tramite `ruleId` e `ruleDomain` e mostra/invia `templateText` senza ricomporlo; Documenti personali e record storici conservano i rispettivi percorsi compatibili. I test mirati su modello, Dettaglio, invio e-mail e notifiche Push sono verdi **60/60**; anche la regressione completa `npm test` ha concluso con codice 0.
+
+La PR `#220` è stata unita nel merge commit `7c2d8ec9`. Il workflow manuale `39908470577` ha validato `master` e pubblicato Firebase Hosting; la verifica pubblica restituisce `200` e conferma versione e modulo corretti. Sono state distribuite esclusivamente le Functions Scadenze `checkDeadlines`, `onScadenzaCreated` e `onScadenzaUpdated`. Nessun dato reale è stato riscritto e Rules, indici e migrazioni sono rimasti invariati.
 
 ## Candidata 1.2.227 — recupero Push e caricamento osservabile dei video grandi — 22/10/2026
 
