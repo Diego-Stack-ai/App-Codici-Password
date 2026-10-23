@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Ripristino dell'installazione AI 2 — 23/10/2026
+
+Il tentativo reale di installare AI 2 `power` è fallito dopo la conferma dell'utente. La verifica degli URL pubblici ha accertato che i percorsi dei pacchetti `medium` e `power` restituivano la pagina HTML di fallback: gli asset di grandi dimensioni sono esclusi da Git e il workflow Hosting non li materializzava prima del deploy.
+
+Diego autorizza con **«si procedi»** la correzione e la pubblicazione. La candidata `1.2.232` aggiunge al solo job manuale di deploy il ripristino della cache, lo staging dalle revisioni fissate, l'audit byte/SHA-256, la verifica di coerenza del catalogo e il controllo HTTP degli asset effettivamente pubblicati. Il primo popolamento comporta circa 1,87 GB e può richiedere più tempo. Sono autorizzati bump patch, commit, push, PR, merge e workflow del solo Firebase Hosting; Functions, Rules, indici, migrazioni, installazioni automatiche sul dispositivo e dati reali restano esclusi.
+
 ## Scheda aziendale PDF compatta — 23/10/2026
 
 Diego richiede di sostituire la presentazione dispersiva del PDF aziendale con un'anagrafica compatta ispirata al modello fornito, senza copiarne le richieste specifiche, i campi bancari, il timbro o la firma. L'intestazione usa il logo dell'azienda presente nell'app, la ragione sociale e un riepilogo dei dati selezionati; il corpo conserva esclusivamente i gruppi già autorizzati dall'utente.

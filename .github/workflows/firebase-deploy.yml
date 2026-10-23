@@ -123,10 +123,30 @@ jobs:
       - name: Install deployment dependencies
         run: npm ci
 
+      - name: Restore staged AI 2 packages
+        uses: actions/cache@v4
+        with:
+          path: Frontend/public/assets/local-ai-packages
+          key: local-ai-a2-${{ runner.os }}-${{ hashFiles('scripts/stage-local-ai-hosting-assets.mjs', 'Frontend/public/assets/js/modules/assistant/local-ai-hosting-catalog.generated.js') }}
+
+      - name: Stage AI 2 Hosting packages
+        run: npm run stage:assistant-local-ai
+
+      - name: Verify AI 2 Hosting packages
+        run: |
+          npm run audit:assistant-local-ai-stage
+          npm run build:assistant-local-ai-catalog
+          git diff --exit-code -- Frontend/public/assets/js/modules/assistant/local-ai-hosting-catalog.generated.js
+
       # Le Functions restano escluse e richiedono un'autorizzazione separata.
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.
       - name: Deploy Hosting only
         run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Verify public AI 2 packages
+        env:
+          LOCAL_AI_PUBLIC_ORIGIN: https://appcodici-password.web.app
+        run: npm run verify:assistant-local-ai-publication
 
       - name: Record deployed commit
         shell: bash

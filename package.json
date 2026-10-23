@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.231",
+  "version": "1.2.232",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -117,6 +117,7 @@
     "stage:assistant-local-ai": "node scripts/stage-local-ai-hosting-assets.mjs medium power",
     "audit:assistant-local-ai-stage": "node scripts/audit-local-ai-hosting-stage.mjs qwen2.5-1.5b-instruct-q4f16-1-mlc/0.1.0 smollm2-1.7b-instruct-q4f16-1-mlc/0.1.0",
     "build:assistant-local-ai-catalog": "node scripts/generate-local-ai-hosting-catalog.mjs",
+    "verify:assistant-local-ai-publication": "node scripts/verify-local-ai-publication.mjs",
     "test:assistant-local-ai-browser": "node scripts/test-local-ai-browser-probe.mjs",
     "test:profile": "node --test tests/avatar-change-residues.test.mjs tests/consultation-copies.test.mjs tests/profile-model.test.mjs tests/profile-lazy-editor.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs tests/profile-contact-link.test.mjs tests/company-profile.test.mjs tests/company-form-freshness.test.mjs tests/company-detail-freshness.test.mjs tests/profile-account-management.test.mjs tests/contact-card-photo.test.mjs tests/profile-document-attachments-production.test.mjs",
     "test:maturity-fixture": "node --test tests/maturity-dataset.test.mjs",

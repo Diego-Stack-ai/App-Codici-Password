@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.232 — pacchetti AI 2 inclusi e verificati nel deploy — 23/10/2026
+
+Il collaudo dell'installazione AI 2 ha rilevato che gli URL pubblici delle taglie `medium` e `power` restituivano il fallback HTML dell'app anziché i file dei modelli. I manifest e il catalogo erano corretti, ma i pacchetti, volutamente esclusi dalla cronologia Git per dimensione, non venivano ricostruiti nella snapshot usata dal workflow Firebase Hosting.
+
+Il job di pubblicazione ora ripristina una cache dedicata, materializza entrambe le taglie dalle revisioni immutabili dichiarate, verifica dimensioni e SHA-256 locali e rigenera il catalogo prima del deploy. Dopo il deploy controlla il manifest pubblico e la dimensione di ogni file, rifiutando fallback HTML o asset mancanti prima di registrare la release come riuscita. Questa fase trasferisce circa 1,87 GB al primo popolamento e rende il rilascio sensibilmente più lungo; non è un controllo superfluo, perché Firebase Hosting richiede l'intera snapshot del sito a ogni release.
+
+L'ordine **«si procedi»**, impartito dopo la diagnosi e la conferma dell'installazione AI 2 fallita, autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.231 — Assistente locale operativo e proprietario Scadenze — 23/10/2026
 
 La ricerca deterministica dell'Assistente riconosce domande naturali su Account, aziende, documenti e Scadenze, sinonimi controllati e piccoli errori di digitazione. L'AI locale avanzata produce soltanto intenti tipizzati e convalidati di spiegazione, ricerca, selezione o chiarimento; il motore deterministico resta l'unico componente che consulta i record locali. Scritture, modifiche e cancellazioni non sono consentite.

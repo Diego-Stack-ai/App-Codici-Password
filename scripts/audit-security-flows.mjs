@@ -309,6 +309,10 @@ assert.match(deployWorkflow, /Verify manual release source[\s\S]*?git ls-remote 
     'La validazione manuale non confronta la candidata con il master remoto');
 assert.match(deployWorkflow, /Verify master before deploy[\s\S]*?GITHUB_SHA[\s\S]*?remote_master[\s\S]*?Deploy Hosting only/,
     'Il deploy non ricontrolla master immediatamente prima della pubblicazione');
+assert.match(deployWorkflow, /Restore staged AI 2 packages[\s\S]*?Stage AI 2 Hosting packages[\s\S]*?npm run stage:assistant-local-ai[\s\S]*?Verify AI 2 Hosting packages[\s\S]*?npm run audit:assistant-local-ai-stage[\s\S]*?npm run build:assistant-local-ai-catalog[\s\S]*?git diff --exit-code[\s\S]*?Deploy Hosting only/,
+    'Il deploy Hosting non prepara e verifica i pacchetti AI 2 prima della pubblicazione');
+assert.match(deployWorkflow, /Deploy Hosting only[\s\S]*?Verify public AI 2 packages[\s\S]*?npm run verify:assistant-local-ai-publication[\s\S]*?Record deployed commit/,
+    'Il deploy Hosting non verifica i pacchetti AI 2 effettivamente pubblicati');
 assert.match(deployWorkflow, /Deploy Hosting only[\s\S]*?Record deployed commit[\s\S]*?GITHUB_SHA[\s\S]*?GITHUB_STEP_SUMMARY/,
     'Il workflow non verifica e registra lo SHA distribuito dopo il deploy');
 assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');
