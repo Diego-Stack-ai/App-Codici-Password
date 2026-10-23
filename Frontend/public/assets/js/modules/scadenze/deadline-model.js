@@ -87,6 +87,33 @@ export function profileDocumentDeadlineMessage({templateText, documentType, docu
     return sections.filter(Boolean).join(' ');
 }
 
+export function deadlineTemplateIsComplete(record = {}) {
+    const profileDocument = record.linkKind === 'profile-document-deadline-v1'
+        || record.sourceRef?.type === 'profileDocument';
+    const structuredRule = Boolean(text(record.ruleId) && text(record.ruleDomain));
+    return profileDocument || structuredRule;
+}
+
+export function deadlineTemplateMessage(record = {}) {
+    if (record.templateText != null && typeof record.templateText !== 'string') {
+        throw new TypeError('DEADLINE_TEMPLATE_INVALID');
+    }
+    const template = text(record.templateText);
+    if (!template) return '';
+    if (deadlineTemplateIsComplete(record)) return template;
+
+    if (record.mode === 'automezzi') {
+        const vehicle = text(record.veicolo_modello);
+        return `E' in scadenza ${template}${vehicle ? ` ${vehicle}` : ''}`;
+    }
+    if (record.mode === 'documenti') {
+        let code = text(record.veicolo_modello);
+        if (code.includes(' - ')) code = code.split(' - ')[1].trim();
+        return `E' in scadenza ${template}${code ? ` ${code}` : ''}`;
+    }
+    return `E' in scadenza ${template}`;
+}
+
 export function deadlineDate(record = {}) {
     const value = record.dueDate || record.date;
     if (!value) return null;

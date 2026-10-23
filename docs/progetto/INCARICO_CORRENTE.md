@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Testo completo delle nuove Scadenze senza ricomposizione legacy — 23/10/2026
+
+Il collaudo reale della Scadenza **Olio motore** conferma che il nuovo form salva correttamente una frase completa, ma il Dettaglio e la Function e-mail la trattano ancora come il vecchio oggetto breve: aggiungono rispettivamente il prefisso storico e una seconda copia del riferimento veicolo. Il record reale non è corrotto e non richiede migrazione.
+
+L'ordine **«sistemiamo il problema del testo email»** ha autorizzato la correzione e i test. Una Scadenza con `ruleId` e `ruleDomain`, oppure collegata a un Documento personale, usa ora `templateText` come messaggio finale; soltanto i record privi del collegamento strutturato conservano la composizione legacy. La stessa distinzione è applicata al Dettaglio, all'e-mail e alle notifiche Push, con test di regressione per testo completo, compatibilità legacy e dati malformati.
+
+Il successivo ordine **«pubblica la modifica che controllo subito»**, ricevuto dopo aver dichiarato che la correzione richiede Hosting e Functions, autorizza la release `1.2.228` e il deploy coordinato del Frontend e delle sole Functions Scadenze `checkDeadlines`, `onScadenzaCreated` e `onScadenzaUpdated`. Rules, indici, migrazioni e dati reali non fanno parte dell'operazione.
+
 ## Riallineamento dello stato Push dopo una nuova registrazione — 22/10/2026
 
 Il collaudo reale sul secondo telefono ha confermato che la nuova prova Push arriva dopo pochi secondi. L'analisi dei log e del record dispositivo ha però rilevato uno stato contraddittorio: dopo la sostituzione riuscita del token revocato il dispositivo tornava abilitato, ma conservava ancora `status: invalid` e `invalidatedAt` della registrazione precedente.

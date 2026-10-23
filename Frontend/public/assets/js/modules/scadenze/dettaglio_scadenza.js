@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.227';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.228';
 import { deleteDoc, doc, serverTimestamp, updateDoc, runTransaction, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteObject, getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
@@ -20,7 +20,12 @@ import {
     getReceivedDeadline
 } from '../data/vault-repository.js';
 import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
-import { deadlineDate, deadlineDateInputFields, deadlinePresentation } from './deadline-model.js';
+import {
+    deadlineDate,
+    deadlineDateInputFields,
+    deadlinePresentation,
+    deadlineTemplateMessage
+} from './deadline-model.js';
 
 let mountedDeadline = null;
 
@@ -486,27 +491,7 @@ function renderDeadlineContents(scadenza, mount) {
     const templateSec = document.getElementById('section-template');
     if (scadenza.templateText) {
         if (templateSec) templateSec.classList.remove('hidden');
-
-        let compiledText = '';
-        if (scadenza.linkKind === 'profile-document-deadline-v1') {
-            compiledText = scadenza.templateText.trim();
-        } else if (scadenza.mode === 'automezzi') {
-            const subject = scadenza.templateText.trim();
-            const vehicle = scadenza.veicolo_modello ? ` ${scadenza.veicolo_modello.trim()}` : '';
-            compiledText = `E' in scadenza ${subject}${vehicle}`;
-        } else if (scadenza.mode === 'documenti') {
-            const subject = scadenza.templateText.trim();
-            let code = scadenza.veicolo_modello ? scadenza.veicolo_modello.trim() : '';
-            if (code.includes(' - ')) {
-                code = code.split(' - ')[1].trim();
-            }
-            const vehicle = code ? ` ${code}` : '';
-            compiledText = `E' in scadenza ${subject}${vehicle}`;
-        } else {
-            compiledText = `E' in scadenza ${scadenza.templateText.trim()}`;
-        }
-
-        document.getElementById('detail-template').textContent = compiledText;
+        document.getElementById('detail-template').textContent = deadlineTemplateMessage(scadenza);
     }
 }
 

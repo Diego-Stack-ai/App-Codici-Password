@@ -191,6 +191,18 @@ test('rendering a deadline with no optional values clears the previous sections'
     assert.equal(f.nodes['detail-note-body'].textContent, ''); assert.equal(f.nodes['display-attachments'].children.length, 0);
 });
 
+test('linked deadline detail renders its complete template without legacy prefix or vehicle suffix', async () => {
+    const f = fixture();
+    const complete = 'Promemoria: Olio motore da controllare sulla Hyundai I10 con targa FL790AX.';
+    f.context.getDeadline = async () => ({
+        title: 'Olio motore', templateText: complete, mode: 'automezzi',
+        veicolo_modello: 'Hyundai I10 - FL790AX', ruleDomain: 'vehicles',
+        ruleId: 'deadlineConfig:legacy-5'
+    });
+    await f.init();
+    assert.equal(f.nodes['detail-template'].textContent, complete);
+});
+
 test('failed deadline reads or rendering clear partial data and never enable footer mutations', async () => {
     for (const stage of ['read', 'render']) {
         const f = fixture();

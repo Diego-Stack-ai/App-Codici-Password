@@ -1,5 +1,14 @@
 # Collaudi
 
+## 23/10/2026 — testo completo della nuova Scadenza in Dettaglio, e-mail e Push
+
+- La prova reale **Olio motore** ha prodotto una sola Scadenza, correttamente collegata alla nuova regola, ma il Dettaglio aggiungeva il prefisso storico e il riferimento veicolo al `templateText` già completo.
+- La successiva e-mail reale ha confermato lo stesso residuo backend: il corpo conteneva il testo completo seguito da una seconda copia di `Hyundai I10 - FL790AX`.
+- La correzione distingue i record strutturati (`ruleId` + `ruleDomain`) dai record legacy: i primi usano il testo finale una sola volta; i secondi mantengono la composizione storica.
+- Test mirati modello, lifecycle del Dettaglio, invio e-mail e notifiche Push verdi **60/60**; conservato il fallimento sicuro per un `templateText` malformato.
+- Regressione completa `npm test` conclusa con codice 0; emulatori Firebase arrestati regolarmente.
+- Nessuna Scadenza reale è stata modificata dalla correzione e nessuna Function è stata distribuita.
+
 ## 22/10/2026 — recupero dello stato Push dopo token revocato
 
 - I log di produzione hanno mostrato il precedente token iOS come non registrato; il record dispositivo era stato invalidato correttamente.

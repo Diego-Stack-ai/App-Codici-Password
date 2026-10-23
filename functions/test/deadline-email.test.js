@@ -76,6 +76,25 @@ test("profile document email uses the configured full message without repeating 
   assert.equal((h.mails[0].html.match(/AA123/g) || []).length, 1);
 });
 
+test("linked rule email uses its complete message without repeating the vehicle", async () => {
+  const h = harness();
+  const complete = "Promemoria: Olio motore da controllare sulla Hyundai I10 con targa FL790AX.";
+  await h.send({
+    templateText: complete,
+    veicolo_modello: "Hyundai I10 - FL790AX",
+    ruleDomain: "vehicles",
+    ruleId: "deadlineConfig:legacy-5"
+  });
+  assert.equal((h.mails[0].html.match(/Hyundai I10/g) || []).length, 1);
+  assert.match(h.mails[0].html, /Promemoria: Olio motore da controllare/);
+});
+
+test("legacy vehicle email keeps appending its stored reference", async () => {
+  const h = harness();
+  await h.send({templateText: "Olio motore da controllare", veicolo_modello: "Hyundai I10 - FL790AX"});
+  assert.match(h.mails[0].html, /Olio motore da controllare Hyundai I10 - FL790AX/);
+});
+
 test("overlapping email calls reserve once for the same deadline", async () => {
   const h = harness();
   await Promise.all([h.send(), h.send()]);

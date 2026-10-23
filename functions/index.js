@@ -753,13 +753,14 @@ function isProfileDocumentDeadline(scadenza = {}) {
 }
 
 function pushText(scadenza, diffDays) {
-    const profileDocument = isProfileDocumentDeadline(scadenza);
-    const tipo = String(profileDocument
+    const completeTemplate = isProfileDocumentDeadline(scadenza)
+        || Boolean(String(scadenza.ruleId || "").trim() && String(scadenza.ruleDomain || "").trim());
+    const tipo = String(completeTemplate
         ? scadenza.templateText || scadenza.type || "Scadenza"
         : scadenza.type || scadenza.templateText || "Scadenza").trim().slice(0, 300);
     const veicolo = String(scadenza.veicolo_modello || "").trim();
     const when = diffDays === 0 ? "Scade oggi" : diffDays === 1 ? "Scade domani" : `Scadenza tra ${diffDays} giorni`;
-    return { title: "Codici & Password", body: `${tipo}${!profileDocument && veicolo ? ` · ${veicolo}` : ""}\n${when}` };
+    return { title: "Codici & Password", body: `${tipo}${!completeTemplate && veicolo ? ` · ${veicolo}` : ""}\n${when}` };
 }
 
 function normalizeEmail(email) {
@@ -1753,15 +1754,25 @@ function escapeHtml(value) {
         .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+function deadlineEmailObjectText(record = {}) {
+    const templateText = String(record.templateText || record.type || "una scadenza").trim();
+    const completeTemplate = record.linkKind === "profile-document-deadline-v1"
+        || record.sourceRef?.type === "profileDocument"
+        || Boolean(String(record.ruleId || "").trim() && String(record.ruleDomain || "").trim());
+    if (completeTemplate) return templateText;
+    const vehicle = String(record.veicolo_modello || "").trim();
+    return [templateText, vehicle].filter(Boolean).join(" ");
+}
+
 async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     const dueDay = deadlineCalendar.day(s.dueDate);
     if (dueDay === null) throw new Error("Data scadenza non valida.");
     const dueDateFormatted = deadlineCalendar.format(dueDay);
 
     const templateText = s.templateText || s.type || "una scadenza";
+    const emailObjectText = deadlineEmailObjectText(s);
     const profileDocument = s.linkKind === "profile-document-deadline-v1"
         || s.sourceRef?.type === "profileDocument";
-    const veicolo = !profileDocument && s.veicolo_modello ? ` ${escapeHtml(s.veicolo_modello)}` : "";
 
     const giorniLabel =
         diffDays === 0 ? "⚠️ OGGI" :
@@ -1794,7 +1805,7 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     <p>${profileDocument ? "ti ricordiamo questa scadenza:" : "ti ricordiamo che sta per scadere:"}</p>
 
     <div class="label">Oggetto</div>
-    <div class="value">📋 ${escapeHtml(templateText)}${veicolo}</div>
+    <div class="value">📋 ${escapeHtml(emailObjectText)}</div>
 
     <div class="label">Categoria</div>
     <div class="value">🏷️ ${escapeHtml(s.type || "—")}</div>
