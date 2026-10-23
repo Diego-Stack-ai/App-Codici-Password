@@ -1,12 +1,14 @@
 # Rilascio
 
-## Candidata 1.2.228 — testo Scadenze non duplicato — 23/10/2026
+## Esito operativo 1.2.228 — testo Scadenze non duplicato — 23/10/2026
 
 Le Scadenze create dal nuovo form conservano in `templateText` il messaggio finale già completo. Dettaglio, e-mail e notifiche Push riconoscono il collegamento strutturato tramite `ruleId` e `ruleDomain` e non aggiungono più prefisso storico, modello o targa una seconda volta. I record legacy privi del collegamento continuano a usare la composizione precedente.
 
 L'ordine **«pubblica la modifica che controllo subito»**, impartito dopo aver esplicitato la necessità del rilascio coordinato, autorizza bump patch, commit, push, PR, merge, deploy Firebase Hosting e deploy delle sole Functions Scadenze coinvolte: `checkDeadlines`, `onScadenzaCreated` e `onScadenzaUpdated`. Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
 La candidata ha superato la regressione completa `npm test` con codice **0**, i test mirati Dettaglio/e-mail/Push **60/60**, Functions/security **468 pass, 9 skip, 0 fail**, documentazione **11/11**, sintassi e controllo del diff.
+
+La PR `#220` è stata unita nel merge commit `7c2d8ec9` dopo i gate verdi. Il workflow manuale `39908470577` ha ripetuto la suite completa sullo SHA corrente di `master` e ha pubblicato Firebase Hosting; la verifica HTTP senza cache restituisce `200`, conferma la versione `1.2.228` e il nuovo percorso `deadlineTemplateIsComplete`. Le sole Functions `checkDeadlines`, `onScadenzaCreated` e `onScadenzaUpdated` sono state aggiornate con esito positivo. Firestore Rules, Storage Rules, indici, migrazioni e dati reali non sono stati distribuiti o modificati.
 
 ## Candidata 1.2.227 — stato Push e affidabilità percepibile dei video grandi — 22/10/2026
 

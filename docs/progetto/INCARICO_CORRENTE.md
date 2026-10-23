@@ -8,6 +8,8 @@ L'ordine **«sistemiamo il problema del testo email»** ha autorizzato la correz
 
 Il successivo ordine **«pubblica la modifica che controllo subito»**, ricevuto dopo aver dichiarato che la correzione richiede Hosting e Functions, autorizza la release `1.2.228` e il deploy coordinato del Frontend e delle sole Functions Scadenze `checkDeadlines`, `onScadenzaCreated` e `onScadenzaUpdated`. Rules, indici, migrazioni e dati reali non fanno parte dell'operazione.
 
+Esito: la PR `#220` è stata unita nel merge commit `7c2d8ec9`; il workflow manuale `39908470577` ha completato validazione e deploy Hosting. La verifica HTTP pubblica conferma `1.2.228` e il modulo aggiornato. Il deploy separato delle tre Functions autorizzate si è concluso con successo; Rules, indici, migrazioni e dati reali non sono stati modificati.
+
 ## Riallineamento dello stato Push dopo una nuova registrazione — 22/10/2026
 
 Il collaudo reale sul secondo telefono ha confermato che la nuova prova Push arriva dopo pochi secondi. L'analisi dei log e del record dispositivo ha però rilevato uno stato contraddittorio: dopo la sostituzione riuscita del token revocato il dispositivo tornava abilitato, ma conservava ancora `status: invalid` e `invalidatedAt` della registrazione precedente.
