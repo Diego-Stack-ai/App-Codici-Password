@@ -42,6 +42,12 @@ Il prodotto conserva due livelli separati:
 - **Assistente base**, disponibile senza AI: regole, sinonimi, fuzzy search, filtri, conoscenza delle pagine, guida, navigazione e risultati verificabili;
 - **AI locale avanzata**, facoltativa nelle Impostazioni: interpreta formulazioni vaghe e restituisce soltanto azioni/parametri tipizzati. Non interroga direttamente i dati, non esegue scritture e non sostituisce il livello base.
 
+### Integrazione operativa degli intenti — 23/10/2026
+
+La ricerca base riconosce domande naturali su Account, aziende, documenti e Scadenze, amplia le parole significative con sinonimi controllati e tollera piccoli errori di digitazione. L'AI locale avanzata restituisce esclusivamente gli intenti convalidati `explain_page`, `semantic_search`, `select_result` e `clarify`; ricerca e selezione vengono poi eseguite dal motore deterministico sugli stessi record locali. Un tipo sconosciuto viene rifiutato e non viene interpretato come comando libero.
+
+Il modello non può proporre o compiere scritture, modifiche, cancellazioni o archiviazioni. L'archiviazione Account resta un gesto dell'utente e richiede sempre il modale di conferma esplicita prima del servizio transazionale.
+
 ### Contratto candidato a due livelli — 16/10/2026
 
 Il candidato locale successivo alla 1.2.195 presenta due soli livelli all'utente. **AI.1 Locale** unisce la ricerca deterministica, sempre disponibile, alla ricerca semantica installabile dell'ex A2. **AI.2 Avanzata per PC** riusa il pacchetto generativo dell'ex A3 ed è proposta soltanto sui PC che superano i gate reali WebGPU, memoria, quota e smoke test. L'etichetta «installato» indica soltanto la presenza completa del pacchetto; «verificato» richiede anche inizializzazione e prova sintetica; «attivo» richiede entrambe le condizioni più la selezione esplicita.
@@ -115,7 +121,7 @@ I manifest fissati misurano 145.871.600 byte per A2 e 301.982.152 byte per A3. I
 
 A2 deve rispettare un tempo interattivo deciso dopo misura e non bloccare il main thread. A3 misura almeno: tempo di caricamento, tempo al primo token, token/s, picco memoria, energia/temperatura osservabile, cancellazione entro un tempo finito e assenza di crash della PWA. I test di qualità includono le otto lingue dell'app, domande ambigue, round-trip di lingua, output JSON alterato, prompt injection nei titoli e nei dati sintetici, assenza di rete dopo installazione e cancellazione delle risorse. Nessun banco automatico sostituisce i dispositivi fisici.
 
-Lo scaffold locale `advanced-local-ai-contract.js` è deliberatamente non importato dal runtime pubblico. Serve a rendere eseguibili i contratti di manifest, capacità, envelope, intenti e memoria prima di scegliere artefatti o implementare download. Non effettua rete, storage, inferenza o accesso al Vault.
+Nella fase iniziale lo scaffold locale `advanced-local-ai-contract.js` non era importato dal runtime pubblico. Il runtime candidato ne riusa ora la validazione degli intenti e continua a separarla da rete, storage, inferenza e accesso diretto al Vault.
 
 ### Incremento Assistente base 14/10/2026
 
@@ -123,7 +129,7 @@ L'interfaccia mantiene un solo **Agente Codex** con due modalità esplicite. **C
 
 Le varianti di apertura includono anche trascrizioni vocali come `apre undicesimo`. Se una richiesta di apertura resta ambigua, il motore chiede di indicare posizione o nome e conserva l'ultimo elenco: un errore di riconoscimento non può interrompere il comando successivo. Il saluto iniziale non viene inserito nella cronologia.
 
-I risultati Account riusano il gesto laterale canonico delle liste. Il trascinamento verso sinistra espone il cestino e richiede conferma; quello verso destra espone Archivio e richiede comunque avviso quando l'Account ha destinatari. Entrambe le azioni chiamano il servizio transazionale di archiviazione: la cancellazione definitiva resta esclusa dall'Assistente e confinata alla pagina Archivio.
+I risultati Account riusano il gesto laterale canonico delle liste. Il trascinamento verso sinistra espone il cestino e quello verso destra espone Archivio, ma entrambi richiedono sempre la stessa conferma esplicita. Solo dopo la conferma viene chiamato il servizio transazionale di archiviazione: la cancellazione definitiva resta esclusa dall'Assistente e confinata alla pagina Archivio.
 
 Il contesto del livello base conserva l'ultimo elenco di risultati. I comandi di apertura accettano ordinali, cifre e cardinali italiani da uno a dodici; un nome Azienda viene aperto soltanto per corrispondenza esatta e univoca con il record Azienda, mentre un titolo esatto e univoco può selezionare una card dell'ultimo elenco. Queste sono regole deterministiche: non costituiscono comprensione generativa e non attivano l'AI locale avanzata.
 

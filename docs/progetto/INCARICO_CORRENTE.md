@@ -6,7 +6,15 @@ Diego richiede di sostituire la presentazione dispersiva del PDF aziendale con u
 
 Il caso aziendale ordinario deve rientrare in una sola pagina A4 attraverso righe compatte etichetta/valore. Testi eccezionalmente lunghi possono continuare su pagine successive senza essere tagliati. Password, PIN, note riservate, allegati, dati bancari e collegamenti Account restano esclusi.
 
-L'approvazione **«mi sembra buono, procedi»**, ricevuta dopo la verifica dell'anteprima e la conferma che il logo proviene dalla ditta presente nell'app, autorizza la release `1.2.230`: bump patch, commit, push, pull request, merge e pubblicazione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+L'ordine **«pubblica la modifica»** autorizza la release `1.2.230` del solo Firebase Hosting. La PR `#223` è stata unita nel merge commit `11d577c2`; il workflow manuale `39947698947` ha completato validazione e deploy. La verifica HTTP pubblica conferma versione e generatore aggiornati.
+
+## Assistente locale operativo e proprietario delle Scadenze — 23/10/2026
+
+Diego autorizza con **«procedi»** il completamento locale coordinato dei due livelli dell'Assistente. Il livello base amplia la ricerca deterministica su Account, aziende, documenti e Scadenze, riconoscendo domande naturali, sinonimi e piccoli errori di digitazione. L'AI locale avanzata non accede direttamente al Vault e non esegue operazioni: restituisce esclusivamente intenti tipizzati di spiegazione, ricerca, selezione o chiarimento, che vengono convalidati ed eseguiti dal motore deterministico dell'app.
+
+L'archiviazione di un Account dall'Assistente richiede sempre una conferma esplicita, indipendentemente dal gesto laterale usato. Nel compositore delle Scadenze, quando il destinatario coincide con l'utente proprietario autenticato, il permesso di gestione è implicito e il controllo **Può gestire** non viene mostrato; per gli altri destinatari resta esplicito.
+
+Gli ordini **«pubblica anche la modifica precedente»** e **«poi continua con AI»** autorizzano il rilascio coordinato `1.2.231`: bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Rules, indici, migrazioni e dati reali restano esclusi.
 
 ## Spazi automatici nel compositore delle Scadenze — 23/10/2026
 

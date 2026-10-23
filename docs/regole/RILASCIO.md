@@ -1,12 +1,20 @@
 # Rilascio
 
-## Candidata 1.2.230 — scheda aziendale PDF compatta — 23/10/2026
+## Candidata 1.2.231 — Assistente locale operativo e proprietario Scadenze — 23/10/2026
+
+La ricerca deterministica dell'Assistente riconosce domande naturali su Account, aziende, documenti e Scadenze, sinonimi controllati e piccoli errori di digitazione. L'AI locale avanzata produce soltanto intenti tipizzati e convalidati di spiegazione, ricerca, selezione o chiarimento; il motore deterministico resta l'unico componente che consulta i record locali. Scritture, modifiche e cancellazioni non sono consentite.
+
+L'archiviazione di un Account dall'Assistente richiede sempre una conferma esplicita. Nel compositore Scadenze il proprietario autenticato dispone implicitamente del permesso di gestione e non vede il controllo ridondante **Può gestire**; per gli altri destinatari il controllo resta configurabile.
+
+Gli ordini **«pubblica anche la modifica precedente»** e **«poi continua con AI»** autorizzano bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+## Esito operativo 1.2.230 — scheda aziendale PDF compatta — 23/10/2026
 
 La scheda aziendale generata dall'app adotta un'impaginazione A4 compatta con logo della ditta salvato nell'app, intestazione aziendale e sezioni in tabella. Il caso ordinario rientra in una pagina; i testi eccezionalmente lunghi proseguono senza troncamento. Non vengono introdotti timbro, firma, richieste del fornitore, dati bancari o nuovi campi.
 
 L'ordine **«mi sembra buono, procedi»**, ricevuto dopo la verifica dell'anteprima e la conferma della provenienza del logo, autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
 
-La candidata ha superato i test PDF e integrazione **35/35**, controllo sintassi, budget prestazionale, documentazione, `git diff --check` e ispezione visiva dell'anteprima A4.
+La candidata ha superato i test PDF e integrazione **35/35**, controllo sintassi, budget prestazionale, documentazione, `git diff --check` e ispezione visiva dell'anteprima A4. La PR `#223` è stata unita nel merge commit `11d577c2`; il workflow manuale `39947698947` ha completato validazione e deploy del solo Hosting. La verifica HTTP pubblica restituisce `200` e conferma versione `1.2.230` e generatore aggiornato.
 
 ## Candidata 1.2.229 — spazi automatici nei testi delle Scadenze — 23/10/2026
 

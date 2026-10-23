@@ -3,7 +3,9 @@ import { normalizeSearchText } from './search-normalizer.js';
 const STOP_WORDS = new Set([
     'a', 'al', 'alla', 'alle', 'che', 'cerca', 'cercando', 'cerco', 'codex', 'dei', 'del', 'dell', 'della', 'di',
     'fammi', 'gli', 'ho', 'il', 'in', 'la', 'le', 'mi', 'mostra', 'mostrami', 'nell', 'per', 'puoi',
-    'avevo', 'cera', 'cosa', 'ero', 'ma', 'non', 'quale', 'quali', 'ricordo', 'ricordavo', 'sicuro', 'solo', 'stavo', 'sto', 'su',
+    'avevo', 'cera', 'come', 'cosa', 'dove', 'ero', 'ma', 'non', 'quando',
+    'quale', 'quali', 'ricordo', 'ricordavo', 'scade', 'scadera',
+    'scadere', 'sicuro', 'solo', 'stavo', 'sto', 'su',
     'trovami', 'trova', 'trovare', 'trovo', 'un', 'una', 'uno', 'vorrei'
 ]);
 const OPEN_WORDS = new Set(['apre', 'apri', 'aprimi', 'aprire', 'portami', 'vai', 'visualizza']);
@@ -18,11 +20,11 @@ const ORDINALS = new Map([
     ['ultimo', -1], ['ultima', -1]
 ]);
 const SYNONYMS = new Map([
-    ['banca', ['banca', 'bancario', 'conto']], ['conto', ['conto', 'banca', 'bancario']],
-    ['documento', ['documento', 'identita', 'patente', 'passaporto']],
-    ['identita', ['identita', 'documento']], ['societa', ['societa', 'azienda', 'impresa']],
-    ['azienda', ['azienda', 'societa', 'impresa']], ['scadenza', ['scadenza']], ['scadenze', ['scadenza']], ['account', ['account']]
-]);
+    ['banca', 'bancario', 'conto'], ['documento', 'identita', 'patente', 'passaporto'],
+    ['societa', 'azienda', 'impresa'], ['scadenza', 'scadenze', 'promemoria'], ['account'],
+    ['assicurazione', 'polizza', 'rca'], ['auto', 'automobile', 'macchina', 'veicolo'],
+    ['moto', 'motociclo', 'motocicletta'], ['bollo', 'tassa', 'automobilistica']
+].flatMap(group => group.map(word => [word, group])));
 const CATEGORY_WORDS = new Set(['account', 'azienda', 'banca', 'conto', 'documento', 'identita', 'scadenza', 'scadenze', 'societa']);
 
 const safeText = record => normalizeSearchText([
@@ -31,10 +33,6 @@ const safeText = record => normalizeSearchText([
 
 function meaningfulTokens(query) {
     return normalizeSearchText(query).split(' ').filter(token => token.length > 1 && !STOP_WORDS.has(token) && !OPEN_WORDS.has(token));
-}
-
-function matchesToken(recordText, token) {
-    return (SYNONYMS.get(token) || [token]).some(candidate => recordText.includes(candidate));
 }
 
 function editDistance(left, right) {
@@ -51,6 +49,18 @@ function editDistance(left, right) {
         previous.splice(0, previous.length, ...current);
     }
     return previous[right.length];
+}
+
+function fuzzyWordMatch(recordText, token) {
+    if (token.length < 5) return false;
+    const maximum = token.length >= 9 ? 2 : 1;
+    return recordText.split(' ').some(word => Math.abs(word.length - token.length) <= maximum
+        && editDistance(word, token) <= maximum);
+}
+
+function matchesToken(recordText, token) {
+    return (SYNONYMS.get(token) || [token]).some(candidate => recordText.includes(candidate)
+        || fuzzyWordMatch(recordText, candidate));
 }
 
 function resemblesCompany(record, queryTokens) {
@@ -146,6 +156,29 @@ export class VaultConversationEngine {
         if (!items.length && this.#lastResults.length) items = searchRecords(this.#lastResults, query);
         if (items.length) this.#lastResults = items;
         return { message: describe(items), items };
+    }
+
+    executeIntent(intent, fallbackQuery = '') {
+        if (!intent || typeof intent !== 'object') {
+            return { message: 'Non ho compreso la richiesta. Prova a indicare cosa vuoi cercare.', items: [] };
+        }
+        if (intent.type === 'semantic_search') return this.ask(intent.query || fallbackQuery);
+        if (intent.type === 'select_result') {
+            const item = this.#lastResults[Number(intent.resultOrdinal) - 1];
+            return item
+                ? { message: `Apro ${item.title}.`, items: [item], navigateTo: item.href }
+                : { message: 'Risultato non disponibile.', items: [] };
+        }
+        if (intent.type === 'explain_page' || intent.type === 'clarify') {
+            return {
+                message: intent.query || 'Non ho ancora informazioni sufficienti per rispondere.',
+                items: []
+            };
+        }
+        return {
+            message: 'Richiesta non disponibile.',
+            items: []
+        };
     }
 
     removeRecord(id) {

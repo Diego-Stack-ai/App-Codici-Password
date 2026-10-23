@@ -1,11 +1,11 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.230';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.230';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.231';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.231';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
-import { archiveConfirmMessage, archiveRecipients } from '../settings/archive-account-model.js';
+import { archiveConfirmMessage } from '../settings/archive-account-model.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t, getCurrentLanguage } from '../../translations.js';
 import { createLocalAiAssistantService } from './local-ai-assistant-service.js';
@@ -15,7 +15,7 @@ let activeController = null;
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.230'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.231'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -59,14 +59,16 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             advanced = createLocalAiAssistantService({ language:getCurrentLanguage() });
             dialog = createAssistantUI({
             onAsk: query => conversation.ask(query),
-            onExplain: advanced ? (query, context) => advanced.ask(query, context) : null,
+            onExplain: advanced ? async (query, context) => {
+                const intent = await advanced.ask(query, context);
+                return conversation.executeIntent(intent, query);
+            } : null,
             onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
-                onArchive: async (item, { requireConfirmation = true } = {}) => {
+                onArchive: async item => {
                     const target = item.archiveAction;
                     if (!target) return false;
-                    const mustConfirm = requireConfirmation || archiveRecipients(target).length > 0;
-                    if (mustConfirm && !await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(target, t))) return false;
+                    if (!await showConfirmModal(t('confirm_archive_title'), archiveConfirmMessage(target, t))) return false;
                     try {
                         const result = await archiveAccount(user.uid, target);
                         conversation.removeRecord(item.id);

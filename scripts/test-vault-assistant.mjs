@@ -40,11 +40,25 @@ assert.equal(contextual.ask("apri l'azienda Demo Nord").navigateTo, '/company-de
 conversation.removeRecord('account:company-1');
 assert.equal(conversation.ask('banca Demo Nord').items.length, 0);
 conversation.clear();
-const [loaderSource, uiSource, controllerSource, guideSource] = await Promise.all([
+const natural = new VaultConversationEngine([
+    { id:'deadline:insurance', kind:'scadenza', title:'Assicurazione', subtitle:'Peugeot e-208 · Scadenza 31/03/2027',
+        keywords:['polizza', 'auto', 'GM277DC'], href:'/deadline-insurance' },
+    { id:'deadline:tax', kind:'scadenza', title:'Bollo', subtitle:'Peugeot e-208 · Scadenza 31/12/2027',
+        keywords:['auto', 'GM277DC'], href:'/deadline-tax' }
+]);
+const naturalDeadline = natural.ask('quando scade la polizza della macchina Peugeut');
+assert.equal(naturalDeadline.items.length, 1);
+assert.equal(naturalDeadline.items[0].href, '/deadline-insurance');
+assert.equal(natural.executeIntent({type:'semantic_search', query:'bollo Peugeot'}, '').items[0].href, '/deadline-tax');
+assert.equal(natural.executeIntent({type:'select_result', resultOrdinal:1}, '').navigateTo, '/deadline-tax');
+assert.match(natural.executeIntent({type:'clarify', query:'Quale veicolo intendi?'}, '').message, /Quale veicolo/);
+assert.doesNotMatch(natural.executeIntent({type:'delete_record', query:'elimina tutto'}, '').message, /elimina tutto/);
+const [loaderSource, uiSource, controllerSource, guideSource, localAiSource] = await Promise.all([
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/vault-data-loader.js', import.meta.url), 'utf8'),
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8'),
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8'),
-    readFile(new URL('../Frontend/public/assets/js/guide.js', import.meta.url), 'utf8')
+    readFile(new URL('../Frontend/public/assets/js/guide.js', import.meta.url), 'utf8'),
+    readFile(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-assistant-service.js', import.meta.url), 'utf8')
 ]);
 assert.match(loaderSource, /iconSource: data\.logo \|\| data\.avatar/);
 assert.match(loaderSource, /archiveAction:/);
@@ -66,8 +80,8 @@ assert.equal(deadlineResult.subtitle, 'Utente Demo · Veicolo demo ZZ000ZZ · Sc
 assert.ok(deadlineResult.keywords.includes('ZZ000ZZ'));
 assert.ok(deadlineResult.keywords.includes('14/02/2027'));
 assert.match(uiSource, /new SwipeList\(selector/);
-assert.match(uiSource, /onSwipeLeft: card => \{ void run\(card, true\); \}/);
-assert.match(uiSource, /onSwipeRight: card => \{ void run\(card, false\); \}/);
+assert.match(uiSource, /onSwipeLeft: card => \{ void run\(card\); \}/);
+assert.match(uiSource, /onSwipeRight: card => \{ void run\(card\); \}/);
 assert.match(uiSource, /probeMicrophoneAccess\(/);
 assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
 assert.match(uiSource, /pendingSpokenAnswer = Promise\.resolve\(ask\(transcriptState\.final\)\)/);
@@ -76,14 +90,18 @@ assert.match(uiSource, /const vaultAnswer = onAsk\(value\);[\s\S]*vaultAnswer\?\
 assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
 assert.match(uiSource, /vault-assistant-mode[^\n]*Cerca/);
 assert.match(uiSource, /vault-assistant-help/);
-assert.match(uiSource, /nome completo o parziale di un Account/);
+assert.match(uiSource, /Account, aziende, documenti e scadenze/);
 assert.match(uiSource, /if \(!supportsLocalRecognition\) \{ beginRecognition\(false\); return; \}/);
 assert.match(uiSource, /microphone\.addEventListener\('click', async \(\) => \{[\s\S]*speechSynthesis\?\.prime\(\);[\s\S]*await probeMicrophoneAccess/);
 assert.match(uiSource, /recognition\.addEventListener\('end',[\s\S]*speechSynthesis\?\.speakAfterAudioRelease\(message\)/);
 assert.doesNotMatch(uiSource, /speechSynthesis\.cancel\(\);[\s\S]{0,200}speechSynthesis\.speak\(/);
 assert.doesNotMatch(uiSource, /ask\(transcriptState\.final, true\)/);
 assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
-assert.match(controllerSource, /archiveRecipients\(target\)\.length > 0/);
+assert.match(controllerSource, /if \(!await showConfirmModal\(t\('confirm_archive_title'\), archiveConfirmMessage\(target, t\)\)\) return false/);
+assert.doesNotMatch(controllerSource, /mustConfirm|requireConfirmation/);
+assert.match(controllerSource, /conversation\.executeIntent\(intent, query\)/);
+assert.match(localAiSource, /Vietate scritture, modifiche, eliminazioni/);
+assert.match(localAiSource, /return intent;/);
 assert.match(guideSource, /getElementById\('footer-center-actions'\)/);
 assert.match(guideSource, /documentation-button-footer/);
 console.log('Vault assistant search tests: OK');

@@ -67,7 +67,10 @@ test('il controller delega la navigazione al salvataggio della bozza', async () 
     const contacts = await readFile(new URL('../shared/gestione-destinatari.js', root), 'utf8');
     assert.match(controller, /createDeadlineRecipientController\(\{ onManageContacts \} = \{\}\)/);
     assert.match(controller, /await onManageContacts\(returnTo\)/);
+    assert.match(controller, /canManage: recipient\.canManage \|\| isOwner\(recipient\)/);
+    assert.match(controller, /\.\.\.\(owner \? \[\] : \[createElement\('label'/);
     assert.match(editor, /sessionStorage\.setItem\(DEADLINE_EDITOR_RETURN_DRAFT_KEY/);
+    assert.match(editor, /recipientController\.init\(user\.email\)/);
     assert.match(editor, /restoreDeadlineEditorAfterRecipientManagement\(\)/);
     assert.match(contacts, /ALLOWED_RETURN_PAGES/);
     assert.match(contacts, /safeReturnTarget\(new URLSearchParams/);
