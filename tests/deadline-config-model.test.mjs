@@ -127,6 +127,42 @@ test('la configurazione automezzi annida oggetti, modelli, targhe e testo senza 
     assert.equal(legacy.deadlineTypes[0].emailObjects, undefined);
 });
 
+test('il compositore normalizza i confini senza raddoppiare gli spazi gia configurati', () => {
+    const compose = message => model.compileDeadlineMessage({
+        objectText: 'Assicurazione',
+        model: 'Peugeot e-208',
+        plate: 'GM277DC',
+        message
+    });
+
+    assert.equal(compose({
+        beforeObject: 'È in scadenza la ',
+        betweenObjectModel: ' della ',
+        betweenModelPlate: ' con targa ',
+        afterPlate: '.'
+    }), 'È in scadenza la Assicurazione della Peugeot e-208 con targa GM277DC.');
+    assert.equal(compose({
+        beforeObject: 'È in scadenza la',
+        betweenObjectModel: 'della',
+        betweenModelPlate: 'con targa',
+        afterPlate: '.'
+    }), 'È in scadenza la Assicurazione della Peugeot e-208 con targa GM277DC.');
+});
+
+test('il compositore conserva apostrofi e punteggiatura senza spazi impropri', () => {
+    assert.equal(model.compileDeadlineMessage({
+        objectText: 'assicurazione',
+        model: 'Land Rover',
+        plate: 'GK910HB',
+        message: {
+            beforeObject: "È in scadenza l'",
+            betweenObjectModel: 'della',
+            betweenModelPlate: ', targa',
+            afterPlate: '!'
+        }
+    }), "È in scadenza l'assicurazione della Land Rover, targa GK910HB!");
+});
+
 test('la conversione legacy assegna ogni mezzo soltanto al testo email coerente', () => {
     const legacy = {
         deadlineTypes: [{name: 'Assicurazione', period: 14, freq: 7}],

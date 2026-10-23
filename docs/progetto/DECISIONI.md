@@ -1,5 +1,11 @@
 # Decisioni
 
+## 23/10/2026 — spazi automatici nel compositore delle Scadenze
+
+Il compositore dei messaggi delle Scadenze non affida più agli spazi iniziali o finali inseriti dall'utente la separazione tra testo, oggetto, modello e targa. Ogni frammento conserva il proprio contenuto ma viene ripulito ai confini; il compositore inserisce un solo spazio quando serve e nessuno prima della punteggiatura o dopo parentesi aperte e apostrofi. Le configurazioni già corrette non producono quindi doppi spazi, mentre quelle prive del raccordo vengono composte correttamente. Anteprima, catalogo del form e salvataggio devono usare la stessa funzione centrale.
+
+I Documenti personali restano esclusi da questa ricomposizione e continuano a seguire il flusso dedicato del Profilo. Le Scadenze esistenti non vengono riscritte in massa: i cinque messaggi già individuati richiedono una ricomposizione mirata dopo la pubblicazione del nuovo compositore.
+
 ## 22/10/2026 — tipo obbligatorio prima della regola
 
 Una nuova Scadenza non assume un ambito predefinito. L'utente sceglie prima il **Tipo di scadenza**, poi la **Regola** e infine il **Riferimento**; la pianificazione e il testo restano proprietà della regola. La modifica di una Scadenza conserva invece la selezione persistita. **Documenti personali** è un percorso guidato verso i Documenti del Profilo e non permette di creare dal form generico una Scadenza scollegata dalla propria sorgente.
