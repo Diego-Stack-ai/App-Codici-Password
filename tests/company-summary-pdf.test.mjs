@@ -14,6 +14,20 @@ test('PDF contains embedded fonts, correct title and no active actions', async (
     assert.equal(pdf.catalog.has(PDFName.of('AA')), false);
     assert.ok(bytes.length > 1000); assert.ok(pdf.getPage(0).node.Resources());
 });
+test('a normal complete company sheet stays on one page and embeds its logo', async () => {
+    const value = model();
+    value.logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    value.sections.push(
+        {title: 'Dati fiscali', rows: [['Partita IVA', '01234567890'], ['Codice SDI', 'ABC1234'], ['CCIAA', 'RM - 123456'], ['Data iscrizione', '10/07/2019']].map(([label, content]) => ({label, value: content}))},
+        {title: 'Referente', rows: [['Nome', 'Diego'], ['Cognome', 'Boschetto'], ['Ruolo', 'Amministratore'], ['Cellulare', '3490000000']].map(([label, content]) => ({label, value: content}))},
+        {title: 'Contatti', rows: [['Telefono', '0490000000'], ['Fax', '0490000001'], ['PEC', 'azienda@legalmail.it'], ['Email amministrazione', 'amministrazione@example.it']].map(([label, content]) => ({label, value: content}))},
+        {title: 'Sede legale', rows: [['Indirizzo', 'Piazzale delle Medaglie d’Oro'], ['Civico', '7'], ['Città', 'Roma'], ['Provincia', 'RM'], ['CAP', '00136']].map(([label, content]) => ({label, value: content}))},
+        {title: 'Altra sede 1', rows: [['Tipo', 'Sede operativa'], ['Indirizzo', 'Via A. Volta'], ['Civico', '23'], ['Città', 'Veggiano'], ['Provincia', 'PD'], ['CAP', '35030']].map(([label, content]) => ({label, value: content}))}
+    );
+    const pdf = await PDFDocument.load(await generateCompanySummaryPdf(value, options));
+    assert.equal(pdf.getPageCount(), 1);
+    assert.ok(pdf.getPage(0).node.Resources()?.lookup(PDFName.of('XObject')));
+});
 test('long fields and words paginate without silently truncating the model', async () => {
     const value = model(); value.sections[0].rows[0].value = ('Indirizzo molto lungo con città e accenti. '.repeat(160)) + 'X'.repeat(1000);
     const pdf = await PDFDocument.load(await generateCompanySummaryPdf(value, options));
@@ -21,7 +35,7 @@ test('long fields and words paginate without silently truncating the model', asy
 });
 test('unsupported glyphs and unexpected data cannot silently enter the PDF', async () => {
     for (const mutate of [value => {value.password = 'secret';}, value => {value.sections[0].rows[0].value = '😀';},
-        value => {value.sections[0].rows[0].value = 'x'.repeat(20001);}]) {
+        value => {value.sections[0].rows[0].value = 'x'.repeat(20001);}, value => {value.logo = 'data:image/svg+xml;base64,AAAA';}]) {
         const value = model(); mutate(value); await assert.rejects(generateCompanySummaryPdf(value, options));
     }
 });

@@ -27,6 +27,13 @@ test('unchecked groups are never decrypted and empty rows are omitted', async ()
     const result = await f.read(selected); assert.deepEqual(f.reads, ['enc:Società Fittizia']); assert.equal(result.sections.length, 1);
     await assert.rejects(f.read({...selected, arbitrary: true}));
 });
+test('the company logo enters the model only with the identity group', async () => {
+    const f = fixture(); f.record.logo = 'data:image/png;base64,AAAA';
+    const identity = Object.fromEntries(COMPANY_SUMMARY_GROUPS.map(key => [key, key === 'identity']));
+    assert.equal((await f.read(identity)).logo, f.record.logo);
+    const contacts = Object.fromEntries(COMPANY_SUMMARY_GROUPS.map(key => [key, key === 'contacts']));
+    assert.equal((await f.read(contacts)).logo, undefined);
+});
 for (const boundary of ['lock', 'change', 'abort', 'record']) test(`PDF projection rejects late results after ${boundary}`, async () => {
     let release, first = true; const f = fixture({decrypt: value => first ? (first = false, new Promise(resolve => {release = resolve;})) : value.slice(4)});
     const pending = f.read(all()); await new Promise(setImmediate); const rejected = assert.rejects(pending);
