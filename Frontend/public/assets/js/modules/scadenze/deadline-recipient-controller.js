@@ -2,8 +2,8 @@ import { clearElement, createElement } from '../../dom-utils.js';
 import { mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
 
 export function createDeadlineRecipientController({ onManageContacts } = {}) {
-    let recipients = [];
-    let contacts = [];
+    let recipients = [], contacts = [], ownerEmail = '';
+    const isOwner = recipient => Boolean(ownerEmail && normalizeRecipientEmail(recipient?.email || recipient?.address) === ownerEmail);
 
     function renderRecipients() {
         const container = document.getElementById('deadline-recipients-list');
@@ -14,10 +14,10 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
             return;
         }
         recipients.forEach((recipient, index) => {
+            const owner = isOwner(recipient);
             const emailToggle = createElement('input', { type: 'checkbox', checked: recipient.sendEmail, dataset: { recipientIndex: String(index), channel: 'email' } });
             const pushToggle = createElement('input', { type: 'checkbox', checked: recipient.sendPush, dataset: { recipientIndex: String(index), channel: 'push' } });
-            const manageToggle = createElement('input', { type: 'checkbox', checked: recipient.canManage, dataset: { recipientIndex: String(index), channel: 'manage' } });
-            container.appendChild(createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush || recipient.canManage ? '' : ' is-paused'}` }, [
+            container.appendChild(createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush || recipient.canManage || owner ? '' : ' is-paused'}` }, [
                 createElement('div', {}, [
                     createElement('span', { className: 'deadline-recipient-name', textContent: recipient.displayName || 'Destinatario' }),
                     createElement('span', { className: 'deadline-recipient-email', textContent: recipient.email })
@@ -25,7 +25,10 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
                 createElement('div', { className: 'deadline-recipient-controls' }, [
                     createElement('label', { className: 'deadline-channel-label' }, [emailToggle, document.createTextNode('Email')]),
                     createElement('label', { className: 'deadline-channel-label' }, [pushToggle, document.createTextNode('Push')]),
-                    createElement('label', { className: 'deadline-channel-label' }, [manageToggle, document.createTextNode('Può gestire')]),
+                    ...(owner ? [] : [createElement('label', { className: 'deadline-channel-label' }, [
+                        createElement('input', { type: 'checkbox', checked: recipient.canManage, dataset: { recipientIndex: String(index), channel: 'manage' } }),
+                        document.createTextNode('Può gestire')
+                    ])]),
                     createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: 'Rimuovi destinatario' }, [
                         createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'delete' })
                     ])
@@ -56,7 +59,8 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
         renderRecipients();
     }
 
-    function init() {
+    function init(value = '') {
+        ownerEmail = normalizeRecipientEmail(value);
         document.getElementById('btn-manage-deadline-contacts')?.addEventListener('click', async () => {
             const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
             if (onManageContacts) {
@@ -94,7 +98,10 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
 
     return {
         init,
-        getRecipients: () => recipients.map(recipient => ({ ...recipient })),
+        getRecipients: () => recipients.map(recipient => ({
+            ...recipient,
+            canManage: recipient.canManage || isOwner(recipient)
+        })),
         getContacts: () => contacts.map(contact => ({ ...contact })),
         setRecipients(value) {
             recipients = Array.isArray(value) ? value.map(recipient => ({ ...recipient })) : [];

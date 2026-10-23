@@ -1,4 +1,4 @@
-import { auth, db, functions } from '../../firebase-config.js?v=1.2.230';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.231';
 import { deleteField, doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20261022a';

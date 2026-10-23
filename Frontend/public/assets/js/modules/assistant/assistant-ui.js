@@ -38,7 +38,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', 'Agente Codex');
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
-    heading.append(element('h2', '', 'Agente Codex'), element('p', '', 'Conversazione locale, protetta e in sola lettura'));
+    heading.append(element('h2', '', 'Agente Codex'), element('p', '', 'Ricerca locale protetta; ogni azione richiede conferma'));
     const headerActions = element('div', 'vault-assistant-header-actions');
     const help = element('button', 'vault-assistant-help', '?');
     help.type = 'button'; help.setAttribute('aria-label', 'Istruzioni Agente Codex'); help.setAttribute('aria-expanded', 'false');
@@ -57,7 +57,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     instructions.hidden = true;
     instructions.append(
         element('strong', '', 'Come usare Agente Codex'),
-        element('p', '', 'In Cerca puoi cercare il nome completo o parziale di un Account, poi dire “apri il secondo”, “apri il due” oppure indicare il nome esatto.'),
+        element('p', '', 'In Cerca puoi trovare Account, aziende, documenti e scadenze anche con parole non esatte, poi dire “apri il secondo” oppure indicare il nome.'),
         element('p', '', onExplain
             ? 'In Chiedi il pacchetto locale spiega questa pagina senza inviare dati a servizi esterni.'
             : 'Per usare Chiedi installa e verifica AI.1 Locale oppure AI.2 Avanzata per PC nelle Impostazioni.')
@@ -179,49 +179,47 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         conversation.append(group); conversation.scrollTop = conversation.scrollHeight;
         if (items.some(item => item.archiveAction) && onArchive) {
             const selector = `.vault-assistant-result.swipe-row`;
-            const run = async (card, requireConfirmation) => {
+            const run = async card => {
                 const item = card.assistantItem;
                 if (!item?.archiveAction) return;
-                const completed = await onArchive(item, { requireConfirmation });
+                const completed = await onArchive(item);
                 if (!completed) window.setTimeout(() => { void addResults([item]); }, 500);
             };
             const swipeList = new SwipeList(selector, {
                 threshold: 0.15,
-                onSwipeLeft: card => { void run(card, true); },
-                onSwipeRight: card => { void run(card, false); }
+                onSwipeLeft: card => { void run(card); },
+                onSwipeRight: card => { void run(card); }
             });
             swipeLists.forEach(instance => instance.destroy());
             swipeLists.clear(); swipeLists.add(swipeList);
         }
     };
     let lastShortlist = [];
+    const presentAnswer = answer => {
+        const normalized = typeof answer === 'string' ? { message:answer, items:[] } : (answer || { message:'', items:[] });
+        if (normalized.items?.length) lastShortlist = normalized.items;
+        addBubble('assistant', normalized.message || 'Non ho trovato una risposta.');
+        void addResults(normalized.items || []);
+        if (normalized.navigateTo) window.setTimeout(() => { window.location.href = normalized.navigateTo; }, 450);
+        return normalized;
+    };
     const ask = query => {
         const value = query.trim(); if (!value) return;
         addBubble('user', value); input.value = '';
         if (!onExplain || activeMode === 'search') {
-            const answer = onAsk(value); if (answer.items?.length) lastShortlist = answer.items;
-            addBubble('assistant', answer.message); void addResults(answer.items || []);
-            if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
-            return answer;
+            return presentAnswer(onAsk(value));
         }
         const vaultAnswer = onAsk(value);
         if (vaultAnswer?.items?.length || vaultAnswer?.navigateTo) {
-            if (vaultAnswer.items?.length) lastShortlist = vaultAnswer.items;
-            addBubble('assistant', vaultAnswer.message); void addResults(vaultAnswer.items || []);
-            if (vaultAnswer.navigateTo) window.setTimeout(() => { window.location.href = vaultAnswer.navigateTo; }, 450);
-            return Promise.resolve(vaultAnswer);
+            return Promise.resolve(presentAnswer(vaultAnswer));
         }
         status.textContent = 'Elaborazione locale…';
-        return onExplain(value, { shortlist:lastShortlist }).then(message => {
-            addBubble('assistant', message); return { message, items:[] };
-        }).catch(() => {
+        return onExplain(value, { shortlist:lastShortlist }).then(presentAnswer).catch(() => {
             const fallback = onAsk(value);
             const message = fallback?.items?.length
                 ? fallback.message
                 : 'Il pacchetto locale non è pronto su questo dispositivo. Puoi continuare con Cerca.';
-            if (fallback?.items?.length) lastShortlist = fallback.items;
-            addBubble('assistant', message); void addResults(fallback?.items || []);
-            return { message, items:fallback?.items || [] };
+            return presentAnswer({ message, items:fallback?.items || [], navigateTo:fallback?.navigateTo });
         }).finally(() => { status.textContent = 'I dati segreti non vengono mostrati nella conversazione.'; });
     };
     searchRow.addEventListener('submit', event => { event.preventDefault(); void ask(input.value); });
