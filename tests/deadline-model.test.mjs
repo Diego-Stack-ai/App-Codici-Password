@@ -53,6 +53,22 @@ test('mantiene i fallback dei record storici', () => {
     assert.equal(result.vehicleLabel, 'Veicolo non specificato');
 });
 
+test('mostra una sola volta il testo completo delle nuove regole e conserva il fallback legacy', () => {
+    const complete = 'Promemoria: Olio motore da controllare sulla Hyundai I10 con targa FL790AX.';
+    assert.equal(model.deadlineTemplateMessage({
+        templateText: complete,
+        mode: 'automezzi',
+        veicolo_modello: 'Hyundai I10 - FL790AX',
+        ruleDomain: 'vehicles',
+        ruleId: 'deadlineConfig:legacy-5'
+    }), complete);
+    assert.equal(model.deadlineTemplateMessage({
+        templateText: 'Olio motore da controllare',
+        mode: 'automezzi',
+        veicolo_modello: 'Hyundai I10 - FL790AX'
+    }), "E' in scadenza Olio motore da controllare Hyundai I10 - FL790AX");
+});
+
 test('interpreta date ISO, italiane e Timestamp-like', () => {
     assert.equal(model.deadlineDate({ dueDate: '2026-09-30' }).getDate(), 30);
     assert.equal(model.deadlineDate({ dueDate: '30/09/2026' }).getMonth(), 8);

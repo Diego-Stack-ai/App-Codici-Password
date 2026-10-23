@@ -1,4 +1,4 @@
-import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.227';
+import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.228';
 import {
     multiFactor,
     onAuthStateChanged,

@@ -98,6 +98,13 @@ test("push helper filters scopes/tokens and normalizes/deduplicates recipients",
     templateText: "È in scadenza il tuo passaporto. Numero AA123.",
     veicolo_modello: "AA123"
   }, 4).body, "È in scadenza il tuo passaporto. Numero AA123.\nScadenza tra 4 giorni");
+  assert.equal(h.context.pushText({
+    ruleDomain: "vehicles",
+    ruleId: "deadlineConfig:legacy-5",
+    type: "Olio motore",
+    templateText: "Promemoria: Olio motore da controllare sulla Hyundai I10 con targa FL790AX.",
+    veicolo_modello: "Hyundai I10 - FL790AX"
+  }, 4).body, "Promemoria: Olio motore da controllare sulla Hyundai I10 con targa FL790AX.\nScadenza tra 4 giorni");
 });
 
 test("real scheduler and recipient sender retry next day, respect cadence and stop after expiry", async () => {

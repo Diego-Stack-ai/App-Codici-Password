@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.227';
+import { auth } from './firebase-config.js?v=1.2.228';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
