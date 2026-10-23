@@ -166,6 +166,18 @@ function messagePart(value) {
     return String(value || '');
 }
 
+const MESSAGE_PUNCTUATION_WITHOUT_LEADING_SPACE = /^[,.;:!?%)}\]»]/u;
+const MESSAGE_BOUNDARY_WITHOUT_TRAILING_SPACE = /[(\[{«'’]$/u;
+
+function appendDeadlineMessagePart(result, value) {
+    const part = messagePart(value).trim();
+    if (!part) return result;
+    if (!result) return part;
+    const separator = MESSAGE_PUNCTUATION_WITHOUT_LEADING_SPACE.test(part)
+        || MESSAGE_BOUNDARY_WITHOUT_TRAILING_SPACE.test(result) ? '' : ' ';
+    return `${result}${separator}${part}`;
+}
+
 export function normalizeDeadlineMessage(message = {}, defaults = {}) {
     return {
         beforeObject: messagePart(message.beforeObject ?? defaults.beforeObject),
@@ -177,8 +189,15 @@ export function normalizeDeadlineMessage(message = {}, defaults = {}) {
 
 export function compileDeadlineMessage({message = {}, objectText = '', model = '', plate = ''} = {}) {
     const parts = normalizeDeadlineMessage(message);
-    return `${parts.beforeObject}${String(objectText || '')}${parts.betweenObjectModel}${String(model || '')}`
-        + `${parts.betweenModelPlate}${String(plate || '')}${parts.afterPlate}`;
+    return [
+        parts.beforeObject,
+        objectText,
+        parts.betweenObjectModel,
+        model,
+        parts.betweenModelPlate,
+        plate,
+        parts.afterPlate
+    ].reduce(appendDeadlineMessagePart, '');
 }
 
 function normalizedEmailObject(item = {}, rule = {}, index = 0, defaults = {}) {

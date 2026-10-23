@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Spazi automatici nel compositore delle Scadenze — 23/10/2026
+
+Il controllo delle Scadenze riconciliate ha individuato cinque messaggi di automezzi nei quali il raccordo `con targa` viene unito al modello senza spazio. Le altre configurazioni contengono già spazi manuali ai confini dei campi; una semplice aggiunta indiscriminata produrrebbe quindi spazi doppi.
+
+Diego approva il piano che centralizza la correzione nel compositore: ogni frammento viene ripulito ai confini e unito con un solo spazio quando richiesto dal contesto, conservando apostrofi e punteggiatura senza separazioni improprie. La stessa funzione alimenta anteprima e testo usato dal form. I Documenti personali e le tre date moto già trascorse restano invariati.
+
+L'ordine **«Procediamo con questo piano»** autorizza implementazione locale, aggiornamento dei contratti e test pertinenti. Il successivo ordine **«l'altro agente che doveva sistemare le scadenze e aggiornare le scadenze ha finito, si può pubblicare»** autorizza la release `1.2.229`: bump patch, commit, push, pull request, merge e deploy del solo Firebase Hosting. Functions, Rules, indici, migrazioni e ulteriori scritture sui dati reali restano esclusi.
+
 ## Testo completo delle nuove Scadenze senza ricomposizione legacy — 23/10/2026
 
 Il collaudo reale della Scadenza **Olio motore** conferma che il nuovo form salva correttamente una frase completa, ma il Dettaglio e la Function e-mail la trattano ancora come il vecchio oggetto breve: aggiungono rispettivamente il prefisso storico e una seconda copia del riferimento veicolo. Il record reale non è corrotto e non richiede migrazione.

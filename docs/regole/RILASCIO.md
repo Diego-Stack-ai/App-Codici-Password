@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.229 — spazi automatici nei testi delle Scadenze — 23/10/2026
+
+Il compositore unico delle Scadenze normalizza i confini dei frammenti configurati e aggiunge un solo spazio quando necessario. Non inserisce spazi prima della punteggiatura né dopo apostrofi o parentesi aperte; anteprima e salvataggio usano la stessa funzione. I Documenti personali restano invariati.
+
+L'ordine **«si può pubblicare»**, ricevuto dopo la conclusione del riallineamento delle Scadenze reali, autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e ulteriori scritture sui dati reali restano esclusi.
+
+La candidata ha superato il compositore **21/21**, guida **6/6**, documentazione **11/11**, controllo versione, `git diff --check` e l'intera suite `npm test` con codice **0**.
+
 ## Esito operativo 1.2.228 — testo Scadenze non duplicato — 23/10/2026
 
 Le Scadenze create dal nuovo form conservano in `templateText` il messaggio finale già completo. Dettaglio, e-mail e notifiche Push riconoscono il collegamento strutturato tramite `ruleId` e `ruleDomain` e non aggiungono più prefisso storico, modello o targa una seconda volta. I record legacy privi del collegamento continuano a usare la composizione precedente.

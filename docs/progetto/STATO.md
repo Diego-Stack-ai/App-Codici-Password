@@ -1,5 +1,7 @@
 # Stato
 
+23/10/2026 — candidata `1.2.229`, compositore Scadenze con spazi automatici: la funzione centrale che unisce testo, oggetto, modello e targa ora normalizza i confini dei frammenti e inserisce un solo spazio quando serve, evitando doppi spazi nelle configurazioni che li contenevano già. Apostrofi, parentesi aperte e punteggiatura conservano la giunzione corretta. I Documenti personali restano fuori dal percorso. Il riallineamento delle Scadenze reali è stato concluso separatamente; la pubblicazione autorizzata riguarda esclusivamente il codice Hosting e non modifica altri dati. Verifiche verdi: compositore **21/21**, guida **6/6**, documentazione **11/11**, versione e `git diff --check`, oltre alla suite completa `npm test` con codice **0**.
+
 ## Release 1.2.228 pubblicata — testo Scadenza completo in Dettaglio, e-mail e Push — 23/10/2026
 
 La Scadenza reale **Olio motore** conserva correttamente nel record il testo completo configurato. La duplicazione osservata nasceva in due lettori legacy: il Dettaglio anteponeva nuovamente «E' in scadenza» e accodava il veicolo, mentre la Function e-mail accodava una seconda volta modello e targa.
