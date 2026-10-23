@@ -60,6 +60,8 @@ export function createCompanySummaryReader({context, getUser, source, isEncrypte
         const current = await load(); check(); if (JSON.stringify(current) !== fingerprint) fail();
         const nonempty = sections.filter(item => item.rows.length).map(item => Object.freeze({title: item.title, rows: Object.freeze(item.rows)}));
         if (!nonempty.length) fail();
-        return Object.freeze({title: 'Scheda aziendale', sections: Object.freeze(nonempty)});
+        let logo;
+        if (included.identity && typeof record.logo === 'string' && record.logo.length <= 1500000 && /^data:image\/(?:png|jpe?g);base64,/i.test(record.logo)) logo = record.logo;
+        return Object.freeze({title: 'Scheda aziendale', ...(logo ? {logo} : {}), sections: Object.freeze(nonempty)});
     };
 }

@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Scheda aziendale PDF compatta — 23/10/2026
+
+Diego richiede di sostituire la presentazione dispersiva del PDF aziendale con un'anagrafica compatta ispirata al modello fornito, senza copiarne le richieste specifiche, i campi bancari, il timbro o la firma. L'intestazione usa il logo dell'azienda presente nell'app, la ragione sociale e un riepilogo dei dati selezionati; il corpo conserva esclusivamente i gruppi già autorizzati dall'utente.
+
+Il caso aziendale ordinario deve rientrare in una sola pagina A4 attraverso righe compatte etichetta/valore. Testi eccezionalmente lunghi possono continuare su pagine successive senza essere tagliati. Password, PIN, note riservate, allegati, dati bancari e collegamenti Account restano esclusi.
+
+L'approvazione **«mi sembra buono, procedi»**, ricevuta dopo la verifica dell'anteprima e la conferma che il logo proviene dalla ditta presente nell'app, autorizza la release `1.2.230`: bump patch, commit, push, pull request, merge e pubblicazione del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Spazi automatici nel compositore delle Scadenze — 23/10/2026
 
 Il controllo delle Scadenze riconciliate ha individuato cinque messaggi di automezzi nei quali il raccordo `con targa` viene unito al modello senza spazio. Le altre configurazioni contengono già spazi manuali ai confini dei campi; una semplice aggiunta indiscriminata produrrebbe quindi spazi doppi.

@@ -6,34 +6,60 @@ import fontkit from '@pdf-lib/fontkit';
 export async function generateCompanySummaryPdf(model, {regularFont, boldFont, assertActive}) {
     const check = () => assertActive(); check();
     const validKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).every(key => keys.includes(key));
-    if (!validKeys(model, ['title', 'sections']) || model.title !== 'Scheda aziendale' || !Array.isArray(model.sections) || !model.sections.length || model.sections.length > 100) throw Error('PDF_MODEL_INVALID');
+    if (!validKeys(model, ['title', 'logo', 'sections']) || model.title !== 'Scheda aziendale' ||
+        !Array.isArray(model.sections) || !model.sections.length || model.sections.length > 100) throw Error('PDF_MODEL_INVALID');
     let total = 0, rows = 0;
+    const cleanText = value => {
+        if (typeof value !== 'string' || !value.trim() || value.length > 20000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) throw Error('PDF_TEXT_INVALID');
+        total += value.length; if (total > 110000) throw Error('PDF_SIZE_LIMIT');
+        return value.normalize('NFC').replace(/\r\n|\r/g, '\n').replace(/\t/g, ' ');
+    };
     const sections = model.sections.map(section => {
         if (!validKeys(section, ['title', 'rows']) || !Array.isArray(section.rows) || !section.rows.length) throw Error('PDF_MODEL_INVALID');
-        const text = value => {
-            if (typeof value !== 'string' || !value.trim() || value.length > 20000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) throw Error('PDF_TEXT_INVALID');
-            total += value.length; if (total > 110000) throw Error('PDF_SIZE_LIMIT');
-            return value.normalize('NFC').replace(/\r\n|\r/g, '\n').replace(/\t/g, ' ');
-        };
-        return {title: text(section.title), rows: section.rows.map(row => {
+        return {title: cleanText(section.title), rows: section.rows.map(row => {
             if (!validKeys(row, ['label', 'value']) || ++rows > 500) throw Error('PDF_MODEL_INVALID');
-            return {label: text(row.label), value: text(row.value)};
+            return {label: cleanText(row.label), value: cleanText(row.value)};
         })};
     });
+    const parseLogo = value => {
+        if (value == null || value === '') return null;
+        if (typeof value !== 'string' || value.length > 1500000) throw Error('PDF_LOGO_INVALID');
+        const match = value.match(/^data:image\/(png|jpe?g);base64,([A-Za-z0-9+/]+={0,2})$/i);
+        if (!match || match[2].length > 1400000) throw Error('PDF_LOGO_INVALID');
+        let binary;
+        try {binary = globalThis.atob(match[2]);} catch {throw Error('PDF_LOGO_INVALID');}
+        if (!binary.length || binary.length > 1000000) throw Error('PDF_LOGO_INVALID');
+        return {type: match[1].toLowerCase() === 'png' ? 'png' : 'jpg', bytes: Uint8Array.from(binary, char => char.charCodeAt(0))};
+    };
+    const logo = parseLogo(model.logo);
     const document = await PDFDocument.create(); check(); document.registerFontkit(fontkit);
     const regular = await document.embedFont(regularFont, {subset: true}); check();
     const bold = await document.embedFont(boldFont, {subset: true}); check();
+    let logoImage = null;
+    if (logo) {logoImage = logo.type === 'png' ? await document.embedPng(logo.bytes) : await document.embedJpg(logo.bytes); check();}
     const supported = new Set(regular.getCharacterSet()), boldSupported = new Set(bold.getCharacterSet());
     const validateGlyphs = (value, set) => {for (const char of value) if (char !== '\n' && !set.has(char.codePointAt(0))) throw Error('PDF_UNSUPPORTED_CHARACTER');};
     for (const section of sections) {
         validateGlyphs(section.title, boldSupported);
         for (const row of section.rows) {validateGlyphs(row.label.toUpperCase(), boldSupported); validateGlyphs(row.value, supported);}
     }
-    const width = 595.28, height = 841.89, margin = 40, available = width - 2 * margin;
-    const gap = 12, columnWidth = (available - gap) / 2;
-    const ink = rgb(0.10, 0.17, 0.25), muted = rgb(0.36, 0.42, 0.49), blue = rgb(0.04, 0.37, 0.72);
-    const line = rgb(0.84, 0.89, 0.94), panel = rgb(0.96, 0.98, 1), white = rgb(1, 1, 1);
-    const wrap = (value, font, size, maxWidth = available) => {
+    const companyName = sections.flatMap(section => section.rows).find(row => row.label.toLowerCase() === 'ragione sociale')?.value || 'Scheda aziendale';
+    validateGlyphs(companyName, boldSupported);
+    const sectionByTitle = title => sections.find(section => section.title.toLowerCase() === title)?.rows || [];
+    const field = (source, label) => source.find(row => row.label.toLowerCase() === label)?.value || '';
+    const legal = sectionByTitle('sede legale'), fiscal = sectionByTitle('dati fiscali'), contacts = sectionByTitle('contatti');
+    const legalAddress = [field(legal, 'indirizzo'), field(legal, 'civico')].filter(Boolean).join(', ');
+    const legalCity = [field(legal, 'cap'), field(legal, 'città'), field(legal, 'provincia') ? `(${field(legal, 'provincia')})` : ''].filter(Boolean).join(' ');
+    const headerLines = [
+        [legalAddress, legalCity].filter(Boolean).join(' - '),
+        [field(fiscal, 'partita iva') ? `P.IVA ${field(fiscal, 'partita iva')}` : '', field(fiscal, 'codice sdi') ? `SDI ${field(fiscal, 'codice sdi')}` : ''].filter(Boolean).join(' - '),
+        [field(contacts, 'telefono') ? `Tel. ${field(contacts, 'telefono')}` : '', field(contacts, 'pec')].filter(Boolean).join(' - ')
+    ].filter(Boolean);
+    const width = 595.28, height = 841.89, margin = 42, available = width - 2 * margin;
+    const labelWidth = 168, valueWidth = available - labelWidth;
+    const ink = rgb(0.10, 0.14, 0.20), muted = rgb(0.35, 0.39, 0.44), blue = rgb(0.04, 0.37, 0.72);
+    const line = rgb(0.76, 0.79, 0.83), pale = rgb(0.96, 0.97, 0.98), white = rgb(1, 1, 1);
+    const wrap = (value, font, size, maxWidth) => {
         const output = [];
         for (const paragraph of value.split('\n')) {
             if (!paragraph.trim()) {output.push(''); continue;}
@@ -43,91 +69,82 @@ export async function generateCompanySummaryPdf(model, {regularFont, boldFont, a
                 if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {current = candidate; continue;}
                 if (current) {output.push(current); current = '';}
                 for (const char of word) {
-                    if (font.widthOfTextAtSize(current + char, size) > maxWidth) {output.push(current); current = '';}
+                    if (current && font.widthOfTextAtSize(current + char, size) > maxWidth) {output.push(current); current = '';}
                     current += char;
                 }
             }
-            output.push(current);
+            if (current || !output.length) output.push(current);
         }
         return output;
     };
     let page, y;
-    const text = (value, x, at, font, size, color) => {if (value) page.drawText(value, {x, y: at, font, size, color});};
-    const newPage = () => {
+    const drawText = (value, x, at, font, size, color, options = {}) => {if (value) page.drawText(value, {x, y: at, font, size, color, ...options});};
+    const drawHeader = continuation => {
         check(); if (document.getPageCount() >= 40) throw Error('PDF_PAGE_LIMIT');
         page = document.addPage([width, height]);
-        page.drawRectangle({x: 0, y: height - 116, width, height: 116, color: blue});
-        text('CODICI & PASSWORD', margin, height - 38, bold, 9, white);
-        text('Scheda aziendale', margin, height - 75, bold, 25, white);
-        text('Riepilogo ordinato dei dati selezionati', margin, height - 96, regular, 10, white);
+        const top = height - 38;
+        if (logoImage) {
+            const scale = Math.min(150 / logoImage.width, 54 / logoImage.height, 1);
+            page.drawImage(logoImage, {x: margin, y: top - logoImage.height * scale, width: logoImage.width * scale, height: logoImage.height * scale});
+        } else {
+            page.drawRectangle({x: margin, y: top - 46, width: 46, height: 46, color: blue});
+            const initials = companyName.split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]?.toUpperCase()).join('') || 'AZ';
+            const initialsWidth = bold.widthOfTextAtSize(initials, 15);
+            drawText(initials, margin + (46 - initialsWidth) / 2, top - 29, bold, 15, white);
+        }
+        const nameLines = wrap(companyName, bold, 12, 290).slice(0, 2);
+        let nameY = top - 4;
+        for (const value of nameLines) {drawText(value, width - margin - bold.widthOfTextAtSize(value, 12), nameY, bold, 12, ink); nameY -= 15;}
+        for (const lineValue of headerLines.flatMap(value => wrap(value, regular, 7.5, 290)).slice(0, 4)) {
+            drawText(lineValue, width - margin - regular.widthOfTextAtSize(lineValue, 7.5), nameY, regular, 7.5, muted); nameY -= 10;
+        }
+        page.drawLine({start: {x: margin, y: height - 105}, end: {x: width - margin, y: height - 105}, thickness: 1.2, color: blue});
+        const title = continuation ? 'SCHEDA AZIENDALE - CONTINUA' : 'SCHEDA AZIENDALE';
+        drawText(title, (width - bold.widthOfTextAtSize(title, 13)) / 2, height - 126, bold, 13, ink);
         y = height - 142;
     };
-    newPage();
+    const ensureSpace = required => {
+        if (y - required >= 48) return false;
+        drawHeader(true); return true;
+    };
+    const drawSectionTitle = (title, continuation = false) => {
+        page.drawRectangle({x: margin, y: y - 15, width: available, height: 15, color: blue});
+        drawText(`${title.toUpperCase()}${continuation ? ' - SEGUE' : ''}`, margin + 8, y - 11, bold, 7.7, white);
+        y -= 15;
+    };
+    drawHeader(false);
     for (const section of sections) {
-        const heading = continuation => {
-            for (const value of wrap(section.title + (continuation ? ' (segue)' : ''), bold, 13)) {
-                if (y < 92) newPage(); text(value, margin, y, bold, 13, blue); y -= 18;
-            }
-            y -= 4;
-        };
-        if (y < 145) newPage(); heading(false);
-        for (let index = 0; index < section.rows.length;) {
+        ensureSpace(35); drawSectionTitle(section.title);
+        for (const row of section.rows) {
             check();
-            const first = section.rows[index];
-            const firstWide = first.value.includes('\n') || first.value.length > 72;
-            const second = !firstWide ? section.rows[index + 1] : null;
-            const secondWide = second && (second.value.includes('\n') || second.value.length > 72);
-            const pair = second && !secondWide ? [first, second] : [first];
-            const cellWidth = pair.length === 2 ? columnWidth : available;
-            const innerWidth = cellWidth - 22;
-            const prepared = pair.map(row => ({
-                labels: wrap(row.label.toUpperCase(), bold, 8, innerWidth),
-                values: wrap(row.value, regular, 10.5, innerWidth)
-            }));
-            const blockHeight = Math.max(...prepared.map(cell => 18 + cell.labels.length * 11 + cell.values.length * 14)) + 12;
-            if (pair.length === 1 && blockHeight > y - 58) {
-                const cell = prepared[0];
-                let offset = 0;
-                while (offset < cell.values.length) {
-                    const labelLines = cell.labels.length;
-                    const capacity = Math.max(1, Math.floor((y - 70 - labelLines * 11) / 14));
-                    if (capacity < 2) {newPage(); heading(true); continue;}
-                    const values = cell.values.slice(offset, offset + capacity);
-                    const segmentHeight = 30 + labelLines * 11 + values.length * 14;
-                    page.drawRectangle({x: margin, y: y - segmentHeight, width: available, height: segmentHeight,
-                        color: panel, borderColor: line, borderWidth: 0.6});
-                    let cursor = y - 15;
-                    for (const label of cell.labels) {text(label, margin + 11, cursor, bold, 8, muted); cursor -= 11;}
-                    cursor -= 2;
-                    for (const value of values) {text(value, margin + 11, cursor, regular, 10.5, ink); cursor -= 14;}
-                    offset += values.length;
-                    y -= segmentHeight + 9;
-                    if (offset < cell.values.length) {newPage(); heading(true);}
-                }
-                index += 1;
-                continue;
+            const labels = wrap(row.label.toUpperCase(), bold, 7.2, labelWidth - 16);
+            const values = wrap(row.value, regular, 8.8, valueWidth - 16);
+            let offset = 0, firstSegment = true;
+            while (offset < values.length) {
+                const segmentLabels = firstSegment ? labels : wrap(`${row.label.toUpperCase()} - SEGUE`, bold, 7.2, labelWidth - 16);
+                const labelHeight = segmentLabels.length * 9;
+                const capacity = Math.max(1, Math.floor((y - 48 - 7) / 10));
+                const segmentValues = values.slice(offset, offset + capacity);
+                const rowHeight = Math.max(18, 7 + Math.max(labelHeight, segmentValues.length * 10));
+                if (ensureSpace(rowHeight)) drawSectionTitle(section.title, true);
+                page.drawRectangle({x: margin, y: y - rowHeight, width: labelWidth, height: rowHeight, color: pale, borderColor: line, borderWidth: 0.4});
+                page.drawRectangle({x: margin + labelWidth, y: y - rowHeight, width: valueWidth, height: rowHeight, color: white, borderColor: line, borderWidth: 0.4});
+                let labelY = y - 12;
+                for (const value of segmentLabels) {drawText(value, margin + 8, labelY, bold, 7.2, muted); labelY -= 9;}
+                let valueY = y - 12;
+                for (const value of segmentValues) {drawText(value, margin + labelWidth + 8, valueY, regular, 8.8, ink); valueY -= 10;}
+                y -= rowHeight; offset += segmentValues.length; firstSegment = false;
+                if (offset < values.length) {drawHeader(true); drawSectionTitle(section.title, true);}
             }
-            if (y - blockHeight < 58) {newPage(); heading(true);}
-            pair.forEach((row, cellIndex) => {
-                const x = margin + cellIndex * (columnWidth + gap);
-                page.drawRectangle({x, y: y - blockHeight, width: cellWidth, height: blockHeight,
-                    color: panel, borderColor: line, borderWidth: 0.6});
-                let cursor = y - 15;
-                for (const label of prepared[cellIndex].labels) {text(label, x + 11, cursor, bold, 8, muted); cursor -= 11;}
-                cursor -= 2;
-                for (const value of prepared[cellIndex].values) {text(value, x + 11, cursor, regular, 10.5, ink); cursor -= 14;}
-            });
-            y -= blockHeight + 9;
-            index += pair.length;
         }
-        y -= 10;
+        y -= 4;
     }
     const pages = document.getPages();
     pages.forEach((item, index) => {
-        item.drawLine({start: {x: margin, y: 43}, end: {x: width - margin, y: 43}, thickness: 0.5, color: line});
-        item.drawText('Scheda aziendale', {x: margin, y: 28, font: regular, size: 8, color: muted});
+        item.drawLine({start: {x: margin, y: 39}, end: {x: width - margin, y: 39}, thickness: 0.45, color: line});
+        item.drawText('Documento generato da Codici & Password', {x: margin, y: 25, font: regular, size: 7.5, color: muted});
         const number = `${index + 1} / ${pages.length}`;
-        item.drawText(number, {x: width - margin - regular.widthOfTextAtSize(number, 8), y: 28, font: regular, size: 8, color: muted});
+        item.drawText(number, {x: width - margin - regular.widthOfTextAtSize(number, 7.5), y: 25, font: regular, size: 7.5, color: muted});
     });
     document.setTitle('Scheda aziendale'); document.setCreator('Codici & Password'); document.setProducer('Codici & Password');
     check(); const bytes = await document.save(); check(); return bytes;

@@ -5,6 +5,12 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Scheda aziendale PDF — 23/10/2026
+
+La scheda usa una pagina A4 compatta con intestazione aziendale: logo salvato nel profilo, ragione sociale e riferimenti essenziali già compresi nei gruppi selezionati. Se il logo manca viene prodotto un monogramma neutro. Il corpo presenta sezioni a tabella con etichetta a sinistra e valore a destra; non espone timbro, firma, testo di richiesta o campi derivati da modelli esterni.
+
+Il caso ordinario con dati fiscali, referente, contatti, sede legale e una sede aggiuntiva deve rientrare in una pagina. La compattezza non autorizza il troncamento: valori eccezionalmente lunghi proseguono su pagine successive con intestazione e sezione di continuazione. La selezione **Dati azienda** controlla anche l'inclusione del logo; credenziali, note riservate, allegati, dati bancari e collegamenti Account restano sempre esclusi.
+
 ## Lista Scadenze — archivio separato dagli Account — 22/10/2026
 
 Il filtro **Archiviate** raccoglie le Scadenze con `completed: true` e non appartiene all’Archivio Account delle Impostazioni. Nelle viste attive lo scorrimento verso destra archivia la card; in Archiviate lo stesso gesto ripristina la Scadenza. Lo scorrimento verso sinistra è disabilitato per le Scadenze attive ed è disponibile soltanto sulle card archiviate, dove richiede una conferma prima della cancellazione definitiva. Le Scadenze ricevute sono consultabili ma non espongono gesti proprietari.

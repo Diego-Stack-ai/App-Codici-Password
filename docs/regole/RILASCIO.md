@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.230 — scheda aziendale PDF compatta — 23/10/2026
+
+La scheda aziendale generata dall'app adotta un'impaginazione A4 compatta con logo della ditta salvato nell'app, intestazione aziendale e sezioni in tabella. Il caso ordinario rientra in una pagina; i testi eccezionalmente lunghi proseguono senza troncamento. Non vengono introdotti timbro, firma, richieste del fornitore, dati bancari o nuovi campi.
+
+L'ordine **«mi sembra buono, procedi»**, ricevuto dopo la verifica dell'anteprima e la conferma della provenienza del logo, autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+La candidata ha superato i test PDF e integrazione **35/35**, controllo sintassi, budget prestazionale, documentazione, `git diff --check` e ispezione visiva dell'anteprima A4.
+
 ## Candidata 1.2.229 — spazi automatici nei testi delle Scadenze — 23/10/2026
 
 Il compositore unico delle Scadenze normalizza i confini dei frammenti configurati e aggiunge un solo spazio quando necessario. Non inserisce spazi prima della punteggiatura né dopo apostrofi o parentesi aperte; anteprima e salvataggio usano la stessa funzione. I Documenti personali restano invariati.

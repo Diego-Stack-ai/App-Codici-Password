@@ -1,5 +1,7 @@
 # Stato
 
+23/10/2026 — candidata `1.2.230`, scheda aziendale PDF compatta: il generatore usa un'intestazione bianca con logo aziendale, ragione sociale, sede legale e riferimenti essenziali, seguita da una tabella etichetta/valore che porta su una sola pagina il caso completo di riferimento. Non sono presenti timbro, firma, richieste del fornitore o nuovi campi. In assenza di logo viene mostrato un monogramma; contenuti eccezionalmente lunghi continuano su pagine aggiuntive senza troncamento. Test PDF e integrazione verdi **35/35** e rendering A4 ispezionato. La pubblicazione autorizzata riguarda esclusivamente Firebase Hosting e non modifica Functions, Rules, indici, migrazioni o dati reali.
+
 23/10/2026 — candidata `1.2.229`, compositore Scadenze con spazi automatici: la funzione centrale che unisce testo, oggetto, modello e targa ora normalizza i confini dei frammenti e inserisce un solo spazio quando serve, evitando doppi spazi nelle configurazioni che li contenevano già. Apostrofi, parentesi aperte e punteggiatura conservano la giunzione corretta. I Documenti personali restano fuori dal percorso. Il riallineamento delle Scadenze reali è stato concluso separatamente; la pubblicazione autorizzata riguarda esclusivamente il codice Hosting e non modifica altri dati. Verifiche verdi: compositore **21/21**, guida **6/6**, documentazione **11/11**, versione e `git diff --check`, oltre alla suite completa `npm test` con codice **0**.
 
 ## Release 1.2.228 pubblicata — testo Scadenza completo in Dettaglio, e-mail e Push — 23/10/2026
