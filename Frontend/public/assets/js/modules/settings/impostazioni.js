@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.232';
+import { auth, db } from '../../firebase-config.js?v=1.2.233';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -40,7 +40,7 @@ export async function initImpostazioni(user) {
     initSettingsEvents(user);
     setupSecurityToggles(currentUserData);
     setupAIAssistantToggle(user, currentUserData);
-    import('../assistant/assistant-package-settings.js?v=1.2.232&ai=20261019a')
+    import('../assistant/assistant-package-settings.js?v=1.2.233&ai=20261024a')
         .then(module => module.initAssistantPackageSettings())
         .catch(error => console.error('[LOCAL AI] Impostazioni pacchetto non disponibili.', error));
     setupCompanyAreaToggle(user, currentUserData);
@@ -63,7 +63,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.232');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.233');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -177,7 +177,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.232');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.233');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -309,7 +309,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.232');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.233');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -932,22 +932,20 @@ function setupPortableArchive(user) {
                 try { await preparedOutput?.cleanup(); } catch {}
                 if (action.active() && error?.name !== 'AbortError') {
                     const capacityCodes = new Set([
-                        'PORTABLE_CAPACITY_EXCEEDED', 'PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED',
-                        'PORTABLE_CHUNKED_ATTACHMENT_UNSUPPORTED'
+                        'PORTABLE_CAPACITY_EXCEEDED', 'PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED'
                     ]);
                     const inventoryCodes = new Set([
                         'PORTABLE_ATTACHMENT_INVENTORY_DUPLICATE', 'PORTABLE_ATTACHMENT_INVENTORY_MISMATCH',
-                        'PORTABLE_ATTACHMENT_OWNER_MISSING', 'PORTABLE_ATTACHMENT_METADATA_CONFLICT'
+                        'PORTABLE_ATTACHMENT_OWNER_MISSING', 'PORTABLE_ATTACHMENT_METADATA_CONFLICT',
+                        'PORTABLE_CHUNK_MANIFEST_INVALID'
                     ]);
-                    const message = capacityCodes.has(error?.code)
-                        ? 'Gli allegati superano la capacità sicura di questa versione. Ripeti senza allegati oppure riduci i file inclusi.'
-                        : inventoryCodes.has(error?.code)
-                            ? 'Gli allegati non corrispondono in modo completo alle schede: archivio interrotto senza creare una copia parziale.'
-                            : error?.code === 'PORTABLE_DECRYPT_FAILED'
-                                ? 'Un dato non è decifrabile: archivio interrotto senza creare una copia incompleta.'
-                                : error?.code === 'PORTABLE_STREAMING_REQUIRED'
-                                    ? 'Questo browser non può salvare progressivamente un archivio di queste dimensioni. Usa un browser desktop Chromium oppure ripeti senza allegati.'
-                                : 'Archivio non creato. Nessun dato è stato modificato.';
+                    let message = t('portable_generic_error');
+                    if (capacityCodes.has(error?.code)) message = t('portable_capacity_error');
+                    else if (inventoryCodes.has(error?.code)) message = t('portable_inventory_error');
+                    else if (error?.code === 'PORTABLE_DECRYPT_FAILED') message = t('portable_decrypt_error');
+                    else if (error?.code === 'PORTABLE_ATTACHMENT_DECRYPT_FAILED') {
+                        message = t('portable_attachment_decrypt_error');
+                    } else if (error?.code === 'PORTABLE_STREAMING_REQUIRED') message = t('portable_streaming_error');
                     showToast(message, 'error');
                 }
             } finally {
@@ -961,6 +959,7 @@ function setupPortableArchive(user) {
             createElement('h3', {className: 'modal-title', textContent: t('portable_title')}),
             createElement('p', {className: 'modal-text', textContent: t('portable_intro')}),
             createElement('p', {className: 'portable-archive-warning', textContent: t('portable_warning')}),
+            createElement('p', {className: 'modal-text', textContent: t('portable_large_note')}),
             password, confirmation,
             createElement('label', {className: 'portable-archive-choice'}, [includeAttachments, createElement('span', {textContent: t('portable_include_attachments')})]),
             createElement('label', {className: 'portable-archive-choice'}, [acknowledged, createElement('span', {textContent: t('portable_acknowledge')})]),
@@ -1137,7 +1136,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.232');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.233');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

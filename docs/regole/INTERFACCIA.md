@@ -5,6 +5,12 @@
 
 Questa raccolta mantiene distinti i contratti specialistici (pagine, registro canonico e design system) dalla guida implementativa Frontend. In caso di conflitto prevalgono i primi, secondo la gerarchia storica preservata nell’indice. Le note di avanzamento Frontend sono nello storico; non costituiscono una seconda roadmap.
 
+## Archivio portabile con allegati grandi — 24/10/2026
+
+Il dialogo di esportazione spiega prima dell'avvio che gli allegati a blocchi, inclusi i video fino a 512 MiB, richiedono un browser desktop capace di salvare progressivamente su file. I messaggi distinguono capacità superata, inventario o manifest incoerente, dato non decifrabile, blocco non autenticabile e browser privo dello streaming necessario. Nessuno di questi casi deve essere mostrato come successo o lasciare intendere che esista una copia completa.
+
+Nel visualizzatore offline l'avviso chiarisce che gli allegati grandi vengono letti e salvati progressivamente. La navigazione resta disponibile soltanto dopo la verifica completa dell'archivio; il comando di download esegue una seconda passata autenticata e, oltre 8 MiB, richiede il salvataggio diretto su file. I limiti non vengono nascosti dietro un errore generico e sono tradotti nelle otto lingue supportate dal pannello Impostazioni.
+
 ## Scheda aziendale PDF — 23/10/2026
 
 La scheda usa una pagina A4 compatta con intestazione aziendale: logo salvato nel profilo, ragione sociale e riferimenti essenziali già compresi nei gruppi selezionati. Se il logo manca viene prodotto un monogramma neutro. Il corpo presenta sezioni a tabella con etichetta a sinistra e valore a destra; non espone timbro, firma, testo di richiesta o campi derivati da modelli esterni.

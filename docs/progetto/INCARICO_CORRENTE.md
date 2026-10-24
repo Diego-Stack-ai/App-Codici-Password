@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## Archivio portatile con video a blocchi — 24/10/2026
+
+Diego conferma come decisione di prodotto che l'Archivio portatile deve includere anche gli allegati cifrati a blocchi, compreso il video di circa 485 MB, dentro l'unico file dati cifrato esportato. Sono autorizzati l'estensione dell'inventario, la validazione del manifest, la decifratura progressiva e il raccordo al writer e al visualizzatore, con memoria limitata a pochi blocchi e senza ricostruire il file completo in JavaScript.
+
+Il formato portabile resta v2, con catena AES-GCM, manifest e controllo fino a EOF. I limiti candidati sono 512 MiB per allegato, 1 GiB cumulativo e 1,5 GiB per il contenitore cifrato; per i file grandi il percorso supportato è il salvataggio diretto progressivo su browser desktop compatibile. Errori di inventario, manifest, dimensione o autenticazione devono fallire chiusi e rimuovere l'output parziale. Il successivo ordine **«Prosegui con commit push e pubblica»** autorizza l'integrazione nella candidata `1.2.233`, bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Migrazioni, backend, Rules, indici e dati reali restano esclusi.
+
+## Diagnostica persistente della verifica AI.2 — 24/10/2026
+
+Il collaudo reale mostra che anche la taglia AI.2 `light`, dopo download e verifica di byte/SHA-256, resta nello stato **Installato · verifica richiesta**. La Console non espone l'eccezione perché il pannello sostituisce ogni errore del runtime con un messaggio generico; gli avvisi su `SharedArrayBuffer`, campi password e tempi degli handler non dimostrano la causa del fallimento AI.2.
+
+Diego autorizza con **«procedi»** una correzione diagnostica locale. Il loader deve classificare le fasi preflight, controllo pacchetto/capacità, import, inizializzazione, smoke test e salvataggio della verifica; il pannello conserva per la sessione e mostra codice `LOCAL_AI_*` e fase, registrando in Console soltanto livello, taglia, codice, fase e tipo d'errore. Messaggi originali, stack, prompt e contenuti della Vault restano esclusi. La risposta visibile nel pannello **Chiedi** non certifica AI.2: finché il pacchetto non è verificato l'app conserva il fallback deterministico/AI.1.
+
+Il successivo ordine **«Prosegui con commit push e pubblica»** autorizza l'integrazione nella candidata `1.2.233`, bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Backend, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Ripristino dell'installazione AI 2 — 23/10/2026
 
 Il tentativo reale di installare AI 2 `power` è fallito dopo la conferma dell'utente. La verifica degli URL pubblici ha accertato che i percorsi dei pacchetti `medium` e `power` restituivano la pagina HTML di fallback: gli asset di grandi dimensioni sono esclusi da Git e il workflow Hosting non li materializzava prima del deploy.
@@ -54,7 +68,7 @@ Esito locale: test mirati Allegati e lifecycle **34/34**, budget prestazionale s
 
 Diego chiede di poter conservare anche un video da circa 450 MB negli allegati dei Memorandum. L'implementazione locale mantiene invariati i file ordinari fino a 32 MiB e introduce, soltanto per i video, un limite di 512 MiB con cifratura e upload sequenziale in blocchi da 8 MiB. Firestore conserva un solo allegato logico e il manifest dei blocchi; Storage conserva esclusivamente i blocchi cifrati. La condivisione continua a distribuire una sola chiave-file cifrata per destinatario, mentre cancellazione manuale, purge dell'Account e backup cifrato devono coprire tutti i percorsi del manifest.
 
-L'apertura usa un file temporaneo nel contenitore privato del browser e richiede il supporto OPFS; un browser privo di tale capacità mostra un errore esplicito senza tentare di caricare centinaia di megabyte nella memoria della pagina. L'archivio portatile conserva i propri limiti e rifiuta in modo dichiarato i video a blocchi; il backup cifrato completo li include come oggetti separati e li ricostruisce tramite i metadati ripristinati.
+L'apertura usa un file temporaneo nel contenitore privato del browser e richiede il supporto OPFS; un browser privo di tale capacità mostra un errore esplicito senza tentare di caricare centinaia di megabyte nella memoria della pagina. Nella `1.2.226` l'Archivio portatile rifiutava in modo dichiarato i video a blocchi; la decisione del 24/10/2026 autorizza e sostituisce quel limite con ricomposizione progressiva autenticata. Il backup cifrato completo continua a includerli come oggetti separati e a ricostruirli tramite i metadati ripristinati.
 
 Le schermate inviate da Diego mostrano inoltre chiavi `deadline_*` nel nuovo form Scadenze. La causa è il mancato caricamento del catalogo specializzato sulla route `aggiungi_scadenza.html`; la correzione include tale route nello stesso catalogo già usato da Regole scadenze e Configurazione automezzi.
 

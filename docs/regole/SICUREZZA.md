@@ -1,5 +1,11 @@
 # Sicurezza
 
+## Archivio portatile di allegati a blocchi — 24/10/2026
+
+L'esportazione non ricompone in RAM gli allegati grandi. Prima di leggere Storage valida versione crittografica, tipo video, limite dichiarato, dimensione e numero dei blocchi, ordine e unicità dei percorsi, IV, dimensioni chiare/cifrate e somma finale. La chiave-file viene aperta una volta, ogni blocco viene scaricato entro la dimensione dichiarata, autenticato con AES-GCM e AAD già vincolato a identità e posizione, consegnato al writer e azzerato prima del blocco successivo. La chiave-file viene azzerata anche in caso di errore.
+
+Il writer portabile conserva PBKDF2-SHA256 a 600.000 iterazioni e AES-GCM-256 concatenato del formato v2. Manifest, ordine, conteggi, dimensioni, digest, terminatore ed EOF restano verificati prima dell'esposizione; il visualizzatore esegue una seconda lettura autenticata per salvare un allegato. Blocco mancante o sostituito, manifest incoerente, dimensione diversa o tag AEAD non valido producono un fallimento chiuso e nessun archivio parziale utilizzabile.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

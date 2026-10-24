@@ -9,7 +9,8 @@ import {
     PORTABLE_PROJECTION_FORMAT, sha256Base64
 } from '../Frontend/public/assets/js/modules/settings/portable-archive-projections.js';
 import {
-    createPortableCapacityGuard, portableRecordKey, reconcilePortableAttachmentInventory
+    createPortableCapacityGuard, portableRecordKey, PORTABLE_ATTACHMENT_LIMITS,
+    reconcilePortableAttachmentInventory
 } from '../Frontend/public/assets/js/modules/settings/portable-archive-inventory.js';
 import {
     createBoundedPortableSink, createPortableArchiveWriter, createPortableHeader,
@@ -124,6 +125,7 @@ test('il visualizzatore v2 è autonomo, offline e privo di dati incorporati', ()
     assert.match(html, /&lt;Archivio&gt;/);
     assert.match(html, /archivio\.cpportable/);
     assert.match(html, /Integrità e autenticità/i);
+    assert.match(html, /allegati grandi vengono letti e salvati progressivamente/i);
     assert.doesNotMatch(html, /utente-sintetico/);
 });
 
@@ -184,6 +186,8 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
 });
 
 test('la capacità ammette i limiti esatti e fallisce senza allocare file enormi', () => {
+    assert.equal(PORTABLE_ATTACHMENT_LIMITS.perFileBytes, 512 * 1024 * 1024);
+    assert.equal(PORTABLE_ATTACHMENT_LIMITS.totalBytes, 1024 * 1024 * 1024);
     const oneFile = createPortableCapacityGuard({perFileBytes: 8, totalBytes: 12});
     assert.equal(oneFile.accept(8), 8);
     assert.throws(() => oneFile.accept(5), {code: 'PORTABLE_CAPACITY_EXCEEDED'});
@@ -252,21 +256,43 @@ test('l’inventario sintetico riconcilia ogni allegato e tutte le relazioni', (
     );
 });
 
-test('l’archivio portatile rifiuta esplicitamente i video cifrati a blocchi', () => {
+test('l’inventario include un video a blocchi come un solo allegato logico', () => {
     const owner = {scope: 'private-account', id: 'a1', data: {nome: 'Privato'}};
+    const firstPath = 'users/fixture/accounts/a1/attachments/v1/chunks/0000.bin';
+    const secondPath = 'users/fixture/accounts/a1/attachments/v1/chunks/0001.bin';
+    const b64 = size => Buffer.alloc(size).toString('base64');
     const attachment = {
         scope: 'private-account-attachment', id: 'v1', accountId: 'a1',
         data: {
             name: 'video.mp4',
-            encryption: {chunked: true, originalType: 'video/mp4'},
-            chunks: [{storagePath: 'users/fixture/accounts/a1/attachments/v1/chunks/0000.bin'}]
+            encryption: {
+                version: 1, cipher: 'AES-GCM-256', keyWrap: 'HKDF-SHA256+A256GCM',
+                wrapSalt: b64(32), wrapIv: b64(12), wrappedFileKey: b64(48),
+                chunked: true, chunkVersion: 1, chunkBinding: 'attachment-v1',
+                chunkSize: 8, chunkCount: 2, originalType: 'video/mp4', originalSize: 12
+            },
+            chunks: [
+                {index: 0, contentIv: b64(12), clearSize: 8, encryptedSize: 24, storagePath: firstPath},
+                {index: 1, contentIv: b64(12), clearSize: 4, encryptedSize: 20, storagePath: secondPath}
+            ]
         }
     };
-    assert.throws(() => reconcilePortableAttachmentInventory(
+    const inventory = reconcilePortableAttachmentInventory(
         [owner, attachment],
-        ['users/fixture/accounts/a1/attachments/v1/chunks/0000.bin'],
+        [firstPath, secondPath],
         new Set([portableRecordKey(owner)])
-    ), {code: 'PORTABLE_CHUNKED_ATTACHMENT_UNSUPPORTED'});
+    );
+    assert.equal(inventory.length, 1);
+    assert.equal(inventory[0].layout, 'chunked-v1');
+    assert.equal(inventory[0].storagePath, null);
+    assert.deepEqual(inventory[0].storagePaths, [firstPath, secondPath]);
+    assert.deepEqual(inventory[0].recordKeys, ['private-account:::a1']);
+
+    const invalid = structuredClone(attachment);
+    invalid.data.chunks[1].clearSize = 5;
+    assert.throws(() => reconcilePortableAttachmentInventory(
+        [owner, invalid], [firstPath, secondPath], new Set([portableRecordKey(owner)])
+    ), {code: 'PORTABLE_CHUNK_MANIFEST_INVALID'});
 });
 
 test('la proiezione regge il limite sintetico di 10.000 record', async () => {
@@ -320,6 +346,9 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     assert.match(settings, /forceReload: true, promptImmediately: true/);
     assert.match(settings, /PORTABLE_ATTACHMENT_CAPACITY_EXCEEDED/);
     assert.match(settings, /PORTABLE_ATTACHMENT_METADATA_CONFLICT/);
+    assert.match(settings, /PORTABLE_CHUNK_MANIFEST_INVALID/);
+    assert.match(settings, /portable_large_note/);
+    assert.doesNotMatch(settings, /PORTABLE_CHUNKED_ATTACHMENT_UNSUPPORTED/);
     assert.match(offline, /portable-archive-service\.js/);
     assert.match(offline, /portable-archive-inventory\.js/);
     assert.match(offline, /portable-archive-projections\.js/);
@@ -389,6 +418,29 @@ test('il formato v2 cifra a chunk, concatena l’ordine e verifica il manifest p
     assert.equal(opened.manifest.counts.attachments, 1);
     assert.deepEqual(JSON.parse(new TextDecoder().decode(opened.retained.get('records'))), JSON.parse(new TextDecoder().decode(records)));
     assert.equal(opened.retained.has('attachment-1'), false);
+});
+
+test('il writer consuma un allegato come flusso senza richiedere un buffer monolitico', async () => {
+    const sink = memorySink();
+    const writer = await createPortableArchiveWriter({
+        sink, password: STRONG_PASSWORD,
+        header: createPortableHeader({chunkSize: 64 * 1024, cryptoApi: webcrypto}), cryptoApi: webcrypto
+    });
+    let generated = 0;
+    async function *source() {
+        for (const size of [90_000, 90_000, 25_000]) {
+            const part = new Uint8Array(size).fill(++generated);
+            try { yield part; } finally { part.fill(0); }
+        }
+    }
+    const entry = await writer.addEntry({id: 'streamed-video', kind: 'attachment'}, source());
+    const manifest = await writer.close({counts: {records: 0, attachments: 1}});
+    assert.equal(generated, 3);
+    assert.equal(entry.size, 205_000);
+    assert.equal(entry.chunkCount, 4);
+    assert.equal(manifest.entries[0].id, 'streamed-video');
+    const opened = await verifyBytes(sink.bytes(), STRONG_PASSWORD, {retainKinds: []});
+    assert.equal(opened.manifest.entries[0].size, 205_000);
 });
 
 test('il formato v2 rifiuta password errata, manomissione, riordino e output incompleto', async () => {
@@ -467,7 +519,7 @@ test('parser e verificatore falliscono chiusi sui budget di file, linea, frame, 
         () => verifyBytes(bytes, STRONG_PASSWORD, {limits: {maxRetainedPlaintextBytes: 16}}),
         /PORTABLE_RETAINED_LIMIT/
     );
-    assert.equal(PORTABLE_ARCHIVE_LIMITS.maxFileBytes, 384 * 1024 * 1024);
+    assert.equal(PORTABLE_ARCHIVE_LIMITS.maxFileBytes, 1536 * 1024 * 1024);
     assert.equal(PORTABLE_ARCHIVE_LIMITS.maxRecords, 10000);
 });
 

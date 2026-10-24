@@ -1,5 +1,11 @@
 # Decisioni
 
+## 24/10/2026 — allegati a blocchi nell’Archivio portatile
+
+Diego approva esplicitamente l'inclusione degli allegati cifrati a blocchi nell'Archivio portatile. Il manifest di un video viene validato come una sola voce logica; i blocchi sono scaricati, autenticati, decifrati e passati al writer in ordine, uno per volta. Il contenitore resta il formato v2 già pubblicato: un solo `archivio.cpportable` cifrato e autenticato contiene dati e allegati, mentre `visualizzatore.html` e `LEGGIMI.txt` non contengono dati utente.
+
+Il limite è 512 MiB per singolo allegato, 1 GiB per il totale degli allegati e 1,5 GiB per il contenitore cifrato. Gli allegati grandi richiedono File System Access in un browser desktop compatibile; i fallback restano limitati a 12 MiB per la creazione e 8 MiB per il download dal visualizzatore. Manifest incoerente, blocco mancante, dimensione errata o autenticazione fallita interrompono l'operazione e invalidano o rimuovono l'output parziale. La decisione autorizza codice, test e documentazione locale, non commit, pubblicazione o uso di dati reali.
+
 ## 23/10/2026 — spazi automatici nel compositore delle Scadenze
 
 Il compositore dei messaggi delle Scadenze non affida più agli spazi iniziali o finali inseriti dall'utente la separazione tra testo, oggetto, modello e targa. Ogni frammento conserva il proprio contenuto ma viene ripulito ai confini; il compositore inserisce un solo spazio quando serve e nessuno prima della punteggiatura o dopo parentesi aperte e apostrofi. Le configurazioni già corrette non producono quindi doppi spazi, mentre quelle prive del raccordo vengono composte correttamente. Anteprima, catalogo del form e salvataggio devono usare la stessa funzione centrale.

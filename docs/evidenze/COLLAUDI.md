@@ -1,5 +1,13 @@
 # Collaudi
 
+## 24/10/2026 — Archivio portatile con video sintetico da 485 MiB
+
+- Test puri Portable Archive verdi **17/17**: formato v2, inventario logico dei blocchi, writer da iterabile asincrono, limiti, manomissione, EOF e UI.
+- Test sicurezza allegati verdi **22/22**: manifest valido, ordine, dimensioni, decifratura progressiva e rifiuto delle alterazioni.
+- Il probe isolato usa esclusivamente byte sintetici generati in blocchi da 8 MiB. Per 1×485 MiB registra output cifrato **646,9 MiB**, scrittura massima al sink **1,33 MiB**, picco RSS circa **292,2 MiB** e nessun buffer monolitico. Anche 1×32, 2×32 e 8×32 MiB restano sotto 384 MiB RSS.
+- Il banco browser offline è verde in Chrome desktop fuori dal sandbox: password errata, manomissione, dati finali, conteggi, limiti, allegati, download e viewport. Nel sandbox il download di Chrome veniva annullato dal contenimento; una prova Blob minima indipendente ha riprodotto lo stesso vincolo ambientale.
+- Sintassi JavaScript verificata su **222 moduli**. Nessun allegato reale, Vault reale o dato utente è stato letto o scritto; il video da circa 485 MB non è stato riesportato.
+
 ## 23/10/2026 — testo completo della nuova Scadenza in Dettaglio, e-mail e Push
 
 - La prova reale **Olio motore** ha prodotto una sola Scadenza, correttamente collegata alla nuova regola, ma il Dettaglio aggiungeva il prefisso storico e il riferimento veicolo al `templateText` già completo.
