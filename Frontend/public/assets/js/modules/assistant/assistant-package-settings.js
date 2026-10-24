@@ -3,11 +3,45 @@ import { assistantText } from '../../translations/assistant.js';
 import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
 import { getLocalAiPackageCandidate, LOCAL_AI_ADVANCED_TIERS } from './local-ai-package-catalog.js';
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
-import { createLocalAiRuntimeLoader } from './local-ai-runtime-loader.js';
+import { createLocalAiRuntimeLoader, readLocalAiRuntimeDiagnostic } from './local-ai-runtime-loader.js';
 import { readSelectedAdvancedTier, readSelectedLocalAi, writeSelectedAdvancedTier, writeSelectedLocalAi } from './local-ai-selection.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 
 const mib = bytes => `${Math.ceil(bytes / 1024 / 1024)} MiB`;
+const DIAGNOSTIC_STORAGE_PREFIX = 'codici-password:local-ai-diagnostic:v1';
+
+function diagnosticKey(level, tier) {
+    return `${DIAGNOSTIC_STORAGE_PREFIX}:${level}:${level === 'A2' ? tier : 'default'}`;
+}
+
+function readStoredDiagnostic(level, tier) {
+    try {
+        const value = JSON.parse(sessionStorage.getItem(diagnosticKey(level, tier)) || 'null');
+        if (!value || !/^LOCAL_AI_[A-Z0-9_]+$/.test(value.code) || !/^[a-z][a-z0-9-]{0,47}$/.test(value.stage)) return null;
+        return { code:value.code, stage:value.stage, errorName:String(value.errorName || 'Error') };
+    } catch { return null; }
+}
+
+function persistDiagnostic(level, tier, diagnostic) {
+    try { sessionStorage.setItem(diagnosticKey(level, tier), JSON.stringify(diagnostic)); } catch { /* Diagnostica best effort. */ }
+}
+
+function clearDiagnostic(level, tier) {
+    try { sessionStorage.removeItem(diagnosticKey(level, tier)); } catch { /* Diagnostica best effort. */ }
+}
+
+function reportVerificationFailure(level, tier, error, fallbackStage) {
+    const diagnostic = readLocalAiRuntimeDiagnostic(error, fallbackStage);
+    persistDiagnostic(level, tier, diagnostic);
+    console.error('[Local AI verification failed]', {
+        level,
+        tier:level === 'A2' ? tier : 'default',
+        code:diagnostic.code,
+        stage:diagnostic.stage,
+        errorName:diagnostic.errorName
+    });
+    return diagnostic;
+}
 
 export async function initAssistantPackageSettings(container = document.getElementById('assistant-package-settings')) {
     if (!container) return;
@@ -19,7 +53,10 @@ export async function initAssistantPackageSettings(container = document.getEleme
     let selected = readSelectedLocalAi();
     let selectedTier = readSelectedAdvancedTier();
     let downloading = null;
-    const errors = {};
+    const errors = {
+        A1:readStoredDiagnostic('A1', 'light'),
+        A2:readStoredDiagnostic('A2', selectedTier)
+    };
 
     const render = async () => {
         container.replaceChildren();
@@ -86,7 +123,7 @@ export async function initAssistantPackageSettings(container = document.getEleme
                         if (tier === selectedTier) return;
                         selectedTier = tier;
                         writeSelectedAdvancedTier(tier);
-                        delete errors.A2;
+                        errors.A2 = readStoredDiagnostic('A2', tier);
                         void render();
                     };
                     tierSelector.append(tierButton);
@@ -95,7 +132,9 @@ export async function initAssistantPackageSettings(container = document.getEleme
             }
             if (errors[level]) {
                 const error = document.createElement('small');
-                error.className = 'assistant-package-error'; error.textContent = errors[level];
+                error.className = 'assistant-package-error';
+                error.setAttribute('role', 'alert');
+                error.textContent = `${label('failed')}. ${label('fallback')}. ${label('diagnosticCode')}: ${errors[level].code} · ${label('diagnosticStage')}: ${errors[level].stage}`;
                 card.firstElementChild.append(error);
             }
             if (status.installed) {
@@ -125,14 +164,20 @@ export async function initAssistantPackageSettings(container = document.getEleme
                     if (!confirmed) return;
                     downloading = level; install.textContent = label('downloading');
                     const progress = document.createElement('progress'); progress.max = candidate.manifest.approxDownloadBytes; progress.value = 0; card.append(progress);
+                    let lastStage = 'download';
                     try {
                         delete errors[level];
+                        clearDiagnostic(level, selectedTier);
                         await manager.install(candidate.manifest, { baseUrl:candidate.baseUrl,
                             onProgress:value => { progress.value = value.completedBytes; } });
-                        const runtime = await loader.load(level, { assessment:capabilities, tier:level === 'A2' ? selectedTier : 'light' });
+                        const runtime = await loader.load(level, {
+                            assessment:capabilities,
+                            tier:level === 'A2' ? selectedTier : 'light',
+                            onStage:stage => { lastStage = stage; }
+                        });
                         await runtime.dispose?.();
                     } catch (error) {
-                        if (error?.name !== 'AbortError') errors[level] = 'Installazione o verifica non riuscita su questo dispositivo.';
+                        if (error?.name !== 'AbortError') errors[level] = reportVerificationFailure(level, selectedTier, error, lastStage);
                     } finally { downloading = null; await render(); }
                 };
                 actions.append(install);
@@ -141,15 +186,26 @@ export async function initAssistantPackageSettings(container = document.getEleme
                 const verify = document.createElement('button'); verify.type = 'button'; verify.textContent = label('verify');
                 verify.onclick = async () => {
                     verify.disabled = true; verify.textContent = label('verifying');
-                    try { delete errors[level]; const runtime = await loader.load(level, { assessment:capabilities, tier:level === 'A2' ? selectedTier : 'light' }); await runtime.dispose?.(); }
-                    catch { errors[level] = 'Il pacchetto non ha superato la verifica su questo dispositivo.'; }
+                    let lastStage = 'preflight';
+                    try {
+                        delete errors[level];
+                        clearDiagnostic(level, selectedTier);
+                        const runtime = await loader.load(level, {
+                            assessment:capabilities,
+                            tier:level === 'A2' ? selectedTier : 'light',
+                            onStage:stage => { lastStage = stage; }
+                        });
+                        await runtime.dispose?.();
+                    } catch (error) {
+                        errors[level] = reportVerificationFailure(level, selectedTier, error, lastStage);
+                    }
                     await render();
                 };
                 actions.append(verify);
             }
             if (status.installed) {
                 const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = label('remove');
-                remove.onclick = async () => { await manager.remove(level); if (selected === level) { selected = 'A1'; writeSelectedLocalAi(selected); } await render(); };
+                remove.onclick = async () => { await manager.remove(level); clearDiagnostic(level, selectedTier); delete errors[level]; if (selected === level) { selected = 'A1'; writeSelectedLocalAi(selected); } await render(); };
                 actions.append(remove);
             }
             if (downloading === level) {

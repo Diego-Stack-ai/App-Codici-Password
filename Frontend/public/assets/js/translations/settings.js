@@ -97,5 +97,80 @@ const portable = {
   pt: { portable_password_placeholder: 'Palavra-passe forte do arquivo (pelo menos 14 caracteres)', portable_password_aria: 'Palavra-passe do arquivo portátil', portable_confirm_placeholder: 'Repita a palavra-passe', portable_confirm_aria: 'Confirmar palavra-passe do arquivo portátil', portable_create: 'Criar arquivo', portable_title: 'Exportar arquivo portátil', portable_intro: 'Está a criar uma cópia legível dos seus dados, que também pode ser utilizada fora desta app.', portable_warning: 'A cópia pode conter dados pessoais, credenciais e anexos sensíveis. Guarde-a em segurança e não a partilhe com pessoas não autorizadas.', portable_include_attachments: 'Incluir anexos', portable_acknowledge: 'Compreendo que este ficheiro não é uma cópia de segurança restaurável.', portable_password_required: 'Introduza uma palavra-passe dedicada para o arquivo.', portable_password_short: 'Use pelo menos 14 caracteres.', portable_password_long: 'Use no máximo 256 caracteres.', portable_password_common: 'Evite palavras ou sequências comuns e escolha uma palavra-passe única.', portable_password_repetitive: 'Evite caracteres ou padrões repetidos.', portable_password_weak: 'Combine pelo menos três tipos entre maiúsculas, minúsculas, números e símbolos, ou use uma frase com pelo menos 24 caracteres.', portable_password_strong: 'Palavra-passe forte.', portable_working_title: 'A criar arquivo portátil…', portable_working_desc: 'Os dados são decifrados apenas em memória, cifrados em blocos e escritos progressivamente.' }
 };
 
+const portableLarge = {
+  it: {
+    portable_large_note: 'Gli allegati a blocchi, compresi i video fino a 512 MiB, richiedono il salvataggio progressivo di un browser desktop compatibile.',
+    portable_capacity_error: 'Un singolo allegato può occupare al massimo 512 MiB e gli allegati complessivi 1 GiB. Riduci i file oppure esporta senza allegati.',
+    portable_inventory_error: 'Il manifest o i blocchi degli allegati non corrispondono alle schede. L’archivio è stato interrotto senza creare una copia parziale.',
+    portable_decrypt_error: 'Un dato non è decifrabile: archivio interrotto senza creare una copia incompleta.',
+    portable_attachment_decrypt_error: 'Un allegato o uno dei suoi blocchi non è autenticabile o decifrabile. L’archivio incompleto è stato eliminato.',
+    portable_streaming_error: 'Questo browser non può salvare progressivamente un archivio di queste dimensioni. Usa un browser desktop Chromium oppure ripeti senza allegati.',
+    portable_generic_error: 'Archivio non creato. Nessun dato è stato modificato.'
+  },
+  en: {
+    portable_large_note: 'Chunked attachments, including videos up to 512 MiB, require progressive saving in a compatible desktop browser.',
+    portable_capacity_error: 'One attachment may be at most 512 MiB and all attachments together 1 GiB. Reduce the files or export without attachments.',
+    portable_inventory_error: 'The attachment manifest or chunks do not match the records. Export stopped without creating a partial archive.',
+    portable_decrypt_error: 'A value cannot be decrypted. Export stopped without creating an incomplete archive.',
+    portable_attachment_decrypt_error: 'An attachment or one of its chunks cannot be authenticated or decrypted. The incomplete archive was removed.',
+    portable_streaming_error: 'This browser cannot progressively save an archive of this size. Use a desktop Chromium browser or export without attachments.',
+    portable_generic_error: 'Archive not created. No data was changed.'
+  },
+  es: {
+    portable_large_note: 'Los adjuntos por bloques, incluidos vídeos de hasta 512 MiB, requieren guardado progresivo en un navegador de escritorio compatible.',
+    portable_capacity_error: 'Cada adjunto puede ocupar hasta 512 MiB y el total 1 GiB. Reduce los archivos o exporta sin adjuntos.',
+    portable_inventory_error: 'El manifiesto o los bloques no coinciden con las fichas. La exportación se detuvo sin crear un archivo parcial.',
+    portable_decrypt_error: 'Un dato no puede descifrarse. La exportación se detuvo sin crear una copia incompleta.',
+    portable_attachment_decrypt_error: 'Un adjunto o uno de sus bloques no puede autenticarse o descifrarse. Se eliminó el archivo incompleto.',
+    portable_streaming_error: 'Este navegador no puede guardar progresivamente un archivo de este tamaño. Usa Chromium de escritorio o exporta sin adjuntos.',
+    portable_generic_error: 'No se creó el archivo. No se modificó ningún dato.'
+  },
+  fr: {
+    portable_large_note: 'Les pièces jointes en blocs, dont les vidéos jusqu’à 512 Mio, nécessitent l’enregistrement progressif d’un navigateur de bureau compatible.',
+    portable_capacity_error: 'Une pièce jointe peut atteindre 512 Mio et l’ensemble 1 Gio. Réduisez les fichiers ou exportez sans pièces jointes.',
+    portable_inventory_error: 'Le manifeste ou les blocs ne correspondent pas aux fiches. L’export s’est arrêté sans archive partielle.',
+    portable_decrypt_error: 'Une donnée ne peut pas être déchiffrée. L’export s’est arrêté sans copie incomplète.',
+    portable_attachment_decrypt_error: 'Une pièce jointe ou un bloc ne peut pas être authentifié ou déchiffré. L’archive incomplète a été supprimée.',
+    portable_streaming_error: 'Ce navigateur ne peut pas enregistrer progressivement une archive de cette taille. Utilisez Chromium sur ordinateur ou exportez sans pièces jointes.',
+    portable_generic_error: 'Archive non créée. Aucune donnée n’a été modifiée.'
+  },
+  de: {
+    portable_large_note: 'Blockweise Anhänge, einschließlich Videos bis 512 MiB, benötigen progressives Speichern in einem kompatiblen Desktop-Browser.',
+    portable_capacity_error: 'Ein Anhang darf 512 MiB, alle Anhänge zusammen 1 GiB groß sein. Dateien verkleinern oder ohne Anhänge exportieren.',
+    portable_inventory_error: 'Manifest oder Blöcke stimmen nicht mit den Einträgen überein. Der Export wurde ohne Teilarchiv beendet.',
+    portable_decrypt_error: 'Ein Wert kann nicht entschlüsselt werden. Der Export wurde ohne unvollständige Kopie beendet.',
+    portable_attachment_decrypt_error: 'Ein Anhang oder Block kann nicht authentifiziert oder entschlüsselt werden. Das unvollständige Archiv wurde entfernt.',
+    portable_streaming_error: 'Dieser Browser kann ein Archiv dieser Größe nicht progressiv speichern. Desktop-Chromium verwenden oder ohne Anhänge exportieren.',
+    portable_generic_error: 'Archiv nicht erstellt. Keine Daten wurden geändert.'
+  },
+  zh: {
+    portable_large_note: '分块附件（包括最大 512 MiB 的视频）需要兼容的桌面浏览器进行渐进式保存。',
+    portable_capacity_error: '单个附件最大 512 MiB，附件总计最大 1 GiB。请减少文件或不含附件导出。',
+    portable_inventory_error: '附件清单或分块与记录不一致。导出已停止，未创建不完整归档。',
+    portable_decrypt_error: '某项数据无法解密。导出已停止，未创建不完整副本。',
+    portable_attachment_decrypt_error: '某个附件或分块无法验证或解密。不完整归档已删除。',
+    portable_streaming_error: '此浏览器无法渐进式保存这么大的归档。请使用桌面 Chromium，或不含附件导出。',
+    portable_generic_error: '未创建归档，未更改任何数据。'
+  },
+  hi: {
+    portable_large_note: '512 MiB तक के वीडियो सहित ब्लॉक वाले अटैचमेंट के लिए संगत डेस्कटॉप ब्राउज़र में क्रमिक सहेजना आवश्यक है।',
+    portable_capacity_error: 'एक अटैचमेंट अधिकतम 512 MiB और सभी अटैचमेंट कुल 1 GiB हो सकते हैं। फ़ाइलें घटाएँ या बिना अटैचमेंट निर्यात करें।',
+    portable_inventory_error: 'अटैचमेंट मैनिफ़ेस्ट या ब्लॉक रिकॉर्ड से मेल नहीं खाते। अधूरा संग्रह बनाए बिना निर्यात रोक दिया गया।',
+    portable_decrypt_error: 'एक डेटा मान डिक्रिप्ट नहीं हो सका। अधूरी प्रति बनाए बिना निर्यात रोक दिया गया।',
+    portable_attachment_decrypt_error: 'एक अटैचमेंट या ब्लॉक प्रमाणित या डिक्रिप्ट नहीं हो सका। अधूरा संग्रह हटा दिया गया।',
+    portable_streaming_error: 'यह ब्राउज़र इतने बड़े संग्रह को क्रमिक रूप से नहीं सहेज सकता। डेस्कटॉप Chromium उपयोग करें या बिना अटैचमेंट निर्यात करें।',
+    portable_generic_error: 'संग्रह नहीं बना। कोई डेटा नहीं बदला गया।'
+  },
+  pt: {
+    portable_large_note: 'Anexos em blocos, incluindo vídeos até 512 MiB, exigem gravação progressiva num navegador de computador compatível.',
+    portable_capacity_error: 'Cada anexo pode ter até 512 MiB e o total 1 GiB. Reduza os ficheiros ou exporte sem anexos.',
+    portable_inventory_error: 'O manifesto ou os blocos não correspondem aos registos. A exportação parou sem criar um arquivo parcial.',
+    portable_decrypt_error: 'Um dado não pode ser decifrado. A exportação parou sem criar uma cópia incompleta.',
+    portable_attachment_decrypt_error: 'Um anexo ou bloco não pode ser autenticado ou decifrado. O arquivo incompleto foi removido.',
+    portable_streaming_error: 'Este navegador não consegue gravar progressivamente um arquivo deste tamanho. Use Chromium no computador ou exporte sem anexos.',
+    portable_generic_error: 'Arquivo não criado. Nenhum dado foi alterado.'
+  }
+};
+
 export const settingsCatalogs = Object.fromEntries(Object.entries({ it, en, es, fr, de, zh, hi, pt })
-  .map(([language, catalog]) => [language, { ...catalog, ...portable[language] }]));
+  .map(([language, catalog]) => [language, { ...catalog, ...portable[language], ...portableLarge[language] }]));

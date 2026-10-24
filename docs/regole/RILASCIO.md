@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.233 — Archivio portatile con allegati a blocchi e diagnostica AI.2 — 24/10/2026
+
+La candidata estende il percorso già pubblicato senza cambiare `formatVersion: 2`: inventario, validazione manifest e decifratura progressiva trasformano tutti i blocchi di un video in una sola voce dell'archivio. I nuovi limiti sono 512 MiB per allegato, 1 GiB cumulativo e 1,5 GiB per il contenitore; i fallback senza salvataggio diretto restano intenzionalmente piccoli. Il visualizzatore continua a verificare autenticità, catena, manifest, terminatore ed EOF prima dell'uso.
+
+La stessa candidata rende persistente per la sessione la diagnostica sicura della verifica AI.2: il pannello mostra soltanto codice `LOCAL_AI_*` e fase stabile, mentre la Console esclude messaggi originali, stack, prompt e contenuti della Vault. I gate richiesti comprendono test puri Portable Archive, sicurezza allegati, browser offline, probe sintetico da 485 MiB, AI locale, sintassi, i18n, documentazione e suite completa. Non usare file reali per il probe.
+
+L'ordine **«Prosegui con commit push e pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.232 — pacchetti AI 2 inclusi e verificati nel deploy — 23/10/2026
 
 Il collaudo dell'installazione AI 2 ha rilevato che gli URL pubblici delle taglie `medium` e `power` restituivano il fallback HTML dell'app anziché i file dei modelli. I manifest e il catalogo erano corretti, ma i pacchetti, volutamente esclusi dalla cronologia Git per dimensione, non venivano ricostruiti nella snapshot usata dal workflow Firebase Hosting.

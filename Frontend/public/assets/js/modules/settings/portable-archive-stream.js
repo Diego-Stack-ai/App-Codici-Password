@@ -5,7 +5,7 @@ const KDF_ITERATIONS = 600000;
 const DEFAULT_CHUNK_SIZE = 1024 * 1024;
 const MIB = 1024 * 1024;
 const PORTABLE_LIMITS = Object.freeze({
-    maxFileBytes: 384 * MIB,
+    maxFileBytes: 1536 * MIB,
     maxLineBytes: 17 * MIB,
     maxChunkBytes: 4 * MIB,
     maxChunkMetadataBytes: 64 * 1024,

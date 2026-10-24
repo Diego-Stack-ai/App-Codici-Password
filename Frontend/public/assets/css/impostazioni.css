@@ -1524,5 +1524,6 @@ h3.settings-desc {
 .assistant-package-tier.recommended:not(.selected) { border-style:dashed; }
 .assistant-package-tier:disabled { cursor:not-allowed; opacity:.48; }
 .assistant-package-card progress { width:100%; grid-column:1/-1; }
+.assistant-package-error { color:#c43d55; font-weight:650; overflow-wrap:anywhere; }
 .assistant-package-card[data-error]::after { content:attr(data-error); color:#c43d55; display:block; }
 @media (max-width:600px) { .assistant-package-card { align-items:stretch; flex-direction:column; } .assistant-package-actions { justify-content:stretch; } .assistant-package-actions button { flex:1; } .assistant-package-tier-selector { grid-template-columns:1fr; } }

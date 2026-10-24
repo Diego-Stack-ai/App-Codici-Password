@@ -1,10 +1,16 @@
 # Allegati documenti
 
+## Raccordo con l'Archivio portabile — candidata locale 24/10/2026
+
+Il manifest di un allegato video a blocchi viene ora accettato dall'Archivio portabile come un solo file logico. La validazione richiede schema `chunked-v1`, ordine continuo, percorsi unici, IV validi, dimensione cifrata uguale alla dimensione chiara più il tag AES-GCM, blocchi intermedi della dimensione dichiarata e somma esatta pari a `originalSize`. Il limite rimane 512 MiB.
+
+L'esportazione apre la chiave-file una sola volta e usa un generatore asincrono: ogni oggetto Storage è scaricato entro la dimensione dichiarata, decifrato e autenticato, passato al writer portabile e azzerato prima di proseguire. Il writer ricompatta il flusso nei propri frame v2 da 1 MiB; non viene creato un buffer chiaro grande quanto il video. Il nome e le relazioni della voce restano quelli dell'allegato logico, non dei singoli blocchi.
+
 ## Video grandi negli allegati Account e Memorandum — candidata locale 22/10/2026
 
 Il contratto storico resta identico per immagini, PDF, documenti e video fino a 32 MiB. Un video più grande può arrivare a 512 MiB ed è elaborato senza lettura integrale: il client genera una sola chiave-file, divide il contenuto in blocchi da 8 MiB e cifra ogni blocco con AES-GCM, IV autonomo e AAD vincolato a identificativo, posizione e numero totale dei blocchi. Il record allegato conserva `encryption.chunked`, dimensioni, conteggio e manifest ordinato; ciascun elemento del manifest contiene il proprio `storagePath`.
 
-Il record Firestore viene creato soltanto dopo l'ultimo upload riuscito. Un errore rimuove al meglio tutti i blocchi già caricati. La cancellazione visibile e il purge definitivo dell'Account eliminano ogni percorso verificato prima dei metadati; il backup cifrato indicizza ogni `storagePath` del manifest. Il visualizzatore portatile non tratta i blocchi come allegati autonomi: interrompe l'esportazione con un errore di capacità dichiarato finché quel formato non avrà un proprio protocollo di ricomposizione.
+Il record Firestore viene creato soltanto dopo l'ultimo upload riuscito. Un errore rimuove al meglio tutti i blocchi già caricati. La cancellazione visibile e il purge definitivo dell'Account eliminano ogni percorso verificato prima dei metadati; il backup cifrato indicizza ogni `storagePath` del manifest. Dalla candidata del 24/10/2026 anche l'Archivio portatile riconcilia tutti i percorsi e li ricompone progressivamente come un solo allegato logico.
 
 La riproduzione scarica e decifra un blocco alla volta in un file OPFS temporaneo, quindi apre un URL `blob:` del file ricomposto. Se OPFS non è disponibile il client fallisce in modo esplicito e non usa un ripiego che accumuli l'intero video nella memoria JavaScript. La condivisione riusa la chiave-file già avvolta e le buste individuali esistenti; i byte dei blocchi restano sempre opachi in Storage.
 

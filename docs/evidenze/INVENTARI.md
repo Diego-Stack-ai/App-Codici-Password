@@ -1,5 +1,13 @@
 # Inventari
 
+## 24/10/2026 — inventario Archivio portatile degli allegati a blocchi
+
+- Ogni record con `encryption.chunked: true` e manifest valido produce una sola voce logica, anche se Storage contiene più oggetti.
+- La chiave d'inventario comprende l'elenco ordinato completo dei percorsi; tutti i percorsi raccolti dal backup devono essere consumati esattamente una volta dal contratto e nessun percorso inatteso è ammesso.
+- Il confronto dei metadati comprende cifratura, manifest, nome e MIME; lo stesso allegato collegato a più schede unisce le relazioni, mentre un contratto discordante sul medesimo percorso fallisce chiuso.
+- Il manifest richiede indici contigui, percorsi unici, IV AES-GCM, tag da 16 byte, dimensioni coerenti e somma chiara esatta. L'allegato massimo è 512 MiB e il totale ammesso dall'esportazione è 1 GiB.
+- Percorsi runtime interessati: `portable-archive-inventory.js` per riconciliazione e limiti, `portable-archive-service.js` per sorgente progressiva, `chunked-attachment-security.js` per validazione e decifratura, `portable-archive-stream.js` per il contenitore v2.
+
 ## M8/PURGE — inventario incrementale del 04/10/2026
 
 Contratto multipasso candidato (15:47 UTC, non implementato): il modello single-effect non va riutilizzato azzerando effect dopo ogni delete, perché perderebbe esiti parziali e identità dei retry. Piano immutabile ordinato di bersagli versionati, hash di piano e indice del passo legati a operationId/claimRevision; ogni risultato conserva identità del piano e del passo. Stato distingue passi applied, conflitto/not-applied, pending/unknown e non avviati; riepilogo mantiene appliedCount anche dopo stop. Un solo passo autorizzato alla volta. Stop impedisce avanzamento, conflitto interrompe il piano senza sostituire versioni; pending/unknown impedisce avanzamento e rilascio. Per Firestore delete+avanzamento+ricevuta nello stesso commit con barriera nel read-set; Storage resta protocollo separato, nessuna I/O dentro callback transazionale. Piano fornito non attesta completezza dell'albero: inventario/riferimenti e copertura writer sono prerequisiti separati, non risolti da hash/count. Fine lista non autorizza release o dichiara purge completo senza verifica globale. Primo passo sicuro: modello puro di avanzamento/riepilogo su piano sintetico, stop dopo primo successo e rifiuto replay sotto piano mutato. Nessun nuovo registro runtime, durata di conservazione o ripartenza automatica decisi.

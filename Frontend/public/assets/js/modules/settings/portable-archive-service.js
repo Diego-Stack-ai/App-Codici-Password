@@ -1,7 +1,10 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.232';
+import {auth, storage} from '../../firebase-config.js?v=1.2.233';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptRequiredValue, isEncryptedValue} from '../core/crypto-utils.js';
-import {decryptAttachmentBytes} from '../shared/attachment-security.js';
+import {
+    decryptAttachmentBytes, MAX_ATTACHMENT_BYTES, unwrapAttachmentFileKey
+} from '../shared/attachment-security.js';
+import {streamDecryptedAttachmentChunks} from '../shared/chunked-attachment-security.js';
 import {collectOwnerBackup} from './backup-export-service.js';
 import {
     createBoundedPortableSink, createPortableArchiveWriter, createPortableHeader, PORTABLE_ARCHIVE_LIMITS
@@ -13,7 +16,7 @@ import {
 } from './portable-archive-inventory.js';
 import {iteratePortableProjectionEntries} from './portable-archive-projections.js';
 
-const MAX_ATTACHMENT_DOWNLOAD = PORTABLE_ATTACHMENT_LIMITS.perFileBytes + 1024;
+const MAX_SINGLE_ATTACHMENT_DOWNLOAD = MAX_ATTACHMENT_BYTES + 1024;
 const FALLBACK_ENCRYPTED_LIMIT = 12 * 1024 * 1024;
 const VIEWER_FILE_NAME = ['visualizzatore', 'html'].join('.');
 const encoder = new TextEncoder();
@@ -69,6 +72,32 @@ function recordTitle(record, data) {
 
 function attachmentName(attachment, storagePath) {
     return String(attachment.originalName || attachment.fileName || attachment.nomeFile || attachment.name || storagePath.split('/').pop() || 'allegato');
+}
+
+function portableError(code) {
+    return Object.assign(new Error(code), {code});
+}
+
+async function *chunkedAttachmentSource(uid, item, vaultKeyMaterial, options) {
+    let fileKeyBytes = null;
+    try {
+        fileKeyBytes = await unwrapAttachmentFileKey(item.attachment.encryption, vaultKeyMaterial);
+        yield* streamDecryptedAttachmentChunks({
+            attachment: item.attachment,
+            fileKeyBytes,
+            async loadChunk(chunk) {
+                checkSession(uid, options);
+                const bytes = await getBytes(ref(storage, chunk.storagePath), chunk.encryptedSize);
+                checkSession(uid, options);
+                return bytes;
+            }
+        });
+    } catch (error) {
+        if (error?.code === 'PORTABLE_SESSION_INVALIDATED' || error?.name === 'AbortError') throw error;
+        throw portableError('PORTABLE_ATTACHMENT_DECRYPT_FAILED');
+    } finally {
+        fileKeyBytes?.fill(0);
+    }
 }
 
 function downloadBlob(blob, filename) {
@@ -203,24 +232,37 @@ export async function exportPortableArchive(uid, {
             for (const item of attachmentInventory) {
                 checkSession(uid, options);
                 const {storagePath, attachment} = item;
-                const ciphertext = new Uint8Array(await getBytes(ref(storage, storagePath), MAX_ATTACHMENT_DOWNLOAD));
-                let clear = ciphertext;
-                try {
-                    if (attachment.encryption) {
-                        clear = new Uint8Array(await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKeyMaterial));
-                    }
-                    capacity.accept(clear.byteLength);
-                    const openedName = await openValue(attachmentName(attachment, storagePath), vaultKeyMaterial, 'attachment.name');
+                const fallbackPath = storagePath || item.storagePaths[0];
+                const openedName = await openValue(attachmentName(attachment, fallbackPath), vaultKeyMaterial, 'attachment.name');
+                const entry = {
+                    id: `attachment:${attachmentCount}:${String(attachment.id || attachment.attachmentId || fallbackPath.split('/').pop())}`,
+                    kind: 'attachment', name: String(openedName || 'allegato'), recordKeys: item.recordKeys,
+                    type: attachment.encryption?.originalType || attachment.mimeType || attachment.type || 'application/octet-stream'
+                };
+                if (item.layout === 'chunked-v1') {
+                    capacity.accept(attachment.encryption.originalSize);
                     await writer.addEntry({
-                        id: `attachment:${attachmentCount}:${String(attachment.id || attachment.attachmentId || storagePath.split('/').pop())}`,
-                        kind: 'attachment', name: String(openedName || 'allegato'), recordKeys: item.recordKeys,
-                        type: attachment.encryption?.originalType || attachment.mimeType || attachment.type || 'application/octet-stream'
-                    }, clear);
-                    attachmentCount += 1;
-                } finally {
-                    if (clear !== ciphertext) clear.fill(0);
-                    ciphertext.fill(0);
+                        ...entry, schemaVersion: 1
+                    }, chunkedAttachmentSource(uid, item, vaultKeyMaterial, options));
+                } else {
+                    const ciphertext = new Uint8Array(await getBytes(ref(storage, storagePath), MAX_SINGLE_ATTACHMENT_DOWNLOAD));
+                    let clear = ciphertext;
+                    try {
+                        if (attachment.encryption) {
+                            try {
+                                clear = new Uint8Array(await decryptAttachmentBytes(ciphertext, attachment.encryption, vaultKeyMaterial));
+                            } catch {
+                                throw portableError('PORTABLE_ATTACHMENT_DECRYPT_FAILED');
+                            }
+                        }
+                        capacity.accept(clear.byteLength);
+                        await writer.addEntry(entry, clear);
+                    } finally {
+                        if (clear !== ciphertext) clear.fill(0);
+                        ciphertext.fill(0);
+                    }
                 }
+                attachmentCount += 1;
             }
         }
         checkSession(uid, options);

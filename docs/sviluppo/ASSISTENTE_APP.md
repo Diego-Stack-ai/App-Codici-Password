@@ -68,6 +68,8 @@ Il benchmark riproducibile usa `assessAdvancedRuntimeBenchmark`: per `light` ric
 
 La sessione effimera collega Cerca e Chiedi tramite una shortlist redatta di massimo dodici riferimenti, contenente soltanto identificatore opaco, tipo, titolo e sottotitolo. Password, segreti e altri dati D4 non entrano in envelope, modello, log o diagnostica. Gli errori tecnici `LOCAL_AI_*` restano nella diagnostica locale e non vengono mostrati nel dialogo; l'interfaccia ripiega su Cerca con un messaggio comprensibile. Questo blocco è una candidata locale: STATO distingue verifica, integrazione e distribuzione.
 
+Dal collaudo del 24/10 la verifica del pacchetto distingue le fasi `preflight`, `package-check`, `capability-check`, `runtime-import`, `runtime-initialization`, `smoke-test` e `verification-save`. In caso di errore il pannello Impostazioni conserva per la sola sessione e mostra un codice `LOCAL_AI_*` con la fase; la Console registra soltanto livello, taglia, codice, fase e nome tecnico dell'eccezione. Messaggio originale, stack, prompt, shortlist e contenuti della Vault non vengono conservati né registrati. Il codice serve a identificare il gate reale prima di intervenire sul runtime e non rende verificato un pacchetto fallito; Cerca e AI.1 restano il fallback.
+
 La sezione storica seguente documenta la provenienza dei tre livelli e dei due pacchetti; non descrive più la nomenclatura prevista dalla candidata.
 
 ### Architettura sperimentale A1/A2/A3 — 15/10/2026 (storica)

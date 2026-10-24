@@ -145,6 +145,8 @@ test('cifra e ricompone un video in blocchi autenticati e vincolati all’ordine
   );
   assert.equal(encrypted.metadata.chunked, true);
   assert.equal(encrypted.chunks.length, Math.ceil(clear.length / 7));
+  const attachment = {encryption: encrypted.metadata, chunks: encrypted.chunks};
+  assert.equal(chunkedSecurity.validateChunkedAttachmentManifest(attachment).length, encrypted.chunks.length);
   const fileKey = await security.unwrapAttachmentFileKey(encrypted.metadata, 'vault-video');
   try {
     const restored = [];
@@ -157,6 +159,35 @@ test('cifra e ricompone un video in blocchi autenticati e vincolati all’ordine
     await assert.rejects(chunkedSecurity.decryptAttachmentChunkBytesWithFileKey(
       encryptedChunks[0], encrypted.metadata, {...encrypted.chunks[0], index: 1}, fileKey
     ));
+
+    const streamed = [];
+    let loads = 0;
+    for await (const part of chunkedSecurity.streamDecryptedAttachmentChunks({
+      attachment,
+      fileKeyBytes: fileKey,
+      loadChunk: async chunk => {
+        loads++;
+        return encryptedChunks[chunk.index];
+      },
+    })) streamed.push(Uint8Array.from(part));
+    assert.equal(loads, encrypted.chunks.length);
+    assert.deepEqual(Buffer.concat(streamed.map(value => Buffer.from(value))), Buffer.from(clear));
+
+    const invalidSize = structuredClone(attachment);
+    invalidSize.chunks[0].encryptedSize += 1;
+    await assert.rejects(async () => {
+      for await (const ignored of chunkedSecurity.streamDecryptedAttachmentChunks({
+        attachment: invalidSize, fileKeyBytes: fileKey,
+        loadChunk: async chunk => encryptedChunks[chunk.index],
+      })) void ignored;
+    }, {code: 'ATTACHMENT_CHUNK_MANIFEST_INVALID'});
+
+    const reordered = structuredClone(attachment);
+    reordered.chunks.reverse();
+    assert.throws(
+      () => chunkedSecurity.validateChunkedAttachmentManifest(reordered),
+      {code: 'ATTACHMENT_CHUNK_MANIFEST_INVALID'},
+    );
   } finally {
     fileKey.fill(0);
   }

@@ -1,12 +1,17 @@
 import {
     ATTACHMENT_CHUNK_BYTES,
     MAX_ATTACHMENT_BYTES,
+    MAX_LARGE_VIDEO_BYTES,
     resolveAccountAttachmentMime,
     validateAccountAttachmentFile,
     wrapAttachmentFileKey
 } from './attachment-security.js';
 
 const CHUNK_BINDING_PATTERN = /^[A-Za-z0-9._:-]{1,180}$/;
+
+function attachmentError(code) {
+    return Object.assign(new Error(code), {code});
+}
 
 function bytesToBase64(value) {
     let binary = '';
@@ -123,16 +128,80 @@ export function isChunkedAttachment(attachment) {
         Array.isArray(attachment?.chunks) && attachment.chunks.length > 0;
 }
 
+export function validateChunkedAttachmentManifest(attachment, {maxOriginalSize = MAX_LARGE_VIDEO_BYTES} = {}) {
+    const encryption = attachment?.encryption;
+    if (!isChunkedAttachment(attachment) || encryption.version !== 1 || encryption.cipher !== 'AES-GCM-256' ||
+        encryption.keyWrap !== 'HKDF-SHA256+A256GCM' ||
+        !Number.isSafeInteger(maxOriginalSize) || maxOriginalSize <= 0 ||
+        !Number.isSafeInteger(encryption.originalSize) || encryption.originalSize <= 0 ||
+        encryption.originalSize > maxOriginalSize ||
+        !Number.isSafeInteger(encryption.chunkSize) || encryption.chunkSize <= 0 ||
+        encryption.chunkSize > MAX_ATTACHMENT_BYTES ||
+        !Number.isSafeInteger(encryption.chunkCount) || encryption.chunkCount !== attachment.chunks.length ||
+        !CHUNK_BINDING_PATTERN.test(String(encryption.chunkBinding || '')) ||
+        !String(encryption.originalType || '').startsWith('video/')) {
+        throw attachmentError('ATTACHMENT_CHUNK_MANIFEST_INVALID');
+    }
+    try {
+        if (base64ToBytes(encryption.wrapSalt).byteLength !== 32 ||
+            base64ToBytes(encryption.wrapIv).byteLength !== 12 ||
+            base64ToBytes(encryption.wrappedFileKey).byteLength !== 48) {
+            throw attachmentError('ATTACHMENT_CHUNK_MANIFEST_INVALID');
+        }
+    } catch {
+        throw attachmentError('ATTACHMENT_CHUNK_MANIFEST_INVALID');
+    }
+    const paths = new Set();
+    let clearTotal = 0;
+    for (let index = 0; index < attachment.chunks.length; index += 1) {
+        const chunk = attachment.chunks[index];
+        const clearSize = Number(chunk?.clearSize);
+        const encryptedSize = Number(chunk?.encryptedSize);
+        const storagePath = String(chunk?.storagePath || '');
+        let ivLength = 0;
+        try { ivLength = base64ToBytes(chunk?.contentIv).byteLength; } catch {}
+        if (Number(chunk?.index) !== index || !Number.isSafeInteger(clearSize) || clearSize <= 0 ||
+            clearSize > encryption.chunkSize || (index < attachment.chunks.length - 1 && clearSize !== encryption.chunkSize) ||
+            !Number.isSafeInteger(encryptedSize) || encryptedSize !== clearSize + 16 || ivLength !== 12 ||
+            !storagePath || storagePath.length > 1024 || storagePath.includes('..') || paths.has(storagePath) ||
+            clearSize > Number.MAX_SAFE_INTEGER - clearTotal) {
+            throw attachmentError('ATTACHMENT_CHUNK_MANIFEST_INVALID');
+        }
+        paths.add(storagePath);
+        clearTotal += clearSize;
+    }
+    if (clearTotal !== encryption.originalSize) throw attachmentError('ATTACHMENT_CHUNK_MANIFEST_INVALID');
+    return attachment.chunks;
+}
+
+export async function *streamDecryptedAttachmentChunks({attachment, fileKeyBytes, loadChunk} = {}) {
+    const chunks = validateChunkedAttachmentManifest(attachment);
+    if (typeof loadChunk !== 'function') throw attachmentError('ATTACHMENT_CHUNK_HANDLER_REQUIRED');
+    for (const chunk of chunks) {
+        let ciphertext = null;
+        let clear = null;
+        try {
+            const loaded = await loadChunk(chunk);
+            ciphertext = loaded instanceof Uint8Array ? loaded.slice() : new Uint8Array(loaded);
+            if (ciphertext.byteLength !== chunk.encryptedSize) {
+                throw attachmentError('ATTACHMENT_CHUNK_SIZE_MISMATCH');
+            }
+            clear = new Uint8Array(await decryptAttachmentChunkBytesWithFileKey(
+                ciphertext, attachment.encryption, chunk, fileKeyBytes
+            ));
+            if (clear.byteLength !== chunk.clearSize) throw attachmentError('ATTACHMENT_CHUNK_SIZE_MISMATCH');
+            yield clear;
+        } finally {
+            clear?.fill(0);
+            ciphertext?.fill(0);
+        }
+    }
+}
+
 export async function openChunkedDecryptedAttachment({attachment, fileKeyBytes, loadChunk}) {
-    if (!isChunkedAttachment(attachment) || typeof loadChunk !== 'function') {
-        throw new Error('ATTACHMENT_CHUNK_METADATA_INVALID');
-    }
+    validateChunkedAttachmentManifest(attachment);
+    if (typeof loadChunk !== 'function') throw attachmentError('ATTACHMENT_CHUNK_HANDLER_REQUIRED');
     if (!navigator.storage?.getDirectory) throw new Error('ATTACHMENT_LARGE_PREVIEW_UNSUPPORTED');
-    const ordered = [...attachment.chunks].sort((left, right) => Number(left.index) - Number(right.index));
-    if (ordered.length !== Number(attachment.encryption.chunkCount) ||
-        ordered.some((chunk, index) => Number(chunk.index) !== index || !chunk.storagePath)) {
-        throw new Error('ATTACHMENT_CHUNK_METADATA_INVALID');
-    }
     const root = await navigator.storage.getDirectory();
     const directory = await root.getDirectoryHandle('codici-password-previews', {create: true});
     const temporaryName = `${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(16).slice(2)}.bin`;
@@ -140,17 +209,8 @@ export async function openChunkedDecryptedAttachment({attachment, fileKeyBytes, 
     const writable = await handle.createWritable();
     let closed = false;
     try {
-        for (const chunk of ordered) {
-            const ciphertext = await loadChunk(chunk);
-            const clear = new Uint8Array(await decryptAttachmentChunkBytesWithFileKey(
-                ciphertext, attachment.encryption, chunk, fileKeyBytes
-            ));
-            try {
-                if (clear.byteLength !== Number(chunk.clearSize)) throw new Error('ATTACHMENT_CHUNK_SIZE_MISMATCH');
-                await writable.write(clear);
-            } finally {
-                clear.fill(0);
-            }
+        for await (const clear of streamDecryptedAttachmentChunks({attachment, fileKeyBytes, loadChunk})) {
+            await writable.write(clear);
         }
         await writable.close();
         closed = true;

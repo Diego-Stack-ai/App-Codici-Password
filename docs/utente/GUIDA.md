@@ -4,7 +4,7 @@
 
 Negli allegati di un Account o Memorandum puoi selezionare dalla **Galleria** un video fino a 512 MB. Oltre 32 MB l'app lo prepara e lo carica in più blocchi cifrati, mostrando l'avanzamento; il risultato resta un solo allegato e non devi unire manualmente i pezzi. Mantieni l'app aperta e la connessione attiva fino al messaggio di completamento.
 
-Per aprire un video grande il browser deve supportare lo spazio temporaneo privato necessario alla ricomposizione. Se non lo supporta, l'app lo segnala senza scaricare tutto il file nella memoria della pagina. Il normale **Backup cifrato** comprende i blocchi; l'**Archivio portatile** con allegati conserva invece un limite più prudente e può chiederti di ripetere l'esportazione senza allegati grandi.
+Per aprire un video grande il browser deve supportare lo spazio temporaneo privato necessario alla ricomposizione. Se non lo supporta, l'app lo segnala senza scaricare tutto il file nella memoria della pagina. Il normale **Backup cifrato** comprende i blocchi; anche l'**Archivio portatile** può includerli come un solo allegato fino a 512 MiB, ma per creare e poi salvare file grandi serve un browser desktop compatibile con il salvataggio progressivo. Il totale degli allegati esportati non può superare 1 GiB.
 
 ## Lingua e prima configurazione
 

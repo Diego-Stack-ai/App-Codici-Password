@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LOCAL_AI_ADVANCED_TIERS, LOCAL_AI_PACKAGE_CATALOG, LOCAL_AI_RUNTIME_PROVENANCE, getLocalAiPackageCandidate } from '../Frontend/public/assets/js/modules/assistant/local-ai-package-catalog.js';
-import { createLocalAiRuntimeLoader } from '../Frontend/public/assets/js/modules/assistant/local-ai-runtime-loader.js';
+import { createLocalAiRuntimeLoader, readLocalAiRuntimeDiagnostic } from '../Frontend/public/assets/js/modules/assistant/local-ai-runtime-loader.js';
 import { readFileSync } from 'node:fs';
 
 test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile', () => {
@@ -41,12 +41,61 @@ test('il loader usa il runtime Hosting della taglia AI.2 medium materializzata',
     assert.match(imported, /^https:\/\/app\.example\/assets\/local-ai-packages\/a2\//);
 });
 
+test('il loader espone fasi e codice sicuro quando l’inizializzazione AI.2 fallisce', async () => {
+    const stages = [];
+    const loader = createLocalAiRuntimeLoader({
+        packageManager:{ status:async () => ({ installed:true, active:{ cacheName:'light' } }), markVerified(){} },
+        importModule:async () => ({ createGenerativeRuntime:async () => { throw new DOMException('dettaglio non esposto', 'OperationError'); } }),
+        origin:'https://app.example'
+    });
+    let failure;
+    try {
+        await loader.load('A2', {
+            tier:'light',
+            assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light'] } },
+            onStage:stage => stages.push(stage)
+        });
+    } catch (error) { failure = error; }
+    assert.deepEqual(stages, ['preflight','package-check','capability-check','runtime-import','runtime-initialization']);
+    assert.equal(failure.code, 'LOCAL_AI_RUNTIME_INITIALIZATION_FAILED');
+    assert.equal(failure.stage, 'runtime-initialization');
+    assert.equal(failure.causeName, 'OperationError');
+    assert.doesNotMatch(failure.message, /dettaglio non esposto/);
+});
+
+test('il loader chiude il runtime e classifica un errore dello smoke test', async () => {
+    let disposed = 0;
+    const loader = createLocalAiRuntimeLoader({
+        packageManager:{ status:async () => ({ installed:true, active:{} }), markVerified(){} },
+        importModule:async () => ({ createGenerativeRuntime:async () => ({
+            complete:async () => { throw new Error('contenuto interno'); },
+            dispose:async () => { disposed++; }
+        }) }),
+        origin:'https://app.example'
+    });
+    await assert.rejects(
+        loader.load('A2', { tier:'light', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light'] } } }),
+        error => error.code === 'LOCAL_AI_SMOKE_TEST_FAILED' && error.stage === 'smoke-test'
+    );
+    assert.equal(disposed, 1);
+});
+
+test('la diagnostica scarta messaggi arbitrari e conserva solo codice e fase ammessi', () => {
+    assert.deepEqual(
+        readLocalAiRuntimeDiagnostic({ message:'dato sensibile', name:'OperationError' }, 'runtime-import'),
+        { code:'LOCAL_AI_RUNTIME_IMPORT_FAILED', stage:'runtime-import', errorName:'OperationError' }
+    );
+});
+
 test('le impostazioni espongono la scelta operativa delle tre taglie AI.2', () => {
     const source = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-package-settings.js', import.meta.url), 'utf8');
     assert.match(source, /getLocalAiPackageCandidate\(level, \{ tier:selectedTier \}\)/);
     assert.match(source, /setAttribute\('role', 'radiogroup'\)/);
     assert.match(source, /writeSelectedAdvancedTier\(tier\)/);
     assert.match(source, /tierButton\.classList\.toggle\('recommended'/);
+    assert.match(source, /sessionStorage\.setItem\(diagnosticKey/);
+    assert.match(source, /readLocalAiRuntimeDiagnostic/);
+    assert.match(source, /\[Local AI verification failed\]/);
 });
 
 test('il pannello dei pacchetti segue lo stato dell’interruttore Agente AI', () => {

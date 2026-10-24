@@ -35,10 +35,13 @@ function domainDictionaryKeys(source, language) {
   if (start < 0) return [];
   const end = source.indexOf('\n};', start);
   const keys = [...source.slice(start, end).matchAll(/(?:^|,)\s*([A-Za-z][A-Za-z0-9_.-]*)\s*:/gm)].map(match => match[1]);
-  const portableStart = source.indexOf(`  ${language}: {`, source.indexOf('const portable = {'));
-  if (portableStart >= 0) {
-    const commaEnd = source.indexOf(' },', portableStart);
-    const portableEnd = commaEnd >= 0 ? commaEnd : source.indexOf(' }\n};', portableStart);
+  for (const catalogName of ['portable', 'portableLarge']) {
+    const catalogStart = source.indexOf(`const ${catalogName} = {`);
+    const catalogEnd = source.indexOf('\n};', catalogStart);
+    const portableStart = source.indexOf(`  ${language}: {`, catalogStart);
+    if (catalogStart < 0 || catalogEnd < 0 || portableStart < 0 || portableStart > catalogEnd) continue;
+    const following = source.slice(portableStart + 1, catalogEnd).match(/\n  [a-z]{2}: \{/);
+    const portableEnd = following ? portableStart + 1 + following.index : catalogEnd;
     keys.push(...[...source.slice(portableStart, portableEnd).matchAll(/(?:\{|,)\s*([A-Za-z][A-Za-z0-9_.-]*)\s*:/gm)].map(match => match[1]));
   }
   for (const match of source.matchAll(new RegExp(`Object\\.assign\\(${language},\\s*\\{([\\s\\S]*?)\\}\\);`, 'g'))) {

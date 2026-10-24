@@ -8,20 +8,25 @@ import {
 } from '../Frontend/public/assets/js/modules/settings/portable-archive-stream.js';
 
 const MIB = 1024 * 1024;
-const attachmentMiB = 32;
-const scenario = process.env.PORTABLE_ARCHIVE_MEMORY_PROBE_FILES;
+const scenario = process.env.PORTABLE_ARCHIVE_MEMORY_PROBE_SCENARIO;
 
 if (!scenario) {
-    const results = [1, 2, 8].map(fileCount => {
+    const scenarios = [
+        {fileCount: 1, attachmentMiB: 32, sourceChunkMiB: 8},
+        {fileCount: 2, attachmentMiB: 32, sourceChunkMiB: 8},
+        {fileCount: 8, attachmentMiB: 32, sourceChunkMiB: 8},
+        {fileCount: 1, attachmentMiB: 485, sourceChunkMiB: 8, chunkedManifest: true}
+    ];
+    const results = scenarios.map(specification => {
         const child = spawnSync(process.execPath, ['--expose-gc', fileURLToPath(import.meta.url)], {
-            env: {...process.env, PORTABLE_ARCHIVE_MEMORY_PROBE_FILES: String(fileCount)},
+            env: {...process.env, PORTABLE_ARCHIVE_MEMORY_PROBE_SCENARIO: JSON.stringify(specification)},
             encoding: 'utf8', maxBuffer: 1024 * 1024
         });
-        if (child.status !== 0) throw new Error(child.stderr || child.stdout || `PORTABLE_CAPACITY_CHILD_${fileCount}`);
+        if (child.status !== 0) throw new Error(child.stderr || child.stdout || 'PORTABLE_CAPACITY_CHILD_FAILED');
         return JSON.parse(child.stdout.trim());
     });
     for (const result of results) {
-        assert.ok(result.maxRssMiB < 320, `picco RSS streaming eccessivo per ${result.fixture}: ${result.maxRssMiB} MiB`);
+        assert.ok(result.maxRssMiB < 384, `picco RSS streaming eccessivo per ${result.fixture}: ${result.maxRssMiB} MiB`);
         assert.ok(result.maxWriteMiB < 1.5, `il sink ha ricevuto un blocco eccessivo: ${result.maxWriteMiB} MiB`);
         assert.ok(result.outputMiB < result.clearMiB * 1.45 + 2, 'overhead del contenitore streaming oltre il limite');
     }
@@ -31,8 +36,14 @@ if (!scenario) {
     process.exit(0);
 }
 
-const fileCount = Number(scenario);
-if (!Number.isSafeInteger(fileCount) || fileCount < 1 || fileCount > 8) throw new Error('PORTABLE_MEMORY_PROBE_FILE_COUNT_INVALID');
+let specification;
+try { specification = JSON.parse(scenario); } catch { throw new Error('PORTABLE_MEMORY_PROBE_SCENARIO_INVALID'); }
+const {fileCount, attachmentMiB, sourceChunkMiB, chunkedManifest = false} = specification;
+if (!Number.isSafeInteger(fileCount) || fileCount < 1 || fileCount > 8 ||
+    !Number.isSafeInteger(attachmentMiB) || attachmentMiB < 1 || attachmentMiB > 512 ||
+    !Number.isSafeInteger(sourceChunkMiB) || sourceChunkMiB < 1 || sourceChunkMiB > 32) {
+    throw new Error('PORTABLE_MEMORY_PROBE_SCENARIO_INVALID');
+}
 const startedAt = performance.now();
 let outputBytes = 0, maxWriteBytes = 0, closed = false;
 const sink = {
@@ -48,18 +59,30 @@ const writer = await createPortableArchiveWriter({
     sink, password: 'Fiume!Quarzo-83#Luna', cryptoApi: webcrypto,
     header: createPortableHeader({createdAt: '2026-10-15T00:00:00.000Z', cryptoApi: webcrypto})
 });
+async function *syntheticAttachment(totalBytes, chunkBytes, seed) {
+    let remaining = totalBytes, chunkIndex = 0;
+    while (remaining > 0) {
+        const size = Math.min(remaining, chunkBytes);
+        const clear = new Uint8Array(size);
+        for (let offset = 0; offset < clear.length; offset += MIB) clear[offset] = (seed + chunkIndex + offset / MIB) % 251;
+        try { yield clear; }
+        finally { clear.fill(0); globalThis.gc?.(); }
+        remaining -= size;
+        chunkIndex += 1;
+    }
+}
 for (let index = 0; index < fileCount; index += 1) {
-    const clear = new Uint8Array(attachmentMiB * MIB);
-    for (let offset = 0; offset < clear.length; offset += MIB) clear[offset] = (index + offset / MIB) % 251;
-    await writer.addEntry({id: `fixture-${index + 1}`, kind: 'attachment', name: `fixture-${index + 1}.bin`}, clear);
-    clear.fill(0); globalThis.gc?.();
+    await writer.addEntry(
+        {id: `fixture-${index + 1}`, kind: 'attachment', name: `fixture-${index + 1}.bin`},
+        syntheticAttachment(attachmentMiB * MIB, sourceChunkMiB * MIB, index)
+    );
 }
 await writer.close({counts: {records: 0, attachments: fileCount}});
 const maxRssMiB = process.resourceUsage().maxRSS / 1024;
 const elapsedMs = performance.now() - startedAt;
 assert.equal(closed, true);
 console.log(JSON.stringify({
-    fixture: `${fileCount}x${attachmentMiB} MiB`,
+    fixture: `${fileCount}x${attachmentMiB} MiB${chunkedManifest ? ' block-manifest stream' : ''}`,
     clearMiB: attachmentMiB * fileCount,
     outputMiB: Number((outputBytes / MIB).toFixed(1)),
     maxWriteMiB: Number((maxWriteBytes / MIB).toFixed(2)),

@@ -1,5 +1,13 @@
 # Collaudi
 
+## Archivio portatile con allegati a blocchi
+
+Usare soltanto fixture sintetiche. Eseguire `npm run test:portable-archive`, `node --test tests/attachment-security.test.mjs`, `npm run test:portable-archive-capacity` e `npm run test:portable-archive-browser`; il gate aggregato resta `npm run test:portable-archive-prerelease`. Il probe deve comprendere uno stream da 485 MiB prodotto in blocchi da 8 MiB, non un'allocazione monolitica, e deve attestare output completo, scrittura massima sotto 1,5 MiB e RSS sotto 384 MiB nell'ambiente di riferimento.
+
+Il banco browser deve aprire da `file://` il visualizzatore, verificare l'intero archivio prima di mostrare schede e scaricare un allegato con la seconda lettura autenticata. Provare password errata, ciphertext alterato, blocco riordinato o troncato, manifest/conteggio incoerente, byte dopo il terminatore, annullamento e cleanup dell'output parziale. Per un allegato oltre 8 MiB verificare File System Access e l'assenza di fallback Blob; per la creazione oltre 12 MiB verificare l'assenza del fallback in memoria.
+
+Registrare browser, sistema operativo, dimensioni chiare/cifrate, picco RSS e massima singola scrittura. Un limite del sandbox sui download va distinto da un difetto applicativo con una prova minima indipendente e la ripetizione nello stesso browser fuori dal contenimento. Il test sintetico non certifica velocità, spazio libero o comportamento fisico su iPhone/Android.
+
 ## Banco Google Cloud reale per M7/M8
 
 Questo banco serve a colmare il limite noto dell'emulatore Storage, che non certifica `ifGenerationMatch`. Prerequisiti: Google Cloud CLI (`gcloud`) installata; autenticazione con identità a privilegi minimi sul solo progetto `appcodici-password`; bucket e regione verificati; prefisso sintetico univoco registrato nel verbale; nessun oggetto o documento appartenente a utenti reali.
