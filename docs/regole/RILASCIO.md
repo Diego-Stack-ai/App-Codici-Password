@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.238 — runtime AI.2 isolato e verificabile — 25/10/2026
+
+AI.2 esegue WebLLM in un Web Worker dedicato e carica il runtime incluso nel pacchetto verificato della taglia selezionata. Il preflight richiede un adattatore WebGPU reale; il Service Worker consulta soltanto le cache applicative promosse, mentre rimozione e recupero eliminano anche le cache derivate WebLLM. Lo smoke test accetta soltanto un JSON conforme allo schema chiuso degli intenti autorizzati. Il runtime puo restare caldo per cinque minuti nella scheda senza persistere conversazioni o dati della Vault.
+
+Chrome ed Edge reali hanno superato il probe del Worker e WebGPU. Firefox e Safari restano condizionati alla disponibilita effettiva di WebGPU e allo smoke test sul dispositivo; mobile conserva AI.1 come percorso supportato. Sono verdi i test AI locale **41/41**, Assistente **17/17**, sicurezza **25/25**, offline **14/14**, sintassi JavaScript su **224 moduli**, riferimenti statici su **317 file**, documentazione **11/11** e l'intera suite `npm test` con codice **0**.
+
+L'ordine **«commit, push e deploy procedi»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi. Il collaudo autenticato del modello reale installato avviene dopo la pubblicazione.
+
 ## Candidata 1.2.237 — Widget generici e recupero configurazione AI.2 — 25/10/2026
 
 Il menu dei Widget Account proietta anche le strutture generiche legacy prive di `profileId`, escludendo valori, ciphertext e Widget bancari. Un solo cestino presenta **Solo dall’account** e **Account e lista**; la seconda azione è disponibile soltanto quando nessun altro Account usa il profilo e il backend ripete il controllo autoritativo.

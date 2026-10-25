@@ -1,8 +1,3 @@
-// La revisione nella query evita che il service worker riusi una vecchia copia
-// del runtime presente nelle cache dei pacchetti AI gia installati. I pesi del
-// modello restano invece nelle cache dedicate e non vengono riscaricati.
-import { CreateMLCEngine, deleteChatConfigInCache } from '../../../local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js?codex-runtime=2';
-
 const MODEL_SPECS = Object.freeze({
     'qwen2.5-0.5b-instruct-q4f16-1-mlc': Object.freeze({
         modelId:'codex-qwen2.5-0.5b-instruct-q4f16-1',
@@ -24,7 +19,10 @@ const MODEL_SPECS = Object.freeze({
 export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProgress = () => {} }) {
     const spec = MODEL_SPECS[manifest?.packageId];
     if (!spec) throw new Error('LOCAL_AI_MODEL_UNSUPPORTED');
+    const runtimeUrl = new URL('runtime/web-llm.js', packageBaseUrl).href;
+    const { CreateWebWorkerMLCEngine, deleteModelAllInfoInCache } = await import(runtimeUrl);
     const appConfig = {
+        cacheBackend:'cache',
         model_list: [{
             model:packageBaseUrl,
             model_id:spec.modelId,
@@ -33,27 +31,49 @@ export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProg
             low_resource_required:true
         }]
     };
-    let engine;
+    const createWorker = () => new Worker(
+        new URL(`./local-ai-generative-worker.js?runtime=${encodeURIComponent(runtimeUrl)}`, import.meta.url),
+        { type:'module', name:'codici-password-ai2' }
+    );
+    const initialize = async () => {
+        const worker = createWorker();
+        try {
+            const engine = await CreateWebWorkerMLCEngine(worker, spec.modelId, {
+                appConfig,
+                initProgressCallback:onProgress
+            });
+            return { engine, worker };
+        } catch (error) {
+            worker.terminate();
+            throw error;
+        }
+    };
+    let active;
     try {
-        engine = await CreateMLCEngine(spec.modelId, { appConfig, initProgressCallback:onProgress });
+        active = await initialize();
     } catch (error) {
-        // Le prime pubblicazioni dei pacchetti AI.2 potevano lasciare nella cache
-        // WebLLM il fallback HTML di Hosting al posto di mlc-chat-config.json.
-        // Il pacchetto installato e verificato non va riscaricato: eliminiamo solo
-        // la configurazione WebLLM obsoleta e ripetiamo una volta il caricamento.
+        // Un SyntaxError dopo l'accesso a WebGPU indica normalmente un artefatto
+        // derivato WebLLM obsoleto o incompleto. La cache applicativa verificata
+        // resta intatta; config, tokenizer, tensori e WASM derivati vengono invece
+        // eliminati insieme, evitando riparazioni parziali e nuovi stati ibridi.
         if (String(error?.name || '') !== 'SyntaxError') throw error;
-        await deleteChatConfigInCache(spec.modelId, appConfig);
-        engine = await CreateMLCEngine(spec.modelId, { appConfig, initProgressCallback:onProgress });
+        await deleteModelAllInfoInCache(spec.modelId, appConfig);
+        active = await initialize();
     }
     return Object.freeze({
         level:'A2',
         async complete(messages, options = {}) {
-            return engine.chat.completions.create({
+            return active.engine.chat.completions.create({
                 messages,
                 temperature:options.temperature ?? 0.1,
-                max_tokens:options.maxTokens ?? 256
+                max_tokens:options.maxTokens ?? 256,
+                ...(options.responseFormat ? { response_format:options.responseFormat } : {})
             });
         },
-        async dispose() { await engine.unload?.(); }
+        async interrupt() { await active.engine.interruptGenerate?.(); },
+        async dispose() {
+            try { await active.engine.unload?.(); }
+            finally { active.worker.terminate(); }
+        }
     });
 }

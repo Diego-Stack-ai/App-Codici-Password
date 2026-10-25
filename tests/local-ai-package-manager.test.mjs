@@ -77,6 +77,15 @@ test('installa soltanto file con dimensione e SHA-256 corretti, poi rimuove ogni
     assert.deepEqual(await state.cacheStorage.keys(), []);
 });
 
+test('rimuovere AI.2 elimina anche le cache derivate create dal runtime WebLLM', async () => {
+    const state = manager(async () => new Response('fixture'));
+    for (const name of ['codex-local-ai-a2-fixture-1.0.0-ready', 'webllm/config', 'webllm/model', 'webllm/wasm']) {
+        await state.cacheStorage.open(name);
+    }
+    await state.instance.remove('A2');
+    assert.deepEqual(await state.cacheStorage.keys(), []);
+});
+
 test('un hash errato elimina lo staging e non attiva il pacchetto', async () => {
     const { manifest } = await fixture();
     const state = manager(async () => new Response('contenuto alterato'));

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.237';
+const CACHE_NAME = 'codex-shell-v1.2.238';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./offline-assets.js');
@@ -41,6 +41,16 @@ async function fetchAndCache(request) {
     return response;
 }
 
+async function matchVerifiedLocalAiPackage(request) {
+    const names = await caches.keys();
+    const readyNames = names.filter(name => name.startsWith('codex-local-ai-') && name.endsWith('-ready'));
+    for (const name of readyNames) {
+        const response = await (await caches.open(name)).match(request);
+        if (response) return response;
+    }
+    return null;
+}
+
 async function navigationFallback(request) {
     const cache = await caches.open(CACHE_NAME);
     const exact = await cache.match(request) || await cache.match(new URL(request.url).pathname.slice(1));
@@ -68,7 +78,10 @@ self.addEventListener('fetch', (event) => {
     // offline senza copiarli nella shell e senza accettare file non verificati.
     if (url.pathname.startsWith('/assets/local-ai/') || url.pathname.startsWith('/assets/local-ai-packages/')) {
         event.respondWith((async () => {
-            const cached = await caches.match(request);
+            // Non usare caches.match(): attraverserebbe anche le cache interne
+            // di WebLLM e potrebbe servire un artefatto derivato vecchio. Solo i
+            // pacchetti promossi dopo byte/SHA-256 sono una sorgente attendibile.
+            const cached = await matchVerifiedLocalAiPackage(request);
             return cached || fetch(request, { cache: 'no-store', credentials: 'omit' });
         })());
         return;

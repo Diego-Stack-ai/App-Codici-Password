@@ -61,13 +61,22 @@ test('la matrice abilita AI.1 e limita AI.2 avanzata su iPhone', () => {
 test('il probe usa capacità e quota reali senza accedere alla Vault', async () => {
     const result = await probeLocalAiCapabilities({ navigatorObject: {
         storage: { estimate: async () => ({ quota: 2_000_000_000, usage: 100_000_000 }) },
-        gpu: {}, hardwareConcurrency: 8, deviceMemory: 8,
+        gpu: { requestAdapter:async () => ({ limits:{} }) }, hardwareConcurrency: 8, deviceMemory: 8,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', platform: 'Win32', maxTouchPoints: 0
     } });
     assert.equal(result.A1.status, 'candidate');
     assert.equal(result.A2.status, 'candidate');
     assert.deepEqual(result.A2.allowedTiers, ['light']);
     assert.equal(result.A2.recommendedTier, 'light');
+});
+
+test('la taglia light usa il collaudo reale quando il browser non espone deviceMemory', () => {
+    const result = assessLocalAiCapabilities({
+        wasm:true, webgpu:true, hardwareConcurrency:8, deviceMemoryGiB:null,
+        storageAvailableBytes:3*1024*1024*1024, mobile:false, ios:false
+    });
+    assert.equal(result.A2.status, 'candidate');
+    assert.deepEqual(result.A2.allowedTiers, ['light']);
 });
 
 test('AI.2 resta una sola AI ma il controllo tecnico abilita taglie progressive', () => {
