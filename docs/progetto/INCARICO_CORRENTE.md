@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Consultazione completa dell'Archivio portatile — 25/10/2026
+
+Diego autorizza l'evoluzione del visualizzatore senza cambiare il formato cifrato v2 né il flusso progressivo già collaudato per gli allegati grandi. Le schede mostrano prima i dati utili e raccolgono identificativi, revisioni, visibilità, condivisioni e altri metadati in **Informazioni tecniche**; i campi sconosciuti restano comunque conservati e visibili. Le date Firestore e ISO sono rese in formato leggibile.
+
+Foto, video, audio, PDF e testo possono essere aperti direttamente su richiesta; il salvataggio singolo e **Salva tutti gli allegati** restano facoltativi e producono copie decifrate soltanto dopo un avviso esplicito. L'anteprima grande usa un file applicativo temporaneo isolato, revoca gli URL e rimuove i residui alla chiusura e alla successiva apertura. Il visualizzatore e `LEGGIMI.txt` dichiarano i limiti del browser e l'impossibilità di garantire una cancellazione fisica forense assoluta. Alle proiezioni JSON, CSV e ODS si aggiunge un vero XLSX nativo con fogli separati, filtri, colonne dimensionate, date leggibili e celle testuali. L'ordine successivo **«pubblichiamo tutto»** autorizza la candidata `1.2.236`, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting insieme alla diagnostica AI.2; backend, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Aggiornamento cache del runtime AI.2 — 25/10/2026
 
 Il collaudo diretto successivo al deploy `1.2.234` conferma che il browser può ancora ricevere dalla cache locale la copia precedente di `web-llm.js`: la URL del runtime coincide con quella già salvata insieme al pacchetto AI.2 e il service worker privilegia correttamente la cache dei modelli. La correzione usa una revisione di URL per il solo runtime condiviso, conservando il pacchetto `power` da 935 MiB e i relativi pesi.

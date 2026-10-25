@@ -1,5 +1,35 @@
 const encoder = new TextEncoder();
 const ODS_MIME = 'application/vnd.oasis.opendocument.spreadsheet';
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+function timestampDate(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const seconds = Number(value.seconds ?? value._seconds);
+    const nanoseconds = Number(value.nanoseconds ?? value._nanoseconds ?? 0);
+    if (!Number.isSafeInteger(seconds) || !Number.isFinite(nanoseconds) || nanoseconds < 0 || nanoseconds >= 1e9) {
+        return null;
+    }
+    const date = new Date((seconds * 1000) + Math.floor(nanoseconds / 1e6));
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function readableDate(value) {
+    return new Intl.DateTimeFormat('it-IT', {
+        dateStyle: 'medium', timeStyle: 'medium', timeZone: 'UTC'
+    }).format(value) + ' UTC';
+}
+
+function looksLikeDatePath(path) {
+    return /(?:^|\.)(?:date|data|.*Date|.*At|timestamp)$/i.test(String(path || ''));
+}
+
+function readableScalar(value, path) {
+    if (typeof value === 'string' && looksLikeDatePath(path)) {
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime()) && /^\d{4}-\d{2}-\d{2}(?:T|$)/.test(value)) return readableDate(parsed);
+    }
+    return value;
+}
 
 function bytesToBase64(value) {
     const bytes = value instanceof Uint8Array ? value : new Uint8Array(value);
@@ -34,16 +64,24 @@ function flattenValue(value, prefix, target) {
         return;
     }
     if (Array.isArray(value)) {
-        target[prefix] = JSON.stringify(value);
+        target[prefix] = JSON.stringify(value, (_key, child) => {
+            const date = timestampDate(child);
+            return date ? readableDate(date) : child;
+        });
         return;
     }
     if (typeof value === 'object') {
+        const date = timestampDate(value);
+        if (date) {
+            target[prefix] = readableDate(date);
+            return;
+        }
         const entries = Object.entries(value);
         if (!entries.length && prefix) target[prefix] = '{}';
         for (const [key, child] of entries) flattenValue(child, prefix ? `${prefix}.${key}` : key, target);
         return;
     }
-    target[prefix] = String(value);
+    target[prefix] = String(readableScalar(value, prefix));
 }
 
 export function buildProjectionTables(records = []) {
@@ -196,6 +234,63 @@ export function buildOdsBytes(tables, {createdAt = new Date().toISOString()} = {
     ]);
 }
 
+function columnName(index) {
+    let value = index + 1;
+    let output = '';
+    while (value > 0) {
+        value -= 1;
+        output = String.fromCharCode(65 + (value % 26)) + output;
+        value = Math.floor(value / 26);
+    }
+    return output;
+}
+
+function xlsxCell(reference, value, styleIndex = 2) {
+    return `<c r="${reference}" s="${styleIndex}" t="inlineStr"><is><t xml:space="preserve">${xmlEscape(safeTabularValue(value))}</t></is></c>`;
+}
+
+function xlsxColumnWidth(table, column) {
+    let width = Math.max(10, String(column).length + 2);
+    for (const row of table.rows.slice(0, 500)) width = Math.max(width, String(row[column] ?? '').length + 2);
+    return Math.min(60, width);
+}
+
+export function buildXlsxBytes(tables, {createdAt = new Date().toISOString()} = {}) {
+    const names = uniqueSheetNames(tables);
+    const worksheets = tables.map((table, sheetIndex) => {
+        const header = table.columns.map((column, columnIndex) => xlsxCell(`${columnName(columnIndex)}1`, column, 1)).join('');
+        const rows = table.rows.map((row, rowIndex) => {
+            const cells = table.columns.map((column, columnIndex) =>
+                xlsxCell(`${columnName(columnIndex)}${rowIndex + 2}`, row[column])
+            ).join('');
+            return `<row r="${rowIndex + 2}">${cells}</row>`;
+        }).join('');
+        const columns = table.columns.map((column, columnIndex) =>
+            `<col min="${columnIndex + 1}" max="${columnIndex + 1}" width="${xlsxColumnWidth(table, column)}" customWidth="1"/>`
+        ).join('');
+        const lastColumn = columnName(Math.max(0, table.columns.length - 1));
+        const lastRow = Math.max(1, table.rows.length + 1);
+        const filter = table.columns.length ? `<autoFilter ref="A1:${lastColumn}${lastRow}"/>` : '';
+        const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${columns}</cols><sheetData><row r="1">${header}</row>${rows}</sheetData>${filter}</worksheet>`;
+        return {name: `xl/worksheets/sheet${sheetIndex + 1}.xml`, data: xml};
+    });
+    const sheets = names.map((name, index) => `<sheet name="${xmlEscape(name)}" sheetId="${index + 1}" r:id="rId${index + 1}"/>`).join('');
+    const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets}</sheets></workbook>`;
+    const workbookRelationships = names.map((_name, index) => `<Relationship Id="rId${index + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${index + 1}.xml"/>`).join('');
+    const contentTypes = worksheets.map((_sheet, index) => `<Override PartName="/xl/worksheets/sheet${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('');
+    const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Aptos"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1377D4"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="49" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/><xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+    return createStoredZip([
+        {name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>${contentTypes}</Types>`},
+        {name: '_rels/.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`},
+        {name: 'docProps/core.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:creator>Codici &amp; Password</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${xmlEscape(createdAt)}</dcterms:created></cp:coreProperties>`},
+        {name: 'docProps/app.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>Codici &amp; Password</Application></Properties>`},
+        {name: 'xl/workbook.xml', data: workbook},
+        {name: 'xl/_rels/workbook.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${workbookRelationships}<Relationship Id="rId${names.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+        {name: 'xl/styles.xml', data: styles},
+        ...worksheets
+    ]);
+}
+
 export async function sha256Base64(bytes, cryptoApi = crypto) {
     const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     return bytesToBase64(await cryptoApi.subtle.digest('SHA-256', data));
@@ -211,8 +306,10 @@ export async function buildPortableProjections(records, {createdAt = new Date().
     const csv = buildCsvFiles(tables);
     const odsBytes = buildOdsBytes(tables, {createdAt});
     const ods = {filename: 'archivio-portabile.ods', type: ODS_MIME, size: odsBytes.byteLength, content: bytesToBase64(odsBytes)};
-    for (const file of [json, ...csv, ods]) file.sha256 = await sha256Base64(Uint8Array.from(atob(file.content), character => character.charCodeAt(0)), cryptoApi);
-    return {version: 1, json, csv, ods};
+    const xlsxBytes = buildXlsxBytes(tables, {createdAt});
+    const xlsx = {filename: 'archivio-portabile.xlsx', type: XLSX_MIME, size: xlsxBytes.byteLength, content: bytesToBase64(xlsxBytes)};
+    for (const file of [json, ...csv, ods, xlsx]) file.sha256 = await sha256Base64(Uint8Array.from(atob(file.content), character => character.charCodeAt(0)), cryptoApi);
+    return {version: 1, json, csv, ods, xlsx};
 }
 
 export async function *iteratePortableProjectionEntries(records, {createdAt = new Date().toISOString()} = {}) {
@@ -226,6 +323,7 @@ export async function *iteratePortableProjectionEntries(records, {createdAt = ne
         yield {kind: 'csv', filename: entry.filename, type: entry.type, bytes: entry.bytes};
     }
     yield {kind: 'ods', filename: 'archivio-portabile.ods', type: ODS_MIME, bytes: buildOdsBytes(tables, {createdAt})};
+    yield {kind: 'xlsx', filename: 'archivio-portabile.xlsx', type: XLSX_MIME, bytes: buildXlsxBytes(tables, {createdAt})};
 }
 
-export const PORTABLE_PROJECTION_FORMAT = Object.freeze({version: 1, odsMime: ODS_MIME});
+export const PORTABLE_PROJECTION_FORMAT = Object.freeze({version: 1, odsMime: ODS_MIME, xlsxMime: XLSX_MIME});

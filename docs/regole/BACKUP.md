@@ -1,5 +1,11 @@
 # Backup
 
+## Consultazione e copie decifrate dell'Archivio portatile — 25/10/2026
+
+Il visualizzatore presenta i campi operativi prima dei metadati tecnici, conserva i campi sconosciuti e rende leggibili timestamp Firestore e date ISO. Gli allegati restano esclusivamente nel contenitore cifrato finché l'utente non sceglie **Visualizza/Riproduci**, **Salva sul PC** o **Salva tutti gli allegati**. Ogni salvataggio richiede conferma perché genera una copia decifrata; nessuna cartella in chiaro viene estratta automaticamente.
+
+Le anteprime piccole usano Blob temporanei; quelle grandi vengono ricostruite progressivamente in un'area OPFS applicativa isolata. URL e file temporanei sono rimossi alla chiusura e l'area viene bonificata alla successiva apertura. Questa è una cancellazione applicativa accurata, non una garanzia di cancellazione fisica forense. JSON, CSV e ODS restano disponibili; XLSX è un pacchetto OOXML nativo con fogli separati, intestazioni, filtri, colonne dimensionate e celle testuali per preservare codici e zeri iniziali. Il formato cifrato, il manifest e `formatVersion: 2` non cambiano.
+
 ## Allegati a blocchi nell'Archivio portabile — decisione 24/10/2026
 
 L'Archivio portabile include gli allegati video cifrati a blocchi come singole voci logiche. L'inventario riconcilia tutti i percorsi del manifest con le schede proprietarie; il servizio apre una sola chiave-file, scarica e autentica un blocco per volta e alimenta direttamente il writer v2. Il file chiaro completo non viene mai assemblato nella memoria JavaScript. Il formato non cambia: dati e allegati sono contenuti nel solo `archivio.cpportable` cifrato e autenticato; visualizzatore e istruzioni restano separati e privi di dati utente.

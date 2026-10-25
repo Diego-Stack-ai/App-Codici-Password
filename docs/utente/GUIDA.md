@@ -1,5 +1,11 @@
 # Guida
 
+## Consultare l'Archivio portatile
+
+Nel visualizzatore scegli `archivio.cpportable` e inserisci la password dedicata. Le schede mostrano subito i dati utili; identificativi, revisioni, condivisioni e altri metadati restano disponibili in **Informazioni tecniche**. Foto, video, audio, PDF e testo si aprono con **Visualizza** o **Riproduci** quando il browser li supporta. **Salva sul PC** conserva il singolo file e **Salva tutti gli allegati** permette di scegliere una cartella.
+
+Il salvataggio di allegati o di JSON, CSV, ODS ed Excel crea una copia decifrata leggibile senza la password dell'archivio: conferma soltanto se puoi conservarla in un luogo sicuro. Le anteprime temporanee vengono rimosse alla chiusura; per file grandi usa Chrome o Edge desktop aggiornato. In caso di codec, PDF, memoria o browser non compatibili, apri **Compatibilità e problemi di visualizzazione** oppure salva il file e usa un programma adatto.
+
 ## Video grandi nei Memorandum
 
 Negli allegati di un Account o Memorandum puoi selezionare dalla **Galleria** un video fino a 512 MB. Oltre 32 MB l'app lo prepara e lo carica in più blocchi cifrati, mostrando l'avanzamento; il risultato resta un solo allegato e non devi unire manualmente i pezzi. Mantieni l'app aperta e la connessione attiva fino al messaggio di completamento.

@@ -196,7 +196,7 @@ test('T-24: l’export del backup richiede la rete, non filtra gli archiviati e 
 
 // ── 4. Indicatori di export nel checkout locale: non è una prova di produzione ──
 
-test('T-24: indicatori storici XLSX/stampa assenti nei moduli locali e proiezione Excel non montata', async () => {
+test('T-24: XLSX resta confinato all’Archivio portatile e la proiezione di laboratorio non è montata', async () => {
     const files = [];
     const walk = async directory => {
         for (const entry of await readdir(directory, {withFileTypes: true})) {
@@ -211,7 +211,12 @@ test('T-24: indicatori storici XLSX/stampa assenti nei moduli locali e proiezion
         }
     };
     await walk(root);
-    for (const needle of ['xlsx', 'SheetJS', 'jspdf', 'window.print', 'html2pdf']) {
+    const xlsxHits = files.filter(file => file.executableText.includes('xlsx')).map(file => file.path).sort();
+    assert.deepEqual(xlsxHits, [
+        'assets/js/modules/settings/portable-archive-projections.js',
+        'assets/js/modules/settings/portable-archive-viewer.js'
+    ], 'il formato Excel nativo appartiene soltanto all’Archivio portatile');
+    for (const needle of ['SheetJS', 'jspdf', 'window.print', 'html2pdf']) {
         const hits = files.filter(file => file.executableText.includes(needle)).map(file => file.path);
         assert.deepEqual(hits, [], `${needle}: indicatore assente nel checkout esaminato, non verifica remota`);
     }

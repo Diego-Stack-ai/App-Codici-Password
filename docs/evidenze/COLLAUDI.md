@@ -1,5 +1,12 @@
 # Collaudi
 
+## 25/10/2026 — consultazione completa e XLSX dell'Archivio portatile
+
+- Test puri Portable Archive verdi **17/17**: separazione campi tecnici, timestamp leggibili, proiezioni future-safe e pacchetto XLSX OOXML nativo con fogli, filtri, colonne e celle testuali. Apertura indipendente con openpyxl 3.1.5 riuscita: fogli e filtro leggibili, codice sintetico `00123` conservato come stringa con formato testo.
+- Banco Chrome offline verde: apertura fail-closed, navigazione, viewport desktop/mobile, esportazioni e allegato riletti e autenticati. Poiché il Chrome headless installato annulla anche un download Blob minimo indipendente, il contenuto salvato è verificato tramite sink File System Access sintetico; il limite ambientale non è attribuito al visualizzatore.
+- Probe di capacità verde fino allo stream sintetico da **485 MiB**: output cifrato **646,9 MiB**, scrittura massima **1,33 MiB**, picco RSS circa **293,4 MiB**. Nessun dato o allegato reale è stato usato.
+- `git diff --check` verde. Formato cifrato v2, manifest, limiti e flusso degli allegati a blocchi invariati. Modifica inclusa nella candidata Hosting `1.2.236` autorizzata dall'ordine **«pubblichiamo tutto»**.
+
 ## 24/10/2026 — Archivio portatile con video sintetico da 485 MiB
 
 - Test puri Portable Archive verdi **17/17**: formato v2, inventario logico dei blocchi, writer da iterabile asincrono, limiti, manomissione, EOF e UI.
