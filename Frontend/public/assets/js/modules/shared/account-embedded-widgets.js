@@ -4,14 +4,15 @@ import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
     createAccountWidget, deleteAccountWidget, updateAccountWidget
 } from '../data/account-widget-client.js';
-import {createWidgetProfile} from '../data/widget-profile-client.js';
+import {createWidgetProfile, deleteWidgetProfile} from '../data/widget-profile-client.js';
 import {
     listAccountWidgetProfiles, listAccountWidgetProfilesConfirmed, listPrivateAccountAttachments, listCompanyAccountAttachments,
     listAccountWidgets, listAccountWidgetsConfirmed
 } from '../data/vault-repository.js';
 import {createAccountWidgetLifecycle, clearWidgetValues} from './account-widget-lifecycle.js';
 import {
-    isProfileAlreadyInserted, profileFieldSummary, profilesForCategory, structuralTitleCase
+    isProfileAlreadyInserted, isWidgetTemplateAlreadyInserted, legacyAccountWidgetTemplates,
+    profileFieldSummary, profilesForCategory, structuralTitleCase, widgetTemplateSignature
 } from './widget-profile-model.js';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
@@ -299,9 +300,10 @@ async function prepareAccountDeadline(field, value, widget, context) {
     window.location.href = 'aggiungi_scadenza.html?accountSource=1';
 }
 
-function widgetCard(widget, context, refresh) {
+function widgetCard(widget, context, refresh, catalogState = {}) {
     let collapsed = widget.collapsed === true;
     let dirty = false;
+    let preservedLegacyProfile = false;
     const fields = createElement('div', {className: 'shared-account-fields account-widget-fields'});
     const fieldReaders = [];
     const markDirty = () => { dirty = true; };
@@ -391,24 +393,63 @@ function widgetCard(widget, context, refresh) {
             onclick: () => openEditor(draftWidget(), context, refresh)
         }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'edit'})]),
         createElement('button', {
-            type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Elimina widget',
+            type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Rimuovi widget',
             onclick: async () => {
                 if (!context.active()) return;
-                const confirmation = await context.requestDecision('Elimina widget',
-                    `Per eliminare definitivamente “${widget.title}”, riscrivi esattamente il nome del widget.`,
-                    'Elimina', 'Annulla', {placeholder: widget.title});
+                const allWidgets = catalogState.widgets || [];
+                const genericWidget = !widget.bankId && widget.profileCategory !== 'bank';
+                const signature = widgetTemplateSignature(widget);
+                const profileUses = widget.profileId
+                    ? allWidgets.filter(candidate => candidate.profileId === widget.profileId).length
+                    : allWidgets.filter(candidate => candidate?.kind === 'embedded' && !candidate.profileId && !candidate.bankId &&
+                        widgetTemplateSignature(candidate) === signature).length;
+                const canRemoveFromCatalog = genericWidget && profileUses === 1;
+                const usageMessage = genericWidget && profileUses > 1
+                    ? ` Il modello è utilizzato in altri ${profileUses - 1} account e non può essere eliminato dalla lista.` : '';
+                const confirmation = await context.requestChoice('Rimuovi widget',
+                    `Riscrivi “${widget.title}”, poi scegli se rimuoverlo soltanto da questo account o anche dalla lista dei widget disponibili.${usageMessage}`,
+                    [
+                        {value: 'account', text: 'Solo dall’account', className: 'btn-secondary'},
+                        {value: 'catalog', text: 'Account e lista', className: 'btn-primary', disabled: !canRemoveFromCatalog,
+                            disabledReason: genericWidget ? 'Il modello è utilizzato in altri account.' : 'Disponibile soltanto per i widget generici.'}
+                    ], {placeholder: widget.title});
                 if (!context.active() || confirmation === null) return;
-                if (confirmation.trim() !== widget.title.trim()) {
+                if (confirmation.input.trim() !== widget.title.trim()) {
                     showToast('Il nome inserito non corrisponde. Widget non eliminato.', 'warning');
                     return;
                 }
+                let widgetRemoved = false;
                 try {
+                    if (confirmation.choice === 'account' && genericWidget && !widget.profileId && profileUses === 1 &&
+                        !preservedLegacyProfile && !(catalogState.profiles || []).some(profile =>
+                            profile?.category === 'account' && widgetTemplateSignature(profile) === signature)) {
+                        const [template] = legacyAccountWidgetTemplates([widget], []);
+                        if (template) {
+                            await createWidgetProfile({
+                                category: 'account', title: template.title, description: template.description,
+                                icon: template.icon, color: template.color, fields: template.fields
+                            });
+                            preservedLegacyProfile = true;
+                        }
+                    }
                     await deleteAccountWidget(widget, context);
+                    widgetRemoved = true;
+                    if (confirmation.choice === 'catalog' && widget.profileId) {
+                        const profile = (catalogState.profiles || []).find(candidate => candidate.id === widget.profileId);
+                        if (!profile) throw new Error('Profilo Widget non disponibile. Il Widget è stato rimosso dall’account, ma resta nella lista.');
+                        await deleteWidgetProfile(profile);
+                    }
                     if (!context.active()) return;
                     await refresh(true);
-                    if (context.active()) showToast('Widget eliminato.', 'success');
+                    if (context.active()) showToast(confirmation.choice === 'catalog'
+                        ? 'Widget rimosso dall’account e dalla lista.' : 'Widget rimosso dall’account.', 'success');
                 }
-                catch (error) { if (context.active()) showToast(error.message || 'Eliminazione non riuscita.', 'error'); }
+                catch (error) {
+                    if (!context.active()) return;
+                    if (widgetRemoved) await refresh(true);
+                    if (context.active()) showToast(error.message || (widgetRemoved
+                        ? 'Widget rimosso dall’account, ma il modello è rimasto nella lista.' : 'Rimozione non riuscita.'), 'error');
+                }
             }
         }, [createElement('span', {className: 'material-symbols-outlined notranslate', textContent: 'delete'})])
     ]) : null;
@@ -608,7 +649,7 @@ export async function initAccountEmbeddedWidgets(context) {
         }
         attachTemplate.disabled = true;
         try {
-            const alreadyInserted = isProfileAlreadyInserted(insertedWidgets, choice.template.id, choice.bankId);
+            const alreadyInserted = isWidgetTemplateAlreadyInserted(insertedWidgets, choice.template, choice.bankId);
             if (alreadyInserted) throw new Error('Widget già inserito. Crea un nuovo profilo widget.');
             const fields = (choice.template.fields || []).map((field, order) => ({
                 id: newId('field'), label: field.label, type: field.type,
@@ -616,8 +657,8 @@ export async function initAccountEmbeddedWidgets(context) {
             }));
             await createAccountWidget(widgetData({
                 ...choice.template,
-                profileId: choice.template.id,
-                profileCategory: choice.template.category,
+                profileId: choice.template.kind === 'widget-profile' ? choice.template.id : null,
+                profileCategory: choice.template.kind === 'widget-profile' ? choice.template.category : null,
                 bankId: choice.bankId,
                 order: cards.size,
                 collapsed: false
@@ -654,6 +695,7 @@ export async function initAccountEmbeddedWidgets(context) {
         insertedWidgets = widgets;
         availableTemplates = [
             ...profilesForCategory(profiles, 'account'),
+            ...legacyAccountWidgetTemplates(allWidgets, profiles),
             ...profilesForCategory(profiles, 'bank')
         ];
         updateTemplateMenu();
@@ -664,7 +706,7 @@ export async function initAccountEmbeddedWidgets(context) {
         widgets.forEach((widget, index) => cards.set(widget.id, {widget, card: widgetCard({
             ...widget,
             fields: editableWidgets[index]
-        }, context, refresh)}));
+        }, context, refresh, {widgets: allWidgets, profiles})}));
         placeBankWidgets();
         if (add) {
             add.classList.toggle('hidden', !editable);

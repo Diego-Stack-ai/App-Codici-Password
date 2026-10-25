@@ -1,7 +1,7 @@
 // La revisione nella query evita che il service worker riusi una vecchia copia
 // del runtime presente nelle cache dei pacchetti AI gia installati. I pesi del
 // modello restano invece nelle cache dedicate e non vengono riscaricati.
-import { CreateMLCEngine } from '../../../local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js?codex-runtime=2';
+import { CreateMLCEngine, deleteChatConfigInCache } from '../../../local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js?codex-runtime=2';
 
 const MODEL_SPECS = Object.freeze({
     'qwen2.5-0.5b-instruct-q4f16-1-mlc': Object.freeze({
@@ -33,7 +33,18 @@ export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProg
             low_resource_required:true
         }]
     };
-    const engine = await CreateMLCEngine(spec.modelId, { appConfig, initProgressCallback:onProgress });
+    let engine;
+    try {
+        engine = await CreateMLCEngine(spec.modelId, { appConfig, initProgressCallback:onProgress });
+    } catch (error) {
+        // Le prime pubblicazioni dei pacchetti AI.2 potevano lasciare nella cache
+        // WebLLM il fallback HTML di Hosting al posto di mlc-chat-config.json.
+        // Il pacchetto installato e verificato non va riscaricato: eliminiamo solo
+        // la configurazione WebLLM obsoleta e ripetiamo una volta il caricamento.
+        if (String(error?.name || '') !== 'SyntaxError') throw error;
+        await deleteChatConfigInCache(spec.modelId, appConfig);
+        engine = await CreateMLCEngine(spec.modelId, { appConfig, initProgressCallback:onProgress });
+    }
     return Object.freeze({
         level:'A2',
         async complete(messages, options = {}) {

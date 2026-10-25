@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.237 — Widget generici e recupero configurazione AI.2 — 25/10/2026
+
+Il menu dei Widget Account proietta anche le strutture generiche legacy prive di `profileId`, escludendo valori, ciphertext e Widget bancari. Un solo cestino presenta **Solo dall’account** e **Account e lista**; la seconda azione è disponibile soltanto quando nessun altro Account usa il profilo e il backend ripete il controllo autoritativo.
+
+Il collaudo autenticato precedente al rilascio ha distinto gli avvisi innocui di Chrome dal blocco reale `LOCAL_AI_MODEL_CONFIG_INVALID · SyntaxError`. Poiché i JSON e il manifest Hosting pubblici risultano validi, la factory WebLLM ripara il residuo delle prime pubblicazioni incomplete: al primo `SyntaxError` elimina esclusivamente `mlc-chat-config.json` dalla cache interna WebLLM e ripete una volta l'inizializzazione. Il pacchetto verificato e i pesi restano conservati.
+
+L'ordine **«ok procedi e pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.236 — Archivio portatile completo e diagnostica AI.2 — 25/10/2026
 
 L'Archivio portatile mantiene il contenitore cifrato v2 e il flusso progressivo già pubblicato, ma rende la consultazione offline completa: dati principali ordinati, metadati raccolti in **Informazioni tecniche**, date leggibili, anteprime su richiesta per foto, video, audio, PDF e testo, salvataggio facoltativo del singolo allegato o dell'intera cartella e bonifica applicativa delle risorse temporanee. I formati non visualizzabili restano scaricabili; visualizzatore e `LEGGIMI.txt` distinguono codec non supportato, limiti del browser, memoria insufficiente, PDF non visualizzabile e allegato incompleto. Ogni esportazione decifrata richiede un avviso di sicurezza. Alle proiezioni JSON, CSV e ODS si aggiunge un file XLSX OOXML nativo con fogli separati, filtri, colonne dimensionate e codici conservati come testo.

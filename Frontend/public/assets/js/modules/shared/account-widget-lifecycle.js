@@ -1,4 +1,4 @@
-import {auth} from '../../firebase-config.js?v=1.2.236';
+import {auth} from '../../firebase-config.js?v=1.2.237';
 import {onAuthStateChanged} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, clearElement} from '../../dom-utils.js';
 
@@ -78,7 +78,49 @@ export function createAccountWidgetLifecycle(context, {section, list, add}) {
         document.body.appendChild(overlay);
         (input || overlay.querySelector('button'))?.focus();
     });
-    const lifecycle = {active, destroy, registerCleanup, requestDecision};
+    const requestChoice = (title, message, choices = [], inputOptions) => new Promise(resolve => {
+        if (!active()) return resolve(null);
+        const previousFocus = document.activeElement;
+        const titleId = `account-widget-prompt-${++promptId}`;
+        let settled = false, unregister = () => {};
+        const input = inputOptions ? createElement('input', {type: 'text', value: inputOptions.initialValue || '',
+            placeholder: inputOptions.placeholder || '', autocomplete: 'off', className: 'shared-account-select-control'}) : null;
+        const close = value => {
+            if (settled) return;
+            settled = true;
+            if (input) input.value = '';
+            overlay.remove();
+            unregister();
+            resolve(value);
+            if (active() && previousFocus?.isConnected) previousFocus.focus();
+        };
+        const actionButtons = choices.map(choice => createElement('button', {
+            type: 'button', className: `btn-modal ${choice.className || 'btn-secondary'}`,
+            textContent: choice.text, disabled: choice.disabled === true,
+            title: choice.disabled ? choice.disabledReason || '' : '',
+            onclick: () => {
+                if (active() && choice.disabled !== true) close({choice: choice.value, input: input?.value || ''});
+            }
+        }));
+        const overlay = createElement('div', {className: 'modal-overlay active'}, [
+            createElement('section', {className: 'modal-box', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId}, [
+                createElement('h3', {id: titleId, className: 'modal-title', textContent: title}),
+                createElement('p', {className: 'modal-text', textContent: message}), input,
+                createElement('div', {className: 'modal-actions'}, [
+                    createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla',
+                        onclick: () => close(null)}),
+                    ...actionButtons
+                ])
+            ])
+        ]);
+        overlay.addEventListener('keydown', event => {
+            if (event.key === 'Escape') { event.preventDefault(); close(null); }
+        });
+        unregister = registerCleanup(() => close(null));
+        document.body.appendChild(overlay);
+        (input || overlay.querySelector('button'))?.focus();
+    });
+    const lifecycle = {active, destroy, registerCleanup, requestDecision, requestChoice};
     mounts.set(section, lifecycle);
     context.signal?.addEventListener('abort', destroy, {once: true});
     globalThis.addEventListener?.('pagehide', destroy, {once: true});
