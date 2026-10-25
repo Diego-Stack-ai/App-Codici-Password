@@ -5,6 +5,7 @@ const root = resolve(import.meta.dirname, '..');
 const stageRoot = join(root, 'Frontend', 'public', 'assets', 'local-ai-packages', 'a2');
 const output = join(root, 'Frontend', 'public', 'assets', 'js', 'modules', 'assistant',
     'local-ai-hosting-catalog.generated.js');
+const advancedRuntimeUrl = '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js';
 const entries = [
     ['medium', 'qwen2.5-1.5b-instruct-q4f16-1-mlc', 'MLC AI / Qwen',
         'mlc-ai/Qwen2.5-1.5B-Instruct-q4f16_1-MLC'],
@@ -17,7 +18,7 @@ for (const [tier, packageId, provider, modelId] of entries) {
     result[tier] = {
         tier, level:'A2', status:'available', blockReason:null,
         baseUrl:hosted.immutableBaseUrl,
-        runtimeUrl:`${hosted.immutableBaseUrl}runtime/factory.js`,
+        runtimeUrl:advancedRuntimeUrl,
         source:`https://huggingface.co/${hosted.source.repo}`,
         manifest:{ schemaVersion:1, level:'A2', packageId, version:'0.1.0', runtime:'webllm-webgpu',
             model:{ provider, modelId, revision:hosted.source.revision, license:hosted.source.license },

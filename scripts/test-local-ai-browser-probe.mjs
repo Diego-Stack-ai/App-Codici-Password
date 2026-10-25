@@ -18,6 +18,7 @@ const server = createServer(async (request, response) => {
                 import { probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
                 import { LOCAL_AI_PACKAGE_CATALOG } from '/assets/js/modules/assistant/local-ai-package-catalog.js';
                 import { initAssistantPackageSettings } from '/assets/js/modules/assistant/assistant-package-settings.js';
+                import { createGenerativeRuntime } from '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js';
                 window.__probe = await probeLocalAiCapabilities();
                 window.__catalog = { A1: LOCAL_AI_PACKAGE_CATALOG.A1.status, A2: LOCAL_AI_PACKAGE_CATALOG.A2.status };
                 await initAssistantPackageSettings();
@@ -28,6 +29,7 @@ const server = createServer(async (request, response) => {
                     recommended:button.classList.contains('recommended')
                 }));
                 window.__cacheNames = await caches.keys();
+                window.__runtimeFactory = typeof createGenerativeRuntime;
                 window.__ready = true;
             </script>`);
             return;
@@ -57,7 +59,7 @@ try {
     await command('Runtime.enable');
     let value;
     for(let attempt=0;attempt<100;attempt++){
-        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,tiers:window.__tiers,caches:window.__cacheNames}) : null',returnByValue:true});
+        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,tiers:window.__tiers,caches:window.__cacheNames,runtimeFactory:window.__runtimeFactory}) : null',returnByValue:true});
         value=result.result.value; if(value)break; await delay(100);
     }
     assert.equal(value.probe.A1.status,'candidate');
@@ -68,6 +70,7 @@ try {
     assert.equal(value.tiers.find(item => item.recommended)?.tier, value.probe.A2.recommendedTier);
     assert.equal(value.tiers.filter(item => item.selected).length, 1);
     assert.deepEqual(value.caches,[]);
+    assert.equal(value.runtimeFactory,'function');
     console.log('Local AI browser probe: OK');
 } finally {
     socket?.close(); browser.kill(); await Promise.race([exited,delay(2000)]); server.close(); await rm(profile,{recursive:true,force:true});

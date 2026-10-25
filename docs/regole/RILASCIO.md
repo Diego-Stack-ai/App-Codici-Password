@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.234 — inizializzazione AI.2 con runtime locale condiviso — 25/10/2026
+
+Il controllo diretto dell'app pubblicata ha confermato che **Verifica** avvia correttamente il percorso AI.2 ma termina nella fase `runtime-initialization`. La causa è la normalizzazione del runtime WebLLM: il suffisso Hugging Face `resolve/main/` veniva applicato anche agli URL same-origin dei pacchetti già installati su Firebase Hosting, producendo un percorso inesistente.
+
+La candidata limita tale riscrittura al solo host `huggingface.co` e introduce una factory generativa condivisa per le taglie Leggera, Media e Potente. I pacchetti e i pesi già installati restano validi e non devono essere scaricati di nuovo. Il perimetro è esclusivamente Firebase Hosting; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+L'ordine **«pubblica»**, ricevuto dopo diagnosi, correzione e suite completa locale conclusa con codice `0`, autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting.
+
 ## Candidata 1.2.233 — Archivio portatile con allegati a blocchi e diagnostica AI.2 — 24/10/2026
 
 La candidata estende il percorso già pubblicato senza cambiare `formatVersion: 2`: inventario, validazione manifest e decifratura progressiva trasformano tutti i blocchi di un video in una sola voce dell'archivio. I nuovi limiti sono 512 MiB per allegato, 1 GiB cumulativo e 1,5 GiB per il contenitore; i fallback senza salvataggio diretto restano intenzionalmente piccoli. Il visualizzatore continua a verificare autenticità, catena, manifest, terminatore ed EOF prima dell'uso.

@@ -84,6 +84,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/assistant/documentation-view.js",
   "assets/js/modules/assistant/incremental-sha256.js",
   "assets/js/modules/assistant/local-ai-assistant-service.js",
+  "assets/js/modules/assistant/local-ai-generative-runtime-factory.js",
   "assets/js/modules/assistant/local-ai-hosting-catalog.generated.js",
   "assets/js/modules/assistant/local-ai-package-catalog.js",
   "assets/js/modules/assistant/local-ai-package-manager.js",

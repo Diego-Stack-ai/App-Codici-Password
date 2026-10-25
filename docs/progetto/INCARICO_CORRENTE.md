@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Correzione inizializzazione AI.2 — 24/10/2026
+
+Il controllo diretto nell'app sbloccata conferma che **Verifica** non esegue un semplice refresh: la taglia `power` installata raggiunge la fase `runtime-initialization` e termina con `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED`, senza errori aggiuntivi nella Console. L'analisi del runtime individua la causa nella normalizzazione WebLLM: anche l'URL same-origin del pacchetto Hosting veniva trattato come repository Hugging Face e riceveva il suffisso inesistente `resolve/main/`.
+
+Diego autorizza con **«procedi con le eventuali modifiche, la app è sbloccata e controlla direttamente»** la correzione locale e il collaudo autenticato in sola lettura. Il runtime generativo viene condiviso dalle tre taglie AI.2 e conserva invariati gli URL same-origin; il suffisso `resolve/main/` resta applicato soltanto a `huggingface.co`. I pesi già installati non vengono rimossi né riscaricati e Cerca/AI.1 restano disponibili.
+
+Il successivo ordine **«pubblica»** autorizza la candidata `1.2.234`: bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Rules, indici, migrazioni e dati reali restano esclusi; il collaudo finale del pacchetto reale avviene dopo il deploy.
+
 ## Archivio portatile con video a blocchi — 24/10/2026
 
 Diego conferma come decisione di prodotto che l'Archivio portatile deve includere anche gli allegati cifrati a blocchi, compreso il video di circa 485 MB, dentro l'unico file dati cifrato esportato. Sono autorizzati l'estensione dell'inventario, la validazione del manifest, la decifratura progressiva e il raccordo al writer e al visualizzatore, con memoria limitata a pochi blocchi e senza ricostruire il file completo in JavaScript.
