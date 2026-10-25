@@ -125,14 +125,14 @@ test('il visualizzatore v2 è autonomo, offline e privo di dati incorporati', ()
     assert.match(html, /&lt;Archivio&gt;/);
     assert.match(html, /archivio\.cpportable/);
     assert.match(html, /Integrità e autenticità/i);
-    assert.match(html, /allegati grandi vengono letti e salvati progressivamente/i);
+    assert.match(html, /allegati vengono aperti solo su richiesta/i);
     assert.doesNotMatch(html, /utente-sintetico/);
 });
 
 test('il visualizzatore presenta un catalogo umano e relega le esportazioni tecniche', () => {
     const html = buildPortableViewerHtml();
     assert.match(html, /Esportazioni tecniche/);
-    assert.match(html, /JSON contiene tutti i dati/);
+    assert.match(html, /JSON conserva tutti i dati/);
     assert.match(html, /Account privati/);
     assert.match(html, /Account aziendali/);
     assert.match(html, /Tutte le aziende/);
@@ -140,8 +140,19 @@ test('il visualizzatore presenta un catalogo umano e relega le esportazioni tecn
     assert.match(html, /numeroCCIAA:'Numero CCIAA'/);
     assert.match(html, /referenteCognome:'Cognome referente'/);
     assert.match(html, /data:image/);
+    assert.match(html, /Informazioni tecniche/);
+    assert.match(html, /Compatibilità e problemi di visualizzazione/);
+    assert.match(html, /Salva tutti gli allegati/);
+    assert.match(html, /Salva sul PC/);
+    assert.match(html, /video\//);
+    assert.match(html, /audio\//);
+    assert.match(html, /application\/pdf/);
+    assert.match(html, /TEMP_DIRECTORY='codici-password-portable-preview-v1'/);
+    assert.match(html, /removeEntry\(TEMP_DIRECTORY,\{recursive:true\}\)/);
+    assert.match(html, /cancellazione fisica forense assoluta/);
+    assert.match(html, /copie decifrate e leggibili/);
     assert.match(html, /Seleziona una scheda per visualizzarne i dettagli/);
-    assert.match(html, /aria-label','Scarica '/);
+    assert.match(html, /aria-label','Salva sul PC '/);
     assert.doesNotMatch(html, /Identificativo archivio/);
     assert.doesNotMatch(html, /record\.title\|\|record\.id\|\|record\.scope/);
 });
@@ -151,7 +162,8 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
         key: 'private-account:::a1', scope: 'private-account', id: 'a1', title: 'Conto',
         data: {
             utente: 'sintetico', nuovoWidget: {colore: 'blu', valore: 7},
-            nota: '=HYPERLINK("https://invalid.test")', controllo: 'prima\u0001dopo'
+            nota: '=HYPERLINK("https://invalid.test")', controllo: 'prima\u0001dopo',
+            createdAt: {seconds: 1791972000, nanoseconds: 500000000}
         }
     }, {
         key: 'profile-widget:::w1', scope: 'profile-widget', id: 'w1', title: 'Widget futuro',
@@ -160,6 +172,8 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     const tables = buildProjectionTables(records);
     assert.equal(tables.length, 2);
     assert.ok(tables.find(table => table.scope === 'private-account').columns.includes('data.nuovoWidget.colore'));
+    assert.ok(tables.find(table => table.scope === 'private-account').columns.includes('data.createdAt'));
+    assert.equal(tables.find(table => table.scope === 'private-account').columns.includes('data.createdAt.seconds'), false);
 
     const projections = await buildPortableProjections(records, {
         createdAt: '2026-10-14T10:00:00.000Z', cryptoApi: webcrypto
@@ -182,6 +196,27 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     assert.doesNotMatch(content, /\u0001/);
     assert.doesNotMatch(content, /table:formula/);
     assert.equal(projections.ods.sha256, await sha256Base64(odsBytes, webcrypto));
+
+    const xlsxBytes = new Uint8Array(Buffer.from(projections.xlsx.content, 'base64'));
+    const xlsxEntries = readStoredZip(xlsxBytes);
+    assert.equal(projections.xlsx.type, PORTABLE_PROJECTION_FORMAT.xlsxMime);
+    assert.ok(xlsxEntries.has('[Content_Types].xml'));
+    assert.ok(xlsxEntries.has('xl/workbook.xml'));
+    assert.ok(xlsxEntries.has('xl/styles.xml'));
+    assert.ok(xlsxEntries.has('xl/worksheets/sheet1.xml'));
+    const workbook = new TextDecoder().decode(xlsxEntries.get('xl/workbook.xml'));
+    const worksheet = new TextDecoder().decode(xlsxEntries.get('xl/worksheets/sheet1.xml'));
+    const styles = new TextDecoder().decode(xlsxEntries.get('xl/styles.xml'));
+    assert.match(workbook, /sheet name="private-account"/);
+    assert.match(worksheet, /autoFilter ref="A1:/);
+    assert.match(worksheet, /<cols><col /);
+    assert.match(worksheet, /t="inlineStr"/);
+    assert.match(worksheet, /data\.nuovoWidget\.colore/);
+    assert.match(worksheet, /&apos;=HYPERLINK/);
+    assert.match(worksheet, /data\.createdAt/);
+    assert.doesNotMatch(worksheet, /data\.createdAt\.seconds/);
+    assert.match(styles, /numFmtId="49"/);
+    assert.equal(projections.xlsx.sha256, await sha256Base64(xlsxBytes, webcrypto));
 
 });
 
@@ -306,6 +341,7 @@ test('la proiezione regge il limite sintetico di 10.000 record', async () => {
     assert.equal(projections.csv.length, 1);
     assert.ok(projections.json.size > 1_000_000);
     assert.ok(projections.ods.size > 1_000_000);
+    assert.ok(projections.xlsx.size > 1_000_000);
     assert.match(Buffer.from(projections.csv[0].content, 'base64').toString('utf8'), /fixture-9999/);
 });
 
@@ -321,7 +357,8 @@ test('il runtime emette le proiezioni una alla volta come byte, senza Base64 cum
     assert.deepEqual(entries, [
         {kind: 'json', filename: 'dati-completi.json'},
         {kind: 'csv', filename: 'fixture.csv'},
-        {kind: 'ods', filename: 'archivio-portabile.ods'}
+        {kind: 'ods', filename: 'archivio-portabile.ods'},
+        {kind: 'xlsx', filename: 'archivio-portabile.xlsx'}
     ]);
 });
 
@@ -359,6 +396,8 @@ test('la UI distingue esplicitamente archivio portabile e backup', async () => {
     assert.match(service, /createPortableCapacityGuard/);
     assert.match(service, /createPortableArchiveWriter/);
     assert.match(service, /preparePortableArchiveOutput/);
+    assert.match(service, /COMPATIBILITÀ E PROBLEMI DI VISUALIZZAZIONE/);
+    assert.match(service, /copie decifrate e leggibili/);
     assert.match(service, /LEGACY_VAULT_KEY_MATERIAL_FIELD = \['master', 'Key'\]\.join\(''\)/);
     assert.doesNotMatch(service, /\bmasterKey\b/);
     assert.match(settings, /vaultKeyMaterial = await ensureVaultKeyMaterial/);

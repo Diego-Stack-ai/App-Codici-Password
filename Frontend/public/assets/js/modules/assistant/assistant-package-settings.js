@@ -134,7 +134,7 @@ export async function initAssistantPackageSettings(container = document.getEleme
                 const error = document.createElement('small');
                 error.className = 'assistant-package-error';
                 error.setAttribute('role', 'alert');
-                error.textContent = `${label('failed')}. ${label('fallback')}. ${label('diagnosticCode')}: ${errors[level].code} · ${label('diagnosticStage')}: ${errors[level].stage}`;
+                error.textContent = `${label('failed')}. ${label('fallback')}. ${label('diagnosticCode')}: ${errors[level].code} · ${label('diagnosticStage')}: ${errors[level].stage} · ${errors[level].errorName}`;
                 card.firstElementChild.append(error);
             }
             if (status.installed) {

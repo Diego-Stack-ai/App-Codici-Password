@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.236 — Archivio portatile completo e diagnostica AI.2 — 25/10/2026
+
+L'Archivio portatile mantiene il contenitore cifrato v2 e il flusso progressivo già pubblicato, ma rende la consultazione offline completa: dati principali ordinati, metadati raccolti in **Informazioni tecniche**, date leggibili, anteprime su richiesta per foto, video, audio, PDF e testo, salvataggio facoltativo del singolo allegato o dell'intera cartella e bonifica applicativa delle risorse temporanee. I formati non visualizzabili restano scaricabili; visualizzatore e `LEGGIMI.txt` distinguono codec non supportato, limiti del browser, memoria insufficiente, PDF non visualizzabile e allegato incompleto. Ogni esportazione decifrata richiede un avviso di sicurezza. Alle proiezioni JSON, CSV e ODS si aggiunge un file XLSX OOXML nativo con fogli separati, filtri, colonne dimensionate e codici conservati come testo.
+
+La stessa candidata amplia la diagnostica sicura di AI.2: il fallimento della verifica continua a non esporre messaggi originali, stack, prompt o dati della Vault, ma classifica cause stabili come WebGPU, limiti GPU, memoria, fetch, configurazione, WebAssembly e artefatti del modello. Il pannello mostra codice, fase e tipo di errore consentito, così il prossimo collaudo reale può individuare la causa di `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED` senza ridurre la riservatezza.
+
+L'ordine **«pubblichiamo tutto»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting per entrambe le modifiche. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.235 — aggiornamento mirato del runtime AI.2 — 25/10/2026
 
 Il collaudo autenticato della `1.2.234` ha dimostrato che il service worker poteva riutilizzare una copia precedente di `web-llm.js` già presente nella cache locale del pacchetto AI.2. Di conseguenza la correzione Hosting era pubblicata ma il browser continuava a eseguire il runtime precedente e mostrava ancora `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED`.

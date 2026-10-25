@@ -72,7 +72,7 @@ test('il loader espone fasi e codice sicuro quando l’inizializzazione AI.2 fal
         });
     } catch (error) { failure = error; }
     assert.deepEqual(stages, ['preflight','package-check','capability-check','runtime-import','runtime-initialization']);
-    assert.equal(failure.code, 'LOCAL_AI_RUNTIME_INITIALIZATION_FAILED');
+    assert.equal(failure.code, 'LOCAL_AI_GPU_OPERATION_FAILED');
     assert.equal(failure.stage, 'runtime-initialization');
     assert.equal(failure.causeName, 'OperationError');
     assert.doesNotMatch(failure.message, /dettaglio non esposto/);
@@ -98,7 +98,22 @@ test('il loader chiude il runtime e classifica un errore dello smoke test', asyn
 test('la diagnostica scarta messaggi arbitrari e conserva solo codice e fase ammessi', () => {
     assert.deepEqual(
         readLocalAiRuntimeDiagnostic({ message:'dato sensibile', name:'OperationError' }, 'runtime-import'),
-        { code:'LOCAL_AI_RUNTIME_IMPORT_FAILED', stage:'runtime-import', errorName:'OperationError' }
+        { code:'LOCAL_AI_GPU_OPERATION_FAILED', stage:'runtime-import', errorName:'OperationError' }
+    );
+});
+
+test('la diagnostica classifica gli errori noti senza esporne il testo', () => {
+    assert.deepEqual(
+        readLocalAiRuntimeDiagnostic({ name:'DeviceLostError', message:'contenuto non pubblicabile' }, 'runtime-initialization'),
+        { code:'LOCAL_AI_GPU_DEVICE_LOST', stage:'runtime-initialization', errorName:'DeviceLostError' }
+    );
+    assert.deepEqual(
+        readLocalAiRuntimeDiagnostic({ name:'CompileError', message:'dettaglio WebAssembly riservato' }, 'runtime-initialization'),
+        { code:'LOCAL_AI_WASM_COMPILE_FAILED', stage:'runtime-initialization', errorName:'CompileError' }
+    );
+    assert.deepEqual(
+        readLocalAiRuntimeDiagnostic({ name:'Error', message:'Failed to fetch a model file at a private URL' }, 'runtime-initialization'),
+        { code:'LOCAL_AI_MODEL_FETCH_FAILED', stage:'runtime-initialization', errorName:'Error' }
     );
 });
 
@@ -111,6 +126,7 @@ test('le impostazioni espongono la scelta operativa delle tre taglie AI.2', () =
     assert.match(source, /sessionStorage\.setItem\(diagnosticKey/);
     assert.match(source, /readLocalAiRuntimeDiagnostic/);
     assert.match(source, /\[Local AI verification failed\]/);
+    assert.match(source, /errors\[level\]\.errorName/);
 });
 
 test('il pannello dei pacchetti segue lo stato dell’interruttore Agente AI', () => {

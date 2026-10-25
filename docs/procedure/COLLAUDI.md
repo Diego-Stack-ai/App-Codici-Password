@@ -1,5 +1,11 @@
 # Collaudi
 
+## Consultazione completa dell'Archivio portatile
+
+Oltre al gate `npm run test:portable-archive-prerelease`, verificare con fixture sintetiche: ordine fra dati principali e **Informazioni tecniche**; timestamp leggibili; persistenza dei campi sconosciuti; anteprima di immagine, video, audio, PDF e testo; messaggi e azioni per codec, browser, quota/memoria, PDF e integrità; revoca Object URL e pulizia OPFS alla chiusura e alla riapertura. Non usare allegati o dati reali.
+
+Verificare che nessuna copia in chiaro sia creata prima della conferma, che **Salva tutti** richieda una cartella scelta dall'utente e che ogni esportazione mostri l'avviso di sicurezza. Aprire l'XLSX prodotto con un lettore indipendente: fogli distinti, intestazioni e filtri presenti, colonne dimensionate, date leggibili e codici con zeri iniziali conservati come testo. Un browser headless che annulla ogni download Blob va diagnosticato con una prova minima separata; il banco automatico può usare un sink File System Access sintetico per verificare nome e byte salvati.
+
 ## Archivio portatile con allegati a blocchi
 
 Usare soltanto fixture sintetiche. Eseguire `npm run test:portable-archive`, `node --test tests/attachment-security.test.mjs`, `npm run test:portable-archive-capacity` e `npm run test:portable-archive-browser`; il gate aggregato resta `npm run test:portable-archive-prerelease`. Il probe deve comprendere uno stream da 485 MiB prodotto in blocchi da 8 MiB, non un'allocazione monolitica, e deve attestare output completo, scrittura massima sotto 1,5 MiB e RSS sotto 384 MiB nell'ambiente di riferimento.

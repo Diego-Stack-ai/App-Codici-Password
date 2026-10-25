@@ -3,6 +3,14 @@ import { getLocalAiPackageCandidate, LOCAL_AI_RUNTIME_PROVENANCE } from './local
 const FACTORIES = Object.freeze({ A1:'createSemanticRuntime', A2:'createGenerativeRuntime' });
 const DIAGNOSTIC_CODE = /^LOCAL_AI_[A-Z0-9_]+$/;
 const DIAGNOSTIC_STAGE = /^[a-z][a-z0-9-]{0,47}$/;
+const CAUSE_CODES = Object.freeze({
+    WebGPUNotAvailableError:'LOCAL_AI_WEBGPU_UNAVAILABLE',
+    WebGPUNotFoundError:'LOCAL_AI_WEBGPU_UNAVAILABLE',
+    ShaderF16SupportError:'LOCAL_AI_GPU_FEATURE_UNSUPPORTED',
+    DeviceLostError:'LOCAL_AI_GPU_DEVICE_LOST',
+    CompileError:'LOCAL_AI_WASM_COMPILE_FAILED',
+    OperationError:'LOCAL_AI_GPU_OPERATION_FAILED'
+});
 
 export const LOCAL_AI_RUNTIME_STAGES = Object.freeze({
     PREFLIGHT:'preflight',
@@ -18,10 +26,27 @@ function fallbackCode(stage) {
     return `LOCAL_AI_${String(stage || LOCAL_AI_RUNTIME_STAGES.PREFLIGHT).replace(/-/g, '_').toUpperCase()}_FAILED`;
 }
 
+function classifyCause(error, stage) {
+    const direct = String(error?.code || error?.message || '');
+    if (DIAGNOSTIC_CODE.test(direct)) return direct;
+    const named = CAUSE_CODES[String(error?.causeName || error?.name || '')];
+    if (named) return named;
+    const message = String(error?.message || '');
+    if (/maxBufferSize|maxStorageBufferBindingSize/i.test(message)) return 'LOCAL_AI_GPU_LIMIT_UNSUPPORTED';
+    if (/device lost|out of memory|\bOOM\b/i.test(message)) return 'LOCAL_AI_GPU_DEVICE_LOST';
+    if (/failed to fetch|networkerror/i.test(message)) return 'LOCAL_AI_MODEL_FETCH_FAILED';
+    if (/mlc-chat-config|JSON/i.test(message)) return 'LOCAL_AI_MODEL_CONFIG_INVALID';
+    if (/quota/i.test(message)) return 'LOCAL_AI_STORAGE_QUOTA_EXCEEDED';
+    if (/abort/i.test(message)) return 'LOCAL_AI_OPERATION_ABORTED';
+    if (/WebGPU|GPU adapter/i.test(message)) return 'LOCAL_AI_WEBGPU_UNAVAILABLE';
+    if (/WebAssembly|wasm/i.test(message)) return 'LOCAL_AI_WASM_RUNTIME_FAILED';
+    if (/tensor|tokenizer/i.test(message)) return 'LOCAL_AI_MODEL_ARTIFACT_INVALID';
+    return fallbackCode(stage);
+}
+
 export function readLocalAiRuntimeDiagnostic(error, fallbackStage = LOCAL_AI_RUNTIME_STAGES.PREFLIGHT) {
     const stage = DIAGNOSTIC_STAGE.test(String(error?.stage || '')) ? String(error.stage) : fallbackStage;
-    const directCode = String(error?.code || error?.message || '');
-    const code = DIAGNOSTIC_CODE.test(directCode) ? directCode : fallbackCode(stage);
+    const code = classifyCause(error, stage);
     const errorName = /^[A-Za-z][A-Za-z0-9]{0,47}$/.test(String(error?.causeName || error?.name || ''))
         ? String(error?.causeName || error?.name)
         : 'Error';

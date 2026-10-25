@@ -1,5 +1,11 @@
 # Sicurezza
 
+## Anteprime temporanee e copie leggibili dell'Archivio portatile — 25/10/2026
+
+Il visualizzatore non estrae automaticamente allegati in chiaro. Anteprima, salvataggio singolo, salvataggio collettivo ed esportazioni JSON/CSV/ODS/XLSX sono azioni esplicite; prima della persistenza viene mostrato che il risultato è decifrato e deve essere custodito in un luogo sicuro. Gli allegati vengono riletti e autenticati dal contenitore prima dell'uso.
+
+Per i file grandi il browser usa esclusivamente un namespace temporaneo OPFS dell'applicazione, senza Cache Storage o IndexedDB. Alla chiusura revoca gli Object URL, elimina i file temporanei e azzera i buffer mutabili disponibili; all'avvio rimuove eventuali residui di una chiusura improvvisa. Il contratto non promette cancellazione fisica forense assoluta dalla RAM, dai file di paging o dal supporto. Errori di codec, compatibilità, quota/memoria, PDF e integrità restano distinti e non degradano in esposizione parziale.
+
 ## Archivio portatile di allegati a blocchi — 24/10/2026
 
 L'esportazione non ricompone in RAM gli allegati grandi. Prima di leggere Storage valida versione crittografica, tipo video, limite dichiarato, dimensione e numero dei blocchi, ordine e unicità dei percorsi, IV, dimensioni chiare/cifrate e somma finale. La chiave-file viene aperta una volta, ogni blocco viene scaricato entro la dimensione dichiarata, autenticato con AES-GCM e AAD già vincolato a identità e posizione, consegnato al writer e azzerato prima del blocco successivo. La chiave-file viene azzerata anche in caso di errore.

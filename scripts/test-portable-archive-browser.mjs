@@ -84,12 +84,12 @@ async function rewriteAuthenticatedEntryCount(bytes) {
 }
 
 async function downloadBytes(page, role, name) {
-    const downloadPromise = page.waitForEvent('download');
     await page.getByRole(role, {name, exact: true}).click();
-    const download = await downloadPromise;
-    return Buffer.from(await download.createReadStream().then(async stream => {
-        const chunks = []; for await (const chunk of stream) chunks.push(chunk); return Buffer.concat(chunks);
-    }));
+    await page.getByRole('button', {name: 'Continua e salva', exact: true}).click();
+    await page.waitForFunction(() => window.__portableDownloads?.length > 0);
+    const saved = await page.evaluate(() => window.__portableDownloads.shift());
+    assert.equal(saved.name, name.replace(/^(?:Scarica |Salva sul PC )/, ''));
+    return Buffer.from(saved.bytes);
 }
 
 const temporary = await mkdtemp(path.join(os.tmpdir(), 'codici-password-portable-v2-'));
@@ -123,7 +123,24 @@ try {
     browser = await chromium.launch({executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true});
     const context = await browser.newContext({acceptDownloads: true});
     const page = await context.newPage();
-    await page.addInitScript(() => Object.defineProperty(window, 'showSaveFilePicker', {value: undefined, configurable: true}));
+    await page.addInitScript(() => {
+        window.__portableDownloads = [];
+        Object.defineProperty(window, 'showSaveFilePicker', {
+            configurable: true,
+            value: async ({suggestedName}) => ({
+                async createWritable() {
+                    const chunks = [];
+                    return {
+                        async write(value) { chunks.push(Array.from(value)); },
+                        async close() {
+                            window.__portableDownloads.push({name: suggestedName, bytes: chunks.flat()});
+                        },
+                        async abort() { chunks.length = 0; }
+                    };
+                }
+            })
+        });
+    });
     const errors = [], network = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -133,6 +150,8 @@ try {
     await page.locator('#archive').setInputFiles(archivePath);
     await page.locator('#password').fill('password-errata-123');
     await page.getByRole('button', {name: 'Verifica e apri', exact: true}).click();
+    await page.waitForTimeout(100);
+    assert.deepEqual(errors, [], `Errori iniziali del visualizzatore: ${errors.join(' | ')}`);
     await page.getByText('Password errata, archivio incompleto, troppo grande o manomesso.').waitFor();
     await page.locator('#password').fill(password);
     await page.getByRole('button', {name: 'Verifica e apri', exact: true}).click();
@@ -141,21 +160,22 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.getByRole('button', {name: /Account privati 1/}).click();
     await page.getByRole('heading', {name: 'Account sintetico', exact: true}).waitFor();
-    assert.equal(await page.getByText('fixture', {exact: true}).count(), 0);
+    assert.equal(await page.getByText('fixture', {exact: true}).count(), 1);
+    assert.equal(await page.getByText('fixture', {exact: true}).isHidden(), true);
     await page.getByRole('button', {name: /Account aziendali 1/}).click();
     await page.locator('#company-filter').selectOption('azienda-fixture');
     await page.getByRole('heading', {name: 'Portale sintetico', exact: true}).waitFor();
     await page.locator('#search').fill('Portale sintetico');
     await page.getByText(/1 schede su 3/).waitFor();
 
-    await page.locator('.technical').evaluate(element => { element.open = true; });
+    await page.locator('.technical').first().evaluate(element => { element.open = true; });
     const json = JSON.parse((await downloadBytes(page, 'button', 'Scarica dati-completi.json')).toString('utf8'));
     assert.equal(json.records[0].data.campoFuturo.valore, 42);
     const csv = (await downloadBytes(page, 'button', 'Scarica private-account.csv')).toString('utf8');
     assert.match(csv, /utente-sintetico/);
     await page.locator('#search').fill('Account sintetico');
     await page.getByRole('button', {name: /Account privati 1/}).click();
-    const attachment = (await downloadBytes(page, 'button', 'Scarica fixture.txt')).toString('utf8');
+    const attachment = (await downloadBytes(page, 'button', 'Salva sul PC fixture.txt')).toString('utf8');
     assert.equal(attachment, 'allegato sintetico senza dati reali');
 
     await page.getByRole('button', {name: 'Chiudi archivio', exact: true}).click();

@@ -1,4 +1,4 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.235';
+import {auth, storage} from '../../firebase-config.js?v=1.2.236';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptRequiredValue, isEncryptedValue} from '../core/crypto-utils.js';
 import {
@@ -110,6 +110,29 @@ function downloadBlob(blob, filename) {
     setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
+function portableReadmeText() {
+    return [
+        'Archivio portabile Codici & Password', '',
+        `Apri ${VIEWER_FILE_NAME} e seleziona archivio.cpportable.`,
+        'Il visualizzatore lavora offline. Il file non è un backup reimportabile.', '',
+        'CONSULTAZIONE E ALLEGATI',
+        '- Foto, video, audio, PDF e formati supportati si aprono direttamente nel visualizzatore.',
+        '- Il salvataggio sul PC è facoltativo. “Salva tutti gli allegati” crea copie solo dopo una conferma esplicita.',
+        '- Gli allegati restano cifrati dentro archivio.cpportable finché non scegli di salvarli.', '',
+        'COMPATIBILITÀ E PROBLEMI DI VISUALIZZAZIONE',
+        '- Per i file grandi usa un browser desktop aggiornato, preferibilmente Chrome o Edge.',
+        '- Un formato o codec non supportato può essere salvato e aperto con un programma compatibile.',
+        '- Se un PDF non appare, salvalo e aprilo con un lettore PDF.',
+        '- Se manca memoria o spazio temporaneo, chiudi altre applicazioni oppure salva il file sul PC.',
+        '- Un allegato danneggiato o incompleto non viene aperto: ripeti la verifica dell’archivio.', '',
+        'PRIVACY DEI FILE TEMPORANEI',
+        'Le anteprime vengono create solo su richiesta. Il visualizzatore revoca i collegamenti temporanei, azzera i buffer disponibili e rimuove i file temporanei applicativi alla chiusura e alla successiva apertura.',
+        'Un browser non può garantire la cancellazione fisica forense assoluta dalla memoria o dal supporto del dispositivo.', '',
+        'AVVISO DI SICUREZZA',
+        'Excel, ODS, CSV, JSON e gli allegati salvati sul PC sono copie decifrate e leggibili. Conservali in un luogo sicuro.', ''
+    ].join('\n');
+}
+
 async function writePackageFile(directory, name, content) {
     const handle = await directory.getFileHandle(name, {create: true});
     const writable = await handle.createWritable();
@@ -136,10 +159,7 @@ export async function preparePortableArchiveOutput(createdAt = new Date().toISOS
             sink, streamed: false,
             async finish() {
                 downloadBlob(new Blob([buildPortableViewerHtml()], {type: 'text/html;charset=utf-8'}), VIEWER_FILE_NAME);
-                downloadBlob(new Blob([
-                    `Archivio portabile Codici & Password\n\nApri ${VIEWER_FILE_NAME} e seleziona archivio.cpportable.\n`,
-                    'Il visualizzatore lavora offline. Il file non è un backup reimportabile.\n'
-                ], {type: 'text/plain;charset=utf-8'}), 'LEGGIMI.txt');
+                downloadBlob(new Blob([portableReadmeText()], {type: 'text/plain;charset=utf-8'}), 'LEGGIMI.txt');
             },
             async cleanup() { await sink.abort(); }
         };
@@ -159,8 +179,7 @@ export async function preparePortableArchiveOutput(createdAt = new Date().toISOS
         sink, streamed: true, packageName,
         async finish() {
             await writePackageFile(directory, VIEWER_FILE_NAME, buildPortableViewerHtml());
-            await writePackageFile(directory, 'LEGGIMI.txt',
-                `Archivio portabile Codici & Password\n\nApri ${VIEWER_FILE_NAME} e seleziona archivio.cpportable.\nIl visualizzatore lavora offline. Il file non è un backup reimportabile.\n`);
+            await writePackageFile(directory, 'LEGGIMI.txt', portableReadmeText());
         },
         async cleanup() {
             await sink.abort();
