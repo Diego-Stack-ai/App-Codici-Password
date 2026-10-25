@@ -9,14 +9,15 @@ test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile'
         const entry = LOCAL_AI_PACKAGE_CATALOG[level];
         assert.equal(entry.status, 'available');
         assert.match(entry.baseUrl, /^\/assets\/local-ai\//);
-        assert.match(entry.runtimeUrl, /^\/assets\/local-ai\/.+\/runtime\/factory\.js$/);
+        if (level === 'A1') assert.match(entry.runtimeUrl, /^\/assets\/local-ai\/.+\/runtime\/factory\.js$/);
+        else assert.equal(entry.runtimeUrl, '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js');
         assert.equal(entry.manifest.files.reduce((sum, item) => sum + item.bytes, 0), entry.manifest.approxDownloadBytes);
         assert.match(entry.manifest.model.revision, /^[a-f0-9]{40}$/);
         assert.match(LOCAL_AI_RUNTIME_PROVENANCE[level].gitRevision, /^[a-f0-9]{40}$/);
         assert.match(LOCAL_AI_RUNTIME_PROVENANCE[level].npmIntegrity, /^sha512-/);
     }
     assert.equal(LOCAL_AI_PACKAGE_CATALOG.A1.manifest.approxDownloadBytes, 145871600);
-    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes, 301981904);
+    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes, 301981873);
     assert.equal(LOCAL_AI_ADVANCED_TIERS.light.status, 'available');
     assert.equal(LOCAL_AI_ADVANCED_TIERS.medium.status, 'available');
     assert.equal(LOCAL_AI_ADVANCED_TIERS.power.status, 'available');
@@ -38,7 +39,20 @@ test('il loader usa il runtime Hosting della taglia AI.2 medium materializzata',
         }) }; }, origin:'https://app.example'
     });
     await loader.load('A2', { tier:'medium', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light','medium'] } } });
-    assert.match(imported, /^https:\/\/app\.example\/assets\/local-ai-packages\/a2\//);
+    assert.equal(imported, 'https://app.example/assets/js/modules/assistant/local-ai-generative-runtime-factory.js');
+});
+
+test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Face', () => {
+    const source = readFileSync(new URL('../Frontend/public/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js', import.meta.url), 'utf8');
+    const cleanModelUrl = source.match(/function cleanModelUrl\(modelUrl\) \{[\s\S]*?\n\}/)?.[0] || '';
+    assert.match(cleanModelUrl, /resolved\.hostname === "huggingface\.co"/);
+    assert.match(cleanModelUrl, /resolved\.pathname \+= "resolve\/main\/"/);
+    assert.doesNotMatch(cleanModelUrl, /modelUrl \+= "resolve\/main\/"/);
+    const factory = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-generative-runtime-factory.js', import.meta.url), 'utf8');
+    assert.match(factory, /'qwen2\.5-0\.5b-instruct-q4f16-1-mlc'/);
+    assert.match(factory, /'qwen2\.5-1\.5b-instruct-q4f16-1-mlc'/);
+    assert.match(factory, /'smollm2-1\.7b-instruct-q4f16-1-mlc'/);
+    assert.doesNotMatch(factory, /response_format/);
 });
 
 test('il loader espone fasi e codice sicuro quando l’inizializzazione AI.2 fallisce', async () => {

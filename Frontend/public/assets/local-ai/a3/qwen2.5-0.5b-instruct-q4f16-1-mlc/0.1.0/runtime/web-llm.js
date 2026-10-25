@@ -11273,17 +11273,17 @@ function getTokenTableFromTokenizer(tokenizer) {
     return tokenTable;
 }
 /**
- * Postprocess the suffix of ModelRecord.model to be "/resolve/main/" if it is not specified otherwise.
- * e.g. https://huggingface.co/mlc-ai/OpenHermes-2.5-Mistral-7B-q4f16_1-MLC/resolve/main/
+ * Postprocess Hugging Face model URLs with "/resolve/main/" when needed.
+ * Same-origin packages are already rooted at their immutable Hosting directory
+ * and must not be rewritten as if they were Hugging Face repositories.
  * @return the href of the final URL.
  */
 function cleanModelUrl(modelUrl) {
-    // https://huggingface.co/USER/MODEL -> https://huggingface.co/USER/MODEL/
-    modelUrl += modelUrl.endsWith("/") ? "" : "/";
-    if (!modelUrl.match(/.+\/resolve\/.+\//))
-        modelUrl += "resolve/main/";
-    // https://huggingface.co/USER/MODEL/ -> https://huggingface.co/USER/MODEL/resolve/main/
-    return new URL(modelUrl).href;
+    const resolved = new URL(modelUrl);
+    resolved.pathname += resolved.pathname.endsWith("/") ? "" : "/";
+    if (resolved.hostname === "huggingface.co" && !resolved.pathname.match(/.+\/resolve\/.+\//))
+        resolved.pathname += "resolve/main/";
+    return resolved.href;
 }
 // Constants for Hermes-2-Pro / Hermes-3 models function calling
 // Follows https://huggingface.co/NousResearch/Hermes-2-Pro-Llama-3-8B#prompt-format-for-function-calling
