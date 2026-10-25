@@ -2,6 +2,7 @@ import { validateLocalAiPackageManifest } from './advanced-local-ai-contract.js'
 import { hashReadableStream } from './incremental-sha256.js';
 
 const CACHE_PREFIX = 'codex-local-ai-';
+const WEBLLM_DERIVED_CACHES = Object.freeze(['webllm/config', 'webllm/model', 'webllm/wasm']);
 const ACTIVE_KEY = 'codex.local-ai.active.v1';
 const VERIFIED_KEY = 'codex.local-ai.verified.v2';
 
@@ -140,6 +141,9 @@ export function createLocalAiPackageManager({
         storage.setItem(VERIFIED_KEY, JSON.stringify(verified));
         for (const name of await cacheStorage.keys()) {
             if (name.startsWith(`${CACHE_PREFIX}${String(level).toLowerCase()}-`)) await cacheStorage.delete(name);
+        }
+        if (level === 'A2') {
+            for (const name of WEBLLM_DERIVED_CACHES) await cacheStorage.delete(name);
         }
     }
 

@@ -52,11 +52,18 @@ test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Fac
     assert.match(factory, /'qwen2\.5-0\.5b-instruct-q4f16-1-mlc'/);
     assert.match(factory, /'qwen2\.5-1\.5b-instruct-q4f16-1-mlc'/);
     assert.match(factory, /'smollm2-1\.7b-instruct-q4f16-1-mlc'/);
-    assert.match(factory, /web-llm\.js\?codex-runtime=2/);
-    assert.match(factory, /deleteChatConfigInCache/);
+    assert.match(factory, /new URL\('runtime\/web-llm\.js', packageBaseUrl\)\.href/);
+    assert.match(factory, /await import\(runtimeUrl\)/);
+    assert.match(factory, /CreateWebWorkerMLCEngine/);
+    assert.match(factory, /local-ai-generative-worker\.js\?runtime=/);
+    assert.match(factory, /deleteModelAllInfoInCache/);
     assert.match(factory, /String\(error\?\.name \|\| ''\) !== 'SyntaxError'/);
-    assert.match(factory, /await deleteChatConfigInCache\(spec\.modelId, appConfig\)/);
-    assert.doesNotMatch(factory, /response_format/);
+    assert.match(factory, /await deleteModelAllInfoInCache\(spec\.modelId, appConfig\)/);
+    assert.match(factory, /response_format:options\.responseFormat/);
+    const worker = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-generative-worker.js', import.meta.url), 'utf8');
+    assert.match(worker, /new URL\(runtimeUrl\)\.origin !== self\.location\.origin/);
+    assert.match(worker, /handlerPromise = import\(runtimeUrl\)/);
+    assert.match(worker, /\(await handlerPromise\)\.onmessage\(message\)/);
 });
 
 test('il loader espone fasi e codice sicuro quando l’inizializzazione AI.2 fallisce', async () => {
@@ -117,6 +124,10 @@ test('la diagnostica classifica gli errori noti senza esporne il testo', () => {
     assert.deepEqual(
         readLocalAiRuntimeDiagnostic({ name:'Error', message:'Failed to fetch a model file at a private URL' }, 'runtime-initialization'),
         { code:'LOCAL_AI_MODEL_FETCH_FAILED', stage:'runtime-initialization', errorName:'Error' }
+    );
+    assert.deepEqual(
+        readLocalAiRuntimeDiagnostic({ name:'SyntaxError', message:'Unexpected token in JSON' }, 'runtime-initialization'),
+        { code:'LOCAL_AI_ARTIFACT_PARSE_FAILED', stage:'runtime-initialization', errorName:'SyntaxError' }
     );
 });
 

@@ -31,16 +31,18 @@ function classifyCause(error, stage) {
     if (DIAGNOSTIC_CODE.test(direct)) return direct;
     const named = CAUSE_CODES[String(error?.causeName || error?.name || '')];
     if (named) return named;
+    if (String(error?.causeName || error?.name || '') === 'SyntaxError') return 'LOCAL_AI_ARTIFACT_PARSE_FAILED';
     const message = String(error?.message || '');
     if (/maxBufferSize|maxStorageBufferBindingSize/i.test(message)) return 'LOCAL_AI_GPU_LIMIT_UNSUPPORTED';
     if (/device lost|out of memory|\bOOM\b/i.test(message)) return 'LOCAL_AI_GPU_DEVICE_LOST';
     if (/failed to fetch|networkerror/i.test(message)) return 'LOCAL_AI_MODEL_FETCH_FAILED';
-    if (/mlc-chat-config|JSON/i.test(message)) return 'LOCAL_AI_MODEL_CONFIG_INVALID';
+    if (/tensor|tokenizer/i.test(message)) return 'LOCAL_AI_MODEL_ARTIFACT_INVALID';
+    if (/mlc-chat-config/i.test(message)) return 'LOCAL_AI_MODEL_CONFIG_INVALID';
+    if (/JSON/i.test(message)) return 'LOCAL_AI_ARTIFACT_PARSE_FAILED';
     if (/quota/i.test(message)) return 'LOCAL_AI_STORAGE_QUOTA_EXCEEDED';
     if (/abort/i.test(message)) return 'LOCAL_AI_OPERATION_ABORTED';
     if (/WebGPU|GPU adapter/i.test(message)) return 'LOCAL_AI_WEBGPU_UNAVAILABLE';
     if (/WebAssembly|wasm/i.test(message)) return 'LOCAL_AI_WASM_RUNTIME_FAILED';
-    if (/tensor|tokenizer/i.test(message)) return 'LOCAL_AI_MODEL_ARTIFACT_INVALID';
     return fallbackCode(stage);
 }
 
@@ -121,11 +123,20 @@ export function createLocalAiRuntimeLoader({ packageManager, importModule = url 
                         throw runtimeError('LOCAL_AI_RUNTIME_SMOKE_TEST_FAILED', LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST);
                     }
                 } else {
+                    const schema = JSON.stringify({
+                        type:'object',
+                        additionalProperties:false,
+                        required:['ok'],
+                        properties:{ ok:{ type:'boolean', const:true } }
+                    });
                     const result = await runStage(LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST, () => runtime.complete([
                         { role:'system', content:'Rispondi soltanto con {"ok":true}.' },
                         { role:'user', content:'Verifica locale.' }
-                    ], { maxTokens:16, temperature:0 }));
-                    if (typeof result?.choices?.[0]?.message?.content !== 'string') {
+                    ], { maxTokens:16, temperature:0, responseFormat:{ type:'json_object', schema } }));
+                    const raw = result?.choices?.[0]?.message?.content;
+                    let parsed = null;
+                    try { parsed = JSON.parse(String(raw || '')); } catch { /* Fallisce nel controllo seguente. */ }
+                    if (!parsed || parsed.ok !== true || Object.keys(parsed).length !== 1) {
                         throw runtimeError('LOCAL_AI_RUNTIME_SMOKE_TEST_FAILED', LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST);
                     }
                 }

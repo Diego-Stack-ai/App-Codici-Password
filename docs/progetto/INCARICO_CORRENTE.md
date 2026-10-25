@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Stabilizzazione strutturale AI.2 — 25/10/2026
+
+Diego autorizza con **«Procedi»** la prima fase del progetto strutturale AI.2, dopo l'analisi estesa del runtime e della compatibilita browser. La correzione non deve inseguire un singolo messaggio di WebLLM: deve separare l'inferenza dall'interfaccia, accettare come compatibile soltanto un adattatore WebGPU realmente ottenuto, impedire che il Service Worker confonda pacchetti verificati e cache derivate, e considerare riuscita la verifica soltanto dopo un output JSON conforme al contratto.
+
+Il runtime generativo viene quindi spostato in un **Web Worker dedicato** e riusato per cinque minuti fra aperture successive della chat, senza persistere conversazioni o dati della Vault. I pacchetti applicativi promossi dopo byte/SHA-256 restano la sola sorgente offline attendibile; le cache `webllm/config`, `webllm/model` e `webllm/wasm` sono derivate, vengono ripulite insieme dopo un artefatto non interpretabile e sono eliminate quando l'utente rimuove AI.2. Il Service Worker non le attraversa piu con una ricerca globale.
+
+Chrome ed Edge desktop costituiscono il primo perimetro di collaudo fisico. Firefox e Safari possono accedere alla taglia leggera soltanto quando forniscono davvero un adattatore WebGPU e superano lo smoke test; l'assenza di `navigator.deviceMemory` non e da sola un'incompatibilita, ma impedisce di proporre automaticamente le taglie media e potente. Mobile conserva AI.1 e la ricerca deterministica come percorso supportato. Il successivo ordine **«commit, push e deploy procedi»** autorizza la candidata `1.2.238`, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting dopo i gate verdi. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi; il modello reale installato deve essere collaudato dopo la pubblicazione.
+
 ## Widget generici e recupero cache AI.2 — 25/10/2026
 
 L'ordine **«ok procedi e pubblica»** autorizza la candidata `1.2.237`, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Il rilascio collega i Widget generici legacy al menu Account e introduce il cestino con le due scelte già concordate, senza valori nel profilo e senza migrazioni automatiche.

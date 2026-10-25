@@ -98,15 +98,18 @@ export function assessLocalAiCapabilities(input) {
     const a2Reasons = [];
     if (input.mobile || input.ios) a2Reasons.push('desktop-required');
     if (!input.webgpu) a2Reasons.push('webgpu-unavailable');
-    if (input.deviceMemoryGiB === null) a2Reasons.push('memory-unknown');
-    else if (input.deviceMemoryGiB < 4) a2Reasons.push('memory-below-ai2-budget');
+    // Firefox e Safari non espongono necessariamente navigator.deviceMemory.
+    // L'assenza del dato non deve diventare una falsa incompatibilita: la taglia
+    // light passa al collaudo reale del runtime, mentre le taglie superiori
+    // richiedono ancora una memoria dichiarata sufficiente.
+    if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB < 4) a2Reasons.push('memory-below-ai2-budget');
     if (input.storageAvailableBytes < 1600 * 1024 * 1024) a2Reasons.push('storage-below-ai2-budget');
     const allowedTiers = [];
     if (!a2Reasons.length) {
         allowedTiers.push('light');
-        if (input.deviceMemoryGiB >= 8 && input.hardwareConcurrency >= 8
+        if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB >= 8 && input.hardwareConcurrency >= 8
             && input.storageAvailableBytes >= 4 * 1024 * 1024 * 1024) allowedTiers.push('medium');
-        if (input.deviceMemoryGiB >= 16 && input.hardwareConcurrency >= 12
+        if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB >= 16 && input.hardwareConcurrency >= 12
             && input.storageAvailableBytes >= 8 * 1024 * 1024 * 1024) allowedTiers.push('power');
     }
     return freezeTree({
@@ -148,9 +151,16 @@ export async function probeLocalAiCapabilities({ navigatorObject = globalThis.na
     const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent);
     const ios = /iPhone|iPad|iPod/i.test(userAgent)
         || (navigatorObject?.platform === 'MacIntel' && Number(navigatorObject?.maxTouchPoints) > 1);
+    let webgpu = false;
+    try {
+        const adapter = await navigatorObject?.gpu?.requestAdapter?.();
+        webgpu = Boolean(adapter);
+    } catch {
+        webgpu = false;
+    }
     return assessLocalAiCapabilities({
         wasm: typeof WebAssembly === 'object',
-        webgpu: Boolean(navigatorObject?.gpu),
+        webgpu,
         hardwareConcurrency: Math.max(1, Number(navigatorObject?.hardwareConcurrency) || 1),
         deviceMemoryGiB: Number.isFinite(navigatorObject?.deviceMemory) ? navigatorObject.deviceMemory : null,
         storageAvailableBytes: Math.max(0, quota - usage),

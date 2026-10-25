@@ -48,6 +48,16 @@ La ricerca base riconosce domande naturali su Account, aziende, documenti e Scad
 
 Il modello non può proporre o compiere scritture, modifiche, cancellazioni o archiviazioni. L'archiviazione Account resta un gesto dell'utente e richiede sempre il modale di conferma esplicita prima del servizio transazionale.
 
+### Runtime AI.2 isolato e contratto di supporto — 25/10/2026
+
+AI.2 esegue WebLLM in un Web Worker dedicato: download, inizializzazione e generazione non condividono piu il main thread con la UI. Un runtime verificato puo essere mantenuto caldo per cinque minuti dopo la chiusura del dialogo e viene riusato soltanto nella stessa scheda e per la stessa taglia; cronologia, shortlist e dati della Vault restano effimeri e vengono comunque eliminati alla chiusura della sessione. Lo spegnimento scarica il motore e termina il Worker.
+
+La compatibilita non deriva dalla sola presenza di `navigator.gpu`: il preflight deve ottenere un `GPUAdapter` reale. La taglia leggera puo passare al collaudo anche quando il browser non dichiara `navigator.deviceMemory`; media e potente richiedono invece memoria e concorrenza note oltre alle soglie gia definite. Il perimetro supportato iniziale e Chrome/Edge desktop; Firefox e Safari desktop restano candidati condizionati al preflight e allo smoke test reali, mentre telefoni e tablet usano AI.1/ricerca deterministica.
+
+Esistono due famiglie di cache con autorita diversa. Le cache `codex-local-ai-*-ready` contengono gli asset applicativi promossi soltanto dopo controllo di byte e SHA-256; le cache `webllm/config`, `webllm/model` e `webllm/wasm` sono copie derivate del runtime e non certificano nulla. Il Service Worker serve offline un asset AI soltanto dalla prima famiglia. Un errore di parsing elimina insieme tutte le informazioni derivate WebLLM e ritenta una sola volta, senza riscaricare il pacchetto verificato; la rimozione di AI.2 elimina entrambe le famiglie pertinenti.
+
+La verifica AI.2 inizializza realmente modello e Worker e richiede un oggetto JSON vincolato da schema, non una semplice stringa. La stessa grammatica limita gli intenti runtime ai soli tipi convalidati dall'app. Solo dopo tale prova il pacchetto riceve lo stato `verified`; qualsiasi errore mantiene disponibile Cerca/AI.1 e conserva un codice diagnostico privo di prompt o dati personali.
+
 ### Contratto candidato a due livelli — 16/10/2026
 
 Il candidato locale successivo alla 1.2.195 presenta due soli livelli all'utente. **AI.1 Locale** unisce la ricerca deterministica, sempre disponibile, alla ricerca semantica installabile dell'ex A2. **AI.2 Avanzata per PC** riusa il pacchetto generativo dell'ex A3 ed è proposta soltanto sui PC che superano i gate reali WebGPU, memoria, quota e smoke test. L'etichetta «installato» indica soltanto la presenza completa del pacchetto; «verificato» richiede anche inizializzazione e prova sintetica; «attivo» richiede entrambe le condizioni più la selezione esplicita.
