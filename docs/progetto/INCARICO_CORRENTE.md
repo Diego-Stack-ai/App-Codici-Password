@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Aggiornamento cache del runtime AI.2 — 25/10/2026
+
+Il collaudo diretto successivo al deploy `1.2.234` conferma che il browser può ancora ricevere dalla cache locale la copia precedente di `web-llm.js`: la URL del runtime coincide con quella già salvata insieme al pacchetto AI.2 e il service worker privilegia correttamente la cache dei modelli. La correzione usa una revisione di URL per il solo runtime condiviso, conservando il pacchetto `power` da 935 MiB e i relativi pesi.
+
+L'ordine **«pubblica»** resta l'autorizzazione esplicita per completare il rilascio della correzione emersa durante il collaudo: candidata `1.2.235`, bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Sono esclusi Functions, Rules, indici, migrazioni e dati reali.
+
 ## Correzione inizializzazione AI.2 — 24/10/2026
 
 Il controllo diretto nell'app sbloccata conferma che **Verifica** non esegue un semplice refresh: la taglia `power` installata raggiunge la fase `runtime-initialization` e termina con `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED`, senza errori aggiuntivi nella Console. L'analisi del runtime individua la causa nella normalizzazione WebLLM: anche l'URL same-origin del pacchetto Hosting veniva trattato come repository Hugging Face e riceveva il suffisso inesistente `resolve/main/`.

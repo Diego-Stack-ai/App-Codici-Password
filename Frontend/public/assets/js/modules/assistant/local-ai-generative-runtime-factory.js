@@ -1,4 +1,7 @@
-import { CreateMLCEngine } from '../../../local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js';
+// La revisione nella query evita che il service worker riusi una vecchia copia
+// del runtime presente nelle cache dei pacchetti AI gia installati. I pesi del
+// modello restano invece nelle cache dedicate e non vengono riscaricati.
+import { CreateMLCEngine } from '../../../local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js?codex-runtime=2';
 
 const MODEL_SPECS = Object.freeze({
     'qwen2.5-0.5b-instruct-q4f16-1-mlc': Object.freeze({

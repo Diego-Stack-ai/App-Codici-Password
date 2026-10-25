@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.235 — aggiornamento mirato del runtime AI.2 — 25/10/2026
+
+Il collaudo autenticato della `1.2.234` ha dimostrato che il service worker poteva riutilizzare una copia precedente di `web-llm.js` già presente nella cache locale del pacchetto AI.2. Di conseguenza la correzione Hosting era pubblicata ma il browser continuava a eseguire il runtime precedente e mostrava ancora `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED`.
+
+La candidata assegna una revisione esplicita soltanto all'import del runtime condiviso. La richiesta non coincide più con la vecchia voce in Cache Storage e scarica circa 6,8 MB di codice aggiornato, mentre il pacchetto `power` da 935 MiB e tutti i pesi già installati vengono conservati e riutilizzati. Il perimetro resta esclusivamente Firebase Hosting; Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+L'ordine **«pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting anche per questa correzione emersa durante il collaudo conclusivo della pubblicazione.
+
 ## Candidata 1.2.234 — inizializzazione AI.2 con runtime locale condiviso — 25/10/2026
 
 Il controllo diretto dell'app pubblicata ha confermato che **Verifica** avvia correttamente il percorso AI.2 ma termina nella fase `runtime-initialization`. La causa è la normalizzazione del runtime WebLLM: il suffisso Hugging Face `resolve/main/` veniva applicato anche agli URL same-origin dei pacchetti già installati su Firebase Hosting, producendo un percorso inesistente.
