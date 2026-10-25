@@ -32,6 +32,10 @@ Nell’editor dei Widget Account un campo può essere definito come **Data** e a
 
 Il modello profilo/istanza descritto sotto è attivo nella versione `1.2.154`. I cataloghi Account e Banca restano separati; i valori appartengono esclusivamente all'istanza inserita. La callable di gestione profili, l'aggiornamento di `manageAccountWidget` e le Rules sono distribuiti. I widget legacy senza `profileId` restano compatibili e non sono stati convertiti automaticamente né copiati con valori nel catalogo.
 
+Dal 25/10/2026 il menu a tendina dei Widget Account include anche una proiezione dei Widget generici legacy privi di `profileId`. La proiezione è soltanto strutturale, esclude i Widget con `bankId`, non contiene valori o ciphertext, elimina i duplicati equivalenti e non riscrive i record originali. Il catalogo bancario resta separato e invariato.
+
+La rimozione di un Widget generico distingue l'istanza dal profilo: **Solo dall’account** conserva il modello riutilizzabile; **Account e lista** elimina anche il profilo soltanto se l'istanza corrente è l'ultimo utilizzo. Un profilo ancora usato altrove non può essere eliminato e il backend ripete il controllo nella transazione. La conferma richiede sempre la riscrittura esatta del titolo.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 

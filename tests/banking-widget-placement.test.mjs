@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 const source = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-embedded-widgets.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 const lifecycleSource = (await readFile(new URL('../Frontend/public/assets/js/modules/shared/account-widget-lifecycle.js', import.meta.url), 'utf8')).replace(/^import[\s\S]*?;\r?\n/gm, '').replace(/^export /gm, '');
 function fixture(editable = true) {
-    const all = [], updates = [];
+    const all = [], updates = [], widgetDeletes = [], profileDeletes = [];
     function element(tag, props = {}, children = []) {
         const classes = new Set();
         const n = {tag, value: '', dataset: {}, children: [], ...props, classList: {
@@ -37,13 +37,22 @@ function fixture(editable = true) {
         profilesForCategory:(items,category)=>items.filter(item=>item.category===category),
         structuralTitleCase:value=>String(value??'').trim().replace(/\s+/gu,' ').toLocaleLowerCase('it-IT')
             .replace(/\p{L}[\p{L}\p{M}]*/gu,word=>word.charAt(0).toLocaleUpperCase('it-IT')+word.slice(1)),
+        widgetTemplateSignature:item=>JSON.stringify({title:item.title,fields:(item.fields||[]).map(field=>({label:field.label,type:field.type,encrypted:field.encrypted===true}))}),
         profileFieldSummary:profile=>profile.fields.map(field=>field.label).join(', '),
         isProfileAlreadyInserted:(items,profileId,bankId=null)=>items.some(item=>item.profileId===profileId&&(item.bankId||null)===(bankId||null)),
+        legacyAccountWidgetTemplates:(items,knownProfiles)=>items.filter(item=>item.kind==='embedded'&&!item.profileId&&!item.bankId)
+            .filter((item,index,candidates)=>candidates.findIndex(candidate=>candidate.title===item.title)===index)
+            .filter(item=>!knownProfiles.some(profile=>profile.category==='account'&&profile.title===item.title))
+            .map(item=>({...item,id:`legacy:${item.id}`,kind:'legacy-widget-template',category:'account',templateSignature:item.title})),
+        isWidgetTemplateAlreadyInserted:(items,template,bankId=null)=>template.kind==='widget-profile'
+            ? items.some(item=>item.profileId===template.id&&(item.bankId||null)===(bankId||null))
+            : items.some(item=>(item.bankId||null)===(bankId||null)&&item.title===template.templateSignature),
         listSharedVaultDataConfirmed:async()=>[], showToast(){},
-        createWidgetProfile:async()=>({profileId:'created-profile'}),
+        createWidgetProfile:async()=>({profileId:'created-profile'}), deleteWidgetProfile:async(...args)=>profileDeletes.push(args),
+        deleteAccountWidget:async(...args)=>widgetDeletes.push(args),
         updateAccountWidget:async (...args)=>updates.push(args), createAccountWidget:async(...args)=>updates.push(args)};
     vm.createContext(sandbox); vm.runInContext(lifecycleSource,sandbox); vm.runInContext(source,sandbox);
-    return {all, ids, widgets, updates, sandbox, get hosts(){return hosts;},
+    return {all, ids, widgets, updates, widgetDeletes, profileDeletes, sandbox, get hosts(){return hosts;},
         remount() {hosts = hosts.map(h=>element('div',{dataset:{...h.dataset}}));},
         init:(extra={})=>sandbox.initAccountEmbeddedWidgets({...extra,uid:'owner',context:'private',accountId:'account',editable})};
 }
@@ -76,6 +85,7 @@ test('Account catalog lists only Account profiles; Bank profiles stay in the ban
     const f=fixture();await f.init();
     const select=f.ids['account-widget-template-select'],attach=f.ids['btn-attach-account-widget'];
     assert.equal(select.children.some(option=>option.textContent.includes('Coordinate')),false);
+    assert.equal(select.children.some(option=>option.textContent.includes('Generic')),true);
     select.value=[...select.children].find(option=>option.textContent.includes('Accessi')).value;
     select.onchange();await attach.onclick();
     assert.equal(f.updates[0][0].title,'Accessi');assert.equal(f.updates[0][0].bankId,null);
@@ -116,4 +126,24 @@ test('bank card values and detached bank hosts are cleared on lifecycle destroy'
  const f=fixture(); const controller=await f.init();const input=f.all.find(n=>n.className==='account-widget-inline-input');input.value='sensitive draft';
  controller.destroy(); assert.equal(input.value,'');assert.ok(f.hosts.every(host=>host.children.length===0));
  controller.placeBankWidgets();assert.ok(f.hosts.every(host=>host.children.length===0));assert.equal(controller.hasPendingChanges(),false);
+});
+
+test('un solo cestino può rimuovere il widget generico anche dalla lista quando è l’unico utilizzo',async()=>{
+ const f=fixture();const generic=f.widgets.find(widget=>widget.id==='g');
+ Object.assign(generic,{profileId:'profile-account',profileCategory:'account',title:'Accessi'});
+ await f.init();const remove=f.all.filter(node=>node['aria-label']==='Rimuovi widget').at(-1);const pending=remove.onclick();
+ await Promise.resolve();const input=f.all.find(node=>node.placeholder==='Accessi');input.value='Accessi';
+ const removeBoth=f.all.find(node=>node.textContent==='Account e lista');assert.equal(removeBoth.disabled,false);removeBoth.onclick();await pending;
+ assert.equal(f.widgetDeletes.length,1);assert.equal(f.profileDeletes.length,1);assert.equal(f.profileDeletes[0][0].id,'profile-account');
+});
+
+test('la rimozione dalla lista è disabilitata quando il profilo è usato da un altro account',async()=>{
+ const f=fixture();const generic=f.widgets.find(widget=>widget.id==='g');
+ Object.assign(generic,{profileId:'profile-account',profileCategory:'account',title:'Accessi'});
+ f.widgets.push({...generic,id:'g-altro',accountId:'altro-account'});
+ await f.init();const remove=f.all.filter(node=>node['aria-label']==='Rimuovi widget').at(-1);const pending=remove.onclick();
+ await Promise.resolve();const input=f.all.find(node=>node.placeholder==='Accessi');input.value='Accessi';
+ const removeBoth=f.all.find(node=>node.textContent==='Account e lista');assert.equal(removeBoth.disabled,true);
+ f.all.find(node=>node.textContent==='Solo dall’account').onclick();await pending;
+ assert.equal(f.widgetDeletes.length,1);assert.equal(f.profileDeletes.length,0);
 });

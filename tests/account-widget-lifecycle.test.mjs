@@ -25,7 +25,7 @@ function fixture(which=1){
  roots['btn-link-shared-credential']=createElement('button');roots['btn-add-account-widget']=createElement('button');
  const body=createElement('body');Object.values(roots).forEach(n=>body.appendChild(n));
  const auth={currentUser:{uid:'A'}};
- const sandbox={WeakMap,URLSearchParams,URL,AbortController,crypto:{randomUUID:()=> 'fixture'},auth,onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)},createElement,clearElement,setChildren:(n,children)=>{clearElement(n);(Array.isArray(children)?children:[children]).filter(Boolean).forEach(c=>n.appendChild(c))},document:{body,getElementById:id=>roots[id],querySelectorAll:()=>[]},navigator:{onLine:true},showToast:(...x)=>toasts.push(x),ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=> 'secret',listAccountWidgets:async()=>[],listAccountWidgetsConfirmed:async()=>[],listAccountWidgetProfiles:async()=>[],listAccountWidgetProfilesConfirmed:async()=>[],profilesForCategory:(profiles,category)=>profiles.filter(profile=>profile.category===category),profileFieldSummary:profile=>(profile.fields||[]).map(field=>field.label).join(', '),isProfileAlreadyInserted:()=>false,listSharedVaultData:async()=>[],listSharedVaultDataConfirmed:async()=>[],updateSharedCredential:async(...x)=>writes.push(x),linkSharedCredential:async(...x)=>writes.push(x),unlinkSharedCredential:async(...x)=>writes.push(x),createWidgetProfile:async()=>({profileId:'profile'}),createAccountWidget:async(...x)=>writes.push(x),updateAccountWidget:async(...x)=>writes.push(x),deleteAccountWidget:async(...x)=>writes.push(x)};
+ const sandbox={WeakMap,URLSearchParams,URL,AbortController,crypto:{randomUUID:()=> 'fixture'},auth,onAuthStateChanged:(_auth,fn)=>{listeners.add(fn);return()=>listeners.delete(fn)},createElement,clearElement,setChildren:(n,children)=>{clearElement(n);(Array.isArray(children)?children:[children]).filter(Boolean).forEach(c=>n.appendChild(c))},document:{body,getElementById:id=>roots[id],querySelectorAll:()=>[]},navigator:{onLine:true},showToast:(...x)=>toasts.push(x),ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=> 'secret',listAccountWidgets:async()=>[],listAccountWidgetsConfirmed:async()=>[],listAccountWidgetProfiles:async()=>[],listAccountWidgetProfilesConfirmed:async()=>[],profilesForCategory:(profiles,category)=>profiles.filter(profile=>profile.category===category),legacyAccountWidgetTemplates:()=>[],profileFieldSummary:profile=>(profile.fields||[]).map(field=>field.label).join(', '),isProfileAlreadyInserted:()=>false,isWidgetTemplateAlreadyInserted:()=>false,listSharedVaultData:async()=>[],listSharedVaultDataConfirmed:async()=>[],updateSharedCredential:async(...x)=>writes.push(x),linkSharedCredential:async(...x)=>writes.push(x),unlinkSharedCredential:async(...x)=>writes.push(x),createWidgetProfile:async()=>({profileId:'profile'}),createAccountWidget:async(...x)=>writes.push(x),updateAccountWidget:async(...x)=>writes.push(x),deleteAccountWidget:async(...x)=>writes.push(x)};
  sandbox.addEventListener=(name,callback)=>{if(!globalListeners.has(name))globalListeners.set(name,new Set());globalListeners.get(name).add(callback)};
  sandbox.removeEventListener=(name,callback)=>globalListeners.get(name)?.delete(callback);
  sandbox.dispatchEvent=event=>{for(const callback of [...(globalListeners.get(event.type)||[])])callback(event)};
@@ -92,6 +92,16 @@ test('owned prompt supports Escape and restores focus only within the surviving 
  const life=f.makeLife();const pending=life.requestDecision('Confirm','message');const modal=f.dialogs[0];const section=modal.querySelector('section');assert.equal(section['aria-labelledby'],modal.querySelector('h3').id);
  modal.events.keydown({key:'Escape',preventDefault(){}});assert.equal(await pending,false);assert.equal(focused,1);
  const aborted=life.requestDecision('Another','message');life.destroy();assert.equal(await aborted,false);assert.equal(focused,1);
+});
+
+test('owned choice distinguishes actions and Escape never selects a destructive option',async()=>{
+ const f=fixture();const life=f.makeLife();
+ const cancelled=life.requestChoice('Remove','message',[{value:'account',text:'Only account'},{value:'catalog',text:'Account and list'}],{placeholder:'Widget'});
+ f.dialogs[0].events.keydown({key:'Escape',preventDefault(){}});assert.equal(await cancelled,null);
+ const selected=life.requestChoice('Remove','message',[{value:'account',text:'Only account'}],{placeholder:'Widget'});
+ const dialog=f.dialogs[0],input=dialog.querySelector('input');input.value='Widget';
+ dialog.querySelectorAll('button').find(button=>button.textContent==='Only account').click();
+ const result=await selected;assert.equal(result.choice,'account');assert.equal(result.input,'Widget');life.destroy();
 });
 
 test('detached section during read cannot render and releases its auth listener',async()=>{

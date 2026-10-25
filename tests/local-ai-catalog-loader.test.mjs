@@ -53,6 +53,9 @@ test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Fac
     assert.match(factory, /'qwen2\.5-1\.5b-instruct-q4f16-1-mlc'/);
     assert.match(factory, /'smollm2-1\.7b-instruct-q4f16-1-mlc'/);
     assert.match(factory, /web-llm\.js\?codex-runtime=2/);
+    assert.match(factory, /deleteChatConfigInCache/);
+    assert.match(factory, /String\(error\?\.name \|\| ''\) !== 'SyntaxError'/);
+    assert.match(factory, /await deleteChatConfigInCache\(spec\.modelId, appConfig\)/);
     assert.doesNotMatch(factory, /response_format/);
 });
 

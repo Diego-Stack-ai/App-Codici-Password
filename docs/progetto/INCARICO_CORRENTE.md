@@ -1,5 +1,19 @@
 # Incarico corrente
 
+## Widget generici e recupero cache AI.2 — 25/10/2026
+
+L'ordine **«ok procedi e pubblica»** autorizza la candidata `1.2.237`, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Il rilascio collega i Widget generici legacy al menu Account e introduce il cestino con le due scelte già concordate, senza valori nel profilo e senza migrazioni automatiche.
+
+Durante il collaudo precedente alla pubblicazione, la taglia AI.2 `power` ha restituito `LOCAL_AI_MODEL_CONFIG_INVALID` con `SyntaxError`. Gli asset pubblici `mlc-chat-config.json`, `ndarray-cache.json` e manifest rispondono correttamente; la causa compatibile è una vecchia risposta HTML rimasta nella cache interna `webllm/config` dalle prime pubblicazioni incomplete. La factory elimina soltanto quella configurazione obsoleta dopo un `SyntaxError` e ripete una volta l'avvio, conservando pacchetto e pesi già installati. Gli avvisi Chrome su `powerPreference` e sull'handler di un'estensione non sono errori dell'app. Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+
+## Widget generici legacy nel menu Account — 25/10/2026
+
+Diego conferma che i profili Widget `account` e `bank` restano due cataloghi distinti: i primi sono richiamabili dal menu a tendina generale dell'Account, i secondi soltanto nella sezione del conto bancario attivato. È autorizzato il solo raccordo dei Widget generici già esistenti al menu Account; struttura condivisa e flag di cifratura restano invariati.
+
+Il raccordo proietta in memoria i Widget legacy generici privi di `profileId`, elimina i duplicati strutturali e non include mai quelli collegati a un `bankId`. Titoli, campi e impostazioni servono come modello, mentre valori e ciphertext non entrano nel menu. Non viene eseguita alcuna migrazione o riscrittura automatica dei record esistenti.
+
+Il cestino di un Widget generico presenta due scelte dopo la conferma del nome: **Solo dall’account** conserva il profilo nel menu; **Account e lista** rimuove anche il profilo riutilizzabile, ma è disponibile soltanto quando non esistono altre istanze collegate. Il backend conserva il proprio controllo autoritativo sull'uso del profilo. Per un Widget legacy senza profilo, la prima scelta promuove soltanto la struttura a profilo quando si sta eliminando l'ultima istanza; la seconda non crea il profilo e il modello scompare insieme all'ultima istanza. I valori non entrano mai nel profilo.
+
 ## Consultazione completa dell'Archivio portatile — 25/10/2026
 
 Diego autorizza l'evoluzione del visualizzatore senza cambiare il formato cifrato v2 né il flusso progressivo già collaudato per gli allegati grandi. Le schede mostrano prima i dati utili e raccolgono identificativi, revisioni, visibilità, condivisioni e altri metadati in **Informazioni tecniche**; i campi sconosciuti restano comunque conservati e visibili. Le date Firestore e ISO sono rese in formato leggibile.
