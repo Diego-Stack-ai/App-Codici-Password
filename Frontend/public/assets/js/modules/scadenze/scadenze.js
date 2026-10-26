@@ -4,7 +4,7 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.239';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.240';
 import { getFooterReady } from '../../footer-state.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -13,7 +13,7 @@ import { updateDoc, deleteDoc, doc, onAuthStateChanged, runTransaction, serverTi
 import {deleteObject, ref} from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlineBucket, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.239';
+import { initComponents } from '../../components-v129.js?v=1.2.240';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
@@ -306,9 +306,9 @@ function setupDeadlineSwipe(hasOwnedCards) {
 
     deadlineSwipeList = new SwipeList('.deadline-card-owned', {
         threshold: 0.25,
-        canSwipeLeft: item => item.dataset.archived === 'true',
+        canSwipeLeft: () => true,
         onSwipeRight: item => listActive() && setDeadlineArchived(item.dataset.id, item.dataset.archived !== 'true'),
-        onSwipeLeft: item => listActive() && requestDeleteArchivedDeadline(item.dataset.id)
+        onSwipeLeft: item => listActive() && requestDeleteDeadline(item.dataset.id)
     });
 }
 
@@ -408,7 +408,7 @@ function createScadenzaCard(scadenza) {
                 ? `dettaglio_scadenza.html?received=${encodeURIComponent(scadenza.id)}`
                 : `dettaglio_scadenza.html?id=${encodeURIComponent(scadenza.id)}`
         }
-    }, scadenza.received ? [swipeContent] : [bgArchive, ...(scadenza.completed ? [bgDelete] : []), swipeContent]);
+    }, scadenza.received ? [swipeContent] : [bgArchive, bgDelete, swipeContent]);
 
     card.onclick = () => {
         if (mount !== listMount || !listActive()) return;
@@ -443,15 +443,15 @@ async function setDeadlineArchived(id, archived) {
     }
 }
 
-async function requestDeleteArchivedDeadline(id) {
+async function requestDeleteDeadline(id) {
     const deadline = allScadenze.find(item => item.id === id && !item.received);
-    if (!deadline?.completed) {
+    if (!deadline) {
         renderFilteredScadenze();
         return;
     }
     const confirmed = await showConfirmModal(
         t('confirm_delete_title'),
-        t('deadline_delete_archived_confirm'),
+        t('deadline_delete_confirm'),
         t('deadline_delete_action'),
         t('cancel') || 'Annulla'
     );

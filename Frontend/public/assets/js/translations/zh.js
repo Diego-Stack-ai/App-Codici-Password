@@ -3,13 +3,13 @@
 // Lingua: zh — 116 chiavi
 export default {
     "deadline_swipe_archive_restore": "向右滑动以归档或恢复",
-    "deadline_swipe_delete_archived": "在已归档中向左滑动以删除",
+    "deadline_swipe_delete": "向左滑动以删除",
     "filter_completed": "已归档",
     "deadline_swipe_actions": "到期事项快捷操作",
     "deadline_archive_action": "归档",
     "deadline_restore_action": "恢复",
     "deadline_delete_action": "删除",
-    "deadline_delete_archived_confirm": "该到期事项将被永久删除。是否继续？",
+    "deadline_delete_confirm": "该到期事项将被永久删除。是否继续？",
     "deadline_archived_success": "到期事项已归档",
     "deadline_restored_success": "到期事项已恢复",
     "deadline_archive_error": "无法归档该到期事项",

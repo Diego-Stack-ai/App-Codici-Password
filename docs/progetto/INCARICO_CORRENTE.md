@@ -1,5 +1,17 @@
 # Incarico corrente
 
+## Autorizzazione al rilascio completo della candidata 1.2.240 — 26/10/2026
+
+L'ordine umano **«Pubblica ed aggiorna GitHub»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting per il contrasto comune di header/footer e il cestino nelle liste Scadenze attive e archiviate. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+## Cestino nelle Scadenze attive e archiviate — 26/10/2026
+
+Diego richiede che il cestino sia disponibile con lo scorrimento verso sinistra sia nella lista delle Scadenze attive sia nel filtro **Archiviate**. Lo scorrimento verso destra continua ad archiviare o ripristinare; la cancellazione resta definitiva soltanto dopo conferma esplicita e non viene estesa alle Scadenze ricevute.
+
+## Contrasto comune di header e footer — 26/10/2026
+
+Diego richiede di aumentare del 15% il contrasto delle due fasce comuni per rendere più visibili le icone in tutte le pagine. L’intervento deve restare centralizzato in `core_fascie.css`, conservare la dissolvenza verso il contenuto e valere sia per tema chiaro sia per tema scuro, senza introdurre correzioni pagina per pagina.
+
 ## Autorizzazione al rilascio completo della candidata 1.2.239 — 26/10/2026
 
 Il successivo ordine umano **«Pubblica tutto»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting per la correzione AI.2 e gli aggiornamenti dell’Archivio portatile già compresi nella working tree. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.

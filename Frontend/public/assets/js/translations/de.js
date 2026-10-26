@@ -3,13 +3,13 @@
 // Lingua: de — 117 chiavi
 export default {
     "deadline_swipe_archive_restore": "Nach rechts wischen, um zu archivieren oder wiederherzustellen",
-    "deadline_swipe_delete_archived": "Unter Archiviert nach links wischen, um zu löschen",
+    "deadline_swipe_delete": "Zum Löschen nach links wischen",
     "filter_completed": "Archiviert",
     "deadline_swipe_actions": "Schnellaktionen für Fristen",
     "deadline_archive_action": "Archivieren",
     "deadline_restore_action": "Wiederherstellen",
     "deadline_delete_action": "Löschen",
-    "deadline_delete_archived_confirm": "Die Frist wird endgültig gelöscht. Fortfahren?",
+    "deadline_delete_confirm": "Die Frist wird endgültig gelöscht. Fortfahren?",
     "deadline_archived_success": "Frist archiviert",
     "deadline_restored_success": "Frist wiederhergestellt",
     "deadline_archive_error": "Frist konnte nicht archiviert werden",

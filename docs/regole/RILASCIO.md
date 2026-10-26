@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.240 — contrasto delle fasce e cancellazione Scadenze — 26/10/2026
+
+Header e footer comuni aumentano di 15 punti percentuali il contrasto della maschera, dal 40% al 55%, mantenendo la dissolvenza verso il contenuto e lo stesso comportamento nei temi chiaro e scuro. La modifica resta centralizzata in `core_fascie.css` e vale per tutte le pagine che usano le fasce condivise.
+
+Nella lista Scadenze il cestino tramite scorrimento verso sinistra è disponibile sia per le Scadenze attive sia nel filtro **Archiviate**. Lo scorrimento verso destra continua ad archiviare o ripristinare; la cancellazione definitiva richiede sempre conferma esplicita ed è limitata alle Scadenze possedute, senza estendere azioni di mutazione alle copie ricevute.
+
+L'ordine **«Pubblica ed aggiorna GitHub»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.239 — manifest tensoriale AI.2 verificato — 26/10/2026
 
 Il collaudo reale successivo alla reinstallazione ha escluso pacchetti obsoleti e ha recuperato dal Worker la causa originale: WebLLM 0.2.86 richiedeva `tensor-cache.json`, mentre tutte e tre le revisioni MLC fissate e verificate dall'app pubblicano il manifest dei pesi come `ndarray-cache.json`. Il `404` veniva trasformato dalla Cache API in `TypeError: Failed to execute 'add' on 'Cache': Request failed` e poi ridotto dal loader al codice generico `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED`.
