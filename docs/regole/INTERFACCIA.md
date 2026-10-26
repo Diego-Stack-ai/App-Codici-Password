@@ -2,7 +2,7 @@
 
 ## Visualizzatore Archivio portatile — 25/10/2026
 
-La scheda mette in alto nome Account, utente, password, e-mail, sito, codici, note e gli altri dati operativi; visualizzazioni, visibilità, condivisioni, revisioni e identificativi sono raccolti nel pannello richiudibile **Informazioni tecniche**. Campi non riconosciuti e futuri non vengono nascosti. Le date sono mostrate in forma leggibile senza esporre `Seconds` e `Nanoseconds`.
+La scheda mette in alto soltanto i dati operativi valorizzati: nome Account, utente, password, e-mail, sito, codici, note e gli altri contenuti utili. Negli Account e Memorandum, classificatori e stati interni come `type`, `isArchived`, `sharingCycle`, `isExplicitMemo` e `isBanking` sono raccolti nel pannello richiudibile **Informazioni tecniche**; i valori tecnici predefiniti `false` e `0` non appesantiscono la vista. Il campo operativo `account`, quando contiene un codice o valore dell'utente, resta invece fra i dati principali. CSV, ODS e XLSX rispettano la stessa gerarchia: dati principali all’inizio, altri campi non tecnici al centro e metadati tecnici in fondo. Campi non riconosciuti e futuri non vengono eliminati. Le date sono mostrate in forma leggibile senza esporre `Seconds` e `Nanoseconds`.
 
 Per ciascun allegato **Visualizza/Riproduci** è l'azione primaria quando il browser supporta il formato; **Salva sul PC** è secondaria e **Salva tutti gli allegati** richiede una cartella esplicita. Gli errori distinguono formato/codec, browser, dimensione, memoria, PDF e corruzione e offrono **Riprova**, **Salva sul PC**, **Chiudi anteprima** e **Mostra istruzioni**. La sezione **Compatibilità e problemi di visualizzazione** resta accessibile nel visualizzatore.
 

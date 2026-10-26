@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.239 — manifest tensoriale AI.2 verificato — 26/10/2026
+
+Il collaudo reale successivo alla reinstallazione ha escluso pacchetti obsoleti e ha recuperato dal Worker la causa originale: WebLLM 0.2.86 richiedeva `tensor-cache.json`, mentre tutte e tre le revisioni MLC fissate e verificate dall'app pubblicano il manifest dei pesi come `ndarray-cache.json`. Il `404` veniva trasformato dalla Cache API in `TypeError: Failed to execute 'add' on 'Cache': Request failed` e poi ridotto dal loader al codice generico `LOCAL_AI_RUNTIME_INITIALIZATION_FAILED`.
+
+Il runtime usa ora in modo coerente `ndarray-cache.json` in tutti i percorsi interni e riceve la revisione URL `codex-runtime=3`, così le taglie già installate conservano i pesi e scaricano soltanto circa 6,8 MB di runtime corretto. La diagnostica riconosce anche le eccezioni serializzate dal Worker senza registrare messaggi liberi, stack, prompt o dati della Vault. Un probe reale in Edge ha inizializzato il modello `light` al 100% su WebGPU Intel; lo stesso runtime viene copiato dal workflow nei pacchetti `medium` e `power` e il relativo hash entra nella chiave della cache CI.
+
+L'ordine **«Pubblica tutto»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting anche per gli aggiornamenti già verificati dell'Archivio portatile. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.238 — runtime AI.2 isolato e verificabile — 25/10/2026
 
 AI.2 esegue WebLLM in un Web Worker dedicato e carica il runtime incluso nel pacchetto verificato della taglia selezionata. Il preflight richiede un adattatore WebGPU reale; il Service Worker consulta soltanto le cache applicative promosse, mentre rimozione e recupero eliminano anche le cache derivate WebLLM. Lo smoke test accetta soltanto un JSON conforme allo schema chiuso degli intenti autorizzati. Il runtime puo restare caldo per cinque minuti nella scheda senza persistere conversazioni o dati della Vault.

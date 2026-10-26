@@ -17,7 +17,7 @@ test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile'
         assert.match(LOCAL_AI_RUNTIME_PROVENANCE[level].npmIntegrity, /^sha512-/);
     }
     assert.equal(LOCAL_AI_PACKAGE_CATALOG.A1.manifest.approxDownloadBytes, 145871600);
-    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes, 301981873);
+    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes, 301982289);
     assert.equal(LOCAL_AI_ADVANCED_TIERS.light.status, 'available');
     assert.equal(LOCAL_AI_ADVANCED_TIERS.medium.status, 'available');
     assert.equal(LOCAL_AI_ADVANCED_TIERS.power.status, 'available');
@@ -52,18 +52,26 @@ test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Fac
     assert.match(factory, /'qwen2\.5-0\.5b-instruct-q4f16-1-mlc'/);
     assert.match(factory, /'qwen2\.5-1\.5b-instruct-q4f16-1-mlc'/);
     assert.match(factory, /'smollm2-1\.7b-instruct-q4f16-1-mlc'/);
-    assert.match(factory, /new URL\('runtime\/web-llm\.js', packageBaseUrl\)\.href/);
+    assert.match(factory, /new URL\('runtime\/web-llm\.js\?codex-runtime=3', packageBaseUrl\)\.href/);
     assert.match(factory, /await import\(runtimeUrl\)/);
     assert.match(factory, /CreateWebWorkerMLCEngine/);
     assert.match(factory, /local-ai-generative-worker\.js\?runtime=/);
     assert.match(factory, /deleteModelAllInfoInCache/);
-    assert.match(factory, /String\(error\?\.name \|\| ''\) !== 'SyntaxError'/);
+    assert.match(factory, /\^SyntaxError\\s\*:/);
     assert.match(factory, /await deleteModelAllInfoInCache\(spec\.modelId, appConfig\)/);
     assert.match(factory, /response_format:options\.responseFormat/);
     const worker = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-generative-worker.js', import.meta.url), 'utf8');
     assert.match(worker, /new URL\(runtimeUrl\)\.origin !== self\.location\.origin/);
     assert.match(worker, /handlerPromise = import\(runtimeUrl\)/);
     assert.match(worker, /\(await handlerPromise\)\.onmessage\(message\)/);
+});
+
+test('il runtime usa il manifest tensoriale realmente incluso nei pacchetti MLC', () => {
+    const source = readFileSync(new URL('../Frontend/public/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js', import.meta.url), 'utf8');
+    assert.match(source, /TENSOR_CACHE_MANIFEST_FILENAME = "ndarray-cache\.json"/);
+    assert.doesNotMatch(source, /TENSOR_CACHE_MANIFEST_FILENAME = "tensor-cache\.json"/);
+    assert.doesNotMatch(source, /new URL\("tensor-cache\.json"/);
+    assert.match(source, /new URL\(TENSOR_CACHE_MANIFEST_FILENAME, tensorCacheUrl\)/);
 });
 
 test('il loader espone fasi e codice sicuro quando l’inizializzazione AI.2 fallisce', async () => {
@@ -128,6 +136,10 @@ test('la diagnostica classifica gli errori noti senza esporne il testo', () => {
     assert.deepEqual(
         readLocalAiRuntimeDiagnostic({ name:'SyntaxError', message:'Unexpected token in JSON' }, 'runtime-initialization'),
         { code:'LOCAL_AI_ARTIFACT_PARSE_FAILED', stage:'runtime-initialization', errorName:'SyntaxError' }
+    );
+    assert.deepEqual(
+        readLocalAiRuntimeDiagnostic("TypeError: Failed to execute 'add' on 'Cache': Request failed", 'runtime-initialization'),
+        { code:'LOCAL_AI_MODEL_MANIFEST_UNAVAILABLE', stage:'runtime-initialization', errorName:'TypeError' }
     );
 });
 

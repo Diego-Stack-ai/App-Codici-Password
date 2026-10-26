@@ -20,7 +20,7 @@ export const HOSTED_ADVANCED_AI_CATALOG = Object.freeze({
         "revision": "9bd564b064631febf14deadcac492efb761d60c3",
         "license": "Apache-2.0"
       },
-      "approxDownloadBytes": 893034433,
+      "approxDownloadBytes": 893034849,
       "maxResidentBytes": 1708916736,
       "locales": [
         "it-IT",
@@ -219,8 +219,8 @@ export const HOSTED_ADVANCED_AI_CATALOG = Object.freeze({
         },
         {
           "path": "runtime/web-llm.js",
-          "bytes": 6817060,
-          "sha256": "ec4bb3ee4de76747bc05a7ca1e29e97d3828315f3ede1d09ed279ab1c3bf6641"
+          "bytes": 6817476,
+          "sha256": "336c589eda44eea4a2179830788e2bce88720aac3651e4c53be1b4a532345555"
         },
         {
           "path": "tokenizer_config.json",
@@ -260,7 +260,7 @@ export const HOSTED_ADVANCED_AI_CATALOG = Object.freeze({
         "revision": "84f57f8580a9d8d623266b600ad4273bb9fd84c1",
         "license": "Apache-2.0"
       },
-      "approxDownloadBytes": 979573255,
+      "approxDownloadBytes": 979573671,
       "maxResidentBytes": 1860373054,
       "locales": [
         "it-IT",
@@ -494,8 +494,8 @@ export const HOSTED_ADVANCED_AI_CATALOG = Object.freeze({
         },
         {
           "path": "runtime/web-llm.js",
-          "bytes": 6817060,
-          "sha256": "ec4bb3ee4de76747bc05a7ca1e29e97d3828315f3ede1d09ed279ab1c3bf6641"
+          "bytes": 6817476,
+          "sha256": "336c589eda44eea4a2179830788e2bce88720aac3651e4c53be1b4a532345555"
         },
         {
           "path": "tokenizer_config.json",

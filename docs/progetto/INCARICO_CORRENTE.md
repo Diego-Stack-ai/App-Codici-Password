@@ -1,5 +1,21 @@
 # Incarico corrente
 
+## Autorizzazione al rilascio completo della candidata 1.2.239 — 26/10/2026
+
+Il successivo ordine umano **«Pubblica tutto»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting per la correzione AI.2 e gli aggiornamenti dell’Archivio portatile già compresi nella working tree. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
+## Correzione conclusiva dell'avvio AI.2 — 26/10/2026
+
+Dopo la rimozione, il nuovo download e la nuova verifica della taglia `power`, Diego autorizza con **«procedi e risolvi il problema»** l'analisi del percorso reale di inizializzazione. Il probe ha recuperato dal Worker `TypeError: Failed to execute 'add' on 'Cache': Request failed`: WebLLM richiedeva `tensor-cache.json`, assente nelle revisioni MLC distribuite, che contengono invece `ndarray-cache.json`.
+
+Il runtime deve usare lo stesso nome in tutti i punti di caricamento, aggiornarsi tramite una nuova query di revisione senza riscaricare i pesi e classificare in modo sicuro anche gli errori serializzati come stringa. Il collaudo reale sul modello `light`, che condivide il runtime delle taglie superiori, deve raggiungere il completamento WebGPU; il workflow deve propagare hash e runtime aggiornati a `medium` e `power`. Questo ordine autorizza implementazione e verifiche locali, ma non costituisce da solo autorizzazione a commit, push, merge o deploy.
+
+## Ordine umano nelle esportazioni dell’Archivio portatile — 26/10/2026
+
+Diego autorizza con **«procedi»** l’allineamento di CSV, ODS e XLSX alla presentazione già usata dal visualizzatore dell’Archivio portatile. Nome Account e altri dati identificativi utili, credenziali, contatti, sito, codici e note devono precedere gli altri campi operativi; identificativi interni, ambito, proprietà, visibilità, condivisioni, revisioni, versioni e date tecniche devono essere raccolti in fondo alle colonne. I campi sconosciuti o futuri restano presenti e precedono i metadati tecnici. JSON resta integrale e invariato. L’intervento è locale: non autorizza da solo bump di versione, commit, push, merge o deploy.
+
+Estensione approvata nello stesso giorno: nelle schede Account e Memorandum il visualizzatore deve trattare `type`, `isArchived`, `sharingCycle`, `isExplicitMemo`, `isBanking` e gli equivalenti stati interni come informazioni tecniche. I valori tecnici predefiniti `false` e `0` non devono essere mostrati, mentre un campo operativo `account` contenente un codice resta principale. La distinzione è limitata agli ambiti Account per non degradare campi `tipo` significativi di Documenti, Scadenze o altre sezioni. Tutti i valori rimangono nel contenitore cifrato, nel JSON completo e nelle esportazioni tecniche.
+
 ## Stabilizzazione strutturale AI.2 — 25/10/2026
 
 Diego autorizza con **«Procedi»** la prima fase del progetto strutturale AI.2, dopo l'analisi estesa del runtime e della compatibilita browser. La correzione non deve inseguire un singolo messaggio di WebLLM: deve separare l'inferenza dall'interfaccia, accettare come compatibile soltanto un adattatore WebGPU realmente ottenuto, impedire che il Service Worker confonda pacchetti verificati e cache derivate, e considerare riuscita la verifica soltanto dopo un output JSON conforme al contratto.
