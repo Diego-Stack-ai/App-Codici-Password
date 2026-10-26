@@ -1,4 +1,4 @@
-import {auth, storage} from '../../firebase-config.js?v=1.2.240';
+import {auth, storage} from '../../firebase-config.js?v=1.2.241';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptRequiredValue, isEncryptedValue} from '../core/crypto-utils.js';
 import {

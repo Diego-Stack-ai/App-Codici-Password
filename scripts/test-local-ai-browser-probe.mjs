@@ -16,10 +16,11 @@ const server = createServer(async (request, response) => {
         if (url.pathname === '/') {
             response.setHeader('Content-Type', 'text/html');
             response.end(`<div id="assistant-package-settings"></div><script type="module">
-                import { probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
+                import { createLocalAiEnvelope, probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
                 import { LOCAL_AI_PACKAGE_CATALOG } from '/assets/js/modules/assistant/local-ai-package-catalog.js';
                 import { initAssistantPackageSettings } from '/assets/js/modules/assistant/assistant-package-settings.js';
                 import { createGenerativeRuntime } from '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js';
+                import { createA2IntentRequest, stabilizeA2Intent } from '/assets/js/modules/assistant/local-ai-assistant-service.js';
                 window.__probe = await probeLocalAiCapabilities();
                 window.__catalog = { A1: LOCAL_AI_PACKAGE_CATALOG.A1.status, A2: LOCAL_AI_PACKAGE_CATALOG.A2.status };
                 await initAssistantPackageSettings();
@@ -61,10 +62,28 @@ const server = createServer(async (request, response) => {
                         ], { maxTokens:16, temperature:0, responseFormat:{ type:'json_object', schema } });
                         const content = String(result?.choices?.[0]?.message?.content || '');
                         const parsed = JSON.parse(content);
+                        const guide = {
+                            pageId:'impostazioni',
+                            purpose:'Configura preferenze, sicurezza, notifiche, backup e assistente locale.',
+                            steps:[{ body:'Scegli tema e lingua.' }, { body:'Gestisci sicurezza e notifiche.' }]
+                        };
+                        const question = 'Spiegami questa pagina e dimmi a cosa serve.';
+                        const envelope = createLocalAiEnvelope({
+                            level:'A2', locale:'it-IT', page:{ pageId:guide.pageId, purpose:guide.purpose },
+                            question, turns:[], shortlist:[]
+                        });
+                        const intentRequest = createA2IntentRequest({ question, envelope, guide });
+                        const intentResult = await runtime.complete(intentRequest.messages, intentRequest.options);
+                        const rawIntent = JSON.parse(String(intentResult?.choices?.[0]?.message?.content || ''));
+                        const stableIntent = stabilizeA2Intent({ intent:rawIntent, question, guide });
                         window.__realModelProbe = {
-                            ok:parsed?.ok === true && Object.keys(parsed).length === 1,
+                            ok:parsed?.ok === true && Object.keys(parsed).length === 1
+                                && stableIntent.type === 'explain_page'
+                                && stableIntent.query.includes('Configura preferenze'),
                             progress:window.__realModelProgress || null,
-                            smoke:parsed
+                            smoke:parsed,
+                            rawIntent,
+                            stableIntent
                         };
                     } catch (error) {
                         window.__realModelProbe = {

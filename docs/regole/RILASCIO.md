@@ -462,3 +462,7 @@ Aggiornare la PWA prima di modificare i conti: i vecchi form aziendali possono o
 Il paragrafo precedente descrive la preparazione storica della 1.2.119. Successivamente autorizzati e pubblicati: Hosting 1.2.118–1.2.121 e la sola Function `manageAccountWidget` per i collegamenti bancari. Master è `6fc3546e`, versione 1.2.121. Le modifiche strutturali Vault, le nuove ricevute e i prerequisiti backend del ramo sperimentale non sono stati distribuiti.
 
 Il merge `e2edd2b9` riconcilia questi rilasci nel solo ramo `experiment/vault-shell-v121`. Il push sperimentale non autorizza merge master o deploy: restano necessari distribuzione coordinata dei prerequisiti, compatibilità/rollback e i gate aperti del programma. Il coordinatore ibrido M6 è soltanto di laboratorio, senza upgrade IndexedDB né import nell'app.
+
+### Gate AI.2 locale — candidata 1.2.241, 26/10/2026
+
+Prima del rilascio dell'AI.2 devono essere verdi: contratto degli intenti, regressione conversazionale, probe browser, probe WebGPU con modello reale, verifica versione/catalogo, suite completa ed emulatori. La risposta grezza del modello non è considerata affidabile da sola: deve attraversare la validazione tipizzata e la barriera deterministica locale. Il fallback di ricerca resta disponibile se l'inizializzazione del modello fallisce; nessuna azione di scrittura può essere derivata dal modello. Il rollback ripristina gli asset Hosting precedenti senza toccare dati, Rules o Functions.
