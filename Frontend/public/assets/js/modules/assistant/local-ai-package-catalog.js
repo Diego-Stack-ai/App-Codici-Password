@@ -29,7 +29,7 @@ const A1_MANIFEST = validateLocalAiPackageManifest({
 const A2_LIGHT_MANIFEST = validateLocalAiPackageManifest({
     schemaVersion:1, level:'A2', packageId:'qwen2.5-0.5b-instruct-q4f16-1-mlc', version:'0.1.0', runtime:'webllm-webgpu',
     model:{ provider:'MLC AI / Qwen', modelId:'mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC', revision:'32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad', license:'Apache-2.0' },
-    approxDownloadBytes:301981873, maxResidentBytes:Math.ceil(944.62*MIB),
+    approxDownloadBytes:301982289, maxResidentBytes:Math.ceil(944.62*MIB),
     locales:['it-IT','en-US','es-ES','fr-FR','de-DE','zh-CN','pt-PT'],
     files:[
         file('LICENSE-model.txt',11343,'832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e'),
@@ -46,7 +46,7 @@ const A2_LIGHT_MANIFEST = validateLocalAiPackageManifest({
         file('params_shard_6.bin',33297408,'192576d43956aa977ec60848b8a7fc8483b5fe38ca9669aa9a3ca2ba795a7a33'),
         file('params_shard_7.bin',14605824,'1ee25c2a41dad6833e000b7e3ec13a5a1761c32ffbed0ad8a98a6ad313338dc0'),
         file('runtime/factory.js',975,'8b2614cdf3e54b0aee6b7600f48430eeff3b5db9efd99c6d21fbcd61284ddfad'),
-        file('runtime/web-llm.js',6817060,'ec4bb3ee4de76747bc05a7ca1e29e97d3828315f3ede1d09ed279ab1c3bf6641'),
+        file('runtime/web-llm.js',6817476,'336c589eda44eea4a2179830788e2bce88720aac3651e4c53be1b4a532345555'),
         file('tokenizer_config.json',7308,'5214600ee45ca2f887ce2eede8910378a0111ea99d657428bcbce94778e65a92'),
         file('tokenizer.json',7031645,'c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539'),
         file('vocab.json',2776833,'ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910'),

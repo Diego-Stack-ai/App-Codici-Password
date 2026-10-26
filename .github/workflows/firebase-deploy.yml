@@ -127,7 +127,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Frontend/public/assets/local-ai-packages
-          key: local-ai-a2-${{ runner.os }}-${{ hashFiles('scripts/stage-local-ai-hosting-assets.mjs', 'Frontend/public/assets/js/modules/assistant/local-ai-hosting-catalog.generated.js') }}
+          key: local-ai-a2-${{ runner.os }}-${{ hashFiles('scripts/stage-local-ai-hosting-assets.mjs', 'Frontend/public/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js', 'Frontend/public/assets/js/modules/assistant/local-ai-hosting-catalog.generated.js') }}
 
       - name: Stage AI 2 Hosting packages
         run: npm run stage:assistant-local-ai

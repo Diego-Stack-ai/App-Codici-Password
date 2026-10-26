@@ -1,6 +1,51 @@
 const encoder = new TextEncoder();
 const ODS_MIME = 'application/vnd.oasis.opendocument.spreadsheet';
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const TECHNICAL_FIELDS = new Set([
+    'id', 'key', 'scope', 'uid', 'owner', 'ownerUid', 'companyId', 'accountId',
+    'visibility', 'views', 'revision', 'version', 'schemaVersion', 'sharedWith',
+    'sharedWithUids', 'acceptedCount', 'createdAt', 'updatedAt', 'createdBy',
+    'updatedBy', 'isPinned'
+]);
+const ACCOUNT_TECHNICAL_FIELDS = new Set([
+    'type', 'tipo', 'isArchived', 'sharingCycle', 'isExplicitMemo', 'isBanking',
+    '_isGuest', 'shared', 'isMemo', 'hasMemo', 'isMemoShared'
+]);
+const ACCOUNT_SCOPES = new Set(['private-account', 'company-account']);
+const IMPORTANT_FIELDS = [
+    'nomeAccount', 'name', 'nome', 'titolo', 'title', 'username', 'utente',
+    'password', 'email', 'website', 'sitoWeb', 'url', 'codice', 'code', 'pin',
+    'puk', 'note', 'descrizione', 'description'
+];
+
+function projectionPathParts(path) {
+    return String(path || '').split('.').map(part => part.trim()).filter(Boolean);
+}
+
+function isTechnicalProjectionColumn(path, scope = '') {
+    const parts = projectionPathParts(path);
+    const accountRootField = parts.length === 2 && parts[0] === 'data' ? parts[1] : '';
+    return parts.some(part => TECHNICAL_FIELDS.has(part)
+        || /(?:^|_)(?:id|uid|revision|version)$/i.test(part))
+        || (ACCOUNT_SCOPES.has(scope) && ACCOUNT_TECHNICAL_FIELDS.has(accountRootField));
+}
+
+function projectionColumnPriority(path) {
+    const parts = projectionPathParts(path);
+    const index = IMPORTANT_FIELDS.findIndex(field => parts.includes(field));
+    return index < 0 ? IMPORTANT_FIELDS.length : index;
+}
+
+function compareProjectionColumns(left, right, scope = '') {
+    const leftTechnical = isTechnicalProjectionColumn(left, scope);
+    const rightTechnical = isTechnicalProjectionColumn(right, scope);
+    if (leftTechnical !== rightTechnical) return leftTechnical ? 1 : -1;
+    if (!leftTechnical) {
+        const priority = projectionColumnPriority(left) - projectionColumnPriority(right);
+        if (priority) return priority;
+    }
+    return left.localeCompare(right, 'it', {numeric: true, sensitivity: 'base'});
+}
 
 function timestampDate(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -100,9 +145,8 @@ export function buildProjectionTables(records = []) {
     return [...grouped.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([scope, rows]) => {
         const dynamic = new Set();
         for (const row of rows) for (const key of Object.keys(row)) dynamic.add(key);
-        const fixed = ['key', 'scope', 'id', 'companyId', 'accountId', 'title'];
-        const columns = [...fixed.filter(key => dynamic.has(key) || key === 'key' || key === 'scope'),
-            ...[...dynamic].filter(key => !fixed.includes(key)).sort()];
+        const columns = (dynamic.size ? [...dynamic] : ['key', 'scope'])
+            .sort((left, right) => compareProjectionColumns(left, right, scope));
         return {scope, columns, rows};
     });
 }

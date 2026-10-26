@@ -8,6 +8,7 @@ import os from 'node:os';
 
 const root = path.resolve(import.meta.dirname, '../Frontend/public');
 const executable = process.env.LOCAL_AI_TEST_BROWSER || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const realModelProbe = process.env.LOCAL_AI_REAL_MODEL_PROBE === '1';
 const delay = value => new Promise(resolve => setTimeout(resolve, value));
 const server = createServer(async (request, response) => {
     try {
@@ -41,6 +42,42 @@ const server = createServer(async (request, response) => {
                     });
                     worker.terminate();
                 } catch (error) { window.__workerEcho = { error:String(error?.message || error) }; }
+                if (${JSON.stringify(realModelProbe)}) {
+                    let runtime;
+                    try {
+                        const candidate = LOCAL_AI_PACKAGE_CATALOG.A2;
+                        runtime = await createGenerativeRuntime({
+                            manifest:candidate.manifest,
+                            packageBaseUrl:new URL(candidate.baseUrl, location.href).href,
+                            onProgress:report => { window.__realModelProgress = report; }
+                        });
+                        const schema = JSON.stringify({
+                            type:'object', additionalProperties:false, required:['ok'],
+                            properties:{ ok:{ type:'boolean', const:true } }
+                        });
+                        const result = await runtime.complete([
+                            { role:'system', content:'Rispondi soltanto con {"ok":true}.' },
+                            { role:'user', content:'Verifica locale.' }
+                        ], { maxTokens:16, temperature:0, responseFormat:{ type:'json_object', schema } });
+                        const content = String(result?.choices?.[0]?.message?.content || '');
+                        const parsed = JSON.parse(content);
+                        window.__realModelProbe = {
+                            ok:parsed?.ok === true && Object.keys(parsed).length === 1,
+                            progress:window.__realModelProgress || null,
+                            smoke:parsed
+                        };
+                    } catch (error) {
+                        window.__realModelProbe = {
+                            ok:false,
+                            type:typeof error,
+                            name:String(error?.name || ''),
+                            message:String(error?.message || error),
+                            stack:String(error?.stack || '')
+                        };
+                    } finally {
+                        await runtime?.dispose?.();
+                    }
+                }
                 window.__ready = true;
             </script>`);
             return;
@@ -74,8 +111,9 @@ try {
     const command=(method,params={})=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});socket.send(JSON.stringify({id,method,params}));});
     await command('Runtime.enable');
     let value;
-    for(let attempt=0;attempt<100;attempt++){
-        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,tiers:window.__tiers,caches:window.__cacheNames,runtimeFactory:window.__runtimeFactory,workerEcho:window.__workerEcho}) : null',returnByValue:true});
+    const attempts = realModelProbe ? 3600 : 100;
+    for(let attempt=0;attempt<attempts;attempt++){
+        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,tiers:window.__tiers,caches:window.__cacheNames,runtimeFactory:window.__runtimeFactory,workerEcho:window.__workerEcho,realModelProbe:window.__realModelProbe}) : null',returnByValue:true});
         value=result.result.value; if(value)break; await delay(100);
     }
     assert.equal(value.probe.A1.status,'candidate');
@@ -88,6 +126,10 @@ try {
     assert.deepEqual(value.caches,[]);
     assert.equal(value.runtimeFactory,'function');
     assert.deepEqual(value.workerEcho,{ echo:'ai2-worker' });
+    if (realModelProbe) {
+        console.log('Local AI real model probe:', JSON.stringify(value.realModelProbe));
+        assert.equal(value.realModelProbe?.ok, true, value.realModelProbe?.message || 'inizializzazione reale fallita');
+    }
     console.log('Local AI browser probe: OK');
 } finally {
     socket?.close(); browser.kill(); await Promise.race([exited,delay(2000)]); server.close(); await rm(profile,{recursive:true,force:true});

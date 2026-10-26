@@ -141,6 +141,10 @@ test('il visualizzatore presenta un catalogo umano e relega le esportazioni tecn
     assert.match(html, /referenteCognome:'Cognome referente'/);
     assert.match(html, /data:image/);
     assert.match(html, /Informazioni tecniche/);
+    assert.match(html, /accountScopes=new Set\(\['private-account','company-account'\]\)/);
+    assert.match(html, /'isArchived','sharingCycle','isExplicitMemo','isBanking'/);
+    assert.match(html, /isDefaultTechnicalValue\(value\)\{return value==='false'\|\|value==='0'\}/);
+    assert.match(html, /isTechnicalPath\(path,record\.scope\)/);
     assert.match(html, /Compatibilità e problemi di visualizzazione/);
     assert.match(html, /Salva tutti gli allegati/);
     assert.match(html, /Salva sul PC/);
@@ -161,7 +165,9 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     const records = [{
         key: 'private-account:::a1', scope: 'private-account', id: 'a1', title: 'Conto',
         data: {
-            utente: 'sintetico', nuovoWidget: {colore: 'blu', valore: 7},
+            utente: 'sintetico', nuovoWidget: {colore: 'blu', valore: 7, type: 'text'},
+            account: '000123', type: 'account', isArchived: false, sharingCycle: 1,
+            isExplicitMemo: false, isBanking: false,
             nota: '=HYPERLINK("https://invalid.test")', controllo: 'prima\u0001dopo',
             createdAt: {seconds: 1791972000, nanoseconds: 500000000}
         }
@@ -171,9 +177,20 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     }];
     const tables = buildProjectionTables(records);
     assert.equal(tables.length, 2);
-    assert.ok(tables.find(table => table.scope === 'private-account').columns.includes('data.nuovoWidget.colore'));
-    assert.ok(tables.find(table => table.scope === 'private-account').columns.includes('data.createdAt'));
-    assert.equal(tables.find(table => table.scope === 'private-account').columns.includes('data.createdAt.seconds'), false);
+    const accountTable = tables.find(table => table.scope === 'private-account');
+    assert.ok(accountTable.columns.includes('data.nuovoWidget.colore'));
+    assert.ok(accountTable.columns.includes('data.createdAt'));
+    assert.equal(accountTable.columns.includes('data.createdAt.seconds'), false);
+    assert.ok(accountTable.columns.indexOf('title') < accountTable.columns.indexOf('data.utente'));
+    assert.ok(accountTable.columns.indexOf('data.utente') < accountTable.columns.indexOf('data.nuovoWidget.colore'));
+    assert.ok(accountTable.columns.indexOf('data.nuovoWidget.colore') < accountTable.columns.indexOf('key'));
+    assert.ok(accountTable.columns.indexOf('data.controllo') < accountTable.columns.indexOf('data.createdAt'));
+    assert.ok(accountTable.columns.indexOf('data.account') < accountTable.columns.indexOf('data.type'));
+    assert.ok(accountTable.columns.indexOf('data.account') < accountTable.columns.indexOf('data.isArchived'));
+    assert.ok(accountTable.columns.indexOf('data.account') < accountTable.columns.indexOf('data.sharingCycle'));
+    assert.ok(accountTable.columns.indexOf('data.nuovoWidget.type') < accountTable.columns.indexOf('key'));
+    const widgetTable = tables.find(table => table.scope === 'profile-widget');
+    assert.ok(widgetTable.columns.indexOf('data.tipo') < widgetTable.columns.indexOf('key'));
 
     const projections = await buildPortableProjections(records, {
         createdAt: '2026-10-14T10:00:00.000Z', cryptoApi: webcrypto
@@ -183,6 +200,11 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     assert.match(accountCsv, /data\.nuovoWidget\.colore/);
     assert.match(accountCsv, /'=HYPERLINK/);
     assert.doesNotMatch(accountCsv, /,"=HYPERLINK/);
+    const csvColumns = accountCsv.replace(/^\uFEFF/, '').split(/\r?\n/, 1)[0].split(',');
+    assert.ok(csvColumns.indexOf('data.utente') < csvColumns.indexOf('key'));
+    assert.ok(csvColumns.indexOf('data.nuovoWidget.colore') < csvColumns.indexOf('data.createdAt'));
+    assert.ok(csvColumns.indexOf('data.account') < csvColumns.indexOf('data.type'));
+    assert.ok(csvColumns.includes('data.isArchived'));
 
     const odsBytes = new Uint8Array(Buffer.from(projections.ods.content, 'base64'));
     const entries = readStoredZip(odsBytes);
@@ -195,6 +217,8 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     assert.match(content, /prima\uFFFDdopo/);
     assert.doesNotMatch(content, /\u0001/);
     assert.doesNotMatch(content, /table:formula/);
+    assert.ok(content.indexOf('title') < content.indexOf('data.utente'));
+    assert.ok(content.indexOf('data.nuovoWidget.colore') < content.indexOf('data.createdAt'));
     assert.equal(projections.ods.sha256, await sha256Base64(odsBytes, webcrypto));
 
     const xlsxBytes = new Uint8Array(Buffer.from(projections.xlsx.content, 'base64'));
@@ -215,6 +239,9 @@ test('le proiezioni preservano campi futuri e neutralizzano le formule', async (
     assert.match(worksheet, /&apos;=HYPERLINK/);
     assert.match(worksheet, /data\.createdAt/);
     assert.doesNotMatch(worksheet, /data\.createdAt\.seconds/);
+    assert.ok(worksheet.indexOf('>title</t>') < worksheet.indexOf('>data.utente</t>'));
+    assert.ok(worksheet.indexOf('>data.nuovoWidget.colore</t>') < worksheet.indexOf('>key</t>'));
+    assert.ok(worksheet.indexOf('>data.nuovoWidget.colore</t>') < worksheet.indexOf('>data.createdAt</t>'));
     assert.match(styles, /numFmtId="49"/);
     assert.equal(projections.xlsx.sha256, await sha256Base64(xlsxBytes, webcrypto));
 

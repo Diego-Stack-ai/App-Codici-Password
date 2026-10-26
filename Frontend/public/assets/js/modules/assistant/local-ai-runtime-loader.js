@@ -27,12 +27,17 @@ function fallbackCode(stage) {
 }
 
 function classifyCause(error, stage) {
-    const direct = String(error?.code || error?.message || '');
+    const message = typeof error === 'string' ? error : String(error?.message || '');
+    const direct = String(error?.code || message || '');
     if (DIAGNOSTIC_CODE.test(direct)) return direct;
-    const named = CAUSE_CODES[String(error?.causeName || error?.name || '')];
+    const serializedName = message.match(/^([A-Za-z][A-Za-z0-9]{0,47})(?::|$)/)?.[1] || '';
+    const causeName = String(error?.causeName || error?.name || serializedName);
+    const named = CAUSE_CODES[causeName];
     if (named) return named;
-    if (String(error?.causeName || error?.name || '') === 'SyntaxError') return 'LOCAL_AI_ARTIFACT_PARSE_FAILED';
-    const message = String(error?.message || '');
+    if (causeName === 'SyntaxError') return 'LOCAL_AI_ARTIFACT_PARSE_FAILED';
+    if (/Failed to execute ['"]add['"] on ['"]Cache['"]:\s*Request failed/i.test(message)) {
+        return 'LOCAL_AI_MODEL_MANIFEST_UNAVAILABLE';
+    }
     if (/maxBufferSize|maxStorageBufferBindingSize/i.test(message)) return 'LOCAL_AI_GPU_LIMIT_UNSUPPORTED';
     if (/device lost|out of memory|\bOOM\b/i.test(message)) return 'LOCAL_AI_GPU_DEVICE_LOST';
     if (/failed to fetch|networkerror/i.test(message)) return 'LOCAL_AI_MODEL_FETCH_FAILED';
@@ -49,8 +54,11 @@ function classifyCause(error, stage) {
 export function readLocalAiRuntimeDiagnostic(error, fallbackStage = LOCAL_AI_RUNTIME_STAGES.PREFLIGHT) {
     const stage = DIAGNOSTIC_STAGE.test(String(error?.stage || '')) ? String(error.stage) : fallbackStage;
     const code = classifyCause(error, stage);
-    const errorName = /^[A-Za-z][A-Za-z0-9]{0,47}$/.test(String(error?.causeName || error?.name || ''))
-        ? String(error?.causeName || error?.name)
+    const serializedName = (typeof error === 'string' ? error : String(error?.message || ''))
+        .match(/^([A-Za-z][A-Za-z0-9]{0,47})(?::|$)/)?.[1] || '';
+    const candidateName = String(error?.causeName || error?.name || serializedName);
+    const errorName = /^[A-Za-z][A-Za-z0-9]{0,47}$/.test(candidateName)
+        ? candidateName
         : 'Error';
     return Object.freeze({ code, stage, errorName });
 }

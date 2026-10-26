@@ -19,7 +19,7 @@ const MODEL_SPECS = Object.freeze({
 export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProgress = () => {} }) {
     const spec = MODEL_SPECS[manifest?.packageId];
     if (!spec) throw new Error('LOCAL_AI_MODEL_UNSUPPORTED');
-    const runtimeUrl = new URL('runtime/web-llm.js', packageBaseUrl).href;
+    const runtimeUrl = new URL('runtime/web-llm.js?codex-runtime=3', packageBaseUrl).href;
     const { CreateWebWorkerMLCEngine, deleteModelAllInfoInCache } = await import(runtimeUrl);
     const appConfig = {
         cacheBackend:'cache',
@@ -56,7 +56,8 @@ export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProg
         // derivato WebLLM obsoleto o incompleto. La cache applicativa verificata
         // resta intatta; config, tokenizer, tensori e WASM derivati vengono invece
         // eliminati insieme, evitando riparazioni parziali e nuovi stati ibridi.
-        if (String(error?.name || '') !== 'SyntaxError') throw error;
+        const errorText = String(error?.message || error || '');
+        if (String(error?.name || '') !== 'SyntaxError' && !/^SyntaxError\s*:/i.test(errorText)) throw error;
         await deleteModelAllInfoInCache(spec.modelId, appConfig);
         active = await initialize();
     }

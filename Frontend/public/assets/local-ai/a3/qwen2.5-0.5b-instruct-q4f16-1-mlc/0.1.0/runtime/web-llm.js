@@ -3235,7 +3235,12 @@ function isValidSRI(sri) {
 }
 
 const MODEL_PACKAGE_MANIFEST_FILENAME = "mlc-model-manifest.json";
-const TENSOR_CACHE_MANIFEST_FILENAME = "tensor-cache.json";
+// I tre pacchetti MLC fissati dall'app provengono dal formato WebLLM 0.2.x
+// pubblicato con il nome storico `ndarray-cache.json`. Il runtime 0.2.86 usa
+// questo valore anche per costruire la richiesta iniziale del tensor cache.
+// Lasciarlo su `tensor-cache.json` produce un 404 e Cache.add() restituisce
+// soltanto "Request failed", pur con pacchetto integro e gia verificato.
+const TENSOR_CACHE_MANIFEST_FILENAME = "ndarray-cache.json";
 const ARTIFACT_SCHEMA_VERSION = 1;
 function fail(path, message) {
     throw new ArtifactManifestError(`${path}: ${message}`);
@@ -6992,7 +6997,7 @@ fn fragment_clear(@location(0) uv : vec2<f32>) -> @location(0) vec4<f32> {
 		            const options = normalizeCacheAccessOptions(cacheScopeOrOptions, cacheType);
 		            const cacheScope = (_a = options.cacheScope) !== null && _a !== void 0 ? _a : "tvmjs";
 		            const artifactCache = createArtifactCache(cacheScope, options);
-		            const jsonUrl = new URL("tensor-cache.json", tensorCacheUrl).href;
+		            const jsonUrl = new URL(TENSOR_CACHE_MANIFEST_FILENAME, tensorCacheUrl).href;
 		            const hasJsonUrlInCache = yield artifactCache.hasAllKeys([jsonUrl]);
 		            if (!hasJsonUrlInCache) {
 		                return false;
@@ -7011,7 +7016,7 @@ fn fragment_clear(@location(0) uv : vec2<f32>) -> @location(0) vec4<f32> {
 		                // Cross-origin storage extension does not currently support programmatic deletion.
 		                return;
 		            }
-		            const jsonUrl = new URL("tensor-cache.json", cacheUrl).href;
+		            const jsonUrl = new URL(TENSOR_CACHE_MANIFEST_FILENAME, cacheUrl).href;
 		            const list = yield artifactCache.fetchWithCache(jsonUrl, "json");
 		            const arrayentry = list["records"];
 		            const processShard = (i) => __awaiter(this, void 0, void 0, function* () {
@@ -8120,7 +8125,7 @@ fn fragment_clear(@location(0) uv : vec2<f32>) -> @location(0) vec4<f32> {
 		                const cacheScope = (_a = options.cacheScope) !== null && _a !== void 0 ? _a : "tvmjs";
 		                const artifactCache = createArtifactCache(cacheScope, Object.assign(Object.assign({}, options), { cacheType: (_b = options.cacheType) !== null && _b !== void 0 ? _b : cacheType }));
 		                const effectiveSignal = (_c = options.signal) !== null && _c !== void 0 ? _c : signal;
-		                const jsonUrl = new URL("tensor-cache.json", tensorCacheUrl).href;
+		                const jsonUrl = new URL(TENSOR_CACHE_MANIFEST_FILENAME, tensorCacheUrl).href;
 		                const list = yield artifactCache.fetchWithCache(jsonUrl, "json", effectiveSignal);
 		                yield this.fetchTensorCacheInternal(tensorCacheUrl, list["records"], device, artifactCache, effectiveSignal);
 		                this.cacheMetadata = Object.assign(Object.assign({}, this.cacheMetadata), list["metadata"]);

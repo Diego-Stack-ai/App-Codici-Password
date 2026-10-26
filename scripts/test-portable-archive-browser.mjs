@@ -29,7 +29,11 @@ function memorySink() {
 
 async function createArchive(records = [{
     key: 'private-account:::fixture', scope: 'private-account', id: 'fixture', title: '',
-    data: {nomeAccount: 'Account sintetico', utente: 'utente-sintetico', campoFuturo: {valore: 42}}
+    data: {
+        nomeAccount: 'Account sintetico', utente: 'utente-sintetico', account: '000123',
+        type: 'account', isArchived: false, sharingCycle: 1, isExplicitMemo: false,
+        isBanking: false, email: '   ', campoFuturo: {valore: 42}, nuovoWidget: {type: 'text'}
+    }
 }, {
     key: 'company:::azienda-fixture', scope: 'company', id: 'azienda-fixture', title: '',
     data: {ragioneSociale: 'Azienda sintetica'}
@@ -160,8 +164,20 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.getByRole('button', {name: /Account privati 1/}).click();
     await page.getByRole('heading', {name: 'Account sintetico', exact: true}).waitFor();
+    const privateDetail = page.locator('#detail');
+    await privateDetail.getByText('000123', {exact: true}).waitFor();
+    await privateDetail.getByText('text', {exact: true}).waitFor();
+    assert.equal(await privateDetail.getByText('E-mail', {exact: true}).count(), 0);
+    assert.equal(await privateDetail.getByText('Archiviato', {exact: true}).count(), 0);
+    assert.equal(await privateDetail.getByText('Memorandum esplicito', {exact: true}).count(), 0);
+    assert.equal(await privateDetail.getByText('Account bancario', {exact: true}).count(), 0);
     assert.equal(await page.getByText('fixture', {exact: true}).count(), 1);
     assert.equal(await page.getByText('fixture', {exact: true}).isHidden(), true);
+    await privateDetail.locator('details.technical').evaluate(element => { element.open = true; });
+    await privateDetail.getByText('Tipo', {exact: true}).waitFor();
+    await privateDetail.getByText('account', {exact: true}).waitFor();
+    await privateDetail.getByText('Ciclo condivisione', {exact: true}).waitFor();
+    assert.equal(await page.getByText('fixture', {exact: true}).isVisible(), true);
     await page.getByRole('button', {name: /Account aziendali 1/}).click();
     await page.locator('#company-filter').selectOption('azienda-fixture');
     await page.getByRole('heading', {name: 'Portale sintetico', exact: true}).waitFor();
