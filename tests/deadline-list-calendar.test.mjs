@@ -54,7 +54,8 @@ test('list uses calendar boundary for owned and received without merging same id
  assert.ok(f.list.children.every(n=>n.className.includes('deadline-card-upcoming')));
  assert.equal(f.list.children[0].dataset.href,'dettaglio_scadenza.html?id=same');
  assert.equal(f.list.children[1].dataset.href,'dettaglio_scadenza.html?received=same');
- assert.equal(f.list.children[1].children.length,1);assert.equal(f.swipes[0].selector,'.deadline-card-owned');
+ assert.equal(f.list.children[0].children.length,3);assert.equal(f.list.children[1].children.length,1);
+ assert.equal(f.swipes[0].selector,'.deadline-card-owned');
  f.filter('urgent');assert.equal(f.count.textContent,0);
  f.date(new Date(2026,8,27));await f.tick();assert.equal(f.count.textContent,2);
  assert.ok(f.list.children.every(n=>n.className.includes('deadline-card-expired')));assert.equal(f.writes.length,0);
@@ -107,7 +108,7 @@ test('deadline cards expose a chevron that indicates opening the detail',async()
 test('right swipe archives active deadlines and restores archived deadlines',async()=>{
  const f=fixture();f.data.received=[];await f.start();
  const activeSwipe=f.swipes.at(-1).options;
- assert.equal(activeSwipe.canSwipeLeft({dataset:{archived:'false'}}),false);
+ assert.equal(activeSwipe.canSwipeLeft({dataset:{archived:'false'}}),true);
  await activeSwipe.onSwipeRight({dataset:{id:'same',archived:'false'}});
  assert.equal(JSON.stringify(f.writes.at(-1)),JSON.stringify(['update','users/A/scadenze/same',{completed:true,completedAt:{server:true}}]));
  f.filter('completed');
@@ -117,10 +118,14 @@ test('right swipe archives active deadlines and restores archived deadlines',asy
  assert.equal(JSON.stringify(f.writes.at(-1)),JSON.stringify(['update','users/A/scadenze/same',{completed:false,completedAt:null}]));
 });
 
-test('left swipe permanently deletes only archived deadlines after confirmation',async()=>{
- const f=fixture();f.data.received=[];f.data.owned[0].completed=true;await f.start();f.filter('completed');
- const archivedSwipe=f.swipes.at(-1).options;
- await archivedSwipe.onSwipeLeft({dataset:{id:'same',archived:'true'}});
- assert.equal(f.confirmations.length,1);
- assert.deepEqual(f.writes.at(-1),['delete','users/A/scadenze/same']);
+test('left swipe permanently deletes active and archived owned deadlines after confirmation',async()=>{
+ for(const archived of [false,true]){
+  const f=fixture();f.data.received=[];f.data.owned[0].completed=archived;await f.start();
+  if(archived)f.filter('completed');
+  const swipe=f.swipes.at(-1).options;
+  assert.equal(swipe.canSwipeLeft({dataset:{archived:String(archived)}}),true);
+  await swipe.onSwipeLeft({dataset:{id:'same',archived:String(archived)}});
+  assert.equal(f.confirmations.length,1);
+  assert.deepEqual(f.writes.at(-1),['delete','users/A/scadenze/same']);
+ }
 });

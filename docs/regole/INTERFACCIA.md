@@ -25,7 +25,7 @@ Il caso ordinario con dati fiscali, referente, contatti, sede legale e una sede 
 
 ## Lista Scadenze — archivio separato dagli Account — 22/10/2026
 
-Il filtro **Archiviate** raccoglie le Scadenze con `completed: true` e non appartiene all’Archivio Account delle Impostazioni. Nelle viste attive lo scorrimento verso destra archivia la card; in Archiviate lo stesso gesto ripristina la Scadenza. Lo scorrimento verso sinistra è disabilitato per le Scadenze attive ed è disponibile soltanto sulle card archiviate, dove richiede una conferma prima della cancellazione definitiva. Le Scadenze ricevute sono consultabili ma non espongono gesti proprietari.
+Il filtro **Archiviate** raccoglie le Scadenze con `completed: true` e non appartiene all’Archivio Account delle Impostazioni. Nelle viste attive lo scorrimento verso destra archivia la card; in Archiviate lo stesso gesto ripristina la Scadenza. Lo scorrimento verso sinistra espone il cestino sia nelle viste attive sia in **Archiviate** e richiede sempre una conferma prima della cancellazione definitiva. Le Scadenze ricevute sono consultabili ma non espongono gesti proprietari.
 
 ## Form unico delle Scadenze — 22/10/2026
 

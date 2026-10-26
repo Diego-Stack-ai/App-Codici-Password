@@ -3,13 +3,13 @@
 // Lingua: hi — 116 chiavi
 export default {
     "deadline_swipe_archive_restore": "संग्रहित या पुनर्स्थापित करने के लिए दाईं ओर स्वाइप करें",
-    "deadline_swipe_delete_archived": "संग्रहित में हटाने के लिए बाईं ओर स्वाइप करें",
+    "deadline_swipe_delete": "हटाने के लिए बाईं ओर स्वाइप करें",
     "filter_completed": "संग्रहित",
     "deadline_swipe_actions": "समय-सीमा की त्वरित कार्रवाइयाँ",
     "deadline_archive_action": "संग्रहित करें",
     "deadline_restore_action": "पुनर्स्थापित करें",
     "deadline_delete_action": "हटाएँ",
-    "deadline_delete_archived_confirm": "समय-सीमा स्थायी रूप से हटा दी जाएगी। जारी रखें?",
+    "deadline_delete_confirm": "समय-सीमा स्थायी रूप से हटा दी जाएगी। जारी रखें?",
     "deadline_archived_success": "समय-सीमा संग्रहित की गई",
     "deadline_restored_success": "समय-सीमा पुनर्स्थापित की गई",
     "deadline_archive_error": "समय-सीमा संग्रहित नहीं की जा सकी",

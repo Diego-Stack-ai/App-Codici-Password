@@ -131,8 +131,8 @@
     height: calc(85px + env(safe-area-inset-top));
     border-radius: 0;
     /* Effetto storico: vetro più solido al bordo e dissolvenza ampia verso il centro. */
-    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
     border-bottom: 1px solid var(--card-border);
 }
 
@@ -143,8 +143,8 @@
     justify-content: space-between;
     border-radius: 0;
     /* Effetto storico speculare: dissolvenza dal bordo inferiore verso il centro. */
-    mask-image: linear-gradient(to top, black 40%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+    mask-image: linear-gradient(to top, black 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 55%, transparent 100%);
     border-top: 1px solid var(--card-border);
 }
 

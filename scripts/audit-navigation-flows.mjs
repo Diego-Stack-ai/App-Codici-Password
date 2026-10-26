@@ -9,6 +9,7 @@ const homeDeadlineDashboard = await read('Frontend/public/assets/js/modules/home
 const deadlineConfigController = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
 const deadlineFormModel = await read('Frontend/public/assets/js/modules/scadenze/deadline-form-model.js');
 const deadlineSaveService = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
+const deadlineList = await read('Frontend/public/assets/js/modules/scadenze/scadenze.js');
 const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
 const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
 const companyAccountForm = await read('Frontend/public/assets/js/modules/azienda/form_account_azienda.js');
@@ -85,6 +86,14 @@ assert.match(deadlineSaveService, /contentType: 'application\/octet-stream'[\s\S
     'Il servizio Scadenze non conserva il contratto degli allegati cifrati');
 assert.match(deadlineSaveService, /await runTransaction\(db,[\s\S]+transaction\.set\(deadlineRef, deadlineData\)[\s\S]+expiryReference/,
     'Il servizio Scadenze non mantiene atomico il collegamento ai documenti Profilo');
+assert.match(deadlineList, /canSwipeLeft:\s*\(\)\s*=>\s*true/,
+    'La lista Scadenze non abilita la cancellazione sulle card attive e archiviate');
+assert.match(deadlineList, /scadenza\.received\s*\?\s*\[swipeContent\]\s*:\s*\[bgArchive, bgDelete, swipeContent\]/,
+    'Il cestino non viene renderizzato su tutte le Scadenze proprie');
+assert.match(deadlineList, /async function requestDeleteDeadline\(id\)[\s\S]+showConfirmModal\([\s\S]+deadline_delete_confirm/,
+    'La cancellazione dalla lista non mantiene la conferma esplicita');
+assert.doesNotMatch(deadlineList, /if\s*\(!deadline\?\.completed\)/,
+    'La cancellazione dalla lista è ancora limitata alle sole Scadenze archiviate');
 for (const [name, source] of [['privata', privateAccountList], ['aziendale', companyAccountList]]) {
     assert.match(source, /createAccountListView\(\{/,
         `La lista Account ${name} non usa la vista condivisa`);
