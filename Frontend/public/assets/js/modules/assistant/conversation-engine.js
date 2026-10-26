@@ -3,9 +3,10 @@ import { normalizeSearchText } from './search-normalizer.js';
 const STOP_WORDS = new Set([
     'a', 'al', 'alla', 'alle', 'che', 'cerca', 'cercando', 'cerco', 'codex', 'dei', 'del', 'dell', 'della', 'di',
     'fammi', 'gli', 'ho', 'il', 'in', 'la', 'le', 'mi', 'mostra', 'mostrami', 'nell', 'per', 'puoi',
-    'avevo', 'cera', 'come', 'cosa', 'dove', 'ero', 'ma', 'non', 'quando',
+    'avevo', 'breve', 'cera', 'come', 'cosa', 'dimmi', 'dove', 'ero', 'fare', 'ma', 'non', 'pagina', 'quando',
     'quale', 'quali', 'ricordo', 'ricordavo', 'scade', 'scadera',
-    'scadere', 'sicuro', 'solo', 'stavo', 'sto', 'su',
+    'scadere', 'sezione', 'serve', 'sicuro', 'solo', 'sono', 'spiega', 'spiegami', 'stavo', 'sto', 'su',
+    'prossima', 'prossime', 'prossimi', 'prossimo',
     'trovami', 'trova', 'trovare', 'trovo', 'un', 'una', 'uno', 'vorrei'
 ]);
 const OPEN_WORDS = new Set(['apre', 'apri', 'aprimi', 'aprire', 'portami', 'vai', 'visualizza']);

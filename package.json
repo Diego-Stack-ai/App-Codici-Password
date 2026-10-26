@@ -12,7 +12,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.240",
+  "version": "1.2.241",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -113,7 +113,7 @@
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",
     "test:audit-retention-emulators": "node scripts/run-audit-retention-emulators.mjs",
     "test:assistant": "node scripts/test-vault-assistant.mjs && node --test tests/voice-recognition-model.test.mjs tests/speech-synthesis-controller.test.mjs experiments/card-importer/card-parser.test.mjs",
-    "test:assistant-local-ai": "node --test tests/advanced-local-ai-contract.test.mjs tests/incremental-sha256.test.mjs tests/local-ai-catalog-loader.test.mjs tests/local-ai-package-manager.test.mjs tests/local-ai-hosted-artifacts.test.mjs tests/local-ai-selection.test.mjs",
+    "test:assistant-local-ai": "node --test tests/advanced-local-ai-contract.test.mjs tests/incremental-sha256.test.mjs tests/local-ai-assistant-routing.test.mjs tests/local-ai-catalog-loader.test.mjs tests/local-ai-package-manager.test.mjs tests/local-ai-hosted-artifacts.test.mjs tests/local-ai-selection.test.mjs",
     "stage:assistant-local-ai": "node scripts/stage-local-ai-hosting-assets.mjs medium power",
     "audit:assistant-local-ai-stage": "node scripts/audit-local-ai-hosting-stage.mjs qwen2.5-1.5b-instruct-q4f16-1-mlc/0.1.0 smollm2-1.7b-instruct-q4f16-1-mlc/0.1.0",
     "build:assistant-local-ai-catalog": "node scripts/generate-local-ai-hosting-catalog.mjs",
