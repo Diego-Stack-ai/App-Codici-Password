@@ -7,7 +7,8 @@ const {
     contactHasCompanyAssociation, deadlineCompanyContextFromRecord, deadlineDomainNeedsCompany,
     deadlineRecipientDisplayName, deadlineRecipientFields, deadlineRecipientsFromRecord,
     isValidRecipientEmail, mergeContactCompanyAssociation, mergeDeadlineRecipient,
-    normalizeDeadlineCompanyContext, normalizeDeadlineRecipient, normalizeRecipientEmail
+    normalizeDeadlineCompanyContext, normalizeDeadlineRecipient, normalizeRecipientEmail,
+    replaceContactCompanyAssociations, sortDeadlineContacts
 } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
 test('normalizza e valida l’email senza esporre identificatori tecnici', () => {
@@ -92,8 +93,23 @@ test('collega esplicitamente un solo contatto a più aziende senza interpretare 
     contact = mergeContactCompanyAssociation(contact, pax);
     assert.equal(contact.companyAssociations.length, 2);
     assert.equal(contactHasCompanyAssociation(contact, pax), true);
-    assert.equal(deadlineRecipientDisplayName(contact, pax), 'Diego Boschetto · Pax Tibi srl');
+    assert.equal(deadlineRecipientDisplayName(contact, pax), 'Diego Boschetto');
     assert.equal(deadlineRecipientDisplayName({...contact, cognome: 'Boschetto-Pax'}, null), 'Diego Boschetto-Pax');
+});
+
+test('mostra nome ed email senza attribuire l’azienda corrente a tutti i contatti', () => {
+    const bm = normalizeDeadlineCompanyContext({kind: 'company', companyId: 'bm', companyName: 'BM Service'});
+    const linked = mergeContactCompanyAssociation({id: 'linked', nome: 'Diego', email: 'bm@example.it'}, bm);
+    const privateContact = {id: 'private', nome: 'Diego', email: 'privato@example.it'};
+    assert.deepEqual(sortDeadlineContacts([privateContact, linked], bm).map(item => item.id), ['linked', 'private']);
+    assert.equal(deadlineRecipientDisplayName(privateContact, bm), 'Diego');
+});
+
+test('sostituisce esplicitamente i collegamenti senza duplicati o associazioni implicite', () => {
+    const bm = {kind: 'company', companyId: 'bm', companyName: 'BM Service'};
+    const pax = {kind: 'company', companyId: 'pax', companyName: 'Pax Tibi'};
+    const contact = replaceContactCompanyAssociations({id: 'c1', companyAssociations: [bm]}, [pax, pax]);
+    assert.deepEqual(contact.companyAssociations, [pax]);
 });
 
 test('richiede il contesto azienda solo negli ambiti aziendali e legge i record esistenti', () => {

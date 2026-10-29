@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.243 — rubrica destinatari con associazioni esplicite — 29/10/2026
+
+Nel compositore ogni voce della rubrica mostra soltanto **Nome Cognome — e-mail**. Il nome dell’azienda corrente non viene aggiunto all’etichetta e non viene copiato nei destinatari non collegati; quando esiste un contesto aziendale, i contatti realmente associati vengono soltanto ordinati per primi.
+
+La pagina **Gestisci destinatari** espone i collegamenti aziendali come scelte esplicite. L’azienda di provenienza è preselezionata soltanto per un nuovo contatto; modificando un contatto esistente si vedono e si salvano esclusivamente le associazioni reali. La rimozione richiede conferma e non modifica le Scadenze già esistenti. Nessuna migrazione o scrittura automatica sui dati viene eseguita.
+
+L’ordine **«procedi e poi pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Il lavoro separato su AI2, Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali resta escluso.
+
 ## Candidata 1.2.240 — contrasto delle fasce e cancellazione Scadenze — 26/10/2026
 
 Header e footer comuni aumentano di 15 punti percentuali il contrasto della maschera, dal 40% al 55%, mantenendo la dissolvenza verso il contenuto e lo stesso comportamento nei temi chiaro e scuro. La modifica resta centralizzata in `core_fascie.css` e vale per tutte le pagine che usano le fasce condivise.

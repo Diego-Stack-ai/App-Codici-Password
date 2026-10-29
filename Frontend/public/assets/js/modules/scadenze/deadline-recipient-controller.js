@@ -4,7 +4,8 @@ import {
     deadlineRecipientDisplayName,
     mergeDeadlineRecipient,
     normalizeDeadlineCompanyContext,
-    normalizeRecipientEmail
+    normalizeRecipientEmail,
+    sortDeadlineContacts
 } from './deadline-recipient-model.js';
 
 export function createDeadlineRecipientController({ onManageContacts, getCompanyContext, onAssociateContact } = {}) {
@@ -48,10 +49,10 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
         if (!select) return;
         clearElement(select);
         select.appendChild(new Option('Seleziona dalla rubrica…', ''));
-        [...contacts].sort((left, right) => String(left.nome || '').localeCompare(String(right.nome || ''), 'it')).forEach(contact => {
+        sortDeadlineContacts(contacts, getCompanyContext?.()).forEach(contact => {
             const email = normalizeRecipientEmail(contact.email);
             if (!email) return;
-            const label = deadlineRecipientDisplayName(contact, getCompanyContext?.());
+            const label = deadlineRecipientDisplayName(contact);
             select.appendChild(new Option(`${label} — ${email}`, contact.id || `email:${email}`));
         });
     }
@@ -65,10 +66,13 @@ export function createDeadlineRecipientController({ onManageContacts, getCompany
                 contacts = contacts.map(item => item.id === contact.id ? contact : item);
             }
         }
+        const associatedContext = companyContext && contactHasCompanyAssociation(contact, companyContext)
+            ? companyContext
+            : null;
         const result = mergeDeadlineRecipient(recipients, {
-            contactId: contact.id, displayName: deadlineRecipientDisplayName(contact, companyContext),
+            contactId: contact.id, displayName: deadlineRecipientDisplayName(contact),
             email: contact.email, sendEmail: true, sendPush: true, canManage: false,
-            ...(companyContext ? {companyContext} : {})
+            ...(associatedContext ? {companyContext: associatedContext} : {})
         });
         recipients = result.recipients;
         renderRecipients();

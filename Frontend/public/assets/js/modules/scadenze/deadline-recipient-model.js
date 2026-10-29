@@ -45,12 +45,34 @@ export function mergeContactCompanyAssociation(contact = {}, context) {
     return {...contact, companyAssociations: [...contactCompanyAssociations(contact), normalized]};
 }
 
-export function deadlineRecipientDisplayName(contact = {}, context = null) {
+export function replaceContactCompanyAssociations(contact = {}, contexts = []) {
+    const normalized = contexts.reduce((result, context) => {
+        const next = normalizeDeadlineCompanyContext(context);
+        if (!next || contactHasCompanyAssociation({companyAssociations: result}, next)) return result;
+        return [...result, next];
+    }, []);
+    return {...contact, companyAssociations: normalized};
+}
+
+export function deadlineRecipientDisplayName(contact = {}) {
     const person = [contact.nome, contact.cognome].filter(Boolean).join(' ').trim()
         || String(contact.displayName || contact.name || '').trim()
         || normalizeRecipientEmail(contact.email);
+    return person;
+}
+
+export function sortDeadlineContacts(contacts = [], context = null) {
     const normalized = normalizeDeadlineCompanyContext(context);
-    return normalized?.companyName ? `${person} · ${normalized.companyName}` : person;
+    return [...contacts].sort((left, right) => {
+        if (normalized) {
+            const leftRank = contactHasCompanyAssociation(left, normalized) ? 0 : 1;
+            const rightRank = contactHasCompanyAssociation(right, normalized) ? 0 : 1;
+            if (leftRank !== rightRank) return leftRank - rightRank;
+        }
+        const leftLabel = `${deadlineRecipientDisplayName(left)} ${normalizeRecipientEmail(left.email)}`;
+        const rightLabel = `${deadlineRecipientDisplayName(right)} ${normalizeRecipientEmail(right.email)}`;
+        return leftLabel.localeCompare(rightLabel, 'it', {sensitivity: 'base'});
+    });
 }
 
 export function normalizeDeadlineRecipient(recipient = {}, { defaultSendEmail = false } = {}) {

@@ -79,6 +79,10 @@ test('il controller delega la navigazione al salvataggio della bozza', async () 
     assert.match(contacts, /textContent: contact\.active === false \? 'person_off' : 'person_check'/);
     assert.match(editor, /contactsById\.get\(recipient\.contactId\)/);
     assert.match(editor, /companyKind/);
-    assert.match(contacts, /Destinatario già esistente/);
+    assert.match(contacts, /Questa email è già presente/);
     assert.match(contacts, /companyAssociations/);
+    assert.match(contacts, /replaceContactCompanyAssociations/);
+    assert.doesNotMatch(contacts, /mergeContactCompanyAssociation/);
+    assert.match(controller, /sortDeadlineContacts\(contacts, getCompanyContext\?\.\(\)\)/);
+    assert.match(controller, /deadlineRecipientDisplayName\(contact\)/);
 });
