@@ -1,5 +1,11 @@
 # Rilascio
 
+## Candidata 1.2.244 — contrasto del menu Rubrica nelle Scadenze — 29/10/2026
+
+Il menu nativo **Seleziona dalla rubrica** del compositore Scadenze non eredita più il testo bianco del tema scuro quando Chrome o Edge su Windows presentano l'elenco su sfondo bianco. Le singole opzioni e i gruppi ricevono colori espliciti ad alto contrasto; il controllo chiuso conserva invece i colori del tema dell'app. Il contenuto, l'ordine e le associazioni dei destinatari restano invariati.
+
+La correzione è coperta da un test dedicato incluso nel gate di navigazione. Il rilascio resta limitato al solo Firebase Hosting: AI2 in lavorazione, Functions, Rules, indici, migrazioni e dati reali sono esclusi.
+
 ## Candidata 1.2.243 — rubrica destinatari con associazioni esplicite — 29/10/2026
 
 Nel compositore ogni voce della rubrica mostra soltanto **Nome Cognome — e-mail**. Il nome dell’azienda corrente non viene aggiunto all’etichetta e non viene copiato nei destinatari non collegati; quando esiste un contesto aziendale, i contatti realmente associati vengono soltanto ordinati per primi.
