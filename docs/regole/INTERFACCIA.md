@@ -1,5 +1,11 @@
 # Interfaccia
 
+## Rubrica destinatari — identità e collegamenti aziendali espliciti — 29/10/2026
+
+Nel selettore del compositore ogni voce mostra soltanto **Nome Cognome — e-mail**. Il nome dell’azienda corrente non viene aggiunto all’etichetta e quindi non può far apparire tutti i contatti come appartenenti alla stessa azienda; quando esiste un contesto aziendale, i contatti realmente collegati vengono soltanto ordinati per primi.
+
+In **Gestisci destinatari** i collegamenti alle aziende sono visibili come scelte esplicite e modificabili. Nessun collegamento viene creato o sostituito in base alla pagina di provenienza, al nome del contatto o a convenzioni testuali. Lasciare tutte le aziende non selezionate identifica un destinatario privato. La rimozione di un collegamento richiede conferma e non riscrive le Scadenze già salvate.
+
 ## Visualizzatore Archivio portatile — 25/10/2026
 
 La scheda mette in alto soltanto i dati operativi valorizzati: nome Account, utente, password, e-mail, sito, codici, note e gli altri contenuti utili. Negli Account e Memorandum, classificatori e stati interni come `type`, `isArchived`, `sharingCycle`, `isExplicitMemo` e `isBanking` sono raccolti nel pannello richiudibile **Informazioni tecniche**; i valori tecnici predefiniti `false` e `0` non appesantiscono la vista. Il campo operativo `account`, quando contiene un codice o valore dell'utente, resta invece fra i dati principali. CSV, ODS e XLSX rispettano la stessa gerarchia: dati principali all’inizio, altri campi non tecnici al centro e metadati tecnici in fondo. Campi non riconosciuti e futuri non vengono eliminati. Le date sono mostrate in forma leggibile senza esporre `Seconds` e `Nanoseconds`.

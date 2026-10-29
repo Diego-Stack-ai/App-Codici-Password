@@ -1,19 +1,20 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.242';
+import { db, functions } from '../../firebase-config.js?v=1.2.243';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
-import { listContacts } from '../data/vault-repository.js';
+import { listCompanies, listContacts } from '../data/vault-repository.js';
 import {
     contactCompanyAssociations,
-    contactHasCompanyAssociation,
-    mergeContactCompanyAssociation,
-    normalizeDeadlineCompanyContext
+    normalizeDeadlineCompanyContext,
+    replaceContactCompanyAssociations
 } from '../scadenze/deadline-recipient-model.js';
 
 let currentUser = null;
 let contacts = [];
+let companies = [];
 let editingId = '';
 let requestedCompanyContext = null;
+let associationCatalog = [];
 const ALLOWED_RETURN_PAGES = new Set([
     'aggiungi_scadenza.html',
     'form_account_azienda.html',
@@ -35,6 +36,64 @@ function validEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+function companyName(company = {}) {
+    return String(company.ragioneSociale || company.denominazione || company.nome || '').trim();
+}
+
+function associationKey(context) {
+    const normalized = normalizeDeadlineCompanyContext(context);
+    if (!normalized) return '';
+    return normalized.kind === 'company'
+        ? `company:${normalized.companyId}`
+        : `external:${normalized.companyName.toLocaleLowerCase('it')}`;
+}
+
+function buildAssociationCatalog() {
+    const available = [
+        ...companies.map(company => normalizeDeadlineCompanyContext({
+            kind: 'company', companyId: company.id, companyName: companyName(company)
+        })),
+        ...contacts.flatMap(contactCompanyAssociations),
+        requestedCompanyContext
+    ].filter(Boolean);
+    const unique = new Map();
+    available.forEach(context => unique.set(associationKey(context), context));
+    associationCatalog = [...unique.values()].sort((left, right) => left.companyName.localeCompare(right.companyName, 'it', {sensitivity: 'base'}));
+}
+
+function renderCompanyOptions(selected = []) {
+    const container = document.getElementById('recipient-company-options');
+    if (!container) return;
+    buildAssociationCatalog();
+    clearElement(container);
+    const selectedKeys = new Set(selected.map(associationKey));
+    if (!associationCatalog.length) {
+        container.appendChild(createElement('p', {
+            className: 'recipient-company-empty',
+            textContent: 'Nessuna azienda disponibile. Il destinatario resterà privato.'
+        }));
+        return;
+    }
+    associationCatalog.forEach(context => {
+        const key = associationKey(context);
+        container.appendChild(createElement('label', {className: 'recipient-company-option'}, [
+            createElement('input', {
+                type: 'checkbox',
+                value: key,
+                checked: selectedKeys.has(key),
+                dataset: {associationKey: key}
+            }),
+            document.createTextNode(context.companyName)
+        ]));
+    });
+}
+
+function selectedCompanyAssociations() {
+    const selected = new Set([...document.querySelectorAll('#recipient-company-options input[data-association-key]:checked')]
+        .map(input => input.dataset.associationKey));
+    return associationCatalog.filter(context => selected.has(associationKey(context)));
+}
+
 function resetForm() {
     editingId = '';
     document.getElementById('recipient-first-name').value = '';
@@ -43,6 +102,7 @@ function resetForm() {
     document.getElementById('recipient-form-title').textContent = 'Nuovo destinatario';
     document.getElementById('recipient-save').textContent = 'Salva destinatario';
     document.getElementById('recipient-cancel').classList.add('hidden');
+    renderCompanyOptions(requestedCompanyContext ? [requestedCompanyContext] : []);
 }
 
 function editContact(contact) {
@@ -50,6 +110,7 @@ function editContact(contact) {
     document.getElementById('recipient-first-name').value = contact.nome || '';
     document.getElementById('recipient-last-name').value = contact.cognome || '';
     document.getElementById('recipient-email').value = contact.email || '';
+    renderCompanyOptions(contactCompanyAssociations(contact));
     document.getElementById('recipient-form-title').textContent = 'Modifica destinatario';
     document.getElementById('recipient-save').textContent = 'Aggiorna destinatario';
     document.getElementById('recipient-cancel').classList.remove('hidden');
@@ -103,8 +164,8 @@ function renderContacts() {
             createElement('span', { className: 'recipient-card-email', textContent: contact.email }),
             ...(contactCompanyAssociations(contact).length ? [createElement('span', {
                 className: 'recipient-card-associations',
-                textContent: `Collegato a: ${contactCompanyAssociations(contact).map(item => item.companyName).join(', ')}`
-            })] : []),
+                textContent: `Aziende: ${contactCompanyAssociations(contact).map(item => item.companyName).join(', ')}`
+            })] : [createElement('span', {className: 'recipient-card-associations'}, [document.createTextNode('Privato')])]),
             ...(contact.active === false ? [createElement('span', { className: 'recipient-card-status', textContent: 'Disattivato' })] : [])
         ]),
         createElement('div', { className: 'recipient-card-actions' }, [
@@ -128,6 +189,14 @@ async function loadContacts() {
     renderContacts();
 }
 
+async function loadCompanies() {
+    try {
+        companies = (await listCompanies(currentUser.uid)).filter(company => company.id && companyName(company));
+    } catch {
+        companies = [];
+    }
+}
+
 async function saveContact() {
     const nome = document.getElementById('recipient-first-name').value.trim();
     const cognome = document.getElementById('recipient-last-name').value.trim();
@@ -136,32 +205,29 @@ async function saveContact() {
     if (!validEmail(email)) return showToast('Inserisci un indirizzo email valido.', 'warning');
     const duplicate = contacts.find(contact => contact.id !== editingId && normalizeEmail(contact.email) === email);
     if (duplicate) {
-        if (!requestedCompanyContext || contactHasCompanyAssociation(duplicate, requestedCompanyContext)) {
-            return showToast('Questa email è già presente nella rubrica.', 'warning');
-        }
-        const confirmed = await showConfirmModal(
-            'Destinatario già esistente',
-            `${email} è già presente. Vuoi collegarlo anche a “${requestedCompanyContext.companyName}”?`,
-            'Collega',
-            'Annulla'
-        );
-        if (!confirmed) return;
-        const linked = mergeContactCompanyAssociation(duplicate, requestedCompanyContext);
-        await updateDoc(doc(db, 'users', currentUser.uid, 'contacts', duplicate.id), {
-            companyAssociations: linked.companyAssociations,
-            updatedAt: serverTimestamp()
-        });
-        showToast(`Destinatario collegato a ${requestedCompanyContext.companyName}.`, 'success');
-        resetForm();
-        await loadContacts();
+        editContact(duplicate);
+        showToast('Questa email è già presente. Ho aperto il destinatario esistente: scegli qui i collegamenti corretti.', 'warning');
         return;
     }
     const existing = contacts.find(contact => contact.id === editingId);
-    const linked = mergeContactCompanyAssociation(existing || {}, requestedCompanyContext);
+    const selectedAssociations = selectedCompanyAssociations();
+    const previousAssociations = contactCompanyAssociations(existing || {});
+    const selectedKeys = new Set(selectedAssociations.map(associationKey));
+    const removed = previousAssociations.filter(context => !selectedKeys.has(associationKey(context)));
+    if (removed.length) {
+        const confirmed = await showConfirmModal(
+            'Rimuovi collegamenti aziendali',
+            `Vuoi rimuovere il collegamento a ${removed.map(item => item.companyName).join(', ')}? Le Scadenze già salvate non verranno modificate.`,
+            'Rimuovi collegamento',
+            'Annulla'
+        );
+        if (!confirmed) return;
+    }
+    const scoped = replaceContactCompanyAssociations(existing || {}, selectedAssociations);
     const data = {
         nome, cognome, email, emailNormalized: email,
         active: existing?.active !== false,
-        companyAssociations: linked.companyAssociations || [],
+        companyAssociations: scoped.companyAssociations,
         updatedAt: serverTimestamp()
     };
     if (editingId) await updateDoc(doc(db, 'users', currentUser.uid, 'contacts', editingId), data);
@@ -192,5 +258,6 @@ export async function initGestioneDestinatari(user) {
     }
     document.getElementById('recipient-save')?.addEventListener('click', () => saveContact().catch(error => showToast(error.message, 'error')));
     document.getElementById('recipient-cancel')?.addEventListener('click', resetForm);
-    await loadContacts();
+    await Promise.all([loadCompanies(), loadContacts()]);
+    resetForm();
 }

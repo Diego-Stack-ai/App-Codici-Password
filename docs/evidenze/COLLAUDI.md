@@ -1,5 +1,12 @@
 # Collaudi
 
+## 29/10/2026 — rubrica destinatari e contesti aziendali
+
+- Test mirati sul modello verificano etichetta compatta **Nome Cognome — e-mail**, ordinamento dei soli contatti realmente associati, sostituzione esplicita delle associazioni e deduplica per email.
+- I controlli statici verificano che il gestore non usi più l’associazione automatica e che il compositore non aggiunga il nome dell’azienda all’etichetta del contatto.
+- La rimozione di un collegamento richiede conferma e non modifica le Scadenze già salvate. Nessuna migrazione e nessuna scrittura su dati reali sono incluse nel collaudo.
+- Verifica candidata `1.2.243` completata: **15/15** test mirati, controllo versione su **267** riferimenti, build offline e dipendenze senza cicli, controlli documentali **11/11**, suite Functions **468** verdi con **9** esclusioni previste e intera sequenza emulatori Firebase conclusa senza errori.
+
 ## 25/10/2026 — consultazione completa e XLSX dell'Archivio portatile
 
 - Test puri Portable Archive verdi **17/17**: separazione campi tecnici, timestamp leggibili, proiezioni future-safe e pacchetto XLSX OOXML nativo con fogli, filtri, colonne e celle testuali. Apertura indipendente con openpyxl 3.1.5 riuscita: fogli e filtro leggibili, codice sintetico `00123` conservato come stringa con formato testo.
