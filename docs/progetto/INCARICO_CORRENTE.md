@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Destinatari aziendali e nuova Regola dal compositore Scadenze — 29/10/2026
+
+Diego autorizza con **«procediamo con queste due modifiche, e poi pubblichiamo»** l’aggiornamento del compositore Scadenze e il successivo rilascio del solo Firebase Hosting. Il contesto aziendale del destinatario deve essere scelto esplicitamente: non viene ricavato da trattini, etichette o nomi. Un’unica email può restare associata allo stesso contatto e a più aziende senza creare duplicati; se il contatto esiste già, l’app propone il collegamento all’azienda selezionata oppure l’uso limitato alla sola Scadenza.
+
+Accanto al selettore **Regola** viene aggiunto il comando **Nuova regola**. Il passaggio conserva la bozza, apre l’ambito corretto delle Regole scadenze e, dopo la creazione, ritorna al compositore selezionando la nuova regola. Il progetto AI2 è esplicitamente escluso da questo rilascio: resta sospeso e separato per successivi aggiornamenti. Sono esclusi anche Functions, Firestore Rules, Storage Rules, indici, migrazioni e modifiche ai dati reali.
+
 ## Autorizzazione al rilascio completo della candidata 1.2.240 — 26/10/2026
 
 L'ordine umano **«Pubblica ed aggiorna GitHub»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting per il contrasto comune di header/footer e il cestino nelle liste Scadenze attive e archiviate. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.

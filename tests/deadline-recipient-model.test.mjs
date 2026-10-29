@@ -4,8 +4,10 @@ import {readFile} from 'node:fs/promises';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js', import.meta.url), 'utf8');
 const {
-    deadlineRecipientFields, deadlineRecipientsFromRecord, isValidRecipientEmail,
-    mergeDeadlineRecipient, normalizeDeadlineRecipient, normalizeRecipientEmail
+    contactHasCompanyAssociation, deadlineCompanyContextFromRecord, deadlineDomainNeedsCompany,
+    deadlineRecipientDisplayName, deadlineRecipientFields, deadlineRecipientsFromRecord,
+    isValidRecipientEmail, mergeContactCompanyAssociation, mergeDeadlineRecipient,
+    normalizeDeadlineCompanyContext, normalizeDeadlineRecipient, normalizeRecipientEmail
 } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
 test('normalizza e valida l’email senza esporre identificatori tecnici', () => {
@@ -79,4 +81,27 @@ test('scrive i campi email retrocompatibili senza perdere Push only', () => {
 test('normalizza il permesso di gestione senza abilitarlo implicitamente', () => {
     assert.equal(normalizeDeadlineRecipient({email: 'view@example.it'}).canManage, false);
     assert.equal(normalizeDeadlineRecipient({email: 'manage@example.it', canManage: true}).canManage, true);
+});
+
+test('collega esplicitamente un solo contatto a più aziende senza interpretare etichette', () => {
+    const pax = normalizeDeadlineCompanyContext({kind: 'company', companyId: 'pax', companyName: 'Pax Tibi srl'});
+    const external = normalizeDeadlineCompanyContext({kind: 'external', companyName: 'Fornitore esterno'});
+    let contact = {id: 'c1', nome: 'Diego', cognome: 'Boschetto', email: 'diego@example.it'};
+    contact = mergeContactCompanyAssociation(contact, pax);
+    contact = mergeContactCompanyAssociation(contact, external);
+    contact = mergeContactCompanyAssociation(contact, pax);
+    assert.equal(contact.companyAssociations.length, 2);
+    assert.equal(contactHasCompanyAssociation(contact, pax), true);
+    assert.equal(deadlineRecipientDisplayName(contact, pax), 'Diego Boschetto · Pax Tibi srl');
+    assert.equal(deadlineRecipientDisplayName({...contact, cognome: 'Boschetto-Pax'}, null), 'Diego Boschetto-Pax');
+});
+
+test('richiede il contesto azienda solo negli ambiti aziendali e legge i record esistenti', () => {
+    assert.equal(deadlineDomainNeedsCompany('company'), true);
+    assert.equal(deadlineDomainNeedsCompany('user-company'), true);
+    assert.equal(deadlineDomainNeedsCompany('vehicles'), false);
+    assert.deepEqual(deadlineCompanyContextFromRecord({
+        companyContextKind: 'company', companyId: 'a1', companyName: 'Azienda Uno'
+    }), {kind: 'company', companyId: 'a1', companyName: 'Azienda Uno'});
+    assert.equal(normalizeDeadlineCompanyContext({kind: 'company', companyName: 'Manca id'}), null);
 });

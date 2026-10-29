@@ -52,6 +52,9 @@ test('the deadline hub loads profile documents and keeps keyboard navigation acc
   assert.doesNotMatch(source, /profile_deadline_card_open_previous|pilotDeadlineReference\?\.deadlineId/);
   assert.match(source, /settings', sourceId\), \{deadlineTypes: nextRules\}/);
   assert.match(source, /deadline_domain_rule_linked_blocked/);
+  assert.match(source, /DEADLINE_EDITOR_RETURN_DRAFT_KEY/);
+  assert.match(source, /prepareDeadlineEditorReturn/);
+  assert.match(source, /requestedDomain/);
 });
 
 test('personal document summary has loading, empty, error and responsive card states', async () => {

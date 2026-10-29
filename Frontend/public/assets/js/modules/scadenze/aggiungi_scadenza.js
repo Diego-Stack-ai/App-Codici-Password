@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.241';
+import { auth } from '../../firebase-config.js?v=1.2.242';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
@@ -16,15 +16,19 @@ import { getCurrentLanguage, t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { normalizeExternalUrl } from '../shared/attachment-security.js';
 import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
-import { deadlineRecipientsFromRecord, normalizeRecipientEmail } from './deadline-recipient-model.js';
+import {
+    deadlineCompanyContextFromRecord,
+    deadlineDomainNeedsCompany,
+    deadlineRecipientsFromRecord,
+    normalizeDeadlineCompanyContext,
+    normalizeRecipientEmail
+} from './deadline-recipient-model.js';
 import {
     deadlineDateDisplay,
     deadlineDateForSave,
     deadlineDateInputFields,
     profileDocumentDeadlineMessage
 } from './deadline-model.js';
-import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
-import { createDeadlineRecipientController } from './deadline-recipient-controller.js';
 import {
     DEADLINE_EDITOR_RETURN_DRAFT_KEY,
     consumeDeadlineEditorReturnDraft,
@@ -45,8 +49,8 @@ const typeSelect = document.getElementById('tipo_scadenza');
 let currentUser = null;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
-const attachmentController = createDeadlineAttachmentController();
-const recipientController = createDeadlineRecipientController({ onManageContacts: openRecipientManager });
+let attachmentController = null;
+let recipientController = null;
 let profileDocumentLinkDraft = null;
 let accountDeadlineLinkDraft = null;
 let linkedSourceRef = null;
@@ -54,6 +58,8 @@ let profileDocumentEditorData = null;
 let deadlineRuleCatalog = [];
 let currentDeadlineRule = null;
 let currentDeadlineParameter = null;
+let deadlineCompanyController = null;
+let deadlineCompanyControllerPromise = null;
 
 const PROFILE_DEADLINE_DRAFT_KEY = 'profile-deadline-link-draft';
 const ACCOUNT_DEADLINE_DRAFT_KEY = 'account-deadline-link-draft';
@@ -78,6 +84,44 @@ function normalizeComparable(value) {
 
 function valuesMatch(left, right) {
     return normalizeComparable(left) === normalizeComparable(right);
+}
+
+function selectedDeadlineCompanyContext() {
+    return deadlineCompanyController?.getSelected() || null;
+}
+
+async function ensureDeadlineCompanyController(preferred = null) {
+    if (!deadlineCompanyControllerPromise) {
+        deadlineCompanyControllerPromise = import('./deadline-company-context-controller.js').then(({createDeadlineCompanyContextController}) => {
+            deadlineCompanyController = createDeadlineCompanyContextController({
+                getCurrentUser: () => currentUser,
+                getCurrentDomain: () => currentDeadlineRule?.domain || document.getElementById('deadline-domain-select')?.value,
+                recipientController,
+                showConfirmModal,
+                showToast,
+                t
+            });
+            deadlineCompanyController.bind();
+            return deadlineCompanyController;
+        });
+    }
+    const controller = await deadlineCompanyControllerPromise;
+    if (preferred || !controller.isLoaded()) await controller.refresh(preferred);
+    return controller;
+}
+
+function updateDeadlineCompanyContextUi() {
+    const needed = deadlineDomainNeedsCompany(currentDeadlineRule?.domain
+        || document.getElementById('deadline-domain-select')?.value);
+    if (!needed) return deadlineCompanyController?.updateUi();
+    ensureDeadlineCompanyController().then(controller => controller.updateUi()).catch(error => {
+        console.error('Company context load failed', error);
+        showToast('Impossibile caricare l’elenco aziende.', 'error');
+    });
+}
+
+async function associateContactWithCompany(contact, context) {
+    return (await ensureDeadlineCompanyController()).associateContact(contact, context);
 }
 
 async function loadDeadlineFormCatalog(user) {
@@ -246,9 +290,11 @@ function renderDeadlineRules(preferred = {}) {
     if (!currentDeadlineRule) {
         clearDeadlineRuleState({clearRules: !rules.length});
         document.getElementById('deadline-rule-fields')?.classList.toggle('hidden', !selectedDomain || personalGuidance || noRules);
+        updateDeadlineCompanyContextUi();
         return;
     }
     renderDeadlineParameters(preferred, {selectFirst: isProfileDocumentEditor()});
+    updateDeadlineCompanyContextUi();
 }
 
 function selectDeadlineRule(preferred = {}) {
@@ -291,16 +337,19 @@ function initDeadlineRuleSelector() {
             return;
         }
         renderDeadlineParameters();
+        updateDeadlineCompanyContextUi();
     });
     document.getElementById('deadline-parameter-select')?.addEventListener('change', event => {
         currentDeadlineParameter = currentDeadlineRule?.parameters.find(parameter => parameter.id === event.currentTarget.value) || null;
         applyDeadlineRuleValues();
     });
+    document.getElementById('btn-add-deadline-rule')?.addEventListener('click', () => openDeadlineRuleManager());
     renderDeadlineRules();
 }
 
 function deadlineEditorFieldValues() {
     const dateInput = document.getElementById('dueDate');
+    const companyContext = selectedDeadlineCompanyContext();
     return {
         name: document.getElementById('nome_cognome')?.value,
         type: typeSelect?.value,
@@ -314,6 +363,9 @@ function deadlineEditorFieldValues() {
             : document.getElementById('testo_email_select')?.value,
         notice: document.getElementById('notif_days_before')?.value,
         frequency: document.getElementById('notif_frequency')?.value,
+        companyContextKind: companyContext?.kind,
+        companyId: companyContext?.companyId,
+        companyName: companyContext?.companyName,
         ...deadlineRuleLinkFields(currentDeadlineRule, currentDeadlineParameter)
     };
 }
@@ -404,7 +456,44 @@ async function openRecipientManager(returnTo) {
     } catch {
         return showToast(t('deadline_draft_preserve_error'), 'error');
     }
-    window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
+    const companyContext = selectedDeadlineCompanyContext();
+    const params = new URLSearchParams({return: returnTo});
+    if (companyContext) {
+        params.set('companyKind', companyContext.kind);
+        params.set('companyId', companyContext.companyId);
+        params.set('companyName', companyContext.companyName);
+    }
+    window.location.href = `gestione_destinatari.html?${params.toString()}`;
+}
+
+async function openDeadlineRuleManager() {
+    if (isProfileDocumentEditor()) return;
+    if (attachmentController.getSelectedFiles().length) {
+        const confirmed = await showConfirmModal(
+            'Nuova regola',
+            'Gli allegati selezionati non possono essere conservati durante il passaggio alle Regole. Continuare senza allegati?',
+            'Continua',
+            'Annulla'
+        );
+        if (!confirmed) return;
+    }
+    const returnTo = deadlineEditorReturnTarget(window.location);
+    const draft = createDeadlineEditorReturnDraft({
+        ownerUid: currentUser?.uid,
+        returnTarget: returnTo,
+        mode: currentMode,
+        fields: deadlineEditorFieldValues(),
+        recipients: recipientController.getRecipients()
+    });
+    if (!draft) return showToast(t('deadline_draft_preserve_error'), 'error');
+    try {
+        sessionStorage.setItem(DEADLINE_EDITOR_RETURN_DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+        return showToast(t('deadline_draft_preserve_error'), 'error');
+    }
+    const domain = document.getElementById('deadline-domain-select')?.value || 'contracts';
+    const params = new URLSearchParams({return: returnTo, domain});
+    window.location.href = `regole_scadenze.html?${params.toString()}`;
 }
 
 function restoreDeadlineEditorAfterRecipientManagement() {
@@ -416,6 +505,14 @@ function restoreDeadlineEditorAfterRecipientManagement() {
     setMode(draft.mode);
     const fields = draft.fields || {};
     selectDeadlineRule(fields);
+    const restoredCompany = normalizeDeadlineCompanyContext({
+        kind: fields.companyContextKind,
+        companyId: fields.companyId,
+        companyName: fields.companyName
+    });
+    if (restoredCompany) ensureDeadlineCompanyController(restoredCompany).catch(error => {
+        console.error('Company context restore failed', error);
+    });
     const nameInput = document.getElementById('nome_cognome');
     if (nameInput) nameInput.value = fields.name || '';
     if (typeSelect && fields.type) selectValuePreservingCustomOption(typeSelect, fields.type);
@@ -501,6 +598,19 @@ export async function initAggiungiScadenza(user) {
     deadlineRuleCatalog = [];
     currentDeadlineRule = null;
     currentDeadlineParameter = null;
+
+    if (!attachmentController || !recipientController) {
+        const [{createDeadlineAttachmentController}, {createDeadlineRecipientController}] = await Promise.all([
+            import('./deadline-attachment-controller.js'),
+            import('./deadline-recipient-controller.js')
+        ]);
+        attachmentController = createDeadlineAttachmentController();
+        recipientController = createDeadlineRecipientController({
+            onManageContacts: openRecipientManager,
+            getCompanyContext: selectedDeadlineCompanyContext,
+            onAssociateContact: associateContactWithCompany
+        });
+    }
 
     editingScadenzaId = new URLSearchParams(window.location.search).get('id');
     const profileDocumentId = new URLSearchParams(window.location.search).get('profileDocumentId');
@@ -740,9 +850,15 @@ function setupSaveLogic() {
         const type = currentDeadlineRule?.name || typeSelect.value;
         const dateInput = document.getElementById('dueDate');
         const date = deadlineDateForSave(profileDocumentLinkDraft, dateInput.dataset.isoValue, dateInput.value);
+        const companyContext = deadlineDomainNeedsCompany(currentDeadlineRule?.domain)
+            ? (await ensureDeadlineCompanyController()).getSelected()
+            : null;
 
         if (!name || !currentDeadlineRule || !currentDeadlineParameter || !date) {
             return showToast(t('deadline_form_required'), "error");
+        }
+        if (deadlineDomainNeedsCompany(currentDeadlineRule.domain) && !companyContext) {
+            return showToast('Seleziona l’azienda collegata oppure indica un’azienda esterna.', 'error');
         }
 
         const rawReferenceUrl = document.getElementById('deadline_url')?.value.trim() || '';
@@ -792,6 +908,12 @@ function setupSaveLogic() {
                     notifChannel: 'multichannel',
                     notif_days_before: Number(currentDeadlineRule.period),
                     notif_frequency: Number(currentDeadlineRule.frequency),
+                    ...(companyContext ? {
+                        companyContext,
+                        companyContextKind: companyContext.kind,
+                        companyId: companyContext.companyId,
+                        companyName: companyContext.companyName
+                    } : {}),
                     ...deadlineRuleLinkFields(currentDeadlineRule, currentDeadlineParameter)
                 },
                 recipients: recipientController.getRecipients(),
@@ -864,6 +986,8 @@ async function loadScadenzaForEdit(id) {
 
         // 2. Imposta il Mode (popola i select nativi)
         setMode(foundMode);
+        const storedCompanyContext = deadlineCompanyContextFromRecord(data);
+        if (storedCompanyContext) await ensureDeadlineCompanyController(storedCompanyContext);
 
         // 3. Riempi i campi base e i menu a tendina
         document.getElementById('nome_cognome').value = data.name || '';
@@ -904,7 +1028,7 @@ async function loadScadenzaForEdit(id) {
             document.getElementById('linked-document-date-help')?.classList.remove('hidden');
             let sourceDraft = null;
             try {
-                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.241');
+                const {loadLinkedDocumentDeadlineDraft} = await import('../privato/profile-document-deadline-link.js?v=1.2.242');
                 sourceDraft = await loadLinkedDocumentDeadlineDraft(currentUser.uid, linkedSourceRef.id);
             } catch (error) {
                 console.warn('[TRACE] Documento sorgente non disponibile per il riepilogo:', error?.message || error);

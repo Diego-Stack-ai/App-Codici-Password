@@ -18,10 +18,15 @@ const opaqueLocalAiRuntimeFiles = new Set([
   'transformers.bundle.js',
   'web-llm.js'
 ]);
+const isOpaqueLocalAiRuntime = file =>
+  [
+    `${path.sep}assets${path.sep}local-ai${path.sep}`,
+    `${path.sep}assets${path.sep}local-ai-packages${path.sep}`
+  ].some(directory => file.includes(directory)) && opaqueLocalAiRuntimeFiles.has(path.basename(file));
 const files = walk(publicRoot).filter(file =>
   !file.includes('ui-preview') &&
   !file.includes(`${path.sep}vendor${path.sep}`) &&
-  !(file.includes(`${path.sep}assets${path.sep}local-ai${path.sep}`) && opaqueLocalAiRuntimeFiles.has(path.basename(file)))
+  !isOpaqueLocalAiRuntime(file)
 );
 const cssFiles = files.filter(file => file.endsWith('.css'));
 const markupFiles = files.filter(file => /\.(?:html|js)$/.test(file));
