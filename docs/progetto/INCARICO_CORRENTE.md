@@ -1,5 +1,9 @@
 # Incarico corrente
 
+## Contrasto della rubrica nel compositore Scadenze — 29/10/2026
+
+Diego segnala che **Seleziona dalla rubrica** apre un elenco bianco con voci anch'esse bianche, leggibili soltanto durante il passaggio del mouse. La correzione deve riguardare esclusivamente il contrasto delle opzioni native su Chrome ed Edge, senza cambiare contenuto, ordine, associazioni o dati dei destinatari. Il lavoro AI2 presente nella cartella principale resta separato e non deve entrare nel rilascio.
+
 ## Destinatari aziendali e nuova Regola dal compositore Scadenze — 29/10/2026
 
 Diego autorizza con **«procediamo con queste due modifiche, e poi pubblichiamo»** l’aggiornamento del compositore Scadenze e il successivo rilascio del solo Firebase Hosting. Il contesto aziendale del destinatario deve essere scelto esplicitamente: non viene ricavato da trattini, etichette o nomi. Un’unica email può restare associata allo stesso contatto e a più aziende senza creare duplicati; se il contatto esiste già, l’app propone il collegamento all’azienda selezionata oppure l’uso limitato alla sola Scadenza.

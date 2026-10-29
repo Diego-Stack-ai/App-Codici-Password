@@ -1052,6 +1052,17 @@
 }
 .deadline-recipient-add-row{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:8px;align-items:center}.deadline-contact-select{box-sizing:border-box;width:100%;min-width:0;height:44px;padding:0 12px;color:var(--text-primary)}.deadline-recipients-list{display:grid;gap:10px}.deadline-recipient-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:12px;border:1px solid rgba(148,163,184,.25);border-radius:14px;background:rgba(255,255,255,.06)}.deadline-recipient-card.is-paused{opacity:.66}.deadline-recipient-name,.deadline-recipient-email{display:block;overflow-wrap:anywhere}.deadline-recipient-name{font-weight:800}.deadline-recipient-email{margin-top:3px;font:var(--font-caption);opacity:.68}.deadline-recipient-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.deadline-channel-label{display:inline-flex;align-items:center;gap:5px;min-height:var(--touch-target-min,44px);font:var(--font-caption);font-weight:800}.deadline-channel-label input{accent-color:#4f7cff}.deadline-recipient-remove{display:grid;place-items:center;width:var(--touch-target-min,44px);height:var(--touch-target-min,44px);border:0;border-radius:9px;background:rgba(239,68,68,.12);color:#ef4444;cursor:pointer}.deadline-recipient-remove .material-symbols-outlined{font-size:18px}.deadline-recipient-help{margin:0;font:var(--font-caption);line-height:1.45;opacity:.55}@media(max-width:430px){.deadline-recipient-card{grid-template-columns:1fr}.deadline-recipient-controls{justify-content:flex-start}}
 
+/*
+ * Il popup nativo di Chrome/Edge su Windows puo mantenere uno sfondo chiaro
+ * anche quando la pagina usa color-scheme: dark. Le option non devono quindi
+ * ereditare il testo bianco del controllo chiuso.
+ */
+select.deadline-contact-select option,
+select.deadline-contact-select optgroup {
+    background-color: #fff;
+    color: #172033;
+}
+
 .deadline-automation-note {
     margin-top: 6px;
     color: var(--text-secondary);
