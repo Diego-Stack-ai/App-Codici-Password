@@ -1,12 +1,19 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.241';
+import { db, functions } from '../../firebase-config.js?v=1.2.242';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { listContacts } from '../data/vault-repository.js';
+import {
+    contactCompanyAssociations,
+    contactHasCompanyAssociation,
+    mergeContactCompanyAssociation,
+    normalizeDeadlineCompanyContext
+} from '../scadenze/deadline-recipient-model.js';
 
 let currentUser = null;
 let contacts = [];
 let editingId = '';
+let requestedCompanyContext = null;
 const ALLOWED_RETURN_PAGES = new Set([
     'aggiungi_scadenza.html',
     'form_account_azienda.html',
@@ -94,6 +101,10 @@ function renderContacts() {
         createElement('div', { className: 'recipient-card-copy' }, [
             createElement('span', { className: 'recipient-card-name', textContent: [contact.nome, contact.cognome].filter(Boolean).join(' ') || 'Destinatario' }),
             createElement('span', { className: 'recipient-card-email', textContent: contact.email }),
+            ...(contactCompanyAssociations(contact).length ? [createElement('span', {
+                className: 'recipient-card-associations',
+                textContent: `Collegato a: ${contactCompanyAssociations(contact).map(item => item.companyName).join(', ')}`
+            })] : []),
             ...(contact.active === false ? [createElement('span', { className: 'recipient-card-status', textContent: 'Disattivato' })] : [])
         ]),
         createElement('div', { className: 'recipient-card-actions' }, [
@@ -123,11 +134,36 @@ async function saveContact() {
     const email = normalizeEmail(document.getElementById('recipient-email').value);
     if (!nome) return showToast('Inserisci il nome o una descrizione.', 'warning');
     if (!validEmail(email)) return showToast('Inserisci un indirizzo email valido.', 'warning');
-    if (contacts.some(contact => contact.id !== editingId && normalizeEmail(contact.email) === email)) {
-        return showToast('Questa email è già presente nella rubrica.', 'warning');
+    const duplicate = contacts.find(contact => contact.id !== editingId && normalizeEmail(contact.email) === email);
+    if (duplicate) {
+        if (!requestedCompanyContext || contactHasCompanyAssociation(duplicate, requestedCompanyContext)) {
+            return showToast('Questa email è già presente nella rubrica.', 'warning');
+        }
+        const confirmed = await showConfirmModal(
+            'Destinatario già esistente',
+            `${email} è già presente. Vuoi collegarlo anche a “${requestedCompanyContext.companyName}”?`,
+            'Collega',
+            'Annulla'
+        );
+        if (!confirmed) return;
+        const linked = mergeContactCompanyAssociation(duplicate, requestedCompanyContext);
+        await updateDoc(doc(db, 'users', currentUser.uid, 'contacts', duplicate.id), {
+            companyAssociations: linked.companyAssociations,
+            updatedAt: serverTimestamp()
+        });
+        showToast(`Destinatario collegato a ${requestedCompanyContext.companyName}.`, 'success');
+        resetForm();
+        await loadContacts();
+        return;
     }
     const existing = contacts.find(contact => contact.id === editingId);
-    const data = { nome, cognome, email, emailNormalized: email, active: existing?.active !== false, updatedAt: serverTimestamp() };
+    const linked = mergeContactCompanyAssociation(existing || {}, requestedCompanyContext);
+    const data = {
+        nome, cognome, email, emailNormalized: email,
+        active: existing?.active !== false,
+        companyAssociations: linked.companyAssociations || [],
+        updatedAt: serverTimestamp()
+    };
     if (editingId) await updateDoc(doc(db, 'users', currentUser.uid, 'contacts', editingId), data);
     else await addDoc(collection(db, 'users', currentUser.uid, 'contacts'), { ...data, createdAt: serverTimestamp() });
     showToast(editingId ? 'Destinatario aggiornato.' : 'Destinatario salvato.', 'success');
@@ -137,7 +173,18 @@ async function saveContact() {
 
 export async function initGestioneDestinatari(user) {
     currentUser = user;
-    const returnTarget = safeReturnTarget(new URLSearchParams(window.location.search).get('return'));
+    const query = new URLSearchParams(window.location.search);
+    const returnTarget = safeReturnTarget(query.get('return'));
+    requestedCompanyContext = normalizeDeadlineCompanyContext({
+        kind: query.get('companyKind'),
+        companyId: query.get('companyId'),
+        companyName: query.get('companyName')
+    });
+    const companyContext = document.getElementById('recipient-company-context');
+    if (requestedCompanyContext && companyContext) {
+        document.getElementById('recipient-company-context-name').textContent = requestedCompanyContext.companyName;
+        companyContext.classList.remove('hidden');
+    }
     const returnLink = document.getElementById('recipient-return');
     if (returnTarget) {
         returnLink.href = returnTarget;

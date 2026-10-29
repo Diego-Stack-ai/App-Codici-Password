@@ -14,17 +14,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.241" />
+    <link rel="manifest" href="manifest.json?v=1.2.242" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.241">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.241">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.241">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.241">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.241">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.241">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.241&deadline-share=20260908a">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.242">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.242">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.242">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.242">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.242">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.242">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.242&deadline-share=20260908a">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -86,10 +86,16 @@
                     </div>
 
                     <div id="deadline-rule-fields" class="deadline-rule-grid hidden">
-                        <label id="deadline-rule-field" class="form-group" for="deadline-rule-select">
-                            <span class="label-sm" data-t="deadline_form_rule">Regola</span>
-                            <select id="deadline-rule-select" class="input" required></select>
-                        </label>
+                        <div id="deadline-rule-field" class="form-group">
+                            <span class="label-sm"><span data-t="deadline_form_rule">Regola</span></span>
+                            <div class="deadline-rule-select-row">
+                                <label class="sr-only" for="deadline-rule-select">Regola</label>
+                                <select id="deadline-rule-select" class="input" required></select>
+                                <button type="button" id="btn-add-deadline-rule" class="deadline-rule-add-button" title="Nuova regola" aria-label="Nuova regola" data-t-title="deadline_form_new_rule" data-t-aria="deadline_form_new_rule">
+                                    <span class="material-symbols-outlined notranslate" translate="no">add</span>
+                                </button>
+                            </div>
+                        </div>
                         <label id="deadline-parameter-field" class="form-group hidden" for="deadline-parameter-select">
                             <span class="label-sm" data-t="deadline_form_parameter">Riferimento</span>
                             <select id="deadline-parameter-select" class="input" required disabled></select>
@@ -98,6 +104,30 @@
                     <div id="deadline-rule-summary" class="deadline-rule-summary hidden" aria-live="polite">
                         <span id="deadline-rule-summary-name">—</span>
                         <span id="deadline-rule-summary-schedule">—</span>
+                    </div>
+                    <div id="deadline-company-context" class="deadline-company-context hidden">
+                        <label class="form-group" for="deadline-company-context-select">
+                            <span class="label-sm" data-t="deadline_form_company_context">Azienda collegata</span>
+                            <select id="deadline-company-context-select" class="input">
+                                <option value="" data-t="deadline_form_select_company">Seleziona l’azienda…</option>
+                            </select>
+                        </label>
+                        <label id="deadline-external-company-field" class="form-group hidden" for="deadline-external-company-name">
+                            <span class="label-sm" data-t="deadline_form_external_company_name">Nome azienda esterna</span>
+                            <input id="deadline-external-company-name" class="input" type="text" autocomplete="organization" placeholder="Nome dell’azienda" data-t-placeholder="deadline_form_external_company_placeholder">
+                        </label>
+                        <div id="deadline-new-company-help" class="deadline-form-guidance hidden">
+                            <span class="material-symbols-outlined notranslate" translate="no">add_business</span>
+                            <div>
+                                <strong data-t="deadline_form_new_company_title">Nuova azienda nell’app</strong>
+                                <p data-t="deadline_form_new_company_help">Creala in una nuova scheda, poi torna qui e aggiorna l’elenco senza perdere questa bozza.</p>
+                                <div class="deadline-company-actions">
+                                    <a class="btn-link" href="modifica_azienda.html" target="_blank" rel="noopener" data-t="deadline_form_create_company_action">Crea azienda</a>
+                                    <button type="button" id="btn-refresh-deadline-companies" class="btn-link" data-t="deadline_form_refresh_companies">Aggiorna elenco</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="deadline-field-help" data-t="deadline_form_company_explicit_help">Il collegamento è un dato esplicito: non viene ricavato dal nome del destinatario o da trattini nell’etichetta.</p>
                     </div>
                 </section>
 

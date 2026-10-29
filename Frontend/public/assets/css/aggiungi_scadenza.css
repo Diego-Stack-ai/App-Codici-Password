@@ -202,6 +202,52 @@
     background: var(--card-bg);
 }
 
+.deadline-rule-select-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--touch-target-min, 44px);
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.deadline-rule-add-button {
+    display: grid;
+    place-items: center;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border-color));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.deadline-rule-add-button:hover,
+.deadline-rule-add-button:focus-visible {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    outline-offset: 2px;
+}
+
+.deadline-company-context {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.deadline-company-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.deadline-company-actions .btn-link {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
 .deadline-rule-summary {
     display: flex;
     align-items: center;

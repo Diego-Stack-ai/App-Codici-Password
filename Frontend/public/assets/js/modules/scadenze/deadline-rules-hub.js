@@ -1,4 +1,4 @@
-import {auth, db} from '../../firebase-config.js?v=1.2.241';
+import {auth, db} from '../../firebase-config.js?v=1.2.242';
 import {doc, setDoc} from '/assets/js/vendor/firebase-runtime.js';
 import {createElement, setChildren} from '../../dom-utils.js';
 import {getCurrentLanguage, t} from '../../translations.js';
@@ -17,6 +17,7 @@ import {createDeadlineFromDocument} from '../privato/profilo-links.js';
 import {deadlineRecipientsFromRecord} from './deadline-recipient-model.js';
 import {deadlineDateDisplay} from './deadline-model.js';
 import {buildDeadlineDomainInventory} from './deadline-domain-model.js';
+import {DEADLINE_EDITOR_RETURN_DRAFT_KEY} from './deadline-editor-return-draft.js';
 import {
     appendDeadlineType,
     deadlineRuleRouteKey,
@@ -37,6 +38,33 @@ const DOCUMENT_ENCRYPTED_FIELDS = Object.freeze([
     'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
 ]);
 let disposeMount = () => {};
+
+function deadlineEditorReturnTarget() {
+    const value = String(new URLSearchParams(window.location.search).get('return') || '').trim();
+    return /^aggiungi_scadenza\.html(?:\?[^#]*)?$/i.test(value) ? value : '';
+}
+
+function prepareDeadlineEditorReturn({sourceId, rule, domain}) {
+    const returnTarget = deadlineEditorReturnTarget();
+    if (!returnTarget) return false;
+    try {
+        const draft = JSON.parse(sessionStorage.getItem(DEADLINE_EDITOR_RETURN_DRAFT_KEY) || 'null');
+        if (!draft || draft.returnTarget !== returnTarget) return false;
+        draft.fields = {
+            ...(draft.fields || {}),
+            ruleId: rule.id,
+            ruleSourceId: sourceId,
+            ruleRouteKey: deadlineRuleRouteKey(rule),
+            ruleDomain: domain,
+            type: rule.name
+        };
+        sessionStorage.setItem(DEADLINE_EDITOR_RETURN_DRAFT_KEY, JSON.stringify(draft));
+        window.location.href = returnTarget;
+        return true;
+    } catch {
+        return false;
+    }
+}
 
 function icon(name, className = '') {
     return createElement('span', {
@@ -263,10 +291,10 @@ async function loadDomainInventories(user, root, active) {
             configs: {deadlineConfig, deadlineConfigDocuments, generalConfig}, deadlines
         });
         const configsBySource = {deadlineConfig, deadlineConfigDocuments, generalConfig};
-        const persistRules = async (sourceId, nextRules) => {
+        const persistRules = async (sourceId, nextRules, {reload = true} = {}) => {
             if (!Object.hasOwn(configsBySource, sourceId)) throw new Error(t('deadline_domain_error'));
             await setDoc(doc(db, 'users', user.uid, 'settings', sourceId), {deadlineTypes: nextRules}, {merge: true});
-            if (active()) await loadDomainInventories(user, root, active);
+            if (reload && active()) await loadDomainInventories(user, root, active);
         };
         const actions = {
             async rename(configuration) {
@@ -308,11 +336,16 @@ async function loadDomainInventories(user, root, active) {
                 const frequencyValue = await showInputModal(t('prompt_freq_days'), '7', t('prompt_freq_days'));
                 if (frequencyValue === null) return;
                 try {
-                    const next = appendDeadlineType(sourceConfig, withDeadlineRuleIdentity({
+                    const createdRule = withDeadlineRuleIdentity({
                         name: name.trim(), period: validateDeadlineNotice(periodValue),
                         freq: validateDeadlineFrequency(frequencyValue), domain
-                    }, {id: `rule-${globalThis.crypto?.randomUUID?.() || Date.now()}`, domain}));
-                    await persistRules(sourceId, next.deadlineTypes);
+                    }, {id: `rule-${globalThis.crypto?.randomUUID?.() || Date.now()}`, domain});
+                    const next = appendDeadlineType(sourceConfig, createdRule);
+                    const returning = Boolean(deadlineEditorReturnTarget());
+                    await persistRules(sourceId, next.deadlineTypes, {reload: !returning});
+                    if (!prepareDeadlineEditorReturn({sourceId, rule: createdRule, domain}) && active()) {
+                        await loadDomainInventories(user, root, active);
+                    }
                 } catch (error) {
                     showToast(error.message || t('error_config_save'), 'error');
                 }
@@ -423,7 +456,10 @@ export function initDeadlineRulesHub(user) {
         }, {signal: controller.signal});
     }
 
-    activate(tabs.find(tab => tab.getAttribute('aria-selected') === 'true')?.dataset.deadlineDomain);
+    const requestedDomain = new URLSearchParams(window.location.search).get('domain');
+    activate(tabs.some(tab => tab.dataset.deadlineDomain === requestedDomain)
+        ? requestedDomain
+        : tabs.find(tab => tab.getAttribute('aria-selected') === 'true')?.dataset.deadlineDomain);
     void loadPersonalDocuments(user, root.querySelector('#personal-documents-summary'), active);
     void loadDomainInventories(user, root, active);
     return disposeMount;

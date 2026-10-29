@@ -152,3 +152,36 @@
         justify-content: flex-end;
     }
 }
+.recipient-company-context {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border-color));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.recipient-company-context > .material-symbols-outlined {
+    color: var(--accent);
+}
+
+.recipient-company-context strong,
+.recipient-company-context p {
+    display: block;
+    margin: 0;
+}
+
+.recipient-company-context p {
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    font: var(--font-caption);
+}
+
+.recipient-card-associations {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--accent);
+    font: var(--font-caption);
+}

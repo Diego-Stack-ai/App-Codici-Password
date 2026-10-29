@@ -1,7 +1,13 @@
 import { clearElement, createElement } from '../../dom-utils.js';
-import { mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
+import {
+    contactHasCompanyAssociation,
+    deadlineRecipientDisplayName,
+    mergeDeadlineRecipient,
+    normalizeDeadlineCompanyContext,
+    normalizeRecipientEmail
+} from './deadline-recipient-model.js';
 
-export function createDeadlineRecipientController({ onManageContacts } = {}) {
+export function createDeadlineRecipientController({ onManageContacts, getCompanyContext, onAssociateContact } = {}) {
     let recipients = [], contacts = [], ownerEmail = '';
     const isOwner = recipient => Boolean(ownerEmail && normalizeRecipientEmail(recipient?.email || recipient?.address) === ownerEmail);
 
@@ -45,15 +51,24 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
         [...contacts].sort((left, right) => String(left.nome || '').localeCompare(String(right.nome || ''), 'it')).forEach(contact => {
             const email = normalizeRecipientEmail(contact.email);
             if (!email) return;
-            const label = [contact.nome, contact.cognome].filter(Boolean).join(' ').trim() || email;
+            const label = deadlineRecipientDisplayName(contact, getCompanyContext?.());
             select.appendChild(new Option(`${label} — ${email}`, contact.id || `email:${email}`));
         });
     }
 
-    function add(contact) {
+    async function add(contact) {
+        const companyContext = normalizeDeadlineCompanyContext(getCompanyContext?.());
+        if (companyContext && !contactHasCompanyAssociation(contact, companyContext) && onAssociateContact) {
+            const linked = await onAssociateContact(contact, companyContext);
+            if (linked) {
+                contact = {...contact, companyAssociations: linked.companyAssociations || contact.companyAssociations};
+                contacts = contacts.map(item => item.id === contact.id ? contact : item);
+            }
+        }
         const result = mergeDeadlineRecipient(recipients, {
-            contactId: contact.id, displayName: [contact.nome, contact.cognome].filter(Boolean).join(' '),
-            email: contact.email, sendEmail: true, sendPush: true, canManage: false
+            contactId: contact.id, displayName: deadlineRecipientDisplayName(contact, companyContext),
+            email: contact.email, sendEmail: true, sendPush: true, canManage: false,
+            ...(companyContext ? {companyContext} : {})
         });
         recipients = result.recipients;
         renderRecipients();
@@ -69,10 +84,10 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
             }
             window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
         });
-        document.getElementById('deadline-contact-select')?.addEventListener('change', event => {
+        document.getElementById('deadline-contact-select')?.addEventListener('change', async event => {
             const selectedValue = event.currentTarget.value || '';
             const contact = contacts.find(item => item.id === selectedValue || `email:${normalizeRecipientEmail(item.email)}` === selectedValue);
-            if (contact) add(contact);
+            if (contact) await add(contact);
             event.currentTarget.value = '';
         });
         document.getElementById('deadline-recipients-list')?.addEventListener('change', event => {
@@ -110,6 +125,10 @@ export function createDeadlineRecipientController({ onManageContacts } = {}) {
         setContacts(value) {
             contacts = Array.isArray(value) ? value.map(contact => ({ ...contact })) : [];
             renderContacts();
+        },
+        refreshContext() {
+            renderContacts();
+            renderRecipients();
         }
     };
 }

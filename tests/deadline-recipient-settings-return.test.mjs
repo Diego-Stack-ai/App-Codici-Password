@@ -65,7 +65,7 @@ test('il controller delega la navigazione al salvataggio della bozza', async () 
     const controller = await readFile(new URL('deadline-recipient-controller.js', root), 'utf8');
     const editor = await readFile(new URL('aggiungi_scadenza.js', root), 'utf8');
     const contacts = await readFile(new URL('../shared/gestione-destinatari.js', root), 'utf8');
-    assert.match(controller, /createDeadlineRecipientController\(\{ onManageContacts \} = \{\}\)/);
+    assert.match(controller, /createDeadlineRecipientController\(\{ onManageContacts, getCompanyContext, onAssociateContact \} = \{\}\)/);
     assert.match(controller, /await onManageContacts\(returnTo\)/);
     assert.match(controller, /canManage: recipient\.canManage \|\| isOwner\(recipient\)/);
     assert.match(controller, /\.\.\.\(owner \? \[\] : \[createElement\('label'/);
@@ -73,8 +73,12 @@ test('il controller delega la navigazione al salvataggio della bozza', async () 
     assert.match(editor, /recipientController\.init\(user\.email\)/);
     assert.match(editor, /restoreDeadlineEditorAfterRecipientManagement\(\)/);
     assert.match(contacts, /ALLOWED_RETURN_PAGES/);
-    assert.match(contacts, /safeReturnTarget\(new URLSearchParams/);
+    assert.match(contacts, /const query = new URLSearchParams\(window\.location\.search\)/);
+    assert.match(contacts, /safeReturnTarget\(query\.get\('return'\)\)/);
     assert.match(contacts, /title: contact\.active === false \? 'Riattiva' : 'Disattiva'/);
     assert.match(contacts, /textContent: contact\.active === false \? 'person_off' : 'person_check'/);
     assert.match(editor, /contactsById\.get\(recipient\.contactId\)/);
+    assert.match(editor, /companyKind/);
+    assert.match(contacts, /Destinatario già esistente/);
+    assert.match(contacts, /companyAssociations/);
 });
