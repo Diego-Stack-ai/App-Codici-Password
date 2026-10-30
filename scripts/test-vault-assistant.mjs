@@ -53,6 +53,36 @@ assert.equal(natural.executeIntent({type:'semantic_search', query:'bollo Peugeot
 assert.equal(natural.executeIntent({type:'select_result', resultOrdinal:1}, '').navigateTo, '/deadline-tax');
 assert.match(natural.executeIntent({type:'clarify', query:'Quale veicolo intendi?'}, '').message, /Quale veicolo/);
 assert.doesNotMatch(natural.executeIntent({type:'delete_record', query:'elimina tutto'}, '').message, /elimina tutto/);
+const manyDeadlines = new VaultConversationEngine(Array.from({ length:31 }, (_, index) => ({
+    id:`deadline:${index + 1}`, kind:'scadenza', title:`Scadenza ${index + 1}`, subtitle:'Privato',
+    scope:'privato', companyName:'', keywords:['scadenza'], href:`/deadline-${index + 1}`
+})));
+const firstDeadlinePage = manyDeadlines.ask('mostrami tutte le scadenze');
+assert.equal(firstDeadlinePage.items.length, 12);
+assert.equal(firstDeadlinePage.total, 31);
+assert.equal(firstDeadlinePage.offset, 0);
+assert.equal(firstDeadlinePage.hasMore, true);
+assert.match(firstDeadlinePage.message, /31 risultati e mostro 1–12/);
+const secondDeadlinePage = manyDeadlines.ask('mostra altri');
+assert.equal(secondDeadlinePage.items.length, 12);
+assert.equal(secondDeadlinePage.offset, 12);
+assert.equal(secondDeadlinePage.items[0].href, '/deadline-20');
+assert.equal(manyDeadlines.ask('apri 13').navigateTo, secondDeadlinePage.items[0].href);
+const lastDeadlinePage = manyDeadlines.ask('pagina 3');
+assert.equal(lastDeadlinePage.items.length, 7);
+assert.equal(lastDeadlinePage.offset, 24);
+assert.equal(lastDeadlinePage.hasMore, false);
+assert.equal(manyDeadlines.ask('pagina precedente').offset, 12);
+const contextualDeadlines = new VaultConversationEngine([
+    { id:'deadline:ester', kind:'scadenza', title:'Assicurazione', subtitle:'Ester · Peugeot', scope:'privato',
+        companyName:'', keywords:['Ester', 'Peugeot'], href:'/deadline-ester' },
+    { id:'deadline:greta', kind:'scadenza', title:'Assicurazione', subtitle:'Greta · Hyundai', scope:'privato',
+        companyName:'', keywords:['Greta', 'Hyundai'], href:'/deadline-greta' }
+]);
+assert.equal(contextualDeadlines.ask('assicurazioni').items.length, 2);
+assert.deepEqual(contextualDeadlines.ask('quella di Ester').items.map(item => item.id), ['deadline:ester']);
+contextualDeadlines.ask('assicurazioni');
+assert.equal(contextualDeadlines.ask('apri quella della Hyundai').navigateTo, '/deadline-greta');
 const [loaderSource, uiSource, controllerSource, guideSource, localAiSource] = await Promise.all([
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/vault-data-loader.js', import.meta.url), 'utf8'),
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8'),
@@ -88,7 +118,12 @@ assert.match(uiSource, /pendingSpokenAnswer = Promise\.resolve\(ask\(transcriptS
 assert.match(uiSource, /microphone\.disabled = !usable \|\| !SpeechRecognition/);
 assert.match(uiSource, /const vaultAnswer = onAsk\(value\);[\s\S]*vaultAnswer\?\.items\?\.length/);
 assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
-assert.match(uiSource, /vault-assistant-mode[^\n]*Cerca/);
+assert.match(uiSource, /vault-assistant-mode[^\n]*Ricerca/);
+assert.match(uiSource, /vault-assistant-mode[^\n]*Codex AI\.2/);
+assert.match(uiSource, /askMode\.hidden = !onExplain/);
+assert.match(uiSource, /modes\.classList\.toggle\('single', !onExplain\)/);
+assert.match(uiSource, /l’audio non viene registrato né conservato/);
+assert.match(uiSource, /normalized\.items \|\| \[\], Number\(normalized\.offset\) \|\| 0/);
 assert.match(uiSource, /vault-assistant-help/);
 assert.match(uiSource, /Account, aziende, documenti e scadenze/);
 assert.match(uiSource, /if \(!supportsLocalRecognition\) \{ beginRecognition\(false\); return; \}/);
@@ -100,6 +135,9 @@ assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /if \(!await showConfirmModal\(t\('confirm_archive_title'\), archiveConfirmMessage\(target, t\)\)\) return false/);
 assert.doesNotMatch(controllerSource, /mustConfirm|requireConfirmation/);
 assert.match(controllerSource, /conversation\.executeIntent\(intent, query\)/);
+assert.match(controllerSource, /readSelectedLocalAi\(\) !== 'A2'/);
+assert.match(controllerSource, /status\.installed && status\.verified/);
+assert.match(controllerSource, /Codex AI\.2 non disponibile; Ricerca resta attiva/);
 assert.match(localAiSource, /Vietate scritture, modifiche, eliminazioni/);
 assert.match(localAiSource, /return intent;/);
 assert.match(guideSource, /getElementById\('footer-center-actions'\)/);

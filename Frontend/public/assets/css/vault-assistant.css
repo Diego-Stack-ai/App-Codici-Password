@@ -159,6 +159,10 @@ body.vault-assistant-open {
     cursor: pointer;
 }
 
+.vault-assistant-modes.single {
+    grid-template-columns: 1fr;
+}
+
 .vault-assistant-credential-action .material-symbols-outlined {
     font-size: 17px;
 }
