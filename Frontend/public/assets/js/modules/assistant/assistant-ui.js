@@ -38,7 +38,9 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', 'Agente Codex');
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
-    heading.append(element('h2', '', 'Agente Codex'), element('p', '', 'Ricerca locale protetta; ogni azione richiede conferma'));
+    heading.append(element('h2', '', 'Agente Codex'), element('p', '', onExplain
+        ? 'Ricerca locale e Codex AI.2 attivo su questo PC'
+        : 'Ricerca locale con testo o dettatura vocale'));
     const headerActions = element('div', 'vault-assistant-header-actions');
     const help = element('button', 'vault-assistant-help', '?');
     help.type = 'button'; help.setAttribute('aria-label', 'Istruzioni Agente Codex'); help.setAttribute('aria-expanded', 'false');
@@ -47,24 +49,26 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     headerActions.append(help, close); header.append(heading, headerActions);
 
     const modes = element('div', 'vault-assistant-modes');
+    modes.classList.toggle('single', !onExplain);
     modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Modalità Agente Codex');
-    const searchMode = element('button', 'vault-assistant-mode active', 'Cerca');
-    const askMode = element('button', 'vault-assistant-mode', 'Chiedi');
+    const searchMode = element('button', 'vault-assistant-mode active', 'Ricerca');
+    const askMode = element('button', 'vault-assistant-mode', 'Codex AI.2');
     searchMode.type = 'button'; askMode.type = 'button';
     searchMode.setAttribute('aria-pressed', 'true'); askMode.setAttribute('aria-pressed', 'false');
+    askMode.hidden = !onExplain;
     modes.append(searchMode, askMode);
     const instructions = element('section', 'vault-assistant-instructions');
     instructions.hidden = true;
     instructions.append(
         element('strong', '', 'Come usare Agente Codex'),
-        element('p', '', 'In Cerca puoi trovare Account, aziende, documenti e scadenze anche con parole non esatte, poi dire “apri il secondo” oppure indicare il nome.'),
+        element('p', '', 'In Ricerca puoi trovare Account, aziende, documenti e scadenze anche con parole non esatte. Puoi scrivere o dettare la richiesta: l’audio non viene registrato né conservato.'),
         element('p', '', onExplain
-            ? 'In Chiedi il pacchetto locale spiega questa pagina senza inviare dati a servizi esterni.'
-            : 'Per usare Chiedi installa e verifica AI.1 Locale oppure AI.2 Avanzata per PC nelle Impostazioni.')
+            ? 'Codex AI.2 comprende domande, spiega la pagina e può richiamare la stessa Ricerca senza inviare contenuti a servizi esterni.'
+            : 'Codex AI.2 compare soltanto su un PC compatibile quando è installato, verificato e attivato.')
     );
     const modeNotice = element('p', 'vault-assistant-mode-notice', onExplain
-        ? 'Chiedi usa il pacchetto AI locale installato e non invia contenuti a servizi esterni.'
-        : 'Installa e verifica AI.1 Locale oppure AI.2 Avanzata per PC nelle Impostazioni. Cerca resta sempre disponibile.');
+        ? 'Codex AI.2 usa il pacchetto locale attivo su questo PC e non invia contenuti a servizi esterni.'
+        : 'Ricerca resta sempre disponibile. Codex AI.2 richiede installazione, verifica e attivazione su un PC compatibile.');
     modeNotice.hidden = true;
 
     const conversation = element('div', 'vault-assistant-conversation'); conversation.setAttribute('aria-live', 'polite');
@@ -100,7 +104,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         const usable = searching || Boolean(onExplain);
         input.disabled = !usable; send.disabled = !usable; microphone.disabled = !usable || !SpeechRecognition;
         modeNotice.hidden = searching;
-        input.placeholder = searching ? 'Cosa vuoi cercare?' : (onExplain ? 'Cosa vuoi sapere su questa pagina?' : 'AI locale avanzata non disponibile');
+        input.placeholder = searching ? 'Cosa vuoi cercare?' : (onExplain ? 'Cosa vuoi sapere su questa pagina?' : 'AI.2 non disponibile su questo dispositivo');
         if (searching) input.focus();
     };
     searchMode.addEventListener('click', () => setMode('search'));
@@ -148,12 +152,13 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         }
         container.append(row);
     };
-    const addResults = async items => {
+    const addResults = async (items, offset = 0) => {
         if (!items.length) return;
         const group = element('div', 'vault-assistant-results');
         for (const [index, item] of items.entries()) {
             const card = element('div', 'vault-assistant-result swipe-row');
             card.assistantItem = item;
+            card.dataset.assistantOrdinal = String(offset + index + 1);
             card.tabIndex = 0; card.setAttribute('role', 'link');
             const navigate = () => { window.location.href = item.href; };
             card.addEventListener('click', navigate);
@@ -167,7 +172,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             const heading = element('div', 'vault-assistant-result-heading');
             const icon = item.iconSource ? element('img', 'vault-assistant-result-icon') : element('span', 'vault-assistant-result-icon material-symbols-outlined', 'shield_lock');
             if (item.iconSource) { icon.src = item.iconSource; icon.alt = ''; icon.addEventListener('error', () => icon.remove(), {once: true}); }
-            heading.append(icon, element('strong', '', `${index + 1}. ${item.title}`));
+            heading.append(icon, element('strong', '', `${offset + index + 1}. ${item.title}`));
             body.append(heading, element('small', '', item.subtitle || item.kind));
             if (item.credentials) {
                 await addCredentialRow(body, 'Username', item.credentials.username);
@@ -183,7 +188,10 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
                 const item = card.assistantItem;
                 if (!item?.archiveAction) return;
                 const completed = await onArchive(item);
-                if (!completed) window.setTimeout(() => { void addResults([item]); }, 500);
+                if (!completed) {
+                    const retryOffset = Math.max(0, Number(card.dataset.assistantOrdinal || 1) - 1);
+                    window.setTimeout(() => { void addResults([item], retryOffset); }, 500);
+                }
             };
             const swipeList = new SwipeList(selector, {
                 threshold: 0.15,
@@ -199,7 +207,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         const normalized = typeof answer === 'string' ? { message:answer, items:[] } : (answer || { message:'', items:[] });
         if (normalized.items?.length) lastShortlist = normalized.items;
         addBubble('assistant', normalized.message || 'Non ho trovato una risposta.');
-        void addResults(normalized.items || []);
+        void addResults(normalized.items || [], Number(normalized.offset) || 0);
         if (normalized.navigateTo) window.setTimeout(() => { window.location.href = normalized.navigateTo; }, 450);
         return normalized;
     };

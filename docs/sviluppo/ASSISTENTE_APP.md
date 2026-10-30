@@ -1,5 +1,11 @@
 # Assistente app
 
+## Ricerca universale e visibilità di Codex AI.2 — candidata 1.2.245
+
+La modalità **Ricerca** è il livello universale e deterministico dell’Assistente. Funziona su PC e telefono senza caricare un modello generativo, indicizza i record locali già autorizzati, applica sinonimi controllati e tolleranza limitata agli errori e conserva nella sola sessione l’ultimo insieme di risultati. Il dialogo espone dodici card per pagina, il totale reale, i comandi **mostra altri**, **pagina N** e **pagina precedente**, oltre alle richieste contestuali e all’apertura per numero. La numerazione delle card resta assoluta fra le pagine.
+
+La dettatura alimenta lo stesso campo testuale: l’app non salva file audio né conserva la voce. **Codex AI.2** non è un sinonimo di Ricerca e il relativo selettore viene creato soltanto quando il livello A2 è selezionato, il probe ammette la taglia scelta e il package manager conferma sia installazione sia verifica. Qualunque errore chiude in sicurezza la sola modalità generativa e lascia Ricerca disponibile.
+
 ## Catalogo D0 e risolutore della guida
 
 La progettazione pagina per pagina e la valutazione dei video sono nella [GUIDA](../utente/GUIDA.md#guida-pagina-per-pagina-e-aiuto-contestuale). Per implementazione, verifiche locali e distribuzione consultare soltanto [STATO](../progetto/STATO.md). Il nucleo della guida è indipendente dall'indice personale dell'Assistente: non importa Firebase, sicurezza o cifratori, non legge il DOM o storage e non esegue richieste di rete. Riduce il rischio che una richiesta di istruzioni causi involontariamente sblocco o letture dei dati; il rischio nuovo è una guida obsoleta o un target UI non più corrispondente, mitigato da audit e gate editoriale per release.

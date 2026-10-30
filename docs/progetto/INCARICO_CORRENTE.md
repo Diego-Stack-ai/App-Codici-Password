@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Ricerca universale separata da Codex AI.2 — 30/10/2026
+
+Diego autorizza con **«procedi con il punto 1»** il completamento e la pubblicazione della nuova **Ricerca** universale dell’Agente Codex, mantenendo separato il progetto futuro di AI.2. La Ricerca deve essere disponibile su PC e telefono, accettare testo o dettatura, tollerare sinonimi controllati e piccoli errori, mantenere il contesto delle richieste successive e consentire di scorrere tutti i risultati oltre il primo gruppo visibile. L’audio viene trasformato in testo dal servizio vocale disponibile e non viene registrato né conservato dall’app.
+
+Il pulsante **Codex AI.2** deve comparire esclusivamente quando AI.2 è selezionata, il dispositivo supera il controllo di compatibilità e il pacchetto scelto risulta installato e verificato. AI.1, telefoni, pacchetto incompleto o errore del controllo non devono mostrare una falsa modalità generativa e non devono bloccare Ricerca. Il rilascio riguarda esclusivamente Firebase Hosting; sono esclusi nuovi pacchetti AI.2, Functions, Rules, indici, migrazioni e dati reali.
+
 ## Contrasto della rubrica nel compositore Scadenze — 29/10/2026
 
 Diego segnala che **Seleziona dalla rubrica** apre un elenco bianco con voci anch'esse bianche, leggibili soltanto durante il passaggio del mouse. La correzione deve riguardare esclusivamente il contrasto delle opzioni native su Chrome ed Edge, senza cambiare contenuto, ordine, associazioni o dati dei destinatari. Il lavoro AI2 presente nella cartella principale resta separato e non deve entrare nel rilascio.
