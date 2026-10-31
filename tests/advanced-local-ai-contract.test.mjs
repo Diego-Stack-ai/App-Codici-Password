@@ -21,11 +21,11 @@ const intent = (overrides = {}) => ({
     ...overrides
 });
 
-test('il benchmark riproducibile applica budget diversi alle tre taglie', () => {
-    assert.equal(assessAdvancedRuntimeBenchmark({ tier:'medium', firstTokenMs:9000, tokensPerSecond:5,
-        peakMemoryMiB:1800, cancelMs:500 }).passed, true);
-    const failed = assessAdvancedRuntimeBenchmark({ tier:'power', firstTokenMs:30000, tokensPerSecond:1,
-        peakMemoryMiB:3500, cancelMs:2500 });
+test('il benchmark riproducibile applica il budget del pacchetto desktop32', () => {
+    assert.equal(assessAdvancedRuntimeBenchmark({ tier:'desktop32', firstTokenMs:45000, tokensPerSecond:2,
+        peakMemoryMiB:3000, cancelMs:2000 }).passed, true);
+    const failed = assessAdvancedRuntimeBenchmark({ tier:'desktop32', firstTokenMs:70000, tokensPerSecond:0.5,
+        peakMemoryMiB:9000, cancelMs:3500 });
     assert.equal(failed.passed, false);
     assert.ok(failed.reasons.includes('generation-too-slow'));
 });
@@ -60,32 +60,32 @@ test('la matrice abilita AI.1 e limita AI.2 avanzata su iPhone', () => {
 
 test('il probe usa capacità e quota reali senza accedere alla Vault', async () => {
     const result = await probeLocalAiCapabilities({ navigatorObject: {
-        storage: { estimate: async () => ({ quota: 2_000_000_000, usage: 100_000_000 }) },
+        storage: { estimate: async () => ({ quota: 20_000_000_000, usage: 1_000_000_000 }) },
         gpu: { requestAdapter:async () => ({ limits:{} }) }, hardwareConcurrency: 8, deviceMemory: 8,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', platform: 'Win32', maxTouchPoints: 0
     } });
     assert.equal(result.A1.status, 'candidate');
     assert.equal(result.A2.status, 'candidate');
-    assert.deepEqual(result.A2.allowedTiers, ['light']);
-    assert.equal(result.A2.recommendedTier, 'light');
+    assert.deepEqual(result.A2.allowedTiers, ['desktop32']);
+    assert.equal(result.A2.recommendedTier, 'desktop32');
 });
 
-test('la taglia light usa il collaudo reale quando il browser non espone deviceMemory', () => {
+test('il pacchetto desktop32 usa il collaudo reale quando il browser non espone deviceMemory', () => {
     const result = assessLocalAiCapabilities({
         wasm:true, webgpu:true, hardwareConcurrency:8, deviceMemoryGiB:null,
-        storageAvailableBytes:3*1024*1024*1024, mobile:false, ios:false
+        storageAvailableBytes:12*1024*1024*1024, mobile:false, ios:false
     });
     assert.equal(result.A2.status, 'candidate');
-    assert.deepEqual(result.A2.allowedTiers, ['light']);
+    assert.deepEqual(result.A2.allowedTiers, ['desktop32']);
 });
 
-test('AI.2 resta una sola AI ma il controllo tecnico abilita taglie progressive', () => {
+test('AI.2 espone soltanto il pacchetto desktop32 sui PC tecnicamente idonei', () => {
     const result = assessLocalAiCapabilities({
         wasm:true, webgpu:true, hardwareConcurrency:16, deviceMemoryGiB:16,
         storageAvailableBytes:10*1024*1024*1024, mobile:false, ios:false
     });
-    assert.deepEqual(result.A2.allowedTiers, ['light','medium','power']);
-    assert.equal(result.A2.recommendedTier, 'power');
+    assert.deepEqual(result.A2.allowedTiers, ['desktop32']);
+    assert.equal(result.A2.recommendedTier, 'desktop32');
 });
 
 test('l’envelope ammette solo contesto minimo e rifiuta chiavi sensibili', () => {

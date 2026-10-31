@@ -1,7 +1,7 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.245';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.245';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.246';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.246';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
@@ -12,12 +12,14 @@ import { createLocalAiAssistantService } from './local-ai-assistant-service.js';
 import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
 import { getLocalAiPackageCandidate } from './local-ai-package-catalog.js';
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
-import { readSelectedAdvancedTier, readSelectedLocalAi } from './local-ai-selection.js';
+import { readDesktop32RamConfirmation, readSelectedAdvancedTier, readSelectedLocalAi } from './local-ai-selection.js';
+import { readLocalAiRuntimeState } from './local-ai-runtime-state.js';
 
 let activeController = null;
 
 async function createAvailableA2Service(language) {
     if (readSelectedLocalAi() !== 'A2') return null;
+    if (!readDesktop32RamConfirmation()) return null;
     try {
         const tier = readSelectedAdvancedTier();
         const capabilities = await probeLocalAiCapabilities();
@@ -29,6 +31,7 @@ async function createAvailableA2Service(language) {
             baseUrl: candidate.baseUrl,
             legacyLevel: candidate.legacyLevel
         });
+        if (readLocalAiRuntimeState('A2', tier)?.status === 'failed') return null;
         return status.installed && status.verified ? createLocalAiAssistantService({ language }) : null;
     } catch (error) {
         console.warn('[ASSISTANT] Codex AI.2 non disponibile; Ricerca resta attiva.', error?.name || 'Error');
@@ -39,7 +42,7 @@ async function createAvailableA2Service(language) {
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.245'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.246'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -84,10 +87,10 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             advanced = await createAvailableA2Service(language);
             dialog = createAssistantUI({
                 onAsk: query => conversation.ask(query),
-                onExplain: advanced ? async (query, context) => {
+                onExplain: advanced ? Object.assign(async (query, context) => {
                     const intent = await advanced.ask(query, context);
                     return conversation.executeIntent(intent, query);
-                } : null,
+                }, { cancel:() => advanced?.cancel() }) : null,
                 onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
                 onArchive: async item => {

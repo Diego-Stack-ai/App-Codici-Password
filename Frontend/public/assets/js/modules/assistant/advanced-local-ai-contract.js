@@ -1,5 +1,5 @@
 const LEVELS = new Set(['A1', 'A2']);
-const ADVANCED_TIERS = Object.freeze(['light', 'medium', 'power']);
+const ADVANCED_TIERS = Object.freeze(['desktop32']);
 const INTENTS = new Set(['explain_page', 'semantic_search', 'select_result', 'clarify']);
 const LOCALE = /^[a-z]{2}(?:-[A-Z]{2})?$/;
 const PACKAGE_ID = /^[a-z0-9][a-z0-9._-]{2,80}$/;
@@ -98,20 +98,15 @@ export function assessLocalAiCapabilities(input) {
     const a2Reasons = [];
     if (input.mobile || input.ios) a2Reasons.push('desktop-required');
     if (!input.webgpu) a2Reasons.push('webgpu-unavailable');
-    // Firefox e Safari non espongono necessariamente navigator.deviceMemory.
-    // L'assenza del dato non deve diventare una falsa incompatibilita: la taglia
-    // light passa al collaudo reale del runtime, mentre le taglie superiori
-    // richiedono ancora una memoria dichiarata sufficiente.
-    if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB < 4) a2Reasons.push('memory-below-ai2-budget');
-    if (input.storageAvailableBytes < 1600 * 1024 * 1024) a2Reasons.push('storage-below-ai2-budget');
+    // navigator.deviceMemory e' intenzionalmente arrotondato/limitato dal browser:
+    // non puo' provare la presenza di 32 GB. Qui imponiamo soltanto un limite
+    // tecnico minimo; la soglia commerciale di 32 GB viene confermata
+    // esplicitamente dall'utente e poi validata dal collaudo reale del runtime.
+    if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB < 8) a2Reasons.push('memory-below-ai2-budget');
+    if (input.hardwareConcurrency < 8) a2Reasons.push('cpu-below-ai2-budget');
+    if (input.storageAvailableBytes < 6 * 1024 * 1024 * 1024) a2Reasons.push('storage-below-ai2-budget');
     const allowedTiers = [];
-    if (!a2Reasons.length) {
-        allowedTiers.push('light');
-        if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB >= 8 && input.hardwareConcurrency >= 8
-            && input.storageAvailableBytes >= 4 * 1024 * 1024 * 1024) allowedTiers.push('medium');
-        if (input.deviceMemoryGiB !== null && input.deviceMemoryGiB >= 16 && input.hardwareConcurrency >= 12
-            && input.storageAvailableBytes >= 8 * 1024 * 1024 * 1024) allowedTiers.push('power');
-    }
+    if (!a2Reasons.length) allowedTiers.push('desktop32');
     return freezeTree({
         A1: { status: a1Reasons.length ? 'fallback-only' : 'candidate', reasons: a1Reasons },
         A2: { status: a2Reasons.length ? 'unavailable' : 'candidate', reasons: a2Reasons,
@@ -131,9 +126,7 @@ export function assessAdvancedRuntimeBenchmark(input) {
         requireCondition(Number.isFinite(input[key]) && input[key] >= 0, `BENCHMARK_${key}`);
     }
     const limits = {
-        light:{ firstTokenMs:12000, tokensPerSecond:4, peakMemoryMiB:1400, cancelMs:1500 },
-        medium:{ firstTokenMs:18000, tokensPerSecond:3, peakMemoryMiB:2400, cancelMs:1500 },
-        power:{ firstTokenMs:25000, tokensPerSecond:2, peakMemoryMiB:3200, cancelMs:2000 }
+        desktop32:{ firstTokenMs:60000, tokensPerSecond:1, peakMemoryMiB:4096, cancelMs:3000 }
     }[tier];
     const reasons = [];
     if (input.firstTokenMs > limits.firstTokenMs) reasons.push('first-token-too-slow');
@@ -143,7 +136,7 @@ export function assessAdvancedRuntimeBenchmark(input) {
     return freezeTree({ tier, passed:reasons.length === 0, reasons, limits });
 }
 
-export async function probeLocalAiCapabilities({ navigatorObject = globalThis.navigator } = {}) {
+export async function probeLocalAiCapabilities({ navigatorObject = globalThis.navigator, adapterTimeoutMs = 8000 } = {}) {
     const estimate = await navigatorObject?.storage?.estimate?.() || {};
     const quota = Number.isSafeInteger(estimate.quota) ? estimate.quota : 0;
     const usage = Number.isSafeInteger(estimate.usage) ? estimate.usage : 0;
@@ -152,11 +145,18 @@ export async function probeLocalAiCapabilities({ navigatorObject = globalThis.na
     const ios = /iPhone|iPad|iPod/i.test(userAgent)
         || (navigatorObject?.platform === 'MacIntel' && Number(navigatorObject?.maxTouchPoints) > 1);
     let webgpu = false;
+    let adapterTimer;
     try {
-        const adapter = await navigatorObject?.gpu?.requestAdapter?.();
+        const request = navigatorObject?.gpu?.requestAdapter?.();
+        const adapter = request ? await Promise.race([
+            request,
+            new Promise(resolve => { adapterTimer = setTimeout(() => resolve(null), adapterTimeoutMs); })
+        ]) : null;
         webgpu = Boolean(adapter);
     } catch {
         webgpu = false;
+    } finally {
+        clearTimeout(adapterTimer);
     }
     return assessLocalAiCapabilities({
         wasm: typeof WebAssembly === 'object',

@@ -8,7 +8,7 @@ test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile'
     for (const level of ['A1','A2']) {
         const entry = LOCAL_AI_PACKAGE_CATALOG[level];
         assert.equal(entry.status, 'available');
-        assert.match(entry.baseUrl, /^\/assets\/local-ai\//);
+        assert.match(entry.baseUrl, /^\/assets\/local-ai(?:-packages)?\//);
         if (level === 'A1') assert.match(entry.runtimeUrl, /^\/assets\/local-ai\/.+\/runtime\/factory\.js$/);
         else assert.equal(entry.runtimeUrl, '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js');
         assert.equal(entry.manifest.files.reduce((sum, item) => sum + item.bytes, 0), entry.manifest.approxDownloadBytes);
@@ -17,28 +17,25 @@ test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile'
         assert.match(LOCAL_AI_RUNTIME_PROVENANCE[level].npmIntegrity, /^sha512-/);
     }
     assert.equal(LOCAL_AI_PACKAGE_CATALOG.A1.manifest.approxDownloadBytes, 145871600);
-    assert.equal(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes, 301982289);
-    assert.equal(LOCAL_AI_ADVANCED_TIERS.light.status, 'available');
-    assert.equal(LOCAL_AI_ADVANCED_TIERS.medium.status, 'available');
-    assert.equal(LOCAL_AI_ADVANCED_TIERS.power.status, 'available');
-    assert.match(LOCAL_AI_ADVANCED_TIERS.medium.baseUrl, /^\/assets\/local-ai-packages\/a2\//);
-    assert.match(LOCAL_AI_ADVANCED_TIERS.power.baseUrl, /^\/assets\/local-ai-packages\/a2\//);
-    assert.equal(LOCAL_AI_ADVANCED_TIERS.medium.artifactPlan.license, 'Apache-2.0');
-    assert.equal(LOCAL_AI_ADVANCED_TIERS.power.artifactPlan.license, 'Apache-2.0');
-    assert.match(LOCAL_AI_ADVANCED_TIERS.medium.artifactPlan.revision, /^[a-f0-9]{40}$/);
-    assert.match(LOCAL_AI_ADVANCED_TIERS.power.artifactPlan.revision, /^[a-f0-9]{40}$/);
-    assert.equal(getLocalAiPackageCandidate('A2', { tier:'medium' }).status, 'available');
+    assert.ok(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes > 1_500_000_000);
+    assert.ok(LOCAL_AI_PACKAGE_CATALOG.A2.manifest.approxDownloadBytes < 2_500_000_000);
+    assert.deepEqual(Object.keys(LOCAL_AI_ADVANCED_TIERS), ['desktop32']);
+    assert.equal(LOCAL_AI_ADVANCED_TIERS.desktop32.status, 'available');
+    assert.match(LOCAL_AI_ADVANCED_TIERS.desktop32.baseUrl, /^\/assets\/local-ai-packages\/a2\//);
+    assert.equal(LOCAL_AI_ADVANCED_TIERS.desktop32.artifactPlan.license, 'Apache-2.0');
+    assert.match(LOCAL_AI_ADVANCED_TIERS.desktop32.artifactPlan.revision, /^[a-f0-9]{40}$/);
+    assert.equal(getLocalAiPackageCandidate('A2', { tier:'desktop32' }).status, 'available');
 });
 
-test('il loader usa il runtime Hosting della taglia AI.2 medium materializzata', async () => {
+test('il loader usa il runtime Hosting del pacchetto AI.2 desktop32 materializzato', async () => {
     let imported = '';
     const loader = createLocalAiRuntimeLoader({
-        packageManager:{ status:async () => ({ installed:true, active:{ cacheName:'medium' } }), markVerified(){} },
+        packageManager:{ status:async () => ({ installed:true, active:{ cacheName:'desktop32' } }), markVerified(){} },
         importModule:async url => { imported = url; return { createGenerativeRuntime:async () => ({
             complete:async () => ({ choices:[{ message:{ content:'{"ok":true}' } }] }), dispose:async () => {}
         }) }; }, origin:'https://app.example'
     });
-    await loader.load('A2', { tier:'medium', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light','medium'] } } });
+    await loader.load('A2', { tier:'desktop32', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['desktop32'] } } });
     assert.equal(imported, 'https://app.example/assets/js/modules/assistant/local-ai-generative-runtime-factory.js');
 });
 
@@ -49,9 +46,8 @@ test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Fac
     assert.match(cleanModelUrl, /resolved\.pathname \+= "resolve\/main\/"/);
     assert.doesNotMatch(cleanModelUrl, /modelUrl \+= "resolve\/main\/"/);
     const factory = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-generative-runtime-factory.js', import.meta.url), 'utf8');
-    assert.match(factory, /'qwen2\.5-0\.5b-instruct-q4f16-1-mlc'/);
-    assert.match(factory, /'qwen2\.5-1\.5b-instruct-q4f16-1-mlc'/);
-    assert.match(factory, /'smollm2-1\.7b-instruct-q4f16-1-mlc'/);
+    assert.match(factory, /'qwen2\.5-3b-instruct-q4f16-1-mlc'/);
+    assert.match(factory, /context_window_size:spec\.contextWindowSize/);
     assert.match(factory, /new URL\('runtime\/web-llm\.js\?codex-runtime=3', packageBaseUrl\)\.href/);
     assert.match(factory, /await import\(runtimeUrl\)/);
     assert.match(factory, /CreateWebWorkerMLCEngine/);
@@ -77,15 +73,15 @@ test('il runtime usa il manifest tensoriale realmente incluso nei pacchetti MLC'
 test('il loader espone fasi e codice sicuro quando l’inizializzazione AI.2 fallisce', async () => {
     const stages = [];
     const loader = createLocalAiRuntimeLoader({
-        packageManager:{ status:async () => ({ installed:true, active:{ cacheName:'light' } }), markVerified(){} },
+        packageManager:{ status:async () => ({ installed:true, active:{ cacheName:'desktop32' } }), markVerified(){} },
         importModule:async () => ({ createGenerativeRuntime:async () => { throw new DOMException('dettaglio non esposto', 'OperationError'); } }),
         origin:'https://app.example'
     });
     let failure;
     try {
         await loader.load('A2', {
-            tier:'light',
-            assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light'] } },
+            tier:'desktop32',
+            assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['desktop32'] } },
             onStage:stage => stages.push(stage)
         });
     } catch (error) { failure = error; }
@@ -107,7 +103,7 @@ test('il loader chiude il runtime e classifica un errore dello smoke test', asyn
         origin:'https://app.example'
     });
     await assert.rejects(
-        loader.load('A2', { tier:'light', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['light'] } } }),
+        loader.load('A2', { tier:'desktop32', assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['desktop32'] } } }),
         error => error.code === 'LOCAL_AI_SMOKE_TEST_FAILED' && error.stage === 'smoke-test'
     );
     assert.equal(disposed, 1);
@@ -143,12 +139,13 @@ test('la diagnostica classifica gli errori noti senza esporne il testo', () => {
     );
 });
 
-test('le impostazioni espongono la scelta operativa delle tre taglie AI.2', () => {
+test('le impostazioni espongono un solo pacchetto AI.2 con conferma dei 32 GB', () => {
     const source = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-package-settings.js', import.meta.url), 'utf8');
     assert.match(source, /getLocalAiPackageCandidate\(level, \{ tier:selectedTier \}\)/);
-    assert.match(source, /setAttribute\('role', 'radiogroup'\)/);
-    assert.match(source, /writeSelectedAdvancedTier\(tier\)/);
-    assert.match(source, /tierButton\.classList\.toggle\('recommended'/);
+    assert.match(source, /readDesktop32RamConfirmation/);
+    assert.match(source, /writeDesktop32RamConfirmation\(ramConfirmed\)/);
+    assert.match(source, /usableTiers\.includes\('desktop32'\)/);
+    assert.doesNotMatch(source, /setAttribute\('role', 'radiogroup'\)/);
     assert.match(source, /sessionStorage\.setItem\(diagnosticKey/);
     assert.match(source, /readLocalAiRuntimeDiagnostic/);
     assert.match(source, /\[Local AI verification failed\]/);

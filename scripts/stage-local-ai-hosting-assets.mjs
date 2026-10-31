@@ -8,29 +8,43 @@ const publicRoot = join(root, 'Frontend', 'public');
 const runtimeSource = join(publicRoot, 'assets', 'local-ai', 'a3',
     'qwen2.5-0.5b-instruct-q4f16-1-mlc', '0.1.0', 'runtime', 'web-llm.js');
 const targetRoot = join(publicRoot, 'assets', 'local-ai-packages', 'a2');
-const modelLibPrefix = 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_86/base/';
+const modelLibraryRevision = '00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0';
+const modelLibPrefix = `https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/${modelLibraryRevision}/web-llm-models/v0_2_86/base/`;
 
 const specs = {
-    medium:{
-        packageId:'qwen2.5-1.5b-instruct-q4f16-1-mlc',
-        repo:'mlc-ai/Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
-        revision:'9bd564b064631febf14deadcac492efb761d60c3',
-        upstream:'Qwen/Qwen2.5-1.5B-Instruct',
-        upstreamRevision:'main', modelId:'codex-qwen2.5-1.5b-instruct-q4f16-1',
-        library:'Qwen2-1.5B-Instruct-q4f16_1_cs1k-webgpu.wasm', vramMiB:1629.75
-    },
-    power:{
-        packageId:'smollm2-1.7b-instruct-q4f16-1-mlc',
-        repo:'mlc-ai/SmolLM2-1.7B-Instruct-q4f16_1-MLC',
-        revision:'84f57f8580a9d8d623266b600ad4273bb9fd84c1',
-        upstream:'HuggingFaceTB/SmolLM2-1.7B-Instruct',
-        upstreamRevision:'main', modelId:'codex-smollm2-1.7b-instruct-q4f16-1',
-        library:'SmolLM2-1.7B-Instruct-q4f16_1_cs1k-webgpu.wasm', vramMiB:1774.19
+    desktop32:{
+        packageId:'qwen2.5-3b-instruct-q4f16-1-mlc',
+        repo:'mlc-ai/Qwen2.5-3B-Instruct-q4f16_1-MLC',
+        revision:'7690aaaa46df36b1be0fe93b9c9abac0497eff6c',
+        upstream:'Qwen/Qwen2.5-3B-Instruct',
+        upstreamRevision:'aa8e72537993ba99e69dfaafa59ed015b17504d1', modelId:'codex-qwen2.5-3b-instruct-q4f16-1',
+        library:'Qwen2.5-3B-Instruct-q4f16_1_cs1k-webgpu.wasm', vramMiB:2504.76,
+        lowResourceRequired:true, contextWindowSize:4096
     }
 };
 
 const selected = process.argv.slice(2).filter(value => Object.hasOwn(specs, value));
-if (!selected.length) throw new Error('Uso: node scripts/stage-local-ai-hosting-assets.mjs medium [power]');
+if (!selected.length) throw new Error('Uso: node scripts/stage-local-ai-hosting-assets.mjs desktop32');
+const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+async function fetchWithRetry(url, options = {}, { attempts = 6 } = {}) {
+    let response;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+        response = await fetch(url, {
+            ...options,
+            headers:{ 'User-Agent':'App-Codici-Password-local-ai-stage/1.0', ...(options.headers || {}) }
+        });
+        if (response.status !== 429 && response.status < 500) return response;
+        if (attempt === attempts) return response;
+        const retryAfterSeconds = Number(response.headers.get('retry-after'));
+        const delay = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+            ? Math.min(30_000, retryAfterSeconds * 1000)
+            : Math.min(30_000, 2 ** attempt * 1000);
+        await response.body?.cancel?.();
+        await wait(delay);
+    }
+    return response;
+}
 
 async function sha256(path) {
     const hash = createHash('sha256');
@@ -45,11 +59,11 @@ async function download(url, destination, expectedBytes = null) {
     let offset = existsSync(partial) ? (await stat(partial)).size : 0;
     if (existsSync(destination) && (expectedBytes === null || (await stat(destination)).size === expectedBytes)) return;
     const headers = offset ? { Range:`bytes=${offset}-` } : {};
-    let response = await fetch(url, { headers, redirect:'follow' });
+    let response = await fetchWithRetry(url, { headers, redirect:'follow' });
     if (offset && response.status !== 206) {
         await rm(partial, { force:true });
         offset = 0;
-        response = await fetch(url, { redirect:'follow' });
+        response = await fetchWithRetry(url, { redirect:'follow' });
     }
     if (!response.ok || !response.body) throw new Error(`Download ${response.status}: ${url}`);
     const output = createWriteStream(partial, { flags:offset ? 'a' : 'w' });
@@ -73,7 +87,7 @@ async function stage(tier) {
     const spec = specs[tier];
     const destination = join(targetRoot, spec.packageId, '0.1.0');
     const api = `https://huggingface.co/api/models/${spec.repo}/revision/${spec.revision}`;
-    const metadataResponse = await fetch(api);
+    const metadataResponse = await fetchWithRetry(api);
     if (!metadataResponse.ok) throw new Error(`Metadata ${metadataResponse.status}: ${spec.repo}`);
     const metadata = await metadataResponse.json();
     const siblings = metadata.siblings.filter(item => selectedModelFile(item.rfilename));
@@ -86,14 +100,16 @@ async function stage(tier) {
     const upstreamLicenseUrl = `https://huggingface.co/${spec.upstream}/resolve/${spec.upstreamRevision}/LICENSE`;
     const licenseUrl = spec.upstream.startsWith('HuggingFaceTB/')
         ? 'https://www.apache.org/licenses/LICENSE-2.0.txt' : upstreamLicenseUrl;
+    await rm(join(destination, 'LICENSE-model.txt'), { force:true });
     await download(licenseUrl, join(destination, 'LICENSE-model.txt'));
     const runtimeLicenseSource = join(publicRoot, 'assets', 'local-ai', 'a3',
         'qwen2.5-0.5b-instruct-q4f16-1-mlc', '0.1.0', 'LICENSE-runtime.txt');
     await writeFile(join(destination, 'LICENSE-runtime.txt'), await readFile(runtimeLicenseSource));
     await mkdir(join(destination, 'runtime'), { recursive:true });
     await writeFile(join(destination, 'runtime', 'web-llm.js'), await readFile(runtimeSource));
+    await rm(join(destination, 'lib', spec.library), { force:true });
     await download(`${modelLibPrefix}${spec.library}`, join(destination, 'lib', spec.library));
-    const factory = `import { CreateMLCEngine } from './web-llm.js';\n\nconst MODEL_ID = '${spec.modelId}';\n\nexport async function createGenerativeRuntime({ packageBaseUrl, onProgress = () => {} }) {\n    const appConfig = { model_list: [{ model:packageBaseUrl, model_id:MODEL_ID, model_lib:\`\${packageBaseUrl}lib/${spec.library}\`, vram_required_MB:${spec.vramMiB}, low_resource_required:true }] };\n    const engine = await CreateMLCEngine(MODEL_ID, { appConfig, initProgressCallback:onProgress });\n    return Object.freeze({ level:'A2', async complete(messages, options = {}) { return engine.chat.completions.create({ messages, temperature:options.temperature ?? 0.1, max_tokens:options.maxTokens ?? 256, response_format:{ type:'json_object' } }); }, async dispose() { await engine.unload?.(); } });\n}\n`;
+    const factory = `import { CreateMLCEngine } from './web-llm.js';\n\nconst MODEL_ID = '${spec.modelId}';\n\nexport async function createGenerativeRuntime({ packageBaseUrl, onProgress = () => {} }) {\n    const appConfig = { model_list: [{ model:packageBaseUrl, model_id:MODEL_ID, model_lib:\`\${packageBaseUrl}lib/${spec.library}\`, vram_required_MB:${spec.vramMiB}, low_resource_required:${spec.lowResourceRequired}, overrides:{ context_window_size:${spec.contextWindowSize} } }] };\n    const engine = await CreateMLCEngine(MODEL_ID, { appConfig, initProgressCallback:onProgress });\n    return Object.freeze({ level:'A2', async complete(messages, options = {}) { return engine.chat.completions.create({ messages, temperature:options.temperature ?? 0.1, max_tokens:options.maxTokens ?? 256, stream:options.stream === true, ...(options.responseFormat ? { response_format:options.responseFormat } : {}) }); }, async dispose() { await engine.unload?.(); } });\n}\n`;
     await writeFile(join(destination, 'runtime', 'factory.js'), factory);
     const files = [];
     async function inventory(folder, prefix = '') {
@@ -118,4 +134,8 @@ async function stage(tier) {
     console.log(`${tier}: ${manifest.approxDownloadBytes} byte, ${files.length} file`);
 }
 
+for (const legacy of ['qwen2.5-1.5b-instruct-q4f16-1-mlc', 'smollm2-1.7b-instruct-q4f16-1-mlc',
+    'qwen2.5-7b-instruct-q4f16-1-mlc']) {
+    await rm(join(targetRoot, legacy), { recursive:true, force:true });
+}
 for (const tier of selected) await stage(tier);

@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.246 — AI.2 con stato reale e percorso ibrido — 31/10/2026
+
+La correzione elimina l'uso della grammatica nativa WebLLM che, nel collaudo con il modello reale, poteva riutilizzare un `GrammarMatcher` gia eliminato. Qwen restituisce ora testo strutturato; l'app estrae il candidato JSON, completa soltanto i campi tecnici ammessi e convalida localmente tipo e limiti dell'intento. Il modello non riceve strumenti, non accede direttamente alla Vault e non può eseguire scritture.
+
+Lo stato visibile distingue pacchetto verificato, avvio nella scheda corrente, motore realmente pronto ed errore. Un fallimento non lascia più AI.2 apparentemente attiva: il selettore viene nascosto, Ricerca resta disponibile e la ripetizione della verifica è esplicita. Saluti, spiegazione della pagina, ricerca dichiarata e selezione ordinale percorrono il motore deterministico immediato; Qwen viene inizializzato soltanto per richieste discorsive. Sono presenti cancellazione, blocco dei doppi invii e timeout coordinati.
+
+Il probe fisico Chrome/WebGPU sul pacchetto Qwen ha superato inizializzazione, generazione, cancellazione, ricerca con refusi, saluto, selezione del secondo risultato e spiegazione in una sola frase. Gli avvisi Windows su `powerPreference` restano messaggi informativi di Chromium. L'ordine **«procedi e pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Candidata 1.2.244 — contrasto del menu Rubrica nelle Scadenze — 29/10/2026
 
 Il menu nativo **Seleziona dalla rubrica** del compositore Scadenze non eredita più il testo bianco del tema scuro quando Chrome o Edge su Windows presentano l'elenco su sfondo bianco. Le singole opzioni e i gruppi ricevono colori espliciti ad alto contrasto; il controllo chiuso conserva invece i colori del tema dell'app. Il contenuto, l'ordine e le associazioni dei destinatari restano invariati.

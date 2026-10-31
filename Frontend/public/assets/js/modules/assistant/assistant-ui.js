@@ -6,6 +6,7 @@ import {
     updateSpeechTranscriptState,
     voiceRecognitionErrorMessage
 } from './voice-recognition-model.js';
+import { assistantText } from '../../translations/assistant.js';
 
 function element(tag, className, text = '') {
     const node = document.createElement(tag);
@@ -39,7 +40,7 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
     heading.append(element('h2', '', 'Agente Codex'), element('p', '', onExplain
-        ? 'Ricerca locale e Codex AI.2 attivo su questo PC'
+        ? 'Ricerca locale e Codex AI.2 disponibile su questo PC'
         : 'Ricerca locale con testo o dettatura vocale'));
     const headerActions = element('div', 'vault-assistant-header-actions');
     const help = element('button', 'vault-assistant-help', '?');
@@ -202,7 +203,10 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             swipeLists.clear(); swipeLists.add(swipeList);
         }
     };
+    const REQUEST_TIMEOUT_MS = 90 * 1000;
     let lastShortlist = [];
+    let requestSequence = 0;
+    let busy = false;
     const presentAnswer = answer => {
         const normalized = typeof answer === 'string' ? { message:answer, items:[] } : (answer || { message:'', items:[] });
         if (normalized.items?.length) lastShortlist = normalized.items;
@@ -211,8 +215,44 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         if (normalized.navigateTo) window.setTimeout(() => { window.location.href = normalized.navigateTo; }, 450);
         return normalized;
     };
-    const ask = query => {
+    const setBusy = value => {
+        busy = value;
+        input.disabled = value;
+        send.disabled = value;
+        microphone.disabled = value || !SpeechRecognition;
+        panel.setAttribute('aria-busy', String(value));
+    };
+    const disableExplainMode = error => {
+        const code = /^LOCAL_AI_[A-Z0-9_]+$/.test(String(error?.code || error?.message || ''))
+            ? String(error.code || error.message)
+            : 'LOCAL_AI_RUNTIME_UNAVAILABLE';
+        askMode.hidden = true;
+        modes.classList.add('single');
+        setMode('search');
+        modeNotice.hidden = false;
+        modeNotice.textContent = [
+            assistantText(language, 'runtimeFailed'),
+            `${assistantText(language, 'diagnosticCode')}: ${code}.`,
+            assistantText(language, 'fallback'),
+            assistantText(language, 'runtimeCheckSettings')
+        ].join(' ');
+        return code;
+    };
+    const explainWithinBudget = (value, sequence) => new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            const error = new Error('LOCAL_AI_REQUEST_TIMEOUT');
+            error.code = 'LOCAL_AI_REQUEST_TIMEOUT';
+            void onExplain?.cancel?.();
+            reject(error);
+        }, REQUEST_TIMEOUT_MS);
+        Promise.resolve(onExplain(value, { shortlist:lastShortlist }))
+            .then(answer => { if (sequence === requestSequence) resolve(answer); })
+            .catch(reject)
+            .finally(() => clearTimeout(timer));
+    });
+    const ask = async query => {
         const value = query.trim(); if (!value) return;
+        if (busy) return { message:'Attendi la risposta in corso.', items:[] };
         addBubble('user', value); input.value = '';
         if (!onExplain || activeMode === 'search') {
             return presentAnswer(onAsk(value));
@@ -221,14 +261,22 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
         if (vaultAnswer?.items?.length || vaultAnswer?.navigateTo) {
             return Promise.resolve(presentAnswer(vaultAnswer));
         }
-        status.textContent = 'Elaborazione locale…';
-        return onExplain(value, { shortlist:lastShortlist }).then(presentAnswer).catch(() => {
+        const sequence = ++requestSequence;
+        setBusy(true);
+        status.textContent = assistantText(language, 'runtimeStarting');
+        try {
+            return presentAnswer(await explainWithinBudget(value, sequence));
+        } catch (error) {
+            const code = disableExplainMode(error);
             const fallback = onAsk(value);
             const message = fallback?.items?.length
                 ? fallback.message
-                : 'Il pacchetto locale non è pronto su questo dispositivo. Puoi continuare con Cerca.';
+                : `Codex AI.2 non ha completato la richiesta (${code}). Puoi continuare con Ricerca e verificare il motore nelle Impostazioni.`;
             return presentAnswer({ message, items:fallback?.items || [], navigateTo:fallback?.navigateTo });
-        }).finally(() => { status.textContent = 'I dati segreti non vengono mostrati nella conversazione.'; });
+        } finally {
+            if (sequence === requestSequence) setBusy(false);
+            status.textContent = 'I dati segreti non vengono mostrati nella conversazione.';
+        }
     };
     searchRow.addEventListener('submit', event => { event.preventDefault(); void ask(input.value); });
 
@@ -371,6 +419,8 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
     panel.append(header, modes, instructions, modeNotice, conversation, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
     return { destroy: () => {
+        requestSequence += 1;
+        void onExplain?.cancel?.();
         swipeLists.forEach(instance => instance.destroy()); swipeLists.clear();
         try { activeRecognition?.abort(); } catch {}
         activeRecognition = null;
