@@ -2,8 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     buildCurrentPageExplanation,
+    completeWithinBudget,
     createA2IntentRequest,
+    createDeterministicA2Intent,
     isCurrentPageExplanationRequest,
+    normalizeA2IntentCandidate,
+    parseA2IntentContent,
     stabilizeA2Intent
 } from '../Frontend/public/assets/js/modules/assistant/local-ai-assistant-service.js';
 import { VaultConversationEngine } from '../Frontend/public/assets/js/modules/assistant/conversation-engine.js';
@@ -99,4 +103,70 @@ test('la spiegazione verificata usa solo scopo e passaggi della guida', () => {
         '• Scegli tema e lingua.',
         '• Gestisci sicurezza e notifiche.'
     ].join('\n'));
+});
+
+test('la spiegazione verificata rispetta la richiesta di una sola frase', () => {
+    assert.equal(buildCurrentPageExplanation(guide, 'Rispondi in una sola frase.'), guide.purpose);
+    assert.doesNotMatch(buildCurrentPageExplanation(guide, 'Rispondi in una sola frase.'), /•/);
+});
+
+test('una generazione bloccata viene interrotta entro il budget', async () => {
+    let interrupted = false;
+    const runtime = {
+        complete:() => new Promise(() => {}),
+        interrupt:async () => { interrupted = true; }
+    };
+    await assert.rejects(
+        completeWithinBudget(runtime, [], {}, 5),
+        error => error.code === 'LOCAL_AI_GENERATION_TIMEOUT' && error.stage === 'generation'
+    );
+    assert.equal(interrupted, true);
+});
+
+test('il JSON AI.2 viene estratto e poi validato senza GrammarMatcher WebLLM', () => {
+    const parsed = parseA2IntentContent('```json\n{"type":"clarify"}\n```');
+    assert.deepEqual(parsed, { type:'clarify' });
+    assert.throws(() => parseA2IntentContent('nessun oggetto'), /LOCAL_AI_RESPONSE_INVALID/);
+});
+
+test('i campi tecnici omessi dal modello vengono completati prima della validazione', () => {
+    assert.deepEqual(normalizeA2IntentCandidate({ type:'semantic_search', query:'assicurazione' }), {
+        schemaVersion:1,
+        type:'semantic_search',
+        query:'assicurazione',
+        pageId:null,
+        resultOrdinal:null,
+        confidence:0.5,
+        requiresConfirmation:false
+    });
+});
+
+test('un intento italianizzato dal modello viene ricondotto al contratto locale', () => {
+    assert.equal(normalizeA2IntentCandidate({ intento:'explain_page', query:'Guida.' }).type, 'explain_page');
+});
+
+test('le operazioni affidabili vengono risolte senza avviare il modello generativo', () => {
+    assert.equal(createDeterministicA2Intent('Trova le scadnze dell assicurazione', guide).type, 'semantic_search');
+    assert.equal(createDeterministicA2Intent('Apri il secondo', guide).resultOrdinal, 2);
+    assert.equal(createDeterministicA2Intent('A cosa serve questa pagina?', guide).type, 'explain_page');
+    assert.equal(createDeterministicA2Intent('Ciao', guide).type, 'clarify');
+    assert.equal(createDeterministicA2Intent('Qual è la differenza tra backup e archivio?', guide), null);
+});
+
+test('ricerca con refusi e selezione ordinale non dipendono dal JSON del modello', () => {
+    const search = stabilizeA2Intent({
+        intent:{ intento:'clarify', query:'scadenze' },
+        question:'Trova le scadnze dell assicuraizone e dimmi quante sono.',
+        guide
+    });
+    assert.equal(search.type, 'semantic_search');
+    assert.match(search.query, /scadnze/);
+    assert.match(search.query, /assicuraizone/);
+    const selection = stabilizeA2Intent({
+        intent:{ intento:'clarify' },
+        question:'Apri il secondo',
+        guide
+    });
+    assert.equal(selection.type, 'select_result');
+    assert.equal(selection.resultOrdinal, 2);
 });

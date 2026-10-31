@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Pubblicazione della stabilizzazione AI.2 — 31/10/2026
+
+Dopo l'integrazione della Ricerca universale `1.2.245`, Diego ordina **«procedi e pubblica»** per la correzione strutturale AI.2. Il rilascio deve conservare la Ricerca deterministica e aggiungere sopra di essa il percorso generativo senza dichiararlo attivo quando il runtime non è realmente pronto. La grammatica WebLLM che ha prodotto il difetto `GrammarMatcher instance already deleted` viene sostituita da estrazione e validazione applicativa dell'intento; Qwen resta privo di strumenti e di accesso diretto alla Vault.
+
+La candidata `1.2.246` distingue installazione verificata, avvio, stato pronto ed errore; applica cancellazione e timeout, impedisce invii concorrenti e usa il modello soltanto per domande discorsive. Ricerca esplicita, selezione ordinale, saluto e spiegazione della pagina conservano il percorso deterministico rapido. Sono autorizzati bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting dopo i gate verdi. Functions, Rules, indici, migrazioni e dati reali restano esclusi.
+
 ## Ricerca universale separata da Codex AI.2 — 30/10/2026
 
 Diego autorizza con **«procedi con il punto 1»** il completamento e la pubblicazione della nuova **Ricerca** universale dell’Agente Codex, mantenendo separato il progetto futuro di AI.2. La Ricerca deve essere disponibile su PC e telefono, accettare testo o dettatura, tollerare sinonimi controllati e piccoli errori, mantenere il contesto delle richieste successive e consentire di scorrere tutti i risultati oltre il primo gruppo visibile. L’audio viene trasformato in testo dal servizio vocale disponibile e non viene registrato né conservato dall’app.
@@ -17,6 +23,12 @@ Diego autorizza con **«procediamo con queste due modifiche, e poi pubblichiamo�
 Correzione concordata nello stesso incarico: nel menu **Seleziona dalla rubrica** ogni riga deve restare compatta e mostrare soltanto **Nome Cognome — e-mail**. L’azienda non fa parte dell’etichetta; serve internamente per ordinare prima i contatti effettivamente collegati e per proporre il collegamento quando necessario. In **Gestisci destinatari** l’utente deve poter vedere e scegliere i collegamenti reali alle aziende. La pagina di provenienza non deve associare automaticamente tutti i contatti all’azienda corrente; nessuna Scadenza esistente viene riscritta.
 
 Accanto al selettore **Regola** viene aggiunto il comando **Nuova regola**. Il passaggio conserva la bozza, apre l’ambito corretto delle Regole scadenze e, dopo la creazione, ritorna al compositore selezionando la nuova regola. Il progetto AI2 è esplicitamente escluso da questo rilascio: resta sospeso e separato per successivi aggiornamenti. Sono esclusi anche Functions, Firestore Rules, Storage Rules, indici, migrazioni e modifiche ai dati reali.
+
+## Cerca evoluta universale e AI.2 distinta — 27/10/2026
+
+Diego decide di concentrare l'esperienza universale sulla modalità **Ricerca** deterministica, disponibile su PC e telefono e utilizzabile anche tramite dettatura vocale. La ricerca deve comprendere sinonimi controllati, piccoli errori, categorie, riferimenti e domande successive come «quella di Ester» o «apri quella della Hyundai», mantenendo risultati verificabili senza caricare un modello generativo. Quando esistono più corrispondenze del limite visibile, deve dichiarare il totale reale e indicare che sta mostrando soltanto i primi risultati. La dettatura produce testo nel campo: l'app non registra né conserva l'audio.
+
+**Codex AI.2** resta un prodotto separato per PC compatibili: il corrispondente pulsante deve comparire soltanto quando il livello AI.2 è selezionato e il pacchetto installato ha superato la verifica. AI.1, il telefono o un errore del probe non devono mostrare una falsa modalità generativa e non devono mai impedire l'uso di Ricerca. Codex AI.2 comprende domande e può richiamare la stessa ricerca verificabile. La futura AI.2 unica destinata ai PC con almeno 32 GiB di RAM richiede ancora scelta del modello, manifest immutabile, licenza, hash, budget di memoria e collaudo fisico; questo incremento non sostituisce ancora i tre pacchetti esistenti e non autorizza download, bump di versione, commit, push o deploy.
 
 ## Autorizzazione al rilascio completo della candidata 1.2.240 — 26/10/2026
 
@@ -1559,6 +1571,10 @@ Solo questa sezione può abilitare un incarico. PRONTO nello storico, nei rappor
 ### Incarico operativo AI.2 — 26/10/2026
 
 Diego ha autorizzato correzione, verifiche serie, commit, push e pubblicazione dell'AI.2 locale. L'intervento corregge il routing delle richieste senza ampliare i permessi dell'assistente: le domande sulla pagina corrente vengono ancorate alla guida verificata, le ricerche restano locali, le selezioni inventate vengono respinte e nessuna scrittura viene introdotta. La candidata è `1.2.241`; il rilascio è subordinato a suite completa verde, revisione del diff, allineamento GitHub e verifica successiva del sito pubblicato.
+
+### Incarico pacchetto AI.2 desktop32 — 27/10/2026
+
+Diego ha richiesto di progettare e collaudare il nuovo pacchetto. Il perimetro locale sostituisce le tre taglie con un solo Qwen2.5 7B quantizzato destinato ai PC con almeno 32 GB, senza introdurre azioni di scrittura. Sono richiesti manifest e hash reali, gate desktop/WebGPU/quota, conferma RAM esplicita, migrazione prudente delle vecchie selezioni, smoke test generativo e collaudo Chrome/Edge. Questo comando non autorizza commit, push o pubblicazione.
 
 ### Esito operativo autorizzato del 09/10/2026
 

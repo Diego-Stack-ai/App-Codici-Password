@@ -1,6 +1,7 @@
 const LEGACY_KEY = 'codex.local-ai.selected.v1';
 const SELECTED_KEY = 'codex.local-ai.selected.v2';
 const ADVANCED_TIER_KEY = 'codex.local-ai.advanced-tier.v1';
+const DESKTOP32_RAM_CONFIRMATION_KEY = 'codex.local-ai.desktop32-ram-confirmed.v1';
 
 export function readSelectedLocalAi(storage = globalThis.localStorage) {
     const selected = storage?.getItem?.(SELECTED_KEY);
@@ -21,12 +22,23 @@ export function writeSelectedLocalAi(level, storage = globalThis.localStorage) {
 
 export function readSelectedAdvancedTier(storage = globalThis.localStorage) {
     const tier = storage?.getItem?.(ADVANCED_TIER_KEY);
-    return tier === 'light' || tier === 'medium' || tier === 'power' ? tier : 'light';
+    if (tier !== 'desktop32') storage?.setItem?.(ADVANCED_TIER_KEY, 'desktop32');
+    return 'desktop32';
 }
 
 export function writeSelectedAdvancedTier(tier, storage = globalThis.localStorage) {
-    if (tier !== 'light' && tier !== 'medium' && tier !== 'power') throw new TypeError('LOCAL_AI_ADVANCED_TIER');
+    if (tier !== 'desktop32') throw new TypeError('LOCAL_AI_ADVANCED_TIER');
     storage?.setItem?.(ADVANCED_TIER_KEY, tier);
 }
 
-export { SELECTED_KEY as LOCAL_AI_SELECTED_KEY, ADVANCED_TIER_KEY as LOCAL_AI_ADVANCED_TIER_KEY };
+export function readDesktop32RamConfirmation(storage = globalThis.localStorage) {
+    return storage?.getItem?.(DESKTOP32_RAM_CONFIRMATION_KEY) === 'true';
+}
+
+export function writeDesktop32RamConfirmation(confirmed, storage = globalThis.localStorage) {
+    if (typeof confirmed !== 'boolean') throw new TypeError('LOCAL_AI_DESKTOP32_RAM_CONFIRMATION');
+    storage?.setItem?.(DESKTOP32_RAM_CONFIRMATION_KEY, String(confirmed));
+}
+
+export { SELECTED_KEY as LOCAL_AI_SELECTED_KEY, ADVANCED_TIER_KEY as LOCAL_AI_ADVANCED_TIER_KEY,
+    DESKTOP32_RAM_CONFIRMATION_KEY as LOCAL_AI_DESKTOP32_RAM_CONFIRMATION_KEY };

@@ -26,61 +26,21 @@ const A1_MANIFEST = validateLocalAiPackageManifest({
     ]
 });
 
-const A2_LIGHT_MANIFEST = validateLocalAiPackageManifest({
-    schemaVersion:1, level:'A2', packageId:'qwen2.5-0.5b-instruct-q4f16-1-mlc', version:'0.1.0', runtime:'webllm-webgpu',
-    model:{ provider:'MLC AI / Qwen', modelId:'mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC', revision:'32ff081fe7e4dfe4ffb167b94c66fdf11e02b8ad', license:'Apache-2.0' },
-    approxDownloadBytes:301982289, maxResidentBytes:Math.ceil(944.62*MIB),
-    locales:['it-IT','en-US','es-ES','fr-FR','de-DE','zh-CN','pt-PT'],
-    files:[
-        file('LICENSE-model.txt',11343,'832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e'),
-        file('LICENSE-runtime.txt',11726,'87935f332472db09253871326ef23d5d6a45f4fd2e6c96772f72052866dfab0d'),
-        file('merges.txt',1671839,'599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3'),
-        file('mlc-chat-config.json',2041,'5439c03bdf4ee7cfe0f8a97a6588018b0144dc1280c71bbaea2853cdbab874b9'),
-        file('ndarray-cache.json',102431,'23a54b5e9b271204561901b513c5b359498733429ee219ccc907eb1cd0790e3f'),
-        file('params_shard_0.bin',68067328,'9f309954d310dc63adfaf3ef6aa987c681b8aa6d1b9686aa2525b454b0d058d5'),
-        file('params_shard_1.bin',33234176,'6d174758dd299d9ef4222b1ad4283be832ebd43853951da25b50501ab1b75ba7'),
-        file('params_shard_2.bin',33505280,'83e0b530bf5c44cbead1a6c220af81040a975f7c81fb708977a02e3ac8d7ffa7'),
-        file('params_shard_3.bin',33053696,'5ff16197c197d8783d398d0c35fa9641e606e6e2dc1d53b9f26a0c9c17a97921'),
-        file('params_shard_4.bin',33020928,'a7a3d2b02aa9258154f250a714d1743672e423c5c7c8e5c5eefcb9bf337aa0fd'),
-        file('params_shard_5.bin',29211648,'19dfd7a3064b84082915575c0e5a57fc1cd7108828e1ce9fbbbaf9db4b63b9af'),
-        file('params_shard_6.bin',33297408,'192576d43956aa977ec60848b8a7fc8483b5fe38ca9669aa9a3ca2ba795a7a33'),
-        file('params_shard_7.bin',14605824,'1ee25c2a41dad6833e000b7e3ec13a5a1761c32ffbed0ad8a98a6ad313338dc0'),
-        file('runtime/factory.js',975,'8b2614cdf3e54b0aee6b7600f48430eeff3b5db9efd99c6d21fbcd61284ddfad'),
-        file('runtime/web-llm.js',6817476,'336c589eda44eea4a2179830788e2bce88720aac3651e4c53be1b4a532345555'),
-        file('tokenizer_config.json',7308,'5214600ee45ca2f887ce2eede8910378a0111ea99d657428bcbce94778e65a92'),
-        file('tokenizer.json',7031645,'c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539'),
-        file('vocab.json',2776833,'ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910'),
-        file('lib/Qwen2-0.5B-Instruct-q4f16_1_cs1k-webgpu.wasm',5552384,'a618074b30f7d022ab7886d0cf57be2aefdac342901d43bee4e19110e1b4b739')
-    ]
-});
-
 export const LOCAL_AI_RUNTIME_PROVENANCE = Object.freeze({
     A1:Object.freeze({ package:'@huggingface/transformers', version:'3.8.1', gitRevision:'2ec882e739e4cb461f8d440d4d7394cbf5372429', license:'Apache-2.0', licenseSha256:'3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5', upstreamRevision:'835ad14087e140460703cf0fae09f97d469d65c2', npmIntegrity:'sha512-tsTk4zVjImqdqjS8/AOZg2yNLd1z9S5v+7oUPpXaasDRwEDhB+xnglK1k5cad26lL5/ZIaeREgWWy0bs9y9pPA==' }),
-    A2:Object.freeze({ package:'@mlc-ai/web-llm', version:'0.2.86', gitRevision:'c42c36670cfc426c75e53ee297443882f1ae8d84', license:'Apache-2.0', licenseSha256:'2924cf70d9e0ee3786cea316851ac9f4fe49e56de5c3124f6b69cccfdb248187', npmIntegrity:'sha512-plciXBCYtY7iTKHzEcsqOfSO+s5u8NqMYFPnHmRbsN8CEdKcolgXIoGLPbzO6FtJHV43m7YP00x6qQ6Kb8CJJw==', modelLibraryRevision:'00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0', upstreamRevision:'7ae557604adf67be50417f59c2c2f167def9a775', upstreamLicenseSha256:'832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e' })
+    A2:Object.freeze({ package:'@mlc-ai/web-llm', version:'0.2.86', gitRevision:'c42c36670cfc426c75e53ee297443882f1ae8d84', license:'Apache-2.0', licenseSha256:'2924cf70d9e0ee3786cea316851ac9f4fe49e56de5c3124f6b69cccfdb248187', npmIntegrity:'sha512-plciXBCYtY7iTKHzEcsqOfSO+s5u8NqMYFPnHmRbsN8CEdKcolgXIoGLPbzO6FtJHV43m7YP00x6qQ6Kb8CJJw==', modelLibraryRevision:'00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0', upstreamRevision:'aa8e72537993ba99e69dfaafa59ed015b17504d1', upstreamLicenseSha256:'ef52482bb785733093dc9a2e8edd8e764c77d12d8e9d8f10a80c9b547d32d0f9' })
 });
 
-const A2_LIGHT = Object.freeze({ tier:'light', level:'A2', legacyLevel:'A3', status:'available', blockReason:null,
-    manifest:A2_LIGHT_MANIFEST,
-    baseUrl:'/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/',
-    runtimeUrl:ADVANCED_RUNTIME_URL,
-    source:'https://huggingface.co/mlc-ai/Qwen2.5-0.5B-Instruct-q4f16_1-MLC' });
-
 export const LOCAL_AI_ADVANCED_TIERS = Object.freeze({
-    light:A2_LIGHT,
-    medium:Object.freeze({ ...HOSTED_ADVANCED_AI_CATALOG.medium,
-        manifest:validateLocalAiPackageManifest(HOSTED_ADVANCED_AI_CATALOG.medium.manifest),
-        minimum:Object.freeze({ deviceMemoryGiB:8, hardwareConcurrency:8, storageBytes:4*1024*1024*1024 }),
-        artifactPlan:Object.freeze({ packageId:'qwen2.5-1.5b-instruct-q4f16-1-mlc', quantization:'q4f16_1',
-            modelSource:'https://huggingface.co/mlc-ai/Qwen2.5-1.5B-Instruct-q4f16_1-MLC', revision:'9bd564b064631febf14deadcac492efb761d60c3',
-            upstream:'https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct', license:'Apache-2.0', approxDownloadBytes:880289238, weightFiles:30,
-            maxResidentBytes:Math.ceil(1629.75*MIB), runtimeLibrary:'Qwen2-1.5B-Instruct-q4f16_1_cs1k-webgpu.wasm' }) }),
-    power:Object.freeze({ ...HOSTED_ADVANCED_AI_CATALOG.power,
-        manifest:validateLocalAiPackageManifest(HOSTED_ADVANCED_AI_CATALOG.power.manifest),
-        minimum:Object.freeze({ deviceMemoryGiB:16, hardwareConcurrency:12, storageBytes:8*1024*1024*1024 }),
-        artifactPlan:Object.freeze({ packageId:'smollm2-1.7b-instruct-q4f16-1-mlc', quantization:'q4f16_1',
-            modelSource:'https://huggingface.co/mlc-ai/SmolLM2-1.7B-Instruct-q4f16_1-MLC', revision:'84f57f8580a9d8d623266b600ad4273bb9fd84c1',
-            upstream:'https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct', license:'Apache-2.0', approxDownloadBytes:966375820, weightFiles:37,
-            maxResidentBytes:Math.ceil(1774.19*MIB), runtimeLibrary:'SmolLM2-1.7B-Instruct-q4f16_1_cs1k-webgpu.wasm' }) })
+    desktop32:Object.freeze({ ...HOSTED_ADVANCED_AI_CATALOG.desktop32,
+        manifest:validateLocalAiPackageManifest(HOSTED_ADVANCED_AI_CATALOG.desktop32.manifest),
+        minimum:Object.freeze({ confirmedRamGiB:32, hardwareConcurrency:8, storageBytes:6*1024*1024*1024 }),
+        artifactPlan:Object.freeze({ packageId:'qwen2.5-3b-instruct-q4f16-1-mlc', quantization:'q4f16_1',
+            modelSource:'https://huggingface.co/mlc-ai/Qwen2.5-3B-Instruct-q4f16_1-MLC', revision:'7690aaaa46df36b1be0fe93b9c9abac0497eff6c',
+            upstream:'https://huggingface.co/Qwen/Qwen2.5-3B-Instruct', license:'Apache-2.0',
+            approxDownloadBytes:HOSTED_ADVANCED_AI_CATALOG.desktop32.manifest.approxDownloadBytes, weightFiles:62,
+            maxResidentBytes:HOSTED_ADVANCED_AI_CATALOG.desktop32.manifest.maxResidentBytes,
+            runtimeLibrary:'Qwen2.5-3B-Instruct-q4f16_1_cs1k-webgpu.wasm', contextWindowSize:4096 }) })
 });
 
 export const LOCAL_AI_PACKAGE_CATALOG = Object.freeze({
@@ -88,10 +48,10 @@ export const LOCAL_AI_PACKAGE_CATALOG = Object.freeze({
         baseUrl:'/assets/local-ai/a2/granite-embedding-97m-multilingual-r2-onnx-int8/0.1.0/',
         runtimeUrl:'/assets/local-ai/a2/granite-embedding-97m-multilingual-r2-onnx-int8/0.1.0/runtime/factory.js',
         source:'https://huggingface.co/yuiseki/granite-embedding-97m-multilingual-r2-ONNX' }),
-    A2:Object.freeze({ ...A2_LIGHT, tiers:LOCAL_AI_ADVANCED_TIERS })
+    A2:Object.freeze({ ...LOCAL_AI_ADVANCED_TIERS.desktop32, tiers:LOCAL_AI_ADVANCED_TIERS })
 });
 
-export function getLocalAiPackageCandidate(level, { tier = 'light' } = {}) {
+export function getLocalAiPackageCandidate(level, { tier = 'desktop32' } = {}) {
     if (level === 'A2') return LOCAL_AI_ADVANCED_TIERS[tier] || null;
     return LOCAL_AI_PACKAGE_CATALOG[level] || null;
 }

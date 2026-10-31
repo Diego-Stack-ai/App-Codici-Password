@@ -4,7 +4,7 @@ const STOP_WORDS = new Set([
     'a', 'al', 'alla', 'alle', 'che', 'cerca', 'cercando', 'cerco', 'codex', 'dei', 'del', 'dell', 'della', 'di',
     'fammi', 'gli', 'ho', 'il', 'in', 'la', 'le', 'mi', 'mostra', 'mostrami', 'nell', 'per', 'puoi',
     'avevo', 'breve', 'cera', 'come', 'cosa', 'dimmi', 'dove', 'ero', 'fare', 'ma', 'non', 'pagina', 'quando',
-    'quale', 'quali', 'quella', 'quelle', 'quelli', 'quello', 'questa', 'queste', 'questi', 'questo',
+    'quale', 'quali', 'quanta', 'quante', 'quanti', 'quanto', 'quella', 'quelle', 'quelli', 'quello', 'questa', 'queste', 'questi', 'questo',
     'ricordo', 'ricordavo', 'scade', 'scadera',
     'scadere', 'sezione', 'serve', 'sicuro', 'solo', 'sono', 'spiega', 'spiegami', 'stavo', 'sto', 'su',
     'prossima', 'prossime', 'prossimi', 'prossimo',

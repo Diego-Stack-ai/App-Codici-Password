@@ -90,6 +90,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/assistant/local-ai-package-catalog.js",
   "assets/js/modules/assistant/local-ai-package-manager.js",
   "assets/js/modules/assistant/local-ai-runtime-loader.js",
+  "assets/js/modules/assistant/local-ai-runtime-state.js",
   "assets/js/modules/assistant/local-ai-selection.js",
   "assets/js/modules/assistant/package.json",
   "assets/js/modules/assistant/search-normalizer.js",

@@ -7,10 +7,8 @@ const output = join(root, 'Frontend', 'public', 'assets', 'js', 'modules', 'assi
     'local-ai-hosting-catalog.generated.js');
 const advancedRuntimeUrl = '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js';
 const entries = [
-    ['medium', 'qwen2.5-1.5b-instruct-q4f16-1-mlc', 'MLC AI / Qwen',
-        'mlc-ai/Qwen2.5-1.5B-Instruct-q4f16_1-MLC'],
-    ['power', 'smollm2-1.7b-instruct-q4f16-1-mlc', 'MLC AI / Hugging Face',
-        'mlc-ai/SmolLM2-1.7B-Instruct-q4f16_1-MLC']
+    ['desktop32', 'qwen2.5-3b-instruct-q4f16-1-mlc', 'MLC AI / Qwen',
+        'mlc-ai/Qwen2.5-3B-Instruct-q4f16_1-MLC']
 ];
 const result = {};
 for (const [tier, packageId, provider, modelId] of entries) {

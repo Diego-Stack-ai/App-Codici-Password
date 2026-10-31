@@ -85,7 +85,7 @@ async function runStage(stage, task) {
 export function createLocalAiRuntimeLoader({ packageManager, importModule = url => import(url), origin = location.origin } = {}) {
     if (!packageManager) throw new TypeError('LOCAL_AI_PACKAGE_MANAGER_REQUIRED');
     return Object.freeze({
-        async load(level, { assessment, tier = 'light', runtimeUrl, onProgress = () => {}, onStage = () => {} } = {}) {
+        async load(level, { assessment, tier = 'desktop32', runtimeUrl, onProgress = () => {}, onStage = () => {} } = {}) {
             const notifyStage = stage => {
                 try { onStage(stage); } catch { /* La diagnostica UI non deve interrompere il runtime. */ }
             };
@@ -131,16 +131,10 @@ export function createLocalAiRuntimeLoader({ packageManager, importModule = url 
                         throw runtimeError('LOCAL_AI_RUNTIME_SMOKE_TEST_FAILED', LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST);
                     }
                 } else {
-                    const schema = JSON.stringify({
-                        type:'object',
-                        additionalProperties:false,
-                        required:['ok'],
-                        properties:{ ok:{ type:'boolean', const:true } }
-                    });
                     const result = await runStage(LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST, () => runtime.complete([
                         { role:'system', content:'Rispondi soltanto con {"ok":true}.' },
                         { role:'user', content:'Verifica locale.' }
-                    ], { maxTokens:16, temperature:0, responseFormat:{ type:'json_object', schema } }));
+                    ], { maxTokens:16, temperature:0 }));
                     const raw = result?.choices?.[0]?.message?.content;
                     let parsed = null;
                     try { parsed = JSON.parse(String(raw || '')); } catch { /* Fallisce nel controllo seguente. */ }

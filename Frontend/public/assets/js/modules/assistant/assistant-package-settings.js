@@ -4,10 +4,14 @@ import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
 import { getLocalAiPackageCandidate, LOCAL_AI_ADVANCED_TIERS } from './local-ai-package-catalog.js';
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
 import { createLocalAiRuntimeLoader, readLocalAiRuntimeDiagnostic } from './local-ai-runtime-loader.js';
-import { readSelectedAdvancedTier, readSelectedLocalAi, writeSelectedAdvancedTier, writeSelectedLocalAi } from './local-ai-selection.js';
+import { clearLocalAiRuntimeState, readLocalAiRuntimeState, writeLocalAiRuntimeState } from './local-ai-runtime-state.js';
+import { readDesktop32RamConfirmation, readSelectedAdvancedTier, readSelectedLocalAi,
+    writeDesktop32RamConfirmation, writeSelectedAdvancedTier, writeSelectedLocalAi } from './local-ai-selection.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 
-const mib = bytes => `${Math.ceil(bytes / 1024 / 1024)} MiB`;
+const size = bytes => bytes >= 1024 ** 3
+    ? `${(bytes / 1024 ** 3).toFixed(1)} GiB`
+    : `${Math.ceil(bytes / 1024 / 1024)} MiB`;
 const DIAGNOSTIC_STORAGE_PREFIX = 'codici-password:local-ai-diagnostic:v1';
 
 function diagnosticKey(level, tier) {
@@ -15,6 +19,8 @@ function diagnosticKey(level, tier) {
 }
 
 function readStoredDiagnostic(level, tier) {
+    const runtimeState = readLocalAiRuntimeState(level, tier);
+    if (runtimeState?.status === 'failed') return runtimeState.diagnostic;
     try {
         const value = JSON.parse(sessionStorage.getItem(diagnosticKey(level, tier)) || 'null');
         if (!value || !/^LOCAL_AI_[A-Z0-9_]+$/.test(value.code) || !/^[a-z][a-z0-9-]{0,47}$/.test(value.stage)) return null;
@@ -24,10 +30,12 @@ function readStoredDiagnostic(level, tier) {
 
 function persistDiagnostic(level, tier, diagnostic) {
     try { sessionStorage.setItem(diagnosticKey(level, tier), JSON.stringify(diagnostic)); } catch { /* Diagnostica best effort. */ }
+    writeLocalAiRuntimeState(level, tier, { status:'failed', stage:diagnostic.stage, diagnostic });
 }
 
 function clearDiagnostic(level, tier) {
     try { sessionStorage.removeItem(diagnosticKey(level, tier)); } catch { /* Diagnostica best effort. */ }
+    clearLocalAiRuntimeState(level, tier);
 }
 
 function reportVerificationFailure(level, tier, error, fallbackStage) {
@@ -52,9 +60,10 @@ export async function initAssistantPackageSettings(container = document.getEleme
     const capabilities = await probeLocalAiCapabilities();
     let selected = readSelectedLocalAi();
     let selectedTier = readSelectedAdvancedTier();
+    let ramConfirmed = readDesktop32RamConfirmation();
     let downloading = null;
     const errors = {
-        A1:readStoredDiagnostic('A1', 'light'),
+        A1:readStoredDiagnostic('A1', 'default'),
         A2:readStoredDiagnostic('A2', selectedTier)
     };
 
@@ -66,14 +75,15 @@ export async function initAssistantPackageSettings(container = document.getEleme
         container.append(heading);
         for (const level of ['A1', 'A2']) {
             const capability = capabilities[level];
-            const compatible = capability.status === 'candidate';
+            let compatible = capability.status === 'candidate';
             let usableTiers = [];
             if (level === 'A2') {
                 usableTiers = capability.allowedTiers.filter(tier => LOCAL_AI_ADVANCED_TIERS[tier].status === 'available');
                 if (!usableTiers.includes(selectedTier)) {
-                    selectedTier = usableTiers.at(-1) || 'light';
+                    selectedTier = 'desktop32';
                     writeSelectedAdvancedTier(selectedTier);
                 }
+                compatible = compatible && ramConfirmed && usableTiers.includes('desktop32');
             }
             const candidate = getLocalAiPackageCandidate(level, { tier:selectedTier });
             const status = await manager.status(level, {
@@ -81,54 +91,42 @@ export async function initAssistantPackageSettings(container = document.getEleme
                 baseUrl: candidate.baseUrl,
                 legacyLevel: candidate.legacyLevel
             });
+            const runtimeTier = level === 'A2' ? selectedTier : 'default';
+            const runtimeState = readLocalAiRuntimeState(level, runtimeTier);
+            if (runtimeState?.status === 'failed') errors[level] = runtimeState.diagnostic;
+            else if (runtimeState && runtimeState.status !== 'failed') delete errors[level];
             if (selected === level && level === 'A2' && (!status.verified || !compatible)) {
                 selected = 'A1';
                 writeSelectedLocalAi(selected);
             }
             const card = document.createElement('section');
-            card.className = `assistant-package-card${selected === level && status.verified && compatible ? ' active' : ''}`;
+            card.className = `assistant-package-card${selected === level && runtimeState?.status === 'ready' ? ' active' : ''}`;
             const title = label(level === 'A1' ? 'ai1' : 'ai2');
             const desc = label(level === 'A1' ? 'ai1Desc' : 'ai2Desc');
-            const meta = `${mib(candidate.manifest.approxDownloadBytes)} · ${label('memory')} ${mib(candidate.manifest.maxResidentBytes)}`;
+            const meta = `${size(candidate.manifest.approxDownloadBytes)} · ${label('memory')} ${size(candidate.manifest.maxResidentBytes)}`;
             card.innerHTML = `<div><strong>${title}</strong><small>${desc}</small><small>${meta}</small></div>`;
             if (level === 'A2') {
-                const recommendation = document.createElement('small');
-                recommendation.className = 'assistant-package-tier-recommendation';
-                recommendation.textContent = capability.recommendedTier
-                    ? `${label('tierHardwareRecommendation')} ${label(`tier_${capability.recommendedTier}`)}`
-                    : label('unavailable');
-                card.firstElementChild.append(recommendation);
-                const tierSelector = document.createElement('div');
-                tierSelector.className = 'assistant-package-tier-selector';
-                tierSelector.setAttribute('role', 'radiogroup');
-                tierSelector.setAttribute('aria-label', label('tierChoose'));
-                for (const tier of ['light','medium','power']) {
-                    const entry = LOCAL_AI_ADVANCED_TIERS[tier];
-                    const allowed = usableTiers.includes(tier);
-                    const tierButton = document.createElement('button');
-                    tierButton.type = 'button';
-                    tierButton.className = 'assistant-package-tier';
-                    tierButton.dataset.tier = tier;
-                    tierButton.disabled = !allowed || entry.status !== 'available' || Boolean(downloading);
-                    tierButton.setAttribute('role', 'radio');
-                    tierButton.setAttribute('aria-checked', String(tier === selectedTier));
-                    tierButton.classList.toggle('selected', tier === selectedTier);
-                    tierButton.classList.toggle('recommended', tier === capability.recommendedTier);
-                    const state = !allowed ? label('unavailable')
-                        : tier === capability.recommendedTier ? label('tierRecommended') : label('tierAvailable');
-                    tierButton.replaceChildren(document.createTextNode(
-                        `${label(`tier_${tier}`)} · ${mib(entry.manifest.approxDownloadBytes)} · ${state}`
-                    ));
-                    tierButton.onclick = () => {
-                        if (tier === selectedTier) return;
-                        selectedTier = tier;
-                        writeSelectedAdvancedTier(tier);
-                        errors.A2 = readStoredDiagnostic('A2', tier);
-                        void render();
-                    };
-                    tierSelector.append(tierButton);
-                }
-                card.firstElementChild.append(tierSelector);
+                const requirement = document.createElement('small');
+                requirement.className = 'assistant-package-tier-recommendation';
+                requirement.textContent = label('desktop32Requirement');
+                card.firstElementChild.append(requirement);
+                const confirmation = document.createElement('label');
+                confirmation.className = 'assistant-package-ram-confirmation';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = ramConfirmed;
+                checkbox.disabled = Boolean(downloading);
+                checkbox.onchange = () => {
+                    ramConfirmed = checkbox.checked;
+                    writeDesktop32RamConfirmation(ramConfirmed);
+                    if (!ramConfirmed && selected === 'A2') {
+                        selected = 'A1';
+                        writeSelectedLocalAi(selected);
+                    }
+                    void render();
+                };
+                confirmation.append(checkbox, document.createTextNode(label('desktop32Confirm')));
+                card.firstElementChild.append(confirmation);
             }
             if (errors[level]) {
                 const error = document.createElement('small');
@@ -140,15 +138,31 @@ export async function initAssistantPackageSettings(container = document.getEleme
             if (status.installed) {
                 const installed = document.createElement('small');
                 installed.className = 'assistant-package-installed';
-                installed.textContent = status.verified ? (selected === level ? label('active') : label('verified')) : label('verificationRequired');
+                installed.textContent = !status.verified
+                    ? label('verificationRequired')
+                    : selected !== level
+                        ? label('verified')
+                        : runtimeState?.status === 'ready'
+                            ? label('runtimeReady')
+                            : runtimeState?.status === 'starting'
+                                ? label('runtimeStarting')
+                                : runtimeState?.status === 'failed'
+                                    ? label('runtimeFailed')
+                                    : label('selected');
                 card.firstElementChild.append(installed);
             }
             const actions = document.createElement('div'); actions.className = 'assistant-package-actions';
-            if (status.installed && status.verified && compatible) {
+            if (status.installed && status.verified && compatible && runtimeState?.status !== 'failed') {
                 const activate = document.createElement('button'); activate.type = 'button';
-                activate.textContent = selected === level ? label('active') : label('activate');
+                activate.textContent = selected === level ? label('selected') : label('activate');
                 activate.disabled = selected === level;
-                activate.onclick = () => { selected = level; writeSelectedLocalAi(level); if (level === 'A2') writeSelectedAdvancedTier(selectedTier); void render(); };
+                activate.onclick = () => {
+                    selected = level;
+                    writeSelectedLocalAi(level);
+                    if (level === 'A2') writeSelectedAdvancedTier(selectedTier);
+                    writeLocalAiRuntimeState(level, runtimeTier, { status:'verified', stage:'package-check' });
+                    void render();
+                };
                 actions.append(activate);
             }
             if (!status.installed) {
@@ -157,7 +171,7 @@ export async function initAssistantPackageSettings(container = document.getEleme
                 install.onclick = async () => {
                     const confirmed = await showConfirmModal(
                         label('title'),
-                        `${label('consent')}\n${mib(candidate.manifest.approxDownloadBytes)} · ${label('storage')} ${mib(Math.ceil(candidate.manifest.approxDownloadBytes * 2.15))}`,
+                        `${label('consent')}\n${label('desktop32Confirm')}\n${size(candidate.manifest.approxDownloadBytes)} · ${label('storage')} ${size(Math.ceil(candidate.manifest.approxDownloadBytes * 2.15))}`,
                         label('install'),
                         label('cancel')
                     );
@@ -172,17 +186,22 @@ export async function initAssistantPackageSettings(container = document.getEleme
                             onProgress:value => { progress.value = value.completedBytes; } });
                         const runtime = await loader.load(level, {
                             assessment:capabilities,
-                            tier:level === 'A2' ? selectedTier : 'light',
-                            onStage:stage => { lastStage = stage; }
+                            tier:level === 'A2' ? selectedTier : 'desktop32',
+                            onStage:stage => {
+                                lastStage = stage;
+                                writeLocalAiRuntimeState(level, runtimeTier, { status:'starting', stage });
+                            }
                         });
+                        writeLocalAiRuntimeState(level, runtimeTier, { status:'ready', stage:'ready' });
                         await runtime.dispose?.();
+                        writeLocalAiRuntimeState(level, runtimeTier, { status:'verified', stage:'verification-save' });
                     } catch (error) {
                         if (error?.name !== 'AbortError') errors[level] = reportVerificationFailure(level, selectedTier, error, lastStage);
                     } finally { downloading = null; await render(); }
                 };
                 actions.append(install);
             }
-            if (status.installed && !status.verified && compatible) {
+            if (status.installed && (!status.verified || runtimeState?.status === 'failed') && compatible) {
                 const verify = document.createElement('button'); verify.type = 'button'; verify.textContent = label('verify');
                 verify.onclick = async () => {
                     verify.disabled = true; verify.textContent = label('verifying');
@@ -192,10 +211,15 @@ export async function initAssistantPackageSettings(container = document.getEleme
                         clearDiagnostic(level, selectedTier);
                         const runtime = await loader.load(level, {
                             assessment:capabilities,
-                            tier:level === 'A2' ? selectedTier : 'light',
-                            onStage:stage => { lastStage = stage; }
+                            tier:level === 'A2' ? selectedTier : 'desktop32',
+                            onStage:stage => {
+                                lastStage = stage;
+                                writeLocalAiRuntimeState(level, runtimeTier, { status:'starting', stage });
+                            }
                         });
+                        writeLocalAiRuntimeState(level, runtimeTier, { status:'ready', stage:'ready' });
                         await runtime.dispose?.();
+                        writeLocalAiRuntimeState(level, runtimeTier, { status:'verified', stage:'verification-save' });
                     } catch (error) {
                         errors[level] = reportVerificationFailure(level, selectedTier, error, lastStage);
                     }

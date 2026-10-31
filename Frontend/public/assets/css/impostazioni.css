@@ -1523,6 +1523,8 @@ h3.settings-desc {
 .assistant-package-tier.selected { border-color:var(--color-primary,#7857c5); background:color-mix(in srgb,var(--color-primary,#7857c5) 18%,transparent); box-shadow:0 0 0 1px color-mix(in srgb,var(--color-primary,#7857c5) 35%,transparent); }
 .assistant-package-tier.recommended:not(.selected) { border-style:dashed; }
 .assistant-package-tier:disabled { cursor:not-allowed; opacity:.48; }
+.assistant-package-ram-confirmation { display:flex; align-items:flex-start; gap:.55rem; margin-top:.75rem; padding:.7rem .8rem; border:1px solid rgba(127,127,127,.3); border-radius:.75rem; line-height:1.35; cursor:pointer; }
+.assistant-package-ram-confirmation input { width:1.15rem; height:1.15rem; margin:.1rem 0 0; flex:0 0 auto; accent-color:var(--color-primary,#7857c5); }
 .assistant-package-card progress { width:100%; grid-column:1/-1; }
 .assistant-package-error { color:#c43d55; font-weight:650; overflow-wrap:anywhere; }
 .assistant-package-card[data-error]::after { content:attr(data-error); color:#c43d55; display:block; }
