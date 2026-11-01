@@ -82,10 +82,41 @@ async function runStage(stage, task) {
     }
 }
 
+function stageTimeoutError(code, stage) {
+    const error = new Error(code);
+    error.code = code;
+    error.stage = stage;
+    return error;
+}
+
+async function runSmokeTestWithinBudget(runtime, task, timeoutMs) {
+    let timer;
+    try {
+        return await Promise.race([
+            task(),
+            new Promise((_, reject) => {
+                timer = setTimeout(() => reject(stageTimeoutError('LOCAL_AI_SMOKE_TEST_TIMEOUT', LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST)), timeoutMs);
+            })
+        ]);
+    } catch (error) {
+        if (error?.code === 'LOCAL_AI_SMOKE_TEST_TIMEOUT') await runtime.interrupt?.().catch?.(() => {});
+        throw error;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 export function createLocalAiRuntimeLoader({ packageManager, importModule = url => import(url), origin = location.origin } = {}) {
     if (!packageManager) throw new TypeError('LOCAL_AI_PACKAGE_MANAGER_REQUIRED');
     return Object.freeze({
-        async load(level, { assessment, tier = 'desktop32', runtimeUrl, onProgress = () => {}, onStage = () => {} } = {}) {
+        async load(level, {
+            assessment,
+            tier = 'desktop32',
+            runtimeUrl,
+            onProgress = () => {},
+            onStage = () => {},
+            smokeTestTimeoutMs = 45 * 1000
+        } = {}) {
             const notifyStage = stage => {
                 try { onStage(stage); } catch { /* La diagnostica UI non deve interrompere il runtime. */ }
             };
@@ -131,10 +162,10 @@ export function createLocalAiRuntimeLoader({ packageManager, importModule = url 
                         throw runtimeError('LOCAL_AI_RUNTIME_SMOKE_TEST_FAILED', LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST);
                     }
                 } else {
-                    const result = await runStage(LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST, () => runtime.complete([
-                        { role:'system', content:'Rispondi soltanto con {"ok":true}.' },
-                        { role:'user', content:'Verifica locale.' }
-                    ], { maxTokens:16, temperature:0 }));
+                    const result = await runStage(LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST, () => runSmokeTestWithinBudget(runtime, () => runtime.complete([
+                            { role:'system', content:'Rispondi soltanto con {"ok":true}.' },
+                            { role:'user', content:'Verifica locale.' }
+                        ], { maxTokens:16, temperature:0 }), smokeTestTimeoutMs));
                     const raw = result?.choices?.[0]?.message?.content;
                     let parsed = null;
                     try { parsed = JSON.parse(String(raw || '')); } catch { /* Fallisce nel controllo seguente. */ }

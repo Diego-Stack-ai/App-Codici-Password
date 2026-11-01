@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.247 — AI.2 visibile soltanto dopo il gate runtime — 01/11/2026
+
+La verifica del pacchetto non abilita più da sola **Codex AI.2**. Nella sessione corrente l'app deve inizializzare WebGPU, modello e Worker e completare una breve generazione sintetica valida prima di creare il selettore della modalità generativa. Inizializzazione e smoke test hanno timeout separati; un fallimento interrompe la generazione, termina il Worker, chiude il runtime e conserva esclusivamente codice e fase diagnostici sicuri.
+
+Se il gate non viene superato, il dialogo rimane in **Ricerca**, che continua a funzionare senza modello. Il runtime riuscito può essere riutilizzato per cinque minuti nella stessa pagina. La suite applicativa completa, inclusi i profili Firebase Emulator, è verde; sono inoltre verdi Assistente **17/17**, AI locale **61/61**, sintassi JavaScript su **226 moduli**, documentazione **11/11** e `git diff --check`.
+
+L'ordine **«procedi e pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti del modello e dati reali restano esclusi.
+
 ## Candidata 1.2.246 — AI.2 con stato reale e percorso ibrido — 31/10/2026
 
 La correzione elimina l'uso della grammatica nativa WebLLM che, nel collaudo con il modello reale, poteva riutilizzare un `GrammarMatcher` gia eliminato. Qwen restituisce ora testo strutturato; l'app estrae il candidato JSON, completa soltanto i campi tecnici ammessi e convalida localmente tipo e limiti dell'intento. Il modello non riceve strumenti, non accede direttamente alla Vault e non può eseguire scritture.

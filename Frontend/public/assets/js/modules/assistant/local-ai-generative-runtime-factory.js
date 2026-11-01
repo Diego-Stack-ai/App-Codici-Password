@@ -8,7 +8,21 @@ const MODEL_SPECS = Object.freeze({
     })
 });
 
-export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProgress = () => {} }) {
+const DEFAULT_INITIALIZATION_TIMEOUT_MS = 75 * 1000;
+
+function initializationTimeoutError() {
+    const error = new Error('LOCAL_AI_RUNTIME_STARTUP_TIMEOUT');
+    error.code = 'LOCAL_AI_RUNTIME_STARTUP_TIMEOUT';
+    error.stage = 'runtime-initialization';
+    return error;
+}
+
+export async function createGenerativeRuntime({
+    manifest,
+    packageBaseUrl,
+    onProgress = () => {},
+    initializationTimeoutMs = DEFAULT_INITIALIZATION_TIMEOUT_MS
+}) {
     const spec = MODEL_SPECS[manifest?.packageId];
     if (!spec) throw new Error('LOCAL_AI_MODEL_UNSUPPORTED');
     const runtimeUrl = new URL('runtime/web-llm.js?codex-runtime=3', packageBaseUrl).href;
@@ -30,15 +44,27 @@ export async function createGenerativeRuntime({ manifest, packageBaseUrl, onProg
     );
     const initialize = async () => {
         const worker = createWorker();
+        let timer;
         try {
-            const engine = await CreateWebWorkerMLCEngine(worker, spec.modelId, {
+            const enginePromise = CreateWebWorkerMLCEngine(worker, spec.modelId, {
                 appConfig,
                 initProgressCallback:onProgress
             });
+            const engine = await Promise.race([
+                enginePromise,
+                new Promise((_, reject) => {
+                    timer = setTimeout(() => {
+                        worker.terminate();
+                        reject(initializationTimeoutError());
+                    }, initializationTimeoutMs);
+                })
+            ]);
             return { engine, worker };
         } catch (error) {
             worker.terminate();
             throw error;
+        } finally {
+            clearTimeout(timer);
         }
     };
     let active;

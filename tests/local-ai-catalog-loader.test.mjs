@@ -53,6 +53,9 @@ test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Fac
     assert.match(factory, /CreateWebWorkerMLCEngine/);
     assert.match(factory, /local-ai-generative-worker\.js\?runtime=/);
     assert.match(factory, /deleteModelAllInfoInCache/);
+    assert.match(factory, /LOCAL_AI_RUNTIME_STARTUP_TIMEOUT/);
+    assert.match(factory, /Promise\.race/);
+    assert.match(factory, /worker\.terminate\(\)/);
     assert.match(factory, /\^SyntaxError\\s\*:/);
     assert.match(factory, /await deleteModelAllInfoInCache\(spec\.modelId, appConfig\)/);
     assert.match(factory, /response_format:options\.responseFormat/);
@@ -60,6 +63,30 @@ test('il runtime WebLLM conserva i pacchetti Hosting e riscrive solo Hugging Fac
     assert.match(worker, /new URL\(runtimeUrl\)\.origin !== self\.location\.origin/);
     assert.match(worker, /handlerPromise = import\(runtimeUrl\)/);
     assert.match(worker, /\(await handlerPromise\)\.onmessage\(message\)/);
+});
+
+test('lo smoke test AI.2 ha un timeout, interrompe e chiude il runtime', async () => {
+    let interrupted = 0;
+    let disposed = 0;
+    const loader = createLocalAiRuntimeLoader({
+        packageManager:{ status:async () => ({ installed:true, active:{} }), markVerified(){} },
+        importModule:async () => ({ createGenerativeRuntime:async () => ({
+            complete:() => new Promise(() => {}),
+            interrupt:async () => { interrupted++; },
+            dispose:async () => { disposed++; }
+        }) }),
+        origin:'https://app.example'
+    });
+    await assert.rejects(
+        loader.load('A2', {
+            tier:'desktop32',
+            assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['desktop32'] } },
+            smokeTestTimeoutMs:5
+        }),
+        error => error.code === 'LOCAL_AI_SMOKE_TEST_TIMEOUT' && error.stage === 'smoke-test'
+    );
+    assert.equal(interrupted, 1);
+    assert.equal(disposed, 1);
 });
 
 test('il runtime usa il manifest tensoriale realmente incluso nei pacchetti MLC', () => {
@@ -150,6 +177,17 @@ test('le impostazioni espongono un solo pacchetto AI.2 con conferma dei 32 GB', 
     assert.match(source, /readLocalAiRuntimeDiagnostic/);
     assert.match(source, /\[Local AI verification failed\]/);
     assert.match(source, /errors\[level\]\.errorName/);
+});
+
+test('Codex AI.2 viene esposto soltanto dopo il collaudo del runtime corrente', () => {
+    const controller = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8');
+    const service = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-assistant-service.js', import.meta.url), 'utf8');
+    const ui = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8');
+    assert.match(service, /async prepare\(\)\s*\{\s*await getRuntime\(\)/);
+    assert.match(controller, /await service\.prepare\(\)/);
+    assert.match(controller, /service:null, diagnostic:readLocalAiRuntimeDiagnostic/);
+    assert.match(ui, /Codex AI\.2 non è stato attivato\. Codice:/);
+    assert.match(ui, /\^LOCAL_AI_\[A-Z0-9_\]\+\$/);
 });
 
 test('il pannello dei pacchetti segue lo stato dell’interruttore Agente AI', () => {

@@ -1,5 +1,11 @@
 # Assistente app
 
+## Gate di disponibilità runtime di Codex AI.2 — candidata 1.2.247
+
+Lo stato del pacchetto e quello del motore sono distinti. Byte e SHA-256 corretti attestano soltanto che gli artefatti fissati sono presenti; **Codex AI.2** viene esposto nel dialogo esclusivamente dopo che, nella sessione corrente, WebGPU ha inizializzato modello e Worker e lo smoke test ha prodotto il JSON sintetico previsto. Le risposte deterministiche della guida non possono promuovere né simulare questo stato.
+
+L'inizializzazione del Worker e la generazione di prova hanno budget separati. Al timeout il Worker viene terminato, l'eventuale generazione viene interrotta, il runtime viene chiuso e la diagnostica conserva soltanto codice `LOCAL_AI_*`, fase ed errore tecnico normalizzato. Il dialogo rimane in modalità **Ricerca**, mostra codice e fase sicuri e non crea il selettore AI.2. Un runtime riuscito resta condivisibile per cinque minuti nella stessa pagina; le domande successive non ripetono il caricamento finché quel lease è valido.
+
 ## Ricerca universale e visibilità di Codex AI.2 — candidata 1.2.245
 
 La modalità **Ricerca** è il livello universale e deterministico dell’Assistente. Funziona su PC e telefono senza caricare un modello generativo, indicizza i record locali già autorizzati, applica sinonimi controllati e tolleranza limitata agli errori e conserva nella sola sessione l’ultimo insieme di risultati. Il dialogo espone dodici card per pagina, il totale reale, i comandi **mostra altri**, **pagina N** e **pagina precedente**, oltre alle richieste contestuali e all’apertura per numero. La numerazione delle card resta assoluta fra le pagine.

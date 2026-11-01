@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Pubblicazione del gate runtime effettivo di Codex AI.2 — 01/11/2026
+
+Il collaudo autenticato successivo all'installazione della `1.2.246` ha distinto la risposta deterministica della guida dal modello: il pulsante AI.2 compariva dopo la sola verifica del pacchetto, mentre una domanda realmente generativa restava su **Avvio motore locale…** fino al fallback `LOCAL_AI_RUNTIME_UNAVAILABLE`. Diego ordina **«procedi»** per sostituire le correzioni isolate con un gate unico e verificabile.
+
+Installazione e hash del pacchetto restano necessari ma non certificano il runtime della sessione corrente. Prima di esporre **Codex AI.2**, l'app deve ottenere l'adattatore compatibile, inizializzare modello e Worker ed eseguire un'inferenza sintetica valida. Inizializzazione e smoke test hanno timeout separati, interrompono e chiudono il runtime e conservano soltanto codice e fase sicuri. Se uno qualsiasi dei gate fallisce, il pulsante AI.2 non viene creato, il dialogo mostra la diagnostica tecnica senza dati o prompt e **Ricerca** resta utilizzabile.
+
+Il successivo ordine **«procedi e pubblica»** autorizza la candidata `1.2.247`, bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting dopo il superamento della suite completa. Functions, Rules, indici, migrazioni, pacchetto del modello e dati reali restano esclusi.
+
 ## Pubblicazione della stabilizzazione AI.2 — 31/10/2026
 
 Dopo l'integrazione della Ricerca universale `1.2.245`, Diego ordina **«procedi e pubblica»** per la correzione strutturale AI.2. Il rilascio deve conservare la Ricerca deterministica e aggiungere sopra di essa il percorso generativo senza dichiararlo attivo quando il runtime non è realmente pronto. La grammatica WebLLM che ha prodotto il difetto `GrammarMatcher instance already deleted` viene sostituita da estrazione e validazione applicativa dell'intento; Qwen resta privo di strumenti e di accesso diretto alla Vault.

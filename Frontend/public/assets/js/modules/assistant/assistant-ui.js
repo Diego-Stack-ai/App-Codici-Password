@@ -28,7 +28,16 @@ export function speechLocaleForLanguage(language) {
     return SPEECH_LOCALES[language] || SPEECH_LOCALES.it;
 }
 
-export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive, resolveCredential, offlineNotice = '', language = 'it' }) {
+export function createAssistantUI({
+    onAsk,
+    onExplain = null,
+    onClose,
+    onArchive,
+    resolveCredential,
+    offlineNotice = '',
+    unavailableDiagnostic = null,
+    language = 'it'
+}) {
     const speechLocale = speechLocaleForLanguage(language);
     const pageScrollY = window.scrollY;
     document.documentElement.classList.add('vault-assistant-open');
@@ -67,10 +76,17 @@ export function createAssistantUI({ onAsk, onExplain = null, onClose, onArchive,
             ? 'Codex AI.2 comprende domande, spiega la pagina e può richiamare la stessa Ricerca senza inviare contenuti a servizi esterni.'
             : 'Codex AI.2 compare soltanto su un PC compatibile quando è installato, verificato e attivato.')
     );
+    const safeDiagnostic = unavailableDiagnostic
+        && /^LOCAL_AI_[A-Z0-9_]+$/.test(String(unavailableDiagnostic.code || ''))
+        && /^[a-z][a-z0-9-]{0,47}$/.test(String(unavailableDiagnostic.stage || ''))
+        ? unavailableDiagnostic
+        : null;
     const modeNotice = element('p', 'vault-assistant-mode-notice', onExplain
         ? 'Codex AI.2 usa il pacchetto locale attivo su questo PC e non invia contenuti a servizi esterni.'
-        : 'Ricerca resta sempre disponibile. Codex AI.2 richiede installazione, verifica e attivazione su un PC compatibile.');
-    modeNotice.hidden = true;
+        : safeDiagnostic
+            ? `Codex AI.2 non è stato attivato. Codice: ${safeDiagnostic.code} · fase: ${safeDiagnostic.stage}. Ricerca resta disponibile.`
+            : 'Ricerca resta sempre disponibile. Codex AI.2 richiede installazione, verifica e attivazione su un PC compatibile.');
+    modeNotice.hidden = Boolean(onExplain) || !safeDiagnostic;
 
     const conversation = element('div', 'vault-assistant-conversation'); conversation.setAttribute('aria-live', 'polite');
     const searchRow = element('form', 'vault-assistant-search-row');
