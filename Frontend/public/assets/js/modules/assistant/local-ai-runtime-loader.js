@@ -115,7 +115,8 @@ export function createLocalAiRuntimeLoader({ packageManager, importModule = url 
             runtimeUrl,
             onProgress = () => {},
             onStage = () => {},
-            smokeTestTimeoutMs = 45 * 1000
+            smokeTestTimeoutMs = 45 * 1000,
+            verifyRuntime = true
         } = {}) {
             const notifyStage = stage => {
                 try { onStage(stage); } catch { /* La diagnostica UI non deve interrompere il runtime. */ }
@@ -154,6 +155,7 @@ export function createLocalAiRuntimeLoader({ packageManager, importModule = url 
                 packageBaseUrl: new URL(candidate.baseUrl, origin).href,
                 onProgress
             }));
+            if (!verifyRuntime) return runtime;
             notifyStage(LOCAL_AI_RUNTIME_STAGES.SMOKE_TEST);
             try {
                 if (level === 'A1') {

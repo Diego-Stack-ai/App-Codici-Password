@@ -1,5 +1,17 @@
 # Incarico corrente
 
+## Separazione definitiva fra Ricerca e Codex AI.2 — 01/11/2026
+
+Diego ordina **«procedi»** dopo l'analisi di WebLLM Chat come riferimento tecnico. L'incremento locale elimina il routing ibrido: **Ricerca** resta il motore deterministico universale, mentre **Codex AI.2** usa realmente il modello generativo installato e non restituisce più una risposta preimpostata quando la ricerca trova risultati.
+
+Le due modalità hanno cronologie visive separate. AI.2 riceve soltanto la guida verificata della pagina corrente e una cronologia effimera limitata; non riceve shortlist, record della Vault, password o altri segreti e non dispone di strumenti per aprire, modificare, archiviare o cancellare dati. La risposta del modello è testo conversazionale diretto. Richieste operative o riferite a contenuti personali devono essere rifiutate o rinviate esplicitamente a **Ricerca**, senza fingere di aver consultato la Vault.
+
+Il runtime WebLLM continua a vivere in un Worker dedicato. Le generazioni sono serializzate e il runtime può rimanere caldo per trenta minuti nella stessa pagina e per lo stesso pacchetto. Una risposta vuota non lo invalida; un timeout o un annullamento ricicla invece il Worker dalla cache senza marcare il pacchetto come guasto, evitando il difetto noto di WebLLM 0.2.86 sul riuso dopo `interruptGenerate`. Gli errori fatali di GPU, WebGPU, Worker, WASM, inizializzazione o artefatti modello chiudono il runtime e ne registrano il fallimento. Il budget generativo è di 90 secondi con una protezione esterna di 105 secondi. Questo ordine autorizza implementazione, documentazione e verifiche locali; non autorizza da solo bump, commit, push o deploy.
+
+La verifica sintetica resta confinata all'installazione o al comando esplicito **Verifica**. L'apertura ordinaria di Codex AI.2, già ammessa soltanto per un pacchetto installato e verificato, inizializza un runtime nuovo e usa come prima inferenza la domanda reale dell'utente: non premette un secondo smoke test che consumerebbe lo stesso tokenizer prima della conversazione. Il collaudo fisico di rilascio riproduce quindi due conversazioni consecutive non-streaming sul modello reale.
+
+Il successivo ordine **«aggiorna GitHub e pubblica»** autorizza bump patch, commit e push su GitHub e distribuzione del solo Firebase Hosting dopo il superamento del probe fisico a due conversazioni e dei gate di rilascio. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti modello e dati reali restano esclusi.
+
 ## Pubblicazione del gate runtime effettivo di Codex AI.2 — 01/11/2026
 
 Il collaudo autenticato successivo all'installazione della `1.2.246` ha distinto la risposta deterministica della guida dal modello: il pulsante AI.2 compariva dopo la sola verifica del pacchetto, mentre una domanda realmente generativa restava su **Avvio motore locale…** fino al fallback `LOCAL_AI_RUNTIME_UNAVAILABLE`. Diego ordina **«procedi»** per sostituire le correzioni isolate con un gate unico e verificabile.

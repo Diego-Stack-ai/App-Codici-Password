@@ -114,6 +114,10 @@ body.vault-assistant-open {
     touch-action: pan-y;
 }
 
+.vault-assistant-conversation[hidden] {
+    display: none;
+}
+
 .vault-assistant-result {
     display: block;
     cursor: pointer;

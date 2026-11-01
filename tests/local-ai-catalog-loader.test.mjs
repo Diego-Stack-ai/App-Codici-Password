@@ -89,6 +89,31 @@ test('lo smoke test AI.2 ha un timeout, interrompe e chiude il runtime', async (
     assert.equal(disposed, 1);
 });
 
+test('il runtime AI.2 gia verificato si apre senza ripetere lo smoke test', async () => {
+    let completions = 0;
+    let verifications = 0;
+    const runtime = {
+        complete:async () => { completions++; return { choices:[{ message:{ content:'{"ok":true}' } }] }; },
+        dispose:async () => {}
+    };
+    const loader = createLocalAiRuntimeLoader({
+        packageManager:{
+            status:async () => ({ installed:true, active:{ cacheName:'desktop32' } }),
+            markVerified:async () => { verifications++; }
+        },
+        importModule:async () => ({ createGenerativeRuntime:async () => runtime }),
+        origin:'https://app.example'
+    });
+    const loaded = await loader.load('A2', {
+        tier:'desktop32',
+        assessment:{ A2:{ status:'candidate', reasons:[], allowedTiers:['desktop32'] } },
+        verifyRuntime:false
+    });
+    assert.equal(loaded, runtime);
+    assert.equal(completions, 0);
+    assert.equal(verifications, 0);
+});
+
 test('il runtime usa il manifest tensoriale realmente incluso nei pacchetti MLC', () => {
     const source = readFileSync(new URL('../Frontend/public/assets/local-ai/a3/qwen2.5-0.5b-instruct-q4f16-1-mlc/0.1.0/runtime/web-llm.js', import.meta.url), 'utf8');
     assert.match(source, /TENSOR_CACHE_MANIFEST_FILENAME = "ndarray-cache\.json"/);
@@ -183,7 +208,7 @@ test('Codex AI.2 viene esposto soltanto dopo il collaudo del runtime corrente', 
     const controller = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8');
     const service = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-assistant-service.js', import.meta.url), 'utf8');
     const ui = readFileSync(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8');
-    assert.match(service, /async prepare\(\)\s*\{\s*await getRuntime\(\)/);
+    assert.match(service, /async prepare\(\)\s*\{\s*await getLease\(\)/);
     assert.match(controller, /await service\.prepare\(\)/);
     assert.match(controller, /service:null, diagnostic:readLocalAiRuntimeDiagnostic/);
     assert.match(ui, /Codex AI\.2 non è stato attivato\. Codice:/);

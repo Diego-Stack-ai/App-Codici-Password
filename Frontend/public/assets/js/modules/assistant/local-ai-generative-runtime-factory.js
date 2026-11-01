@@ -80,20 +80,70 @@ export async function createGenerativeRuntime({
         await deleteModelAllInfoInCache(spec.modelId, appConfig);
         active = await initialize();
     }
+    let disposed = false;
+    let interrupted = false;
+    let generationTail = Promise.resolve();
+    const serialize = async task => {
+        const previous = generationTail.catch(() => {});
+        let release;
+        const current = new Promise(resolve => { release = resolve; });
+        generationTail = previous.then(() => current);
+        await previous;
+        if (disposed) {
+            release();
+            throw new Error('LOCAL_AI_RUNTIME_DISPOSED');
+        }
+        try {
+            const result = await task();
+            if (!result?.[Symbol.asyncIterator]) {
+                release();
+                return result;
+            }
+            return {
+                async *[Symbol.asyncIterator]() {
+                    try { yield* result; }
+                    finally { release(); }
+                }
+            };
+        } catch (error) {
+            release();
+            throw error;
+        }
+    };
     return Object.freeze({
         level:'A2',
         async complete(messages, options = {}) {
-            return active.engine.chat.completions.create({
+            if (disposed) throw new Error('LOCAL_AI_RUNTIME_DISPOSED');
+            if (interrupted) throw new Error('LOCAL_AI_RUNTIME_INTERRUPTED');
+            return serialize(() => active.engine.chat.completions.create({
                 messages,
                 temperature:options.temperature ?? 0.1,
                 max_tokens:options.maxTokens ?? 256,
                 stream:options.stream === true,
                 ...(options.responseFormat ? { response_format:options.responseFormat } : {})
-            });
+            }));
         },
-        async interrupt() { await active.engine.interruptGenerate?.(); },
+        async interrupt() {
+            interrupted = true;
+            await active.engine.interruptGenerate?.();
+        },
         async dispose() {
-            try { await active.engine.unload?.(); }
+            if (disposed) return;
+            disposed = true;
+            // WebLLM 0.2.86 può lasciare il lock o il tokenizer in uno stato non
+            // riutilizzabile dopo interruptGenerate. In quel caso il percorso
+            // affidabile è terminare il Worker; gli artefatti restano in cache.
+            if (interrupted) {
+                active.worker.terminate();
+                return;
+            }
+            try {
+                await Promise.race([
+                    generationTail.catch(() => {}),
+                    new Promise(resolve => setTimeout(resolve, 2000))
+                ]);
+                await active.engine.unload?.();
+            }
             finally { active.worker.terminate(); }
         }
     });

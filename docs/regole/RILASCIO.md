@@ -1,5 +1,15 @@
 # Rilascio
 
+## Candidata 1.2.248 — separazione definitiva fra Ricerca e Codex AI.2 — 01/11/2026
+
+**Ricerca** e **Codex AI.2** hanno ora percorsi, cronologie e responsabilità indipendenti. Ricerca continua a usare soltanto il motore deterministico locale per trovare e aprire dati verificabili; Codex AI.2 usa realmente Qwen per ogni domanda conversazionale, ricevendo esclusivamente guida della pagina e breve cronologia effimera. Il modello non riceve Vault, credenziali o strumenti e non può compiere scritture.
+
+Installazione e comando esplicito **Verifica** continuano a inizializzare Worker, WebGPU e modello ed eseguono la prova sintetica. Dopo che il pacchetto è verificato, l'uso ordinario di Codex AI.2 inizializza direttamente la conversazione senza ripetere lo smoke test; richieste concorrenti sono serializzate e timeout, interruzione o chiusura invalidano e liberano il Worker. Il runtime può restare caldo per trenta minuti nella stessa pagina.
+
+Il probe fisico Chrome/WebGPU ha superato due domande conversazionali consecutive e l'interruzione controllata sul pacchetto Qwen reale: inizializzazione circa **6,65 s**, completamento della prima risposta circa **41,60 s**, **1,54 token/s** e cancellazione circa **1,39 s**. La suite applicativa completa, inclusi i profili Firebase Emulator, termina con codice 0.
+
+L'ordine **«aggiorna GitHub e pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti del modello e dati reali restano esclusi.
+
 ## Candidata 1.2.247 — AI.2 visibile soltanto dopo il gate runtime — 01/11/2026
 
 La verifica del pacchetto non abilita più da sola **Codex AI.2**. Nella sessione corrente l'app deve inizializzare WebGPU, modello e Worker e completare una breve generazione sintetica valida prima di creare il selettore della modalità generativa. Inizializzazione e smoke test hanno timeout separati; un fallimento interrompe la generazione, termina il Worker, chiude il runtime e conserva esclusivamente codice e fase diagnostici sicuri.
