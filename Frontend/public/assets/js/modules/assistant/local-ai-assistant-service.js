@@ -320,6 +320,10 @@ export function createLocalAiAssistantService({ language = 'it' } = {}) {
     };
     return Object.freeze({
         level, tier,
+        async prepare() {
+            await getRuntime();
+            return true;
+        },
         async ask(question, { shortlist = [] } = {}) {
             const guide = await loadCurrentGuide(language);
             if (!guide) return validateTypedIntent({
