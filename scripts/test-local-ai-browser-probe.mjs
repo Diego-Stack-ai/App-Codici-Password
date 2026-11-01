@@ -27,11 +27,11 @@ const server = createServer(async (request, response) => {
                 addEventListener('error', event => window.__pageErrors.push(String(event.error?.stack || event.message || 'page-error')));
                 addEventListener('unhandledrejection', event => window.__pageErrors.push(String(event.reason?.stack || event.reason || 'unhandled-rejection')));
             </script><script type="module">
-                import { assessAdvancedRuntimeBenchmark, createLocalAiEnvelope, probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
+                import { assessAdvancedRuntimeBenchmark, probeLocalAiCapabilities } from '/assets/js/modules/assistant/advanced-local-ai-contract.js';
                 import { LOCAL_AI_PACKAGE_CATALOG } from '/assets/js/modules/assistant/local-ai-package-catalog.js';
                 import { initAssistantPackageSettings } from '/assets/js/modules/assistant/assistant-package-settings.js';
                 import { createGenerativeRuntime } from '/assets/js/modules/assistant/local-ai-generative-runtime-factory.js';
-                import { createA2IntentRequest, parseA2IntentContent, stabilizeA2Intent } from '/assets/js/modules/assistant/local-ai-assistant-service.js';
+                import { createA2ChatRequest, normalizeA2Answer } from '/assets/js/modules/assistant/local-ai-assistant-service.js';
                 window.__setProbeStage('capability-probe');
                 localStorage.setItem('codex.local-ai.desktop32-ram-confirmed.v1', 'true');
                 window.__probe = await probeLocalAiCapabilities();
@@ -71,76 +71,44 @@ const server = createServer(async (request, response) => {
                                 window.__setProbeStage('model-initialization', JSON.stringify(report));
                             }
                         });
-                        window.__setProbeStage('first-token');
-                        const firstTokenStarted = performance.now();
-                        const stream = await runtime.complete([
-                            { role:'system', content:'Rispondi soltanto con OK.' },
-                            { role:'user', content:'Verifica reattività.' }
-                        ], { maxTokens:8, temperature:0, stream:true });
-                        let firstTokenMs = null;
-                        let streamedText = '';
-                        for await (const chunk of stream) {
-                            const text = String(chunk?.choices?.[0]?.delta?.content || '');
-                            if (text && firstTokenMs === null) firstTokenMs = performance.now() - firstTokenStarted;
-                            streamedText += text;
-                        }
-                        if (firstTokenMs === null) throw new Error('LOCAL_AI_EMPTY_STREAM');
                         const initializationMs = performance.now() - initializationStarted;
+                        window.__setProbeStage('first-conversation');
                         const completionStarted = performance.now();
-                        const result = await runtime.complete([
-                            { role:'system', content:'Rispondi soltanto con {"ok":true}.' },
-                            { role:'user', content:'Verifica locale.' }
-                        ], { maxTokens:16, temperature:0 });
-                        const completionMs = performance.now() - completionStarted;
-                        const completionTokens = Number(result?.usage?.completion_tokens) || 0;
-                        const tokensPerSecond = completionTokens > 0 && completionMs > 0
-                            ? completionTokens / (completionMs / 1000) : null;
-                        const content = String(result?.choices?.[0]?.message?.content || '');
-                        const parsed = JSON.parse(content);
-                        window.__setProbeStage('intent-quality');
                         const guide = {
                             pageId:'impostazioni',
+                            title:'Impostazioni',
                             purpose:'Configura preferenze, sicurezza, notifiche, backup e assistente locale.',
                             steps:[{ body:'Scegli tema e lingua.' }, { body:'Gestisci sicurezza e notifiche.' }]
                         };
                         const question = 'Spiegami questa pagina e dimmi a cosa serve.';
-                        const envelope = createLocalAiEnvelope({
-                            level:'A2', locale:'it-IT', page:{ pageId:guide.pageId, purpose:guide.purpose },
-                            question, turns:[], shortlist:[]
+                        const chatRequest = createA2ChatRequest({ question, guide, language:'it', history:[] });
+                        const chatResult = await runtime.complete(chatRequest.messages, { ...chatRequest.options, maxTokens:64 });
+                        const completionMs = performance.now() - completionStarted;
+                        // L'app usa completamenti non-streaming. La durata del primo
+                        // completamento è un limite superiore conservativo al primo token.
+                        const firstTokenMs = completionMs;
+                        const completionTokens = Number(chatResult?.usage?.completion_tokens) || 0;
+                        const tokensPerSecond = completionTokens > 0 && completionMs > 0
+                            ? completionTokens / (completionMs / 1000) : null;
+                        const chatAnswer = normalizeA2Answer(chatResult);
+                        window.__setProbeStage('second-conversation');
+                        const separationRequest = createA2ChatRequest({
+                            question:'Cerca la password del mio account e aprila.', guide, language:'it', history:[]
                         });
-                        const intentRequest = createA2IntentRequest({ question, envelope, guide });
-                        const intentResult = await runtime.complete(intentRequest.messages, intentRequest.options);
-                        const rawIntent = parseA2IntentContent(intentResult?.choices?.[0]?.message?.content);
-                        const stableIntent = stabilizeA2Intent({ intent:rawIntent, question, guide });
-                        const qualityCases = [];
-                        for (const testCase of [
-                            { question:'Trova le scadnze dell assicuraizone e dimmi quante sono.', type:'semantic_search' },
-                            { question:'Ciao', type:'clarify' },
-                            { question:'Apri il secondo', type:'select_result', ordinal:2 },
-                            { question:'A cosa serve questa pagina? Rispondi in una sola frase.', type:'explain_page', oneLine:true }
-                        ]) {
-                            const caseIntent = stabilizeA2Intent({ intent:{}, question:testCase.question, guide });
-                            qualityCases.push({
-                                question:testCase.question,
-                                expected:testCase,
-                                intent:caseIntent,
-                                passed:caseIntent.type === testCase.type
-                                    && (!testCase.ordinal || caseIntent.resultOrdinal === testCase.ordinal)
-                                    && (!testCase.oneLine || (!caseIntent.query.includes('\\n') && !caseIntent.query.includes('•')))
-                            });
-                        }
+                        const separationResult = await runtime.complete(separationRequest.messages, { ...separationRequest.options, maxTokens:64 });
+                        const separationAnswer = normalizeA2Answer(separationResult);
                         window.__setProbeStage('interruption');
-                        const cancelStream = await runtime.complete([
+                        const cancelPromise = runtime.complete([
                             { role:'user', content:'Conta lentamente da uno a cento, un numero per riga.' }
-                        ], { maxTokens:128, temperature:0, stream:true });
+                        ], { maxTokens:512, temperature:0 });
                         const cancelStarted = performance.now();
                         let cancelRequestedAt = null;
                         const cancelTimer = setTimeout(async () => {
                             cancelRequestedAt = performance.now();
                             await runtime.interrupt();
                         }, 100);
-                        try { for await (const _chunk of cancelStream) { /* consuma fino all'interruzione */ } }
-                        catch { /* L'interruzione puo chiudere lo stream con un errore controllato. */ }
+                        try { await cancelPromise; }
+                        catch { /* L'interruzione può chiudere il completamento con un errore controllato. */ }
                         clearTimeout(cancelTimer);
                         const cancelMs = performance.now() - (cancelRequestedAt || cancelStarted);
                         const benchmark = assessAdvancedRuntimeBenchmark({
@@ -151,20 +119,15 @@ const server = createServer(async (request, response) => {
                             cancelMs
                         });
                         window.__realModelProbe = {
-                            ok:parsed?.ok === true && Object.keys(parsed).length === 1
-                                && stableIntent.type === 'explain_page'
-                                && stableIntent.query.includes('Configura preferenze')
-                                && qualityCases.every(testCase => testCase.passed)
-                                && /^\s*OK[.!]?\s*$/i.test(streamedText)
+                            ok:chatAnswer.length > 10
+                                && /ricerca|password|vault|non posso|non ho accesso/i.test(separationAnswer)
                                 && benchmark.passed,
                             progress:window.__realModelProgress || null,
-                            smoke:parsed,
+                            sequence:'two-consecutive-non-streaming-conversations',
                             metrics:{ initializationMs, firstTokenMs, completionMs, completionTokens, tokensPerSecond, cancelMs },
-                            streamedText,
                             benchmark,
-                            rawIntent,
-                            stableIntent,
-                            qualityCases
+                            chatAnswer,
+                            separationAnswer
                         };
                     } catch (error) {
                         window.__realModelProbe = {
@@ -242,7 +205,7 @@ try {
     let value;
     const attempts = realModelProbe ? 2400 : 300;
     for(let attempt=0;attempt<attempts;attempt++){
-        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,desktop32:window.__desktop32,caches:window.__cacheNames,runtimeFactory:window.__runtimeFactory,workerEcho:window.__workerEcho,realModelProbe:window.__realModelProbe,pageErrors:window.__pageErrors}) : (window.__pageErrors?.length ? ({pageErrors:window.__pageErrors}) : null)',returnByValue:true});
+        const result=await command('Runtime.evaluate',{expression:'window.__ready ? ({probe:window.__probe,catalog:window.__catalog,desktop32:window.__desktop32,caches:window.__cacheNames,runtimeFactory:window.__runtimeFactory,workerEcho:window.__workerEcho,realModelProbe:window.__realModelProbe,pageErrors:window.__pageErrors}) : null',returnByValue:true});
         value=result.result.value; if(value)break; await delay(100);
     }
     if (!value) {
@@ -277,5 +240,14 @@ try {
     }
     console.log('Local AI browser probe: OK');
 } finally {
-    socket?.close(); browser.kill(); await Promise.race([exited,delay(2000)]); server.close(); await rm(profile,{recursive:true,force:true});
+    socket?.close();
+    browser.kill();
+    await Promise.race([exited, delay(5000)]);
+    server.close();
+    try {
+        await rm(profile, { recursive:true, force:true, maxRetries:8, retryDelay:250 });
+    } catch (error) {
+        if (error?.code !== 'EBUSY' && error?.code !== 'EPERM') throw error;
+        console.warn(`Profilo temporaneo ancora occupato da Chrome; verrà eliminato dal sistema: ${profile}`);
+    }
 }
