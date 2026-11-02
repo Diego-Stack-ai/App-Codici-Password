@@ -8,7 +8,7 @@ const it = {
     downloading:'Download in corso', removed:'Pacchetto rimosso', failed:'Operazione non riuscita',
     fallback:'La ricerca resta disponibile', storage:'Spazio temporaneo richiesto', memory:'Memoria stimata',
     verify:'Verifica', verifying:'Verifica in corso…', verified:'Verificato', verificationRequired:'Installato · verifica richiesta',
-    selected:'Selezionato · avvio alla prima richiesta', runtimeStarting:'Avvio motore locale…', runtimeReady:'Motore locale pronto', runtimeFailed:'Motore locale non disponibile',
+    selected:'Selezionato · avvio alla prima richiesta', runtimeStarting:'Avvio motore locale…', runtimeAnswering:'Elaborazione risposta locale…', runtimeReady:'Motore locale pronto', runtimeFailed:'Motore locale non disponibile',
     runtimeCheckSettings:'Controlla Codex AI.2 nelle Impostazioni.',
     tier_light:'Leggera', tier_medium:'Media', tier_power:'Potente', tierSelected:'selezionata', tierAvailable:'disponibile',
     tierPending:'modello non ancora disponibile', tierHardwareRecommendation:'Taglia consigliata dal dispositivo:',
@@ -44,13 +44,13 @@ Object.assign(translations.zh, { tierChoose:'选择 AI.2 级别', tierRecommende
 Object.assign(translations.hi, { tierChoose:'AI.2 स्तर चुनें', tierRecommended:'इस पीसी के लिए अनुशंसित' });
 Object.assign(translations.pt, { tierChoose:'Escolher o nível AI.2', tierRecommended:'recomendada para este PC' });
 
-Object.assign(translations.en, { selected:'Selected · starts on first request', runtimeStarting:'Starting local engine…', runtimeReady:'Local engine ready', runtimeFailed:'Local engine unavailable', runtimeCheckSettings:'Check Codex AI.2 in Settings.' });
-Object.assign(translations.es, { selected:'Seleccionada · se inicia con la primera solicitud', runtimeStarting:'Iniciando motor local…', runtimeReady:'Motor local listo', runtimeFailed:'Motor local no disponible', runtimeCheckSettings:'Comprueba Codex AI.2 en Ajustes.' });
-Object.assign(translations.fr, { selected:'Sélectionnée · démarrage à la première demande', runtimeStarting:'Démarrage du moteur local…', runtimeReady:'Moteur local prêt', runtimeFailed:'Moteur local indisponible', runtimeCheckSettings:'Vérifiez Codex AI.2 dans les réglages.' });
-Object.assign(translations.de, { selected:'Ausgewählt · Start bei der ersten Anfrage', runtimeStarting:'Lokale Engine wird gestartet…', runtimeReady:'Lokale Engine bereit', runtimeFailed:'Lokale Engine nicht verfügbar', runtimeCheckSettings:'Codex AI.2 in den Einstellungen prüfen.' });
-Object.assign(translations.zh, { selected:'已选择 · 首次请求时启动', runtimeStarting:'正在启动本地引擎…', runtimeReady:'本地引擎已就绪', runtimeFailed:'本地引擎不可用', runtimeCheckSettings:'请在设置中检查 Codex AI.2。' });
-Object.assign(translations.hi, { selected:'चयनित · पहले अनुरोध पर शुरू होगा', runtimeStarting:'स्थानीय इंजन शुरू हो रहा है…', runtimeReady:'स्थानीय इंजन तैयार है', runtimeFailed:'स्थानीय इंजन उपलब्ध नहीं है', runtimeCheckSettings:'सेटिंग में Codex AI.2 की जाँच करें।' });
-Object.assign(translations.pt, { selected:'Selecionada · inicia no primeiro pedido', runtimeStarting:'A iniciar o motor local…', runtimeReady:'Motor local pronto', runtimeFailed:'Motor local indisponível', runtimeCheckSettings:'Verifique o Codex AI.2 nas Definições.' });
+Object.assign(translations.en, { selected:'Selected · starts on first request', runtimeStarting:'Starting local engine…', runtimeAnswering:'Preparing local answer…', runtimeReady:'Local engine ready', runtimeFailed:'Local engine unavailable', runtimeCheckSettings:'Check Codex AI.2 in Settings.' });
+Object.assign(translations.es, { selected:'Seleccionada · se inicia con la primera solicitud', runtimeStarting:'Iniciando motor local…', runtimeAnswering:'Preparando respuesta local…', runtimeReady:'Motor local listo', runtimeFailed:'Motor local no disponible', runtimeCheckSettings:'Comprueba Codex AI.2 en Ajustes.' });
+Object.assign(translations.fr, { selected:'Sélectionnée · démarrage à la première demande', runtimeStarting:'Démarrage du moteur local…', runtimeAnswering:'Préparation de la réponse locale…', runtimeReady:'Moteur local prêt', runtimeFailed:'Moteur local indisponible', runtimeCheckSettings:'Vérifiez Codex AI.2 dans les réglages.' });
+Object.assign(translations.de, { selected:'Ausgewählt · Start bei der ersten Anfrage', runtimeStarting:'Lokale Engine wird gestartet…', runtimeAnswering:'Lokale Antwort wird erstellt…', runtimeReady:'Lokale Engine bereit', runtimeFailed:'Lokale Engine nicht verfügbar', runtimeCheckSettings:'Codex AI.2 in den Einstellungen prüfen.' });
+Object.assign(translations.zh, { selected:'已选择 · 首次请求时启动', runtimeStarting:'正在启动本地引擎…', runtimeAnswering:'正在生成本地回答…', runtimeReady:'本地引擎已就绪', runtimeFailed:'本地引擎不可用', runtimeCheckSettings:'请在设置中检查 Codex AI.2。' });
+Object.assign(translations.hi, { selected:'चयनित · पहले अनुरोध पर शुरू होगा', runtimeStarting:'स्थानीय इंजन शुरू हो रहा है…', runtimeAnswering:'स्थानीय उत्तर तैयार हो रहा है…', runtimeReady:'स्थानीय इंजन तैयार है', runtimeFailed:'स्थानीय इंजन उपलब्ध नहीं है', runtimeCheckSettings:'सेटिंग में Codex AI.2 की जाँच करें।' });
+Object.assign(translations.pt, { selected:'Selecionada · inicia no primeiro pedido', runtimeStarting:'A iniciar o motor local…', runtimeAnswering:'A preparar a resposta local…', runtimeReady:'Motor local pronto', runtimeFailed:'Motor local indisponível', runtimeCheckSettings:'Verifique o Codex AI.2 nas Definições.' });
 
 export function assistantText(language, key) {
     const code = String(language || 'it').toLowerCase().split('-')[0];

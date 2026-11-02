@@ -285,7 +285,7 @@ export function createAssistantUI({
         }
         const sequence = ++requestSequence;
         setBusy(true);
-        status.textContent = assistantText(language, 'runtimeStarting');
+        status.textContent = assistantText(language, 'runtimeAnswering');
         try {
             return presentAnswer(await explainWithinBudget(value, sequence));
         } catch (error) {

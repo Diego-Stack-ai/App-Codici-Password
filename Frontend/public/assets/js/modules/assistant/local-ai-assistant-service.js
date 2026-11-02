@@ -23,17 +23,24 @@ function safeGuideContext(guide) {
     if (!guide) return 'Questa pagina non ha ancora una guida verificata.';
     const current = guide.page || guide;
     const related = Array.isArray(guide.related) ? guide.related.slice(0, 4) : [];
-    const steps = Array.isArray(current.steps)
-        ? current.steps.slice(0, 12).map(step => `- ${boundedText(step?.body, 500)}`).filter(step => step !== '- ')
-        : [];
+    const facts = steps => (Array.isArray(steps) ? steps : [])
+        .slice(0, 12)
+        .map(step => boundedText(step?.body ?? step, 500))
+        .filter(Boolean)
+        .map(step => `- ${step}`);
+    const steps = facts(current.steps);
     return [
+        'FATTI VERIFICATI E VINCOLANTI',
         `Pagina: ${boundedText(current.title, 160)}`,
         `Scopo: ${boundedText(current.purpose, 1200)}`,
         ...steps,
         ...(related.length ? [
             '',
             'Pagine correlate verificate:',
-            ...related.map(page => `- ${boundedText(page.title, 160)}: ${boundedText(page.purpose, 500)}`)
+            ...related.flatMap(page => [
+                `- ${boundedText(page.title, 160)}: ${boundedText(page.purpose, 500)}`,
+                ...facts(page.steps).map(step => `  ${step}`)
+            ])
         ] : [])
     ].join('\n');
 }
@@ -47,7 +54,10 @@ export function createA2ChatRequest({ question, guide, language = 'it', history 
         `Sei Codex AI.2, l'assistente locale dell'app Codici & Password. Rispondi in ${locale(language)}.`,
         'Sei separato dalla funzione Ricerca: non affermare di avere cercato, aperto, modificato o letto record della vault.',
         'Puoi spiegare l’app e la pagina corrente usando soltanto la guida verificata seguente.',
-        'Non inventare pulsanti, dati, risultati o operazioni. Se mancano informazioni, dichiaralo chiaramente.',
+        'I FATTI VERIFICATI sono vincolanti: se contengono una regola esatta, ripetila senza cambiare condizioni, tempi, soglie o significato.',
+        'Non dedurre limiti, automatismi o eccezioni non scritti. Non inventare pulsanti, dati, risultati o operazioni.',
+        'Se la guida non basta, rispondi che l’informazione non è disponibile nella guida verificata e suggerisci la modalità Ricerca.',
+        'Usa esclusivamente la lingua richiesta, salvo nomi propri, sigle e codici presenti nella guida.',
         'Non chiedere né ripetere password, codici segreti o altri dati sensibili.',
         'Le operazioni che modificano dati spettano all’utente. Fornisci istruzioni concise e concrete.',
         '',
@@ -59,7 +69,7 @@ export function createA2ChatRequest({ question, guide, language = 'it', history 
             ...safeHistory.map(message => Object.freeze(message)),
             Object.freeze({ role:'user', content:boundedText(question, 1200) })
         ]),
-        options:Object.freeze({ temperature:0.2, maxTokens:384 })
+        options:Object.freeze({ temperature:0.1, maxTokens:384 })
     });
 }
 
@@ -104,6 +114,39 @@ export async function completeWithinBudget(runtime, messages, options, timeoutMs
     } finally {
         clearTimeout(timer);
     }
+}
+
+export function createA2GenerationActivity() {
+    let active = null;
+    const interruptedError = () => {
+        const error = new Error('LOCAL_AI_RUNTIME_INTERRUPTED');
+        error.code = 'LOCAL_AI_RUNTIME_INTERRUPTED';
+        error.stage = 'generation';
+        return error;
+    };
+    return Object.freeze({
+        async run(task, interrupt) {
+            const token = { interrupt, cancelled:false };
+            active = token;
+            try {
+                const result = await task();
+                if (token.cancelled) throw interruptedError();
+                return result;
+            } catch (error) {
+                if (token.cancelled && error?.code !== 'LOCAL_AI_RUNTIME_INTERRUPTED') throw interruptedError();
+                throw error;
+            }
+            finally { if (active === token) active = null; }
+        },
+        async cancel() {
+            const current = active;
+            if (!current) return false;
+            current.cancelled = true;
+            await current.interrupt?.();
+            return true;
+        },
+        isActive:() => active !== null
+    });
 }
 
 function serialize(entry, task) {
@@ -172,6 +215,7 @@ export function createLocalAiAssistantService({ language = 'it' } = {}) {
     let runtimeLeasePromise = null;
     let activeRuntime = null;
     let closed = false;
+    const generation = createA2GenerationActivity();
     const runtimeTier = tier || 'desktop32';
     const runtimeKey = `${level}:${tier || 'default'}`;
     const getLease = async () => {
@@ -212,7 +256,10 @@ export function createLocalAiAssistantService({ language = 'it' } = {}) {
             const request = createA2ChatRequest({ question, guide, language, history });
             const lease = await getLease();
             try {
-                const completion = await lease.run(() => completeWithinBudget(lease.runtime, request.messages, request.options));
+                const completion = await lease.run(() => generation.run(
+                    () => completeWithinBudget(lease.runtime, request.messages, request.options),
+                    () => lease.runtime.interrupt?.()
+                ));
                 const answer = normalizeA2Answer(completion);
                 history.push(
                     { role:'user', content:boundedText(question, 1200) },
@@ -235,7 +282,7 @@ export function createLocalAiAssistantService({ language = 'it' } = {}) {
                 throw error;
             }
         },
-        async cancel() { await activeRuntime?.interrupt?.(); },
+        async cancel() { return generation.cancel(); },
         close() {
             closed = true;
             history.length = 0;

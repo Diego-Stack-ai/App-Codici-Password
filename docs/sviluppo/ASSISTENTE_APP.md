@@ -1,10 +1,16 @@
 # Assistente app
 
+## Stabilizzazione del lease e grounding AI.2 — candidata locale 02/11/2026
+
+La distruzione del dialogo chiama ancora il percorso di annullamento, ma il servizio inoltra `interruptGenerate` soltanto quando esiste una generazione realmente attiva. Dopo una risposta conclusa la chiusura non altera il Worker e il lease condiviso resta riutilizzabile per trenta minuti nella stessa pagina e per lo stesso pacchetto. Un annullamento effettivo o un timeout ricicla invece il runtime, come richiesto dal contratto WebLLM. Lo stato mostrato durante una domanda è **Elaborazione risposta locale** e non simula un nuovo avvio del motore.
+
+Il contesto generativo resta D0 e privo di dati della Vault. Oltre alla pagina corrente comprende titolo, scopo e istruzioni verificate di massimo quattro pagine correlate selezionate dal grafo. Il messaggio di sistema le identifica come fatti vincolanti: il modello non deve cambiare tempi, soglie, condizioni o significato, non può dedurre automatismi assenti e deve usare la lingua selezionata. La temperatura applicativa è ridotta a `0.1`; se il catalogo non contiene la risposta, AI.2 deve dichiarare il limite e rinviare alla modalità **Ricerca**.
+
 ## Grafo D0 condiviso e controllo Graphify — candidata locale 02/11/2026
 
 Il catalogo `documentation-catalog.json` è la sola base di conoscenza delle pagine usata a runtime. `documentation-guide.js` ne deriva nodi pagina, relazioni esplicite e appartenenza ai percorsi guidati senza import, DOM, storage o rete. Il grafo contiene esclusivamente route canoniche, titoli, scopi e istruzioni D0; query string, valori dei controlli e dati della Vault non vengono acquisiti.
 
-La modalità **Ricerca** consulta la conoscenza D0 solo quando riconosce una richiesta di istruzioni, per esempio «come creare una scadenza», oppure una domanda sulla pagina corrente. I risultati della guida hanno tipo `guida` e restano distinti dai record Account, Azienda e Scadenza. **Codex AI.2** riceve la pagina corrente e fino a quattro riepiloghi correlati pertinenti alla domanda; i riepiloghi correlati includono soltanto titolo e scopo. Il modello non riceve l’intero grafo né acquisisce accesso alla Vault.
+La modalità **Ricerca** consulta la conoscenza D0 solo quando riconosce una richiesta di istruzioni, per esempio «come creare una scadenza», oppure una domanda sulla pagina corrente. I risultati della guida hanno tipo `guida` e restano distinti dai record Account, Azienda e Scadenza. **Codex AI.2** riceve la pagina corrente e fino a quattro riepiloghi correlati pertinenti alla domanda; i riepiloghi correlati includono titolo, scopo e istruzioni D0 verificate. Il modello non riceve l’intero grafo né acquisisce accesso alla Vault.
 
 Graphify analizza in sviluppo il sottosistema Assistente e verifica i ponti fra catalogo, controller, motore deterministico e servizio AI.2. Il suo `graph.json` è un artefatto temporaneo di audit, non un asset Hosting e non una seconda fonte runtime. Ogni variazione alla mappa funzionale deve quindi aggiornare il catalogo, superare `test:guide` e, quando cambia l’architettura dell’Assistente, essere nuovamente controllata con Graphify.
 
