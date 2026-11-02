@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     completeWithinBudget,
+    createA2GenerationActivity,
     createA2ChatRequest,
     isFatalA2RuntimeError,
     normalizeA2Answer,
@@ -29,7 +30,7 @@ test('AI.2 riceve una conversazione autonoma e non un intento per la Ricerca', (
     assert.match(request.messages[0].content, /non affermare di avere cercato/i);
     assert.match(request.messages[0].content, /Configura preferenze/);
     assert.equal(request.messages.at(-1).content, 'Qual è la differenza tra backup e archivio?');
-    assert.equal(request.options.temperature, 0.2);
+    assert.equal(request.options.temperature, 0.1);
     assert.doesNotMatch(request.messages[0].content, /semantic_search|select_result/);
 });
 
@@ -50,7 +51,51 @@ test('AI.2 riceve solo un contesto D0 limitato di pagine correlate verificate', 
     const system = request.messages[0].content;
     assert.match(system, /Pagine correlate verificate/);
     assert.match(system, /Crea o modifica scadenza/);
-    assert.doesNotMatch(system, /Dato non necessario|pageId|aggiungi_scadenza\.html/);
+    assert.match(system, /Dato non necessario nel riepilogo correlato/);
+    assert.doesNotMatch(system, /pageId|aggiungi_scadenza\.html/);
+});
+
+test('AI.2 riceve come vincolante la regola esatta sulle scadenze di oggi', () => {
+    const request = createA2ChatRequest({
+        question:'Una scadenza di oggi è già urgente?',
+        guide:{
+            page:{
+                title:'Home',
+                purpose:'Mostra i riepiloghi principali.',
+                steps:[{ body:'Una scadenza di oggi resta nelle Scadenze; passa alle Urgenze dal giorno successivo.' }]
+            },
+            related:[]
+        }
+    });
+    const system = request.messages[0].content;
+    assert.match(system, /FATTI VERIFICATI E VINCOLANTI/);
+    assert.match(system, /resta nelle Scadenze; passa alle Urgenze dal giorno successivo/);
+    assert.match(system, /senza cambiare condizioni, tempi, soglie o significato/);
+    assert.match(system, /Usa esclusivamente la lingua richiesta/);
+});
+
+test('la chiusura del popup non interrompe il runtime dopo una risposta completata', async () => {
+    const activity = createA2GenerationActivity();
+    let interrupted = 0;
+    assert.equal(await activity.run(async () => 'ok', async () => { interrupted++; }), 'ok');
+    assert.equal(activity.isActive(), false);
+    assert.equal(await activity.cancel(), false);
+    assert.equal(interrupted, 0);
+});
+
+test('annulla interrompe soltanto una generazione realmente in corso', async () => {
+    const activity = createA2GenerationActivity();
+    let release;
+    let interrupted = 0;
+    const running = activity.run(
+        () => new Promise(resolve => { release = resolve; }),
+        async () => { interrupted++; release('interrotta'); }
+    );
+    await Promise.resolve();
+    assert.equal(activity.isActive(), true);
+    assert.equal(await activity.cancel(), true);
+    await assert.rejects(running, error => error.code === 'LOCAL_AI_RUNTIME_INTERRUPTED');
+    assert.equal(interrupted, 1);
 });
 
 test('la cronologia AI.2 è limitata e non acquisisce oggetti della vault', () => {

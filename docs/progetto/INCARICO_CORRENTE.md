@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Stabilizzazione runtime e risposte di Codex AI.2 — 02/11/2026
+
+Diego autorizza con **«pubblica»** il rilascio `1.2.250` della correzione emersa dal collaudo visivo della `1.2.249`. Sono autorizzati bump patch, commit, push, pull request, integrazione in `master` e workflow manuale del solo Firebase Hosting. La chiusura del popup non deve inviare un'interruzione al Worker quando la generazione è già terminata: soltanto una risposta realmente in corso può essere annullata. Il lease del runtime resta così riutilizzabile per trenta minuti nella stessa pagina e per lo stesso pacchetto; timeout, annullamento effettivo ed errori strutturali conservano invece il riciclo già previsto.
+
+Codex AI.2 continua a non ricevere dati della Vault. Il contesto D0 comprende però anche le istruzioni verificate di massimo quattro pagine correlate pertinenti, non soltanto titolo e scopo. Il prompt tratta tali fatti come vincolanti, vieta di introdurre soglie o automatismi assenti e impone la lingua selezionata. L'interfaccia distingue l'inizializzazione del motore dall'elaborazione di una risposta. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti del modello e dati reali restano esclusi dalla pubblicazione.
+
 ## Pubblicazione grafo di conoscenza Assistente — 02/11/2026
 
 Diego ha autorizzato con **«pubblica»** il rilascio del grafo D0 condiviso già implementato e verificato. Sono autorizzati bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti del modello e dati reali restano esclusi. La candidata è `1.2.249`; prima della consegna vanno ripetuti i gate pertinenti, il controllo documentale e la verifica dell’allineamento Git.
@@ -8,7 +14,7 @@ Diego ha autorizzato con **«pubblica»** il rilascio del grafo D0 condiviso gi�
 
 Diego autorizza con **«procedi»** il raccordo fra la mappa tecnica del progetto e la conoscenza usata dall’Assistente. Graphify resta uno strumento di sviluppo per analizzare file, dipendenze e percorsi del codice: il suo grafo completo non viene distribuito al browser e non entra nei prompt. La sorgente runtime unica resta `documentation-catalog.json`, già classificata D0 e priva di dati della Vault.
 
-Dal catalogo l’app deriva un grafo immutabile di pagine e percorsi. **Ricerca** usa questo grafo soltanto per domande operative o sulla pagina corrente, continuando a cercare Account e Scadenze con il motore deterministico separato. **Codex AI.2** riceve la guida della pagina corrente e al massimo quattro pagine correlate pertinenti, limitate a titolo e scopo; non riceve record, query string, valori dei moduli, selettori DOM, password o altri segreti. Graphify viene usato nei controlli di sviluppo per verificare che catalogo, controller, ricerca e servizio AI.2 restino collegati senza creare una seconda base di conoscenza.
+Dal catalogo l’app deriva un grafo immutabile di pagine e percorsi. **Ricerca** usa questo grafo soltanto per domande operative o sulla pagina corrente, continuando a cercare Account e Scadenze con il motore deterministico separato. **Codex AI.2** riceve la guida della pagina corrente e al massimo quattro pagine correlate pertinenti, limitate a titolo, scopo e istruzioni D0 verificate; non riceve record, query string, valori dei moduli, selettori DOM, password o altri segreti. Graphify viene usato nei controlli di sviluppo per verificare che catalogo, controller, ricerca e servizio AI.2 restino collegati senza creare una seconda base di conoscenza.
 
 La Home documenta anche i comandi rapidi **Nuovo Privato**, **Nuova Scadenza**, **Nuovo Account Azienda** e **Impostazioni**. L’incremento autorizza implementazione, documentazione e verifiche locali; non autorizza da solo bump, commit, push o deploy.
 
