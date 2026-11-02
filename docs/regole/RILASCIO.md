@@ -1,5 +1,13 @@
 # Rilascio
 
+## Candidata 1.2.249 — grafo di conoscenza condiviso per Ricerca e Codex AI.2 — 02/11/2026
+
+Il catalogo verificato della guida genera ora una mappa immutabile delle pagine e dei percorsi dell’app. **Ricerca** la usa deterministicamente per rispondere alle domande operative e spiegare la pagina corrente; **Codex AI.2** riceve soltanto la scheda della pagina e un massimo di quattro riepiloghi correlati. Query string, valori della Vault, credenziali, immagini e strumenti restano esclusi.
+
+Graphify rimane uno strumento di analisi del repository e non entra nel runtime distribuito. La Home documenta anche i comandi rapidi del footer; creazione e modifica continuano a richiedere un gesto esplicito dell’utente. Il nuovo grafo non introduce autoapprendimento, scritture o raccolta di conversazioni.
+
+L’ordine **«pubblica»** autorizza bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti del modello e dati reali restano esclusi.
+
 ## Candidata 1.2.248 — separazione definitiva fra Ricerca e Codex AI.2 — 01/11/2026
 
 **Ricerca** e **Codex AI.2** hanno ora percorsi, cronologie e responsabilità indipendenti. Ricerca continua a usare soltanto il motore deterministico locale per trovare e aprire dati verificabili; Codex AI.2 usa realmente Qwen per ogni domanda conversazionale, ricevendo esclusivamente guida della pagina e breve cronologia effimera. Il modello non riceve Vault, credenziali o strumenti e non può compiere scritture.

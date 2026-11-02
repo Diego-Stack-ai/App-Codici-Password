@@ -33,3 +33,32 @@ test('una domanda di memoria successiva conserva scadenza e anno come soli crite
     const result = engine.ask('stavo cercando una scadenza del 2029 ma non mi ricordo cosa');
     assert.deepEqual(result.items.map(item => item.id), ['scadenza:2029']);
 });
+
+test('AI.1 spiega la pagina corrente dal catalogo pubblico senza interrogare i record', () => {
+    const page = {
+        title:'Home',
+        purpose:'Scegli l’area in cui lavorare.',
+        steps:[{ stepId:'step-1', body:'Dal footer puoi aprire Nuova Scadenza e Impostazioni.' }]
+    };
+    const engine = new VaultConversationEngine([], { pageKnowledge:{ page, related:[] } });
+    const result = engine.ask('A cosa serve questa pagina?');
+    assert.match(result.message, /Scegli l’area/);
+    assert.match(result.message, /Nuova Scadenza/);
+    assert.deepEqual(result.items, []);
+});
+
+test('AI.1 instrada le domande operative verso la guida senza mescolarle ai record della vault', () => {
+    const engine = new VaultConversationEngine([{
+        id:'scadenza:fixture', kind:'scadenza', title:'Assicurazione', subtitle:'Scadenza 31/03/2027',
+        scope:'privato', companyName:'', keywords:['scadenza'], href:'/dettaglio_scadenza.html?id=fixture'
+    }], {
+        searchKnowledge:query => query.includes('scadenza') ? [{
+            pageId:'aggiungi_scadenza', route:'/aggiungi_scadenza.html', title:'Crea o modifica scadenza',
+            purpose:'Crea o modifica una scadenza.', steps:['Scegli ambito e regola.'], score:60
+        }] : []
+    });
+    const result = engine.ask('Come creare una nuova scadenza?');
+    assert.equal(result.items[0].id, 'guide:aggiungi_scadenza');
+    assert.equal(result.items[0].kind, 'guida');
+    assert.doesNotMatch(result.message, /Assicurazione/);
+});

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 7,
-  "reviewedAppVersion": "1.2.248",
+  "contentVersion": 8,
+  "reviewedAppVersion": "1.2.249",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -149,13 +149,21 @@
           "stepId": "step-3",
           "bodyKey": "guide.pages.home_page.step-3",
           "target": "#app-presentation-open"
+        },
+        {
+          "stepId": "step-4",
+          "bodyKey": "guide.pages.home_page.step-4",
+          "target": null
         }
       ],
       "relatedPageIds": [
         "area_privata",
         "lista_aziende",
         "scadenze",
-        "impostazioni"
+        "impostazioni",
+        "profilo_privato",
+        "aggiungi_scadenza",
+        "form_account_azienda"
       ],
       "tutorialId": null
     },
@@ -1162,10 +1170,11 @@
       "guide.pages.imposta_nuova_password.step-1": "Scegli una password che rispetta i requisiti indicati e ripetila nel campo di conferma.",
       "guide.pages.imposta_nuova_password.step-2": "Conferma il cambio e segui il ritorno all’accesso. Questa operazione non cambia la Master Password del Vault.",
       "guide.pages.home_page.title": "Home",
-      "guide.pages.home_page.purpose": "Scegli l’area in cui lavorare e controlla i riepiloghi delle scadenze.",
+      "guide.pages.home_page.purpose": "Scegli l’area in cui lavorare, controlla i riepiloghi e avvia rapidamente le operazioni principali.",
       "guide.pages.home_page.step-1": "Apri Privato per Account e dati personali, Azienda per i dati aziendali, Scadenze per l’elenco delle date.",
       "guide.pages.home_page.step-2": "Una scadenza di oggi resta nelle Scadenze; passa alle Urgenze dal giorno successivo. Il riepilogo non sostituisce l’elenco completo.",
       "guide.pages.home_page.step-3": "La presentazione è facoltativa. Il video viene richiesto soltanto quando scegli di riprodurlo.",
+      "guide.pages.home_page.step-4": "Dal footer puoi aprire Nuovo Privato, Nuova Scadenza, Nuovo Account Azienda e Impostazioni. La creazione o modifica resta sempre una tua azione esplicita.",
       "guide.pages.area_privata.title": "Area privata",
       "guide.pages.area_privata.purpose": "Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi.",
       "guide.pages.area_privata.step-1": "Apri la categoria adatta: un memorandum conserva informazioni senza i campi Utente, Account/Codice e Password.",
@@ -1194,7 +1203,7 @@
       "guide.pages.dettaglio_account_privato.step-5": "Scegli Tessera/Carta, Camera, Galleria o Documento. Per le immagini distingui il ritaglio dall’originale; il limite per allegato è 32 MiB.",
       "guide.pages.dettaglio_account_privato.step-6": "La sezione Condivisione del dettaglio è di consultazione; tipologia, destinatari e canali si gestiscono in Crea/Modifica Account.",
       "guide.pages.profilo_privato.title": "Profilo utente",
-      "guide.pages.profilo_privato.purpose": "Organizza identità, contatti, indirizzi, documenti e tessera digitale.",
+      "guide.pages.profilo_privato.purpose": "Organizza e aggiungi i dati di identità, contatti, indirizzi, documenti e tessera digitale.",
       "guide.pages.profilo_privato.step-1": "Scegli la sezione del Profilo. Il riepilogo e la tessera digitale mostrano proiezioni diverse degli stessi dati.",
       "guide.pages.profilo_privato.step-2": "Gestisci la foto dal relativo comando. L’aiuto non legge l’immagine o i dati del Profilo.",
       "guide.pages.profilo_privato.step-3": "Telefoni ed email possono essere autonomi o collegati a un Account; il collegamento non è una nuova copia delle credenziali.",
@@ -1288,7 +1297,7 @@
       "guide.pages.impostazioni.step-4": "Mostra o nascondi l’area Azienda senza eliminare i suoi dati.",
       "guide.pages.impostazioni.step-5": "Apri l’Archivio per ripristino e cancellazione definitiva degli Account, con le conferme previste.",
       "guide.pages.impostazioni.step-6": "Gestisci le Credenziali comuni richiamabili da più Account.",
-      "guide.pages.impostazioni.step-7": "Esporta un backup cifrato e conserva la Recovery Key separatamente. Non inserire la chiave nella guida, in chat o screenshot.",
+      "guide.pages.impostazioni.step-7": "Esporta un backup cifrato oppure un Archivio portatile e conserva le relative chiavi o password separatamente. Non inserirle nella guida, in chat o screenshot.",
       "guide.pages.impostazioni.step-8": "Ripristina dal backup originale dopo l’anteprima e la tua conferma. Le impostazioni di sicurezza correnti non vengono sostituite dal backup.",
       "guide.pages.impostazioni.step-9": "Controlla la salute delle credenziali con l’analisi locale; un controllo locale non promette l’assenza di violazioni.",
       "guide.pages.impostazioni.step-10": "Consulta l’uso dei campi per organizzare i tuoi Account.",

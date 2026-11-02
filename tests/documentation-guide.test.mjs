@@ -60,6 +60,48 @@ test('snapshot e risultati immutabili non condividono oggetti modificabili con i
     assert.throws(() => { service.listJourneys()[0].pageIds.push('prova'); }, TypeError);
 });
 
+test('il grafo di conoscenza deriva solo dal catalogo pubblico e non contiene parametri o dati della vault', () => {
+    const service = createDocumentationGuide(catalog);
+    const graph = service.getKnowledgeGraph();
+    const pageNodes = graph.nodes.filter(node => node.id.startsWith('page:'));
+    assert.equal(pageNodes.length, catalog.pages.length);
+    assert.ok(graph.edges.every(edge => graph.nodes.some(node => node.id === edge.from)
+        && graph.nodes.some(node => node.id === edge.to)));
+    assert.ok(graph.edges.some(edge => edge.type === 'related'));
+    assert.ok(graph.edges.some(edge => edge.type === 'journey'));
+    const serialized = JSON.stringify(graph);
+    assert.doesNotMatch(serialized, /synthetic-record|[?&]id=/i);
+    assert.ok(pageNodes.every(node => Object.keys(node).every(key => [
+        'id', 'pageId', 'route', 'family', 'title', 'purpose', 'steps'
+    ].includes(key))));
+    assert.throws(() => { graph.nodes[0].title = 'Mutated'; }, TypeError);
+});
+
+test('la conoscenza condivisa trova le istruzioni per creare una scadenza e completa la Home', () => {
+    const service = createDocumentationGuide(catalog);
+    const matches = service.searchKnowledge('come creare una nuova scadenza');
+    assert.equal(matches[0].pageId, 'aggiungi_scadenza');
+    const home = service.getPageKnowledge('/home_page.html?record=synthetic-record', {
+        query:'come creare una nuova scadenza'
+    });
+    assert.match(home.page.steps.map(step => step.body).join(' '), /Nuova Scadenza/);
+    assert.ok(home.related.some(page => page.pageId === 'aggiungi_scadenza'));
+    assert.doesNotMatch(JSON.stringify(home), /synthetic-record/);
+});
+
+test('le domande operative comuni puntano alla pagina funzionale corretta', () => {
+    const service = createDocumentationGuide(catalog);
+    const cases = [
+        ['dove modificare un account aziendale', 'form_account_azienda'],
+        ['come configurare le impostazioni', 'impostazioni'],
+        ['come esportare un archivio portatile', 'impostazioni'],
+        ['come aggiungere i dati del profilo', 'profilo_privato']
+    ];
+    for (const [query, expectedPageId] of cases) {
+        assert.equal(service.searchKnowledge(query)[0]?.pageId, expectedPageId, query);
+    }
+});
+
 test('target assenti, ambigui, nascosti, disabilitati o smontati conservano il testo', () => {
     const guide = createDocumentationGuide(catalog).getPageGuide('impostazioni');
     const step = guide.steps[0];

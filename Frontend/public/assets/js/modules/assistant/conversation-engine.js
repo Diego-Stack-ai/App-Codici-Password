@@ -37,6 +37,8 @@ const CATEGORY_WORDS = new Set([
     'account', 'accesso', 'azienda', 'banca', 'conto', 'credenziale', 'documento', 'identita',
     'scadenza', 'scadenze', 'societa', 'utenza'
 ]);
+const CURRENT_PAGE_HELP = /\b(?:a cosa serve|cosa posso fare|come funziona|spiega(?:mi)?|aiuto)\b.*\bpagina\b|\bpagina\b.*\b(?:serve|funziona|fare|aiuto)\b/;
+const INSTRUCTIONAL_QUERY = /\b(?:come|dove)\b.*\b(?:crea|creare|aggiung|modific|configur|impost|us|trova|ved|gest|esport|archivi)/;
 
 const safeText = record => normalizeSearchText([
     record.kind, record.title, record.subtitle, record.scope, record.companyName, ...(record.keywords || [])
@@ -113,7 +115,29 @@ function pageResults(matches, offset = 0) {
 }
 
 function groupLabel(item) {
+    if (item.kind === 'guida') return 'Guida app';
     return item.scope === 'azienda' ? (item.companyName || item.subtitle.replace(/^Azienda:\s*/i, '') || 'Azienda') : 'Privato';
+}
+
+function guideMessage(guide) {
+    if (!guide) return null;
+    const steps = Array.isArray(guide.steps) ? guide.steps
+        .map(step => typeof step === 'string' ? step : step?.body)
+        .filter(Boolean).slice(0, 6) : [];
+    return [guide.purpose, ...steps.map(step => `• ${step}`)].filter(Boolean).join('\n');
+}
+
+function guideItems(matches) {
+    return matches.map(match => ({
+        id:`guide:${match.pageId}`,
+        kind:'guida',
+        title:match.title,
+        subtitle:match.purpose,
+        scope:'guida',
+        companyName:'',
+        keywords:match.steps || [],
+        href:match.route
+    }));
 }
 
 function describe(items, total = items.length, offset = 0, hasMore = false) {
@@ -176,15 +200,44 @@ function exactNamedTarget(records, query, { companyOnly = false } = {}) {
 
 export class VaultConversationEngine {
     #records;
+    #pageKnowledge;
+    #searchKnowledge;
     #lastResults = [];
     #lastMatches = [];
     #lastOffset = 0;
 
-    constructor(records) { this.#records = [...records]; }
+    constructor(records, { pageKnowledge = null, searchKnowledge = null } = {}) {
+        this.#records = [...records];
+        this.#pageKnowledge = pageKnowledge;
+        this.#searchKnowledge = typeof searchKnowledge === 'function' ? searchKnowledge : null;
+    }
 
     ask(query) {
         const normalized = normalizeSearchText(query);
         if (!normalized) return { message: 'Dimmi cosa stai cercando.', items: [] };
+        if (CURRENT_PAGE_HELP.test(normalized) && this.#pageKnowledge?.page) {
+            return { message:guideMessage(this.#pageKnowledge.page), items:[] };
+        }
+        if (INSTRUCTIONAL_QUERY.test(normalized) && this.#searchKnowledge) {
+            const matches = this.#searchKnowledge(query);
+            if (matches.length) {
+                const items = guideItems(matches.slice(0, 5));
+                const direct = matches[0];
+                const detail = matches.length === 1 || direct.score >= ((matches[1]?.score || 0) + 12)
+                    ? `\n${guideMessage(direct)}`
+                    : '';
+                this.#lastMatches = items;
+                this.#lastResults = items;
+                this.#lastOffset = 0;
+                return {
+                    message:`La guida più pertinente è “${direct.title}”.${detail}`,
+                    items,
+                    total:items.length,
+                    offset:0,
+                    hasMore:false
+                };
+            }
+        }
         const normalizedTokens = normalized.split(' ');
         const wantsOpen = normalizedTokens.some(token => OPEN_WORDS.has(token));
         const contextual = normalizedTokens.some(token => CONTEXT_WORDS.has(token));
@@ -247,6 +300,9 @@ export class VaultConversationEngine {
                 : { message: 'Risultato non disponibile.', items: [] };
         }
         if (intent.type === 'explain_page' || intent.type === 'clarify') {
+            if (intent.type === 'explain_page' && this.#pageKnowledge?.page) {
+                return { message:guideMessage(this.#pageKnowledge.page), items:[] };
+            }
             return {
                 message: intent.query || 'Non ho ancora informazioni sufficienti per rispondere.',
                 items: []
@@ -264,5 +320,12 @@ export class VaultConversationEngine {
         this.#lastMatches = this.#lastMatches.filter(record => record.id !== id);
     }
 
-    clear() { this.#records = []; this.#lastResults = []; this.#lastMatches = []; this.#lastOffset = 0; }
+    clear() {
+        this.#records = [];
+        this.#pageKnowledge = null;
+        this.#searchKnowledge = null;
+        this.#lastResults = [];
+        this.#lastMatches = [];
+        this.#lastOffset = 0;
+    }
 }
