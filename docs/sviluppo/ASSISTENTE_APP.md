@@ -1,5 +1,13 @@
 # Assistente app
 
+## Grafo D0 condiviso e controllo Graphify — candidata locale 02/11/2026
+
+Il catalogo `documentation-catalog.json` è la sola base di conoscenza delle pagine usata a runtime. `documentation-guide.js` ne deriva nodi pagina, relazioni esplicite e appartenenza ai percorsi guidati senza import, DOM, storage o rete. Il grafo contiene esclusivamente route canoniche, titoli, scopi e istruzioni D0; query string, valori dei controlli e dati della Vault non vengono acquisiti.
+
+La modalità **Ricerca** consulta la conoscenza D0 solo quando riconosce una richiesta di istruzioni, per esempio «come creare una scadenza», oppure una domanda sulla pagina corrente. I risultati della guida hanno tipo `guida` e restano distinti dai record Account, Azienda e Scadenza. **Codex AI.2** riceve la pagina corrente e fino a quattro riepiloghi correlati pertinenti alla domanda; i riepiloghi correlati includono soltanto titolo e scopo. Il modello non riceve l’intero grafo né acquisisce accesso alla Vault.
+
+Graphify analizza in sviluppo il sottosistema Assistente e verifica i ponti fra catalogo, controller, motore deterministico e servizio AI.2. Il suo `graph.json` è un artefatto temporaneo di audit, non un asset Hosting e non una seconda fonte runtime. Ogni variazione alla mappa funzionale deve quindi aggiornare il catalogo, superare `test:guide` e, quando cambia l’architettura dell’Assistente, essere nuovamente controllata con Graphify.
+
 ## Ricerca deterministica e Codex AI.2 generativa — candidata locale 01/11/2026
 
 **Ricerca** e **Codex AI.2** sono due percorsi distinti. Ricerca interroga i dati locali con regole verificabili, tolleranza agli errori e selezione dei risultati. Codex AI.2 non esegue prima una ricerca nascosta e non usa più il modello come semplice classificatore di intenti: invia al modello installato la domanda, la guida verificata della pagina corrente e una cronologia conversazionale limitata, quindi mostra direttamente la risposta generata.

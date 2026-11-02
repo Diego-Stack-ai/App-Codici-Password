@@ -21,13 +21,20 @@ function boundedText(value, maximum) {
 
 function safeGuideContext(guide) {
     if (!guide) return 'Questa pagina non ha ancora una guida verificata.';
-    const steps = Array.isArray(guide.steps)
-        ? guide.steps.slice(0, 12).map(step => `- ${boundedText(step?.body, 500)}`).filter(step => step !== '- ')
+    const current = guide.page || guide;
+    const related = Array.isArray(guide.related) ? guide.related.slice(0, 4) : [];
+    const steps = Array.isArray(current.steps)
+        ? current.steps.slice(0, 12).map(step => `- ${boundedText(step?.body, 500)}`).filter(step => step !== '- ')
         : [];
     return [
-        `Pagina: ${boundedText(guide.title, 160)}`,
-        `Scopo: ${boundedText(guide.purpose, 1200)}`,
-        ...steps
+        `Pagina: ${boundedText(current.title, 160)}`,
+        `Scopo: ${boundedText(current.purpose, 1200)}`,
+        ...steps,
+        ...(related.length ? [
+            '',
+            'Pagine correlate verificate:',
+            ...related.map(page => `- ${boundedText(page.title, 160)}: ${boundedText(page.purpose, 500)}`)
+        ] : [])
     ].join('\n');
 }
 
@@ -145,11 +152,15 @@ async function evictSharedRuntime(key) {
     try { await (await entry.promise).dispose?.(); } catch { /* Il runtime era gia' in errore. */ }
 }
 
-async function loadCurrentGuide(language) {
+async function loadCurrentGuide(language, question) {
     const response = await fetch('/assets/js/modules/assistant/documentation-catalog.json', { credentials:'omit' });
     if (!response.ok) throw new Error('LOCAL_AI_GUIDE_UNAVAILABLE');
     const guide = createDocumentationGuide(await response.json());
-    return guide.getPageGuide(location.pathname, { locale:locale(language) });
+    return guide.getPageKnowledge(location.pathname, {
+        locale:locale(language),
+        query:question,
+        limit:4
+    });
 }
 
 export function createLocalAiAssistantService({ language = 'it' } = {}) {
@@ -197,7 +208,7 @@ export function createLocalAiAssistantService({ language = 'it' } = {}) {
             return true;
         },
         async ask(question) {
-            const guide = await loadCurrentGuide(language);
+            const guide = await loadCurrentGuide(language, question);
             const request = createA2ChatRequest({ question, guide, language, history });
             const lease = await getLease();
             try {

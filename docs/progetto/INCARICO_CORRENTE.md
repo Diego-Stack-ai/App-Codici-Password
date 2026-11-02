@@ -1,5 +1,17 @@
 # Incarico corrente
 
+## Pubblicazione grafo di conoscenza Assistente — 02/11/2026
+
+Diego ha autorizzato con **«pubblica»** il rilascio del grafo D0 condiviso già implementato e verificato. Sono autorizzati bump patch, commit, push, pull request, merge e workflow manuale del solo Firebase Hosting. Functions, Firestore Rules, Storage Rules, indici, migrazioni, pacchetti del modello e dati reali restano esclusi. La candidata è `1.2.249`; prima della consegna vanno ripetuti i gate pertinenti, il controllo documentale e la verifica dell’allineamento Git.
+
+## Graphify e conoscenza condivisa delle pagine — 02/11/2026
+
+Diego autorizza con **«procedi»** il raccordo fra la mappa tecnica del progetto e la conoscenza usata dall’Assistente. Graphify resta uno strumento di sviluppo per analizzare file, dipendenze e percorsi del codice: il suo grafo completo non viene distribuito al browser e non entra nei prompt. La sorgente runtime unica resta `documentation-catalog.json`, già classificata D0 e priva di dati della Vault.
+
+Dal catalogo l’app deriva un grafo immutabile di pagine e percorsi. **Ricerca** usa questo grafo soltanto per domande operative o sulla pagina corrente, continuando a cercare Account e Scadenze con il motore deterministico separato. **Codex AI.2** riceve la guida della pagina corrente e al massimo quattro pagine correlate pertinenti, limitate a titolo e scopo; non riceve record, query string, valori dei moduli, selettori DOM, password o altri segreti. Graphify viene usato nei controlli di sviluppo per verificare che catalogo, controller, ricerca e servizio AI.2 restino collegati senza creare una seconda base di conoscenza.
+
+La Home documenta anche i comandi rapidi **Nuovo Privato**, **Nuova Scadenza**, **Nuovo Account Azienda** e **Impostazioni**. L’incremento autorizza implementazione, documentazione e verifiche locali; non autorizza da solo bump, commit, push o deploy.
+
 ## Separazione definitiva fra Ricerca e Codex AI.2 — 01/11/2026
 
 Diego ordina **«procedi»** dopo l'analisi di WebLLM Chat come riferimento tecnico. L'incremento locale elimina il routing ibrido: **Ricerca** resta il motore deterministico universale, mentre **Codex AI.2** usa realmente il modello generativo installato e non restituisce più una risposta preimpostata quando la ricerca trova risultati.

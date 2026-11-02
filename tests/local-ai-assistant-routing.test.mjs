@@ -33,6 +33,26 @@ test('AI.2 riceve una conversazione autonoma e non un intento per la Ricerca', (
     assert.doesNotMatch(request.messages[0].content, /semantic_search|select_result/);
 });
 
+test('AI.2 riceve solo un contesto D0 limitato di pagine correlate verificate', () => {
+    const request = createA2ChatRequest({
+        question:'Come creo una scadenza?',
+        guide:{
+            page:guide,
+            related:[{
+                pageId:'aggiungi_scadenza',
+                title:'Crea o modifica scadenza',
+                purpose:'Crea o modifica una scadenza partendo da una regola verificata.',
+                route:'/aggiungi_scadenza.html',
+                steps:['Dato non necessario nel riepilogo correlato.']
+            }]
+        }
+    });
+    const system = request.messages[0].content;
+    assert.match(system, /Pagine correlate verificate/);
+    assert.match(system, /Crea o modifica scadenza/);
+    assert.doesNotMatch(system, /Dato non necessario|pageId|aggiungi_scadenza\.html/);
+});
+
 test('la cronologia AI.2 è limitata e non acquisisce oggetti della vault', () => {
     const history = Array.from({ length:20 }, (_, index) => ({
         role:index % 2 ? 'assistant' : 'user', content:`Messaggio ${index}`

@@ -3,6 +3,25 @@ const ID = /^[a-z][a-z0-9_-]*$/;
 const KEY = /^guide\.[a-zA-Z0-9_.-]+$/;
 const TARGET = /^#[a-zA-Z][a-zA-Z0-9_-]*$/;
 const FAMILIES = new Set(['access', 'internal', 'public-contact']);
+const KNOWLEDGE_STOP_WORDS = new Set([
+    'a', 'al', 'alla', 'che', 'come', 'con', 'cosa', 'da', 'dei', 'del', 'della', 'di', 'dove', 'e', 'gli',
+    'il', 'in', 'la', 'le', 'mi', 'nel', 'nella', 'o', 'per', 'posso', 'puoi', 'questa', 'questo', 'serve',
+    'si', 'su', 'un', 'una'
+]);
+const KNOWLEDGE_EQUIVALENTS = new Map([
+    ['crea', 'creare', 'creo', 'aggiungi', 'aggiungere', 'nuova', 'nuovo'],
+    ['modifica', 'modificare', 'aggiorna', 'aggiornare'],
+    ['scadenza', 'scadenze', 'promemoria', 'rinnovo'],
+    ['account', 'accesso', 'credenziale', 'credenziali'],
+    ['azienda', 'aziendale', 'impresa', 'societa', 'ditta'],
+    ['privato', 'personale'],
+    ['profilo', 'anagrafica', 'identita'],
+    ['archivio', 'archiviare', 'archiviato'],
+    ['backup', 'salvataggio'],
+    ['esporta', 'esportare', 'esportazione'],
+    ['impostazioni', 'preferenze'],
+    ['configura', 'configurare', 'configurazione', 'imposta', 'impostare']
+].flatMap(group => group.map(word => [word, group])));
 
 function requireCondition(condition, code) {
     if (!condition) throw new TypeError(`GUIDE_${code}`);
@@ -19,6 +38,33 @@ function freezeTree(value) {
         Object.freeze(value);
     }
     return value;
+}
+
+function normalizeKnowledgeText(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function knowledgeTokens(value) {
+    return normalizeKnowledgeText(value).split(' ')
+        .filter(token => token.length > 1 && !KNOWLEDGE_STOP_WORDS.has(token));
+}
+
+function knowledgeScore(guide, queryTokens) {
+    if (!queryTokens.length) return 0;
+    const title = normalizeKnowledgeText(guide.title);
+    const purpose = normalizeKnowledgeText(guide.purpose);
+    const steps = normalizeKnowledgeText(guide.steps.map(step => step.body).join(' '));
+    let matched = 0;
+    const score = queryTokens.reduce((total, token) => {
+        const alternatives = KNOWLEDGE_EQUIVALENTS.get(token) || [token];
+        if (alternatives.some(candidate => title.includes(candidate))) { matched += 1; return total + 30; }
+        if (alternatives.some(candidate => purpose.includes(candidate))) { matched += 1; return total + 16; }
+        if (alternatives.some(candidate => steps.includes(candidate))) { matched += 1; return total + 10; }
+        return total;
+    }, 0);
+    return matched ? score - ((queryTokens.length - matched) * 10)
+        + (matched === queryTokens.length ? 20 : 0) : 0;
 }
 
 export function validateGuideCatalog(catalog) {
@@ -120,7 +166,73 @@ export function createDocumentationGuide(input) {
             usesFallback: hasFallback([journey.titleKey], locale), pageIds: [...journey.pageIds]
         })));
     };
-    return Object.freeze({ resolvePageId, getPageGuide, listJourneys });
+    const getKnowledgeGraph = ({ locale = catalog.fallbackLocale } = {}) => {
+        requireCondition(typeof locale === 'string' && /^[a-z]{2}(?:-[A-Z]{2})?$/.test(locale), 'LOCALE_REQUEST');
+        const nodes = catalog.pages.map(page => {
+            const guide = getPageGuide(page.pageId, { locale });
+            return {
+                id:`page:${page.pageId}`, pageId:page.pageId, route:page.route, family:page.family,
+                title:guide.title, purpose:guide.purpose, steps:guide.steps.map(step => step.body)
+            };
+        });
+        const relatedEdges = catalog.pages.flatMap(page => page.relatedPageIds.map(relatedPageId => ({
+            from:`page:${page.pageId}`, to:`page:${relatedPageId}`, type:'related'
+        })));
+        const journeyNodes = listJourneys({ locale }).map(journey => ({
+            id:`journey:${journey.journeyId}`, journeyId:journey.journeyId, title:journey.title
+        }));
+        const journeyEdges = listJourneys({ locale }).flatMap(journey => journey.pageIds.map((pageId, index) => ({
+            from:`journey:${journey.journeyId}`, to:`page:${pageId}`, type:'journey', order:index
+        })));
+        return freezeTree({
+            contentVersion:catalog.contentVersion,
+            reviewedAppVersion:catalog.reviewedAppVersion,
+            nodes:[...nodes, ...journeyNodes],
+            edges:[...relatedEdges, ...journeyEdges]
+        });
+    };
+    const searchKnowledge = (query, { locale = catalog.fallbackLocale, limit = 5 } = {}) => {
+        requireCondition(typeof locale === 'string' && /^[a-z]{2}(?:-[A-Z]{2})?$/.test(locale), 'LOCALE_REQUEST');
+        requireCondition(Number.isSafeInteger(limit) && limit > 0 && limit <= 12, 'KNOWLEDGE_LIMIT');
+        const tokens = knowledgeTokens(query);
+        if (!tokens.length) return freezeTree([]);
+        const matches = catalog.pages.map(page => {
+            const guide = getPageGuide(page.pageId, { locale });
+            return { guide, score:knowledgeScore(guide, tokens) };
+        }).filter(match => match.score > 0)
+            .sort((left, right) => right.score - left.score || left.guide.title.localeCompare(right.guide.title, locale))
+            .slice(0, limit)
+            .map(({ guide, score }) => ({
+                pageId:guide.pageId, route:guide.route, family:guide.family, title:guide.title,
+                purpose:guide.purpose, steps:guide.steps.map(step => step.body), score
+            }));
+        return freezeTree(matches);
+    };
+    const getPageKnowledge = (input, { locale = catalog.fallbackLocale, query = '', limit = 4 } = {}) => {
+        const page = getPageGuide(input, { locale });
+        if (!page) return null;
+        requireCondition(Number.isSafeInteger(limit) && limit > 0 && limit <= 8, 'KNOWLEDGE_LIMIT');
+        const candidates = [
+            ...searchKnowledge(query, { locale, limit }),
+            ...page.relatedPageIds.map(pageId => {
+                const guide = getPageGuide(pageId, { locale });
+                return {
+                    pageId:guide.pageId, route:guide.route, family:guide.family, title:guide.title,
+                    purpose:guide.purpose, steps:guide.steps.map(step => step.body), score:0
+                };
+            })
+        ];
+        const seen = new Set([page.pageId]);
+        const related = candidates.filter(candidate => {
+            if (seen.has(candidate.pageId)) return false;
+            seen.add(candidate.pageId);
+            return true;
+        }).slice(0, limit);
+        return freezeTree({ page, related });
+    };
+    return Object.freeze({
+        resolvePageId, getPageGuide, listJourneys, getKnowledgeGraph, searchKnowledge, getPageKnowledge
+    });
 }
 
 // The future view supplies non-sensitive state, without passing DOM values.

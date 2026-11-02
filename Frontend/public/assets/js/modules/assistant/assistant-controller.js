@@ -1,7 +1,7 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.248';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.248';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.249';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.249';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
@@ -15,8 +15,25 @@ import { createLocalAiPackageManager } from './local-ai-package-manager.js';
 import { readDesktop32RamConfirmation, readSelectedAdvancedTier, readSelectedLocalAi } from './local-ai-selection.js';
 import { readLocalAiRuntimeState } from './local-ai-runtime-state.js';
 import { readLocalAiRuntimeDiagnostic } from './local-ai-runtime-loader.js';
+import { createDocumentationGuide } from './documentation-guide.js';
 
 let activeController = null;
+
+async function loadDocumentationKnowledge(language) {
+    try {
+        const response = await fetch('/assets/js/modules/assistant/documentation-catalog.json', { credentials:'omit' });
+        if (!response.ok) return null;
+        const guide = createDocumentationGuide(await response.json());
+        const locale = language || 'it';
+        return {
+            pageKnowledge:guide.getPageKnowledge(location.pathname, { locale }),
+            searchKnowledge:query => guide.searchKnowledge(query, { locale, limit:5 })
+        };
+    } catch (error) {
+        console.warn('[ASSISTANT] Guida locale non disponibile; la ricerca dati resta attiva.', error?.name || 'Error');
+        return null;
+    }
+}
 
 async function createAvailableA2Service(language) {
     if (readSelectedLocalAi() !== 'A2') return { service:null, diagnostic:null };
@@ -55,7 +72,7 @@ async function createAvailableA2Service(language) {
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.248'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.249'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -72,9 +89,14 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
     if (!trigger) throw new Error('Comando Agente AI non disponibile');
     const prepare = () => {
         if (preparation) return preparation;
-        preparation = Promise.all([ensureVaultKeyMaterial(), loadVaultSearchRecords(user, { includeCompanies })]).then(([key, records]) => {
+        const language = getCurrentLanguage();
+        preparation = Promise.all([
+            ensureVaultKeyMaterial(),
+            loadVaultSearchRecords(user, { includeCompanies }),
+            loadDocumentationKnowledge(language)
+        ]).then(([key, records, documentation]) => {
             vaultKeyMaterial = key;
-            conversation = new VaultConversationEngine(records);
+            conversation = new VaultConversationEngine(records, documentation || {});
             return records.length;
         }).catch(error => {
             preparation = null;
