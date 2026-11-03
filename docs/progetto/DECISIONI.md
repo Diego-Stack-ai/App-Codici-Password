@@ -1,5 +1,11 @@
 # Decisioni
 
+## 03/11/2026 — monitoraggio sicurezza dell'app e del PC
+
+La sorveglianza finale comprende sia l'app pubblica sia il PC Windows usato per sviluppo e rilascio. Il controllo viene eseguito ogni giorno alle 07:30 Europe/Rome, resta silenzioso quando non esistono novità applicabili e non applica automaticamente patch, commit o deploy. Gli allarmi richiedono conferma su fonti primarie, correlazione con le versioni realmente usate e indicazione di una misura concreta.
+
+Il recapito preferito è e-mail; l'indirizzo rilevato dal connettore deve essere approvato esplicitamente prima dell'attivazione. WhatsApp è ammesso soltanto tramite canale Business ufficiale. Non si installano automazioni fragili sul profilo WhatsApp personale. Il monitor non accede alla Vault o a segreti dell'utente.
+
 ## 03/11/2026 — collaudo QA, contenuti utente e archivi multilingua
 
 Il collaudo pre-finale usa l'utente tecnico sintetico per popolare e verificare visivamente tutti i campi applicativi consentiti. Account condivisi e Memorandum condivisi richiedono due evidenze distinte: stato del mittente QA e stato del destinatario. La sola creazione dell'invito non dimostra ricezione, accettazione, permessi, allegati o revoca; quando il destinatario è l'utente di Diego, il suo riscontro viene registrato come prova umana separata.

@@ -1,5 +1,27 @@
 # Sicurezza
 
+## Modello delle minacce operativo e sorveglianza continua — 03/11/2026
+
+Il perimetro da proteggere comprende sia l'app pubblica sia il PC Windows usato per sviluppo e rilascio. Gli asset principali sono: contenuto cifrato della Vault, chiavi presenti soltanto sul dispositivo, identità Firebase, sessioni e fattori MFA, allegati, condivisioni, backup e archivi esportati, configurazione Firebase, credenziali di rilascio, repository GitHub e postazione di sviluppo. Il monitoraggio non deve leggere contenuti della Vault, Master Password, Recovery Key, token, cookie, allegati decifrati o dati personali.
+
+I confini di fiducia sono: browser/PWA e memoria del dispositivo; Service Worker, cache e storage locale; Firebase Authentication e App Check; Firestore e Storage protetti dalle Rules; Cloud Functions con Admin SDK; servizi e-mail/push; GitHub Actions e supply chain npm; sistema operativo, browser e strumenti del PC di sviluppo; file esportati che escono dal perimetro cifrato. L'Admin SDK bypassa le Rules e costituisce quindi un confine privilegiato che richiede autorizzazione esplicita in ogni handler.
+
+| Superficie | Percorso d'attacco prioritario | Controlli e verifiche richiesti |
+|---|---|---|
+| Login, reset, MFA e sessioni | furto account, token riusato, enumeration, recupero abusato | verifica e-mail, autenticazione recente, App Check, revoca sessioni, rate limit, messaggi non rivelatori |
+| Vault e crittografia client | XSS, dipendenza compromessa, chiave persistita, IV/AAD errati | CSP, dipendenze fissate, Web Crypto autenticato, chiavi solo in RAM, test di formato e blocco sessione |
+| Firestore e Storage | Rules eccessive, IDOR, percorso o allegato sostituito | default deny, vincolo UID/ACL, schema e dimensioni, generation/CAS, test emulatori |
+| Cloud Functions | autorizzazione mancante, payload ostile, abuso risorse, segreti nei log | Auth/App Check, allowlist, limiti, idempotenza, audit minimo, nessun plaintext o chiave |
+| Condivisioni e inviti | destinatario errato, revoca incompleta, copia residua | identità canonica, grant per destinatario, stato atomico, rotazione, prova a due utenti |
+| Allegati, QR, OCR, PDF e import | parser vulnerabile, file attivo, decompression bomb, spoofing MIME | limite tipo/dimensione, magic bytes, cifratura prima dell'upload, viewer controllato, dipendenze aggiornate |
+| Backup, ripristino e Archivio portabile | file manipolato, collisione, export in chiaro, residui temporanei | AEAD, manifest e digest, staging/CAS, avviso copia leggibile, pulizia temporanei, nessun import implicito |
+| PWA, offline e Push | cache avvelenata, vecchio codice, dati tra utenti, payload rivelatore | shell versionata, invalidazione su logout/upgrade, ciphertext locale, push minimizzato |
+| Hosting e browser | XSS, clickjacking, framing, CORS/CSP errati, vulnerabilità engine | CSP e header di sicurezza, frame-ancestors, origin allowlist, matrice Chrome/Edge/Safari aggiornata |
+| Repository e CI/CD | dipendenza o Action compromessa, segreto nel commit, deploy non revisionato | lockfile, revisioni fissate, least privilege, secret scanning, branch protection, gate prima del deploy |
+| PC di sviluppo | malware, browser/Node/Git vulnerabili, furto token, servizio esposto | patch Windows/browser/toolchain, cifratura disco, account protetto, credenziali in store sicuro, firewall e nessun listener pubblico |
+
+La sorveglianza quotidiana correla gli advisory soltanto con componenti e versioni realmente presenti. Le notizie sociali sono segnali, non prove: ogni allarme richiede una fonte primaria del produttore o un registro autorevole, verifica dell'applicabilità e un'azione concreta. Nessuna patch, modifica, commit o pubblicazione è automatica.
+
 ## Anteprime temporanee e copie leggibili dell'Archivio portatile — 25/10/2026
 
 Il visualizzatore non estrae automaticamente allegati in chiaro. Anteprima, salvataggio singolo, salvataggio collettivo ed esportazioni JSON/CSV/ODS/XLSX sono azioni esplicite; prima della persistenza viene mostrato che il risultato è decifrato e deve essere custodito in un luogo sicuro. Gli allegati vengono riletti e autenticati dal contenitore prima dell'uso.

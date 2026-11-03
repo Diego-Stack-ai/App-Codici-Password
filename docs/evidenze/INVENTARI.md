@@ -1,5 +1,13 @@
 # Inventari
 
+## 03/11/2026 — baseline componenti per sorveglianza sicurezza
+
+La baseline rilevata sul PC di sviluppo comprende Windows con toolchain locale, Node.js `24.22.1`, npm `11.19.1`, Git for Windows `2.47.0`, GitHub CLI `2.101.0`, Firebase CLI `15.30.1`, Chrome `156.0.8078.80` ed Edge `156.0.4314.58`. La versione di Windows non è stata acquisita dal processo sandbox e deve essere letta dal monitor locale con un controllo che non richieda dati personali.
+
+Il runtime Firebase Functions è dichiarato Node.js `22`; le dipendenze server principali sono `firebase-admin ^14.3.0`, `firebase-functions ^7.3.2` e `nodemailer ^9.1.1`. Il progetto web fissa nel lockfile, fra le altre, Firebase `12.18.0`, Firebase Tools `15.28.2`, Playwright `1.55.0`, Tesseract.js `7.0.0`, ZXing Browser `^0.2.1`, pdf-lib `1.17.1` e fontkit `1.1.1`. Il lockfile, non il solo `package.json`, resta l'autorità per la versione transitiva effettiva.
+
+Le superfici censite sono Firebase Hosting, Authentication, App Check, Firestore, Storage, Cloud Functions, Messaging/Push, Service Worker e cache offline, allegati e parser, condivisioni, backup/ripristino, Archivio portabile, GitHub Actions, dipendenze npm e PC di sviluppo. L'inventario viene aggiornato quando cambiano manifest, lockfile, workflow, runtime o strumenti installati.
+
 ## 24/10/2026 — inventario Archivio portatile degli allegati a blocchi
 
 - Ogni record con `encryption.chunked: true` e manifest valido produce una sola voce logica, anche se Storage contiene più oggetti.
