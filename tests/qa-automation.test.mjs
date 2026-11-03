@@ -31,7 +31,8 @@ test('provisioner e runner non stampano né incorporano i segreti', async () => 
         readFile(new URL('../scripts/test-qa-release-browser.mjs', import.meta.url), 'utf8'),
         readFile(new URL('../scripts/test-qa-page-matrix-browser.mjs', import.meta.url), 'utf8'),
         readFile(new URL('../scripts/populate-qa-profile-browser.mjs', import.meta.url), 'utf8'),
-        readFile(new URL('../scripts/populate-qa-profile-links-browser.mjs', import.meta.url), 'utf8')
+        readFile(new URL('../scripts/populate-qa-profile-links-browser.mjs', import.meta.url), 'utf8'),
+        readFile(new URL('../scripts/populate-qa-company-browser.mjs', import.meta.url), 'utf8')
     ]);
     const joined = sources.join('\n');
     assert.doesNotMatch(joined, /console\.log\([^\n]*(accountPassword|masterPassword)/);
@@ -55,6 +56,18 @@ test('il collaudo dei collegamenti Profilo usa UI reale e fixture non raggiungib
     assert.match(source, /#profile-account-picker/);
     assert.match(source, /#btn-save-footer/);
     assert.match(source, /#save-btn/);
+});
+
+test('il collaudo Azienda usa UI reale, recapiti non raggiungibili e password sintetiche', async () => {
+    const source = await readFile(new URL('../scripts/populate-qa-company-browser.mjs', import.meta.url), 'utf8');
+    assert.match(source, /QA Azienda Sintetica SRL/);
+    assert.match(source, /@appcodici-password\.invalid/);
+    assert.match(source, /QA-PASSWORD-NON-REALE/);
+    assert.match(source, /company-contacts-masked\.png/);
+    assert.match(source, /#btn-save/);
+    assert.match(source, /#btn-add-sede/);
+    assert.match(source, /#btn-add-email/);
+    assert.doesNotMatch(source, /firebase-config|updateDoc|setDoc|addDoc|deleteDoc/);
 });
 
 test('il popolamento profilo usa solo UI e recapiti sintetici non raggiungibili', async () => {
