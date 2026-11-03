@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Sorveglianza sicurezza app e PC — 03/11/2026
+
+Diego approva l'estensione del perimetro dal solo servizio pubblico al PC Windows di sviluppo e conferma il controllo quotidiano alle 07:30 Europe/Rome. Il monitor deve usare l'inventario reale, verificare le notizie su fonti primarie, evitare duplicati e restare silenzioso senza azioni necessarie. Non può leggere dati Vault né installare aggiornamenti, modificare il repository o pubblicare senza un nuovo ordine.
+
+Gli avvisi devono arrivare per e-mail e, in futuro, anche sul telefono tramite WhatsApp soltanto se sarà configurata un'integrazione Business ufficiale. L'indirizzo Gmail individuato richiede ancora conferma esplicita prima di autorizzare invii automatici; fino ad allora l'automazione resta non attivata.
+
 ## Collaudo visivo completo con utente sintetico — 03/11/2026
 
 Diego autorizza l'uso dell'utente tecnico di prova per un collaudo end-to-end visivo, pagina per pagina, eseguito come un utente umano. Possono essere creati dati esclusivamente sintetici e inequivocabilmente fittizi in tutti i campi applicativi popolabili, inclusi i riferimenti necessari a esercitare collegamenti, Widget, Documenti, allegati, Account, Memorandum, Aziende, Scadenze e archivi. Le fixture devono essere riconoscibili, idempotenti o rimovibili e confinate all'utente QA; non devono usare identità, indirizzi, documenti, recapiti, credenziali o contenuti appartenenti a persone reali.

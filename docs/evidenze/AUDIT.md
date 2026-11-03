@@ -1,5 +1,13 @@
 # Audit
 
+## SEC-MON-01 — modello delle minacce e monitoraggio quotidiano — 03/11/2026
+
+È stata avviata una ricognizione repository-grounded delle superfici d'attacco dell'app pubblica e del PC Windows di sviluppo. Sono stati verificati manifest, lockfile, runtime Functions, workflow, header Hosting, Rules, callable con App Check e versioni locali della toolchain. La ricognizione non equivale a penetration test né certifica assenza di vulnerabilità; serve a delimitare asset, confini di fiducia, percorsi d'abuso e fonti da monitorare.
+
+Il controllo ha rilevato CSP e header Hosting centralizzati, Rules con vincoli di identità e numerosi callable con `enforceAppCheck: true`. Questi sono controlli presenti, non prove sufficienti di configurazione produttiva o assenza di IDOR, XSS, race, parser vulnerabili o supply-chain compromise. Restano necessari scan repository dedicato, verifica delle configurazioni effettivamente distribuite, test fisici dei browser supportati e audit indipendente.
+
+È progettato un heartbeat quotidiano alle 07:30 Europe/Rome, silenzioso in assenza di novità applicabili e incapace di modificare autonomamente il progetto. L'attivazione dell'invio e-mail resta sospesa finché il proprietario non conferma esplicitamente l'indirizzo destinatario; non è disponibile un connettore WhatsApp ufficiale e nessuna automazione alternativa dell'account personale è autorizzata.
+
 ## AUDIT-SKILL-01 — registro preventivo di metodo e rischio — 11/10/2026
 
 Stato: **pianificato, non eseguito**. Non risultano ancora installate o utilizzate nel progetto le skill `security-best-practices`, `security-threat-model`, `playwright`, `screenshot` o il plugin Codex Security. Le sole skill operative documentate in precedenza restano `astra-flash-orchestrator` e `computer-use`, installate fuori dal repository.

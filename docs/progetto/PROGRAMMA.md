@@ -1,5 +1,17 @@
 # Programma
 
+## SEC-MON-01 — mappa d'attacco e sorveglianza permanente — 03/11/2026
+
+1. mantenere l'inventario versionato di applicazione, runtime, dipendenze, browser e toolchain del PC;
+2. completare threat model e scan di sicurezza repository-wide, distinguendo controllo presente, finding validato e rischio residuo;
+3. verificare configurazione reale di Hosting, Auth, App Check, Rules, Functions, Storage, Push e workflow di rilascio;
+4. eseguire ogni giorno alle 07:30 il confronto con advisory ufficiali, CISA KEV, NVD e GitHub Security Advisories;
+5. restare silenziosi senza novità applicabili; inviare allarme solo con versione, impatto, prova, mitigazione e fonte;
+6. sottoporre ogni correzione a ramo, revisione, test, autorizzazione e rilascio tracciato;
+7. aggiungere WhatsApp soltanto dopo disponibilità di un'integrazione Business ufficiale.
+
+Questo blocco accompagna la bonifica pre-finale e prosegue dopo il rilascio: non sostituisce aggiornamenti automatici del sistema operativo o dei browser, audit indipendente, test fisici e gestione incidenti.
+
 ## COLLAUDO-QA-FINALE-01 — matrice funzionale e linguistica — 03/11/2026
 
 **Obiettivo:** dimostrare con l'utente tecnico sintetico che ogni percorso dell'app è comprensibile e funzionante dall'interfaccia reale, non soltanto coperto dal codice o da test isolati.

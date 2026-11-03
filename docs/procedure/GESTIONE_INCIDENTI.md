@@ -1,5 +1,15 @@
 # Gestione incidenti
 
+## Sorveglianza quotidiana e canali di allarme — 03/11/2026
+
+Ogni giorno alle 07:30 Europe/Rome viene controllata la sicurezza dell'app e del PC Windows di sviluppo. L'inventario deriva dai manifest, lockfile, workflow, configurazioni e versioni installate; comprende Windows, Chrome, Edge, Safari/WebKit per i client supportati, Node.js, npm, Firebase, Google Cloud, Git, GitHub, Actions, Firebase CLI e le librerie realmente usate dall'app.
+
+Le fonti prioritarie sono gli advisory ufficiali dei produttori, GitHub Security Advisories, CISA KEV e NVD. Blog, social e Instagram possono suggerire una ricerca, ma non producono da soli un allarme. Se non emerge una novità applicabile il controllo resta silenzioso. Un allarme deve indicare componente e versione, advisory/CVE, gravità, sfruttamento noto, percorso interessato, mitigazione immediata, aggiornamento consigliato e fonti.
+
+Il canale approvato è l'e-mail personale del proprietario, previa conferma esplicita dell'indirizzo destinatario. WhatsApp sarà aggiunto soltanto tramite integrazione Business ufficiale; sono vietate automazioni non autorizzate dell'account personale. Un guasto del monitor o una decisione necessaria viene riportato nella chat di manutenzione. Il monitor non applica patch, non cambia configurazioni e non esegue commit, push o deploy.
+
+Alla ricezione di un allarme: 1) confermare versione e raggiungibilità del componente; 2) classificare esposizione e dati coinvolti; 3) applicare eventuale mitigazione temporanea; 4) preparare aggiornamento in ramo revisionabile; 5) eseguire test di sicurezza e regressione; 6) pubblicare soltanto dopo autorizzazione; 7) registrare esito e versione corretta. Un CVE non applicabile viene documentato come tale per evitare falsi allarmi ripetuti.
+
 > Revisione documentale: 23/09/2026. Base delle fonti: `2900ccc0bbd83997de8e50d260b1868f33bc5e38`.
 > Indice e autorità: [LEGGIMI](../LEGGIMI.md). Stato verificato e limiti: [STATO](../progetto/STATO.md).
 
