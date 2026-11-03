@@ -12,13 +12,7 @@ const walk = async dir => (await Promise.all((await readdir(dir, { withFileTypes
 }))).flat();
 
 const files = await walk(publicRoot);
-const opaqueLocalAiRuntimeFiles = new Set(['transformers.bundle.js', 'web-llm.js']);
-const textFiles = files.filter(file =>
-  /\.(?:html|js|css|json)$/i.test(file) &&
-  !((file.includes(`${path.sep}assets${path.sep}local-ai${path.sep}`)
-    || file.includes(`${path.sep}assets${path.sep}local-ai-packages${path.sep}`))
-    && opaqueLocalAiRuntimeFiles.has(path.basename(file)))
-);
+const textFiles = files.filter(file => /\.(?:html|js|css|json)$/i.test(file));
 const errors = [];
 
 for (const file of textFiles) {

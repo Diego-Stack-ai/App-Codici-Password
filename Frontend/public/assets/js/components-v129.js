@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.251';
+import { auth } from './firebase-config.js?v=1.2.252';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -248,14 +248,14 @@ export async function initComponents() {
 
             if (!isAuth) {
                 footerLeft.appendChild(createElement('button', {
-                    id: 'ai-assistant-status',
+                    id: 'search-status',
                     type: 'button',
-                    className: 'ai-assistant-status btn-footer-secondary hidden',
-                    title: 'Apri assistente AI',
-                    ariaLabel: 'Apri assistente AI'
+                    className: 'search-status btn-footer-secondary hidden',
+                    title: 'Apri Ricerca',
+                    ariaLabel: 'Apri Ricerca'
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'smart_toy' }),
-                    createElement('span', { className: 'ai-assistant-label', textContent: 'AI attiva' })
+                    createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'search' }),
+                    createElement('span', { className: 'search-status-label', textContent: 'Ricerca' })
                 ]));
             }
 

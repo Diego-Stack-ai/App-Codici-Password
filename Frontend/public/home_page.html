@@ -3,7 +3,7 @@
 
 <head>
   <script src="assets/js/private-auth-gate.js"></script>
-  <script src="assets/js/home-bootstrap.js?v=1.2.251"></script>
+  <script src="assets/js/home-bootstrap.js?v=1.2.252"></script>
   <!-- Anti-flicker & Theme Master (V3.9) -->
   <script src="assets/js/theme-init.js"></script>
   <meta charset="UTF-8">
@@ -11,19 +11,19 @@
   <title>Home Page</title>
 
   <!-- PWA / Mobile Capable -->
-  <link rel="manifest" href="manifest.json?v=1.2.251" />
+  <link rel="manifest" href="manifest.json?v=1.2.252" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- Design System Master (PROTOCOLLO V5.0) -->
-  <link rel="stylesheet" href="assets/css/core.css?v=1.2.251">
+  <link rel="stylesheet" href="assets/css/core.css?v=1.2.252">
   <link rel="stylesheet" href="assets/css/core_fonts.css">
   <link rel="stylesheet" href="assets/css/core_fascie.css">
-  <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.2.251">
-  <link rel="stylesheet" href="assets/css/home_page.css?v=1.2.251">
-  <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.251">
+  <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.2.252">
+  <link rel="stylesheet" href="assets/css/home_page.css?v=1.2.252">
+  <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.252">
 </head>
 
 <body data-private-auth hidden inert class="base-bg home-page" data-ui-model="hub">
@@ -80,15 +80,9 @@
           </a>
         </div>
 
-        <button id="app-presentation-open" class="app-presentation-open" type="button"
-          aria-haspopup="dialog" aria-controls="app-presentation-modal">
-          <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">play_circle</span>
-          <span>Presentazione dell’app</span>
-        </button>
-
         <!-- Versione applicazione: valorizzata dalla configurazione centrale -->
         <div class="version-display">
-          APP VERSION: <span id="app-version-label" data-app-version>v1.2.251</span>
+          APP VERSION: <span id="app-version-label" data-app-version>v1.2.252</span>
         </div>
       </div>
 
@@ -96,33 +90,6 @@
 
     <!-- FOOTER (V3.9 Semantic) -->
     <footer id="footer-placeholder" class="base-footer"></footer>
-  </div>
-
-  <div id="app-presentation-modal" class="app-presentation-modal" role="dialog" aria-modal="true"
-    aria-labelledby="app-presentation-title" hidden>
-    <div class="app-presentation-backdrop" data-presentation-close></div>
-    <section class="app-presentation-panel">
-      <header class="app-presentation-heading">
-        <div>
-          <h2 id="app-presentation-title">Codici &amp; Password</h2>
-          <p>Anteprima della presentazione</p>
-        </div>
-        <button class="app-presentation-close" type="button" data-presentation-close
-          aria-label="Chiudi presentazione">
-          <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">close</span>
-        </button>
-      </header>
-      <div id="app-presentation-stage" class="app-presentation-stage">
-        <div class="app-presentation-loading" role="status">
-          <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">movie</span>
-          <span>Premi Riproduci per caricare il video protetto.</span>
-        </div>
-      </div>
-      <button id="app-presentation-play" class="app-presentation-play" type="button">
-        <span class="material-symbols-outlined notranslate" aria-hidden="true" translate="no">play_arrow</span>
-        <span>Riproduci</span>
-      </button>
-    </section>
   </div>
 
   <!-- Scripts -->

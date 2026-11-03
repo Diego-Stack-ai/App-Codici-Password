@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.251';
+const CACHE_NAME = 'codex-shell-v1.2.252';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./offline-assets.js');
@@ -24,9 +24,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil((async () => {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames
-            .filter(name => name.startsWith(APP_CACHE_PREFIX)
-                && !name.startsWith('codex-local-ai-')
-                && name !== CACHE_NAME)
+            .filter(name => name.startsWith(APP_CACHE_PREFIX) && name !== CACHE_NAME)
             .map(name => caches.delete(name)));
         await self.clients.claim();
     })());
@@ -39,16 +37,6 @@ async function fetchAndCache(request) {
         await cache.put(request, response.clone());
     }
     return response;
-}
-
-async function matchVerifiedLocalAiPackage(request) {
-    const names = await caches.keys();
-    const readyNames = names.filter(name => name.startsWith('codex-local-ai-') && name.endsWith('-ready'));
-    for (const name of readyNames) {
-        const response = await (await caches.open(name)).match(request);
-        if (response) return response;
-    }
-    return null;
 }
 
 async function navigationFallback(request) {
@@ -67,25 +55,6 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
-
-    // I contenuti protetti e aggiornabili non devono mai essere conservati
-    // nella cache della PWA. La richiesta mantiene così Authorization e
-    // raggiunge sempre l'endpoint, che restituisce Cache-Control: no-store.
-    if (url.pathname === '/protected-media/presentation') return;
-
-    // I pacchetti AI locali vengono inseriti nelle cache dedicate soltanto
-    // dopo verifica di dimensione e SHA-256. Il service worker li serve
-    // offline senza copiarli nella shell e senza accettare file non verificati.
-    if (url.pathname.startsWith('/assets/local-ai/') || url.pathname.startsWith('/assets/local-ai-packages/')) {
-        event.respondWith((async () => {
-            // Non usare caches.match(): attraverserebbe anche le cache interne
-            // di WebLLM e potrebbe servire un artefatto derivato vecchio. Solo i
-            // pacchetti promossi dopo byte/SHA-256 sono una sorgente attendibile.
-            const cached = await matchVerifiedLocalAiPackage(request);
-            return cached || fetch(request, { cache: 'no-store', credentials: 'omit' });
-        })());
-        return;
-    }
 
     // Solo le risorse dichiarate nella shell possono entrare nella Cache API.
     // Evita di conservare accidentalmente future risposte private same-origin.

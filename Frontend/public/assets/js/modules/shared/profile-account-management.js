@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.251';
+import { auth, db } from '../../firebase-config.js?v=1.2.252';
 import { doc, runTransaction, deleteField } from '/assets/js/vendor/firebase-runtime.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -9,7 +9,7 @@ import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferenc
 import { findCompanyProfileContact, companyContactLinkPatch, companyAccountReferences } from '../azienda/company-profile-model.js';
 
 const accountRef = (uid, id, companyId = '') => doc(db, 'users', uid, ...(companyId ? ['aziende', companyId] : []), 'accounts', id);
-const eligible = account => account && !account.isArchived && !account._isGuest && !account.shared && account.visibility !== 'shared' && !account.isMemo && !account.hasMemo && !account.isMemoShared && !['memo', 'memorandum'].includes(account.type);
+const eligible = account => account && !account.isArchived && !account._isGuest;
 
 // Cambia soltanto i riferimenti: credenziali, contatto e altri collegamenti rimangono intatti.
 export async function replaceAccountLink({ contact, type, sourceCompanyId = '', parentAddressId = '' }, selection = null) {

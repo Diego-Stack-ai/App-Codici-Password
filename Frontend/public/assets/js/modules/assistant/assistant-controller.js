@@ -1,22 +1,13 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.251';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.251';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.252';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.252';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
 import { archiveConfirmMessage } from '../settings/archive-account-model.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t, getCurrentLanguage } from '../../translations.js';
-import { createLocalAiAssistantService } from './local-ai-assistant-service.js';
-import { createNativeAi2AssistantService } from './native-ai2-assistant-service.js';
-import { readNativeAi2Pairing } from './native-ai2-client.js';
-import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
-import { getLocalAiPackageCandidate } from './local-ai-package-catalog.js';
-import { createLocalAiPackageManager } from './local-ai-package-manager.js';
-import { readDesktop32RamConfirmation, readSelectedAdvancedTier, readSelectedLocalAi } from './local-ai-selection.js';
-import { readLocalAiRuntimeState } from './local-ai-runtime-state.js';
-import { readLocalAiRuntimeDiagnostic } from './local-ai-runtime-loader.js';
 import { createDocumentationGuide } from './documentation-guide.js';
 
 let activeController = null;
@@ -29,63 +20,22 @@ async function loadDocumentationKnowledge(language) {
         const locale = language || 'it';
         return {
             pageKnowledge:guide.getPageKnowledge(location.pathname, { locale }),
-            searchKnowledge:query => guide.searchKnowledge(query, { locale, limit:5 })
+            searchKnowledge:query => guide.searchKnowledge(query, {
+                locale,
+                limit:5,
+                fromPage:location.pathname
+            })
         };
     } catch (error) {
-        console.warn('[ASSISTANT] Guida locale non disponibile; la ricerca dati resta attiva.', error?.name || 'Error');
+        console.warn('[SEARCH] Guida locale non disponibile; la ricerca dati resta attiva.', error?.name || 'Error');
         return null;
-    }
-}
-
-async function createAvailableA2Service(language) {
-    if (readSelectedLocalAi() !== 'A2') return { service:null, diagnostic:null };
-    if (!readDesktop32RamConfirmation()) return { service:null, diagnostic:null };
-    let nativeDiagnostic = null;
-    if (readNativeAi2Pairing()) {
-        const service = createNativeAi2AssistantService({ language });
-        try {
-            await service.prepare();
-            return { service, diagnostic:null };
-        } catch (error) {
-            await service.close();
-            nativeDiagnostic = readLocalAiRuntimeDiagnostic(error, 'native-connect');
-        }
-    }
-    try {
-        const tier = readSelectedAdvancedTier();
-        const capabilities = await probeLocalAiCapabilities();
-        if (capabilities.A2.status !== 'candidate' || !capabilities.A2.allowedTiers.includes(tier)) {
-            return { service:null, diagnostic:{ code:'LOCAL_AI_CAPABILITY_UNAVAILABLE', stage:'capability-check', errorName:'Error' } };
-        }
-        const candidate = getLocalAiPackageCandidate('A2', { tier });
-        if (!candidate || candidate.status !== 'available') return { service:null, diagnostic:nativeDiagnostic };
-        const status = await createLocalAiPackageManager().status('A2', {
-            manifest: candidate.manifest,
-            baseUrl: candidate.baseUrl,
-            legacyLevel: candidate.legacyLevel
-        });
-        const storedState = readLocalAiRuntimeState('A2', tier);
-        if (storedState?.status === 'failed') return { service:null, diagnostic:nativeDiagnostic || storedState.diagnostic };
-        const packageReady = status.installed && status.verified;
-        if (!packageReady) return { service:null, diagnostic:nativeDiagnostic };
-        const service = createLocalAiAssistantService({ language });
-        try {
-            await service.prepare();
-            return { service, diagnostic:null };
-        } catch (error) {
-            service.close();
-            return { service:null, diagnostic:readLocalAiRuntimeDiagnostic(error, 'runtime-initialization') };
-        }
-    } catch (error) {
-        console.warn('[ASSISTANT] Codex AI.2 non disponibile; Ricerca resta attiva.', error?.name || 'Error');
-        return { service:null, diagnostic:nativeDiagnostic || readLocalAiRuntimeDiagnostic(error, 'preflight') };
     }
 }
 
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.251'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.252'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
@@ -96,10 +46,9 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
     let conversation = null;
     let preparation = null;
     let dialog = null;
-    let advanced = null;
-    const close = () => { dialog?.destroy(); dialog = null; void advanced?.close(); advanced = null; };
-    const trigger = document.getElementById('ai-assistant-status');
-    if (!trigger) throw new Error('Comando Agente AI non disponibile');
+    const close = () => { dialog?.destroy(); dialog = null; };
+    const trigger = document.getElementById('search-status');
+    if (!trigger) throw new Error('Comando Ricerca non disponibile');
     const prepare = () => {
         if (preparation) return preparation;
         const language = getCurrentLanguage();
@@ -118,7 +67,7 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
         return preparation;
     };
     const open = async () => {
-        const label = trigger.querySelector('.ai-assistant-label');
+        const label = trigger.querySelector('.search-status-label');
         const previousLabel = label?.textContent;
         trigger.disabled = true;
         trigger.setAttribute('aria-busy', 'true');
@@ -131,15 +80,8 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             const offlineNotice = !navigator.onLine && !readiness?.complete
                 ? 'Ricerca sui dati disponibili offline: alcuni risultati potrebbero mancare.'
                 : '';
-            const language = getCurrentLanguage();
-            const advancedAvailability = await createAvailableA2Service(language);
-            advanced = advancedAvailability.service;
             dialog = createAssistantUI({
                 onAsk: query => conversation.ask(query),
-                onExplain: advanced ? Object.assign(
-                    query => advanced.ask(query),
-                    { cancel:() => advanced?.cancel() }
-                ) : null,
                 onClose: close,
                 resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
                 onArchive: async item => {
@@ -158,18 +100,17 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
                     }
                 },
                 offlineNotice,
-                unavailableDiagnostic:advancedAvailability.diagnostic,
-                language
+                language:getCurrentLanguage()
             });
         } catch (error) {
-            console.warn('[ASSISTANT] Preparazione non riuscita.', error);
+            console.warn('[SEARCH] Preparazione non riuscita.', error);
             if (label) label.textContent = 'Non disponibile';
         } finally {
             trigger.disabled = false;
             trigger.removeAttribute('aria-busy');
             trigger.classList.remove('assistant-preparing');
             window.setTimeout(() => {
-                if (label) label.textContent = previousLabel || 'AI attiva';
+                if (label) label.textContent = previousLabel || 'Ricerca';
             }, 1200);
         }
     };

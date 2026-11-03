@@ -32,13 +32,6 @@
     ],
     "rewrites": [
       {
-        "source": "/protected-media/presentation",
-        "function": {
-          "functionId": "getAppPresentation",
-          "region": "europe-west1"
-        }
-      },
-      {
         "source": "/home",
         "destination": "/home_page.html"
       },
@@ -94,15 +87,6 @@
         ]
       },
       {
-        "source": "/assets/local-ai-packages/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
-          }
-        ]
-      },
-      {
         "source": "**",
         "headers": [
           {
@@ -119,11 +103,11 @@
           },
           {
             "key": "Permissions-Policy",
-            "value": "camera=(self), microphone=(self), geolocation=(), loopback-network=(self), local-network=()"
+            "value": "camera=(self), microphone=(self), geolocation=(), local-network=()"
           },
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://cdnjs.cloudflare.com https://www.google.com https://www.recaptcha.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net; media-src 'self' blob: https://firebasestorage.googleapis.com; connect-src 'self' http://127.0.0.1:32145 https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://europe-west1-appcodici-password.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://fonts.gstatic.com https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net; frame-src https://www.google.com https://www.recaptcha.net https://appcodici-password.firebaseapp.com; frame-ancestors 'none'; worker-src 'self' blob:; manifest-src 'self';"
+            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://www.google.com https://www.recaptcha.net https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://www.gstatic.com https://www.google.com https://www.recaptcha.net; media-src 'self' blob: https://firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://europe-west1-appcodici-password.cloudfunctions.net https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://fonts.gstatic.com https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net; frame-src https://www.google.com https://www.recaptcha.net https://appcodici-password.firebaseapp.com; frame-ancestors 'none'; worker-src 'self' blob:; manifest-src 'self';"
           }
         ]
       }

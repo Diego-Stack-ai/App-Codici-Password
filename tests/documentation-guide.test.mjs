@@ -69,12 +69,41 @@ test('il grafo di conoscenza deriva solo dal catalogo pubblico e non contiene pa
         && graph.nodes.some(node => node.id === edge.to)));
     assert.ok(graph.edges.some(edge => edge.type === 'related'));
     assert.ok(graph.edges.some(edge => edge.type === 'journey'));
+    assert.ok(graph.edges.some(edge => edge.type === 'control'));
+    const controlNodes = graph.nodes.filter(node => node.id.startsWith('control:'));
+    assert.ok(controlNodes.some(node => node.target === '#btn-change-master-password'
+        && node.pageId === 'impostazioni'));
     const serialized = JSON.stringify(graph);
     assert.doesNotMatch(serialized, /synthetic-record|[?&]id=/i);
     assert.ok(pageNodes.every(node => Object.keys(node).every(key => [
         'id', 'pageId', 'route', 'family', 'title', 'purpose', 'steps'
     ].includes(key))));
     assert.throws(() => { graph.nodes[0].title = 'Mutated'; }, TypeError);
+});
+
+test('la ricerca usa collegamenti fra pagina, pulsante e destinazione', () => {
+    const service = createDocumentationGuide(catalog);
+    const [match] = service.searchKnowledge('dove trovo il pulsante per cambiare la master password', {
+        fromPage:'/home_page.html'
+    });
+    assert.equal(match.pageId, 'impostazioni');
+    assert.equal(match.matchedStep.target, '#btn-change-master-password');
+    assert.deepEqual(match.path.map(page => page.pageId), ['home_page', 'impostazioni']);
+    assert.match(match.matchedStep.body, /Master Password/);
+});
+
+test('un controllo collegato prevale sulle pagine che contengono soltanto parole simili', () => {
+    const service = createDocumentationGuide(catalog);
+    const [match] = service.searchKnowledge('dove gestisco i destinatari della scadenza', {
+        fromPage:'home_page'
+    });
+    assert.equal(match.pageId, 'aggiungi_scadenza');
+    assert.equal(match.matchedStep.target, '#btn-manage-deadline-contacts');
+});
+
+test('la ricerca tollera un piccolo errore di digitazione senza usare un modello AI', () => {
+    const [match] = createDocumentationGuide(catalog).searchKnowledge('come creo una scadnza');
+    assert.equal(match.pageId, 'aggiungi_scadenza');
 });
 
 test('la conoscenza condivisa trova le istruzioni per creare una scadenza e completa la Home', () => {

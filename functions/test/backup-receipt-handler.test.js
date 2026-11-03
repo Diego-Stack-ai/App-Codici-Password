@@ -8,7 +8,7 @@ const previewApi = require('../backup-restore-preview');
 const authorityApi = require('../backup-restore-authority');
 const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
-const handler = source.slice(source.indexOf('exports.restoreBackupChunk ='), source.indexOf('exports.getAppPresentation ='));
+const handler = source.slice(source.indexOf('exports.restoreBackupChunk ='), source.indexOf('// Segreti cifrati'));
 const original = {expectedOwnerUid: 'owner', operationId: 'restore:fixture:0', backupId: 'fixture', chunkIndex: 0,
   chunkCount: 1, mode: 'apply', confirmation: 'RESTORE_VALIDATED',
   records: [{scope: 'private-account', id: 'record', data: {password: 'synthetic-cipher'}, expectedVersion: {exists: false}}]};

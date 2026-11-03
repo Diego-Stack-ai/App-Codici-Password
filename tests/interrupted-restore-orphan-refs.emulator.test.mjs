@@ -43,7 +43,7 @@ const purgeLock = requireFunctions('./archive-purge-global-lock.js');
 
 const indexSource = await read('../functions/index.js');
 const restoreSlice = indexSource.slice(indexSource.indexOf('exports.restoreBackupChunk'),
-    indexSource.indexOf('\nexports.', indexSource.indexOf('exports.restoreBackupChunk') + 1));
+    indexSource.indexOf('// Segreti cifrati', indexSource.indexOf('exports.restoreBackupChunk') + 1));
 const adminApp = initializeApp({projectId: PROJECT_ID}, `m8-orphans-${process.pid}`);
 const adminDb = getFirestore(adminApp);
 const restoreChunk = new Function('exports', 'HttpsError', 'Timestamp', 'FieldValue', 'console',

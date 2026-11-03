@@ -18,8 +18,8 @@ assert.match(csp, /frame-ancestors 'none'/, 'CSP frame-ancestors mancante');
 const scriptPolicy = csp.match(/(?:^|;)\s*script-src\s+([^;]+)/)?.[1] ?? '';
 const scriptSources = new Set(scriptPolicy.trim().split(/\s+/).filter(Boolean));
 assert.equal(scriptSources.has("'unsafe-eval'"), false, 'CSP non deve consentire unsafe-eval JavaScript');
-assert.equal(scriptSources.has("'wasm-unsafe-eval'"), true,
-  'CSP deve consentire soltanto la compilazione WebAssembly richiesta dal motore AI locale');
+assert.equal(scriptSources.has("'wasm-unsafe-eval'"), false,
+  'CSP non deve conservare la compilazione WebAssembly della AI locale rimossa');
 assert.doesNotMatch(scriptPolicy, /'unsafe-inline'/, 'CSP script-src non deve consentire script inline');
 assert.match(csp, /(?:^|;)\s*object-src 'none'/, 'CSP object-src deve negare i plugin');
 assert.match(csp, /(?:^|;)\s*base-uri 'self'/, 'CSP base-uri deve essere confinata');

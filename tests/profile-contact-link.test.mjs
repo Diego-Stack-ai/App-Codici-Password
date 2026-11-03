@@ -76,7 +76,11 @@ for (const type of ['email', 'phone']) {
                 listPrivateAccounts: async () => [
                     { id: 'account-a', nomeAccount: 'Account fixture', username: 'fixture@example.test' },
                     { id: 'account-b', nomeAccount: 'Account fixture', username: 'fixture@example.test' },
-                    { id: 'archived', isArchived: true }, { id: 'memo', type: 'memorandum' },
+                    { id: 'shared-owned', nomeAccount: 'IrenYou', visibility: 'shared', username: 'energia@example.test' },
+                    { id: 'shared-received', nomeAccount: 'Ricevuto', visibility: 'shared', _isGuest: true },
+                    { id: 'archived', isArchived: true },
+                    { id: 'memo', nomeAccount: 'Memorandum', type: 'memorandum' },
+                    { id: 'memo-shared', nomeAccount: 'Memorandum condiviso', type: 'memo', visibility: 'shared', isMemoShared: true },
                     { id: 'used', linkedProfileField: { type: 'email', id: 'another' } }
                 ],
                 listCompanies: async () => [{ id: 'company-1', ragioneSociale: 'Azienda fixture' }],
@@ -89,8 +93,12 @@ for (const type of ['email', 'phone']) {
             const contact = { id: 'contact-1', address: 'fixture@example.test', number: '+390001', password: 'SECRET-FIXTURE', pin: 'PIN-FIXTURE' };
             let synced = 0;
             await controller[type === 'email' ? 'connectEmailAccount' : 'connectPhoneAccount'](contact, async () => { synced++; });
-            assert.equal(modal.accounts.length, 4);
+            assert.equal(modal.accounts.length, 7);
             assert.equal(modal.accounts.filter(item => item.id === 'account-b').length, 2);
+            assert.equal(modal.accounts.some(item => item.id === 'shared-owned' && item.name === 'IrenYou'), true);
+            assert.equal(modal.accounts.some(item => item.id === 'shared-received'), false);
+            assert.equal(modal.accounts.some(item => item.id === 'memo'), true);
+            assert.equal(modal.accounts.some(item => item.id === 'memo-shared'), true);
             await modal.onSelect(createNew ? { companyId: company ? 'company-1' : '' } : modal.accounts.find(item => item.id === 'account-b' && Boolean(item.companyId) === company));
             assert.equal(window.location.href.includes('aziendaId=company-1'), company);
             assert.equal(window.location.href.includes('form_account_azienda.html'), company);
@@ -124,13 +132,13 @@ test('un errore di sincronizzazione non apre il form e non persiste la bozza', a
     assert.equal(window.location.href, '');
 });
 
-async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false, multiple = false } = {}) {
+async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false, multiple = false, shared = false, memo = false, memoShared = false } = {}) {
     const profileKey = {email:'contactEmails',phone:'contactPhones',document:'documenti',utility:'userAddresses'}[type];
     const contact = { id: 'contact-1', number: '+390001', address: 'fixture@example.test', password: legacy ? `cipher:${legacy}` : '', note: 'cipher:nota', custom: 'preserve' };
     const records = missing ? [] : [contact, {id:'other',password:'cipher:other',...(multiple?{linkedAccountId:'account-1',linkedAccountCompanyId:company?'company-1':''}:{})}];
     const profile = {[profileKey]:type==='utility'?[{id:'address',utilities:records}]:records};
     const sourceData = {emails:{extra:[{...contact,email:contact.address}]},telefonoAzienda:contact.number};
-    const fields = { 'account-name': { value: 'Fixture' }, 'account-password': { value: password }, 'account-username': { value: 'fixture@example.test' }, 'btn-save-footer': { disabled: false }, 'save-btn-footer': { disabled: false } };
+    const fields = { 'account-name': { value: 'Fixture' }, 'account-password': { value: memo || memoShared ? '' : password }, 'account-username': { value: memo || memoShared ? '' : 'fixture@example.test' }, 'flag-shared': { checked: shared }, 'flag-memo': { checked: memo }, 'flag-memo-shared': { checked: memoShared }, 'btn-save-footer': { disabled: false }, 'save-btn-footer': { disabled: false } };
     const committed = [];
     const messages = [];
     let draftRemoved = false;
@@ -167,7 +175,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
     dependencies.decryptRequiredValue = dependencies.decodeProfileContactValue;
     const method = company ? 'saveAccount' : 'savePrivateAccount';
     const controller = await loadController(company ? 'azienda/form-azienda-save.js' : 'privato/form-privato-save.js', dependencies, [method]);
-    await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1, loadContext: createAccountLoadContext({mode: 'create'}),
+    await controller[method]({ bankAccounts: [], invitedEmails: shared || memoShared ? ['recipient@example.test'] : [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1, loadContext: createAccountLoadContext({mode: 'create'}),
         profileContactLinkDraft: { profileContactId: sourceCompany && type === 'phone' ? 'telefonoAzienda' : 'contact-1', contactType: type, ownerUid: 'owner', ...(type==='utility'?{parentAddressId:'address'}:{}), ...(sourceCompany ? {sourceCompanyId:'source',contactValue:type==='phone'?contact.number:contact.address} : {}), ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
     return { committed, contact, messages, draftRemoved, profileKey };
 }
@@ -184,6 +192,24 @@ for (const editing of [true, false]) test(`salvataggio ${editing ? 'esistente' :
     assert.equal(profile.contactEmails[1].password, 'cipher:other');
     assert.equal(result.contact.password, 'cipher:legacy');
     assert.equal(result.draftRemoved, true);
+});
+
+test('un Account condiviso dal proprietario conserva il collegamento al Profilo', async () => {
+    const result = await saveFixture({ shared: true });
+    assert.ok(result.committed.length >= 2);
+    const account = result.committed.find(item => item.path === 'users/owner/accounts/account-1');
+    assert.equal(account.value.visibility, 'shared');
+    assert.deepEqual(account.value.linkedProfileField, { type: 'email', id: 'contact-1' });
+    assert.equal(result.committed.find(item => item.path === 'users/owner').value.contactEmails[0].linkedAccountId, 'account-1');
+});
+
+for (const memoShared of [false, true]) test(`${memoShared ? 'Memorandum condiviso' : 'Memorandum'} del proprietario collegabile al Profilo`, async () => {
+    const result = await saveFixture(memoShared ? { memoShared: true } : { memo: true });
+    const account = result.committed.find(item => item.path === 'users/owner/accounts/account-1');
+    assert.equal(account.value.type, 'memo');
+    assert.equal(account.value.visibility, memoShared ? 'shared' : 'private');
+    assert.deepEqual(account.value.linkedProfileField, { type: 'email', id: 'contact-1' });
+    assert.equal(result.committed.find(item => item.path === 'users/owner').value.contactEmails[0].linkedAccountId, 'account-1');
 });
 
 test('ricerca per nome, utente e azienda, senza dipendere da accenti o maiuscole', () => {

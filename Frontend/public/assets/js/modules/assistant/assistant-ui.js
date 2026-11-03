@@ -6,7 +6,6 @@ import {
     updateSpeechTranscriptState,
     voiceRecognitionErrorMessage
 } from './voice-recognition-model.js';
-import { assistantText } from '../../translations/assistant.js';
 
 function element(tag, className, text = '') {
     const node = document.createElement(tag);
@@ -30,12 +29,10 @@ export function speechLocaleForLanguage(language) {
 
 export function createAssistantUI({
     onAsk,
-    onExplain = null,
     onClose,
     onArchive,
     resolveCredential,
     offlineNotice = '',
-    unavailableDiagnostic = null,
     language = 'it'
 }) {
     const speechLocale = speechLocaleForLanguage(language);
@@ -45,71 +42,44 @@ export function createAssistantUI({
     document.body.style.top = `-${pageScrollY}px`;
     const backdrop = element('div', 'vault-assistant-backdrop');
     const panel = element('section', 'vault-assistant-panel');
-    panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', 'Agente Codex');
+    panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', 'Ricerca');
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
-    heading.append(element('h2', '', 'Agente Codex'), element('p', '', onExplain
-        ? 'Ricerca locale e Codex AI.2 disponibile su questo PC'
-        : 'Ricerca locale con testo o dettatura vocale'));
+    heading.append(element('h2', '', 'Ricerca'), element('p', '', 'Ricerca locale con testo o dettatura vocale'));
     const headerActions = element('div', 'vault-assistant-header-actions');
     const help = element('button', 'vault-assistant-help', '?');
-    help.type = 'button'; help.setAttribute('aria-label', 'Istruzioni Agente Codex'); help.setAttribute('aria-expanded', 'false');
+    help.type = 'button'; help.setAttribute('aria-label', 'Istruzioni Ricerca'); help.setAttribute('aria-expanded', 'false');
     const close = element('button', 'vault-assistant-close', '×');
     close.type = 'button'; close.setAttribute('aria-label', 'Chiudi'); close.addEventListener('click', onClose);
     headerActions.append(help, close); header.append(heading, headerActions);
 
-    const modes = element('div', 'vault-assistant-modes');
-    modes.classList.toggle('single', !onExplain);
-    modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Modalità Agente Codex');
-    const searchMode = element('button', 'vault-assistant-mode active', 'Ricerca');
-    const askMode = element('button', 'vault-assistant-mode', 'Codex AI.2');
-    searchMode.type = 'button'; askMode.type = 'button';
-    searchMode.setAttribute('aria-pressed', 'true'); askMode.setAttribute('aria-pressed', 'false');
-    askMode.hidden = !onExplain;
-    modes.append(searchMode, askMode);
     const instructions = element('section', 'vault-assistant-instructions');
     instructions.hidden = true;
     instructions.append(
-        element('strong', '', 'Come usare Agente Codex'),
-        element('p', '', 'In Ricerca puoi trovare Account, aziende, documenti e scadenze anche con parole non esatte. Puoi scrivere o dettare la richiesta: l’audio non viene registrato né conservato.'),
-        element('p', '', onExplain
-            ? 'Codex AI.2 comprende domande, spiega la pagina e può richiamare la stessa Ricerca senza inviare contenuti a servizi esterni.'
-            : 'Codex AI.2 compare soltanto su un PC compatibile quando è installato, verificato e attivato.')
+        element('strong', '', 'Come usare Ricerca'),
+        element('p', '', 'Puoi trovare Account, aziende, documenti e scadenze anche con parole non esatte. Puoi scrivere o dettare la richiesta: l’audio non viene registrato né conservato.'),
+        element('p', '', 'I risultati sono elaborati localmente usando i dati consentiti e la guida verificata dell’app.')
     );
-    const safeDiagnostic = unavailableDiagnostic
-        && /^LOCAL_AI_[A-Z0-9_]+$/.test(String(unavailableDiagnostic.code || ''))
-        && /^[a-z][a-z0-9-]{0,47}$/.test(String(unavailableDiagnostic.stage || ''))
-        ? unavailableDiagnostic
-        : null;
-    const modeNotice = element('p', 'vault-assistant-mode-notice', onExplain
-        ? 'Codex AI.2 usa il pacchetto locale attivo su questo PC e non invia contenuti a servizi esterni.'
-        : safeDiagnostic
-            ? `Codex AI.2 non è stato attivato. Codice: ${safeDiagnostic.code} · fase: ${safeDiagnostic.stage}. Ricerca resta disponibile.`
-            : 'Ricerca resta sempre disponibile. Codex AI.2 richiede installazione, verifica e attivazione su un PC compatibile.');
-    modeNotice.hidden = Boolean(onExplain) || !safeDiagnostic;
 
     const conversationHost = element('div', 'vault-assistant-conversation-host');
     const searchConversation = element('div', 'vault-assistant-conversation');
-    const aiConversation = element('div', 'vault-assistant-conversation');
     searchConversation.setAttribute('aria-live', 'polite');
-    aiConversation.setAttribute('aria-live', 'polite');
-    aiConversation.hidden = true;
-    conversationHost.append(searchConversation, aiConversation);
+    conversationHost.append(searchConversation);
     const searchRow = element('form', 'vault-assistant-search-row');
     const input = element('input', 'vault-assistant-input');
     input.type = 'text'; input.autocomplete = 'off'; input.spellcheck = false; input.placeholder = 'Chiedimi cosa stai cercando…';
-    input.setAttribute('aria-label', 'Parla con Agente Codex');
+    input.setAttribute('aria-label', 'Cerca nell’app');
     const send = element('button', 'vault-assistant-send');
     send.type = 'submit'; send.setAttribute('aria-label', 'Invia richiesta'); send.append(element('span', 'material-symbols-outlined', 'arrow_upward'));
     const microphone = element('button', 'vault-assistant-microphone');
-    microphone.type = 'button'; microphone.setAttribute('aria-label', 'Parla con Codex'); microphone.append(element('span', 'material-symbols-outlined', 'mic'));
+    microphone.type = 'button'; microphone.setAttribute('aria-label', 'Detta la ricerca'); microphone.append(element('span', 'material-symbols-outlined', 'mic'));
     searchRow.append(input, send, microphone);
     const status = element('p', 'vault-assistant-status', 'I dati segreti non vengono mostrati nella conversazione.');
     const swipeLists = new Set();
     if (offlineNotice) status.textContent = offlineNotice;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let speechSynthesis; let uiDestroyed = false; let activeMode = 'search';
+    let speechSynthesis; let uiDestroyed = false;
     microphone.disabled = true;
     import('./speech-synthesis-controller.js').then(module => {
         speechSynthesis = module.createSpeechSynthesisController({
@@ -119,29 +89,13 @@ export function createAssistantUI({
         });
         if (uiDestroyed) speechSynthesis.destroy(); else microphone.disabled = !SpeechRecognition;
     }).catch(() => { if (!uiDestroyed) microphone.disabled = !SpeechRecognition; });
-    const setMode = mode => {
-        activeMode = mode;
-        const searching = mode === 'search';
-        searchMode.classList.toggle('active', searching); askMode.classList.toggle('active', !searching);
-        searchMode.setAttribute('aria-pressed', String(searching)); askMode.setAttribute('aria-pressed', String(!searching));
-        searchConversation.hidden = !searching;
-        aiConversation.hidden = searching;
-        const usable = searching || Boolean(onExplain);
-        input.disabled = !usable; send.disabled = !usable; microphone.disabled = !usable || !SpeechRecognition;
-        modeNotice.hidden = searching;
-        input.placeholder = searching ? 'Cosa vuoi cercare?' : (onExplain ? 'Cosa vuoi sapere su questa pagina?' : 'AI.2 non disponibile su questo dispositivo');
-        if (searching) input.focus();
-    };
-    searchMode.addEventListener('click', () => setMode('search'));
-    askMode.addEventListener('click', () => setMode('ask'));
     help.addEventListener('click', () => {
         instructions.hidden = !instructions.hidden;
         help.setAttribute('aria-expanded', String(!instructions.hidden));
     });
-    const activeConversation = () => activeMode === 'search' ? searchConversation : aiConversation;
     const addBubble = (role, message) => {
         const bubble = element('div', `vault-assistant-bubble ${role}`, message);
-        const target = activeConversation();
+        const target = searchConversation;
         target.append(bubble); target.scrollTop = target.scrollHeight;
     };
     const addCredentialRow = async (container, label, value, { secret = false } = {}) => {
@@ -229,8 +183,6 @@ export function createAssistantUI({
             swipeLists.clear(); swipeLists.add(swipeList);
         }
     };
-    const REQUEST_TIMEOUT_MS = 105 * 1000;
-    let requestSequence = 0;
     let busy = false;
     const presentAnswer = answer => {
         const normalized = typeof answer === 'string' ? { message:answer, items:[] } : (answer || { message:'', items:[] });
@@ -244,62 +196,24 @@ export function createAssistantUI({
         input.disabled = value;
         send.disabled = value;
         microphone.disabled = value || !SpeechRecognition;
-        searchMode.disabled = value;
-        askMode.disabled = value;
         panel.setAttribute('aria-busy', String(value));
     };
-    const disableExplainMode = error => {
-        const code = /^LOCAL_AI_[A-Z0-9_]+$/.test(String(error?.code || error?.message || ''))
-            ? String(error.code || error.message)
-            : 'LOCAL_AI_RUNTIME_UNAVAILABLE';
-        askMode.hidden = true;
-        modes.classList.add('single');
-        setMode('search');
-        modeNotice.hidden = false;
-        modeNotice.textContent = [
-            assistantText(language, 'runtimeFailed'),
-            `${assistantText(language, 'diagnosticCode')}: ${code}.`,
-            assistantText(language, 'fallback'),
-            assistantText(language, 'runtimeCheckSettings')
-        ].join(' ');
-        return code;
-    };
-    const explainWithinBudget = (value, sequence) => new Promise((resolve, reject) => {
-        const timer = setTimeout(() => {
-            const error = new Error('LOCAL_AI_REQUEST_TIMEOUT');
-            error.code = 'LOCAL_AI_REQUEST_TIMEOUT';
-            void onExplain?.cancel?.();
-            reject(error);
-        }, REQUEST_TIMEOUT_MS);
-        Promise.resolve(onExplain(value))
-            .then(answer => { if (sequence === requestSequence) resolve(answer); })
-            .catch(reject)
-            .finally(() => clearTimeout(timer));
-    });
     const ask = async query => {
         const value = query.trim(); if (!value) return;
         if (busy) return { message:'Attendi la risposta in corso.', items:[] };
         addBubble('user', value); input.value = '';
-        if (!onExplain || activeMode === 'search') {
-            return presentAnswer(onAsk(value));
-        }
-        const sequence = ++requestSequence;
         setBusy(true);
-        status.textContent = assistantText(language, 'runtimeAnswering');
+        status.textContent = 'Ricerca in corso…';
         try {
-            return presentAnswer(await explainWithinBudget(value, sequence));
+            return presentAnswer(await Promise.resolve(onAsk(value)));
         } catch (error) {
-            const code = /^LOCAL_AI_[A-Z0-9_]+$/.test(String(error?.code || error?.message || ''))
-                ? String(error.code || error.message)
-                : 'LOCAL_AI_RUNTIME_UNAVAILABLE';
-            const fatal = /(?:GPU_DEVICE_LOST|WEBGPU_UNAVAILABLE|GPU_LIMIT_UNSUPPORTED|WASM_|WORKER_|RUNTIME_INITIALIZATION|MODEL_ARTIFACT_INVALID)/.test(code);
-            if (fatal) disableExplainMode(error);
+            console.warn('[RICERCA] Richiesta non completata.', error?.name || 'Error');
             return presentAnswer({
-                message:`Codex AI.2 non ha completato la richiesta (${code}). Riprova; Ricerca resta disponibile nella modalità separata.`,
+                message:'La ricerca non ha completato la richiesta. Riprova.',
                 items:[]
             });
         } finally {
-            if (sequence === requestSequence) setBusy(false);
+            setBusy(false);
             status.textContent = 'I dati segreti non vengono mostrati nella conversazione.';
         }
     };
@@ -441,11 +355,9 @@ export function createAssistantUI({
         microphone.addEventListener('click', () => { status.textContent = 'Usa la dettatura della tastiera del telefono.'; });
     }
     backdrop.addEventListener('click', event => { if (event.target === backdrop) onClose(); });
-    panel.append(header, modes, instructions, modeNotice, conversationHost, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
+    panel.append(header, instructions, conversationHost, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
     return { destroy: () => {
-        requestSequence += 1;
-        void onExplain?.cancel?.();
         swipeLists.forEach(instance => instance.destroy()); swipeLists.clear();
         try { activeRecognition?.abort(); } catch {}
         activeRecognition = null;

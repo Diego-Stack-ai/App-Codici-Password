@@ -34,7 +34,7 @@ test('una domanda di memoria successiva conserva scadenza e anno come soli crite
     assert.deepEqual(result.items.map(item => item.id), ['scadenza:2029']);
 });
 
-test('AI.1 spiega la pagina corrente dal catalogo pubblico senza interrogare i record', () => {
+test('Ricerca spiega la pagina corrente dal catalogo pubblico senza interrogare i record', () => {
     const page = {
         title:'Home',
         purpose:'Scegli l’area in cui lavorare.',
@@ -47,7 +47,7 @@ test('AI.1 spiega la pagina corrente dal catalogo pubblico senza interrogare i r
     assert.deepEqual(result.items, []);
 });
 
-test('AI.1 instrada le domande operative verso la guida senza mescolarle ai record della vault', () => {
+test('Ricerca instrada le domande operative verso la guida senza mescolarle ai record della vault', () => {
     const engine = new VaultConversationEngine([{
         id:'scadenza:fixture', kind:'scadenza', title:'Assicurazione', subtitle:'Scadenza 31/03/2027',
         scope:'privato', companyName:'', keywords:['scadenza'], href:'/dettaglio_scadenza.html?id=fixture'
@@ -61,4 +61,16 @@ test('AI.1 instrada le domande operative verso la guida senza mescolarle ai reco
     assert.equal(result.items[0].id, 'guide:aggiungi_scadenza');
     assert.equal(result.items[0].kind, 'guida');
     assert.doesNotMatch(result.message, /Assicurazione/);
+});
+
+test('Ricerca apre direttamente una pagina nominata usando il catalogo', () => {
+    const engine = new VaultConversationEngine([], {
+        searchKnowledge:query => query.includes('impostazioni') ? [{
+            pageId:'impostazioni', route:'/impostazioni.html', family:'internal', title:'Impostazioni',
+            purpose:'Configura aspetto e sicurezza.', steps:['Scegli le preferenze.'], path:[], score:80
+        }] : []
+    });
+    const result = engine.ask('apri impostazioni');
+    assert.equal(result.navigateTo, '/impostazioni.html');
+    assert.equal(result.items[0].kind, 'guida');
 });

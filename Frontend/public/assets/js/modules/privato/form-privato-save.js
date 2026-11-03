@@ -1,6 +1,6 @@
 import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.251';
+import { auth, db } from '../../firebase-config.js?v=1.2.252';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -294,7 +294,7 @@ export async function savePrivateAccount({
                 if (!email) throw new Error('Contatto del Profilo non più disponibile.');
                 if (email.linkedAccountId && (email.linkedAccountId !== targetId || email.linkedAccountCompanyId)) throw new Error('Email già collegata a un altro Account.');
                 if (isEditing && Number(oldData?.revision || 0) !== Number(baseRevision)) throw new Error('Account modificato su un altro dispositivo. Ricarica prima di collegare.');
-                if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account privato attivo per collegare il contatto.');
+                if (oldData?.isArchived) throw new Error('Scegli un Account privato attivo per collegare il contatto.');
                 const legacyPassword = profileContactLinkDraft.contactType === 'email' ? await decodeProfileContactValue(email.password, vaultKeyMaterial) : '';
                 const passwordTransferred = isProfileEmailPasswordTransferred(legacyPassword, credentialValues.password);
                 retainedProfilePassword = Boolean(legacyPassword) && !passwordTransferred;
