@@ -91,6 +91,20 @@ test('ogni documento mostra dati, allegati e azioni nello stesso blocco e in que
     assert.match(documentRenderer.slice(actionsPosition), /profile_deadline_card_configure/);
 });
 
+test('password, PIN, PUK e codice app dei Documenti partono sempre mascherati', async () => {
+    const [cards, css] = await Promise.all([
+        read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js'),
+        read('Frontend/public/assets/css/profilo_privato.css')
+    ]);
+    assert.match(cards, /function createDocumentSecretRow/);
+    assert.match(cards, /textContent: '••••••••'/);
+    for (const field of ['password', 'pin', 'puk', 'codice_app']) {
+        assert.match(cards, new RegExp(`docItem\\.${field} \\? createDocumentSecretRow`));
+    }
+    assert.doesNotMatch(cards, /textContent: docItem\.(?:password|pin|puk|codice_app)/);
+    assert.match(css, /\.base-shield\s*\{[\s\S]*?-webkit-text-security:\s*disc/);
+});
+
 test('il costruttore della Scadenza conserva gli allegati nella bozza senza duplicare il file', async () => {
     const [linkage, deadline] = await Promise.all([
         read('Frontend/public/assets/js/modules/privato/profile-document-deadline-link.js'),

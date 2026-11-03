@@ -29,10 +29,28 @@ const fixture = Object.freeze({
     postalCode: '00000',
     city: 'Citta QA',
     province: 'QA',
-    utility: 'QA-SINTETICO-POD-0001'
+    utility: 'QA-SINTETICO-POD-0001',
+    documentNumber: 'QA-DOC-0001',
+    documentIssuer: 'Ente QA non reale',
+    documentPlace: 'Citta QA',
+    documentIssueDate: '2030-01-15',
+    documentExpiryDate: '2040-01-15',
+    documentWebsite: 'https://example.invalid/qa-documento',
+    documentUsername: 'QA-DOC-USER',
+    documentPassword: 'QA-DOC-PASSWORD-NON-REALE',
+    documentPin: '0000',
+    documentPuk: '00000000',
+    documentAppCode: 'QA-APP-CODE',
+    documentNote: 'QA-SINTETICO · documento privo di validita.',
+    attachmentName: 'qa-allegato-sintetico.txt',
+    widgetTitle: 'QA Widget Profilo',
+    widgetPublicLabel: 'Codice QA visibile',
+    widgetPublicValue: 'QA-VIS-0001',
+    widgetSecretLabel: 'Segreto QA cifrato',
+    widgetSecretValue: 'QA-SEGRETO-NON-REALE'
 });
 const report = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     origin,
     startedAt: new Date().toISOString(),
     actions: [],
@@ -44,7 +62,7 @@ function record(action, status, detail = '') {
     report.actions.push({ action, status, ...(detail ? { detail } : {}) });
 }
 
-async function fillModal(page, values) {
+async function fillModal(page, values, afterSave = null) {
     const modal = page.locator('#profile-edit-modal');
     await modal.waitFor({ state: 'visible', timeout: 10_000 });
     for (const [label, value] of Object.entries(values)) {
@@ -64,12 +82,30 @@ async function fillModal(page, values) {
         else await field.locator('input, textarea').first().fill(value);
     }
     await modal.locator('.btn-primary').click();
+    await afterSave?.();
     try {
         await modal.waitFor({ state: 'detached', timeout: 20_000 });
     } catch {
         const toast = (await page.locator('#toast').textContent().catch(() => ''))?.trim();
         throw new Error(`PROFILE_MODAL_SAVE_FAILED:${toast || 'NO_TOAST'}`);
     }
+}
+
+async function dismissConfirm(page) {
+    const confirm = page.locator('#protocol-confirm-modal');
+    await confirm.waitFor({ state: 'visible', timeout: 20_000 });
+    const previousTitle = (await confirm.locator('.modal-title').textContent())?.trim() || '';
+    await confirm.locator('#confirm-cancel-btn').click();
+    await page.waitForFunction(title => {
+        const current = document.getElementById('protocol-confirm-modal');
+        return !current || current.querySelector('.modal-title')?.textContent?.trim() !== title;
+    }, previousTitle, { timeout: 20_000 });
+}
+
+async function ensureChoiceChecked(label) {
+    const input = label.locator('input[type="checkbox"]');
+    if (!await input.isChecked()) await label.click();
+    await assert.doesNotReject(() => input.isChecked().then(value => assert.equal(value, true)));
 }
 
 async function activateTab(page, name) {
@@ -197,6 +233,117 @@ try {
     addressCard = addressContainer.locator('.form-card').filter({ hasText: fixture.address }).first();
     await addressCard.getByText(fixture.utility, { exact: true }).waitFor({ state: 'visible', timeout: 15_000 });
 
+    await activateTab(page, 'documents');
+    await expandSection(page, 'documenti');
+    const documentsContainer = page.locator('#documenti-view-container');
+    let documentCard = documentsContainer.locator('.form-card').filter({ hasText: fixture.documentNumber }).first();
+    if (!await documentCard.count()) {
+        await page.locator('#btn-add-profile-document').click();
+        await fillModal(page, {
+            'Tipo Documento': 'Carta Identità',
+            'Numero Carta': fixture.documentNumber,
+            'Emessa da': fixture.documentIssuer,
+            'Luogo Rilascio': fixture.documentPlace,
+            'Data di Emissione': fixture.documentIssueDate,
+            'Data di Scadenza': fixture.documentExpiryDate,
+            'Home Page / Sito': fixture.documentWebsite,
+            'Username / CF': fixture.documentUsername,
+            Password: fixture.documentPassword,
+            PIN: fixture.documentPin,
+            PUK: fixture.documentPuk,
+            'Codice App': fixture.documentAppCode,
+            Note: fixture.documentNote
+        }, async () => {
+            await dismissConfirm(page); // allegato: lo gestiamo in modo deterministico dopo il salvataggio
+            await dismissConfirm(page); // scadenza: sara collaudata nel lotto Scadenze
+        });
+        record('profile-document', 'created-with-synthetic-fields');
+        documentCard = documentsContainer.locator('.form-card').filter({ hasText: fixture.documentNumber }).first();
+    } else record('profile-document', 'already-present');
+    await documentCard.waitFor({ state: 'visible', timeout: 20_000 });
+    await documentCard.getByText(fixture.documentNumber, { exact: true }).waitFor({ state: 'visible' });
+    await documentCard.getByText(fixture.documentNote, { exact: true }).waitFor({ state: 'visible' });
+
+    if (!await documentCard.getByText(fixture.attachmentName, { exact: true }).count()) {
+        const attachmentPath = path.join(profileDir, fixture.attachmentName);
+        await writeFile(attachmentPath, 'Allegato sintetico QA. Nessun dato reale.\n', 'utf8');
+        await documentCard.locator('[data-action="document-attachments"]').click();
+        const attachmentsDialog = page.locator('.profile-document-attachments-dialog');
+        await attachmentsDialog.waitFor({ state: 'visible', timeout: 20_000 });
+        await attachmentsDialog.locator('input[accept*=".txt"]').setInputFiles(attachmentPath);
+        await attachmentsDialog.getByText(/1\/10 allegati\./).waitFor({ state: 'visible', timeout: 45_000 });
+        await attachmentsDialog.locator('button[title="Chiudi"]').click();
+        await attachmentsDialog.waitFor({ state: 'detached', timeout: 20_000 });
+        record('profile-document-attachment', 'created-encrypted');
+        documentCard = documentsContainer.locator('.form-card').filter({ hasText: fixture.documentNumber }).first();
+    } else record('profile-document-attachment', 'already-present');
+    await documentCard.getByText(fixture.attachmentName, { exact: true }).first().waitFor({ state: 'visible', timeout: 20_000 });
+
+    await activateTab(page, 'personal');
+    const widgetZone = page.locator('.profile-widget-zone[data-widget-zone="personal"]');
+    let widgetCard = widgetZone.locator('.profile-widget').filter({ hasText: fixture.widgetTitle }).first();
+    if (!await widgetCard.count()) {
+        await widgetZone.locator('button[aria-label="Aggiungi widget"]').click();
+        await fillModal(page, {
+            Titolo: fixture.widgetTitle,
+            Descrizione: 'Widget sintetico per collaudo del Profilo.',
+            'Icona Material Symbols': 'verified_user',
+            Colore: '#3b82f6',
+            Linguetta: 'personal',
+            Dimensione: 'medium'
+        });
+        record('profile-widget', 'created');
+        widgetCard = widgetZone.locator('.profile-widget').filter({ hasText: fixture.widgetTitle }).first();
+    } else record('profile-widget', 'already-present');
+    await widgetCard.waitFor({ state: 'visible', timeout: 20_000 });
+
+    if (!await widgetCard.getByText(fixture.widgetPublicLabel, { exact: true }).count()) {
+        await widgetCard.getByRole('button', { name: 'Aggiungi campo' }).click();
+        await fillModal(page, {
+            Etichetta: fixture.widgetPublicLabel,
+            Tipo: 'identifier',
+            Valore: fixture.widgetPublicValue,
+            'Mostra in anteprima': 'Sì',
+            'Consenti copia': 'Sì',
+            'Includi nel QR': 'Sì',
+            'Etichetta QR': fixture.widgetPublicLabel,
+            'Ordine QR': '1'
+        });
+        record('profile-widget-public-field', 'created');
+        widgetCard = widgetZone.locator('.profile-widget').filter({ hasText: fixture.widgetTitle }).first();
+    } else record('profile-widget-public-field', 'already-present');
+    await widgetCard.getByText(fixture.widgetPublicValue, { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
+
+    if (!await widgetCard.getByText(fixture.widgetSecretLabel, { exact: true }).count()) {
+        await widgetCard.getByRole('button', { name: 'Aggiungi campo' }).click();
+        await fillModal(page, {
+            Etichetta: fixture.widgetSecretLabel,
+            Tipo: 'sensitive',
+            Valore: fixture.widgetSecretValue,
+            'Mostra in anteprima': 'Sì',
+            'Consenti copia': 'No',
+            'Includi nel QR': 'No',
+            'Etichetta QR': fixture.widgetSecretLabel,
+            'Ordine QR': '2'
+        });
+        record('profile-widget-secret-field', 'created-encrypted');
+        widgetCard = widgetZone.locator('.profile-widget').filter({ hasText: fixture.widgetTitle }).first();
+    } else record('profile-widget-secret-field', 'already-present');
+    await widgetCard.getByText(fixture.widgetSecretLabel, { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
+    await widgetCard.getByText('••••••••', { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
+
+    await activateTab(page, 'digital-card');
+    const digitalCard = page.locator('#profile-digital-card');
+    await digitalCard.getByText('Anteprima Tessera digitale', { exact: true }).waitFor({ state: 'visible', timeout: 20_000 });
+    await ensureChoiceChecked(digitalCard.locator('label.digital-card-choice').filter({ hasText: 'Nome e cognome' }));
+    await ensureChoiceChecked(digitalCard.locator('label.digital-card-choice').filter({ hasText: 'Telefono: Cellulare' }));
+    await ensureChoiceChecked(digitalCard.locator('label.digital-card-choice').filter({ hasText: 'Email: Personale' }));
+    await ensureChoiceChecked(digitalCard.locator('label.digital-card-choice').filter({ hasText: 'Indirizzo: Residenza' }));
+    await ensureChoiceChecked(digitalCard.locator('label.digital-card-choice').filter({ hasText: fixture.widgetPublicLabel }));
+    assert.equal(await digitalCard.getByText(fixture.widgetSecretLabel, { exact: false }).count(), 0,
+        'Il campo cifrato non deve essere proponibile nella Tessera digitale');
+    record('digital-card', 'public-fields-selected-secret-excluded');
+
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 45_000 });
     await page.waitForFunction(() => document.documentElement.getAttribute('data-i18n') === 'ready', null, { timeout: 20_000 });
     await page.locator('#profile-tabs').waitFor({ state: 'visible', timeout: 20_000 });
@@ -210,10 +357,32 @@ try {
     await activateTab(page, 'addresses');
     await expandSection(page, 'indirizzi');
     await page.getByText(fixture.utility, { exact: true }).waitFor({ state: 'visible' });
+    await activateTab(page, 'documents');
+    await expandSection(page, 'documenti');
+    await page.locator('#documenti-view-container').getByText(fixture.documentNumber, { exact: true }).waitFor({ state: 'visible' });
+    if (origin === 'https://appcodici-password.web.app') {
+        await page.locator('#documenti-view-container').getByText(fixture.attachmentName, { exact: true }).first().waitFor({ state: 'visible' });
+    } else {
+        record('profile-document-attachment-reload', 'skipped-on-local-app-check-origin');
+    }
+    await activateTab(page, 'personal');
+    widgetCard = page.locator('.profile-widget-zone[data-widget-zone="personal"] .profile-widget').filter({ hasText: fixture.widgetTitle }).first();
+    await widgetCard.getByText(fixture.widgetPublicValue, { exact: true }).waitFor({ state: 'visible' });
+    await widgetCard.getByText('••••••••', { exact: true }).waitFor({ state: 'visible' });
+    await activateTab(page, 'digital-card');
+    await page.locator('#profile-digital-card').getByText('Anteprima Tessera digitale', { exact: true }).waitFor({ state: 'visible' });
     record('reload-verification', 'passed');
 
     await mkdir(outputRoot, { recursive: true });
     await page.screenshot({ path: path.join(outputRoot, 'profile-populated.png'), fullPage: true });
+    await activateTab(page, 'personal');
+    widgetCard = page.locator('.profile-widget-zone[data-widget-zone="personal"] .profile-widget').filter({ hasText: fixture.widgetTitle }).first();
+    await widgetCard.getByText(fixture.widgetPublicValue, { exact: true }).waitFor({ state: 'visible' });
+    await widgetCard.getByText('••••••••', { exact: true }).waitFor({ state: 'visible' });
+    await page.screenshot({ path: path.join(outputRoot, 'profile-widget.png'), fullPage: true });
+    await activateTab(page, 'documents');
+    await expandSection(page, 'documenti');
+    await page.screenshot({ path: path.join(outputRoot, 'profile-documents.png'), fullPage: true });
 } catch (error) {
     report.failure = String(error?.message || error).slice(0, 800);
 } finally {
@@ -229,10 +398,12 @@ const sharingUrl = 'europe-west1-appcodici-password.cloudfunctions.net/registerS
 report.consoleErrors = report.consoleErrors.filter(error => !error.resource.includes(appCheckUrl) && !error.resource.includes(sharingUrl));
 report.consoleErrors = report.consoleErrors.filter(error => !(error.text.includes("Framing 'https://www.google.com/'")
     && error.text.includes('report-only Content Security Policy') && error.text.includes("frame-ancestors 'self'")));
+report.consoleErrors = report.consoleErrors.filter(error => !(origin.startsWith('http://localhost:')
+    && error.resource === `${origin}/favicon.ico` && error.text.includes('404')));
 report.networkErrors = report.networkErrors.filter(error => !((error.status === 403 && error.url.includes(appCheckUrl))
     || (error.status === 401 && error.url.includes(sharingUrl))));
 report.completedAt = new Date().toISOString();
-report.ok = report.actions.length >= 7 && !report.failure && !report.consoleErrors.length && !report.networkErrors.length;
+report.ok = report.actions.length >= 14 && !report.failure && !report.consoleErrors.length && !report.networkErrors.length;
 await mkdir(outputRoot, { recursive: true });
 await writeFile(path.join(outputRoot, 'profile-fixture.json'), `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 console.log(JSON.stringify({ ok: report.ok, actions: report.actions, failure: report.failure || '',

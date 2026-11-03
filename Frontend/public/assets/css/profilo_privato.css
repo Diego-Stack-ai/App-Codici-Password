@@ -676,6 +676,10 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     flex: 1;
 }
 
+.base-shield {
+    -webkit-text-security: disc;
+}
+
 .document-mini-actions {
     gap: 4px;
 }
