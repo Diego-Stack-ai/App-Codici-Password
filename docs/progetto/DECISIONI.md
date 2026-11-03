@@ -4,7 +4,7 @@
 
 La sorveglianza finale comprende sia l'app pubblica sia il PC Windows usato per sviluppo e rilascio. Il controllo viene eseguito ogni giorno alle 07:30 Europe/Rome, resta silenzioso quando non esistono novità applicabili e non applica automaticamente patch, commit o deploy. Gli allarmi richiedono conferma su fonti primarie, correlazione con le versioni realmente usate e indicazione di una misura concreta.
 
-Il recapito preferito è e-mail; l'indirizzo rilevato dal connettore deve essere approvato esplicitamente prima dell'attivazione. WhatsApp è ammesso soltanto tramite canale Business ufficiale. Non si installano automazioni fragili sul profilo WhatsApp personale. Il monitor non accede alla Vault o a segreti dell'utente.
+Il recapito approvato è `boschettodiego@gmail.com`; l'autorizzazione riguarda esclusivamente avvisi di sicurezza senza dati della Vault o dati personali. WhatsApp è ammesso soltanto tramite canale Business ufficiale. Non si installano automazioni fragili sul profilo WhatsApp personale. Il monitor non accede alla Vault o a segreti dell'utente.
 
 ## 03/11/2026 — collaudo QA, contenuti utente e archivi multilingua
 

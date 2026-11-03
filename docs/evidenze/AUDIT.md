@@ -6,7 +6,7 @@
 
 Il controllo ha rilevato CSP e header Hosting centralizzati, Rules con vincoli di identità e numerosi callable con `enforceAppCheck: true`. Questi sono controlli presenti, non prove sufficienti di configurazione produttiva o assenza di IDOR, XSS, race, parser vulnerabili o supply-chain compromise. Restano necessari scan repository dedicato, verifica delle configurazioni effettivamente distribuite, test fisici dei browser supportati e audit indipendente.
 
-È progettato un heartbeat quotidiano alle 07:30 Europe/Rome, silenzioso in assenza di novità applicabili e incapace di modificare autonomamente il progetto. L'attivazione dell'invio e-mail resta sospesa finché il proprietario non conferma esplicitamente l'indirizzo destinatario; non è disponibile un connettore WhatsApp ufficiale e nessuna automazione alternativa dell'account personale è autorizzata.
+È attivo l'heartbeat `sorveglianza-sicurezza-codici-e-password`, eseguito ogni giorno alle 07:30 Europe/Rome, silenzioso in assenza di novità applicabili e incapace di modificare autonomamente il progetto. Il proprietario ha autorizzato esplicitamente l'invio dei soli avvisi di sicurezza a `boschettodiego@gmail.com`, senza dati Vault o personali. Non è disponibile un connettore WhatsApp ufficiale e nessuna automazione alternativa dell'account personale è autorizzata.
 
 ## AUDIT-SKILL-01 — registro preventivo di metodo e rischio — 11/10/2026
 
