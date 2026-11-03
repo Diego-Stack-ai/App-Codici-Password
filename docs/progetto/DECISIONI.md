@@ -1,5 +1,13 @@
 # Decisioni
 
+## 03/11/2026 — collaudo QA, contenuti utente e archivi multilingua
+
+Il collaudo pre-finale usa l'utente tecnico sintetico per popolare e verificare visivamente tutti i campi applicativi consentiti. Account condivisi e Memorandum condivisi richiedono due evidenze distinte: stato del mittente QA e stato del destinatario. La sola creazione dell'invito non dimostra ricezione, accettazione, permessi, allegati o revoca; quando il destinatario è l'utente di Diego, il suo riscontro viene registrato come prova umana separata.
+
+I Widget restano distinti fra Widget bancari legati al conto o all'Account bancario e Widget generici riutilizzabili negli Account. Nomi, etichette e valori creati dall'utente sono contenuto utente e non vengono tradotti cambiando lingua; vengono tradotti soltanto comandi, conferme, errori e testi dell'interfaccia. Lo stesso principio vale per note, descrizioni e altri valori inseriti dall'utente. Le Credenziali comuni devono essere collaudate per cifratura, collegamento multiplo, aggiornamento, scollegamento, mascheramento, copia, archiviazione, condivisione autorizzata ed eliminazione senza esposizione nella Ricerca o nei log.
+
+L'Archivio portabile è una copia destinata alla consultazione umana: si apre nella lingua scelta dall'utente, include il selettore delle lingue supportate e traduce visualizzatore, istruzioni, errori, avvisi, intestazioni e nomi dei fogli. I contenuti utente restano invariati. JSON e identificatori tecnici mantengono chiavi canoniche stabili; CSV, ODS e XLSX usano intestazioni nella lingua selezionata per l'esportazione. Il Backup cifrato resta invece un formato tecnico indipendente dalla lingua: si traducono soltanto interfaccia, messaggi e procedura di ripristino, non il contenuto del contenitore.
+
 ## 03/11/2026 — AI.2 abbandonata, resta solo Ricerca
 
 La funzione generativa AI.2 è rimossa dall'app. Le prove con WebLLM/WebGPU, Qwen e il prototipo di Motore locale Windows restano nello storico documentale, ma non vengono più distribuite né esposte agli utenti. Non devono rimanere download LLM, eseguibili, impostazioni AI, pulsanti AI.2, diagnostica dedicata, permessi loopback o dipendenze di pubblicazione.
