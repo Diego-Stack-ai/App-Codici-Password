@@ -53,3 +53,24 @@ test('la CSP abilita WebAssembly per l AI locale senza abilitare eval JavaScript
     assert.equal(scriptSources.has("'wasm-unsafe-eval'"), true);
     assert.equal(scriptSources.has("'unsafe-eval'"), false);
 });
+
+test('la CSP autorizza soltanto la porta loopback fissa del Motore locale AI.2', () => {
+    const firebase = JSON.parse(readFileSync(fileURLToPath(new URL('../firebase.json', import.meta.url)), 'utf8'));
+    const globalHeaders = firebase.hosting.headers.find(rule => rule.source === '**')?.headers ?? [];
+    const csp = globalHeaders.find(header => header.key === 'Content-Security-Policy')?.value ?? '';
+    const connectPolicy = csp.match(/(?:^|;)\s*connect-src\s+([^;]+)/)?.[1] ?? '';
+    const connectSources = new Set(connectPolicy.trim().split(/\s+/).filter(Boolean));
+
+    assert.equal(connectSources.has('http://127.0.0.1:32145'), true);
+    assert.equal([...connectSources].some(source => /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\*)?$/.test(source)), false);
+});
+
+test('la Permissions Policy abilita soltanto il loopback richiesto dal Motore locale AI.2', () => {
+    const firebase = JSON.parse(readFileSync(fileURLToPath(new URL('../firebase.json', import.meta.url)), 'utf8'));
+    const globalHeaders = firebase.hosting.headers.find(rule => rule.source === '**')?.headers ?? [];
+    const policy = globalHeaders.find(header => header.key === 'Permissions-Policy')?.value ?? '';
+
+    assert.match(policy, /(?:^|,\s*)loopback-network=\(self\)(?:,|$)/);
+    assert.match(policy, /(?:^|,\s*)local-network=\(\)(?:,|$)/);
+    assert.doesNotMatch(policy, /loopback-network=\(\*\)/);
+});

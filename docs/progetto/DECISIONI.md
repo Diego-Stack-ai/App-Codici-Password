@@ -1,5 +1,15 @@
 # Decisioni
 
+## 03/11/2026 — collaudo sintetico e AI.2 nativa
+
+I rilasci vengono verificati con un utente tecnico dedicato e dati esclusivamente fittizi. L'utente conserva tutte le protezioni del prodotto, incluse password di accesso, Master Password e cifratura della Vault; non esiste una modalità senza Master Password o una porta di servizio. Le credenziali automatiche sono protette dal profilo Windows tramite DPAPI e non vengono condivise con il codice o con gli utenti reali.
+
+Codex AI.2 mantiene l'interfaccia web ma separa il calcolo generativo: **Ricerca** resta deterministica nel browser, mentre il modello viene eseguito da un motore Windows locale. Il pulsante di installazione deve spiegare componenti, requisiti, privacy, spazio e rimozione; Windows conserva la propria conferma esplicita per l'eseguibile. Il motore e il modello sono versionati, firmati o verificati tramite hash e distribuiti dall'infrastruttura controllata dell'app. Il servizio ascolta soltanto su loopback, limita l'origine ammessa e richiede un'associazione locale, così un altro sito non può usarlo. Il motore riceve solo conoscenza D0 e cronologia limitata, mai la Master Password, chiavi, credenziali o record della Vault.
+
+La licenza inclusa nel pacchetto WebLLM Qwen2.5 3B è la **Qwen Research License**, non Apache 2.0: quel modello non viene quindi scelto per il nuovo pacchetto distribuibile. La candidata nativa è Qwen3 4B GGUF `Q4_K_M`, pubblicata con licenza Apache 2.0; resta non distribuibile finché binari Windows, modello, licenze, dimensioni e SHA-256 non sono materializzati e collaudati. Il vecchio WebLLM rimane soltanto come confronto e riserva temporanea fino al collaudo A/B.
+
+Il servizio leggero può avviarsi con Windows, ma non carica Qwen finché Codex AI.2 non viene realmente usata. L'accesso dal browser richiede il permesso granulare `loopback-network`; l'accesso alla rete locale ordinaria resta negato. Qwen3 viene eseguito in modalità non-thinking per le risposte operative dell'app, riducendo latenza, uso di token e rischio di timeout senza cambiare la conoscenza D0 fornita al modello.
+
 ## 24/10/2026 — allegati a blocchi nell’Archivio portatile
 
 Diego approva esplicitamente l'inclusione degli allegati cifrati a blocchi nell'Archivio portatile. Il manifest di un video viene validato come una sola voce logica; i blocchi sono scaricati, autenticati, decifrati e passati al writer in ordine, uno per volta. Il contenitore resta il formato v2 già pubblicato: un solo `archivio.cpportable` cifrato e autenticato contiene dati e allegati, mentre `visualizzatore.html` e `LEGGIMI.txt` non contengono dati utente.

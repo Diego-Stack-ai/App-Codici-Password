@@ -37,7 +37,7 @@ export const LOCAL_AI_ADVANCED_TIERS = Object.freeze({
         minimum:Object.freeze({ confirmedRamGiB:32, hardwareConcurrency:8, storageBytes:6*1024*1024*1024 }),
         artifactPlan:Object.freeze({ packageId:'qwen2.5-3b-instruct-q4f16-1-mlc', quantization:'q4f16_1',
             modelSource:'https://huggingface.co/mlc-ai/Qwen2.5-3B-Instruct-q4f16_1-MLC', revision:'7690aaaa46df36b1be0fe93b9c9abac0497eff6c',
-            upstream:'https://huggingface.co/Qwen/Qwen2.5-3B-Instruct', license:'Apache-2.0',
+            upstream:'https://huggingface.co/Qwen/Qwen2.5-3B-Instruct', license:'Qwen Research License',
             approxDownloadBytes:HOSTED_ADVANCED_AI_CATALOG.desktop32.manifest.approxDownloadBytes, weightFiles:62,
             maxResidentBytes:HOSTED_ADVANCED_AI_CATALOG.desktop32.manifest.maxResidentBytes,
             runtimeLibrary:'Qwen2.5-3B-Instruct-q4f16_1_cs1k-webgpu.wasm', contextWindowSize:4096 }) })

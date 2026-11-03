@@ -112,9 +112,13 @@ test('regole integrate rendono metadati e oggetti server-only', async () => {
     assert.match(functions, /exports\.removeProfileDocumentAttachment = onCall/);
 });
 
-test('Hosting consente fotocamera e microfono solo alle pagine della stessa origine', async () => {
+test('Hosting limita fotocamera, microfono e rete locale alle origini previste', async () => {
     const hosting = JSON.parse(await read('firebase.json'));
     const globalHeaders = hosting.hosting.headers.find(entry => entry.source === '**')?.headers || [];
     const permissionsPolicy = globalHeaders.find(header => header.key === 'Permissions-Policy')?.value;
-    assert.equal(permissionsPolicy, 'camera=(self), microphone=(self), geolocation=()');
+    assert.match(permissionsPolicy, /(?:^|, )camera=\(self\)(?:, |$)/);
+    assert.match(permissionsPolicy, /(?:^|, )microphone=\(self\)(?:, |$)/);
+    assert.match(permissionsPolicy, /(?:^|, )geolocation=\(\)(?:, |$)/);
+    assert.match(permissionsPolicy, /(?:^|, )loopback-network=\(self\)(?:, |$)/);
+    assert.match(permissionsPolicy, /(?:^|, )local-network=\(\)(?:, |$)/);
 });
