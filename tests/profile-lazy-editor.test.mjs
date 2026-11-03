@@ -70,3 +70,9 @@ test('editor import failure is visible only in the originating active profile', 
     assert.equal(runtime.calls.length, 0);
   }
 });
+
+test('delegated profile actions rebuild their context after every profile refresh', () => {
+  assert.match(source, /setupDelegation\(\);/);
+  assert.match(source, /function setupDelegation\(\)[\s\S]*?const ctx = buildCtx\(\);[\s\S]*?editAddress\(idx, ctx\)/);
+  assert.doesNotMatch(source, /setupDelegation\(ctx\)/);
+});
