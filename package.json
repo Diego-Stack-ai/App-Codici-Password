@@ -69,6 +69,8 @@
     "qa:release-browser": "node scripts/test-qa-release-browser.mjs",
     "qa:page-matrix-browser": "node scripts/test-qa-page-matrix-browser.mjs",
     "qa:populate-profile-browser": "node scripts/populate-qa-profile-browser.mjs",
+    "qa:populate-profile-links-browser": "node scripts/populate-qa-profile-links-browser.mjs",
+    "qa:populate-company-browser": "node scripts/populate-qa-company-browser.mjs",
     "test:qa-automation": "node scripts/audit-qa-final-inventory.mjs && node --test tests/qa-automation.test.mjs tests/qa-final-inventory.test.mjs",
     "audit:qa-final": "node scripts/audit-qa-final-inventory.mjs",
     "test:page-shells": "node scripts/audit-page-shells.mjs",

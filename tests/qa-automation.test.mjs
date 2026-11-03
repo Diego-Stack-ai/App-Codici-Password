@@ -30,7 +30,9 @@ test('provisioner e runner non stampano né incorporano i segreti', async () => 
         readFile(new URL('../scripts/provision-qa-user.mjs', import.meta.url), 'utf8'),
         readFile(new URL('../scripts/test-qa-release-browser.mjs', import.meta.url), 'utf8'),
         readFile(new URL('../scripts/test-qa-page-matrix-browser.mjs', import.meta.url), 'utf8'),
-        readFile(new URL('../scripts/populate-qa-profile-browser.mjs', import.meta.url), 'utf8')
+        readFile(new URL('../scripts/populate-qa-profile-browser.mjs', import.meta.url), 'utf8'),
+        readFile(new URL('../scripts/populate-qa-profile-links-browser.mjs', import.meta.url), 'utf8'),
+        readFile(new URL('../scripts/populate-qa-company-browser.mjs', import.meta.url), 'utf8')
     ]);
     const joined = sources.join('\n');
     assert.doesNotMatch(joined, /console\.log\([^\n]*(accountPassword|masterPassword)/);
@@ -39,6 +41,33 @@ test('provisioner e runner non stampano né incorporano i segreti', async () => 
     assert.match(joined, /QA_EXISTING_IDENTITY_NOT_OWNED_BY_AUTOMATION/);
     assert.match(joined, /updateMask\.fieldPaths/);
     assert.match(joined, /shouldCreateVault \? \['synthetic Vault verifier\/envelope'\] : \[\]/);
+});
+
+test('il collaudo dei collegamenti Profilo usa UI reale e fixture non raggiungibili', async () => {
+    const source = await readFile(new URL('../scripts/populate-qa-profile-links-browser.mjs', import.meta.url), 'utf8');
+    assert.match(source, /profilo\.qa@appcodici-password\.invalid/);
+    assert.match(source, /QA Account Profilo/);
+    assert.match(source, /QA-DOC-0001/);
+    assert.match(source, /created-without-recipients/);
+    assert.match(source, /deferred-missing-deadline-rule/);
+    assert.match(source, /profile-account-link\.png/);
+    assert.match(source, /profile-deadline-link\.png/);
+    assert.doesNotMatch(source, /firebase-config|updateDoc|setDoc|addDoc|deleteDoc/);
+    assert.match(source, /#profile-account-picker/);
+    assert.match(source, /#btn-save-footer/);
+    assert.match(source, /#save-btn/);
+});
+
+test('il collaudo Azienda usa UI reale, recapiti non raggiungibili e password sintetiche', async () => {
+    const source = await readFile(new URL('../scripts/populate-qa-company-browser.mjs', import.meta.url), 'utf8');
+    assert.match(source, /QA Azienda Sintetica SRL/);
+    assert.match(source, /@appcodici-password\.invalid/);
+    assert.match(source, /QA-PASSWORD-NON-REALE/);
+    assert.match(source, /company-contacts-masked\.png/);
+    assert.match(source, /#btn-save/);
+    assert.match(source, /#btn-add-sede/);
+    assert.match(source, /#btn-add-email/);
+    assert.doesNotMatch(source, /firebase-config|updateDoc|setDoc|addDoc|deleteDoc/);
 });
 
 test('il popolamento profilo usa solo UI e recapiti sintetici non raggiungibili', async () => {

@@ -45,7 +45,10 @@ export const FIXTURE_PLANS = Object.freeze({
 const BASELINE = new Map([
     ['login-v115', 'BASELINE AUTOMATICA'],
     ['home_page', 'BASELINE AUTOMATICA'],
-    ['profilo_privato', 'PARZIALE · profilo, Documento, allegato, Tessera digitale e Widget; restano collegamenti']
+    ['profilo_privato', 'PARZIALE · dati completi e Account collegato; Scadenza rinviata alla creazione della regola QA'],
+    ['lista_aziende', 'PASSA · azienda sintetica unica creata e riletta'],
+    ['modifica_azienda', 'PASSA · anagrafica, sedi, contatti, immagini e allegato completi'],
+    ['dati_azienda', 'PASSA · schede, segreti mascherati, QR e PDF verificati']
 ]);
 
 function escapeCell(value) {
