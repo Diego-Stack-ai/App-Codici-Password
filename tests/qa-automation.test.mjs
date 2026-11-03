@@ -45,9 +45,15 @@ test('il popolamento profilo usa solo UI e recapiti sintetici non raggiungibili'
     const source = await readFile(new URL('../scripts/populate-qa-profile-browser.mjs', import.meta.url), 'utf8');
     assert.match(source, /profilo\.qa@appcodici-password\.invalid/);
     assert.match(source, /QA-SINTETICO/);
+    assert.match(source, /QA-DOC-0001/);
+    assert.match(source, /qa-allegato-sintetico\.txt/);
+    assert.match(source, /QA Widget Profilo/);
+    assert.match(source, /Segreto QA cifrato/);
     assert.doesNotMatch(source, /firebase-config|updateDoc|setDoc|addDoc|deleteDoc/);
     assert.match(source, /#profile-edit-modal/);
     assert.match(source, /reload-verification/);
+    assert.match(source, /profile-widget\.png/);
+    assert.match(source, /profile-documents\.png/);
 });
 
 test('il percorso alternativo delle credenziali indica solo un file locale protetto', async () => {

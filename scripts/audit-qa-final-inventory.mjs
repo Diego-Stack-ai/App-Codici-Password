@@ -45,7 +45,7 @@ export const FIXTURE_PLANS = Object.freeze({
 const BASELINE = new Map([
     ['login-v115', 'BASELINE AUTOMATICA'],
     ['home_page', 'BASELINE AUTOMATICA'],
-    ['profilo_privato', 'PARZIALE · anagrafica, note, contatti, indirizzo e utenza']
+    ['profilo_privato', 'PARZIALE · profilo, Documento, allegato, Tessera digitale e Widget; restano collegamenti']
 ]);
 
 function escapeCell(value) {
