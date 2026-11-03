@@ -18,6 +18,8 @@ L'ordine operativo è vincolante: **prima** completare la matrice funzionale in 
 
 Questo ordine autorizza dati sintetici nel solo utente QA, aggiornamento della documentazione e collaudi applicativi non distruttivi. Non autorizza pubblicazione, modifica di utenti reali, invio a recapiti reali, uso di documenti validi, attivazione MFA, rotazione della Vault tecnica o modifiche a Functions, Rules, indici e dati di produzione.
 
+Checkpoint operativo: inventario e matrice strutturale sono conclusi; **48/48** pagine/viewport private aprono correttamente. Il prossimo blocco autorizzato è la creazione idempotente delle fixture sintetiche e il collaudo dei cicli di vita in italiano. Graphify e lingue restano successivi alla stabilizzazione funzionale.
+
 ## Comandi rapidi Account dalla Home — 03/11/2026
 
 Diego autorizza con **«rigenera e poi pubblica»** il rilascio patch `1.2.253`, il commit, il push su GitHub e il deploy del solo Firebase Hosting. Il pulsante viola del footer deve chiamarsi **Nuovo account privato** e aprire direttamente il relativo form. Il pulsante verde **Nuovo account azienda** deve mostrare un menu accessibile con le Aziende disponibili e aprire il form già associato all'Azienda scelta; se non esistono Aziende deve proporne la creazione. **Nuova Scadenza** resta invariato. Il menu **Archivio Account** dell'Area privata conserva il proprio significato di archivio/cestino recuperabile e non viene rimosso.

@@ -10,3 +10,8 @@ test('il dettaglio scadenza torna sempre al contenitore Scadenze', () => {
     /path\.endsWith\('dettaglio_scadenza\.html'\)[\s\S]*?fallbackHref = 'scadenze\.html';[\s\S]*?preferHistory = false;/
   );
 });
+
+test('la Home usa un avatar locale valido anche senza foto profilo', () => {
+  assert.match(source, /id: 'user-avatar-img',[\s\S]*?src: 'assets\/images\/user-avatar-5\.png'/);
+  assert.doesNotMatch(source, /id: 'user-avatar-img',[\s\S]*?src: 'data:image\/svg\+xml/);
+});

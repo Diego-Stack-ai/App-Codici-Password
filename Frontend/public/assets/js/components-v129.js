@@ -90,7 +90,8 @@ export async function initComponents() {
                 }, [
                     createElement('img', {
                         id: 'user-avatar-img',
-                        src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00czLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYy04LTIuNjYtOC00LTh6Ii8+PC9zdmc+'
+                        src: 'assets/images/user-avatar-5.png',
+                        alt: t('page_title_profile') || 'Profilo'
                     })
                 ]);
                 headerLeft.style.display = 'flex';
