@@ -5,6 +5,7 @@ import { getLocalAiPackageCandidate, LOCAL_AI_ADVANCED_TIERS } from './local-ai-
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
 import { createLocalAiRuntimeLoader, readLocalAiRuntimeDiagnostic } from './local-ai-runtime-loader.js';
 import { clearLocalAiRuntimeState, readLocalAiRuntimeState, writeLocalAiRuntimeState } from './local-ai-runtime-state.js';
+import { nativeAi2InstallSummary } from './native-ai2-installation-plan.js';
 import { readDesktop32RamConfirmation, readSelectedAdvancedTier, readSelectedLocalAi,
     writeDesktop32RamConfirmation, writeSelectedAdvancedTier, writeSelectedLocalAi } from './local-ai-selection.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
@@ -169,9 +170,13 @@ export async function initAssistantPackageSettings(container = document.getEleme
                 const install = document.createElement('button'); install.type = 'button';
                 install.textContent = compatible ? label('install') : label('unavailable'); install.disabled = !compatible || Boolean(downloading);
                 install.onclick = async () => {
+                    const nativeInfo = level === 'A2' ? nativeAi2InstallSummary() : null;
+                    const consent = nativeInfo?.ready
+                        ? `${nativeInfo.body}\n${nativeInfo.requirements}`
+                        : `${label('consent')}\n${label('desktop32Confirm')}\n${size(candidate.manifest.approxDownloadBytes)} · ${label('storage')} ${size(Math.ceil(candidate.manifest.approxDownloadBytes * 2.15))}`;
                     const confirmed = await showConfirmModal(
                         label('title'),
-                        `${label('consent')}\n${label('desktop32Confirm')}\n${size(candidate.manifest.approxDownloadBytes)} · ${label('storage')} ${size(Math.ceil(candidate.manifest.approxDownloadBytes * 2.15))}`,
+                        consent,
                         label('install'),
                         label('cancel')
                     );

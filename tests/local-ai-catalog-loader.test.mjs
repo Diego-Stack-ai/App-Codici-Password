@@ -22,7 +22,8 @@ test('catalogo fissato: somme, revisioni e runtime hanno provenienza immutabile'
     assert.deepEqual(Object.keys(LOCAL_AI_ADVANCED_TIERS), ['desktop32']);
     assert.equal(LOCAL_AI_ADVANCED_TIERS.desktop32.status, 'available');
     assert.match(LOCAL_AI_ADVANCED_TIERS.desktop32.baseUrl, /^\/assets\/local-ai-packages\/a2\//);
-    assert.equal(LOCAL_AI_ADVANCED_TIERS.desktop32.artifactPlan.license, 'Apache-2.0');
+    assert.equal(LOCAL_AI_ADVANCED_TIERS.desktop32.artifactPlan.license, 'Qwen Research License');
+    assert.equal(LOCAL_AI_ADVANCED_TIERS.desktop32.manifest.model.license, 'Qwen Research License');
     assert.match(LOCAL_AI_ADVANCED_TIERS.desktop32.artifactPlan.revision, /^[a-f0-9]{40}$/);
     assert.equal(getLocalAiPackageCandidate('A2', { tier:'desktop32' }).status, 'available');
 });
@@ -202,6 +203,8 @@ test('le impostazioni espongono un solo pacchetto AI.2 con conferma dei 32 GB', 
     assert.match(source, /readLocalAiRuntimeDiagnostic/);
     assert.match(source, /\[Local AI verification failed\]/);
     assert.match(source, /errors\[level\]\.errorName/);
+    assert.match(source, /nativeAi2InstallSummary/);
+    assert.match(source, /nativeInfo\?\.ready/);
 });
 
 test('Codex AI.2 viene esposto soltanto dopo il collaudo del runtime corrente', () => {

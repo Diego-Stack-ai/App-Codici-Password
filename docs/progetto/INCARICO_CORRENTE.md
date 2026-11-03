@@ -1,5 +1,21 @@
 # Incarico corrente
 
+## Pubblicazione fondazioni Motore locale AI.2 — 03/11/2026
+
+Diego autorizza con **«pubblica»** il rilascio patch `1.2.251`, il commit e il push su GitHub e il deploy del solo Firebase Hosting. Il rilascio comprende il banco QA con utente tecnico sintetico, il ponte browser-loopback inattivo in assenza di associazione, il prototipo compilabile del motore Windows, il popup informativo e i controlli di firma, licenza e integrità destinati ai futuri artefatti. Non sono inclusi né pubblicati l'installer Windows, i binari `llama.cpp`, il modello Qwen3, Functions, Rules, indici, migrazioni o dati reali. La AI.2 WebLLM attualmente pubblicata resta il percorso effettivo finché il nuovo pacchetto non supera il collaudo finale.
+
+## Collaudo autonomo e Motore locale AI.2 — 03/11/2026
+
+Diego autorizza con **«procedi»** due incrementi locali distinti. Il primo crea un quinto utente Firebase esclusivamente tecnico, già verificato, marcato come sintetico e privo di collegamenti con utenti o dati reali. Password di accesso e Master Password restano obbligatorie e diverse; vengono conservate soltanto nel contenitore DPAPI dell'utente Windows e mai nel repository, nei log o nell'app. Il collaudo apre il percorso reale di login, sblocca la Vault tramite l'interfaccia, verifica la Home e chiude la sessione. La riconciliazione ordinaria non ruota la chiave della Vault tecnica; la rotazione resta un comando esplicito.
+
+Il secondo incremento mantiene **Ricerca** deterministica nel browser e sostituisce progressivamente l'inferenza WebLLM di **Codex AI.2** con un **Motore locale AI.2** per Windows. Agente Codex resta l'interfaccia; il motore nativo esegue il modello sul PC e restituisce la risposta nello stesso popup. Il servizio deve ascoltare soltanto sull'interfaccia locale, accettare esclusivamente l'origine dell'app, richiedere associazione e token locale, non ricevere dati della Vault e verificare firma e integrità di installer e modello distribuiti dall'infrastruttura controllata dell'app. L'attuale WebLLM resta temporaneamente disponibile come percorso di confronto e riserva finché il motore nativo non supera i test A/B reali. Il testo informativo dell'installazione viene definito durante l'implementazione e potrà essere rifinito dopo il collaudo.
+
+La selezione del modello deve essere compatibile con la distribuzione dell'app. Il Qwen2.5 3B già ospitato per WebLLM conserva la propria **Qwen Research License** e non è la base del nuovo pacchetto commerciale. Il piano nativo usa come candidata Qwen3 4B GGUF `Q4_K_M` con Apache 2.0; download, hash e installer restano bloccati finché gli artefatti finali non sono stati verificati. Il popup di installazione spiega requisiti, elaborazione locale, download dal server dell'app, permanenza della Ricerca e rimozione senza perdita dei dati.
+
+Il piccolo host Windows può restare disponibile senza caricare il modello: `llama-server` e Qwen vengono avviati soltanto quando l'utente usa Codex AI.2. La sola Ricerca non occupa la memoria prevista per il modello. La distribuzione passa da un manifest immutabile con revisione Qwen fissata, licenze Apache incluse, firma Authenticode valida dell'installer, dimensioni e SHA-256 di ogni artefatto; il processo di staging si interrompe se uno di questi vincoli manca.
+
+Questo ordine autorizza implementazione, documentazione, provisioning del solo utente sintetico e verifiche locali/autenticate. Non autorizza ancora bump, commit, push, deploy, pubblicazione dell'installer, modifiche a Functions o Rules, né accesso ad account reali.
+
 ## Stabilizzazione runtime e risposte di Codex AI.2 — 02/11/2026
 
 Diego autorizza con **«pubblica»** il rilascio `1.2.250` della correzione emersa dal collaudo visivo della `1.2.249`. Sono autorizzati bump patch, commit, push, pull request, integrazione in `master` e workflow manuale del solo Firebase Hosting. La chiusura del popup non deve inviare un'interruzione al Worker quando la generazione è già terminata: soltanto una risposta realmente in corso può essere annullata. Il lease del runtime resta così riutilizzabile per trenta minuti nella stessa pagina e per lo stesso pacchetto; timeout, annullamento effettivo ed errori strutturali conservano invece il riciclo già previsto.

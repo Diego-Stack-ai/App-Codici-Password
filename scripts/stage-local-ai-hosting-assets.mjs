@@ -18,6 +18,7 @@ const specs = {
         revision:'7690aaaa46df36b1be0fe93b9c9abac0497eff6c',
         upstream:'Qwen/Qwen2.5-3B-Instruct',
         upstreamRevision:'aa8e72537993ba99e69dfaafa59ed015b17504d1', modelId:'codex-qwen2.5-3b-instruct-q4f16-1',
+        license:'Qwen Research License',
         library:'Qwen2.5-3B-Instruct-q4f16_1_cs1k-webgpu.wasm', vramMiB:2504.76,
         lowResourceRequired:true, contextWindowSize:4096
     }
@@ -128,7 +129,7 @@ async function stage(tier) {
     files.sort((a, b) => a.path.localeCompare(b.path));
     const manifest = { schemaVersion:1, level:'A2', tier, packageId:spec.packageId, version:'0.1.0',
         immutableBaseUrl:`/assets/local-ai-packages/a2/${spec.packageId}/0.1.0/`,
-        source:{ repo:spec.repo, revision:spec.revision, upstream:spec.upstream, license:'Apache-2.0' },
+        source:{ repo:spec.repo, revision:spec.revision, upstream:spec.upstream, license:spec.license },
         approxDownloadBytes:files.reduce((sum, file) => sum + file.bytes, 0), maxResidentBytes:Math.ceil(spec.vramMiB * 1024 * 1024), files };
     await writeFile(join(destination, 'hosting-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
     console.log(`${tier}: ${manifest.approxDownloadBytes} byte, ${files.length} file`);

@@ -18,7 +18,7 @@ export const HOSTED_ADVANCED_AI_CATALOG = Object.freeze({
         "provider": "MLC AI / Qwen",
         "modelId": "mlc-ai/Qwen2.5-3B-Instruct-q4f16_1-MLC",
         "revision": "7690aaaa46df36b1be0fe93b9c9abac0497eff6c",
-        "license": "Apache-2.0"
+        "license": "Qwen Research License"
       },
       "approxDownloadBytes": 1760923338,
       "maxResidentBytes": 2626431222,

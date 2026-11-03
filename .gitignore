@@ -12,6 +12,9 @@ firebase-debug.*.log*
 .codex-tmp/
 .codex-worktrees/
 Frontend/public/assets/local-ai-packages/
+tools/native-ai2/bin/
+tools/native-ai2/obj/
+graphify-out/
 
 # Firebase config
 

@@ -1,7 +1,7 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.250';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.250';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.251';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.251';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 import { archiveAccount } from '../settings/archive-account-service.js';
@@ -9,6 +9,8 @@ import { archiveConfirmMessage } from '../settings/archive-account-model.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t, getCurrentLanguage } from '../../translations.js';
 import { createLocalAiAssistantService } from './local-ai-assistant-service.js';
+import { createNativeAi2AssistantService } from './native-ai2-assistant-service.js';
+import { readNativeAi2Pairing } from './native-ai2-client.js';
 import { probeLocalAiCapabilities } from './advanced-local-ai-contract.js';
 import { getLocalAiPackageCandidate } from './local-ai-package-catalog.js';
 import { createLocalAiPackageManager } from './local-ai-package-manager.js';
@@ -38,6 +40,17 @@ async function loadDocumentationKnowledge(language) {
 async function createAvailableA2Service(language) {
     if (readSelectedLocalAi() !== 'A2') return { service:null, diagnostic:null };
     if (!readDesktop32RamConfirmation()) return { service:null, diagnostic:null };
+    let nativeDiagnostic = null;
+    if (readNativeAi2Pairing()) {
+        const service = createNativeAi2AssistantService({ language });
+        try {
+            await service.prepare();
+            return { service, diagnostic:null };
+        } catch (error) {
+            await service.close();
+            nativeDiagnostic = readLocalAiRuntimeDiagnostic(error, 'native-connect');
+        }
+    }
     try {
         const tier = readSelectedAdvancedTier();
         const capabilities = await probeLocalAiCapabilities();
@@ -45,16 +58,16 @@ async function createAvailableA2Service(language) {
             return { service:null, diagnostic:{ code:'LOCAL_AI_CAPABILITY_UNAVAILABLE', stage:'capability-check', errorName:'Error' } };
         }
         const candidate = getLocalAiPackageCandidate('A2', { tier });
-        if (!candidate || candidate.status !== 'available') return { service:null, diagnostic:null };
+        if (!candidate || candidate.status !== 'available') return { service:null, diagnostic:nativeDiagnostic };
         const status = await createLocalAiPackageManager().status('A2', {
             manifest: candidate.manifest,
             baseUrl: candidate.baseUrl,
             legacyLevel: candidate.legacyLevel
         });
         const storedState = readLocalAiRuntimeState('A2', tier);
-        if (storedState?.status === 'failed') return { service:null, diagnostic:storedState.diagnostic };
+        if (storedState?.status === 'failed') return { service:null, diagnostic:nativeDiagnostic || storedState.diagnostic };
         const packageReady = status.installed && status.verified;
-        if (!packageReady) return { service:null, diagnostic:null };
+        if (!packageReady) return { service:null, diagnostic:nativeDiagnostic };
         const service = createLocalAiAssistantService({ language });
         try {
             await service.prepare();
@@ -65,14 +78,14 @@ async function createAvailableA2Service(language) {
         }
     } catch (error) {
         console.warn('[ASSISTANT] Codex AI.2 non disponibile; Ricerca resta attiva.', error?.name || 'Error');
-        return { service:null, diagnostic:readLocalAiRuntimeDiagnostic(error, 'preflight') };
+        return { service:null, diagnostic:nativeDiagnostic || readLocalAiRuntimeDiagnostic(error, 'preflight') };
     }
 }
 
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.250'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.251'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
