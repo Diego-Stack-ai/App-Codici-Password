@@ -1,5 +1,17 @@
 # Incarico corrente
 
+## Collaudo visivo completo con utente sintetico — 03/11/2026
+
+Diego autorizza l'uso dell'utente tecnico di prova per un collaudo end-to-end visivo, pagina per pagina, eseguito come un utente umano. Possono essere creati dati esclusivamente sintetici e inequivocabilmente fittizi in tutti i campi applicativi popolabili, inclusi i riferimenti necessari a esercitare collegamenti, Widget, Documenti, allegati, Account, Memorandum, Aziende, Scadenze e archivi. Le fixture devono essere riconoscibili, idempotenti o rimovibili e confinate all'utente QA; non devono usare identità, indirizzi, documenti, recapiti, credenziali o contenuti appartenenti a persone reali.
+
+Il collaudo deve attraversare l'intero ciclo di vita osservabile: prima configurazione e Profilo; creazione, dettaglio, modifica, ricerca e collegamento; condivisione e revoca; archiviazione, ripristino ed eliminazione; apertura degli allegati; errori, stati vuoti, conferme e ritorno alla pagina chiamante. Ogni pagina viene controllata anche per layout, contrasto, overflow, focus, tastiera, messaggi, Console e richieste di rete. Le condivisioni vengono verificate da entrambi i lati: il banco crea o invia la richiesta sintetica, mentre Diego comunica l'evidenza dell'account ricevente quando l'altro lato non è disponibile al banco automatico.
+
+La matrice comprende esplicitamente Account condivisi e Memorandum condivisi con allegati, Widget bancari legati al conto, Widget generici riutilizzabili e Credenziali comuni collegate a più Account. Per i Widget e per ogni altro contenuto scritto dall'utente, il cambio lingua non deve tradurre nome, etichetta o valore; cambiano soltanto i testi applicativi. Per l'Archivio portabile il visualizzatore, le istruzioni e le esportazioni tabellari devono seguire la lingua selezionata, mentre il JSON completo conserva le chiavi canoniche. Il Backup cifrato resta neutro rispetto alla lingua.
+
+L'ordine operativo è vincolante: **prima** completare la matrice funzionale in italiano e correggere le regressioni; **poi** cambiare lingua e ripetere la verifica visiva di tutte le pagine, dei popup, dei menu, delle etichette, degli errori, dell'ARIA e dei contenuti dinamici in ogni lingua supportata. Graphify viene usato per censire pagine, pulsanti e percorsi, ma non sostituisce l'osservazione visiva. Le verifiche automatiche e gli screenshot sono evidenze complementari, non equivalenti a un esito fisico su iPhone/Safari, notifiche Push o lettore di schermo reale.
+
+Questo ordine autorizza dati sintetici nel solo utente QA, aggiornamento della documentazione e collaudi applicativi non distruttivi. Non autorizza pubblicazione, modifica di utenti reali, invio a recapiti reali, uso di documenti validi, attivazione MFA, rotazione della Vault tecnica o modifiche a Functions, Rules, indici e dati di produzione.
+
 ## Comandi rapidi Account dalla Home — 03/11/2026
 
 Diego autorizza con **«rigenera e poi pubblica»** il rilascio patch `1.2.253`, il commit, il push su GitHub e il deploy del solo Firebase Hosting. Il pulsante viola del footer deve chiamarsi **Nuovo account privato** e aprire direttamente il relativo form. Il pulsante verde **Nuovo account azienda** deve mostrare un menu accessibile con le Aziende disponibili e aprire il form già associato all'Azienda scelta; se non esistono Aziende deve proporne la creazione. **Nuova Scadenza** resta invariato. Il menu **Archivio Account** dell'Area privata conserva il proprio significato di archivio/cestino recuperabile e non viene rimosso.

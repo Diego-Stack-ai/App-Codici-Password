@@ -1,5 +1,43 @@
 # Programma
 
+## COLLAUDO-QA-FINALE-01 — matrice funzionale e linguistica — 03/11/2026
+
+**Obiettivo:** dimostrare con l'utente tecnico sintetico che ogni percorso dell'app è comprensibile e funzionante dall'interfaccia reale, non soltanto coperto dal codice o da test isolati.
+
+### Fase A — inventario Graphify e fixture
+
+1. censire pagine, modali, menu, pulsanti, rotte e collegamenti con Graphify e sorgente canonica;
+2. associare a ogni area i record necessari e tutti i campi realmente popolabili;
+3. preparare dati fittizi riconoscibili, ripetibili e cancellabili, inclusi piccoli allegati sintetici nei formati supportati;
+4. escludere dati personali reali, recapiti raggiungibili, identificativi formalmente validi, credenziali, token Push, MFA e segreti operativi.
+
+### Fase B — collaudo funzionale italiano
+
+Percorrere visualmente prima configurazione, Home, Profilo, contatti, indirizzi e utenze, Documenti e Tessera digitale, Aziende e sedi, Account privati e aziendali, vista bancaria, Memorandum e Memorandum condivisi, Widget, Scadenze, destinatari, allegati, archivi, Impostazioni e Ricerca. Per ogni record provare quando disponibile: creazione, lettura, modifica, ricerca, collegamento, condivisione, revoca, archiviazione, ripristino ed eliminazione. Verificare inoltre pagina chiamante/ritorno, stati vuoti, messaggi, conferme, contrasto, overflow, focus, tastiera, Console e rete.
+
+I casi obbligatori distinguono Widget bancari collegati a un conto e Widget generici riutilizzabili; comprendono istanza, modello, cifratura, mostra/nascondi, modifica, riuso ed eliminazione. Le Credenziali comuni vengono provate con più Account per propagazione, scollegamento selettivo, autorizzazioni, archiviazione ed eliminazione. I contenuti creati dall'utente non cambiano al cambio lingua.
+
+### Fase C — condivisioni a due utenti
+
+Creare richieste esclusivamente sintetiche e registrare separatamente l'esito del mittente e quello del destinatario. Quando il secondo lato richiede l'intervento di Diego, il banco conserva l'identificativo sintetico e attende la sua evidenza senza dichiarare riuscita la condivisione. Account condivisi, Memorandum condivisi, revoca e visibilità successiva devono essere casi distinti.
+
+### Fase D — matrice multilingua
+
+Solo dopo la chiusura funzionale italiana, ripetere per ogni lingua supportata la navigazione completa e il controllo di testi statici e dinamici: titoli, campi, placeholder, pulsanti, menu, popup, conferme, errori, guida/Ricerca, ARIA, formati data e adattamento mobile. Il cambio lingua deve propagarsi a tutte le pagine senza tradurre o alterare i contenuti creati dall'utente.
+
+La matrice comprende inoltre Archivio portabile, `LEGGIMI`, anteprime e messaggi degli allegati, intestazioni e fogli CSV/ODS/XLSX, avvisi di sicurezza e schermate di Backup/Ripristino. L'Archivio portabile parte dalla lingua scelta e permette di selezionare una lingua supportata anche offline; il JSON conserva chiavi tecniche canoniche. Il Backup cifrato non viene tradotto internamente.
+
+### Evidenza e criteri di uscita
+
+- una riga di matrice per pagina, lingua, viewport, percorso e risultato;
+- screenshot privi di segreti per i difetti visivi e indicazione di Console/rete per gli errori tecnici;
+- distinzione esplicita fra automatico, browser reale Windows, prova dell'altro utente e dispositivo fisico;
+- nessun caso non eseguito marcato come superato;
+- cleanup verificato delle fixture oppure inventario delle fixture conservate per regressione;
+- correzioni rieseguite sullo stesso percorso prima di considerare chiuso il difetto.
+
+**Ordine nella roadmap:** questo ciclo precede la guida visuale Graphify e la revisione finale delle lingue; dopo la stabilizzazione delle guide si esegue l'ultima passata multilingua, quindi bonifica conclusiva, audit fisici/privacy/legale e chiusura degli MD.
+
 ## RICERCA-GRAPHIFY-01 — consolidamento e futura guida interattiva — 03/11/2026
 
 **Stato:** AI.2 chiusa e non operativa. La cronologia tecnica resta documentata, ma LLM, WebLLM, Qwen e Motore locale non fanno più parte del prodotto.

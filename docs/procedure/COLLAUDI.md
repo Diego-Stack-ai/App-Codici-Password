@@ -1,5 +1,51 @@
 # Collaudi
 
+## Procedura pre-finale con utente tecnico sintetico
+
+### Preparazione sicura
+
+- usare soltanto l'utente marcato `codexQa` e `synthetic`, con profilo browser isolato;
+- verificare UID e marcatori prima di ogni scrittura; interrompere se il target non coincide;
+- non ruotare la chiave della Vault tecnica durante provisioning o riconciliazione ordinari;
+- assegnare alle fixture un prefisso o identificatore stabile di collaudo, così una seconda esecuzione aggiorna i propri record senza moltiplicarli;
+- usare domini riservati come `example.invalid`, numeri e codici chiaramente fittizi e allegati sintetici di piccole dimensioni;
+- non creare recapiti realmente raggiungibili, documenti formalmente validi, token Push, segreti MFA o credenziali riutilizzabili.
+
+### Percorso obbligatorio per ogni pagina
+
+1. aprire la pagina dalla navigazione reale, non soltanto tramite URL diretto;
+2. verificare titolo, header/footer, comandi, testo, stato vuoto e focus iniziale;
+3. compilare tutti i campi pertinenti con fixture sintetiche, incluse varianti facoltative e riferimenti collegabili;
+4. salvare e rileggere dal dettaglio o dalla lista, quindi ricaricare la pagina per escludere risultati presenti soltanto in memoria;
+5. modificare almeno un valore, svuotare quando consentito un valore facoltativo e verificarne la persistenza;
+6. provare ricerca e collegamenti verso Account, Memorandum, Aziende, Documenti e Scadenze, inclusi i record condivisi autorizzati;
+7. provare archiviazione/ripristino e, quando previsto e sicuro, eliminazione con relativa conferma;
+8. controllare layout desktop e viewport telefono, scorrimento, overflow, contrasto, focus, tastiera e chiusura dei popup;
+9. acquisire Console e richieste di rete senza registrare valori sensibili;
+10. uscire dalla pagina, rientrare e annotare esito, difetto, riproduzione ed eventuale cleanup.
+
+### Copertura dati minima
+
+Il percorso deve comprendere Profilo e prima configurazione; Anagrafica, Contatti, Indirizzi, Utenze, Documenti e Tessera digitale; Aziende, sedi e dati aziendali; Account privati, aziendali e bancari; Memorandum, Memorandum condivisi e Widget; Scadenze, regole, destinatari, Email/Push soltanto in modalità non recapitabile; allegati sintetici; archivi, Impostazioni, Ricerca e flussi di collegamento. I campi dipendenti da hardware, provider o identità reale vengono verificati strutturalmente e registrati come gate fisico, non simulati come prova riuscita.
+
+Per i Widget creare almeno un modello bancario legato a un conto e un modello generico riutilizzato in due Account. Verificare valori cifrati, mostra/nascondi, modifica, eliminazione della sola istanza e rimozione del modello quando non più usato. Cambiare lingua e confermare che nomi, etichette e valori creati dall'utente restino invariati mentre i comandi dell'app si traducano. Per le Credenziali comuni collegare una fixture a due Account, aggiornarla, scollegarne uno, archiviare l'altro e verificare cifratura, mascheramento, copia e assenza dalla Ricerca e dai log.
+
+### Condivisione
+
+Mittente e destinatario sono due evidenze distinte. Annotare richiesta, accettazione, visibilità, permessi, revoca e stato successivo per Account condiviso e Memorandum condiviso. Se l'altro account viene controllato da Diego, attendere la sua conferma esplicita e riportarla come evidenza umana separata; la sola creazione dell'invito non certifica la ricezione.
+
+Usare allegati sintetici piccoli nel Memorandum condiviso e verificare separatamente elenco, apertura, permesso, revoca e cleanup. Non inviare segreti o dati reali all'account destinatario.
+
+### Lingue
+
+La prima esecuzione completa avviene in italiano. Dopo la stabilizzazione funzionale, ripetere in ogni lingua supportata tutte le pagine e i componenti visibili: titoli, etichette, placeholder, menu, popup, conferme, errori, ARIA, guida/Ricerca e date. Verificare il cambio lingua sia durante la sessione sia dopo ricarica e nuovo login. I contenuti creati dall'utente devono restare invariati. Una chiave esistente nel dizionario non dimostra da sola che il testo sia corretto o visibile nella pagina.
+
+Esportare anche l'Archivio portabile in ciascuna lingua campione e controllare visualizzatore offline, selettore lingua, `LEGGIMI`, compatibilità allegati, avvisi e intestazioni CSV/ODS/XLSX. Il JSON deve conservare le stesse chiavi canoniche in ogni lingua. Per il Backup cifrato confrontare hash/struttura e ripristino: la lingua modifica soltanto l'interfaccia, mai il contenitore tecnico.
+
+### Registrazione dell'esito
+
+Per ogni caso conservare versione, commit, browser, sistema, viewport, lingua, pagina, fixture, passi, risultato atteso, risultato osservato, Console/rete, screenshot redatto e stato del cleanup. Usare **superato**, **fallito**, **bloccato** o **non eseguito**; non trasformare un blocco o un controllo automatico in prova visiva superata.
+
 ## Consultazione completa dell'Archivio portatile
 
 Oltre al gate `npm run test:portable-archive-prerelease`, verificare con fixture sintetiche: ordine fra dati principali e **Informazioni tecniche**; negli ambiti Account separazione fra il campo operativo `account` e i soli classificatori `type`/`tipo` di primo livello, senza spostare il tipo di un campo Widget annidato; omissione visuale dei valori tecnici predefiniti `false` e `0` senza perdita nel JSON o nelle tabelle; timestamp leggibili; persistenza dei campi sconosciuti; anteprima di immagine, video, audio, PDF e testo; messaggi e azioni per codec, browser, quota/memoria, PDF e integrità; revoca Object URL e pulizia OPFS alla chiusura e alla riapertura. Non usare allegati o dati reali.

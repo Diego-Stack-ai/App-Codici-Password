@@ -1,5 +1,15 @@
 # Collaudi
 
+## 03/11/2026 — piano avviato, collaudo visivo completo con utente QA
+
+- Autorizzato l'uso dell'utente tecnico sintetico per popolare tutti i campi applicativi utili con dati fittizi riconoscibili e per percorrere l'app pagina per pagina come un utente umano.
+- Baseline autenticata sulla versione pubblicata `1.2.253`: il banco isolato ha completato login, inserimento della Master Password tecnica, apertura Home e logout; `consoleErrors` e `networkErrors` sono vuoti. L'unico avviso è il rifiuto App Check/reCAPTCHA atteso nell'esecuzione headless e viene classificato separatamente.
+- La matrice comprende Profilo, Aziende, Account, vista bancaria, Memorandum, condivisioni, Widget, Documenti, Tessera digitale, Scadenze, allegati, archivi, Impostazioni e Ricerca; per ciascun ambito copre i cicli di vita disponibili e il controllo visivo desktop/telefono.
+- Le condivisioni richiedono evidenza separata del mittente e del destinatario. L'eventuale riscontro comunicato da Diego verrà registrato come prova umana distinta. Account condivisi e Memorandum condivisi con allegati restano casi separati.
+- Il collaudo distingue Widget bancari, Widget generici e Credenziali comuni. I testi creati dall'utente non devono essere alterati dal cambio lingua.
+- Il collaudo completo parte in italiano; la matrice multilingua viene eseguita soltanto dopo la stabilizzazione funzionale e deve verificare tutte le pagine, i componenti dinamici, l'ARIA, l'Archivio portabile e le interfacce Backup/Ripristino. L'Archivio portabile traduce la presentazione e le esportazioni leggibili, non le chiavi canoniche del JSON; il Backup resta tecnicamente neutro.
+- **Stato attuale: pianificato e avviato, non ancora eseguito integralmente.** Nessuna pagina, lingua, condivisione o funzione viene dichiarata superata da questa voce.
+
 ## 29/10/2026 — rubrica destinatari e contesti aziendali
 
 - Test mirati sul modello verificano etichetta compatta **Nome Cognome — e-mail**, ordinamento dei soli contatti realmente associati, sostituzione esplicita delle associazioni e deduplica per email.
