@@ -4,7 +4,7 @@
 
 Diego approva l'estensione del perimetro dal solo servizio pubblico al PC Windows di sviluppo e conferma il controllo quotidiano alle 07:30 Europe/Rome. Il monitor deve usare l'inventario reale, verificare le notizie su fonti primarie, evitare duplicati e restare silenzioso senza azioni necessarie. Non può leggere dati Vault né installare aggiornamenti, modificare il repository o pubblicare senza un nuovo ordine.
 
-Gli avvisi devono arrivare per e-mail e, in futuro, anche sul telefono tramite WhatsApp soltanto se sarà configurata un'integrazione Business ufficiale. L'indirizzo Gmail individuato richiede ancora conferma esplicita prima di autorizzare invii automatici; fino ad allora l'automazione resta non attivata.
+Gli avvisi devono arrivare per e-mail e, in futuro, anche sul telefono tramite WhatsApp soltanto se sarà configurata un'integrazione Business ufficiale. Diego autorizza gli invii automatici dei soli avvisi di sicurezza a `boschettodiego@gmail.com`, senza dati della Vault o dati personali. L'automazione quotidiana è attiva; resta silenziosa quando non esistono novità applicabili.
 
 ## Collaudo visivo completo con utente sintetico — 03/11/2026
 
