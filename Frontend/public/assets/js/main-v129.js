@@ -26,7 +26,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.251';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.252';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, limit, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage, observeTranslatedSubtrees } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.251&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
+import * as Pages from './pages-init.js?v=1.2.252&push=20261022a&ai=20261019b&deadline-share=20260908a&touch=20261017b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -382,19 +382,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }).catch((error) => console.warn('[OFFLINE] Sincronizzazione in background non riuscita.', error));
                 }
 
-                // L'assistente è un servizio privato globale e il relativo comando
-                // appartiene al footer comune, non alla sola Home.
-                const assistantOverride = new URLSearchParams(window.location.search).get('assistant') === '1';
-                const assistantEnabled = assistantOverride || userDoc.data()?.settings_ai_assistant === true;
-                if (isPrivatePage && assistantEnabled) {
+                // La ricerca è disponibile in tutte le pagine private.
+                if (isPrivatePage) {
                     try {
-                        const trigger = document.getElementById('ai-assistant-status');
+                        const trigger = document.getElementById('search-status');
                         const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
-                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.251');
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.252');
                         await initVaultAssistant(user, { includeCompanies });
                         trigger?.classList.remove('hidden');
                     } catch (error) {
-                        console.warn('[ASSISTANT] Avvio globale non riuscito.', error);
+                        console.warn('[SEARCH] Avvio globale non riuscito.', error);
                     }
                 }
 

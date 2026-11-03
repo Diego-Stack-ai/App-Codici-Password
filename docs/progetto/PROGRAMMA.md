@@ -1,5 +1,13 @@
 # Programma
 
+## RICERCA-GRAPHIFY-01 — consolidamento e futura guida interattiva — 03/11/2026
+
+**Stato:** AI.2 chiusa e non operativa. La cronologia tecnica resta documentata, ma LLM, WebLLM, Qwen e Motore locale non fanno più parte del prodotto.
+
+**Incremento corrente completato localmente:** mantenere una sola funzione denominata **Ricerca**, sempre disponibile nelle pagine private, basata sul motore deterministico, sulla guida D0 e sulla mappa Graphify. Il grafo runtime comprende pagine, controlli e collegamenti; la ricerca usa sinonimi, tolleranza ai piccoli errori e percorsi fra pagine per restituire la sezione o il pulsante più pertinente. Il vecchio video e ogni componente operativo AI.2 vengono rimossi.
+
+**Progetto futuro separato:** usare la stessa mappa Graphify già collegata alla Ricerca per costruire aiuti contestuali animati (freccia mobile, evidenziazione del controllo, testo del passo e avanzamento). La guida dovrà restare priva di dati segreti ed essere verificata pagina per pagina prima di qualsiasi pubblicazione.
+
 ## AUDIT-SKILL-01 — sicurezza, qualità visiva e prestazioni — pianificazione 11/10/2026
 
 **Obiettivo:** introdurre un ciclo di verifica indipendente e ripetibile dell'app, senza attribuire alle skill autorità di rilascio e senza eseguire test distruttivi sulla produzione.

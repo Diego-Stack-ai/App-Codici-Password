@@ -48,7 +48,7 @@ const slice = (startMarker, nextMarker) => indexSource.slice(indexSource.indexOf
     indexSource.indexOf(nextMarker, indexSource.indexOf(startMarker) + 1));
 const ownerGuardSlice = slice('function requireMutationOwner(', 'exports.applyOfflineMutation');
 const purgeSlice = slice('exports.purgeArchivedAccount', 'exports.restoreBackupChunk');
-const restoreSlice = slice('exports.restoreBackupChunk', '\nexports.');
+const restoreSlice = slice('exports.restoreBackupChunk', '// Segreti cifrati');
 assert.ok(purgeSlice.length > 0 && restoreSlice.length > 0, 'le due callable devono essere estraibili');
 
 process.env.STORAGE_EMULATOR_HOST ??= `http://${process.env.FIREBASE_STORAGE_EMULATOR_HOST}`;

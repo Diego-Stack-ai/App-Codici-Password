@@ -1,5 +1,13 @@
 # Incarico corrente
 
+## Chiusura AI.2 e consolidamento Ricerca — 03/11/2026
+
+Diego dispone l'abbandono del progetto AI.2 nell'app. Tutte le analisi, le procedure, le prove WebLLM/WebGPU, Qwen e Motore locale Windows restano documentate in questi file come storico tecnico, ma sono dichiarate **chiuse e non operative**. Dal prodotto devono essere rimossi pacchetti LLM, download, installer o host Windows, impostazioni, diagnostica, permessi loopback, pulsanti generativi e riferimenti visibili ad AI.2 o Agente AI.
+
+L'unica funzione mantenuta è la ricerca deterministica, chiamata semplicemente **Ricerca**. È disponibile nelle pagine private, accetta testo o dettatura e continua a usare i dati consentiti della Vault e la guida verificata dell'app. Con l'incremento autorizzato il motore usa la conoscenza ricavata con Graphify per indicizzare pagine, scopi, collegamenti, percorsi e controlli reali: riconosce sinonimi e piccoli errori e può indicare il pulsante o la sezione pertinente senza introdurre un modello generativo. Il vecchio video di presentazione viene rimosso. L'aiuto animato con frecce, evidenziazioni e passaggi contestuali resta un progetto successivo e separato, basato sulla stessa mappa.
+
+L'ordine autorizza implementazione, rimozione degli artefatti AI.2, aggiornamento della documentazione e verifiche locali. Non autorizza da solo bump, commit, push o deploy.
+
 ## Pubblicazione fondazioni Motore locale AI.2 — 03/11/2026
 
 Diego autorizza con **«pubblica»** il rilascio patch `1.2.251`, il commit e il push su GitHub e il deploy del solo Firebase Hosting. Il rilascio comprende il banco QA con utente tecnico sintetico, il ponte browser-loopback inattivo in assenza di associazione, il prototipo compilabile del motore Windows, il popup informativo e i controlli di firma, licenza e integrità destinati ai futuri artefatti. Non sono inclusi né pubblicati l'installer Windows, i binari `llama.cpp`, il modello Qwen3, Functions, Rules, indici, migrazioni o dati reali. La AI.2 WebLLM attualmente pubblicata resta il percorso effettivo finché il nuovo pacchetto non supera il collaudo finale.

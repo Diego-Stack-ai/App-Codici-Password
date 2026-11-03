@@ -1,5 +1,11 @@
 # Decisioni
 
+## 03/11/2026 — AI.2 abbandonata, resta solo Ricerca
+
+La funzione generativa AI.2 è rimossa dall'app. Le prove con WebLLM/WebGPU, Qwen e il prototipo di Motore locale Windows restano nello storico documentale, ma non vengono più distribuite né esposte agli utenti. Non devono rimanere download LLM, eseguibili, impostazioni AI, pulsanti AI.2, diagnostica dedicata, permessi loopback o dipendenze di pubblicazione.
+
+La funzione mantenuta si chiama **Ricerca**: è deterministica, locale, utilizzabile con testo o dettatura e non pretende di essere un'intelligenza artificiale. Graphify fornisce la mappa tecnica usata per ampliare comprensione delle parole, collegamenti fra pagine, percorsi e conoscenza dei controlli reali. Il precedente video di presentazione viene eliminato; la futura guida interattiva con evidenziazioni e frecce riuserà questa base ma sarà progettata e collaudata separatamente.
+
 ## 03/11/2026 — collaudo sintetico e AI.2 nativa
 
 I rilasci vengono verificati con un utente tecnico dedicato e dati esclusivamente fittizi. L'utente conserva tutte le protezioni del prodotto, incluse password di accesso, Master Password e cifratura della Vault; non esiste una modalità senza Master Password o una porta di servizio. Le credenziali automatiche sono protette dal profilo Windows tramite DPAPI e non vengono condivise con il codice o con gli utenti reali.

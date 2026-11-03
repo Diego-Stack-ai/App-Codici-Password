@@ -11,7 +11,7 @@ const authorityApi = require('../backup-restore-authority');
 const {assertTransactionGlobalPurgeUnlocked} = require('../archive-purge-global-lock');
 const source = readFileSync(require.resolve('../index'), 'utf8');
 const start = source.indexOf('exports.restoreBackupChunk =');
-const end = source.indexOf('exports.getAppPresentation =', start);
+const end = source.indexOf('// Segreti cifrati', start);
 assert.ok(start >= 0 && end > start);
 
 function fixture() {

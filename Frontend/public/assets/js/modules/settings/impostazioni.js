@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.251';
+import { auth, db } from '../../firebase-config.js?v=1.2.252';
 import { signOut, onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -39,10 +39,6 @@ export async function initImpostazioni(user) {
     setupSettingsProfileQr(user);
     initSettingsEvents(user);
     setupSecurityToggles(currentUserData);
-    setupAIAssistantToggle(user, currentUserData);
-    import('../assistant/assistant-package-settings.js?v=1.2.251&ai=20261024a')
-        .then(module => module.initAssistantPackageSettings())
-        .catch(error => console.error('[LOCAL AI] Impostazioni pacchetto non disponibili.', error));
     setupCompanyAreaToggle(user, currentUserData);
     setupAppInfo();
     setupPrivacyShort();
@@ -63,7 +59,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.251');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.252');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -177,7 +173,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…', current
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.251');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.252');
             current.check();
             const report = await inspectOwnerCredentialHealth(user.uid, {signal: current.signal, isActive: current.active});
             current.check();
@@ -309,7 +305,7 @@ function setupAccountFieldUsage(user) {
             'Controllo locale dei campi realmente compilati in corso…'
         );
         try {
-            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.251');
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.252');
             const report = await inspectAccountFieldUsage(user.uid);
             working.close();
             showAccountFieldUsage(report);
@@ -1120,47 +1116,6 @@ function setupCompanyAreaToggle(user, data) {
             toggle.disabled = false;
         }
     });
-}
-
-function setupAIAssistantToggle(user, data) {
-    const toggle = document.getElementById('ai-assistant-toggle');
-    if (!toggle) return;
-    toggle.checked = data?.settings_ai_assistant === true;
-    syncAssistantPackageSettingsVisibility(toggle.checked);
-    toggle.addEventListener('change', async () => {
-        const enabled = toggle.checked;
-        syncAssistantPackageSettingsVisibility(enabled);
-        toggle.disabled = true;
-        try {
-            await updateDoc(doc(db, 'users', user.uid), { settings_ai_assistant: enabled });
-            if (currentUserData) currentUserData.settings_ai_assistant = enabled;
-            const trigger = document.getElementById('ai-assistant-status');
-            if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.251');
-                await initVaultAssistant(user, {
-                    includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
-                });
-                trigger?.classList.remove('hidden');
-            } else {
-                trigger?.classList.add('hidden');
-            }
-            showToast(enabled ? 'Agente AI attivato' : 'Agente AI disattivato', 'success');
-        } catch (error) {
-            console.error('[ASSISTANT] Salvataggio preferenza fallito.', error);
-            toggle.checked = !enabled;
-            syncAssistantPackageSettingsVisibility(toggle.checked);
-            showToast('Impossibile salvare la preferenza Agente AI', 'error');
-        } finally {
-            toggle.disabled = false;
-        }
-    });
-}
-
-function syncAssistantPackageSettingsVisibility(enabled) {
-    const packageSettings = document.getElementById('assistant-package-settings');
-    if (!packageSettings) return;
-    packageSettings.hidden = !enabled;
-    packageSettings.setAttribute('aria-hidden', String(!enabled));
 }
 
 function showPendingSecurityNotice() {

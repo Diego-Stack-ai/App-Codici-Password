@@ -14,19 +14,9 @@ function walk(directory) {
   });
 }
 
-const opaqueLocalAiRuntimeFiles = new Set([
-  'transformers.bundle.js',
-  'web-llm.js'
-]);
-const isOpaqueLocalAiRuntime = file =>
-  [
-    `${path.sep}assets${path.sep}local-ai${path.sep}`,
-    `${path.sep}assets${path.sep}local-ai-packages${path.sep}`
-  ].some(directory => file.includes(directory)) && opaqueLocalAiRuntimeFiles.has(path.basename(file));
 const files = walk(publicRoot).filter(file =>
   !file.includes('ui-preview') &&
-  !file.includes(`${path.sep}vendor${path.sep}`) &&
-  !isOpaqueLocalAiRuntime(file)
+  !file.includes(`${path.sep}vendor${path.sep}`)
 );
 const cssFiles = files.filter(file => file.endsWith('.css'));
 const markupFiles = files.filter(file => /\.(?:html|js)$/.test(file));
@@ -102,7 +92,7 @@ const requiredSignals = [
   ['header senza elemento fisso annidato', components.includes('setChildren(headerPh, headerContent)') && !components.includes("createElement('header', { className: 'base-header' }")],
   ['saluto Home con tipografia semantica', components.includes("className: 'header-greeting'") && !components.includes('text-[9px]')],
   ['versione Home senza stile inline', /<div class="version-display">/.test(home)],
-  ['assistente AI globale collocato nel footer', components.includes("id: 'ai-assistant-status'") && components.includes('footerLeft.appendChild') && !home.includes('id="ai-assistant-status"')],
+  ['Ricerca globale collocata nel footer', components.includes("id: 'search-status'") && components.includes('footerLeft.appendChild') && !home.includes('id="search-status"')],
   ['avatar profilo senza immagine di cortesia anticipata', /id="profile-avatar" class="profile-avatar-pending"/.test(fs.readFileSync(path.join(publicRoot, 'profilo_privato.html'), 'utf8'))],
   ['account personali senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(privateAccountCss)],
   ['azioni account personali con target tattile', privateAccountCss.includes('width: var(--touch-target-min, 44px)')],

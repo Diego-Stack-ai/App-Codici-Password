@@ -119,6 +119,6 @@ test('Hosting limita fotocamera, microfono e rete locale alle origini previste',
     assert.match(permissionsPolicy, /(?:^|, )camera=\(self\)(?:, |$)/);
     assert.match(permissionsPolicy, /(?:^|, )microphone=\(self\)(?:, |$)/);
     assert.match(permissionsPolicy, /(?:^|, )geolocation=\(\)(?:, |$)/);
-    assert.match(permissionsPolicy, /(?:^|, )loopback-network=\(self\)(?:, |$)/);
+    assert.doesNotMatch(permissionsPolicy, /loopback-network/);
     assert.match(permissionsPolicy, /(?:^|, )local-network=\(\)(?:, |$)/);
 });

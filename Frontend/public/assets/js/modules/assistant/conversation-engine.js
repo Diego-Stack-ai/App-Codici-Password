@@ -38,7 +38,7 @@ const CATEGORY_WORDS = new Set([
     'scadenza', 'scadenze', 'societa', 'utenza'
 ]);
 const CURRENT_PAGE_HELP = /\b(?:a cosa serve|cosa posso fare|come funziona|spiega(?:mi)?|aiuto)\b.*\bpagina\b|\bpagina\b.*\b(?:serve|funziona|fare|aiuto)\b/;
-const INSTRUCTIONAL_QUERY = /\b(?:come|dove)\b.*\b(?:crea|creare|aggiung|modific|configur|impost|us|trova|ved|gest|esport|archivi)/;
+const INSTRUCTIONAL_QUERY = /\b(?:come|dove|quale)\b.*\b(?:crea|creare|aggiung|modific|configur|impost|us|trova|ved|gest|esport|archivi|colleg|condivid|salv|elimin|cancell|ripristin)|\b(?:pulsante|bottone|tasto|menu|selettore|campo|comando|percorso|schermata|sezione)\b/;
 
 const safeText = record => normalizeSearchText([
     record.kind, record.title, record.subtitle, record.scope, record.companyName, ...(record.keywords || [])
@@ -124,7 +124,11 @@ function guideMessage(guide) {
     const steps = Array.isArray(guide.steps) ? guide.steps
         .map(step => typeof step === 'string' ? step : step?.body)
         .filter(Boolean).slice(0, 6) : [];
-    return [guide.purpose, ...steps.map(step => `• ${step}`)].filter(Boolean).join('\n');
+    const path = Array.isArray(guide.path) ? guide.path.map(page => page?.title).filter(Boolean) : [];
+    const matchedBody = typeof guide.matchedStep === 'string' ? guide.matchedStep : guide.matchedStep?.body;
+    const details = matchedBody ? [`• ${matchedBody}`] : steps.map(step => `• ${step}`);
+    return [guide.purpose, path.length > 1 ? `Percorso: ${path.join(' → ')}` : '', ...details]
+        .filter(Boolean).join('\n');
 }
 
 function guideItems(matches) {
@@ -132,12 +136,22 @@ function guideItems(matches) {
         id:`guide:${match.pageId}`,
         kind:'guida',
         title:match.title,
-        subtitle:match.purpose,
+        subtitle:match.path?.length > 1
+            ? `Percorso: ${match.path.map(page => page.title).join(' → ')}`
+            : (match.matchedStep?.body || match.purpose),
         scope:'guida',
         companyName:'',
-        keywords:match.steps || [],
+        keywords:[...(match.steps || []), match.matchedStep?.body || '',
+            ...(match.path || []).map(page => page.title)].filter(Boolean),
         href:match.route
     }));
+}
+
+function exactGuideTarget(matches, query) {
+    const target = meaningfulTokens(query).join(' ');
+    if (!target) return null;
+    const exact = matches.filter(match => normalizeSearchText(match.title) === target);
+    return exact.length === 1 ? exact[0] : null;
 }
 
 function describe(items, total = items.length, offset = 0, hasMore = false) {
@@ -215,15 +229,22 @@ export class VaultConversationEngine {
     ask(query) {
         const normalized = normalizeSearchText(query);
         if (!normalized) return { message: 'Dimmi cosa stai cercando.', items: [] };
+        const normalizedTokens = normalized.split(' ');
+        const wantsOpen = normalizedTokens.some(token => OPEN_WORDS.has(token));
+        const contextual = normalizedTokens.some(token => CONTEXT_WORDS.has(token));
+        const knowledgeMatches = this.#searchKnowledge ? this.#searchKnowledge(query) : [];
         if (CURRENT_PAGE_HELP.test(normalized) && this.#pageKnowledge?.page) {
             return { message:guideMessage(this.#pageKnowledge.page), items:[] };
         }
-        if (INSTRUCTIONAL_QUERY.test(normalized) && this.#searchKnowledge) {
-            const matches = this.#searchKnowledge(query);
-            if (matches.length) {
-                const items = guideItems(matches.slice(0, 5));
-                const direct = matches[0];
-                const detail = matches.length === 1 || direct.score >= ((matches[1]?.score || 0) + 12)
+        const exactGuide = wantsOpen ? exactGuideTarget(knowledgeMatches, query) : null;
+        if (exactGuide) {
+            const [item] = guideItems([exactGuide]);
+            return { message:`Apro ${item.title}.`, items:[item], navigateTo:item.href };
+        }
+        if (INSTRUCTIONAL_QUERY.test(normalized) && knowledgeMatches.length) {
+                const items = guideItems(knowledgeMatches.slice(0, 5));
+                const direct = knowledgeMatches[0];
+                const detail = knowledgeMatches.length === 1 || direct.score >= ((knowledgeMatches[1]?.score || 0) + 12)
                     ? `\n${guideMessage(direct)}`
                     : '';
                 this.#lastMatches = items;
@@ -236,11 +257,7 @@ export class VaultConversationEngine {
                     offset:0,
                     hasMore:false
                 };
-            }
         }
-        const normalizedTokens = normalized.split(' ');
-        const wantsOpen = normalizedTokens.some(token => OPEN_WORDS.has(token));
-        const contextual = normalizedTokens.some(token => CONTEXT_WORDS.has(token));
         const pageOffset = this.#lastMatches.length
             ? requestedPageOffset(normalized, this.#lastMatches.length, this.#lastOffset)
             : null;
@@ -279,6 +296,20 @@ export class VaultConversationEngine {
             ? rankRecords(this.#lastMatches, query)
             : rankRecords(this.#records, query);
         if (!matches.length && this.#lastMatches.length) matches = rankRecords(this.#lastMatches, query);
+        if (!matches.length && knowledgeMatches.length) {
+            const items = guideItems(knowledgeMatches.slice(0, 5));
+            const direct = knowledgeMatches[0];
+            this.#lastMatches = items;
+            this.#lastResults = items;
+            this.#lastOffset = 0;
+            return {
+                message:`La pagina più pertinente è “${direct.title}”.\n${guideMessage(direct)}`,
+                items,
+                total:items.length,
+                offset:0,
+                hasMore:false
+            };
+        }
         const page = pageResults(matches);
         if (page.items.length) {
             this.#lastMatches = matches;

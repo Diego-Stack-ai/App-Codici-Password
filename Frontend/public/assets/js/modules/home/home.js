@@ -12,7 +12,6 @@ import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { getUserProfile, listCompanies } from '../data/vault-repository.js';
-import { initHomePresentation } from './home-presentation.js';
 import { initHomeDeadlineReminders } from './home-deadline-inbox.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
@@ -48,7 +47,6 @@ export async function initHomePage(user) {
 
     // Inizializza Listeners immediatamente (non dipende da dati remoti)
     initHomeListeners();
-    initHomePresentation();
 
     // Sblocco visibilità subito
     document.documentElement.setAttribute("data-i18n", "ready");

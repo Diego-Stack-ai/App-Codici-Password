@@ -26,7 +26,6 @@
   "excludedPathFragments": [
     "/assets/js/vendor/",
     "/assets/js/translations/",
-    "/assets/local-ai/",
     "/ui-preview/"
   ],
   "debt": {

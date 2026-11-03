@@ -83,12 +83,11 @@ assert.equal(contextualDeadlines.ask('assicurazioni').items.length, 2);
 assert.deepEqual(contextualDeadlines.ask('quella di Ester').items.map(item => item.id), ['deadline:ester']);
 contextualDeadlines.ask('assicurazioni');
 assert.equal(contextualDeadlines.ask('apri quella della Hyundai').navigateTo, '/deadline-greta');
-const [loaderSource, uiSource, controllerSource, guideSource, localAiSource] = await Promise.all([
+const [loaderSource, uiSource, controllerSource, guideSource] = await Promise.all([
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/vault-data-loader.js', import.meta.url), 'utf8'),
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-ui.js', import.meta.url), 'utf8'),
     readFile(new URL('../Frontend/public/assets/js/modules/assistant/assistant-controller.js', import.meta.url), 'utf8'),
-    readFile(new URL('../Frontend/public/assets/js/guide.js', import.meta.url), 'utf8'),
-    readFile(new URL('../Frontend/public/assets/js/modules/assistant/local-ai-assistant-service.js', import.meta.url), 'utf8')
+    readFile(new URL('../Frontend/public/assets/js/guide.js', import.meta.url), 'utf8')
 ]);
 assert.match(loaderSource, /iconSource: data\.logo \|\| data\.avatar/);
 assert.match(loaderSource, /archiveAction:/);
@@ -115,16 +114,14 @@ assert.match(uiSource, /onSwipeRight: card => \{ void run\(card\); \}/);
 assert.match(uiSource, /probeMicrophoneAccess\(/);
 assert.match(uiSource, /!remoteConsentPending && !submittedFinal/);
 assert.match(uiSource, /pendingSpokenAnswer = Promise\.resolve\(ask\(transcriptState\.final\)\)/);
-assert.match(uiSource, /microphone\.disabled = !usable \|\| !SpeechRecognition/);
+assert.match(uiSource, /microphone\.disabled = true/);
+assert.match(uiSource, /microphone\.disabled = !SpeechRecognition/);
 assert.doesNotMatch(uiSource, /const vaultAnswer = onAsk\(value\)/);
-assert.match(uiSource, /Promise\.resolve\(onExplain\(value\)\)/);
-assert.match(uiSource, /searchConversation\.hidden = !searching/);
-assert.match(uiSource, /aiConversation\.hidden = searching/);
+assert.match(uiSource, /Promise\.resolve\(onAsk\(value\)\)/);
+assert.doesNotMatch(uiSource, /onExplain|aiConversation|Codex AI\.2/);
 assert.doesNotMatch(uiSource, /Ciao\. Dimmi cosa stai cercando/);
-assert.match(uiSource, /vault-assistant-mode[^\n]*Ricerca/);
-assert.match(uiSource, /vault-assistant-mode[^\n]*Codex AI\.2/);
-assert.match(uiSource, /askMode\.hidden = !onExplain/);
-assert.match(uiSource, /modes\.classList\.toggle\('single', !onExplain\)/);
+assert.match(uiSource, /aria-label', 'Ricerca'/);
+assert.match(uiSource, /'Come usare Ricerca'/);
 assert.match(uiSource, /l’audio non viene registrato né conservato/);
 assert.match(uiSource, /normalized\.items \|\| \[\], Number\(normalized\.offset\) \|\| 0/);
 assert.match(uiSource, /vault-assistant-help/);
@@ -138,13 +135,8 @@ assert.match(controllerSource, /archiveAccount\(user\.uid, target\)/);
 assert.match(controllerSource, /if \(!await showConfirmModal\(t\('confirm_archive_title'\), archiveConfirmMessage\(target, t\)\)\) return false/);
 assert.doesNotMatch(controllerSource, /mustConfirm|requireConfirmation/);
 assert.doesNotMatch(controllerSource, /conversation\.executeIntent\(intent, query\)/);
-assert.match(controllerSource, /query => advanced\.ask\(query\)/);
-assert.match(controllerSource, /readSelectedLocalAi\(\) !== 'A2'/);
-assert.match(controllerSource, /status\.installed && status\.verified/);
-assert.match(controllerSource, /Codex AI\.2 non disponibile; Ricerca resta attiva/);
-assert.match(localAiSource, /Sei separato dalla funzione Ricerca/);
-assert.match(localAiSource, /non affermare di avere cercato/);
-assert.match(localAiSource, /return \{ message:answer, items:\[\] \}/);
+assert.match(controllerSource, /onAsk: query => conversation\.ask\(query\)/);
+assert.doesNotMatch(controllerSource, /local-ai|native-ai2|onExplain|Codex AI\.2/);
 assert.match(guideSource, /getElementById\('footer-center-actions'\)/);
 assert.match(guideSource, /documentation-button-footer/);
 console.log('Vault assistant search tests: OK');

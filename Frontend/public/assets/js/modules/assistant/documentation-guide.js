@@ -6,7 +6,8 @@ const FAMILIES = new Set(['access', 'internal', 'public-contact']);
 const KNOWLEDGE_STOP_WORDS = new Set([
     'a', 'al', 'alla', 'che', 'come', 'con', 'cosa', 'da', 'dei', 'del', 'della', 'di', 'dove', 'e', 'gli',
     'il', 'in', 'la', 'le', 'mi', 'nel', 'nella', 'o', 'per', 'posso', 'puoi', 'questa', 'questo', 'serve',
-    'si', 'su', 'un', 'una'
+    'si', 'su', 'un', 'una', 'bottone', 'campo', 'comando', 'controllo', 'menu', 'pagina', 'pulsante',
+    'schermata', 'selettore', 'sezione', 'tasto'
 ]);
 const KNOWLEDGE_EQUIVALENTS = new Map([
     ['crea', 'creare', 'creo', 'aggiungi', 'aggiungere', 'nuova', 'nuovo'],
@@ -20,8 +21,24 @@ const KNOWLEDGE_EQUIVALENTS = new Map([
     ['backup', 'salvataggio'],
     ['esporta', 'esportare', 'esportazione'],
     ['impostazioni', 'preferenze'],
-    ['configura', 'configurare', 'configurazione', 'imposta', 'impostare']
+    ['configura', 'configurare', 'configurazione', 'imposta', 'impostare'],
+    ['collega', 'collegare', 'associa', 'associare', 'abbina', 'abbinare'],
+    ['condividi', 'condividere', 'condivisione', 'condiviso', 'condivisa'],
+    ['destinatario', 'destinatari', 'rubrica', 'contatto', 'contatti'],
+    ['allegato', 'allegati', 'documento', 'documenti', 'file'],
+    ['memorandum', 'memo', 'annotazione'],
+    ['widget', 'campi', 'personalizzato', 'personalizzati'],
+    ['notifica', 'notifiche', 'push', 'avviso', 'avvisi'],
+    ['password', 'credenziale', 'credenziali', 'segreto', 'segreti']
 ].flatMap(group => group.map(word => [word, group])));
+const TARGET_WORDS = new Map([
+    ['btn', 'pulsante'], ['button', 'pulsante'], ['toggle', 'interruttore'], ['select', 'selettore'],
+    ['selector', 'selettore'], ['search', 'ricerca'], ['list', 'elenco'], ['container', 'area'],
+    ['section', 'sezione'], ['form', 'modulo'], ['save', 'salva'], ['add', 'aggiungi'],
+    ['edit', 'modifica'], ['delete', 'elimina'], ['remove', 'rimuovi'], ['archive', 'archivio'],
+    ['manage', 'gestisci'], ['contacts', 'destinatari'],
+    ['account', 'account'], ['deadline', 'scadenza'], ['profile', 'profilo'], ['company', 'azienda']
+]);
 
 function requireCondition(condition, code) {
     if (!condition) throw new TypeError(`GUIDE_${code}`);
@@ -50,21 +67,74 @@ function knowledgeTokens(value) {
         .filter(token => token.length > 1 && !KNOWLEDGE_STOP_WORDS.has(token));
 }
 
-function knowledgeScore(guide, queryTokens) {
-    if (!queryTokens.length) return 0;
+function editDistance(left, right) {
+    const previous = Array.from({ length:right.length + 1 }, (_, index) => index);
+    for (let row = 1; row <= left.length; row += 1) {
+        const current = [row];
+        for (let column = 1; column <= right.length; column += 1) {
+            current[column] = Math.min(current[column - 1] + 1, previous[column] + 1,
+                previous[column - 1] + (left[row - 1] === right[column - 1] ? 0 : 1));
+        }
+        previous.splice(0, previous.length, ...current);
+    }
+    return previous[right.length];
+}
+
+function textMatches(text, candidate) {
+    if (text.includes(candidate)) return true;
+    if (candidate.length < 5) return false;
+    const maximum = candidate.length >= 9 ? 2 : 1;
+    return text.split(' ').some(word => Math.abs(word.length - candidate.length) <= maximum
+        && editDistance(word, candidate) <= maximum);
+}
+
+function targetText(target) {
+    if (!target) return '';
+    return normalizeKnowledgeText(target.slice(1)).split(' ')
+        .map(token => TARGET_WORDS.get(token) || token).join(' ');
+}
+
+function knowledgeScore(guide, queryTokens, { route = '', relatedText = '' } = {}) {
+    if (!queryTokens.length) return { score:0, matchedStep:null };
     const title = normalizeKnowledgeText(guide.title);
     const purpose = normalizeKnowledgeText(guide.purpose);
-    const steps = normalizeKnowledgeText(guide.steps.map(step => step.body).join(' '));
+    const routeText = normalizeKnowledgeText(route);
+    const related = normalizeKnowledgeText(relatedText);
+    const steps = guide.steps.map(step => ({
+        step,
+        body:normalizeKnowledgeText(step.body),
+        target:targetText(step.target),
+        score:0,
+        targetHits:new Set()
+    }));
     let matched = 0;
     const score = queryTokens.reduce((total, token) => {
         const alternatives = KNOWLEDGE_EQUIVALENTS.get(token) || [token];
-        if (alternatives.some(candidate => title.includes(candidate))) { matched += 1; return total + 30; }
-        if (alternatives.some(candidate => purpose.includes(candidate))) { matched += 1; return total + 16; }
-        if (alternatives.some(candidate => steps.includes(candidate))) { matched += 1; return total + 10; }
+        let best = 0;
+        if (alternatives.some(candidate => title === candidate)) best = 36;
+        else if (alternatives.some(candidate => textMatches(title, candidate))) best = 28;
+        if (alternatives.some(candidate => textMatches(purpose, candidate))) best = Math.max(best, 18);
+        if (alternatives.some(candidate => textMatches(routeText, candidate))) best = Math.max(best, 12);
+        if (alternatives.some(candidate => textMatches(related, candidate))) best = Math.max(best, 7);
+        steps.forEach(item => {
+            let stepScore = 0;
+            if (alternatives.some(candidate => textMatches(item.target, candidate))) {
+                stepScore = 26;
+                item.targetHits.add(alternatives[0]);
+            } else if (alternatives.some(candidate => textMatches(item.body, candidate))) stepScore = 16;
+            item.score += stepScore;
+            best = Math.max(best, stepScore);
+        });
+        if (best > 0) { matched += 1; return total + best; }
         return total;
     }, 0);
-    return matched ? score - ((queryTokens.length - matched) * 10)
-        + (matched === queryTokens.length ? 20 : 0) : 0;
+    const matchedStep = steps.sort((left, right) => right.score - left.score)[0];
+    const controlConnectionBonus = matchedStep?.targetHits.size > 1 ? matchedStep.score : 0;
+    return {
+        score:matched ? score - ((queryTokens.length - matched) * 12)
+            + (matched === queryTokens.length ? 24 : 0) + controlConnectionBonus : 0,
+        matchedStep:matchedStep?.score > 0 ? matchedStep.step : null
+    };
 }
 
 export function validateGuideCatalog(catalog) {
@@ -144,6 +214,30 @@ export function createDocumentationGuide(input) {
         const match = /^\/?([a-z][a-z0-9_-]*)\.html$/.exec(route);
         return match && pages.has(match[1]) ? match[1] : null;
     };
+    const adjacency = new Map(catalog.pages.map(page => [page.pageId, new Set()]));
+    catalog.pages.forEach(page => page.relatedPageIds.forEach(relatedPageId => {
+        adjacency.get(page.pageId).add(relatedPageId);
+        adjacency.get(relatedPageId).add(page.pageId);
+    }));
+    const shortestPagePath = (from, to) => {
+        const fromId = resolvePageId(from);
+        const toId = resolvePageId(to);
+        if (!fromId || !toId) return [];
+        if (fromId === toId) return [fromId];
+        const queue = [[fromId]];
+        const visited = new Set([fromId]);
+        while (queue.length) {
+            const path = queue.shift();
+            for (const next of adjacency.get(path.at(-1)) || []) {
+                if (visited.has(next)) continue;
+                const candidate = [...path, next];
+                if (next === toId) return candidate;
+                visited.add(next);
+                queue.push(candidate);
+            }
+        }
+        return [];
+    };
     const getPageGuide = (input, { locale = catalog.fallbackLocale } = {}) => {
         requireCondition(typeof locale === 'string' && /^[a-z]{2}(?:-[A-Z]{2})?$/.test(locale), 'LOCALE_REQUEST');
         const page = pages.get(resolvePageId(input));
@@ -175,6 +269,19 @@ export function createDocumentationGuide(input) {
                 title:guide.title, purpose:guide.purpose, steps:guide.steps.map(step => step.body)
             };
         });
+        const controlNodes = catalog.pages.flatMap(page => {
+            const guide = getPageGuide(page.pageId, { locale });
+            return guide.steps.filter(step => step.target).map(step => ({
+                id:`control:${page.pageId}:${step.stepId}`, pageId:page.pageId, stepId:step.stepId,
+                target:step.target, title:step.body
+            }));
+        });
+        const controlEdges = catalog.pages.flatMap(page => {
+            const guide = getPageGuide(page.pageId, { locale });
+            return guide.steps.filter(step => step.target).map(step => ({
+                from:`page:${page.pageId}`, to:`control:${page.pageId}:${step.stepId}`, type:'control'
+            }));
+        });
         const relatedEdges = catalog.pages.flatMap(page => page.relatedPageIds.map(relatedPageId => ({
             from:`page:${page.pageId}`, to:`page:${relatedPageId}`, type:'related'
         })));
@@ -187,25 +294,35 @@ export function createDocumentationGuide(input) {
         return freezeTree({
             contentVersion:catalog.contentVersion,
             reviewedAppVersion:catalog.reviewedAppVersion,
-            nodes:[...nodes, ...journeyNodes],
-            edges:[...relatedEdges, ...journeyEdges]
+            nodes:[...nodes, ...controlNodes, ...journeyNodes],
+            edges:[...relatedEdges, ...controlEdges, ...journeyEdges]
         });
     };
-    const searchKnowledge = (query, { locale = catalog.fallbackLocale, limit = 5 } = {}) => {
+    const searchKnowledge = (query, { locale = catalog.fallbackLocale, limit = 5, fromPage = '' } = {}) => {
         requireCondition(typeof locale === 'string' && /^[a-z]{2}(?:-[A-Z]{2})?$/.test(locale), 'LOCALE_REQUEST');
         requireCondition(Number.isSafeInteger(limit) && limit > 0 && limit <= 12, 'KNOWLEDGE_LIMIT');
         const tokens = knowledgeTokens(query);
         if (!tokens.length) return freezeTree([]);
         const matches = catalog.pages.map(page => {
             const guide = getPageGuide(page.pageId, { locale });
-            return { guide, score:knowledgeScore(guide, tokens) };
+            const relatedText = page.relatedPageIds.map(pageId => {
+                const related = getPageGuide(pageId, { locale });
+                return `${related.title} ${related.purpose}`;
+            }).join(' ');
+            return { guide, ...knowledgeScore(guide, tokens, { route:page.route, relatedText }) };
         }).filter(match => match.score > 0)
             .sort((left, right) => right.score - left.score || left.guide.title.localeCompare(right.guide.title, locale))
             .slice(0, limit)
-            .map(({ guide, score }) => ({
+            .map(({ guide, score, matchedStep }) => {
+                const path = shortestPagePath(fromPage, guide.pageId).map(pageId => {
+                    const page = getPageGuide(pageId, { locale });
+                    return { pageId, route:page.route, title:page.title };
+                });
+                return {
                 pageId:guide.pageId, route:guide.route, family:guide.family, title:guide.title,
-                purpose:guide.purpose, steps:guide.steps.map(step => step.body), score
-            }));
+                    purpose:guide.purpose, steps:guide.steps.map(step => step.body), matchedStep, path, score
+                };
+            });
         return freezeTree(matches);
     };
     const getPageKnowledge = (input, { locale = catalog.fallbackLocale, query = '', limit = 4 } = {}) => {
@@ -231,7 +348,7 @@ export function createDocumentationGuide(input) {
         return freezeTree({ page, related });
     };
     return Object.freeze({
-        resolvePageId, getPageGuide, listJourneys, getKnowledgeGraph, searchKnowledge, getPageKnowledge
+        resolvePageId, shortestPagePath, getPageGuide, listJourneys, getKnowledgeGraph, searchKnowledge, getPageKnowledge
     });
 }
 

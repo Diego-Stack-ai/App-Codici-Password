@@ -4,14 +4,14 @@ import {readFile} from 'node:fs/promises';
 const root=new URL('../Frontend/public/assets/js/modules/',import.meta.url);
 async function model(path){return import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL(path,root),'utf8')).toString('base64'));}
 const privateModel=await model('privato/profile-model.js'),companyModel=await model('azienda/company-profile-model.js');
-async function fixture({sourceCompany=false,type='email',nextCompany=false,unlink=false,fail=false,stale=false,missingOld=false,archived=false}={}){
+async function fixture({sourceCompany=false,type='email',nextCompany=false,unlink=false,fail=false,stale=false,missingOld=false,archived=false,shared=false,guest=false,memo=false}={}){
  const oldId='old',nextId='next',sourcePath=sourceCompany?'users/u/aziende/source':'users/u';
  const contact={id:sourceCompany?(type==='email'?'pec':'telefonoAzienda'):'item',linkedAccountId:oldId,linkedAccountCompanyId:'',password:'cipher:preserve',note:'cipher:note',value:'cipher:POD'};
  const other={id:'other',linkedAccountId:oldId,linkedAccountCompanyId:'',password:'cipher:other'};
  const source=sourceCompany?{emails:{pec:{...contact,email:'fixture@example.test'}},telefonoAzienda:'123',phoneAccountLinks:{telefonoAzienda:{linkedAccountId:oldId}},untouched:'keep'}:{contactEmails:type==='email'?[contact,other]:[other],contactPhones:type==='phone'?[contact]:[],documenti:type==='document'?[contact]:[],userAddresses:[{id:'address',utilities:type==='utility'?[contact]:[]}],untouched:'keep'};
  const first={companyId:'source',type,id:contact.id},second={companyId:'otherCompany',type:'phone',id:'another'};
  const old={password:'cipher:old-password',linkedCompanyProfileField:first,linkedCompanyProfileFields:[first,second]};
- const next={password:'cipher:next-password',username:'cipher:username',isArchived:archived,linkedCompanyProfileFields:[second]};
+ const next={password:'cipher:next-password',username:'cipher:username',isArchived:archived,visibility:shared?'shared':'private',type:memo?'memo':'account',_isGuest:guest,linkedCompanyProfileFields:[second]};
  const records=new Map([[sourcePath,source],['users/u/accounts/old',old],[nextCompany?'users/u/aziende/target/accounts/next':'users/u/accounts/next',next],['users/u/aziende/target',{}]]);
  if(missingOld)records.delete('users/u/accounts/old');
  if(stale){if(sourceCompany){if(type==='email')source.emails.pec.linkedAccountId='changed';else source.phoneAccountLinks.telefonoAzienda.linkedAccountId='changed';}else privateModel.findProfileAccountItem(source,{contactType:type,profileContactId:contact.id,parentAddressId:'address'}).linkedAccountId='changed';}
@@ -34,4 +34,7 @@ for(const sourceCompany of [false,true])for(const type of sourceCompany?['email'
  if(sourceCompany)assert.deepEqual(old.linkedCompanyProfileFields,[{companyId:'otherCompany',type:'phone',id:'another'}]);else assert.equal(old.linkedProfileFields.some(f=>f.id==='other'),true);
 });
 for(const sourceCompany of [false,true])for(const failure of ['fail','stale','archived'])test(`nessuna scrittura parziale ${sourceCompany} ${failure}`,async()=>{const r=await fixture({sourceCompany,[failure]:true});assert.ok(r.error);assert.deepEqual(r.writes,[]);});
+test('un Account condiviso dal proprietario resta collegabile',async()=>{const r=await fixture({shared:true});assert.equal(r.error,undefined);assert.equal(r.writes.length,3);});
+test('Memorandum e Memorandum condiviso del proprietario restano collegabili',async()=>{for(const shared of [false,true]){const r=await fixture({memo:true,shared});assert.equal(r.error,undefined);assert.equal(r.writes.length,3);}});
+test('una copia condivisa ricevuta non diventa destinazione del collegamento',async()=>{const r=await fixture({shared:true,guest:true});assert.ok(r.error);assert.deepEqual(r.writes,[]);});
 test('scollega anche un Account non più esistente senza cancellare la scheda',async()=>{const r=await fixture({missingOld:true,unlink:true});assert.equal(r.error,undefined);assert.equal(r.writes.length,1);});

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "contentVersion": 8,
-  "reviewedAppVersion": "1.2.251",
+  "contentVersion": 9,
+  "reviewedAppVersion": "1.2.252",
   "fallbackLocale": "it",
   "pages": [
     {
@@ -147,11 +147,6 @@
         },
         {
           "stepId": "step-3",
-          "bodyKey": "guide.pages.home_page.step-3",
-          "target": "#app-presentation-open"
-        },
-        {
-          "stepId": "step-4",
           "bodyKey": "guide.pages.home_page.step-4",
           "target": null
         }
@@ -840,11 +835,6 @@
           "target": "#theme-selector"
         },
         {
-          "stepId": "step-3",
-          "bodyKey": "guide.pages.impostazioni.step-3",
-          "target": "#ai-assistant-toggle"
-        },
-        {
           "stepId": "step-4",
           "bodyKey": "guide.pages.impostazioni.step-4",
           "target": "#company-area-toggle"
@@ -1154,7 +1144,7 @@
       "guide.pages.login-v115.title": "Accesso",
       "guide.pages.login-v115.purpose": "Accedi con l’identità del tuo account; lo sblocco del Vault è un passaggio distinto.",
       "guide.pages.login-v115.step-1": "Inserisci email e password di accesso. Non inserire qui la Master Password del Vault.",
-      "guide.pages.login-v115.step-2": "Se hai attivato un Authenticator, segui la richiesta del secondo fattore. Non comunicare codici o password all’assistente.",
+      "guide.pages.login-v115.step-2": "Se hai attivato un Authenticator, segui la richiesta del secondo fattore. Non comunicare codici o password nella Ricerca.",
       "guide.pages.login-v115.step-3": "Se hai dimenticato la password di accesso, apri il recupero. Il recupero della password di accesso non ricostruisce il segreto del Vault.",
       "guide.pages.registrati.title": "Registrazione",
       "guide.pages.registrati.purpose": "Crea l’account di accesso e segui la verifica dell’email.",
@@ -1173,7 +1163,6 @@
       "guide.pages.home_page.purpose": "Scegli l’area in cui lavorare, controlla i riepiloghi e avvia rapidamente le operazioni principali.",
       "guide.pages.home_page.step-1": "Apri Privato per Account e dati personali, Azienda per i dati aziendali, Scadenze per l’elenco delle date.",
       "guide.pages.home_page.step-2": "Una scadenza di oggi resta nelle Scadenze; passa alle Urgenze dal giorno successivo. Il riepilogo non sostituisce l’elenco completo.",
-      "guide.pages.home_page.step-3": "La presentazione è facoltativa. Il video viene richiesto soltanto quando scegli di riprodurlo.",
       "guide.pages.home_page.step-4": "Dal footer puoi aprire Nuovo Privato, Nuova Scadenza, Nuovo Account Azienda e Impostazioni. La creazione o modifica resta sempre una tua azione esplicita.",
       "guide.pages.area_privata.title": "Area privata",
       "guide.pages.area_privata.purpose": "Scegli fra Account, Account condivisi, memorandum privati e memorandum condivisi.",
@@ -1225,7 +1214,7 @@
       "guide.pages.modifica_azienda.step-1": "Indica una ragione sociale riconoscibile e completa i dati richiesti.",
       "guide.pages.modifica_azienda.step-2": "Apri le sezioni fiscali e del referente quando necessarie; le scelte QR sono separate dal salvataggio del dato.",
       "guide.pages.modifica_azienda.step-3": "Organizza sede e altre sedi senza sostituire automaticamente i dati degli Account collegati.",
-      "guide.pages.modifica_azienda.step-4": "Gestisci email e relativi collegamenti. Non comunicare password o codici all’assistente.",
+      "guide.pages.modifica_azienda.step-4": "Gestisci email e relativi collegamenti. Non comunicare password o codici nella Ricerca.",
       "guide.pages.modifica_azienda.step-5": "Aggiungi allegati dai comandi disponibili e controlla limiti e conferma.",
       "guide.pages.modifica_azienda.step-6": "Salva con il comando dell’app e verifica l’esito; le modifiche non si applicano premendo Avanti nella guida.",
       "guide.pages.account_azienda.title": "Account azienda",
@@ -1293,7 +1282,6 @@
       "guide.pages.impostazioni.purpose": "Configura aspetto, servizi, sicurezza e gestione dei dati dal centro di controllo.",
       "guide.pages.impostazioni.step-1": "Scegli la lingua dell’app. I nomi, le note e i valori che hai creato non vengono tradotti automaticamente.",
       "guide.pages.impostazioni.step-2": "Tema luminoso e colore sono preferenze separate. Scegli la combinazione che rende leggibili i controlli.",
-      "guide.pages.impostazioni.step-3": "L’interruttore corrente abilita la ricerca locale dell’Assistente. La conoscenza statica della guida non richiede contenuti personali o un modello AI.",
       "guide.pages.impostazioni.step-4": "Mostra o nascondi l’area Azienda senza eliminare i suoi dati.",
       "guide.pages.impostazioni.step-5": "Apri l’Archivio per ripristino e cancellazione definitiva degli Account, con le conferme previste.",
       "guide.pages.impostazioni.step-6": "Gestisci le Credenziali comuni richiamabili da più Account.",
@@ -1304,7 +1292,7 @@
       "guide.pages.impostazioni.step-11": "Apri le configurazioni delle scadenze per tipi e testi riutilizzabili.",
       "guide.pages.impostazioni.step-12": "Password di accesso e Master Password sono segreti diversi. Usa il relativo comando per ciascun cambio.",
       "guide.pages.impostazioni.step-13": "Configura la sicurezza e il materiale di recupero dai comandi dell’app. Un codice di recupero non è una password ordinaria.",
-      "guide.pages.impostazioni.step-14": "Gestisci la Master Password dal percorso dedicato senza comunicarla all’Assistente.",
+      "guide.pages.impostazioni.step-14": "Gestisci la Master Password dal percorso dedicato senza comunicarla nella Ricerca.",
       "guide.pages.impostazioni.step-15": "La disponibilità biometrica dipende dalle capacità effettive del browser e dispositivo; segui l’esito dell’app.",
       "guide.pages.impostazioni.step-16": "Scegli il timer di blocco del Vault. Blocco del Vault e logout dell’account sono operazioni distinte.",
       "guide.pages.impostazioni.step-17": "Leggi attentamente il percorso di reset e le conferme. La guida non preme comandi distruttivi.",

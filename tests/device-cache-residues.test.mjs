@@ -130,13 +130,12 @@ test('T-23: nel runtime del client non esiste alcuna cancellazione degli archivi
         const hits = sources.filter(file => file.text.includes(needle)).map(file => file.path);
         assert.deepEqual(hits, [], `${needle} non deve comparire nel runtime (trovato in ${hits.join(', ')})`);
     }
-    // `caches.delete` esiste solo nel service worker, e solo per le proprie cache
-    // di shell (`codex-*`) diverse da quella corrente; i pacchetti AI locali
-    // verificati hanno un namespace distinto e sopravvivono agli upgrade shell.
+    // `caches.delete` esiste solo nel service worker e solo per le proprie cache
+    // di shell (`codex-*`) diverse da quella corrente.
     const cacheDeleters = sources.filter(file => file.text.includes('caches.delete')).map(file => file.path);
     assert.deepEqual(cacheDeleters, ['sw.js'], 'solo il service worker cancella cache');
-    assert.match(swSource, /name\.startsWith\(APP_CACHE_PREFIX\)[\s\S]*!name\.startsWith\('codex-local-ai-'\)[\s\S]*name !== CACHE_NAME/,
-        'la cancellazione è limitata alle cache di shell proprie, non correnti e non ai pacchetti AI verificati');
+    assert.match(swSource, /name\.startsWith\(APP_CACHE_PREFIX\) && name !== CACHE_NAME/,
+        'la cancellazione è limitata alle cache di shell proprie e non correnti');
     assert.match(swSource, /const APP_CACHE_PREFIX = 'codex-'/);
 });
 
@@ -145,7 +144,7 @@ test('T-23: nel runtime del client non esiste alcuna cancellazione degli archivi
 function serviceWorkerFixture(shell = ['home_page.html', 'assets/js/modules/privato/profilo-ui.js']) {
     const put = [], deleted = [], opened = [];
     const caches = {
-        keys: async () => ['codex-shell-v1.2.126', 'codex-shell-v1.2.127', 'codex-local-ai-a2-0.1.0', 'workbox-precache-v2'],
+        keys: async () => ['codex-shell-v1.2.126', 'codex-shell-v1.2.127', 'workbox-precache-v2'],
         delete: async name => { deleted.push(name); return true; },
         open: async name => {
             opened.push(name);
@@ -194,8 +193,6 @@ test('T-23: il service worker conserva solo la shell stessa-origine, mai rispost
     assert.equal(fetchEvent(f, {url: 'https://appcodici-password.web.app.evil.example/home_page.html',
         mode: 'navigate'}), null, 'un host che imita il dominio non è la stessa origine');
     assert.deepEqual(f.put, [], 'a questo punto nulla è stato messo in cache');
-    // Contenuto protetto: escluso esplicitamente.
-    assert.equal(fetchEvent(f, {url: 'https://appcodici-password.web.app/protected-media/presentation'}), null);
     // Risorsa di shell: rete prima, poi cache.
     await fetchEvent(f, {url: 'https://appcodici-password.web.app/assets/js/modules/privato/profilo-ui.js'});
     assert.deepEqual(f.put.map(entry => entry.key),
