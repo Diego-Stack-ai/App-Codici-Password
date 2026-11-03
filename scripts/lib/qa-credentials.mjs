@@ -9,6 +9,7 @@ const TARGET_NAME = 'CodiciPassword-QA-Automation';
 const ENTROPY = 'CodiciPassword|QA|DPAPI|v1';
 
 function defaultSecretPath() {
+    if (process.env.CODEX_QA_CREDENTIAL_PATH) return path.resolve(process.env.CODEX_QA_CREDENTIAL_PATH);
     const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
     return path.join(localAppData, 'CodiciPassword', 'qa', 'credentials.dpapi');
 }

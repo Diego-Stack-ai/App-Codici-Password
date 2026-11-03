@@ -76,7 +76,15 @@ const field = {
 
 async function writeDocument(documentPath, fields) {
     const client = new Client({ urlPrefix: firestoreOrigin(), auth: true });
-    await client.patch(`/v1/projects/${PROJECT_ID}/databases/(default)/documents/${documentPath}`, { fields });
+    const queryParams = new URLSearchParams();
+    Object.keys(fields).forEach(fieldPath => queryParams.append('updateMask.fieldPaths', fieldPath));
+    await client.patch(`/v1/projects/${PROJECT_ID}/databases/(default)/documents/${documentPath}`, { fields }, { queryParams });
+}
+
+async function readDocument(documentPath) {
+    const client = new Client({ urlPrefix: firestoreOrigin(), auth: true });
+    const response = await client.get(`/v1/projects/${PROJECT_ID}/databases/(default)/documents/${documentPath}`);
+    return response.body || response;
 }
 
 async function seedSyntheticProfile(uid) {
@@ -150,6 +158,13 @@ if (!APPLY) {
     await seedSyntheticProfile(uid);
     if (shouldCreateVault) await seedSyntheticVault(uid, credentials.masterPassword);
     await saveQaCredentialBundle(credentials);
+
+    const profile = await readDocument(`users/${uid}`);
+    const settings = profile?.fields?.settings?.mapValue?.fields || {};
+    const firstConfiguration = settings.firstConfiguration?.mapValue?.fields || {};
+    assert.equal(settings.language?.stringValue, 'it');
+    assert.equal(firstConfiguration.version?.integerValue, '1');
+    assert.equal(firstConfiguration.completed?.booleanValue, true);
 
     const verified = await findUser(PROJECT_ID, QA_EMAIL);
     const marker = markerFromUser(verified);

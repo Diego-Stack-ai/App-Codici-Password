@@ -28,11 +28,21 @@ test('la validazione rifiuta progetto, email e password non conformi', () => {
 test('provisioner e runner non stampano né incorporano i segreti', async () => {
     const sources = await Promise.all([
         readFile(new URL('../scripts/provision-qa-user.mjs', import.meta.url), 'utf8'),
-        readFile(new URL('../scripts/test-qa-release-browser.mjs', import.meta.url), 'utf8')
+        readFile(new URL('../scripts/test-qa-release-browser.mjs', import.meta.url), 'utf8'),
+        readFile(new URL('../scripts/test-qa-page-matrix-browser.mjs', import.meta.url), 'utf8')
     ]);
     const joined = sources.join('\n');
     assert.doesNotMatch(joined, /console\.log\([^\n]*(accountPassword|masterPassword)/);
     assert.doesNotMatch(joined, /Local-Test-Only|LOCAL-Vault-Only/);
     assert.match(joined, /codex\.qa@appcodici-password\.invalid/);
     assert.match(joined, /QA_EXISTING_IDENTITY_NOT_OWNED_BY_AUTOMATION/);
+    assert.match(joined, /updateMask\.fieldPaths/);
+    assert.match(joined, /shouldCreateVault \? \['synthetic Vault verifier\/envelope'\] : \[\]/);
+});
+
+test('il percorso alternativo delle credenziali indica solo un file locale protetto', async () => {
+    const source = await readFile(new URL('../scripts/lib/qa-credentials.mjs', import.meta.url), 'utf8');
+    assert.match(source, /CODEX_QA_CREDENTIAL_PATH/);
+    assert.doesNotMatch(source, /accountPassword\s*[:=]\s*["'][^"']+["']/);
+    assert.doesNotMatch(source, /masterPassword\s*[:=]\s*["'][^"']+["']/);
 });
