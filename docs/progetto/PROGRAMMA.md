@@ -8,6 +8,20 @@
 
 **Progetto futuro separato:** usare la stessa mappa Graphify già collegata alla Ricerca per costruire aiuti contestuali animati (freccia mobile, evidenziazione del controllo, testo del passo e avanzamento). La guida dovrà restare priva di dati segreti ed essere verificata pagina per pagina prima di qualsiasi pubblicazione.
 
+**Incremento `1.2.253`:** i comandi rapidi della Home portano direttamente al nuovo Account privato o, dopo la scelta esplicita dell'Azienda, al nuovo Account aziendale. Il catalogo D0 e il grafo Graphify sono stati rigenerati e verificati insieme alla suite completa.
+
+### Backlog effettivo dopo `1.2.253`
+
+Le attività ancora aperte si dividono in prodotto e certificazione; AI.2 è storico chiuso e non è un punto residuo:
+
+1. completare la revisione editoriale e funzionale delle otto lingue, inclusi Ricerca, dettatura, messaggi, ARIA e adattamento mobile;
+2. realizzare la guida visuale basata sulla mappa Graphify, con frecce, evidenziazioni e passi contestuali; eventuali video restano opzionali e separati;
+3. chiudere l'interoperabilità dell'Archivio portabile su un secondo programma ODS e la matrice dei browser/dispositivi destinatari;
+4. completare i gate fisici/offline residui: consultazione bancaria su iPhone, fallback senza Web Locks, backup interrotto/ripresa, memoria e dispositivi supportati;
+5. approvare la politica di retention per archivio, allegati e backup e completare il collaudo Windows della Salute credenziali;
+6. eseguire il ciclo finale di maturità: end-to-end sui browser supportati, verifica di produzione, audit indipendente di sicurezza/crittografia, revisione privacy/legale e procedura incidenti;
+7. concludere il riordino definitivo delle Impostazioni e il censimento manuale di tutti i lucchetti/campi protetti.
+
 ## AUDIT-SKILL-01 — sicurezza, qualità visiva e prestazioni — pianificazione 11/10/2026
 
 **Obiettivo:** introdurre un ciclo di verifica indipendente e ripetibile dell'app, senza attribuire alle skill autorità di rilascio e senza eseguire test distruttivi sulla produzione.

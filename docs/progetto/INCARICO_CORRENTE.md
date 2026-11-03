@@ -1,5 +1,11 @@
 # Incarico corrente
 
+## Comandi rapidi Account dalla Home — 03/11/2026
+
+Diego autorizza con **«rigenera e poi pubblica»** il rilascio patch `1.2.253`, il commit, il push su GitHub e il deploy del solo Firebase Hosting. Il pulsante viola del footer deve chiamarsi **Nuovo account privato** e aprire direttamente il relativo form. Il pulsante verde **Nuovo account azienda** deve mostrare un menu accessibile con le Aziende disponibili e aprire il form già associato all'Azienda scelta; se non esistono Aziende deve proporne la creazione. **Nuova Scadenza** resta invariato. Il menu **Archivio Account** dell'Area privata conserva il proprio significato di archivio/cestino recuperabile e non viene rimosso.
+
+Graphify e il catalogo della Ricerca vengono rigenerati e verificati insieme all'incremento. La pubblicazione non comprende Functions, Rules, indici, migrazioni o modifiche ai dati reali.
+
 ## Chiusura AI.2 e consolidamento Ricerca — 03/11/2026
 
 Diego dispone l'abbandono del progetto AI.2 nell'app. Tutte le analisi, le procedure, le prove WebLLM/WebGPU, Qwen e Motore locale Windows restano documentate in questi file come storico tecnico, ma sono dichiarate **chiuse e non operative**. Dal prodotto devono essere rimossi pacchetti LLM, download, installer o host Windows, impostazioni, diagnostica, permessi loopback, pulsanti generativi e riferimenti visibili ad AI.2 o Agente AI.
