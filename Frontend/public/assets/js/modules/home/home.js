@@ -278,14 +278,17 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
         if (!footerCenter) return;
         clearElement(footerCenter);
 
+        document.getElementById('home-company-quick-menu')?.remove();
+
         // Container Gruppo
         const fabGroup = createElement('div', { className: 'fab-group' });
 
         // 1. Privato (SX)
         const btnPrivato = createElement('button', {
             className: 'btn-fab-action btn-fab-privato',
-            title: 'Nuovo Privato',
-            dataset: { label: 'Privato' },
+            title: 'Nuovo account privato',
+            'aria-label': 'Nuovo account privato',
+            dataset: { label: 'Account privato' },
             onclick: () => window.location.href = 'form_account_privato.html'
         }, [
             createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'person_add' })
@@ -295,29 +298,101 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
         const btnScadenza = createElement('button', {
             className: 'btn-fab-action btn-fab-scadenza',
             title: 'Nuova Scadenza',
+            'aria-label': 'Nuova scadenza',
             dataset: { label: 'Scadenza' },
             onclick: () => window.location.href = 'aggiungi_scadenza.html'
         }, [
             createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'event' })
         ]);
 
-        // 3. Azienda (Dynamic Redirect)
+        // 3. Azienda (selettore rapido senza passare dalla lista aziende)
+        const companyOptions = aziendes
+            .filter(company => company?.id)
+            .map(company => ({
+                id: String(company.id),
+                label: String(company.ragioneSociale || 'Azienda senza nome').trim() || 'Azienda senza nome'
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label, 'it', { sensitivity: 'base' }));
+
         const btnAzienda = createElement('button', {
             className: 'btn-fab-action btn-fab-azienda',
             title: 'Nuovo Account Azienda',
-            dataset: { label: 'Azienda' },
-            onclick: () => {
-                if (aziendes.length === 1) {
-                    window.location.href = `form_account_azienda.html?aziendaId=${aziendes[0].id}`;
-                } else if (aziendes.length > 1) {
-                    window.location.href = 'lista_aziende.html?select=1';
-                } else {
-                    window.location.href = 'modifica_azienda.html';
-                }
-            }
+            'aria-label': 'Nuovo account azienda: scegli azienda',
+            'aria-haspopup': 'menu',
+            'aria-expanded': 'false',
+            'aria-controls': 'home-company-quick-menu',
+            dataset: { label: 'Account azienda' }
         }, [
             createElement('span', { className: 'material-symbols-outlined notranslate', textContent: 'domain_add' })
         ]);
+
+        const menuItems = companyOptions.length
+            ? companyOptions.map(company => createElement('button', {
+                type: 'button',
+                className: 'home-company-quick-menu-item',
+                role: 'menuitem',
+                textContent: company.label,
+                onclick: () => {
+                    window.location.href = `form_account_azienda.html?aziendaId=${encodeURIComponent(company.id)}`;
+                }
+            }))
+            : [createElement('button', {
+                type: 'button',
+                className: 'home-company-quick-menu-item home-company-quick-menu-create',
+                role: 'menuitem',
+                textContent: 'Crea nuova azienda',
+                onclick: () => { window.location.href = 'modifica_azienda.html'; }
+            })];
+
+        const companyMenu = createElement('div', {
+            id: 'home-company-quick-menu',
+            className: 'home-company-quick-menu hidden',
+            role: 'menu',
+            'aria-label': companyOptions.length ? 'Scegli azienda' : 'Crea azienda'
+        }, [
+            createElement('div', {
+                className: 'home-company-quick-menu-title',
+                textContent: companyOptions.length ? 'Scegli l’azienda' : 'Nessuna azienda disponibile'
+            }),
+            ...menuItems
+        ]);
+
+        const closeCompanyMenu = ({ restoreFocus = false } = {}) => {
+            companyMenu.classList.add('hidden');
+            btnAzienda.setAttribute('aria-expanded', 'false');
+            if (restoreFocus) btnAzienda.focus();
+        };
+        const openCompanyMenu = () => {
+            companyMenu.classList.remove('hidden');
+            btnAzienda.setAttribute('aria-expanded', 'true');
+            companyMenu.querySelector('[role="menuitem"]')?.focus();
+        };
+        btnAzienda.onclick = event => {
+            event.stopPropagation();
+            if (companyMenu.classList.contains('hidden')) openCompanyMenu();
+            else closeCompanyMenu({ restoreFocus: true });
+        };
+        const onOutsidePointer = event => {
+            if (!companyMenu.classList.contains('hidden') &&
+                !companyMenu.contains(event.target) && !btnAzienda.contains(event.target)) closeCompanyMenu();
+        };
+        const onKeydown = event => {
+            if (event.key === 'Escape' && !companyMenu.classList.contains('hidden')) {
+                event.preventDefault();
+                closeCompanyMenu({ restoreFocus: true });
+            }
+        };
+        const cleanupCompanyMenu = () => {
+            document.removeEventListener('pointerdown', onOutsidePointer);
+            document.removeEventListener('keydown', onKeydown);
+            companyMenu.remove();
+        };
+        if (companyAreaEnabled) {
+            document.addEventListener('pointerdown', onOutsidePointer);
+            document.addEventListener('keydown', onKeydown);
+            window.addEventListener('pagehide', cleanupCompanyMenu, { once: true });
+            document.body.appendChild(companyMenu);
+        }
 
         // Assemblaggio
         fabGroup.appendChild(btnPrivato);
