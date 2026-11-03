@@ -18,7 +18,7 @@ L'ordine operativo è vincolante: **prima** completare la matrice funzionale in 
 
 Questo ordine autorizza dati sintetici nel solo utente QA, aggiornamento della documentazione e collaudi applicativi non distruttivi. Non autorizza pubblicazione, modifica di utenti reali, invio a recapiti reali, uso di documenti validi, attivazione MFA, rotazione della Vault tecnica o modifiche a Functions, Rules, indici e dati di produzione.
 
-Checkpoint operativo: inventario e matrice strutturale sono conclusi; **48/48** pagine/viewport private aprono correttamente. Il prossimo blocco autorizzato è la creazione idempotente delle fixture sintetiche e il collaudo dei cicli di vita in italiano. Graphify e lingue restano successivi alla stabilizzazione funzionale.
+Checkpoint operativo: inventario e matrice strutturale sono conclusi; **48/48** pagine/viewport private aprono correttamente. Il primo lotto Profilo è stato popolato e riletto via UI; resta parziale fino a Documenti, allegati, Tessera digitale, collegamenti e Widget. Il percorso ha prodotto una correzione locale alla delega Indirizzi/Utenze, verificata su Hosting locale ma non ancora pubblicata. Il prossimo blocco autorizzato completa il Profilo e prosegue con Aziende/Account. Graphify e lingue restano successivi alla stabilizzazione funzionale.
 
 ## Comandi rapidi Account dalla Home — 03/11/2026
 

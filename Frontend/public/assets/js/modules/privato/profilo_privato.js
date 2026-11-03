@@ -208,7 +208,7 @@ export async function initProfiloPrivato(user) {
 
     // Setup UI
     setupAvatarEdit();
-    setupDelegation(ctx);
+    setupDelegation();
     setupPersonalDataCopy();
     initProxyDropdowns();
     setupQRToggles();
@@ -447,13 +447,17 @@ function openFiscalDocument() {
 
 // ─── DELEGATION ───────────────────────────────────────────────────────────────
 
-function setupDelegation(ctx) {
+function setupDelegation() {
     document.addEventListener('click', async (e) => {
         const target = e.target.closest('[data-action]');
         if (!target) return;
         const action = target.dataset.action;
         const idx = parseInt(target.dataset.idx);
         const uIdx = parseInt(target.dataset.uidx);
+        // loadUserData replaces the profile arrays after a save. Rebuild the
+        // context for every delegated action so editors never mutate a stale
+        // pre-refresh array that syncData cannot persist.
+        const ctx = buildCtx();
 
         switch (action) {
             // profilo-actions.js
