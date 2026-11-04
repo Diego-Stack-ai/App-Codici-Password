@@ -77,7 +77,10 @@ test('un nuovo documento propone prima l’allegato e configura la scadenza dopo
 });
 
 test('ogni documento mostra dati, allegati e azioni nello stesso blocco e in questo ordine', async () => {
-    const cards = await read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js');
+    const [cards, links] = await Promise.all([
+        read('Frontend/public/assets/js/modules/privato/profilo-addresses-docs.js'),
+        read('Frontend/public/assets/js/modules/privato/profilo-links.js')
+    ]);
     const documentRenderer = cards.slice(cards.indexOf('function renderDocumentiView'));
     const dataPosition = documentRenderer.indexOf('document-date-list');
     const attachmentsPosition = documentRenderer.indexOf("className: 'profile-document-inline-attachments'");
@@ -86,7 +89,8 @@ test('ogni documento mostra dati, allegati e azioni nello stesso blocco e in que
     assert.ok(dataPosition >= 0, 'il blocco dati del documento deve esistere');
     assert.ok(attachmentsPosition > dataPosition, 'gli allegati devono seguire i dati del documento');
     assert.ok(actionsPosition > attachmentsPosition, 'le azioni devono seguire gli allegati');
-    assert.match(documentRenderer.slice(actionsPosition), /Collega o crea Account/);
+    assert.match(documentRenderer.slice(actionsPosition), /createLinkedAccountButton\(docItem/);
+    assert.match(links, /export function createLinkedAccountButton[\s\S]+Collega o crea Account/);
     assert.doesNotMatch(documentRenderer.slice(actionsPosition), /profile_deadline_card_open_previous/);
     assert.match(documentRenderer.slice(actionsPosition), /profile_deadline_card_configure/);
 });

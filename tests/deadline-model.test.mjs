@@ -67,6 +67,12 @@ test('mostra una sola volta il testo completo delle nuove regole e conserva il f
         mode: 'automezzi',
         veicolo_modello: 'Hyundai I10 - FL790AX'
     }), "E' in scadenza Olio motore da controllare Hyundai I10 - FL790AX");
+    assert.equal(model.deadlineTemplateMessage({
+        linkKind: 'profile-document-deadline-v1',
+        templateText: ' Messaggio documento completo. ',
+        mode: 'documenti',
+        veicolo_modello: 'QA-DOC-0001'
+    }), 'Messaggio documento completo.');
 });
 
 test('interpreta date ISO, italiane e Timestamp-like', () => {

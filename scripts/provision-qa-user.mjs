@@ -3,7 +3,13 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { createQaCredentialBundle, loadQaCredentialBundle, saveQaCredentialBundle, QA_CREDENTIAL_PATH } from './lib/qa-credentials.mjs';
+import {
+    createQaCredentialBundle,
+    loadQaCredentialBundle,
+    saveQaCredentialBundle,
+    QA_CREDENTIAL_PATH,
+    QA_DEFAULT_EMAIL
+} from './lib/qa-credentials.mjs';
 
 const require = createRequire(import.meta.url);
 const cliAuth = require('firebase-tools/lib/auth');
@@ -12,7 +18,7 @@ const { identityOrigin, firestoreOrigin } = require('firebase-tools/lib/api');
 const { findUser, setCustomClaim } = require('firebase-tools/lib/gcp/auth');
 
 const PROJECT_ID = 'appcodici-password';
-const QA_EMAIL = 'codex.qa@appcodici-password.invalid';
+let qaEmail = QA_DEFAULT_EMAIL;
 const DISPLAY_NAME = 'Codex QA Sintetico';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const APPLY = process.argv.includes('--apply');
@@ -44,7 +50,7 @@ async function publicSignUp(accountPassword) {
     if (parts.length !== 3) throw new Error('QA_FIREBASE_WEB_KEY_NOT_FOUND');
     const response = await fetch(`${identityOrigin()}/v1/accounts:signUp?key=${encodeURIComponent(parts.join(''))}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: QA_EMAIL, password: accountPassword, returnSecureToken: true })
+        body: JSON.stringify({ email: qaEmail, password: accountPassword, returnSecureToken: true })
     });
     const body = await response.json();
     if (!response.ok || !body.localId) throw new Error(`QA_AUTH_CREATE_FAILED:${body?.error?.message || response.status}`);
@@ -56,7 +62,7 @@ async function updateAuthUser(uid, accountPassword) {
     await client.post('/v1/accounts:update', {
         targetProjectId: PROJECT_ID,
         localId: uid,
-        email: QA_EMAIL,
+        email: qaEmail,
         password: accountPassword,
         emailVerified: true,
         displayName: DISPLAY_NAME,
@@ -91,7 +97,7 @@ async function seedSyntheticProfile(uid) {
     const now = new Date().toISOString();
 
     await writeDocument(`users/${uid}`, {
-        email: field.string(QA_EMAIL),
+        email: field.string(qaEmail),
         nome: field.string('Collaudo'),
         cognome: field.string('Sintetico'),
         photoURL: field.string(''),
@@ -123,20 +129,34 @@ async function seedSyntheticVault(uid, masterPassword) {
 }
 
 activateFirebaseCliAccount();
+const storedCredentials = await optionalExistingSecret();
+const requestedEmail = String(process.env.CODEX_QA_EMAIL || '').trim().toLowerCase();
+if (requestedEmail && storedCredentials && storedCredentials.email !== requestedEmail) {
+    throw new Error('QA_CREDENTIALS_IDENTITY_MISMATCH');
+}
+qaEmail = requestedEmail || storedCredentials?.email || QA_DEFAULT_EMAIL;
+
 let existing = null;
-try { existing = await findUser(PROJECT_ID, QA_EMAIL); }
+try { existing = await findUser(PROJECT_ID, qaEmail); }
 catch (error) { if (!/No users found/.test(String(error?.message))) throw error; }
 
 if (existing) {
     const marker = markerFromUser(existing);
-    if (existing.email !== QA_EMAIL || marker.codexQa !== true || marker.synthetic !== true) {
+    if (existing.email !== qaEmail || marker.codexQa !== true || marker.synthetic !== true) {
         throw new Error('QA_EXISTING_IDENTITY_NOT_OWNED_BY_AUTOMATION');
     }
+    if (storedCredentials?.uid && storedCredentials.uid !== existing.uid) {
+        throw new Error('QA_CREDENTIALS_UID_MISMATCH');
+    }
+} else if (storedCredentials) {
+    throw new Error('QA_CREDENTIALS_IDENTITY_NOT_FOUND');
 }
 
-const storedCredentials = await optionalExistingSecret();
 const rotateRequested = args.includes('--rotate');
-const shouldCreateVault = !existing || !storedCredentials || rotateRequested;
+if (existing && !storedCredentials && !rotateRequested) {
+    throw new Error('QA_CREDENTIALS_MISSING_EXISTING_VAULT');
+}
+const shouldCreateVault = !existing || rotateRequested;
 
 if (!APPLY) {
     console.log(JSON.stringify({
@@ -150,7 +170,7 @@ if (!APPLY) {
     }, null, 2));
 } else {
     let credentials = storedCredentials;
-    if (!credentials || rotateRequested) credentials = createQaCredentialBundle();
+    if (!credentials || rotateRequested) credentials = createQaCredentialBundle({email: qaEmail});
     let uid = existing?.uid || '';
     if (!uid) uid = await publicSignUp(credentials.accountPassword);
     credentials = Object.freeze({ ...credentials, uid });
@@ -166,7 +186,7 @@ if (!APPLY) {
     assert.equal(firstConfiguration.version?.integerValue, '1');
     assert.equal(firstConfiguration.completed?.booleanValue, true);
 
-    const verified = await findUser(PROJECT_ID, QA_EMAIL);
+    const verified = await findUser(PROJECT_ID, qaEmail);
     const marker = markerFromUser(verified);
     assert.equal(verified.uid, uid);
     assert.equal(verified.emailVerified, true);

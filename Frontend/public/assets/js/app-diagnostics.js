@@ -47,7 +47,8 @@ export async function runAppDiagnostics({
     cryptoApi = globalThis.crypto,
     indexedDb = globalThis.indexedDB,
     serviceWorker = navigator.serviceWorker,
-    authenticated = false
+    authenticated = false,
+    session = sessionStorage
 } = {}) {
     const checks = [
         result('network', 'Connessione', online ? 'pass' : 'warn', online ? 'Browser online.' : 'Browser offline.'),
@@ -58,6 +59,14 @@ export async function runAppDiagnostics({
     ];
     checks.push(await checkLocalStorage(storage));
     checks.push(await checkHosting(fetcher, online));
+    try {
+        const failure = JSON.parse(session?.getItem('codex_auth_gate_last_failure_v1') || 'null');
+        if (failure?.reason) {
+            const elapsed = Number.isFinite(failure.elapsedMs) ? ` dopo ${Math.round(failure.elapsedMs / 1000)} s` : '';
+            checks.push(result('auth-gate-history', 'Ultimo controllo accesso', 'warn',
+                `Ultimo blocco: ${failure.reason}${elapsed} · ${failure.page || 'pagina privata'} · ${failure.at || 'orario non disponibile'}.`));
+        }
+    } catch { /* Un marker non valido viene ignorato. */ }
     return {
         schemaVersion: 1,
         generatedAt: new Date().toISOString(),

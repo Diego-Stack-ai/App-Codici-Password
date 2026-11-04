@@ -9,22 +9,19 @@
 .profile-contact-card .company-contact-actions { display: grid; gap: .75rem; }
 [data-company-panel="contacts"] { width: 100%; max-width: 800px; margin-inline: auto; }
 
-/* The three Account commands share one compact row in every profile section. */
+/* Nome Account in evidenza; cambio e scollegamento restano azioni secondarie. */
 .profile-account-actions,
 .profile-contact-card .company-contact-actions.profile-account-actions {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(4px, 1vw, 8px);
-    width: fit-content;
-    max-width: 100%;
+    width: 100%;
     margin-top: 0.75rem;
 }
 
 .profile-account-actions > button,
 .profile-contact-card .profile-account-actions > button {
-    flex: 0 1 auto;
-    width: auto;
+    width: 100%;
     min-width: 0;
     min-height: 44px;
     margin: 0;
@@ -33,6 +30,25 @@
     line-height: 1.25;
     white-space: normal;
     overflow-wrap: normal;
+}
+
+.profile-account-actions > .profile-account-primary,
+.profile-contact-card .profile-account-actions > .profile-account-primary {
+    grid-column: 1 / -1;
+    min-height: 48px;
+    font-size: var(--fs-base);
+}
+
+.profile-legacy-credential {
+    border: 1px solid rgb(var(--accent-rgb) / 0.22);
+    border-radius: 12px;
+    padding: 0.7rem;
+}
+
+.profile-legacy-credential > summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font: var(--font-label);
 }
 
 @media (max-width: 600px) {

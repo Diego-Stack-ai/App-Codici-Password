@@ -51,27 +51,29 @@ test("creation trigger blocks disabled and pilot deadlines before sync or delive
   }
 });
 
-test("manual push test selects the current Italian day, then next day after midnight", async () => {
+test("manual push test is neutral and never reads or exposes a real deadline", async () => {
   const a = source.indexOf("exports.sendDeadlinePushTest = onCall(");
   const b = source.indexOf("function validFutureIsoDate(", a);
   assert.ok(a >= 0 && b > a);
-  for (const [instant, expected] of [["2026-09-26T21:30:00Z", "today"], ["2026-09-26T22:30:00Z", "tomorrow"]]) {
+  for (const instant of ["2026-09-26T21:30:00Z", "2026-09-26T22:30:00Z"]) {
     class Clock extends Date {constructor(...args) {super(...(args.length ? args : [instant]));} static now() {return Date.parse(instant);}}
     const sent = [];
     const device = {enabled: true, notificationScopes: ["deadlines"], token: "synthetic"};
-    const rows = [{id: "today", data: () => ({dueDate: "2026-09-26"})}, {id: "tomorrow", data: () => ({dueDate: "2026-09-27"})}];
+    let queriedDeadlines = 0;
     const ref = {doc: () => ref, collection: () => ref, get: async () => ({exists: true, data: () => device}),
-      set: async () => {}, where: () => ({get: async () => ({docs: rows})})};
+      set: async () => {}, where: () => {queriedDeadlines++; throw new Error("deadline query forbidden in a neutral test");}};
     const firestore = () => ref;
     firestore.FieldValue = {serverTimestamp: () => "synthetic"};
     const context = {Date: Clock, deadlineCalendar: require("../deadline-calendar"), exports: {},
       onCall: (_config, handler) => handler, HttpsError: Error, console: {error() {}},
-      admin: {firestore, messaging: () => ({send: async payload => sent.push(payload)})},
-      pushText: (_data, days) => ({title: "Synthetic", body: String(days)})};
+      admin: {firestore, messaging: () => ({send: async payload => sent.push(payload)})}};
     vm.runInNewContext(source.slice(a, b), context);
-    await context.exports.sendDeadlinePushTest({auth: {uid: "owner"}, data: {deviceId: "11111111-1111-1111-1111-111111111111"}});
+    const result = await context.exports.sendDeadlinePushTest({auth: {uid: "owner"}, data: {deviceId: "11111111-1111-1111-1111-111111111111"}});
     assert.equal(sent.length, 1);
-    assert.equal(sent[0].data.deadlineId, expected);
-    assert.equal(sent[0].data.body, "0");
+    assert.equal(queriedDeadlines, 0);
+    assert.equal(sent[0].data.deadlineId, "");
+    assert.equal(sent[0].data.title, "Codici & Password");
+    assert.equal(sent[0].data.body, "Notifica di prova ricevuta correttamente");
+    assert.equal(result.opensDeadline, false);
   }
 });

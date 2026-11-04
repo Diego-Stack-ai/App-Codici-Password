@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.253';
+import { auth, db } from '../../firebase-config.js?v=1.2.254';
 import { collection, doc, runTransaction, deleteField, Timestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -15,6 +15,37 @@ import {
 } from './profile-model.js';
 import {getCurrentLanguage, t} from '../../translations.js';
 import {deadlineDateDisplay} from '../scadenze/deadline-model.js';
+import {createElement} from '../../dom-utils.js';
+
+const linkedAccountNameCache = new Map();
+
+export async function readLinkedAccountName(contact) {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !contact?.linkedAccountId) return '';
+    const companyId = contact.linkedAccountCompanyId || '';
+    const cacheKey = `${uid}|${companyId}|${contact.linkedAccountId}`;
+    if (linkedAccountNameCache.has(cacheKey)) return linkedAccountNameCache.get(cacheKey);
+    const account = companyId
+        ? await getCompanyAccount(uid, companyId, contact.linkedAccountId)
+        : await getPrivateAccount(uid, contact.linkedAccountId);
+    if (auth.currentUser?.uid !== uid || !account || account.isArchived) return '';
+    const name = String(account.nomeAccount || account.name || '').trim();
+    if (name) linkedAccountNameCache.set(cacheKey, name);
+    return name;
+}
+
+export function createLinkedAccountButton(contact, open, connect) {
+    const linked = Boolean(contact.linkedAccountId);
+    const button = createElement('button', {
+        className: linked ? 'btn-upload-trigger profile-account-primary' : 'btn-upload-trigger',
+        textContent: linked ? 'Apri Account collegato' : 'Collega o crea Account',
+        onclick: linked ? open : connect
+    });
+    if (linked) Promise.resolve(readLinkedAccountName(contact)).then(name => {
+        if (name && button.isConnected !== false) button.textContent = `Apri: ${name}`;
+    }).catch(() => {});
+    return button;
+}
 
 export async function readLinkedEmailAccountPassword(email) {
     const uid = auth.currentUser?.uid;
@@ -228,7 +259,7 @@ export async function createDeadlineFromDocument(documentItem, syncData, profile
 
     await syncData?.();
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
-    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.253');
+    const {buildLinkedDocumentDeadlineDraft} = await import('./profile-document-deadline-link.js?v=1.2.254');
     const draft = await buildLinkedDocumentDeadlineDraft(user.uid, documentItem, profile);
     if (auth.currentUser?.uid !== user.uid) return {action: 'cancelled-account-changed'};
     sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({...draft, ownerUid: user.uid}));

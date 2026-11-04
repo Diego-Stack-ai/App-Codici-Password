@@ -92,10 +92,15 @@ test('l’editor dedicato risolve regola, pianificazione e testo dal catalogo un
 });
 
 test('il dettaglio non ricompone il testo né presenta il numero come veicolo', async () => {
-  const source = await read('Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js');
-  assert.match(source, /scadenza\.linkKind === 'profile-document-deadline-v1'[\s\S]+compiledText = scadenza\.templateText\.trim\(\)/);
-  assert.match(source, /profile_document_number_label/);
-  assert.match(source, /profile_document_number_icon/);
+  const detail = await read('Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js');
+  const model = await read('Frontend/public/assets/js/modules/scadenze/deadline-model.js');
+  assert.match(detail, /deadlineTemplateMessage\(scadenza\)/);
+  assert.match(model, /record\.linkKind === 'profile-document-deadline-v1'/);
+  assert.match(model, /record\.sourceRef\?\.type === 'profileDocument'/);
+  assert.match(model, /if \(deadlineTemplateIsComplete\(record\)\) return template/);
+  assert.match(detail, /scadenza\.linkKind === 'profile-document-deadline-v1'/);
+  assert.match(detail, /profile_document_number_label/);
+  assert.match(detail, /profile_document_number_icon/);
 });
 
 test('la configurazione modifica data e nota e sincronizza la data con il Documento', async () => {

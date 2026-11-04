@@ -231,7 +231,28 @@ try {
         record('utility', 'created-encrypted');
     } else record('utility', 'already-present');
     addressCard = addressContainer.locator('.form-card').filter({ hasText: fixture.address }).first();
-    await addressCard.getByText(fixture.utility, { exact: true }).waitFor({ state: 'visible', timeout: 15_000 });
+    const utilityValue = addressCard.getByText(fixture.utility, { exact: true });
+    if (!await utilityValue.isVisible().catch(() => false)) {
+        // A successful save must survive a fresh read. Reloading here also
+        // distinguishes a stale post-save render from a persistence failure.
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: 45_000 });
+        await page.waitForFunction(() => document.documentElement.getAttribute('data-i18n') === 'ready', null, { timeout: 20_000 });
+        await page.locator('#profile-tabs').waitFor({ state: 'visible', timeout: 20_000 });
+        await page.waitForFunction(() => document.querySelector('#profile-overview')?.children.length > 0, null, { timeout: 20_000 });
+        await activateTab(page, 'addresses');
+        await expandSection(page, 'indirizzi');
+        const reloadedAddressCard = page.locator('#indirizzi-view-container .form-card').filter({ hasText: fixture.address }).first();
+        const reloadedUtilityValue = reloadedAddressCard.getByText(fixture.utility, { exact: true });
+        if (!await reloadedUtilityValue.isVisible().catch(() => false)) {
+            const utilityRows = await reloadedAddressCard.locator('.card-utility-item').allTextContents();
+            throw new Error(`PROFILE_UTILITY_READBACK_MISSING:${JSON.stringify(
+                utilityRows.map(value => value.trim()).filter(Boolean)
+            )}`);
+        }
+        record('utility-readback', 'passed-after-reload');
+    } else {
+        record('utility-readback', 'passed-immediately');
+    }
 
     await activateTab(page, 'documents');
     await expandSection(page, 'documenti');
@@ -264,7 +285,9 @@ try {
     await documentCard.getByText(fixture.documentNumber, { exact: true }).waitFor({ state: 'visible' });
     await documentCard.getByText(fixture.documentNote, { exact: true }).waitFor({ state: 'visible' });
 
-    if (!await documentCard.getByText(fixture.attachmentName, { exact: true }).count()) {
+    if (origin !== 'https://appcodici-password.web.app') {
+        record('profile-document-attachment', 'skipped-on-local-app-check-origin');
+    } else if (!await documentCard.getByText(fixture.attachmentName, { exact: true }).count()) {
         const attachmentPath = path.join(profileDir, fixture.attachmentName);
         await writeFile(attachmentPath, 'Allegato sintetico QA. Nessun dato reale.\n', 'utf8');
         await documentCard.locator('[data-action="document-attachments"]').click();
@@ -277,7 +300,9 @@ try {
         record('profile-document-attachment', 'created-encrypted');
         documentCard = documentsContainer.locator('.form-card').filter({ hasText: fixture.documentNumber }).first();
     } else record('profile-document-attachment', 'already-present');
-    await documentCard.getByText(fixture.attachmentName, { exact: true }).first().waitFor({ state: 'visible', timeout: 20_000 });
+    if (origin === 'https://appcodici-password.web.app') {
+        await documentCard.getByText(fixture.attachmentName, { exact: true }).first().waitFor({ state: 'visible', timeout: 20_000 });
+    }
 
     await activateTab(page, 'personal');
     const widgetZone = page.locator('.profile-widget-zone[data-widget-zone="personal"]');

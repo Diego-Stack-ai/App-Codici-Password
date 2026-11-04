@@ -18,6 +18,7 @@ test('diagnostica esegue solo sonde locali e same-origin senza contenuti Vault',
         online: true,
         authenticated: true,
         storage,
+        session: storageFixture(),
         fetcher: async (url, options) => { requests.push({ url, options }); return { ok: true, status: 200 }; },
         cryptoApi: { subtle: {} },
         indexedDb: {},
@@ -37,11 +38,31 @@ test('offline produce un avviso senza richieste remote', async () => {
         online: false,
         authenticated: true,
         storage: storageFixture(),
+        session: storageFixture(),
         fetcher: async () => { requests += 1; },
         cryptoApi: { subtle: {} }, indexedDb: {}, serviceWorker: { controller: {} }
     });
     assert.equal(report.overall, 'warn');
     assert.equal(requests, 0);
+});
+
+test('segnala senza dati sensibili un precedente timeout del gate', async () => {
+    const session = storageFixture();
+    session.setItem('codex_auth_gate_last_failure_v1', JSON.stringify({
+        reason: 'timeout', elapsedMs: 45000, page: 'profilo_privato.html', at: '2026-11-04T00:00:00.000Z'
+    }));
+    const report = await runAppDiagnostics({
+        online: true,
+        authenticated: true,
+        storage: storageFixture(),
+        session,
+        fetcher: async () => ({ok: true, status: 200}),
+        cryptoApi: {subtle: {}}, indexedDb: {}, serviceWorker: {controller: {}}
+    });
+    const check = report.checks.find(item => item.id === 'auth-gate-history');
+    assert.equal(check.status, 'warn');
+    assert.match(check.detail, /timeout dopo 45 s/);
+    assert.equal(report.overall, 'warn');
 });
 
 test('stato motori distingue motori attivi e disabilitati', () => {

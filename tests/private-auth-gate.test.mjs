@@ -14,14 +14,15 @@ function fixture() {
     const redirects = [], events = [], timers = new Map(), handlers = new Map(), storage = new Map();
     let serial = 0;
     const body = {hidden: true, inert: true};
-    const window = {location: {replace: url => redirects.push(url), reload: () => redirects.push('reload')},
+    const documentElement = {dataset: {}};
+    const window = {location: {pathname: '/fixture.html', replace: url => redirects.push(url), reload: () => redirects.push('reload')},
         dispatchEvent: event => events.push(event.type), addEventListener: (name, fn) => handlers.set(name, fn)};
-    const context = vm.createContext({window, document: {body}, Event, Promise,
+    const context = vm.createContext({window, document: {body, documentElement}, Event, Promise,
         setTimeout: (fn, ms) => { timers.set(++serial, {fn, ms}); return serial; },
         clearTimeout: id => timers.delete(id),
         sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key)}});
     vm.runInContext(gateSource, context);
-    return {context, gate: window.privateAuthGate, body, redirects, events, storage, timers, handlers};
+    return {context, gate: window.privateAuthGate, body, documentElement, redirects, events, storage, timers, handlers};
 }
 
 test('all 22 private HTML entries are hidden and inert before JavaScript; public exceptions stay public', async () => {
@@ -38,6 +39,7 @@ test('all 22 private HTML entries are hidden and inert before JavaScript; public
     assert.equal(count, 22);
     const css = await readFile(new URL('assets/css/core.css', root), 'utf8');
     assert.match(css, /body\[data-private-auth\]\[hidden\]\s*\{\s*display: none !important;/);
+    assert.match(css, /html\[data-private-auth-state="pending"\]::before/);
 });
 
 test('direct unauthenticated access stays hidden and redirects to absolute login', () => {
@@ -51,7 +53,9 @@ test('direct unauthenticated access stays hidden and redirects to absolute login
 test('verified Firebase identity reveals the page only after the pending check', () => {
     const f = fixture(); const ticket = f.gate.begin(verifiedUser.uid);
     assert.equal(f.body.hidden, true);
+    assert.equal(f.documentElement.dataset.privateAuthState, 'pending');
     assert.equal(f.gate.acceptIdentity(ticket, verifiedUser), true);
+    assert.equal(f.documentElement.dataset.privateAuthState, undefined);
     assert.equal(f.body.hidden, false); assert.equal(f.body.inert, false); assert.equal(f.timers.size, 0);
 });
 
@@ -71,8 +75,13 @@ for (const kind of ['error', 'timeout']) test(kind + ' keeps the page hidden and
 });
 
 test('missing bootstrap also times out closed', () => {
-    const f = fixture(); [...f.timers.values()][0].fn();
+    const f = fixture();
+    assert.equal([...f.timers.values()][0].ms, 45000);
+    [...f.timers.values()][0].fn();
     assert.equal(f.body.hidden, true); assert.equal(f.redirects.length, 1);
+    const marker = JSON.parse(f.storage.get('codex_auth_gate_last_failure_v1'));
+    assert.equal(marker.reason, 'timeout');
+    assert.equal(marker.page, 'fixture.html');
 });
 
 test('stale identity callbacks cannot reveal the page after logout or UID change', () => {
